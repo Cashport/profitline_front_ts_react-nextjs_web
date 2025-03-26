@@ -33,6 +33,7 @@ export interface IData {
   is_deleted: number;
   is_legalized: number;
   is_rejected: number | null;
+  payment_id: number | null;
   payment_agreement_id: number;
   previous_status: string | null;
   previous_status_id: number | null;
