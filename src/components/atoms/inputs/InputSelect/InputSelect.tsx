@@ -22,6 +22,7 @@ interface InputSelectProps {
   className?: string;
   loading?: boolean;
   isError?: boolean;
+  mode?: "multiple" | "tags";
 }
 
 export const InputSelect = ({
@@ -36,11 +37,16 @@ export const InputSelect = ({
   validationRules,
   className,
   loading = false,
-  isError = false
+  isError = false,
+  mode
 }: InputSelectProps) => {
   return (
     <Flex vertical className={`selectContainer ${className}`}>
-      {!hiddenTitle && <p className="select-form-title">{titleInput}</p>}
+      {!hiddenTitle && (
+        <Typography.Title className="input-form-title" level={5}>
+          {titleInput}
+        </Typography.Title>
+      )}
       <Controller
         name={nameInput}
         rules={{ required: true, ...validationRules }}
@@ -58,6 +64,7 @@ export const InputSelect = ({
               disabled={disabled}
               onChange={(value) => field.onChange(value)}
               value={field.value}
+              mode={mode}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

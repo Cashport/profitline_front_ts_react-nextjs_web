@@ -1,9 +1,15 @@
-export interface ThirdPartiesData {
+export interface IThirdPartiesData {
   id: number;
-  key: string;
+  projectId: number;
+  subjectSubtypeId: number;
   name: string;
-  type: string;
-  creationDate: string;
-  expirationDate: string;
-  status: string;
+  documentNumber: number;
+  documentType: number;
+  createdAt: string;
+  subtypeName: string;
+  status: {
+    id: number;
+    name: string;
+    color: string;
+  };
 }

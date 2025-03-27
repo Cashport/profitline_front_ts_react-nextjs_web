@@ -1,10 +1,16 @@
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { Tag } from "@/components/atoms/Tag/Tag";
+import { formatDate } from "@/utils/utils";
 import { Flex } from "antd";
 import { Eye } from "phosphor-react";
-import { getTagColor } from "../utils/utils";
-
-export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
+import { Document } from "./types";
+export const columns = ({
+  handleOpenDrawer,
+  setSelectedDocument
+}: {
+  handleOpenDrawer: () => void;
+  setSelectedDocument: React.Dispatch<React.SetStateAction<Document | null>>;
+}) => [
   { title: "Nombre", dataIndex: "name", key: "name" },
   {
     title: "Descripción",
@@ -13,37 +19,48 @@ export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
   },
   {
     title: "Fecha cargue",
-    dataIndex: "uploadDate",
-    key: "uploadDate",
-    render: () => "-"
+    dataIndex: "createdAt",
+    key: "createdAt",
+    render: (_: string, record: any) => {
+      if (record.createdAt) {
+        return formatDate(record.createdAt);
+      }
+      return "-";
+    }
   },
   {
     title: "Vencimiento",
     dataIndex: "expiryDate",
     key: "expiryDate",
-    render: () => "-"
+    render: (_: string, record: any) => {
+      if (record.expiryDate) {
+        return formatDate(record.expiryDate);
+      }
+      return "-";
+    }
   },
   {
     title: "Estado",
     dataIndex: "status",
     key: "status",
-    render: (status: string) => {
-      const color = getTagColor(status);
-      return (
-        <Flex>
-          <Tag color={color} content={status} style={{ fontSize: 14, fontWeight: 400 }} />
-        </Flex>
-      );
-    }
+    render: (_: string, record: any) => (
+      <Flex>
+        <Tag
+          color={record.statusColor}
+          content={record.statusName}
+          style={{ fontSize: 14, fontWeight: 400 }}
+        />
+      </Flex>
+    )
   },
   {
     title: "",
     dataIndex: "seeMore",
     key: "seeMore",
-    render: (_: any, record: any, index: number) => (
+    render: (_: any, record: any) => (
       <IconButton
         onClick={() => {
-          setRequirementIndex(index);
+          setSelectedDocument(record);
           handleOpenDrawer();
         }}
         icon={<Eye size={"1.3rem"} />}

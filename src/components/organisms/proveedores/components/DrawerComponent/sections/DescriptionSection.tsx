@@ -11,12 +11,12 @@ const DescriptionSection: React.FC<{ description: string; uploadedBy: string }> 
     <ColumnText
       title="Descripción"
       icon={<TextAlignLeft size={16} color="#7B7B7B" />}
-      content={description}
+      content={description || "-"}
     />
     <ColumnText
       title="Cargado por"
       icon={<User size={16} color="#7B7B7B" />}
-      content={uploadedBy}
+      content={uploadedBy || "-"}
     />
   </Flex>
 );

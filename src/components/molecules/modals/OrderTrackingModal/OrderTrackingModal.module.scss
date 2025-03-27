@@ -1,0 +1,488 @@
+@import "@styles/variables.scss";
+
+.wrapper {
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    position: fixed;
+    max-width: 630px;
+    padding: 18px 24px;
+    flex-direction: column;
+    transition: transform 0.3s;
+    background-color: #ffffff;
+    justify-content: space-between;
+    box-shadow: 0px 4px 82px 0px #0000003d;
+    z-index: 2;
+    overflow-y: auto;
+    scrollbar-width: thin;
+
+    sc &.show {
+        transform: translateX(0);
+    }
+
+    &.hide {
+        transform: translateX(100%);
+    }
+
+    .header {
+        gap: 16px;
+        padding: 1rem 0px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .numberInvoice {
+            flex: 1;
+            display: flex;
+            font-weight: 600;
+            color: #141414;
+            font-size: 1.25rem;
+            text-align: center;
+            line-height: normal;
+        }
+
+        .viewInvoice {
+            gap: 8px;
+            display: flex;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 300;
+            color: #141414;
+            line-height: 18px;
+            align-items: center;
+        }
+
+        .button {
+            &__actions {
+                padding: 0.75rem 1rem;
+                background-color: $background;
+                border: solid 1px transparent;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                height: 3rem;
+
+                &:hover {
+                    border: solid 1px $dark-gray;
+                }
+            }
+        }
+    }
+    .currentTrip {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 8px 16px 24px 8px;
+    }
+    .idOrder {
+        gap: 4px;
+        display: flex;
+        margin-top: 6px;
+        font-size: 14px;
+        font-weight: 300;
+        color: #141414;
+        line-height: 18px;
+
+        .id {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 18px;
+            color: #141414;
+        }
+    }
+
+    .body {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        flex: 1 1 0;
+        padding: 1rem;
+        max-height: 65vh;
+
+        .headerBody {
+            width: 100%;
+            display: flex;
+            margin-top: 16px;
+            align-items: center;
+            justify-content: space-between;
+
+            .title {
+                font-size: 16px;
+                font-weight: 500;
+                color: #141414;
+                line-height: normal;
+            }
+
+            .status {
+                color: #fff;
+                display: flex;
+                margin-right: 0px;
+                padding: 6px 12px;
+                border-radius: 8px;
+
+                &.identifiedReconciled {
+                    background: #0085ff;
+                }
+
+                &.inAudit {
+                    background: #fe7a01;
+                }
+
+                &.unidentified {
+                    background: #e53261;
+                }
+
+                &.applied {
+                    background: #cbe61e;
+                }
+
+                &.partially {
+                    background: #e0f07e;
+                }
+
+                &.noReconcile {
+                    background: #969696;
+                }
+
+                &.novelty {
+                    background: #f4076a;
+                }
+
+                &.balances {
+                    background: #3d3d3d;
+                }
+
+                &.glossed {
+                    background: #00c2ff;
+                }
+
+                &.return {
+                    background: #ff6b00;
+                }
+
+                &.annulment {
+                    background: #c80000;
+                }
+            }
+        }
+
+        .content {
+            width: 100%;
+            display: flex;
+            padding-top: 5px;
+            margin-top: 10px;
+            overflow-y: scroll;
+            scrollbar-width: thin;
+
+            .progress {
+                width: 40px;
+                display: flex;
+                flex-direction: column;
+
+                .iconContainer {
+                    display: flex;
+                    justify-content: flex-start;
+
+                    .iconProgress {
+                        width: 24px;
+                        height: 24px;
+                        padding: 6px;
+                        display: flex;
+                        cursor: pointer;
+                        border-radius: 4px;
+                        background: #f7f7f7;
+                        justify-content: center;
+                    }
+                }
+            }
+
+            .description {
+                display: flex;
+                flex-direction: column;
+
+                .stepperContainer {
+                    display: flex;
+                    justify-content: center;
+
+                    .stepperContent {
+                        .mainStep {
+                            height: 120px;
+                            display: flex;
+                            column-gap: 10px;
+                            position: relative;
+                            border-bottom: 10px;
+
+                            &:lastchild {
+                                height: auto;
+                            }
+
+                            .stepLine {
+                                width: 1px;
+                                height: 100%;
+                                background-color: #dddddd;
+
+                                &.active {
+                                    background-color: transparent;
+                                    border-left: 1px dashed #cbe71e;
+                                }
+                            }
+
+                            .stepCircle {
+                                top: 0px;
+                                left: -5px;
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                position: absolute;
+                                background-color: #dddddd;
+
+                                &.active {
+                                    background-color: #cbe71e;
+                                }
+                            }
+
+                            .stepLabel {
+                                display: flex;
+                                margin-top: -5px;
+
+                                .quantity {
+                                    gap: 6px;
+                                    height: 32px;
+                                    display: flex;
+                                    padding-left: 8px;
+
+                                    .button {
+                                        display: flex;
+                                        cursor: pointer;
+                                        padding: 10px 6px;
+                                        border-radius: 4px;
+                                        background: #f7f7f7;
+                                        justify-content: center;
+                                    }
+
+                                    .number {
+                                        display: flex;
+                                        height: 32px;
+                                        width: 40px;
+                                        font-weight: 400;
+                                        color: #141414;
+                                        padding: 6px 8px;
+                                        text-align: center;
+                                        border-radius: 4px;
+                                        align-items: center;
+                                        line-height: normal;
+                                        background: #f7f7f7;
+                                        justify-content: center;
+                                    }
+                                }
+
+                                .cardInvoiceFiling {
+                                    display: flex;
+                                    flex-direction: column;
+
+                                    .icons {
+                                        display: flex;
+                                        padding: 6px;
+                                        cursor: pointer;
+                                        margin-top: -44px;
+                                        border-radius: 4px;
+                                        position: absolute;
+                                        margin-left: -50px;
+                                        background: #f7f7f7;
+                                    }
+
+                                    .adjustment {
+                                        gap: 4px;
+                                        display: flex;
+                                        font-size: 12px;
+                                        font-weight: 400;
+                                        color: #a5a5a5;
+                                        padding-left: 8px;
+                                        line-height: normal;
+
+                                        .idAdjustment {
+                                            color: #0085ff;
+                                        }
+                                    }
+
+                                    .title {
+                                        display: flex;
+                                        font-size: 1rem;
+                                        font-weight: 300;
+                                        padding-left: 8px;
+                                        color: #141414;
+                                        line-height: normal;
+                                    }
+
+                                    .date {
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        color: #a5a5a5;
+                                        padding-left: 8px;
+                                        line-height: normal;
+                                    }
+
+                                    .dateAndYears {
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        color: #a5a5a5;
+                                        padding-left: 8px;
+                                        line-height: normal;
+                                    }
+
+                                    .name {
+                                        font-size: 12px;
+                                        font-weight: 400;
+                                        color: #a5a5a5;
+                                        padding-left: 8px;
+                                        line-height: normal;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .footer {
+        width: 100%;
+        display: flex;
+        margin-bottom: 0px;
+        flex-direction: column;
+
+        .resume {
+            color: #141414;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: normal;
+            padding: 10px 0 10px 0;
+        }
+
+        .bodyContent {
+            width: 100%;
+            display: flex;
+            height: 160px;
+            max-height: 160px;
+            margin-bottom: 0px;
+            background: #f7f7f7;
+            flex-direction: column;
+            border-radius: 0.5rem;
+
+            hr {
+                margin: auto;
+                width: calc(100% - 48px);
+                border: 1px solid white;
+            }
+
+            .initialValue {
+                width: 100%;
+                display: flex;
+                background: #f7f7f7;
+                padding: 14px 24px 14px 24px;
+                border-radius: 8px 8px 0 0;
+                justify-content: space-between;
+
+                .value {
+                    font-size: 16px;
+                    font-weight: 300;
+                    color: #141414;
+                    line-height: normal;
+                }
+
+                .result {
+                    display: flex;
+                    font-size: 16px;
+                    font-weight: 300;
+                    color: #141414;
+                    line-height: normal;
+                }
+            }
+        }
+
+        .total {
+            width: 100%;
+            display: flex;
+            padding: 14px 24px;
+            background: #f7f7f7;
+            border-radius: 0 0 8px 8px;
+            justify-content: space-between;
+
+            .value {
+                display: flex;
+                font-size: 16px;
+                font-weight: 600;
+                color: #141414;
+                line-height: normal;
+            }
+
+            .result {
+                display: flex;
+                font-size: 16px;
+                font-weight: 600;
+                color: #141414;
+                line-height: normal;
+            }
+        }
+    }
+
+    .buttonBack {
+        background-color: $white;
+        border: none;
+        display: flex;
+        font-size: 20px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background-color: #f7f7f7;
+        }
+    }
+}
+.trackStateContainer {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    .trackState {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+        background-color: #cbe71e;
+        border-radius: 8px;
+        padding: 6px 12px;
+    }
+}
+.stepState {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 18px;
+    background-color: #cbe71e;
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+.link {
+    text-decoration: underline;
+    color: #1e8ff3;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.trackingTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #141414;
+    line-height: normal;
+}
+.subtitle {
+    font-size: 14px;
+    font-weight: 300;
+    color: #141414;
+    line-height: normal;
+}

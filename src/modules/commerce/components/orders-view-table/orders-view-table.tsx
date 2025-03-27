@@ -10,6 +10,10 @@ import { IOrder } from "@/types/commerce/ICommerce";
 import "./orders-view-table.scss";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 import { WarningDiamond } from "@phosphor-icons/react";
+import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
+import { Tag } from "@/components/atoms/Tag/Tag";
+import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
+import { set } from "react-hook-form";
 
 const { Text } = Typography;
 
@@ -38,11 +42,12 @@ const OrdersViewTable = ({
   const [currentWarehouseId, setCurrentWarehouseId] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
 
   const handleSeeDetail = (order: IOrder) => {
     const { id: orderId, order_status } = order;
 
-    console.log(order)
+    console.log(order);
     if (order_status === "En proceso") {
       const url = `/comercio/pedidoConfirmado/${orderId}`;
       router.prefetch(url);
@@ -147,6 +152,54 @@ const OrdersViewTable = ({
       render: (text) => <Text className="cell">{text}</Text>
     },
     {
+      title: "Estado",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        if (!status) status = "En tránsito";
+        const getTagColor = (status: string) => {
+          let color;
+          switch (status) {
+            case "En tránsito":
+              color = "#0085FF";
+              break;
+            case "Entregado":
+              color = "#00DE16";
+              break;
+            case "Rechazado":
+              color = "#E53261";
+              break;
+            case "Alistando":
+              color = "#FF6A00";
+              break;
+            default:
+              color = "black";
+          }
+          return color;
+        };
+        const color = getTagColor(status);
+
+        return (
+          <Flex wrap={false}>
+            <Button onClick={() => setIsOrderTrackingModalOpen(true)}>
+              <Tag
+                color={color}
+                content={status}
+                style={{ fontSize: 14, fontWeight: 400 }}
+                icon={
+                  <div
+                    style={{ backgroundColor: color, width: 6, height: 6, borderRadius: "50%" }}
+                  />
+                }
+                iconPosition="left"
+                withBorder={false}
+              />
+            </Button>
+          </Flex>
+        );
+      }
+    },
+    {
       title: "Total",
       key: "total",
       dataIndex: "total",
@@ -204,6 +257,11 @@ const OrdersViewTable = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         setFetchMutate={setFetchMutate}
+      />
+      <OrderTrackingModal
+        isOpen={isOrderTrackingModalOpen}
+        onClose={() => setIsOrderTrackingModalOpen(false)}
+        idInvoice={1}
       />
     </>
   );

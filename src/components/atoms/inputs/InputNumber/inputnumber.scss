@@ -1,0 +1,76 @@
+@import "@styles/variables.scss";
+
+.containerInput {
+    .ant-typography.input-form-title {
+        color: #909090;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        margin-bottom: 0.25rem;
+    }
+
+    .ant-color-picker-trigger {
+        background-color: $background;
+        justify-content: flex-start;
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .ant-popover-inner {
+        background-color: $background;
+    }
+
+    .ant-select-selection-item-content {
+        color: black;
+    }
+
+    .ant-input-disabled {
+        color: black;
+    }
+
+    .ant-input {
+        width: 100%;
+        background-color: $background;
+        border: none;
+        padding: 0.7rem;
+        border-radius: 0.25rem;
+        font-size: 1rem;
+        font-weight: 300;
+        max-height: 3rem;
+
+        &::placeholder {
+            color: $dark-gray !important;
+        }
+
+        &:disabled {
+            color: $dark-gray !important;
+        }
+
+        &.-readOnly {
+            background-color: $dark-gray;
+            color: $darker-gray;
+        }
+
+        &.error {
+            border: 1px dashed red;
+            background-color: $background;
+            margin-bottom: 0.2rem;
+        }
+
+        &:hover,
+        &:focus,
+        &:focus-within {
+            background-color: $background;
+            border: none;
+            box-shadow: none;
+        }
+    }
+
+    .error-message {
+        margin-top: 0.25rem;
+        padding-left: 0.5rem;
+        font-size: 0.75rem;
+        color: red;
+    }
+}
