@@ -1,9 +1,16 @@
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { Tag } from "@/components/atoms/Tag/Tag";
+import { formatDate } from "@/utils/utils";
 import { Flex } from "antd";
 import { Eye } from "phosphor-react";
-
-export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
+import { Document } from "./types";
+export const columns = ({
+  handleOpenDrawer,
+  setSelectedDocument
+}: {
+  handleOpenDrawer: () => void;
+  setSelectedDocument: React.Dispatch<React.SetStateAction<Document | null>>;
+}) => [
   { title: "Nombre", dataIndex: "name", key: "name" },
   {
     title: "Descripción",
@@ -16,7 +23,7 @@ export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
     key: "createdAt",
     render: (_: string, record: any) => {
       if (record.createdAt) {
-        return record.createdAt;
+        return formatDate(record.createdAt);
       }
       return "-";
     }
@@ -27,7 +34,7 @@ export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
     key: "expiryDate",
     render: (_: string, record: any) => {
       if (record.expiryDate) {
-        return record.expiryDate;
+        return formatDate(record.expiryDate);
       }
       return "-";
     }
@@ -50,10 +57,10 @@ export const columns = ({ handleOpenDrawer, setRequirementIndex }: any) => [
     title: "",
     dataIndex: "seeMore",
     key: "seeMore",
-    render: (_: any, record: any, index: number) => (
+    render: (_: any, record: any) => (
       <IconButton
         onClick={() => {
-          setRequirementIndex(index);
+          setSelectedDocument(record);
           handleOpenDrawer();
         }}
         icon={<Eye size={"1.3rem"} />}
