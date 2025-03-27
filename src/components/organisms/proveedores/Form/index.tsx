@@ -57,58 +57,62 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const supplierId = params?.id;
 
-  const fetchSupplierData = async () => {
-    try {
-      const response = await API.get<ApiResponse>(`/subject/${supplierId}`);
-      const { data } = response;
-      // Combinar todos los fields de todos los creationForms
-      const allFields = data.creationForms?.reduce((acc: any[], form) => {
-        if (form.fields) {
-          return [...acc, ...form.fields];
-        }
-        return acc;
-      }, []);
-
-      if (allFields?.length) {
-        setFormFields(allFields);
-      }
-      const allDocuments = [
-        ...(data.forms?.map((form) => ({ ...form, type: "form" as const })) || []),
-        ...(data.documents?.map((doc) => ({ ...doc, type: "document" as const })) || [])
-      ];
-      setDocuments(allDocuments);
-    } catch (error) {
-      console.error("Error fetching supplier data:", error);
-    }
-  };
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await API.get<ApiResponse>(`/subject/${supplierId}`);
+        // Combinar todos los fields de todos los creationForms
+        const allFields = response.data.creationForms?.reduce((acc: any[], form) => {
+          if (form.fields) {
+            return [...acc, ...form.fields];
+          }
+          return acc;
+        }, []);
+
+        if (allFields?.length) {
+          setFormFields(allFields);
+        }
+        const allDocuments = [
+          ...(response.data.forms?.map((form) => ({ ...form, type: "form" as const })) || []),
+          ...(response.data.documents?.map((doc) => ({ ...doc, type: "document" as const })) || [])
+        ];
+        setDocuments(allDocuments);
+      } catch (error) {
+        console.error("Error fetching supplier data:", error);
+      }
+    };
     if (supplierId) {
-      fetchSupplierData();
+      fetchData();
     }
   }, [supplierId]);
 
-  const onSubmit = (data: any) => {};
+  useEffect(() => {
+    // Initialize form values
+    formFields.forEach((field: FormField) => {
+      const fieldName = field.question.toLowerCase().replace(/\s+/g, "_");
+      if (field.value !== undefined) {
+        switch (field.formFieldType) {
+          case "TEXT":
+            setValue(fieldName, field.value === null ? "" : String(field.value));
+            break;
+          case "NUMBER":
+            setValue(fieldName, typeof field.value === "number" ? field.value : null);
+            break;
+          case "SC":
+            setValue(fieldName, field.value as IOption);
+            break;
+          case "MC":
+            setValue(fieldName, Array.isArray(field.value) ? field.value : []);
+            break;
+        }
+      }
+    });
+  }, [formFields, setValue]);
+
+  const onSubmit = () => {};
 
   const renderFormField = (field: FormField) => {
     const fieldName = field.question.toLowerCase().replace(/\s+/g, "_");
-
-    // Setear el valor inicial según el tipo de campo
-    if (field.value !== undefined) {
-      switch (field.formFieldType) {
-        case "TEXT":
-          setValue(fieldName, field.value === null ? "" : String(field.value));
-          break;
-        case "NUMBER":
-          setValue(fieldName, typeof field.value === "number" ? field.value : null);
-          break;
-        case "SC":
-          setValue(fieldName, field.value as IOption);
-          break;
-        case "MC":
-          setValue(fieldName, Array.isArray(field.value) ? field.value : []);
-          break;
-      }
-    }
 
     const commonProps = {
       titleInput: field.question,
