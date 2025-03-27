@@ -1,59 +1,47 @@
 import React from "react";
-import { Upload, Button, Typography, Flex, message } from "antd";
+import { Upload, Button, Typography, Flex } from "antd";
 import ColumnText from "../../ColumnText/ColumnText";
 import { FileArrowUp, Files } from "@phosphor-icons/react";
 import { FileArrowDown, Plus, Trash } from "phosphor-react";
+import { Control, useFieldArray } from "react-hook-form";
 import "./documentsection.scss";
-import { IDocument } from "@/interfaces/Document";
-import { uploadDocument, deleteDocument } from "@/services/documents/documents";
+import { SupplierFormValues } from "../../../interfaces/FormData";
 
 const { Link } = Typography;
 
 interface DocumentSectionProps {
-  templateUrl?: string;
-  documents: IDocument[];
-  subjectId: string;
-  documentTypeId: string;
-  mutate: () => void;
+  templateUrl?: string; // URL opcional para descargar la plantilla
+  name: `requirements.${number}.files`; // Ruta dentro del formulario para los documentos
+  control: Control<SupplierFormValues, any>;
 }
+interface ExtendedFile extends File {
+  uid: string;
+}
+const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control, name }) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name
+  });
 
-const DocumentSection: React.FC<DocumentSectionProps> = ({ 
-  templateUrl, 
-  documents,
-  subjectId,
-  documentTypeId,
-  mutate 
-}) => {
-  const handleUpload = async (file: File) => {
-    try {
-      await uploadDocument(subjectId, documentTypeId, file);
-      message.success("Documento subido exitosamente");
-      mutate();
-    } catch (error) {
-      message.error("Error al subir el documento");
-      console.error("Error uploading document:", error);
-    }
-    return false;
+  const handleUpload = (file: ExtendedFile) => {
+    // console.log("FILE", file);
+    const fileData = {
+      uid: file.uid,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified,
+      uploadedAt: new Date().toISOString(), // Agrega la fecha actual
+      file // Guarda la referencia al archivo original
+    };
+    append(fileData); // Agrega el archivo al arreglo
+    return false; // Impide la subida automática para control manual
+  };
+  const handleDelete = (index: number) => {
+    remove(index); // Elimina el archivo del arreglo
   };
 
-  const handleDelete = async (documentId: number) => {
-    try {
-      await deleteDocument(subjectId, documentTypeId, documentId);
-      message.success("Documento eliminado exitosamente");
-      mutate();
-    } catch (error) {
-      message.error("Error al eliminar el documento");
-      console.error("Error deleting document:", error);
-    }
-  };
-
-  // Filter out documents with null values
-  const validDocuments = documents.filter(doc => 
-    doc.id !== null && doc.url !== null && doc.name !== null
-  );
-
-  const showEmptyState = validDocuments.length === 0;
-
+  // console.log("fields", fields);
   return (
     <ColumnText
       title="Documento"
@@ -61,10 +49,11 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
       content={
         <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
           <Flex vertical gap={12} className={"document-section"}>
-            {!showEmptyState ? (
-              validDocuments.map((doc) => (
+            {/* Renderización de documentos cargados */}
+            {fields.length > 0 ? (
+              fields.map((doc, index) => (
                 <Flex
-                  key={doc.id}
+                  key={index}
                   align="center"
                   justify="center"
                   style={{
@@ -79,19 +68,21 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
                 >
                   <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
                     <FileArrowUp size={16} />
-                    <Link href={doc.url} target="_blank">
-                      <p style={{ fontSize: 16, fontWeight: 400 }}>{doc.name}</p>
-                    </Link>
+                    <p style={{ fontSize: 16, fontWeight: 400 }}>
+                      {doc.name || "Seleccionar archivo"}
+                    </p>
+                    <p style={{ fontSize: 10, fontWeight: 300 }}>{doc.uploadedAt}</p>
                   </Flex>
                   <Button
                     type="text"
                     icon={<Trash size={16} />}
-                    onClick={() => handleDelete(doc.id)}
+                    onClick={() => handleDelete(index)}
                     style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
                   />
                 </Flex>
               ))
             ) : (
+              // Estado inicial si no hay documentos
               <Upload beforeUpload={handleUpload} showUploadList={false} style={{ width: "100%" }}>
                 <Flex
                   align="center"
@@ -117,6 +108,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
               </Upload>
             )}
           </Flex>
+          {/* Botón para subir documentos */}
           <Upload
             beforeUpload={handleUpload}
             showUploadList={false}
@@ -130,6 +122,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({
               Agregar documento
             </Button>
           </Upload>
+          {/* Enlace para descargar plantilla */}
           {templateUrl && (
             <Link href={templateUrl} target="_blank" style={{ textDecoration: "underline" }}>
               <Flex align="center" gap={4}>

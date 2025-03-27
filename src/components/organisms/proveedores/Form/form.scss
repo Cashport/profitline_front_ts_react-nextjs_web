@@ -23,3 +23,41 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+.selectInputMultiple {
+    width: 100%;
+    margin-bottom: 0.2rem;
+    background-color: var(--background);
+    padding: 0.45rem !important;
+    border-radius: 0.25rem;
+    border-bottom: none;
+    height: 3rem;
+
+    span {
+        font-size: 1rem;
+    }
+
+    div {
+        .ant-select-selection-placeholder {
+            color: var(--dark-gray);
+        }
+    }
+}
+
+.selectInputMultipleError {
+    width: 100%;
+    border: 1px dashed red;
+    height: 3rem !important;
+    margin-bottom: 0.2rem;
+    background-color: var(--background);
+    padding: 0.45rem;
+    border-radius: 0.25rem;
+    font-weight: 300;
+
+    .ant-select-selector {
+        .ant-select-selection-placeholder {
+            color: var(--dark-gray);
+            font-size: 1rem;
+        }
+    }
+}

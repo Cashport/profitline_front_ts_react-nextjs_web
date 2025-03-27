@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Tabs, Table, Space, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { IThirdPartiesData } from "../interfaces/ThirdPartiesData";
@@ -29,12 +29,27 @@ const formatDate = (isoString: string): string => {
 
 const ThirdPartiesView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabsEnum>(TabsEnum.Clients);
-  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   const router = useRouter();
+
+  // Debounce search input
+  const debounceSearch = useCallback((value: string) => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debounceSearch(e.target.value);
+  };
 
   const closeModal = () => {
     setModalOpen(false);
@@ -43,15 +58,20 @@ const ThirdPartiesView: React.FC = () => {
     setModalOpen(true);
   };
   const { data, error, isLoading } = useSWR(
-    `/subject/${activeTab}?page=${currentPage}&limit=${pageSize}`,
+    `/subject/${activeTab}?page=${currentPage}&limit=${pageSize}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
     fetcher
   );
 
   const handleTabChange = (key: TabsEnum) => {
     setActiveTab(key);
-    setSearchText(""); // Reiniciar el texto de búsqueda al cambiar de pestaña
+    setDebouncedSearch("");
     setCurrentPage(1);
   };
+
+  const handlePaginationChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const columns: ColumnsType<IThirdPartiesData> = [
     {
       title: "Nombre",
@@ -114,7 +134,7 @@ const ThirdPartiesView: React.FC = () => {
   ];
 
   return (
-    <Container style={{ gap: "1.5rem" }}>
+    <Container style={{ gap: "1.5rem", overflowY: "auto" }}>
       <Tabs
         defaultActiveKey="clients"
         onChange={(key: string) => handleTabChange(key as TabsEnum)}
@@ -129,13 +149,24 @@ const ThirdPartiesView: React.FC = () => {
       </Tabs>
       <Flex gap={8}>
         <UiSearchInput
-          placeholder="Buscar clientes"
-          onChange={(e) => setSearchText(e.target.value)}
+          placeholder={`Buscar ${activeTab === TabsEnum.Clients ? "clientes" : "proveedores"}`}
+          onChange={handleSearch}
         />
         <FilterClients setFilterClients={() => {}} />
         <GenerateActionButton onClick={openModal} />
       </Flex>
-      <Table columns={columns} dataSource={data?.data} loading={isLoading} />
+      <Table
+        columns={columns}
+        dataSource={data?.data}
+        loading={isLoading}
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: data?.total || 0,
+          onChange: handlePaginationChange,
+          showSizeChanger: false
+        }}
+      />
       <ModalGenerateAction isOpen={isModalOpen} onClose={closeModal} />
     </Container>
   );

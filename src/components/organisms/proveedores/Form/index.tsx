@@ -2,10 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Table, Flex, Button, Typography } from "antd";
-import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import DrawerComponent from "../components/DrawerComponent/DrawerComponent";
 import { useParams, useRouter } from "next/navigation";
-import { IRequirement } from "../interfaces/FormData";
 import { columns } from "./columns";
 import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -15,104 +13,19 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
 import { API } from "@/utils/api/api";
 import { FieldError } from "react-hook-form";
+import {
+  Document,
+  FormField,
+  Props,
+  ApiResponse,
+  IOption,
+  OPTIONS_TYPE_CLIENTS,
+  UserType
+} from "./types";
 import "./form.scss";
+import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 
 const { Text } = Typography;
-
-export const OPTIONS_BASE_LOCATION = [
-  { value: 0, label: "Centro A" },
-  { value: 1, label: "Centro B" },
-  { value: 2, label: "Centro C" },
-  { value: 3, label: "Centro D" }
-];
-
-export const OPTIONS_TYPE_CLIENTS = [
-  { value: 1, label: "Cliente industrial" },
-  { value: 2, label: "Persona natural" },
-  { value: 3, label: "Cliente internacional" },
-  { value: 4, label: "Empresa" }
-];
-
-export enum UserType {
-  ADMIN = "admin",
-  CLIENT = "client",
-  APPROVER = "approver"
-}
-
-interface Props {
-  userType: string;
-  clientTypeId: number;
-}
-
-interface FormField {
-  documentTypeId: number;
-  formFieldType: "TEXT" | "SC" | "MC" | "NUMBER";
-  question: string;
-  description: string;
-  options?: {
-    opions: Array<{ label: string; value: number }>;
-  };
-  isRequired: number;
-}
-
-interface Document {
-  id: number;
-  name: string;
-  templateUrl: string | null;
-  documentType: string;
-  description?: string;
-  createdAt: string | null;
-  expiryDate: string | null;
-  statusName: string;
-  statusColor: string;
-  url: string | null;
-  requirementId?: number;
-  approvers?: string[];
-  type?: string;
-  events?: any[];
-  files?: any[];
-  uploadedAt?: string;
-}
-
-interface ApiResponse {
-  status: number;
-  message: string;
-  id: number;
-  name: string;
-  documentNumber: number;
-  documentType: number;
-  documents: Document[];
-  forms: Document[];
-  creationForms: Array<{
-    id: number;
-    name: string;
-    templateUrl: string | null;
-    documentType: string;
-    validity: string | null;
-    subjectTypeId: string | null;
-    subjectSubtypeId: number | null;
-    documentTypeId: number;
-    isMandatory: number;
-    isAvailable: number;
-    url: string | null;
-    statusName: string;
-    statusColor: string;
-    statusId: string;
-    fields: Array<{
-      documentTypeId: number;
-      formFieldType: "TEXT" | "SC" | "MC" | "NUMBER";
-      question: string;
-      description: string;
-      options?: {
-        opions: Array<{
-          label: string;
-          value: number;
-        }>;
-      };
-      isRequired: number;
-    }>;
-  }>;
-}
 
 const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const {
@@ -134,7 +47,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [modalGenerateActionVisible, setModalGenerateActionVisible] = useState(false);
-  const [documentTypeId, setDocumentTypeId] = useState<number | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   const handleOpenDrawer = () => setDrawerVisible(true);
   const handleCloseDrawer = () => setDrawerVisible(false);
@@ -148,10 +61,21 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     try {
       const response = await API.get<ApiResponse>(`/subject/${supplierId}`);
       const { data } = response;
-      if (data.creationForms?.[0]?.fields) {
-        setFormFields(data.creationForms[0].fields);
+      // Combinar todos los fields de todos los creationForms
+      const allFields = data.creationForms?.reduce((acc: any[], form) => {
+        if (form.fields) {
+          return [...acc, ...form.fields];
+        }
+        return acc;
+      }, []);
+
+      if (allFields?.length) {
+        setFormFields(allFields);
       }
-      const allDocuments = [...(data.forms || []), ...(data.documents || [])];
+      const allDocuments = [
+        ...(data.forms?.map((form) => ({ ...form, type: "form" as const })) || []),
+        ...(data.documents?.map((doc) => ({ ...doc, type: "document" as const })) || [])
+      ];
       setDocuments(allDocuments);
     } catch (error) {
       console.error("Error fetching supplier data:", error);
@@ -163,12 +87,28 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     }
   }, [supplierId]);
 
-  const onSubmit = (data: any) => {
-    console.log("Form Data:", data);
-  };
+  const onSubmit = (data: any) => {};
 
   const renderFormField = (field: FormField) => {
     const fieldName = field.question.toLowerCase().replace(/\s+/g, "_");
+
+    // Setear el valor inicial según el tipo de campo
+    if (field.value !== undefined) {
+      switch (field.formFieldType) {
+        case "TEXT":
+          setValue(fieldName, field.value === null ? "" : String(field.value));
+          break;
+        case "NUMBER":
+          setValue(fieldName, typeof field.value === "number" ? field.value : null);
+          break;
+        case "SC":
+          setValue(fieldName, field.value as IOption);
+          break;
+        case "MC":
+          setValue(fieldName, Array.isArray(field.value) ? field.value : []);
+          break;
+      }
+    }
 
     const commonProps = {
       titleInput: field.question,
@@ -184,7 +124,6 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       case "NUMBER":
         return <InputNumber key={field.question} {...commonProps} />;
       case "SC":
-      case "MC":
         return (
           <InputSelect
             key={field.question}
@@ -199,12 +138,28 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             placeholder={`Seleccionar ${field.description.toLowerCase()}`}
           />
         );
+      case "MC":
+        return (
+          <InputSelect
+            key={field.question}
+            {...commonProps}
+            options={
+              field.options?.opions.map((opt) => ({
+                value: opt.value,
+                label: opt.label
+              })) || []
+            }
+            loading={false}
+            placeholder={`Seleccionar`}
+            mode="tags"
+          />
+        );
       default:
         return null;
     }
   };
 
-  const tableColumns = columns({ handleOpenDrawer, setDocumentTypeId });
+  const tableColumns = columns({ handleOpenDrawer, setSelectedDocument });
 
   const getHeaderTitle = () => {
     switch (userType) {
@@ -255,9 +210,10 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         visible={drawerVisible}
         onClose={handleCloseDrawer}
         subjectId={supplierId.toString()}
-        documentTypeId={documentTypeId?.toString() ?? ""}
+        documentId={selectedDocument?.id ?? 0}
         control={control}
         errors={errors}
+        type={selectedDocument?.type ?? "document"}
       />
 
       <ModalGenerateAction isOpen={modalGenerateActionVisible} onClose={handleCloseModal} />

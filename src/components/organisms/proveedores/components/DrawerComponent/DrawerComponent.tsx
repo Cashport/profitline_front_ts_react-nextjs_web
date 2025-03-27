@@ -3,36 +3,40 @@ import React from "react";
 import { Drawer, Flex, Typography } from "antd";
 import DescriptionSection from "./sections/DescriptionSection";
 import ApproversSection from "./sections/ApproversSection";
-import DocumentSection from "./sections/DocumentSection";
 import ExpirationSection from "./sections/ExpirationSection";
 import EventsSection from "./sections/EventsSection";
 import { ValiditySection } from "./sections/ValiditySection";
-import { CaretDoubleRight } from "phosphor-react";
+import { CaretDoubleRight, Files, ListChecks } from "phosphor-react";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { useDocument } from "@/hooks/useDocument";
+import DocumentUploadSection from "./sections/DocumentUploadSection";
+import ColumnText from "../ColumnText/ColumnText";
 
 const { Title } = Typography;
 
 interface DrawerProps {
   subjectId: string;
-  documentTypeId: string;
+  documentId: number;
   visible: boolean;
   onClose: () => void;
   control: any;
   errors: any;
+  type: "document" | "form";
 }
 
 const DrawerComponent: React.FC<DrawerProps> = ({
   subjectId,
-  documentTypeId,
+  documentId,
   visible,
   onClose,
   control,
-  errors
+  errors,
+  type
 }) => {
-  const { document, isLoading, mutate } = useDocument(subjectId, documentTypeId);
-
+  const { document, isLoading, mutate } = useDocument(subjectId, documentId);
+  // console.log("subjectId", subjectId);
+  // console.log("documentId", documentId);
   if (isLoading || !document) {
     return null;
   }
@@ -73,14 +77,47 @@ const DrawerComponent: React.FC<DrawerProps> = ({
         <ValiditySection validity={document.expiryDate} date={document.createdAt} />
         <ApproversSection approvers={document.approvers} />
         <hr style={{ borderTop: "1px solid #f7f7f7" }} />
-        <DocumentSection
-          documents={document.documents}
-          templateUrl={document.templateUrl}
+        {type === "document" ? (
+          <DocumentUploadSection
+            documents={document.documents}
+            templateUrl={document.templateUrl}
+            subjectId={subjectId}
+            documentId={document.id}
+            mutate={mutate}
+          />
+        ) : (
+          <ColumnText
+            title="Formulario"
+            icon={<Files size={16} color="#7B7B7B" />}
+            content={
+              <Flex
+                vertical
+                align="center"
+                style={{
+                  width: "100%",
+                  backgroundColor: "#F7F7F7",
+                  padding: 16,
+                  cursor: "pointer"
+                }}
+              >
+                <ListChecks size={16} color="#7B7B7B" />
+                <Typography.Text style={{ fontSize: 16, fontWeight: 400 }}>
+                  Formulario
+                </Typography.Text>
+                <Typography.Text style={{ fontSize: 10, fontWeight: 300 }}>
+                  10 Preguntas
+                </Typography.Text>
+              </Flex>
+            }
+          />
+        )}
+        <hr style={{ borderTop: "1px solid #f7f7f7" }} />
+        <ExpirationSection
           subjectId={subjectId}
-          documentTypeId={documentTypeId}
+          documentTypeSubjectId={document.id}
           mutate={mutate}
+          expirationDate={document.expiryDate}
         />
-        <ExpirationSection control={control} name="expirationDate" />
         <EventsSection events={[]} onAddComment={() => {}} />
       </Flex>
     </Drawer>

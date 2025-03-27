@@ -3,19 +3,19 @@ import { IDocument } from "@/interfaces/Document";
 
 export const uploadDocument = async (
   subjectId: string,
-  documentTypeId: string,
+  documentTypeSubjectId: number,
   file: File
 ): Promise<IDocument> => {
   const formData = new FormData();
   formData.append("file", file);
 
   const response = await API.post(
-    `/subject/${subjectId}/documents/${documentTypeId}/upload`,
+    `/subject/${subjectId}/documents/${documentTypeSubjectId}`,
     formData,
     {
       headers: {
-        "Content-Type": "multipart/form-data",
-      },
+        "Content-Type": "multipart/form-data"
+      }
     }
   );
   return response.data;
@@ -23,8 +23,10 @@ export const uploadDocument = async (
 
 export const deleteDocument = async (
   subjectId: string,
-  documentTypeId: string,
+  documentTypeSubjectId: number,
   documentId: number
 ): Promise<void> => {
-  await API.delete(`/subject/${subjectId}/documents/${documentTypeId}/${documentId}`);
+  await API.delete(
+    `/subject/${subjectId}/documentTypeSubjectId/${documentTypeSubjectId}/document/${documentId}`
+  );
 };

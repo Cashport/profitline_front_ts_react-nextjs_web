@@ -5,6 +5,7 @@ export interface IDocument {
 }
 
 export interface IDocumentResponse {
+  id: number;
   documentTypeName: string;
   documentTypeDescription: string;
   createdBy: string;
