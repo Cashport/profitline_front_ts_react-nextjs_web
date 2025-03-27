@@ -8,11 +8,11 @@ export const ValiditySection: React.FC<{ validity: string; date: string | null }
   date
 }) => (
   <Flex vertical gap={16}>
-    <ColumnText
+    {/* <ColumnText
       title="Vigencia"
       icon={<Hourglass size={16} color="#7B7B7B" />}
       content={validity ? `Hasta ${formatDate(validity)}` : "-"}
-    />
+    /> */}
     <ColumnText
       title="Fecha cargue"
       icon={<Calendar size={16} color="#7B7B7B" />}
