@@ -221,7 +221,11 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         type={selectedDocument?.type ?? "document"}
       />
 
-      <ModalGenerateAction isOpen={modalGenerateActionVisible} onClose={handleCloseModal} />
+      <ModalGenerateAction
+        isOpen={modalGenerateActionVisible}
+        onClose={handleCloseModal}
+        selectedClientType={clientTypeId}
+      />
     </div>
   );
 };

@@ -36,6 +36,7 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
             icon={<ListChecks size={16} />}
             title="Formulario"
             onClick={() => handleActionClick("form")}
+            disabled={true}
           />
         </Flex>
       );
@@ -77,13 +78,12 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
 
   return (
     <Modal
-      //className="modalGenerateAction"
-      width={"40%"}
       open={isOpen}
       centered
       title={<Title level={4}>{getTitle()}</Title>}
       footer={null}
       onCancel={onClose}
+      width={currentAction === "document" || currentAction === "form" ? "43rem" : "20%"}
     >
       {renderContent()}
       <CreateDocument
