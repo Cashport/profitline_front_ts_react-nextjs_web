@@ -158,8 +158,8 @@ interface IChangePaymentStatus {
   clientId: number | null;
   payment_ids: number[];
   status_id: number;
-  comment: string;
-  file: File;
+  comment?: string;
+  file?: File;
 }
 
 export const changePaymentStatus = async ({
@@ -177,8 +177,8 @@ export const changePaymentStatus = async ({
 
   formData.append("payments", JSON.stringify(payment_ids));
   formData.append("status", status_id.toString());
-  formData.append("comment", comment);
-  formData.append("file", file);
+  comment && formData.append("comment", comment);
+  file && formData.append("file", file);
 
   try {
     const response: GenericResponse<any> = await API.put(
