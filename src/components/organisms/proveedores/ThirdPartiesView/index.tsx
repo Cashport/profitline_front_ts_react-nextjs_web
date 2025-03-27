@@ -76,24 +76,22 @@ const ThirdPartiesView: React.FC = () => {
     {
       title: "Nombre",
       dataIndex: "name",
-      key: "name"
+      key: "name",
+      width: "30%"
     },
     {
       title: "Tipo",
       dataIndex: "subtypeName",
-      key: "subtypeName"
+      key: "subtypeName",
+      width: "20%"
     },
     {
       title: "Fecha creación",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (createdAt) => formatDate(createdAt)
+      render: (createdAt) => formatDate(createdAt),
+      width: "20%"
     },
-    // {
-    //   title: "Vencimiento",
-    //   dataIndex: "expirationDate",
-    //   key: "expirationDate"
-    // },
     {
       title: "Estado",
       dataIndex: "status",
@@ -112,7 +110,8 @@ const ThirdPartiesView: React.FC = () => {
             />
           </Flex>
         );
-      }
+      },
+      width: "20%"
     },
     {
       title: "Acciones",

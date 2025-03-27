@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Flex, DatePicker } from "antd";
+import { Button, Flex } from "antd";
 import ColumnText from "../../ColumnText/ColumnText";
 import { Files } from "phosphor-react";
 import dayjs from "dayjs";
@@ -10,14 +10,15 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/es";
 
-// dayjs.extend(weekday);
-// dayjs.extend(localeData);
-// dayjs.extend(customParseFormat);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale("es");
 
 import { API } from "@/utils/api/api";
+import { InputDate } from "@/components/atoms/inputs/InputDate/InputDate";
 
 interface ExpirationSectionProps {
   subjectId: string;
@@ -63,20 +64,20 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
         title="Vencimiento"
         icon={<Files size={16} color="#7B7B7B" />}
         content={
-          <DatePicker
-            placeholder="Seleccionar fecha de expiración"
-            value={newExpirationDate ? dayjs(newExpirationDate) : null}
+          <InputDate
+            titleInput="Vencimiento"
+            value={newExpirationDate ? dayjs(newExpirationDate) : undefined}
             onChange={(date) => setNewExpirationDate(date)}
-            style={{ width: "100%" }}
+            hiddenTitle
+            customStyleContainer={{ width: "100%" }}
+            placeholder="Seleccionar fecha de expiración"
           />
         }
       />
       <Button
         onClick={handleSave}
         loading={loading}
-        disabled={
-          newExpirationDate?.isSame(dayjs.utc(expirationDate)) || newExpirationDate === null
-        }
+        disabled={newExpirationDate?.isSame(dayjs.utc(expirationDate))}
         style={{ width: "fit-content", alignSelf: "flex-end" }}
       >
         Guardar
