@@ -115,7 +115,8 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       placeholder: `Ingresar ${field.description.toLowerCase()}`,
       control: control,
       nameInput: fieldName,
-      error: errors?.[fieldName] as FieldError | undefined
+      error: errors?.[fieldName] as FieldError | undefined,
+      disabled: true
     };
 
     switch (field.formFieldType) {

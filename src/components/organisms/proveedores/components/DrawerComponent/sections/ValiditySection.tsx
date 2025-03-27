@@ -14,7 +14,7 @@ export const ValiditySection: React.FC<{ validity: string; date: string | null }
       content={validity ? `Hasta ${formatDate(validity)}` : "-"}
     />
     <ColumnText
-      title="Fecha"
+      title="Fecha cargue"
       icon={<Calendar size={16} color="#7B7B7B" />}
       content={date ? `${formatDate(date)}` : "-"}
     />
