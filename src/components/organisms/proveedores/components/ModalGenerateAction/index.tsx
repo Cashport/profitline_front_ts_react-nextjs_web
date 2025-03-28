@@ -9,7 +9,7 @@ const { Title } = Typography;
 type ModalGenerateActionProps = {
   isOpen: boolean;
   onClose: () => void;
-  selectedClientType: number | null;
+  selectedClientType?: number;
 };
 
 export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
@@ -30,11 +30,13 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
       onCancel={onClose}
     >
       <Flex vertical gap={12}>
-        <ButtonGenerateAction
-          icon={<Files size={20} />}
-          title="Agregar requerimiento"
-          onClick={() => setIsModalAddRequirementOpen(true)}
-        />
+        {selectedClientType && (
+          <ButtonGenerateAction
+            icon={<Files size={20} />}
+            title="Agregar requerimiento"
+            onClick={() => setIsModalAddRequirementOpen(true)}
+          />
+        )}
 
         <ButtonGenerateAction icon={<User size={20} />} title="Crear cliente" onClick={() => {}} />
         <ButtonGenerateAction
@@ -64,11 +66,13 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
         onCancel={() => setIsModalOpen(false)}
         onSubmit={() => {}}
       />
-      <ModalAddRequirement
-        isOpen={isModalAddRequirementOpen}
-        onClose={() => setIsModalAddRequirementOpen(false)}
-        selectedClientType={selectedClientType}
-      />
+      {selectedClientType && (
+        <ModalAddRequirement
+          isOpen={isModalAddRequirementOpen}
+          onClose={() => setIsModalAddRequirementOpen(false)}
+          selectedClientType={selectedClientType}
+        />
+      )}
     </Modal>
   );
 };

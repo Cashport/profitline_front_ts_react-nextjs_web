@@ -15,6 +15,7 @@ interface DocumentSectionProps {
   subjectId: string;
   documentId: number;
   mutate: () => void;
+  mutateSupplierInfo: () => void;
 }
 
 const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
@@ -22,13 +23,15 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   documents,
   subjectId,
   documentId,
-  mutate
+  mutate,
+  mutateSupplierInfo
 }) => {
   const handleUpload = async (file: File) => {
     try {
       await uploadDocument(subjectId, documentId, file);
       message.success("Documento subido exitosamente");
       mutate();
+      mutateSupplierInfo();
     } catch (error) {
       message.error("Error al subir el documento");
       console.error("Error uploading document:", error);
@@ -41,6 +44,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
       await deleteDocument(subjectId, documentId, id);
       message.success("Documento eliminado exitosamente");
       mutate();
+      mutateSupplierInfo();
     } catch (error) {
       message.error("Error al eliminar el documento");
       console.error("Error deleting document:", error);
