@@ -24,6 +24,7 @@ interface ExpirationSectionProps {
   subjectId: string;
   documentTypeSubjectId: number;
   mutate: () => void;
+  mutateSupplierInfo: () => void;
   expirationDate: string | null;
 }
 
@@ -31,6 +32,7 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
   subjectId,
   documentTypeSubjectId,
   mutate,
+  mutateSupplierInfo,
   expirationDate
 }) => {
   const [loading, setLoading] = React.useState(false);
@@ -43,6 +45,7 @@ const ExpirationSection: React.FC<ExpirationSectionProps> = ({
         expirationDate: dateToSend
       });
       mutate();
+      mutateSupplierInfo();
     } catch (error) {
       console.error("Error updating expiration date:", error);
     } finally {

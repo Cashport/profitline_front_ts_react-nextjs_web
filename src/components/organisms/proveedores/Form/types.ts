@@ -57,42 +57,46 @@ export interface FormField {
 }
 
 export interface ApiResponse {
-  status: number;
+  status: string;
   message: string;
-  id: number;
-  name: string;
-  documentNumber: number;
-  documentType: number;
-  documents: Document[];
-  forms: Document[];
-  creationForms: Array<{
+  data: {
+    status: number;
+    message: string;
     id: number;
     name: string;
-    templateUrl: string | null;
-    documentType: string;
-    validity: string | null;
-    subjectTypeId: string | null;
-    subjectSubtypeId: number | null;
-    documentTypeId: number;
-    isMandatory: number;
-    isAvailable: number;
-    url: string | null;
-    statusName: string;
-    statusColor: string;
-    statusId: string;
-    fields: Array<{
+    documentNumber: number;
+    documentType: number;
+    documents: Document[];
+    forms: Document[];
+    creationForms: Array<{
+      id: number;
+      name: string;
+      templateUrl: string | null;
+      documentType: string;
+      validity: string | null;
+      subjectTypeId: string | null;
+      subjectSubtypeId: number | null;
       documentTypeId: number;
-      formFieldType: "TEXT" | "SC" | "MC" | "NUMBER";
-      question: string;
-      description: string;
-      options?: {
-        opions: Array<{
-          label: string;
-          value: number;
-        }>;
-      };
-      isRequired: number;
-      value: string | number | IOption;
+      isMandatory: number;
+      isAvailable: number;
+      url: string | null;
+      statusName: string;
+      statusColor: string;
+      statusId: string;
+      fields: Array<{
+        documentTypeId: number;
+        formFieldType: "TEXT" | "SC" | "MC" | "NUMBER";
+        question: string;
+        description: string;
+        options?: {
+          opions: Array<{
+            label: string;
+            value: number;
+          }>;
+        };
+        isRequired: number;
+        value: string | number | IOption;
+      }>;
     }>;
-  }>;
+  };
 }

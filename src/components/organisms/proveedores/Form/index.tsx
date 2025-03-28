@@ -11,7 +11,7 @@ import { CaretLeft } from "phosphor-react";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
-import { API } from "@/utils/api/api";
+import { fetcher } from "@/utils/api/api";
 import { FieldError } from "react-hook-form";
 import {
   Document,
@@ -24,6 +24,7 @@ import {
 } from "./types";
 import "./form.scss";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+import useSWR from "swr";
 
 const { Text } = Typography;
 
@@ -57,37 +58,36 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const supplierId = params?.id;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await API.get<ApiResponse>(`/subject/${supplierId}`);
-        // Combinar todos los fields de todos los creationForms
-        const allFields = response.data.creationForms?.reduce((acc: any[], form) => {
-          if (form.fields) {
-            return [...acc, ...form.fields];
-          }
-          return acc;
-        }, []);
+  const { data, error, mutate } = useSWR<ApiResponse>(
+    supplierId ? `/subject/${supplierId}` : null,
+    fetcher,
+    {}
+  );
 
-        if (allFields?.length) {
-          setFormFields(allFields);
-        }
-        const allDocuments = [
-          ...(response.data.forms?.map((form) => ({ ...form, type: "form" as const })) || []),
-          ...(response.data.documents?.map((doc) => ({ ...doc, type: "document" as const })) || [])
-        ];
-        setDocuments(allDocuments);
-      } catch (error) {
-        console.error("Error fetching supplier data:", error);
-      }
-    };
-    if (supplierId) {
-      fetchData();
+  useEffect(() => {
+    if (error) {
+      return;
     }
-  }, [supplierId]);
+    if (data) {
+      const allFields = data?.data?.creationForms?.reduce((acc: any[], form) => {
+        if (form.fields) {
+          return [...acc, ...form.fields];
+        }
+        return acc;
+      }, []);
+
+      if (allFields?.length) {
+        setFormFields(allFields);
+      }
+      const allDocuments = [
+        ...(data.data?.forms?.map((form) => ({ ...form, type: "form" as const })) || []),
+        ...(data.data?.documents?.map((doc) => ({ ...doc, type: "document" as const })) || [])
+      ];
+      setDocuments(allDocuments);
+    }
+  }, [data]);
 
   useEffect(() => {
-    // Initialize form values
     formFields.forEach((field: FormField) => {
       const fieldName = field.question.toLowerCase().replace(/\s+/g, "_");
       if (field.value !== undefined) {
@@ -219,9 +219,14 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         control={control}
         errors={errors}
         type={selectedDocument?.type ?? "document"}
+        mutateSupplierInfo={mutate}
       />
 
-      <ModalGenerateAction isOpen={modalGenerateActionVisible} onClose={handleCloseModal} />
+      <ModalGenerateAction
+        isOpen={modalGenerateActionVisible}
+        onClose={handleCloseModal}
+        selectedClientType={clientTypeId}
+      />
     </div>
   );
 };

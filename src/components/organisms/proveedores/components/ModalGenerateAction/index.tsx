@@ -2,16 +2,24 @@ import React, { useState } from "react";
 import { Flex, Modal, Typography } from "antd";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { User } from "@phosphor-icons/react";
-import { Envelope, Megaphone, Trash } from "phosphor-react";
+import { Envelope, Files, Megaphone, Trash } from "phosphor-react";
 import ModalSendInvitation from "../ModalSendInvitation";
+import { ModalAddRequirement } from "@/components/organisms/projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 const { Title } = Typography;
 type ModalGenerateActionProps = {
   isOpen: boolean;
   onClose: () => void;
+  selectedClientType?: number;
 };
 
-export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({ isOpen, onClose }) => {
+export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
+  isOpen,
+  onClose,
+  selectedClientType
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalAddRequirementOpen, setIsModalAddRequirementOpen] = useState(false);
+
   return (
     <Modal
       centered
@@ -22,6 +30,14 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({ isOpen
       onCancel={onClose}
     >
       <Flex vertical gap={12}>
+        {selectedClientType && (
+          <ButtonGenerateAction
+            icon={<Files size={20} />}
+            title="Agregar requerimiento"
+            onClick={() => setIsModalAddRequirementOpen(true)}
+          />
+        )}
+
         <ButtonGenerateAction icon={<User size={20} />} title="Crear cliente" onClick={() => {}} />
         <ButtonGenerateAction
           icon={<Trash size={20} />}
@@ -50,6 +66,13 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({ isOpen
         onCancel={() => setIsModalOpen(false)}
         onSubmit={() => {}}
       />
+      {selectedClientType && (
+        <ModalAddRequirement
+          isOpen={isModalAddRequirementOpen}
+          onClose={() => setIsModalAddRequirementOpen(false)}
+          selectedClientType={selectedClientType}
+        />
+      )}
     </Modal>
   );
 };
