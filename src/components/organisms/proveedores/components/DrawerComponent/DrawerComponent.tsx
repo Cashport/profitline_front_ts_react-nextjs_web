@@ -23,6 +23,7 @@ interface DrawerProps {
   control: any;
   errors: any;
   type: "document" | "form";
+  mutateSupplierInfo: () => void;
 }
 
 const DrawerComponent: React.FC<DrawerProps> = ({
@@ -32,11 +33,10 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   onClose,
   control,
   errors,
-  type
+  type,
+  mutateSupplierInfo
 }) => {
   const { document, isLoading, mutate } = useDocument(subjectId, documentId);
-  // console.log("subjectId", subjectId);
-  // console.log("documentId", documentId);
   if (isLoading || !document) {
     return null;
   }
@@ -84,6 +84,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
             subjectId={subjectId}
             documentId={document.id}
             mutate={mutate}
+            mutateSupplierInfo={mutateSupplierInfo}
           />
         ) : (
           <ColumnText
@@ -116,6 +117,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           subjectId={subjectId}
           documentTypeSubjectId={document.id}
           mutate={mutate}
+          mutateSupplierInfo={mutateSupplierInfo}
           expirationDate={document.expiryDate}
         />
         <EventsSection events={[]} onAddComment={() => {}} />

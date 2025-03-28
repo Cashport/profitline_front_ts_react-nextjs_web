@@ -2,8 +2,10 @@ import IconButton from "@/components/atoms/IconButton/IconButton";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import { formatDate } from "@/utils/utils";
 import { Flex } from "antd";
+import type { ColumnType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 import { Document } from "./types";
+
 export const columns = ({
   handleOpenDrawer,
   setSelectedDocument
@@ -11,11 +13,12 @@ export const columns = ({
   handleOpenDrawer: () => void;
   setSelectedDocument: React.Dispatch<React.SetStateAction<Document | null>>;
 }) => [
-  { title: "Nombre", dataIndex: "name", key: "name" },
+  { title: "Nombre", dataIndex: "name", key: "name", width: "20%" },
   {
     title: "Descripción",
     dataIndex: "description",
-    key: "description"
+    key: "description",
+    width: "35%"
   },
   {
     title: "Fecha cargue",
@@ -26,7 +29,8 @@ export const columns = ({
         return formatDate(record.createdAt);
       }
       return "-";
-    }
+    },
+    width: "15%"
   },
   {
     title: "Vencimiento",
@@ -37,7 +41,8 @@ export const columns = ({
         return formatDate(record.expiryDate);
       }
       return "-";
-    }
+    },
+    width: "15%"
   },
   {
     title: "Estado",
@@ -51,7 +56,8 @@ export const columns = ({
           style={{ fontSize: 14, fontWeight: 400 }}
         />
       </Flex>
-    )
+    ),
+    width: "15%"
   },
   {
     title: "",
@@ -66,6 +72,7 @@ export const columns = ({
         icon={<Eye size={"1.3rem"} />}
         style={{ backgroundColor: "#F4F4F4" }}
       />
-    )
+    ),
+    align: "right" as ColumnType<Document>["align"]
   }
 ];
