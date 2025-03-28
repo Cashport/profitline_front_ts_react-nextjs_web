@@ -37,3 +37,4 @@ export interface ITemplateEmailData {
   body: string;
   attachments: File[];
 }
+
