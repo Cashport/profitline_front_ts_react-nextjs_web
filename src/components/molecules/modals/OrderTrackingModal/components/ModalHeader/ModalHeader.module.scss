@@ -1,0 +1,56 @@
+// .currentTrip {
+//     display: flex;
+//     align-items: flex-start;
+//     justify-content: space-between;
+//     padding: 8px 16px 24px 8px;
+// }
+// .trackStateContainer {
+//     display: flex;
+//     align-items: center;
+//     cursor: pointer;
+
+//     .trackState {
+//         color: #ffffff;
+//         font-size: 14px;
+//         font-weight: 400;
+//         line-height: 18px;
+//         background-color: #cbe71e;
+//         border-radius: 8px;
+//         padding: 6px 12px;
+//     }
+// }
+// .link {
+//     text-decoration: underline;
+//     color: #1e8ff3;
+//     font-size: 16px;
+//     font-weight: 600;
+//     cursor: pointer;
+// }
+.container {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.icon {
+    color: #6b7280;
+    margin-right: 8px;
+}
+
+.label {
+    color: #6b7280;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.value {
+    margin-left: auto;
+    font-weight: 300;
+    font-size: 16px;
+}

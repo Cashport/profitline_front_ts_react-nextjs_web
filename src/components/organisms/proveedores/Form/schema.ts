@@ -16,3 +16,20 @@ export const validationSchema = Yup.object().shape({
     .required("Correo electrónico es requerido"),
   economicActivity: Yup.string().required("Seleccione la actividad económica")
 });
+
+export interface IDocument {
+  id: number;
+  name: string;
+  templateUrl: string;
+  documentType: string;
+  validity: string | null;
+  subjectTypeId: string;
+  subjectSubtypeId: string | null;
+  documentTypeId: number;
+  isMandatory: number;
+  isAvailable: number;
+  url: string | null;
+  statusName: string;
+  statusColor: string;
+  statusId: string;
+}

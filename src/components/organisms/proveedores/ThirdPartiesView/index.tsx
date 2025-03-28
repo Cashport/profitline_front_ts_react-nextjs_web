@@ -1,9 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Tabs, Table, Space, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { ThirdPartiesData } from "../interfaces/ThirdPartiesData";
-import { clientsData, providersData } from "./mocked";
+import { IThirdPartiesData } from "../interfaces/ThirdPartiesData";
 import Container from "@/components/atoms/Container/Container";
 import UiSearchInput from "@/components/ui/search-input";
 import { FilterClients } from "@/components/atoms/Filters/FilterClients/FilterClients";
@@ -13,107 +12,106 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+import { fetcher } from "@/utils/api/api";
 
 enum TabsEnum {
   Clients = "clients",
   Providers = "providers"
 }
+const formatDate = (isoString: string): string => {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Los meses comienzan desde 0
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 const ThirdPartiesView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabsEnum>(TabsEnum.Clients);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<ThirdPartiesData[]>([]);
-  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   const router = useRouter();
+
+  // Debounce search input
+  const debounceSearch = useCallback((value: string) => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debounceSearch(e.target.value);
+  };
+
   const closeModal = () => {
     setModalOpen(false);
   };
   const openModal = () => {
     setModalOpen(true);
   };
-  const fetchData = async (tab: string) => {
-    setLoading(true);
-    try {
-      //const response = await axios.get(`/api/${tab}`);
-      if (tab === "clients") {
-        setData(clientsData);
-      } else {
-        setData(providersData);
-      }
-      // setData(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData(activeTab);
-  }, [activeTab]);
+  const { data, error, isLoading } = useSWR(
+    `/subject/${activeTab}?page=${currentPage}&limit=${pageSize}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
+    fetcher
+  );
 
   const handleTabChange = (key: TabsEnum) => {
     setActiveTab(key);
-    setSearchText(""); // Reiniciar el texto de búsqueda al cambiar de pestaña
+    setDebouncedSearch("");
+    setCurrentPage(1);
   };
 
-  const columns: ColumnsType<ThirdPartiesData> = [
+  const handlePaginationChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const columns: ColumnsType<IThirdPartiesData> = [
     {
       title: "Nombre",
       dataIndex: "name",
-      key: "name"
+      key: "name",
+      width: "30%"
     },
     {
       title: "Tipo",
-      dataIndex: "type",
-      key: "type"
+      dataIndex: "subtypeName",
+      key: "subtypeName",
+      width: "20%"
     },
     {
       title: "Fecha creación",
-      dataIndex: "creationDate",
-      key: "creationDate"
-    },
-    {
-      title: "Vencimiento",
-      dataIndex: "expirationDate",
-      key: "expirationDate"
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (createdAt) => formatDate(createdAt),
+      width: "20%"
     },
     {
       title: "Estado",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        let color;
-        switch (status) {
-          case "Actualizado":
-            color = "#17CC07";
-            break;
-          case "Pendiente":
-            color = "#FF6F00";
-            break;
-          case "Nuevo":
-            color = "#16A9FB";
-            break;
-          case "Inactivo":
-            color = "#DDDDDD";
-            break;
-          default:
-            color = "default";
-        }
         return (
           <Flex>
             <Tag
-              icon={<Circle color={color} weight="fill" size={6} />}
+              icon={<Circle color={status.color} weight="fill" size={6} />}
               style={{
-                border: `${color} 1px solid`,
+                border: `${status.color} 1px solid`,
                 fontSize: 14,
                 fontWeight: 400
               }}
-              content={status}
+              content={status.name}
             />
           </Flex>
         );
-      }
+      },
+      width: "20%"
     },
     {
       title: "Acciones",
@@ -135,7 +133,7 @@ const ThirdPartiesView: React.FC = () => {
   ];
 
   return (
-    <Container style={{ gap: "1.5rem" }}>
+    <Container style={{ gap: "1.5rem", overflowY: "auto" }}>
       <Tabs
         defaultActiveKey="clients"
         onChange={(key: string) => handleTabChange(key as TabsEnum)}
@@ -150,19 +148,23 @@ const ThirdPartiesView: React.FC = () => {
       </Tabs>
       <Flex gap={8}>
         <UiSearchInput
-          placeholder="Buscar clientes"
-          onChange={(e) => setSearchText(e.target.value)}
+          placeholder={`Buscar ${activeTab === TabsEnum.Clients ? "clientes" : "proveedores"}`}
+          onChange={handleSearch}
         />
         <FilterClients setFilterClients={() => {}} />
         <GenerateActionButton onClick={openModal} />
       </Flex>
       <Table
         columns={columns}
-        dataSource={data.filter((item) =>
-          item.name.toLowerCase().includes(searchText.toLowerCase())
-        )}
-        loading={loading}
-        rowSelection={{}}
+        dataSource={data?.data}
+        loading={isLoading}
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: data?.total || 0,
+          onChange: handlePaginationChange,
+          showSizeChanger: false
+        }}
       />
       <ModalGenerateAction isOpen={isModalOpen} onClose={closeModal} />
     </Container>

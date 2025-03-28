@@ -24,7 +24,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
   });
 
   const handleUpload = (file: ExtendedFile) => {
-    console.log("FILE", file);
+    // console.log("FILE", file);
     const fileData = {
       uid: file.uid,
       name: file.name,
@@ -41,7 +41,7 @@ const DocumentSection: React.FC<DocumentSectionProps> = ({ templateUrl, control,
     remove(index); // Elimina el archivo del arreglo
   };
 
-  console.log("fields", fields);
+  // console.log("fields", fields);
   return (
     <ColumnText
       title="Documento"

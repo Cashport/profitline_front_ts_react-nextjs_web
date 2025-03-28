@@ -42,7 +42,7 @@ export interface IRequirement {
   name: string;
   description: string;
   template?: string;
-  validity: string;
+  expiryDate: string;
   approvers: string[];
   type: RequirementType;
   status: Status;
@@ -50,7 +50,7 @@ export interface IRequirement {
   files: IFile[];
   loadedBy?: string;
   uploadedAt: string;
-  expirationDate?: any;
+  createdAt: string;
 }
 
 export interface Event {

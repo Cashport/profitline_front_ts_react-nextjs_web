@@ -25,18 +25,22 @@ export const SelectLocations = <T extends FieldValues>({ errors, field }: Props<
   if (axios.isAxiosError(data)) {
     return null;
   }
-  const options = data?.map((location) => {
-    return {
-      value: location.id,
-      label: location.city,
-      className: "selectOptions"
-    };
-  });
+
+  const options = data?.map((location) => ({
+    value: location.id,
+    label: location.city,
+    className: "selectOptions"
+  }));
+
+  const filterOption = (input: string, option?: { label: string; value: number }) => {
+    return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
+  };
 
   return (
     <Flex vertical>
       <h4 className="inputTitle">Ciudad</h4>
       <Select
+        showSearch
         placeholder="Seleccione la ciudad"
         className={errors ? "selectInputError" : "selectInputCustom"}
         loading={isLoading}
@@ -46,6 +50,7 @@ export const SelectLocations = <T extends FieldValues>({ errors, field }: Props<
         popupClassName="selectDrop"
         options={options}
         labelInValue
+        filterOption={filterOption}
       />
       {errors && (
         <Typography.Text className="textError">La ciudad es obligatoria *</Typography.Text>
