@@ -132,7 +132,8 @@ export const BanksTable = ({
       key: "CLIENT_NAME",
       render: (text) => <Text>{text}</Text>,
       sorter: (a, b) => a.CLIENT_NAME.localeCompare(b.CLIENT_NAME),
-      showSorterTooltip: false
+      showSorterTooltip: false,
+      width: 190
     },
     {
       title: "Fecha",
@@ -168,10 +169,10 @@ export const BanksTable = ({
       key: "bank_description",
       dataIndex: "bank_description",
       render: (text, record) => (
-        <>
+        <div className="accountBankTextContainer">
           <Text>{record.account_number}</Text>
           <p className="accountBankText">{text}</p>
-        </>
+        </div>
       ),
       width: 110
     },

@@ -32,7 +32,7 @@ interface IAssignClient {
   id_user: number;
   payment_ids: number[];
   client_id: string;
-  evidence: File;
+  evidence?: File;
 }
 
 interface IEditClient extends IAssignClient {
@@ -49,7 +49,7 @@ export const assignClient = async ({
   formData.append("id_user", id_user.toString());
   formData.append("payment_ids", JSON.stringify(payment_ids));
   formData.append("assign_client_id", client_id);
-  formData.append("evidence", evidence);
+  evidence && formData.append("evidence", evidence);
   try {
     const response: GenericResponse<any> = await API.put(
       `${config.API_HOST}/bank/assign-client-payments`,
@@ -74,7 +74,7 @@ export const editClient = async ({
   formData.append("id_user", id_user.toString());
   formData.append("payment_ids", JSON.stringify(payment_ids));
   formData.append("assign_client_id", client_id);
-  formData.append("evidence", evidence);
+  evidence && formData.append("evidence", evidence);
   formData.append("previous_assign_client_id", current_client_id);
   try {
     const response: GenericResponse<any> = await API.put(
@@ -158,8 +158,8 @@ interface IChangePaymentStatus {
   clientId: number | null;
   payment_ids: number[];
   status_id: number;
-  comment: string;
-  file: File;
+  comment?: string;
+  file?: File;
 }
 
 export const changePaymentStatus = async ({
@@ -177,8 +177,8 @@ export const changePaymentStatus = async ({
 
   formData.append("payments", JSON.stringify(payment_ids));
   formData.append("status", status_id.toString());
-  formData.append("comment", comment);
-  formData.append("file", file);
+  comment && formData.append("comment", comment);
+  file && formData.append("file", file);
 
   try {
     const response: GenericResponse<any> = await API.put(

@@ -123,7 +123,7 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
         id_user: userId,
         payment_ids: selectedRows?.map((row) => row.id),
         client_id: data.change_for.value,
-        evidence: data.evidence as File,
+        evidence: data.evidence,
         current_client_id: selectedRows[0].id_client.toString()
       });
 
@@ -186,7 +186,7 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
       <div className="modalActionsEditClient__file">
         <Flex vertical>
           <p>Evidencia</p>
-          <em>*Obligatorio</em>
+          <em>*Opcional</em>
         </Flex>
         <DocumentButton
           key={evidence?.name}
@@ -203,7 +203,7 @@ const ModalActionsEditClient = ({ isOpen, onClose, selectedRows }: Props) => {
 
         <PrincipalButton
           onClick={handleSubmit(onSubmit)}
-          disabled={!isValid || !evidence}
+          disabled={!isValid}
           loading={isSubmitting}
         >
           Editar cliente
