@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
+import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
@@ -144,7 +145,11 @@ export const WalletTab = () => {
       // mutate Applytable data
       mutateApplyTabData();
     } catch (error) {
-      messageShow.error("Error al añadir las facturas a la tabla de aplicación de pagos");
+      if (error instanceof AxiosError) {
+        messageShow.error(
+          `Error al añadir facturas(s) a la tabla de aplicación de pagos ${error.message}`
+        );
+      }
     }
   };
 
