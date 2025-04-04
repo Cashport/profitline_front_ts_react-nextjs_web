@@ -87,7 +87,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         Number(projectId) || 0,
         Number(clientId) || 0,
         "payments",
-        selectedPayments?.map((invoice) => invoice.id) || []
+        selectedPayments?.map((payment) => payment.id) || []
       );
       setIsModalActionPaymentOpen(false);
       showMessage("success", "Pagos añadidos a la tabla de aplicación de pagos");
@@ -165,7 +165,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         onChangeTab={onChangetabWithCloseModal}
         setIsSelectedActionModalOpen={setIsSelectedActionModalOpen}
         setIsModalActionPaymentOpen={setIsModalActionPaymentOpen}
-        addPaymentssToApplicationTable={handleAddSelectedPaymentsToApplicationTable}
+        addPaymentsToApplicationTable={handleAddSelectedPaymentsToApplicationTable}
       />
       <ModalIdentifyPayment
         isOpen={isSelectedActionModalOpen.selected === 1}
