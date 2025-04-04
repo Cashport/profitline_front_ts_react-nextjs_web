@@ -15,6 +15,7 @@ type ModalActionPaymentProps = {
     }>
   >;
   setIsModalActionPaymentOpen: Dispatch<SetStateAction<boolean>>;
+  addPaymentssToApplicationTable: () => void;
 };
 
 export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
@@ -22,7 +23,8 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   onClose,
   onChangeTab,
   setIsSelectedActionModalOpen,
-  setIsModalActionPaymentOpen
+  setIsModalActionPaymentOpen,
+  addPaymentssToApplicationTable
 }) => {
   return (
     <Modal
@@ -51,7 +53,8 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
           onClick={() => {
             console.log("Aplicar pagos clicked");
 
-            onChangeTab("5");
+            // onChangeTab("5");
+            addPaymentssToApplicationTable();
           }}
         />
         <ButtonGenerateAction

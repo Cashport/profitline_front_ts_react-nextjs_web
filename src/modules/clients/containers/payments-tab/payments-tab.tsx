@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { Button, Flex, Spin } from "antd";
 import { DotsThree, MagnifyingGlassPlus } from "phosphor-react";
+import { useParams } from "next/navigation";
+import { AxiosError } from "axios";
 
+import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
+import { extractSingleParam } from "@/utils/utils";
 import { useSelectedPayments } from "@/context/SelectedPaymentsContext";
 import { useClientsPayments } from "@/hooks/useClientsPayments";
-
 import { useModalDetail } from "@/context/ModalContext";
+import { useMessageApi } from "@/context/MessageContext";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
+
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import Collapse from "@/components/ui/collapse";
@@ -27,6 +33,9 @@ interface PaymentProd {
 }
 
 const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
+  const params = useParams();
+  const clientId = extractSingleParam(params.clientId);
+  const projectId = extractSingleParam(params.projectId);
   const { selectedPayments, setSelectedPayments } = useSelectedPayments();
   const [isSelectedActionModalOpen, setIsSelectedActionModalOpen] = useState({
     selected: 0
@@ -35,9 +44,11 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
   const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
 
+  const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
 
   const { data, isLoading, mutate } = useClientsPayments();
+  const { mutate: mutateApplyTabData } = useApplicationTable();
 
   const handleActionInDetail = (selectedPayment: IClientPayment | ISingleBank): void => {
     setIsModalActionPaymentOpen((prev) => !prev);
@@ -56,7 +67,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
 
   const onChangetabWithCloseModal = (activeKey: string) => {
     setIsModalActionPaymentOpen(false);
-    onChangeTab(activeKey);
+    // onChangeTab(activeKey);
   };
 
   const handleCloseActionModal = (cancelClicked?: Boolean) => {
@@ -70,6 +81,29 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
     setIsSelectedActionModalOpen({ selected: 1 });
   };
 
+  const handleAddSelectedPaymentsToApplicationTable = async () => {
+    try {
+      await addItemsToTable(
+        Number(projectId) || 0,
+        Number(clientId) || 0,
+        "payments",
+        selectedPayments?.map((invoice) => invoice.id) || []
+      );
+      setIsModalActionPaymentOpen(false);
+      showMessage("success", "Pagos añadidos a la tabla de aplicación de pagos");
+      // mutate Applytable data
+      mutateApplyTabData();
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        showMessage(
+          "error",
+          `Error al añadir pagos a la tabla de aplicación de pagos ${error.message}`
+        );
+      } else {
+        showMessage("error", `Error al añadir pagos a la tabla de aplicación de pagos`);
+      }
+    }
+  };
   return (
     <>
       <div className="paymentsTab">
@@ -131,6 +165,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         onChangeTab={onChangetabWithCloseModal}
         setIsSelectedActionModalOpen={setIsSelectedActionModalOpen}
         setIsModalActionPaymentOpen={setIsModalActionPaymentOpen}
+        addPaymentssToApplicationTable={handleAddSelectedPaymentsToApplicationTable}
       />
       <ModalIdentifyPayment
         isOpen={isSelectedActionModalOpen.selected === 1}

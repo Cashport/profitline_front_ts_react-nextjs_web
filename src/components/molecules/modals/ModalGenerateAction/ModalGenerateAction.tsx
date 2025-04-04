@@ -113,10 +113,7 @@ export const ModalGenerateAction = ({
         <ButtonGenerateAction
           icon={<HandTap size={16} />}
           title="Aplicar pagos"
-          onClick={() => {
-            console.log("Aplicar pagos");
-            addInvoicesToApplicationTable();
-          }}
+          onClick={() => addInvoicesToApplicationTable()}
         />
         <ButtonGenerateAction
           icon={<Paperclip size={16} />}
