@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
 
@@ -14,9 +14,11 @@ const { Text } = Typography;
 interface PropsInvoicesTable {
   dataAdjustmentsByStatus: FinancialDiscount[];
   setSelectedRows: Dispatch<SetStateAction<FinancialDiscount[] | undefined>>;
+  // eslint-disable-next-line no-unused-vars
   openAdjustmentDetail: (adjustment: FinancialDiscount) => void;
   financialStatusId: number;
   legalized?: boolean;
+  selectedRows?: FinancialDiscount[];
 }
 
 const AccountingAdjustmentsTable = ({
@@ -24,11 +26,23 @@ const AccountingAdjustmentsTable = ({
   setSelectedRows,
   openAdjustmentDetail,
   financialStatusId,
-  legalized
+  legalized,
+  selectedRows
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  useEffect(() => {
+    if (selectedRows) {
+      const updatedKeys = selectedRowKeys.filter((key) =>
+        selectedRows.some((row) => row.id === key)
+      );
+      const selectedKeys = selectedRows.map((row) => row.id);
+      setSelectedRowKeys(Array.from(new Set([...updatedKeys, ...selectedKeys])));
+    } else {
+      setSelectedRowKeys([]);
+    }
+  }, [selectedRows]);
 
   const handleOpenDetail = (adjustment: FinancialDiscount) => {
     openAdjustmentDetail({ ...adjustment, legalized: legalized });
@@ -52,6 +66,7 @@ const AccountingAdjustmentsTable = ({
               !newSelectedRowKeys.includes(prevSelectedRow.id) &&
               prevSelectedRow.financial_status_id === financialStatusId
           );
+
           if (unCheckedRows.length > 0) {
             // remove form the prevState the ones present in the unCheckedRows
             const filteredPrevSelectedRows = prevSelectedRows.filter(
@@ -104,7 +119,7 @@ const AccountingAdjustmentsTable = ({
       render: (text) => <Text className="cell -alignRight">{formatDate(text)}</Text>,
       sorter: (a, b) => Date.parse(a.create_at) - Date.parse(b.create_at),
       align: "center",
-      width: 116,
+      width: 120,
       showSorterTooltip: false
     },
     {

@@ -1,28 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
-import { CaretDoubleRight } from "phosphor-react";
+import { CaretDoubleRight, DotsThree } from "phosphor-react";
+import { AxiosError } from "axios";
+import { mutate } from "swr";
+
+import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
+import { extractSingleParam } from "@/utils/utils";
+import { useMessageApi } from "@/context/MessageContext";
+import { useModalDetail } from "@/context/ModalContext";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
+import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
+import { useDebounce } from "@/hooks/useDeabouce";
+
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-adjustments-table";
 import Collapse from "@/components/ui/collapse";
-import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
-import { extractSingleParam } from "@/utils/utils";
+import AccountingAdjustmentsFilter, {
+  SelectedFiltersAccountingAdjustments
+} from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
+import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
+
 import {
   FinancialDiscount,
   StatusFinancialDiscounts
 } from "@/types/financialDiscounts/IFinancialDiscounts";
+
 import "./accounting-adjustments-tab.scss";
-import { useModalDetail } from "@/context/ModalContext";
-import { mutate } from "swr";
-import { useDebounce } from "@/hooks/useDeabouce";
-import AccountingAdjustmentsFilter, {
-  SelectedFiltersAccountingAdjustments
-} from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 
 const AccountingAdjustmentsTab = () => {
   const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>(undefined);
   const [search, setSearch] = useState("");
+  const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
 
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -43,7 +53,24 @@ const AccountingAdjustmentsTab = () => {
     zone: filters.zones,
     channel: filters.channels
   });
+
+  const { mutate: mutateApplyTabData } = useApplicationTable();
+
+  // useMemo to add the key financial_status_id to each row in the data
+  const modifiedData = useMemo(() => {
+    return data?.map((financialState: StatusFinancialDiscounts) => {
+      return {
+        ...financialState,
+        financial_discounts: financialState.financial_discounts.map((adjustment) => ({
+          ...adjustment,
+          financial_status_id: financialState.status_id
+        }))
+      };
+    });
+  }, [data]);
+
   const { openModal, modalType } = useModalDetail();
+  const { showMessage } = useMessageApi();
 
   const handleOpenAdjustmentDetail = (adjustment: FinancialDiscount) => {
     openModal("adjustment", {
@@ -57,6 +84,30 @@ const AccountingAdjustmentsTab = () => {
   useEffect(() => {
     mutate(`/financial-discount/project/${projectId}/client/${clientId}`);
   }, [modalType]);
+
+  const handleAddSelectedAdjustmentsToApplicationTable = async () => {
+    try {
+      await addItemsToTable(
+        Number(projectId) || 0,
+        Number(clientId) || 0,
+        "discounts",
+        selectedRows?.map((adjustment) => adjustment.id) || []
+      );
+      setIsModalActionPaymentOpen(false);
+      showMessage("success", "Ajuste(s) añadidos a la tabla de aplicación de pagos");
+      // mutate Applytable data
+      mutateApplyTabData();
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        showMessage(
+          "error",
+          `Error al añadir ajuste(s) a la tabla de aplicación de pagos ${error.message}`
+        );
+      } else {
+        showMessage("error", `Error al añadir ajuste(s) a la tabla de aplicación de pagos`);
+      }
+    }
+  };
 
   return (
     <>
@@ -74,6 +125,15 @@ const AccountingAdjustmentsTab = () => {
               }}
             />
             <AccountingAdjustmentsFilter onFilterChange={setFilters} />
+            <Button
+              className="button__actions"
+              size="large"
+              icon={<DotsThree size={"1.5rem"} />}
+              disabled={false}
+              onClick={() => setIsModalActionPaymentOpen(true)}
+            >
+              Generar acción
+            </Button>
           </Flex>
           <Button
             type="primary"
@@ -92,7 +152,7 @@ const AccountingAdjustmentsTab = () => {
         ) : (
           <Collapse
             stickyLabel
-            items={data?.map((financialState: StatusFinancialDiscounts) => ({
+            items={modifiedData?.map((financialState: StatusFinancialDiscounts) => ({
               key: financialState.status_id,
               label: (
                 <LabelCollapse status={financialState.status_name} color={financialState.color} />
@@ -105,12 +165,19 @@ const AccountingAdjustmentsTab = () => {
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
+                    selectedRows={selectedRows}
                   />
                 </>
               )
             }))}
           />
         )}
+
+        <ModalActionAccountingAdjustments
+          isOpen={isModalActionPaymentOpen}
+          onClose={() => setIsModalActionPaymentOpen(false)}
+          addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
+        />
       </div>
     </>
   );
