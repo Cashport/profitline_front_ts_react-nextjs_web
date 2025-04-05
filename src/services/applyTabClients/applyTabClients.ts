@@ -149,7 +149,7 @@ export const getApplicationInvoices = async (project_id: number, client_id: numb
 export const getApplicationPayments = async (project_id: number, client_id: number) => {
   try {
     const response: GenericResponse<IClientPaymentStatus[]> = await API.get(
-      `${config.API_HOST}/paymentApplication/get-payments/project/${project_id}/client/${client_id}`
+      `${config.API_HOST}/paymentApplication/get-available-payments/project/${project_id}/client/${client_id}`
     );
 
     return response.data;
