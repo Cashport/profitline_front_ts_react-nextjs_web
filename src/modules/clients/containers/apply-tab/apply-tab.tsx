@@ -28,6 +28,7 @@ import ModalListAdjustments from "./Modals/ModalListAdjustments/ModalListAdjustm
 import ModalCreateAdjustment from "./Modals/ModalCreateAdjustment/ModalCreateAdjustment";
 import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -81,6 +82,9 @@ const ApplyTab: React.FC = () => {
     discounts: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
+  const [openEvidenceModal, setOpenEvidenceModal] = useState(false);
+  const [commentary, setCommentary] = useState<string>();
+  const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
 
   const { data: applicationData, isLoading, mutate, isValidating } = useApplicationTable();
   const showModal = (adding_type: "invoices" | "payments") => {
@@ -181,16 +185,21 @@ const ApplyTab: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  const saveApp = async () => {
     setLoadingSave(true);
     try {
-      await saveApplication(projectId, clientId);
+      await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
       showMessage("success", "Se ha guardado la aplicación correctamente");
       mutate();
+      setOpenEvidenceModal(false);
     } catch (error) {
       showMessage("error", "Ha ocurrido un error al guardar la aplicación");
     }
     setLoadingSave(false);
+  };
+
+  const handleSave = () => {
+    setOpenEvidenceModal(true);
   };
 
   const filteredData = useMemo(() => {
@@ -292,7 +301,7 @@ const ApplyTab: React.FC = () => {
               Generar acción
             </Button>
           </Flex>
-          <Button type="primary" className="save-btn" onClick={handleSave} loading={loadingSave}>
+          <Button type="primary" className="save-btn" onClick={handleSave}>
             Guardar
           </Button>
         </Flex>
@@ -461,6 +470,17 @@ const ApplyTab: React.FC = () => {
           if (succesfullyApplied) mutate();
         }}
         handleCreateAdjustment={handleCreateAdjustment}
+      />
+      <ModalAttachEvidence
+        selectedEvidence={selectedEvidence}
+        setSelectedEvidence={setSelectedEvidence}
+        handleAttachEvidence={saveApp}
+        commentary={commentary}
+        setCommentary={setCommentary}
+        isOpen={openEvidenceModal}
+        setShowEvidenceModal={setOpenEvidenceModal}
+        loading={loadingSave}
+        handleCancel={() => setOpenEvidenceModal(false)}
       />
     </>
   );

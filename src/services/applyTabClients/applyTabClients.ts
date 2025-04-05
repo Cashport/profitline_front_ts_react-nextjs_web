@@ -113,15 +113,32 @@ export const addSpecificAdjustments = async (
   }
 };
 
-export const saveApplication = async (project_id: number, client_id: number) => {
+export const saveApplication = async (
+  project_id: number,
+  client_id: number,
+  comment: string,
+  file: File
+) => {
   const modelData = {
     project_id,
-    client_id
+    client_id,
+    comments: comment,
+    files: file
   };
+
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = modelData[key as keyof typeof modelData];
+    formData.append(
+      key,
+      typeof value === "string" || value instanceof File ? value : String(value)
+    );
+  }
+
   try {
     const response: GenericResponse<{ applications: number[] }> = await API.post(
       `${config.API_HOST}/paymentApplication/save-current-application`,
-      modelData
+      formData
     );
 
     return response.data;
