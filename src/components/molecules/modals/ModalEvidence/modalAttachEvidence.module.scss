@@ -1,0 +1,75 @@
+@import "@/styles/variables";
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: inherit;
+        border: none;
+        padding: 0;
+        box-shadow: none;
+        width: fit-content;
+        background-color: transparent;
+
+        &:hover {
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+    }
+
+    &__description {
+        font-size: 1rem;
+        font-weight: 300;
+    }
+
+    &__evidence {
+        display: grid;
+        grid-template-columns: 1fr minmax(1px, 3fr);
+        justify-content: space-between;
+        gap: 1rem;
+
+        .addDocument {
+            display: flex;
+            grid-column-start: 2;
+            align-items: center;
+            border: none;
+            box-shadow: none;
+            font-size: 0.75rem;
+            padding: 0;
+            margin-top: -0.5rem;
+            height: fit-content;
+            width: fit-content;
+        }
+
+        .documentButton {
+            grid-column-start: 2;
+        }
+
+        em {
+            font-size: 0.75rem;
+            font-weight: 300;
+        }
+
+        textarea {
+            background-color: $background;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            width: 100%;
+            min-height: 4.25rem;
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+    }
+}
