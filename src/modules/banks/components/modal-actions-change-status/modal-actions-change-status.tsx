@@ -66,14 +66,12 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
     setLoading(true);
     try {
       // Call API to change the status of the payment
-      // console.info("commentary", commentary);
-      // console.info("selectedEvidence", selectedEvidence);
       const modelData = {
         projectId,
         clientId: selectedRows[0].id_client,
         payment_ids: selectedRows.map((row) => row.id),
         status_id: parseInt(selectedStatus),
-        comment: commentary || "",
+        comment: commentary,
         file: selectedEvidence[0]
       };
       await changePaymentStatus(modelData);
@@ -161,7 +159,7 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
         <div className={styles.content__evidence}>
           <Flex vertical>
             <p>Evidencia</p>
-            <em className="descriptionDocument">*Obligatorio</em>
+            <em className="descriptionDocument">*Opcional</em>
           </Flex>
           <DocumentButton
             key={selectedEvidence[0]?.name}
@@ -213,19 +211,17 @@ const ModalActionsChangeStatus: React.FC<Props> = ({ isOpen, onClose, selectedRo
           )} */}
 
           <p>Comentarios</p>
-          <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
+          <textarea
+            onChange={handleOnChangeTextArea}
+            placeholder="Ingresar un comentario (opcional)"
+          />
         </div>
         <div className={styles.footer}>
           <SecondaryButton fullWidth onClick={() => setIsSecondView(false)}>
             Cancelar
           </SecondaryButton>
-          <PrincipalButton
-            fullWidth
-            onClick={handleAttachEvidence}
-            disabled={commentary && selectedEvidence.length > 0 ? false : true}
-            loading={loading}
-          >
-            Adjuntar evidencia
+          <PrincipalButton fullWidth onClick={handleAttachEvidence} loading={loading}>
+            {selectedEvidence.length > 0 ? "Adjuntar evidencia" : "Cambiar sin evidencia"}
           </PrincipalButton>
         </div>
       </>

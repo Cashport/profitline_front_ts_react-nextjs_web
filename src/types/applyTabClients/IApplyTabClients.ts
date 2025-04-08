@@ -25,6 +25,7 @@ export interface IApplyTabRecord {
   adjustments_detail: string | null;
   adjustments_breakdown: IAdjustmentBreakdown;
   adjustments?: IApplyTabAdjustment[];
+  erp_id: string | null;
 }
 
 export interface IApplyTabClients {

@@ -33,6 +33,7 @@ interface Props {
   >;
   validateInvoiceIsSelected: () => boolean;
   setSelectOpen: Dispatch<SetStateAction<{ selected: number }>>;
+  addInvoicesToApplicationTable: () => void;
 }
 
 export const ModalGenerateAction = ({
@@ -41,7 +42,8 @@ export const ModalGenerateAction = ({
   clientId,
   validateInvoiceIsSelected,
   setShowActionDetailModal,
-  setSelectOpen
+  setSelectOpen,
+  addInvoicesToApplicationTable
 }: Props) => {
   const router = useRouter();
   const handleActionDetail = (type: number) => {
@@ -111,9 +113,7 @@ export const ModalGenerateAction = ({
         <ButtonGenerateAction
           icon={<HandTap size={16} />}
           title="Aplicar pagos"
-          onClick={() => {
-            handleOpenModal(4);
-          }}
+          onClick={() => addInvoicesToApplicationTable()}
         />
         <ButtonGenerateAction
           icon={<Paperclip size={16} />}

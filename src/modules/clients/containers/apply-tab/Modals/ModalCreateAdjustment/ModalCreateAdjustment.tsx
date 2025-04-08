@@ -15,7 +15,7 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import GeneralSelect from "@/components/ui/general-select";
-import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
+import InputMoney from "@/components/atoms/inputs/InputMoney/InputMoney";
 
 import "./modalCreateAdjustment.scss";
 
@@ -27,7 +27,7 @@ interface ISelect {
 interface IAdjustment {
   motive?: ISelect;
   detail?: string;
-  amount?: number;
+  amount?: string;
 }
 interface ModalCreateAdjustmentProps {
   // eslint-disable-next-line no-unused-vars
@@ -71,7 +71,7 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
     setLoadingCreate(true);
     const adjustments = data.adjustments.map((adjustment) => ({
       motive: parseInt(adjustment?.motive?.value || "0"),
-      amount: adjustment.amount || 0,
+      amount: Number(adjustment.amount?.replaceAll(".", "").replaceAll(",", ".")) || 0,
       description: adjustment.detail || ""
     }));
     try {
@@ -79,6 +79,7 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
       showMessage("success", "Ajuste(s) creado correctamente");
       mutate();
       onCancel(true);
+      console.log("Ajustes creados:", adjustments);
     } catch (error) {
       showMessage("error", "Error al crear el ajuste(s)");
     }
@@ -129,18 +130,17 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
                 nameInput={`adjustments.${index}.detail`}
                 error={errors?.adjustments?.[index]?.detail}
               />
-
-              <InputFormMoney
-                titleInput="Valor"
-                nameInput={`adjustments.${index}.amount`}
+              <InputMoney
+                name={`adjustments.${index}.amount`}
                 control={control}
-                error={errors?.adjustments?.[index]?.amount}
+                titleInput="Valor"
                 placeholder="Valor"
-                customStyle={{ width: "100%" }}
                 validationRules={{
                   required: "Valor es obligatorio",
-                  min: { value: 1, message: "El valor debe ser mayor a 0" }
+                  validate: (value) => parseFloat(value) > 0 || "El valor debe ser mayor a 0"
                 }}
+                error={errors?.adjustments?.[index]?.amount}
+                fixedDecimalScale={true}
               />
             </div>
           ))}
