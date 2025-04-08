@@ -28,22 +28,16 @@ const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, ro
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
       title: "ID ajuste",
-      dataIndex: "financial_discount_id",
-      key: "financial_discount_id",
+      dataIndex: "erp_id",
+      key: "erp_id",
       render: (id) => <p className="sectionContainerTable__id">{id}</p>,
-      sorter: (a, b) => {
-        if (a.financial_discount_id && b.financial_discount_id) {
-          return a.financial_discount_id - b.financial_discount_id;
-        }
-        return 0;
-      },
       showSorterTooltip: false
     },
     {
       title: "Tipo de ajuste",
-      dataIndex: "adjustmentType",
-      key: "adjustmentType",
-      render: () => <p>Nota credito</p>
+      dataIndex: "entity_description",
+      key: "entity_description",
+      render: (entity_description) => <p>{entity_description}</p>
     },
     {
       title: "Facturas",

@@ -23,7 +23,7 @@ export interface IFinancialDiscount {
   percentage: number | null;
   is_discount: number | null;
   date_of_issue: string;
-  erp_id: number;
+  erp_id: string;
   motive_id: number | null;
   validity_range: string | null;
   earlypay_date: string | null;

@@ -179,10 +179,10 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
                     content={
                       <Flex style={{ width: "100%" }} justify="space-between" align="center">
                         <Flex vertical>
-                          <h4 className="adjustments-list__title">Nota crédito {row.id}</h4>
-                          {row.comment && (
-                          <p className="adjustments-list__subtitle">{row.comment}</p>
-                        )}
+                          <h4 className="adjustments-list__title">Nota crédito {row.erp_id}</h4>
+                          {row.comments && (
+                            <p className="adjustments-list__subtitle">{row.comments}</p>
+                          )}
                         </Flex>
 
                         <Flex vertical>
