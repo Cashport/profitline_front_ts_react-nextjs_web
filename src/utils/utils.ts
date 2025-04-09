@@ -158,6 +158,10 @@ export function extractSingleParam(value: string | string[] | undefined): string
 }
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    return "-"; // Return empty string for invalid dates
+  }
   const utcDay = String(date.getUTCDate()).padStart(2, "0");
   const utcMonth = String(date.getUTCMonth() + 1).padStart(2, "0");
   const utcYear = date.getUTCFullYear();

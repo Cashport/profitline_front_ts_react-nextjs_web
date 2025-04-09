@@ -2,13 +2,19 @@ import { useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
+import { AxiosError } from "axios";
+
 import { extractSingleParam } from "@/utils/utils";
+import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useModalDetail } from "@/context/ModalContext";
+
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
 import UiSearchInput from "@/components/ui/search-input";
 import { ModalEstimateTotalInvoices } from "@/components/molecules/modals/modal-estimate-total-invoices/modal-estimate-total-invoices";
-import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
 import WalletTabChangeStatusModal from "@/modules/clients/components/wallet-tab-change-status-modal";
@@ -17,12 +23,12 @@ import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalAc
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
 import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNews";
 import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
-import { useModalDetail } from "@/context/ModalContext";
-import { useDebounce } from "@/hooks/useDeabouce";
 import {
   SelectedFiltersWallet,
   WalletTabFilter
 } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
+
+import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
 import "./wallettab.scss";
 
@@ -68,6 +74,8 @@ export const WalletTab = () => {
     sublines: filters.sublines,
     channels: filters.channels
   });
+
+  const { mutate: mutateApplyTabData } = useApplicationTable();
 
   useEffect(() => {
     if (data) {
@@ -122,6 +130,27 @@ export const WalletTab = () => {
     // Separar los IDs por saltos de línea y luego unirlos con comas
     const formattedValue = value.split(/\s+/).join(",");
     setSearch(formattedValue);
+  };
+
+  const handleAddSelectedInvoicesToApplicationTable = async () => {
+    try {
+      await addItemsToTable(
+        projectId,
+        clientId,
+        "invoices",
+        selectedRows?.map((invoice) => invoice.id) || []
+      );
+      setisGenerateActionOpen(false);
+      messageShow.success("Facturas añadidas correctamente a la tabla de aplicación de pagos");
+      // mutate Applytable data
+      mutateApplyTabData();
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        messageShow.error(
+          `Error al añadir facturas(s) a la tabla de aplicación de pagos ${error.message}`
+        );
+      }
+    }
   };
 
   return (
@@ -194,6 +223,7 @@ export const WalletTab = () => {
           setShowActionDetailModal(e);
         }}
         validateInvoiceIsSelected={validateInvoiceIsSelected}
+        addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
       />
       <PaymentAgreementModal
         invoiceSelected={selectedRows}

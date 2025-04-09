@@ -17,5 +17,17 @@
                 background-color: $secondary !important;
             }
         }
+
+        .button {
+            &__actions {
+                padding: 0.75rem 1rem;
+                background-color: $background;
+                border: solid 1px transparent;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                height: 3rem;
+            }
+        }
     }
 }

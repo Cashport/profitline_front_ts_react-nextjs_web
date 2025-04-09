@@ -45,11 +45,19 @@
         font-weight: 400;
         display: -webkit-box;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
+        // -webkit-line-clamp: 2;
+        // line-clamp: 2;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: normal;
+        height: 44px;
+        overflow-y: scroll;
+        scrollbar-width: none;
+    }
+
+    .accountBankTextContainer {
+        white-space: nowrap;
+        text-align: left;
     }
 
     .accountBankText {

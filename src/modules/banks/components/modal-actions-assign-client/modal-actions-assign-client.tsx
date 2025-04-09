@@ -116,7 +116,7 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
         id_user: userId,
         payment_ids: selectedRows?.map((row) => row.id),
         client_id: data.client.value,
-        evidence: data.evidence as File
+        evidence: data.evidence
       });
 
       showMessage("success", "Cliente asignado correctamente");
@@ -164,7 +164,7 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
       <div className="modalActionsAssignClient__file">
         <Flex vertical>
           <p>Evidencia</p>
-          <em>*Obligatorio</em>
+          <em>*Opcional</em>
         </Flex>
         <DocumentButton
           key={evidence?.name}
@@ -181,7 +181,7 @@ const ModalActionsAssignClient = ({ isOpen, onClose, selectedRows }: Props) => {
 
         <PrincipalButton
           onClick={handleSubmit(onSubmit)}
-          disabled={!isValid || !evidence}
+          disabled={!isValid}
           loading={isSubmitting}
         >
           Asignar cliente
