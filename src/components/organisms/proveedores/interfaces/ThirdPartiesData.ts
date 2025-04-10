@@ -3,7 +3,7 @@ export interface IThirdPartiesData {
   projectId: number;
   subjectSubtypeId: number;
   name: string;
-  documentNumber: number;
+  documentNumber: string;
   documentType: number;
   createdAt: string;
   subtypeName: string;
