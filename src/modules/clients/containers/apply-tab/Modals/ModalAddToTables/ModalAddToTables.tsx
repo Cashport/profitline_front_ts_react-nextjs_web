@@ -327,7 +327,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
             current={currentPage}
             onChange={handlePageChange}
             total={filteredData.length}
+            pageSize={ITEMS_PER_PAGE}
             showSizeChanger={false}
+            showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
             style={{ textAlign: "right", margin: ".5rem 0" }}
           />
         </>
