@@ -97,9 +97,7 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
               <div className={styles.paymentContent__content}>
                 <div className={styles.paymentContent__content__left}>
                   <h3 className={styles.paymentContent__content__name}>Pago {payment.id}</h3>
-                  <p className={styles.paymentContent__content__date}>
-                    {formatDateDMY(payment.payment_date)}
-                  </p>
+                  <p className={styles.paymentContent__content__date}>{payment.description}</p>
                   <p className={styles.paymentContent__content__client}>{payment.CLIENT_NAME}</p>
                 </div>
                 <h2 className={styles.paymentContent__content__amount}>
