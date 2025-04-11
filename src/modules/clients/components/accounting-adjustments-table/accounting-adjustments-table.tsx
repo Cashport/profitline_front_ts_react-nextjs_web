@@ -101,11 +101,11 @@ const AccountingAdjustmentsTable = ({
   const columns: TableProps<FinancialDiscount>["columns"] = [
     {
       title: "ID ERP",
-      dataIndex: "id",
-      key: "id",
-      render: (_, record) => (
+      dataIndex: "erp_id",
+      key: "erp_id",
+      render: (erp_id, record) => (
         <p onClick={() => handleOpenDetail(record)} className="adjustmentsTable__id">
-          {record.id}
+          {erp_id}
         </p>
       ),
       sorter: (a, b) => a.id - b.id,

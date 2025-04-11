@@ -123,7 +123,15 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
 
   const filteredData = useMemo(() => {
     if (!adjustments) return [];
-    return adjustments.filter((row) => row.id.toString().includes(searchQuery));
+    return adjustments.filter((row) => {
+      const query = searchQuery.toLowerCase();
+
+      const matchesErpId = row.erp_id?.toString().toLowerCase().includes(query);
+
+      const matchesComment = row.comments?.toLowerCase().includes(query);
+
+      return matchesErpId || matchesComment;
+    });
   }, [adjustments, searchQuery]);
 
   const paginatedRows = useMemo(() => {
