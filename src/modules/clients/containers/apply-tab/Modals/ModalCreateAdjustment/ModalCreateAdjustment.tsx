@@ -137,8 +137,9 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
                 placeholder="Valor"
                 validationRules={{
                   required: "Valor es obligatorio",
-                  validate: (value) => parseFloat(value) > 0 || "El valor debe ser mayor a 0"
+                  validate: (value) => parseFloat(value) != 0 || "El valor debe ser distinto a 0"
                 }}
+                allowNegative={true}
                 error={errors?.adjustments?.[index]?.amount}
                 fixedDecimalScale={true}
               />
