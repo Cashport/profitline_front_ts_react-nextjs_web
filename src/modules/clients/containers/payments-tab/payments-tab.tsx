@@ -18,12 +18,10 @@ import Collapse from "@/components/ui/collapse";
 import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import PaymentsTable from "@/modules/clients/components/payments-table";
 import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPayment/ModalActionPayment";
+import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
 
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { ISingleBank } from "@/types/banks/IBanks";
-
-import "./payments-tab.scss";
-import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
 
 import "./payments-tab.scss";
 

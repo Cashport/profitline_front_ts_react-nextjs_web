@@ -14,6 +14,7 @@ import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
+import { GenericResponsePage } from "@/types/global/IGlobal";
 
 enum TabsEnum {
   Clients = "clients",
@@ -57,7 +58,8 @@ const ThirdPartiesView: React.FC = () => {
   const openModal = () => {
     setModalOpen(true);
   };
-  const { data, error, isLoading } = useSWR(
+
+  const { data, error, isLoading } = useSWR<GenericResponsePage<IThirdPartiesData[]>>(
     `/subject/${activeTab}?page=${currentPage}&limit=${pageSize}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
     fetcher
   );
@@ -161,7 +163,7 @@ const ThirdPartiesView: React.FC = () => {
         pagination={{
           current: currentPage,
           pageSize: pageSize,
-          total: data?.total || 0,
+          total: data?.pagination?.totalRows || 0,
           onChange: handlePaginationChange,
           showSizeChanger: false
         }}
