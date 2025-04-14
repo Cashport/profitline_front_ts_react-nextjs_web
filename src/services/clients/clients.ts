@@ -25,7 +25,7 @@ export const createClient = async (
   const formatLocations = JSON.stringify([locationResponse]);
 
   const modelData: ICreateClient = {
-    nit: parseInt(data.nit),
+    nit: data.nit,
     project_id: parseInt(idProject),
     client_name: data.client_name,
     business_name: data.business_name,
