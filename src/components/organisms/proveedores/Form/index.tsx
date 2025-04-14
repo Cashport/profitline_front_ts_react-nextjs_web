@@ -45,15 +45,24 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<any[]>([]);
 
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [modalGenerateActionVisible, setModalGenerateActionVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   const handleOpenDrawer = () => setDrawerVisible(true);
   const handleCloseDrawer = () => setDrawerVisible(false);
-  const handleCloseModal = () => setModalGenerateActionVisible(false);
-  const handleOpenModal = () => setModalGenerateActionVisible(true);
+  const handleCloseModal = () =>
+    setIsModalOpen({
+      selected: 0
+    });
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
   const handleGoBack = () => router.back();
 
   const supplierId = params?.id;
@@ -176,7 +185,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
                 strong
               >{`Crear ${OPTIONS_TYPE_CLIENTS.find((option) => option.value === clientTypeId)?.label}`}</Text>
             </Button>
-            <GenerateActionButton onClick={handleOpenModal} />
+            <GenerateActionButton onClick={() => handleOpenModal(1)} />
           </Flex>
         );
       case UserType.CLIENT:
@@ -187,12 +196,21 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             <Button type="text" onClick={handleGoBack} icon={<CaretLeft size={"1.3rem"} />}>
               <Text strong>Nuevo proveedor</Text>
             </Button>
-            <GenerateActionButton onClick={handleOpenModal} />
+            <GenerateActionButton onClick={() => handleOpenModal(1)} />
           </Flex>
         );
       default:
         return "Nuevo proveedor";
     }
+  };
+
+  const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setSelectedDocumentRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    columnWidth: 40,
+    onChange: onSelectChange
   };
 
   return (
@@ -208,7 +226,13 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         <hr style={{ border: "1px solid #DDDDDD" }} />
         <Flex vertical gap={16}>
           <h3>Documentos</h3>
-          <Table dataSource={documents} columns={tableColumns} rowKey="id" pagination={false} />
+          <Table
+            dataSource={documents}
+            columns={tableColumns}
+            rowKey="id"
+            pagination={false}
+            rowSelection={rowSelection}
+          />
         </Flex>
       </Container>
       <DrawerComponent
@@ -223,9 +247,10 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       />
 
       <ModalGenerateAction
-        isOpen={modalGenerateActionVisible}
+        isOpen={isModalOpen.selected === 1}
         onClose={handleCloseModal}
         selectedClientType={clientTypeId}
+        handleOpenModal={handleOpenModal}
       />
     </div>
   );
