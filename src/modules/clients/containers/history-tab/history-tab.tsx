@@ -37,6 +37,10 @@ const HistoryTab = () => {
   };
 
   const handleOpenDetail = (row: IHistoryRow) => {
+    if (row.payment_identification_url && row.payment_identification_url !== null) {
+      window.open(row.payment_identification_url, "_blank");
+      return;
+    }
     if (!row.id_mongo_log) return showMessage("info", "No hay detalle para esta comunicación");
     setRowDetailID(row.id_mongo_log);
     setOpenModal({ selected: 3 });
