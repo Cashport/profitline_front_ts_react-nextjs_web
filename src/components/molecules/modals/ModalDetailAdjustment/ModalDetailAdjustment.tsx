@@ -16,7 +16,7 @@ import styles from "./modalDetailAdjustment.module.scss";
 interface ModalDetailAdjustmentProps {
   isOpen: boolean;
   onClose: () => void;
-  clientId: number;
+  clientId: string;
   selectAdjusment?: FinancialDiscount;
   projectId: number;
   legalized?: boolean;
@@ -305,7 +305,7 @@ const ModalDetailAdjustment: FC<ModalDetailAdjustmentProps> = ({
             onClose={() => {
               setIsModalSelectOpen(false);
             }}
-            clientId={clientId.toString()}
+            clientId={clientId}
             adjustment={{
               type: adjusmentData?.details[0].financial_type,
               id: selectAdjusment?.id.toString() ?? "",

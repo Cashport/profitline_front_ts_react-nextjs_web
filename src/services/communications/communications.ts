@@ -249,7 +249,7 @@ export const sendEmailNotification = async (data: IFormEmailNotification) => {
 
 export const getTemplateByEvent = async (
   projectId: number,
-  clientId: number,
+  clientId: string,
   actionId: string,
   subActionId?: string
 ) => {

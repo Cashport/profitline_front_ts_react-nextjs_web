@@ -16,7 +16,7 @@ import { useModalDetail } from "@/context/ModalContext";
 interface RegisterNewsProps {
   isOpen: boolean;
   onClose: () => void;
-  clientId?: number;
+  clientId: string;
   projectId?: number;
   invoices: InfoConcilation | undefined;
   messageShow: MessageInstance;
@@ -146,7 +146,7 @@ const RegisterNewsConcilation = ({
           data.evidence,
           invoiceList,
           data.commentary,
-          clientId || 0
+          clientId || ""
         );
         if (response.status == 200) {
           onClose();

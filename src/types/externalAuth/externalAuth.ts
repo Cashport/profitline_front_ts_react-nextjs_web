@@ -9,7 +9,7 @@ export interface IExternalUser {
   firebase_uid: string;
   email: string;
   password: string;
-  client_id: number;
+  client_id: string;
   isActive: boolean;
   created_at: Date;
   updated_at: Date;

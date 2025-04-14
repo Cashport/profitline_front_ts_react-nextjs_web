@@ -11,7 +11,7 @@ const { Text } = Typography;
 interface Props {
   className?: any;
   renderedDocument: { ID: number; URL: string };
-  clientId: number;
+  clientId: string;
   editable?: boolean;
   setDocumentReplaced?: Dispatch<SetStateAction<boolean>>;
 }

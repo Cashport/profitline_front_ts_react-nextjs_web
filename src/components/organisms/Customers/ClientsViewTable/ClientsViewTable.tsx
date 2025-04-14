@@ -54,7 +54,7 @@ export const ClientsViewTable = () => {
 
   const [loadingOpenPortfolio, setLoadingOpenPortfolio] = useState({
     isLoading: false,
-    loadingId: 0
+    loadingId: ""
   });
 
   const fetchPortfolios = async ({ pageParam = 1 }) => {

@@ -33,7 +33,7 @@ interface PropsInvoicesTable {
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
   ) => Promise<void>;
-  clientId: number;
+  clientId: string;
 }
 
 const ContactsTabModal = ({

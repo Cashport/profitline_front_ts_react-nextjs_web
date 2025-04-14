@@ -15,7 +15,7 @@ import { radicateInvoice } from "@/services/accountingAdjustment/accountingAdjus
 interface RadicationInvoiceProps {
   isOpen: boolean;
   onClose: () => void;
-  clientId?: number;
+  clientId: string;
   projectId?: number;
   invoiceSelected?: IInvoice[];
   messageShow: MessageInstance;
@@ -117,7 +117,7 @@ const RadicationInvoice = ({
         comments: data.commentary
       };
 
-      await radicateInvoice(radicationData, data.evidence, clientId as number);
+      await radicateInvoice(radicationData, data.evidence, clientId);
       messageShow.success("Factura radicada con éxito");
       reset();
       onClose();

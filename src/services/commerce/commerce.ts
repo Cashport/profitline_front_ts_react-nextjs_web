@@ -38,14 +38,14 @@ export const getClients = async (projectId: number) => {
   return response;
 };
 
-export const getProductsByClient = async (projectId: number, clientId: number) => {
+export const getProductsByClient = async (projectId: number, clientId: string) => {
   const response: GenericResponse<IProductData[]> = await API.get(
     `/marketplace/projects/${projectId}/clients/${clientId}/products`
   );
   return response;
 };
 
-export const getAdresses = async (clientId: number) => {
+export const getAdresses = async (clientId: string) => {
   const response: GenericResponse<ICommerceAdresses[]> = await API.get(
     `/marketplace/clients/${clientId}/other-addresses`
   );
@@ -54,7 +54,7 @@ export const getAdresses = async (clientId: number) => {
 
 export const getDiscounts = async (
   projectId: number,
-  clientId: number
+  clientId: string
 ): Promise<GenericResponse<IDiscountPackageAvailable[]>> => {
   try {
     const response: GenericResponse<IDiscountPackageAvailable[]> = await API.get(
@@ -70,7 +70,7 @@ export const getDiscounts = async (
 
 export const confirmOrder = async (
   projectId: number,
-  clientId: number,
+  clientId: string,
   data: IConfirmOrderData
 ) => {
   try {
@@ -86,7 +86,7 @@ export const confirmOrder = async (
 
 export const createOrder = async (
   projectId: number,
-  clientId: number,
+  clientId: string,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void
@@ -109,7 +109,7 @@ export const createOrder = async (
 
 export const createDraft = async (
   projectId: number,
-  clientId: number,
+  clientId: string,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void
@@ -155,7 +155,7 @@ export const deleteOrders = async (
 
 export const createOrderFromDraft = async (
   projectId: number,
-  clientId: number,
+  clientId: string,
   orderId: number,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars

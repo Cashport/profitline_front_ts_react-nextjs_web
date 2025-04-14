@@ -12,7 +12,7 @@ export const MassConcilationView = () => {
   const [invoices, setInvoices] = useState<InfoConcilation | undefined>(undefined);
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
 
   return (
     <div>

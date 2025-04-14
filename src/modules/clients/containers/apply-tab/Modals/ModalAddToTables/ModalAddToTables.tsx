@@ -36,7 +36,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const [allInvoices, setAllInvoices] = useState<IApplicationInvoice[]>();
   const [allPayments, setAllPayments] = useState<IClientPayment[]>();
 

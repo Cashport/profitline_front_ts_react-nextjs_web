@@ -9,7 +9,7 @@ import { extractSingleParam } from "@/utils/utils";
 export const useApplicationTable = () => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
 
   const { ID } = useAppStore((state) => state.selectedProject);
 

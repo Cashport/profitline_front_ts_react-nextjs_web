@@ -5,7 +5,7 @@ export interface IClientPayment {
   description: string;
   id_account: number;
   project_id: number;
-  id_client: number;
+  id_client: string;
   payment_date: string; // ISO Date string
   created_at: string; // ISO Date string
   currency: string;
@@ -43,7 +43,7 @@ export interface IIdentifiedPayment {
   description: string;
   id_account: number;
   project_id: number;
-  id_client: number | null;
+  id_client: string | null;
   payment_date: string;
   created_at: string;
   currency: string;

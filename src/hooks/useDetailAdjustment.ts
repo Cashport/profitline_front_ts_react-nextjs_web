@@ -43,7 +43,7 @@ interface FinancialDiscountResponse {
 interface UseFinancialDiscountProps {
   financialDiscountId: number;
   projectId: number;
-  clientId: number;
+  clientId: string;
 }
 
 export const useFinancialDiscountDetail = (props: UseFinancialDiscountProps) => {

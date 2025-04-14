@@ -13,7 +13,7 @@ import { MessageInstance } from "antd/es/message/interface";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  clientId?: number;
+  clientId?: string;
   projectId?: number;
   messageShow: MessageInstance;
   invoiceSelected?: IInvoice[];

@@ -59,7 +59,7 @@ interface IEditingRowState {
 const ApplyTab: React.FC = () => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);

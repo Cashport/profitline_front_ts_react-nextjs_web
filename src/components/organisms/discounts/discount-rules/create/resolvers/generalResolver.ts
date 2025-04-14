@@ -264,7 +264,7 @@ export interface DiscountSchema {
     unitsMax: number;
     discount: number;
   }[];
-  client?: number | undefined;
+  client?: string | undefined;
   client_name?: string | undefined;
   annual_ranges?: {
     id?: number | undefined;

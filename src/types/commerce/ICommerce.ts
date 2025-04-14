@@ -1,5 +1,5 @@
 export interface IEcommerceClient {
-  client_id: number;
+  client_id: string;
   client_name: string;
 }
 
@@ -147,7 +147,7 @@ export interface ICommerceAdresses {
 
 export interface ISingleOrder {
   id: number;
-  client_id: number;
+  client_id: string;
   project_id: number;
   city: string;
   contacto: string;
@@ -208,7 +208,7 @@ export interface IDiscount {
   id: number;
   discount_name: string;
   description: string;
-  id_client: number;
+  id_client: string;
   discount_type_id: number;
 }
 

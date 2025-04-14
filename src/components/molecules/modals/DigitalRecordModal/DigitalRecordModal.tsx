@@ -25,7 +25,7 @@ interface DigitalRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId: number;
-  clientId: number;
+  clientId: string;
   invoiceSelected: IInvoice[] | undefined;
   messageShow: MessageInstance;
 }

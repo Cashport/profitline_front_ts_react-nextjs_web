@@ -22,7 +22,7 @@ export const GroupTable = ({ dataClients }: PropsGroupTable) => {
       dataIndex: "id",
       key: "id",
       render: (text) => <Text>{text}</Text>,
-      sorter: (a, b) => b.id - a.id,
+      sorter: (a, b) => b.id.localeCompare(a.id),
       showSorterTooltip: false
     },
     {
