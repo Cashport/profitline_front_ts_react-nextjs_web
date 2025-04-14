@@ -187,7 +187,7 @@ export const generalResolver: ObjectSchema<DiscountSchema> = yup.object({
     otherwise: () => yup.mixed().optional()
   }),
   client: yup
-    .number()
+    .string()
     .optional()
     .when("discount_type", {
       is: (discount_type: number) => discountTypeByAnnual.includes(discount_type),

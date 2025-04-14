@@ -20,7 +20,7 @@ export default function useAnnualFeatures({ form }: AnnualFeaturesProps) {
     data: categoriesByClient,
     isLoading: isLoadingOption,
     error: APIproductsError
-  } = useSWR(key, () => getAllLinesByClient(projectId.toString(), clientId as number), {
+  } = useSWR(key, () => getAllLinesByClient(projectId.toString(), clientId || ""), {
     shouldRetryOnError: false // No volver a intentar si ocurre un error
   });
 
