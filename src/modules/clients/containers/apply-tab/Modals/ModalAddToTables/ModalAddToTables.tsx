@@ -315,7 +315,11 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                           ? `Factura ${(row as IApplicationInvoice).id_erp}`
                           : `Pago ${(row as IClientPayment).id}`}
                       </h4>
-                      <p className="invoices-list__date">{formatDate(row.updated_at)}</p>
+                      <p className="invoices-list__date">
+                          {isModalAddToTableOpen.adding === "invoices" 
+                              ? formatDate((row as IApplicationInvoice).financial_record_date) 
+                              : formatDate((row as IClientPayment).payment_date)}
+                      </p>
                     </div>
                     <h3 className="invoices-list__amount">{formatMoney(row.current_value)}</h3>
                   </Flex>
