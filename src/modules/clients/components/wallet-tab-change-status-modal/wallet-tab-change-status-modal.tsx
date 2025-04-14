@@ -10,7 +10,7 @@ import { MessageInstance } from "antd/es/message/interface";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  clientId?: number;
+  clientId?: string;
   projectId?: number;
   invoiceSelected?: IInvoice[];
   messageShow: MessageInstance;
@@ -59,7 +59,7 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
         commentary as string,
         selectedEvidence,
         projectId as number,
-        clientId as number
+        clientId as string
       );
       messageShow.open({
         type: "success",

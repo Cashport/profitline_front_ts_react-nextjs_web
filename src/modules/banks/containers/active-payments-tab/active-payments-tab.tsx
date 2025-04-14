@@ -86,7 +86,7 @@ export const ActivePaymentsTab: FC = () => {
       await approvePayment({
         payments: selectedRows?.map((row) => row.id) || [],
         project_id: ID,
-        client_id: selectedRows?.[0]?.id_client || 0
+        client_id: selectedRows?.[0]?.id_client || ""
       });
 
       showMessage("success", "Asignación aprobada correctamente");

@@ -60,7 +60,7 @@ export const changeStatusInvoice = async (
   comments: string,
   docFiles: File[] | null,
   projectId: number,
-  clientId: number
+  clientId: string
 ) => {
   const formData = new FormData();
   formData.append("status_name", statusName);
@@ -111,7 +111,7 @@ export const reportInvoiceIncident = async (
 export const radicateInvoice = async (
   radicationData: RadicationData,
   files: File[],
-  clientId: number
+  clientId: string
 ) => {
   const formData = new FormData();
   formData.append("invoices_id", JSON.stringify(radicationData.invoices_id));
@@ -184,7 +184,7 @@ export const legalizeFinancialDiscount = async (
     discount_id_not_legalized: number;
   },
   projectId: number,
-  clientId: number
+  clientId: string
 ): Promise<GenericResponse> => {
   const response: GenericResponse = await API.post(
     `${config.API_HOST}/financial-discount/legalize/project/${projectId}/client/${clientId}`,
@@ -206,7 +206,7 @@ interface DigitalRecordResponse {
 
 export const getDigitalRecordFormInfo = async (
   projectId: number,
-  clientId: number
+  clientId: string
 ): Promise<DigitalRecordResponse> => {
   try {
     const response: DigitalRecordResponse = await API.get(
@@ -225,7 +225,7 @@ export const createDigitalRecord = async (
 
   project_id: number,
   user_id: number,
-  clientId: number
+  clientId: string
 ) => {
   const forward_to = data.forward_to.map((user) => user.value);
   const copy_to = data?.copy_to?.map((user) => user.value);

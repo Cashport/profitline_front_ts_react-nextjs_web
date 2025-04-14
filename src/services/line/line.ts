@@ -12,7 +12,7 @@ export const getSubLinesByProject = async (idProject: string) => {
   );
   return response?.data || [];
 };
-export const getAllLinesByClient = async (idProject: string, clientId: number) => {
+export const getAllLinesByClient = async (idProject: string, clientId: string) => {
   const response: GenericResponse<ICategory[]> = await API.get(
     `marketplace/projects/${idProject}/clients/${clientId}/products`
   );

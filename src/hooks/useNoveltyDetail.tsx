@@ -21,7 +21,7 @@ export interface IIncidentDetail {
   incident_name: string;
   is_open: boolean;
   client: string;
-  client_id: number;
+  client_id: string;
   responsible_user: string;
   invoice_cashport_value: number;
   invoice_client_value: number;

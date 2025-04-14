@@ -13,7 +13,7 @@ const CreateClientPage = () => {
 
   return (
     <ClientProjectForm
-      isViewDetailsClient={{ active: false, id: 0 }}
+      isViewDetailsClient={{ active: false, id: "" }}
       onGoBackTable={onGoBackTableClients}
     />
   );

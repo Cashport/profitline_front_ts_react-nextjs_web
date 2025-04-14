@@ -27,7 +27,7 @@ interface InvoiceDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoiceId: number;
-  clientId: number;
+  clientId: string;
   showId: string;
   hiddenActions?: boolean;
   // eslint-disable-next-line no-unused-vars
@@ -506,6 +506,28 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
                                 </div>
                               ) : null}
+
+                              {item.event_type_name === "Pago aplicado" ? (
+                                <div>
+                                  <div className={styles.icons}>
+                                    <Envelope size={14} onClick={() => {}} />
+                                  </div>
+                                  <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
+                                  <div
+                                    className={styles.name}
+                                  >{`Valor: ${formatMoney(item.ammount)}`}</div>
+                                  {item.payment_id && (
+                                    <div className={styles.adjustment}>
+                                      ID del pago:
+                                      <div className={styles.idAdjustment}>
+                                        {item.payment_id}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                ""
+                              )}
 
                               {item.comments && (
                                 <div className={styles.commentsContainer}>

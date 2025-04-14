@@ -46,7 +46,7 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();

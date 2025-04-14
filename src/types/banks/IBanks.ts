@@ -12,7 +12,7 @@ export interface ISingleBank {
   description: string;
   id_account: number;
   project_id: number;
-  id_client: number;
+  id_client: string;
   payment_date: string;
   created_at: string;
   currency: string;
@@ -54,12 +54,12 @@ export interface IEvent {
   event_date: string;
   id_payment: number;
   id_payment_rule: number | null;
-  previous_id_client: number | null;
+  previous_id_client: string | null;
   id_aplication_payment: number | null;
   payments_events_types: number;
   payments_events_types_name: string;
   client_name: string;
-  id_client: number;
+  id_client: string;
   ids_split_payment: number[] | null;
   previous_name_client: string;
   ammount_applied: number;
@@ -82,7 +82,7 @@ export interface IRules {
   id: number;
   project_id: number;
   description: string;
-  id_client: number;
+  id_client: string;
   is_exactly: number;
   created_at: string;
   created_by: string;
@@ -95,7 +95,7 @@ export interface IRules {
 export interface IPostRule {
   project_id: number;
   description: string;
-  id_client: number;
+  id_client: string;
   is_exactly: boolean;
 }
 

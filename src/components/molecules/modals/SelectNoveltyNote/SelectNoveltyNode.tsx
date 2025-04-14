@@ -10,7 +10,7 @@ interface Props {
   setSelectedNotes: Dispatch<SetStateAction<any[]>>;
   onClose: () => void;
   onContinue: () => void;
-  clientId?: number;
+  clientId?: string;
   projectId?: number;
 }
 
@@ -24,8 +24,8 @@ export const SelectNoveltyNode: React.FC<Props> = ({
   projectId
 }) => {
   const { data, isLoading } = useAcountingAdjustment(
-    clientId?.toString() || "0",
-    projectId?.toString() || "0",
+    clientId?.toString() || "",
+    projectId?.toString() || "",
     type
   );
 

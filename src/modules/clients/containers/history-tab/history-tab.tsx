@@ -28,7 +28,7 @@ const HistoryTab = () => {
   const [openModal, setOpenModal] = useState({ selected: 0 });
   const isLoading = false;
 
-  const { data } = useClientHistory({ clientId: Number(clientIdParam) });
+  const { data } = useClientHistory({ clientId: clientIdParam || "" });
 
   const handleCancelApplication = () => {
     console.info("Anular aplicación");

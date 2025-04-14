@@ -24,7 +24,7 @@ const { Title, Text } = Typography;
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  clientId: number;
+  clientId: string;
   setShowActionDetailModal: Dispatch<
     SetStateAction<{
       isOpen: boolean;

@@ -83,7 +83,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
     try {
       await addItemsToTable(
         Number(projectId) || 0,
-        Number(clientId) || 0,
+        clientId || "",
         "payments",
         selectedPayments?.map((payment) => payment.id) || []
       );

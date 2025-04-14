@@ -56,7 +56,7 @@ export interface IShipTo {
   billing_period_config: IBillingPeriodForm;
   channels: IChannels[];
   city: string;
-  client_id: number;
+  client_id: string;
   condition_day: number;
   condition_payment: number;
   contacts: string;

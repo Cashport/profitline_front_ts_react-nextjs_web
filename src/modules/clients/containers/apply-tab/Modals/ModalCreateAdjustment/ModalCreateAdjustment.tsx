@@ -38,7 +38,7 @@ interface ModalCreateAdjustmentProps {
 const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, onCancel }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const { showMessage } = useMessageApi();
   const { mutate } = useAcountingAdjustment(clientId.toString(), projectId.toString(), 2);
   const { data: motives } = useFinancialDiscountMotives();
@@ -137,8 +137,9 @@ const ModalCreateAdjustment: React.FC<ModalCreateAdjustmentProps> = ({ isOpen, o
                 placeholder="Valor"
                 validationRules={{
                   required: "Valor es obligatorio",
-                  validate: (value) => parseFloat(value) > 0 || "El valor debe ser mayor a 0"
+                  validate: (value) => parseFloat(value) != 0 || "El valor debe ser distinto a 0"
                 }}
+                allowNegative={true}
                 error={errors?.adjustments?.[index]?.amount}
                 fixedDecimalScale={true}
               />

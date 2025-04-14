@@ -7,7 +7,7 @@ import { StatusGroup } from "@/hooks/useAcountingAdjustment";
 
 export const addItemsToTable = async (
   project_id: number,
-  client_id: number,
+  client_id: string,
   adding_type: "invoices" | "payments" | "discounts",
   selected_items_ids: number[]
 ) => {
@@ -52,7 +52,7 @@ interface ICreateGlobalAdjustment {
 
 export const createGlobalAdjustment = async (
   project_id: number,
-  client_id: number,
+  client_id: string,
   adjustments: ICreateGlobalAdjustment[]
 ) => {
   const modelData = {
@@ -115,7 +115,7 @@ export const addSpecificAdjustments = async (
 
 export const saveApplication = async (
   project_id: number,
-  client_id: number,
+  client_id: string,
   comment: string,
   file: File
 ) => {
@@ -148,7 +148,7 @@ export const saveApplication = async (
   }
 };
 
-export const getApplicationInvoices = async (project_id: number, client_id: number) => {
+export const getApplicationInvoices = async (project_id: number, client_id: string) => {
   try {
     const response: GenericResponse<InvoicesData[]> = await API.get(
       `${config.API_HOST}/paymentApplication/client/${client_id}/project/${project_id}?page=1&limit=50`
@@ -163,7 +163,7 @@ export const getApplicationInvoices = async (project_id: number, client_id: numb
   }
 };
 
-export const getApplicationPayments = async (project_id: number, client_id: number) => {
+export const getApplicationPayments = async (project_id: number, client_id: string) => {
   try {
     const response: GenericResponse<IClientPaymentStatus[]> = await API.get(
       `${config.API_HOST}/paymentApplication/get-available-payments/project/${project_id}/client/${client_id}`
@@ -191,7 +191,7 @@ export const getApplicationAdjustments = async (project_id: number, client_id: s
 
 export const updateInvoiceOrPaymentAmount = async (
   project_id: number,
-  client_id: number,
+  client_id: string,
   application_id: number,
   amount: number
 ) => {
