@@ -2,19 +2,22 @@ import React, { useState } from "react";
 import { Flex, Modal, Typography } from "antd";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { User } from "@phosphor-icons/react";
-import { Envelope, Files, Megaphone, Trash } from "phosphor-react";
+import { Envelope, Files, MagnifyingGlass, Megaphone, Trash } from "phosphor-react";
 import ModalSendInvitation from "../ModalSendInvitation";
 import { ModalAddRequirement } from "@/components/organisms/projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 const { Title } = Typography;
 type ModalGenerateActionProps = {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line no-unused-vars
+  handleOpenModal: (modalNumber: number) => void;
   selectedClientType?: number;
 };
 
 export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
   isOpen,
   onClose,
+  handleOpenModal,
   selectedClientType
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +41,15 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
           />
         )}
 
+        <ButtonGenerateAction
+          icon={<MagnifyingGlass size={20} />}
+          title="Auditar requerimientos"
+          onClick={() => {
+            console.log("auditar");
+
+            handleOpenModal(2);
+          }}
+        />
         <ButtonGenerateAction icon={<User size={20} />} title="Crear cliente" onClick={() => {}} />
         <ButtonGenerateAction
           icon={<Trash size={20} />}
