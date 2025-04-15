@@ -5,6 +5,7 @@ import { Button, Input, Modal, Select, Table, TableProps, Typography } from "ant
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
 import { useMessageApi } from "@/context/MessageContext";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
@@ -37,15 +38,13 @@ interface Props {
 const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localSelectedRows, setLocalSelectedRows] = useState<Document[]>([]);
+  const height = useScreenHeight();
 
   const { showMessage } = useMessageApi();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { isValid }
-  } = useForm<IAuditFormValues>();
+  const { control, handleSubmit, reset, watch } = useForm<IAuditFormValues>();
+
+  const auditValues = watch("rows");
 
   useEffect(() => {
     return () => {
@@ -93,6 +92,38 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       key: "requirementsState"
     },
     {
+      title: "Comentario",
+      dataIndex: "commentary",
+      key: "commentary",
+      render: (_: any, record: any, index: number) => {
+        const auditValue = auditValues?.[index]?.audit;
+        const isRejection = auditValue === "Rechazar";
+
+        return (
+          <Controller
+            control={control}
+            name={`rows.${index}.commentary`}
+            rules={{
+              validate: (value) =>
+                isRejection && !value ? "Este campo es obligatorio al rechazar" : true
+            }}
+            render={({ field, fieldState }) => (
+              <Input
+                {...field}
+                placeholder="Agrega un comentario"
+                className={
+                  fieldState.invalid && isRejection
+                    ? "inputAuditRequirements inputAuditRequirements__error"
+                    : "inputAuditRequirements"
+                }
+              />
+            )}
+          />
+        );
+      },
+      width: 300
+    },
+    {
       title: "Auditar",
       dataIndex: "audit",
       key: "audit",
@@ -106,8 +137,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
               {...field}
               placeholder=" - "
               options={[
-                { value: "Aprobado", label: "Aprobado" },
-                { value: "En revision", label: "En revision" }
+                { value: "Aprobar", label: "Aprobar" },
+                { value: "Rechazar", label: "Rechazar" }
               ]}
               className="selectAuditRequirements"
             />
@@ -115,21 +146,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         />
       ),
       width: 200
-    },
-    {
-      title: "Comentario",
-      dataIndex: "commentary",
-      key: "commentary",
-      render: (_: any, record: any, index: number) => (
-        <Controller
-          control={control}
-          name={`rows.${index}.commentary`}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <Input {...field} placeholder="Comentario" className="inputAuditRequirements" />
-          )}
-        />
-      )
     },
     {
       title: "",
@@ -142,7 +158,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
             className="iconDocument"
           />
         );
-      }
+      },
+      width: 60
     }
   ];
 
@@ -173,11 +190,12 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
         dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
         rowSelection={rowSelection}
         pagination={false}
+        scroll={{ y: height - 400 }}
       />
 
       <div className="modalAuditRequirements__footer">
-        <Button>
-          <Sparkle size={24} color="#5b5252" />
+        <Button className="iaButton">
+          <Sparkle size={24} color="#5b21b6" />
           Analizar con Cashport IA
         </Button>
         <FooterButtons
@@ -187,7 +205,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
           handleOk={handleSubmit(onSubmit)}
           titleConfirm="Guardar"
           isConfirmLoading={isSubmitting}
-          isConfirmDisabled={!isValid}
         />
       </div>
     </Modal>
