@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
@@ -14,9 +14,17 @@ import { Document } from "../../Form/types";
 import "./modalAuditRequirements.scss";
 const { Title } = Typography;
 
-interface ISelect {
-  value: string;
-  label: string;
+interface IAuditTableRow {
+  id: number;
+  requrementType: string;
+  requirementsState: string;
+  audit?: string;
+  commentary?: string;
+  document?: any;
+}
+
+interface IAuditFormValues {
+  rows: IAuditTableRow[];
 }
 
 interface Props {
@@ -28,17 +36,16 @@ interface Props {
 
 const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  console.log("selectedRows", selectedRows);
+  const [localSelectedRows, setLocalSelectedRows] = useState<Document[]>([]);
 
   const { showMessage } = useMessageApi();
 
   const {
     control,
     handleSubmit,
-    setValue,
     reset,
-    formState: { errors, isValid }
-  } = useForm<any>();
+    formState: { isValid }
+  } = useForm<IAuditFormValues>();
 
   useEffect(() => {
     return () => {
@@ -46,18 +53,35 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (selectedRows) {
+      const defaultRows = selectedRows.map((doc) => ({
+        id: doc.id,
+        requrementType: doc.name,
+        requirementsState: doc.statusName,
+        audit: undefined,
+        commentary: undefined
+      }));
+
+      reset({ rows: defaultRows });
+    }
+  }, [selectedRows, reset]);
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setLocalSelectedRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    selectedRowKeys: localSelectedRows.map((item) => item.id),
+    onChange: onSelectChange
+  };
+
   const onSubmit = async (data: any) => {
     console.log("data", data);
     showMessage("info", "Asignando cliente a los requerimientos seleccionados");
   };
 
-  const columns: TableProps<{
-    requrementType: string;
-    requirementsState: string;
-    audit: undefined;
-    commentary: undefined;
-    document: undefined;
-  }>["columns"] = [
+  const columns: TableProps<IAuditTableRow>["columns"] = [
     {
       title: "Tipo de requerimiento",
       dataIndex: "requrementType",
@@ -72,42 +96,40 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "Auditar",
       dataIndex: "audit",
       key: "audit",
-      render: (text: any) => {
-        return (
-          <Select
-            placeholder=" - "
-            options={[
-              {
-                value: "Aprobado",
-                label: "Aprobado"
-              },
-              {
-                value: "En revision",
-                label: "En revision"
-              }
-            ]}
-            labelInValue
-            className="selectAuditRequirements"
-          />
-        );
-      },
+      render: (_: any, record: any, index: number) => (
+        <Controller
+          control={control}
+          name={`rows.${index}.audit`}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <Select
+              {...field}
+              placeholder=" - "
+              options={[
+                { value: "Aprobado", label: "Aprobado" },
+                { value: "En revision", label: "En revision" }
+              ]}
+              className="selectAuditRequirements"
+            />
+          )}
+        />
+      ),
       width: 200
     },
     {
       title: "Comentario",
       dataIndex: "commentary",
       key: "commentary",
-      render: () => {
-        return (
-          <Input
-            placeholder="Comentario"
-            className="inputAuditRequirements"
-            onChange={(e) => {
-              setValue("commentary", e.target.value);
-            }}
-          />
-        );
-      }
+      render: (_: any, record: any, index: number) => (
+        <Controller
+          control={control}
+          name={`rows.${index}.commentary`}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <Input {...field} placeholder="Comentario" className="inputAuditRequirements" />
+          )}
+        />
+      )
     },
     {
       title: "",
@@ -124,6 +146,16 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     }
   ];
 
+  const tableData: IAuditTableRow[] = useMemo(() => {
+    if (!selectedRows) return [];
+
+    return selectedRows.map((doc) => ({
+      id: doc.id,
+      requrementType: doc.name,
+      requirementsState: doc.statusName
+    }));
+  }, [selectedRows]);
+
   return (
     <Modal
       className="modalAuditRequirements"
@@ -138,8 +170,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       <Table
         className="modalAuditRequirements__documentsTable"
         columns={columns}
-        dataSource={mockColumns}
-        // rowSelection={rowSelection}
+        dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
+        rowSelection={rowSelection}
         pagination={false}
       />
 
@@ -163,33 +195,3 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
 };
 
 export default ModalAuditRequirements;
-
-const mockColumns: {
-  requrementType: string;
-  requirementsState: string;
-  audit: undefined;
-  commentary: undefined;
-  document: undefined;
-}[] = [
-  {
-    requrementType: "RUT",
-    requirementsState: "En revision",
-    audit: undefined,
-    commentary: undefined,
-    document: undefined
-  },
-  {
-    requrementType: "Referencia Comercial",
-    requirementsState: "En revision",
-    audit: undefined,
-    commentary: undefined,
-    document: undefined
-  },
-  {
-    requrementType: "Referencia bancaria no mayor a 30 dias",
-    requirementsState: "Aprobado IA",
-    audit: undefined,
-    commentary: undefined,
-    document: undefined
-  }
-];
