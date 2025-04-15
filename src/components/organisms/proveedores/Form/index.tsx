@@ -1,18 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useForm } from "react-hook-form";
 import { Table, Flex, Button, Typography } from "antd";
+import { CaretLeft } from "phosphor-react";
+import { FieldError } from "react-hook-form";
+
+import { fetcher } from "@/utils/api/api";
+
 import DrawerComponent from "../components/DrawerComponent/DrawerComponent";
 import { useParams, useRouter } from "next/navigation";
 import { columns } from "./columns";
 import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import { CaretLeft } from "phosphor-react";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
-import { fetcher } from "@/utils/api/api";
-import { FieldError } from "react-hook-form";
+import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
+import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+
 import {
   Document,
   FormField,
@@ -22,9 +28,8 @@ import {
   OPTIONS_TYPE_CLIENTS,
   UserType
 } from "./types";
+
 import "./form.scss";
-import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
-import useSWR from "swr";
 
 const { Text } = Typography;
 
@@ -45,15 +50,24 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>([]);
 
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [modalGenerateActionVisible, setModalGenerateActionVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   const handleOpenDrawer = () => setDrawerVisible(true);
   const handleCloseDrawer = () => setDrawerVisible(false);
-  const handleCloseModal = () => setModalGenerateActionVisible(false);
-  const handleOpenModal = () => setModalGenerateActionVisible(true);
+  const handleCloseModal = () =>
+    setIsModalOpen({
+      selected: 0
+    });
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
   const handleGoBack = () => router.back();
 
   const supplierId = params?.id;
@@ -176,7 +190,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
                 strong
               >{`Crear ${OPTIONS_TYPE_CLIENTS.find((option) => option.value === clientTypeId)?.label}`}</Text>
             </Button>
-            <GenerateActionButton onClick={handleOpenModal} />
+            <GenerateActionButton onClick={() => handleOpenModal(1)} />
           </Flex>
         );
       case UserType.CLIENT:
@@ -187,12 +201,21 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             <Button type="text" onClick={handleGoBack} icon={<CaretLeft size={"1.3rem"} />}>
               <Text strong>Nuevo proveedor</Text>
             </Button>
-            <GenerateActionButton onClick={handleOpenModal} />
+            <GenerateActionButton onClick={() => handleOpenModal(1)} />
           </Flex>
         );
       default:
         return "Nuevo proveedor";
     }
+  };
+
+  const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setSelectedDocumentRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    columnWidth: 40,
+    onChange: onSelectChange
   };
 
   return (
@@ -208,7 +231,13 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         <hr style={{ border: "1px solid #DDDDDD" }} />
         <Flex vertical gap={16}>
           <h3>Documentos</h3>
-          <Table dataSource={documents} columns={tableColumns} rowKey="id" pagination={false} />
+          <Table
+            dataSource={documents}
+            columns={tableColumns}
+            rowKey="id"
+            pagination={false}
+            rowSelection={rowSelection}
+          />
         </Flex>
       </Container>
       <DrawerComponent
@@ -223,9 +252,20 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       />
 
       <ModalGenerateAction
-        isOpen={modalGenerateActionVisible}
+        isOpen={isModalOpen.selected === 1}
         onClose={handleCloseModal}
         selectedClientType={clientTypeId}
+        handleOpenModal={handleOpenModal}
+      />
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 2}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+        }}
+        selectedRows={selectedDocumentRows}
       />
     </div>
   );
