@@ -195,9 +195,12 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
 
       <div className="modalAuditRequirements__footer">
         <Button className="iaButton">
-          <Sparkle size={24} color="#5b21b6" />
-          Analizar con Cashport IA
+          <Sparkle size={14} color="#5b21b6" />
+          <span className="textNormal">
+            Analizar con <span className="cashportIA">Cashport IA</span>
+          </span>
         </Button>
+
         <FooterButtons
           className="modalAuditRequirements__footerButtons"
           titleCancel="Volver"
