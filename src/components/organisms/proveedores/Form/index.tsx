@@ -1,18 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useForm } from "react-hook-form";
 import { Table, Flex, Button, Typography } from "antd";
+import { CaretLeft } from "phosphor-react";
+import { FieldError } from "react-hook-form";
+
+import { fetcher } from "@/utils/api/api";
+
 import DrawerComponent from "../components/DrawerComponent/DrawerComponent";
 import { useParams, useRouter } from "next/navigation";
 import { columns } from "./columns";
 import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import { CaretLeft } from "phosphor-react";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
-import { fetcher } from "@/utils/api/api";
-import { FieldError } from "react-hook-form";
+import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
+import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+
 import {
   Document,
   FormField,
@@ -22,9 +28,8 @@ import {
   OPTIONS_TYPE_CLIENTS,
   UserType
 } from "./types";
+
 import "./form.scss";
-import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
-import useSWR from "swr";
 
 const { Text } = Typography;
 
@@ -45,7 +50,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocumentRows, setSelectedDocumentRows] = useState<any[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>([]);
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState({
@@ -251,6 +256,16 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         onClose={handleCloseModal}
         selectedClientType={clientTypeId}
         handleOpenModal={handleOpenModal}
+      />
+      <ModalAuditRequirements
+        isOpen={isModalOpen.selected === 2}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+        }}
+        selectedRows={selectedDocumentRows}
       />
     </div>
   );

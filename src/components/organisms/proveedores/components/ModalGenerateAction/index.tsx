@@ -10,7 +10,7 @@ type ModalGenerateActionProps = {
   isOpen: boolean;
   onClose: () => void;
   // eslint-disable-next-line no-unused-vars
-  handleOpenModal: (modalNumber: number) => void;
+  handleOpenModal?: (modalNumber: number) => void;
   selectedClientType?: number;
 };
 
@@ -47,7 +47,7 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
           onClick={() => {
             console.log("auditar");
 
-            handleOpenModal(2);
+            if (handleOpenModal) handleOpenModal(2);
           }}
         />
         <ButtonGenerateAction icon={<User size={20} />} title="Crear cliente" onClick={() => {}} />
