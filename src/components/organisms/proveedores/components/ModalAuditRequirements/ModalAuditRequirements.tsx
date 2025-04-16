@@ -9,6 +9,7 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
+import BadgeDocumentStatus from "../BadgeDocumentStatus/BadgeDocumentStatus";
 
 import { Document } from "../../Form/types";
 
@@ -89,7 +90,11 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     {
       title: "Estado",
       dataIndex: "requirementsState",
-      key: "requirementsState"
+      key: "requirementsState",
+      // Crear componente de badges con tags de antdeign que dependi`endo del id que se le pase pinta un estado u otro
+      render: () => {
+        return <BadgeDocumentStatus statusId={(Math.floor(Math.random() * 6) + 1).toString()} />;
+      }
     },
     {
       title: "Comentario",
