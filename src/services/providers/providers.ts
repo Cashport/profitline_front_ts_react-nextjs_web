@@ -10,7 +10,6 @@ export const auditRequirements = async (documents: IAuditTableRow[]) => {
         comments: doc.commentary ?? ""
       }))
     };
-    console.log("body", body);
 
     const response = await API.post("/subject/audit", body);
     return response;
