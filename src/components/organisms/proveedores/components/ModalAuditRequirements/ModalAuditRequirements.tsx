@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
+import { auditRequirements } from "@/services/providers/providers";
 import { useMessageApi } from "@/context/MessageContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
@@ -16,7 +17,7 @@ import { Document } from "../../Form/types";
 import "./modalAuditRequirements.scss";
 const { Title } = Typography;
 
-interface IAuditTableRow {
+export interface IAuditTableRow {
   id: number;
   requrementType: string;
   requirementsState: string;
@@ -76,9 +77,17 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     onChange: onSelectChange
   };
 
-  const onSubmit = async (data: any) => {
-    console.log("data", data);
-    showMessage("info", "Asignando cliente a los requerimientos seleccionados");
+  const onSubmit = async (data: IAuditFormValues) => {
+    setIsSubmitting(true);
+
+    try {
+      await auditRequirements(data.rows);
+      showMessage("success", "Requerimientos auditados correctamente");
+      onClose();
+    } catch (error) {
+      showMessage("error", "Error al auditar requerimientos");
+    }
+    setIsSubmitting(false);
   };
 
   const columns: TableProps<IAuditTableRow>["columns"] = [
@@ -91,7 +100,6 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "Estado",
       dataIndex: "requirementsState",
       key: "requirementsState",
-      // Crear componente de badges con tags de antdeign que dependi`endo del id que se le pase pinta un estado u otro
       render: () => {
         return <BadgeDocumentStatus statusId={(Math.floor(Math.random() * 6) + 1).toString()} />;
       }
