@@ -264,6 +264,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             return setIsModalOpen({ selected: 1 });
           }
           handleCloseModal();
+          mutate();
         }}
         selectedRows={selectedDocumentRows}
       />
