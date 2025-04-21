@@ -254,6 +254,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         onClose={handleCloseModal}
         selectedClientType={clientTypeId}
         handleOpenModal={handleOpenModal}
+        selectedDocumentRows={selectedDocumentRows}
       />
       <ModalAuditRequirements
         isOpen={isModalOpen.selected === 2}
