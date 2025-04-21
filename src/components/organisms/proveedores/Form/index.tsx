@@ -38,8 +38,6 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
-    watch,
     setValue
   } = useForm<any>({
     defaultValues: {},

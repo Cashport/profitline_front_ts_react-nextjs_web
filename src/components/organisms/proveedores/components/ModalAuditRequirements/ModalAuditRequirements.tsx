@@ -59,7 +59,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       const defaultRows = selectedRows.map((doc) => ({
         id: doc.id,
         requrementType: doc.name,
-        requirementsState: doc.statusName,
+        requirementsState: doc.statusId,
         audit: undefined,
         commentary: undefined
       }));
@@ -100,8 +100,8 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "Estado",
       dataIndex: "requirementsState",
       key: "requirementsState",
-      render: () => {
-        return <BadgeDocumentStatus statusId={(Math.floor(Math.random() * 6) + 1).toString()} />;
+      render: (requirementsState) => {
+        return <BadgeDocumentStatus statusId={requirementsState} />;
       }
     },
     {
@@ -182,7 +182,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     return selectedRows.map((doc) => ({
       id: doc.id,
       requrementType: doc.name,
-      requirementsState: doc.statusName
+      requirementsState: doc.statusId || ""
     }));
   }, [selectedRows]);
 
