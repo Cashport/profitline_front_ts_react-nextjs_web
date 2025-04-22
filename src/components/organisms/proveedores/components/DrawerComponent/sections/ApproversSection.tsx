@@ -12,34 +12,6 @@ interface ApproversSectionProps {
 }
 
 const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
-  const fakeApprovers: IDocumentApprover[] = [
-    {
-      documentTypeSubjectApproverId: 0,
-      documentTypeSubjectId: 0,
-      statusName: "rEchazado",
-      statusColor: "#00FF00",
-      statusId: "5081de05-745d-449c-aff5-086e0d8b47a0",
-      userId: 0,
-      agentId: 0,
-      isIa: 0,
-      createdAt: new Date().toISOString(),
-      approverName: "Falso Rechzador"
-    },
-    {
-      documentTypeSubjectApproverId: 0,
-      documentTypeSubjectId: 0,
-      statusName: "Aprobado",
-      statusColor: "#00FF00",
-      statusId: "532d6b7f-03da-4d22-9c28-2ef69590608f",
-      userId: 0,
-      agentId: 0,
-      isIa: 0,
-      createdAt: new Date().toISOString(),
-      approverName: "Falso Aprobador"
-    }
-  ];
-
-  approvers = [...fakeApprovers, ...approvers];
   return (
     <ColumnText
       title="Aprobadores"
