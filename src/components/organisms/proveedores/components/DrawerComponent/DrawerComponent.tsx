@@ -1,15 +1,17 @@
 // DrawerComponent.tsx
 import React from "react";
 import { Drawer, Flex, Typography } from "antd";
+import { DotOutline } from "@phosphor-icons/react";
+import { Files, ListChecks } from "phosphor-react";
+
+import { getStatusDetails } from "../../utils/documentStatusMap";
+import { useDocument } from "@/hooks/useDocument";
+
 import DescriptionSection from "./sections/DescriptionSection";
 import ApproversSection from "./sections/ApproversSection";
 import ExpirationSection from "./sections/ExpirationSection";
 import EventsSection from "./sections/EventsSection";
 import { ValiditySection } from "./sections/ValiditySection";
-import { CaretDoubleRight, Files, ListChecks } from "phosphor-react";
-import { Tag } from "@/components/atoms/Tag/Tag";
-import IconButton from "@/components/atoms/IconButton/IconButton";
-import { useDocument } from "@/hooks/useDocument";
 import DocumentUploadSection from "./sections/DocumentUploadSection";
 import ColumnText from "../ColumnText/ColumnText";
 
@@ -41,25 +43,34 @@ const DrawerComponent: React.FC<DrawerProps> = ({
     return null;
   }
 
+  const { color, backgroundColor } = getStatusDetails(document.statusId);
+
   return (
     <Drawer
       title={
         <Flex vertical justify="flex-start">
-          <IconButton icon={<CaretDoubleRight size={20} />} onClick={onClose} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontWeight: 500,
+              fontSize: "0.75rem",
+              backgroundColor: `${backgroundColor}`,
+              color: color,
+              borderRadius: "42px",
+              padding: "3px 2px",
+              paddingRight: "10px",
+              width: "fit-content"
+            }}
+          >
+            <DotOutline size={24} color={color} weight="fill" />
+            {document.statusName}
+          </div>
           <Title style={{ marginTop: 20 }} level={4}>
             {document?.documentTypeName}
           </Title>
-          <Flex wrap>
-            <Tag
-              content={document?.statusName}
-              color={document?.statusColor}
-              style={{
-                fontWeight: 400,
-                fontSize: 14
-              }}
-            />
-          </Flex>
-          <hr style={{ borderTop: "1px solid #f7f7f7", marginTop: 20 }} />
+
+          <hr style={{ borderTop: "1px solid #f7f7f7", marginTop: 14 }} />
         </Flex>
       }
       placement="right"
