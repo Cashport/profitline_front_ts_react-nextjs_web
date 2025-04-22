@@ -4,6 +4,19 @@ export interface IDocument {
   name: string;
 }
 
+export interface IDocumentApprover {
+  documentTypeSubjectApproverId: number;
+  documentTypeSubjectId: number;
+  statusName: string;
+  statusColor: string;
+  statusId: string;
+  userId: number;
+  agentId: number;
+  isIa: number; // Convertir 0/1 a boolean
+  createdAt: string;
+  approverName: string;
+}
+
 export interface IDocumentResponse {
   id: number;
   documentTypeName: string;
@@ -11,16 +24,10 @@ export interface IDocumentResponse {
   createdBy: string;
   expiryDate: string;
   createdAt: string;
-  approvers: string[];
+  approvers: IDocumentApprover[];
   statusName: string;
   statusColor: string;
   statusId: string;
   templateUrl: string;
   documents: IDocument[];
-}
-
-export interface IDocumentApiResponse {
-  status: number;
-  message: string;
-  data: IDocumentResponse;
 }
