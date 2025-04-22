@@ -1,10 +1,14 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
-import { IDocumentApiResponse } from "@/interfaces/Document";
+import { IDocumentResponse } from "@/interfaces/Document";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 export const useDocument = (subjectId?: string, documentId?: number) => {
   const path = subjectId && documentId ? `/subject/${subjectId}/documents/${documentId}` : null;
-  const { data, error, isLoading, mutate } = useSWR<IDocumentApiResponse>(path, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IDocumentResponse>>(
+    path,
+    fetcher
+  );
 
   return {
     document: data?.data,
