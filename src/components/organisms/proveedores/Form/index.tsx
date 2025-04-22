@@ -38,8 +38,6 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
-    watch,
     setValue
   } = useForm<any>({
     defaultValues: {},
@@ -256,6 +254,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         onClose={handleCloseModal}
         selectedClientType={clientTypeId}
         handleOpenModal={handleOpenModal}
+        selectedDocumentRows={selectedDocumentRows}
       />
       <ModalAuditRequirements
         isOpen={isModalOpen.selected === 2}
@@ -264,6 +263,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             return setIsModalOpen({ selected: 1 });
           }
           handleCloseModal();
+          mutate();
         }}
         selectedRows={selectedDocumentRows}
       />

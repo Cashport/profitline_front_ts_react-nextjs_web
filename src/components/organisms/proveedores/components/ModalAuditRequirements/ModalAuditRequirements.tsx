@@ -4,18 +4,20 @@ import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { DownloadSimple, Sparkle } from "phosphor-react";
 
+import { auditRequirements } from "@/services/providers/providers";
 import { useMessageApi } from "@/context/MessageContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
+import BadgeDocumentStatus from "../BadgeDocumentStatus/BadgeDocumentStatus";
 
 import { Document } from "../../Form/types";
 
 import "./modalAuditRequirements.scss";
 const { Title } = Typography;
 
-interface IAuditTableRow {
+export interface IAuditTableRow {
   id: number;
   requrementType: string;
   requirementsState: string;
@@ -57,7 +59,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
       const defaultRows = selectedRows.map((doc) => ({
         id: doc.id,
         requrementType: doc.name,
-        requirementsState: doc.statusName,
+        requirementsState: doc.statusId,
         audit: undefined,
         commentary: undefined
       }));
@@ -75,9 +77,17 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     onChange: onSelectChange
   };
 
-  const onSubmit = async (data: any) => {
-    console.log("data", data);
-    showMessage("info", "Asignando cliente a los requerimientos seleccionados");
+  const onSubmit = async (data: IAuditFormValues) => {
+    setIsSubmitting(true);
+
+    try {
+      await auditRequirements(data.rows);
+      showMessage("success", "Requerimientos auditados correctamente");
+      onClose();
+    } catch (error) {
+      showMessage("error", "Error al auditar requerimientos");
+    }
+    setIsSubmitting(false);
   };
 
   const columns: TableProps<IAuditTableRow>["columns"] = [
@@ -89,7 +99,10 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     {
       title: "Estado",
       dataIndex: "requirementsState",
-      key: "requirementsState"
+      key: "requirementsState",
+      render: (requirementsState) => {
+        return <BadgeDocumentStatus statusId={requirementsState} />;
+      }
     },
     {
       title: "Comentario",
@@ -169,7 +182,7 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
     return selectedRows.map((doc) => ({
       id: doc.id,
       requrementType: doc.name,
-      requirementsState: doc.statusName
+      requirementsState: doc.statusId || ""
     }));
   }, [selectedRows]);
 

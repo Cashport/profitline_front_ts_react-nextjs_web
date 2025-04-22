@@ -3,11 +3,14 @@ export interface Document {
   name: string;
   templateUrl: string | null;
   documentType: string;
+  documentTypeId?: number;
   description?: string;
   createdAt: string | null;
   expiryDate: string | null;
+  validity?: string | null;
   statusName: string;
   statusColor: string;
+  statusId?: string;
   url: string | null;
   requirementId?: number;
   approvers?: string[];
@@ -15,7 +18,12 @@ export interface Document {
   events?: any[];
   files?: any[];
   uploadedAt?: string;
+  isAvailable?: number | boolean;
+  isMandatory?: number | boolean;
+  subjectSubtypeId?: number;
+  subjectTypeId?: string;
 }
+
 export const OPTIONS_BASE_LOCATION = [
   { value: 0, label: "Centro A" },
   { value: 1, label: "Centro B" },

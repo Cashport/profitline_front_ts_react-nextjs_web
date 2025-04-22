@@ -47,12 +47,12 @@ const DrawerComponent: React.FC<DrawerProps> = ({
         <Flex vertical justify="flex-start">
           <IconButton icon={<CaretDoubleRight size={20} />} onClick={onClose} />
           <Title style={{ marginTop: 20 }} level={4}>
-            {document.documentTypeName}
+            {document?.documentTypeName}
           </Title>
           <Flex wrap>
             <Tag
-              content={document.statusName}
-              color={document.statusColor}
+              content={document?.statusName}
+              color={document?.statusColor}
               style={{
                 fontWeight: 400,
                 fontSize: 14

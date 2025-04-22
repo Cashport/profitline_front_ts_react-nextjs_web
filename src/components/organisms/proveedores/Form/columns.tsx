@@ -1,10 +1,9 @@
 import IconButton from "@/components/atoms/IconButton/IconButton";
-import { Tag } from "@/components/atoms/Tag/Tag";
 import { formatDate } from "@/utils/utils";
-import { Flex } from "antd";
 import type { ColumnType } from "antd/es/table";
 import { Eye } from "phosphor-react";
 import { Document } from "./types";
+import BadgeDocumentStatus from "../components/BadgeDocumentStatus/BadgeDocumentStatus";
 
 export const columns = ({
   handleOpenDrawer,
@@ -46,17 +45,11 @@ export const columns = ({
   },
   {
     title: "Estado",
-    dataIndex: "status",
-    key: "status",
-    render: (_: string, record: any) => (
-      <Flex>
-        <Tag
-          color={record.statusColor}
-          content={record.statusName}
-          style={{ fontSize: 14, fontWeight: 400 }}
-        />
-      </Flex>
-    ),
+    dataIndex: "statusId",
+    key: "statusId",
+    render: (statusId: string) => {
+      return <BadgeDocumentStatus statusId={statusId} />;
+    },
     width: "15%"
   },
   {
