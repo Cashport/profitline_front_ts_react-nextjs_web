@@ -19,10 +19,13 @@ const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
       content={
         <Flex align="center" gap={8} wrap>
           {approvers.map((approver, index) => {
-            const { color, backgroundColor } = getStatusDetails(
+            const { color, backgroundColor, icon, textWrapper } = getStatusDetails(
               approver.statusId,
-              approver.statusName,
-              approver.statusColor
+              {
+                fallbackName: approver.statusName,
+                fallbackColor: approver.statusColor,
+                iconSize: 14
+              }
             );
 
             return (
@@ -32,17 +35,18 @@ const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  gap: "4px",
                   fontWeight: 500,
                   fontSize: "0.75rem",
                   backgroundColor: `${backgroundColor}`,
                   color: color,
                   borderRadius: "42px",
-                  padding: "3px 2px",
-                  paddingRight: "10px"
+                  padding: "3px 10px",
+                  paddingLeft: "6px"
                 }}
               >
-                <DotOutline size={24} color={color} weight="fill" />
-                {approver.approverName}
+                {icon ?? <DotOutline size={24} color={color} weight="fill" />}
+                {textWrapper ? textWrapper(approver.approverName) : approver.approverName}
               </div>
             );
           })}

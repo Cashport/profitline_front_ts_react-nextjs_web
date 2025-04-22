@@ -1,5 +1,5 @@
 // DrawerComponent.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Drawer, Flex, Typography } from "antd";
 import { DotOutline } from "@phosphor-icons/react";
 import { Files, ListChecks } from "phosphor-react";
@@ -39,6 +39,12 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   mutateSupplierInfo
 }) => {
   const { document, isLoading, mutate } = useDocument(subjectId, documentId);
+  useEffect(() => {
+    if (visible) {
+      mutate();
+    }
+  }, [visible, mutate]);
+
   if (isLoading || !document) {
     return null;
   }
