@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar, Typography, Input, Button, List, Flex } from "antd";
-import { Hourglass } from "phosphor-react";
+import { Cloud } from "phosphor-react";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -30,7 +30,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events, onAddComment }) =
   return (
     <Flex vertical gap={20}>
       <Flex gap={8} align="center">
-        <Hourglass size={16} color="#7B7B7B" />
+        <Cloud size={16} color="#7B7B7B" />
         <Text
           style={{
             fontSize: 16,
