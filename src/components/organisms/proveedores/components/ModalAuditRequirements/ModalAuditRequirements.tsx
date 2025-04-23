@@ -208,9 +208,17 @@ const ModalAuditRequirements = ({ isOpen, onClose, selectedRows }: Props) => {
 
       <div className="modalAuditRequirements__footer">
         <Button className="iaButton">
-          <Sparkle size={14} color="#5b21b6" />
+          <Sparkle size={14} color="#5b21b6" weight="fill" />
           <span className="textNormal">
-            Analizar con <span className="cashportIA">Cashport IA</span>
+            Analizar con{" "}
+            <span
+              className="cashportIATextGradient"
+              style={{
+                fontWeight: 500
+              }}
+            >
+              Cashport IA
+            </span>
           </span>
         </Button>
 

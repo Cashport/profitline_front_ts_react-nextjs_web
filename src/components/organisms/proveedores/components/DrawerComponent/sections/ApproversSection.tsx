@@ -12,34 +12,6 @@ interface ApproversSectionProps {
 }
 
 const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
-  const fakeApprovers: IDocumentApprover[] = [
-    {
-      documentTypeSubjectApproverId: 0,
-      documentTypeSubjectId: 0,
-      statusName: "rEchazado",
-      statusColor: "#00FF00",
-      statusId: "5081de05-745d-449c-aff5-086e0d8b47a0",
-      userId: 0,
-      agentId: 0,
-      isIa: 0,
-      createdAt: new Date().toISOString(),
-      approverName: "Falso Rechzador"
-    },
-    {
-      documentTypeSubjectApproverId: 0,
-      documentTypeSubjectId: 0,
-      statusName: "Aprobado",
-      statusColor: "#00FF00",
-      statusId: "532d6b7f-03da-4d22-9c28-2ef69590608f",
-      userId: 0,
-      agentId: 0,
-      isIa: 0,
-      createdAt: new Date().toISOString(),
-      approverName: "Falso Aprobador"
-    }
-  ];
-
-  approvers = [...fakeApprovers, ...approvers];
   return (
     <ColumnText
       title="Aprobadores"
@@ -47,10 +19,13 @@ const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
       content={
         <Flex align="center" gap={8} wrap>
           {approvers.map((approver, index) => {
-            const { color, backgroundColor } = getStatusDetails(
+            const { color, backgroundColor, icon, textWrapper } = getStatusDetails(
               approver.statusId,
-              approver.statusName,
-              approver.statusColor
+              {
+                fallbackName: approver.statusName,
+                fallbackColor: approver.statusColor,
+                iconSize: 14
+              }
             );
 
             return (
@@ -60,17 +35,18 @@ const ApproversSection: React.FC<ApproversSectionProps> = ({ approvers }) => {
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  gap: "4px",
                   fontWeight: 500,
                   fontSize: "0.75rem",
                   backgroundColor: `${backgroundColor}`,
                   color: color,
                   borderRadius: "42px",
-                  padding: "3px 2px",
-                  paddingRight: "10px"
+                  padding: "3px 10px",
+                  paddingLeft: "6px"
                 }}
               >
-                <DotOutline size={24} color={color} weight="fill" />
-                {approver.approverName}
+                {icon ?? <DotOutline size={24} color={color} weight="fill" />}
+                {textWrapper ? textWrapper(approver.approverName) : approver.approverName}
               </div>
             );
           })}
