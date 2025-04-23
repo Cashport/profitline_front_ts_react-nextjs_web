@@ -14,7 +14,9 @@ import EventsSection from "./sections/EventsSection";
 import { ValiditySection } from "./sections/ValiditySection";
 import DocumentUploadSection from "./sections/DocumentUploadSection";
 import ColumnText from "../ColumnText/ColumnText";
+import FooterSection from "./sections/FooterSection";
 
+import "./drawerComponent.scss";
 const { Title } = Typography;
 
 interface DrawerProps {
@@ -85,6 +87,8 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       width={644}
       closeIcon={false}
       style={{ backgroundColor: "#FFFFFF" }}
+      footer={<FooterSection />}
+      className="drawerComponentProviders"
     >
       <Flex gap={16} vertical>
         <DescriptionSection
