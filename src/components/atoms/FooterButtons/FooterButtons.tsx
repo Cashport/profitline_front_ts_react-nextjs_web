@@ -4,18 +4,22 @@ import { Col, Row } from "antd";
 
 const FooterButtons = ({
   titleConfirm,
+  titleCancel = "Cancelar",
   isConfirmDisabled = false,
   onClose,
   handleOk,
   showLeftButton = true,
-  isConfirmLoading = false
+  isConfirmLoading = false,
+  className
 }: {
   titleConfirm?: string;
+  titleCancel?: string;
   isConfirmDisabled?: boolean;
   onClose: () => void;
   handleOk: () => void;
   showLeftButton?: boolean;
   isConfirmLoading?: boolean;
+  className?: string;
 }) => {
   if (!showLeftButton)
     return (
@@ -29,10 +33,10 @@ const FooterButtons = ({
     );
 
   return (
-    <Row style={{ width: "100%" }}>
+    <Row style={{ width: "100%" }} className={className}>
       <Col span={12} style={{ paddingRight: 8, minHeight: 48 }}>
         <SecondaryButton fullWidth onClick={onClose} disabled={isConfirmLoading}>
-          Cancelar
+          {titleCancel}
         </SecondaryButton>
       </Col>
       <Col span={12} style={{ paddingLeft: 8, minHeight: 48 }}>

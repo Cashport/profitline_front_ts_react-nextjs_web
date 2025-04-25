@@ -44,10 +44,11 @@ export const removeItemsFromTable = async (row_id: number) => {
   }
 };
 
-interface ICreateGlobalAdjustment {
+export interface ICreateGlobalAdjustment {
   amount: number;
   motive: number;
   description: string;
+  invoice_id?: string;
 }
 
 export const createGlobalAdjustment = async (
