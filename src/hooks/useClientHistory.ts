@@ -7,7 +7,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IHistoryRow } from "@/types/clientHistory/IClientHistory";
 
 type useBankRulesProps = {
-  clientId: number;
+  clientId: string;
 };
 
 interface IDetailResponse {

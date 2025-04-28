@@ -2,7 +2,7 @@ import { ISelectType } from "../clients/IClients";
 
 export interface IContact {
   id: number;
-  client_id: number;
+  client_id: string;
   contact_name: string;
   contact_phone: string;
   contact_email: string;
@@ -54,7 +54,7 @@ interface IContactPosition {
 }
 
 export interface ICreateEditContact {
-  client_id: number;
+  client_id: string;
   contact_name: string;
   contact_lastname: string;
   contact_email: string;

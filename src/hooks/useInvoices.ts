@@ -30,7 +30,7 @@ export const useInvoices = ({
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
 
   const pageQuery = `page=${page}`;

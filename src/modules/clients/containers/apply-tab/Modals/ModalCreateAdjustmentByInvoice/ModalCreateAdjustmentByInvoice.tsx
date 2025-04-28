@@ -52,7 +52,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
   const { mutate } = useAcountingAdjustment(clientId.toString(), projectId.toString(), 2);

@@ -66,7 +66,7 @@ export interface IClients {
 
 export interface ICreateClient {
   [key: string]: any;
-  nit: number;
+  nit: string;
   project_id: number;
   client_name: string;
   business_name: string;

@@ -107,7 +107,7 @@ export const uploadEvidence = async (payment_id: number, user_id: number, eviden
 };
 
 interface IDataSplitPayment {
-  id_client: number;
+  id_client: string;
   ammount: number;
   key_file: string;
 }
@@ -155,7 +155,7 @@ export const getPaymentsStatus = async () => {
 
 interface IChangePaymentStatus {
   projectId: number;
-  clientId: number | null;
+  clientId: string | null;
   payment_ids: number[];
   status_id: number;
   comment?: string;
@@ -196,7 +196,7 @@ export const changePaymentStatus = async ({
 interface IApprovePayment {
   payments: number[];
   project_id: number;
-  client_id: number;
+  client_id: string;
 }
 
 export const approvePayment = async ({ payments, project_id, client_id }: IApprovePayment) => {

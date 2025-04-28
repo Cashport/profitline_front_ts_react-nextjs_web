@@ -23,11 +23,11 @@ export interface ISelectedCategories {
 interface IOrderViewContext {
   client: {
     name: string;
-    id: number;
+    id: string;
   };
   setClient: Dispatch<{
     name: string;
-    id: number;
+    id: string;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;

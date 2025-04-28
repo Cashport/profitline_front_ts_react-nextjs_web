@@ -11,7 +11,7 @@ import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 const { Text, Link, Title } = Typography;
 
 interface Props {
-  clientId: number;
+  clientId: string;
   projectId: number;
   getClientValues: () => {
     billingPeriod: string;

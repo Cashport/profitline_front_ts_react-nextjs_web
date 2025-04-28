@@ -8,7 +8,7 @@ export interface IClientsGroupsFull {
 }
 
 export interface IClient {
-  id: number;
+  id: string;
   client_name: string;
   holding_name: string;
   bussiness_name: string;

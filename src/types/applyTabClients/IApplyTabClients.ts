@@ -3,7 +3,7 @@ export interface IApplyTabRecord {
   id_erp: string;
   entity_type_id: number;
   project_id: number;
-  client_id: number;
+  client_id: string;
   financial_record_id: number | null;
   financial_discount_id: number | null;
   payment_id: number;

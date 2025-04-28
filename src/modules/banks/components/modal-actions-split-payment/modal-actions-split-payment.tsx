@@ -157,7 +157,7 @@ const ModalActionsSplitPayment = ({ isOpen, onClose, selectedRows }: Props) => {
     setIsSubmitting(true);
     try {
       const dataArray = data.payments.map((payment, index) => ({
-        id_client: Number(payment.client?.value),
+        id_client: payment.client?.value || "",
         ammount: payment.value,
         key_file: `${payment.evidence?.name.split(".")[0]}_${selectedRows ? selectedRows[0]?.id : ""}_${index + 1}`
       }));

@@ -5,7 +5,7 @@ import useSWR from "swr";
 interface UseInvoiceDetailProps {
   id?: number;
   page?: number;
-  clientId?: number;
+  clientId?: string;
   projectId?: number;
   invoiceId?: number;
 }

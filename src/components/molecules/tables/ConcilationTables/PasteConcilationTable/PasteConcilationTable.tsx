@@ -24,7 +24,7 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   setCurrentView: (view: "paste" | "state") => void;
   setInvoices?: Dispatch<SetStateAction<InfoConcilation | undefined>>;
-  clientId: number;
+  clientId: string;
 }
 
 export const PasteConcilationTable = ({

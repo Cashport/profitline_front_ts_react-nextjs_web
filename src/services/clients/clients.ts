@@ -25,7 +25,7 @@ export const createClient = async (
   const formatLocations = JSON.stringify([locationResponse]);
 
   const modelData: ICreateClient = {
-    nit: parseInt(data.nit),
+    nit: data.nit,
     project_id: parseInt(idProject),
     client_name: data.client_name,
     business_name: data.business_name,
@@ -90,7 +90,7 @@ export const getClientById = async (idUser: string, projectId: string): Promise<
 
 export const updateClient = async (
   idProject: string,
-  clientId: number,
+  clientId: string,
   rawData: ClientFormType,
   locationResponse: any,
   hasLocationChanged: boolean,
@@ -146,7 +146,7 @@ export const updateClient = async (
 };
 
 export const deleteClientById = async (
-  idUser: number,
+  idUser: string,
   projectId: string,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
@@ -219,7 +219,7 @@ export const changeClientStatus = async (
 };
 
 type PropsEditClientDocument = {
-  clientId: number;
+  clientId: string;
   documentId: number;
   file: File;
   // eslint-disable-next-line no-unused-vars

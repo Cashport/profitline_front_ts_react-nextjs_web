@@ -3,7 +3,7 @@ import { fetcher } from "@/utils/api/api";
 import { FinancialDiscountsResponse } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 interface Props {
-  clientId: number;
+  clientId: string;
   projectId: number;
   id?: number;
   line?: number[];

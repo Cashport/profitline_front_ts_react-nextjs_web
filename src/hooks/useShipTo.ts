@@ -13,7 +13,7 @@ import {
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 
-export const useShipTos = (clientId: number) => {
+export const useShipTos = (clientId: string) => {
   const { ID } = useAppStore((state) => state.selectedProject);
 
   const { data, isLoading, mutate } = useSWR<IShipTos>(

@@ -9,7 +9,7 @@ import { API } from "@/utils/api/api";
 
 export const invoiceConciliation = async (
   files: File[],
-  clientId: number,
+  clientId: string,
   projectId: number
 ): Promise<InfoConcilation> => {
   const formData = new FormData();
@@ -37,7 +37,7 @@ export const invoiceCreateIncident = async (
   files: File[],
   invoices: IInvoiceIncident[],
   comments: string,
-  clientId: number
+  clientId: string
 ) => {
   const formData = new FormData();
   files.forEach((file) => {

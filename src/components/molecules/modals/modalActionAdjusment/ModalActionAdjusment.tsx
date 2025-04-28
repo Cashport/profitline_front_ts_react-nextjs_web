@@ -63,7 +63,7 @@ export const ModalActionAdjusment = ({ isOpen, onClose, adjustment, clientId }: 
             discount_id_not_legalized: +adjustment.id
           },
           projectId,
-          +clientId
+          clientId
         );
         if (response.success) {
           setSelectedItemId(null);

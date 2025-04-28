@@ -12,7 +12,7 @@ export const useClientDetails = (filters: IClientPortfolioFilters) => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : undefined;
+  const clientId = clientIdParam;
   const projectId = projectIdParam ? parseInt(projectIdParam) : undefined;
 
   const queryParams = [

@@ -20,7 +20,7 @@ const { Text } = Typography;
 
 interface Props {
   invoices: InfoConcilation | undefined;
-  clientId: number;
+  clientId: string;
   setInvoices: Dispatch<SetStateAction<InfoConcilation | undefined>>;
 }
 

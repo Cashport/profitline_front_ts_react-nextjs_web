@@ -37,7 +37,7 @@ const AccountingAdjustmentsTab = () => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
   const debouncedSearchQuery = useDebounce(search, 500);
   const [filters, setFilters] = useState<SelectedFiltersAccountingAdjustments>({
@@ -89,7 +89,7 @@ const AccountingAdjustmentsTab = () => {
     try {
       await addItemsToTable(
         Number(projectId) || 0,
-        Number(clientId) || 0,
+        clientId,
         "discounts",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );

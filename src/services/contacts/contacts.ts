@@ -8,7 +8,7 @@ interface genericResponse {
   message: string;
 }
 
-export const getContact = async (clientId: number, contactId: number): Promise<IGetContacts> => {
+export const getContact = async (clientId: string, contactId: number): Promise<IGetContacts> => {
   try {
     const response: IGetContacts = await API.get(
       `${config.API_HOST}/client/${clientId}/contact/${contactId}`
@@ -48,7 +48,7 @@ export const putContact = async (
 
 export const deleteContact = async (
   contactsIds: { contacts_ids: number[] },
-  clientId: number
+  clientId: string
 ): Promise<genericResponse> => {
   try {
     const customConfig = {

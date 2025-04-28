@@ -16,7 +16,7 @@ type ModalType = "invoice" | "novelty" | "adjustment" | "payment" | "sendEmail" 
 
 interface InvoiceModalProps {
   invoiceId: number;
-  clientId: number;
+  clientId: string;
   showId: string;
   hiddenActions?: boolean;
   // eslint-disable-next-line no-unused-vars
@@ -30,7 +30,7 @@ interface NoveltyModalProps {
 }
 
 interface AdjustmentModalProps {
-  clientId: number;
+  clientId: string;
   selectAdjusment?: FinancialDiscount;
   projectId: number;
   legalized?: boolean;

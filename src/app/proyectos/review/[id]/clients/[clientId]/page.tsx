@@ -15,7 +15,7 @@ const ClientDetailPage = () => {
     <ClientProjectForm
       isViewDetailsClient={{
         active: true,
-        id: parseInt(Array.isArray(clientId) ? clientId[0] : clientId)
+        id: Array.isArray(clientId) ? clientId[0] : clientId
       }}
       onGoBackTable={onGoBackTableClients}
     />
