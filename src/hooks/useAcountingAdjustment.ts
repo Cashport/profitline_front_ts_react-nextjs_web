@@ -19,7 +19,7 @@ export interface IFinancialDiscount {
   delete_at: string | null;
   status_id: number;
   document_type_id: number;
-  client_id: number;
+  client_id: string;
   percentage: number | null;
   is_discount: number | null;
   date_of_issue: string;

@@ -52,7 +52,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const params = useParams();
-  const clientId = Number(extractSingleParam(params.clientId)) || 0;
+  const clientId = extractSingleParam(params.clientId) || "";
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
   const { mutate } = useAcountingAdjustment(clientId.toString(), projectId.toString(), 2);
@@ -145,7 +145,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
               motive: parseInt(adj.adjustment?.value || "0"),
               amount: toNumberOrZero(amount),
               invoice_id: row.invoice,
-              description: "Adjustment by invoice created in Application Tab"
+              description: `${adj.adjustment?.label} ${row.invoice}` || ""
             };
           })
           .filter(Boolean) as ICreateGlobalAdjustment[]; // elimina los nulls si alguna fila no tenía monto

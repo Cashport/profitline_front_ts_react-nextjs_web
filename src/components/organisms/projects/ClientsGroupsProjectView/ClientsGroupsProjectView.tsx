@@ -5,7 +5,7 @@ import { ClientsGroupsTable } from "@/components/molecules/tables/ClientsGroupsT
 export type groupInfo = {
   groupId: number;
   groupName: string;
-  clientsIds: number[];
+  clientsIds: string[];
 };
 
 type showGroupDetails = {

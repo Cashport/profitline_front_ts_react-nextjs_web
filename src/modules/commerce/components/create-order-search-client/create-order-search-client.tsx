@@ -11,7 +11,10 @@ import SelectClient from "../create-order-select-client";
 import { ISelectType } from "@/types/clients/IClients";
 
 export interface selectClientForm {
-  client: ISelectType;
+  client: {
+    value: string;
+    label: string;
+  };
 }
 
 const CreateOrderSearchClient: FC = ({}) => {

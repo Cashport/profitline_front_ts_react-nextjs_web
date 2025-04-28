@@ -14,7 +14,7 @@ import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import { stringToBoolean } from "@/utils/utils";
 
 export const addShipTo = async (
-  clientID: number,
+  clientID: string,
   projectID: number,
   selectedData: ShipToFormType,
   zones: number[],
@@ -81,7 +81,7 @@ export const getShipToByCode = async (code: string, projectId: number): Promise<
 
 // function to update ship to
 export const updateShipTo = async (
-  clientID: number,
+  clientID: string,
   projectID: number,
   selectedData: ShipToFormType,
   zones: number[],

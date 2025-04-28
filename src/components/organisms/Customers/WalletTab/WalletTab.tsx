@@ -62,7 +62,7 @@ export const WalletTab = () => {
     selected: 0
   });
   const [messageShow, contextHolder] = message.useMessage();
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
 
   const { data, isLoading, mutate } = useInvoices({

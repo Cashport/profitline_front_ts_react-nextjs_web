@@ -28,7 +28,7 @@ const ContactsTab = () => {
   const { showMessage } = useMessageApi();
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
   const { data, isLoading, createContact, updateContact, deleteSelectedContacts } =
     useClientContacts(clientId);
 

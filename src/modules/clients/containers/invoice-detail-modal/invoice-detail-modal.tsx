@@ -27,7 +27,7 @@ interface InvoiceDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoiceId: number;
-  clientId: number;
+  clientId: string;
   showId: string;
   hiddenActions?: boolean;
   // eslint-disable-next-line no-unused-vars

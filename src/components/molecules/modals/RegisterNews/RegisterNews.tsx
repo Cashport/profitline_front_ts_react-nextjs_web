@@ -20,7 +20,7 @@ import "./registerNews.scss";
 interface RegisterNewsProps {
   isOpen: boolean;
   onClose: () => void;
-  clientId?: number;
+  clientId: string;
   projectId?: number;
   invoiceSelected?: IInvoice[];
   messageShow: MessageInstance;

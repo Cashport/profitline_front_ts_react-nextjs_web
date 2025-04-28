@@ -14,7 +14,7 @@ interface IInvoiceInfo {
 // Define the type for the data wallet
 interface IDataWallet {
   id: number;
-  client_id: number;
+  client_id: string;
   client_name: string;
   project_id: number;
   past_due_ammount: number;
@@ -42,7 +42,7 @@ export interface IDataSection {
 interface IPaymentsVsInvoices {
   id: number;
   project_id: number;
-  client_id: number;
+  client_id: string;
   month: string;
   sales: number;
   payments: number;

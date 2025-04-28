@@ -47,7 +47,7 @@ interface Props {
 export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnReject }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = parseInt(extractSingleParam(params.clientId) || "0");
+  const clientId = extractSingleParam(params.clientId) || "0";
   const { showMessage } = useMessageApi();
 
   const [currentView, setCurrentView] = useState<IView>("sendEmail");

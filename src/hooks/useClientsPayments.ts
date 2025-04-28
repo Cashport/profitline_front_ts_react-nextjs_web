@@ -13,7 +13,7 @@ export const useClientsPayments = () => {
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
 
-  const clientId = clientIdParam ? parseInt(clientIdParam) : 0;
+  const clientId = clientIdParam || "";
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
 
   const pathKey = `/bank/get-payments/project/${projectId}/client/${clientId}`;

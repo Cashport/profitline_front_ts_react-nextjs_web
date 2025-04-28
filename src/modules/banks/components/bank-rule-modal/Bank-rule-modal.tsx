@@ -88,7 +88,7 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
       const modelData = {
         project_id: ID,
         description: data.rules[0].description,
-        id_client: parseInt(data.rules[0].client_name.value),
+        id_client: data.rules[0].client_name.value,
         is_exactly: data.rules[0].coincidence.value === "1"
       };
 

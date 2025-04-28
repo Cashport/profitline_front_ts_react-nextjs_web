@@ -13,7 +13,7 @@ export interface InvoiceDetail {
 
 export interface IData {
   ammount: number | null;
-  client_id: number;
+  client_id: string;
   comments: string;
   comments_conciliation: string | null;
   comments_incident: any[];

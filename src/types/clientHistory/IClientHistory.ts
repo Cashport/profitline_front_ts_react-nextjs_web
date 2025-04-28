@@ -3,7 +3,7 @@ export interface IHistoryRow {
   event: string;
   description: string;
   project_id: number;
-  id_client: number;
+  id_client: string;
   userId: number;
   created_at: string;
   is_deleted: number;
@@ -15,7 +15,7 @@ export interface IHistoryRow {
 
 export interface IHistoryCommunicationDetail {
   _id: string;
-  client_id: number;
+  client_id: string;
   project_id: number;
   comunication_id: number;
   email_send: string[];

@@ -41,7 +41,7 @@ const { Title } = Typography;
 interface Props {
   isViewDetailsClient: {
     active: boolean;
-    id: number;
+    id: string;
   };
   onGoBackTable: () => void;
 }
@@ -145,7 +145,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
   useEffect(() => {
     // UseEffect para dar un valor a dataClient, para pintar el form
     const fetchClientData = async () => {
-      if (isViewDetailsClient?.id === 0) {
+      if (isViewDetailsClient?.id === "") {
         setIsEditAvailable(true);
         return;
       }
@@ -265,7 +265,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
             >
               Ver Clientes
             </Button>
-            {isViewDetailsClient?.id > 0 && (
+            {isViewDetailsClient?.id !== "" && (
               <Flex gap="1.5rem">
                 <Button
                   size="large"
@@ -511,7 +511,7 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                 ) : null}
               </Flex>
               <DividerCustom />
-              {isViewDetailsClient?.id === 0 ? null : (
+              {isViewDetailsClient?.id === "" ? null : (
                 <>
                   <ShipToProjectTable
                     clientId={isViewDetailsClient.id}

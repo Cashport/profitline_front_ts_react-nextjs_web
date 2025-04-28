@@ -14,7 +14,7 @@ const { Text, Link } = Typography;
 
 interface Props {
   setClientsKeys: Dispatch<SetStateAction<React.Key[]>>;
-  selectedClientsKeys?: number[];
+  selectedClientsKeys?: string[];
 }
 
 export const ClientsTableModal = ({ setClientsKeys, selectedClientsKeys }: Props) => {
