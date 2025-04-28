@@ -145,7 +145,7 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
               motive: parseInt(adj.adjustment?.value || "0"),
               amount: toNumberOrZero(amount),
               invoice_id: row.invoice,
-              description: "Adjustment by invoice created in Application Tab"
+              description: adj.adjustment?.label || ""
             };
           })
           .filter(Boolean) as ICreateGlobalAdjustment[]; // elimina los nulls si alguna fila no tenía monto
