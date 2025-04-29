@@ -30,7 +30,7 @@ interface ModalIdentifiedPaymentProps {
   paymentInfo: IFormIdentifyPaymentModal | undefined;
   identifiedPayments?: IIdentifiedPayment[];
   // eslint-disable-next-line no-unused-vars
-  onClose: (cancelClicked?: boolean) => void;
+  onClose: (cancelClicked?: boolean, mutatePaymentsData?: boolean) => void;
 }
 
 const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
@@ -63,7 +63,7 @@ const ModalIdentifiedPayment: FC<ModalIdentifiedPaymentProps> = ({
       });
 
       showMessage("success", "Pago identificado enviado correctamente!");
-      onClose();
+      onClose(false, true);
       setViewInfo((prev) => ({ ...prev, current: "form" }));
     } catch (error) {
       showMessage("error", "Ocurrió un error al identificar el pago");

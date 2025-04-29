@@ -7,9 +7,10 @@ export interface IHistoryRow {
   userId: number;
   created_at: string;
   is_deleted: number;
-  url: string;
-  id_mongo_log: string;
+  url: string | null;
+  id_mongo_log: string | null;
   user_name: string;
+  payment_identification_url: string | null;
 }
 
 export interface IHistoryCommunicationDetail {

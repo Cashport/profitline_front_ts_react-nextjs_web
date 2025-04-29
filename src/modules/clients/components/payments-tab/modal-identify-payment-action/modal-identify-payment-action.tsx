@@ -31,7 +31,7 @@ import "./modal-identify-payment-action.scss";
 interface ModalIdentifyPaymentProps {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
-  onClose: (cancelClicked?: boolean) => void;
+  onClose: (cancelClicked?: boolean, mutatePaymentsData?: boolean) => void;
 }
 
 interface infoObject {

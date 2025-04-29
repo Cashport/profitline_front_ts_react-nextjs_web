@@ -68,8 +68,12 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
     // onChangeTab(activeKey);
   };
 
-  const handleCloseActionModal = (cancelClicked?: Boolean) => {
+  const handleCloseActionModal = (cancelClicked?: boolean, mutatePaymentsData?: boolean) => {
     setIsSelectedActionModalOpen({ selected: 0 });
+
+    if (mutatePaymentsData) {
+      mutate();
+    }
 
     if (cancelClicked) return;
     setIsModalActionPaymentOpen((prev) => !prev);

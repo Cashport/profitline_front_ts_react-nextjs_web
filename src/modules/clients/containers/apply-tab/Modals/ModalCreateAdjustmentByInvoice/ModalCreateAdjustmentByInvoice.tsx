@@ -5,7 +5,10 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { CaretLeft, CopySimple, Plus } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
-import { createGlobalAdjustment } from "@/services/applyTabClients/applyTabClients";
+import {
+  createGlobalAdjustment,
+  ICreateGlobalAdjustment
+} from "@/services/applyTabClients/applyTabClients";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { useAcountingAdjustment } from "@/hooks/useAcountingAdjustment";
 import { extractSingleParam, toNumberOrZero } from "@/utils/utils";
@@ -130,24 +133,30 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
     setLoadingCreate(true);
 
     if (processed) {
-      const totalPerSelectedAdjustment = Object.keys(processedData).map((key) => {
-        if (key === "invoice" || key === "total") return null;
-        return {
-          adjustment: key.split("_").join(" "),
-          amount: processedData[key]
-        };
+      const finalAdjustments = dataSource.flatMap((row) => {
+        return data.adjustments
+          .filter((adj) => adj.adjustment)
+          .map((adj) => {
+            const labelKey = adj.adjustment?.label?.split(" ").join("_") ?? "";
+            const amount = row[labelKey];
+            if (!amount) return null;
+
+            return {
+              motive: parseInt(adj.adjustment?.value || "0"),
+              amount: toNumberOrZero(amount),
+              invoice_id: row.invoice,
+              description: `${adj.adjustment?.label} ${row.invoice}` || ""
+            };
+          })
+          .filter(Boolean) as ICreateGlobalAdjustment[]; // elimina los nulls si alguna fila no tenía monto
       });
 
-      const finalAdjustments = data.adjustments.map((adjustment) => ({
-        motive: parseInt(adjustment?.adjustment?.value || "0"),
-        amount: totalPerSelectedAdjustment.find(
-          (total) => total?.adjustment === adjustment.adjustment?.label
-        )?.amount as number | 0,
-        description: "Adjustment by invoice created in Application Tab"
-      }));
-
       try {
-        await createGlobalAdjustment(projectId, clientId, finalAdjustments);
+        await createGlobalAdjustment(
+          projectId,
+          clientId,
+          finalAdjustments.filter((adjustment) => adjustment !== null)
+        );
         showMessage("success", "Ajuste(s) creado correctamente");
         mutate();
         onCancel(true);
@@ -158,7 +167,6 @@ const ModalCreateAdjustmentByInvoice: React.FC<ModalCreateAdjustmentByInvoicePro
     }
 
     try {
-      // create the processedData object based on the dataSource when pasting
       const proccessedData: any = dataSource.reduce((acc, row) => {
         Object.entries(row).forEach(([key, value]) => {
           if (key === "invoice") return acc[key] ? (acc[key] += 1) : (acc[key] = 1);
