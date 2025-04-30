@@ -28,7 +28,7 @@ const ColumnText: React.FC<ColumnTextProps> = ({
       {icon}
       <Text
         style={{
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: 400,
           color: "#7B7B7B",
           margin: 0,
@@ -38,7 +38,6 @@ const ColumnText: React.FC<ColumnTextProps> = ({
         {title}
       </Text>
     </Flex>
-
     {/* Columna del contenido */}
     <Flex flex={5}>
       {typeof content === "string" ? (

@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Drawer, Flex, Typography } from "antd";
 import { DotOutline } from "@phosphor-icons/react";
-import { Files, ListChecks } from "phosphor-react";
+import { CaretDoubleRight, Files, ListChecks } from "phosphor-react";
 
 import { getStatusDetails } from "../../utils/documentStatusMap";
 import { useDocument } from "@/hooks/useDocument";
@@ -10,10 +10,10 @@ import { useDocument } from "@/hooks/useDocument";
 import DescriptionSection from "./sections/DescriptionSection";
 import ApproversSection from "./sections/ApproversSection";
 import ExpirationSection from "./sections/ExpirationSection";
-import EventsSection from "./sections/EventsSection";
 import { ValiditySection } from "./sections/ValiditySection";
 import DocumentUploadSection from "./sections/DocumentUploadSection";
 import ColumnText from "../ColumnText/ColumnText";
+import { EventSection } from "./sections/EventSection";
 import FooterSection from "./sections/FooterSection";
 
 import "./drawerComponent.scss";
@@ -57,23 +57,28 @@ const DrawerComponent: React.FC<DrawerProps> = ({
     <Drawer
       title={
         <Flex vertical justify="flex-start">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              fontWeight: 500,
-              fontSize: "0.75rem",
-              backgroundColor: `${backgroundColor}`,
-              color: color,
-              borderRadius: "42px",
-              padding: "3px 2px",
-              paddingRight: "10px",
-              width: "fit-content"
-            }}
-          >
-            <DotOutline size={24} color={color} weight="fill" />
-            {document.statusName}
-          </div>
+          <Flex gap={8} align="center">
+            <button type="button" className="backButton" onClick={onClose}>
+              <CaretDoubleRight />
+            </button>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontWeight: 500,
+                fontSize: "0.75rem",
+                backgroundColor: `${backgroundColor}`,
+                color: color,
+                borderRadius: "42px",
+                padding: "3px 2px",
+                paddingRight: "10px",
+                width: "fit-content"
+              }}
+            >
+              <DotOutline size={24} color={color} weight="fill" />
+              {document.statusName}
+            </div>
+          </Flex>
           <Title style={{ marginTop: 20 }} level={4}>
             {document?.documentTypeName}
           </Title>
@@ -90,14 +95,14 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       footer={<FooterSection />}
       className="drawerComponentProviders"
     >
-      <Flex gap={16} vertical>
+      <Flex gap={8} vertical>
         <DescriptionSection
           description={document.documentTypeDescription}
           uploadedBy={document.createdBy}
         />
         <ValiditySection validity={document.expiryDate} date={document.createdAt} />
         <ApproversSection approvers={document.approvers} />
-        <hr style={{ borderTop: "1px solid #f7f7f7" }} />
+        <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
         {type === "document" ? (
           <DocumentUploadSection
             documents={document.documents}
@@ -133,7 +138,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
             }
           />
         )}
-        <hr style={{ borderTop: "1px solid #f7f7f7" }} />
+        <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
         <ExpirationSection
           subjectId={subjectId}
           documentTypeSubjectId={document.id}
@@ -141,7 +146,8 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           mutateSupplierInfo={mutateSupplierInfo}
           expirationDate={document.expiryDate}
         />
-        <EventsSection events={[]} onAddComment={() => {}} />
+        <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
+        <EventSection />
       </Flex>
     </Drawer>
   );

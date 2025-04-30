@@ -7,15 +7,15 @@ const DescriptionSection: React.FC<{ description: string; uploadedBy: string }> 
   description,
   uploadedBy
 }) => (
-  <Flex vertical gap={16}>
+  <Flex vertical gap={8}>
     <ColumnText
       title="Descripción"
-      icon={<TextAlignLeft size={16} color="#7B7B7B" />}
+      icon={<TextAlignLeft size={14} color="#7B7B7B" />}
       content={description || "-"}
     />
     <ColumnText
       title="Cargado por"
-      icon={<User size={16} color="#7B7B7B" />}
+      icon={<User size={14} color="#7B7B7B" />}
       content={uploadedBy || "-"}
     />
   </Flex>
