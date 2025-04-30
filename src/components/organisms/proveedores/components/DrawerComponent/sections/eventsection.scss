@@ -1,0 +1,114 @@
+.event-section-drawerComponent {
+    .event-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .event-steps {
+        .ant-steps-item {
+            padding-bottom: 16px;
+            min-height: auto;
+
+            &:last-child {
+                padding-bottom: 0;
+
+                .ant-steps-item-tail {
+                    display: none;
+                }
+            }
+
+            .ant-steps-item-tail {
+                inset-inline-start: 15px !important;
+                top: 4px !important;
+
+                &::after {
+                    left: 16px;
+
+                    background-color: transparent !important;
+                    border-radius: 0 !important;
+                    border-left: 1px dashed #cbe71e !important;
+                }
+            }
+
+            .ant-steps-item-icon {
+                width: 24px;
+                height: 24px;
+                margin-right: 12px;
+                background: none;
+                border: none;
+            }
+
+            .ant-steps-item-content {
+                min-height: auto;
+            }
+
+            .ant-steps-item-title {
+                padding-right: 0;
+                line-height: 1.4;
+            }
+        }
+
+        .approval-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #cbe71e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .ant-avatar {
+            width: 32px;
+            height: 32px;
+        }
+
+        .event-content {
+            display: flex;
+            flex-direction: column;
+
+            .ant-typography {
+                line-height: 1.4;
+                margin-bottom: 0;
+
+                &:first-child {
+                    font-weight: bold;
+                }
+
+                &:nth-child(2) {
+                    margin-top: 4px;
+                }
+
+                &:last-child {
+                    color: #8c8c8c;
+                    font-size: 12px;
+                    margin-top: 4px;
+                }
+            }
+        }
+
+        .comment-input-container {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .add-comment {
+            flex-grow: 1;
+            min-width: 0; // This allows the input to shrink below its default minimum width
+            color: #8c8c8c;
+            border: 1px solid #e8e8e8;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .ant-steps-item-title {
+            width: 100%;
+        }
+    }
+}

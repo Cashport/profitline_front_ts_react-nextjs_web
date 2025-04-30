@@ -10,10 +10,10 @@ import { useDocument } from "@/hooks/useDocument";
 import DescriptionSection from "./sections/DescriptionSection";
 import ApproversSection from "./sections/ApproversSection";
 import ExpirationSection from "./sections/ExpirationSection";
-import EventsSection from "./sections/EventsSection";
 import { ValiditySection } from "./sections/ValiditySection";
 import DocumentUploadSection from "./sections/DocumentUploadSection";
 import ColumnText from "../ColumnText/ColumnText";
+import { EventSection } from "./sections/EventSection";
 import FooterSection from "./sections/FooterSection";
 
 import "./drawerComponent.scss";
@@ -146,7 +146,8 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           mutateSupplierInfo={mutateSupplierInfo}
           expirationDate={document.expiryDate}
         />
-        <EventsSection events={[]} onAddComment={() => {}} />
+        <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
+        <EventSection />
       </Flex>
     </Drawer>
   );
