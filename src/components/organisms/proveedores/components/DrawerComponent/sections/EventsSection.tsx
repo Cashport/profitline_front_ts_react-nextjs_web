@@ -33,7 +33,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events, onAddComment }) =
         <Cloud size={16} color="#7B7B7B" />
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: 400,
             color: "#7B7B7B",
             margin: 0
