@@ -94,6 +94,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       style={{ backgroundColor: "#FFFFFF" }}
       footer={<FooterSection />}
       className="drawerComponentProviders"
+      mask={false}
     >
       <Flex gap={8} vertical>
         <DescriptionSection
