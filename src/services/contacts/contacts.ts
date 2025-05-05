@@ -1,5 +1,10 @@
 import config from "@/config";
-import { IContactOptions, ICreateEditContact, IGetContacts } from "@/types/contacts/IContacts";
+import {
+  IContact,
+  IContactOptions,
+  ICreateEditContact,
+  IGetContacts
+} from "@/types/contacts/IContacts";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
@@ -70,6 +75,18 @@ export const getContactOptions = async (): Promise<IContactOptions> => {
   try {
     const response: GenericResponse<IContactOptions> = await API.get(
       `${config.API_HOST}/client/contact/options`
+    );
+
+    return response.data;
+  } catch (error) {
+    throw Promise.reject(error);
+  }
+};
+
+export const getContactByClientId = async (clientId: string): Promise<IContact[]> => {
+  try {
+    const response: GenericResponse<IContact[]> = await API.get(
+      `${config.API_HOST}/client/${clientId}/contact`
     );
 
     return response.data;

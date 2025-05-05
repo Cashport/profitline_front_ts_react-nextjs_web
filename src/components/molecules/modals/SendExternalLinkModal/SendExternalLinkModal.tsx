@@ -5,6 +5,7 @@ import { CaretLeft } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
+import { getContactByClientId } from "@/services/contacts/contacts";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
@@ -15,6 +16,7 @@ import "./sendExternalLinkModal.scss";
 interface SendExternalLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
+  clientId: string;
   clientUUID?: string;
 }
 
@@ -26,7 +28,12 @@ export interface IFormSendExternalLinkModal {
   forward_to: ISelect[];
 }
 
-const SendExternalLinkModal = ({ isOpen, onClose, clientUUID }: SendExternalLinkModalProps) => {
+const SendExternalLinkModal = ({
+  isOpen,
+  onClose,
+  clientId,
+  clientUUID
+}: SendExternalLinkModalProps) => {
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [recipients, setRecipients] = useState<
@@ -47,11 +54,13 @@ const SendExternalLinkModal = ({ isOpen, onClose, clientUUID }: SendExternalLink
   useEffect(() => {
     const fetchFormInfo = async () => {
       try {
-        // const response = await getDigitalRecordFormInfo(projectId, clientId);
-        setRecipients([
-          { value: "1", label: "Usuario 1" },
-          { value: "2", label: "Usuario 2" }
-        ]);
+        const res = await getContactByClientId(clientId);
+        setRecipients(
+          res?.map((item) => ({
+            value: item.contact_email,
+            label: `${item.contact_name} ${item.contact_lastname}`
+          })) || []
+        );
       } catch (error) {
         console.error("Error getting digital record form info2", error);
       }

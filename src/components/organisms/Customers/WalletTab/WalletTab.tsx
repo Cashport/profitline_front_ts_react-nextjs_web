@@ -296,6 +296,7 @@ export const WalletTab = () => {
         isOpen={isSelectOpen.selected === 8}
         onClose={onCloseModal}
         clientUUID={portfolioData?.data_wallet.uuid}
+        clientId={clientId}
       />
     </>
   );
