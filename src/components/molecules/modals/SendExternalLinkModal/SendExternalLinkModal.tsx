@@ -44,13 +44,27 @@ const SendExternalLinkModal = ({
     }[]
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [view, setView] = useState("default"); // New state for modal view
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    watch
   } = useForm<IFormSendExternalLinkModal>();
+
+  const watchForwardTo = watch("forward_to");
+
+  const formatRecipientsList = (recipients: ISelect[]): string => {
+    const labels = recipients.map((r) => r.label);
+    if (labels.length === 1) return labels[0];
+    if (labels.length === 2) return `${labels[0]} y ${labels[1]}`;
+
+    const allButLast = labels.slice(0, -1).join(", ");
+    const last = labels[labels.length - 1];
+    return `${allButLast} y ${last}`;
+  };
 
   useEffect(() => {
     const fetchFormInfo = async () => {
@@ -72,6 +86,7 @@ const SendExternalLinkModal = ({
   useEffect(() => {
     if (!isOpen) {
       reset();
+      setView("default"); // Reset view to default when modal is closed
     }
   }, [isOpen, reset]);
 
@@ -85,13 +100,14 @@ const SendExternalLinkModal = ({
       );
 
       const hasSuccess = results.some((result) => result.status === "fulfilled");
-      console.log("results", results);
 
       if (hasSuccess) {
         showMessage("success", "Link enviado correctamente");
+        setView("success");
       } else {
         showMessage("error", "Error al enviar Link");
       }
+      setView("success");
     } catch (error) {
       console.error("Unexpected error", error);
       showMessage("error", "Error inesperado al enviar Link");
@@ -103,47 +119,73 @@ const SendExternalLinkModal = ({
   return (
     <Modal
       className="sendExternalLinkModal"
-      width="680px"
+      width="660px"
       footer={null}
       open={isOpen}
       closable={false}
       destroyOnClose
     >
-      <button className="sendExternalLinkModal__goBackBtn" onClick={onClose}>
-        <CaretLeft size="1.25rem" />
-        Enviar link externo
-      </button>
+      {view === "default" && (
+        <>
+          <button className="sendExternalLinkModal__goBackBtn" onClick={onClose}>
+            <CaretLeft size="1.25rem" />
+            Enviar link externo
+          </button>
 
-      <Flex vertical gap="0.5rem">
-        <Controller
-          name="forward_to"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <GeneralSearchSelect
-              errors={errors.forward_to}
-              field={field}
-              title="Para"
-              placeholder=""
-              options={recipients}
-              suffixIcon={null}
-              showLabelAndValue
+          <Flex vertical gap="0.5rem">
+            <Controller
+              name="forward_to"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <GeneralSearchSelect
+                  errors={errors.forward_to}
+                  field={field}
+                  title="Para"
+                  placeholder=""
+                  options={recipients}
+                  suffixIcon={null}
+                  showLabelAndValue
+                />
+              )}
             />
-          )}
-        />
-      </Flex>
+          </Flex>
 
-      <div className="sendExternalLinkModal__footer">
-        <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <div className="sendExternalLinkModal__footer">
+            <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
 
-        <PrincipalButton
-          onClick={handleSubmit(onSubmit)}
-          disabled={!isValid}
-          loading={isSubmitting}
-        >
-          Enviar acta
-        </PrincipalButton>
-      </div>
+            <PrincipalButton
+              onClick={handleSubmit(onSubmit)}
+              disabled={!isValid}
+              loading={isSubmitting}
+            >
+              Enviar acta
+            </PrincipalButton>
+          </div>
+        </>
+      )}
+
+      {view === "success" && (
+        <div className="sendExternalLinkModal__successView">
+          <h2>Link enviado exitosamente</h2>
+          <span>
+            <p className="sendExternalLinkModal__successMessage">
+              Se ha enviado el link de ingreso a:
+            </p>
+            <p className="sendExternalLinkModal__recipients">
+              {formatRecipientsList(watchForwardTo)}
+            </p>
+          </span>
+          <PrincipalButton
+            customStyles={{
+              width: "280px"
+            }}
+            onClick={onClose}
+          >
+            Entendido
+          </PrincipalButton>
+        </div>
+      )}
     </Modal>
   );
 };
