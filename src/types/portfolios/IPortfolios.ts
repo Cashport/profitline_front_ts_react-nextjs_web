@@ -13,16 +13,16 @@ interface IInvoiceInfo {
 
 // Define the type for the data wallet
 interface IDataWallet {
-  id: number;
   client_id: string;
   client_name: string;
   project_id: number;
+  total_portfolio: number;
   past_due_ammount: number;
-  budget_ammount: number;
+  budget_ammount: number | null;
   applied_payments_ammount: number;
   unapplied_payments_ammount: number;
-  holding_id: number | null;
-  holding_name: string | null;
+  quota: number;
+  uuid: string;
 }
 
 // Define the type for the full data section of the response
