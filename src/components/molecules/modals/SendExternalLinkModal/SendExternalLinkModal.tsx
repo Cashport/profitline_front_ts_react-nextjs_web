@@ -6,6 +6,7 @@ import { CaretLeft } from "@phosphor-icons/react";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { getContactByClientId } from "@/services/contacts/contacts";
+import { generateLink } from "@/services/external link/externalLink";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
@@ -17,7 +18,7 @@ interface SendExternalLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
   clientId: string;
-  clientUUID?: string;
+  clientUUID: string;
 }
 
 interface ISelect {
@@ -77,14 +78,23 @@ const SendExternalLinkModal = ({
   const onSubmit = async (data: IFormSendExternalLinkModal) => {
     setIsSubmitting(true);
     try {
-      console.log("data", data);
-      console.log("clientUUID", clientUUID);
+      const results = await Promise.allSettled(
+        data.forward_to.map(async (recipient) => {
+          return generateLink(clientUUID, recipient.value);
+        })
+      );
 
-      showMessage("success", "Acta digital enviada correctamente");
+      const hasSuccess = results.some((result) => result.status === "fulfilled");
+      console.log("results", results);
 
-      // onClose();
+      if (hasSuccess) {
+        showMessage("success", "Link enviado correctamente");
+      } else {
+        showMessage("error", "Error al enviar Link");
+      }
     } catch (error) {
-      showMessage("error", "Error al enviar acta digital");
+      console.error("Unexpected error", error);
+      showMessage("error", "Error inesperado al enviar Link");
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +103,7 @@ const SendExternalLinkModal = ({
   return (
     <Modal
       className="sendExternalLinkModal"
-      width="50%"
+      width="680px"
       footer={null}
       open={isOpen}
       closable={false}
