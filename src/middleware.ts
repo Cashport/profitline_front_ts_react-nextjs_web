@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' blob: 'nonce-${nonce}' ;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: ;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
