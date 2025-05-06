@@ -66,12 +66,17 @@ export async function middleware(request: NextRequest) {
     res.headers.set("Content-Security-Policy", contentSecurityPolicyHeaderValue);
     return res;
   }
-
-  const res = NextResponse.redirect(new URL("/clients/all", request.url), {
+  if (request.nextUrl.pathname === "/") {
+    const res = NextResponse.redirect(new URL("/clients/all", request.url), {
+      headers: requestHeaders
+    });
+    res.headers.set("Content-Security-Policy", contentSecurityPolicyHeaderValue);
+    return res;
+  }
+  return NextResponse.next({
+    request: { headers: requestHeaders },
     headers: requestHeaders
   });
-  res.headers.set("Content-Security-Policy", contentSecurityPolicyHeaderValue);
-  return res;
 }
 
 export const config = {
