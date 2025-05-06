@@ -44,6 +44,13 @@ export const columns = ({
     width: "15%"
   },
   {
+    title: "Obligatorio",
+    dataIndex: "isMandatory",
+    key: "isMandatory",
+    render: (isMandatory: boolean) => <p>{isMandatory ? "Sí" : "No"}</p>,
+    width: "10%"
+  },
+  {
     title: "Estado",
     dataIndex: "statusId",
     key: "statusId",
