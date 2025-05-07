@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
@@ -10,6 +10,7 @@ import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useModalDetail } from "@/context/ModalContext";
+import { ClientDetailsContext } from "@/modules/clients/containers/client-details/client-details";
 
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
@@ -27,12 +28,14 @@ import {
   SelectedFiltersWallet,
   WalletTabFilter
 } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
+import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
 import "./wallettab.scss";
 
 export const WalletTab = () => {
+  const { portfolioData } = useContext(ClientDetailsContext);
   const { openModal } = useModalDetail();
   const [filters, setFilters] = useState<SelectedFiltersWallet>({
     lines: [],
@@ -287,6 +290,12 @@ export const WalletTab = () => {
         messageShow={messageShow}
         projectId={projectId}
         invoiceSelected={selectedRows}
+        clientId={clientId}
+      />
+      <SendExternalLinkModal
+        isOpen={isSelectOpen.selected === 8}
+        onClose={onCloseModal}
+        clientUUID={portfolioData?.data_wallet.uuid || ""}
         clientId={clientId}
       />
     </>

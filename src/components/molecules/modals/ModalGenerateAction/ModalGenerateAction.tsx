@@ -11,7 +11,8 @@ import {
   WarningDiamond,
   HandTap,
   PaperPlaneTilt,
-  Paperclip
+  Paperclip,
+  Link
 } from "@phosphor-icons/react";
 
 import "./modalgenerateaction.scss";
@@ -53,6 +54,13 @@ export const ModalGenerateAction = ({
   };
 
   const handleOpenModal = (type: number) => {
+    const noNeedForValidation = [8];
+    if (noNeedForValidation.includes(type)) {
+      setSelectOpen({
+        selected: type
+      });
+      return;
+    }
     if (validateInvoiceIsSelected()) {
       setSelectOpen({
         selected: type
@@ -136,6 +144,13 @@ export const ModalGenerateAction = ({
             setSelectOpen({
               selected: 7
             });
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<Link size={16} />}
+          title="Enviar link a cliente"
+          onClick={() => {
+            handleOpenModal(8);
           }}
         />
       </Flex>
