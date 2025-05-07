@@ -56,8 +56,7 @@ export const columns = ({
     key: "statusId",
     render: (statusId: string) => {
       return <BadgeDocumentStatus statusId={statusId} />;
-    },
-    width: "15%"
+    }
   },
   {
     title: "",
