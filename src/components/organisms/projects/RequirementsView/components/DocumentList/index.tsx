@@ -1,17 +1,15 @@
-import React, { useState } from "react";
-import { Modal, Table, Checkbox, Button, Typography, Flex } from "antd";
-import type { ColumnsType } from "antd/es/table";
-import { FileArrowDown, Plus } from "phosphor-react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
-const { Title, Text } = Typography;
+import { FileArrowDown, Plus } from "phosphor-react";
+import { Table, Checkbox, Button, Typography, Flex } from "antd";
+import type { ColumnsType } from "antd/es/table";
 
-interface Document {
-  key: string;
-  documentName: string;
-  validity: string;
-  template: string | null;
-}
+import { getAvailableDocuments, IDocument } from "@/services/providers/providers";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+
+import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
+
+const { Text } = Typography;
 
 interface Form {
   key: string;
@@ -19,12 +17,7 @@ interface Form {
   validity: string;
   questions_quantity: number;
 }
-const mockedDocuments: Document[] = [
-  { key: "1", documentName: "RUT", validity: "30 días", template: "si" },
-  { key: "2", documentName: "Referencia comercial", validity: "1 año", template: null },
-  { key: "3", documentName: "Cédula representante legal", validity: "-", template: null },
-  { key: "4", documentName: "Certificado de antecedentes", validity: "2 años", template: null }
-];
+
 const mockedForms: Form[] = [
   { key: "1", formName: "Formulario de Registro", validity: "30 días", questions_quantity: 10 },
   { key: "2", formName: "Encuesta de Satisfacción", validity: "1 año", questions_quantity: 5 },
@@ -40,58 +33,35 @@ interface Props {
 
 const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }: Props) => {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [documentList, setDocumentList] = useState<IDocument[]>();
 
-  // const columns: ColumnsType<Document> = [
-  //   {
-  //     title: "Documento",
-  //     dataIndex: "documentName",
-  //     key: "documentName",
-  //     render: (text, record) => (
-  //       <Checkbox
-  //         checked={selectedRows.includes(record.key)}
-  //         onChange={(e) => handleCheckboxChange(record.key, e.target.checked)}
-  //       >
-  //         {text}
-  //       </Checkbox>
-  //     )
-  //   },
-  //   {
-  //     title: "Vigencia",
-  //     dataIndex: "validity",
-  //     key: "validity"
-  //   },
-  //   {
-  //     title: "Plantilla",
-  //     dataIndex: "template",
-  //     key: "template",
-  //     render: (template: string) => {
-  //       if (template?.length > 0) {
-  //         return (
-  //           <Link
-  //             style={{
-  //               display: "flex",
-  //               alignItems: "center",
-  //               gap: "4px",
-  //               textDecoration: "underline"
-  //             }}
-  //             href={`/requisitos/plantilla/${template}`}
-  //           >
-  //             Documento <FileArrowDown size={16} />
-  //           </Link>
-  //         );
-  //       } else return <Text>-</Text>;
-  //     }
-  //   }
-  // ];
-  const documentColumns: ColumnsType<Document> = [
+  const height = useScreenHeight();
+
+  const fetchAvailDocs = async () => {
+    try {
+      const response = await getAvailableDocuments(selectedClientType);
+      console.log("Documentos disponibles:", response);
+      setDocumentList(response);
+    } catch (error) {
+      console.error("Error al obtener documentos disponibles:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedClientType) {
+      fetchAvailDocs();
+    }
+  }, [selectedClientType]);
+
+  const documentColumns: ColumnsType<IDocument> = [
     {
       title: "Documento",
-      dataIndex: "documentName",
-      key: "documentName",
+      dataIndex: "name",
+      key: "name",
       render: (text, record) => (
         <Checkbox
-          checked={selectedRows.includes(record.key)}
-          onChange={(e) => handleCheckboxChange(record.key, e.target.checked)}
+          checked={selectedRows.includes(record.id.toString())}
+          onChange={(e) => handleCheckboxChange(record.id, e.target.checked)}
         >
           {text}
         </Checkbox>
@@ -100,12 +70,16 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
     {
       title: "Vigencia",
       dataIndex: "validity",
-      key: "validity"
+      key: "validity",
+      align: "left",
+      render: (text) => <Text>{text ?? "-"}</Text>,
+      width: 100
     },
     {
       title: "Plantilla",
-      dataIndex: "template",
-      key: "template",
+      dataIndex: "template_url",
+      key: "template_url",
+      align: "center",
       render: (template: string) =>
         template ? (
           <Link
@@ -121,7 +95,8 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
           </Link>
         ) : (
           <Text>-</Text>
-        )
+        ),
+      width: 100
     }
   ];
   const formColumns: ColumnsType<Form> = [
@@ -149,12 +124,12 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       key: "questions_quantity"
     }
   ];
-  const handleCheckboxChange = (key: string, isChecked: boolean) => {
+  const handleCheckboxChange = (key: string | number, isChecked: boolean) => {
     setSelectedRows((prev) =>
-      isChecked ? [...prev, key] : prev.filter((rowKey) => rowKey !== key)
+      isChecked ? [...prev, key.toString()] : prev.filter((rowKey) => rowKey !== key.toString())
     );
   };
-  const dataSource = listType === "documents" ? mockedDocuments : mockedForms;
+  const dataSource = listType === "documents" ? documentList : mockedForms;
   const columns = listType === "documents" ? documentColumns : formColumns;
   // const handleCancel = () => {
   //   setIsModalVisible(false);
@@ -173,6 +148,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
         pagination={false}
         rowKey="key"
         size="small"
+        scroll={{ y: height - 300 }}
         summary={() => (
           <Table.Summary.Row>
             <Table.Summary.Cell colSpan={columns.length} index={0}>
