@@ -297,6 +297,7 @@ export const WalletTab = () => {
         onClose={onCloseModal}
         clientUUID={portfolioData?.data_wallet.uuid || ""}
         clientId={clientId}
+        onCloseAllModals={closeAllModal}
       />
     </>
   );
