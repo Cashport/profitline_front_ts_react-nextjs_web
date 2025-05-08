@@ -39,3 +39,15 @@ export const getAvailableDocuments = async (subjectId: any) => {
     throw error;
   }
 };
+
+export const createDocumentBySubjectId = async (subjectId: any, documentTypeId: any) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/subject/${subjectId}/documents-type/${documentTypeId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear documento por ID de sujeto:", error);
+    throw error;
+  }
+};

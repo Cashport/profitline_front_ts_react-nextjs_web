@@ -270,7 +270,12 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       />
       <ModalAddRequirement
         isOpen={isModalOpen.selected === 3}
-        onClose={() => setIsModalOpen({ selected: 1 })}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+        }}
         selectedClientType={clientTypeId}
       />
     </div>

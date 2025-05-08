@@ -4,10 +4,15 @@ import { FileArrowDown, Plus } from "phosphor-react";
 import { Table, Checkbox, Button, Typography, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
-import { getAvailableDocuments, IDocument } from "@/services/providers/providers";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
+import { useMessageApi } from "@/context/MessageContext";
+import {
+  createDocumentBySubjectId,
+  getAvailableDocuments,
+  IDocument
+} from "@/services/providers/providers";
 
-import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 const { Text } = Typography;
 
@@ -25,22 +30,24 @@ const mockedForms: Form[] = [
 ];
 
 interface Props {
-  onClose: () => void;
+  // eslint-disable-next-line no-unused-vars
+  onClose: (cancelClicked?: boolean) => void;
   selectedClientType: number | null;
   listType: "documents" | "forms";
   addNewDocument: () => void;
 }
 
 const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }: Props) => {
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [selectedRows, setSelectedRows] = useState<(IDocument | Form)[]>([]);
   const [documentList, setDocumentList] = useState<IDocument[]>();
+  const [loadingOkButtton, setLoadingOkButtton] = useState(false);
 
+  const { showMessage } = useMessageApi();
   const height = useScreenHeight();
 
   const fetchAvailDocs = async () => {
     try {
       const response = await getAvailableDocuments(selectedClientType);
-      console.log("Documentos disponibles:", response);
       setDocumentList(response);
     } catch (error) {
       console.error("Error al obtener documentos disponibles:", error);
@@ -60,8 +67,8 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       key: "name",
       render: (text, record) => (
         <Checkbox
-          checked={selectedRows.includes(record.id.toString())}
-          onChange={(e) => handleCheckboxChange(record.id, e.target.checked)}
+          checked={!!selectedRows.find((row) => "id" in row && row.id === record.id)}
+          onChange={(e) => handleCheckboxChange(record, e.target.checked)}
         >
           {text}
         </Checkbox>
@@ -99,15 +106,15 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       width: 100
     }
   ];
-  const formColumns: ColumnsType<Form> = [
+  const formColumns: ColumnsType<any> = [
     {
       title: "Formulario",
       dataIndex: "formName",
       key: "formName",
       render: (text, record) => (
         <Checkbox
-          checked={selectedRows.includes(record.key)}
-          onChange={(e) => handleCheckboxChange(record.key, e.target.checked)}
+          checked={!!selectedRows.find((row) => "id" in row && row.id === record.id)}
+          onChange={(e) => handleCheckboxChange(record, e.target.checked)}
         >
           {text}
         </Checkbox>
@@ -124,21 +131,64 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
       key: "questions_quantity"
     }
   ];
-  const handleCheckboxChange = (key: string | number, isChecked: boolean) => {
-    setSelectedRows((prev) =>
-      isChecked ? [...prev, key.toString()] : prev.filter((rowKey) => rowKey !== key.toString())
-    );
+  const handleCheckboxChange = (record: IDocument | Form, isChecked: boolean) => {
+    setSelectedRows((prev) => {
+      const exists = prev.find((row) => {
+        if ("id" in row && "id" in record) {
+          return row.id === record.id;
+        }
+        return false;
+      });
+      if (isChecked && !exists) {
+        return [...prev, record];
+      } else if (!isChecked && exists) {
+        return prev.filter((row) => {
+          if ("id" in row && "id" in record) {
+            return row.id !== record.id;
+          }
+          return true;
+        });
+      }
+      return prev;
+    });
   };
+
   const dataSource = listType === "documents" ? documentList : mockedForms;
   const columns = listType === "documents" ? documentColumns : formColumns;
-  // const handleCancel = () => {
-  //   setIsModalVisible(false);
-  // };
 
-  // const handleAddDocuments = () => {
-  //   console.log("Agregar documentos seleccionados:", selectedRows);
-  //   setIsModalVisible(false);
-  // };
+  const handleCloseAndReset = () => {
+    showMessage("success", "Documentos agregados correctamente");
+    setSelectedRows([]);
+    onClose();
+  };
+
+  const handleAdd = async () => {
+    if (listType === "documents") {
+      setLoadingOkButtton(true);
+      let allSuccessful = true;
+
+      for (const row of selectedRows) {
+        if ("id" in row) {
+          try {
+            await createDocumentBySubjectId(selectedClientType, row.id);
+          } catch (error) {
+            console.error(`Error al crear documento con ID ${row.id}:`, error);
+            showMessage("error", `Error al crear documento con ID ${row.id}`);
+            allSuccessful = false;
+          }
+        }
+      }
+
+      if (allSuccessful) {
+        handleCloseAndReset();
+      }
+      setLoadingOkButtton(false);
+    }
+
+    if (listType === "forms") {
+      console.info("Formularios seleccionados:", selectedRows);
+    }
+  };
 
   return (
     <Flex vertical gap="1rem">
@@ -172,12 +222,11 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
         )}
       />
       <FooterButtons
-        backTitle={"Cancelar"}
-        nextTitle={`Agregar ${listType === "documents" ? "documentos" : ""}`}
-        handleBack={onClose}
-        handleNext={() => {}}
-        nextDisabled={false}
-        isSubmitting={false}
+        titleConfirm={`Agregar ${listType === "documents" ? "documentos" : "formularios"}`}
+        onClose={() => onClose(true)}
+        handleOk={handleAdd}
+        isConfirmDisabled={selectedRows.length === 0}
+        isConfirmLoading={loadingOkButtton}
       />
     </Flex>
   );
