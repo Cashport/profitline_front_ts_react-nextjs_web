@@ -7,7 +7,6 @@ import { useMessageApi } from "@/context/MessageContext";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import ModalSendInvitation from "../ModalSendInvitation";
-import { ModalAddRequirement } from "@/components/organisms/projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 
 import { Document } from "../../Form/types";
 
@@ -30,7 +29,6 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
   selectedDocumentRows
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalAddRequirementOpen, setIsModalAddRequirementOpen] = useState(false);
   const { showMessage } = useMessageApi();
 
   return (
@@ -47,7 +45,9 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
           <ButtonGenerateAction
             icon={<Files size={20} />}
             title="Agregar requerimiento"
-            onClick={() => setIsModalAddRequirementOpen(true)}
+            onClick={() => {
+              if (handleOpenModal) handleOpenModal(3);
+            }}
           />
         )}
 
@@ -90,13 +90,6 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
         onCancel={() => setIsModalOpen(false)}
         onSubmit={() => {}}
       />
-      {selectedClientType && (
-        <ModalAddRequirement
-          isOpen={isModalAddRequirementOpen}
-          onClose={() => setIsModalAddRequirementOpen(false)}
-          selectedClientType={selectedClientType}
-        />
-      )}
     </Modal>
   );
 };
