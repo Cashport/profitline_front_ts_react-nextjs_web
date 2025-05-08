@@ -18,6 +18,7 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
 import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+import { ModalAddRequirement } from "../../projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 
 import {
   Document,
@@ -266,6 +267,16 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           mutate();
         }}
         selectedRows={selectedDocumentRows}
+      />
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 3}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+        }}
+        selectedClientType={clientTypeId}
       />
     </div>
   );
