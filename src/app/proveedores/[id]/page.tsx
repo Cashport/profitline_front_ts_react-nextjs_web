@@ -1,7 +1,9 @@
 import SupplierForm from "@/components/organisms/proveedores/Form";
 
-function Page() {
-  return <SupplierForm userType={"admin"} clientTypeId={1} />;
-}
+const Page = async ({ params }: { params: { id: number } }) => {
+  const { id: clientTypeId } = params;
+
+  return <SupplierForm userType={"admin"} clientTypeId={clientTypeId} />;
+};
 
 export default Page;
