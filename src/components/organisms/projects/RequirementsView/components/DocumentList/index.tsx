@@ -46,6 +46,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
   const height = useScreenHeight();
 
   const fetchAvailDocs = async () => {
+    if (documentList) return;
     try {
       const response = await getAvailableDocuments(selectedClientType);
       setDocumentList(response);
@@ -54,6 +55,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
     }
   };
 
+  // Fetch documents when selectedClientType changes
   useEffect(() => {
     if (selectedClientType) {
       fetchAvailDocs();
@@ -159,6 +161,7 @@ const DocumentList = ({ onClose, selectedClientType, listType, addNewDocument }:
   const handleCloseAndReset = () => {
     showMessage("success", "Documentos agregados correctamente");
     setSelectedRows([]);
+    setDocumentList(undefined);
     onClose();
   };
 
