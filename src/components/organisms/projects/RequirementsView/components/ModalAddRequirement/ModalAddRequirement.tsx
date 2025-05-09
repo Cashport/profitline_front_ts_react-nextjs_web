@@ -7,11 +7,12 @@ import DocumentList from "../DocumentList";
 import { CreateDocument } from "../CreateDocument";
 import { useRouter } from "next/navigation";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface Props {
   isOpen: boolean;
-  onClose: () => void;
+  // eslint-disable-next-line no-unused-vars
+  onClose: (cancelClicked?: boolean) => void;
   selectedClientType: number | null;
 }
 type ActionType = "document" | "form" | null;
@@ -45,7 +46,11 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
     if (currentAction === "document") {
       return (
         <DocumentList
-          onClose={() => setCurrentAction(null)}
+          onClose={(cancelClicked) => {
+            if (cancelClicked) return setCurrentAction(null);
+            onClose();
+            setCurrentAction(null);
+          }}
           selectedClientType={selectedClientType}
           addNewDocument={() => setIsModalCreateDocumentOpen(true)}
           listType={"documents"}
@@ -82,8 +87,8 @@ export const ModalAddRequirement = ({ isOpen, onClose, selectedClientType }: Pro
       centered
       title={<Title level={4}>{getTitle()}</Title>}
       footer={null}
-      onCancel={onClose}
-      width={currentAction === "document" || currentAction === "form" ? "43rem" : "20%"}
+      onCancel={() => onClose(true)}
+      width={"43rem"}
     >
       {renderContent()}
       <CreateDocument

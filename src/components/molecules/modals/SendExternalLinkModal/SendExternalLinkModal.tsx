@@ -19,6 +19,7 @@ interface SendExternalLinkModalProps {
   onClose: () => void;
   clientId: string;
   clientUUID: string;
+  onCloseAllModals?: () => void;
 }
 
 interface ISelect {
@@ -33,7 +34,8 @@ const SendExternalLinkModal = ({
   isOpen,
   onClose,
   clientId,
-  clientUUID
+  clientUUID,
+  onCloseAllModals
 }: SendExternalLinkModalProps) => {
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -159,7 +161,7 @@ const SendExternalLinkModal = ({
               disabled={!isValid}
               loading={isSubmitting}
             >
-              Enviar acta
+              Enviar correo
             </PrincipalButton>
           </div>
         </>
@@ -180,7 +182,7 @@ const SendExternalLinkModal = ({
             customStyles={{
               width: "280px"
             }}
-            onClick={onClose}
+            onClick={onCloseAllModals}
           >
             Entendido
           </PrincipalButton>

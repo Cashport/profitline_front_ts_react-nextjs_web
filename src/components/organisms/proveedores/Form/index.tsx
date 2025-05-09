@@ -18,6 +18,7 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
 import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
+import { ModalAddRequirement } from "../../projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 
 import {
   Document,
@@ -48,7 +49,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState({
@@ -213,6 +214,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const rowSelection = {
     columnWidth: 40,
+    selectedRowKeys: selectedDocumentRows?.map((row) => row.id) || [],
     onChange: onSelectChange
   };
 
@@ -230,7 +232,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         <Flex vertical gap={16}>
           <h3>Documentos</h3>
           <Table
-            dataSource={documents}
+            dataSource={documents.map((doc) => ({ ...doc, key: doc.id }))}
             columns={tableColumns}
             rowKey="id"
             pagination={false}
@@ -264,8 +266,20 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           }
           handleCloseModal();
           mutate();
+          setSelectedDocumentRows([]);
         }}
         selectedRows={selectedDocumentRows}
+      />
+      <ModalAddRequirement
+        isOpen={isModalOpen.selected === 3}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            return setIsModalOpen({ selected: 1 });
+          }
+          handleCloseModal();
+          mutate();
+        }}
+        selectedClientType={clientTypeId}
       />
     </div>
   );
