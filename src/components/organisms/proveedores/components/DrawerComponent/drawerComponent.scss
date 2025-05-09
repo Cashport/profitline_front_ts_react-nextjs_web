@@ -1,5 +1,8 @@
 @import "@styles/variables.scss";
 .drawerComponentProviders {
+    .drawerContainer {
+        height: 100%;
+    }
     .ant-drawer-body {
         padding-top: 0 !important;
     }

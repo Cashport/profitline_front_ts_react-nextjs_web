@@ -1,7 +1,6 @@
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 import { IChanel } from "@/types/bre/IBRE";
 import { ISelectStringType } from "@/types/communications/ICommunications";
-import { CountryCode } from "@/types/global/IGlobal";
 import utc from "dayjs/plugin/utc";
 import dayjs from "dayjs";
 dayjs.extend(utc);
@@ -408,3 +407,24 @@ export const toNumberOrZero = (value: string): number => {
   const parsed = parseFloat(value);
   return isNaN(parsed) ? 0 : parsed; // Return 0 if parsing fails (NaN)
 };
+
+export function formatTimeAgo(utcDateString: string): string {
+  const now = new Date();
+  const inputDate = new Date(utcDateString);
+  const diffMs = now.getTime() - inputDate.getTime();
+
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (minutes < 60) return `${minutes} minutos`;
+  if (hours < 24) return `${hours} horas`;
+  if (days === 1) return `1 día`;
+  if (days < 30) return `${days} días`;
+  if (months === 1) return `1 mes`;
+  if (months < 12) return `${months} meses`;
+  if (years === 1) return `1 año`;
+  return `${years} años`;
+}
