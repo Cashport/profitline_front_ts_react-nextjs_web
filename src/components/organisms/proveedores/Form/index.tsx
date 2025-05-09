@@ -49,7 +49,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>([]);
+  const [selectedDocumentRows, setSelectedDocumentRows] = useState<Document[]>();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState({
@@ -214,6 +214,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
 
   const rowSelection = {
     columnWidth: 40,
+    selectedRowKeys: selectedDocumentRows?.map((row) => row.id) || [],
     onChange: onSelectChange
   };
 
@@ -231,7 +232,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         <Flex vertical gap={16}>
           <h3>Documentos</h3>
           <Table
-            dataSource={documents}
+            dataSource={documents.map((doc) => ({ ...doc, key: doc.id }))}
             columns={tableColumns}
             rowKey="id"
             pagination={false}
@@ -265,6 +266,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           }
           handleCloseModal();
           mutate();
+          setSelectedDocumentRows([]);
         }}
         selectedRows={selectedDocumentRows}
       />
@@ -275,6 +277,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
             return setIsModalOpen({ selected: 1 });
           }
           handleCloseModal();
+          mutate();
         }}
         selectedClientType={clientTypeId}
       />

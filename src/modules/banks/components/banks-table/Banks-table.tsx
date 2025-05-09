@@ -174,12 +174,12 @@ export const BanksTable = ({
           <p className="accountBankText">{text}</p>
         </div>
       ),
-      width: 110
+      width: 115
     },
     {
       title: "",
       key: "seeProject",
-      width: 64,
+      width: 100,
       dataIndex: "",
       render: (_, record) => (
         <Flex gap={"0.5rem"} justify="end">
