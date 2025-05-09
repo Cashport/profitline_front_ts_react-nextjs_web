@@ -17,3 +17,33 @@ export const useDocument = (subjectId?: string, documentId?: number) => {
     mutate
   };
 };
+
+export interface IDocumentEvent {
+  agentId: number | null;
+  color: string;
+  comment: string;
+  createdAt: string;
+  documentTypeSubjectId: number;
+  id: number;
+  name: string;
+  photo: string;
+  projectId: number;
+  statusId: string;
+  userId: number;
+  username: string;
+}
+
+export const useDrawerDocumentEvents = (subjectId: string, documentSubjectId: number) => {
+  const path = `/subject/${subjectId}/documents-tracking/${documentSubjectId}`;
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IDocumentEvent[]>>(
+    subjectId && documentSubjectId ? path : null,
+    fetcher
+  );
+
+  return {
+    events: data?.data,
+    isLoading,
+    error,
+    mutate
+  };
+};
