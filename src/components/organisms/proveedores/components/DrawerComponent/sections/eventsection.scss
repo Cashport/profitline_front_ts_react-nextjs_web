@@ -1,6 +1,9 @@
 @import "@styles/variables.scss";
 
 .event-section-drawerComponent {
+    overflow-y: auto;
+    scrollbar-width: thin;
+
     .event-header {
         display: flex;
         align-items: center;
@@ -82,7 +85,7 @@
             .timeAgoText {
                 font-size: 0.75rem;
                 font-weight: 400;
-                color: $gray;
+                color: $light-gray;
             }
 
             .username {

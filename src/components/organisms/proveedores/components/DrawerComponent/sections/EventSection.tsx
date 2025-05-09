@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Cloud } from "phosphor-react";
+import { CheckCircle, Cloud, Sparkle, XCircle } from "phosphor-react";
 import { Avatar, Steps, Button, Flex } from "antd";
 
 import { formatTimeAgo } from "@/utils/utils";
@@ -29,7 +29,11 @@ export const EventSection: React.FC<EventSectionProps> = ({
   const { showMessage } = useMessageApi();
 
   const getEventUser = (event: IDocumentEvent) => {
-    return event.username || "Unknown User";
+    return event.is_ia ? (
+      <p className="cashportIATextGradient">CashportIA</p>
+    ) : (
+      event.username || "Unknown User"
+    );
   };
 
   const handleCommentSubmit = async () => {
@@ -84,18 +88,35 @@ export const EventSection: React.FC<EventSectionProps> = ({
         {events?.map((event, index) => (
           <Step
             key={index}
+            className="event-step"
             status="finish"
             title={
-              <div className="event-content">
-                <Flex gap={8} align="center">
-                  <h4 className="username">{getEventUser(event)}</h4>
+              <Flex align="center" gap={8} justify="space-between">
+                <div className="event-content">
+                  <Flex gap={8} align="center">
+                    <h4 className="username">{getEventUser(event)}</h4>
 
-                  <p className="timeAgoText">Hace {formatTimeAgo(event.createdAt)}</p>
-                </Flex>
-                <p className="commentText">{event.comment}</p>
-              </div>
+                    <p className="timeAgoText">Hace {formatTimeAgo(event.createdAt)}</p>
+                  </Flex>
+                  <p className="commentText">{event.comment}</p>
+                </div>
+                {event.is_approved ? (
+                  <CheckCircle size={24} color="#016630" />
+                ) : (
+                  <XCircle size={24} color="#EC003F" />
+                )}
+              </Flex>
             }
-            icon={<Avatar src={event.photo} />}
+            icon={
+              event.is_ia ? (
+                <Avatar
+                  style={{ backgroundColor: "#f5efff" }}
+                  icon={<Sparkle size={14} weight="fill" color="#5B21B6" />}
+                />
+              ) : (
+                <Avatar src={event.photo} />
+              )
+            }
           />
         ))}
       </Steps>

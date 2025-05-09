@@ -31,6 +31,8 @@ export interface IDocumentEvent {
   statusId: string;
   userId: number;
   username: string;
+  is_ia: boolean;
+  is_approved: boolean;
 }
 
 export const useDrawerDocumentEvents = (subjectId: string, documentSubjectId: number) => {

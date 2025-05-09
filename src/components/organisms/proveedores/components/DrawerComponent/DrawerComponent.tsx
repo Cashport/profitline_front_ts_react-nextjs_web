@@ -95,7 +95,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       className="drawerComponentProviders"
       mask={false}
     >
-      <Flex gap={8} vertical>
+      <Flex gap={8} vertical className="drawerContainer">
         <DescriptionSection
           description={document.documentTypeDescription}
           uploadedBy={document.createdBy}
