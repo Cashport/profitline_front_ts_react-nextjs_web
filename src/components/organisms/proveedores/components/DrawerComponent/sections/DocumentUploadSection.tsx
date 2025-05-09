@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Upload, Button, Typography, Flex, message } from "antd";
-import ColumnText from "../../ColumnText/ColumnText";
-import { FileArrowUp, Files } from "@phosphor-icons/react";
 import { FileArrowDown, Plus, Trash } from "phosphor-react";
-import "./documentsection.scss";
-import { IDocument } from "@/interfaces/Document";
+import { FileArrowUp, Files } from "@phosphor-icons/react";
+
 import { uploadDocument, deleteDocument } from "@/services/documents/documents";
+
+import ColumnText from "../../ColumnText/ColumnText";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+
+import { IDocument } from "@/interfaces/Document";
+
+import "./documentsection.scss";
 
 const { Link } = Typography;
 
@@ -26,6 +31,11 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   mutate,
   mutateSupplierInfo
 }) => {
+  const [docToDelete, setDocToDelete] = useState<{
+    openConfirmation: boolean;
+    id: number;
+    loadingRemove?: boolean;
+  }>();
   const handleUpload = async (file: File) => {
     try {
       await uploadDocument(subjectId, documentId, file);
@@ -39,12 +49,30 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
     return false;
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteIcon = (id: number) => {
+    setDocToDelete({
+      openConfirmation: true,
+      id
+    });
+  };
+
+  const handleDelete = async () => {
+    setDocToDelete((prev) => ({
+      ...prev,
+      loadingRemove: true,
+      openConfirmation: prev?.openConfirmation ?? false,
+      id: prev?.id ?? 0
+    }));
     try {
-      await deleteDocument(subjectId, documentId, id);
+      await deleteDocument(subjectId, documentId, docToDelete?.id || 0);
       message.success("Documento eliminado exitosamente");
       mutate();
       mutateSupplierInfo();
+      setDocToDelete({
+        openConfirmation: false,
+        id: 0,
+        loadingRemove: false
+      });
     } catch (error) {
       message.error("Error al eliminar el documento");
       console.error("Error deleting document:", error);
@@ -59,92 +87,112 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
   const showEmptyState = validDocuments.length === 0;
 
   return (
-    <ColumnText
-      title="Documento"
-      icon={<Files size={16} color="#7B7B7B" />}
-      content={
-        <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
-          <Flex vertical gap={12} className={"document-section"}>
-            {!showEmptyState ? (
-              validDocuments.map((doc) => (
-                <Flex
-                  key={doc.id}
-                  align="center"
-                  justify="center"
-                  style={{
-                    backgroundColor: "#F9F9F9",
-                    border: "1px solid #EAEAEA",
-                    borderRadius: 8,
-                    padding: "16px",
-                    textAlign: "center",
-                    width: "100%",
-                    position: "relative"
-                  }}
-                >
-                  <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
-                    <FileArrowUp size={16} />
-                    <Link href={doc.url} target="_blank">
-                      <p style={{ fontSize: 16, fontWeight: 400 }}>{doc.name}</p>
-                    </Link>
+    <>
+      <ColumnText
+        title="Documento"
+        icon={<Files size={16} color="#7B7B7B" />}
+        content={
+          <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
+            <Flex vertical gap={12} className={"document-section"}>
+              {!showEmptyState ? (
+                validDocuments.map((doc) => (
+                  <Flex
+                    key={doc.id}
+                    align="center"
+                    justify="center"
+                    style={{
+                      backgroundColor: "#F9F9F9",
+                      border: "1px solid #EAEAEA",
+                      borderRadius: 8,
+                      padding: "16px",
+                      textAlign: "center",
+                      width: "100%",
+                      position: "relative"
+                    }}
+                  >
+                    <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
+                      <FileArrowUp size={16} />
+                      <Link href={doc.url} target="_blank">
+                        <p style={{ fontSize: 16, fontWeight: 400 }}>{doc.name}</p>
+                      </Link>
+                    </Flex>
+                    <Button
+                      type="text"
+                      icon={<Trash size={16} />}
+                      onClick={() => handleDeleteIcon(doc.id)}
+                      style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
+                    />
                   </Flex>
-                  <Button
-                    type="text"
-                    icon={<Trash size={16} />}
-                    onClick={() => handleDelete(doc.id)}
-                    style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
-                  />
-                </Flex>
-              ))
-            ) : (
-              <Upload beforeUpload={handleUpload} showUploadList={false} style={{ width: "100%" }}>
-                <Flex
-                  align="center"
-                  justify="center"
-                  style={{
-                    backgroundColor: "#F9F9F9",
-                    border: "1px solid #EAEAEA",
-                    borderRadius: 8,
-                    padding: "16px",
-                    textAlign: "center",
-                    width: "100%",
-                    cursor: "pointer"
-                  }}
+                ))
+              ) : (
+                <Upload
+                  beforeUpload={handleUpload}
+                  showUploadList={false}
+                  style={{ width: "100%" }}
                 >
-                  <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
-                    <FileArrowUp size={16} />
-                    <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
-                    <p style={{ fontSize: 10, fontWeight: 300 }}>
-                      PDF, Word, PNG. (Tamaño max 30MB)
-                    </p>
+                  <Flex
+                    align="center"
+                    justify="center"
+                    style={{
+                      backgroundColor: "#F9F9F9",
+                      border: "1px solid #EAEAEA",
+                      borderRadius: 8,
+                      padding: "16px",
+                      textAlign: "center",
+                      width: "100%",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Flex vertical align="center" gap={4} style={{ width: "100%" }}>
+                      <FileArrowUp size={16} />
+                      <p style={{ fontSize: 16, fontWeight: 400 }}>Seleccionar archivo</p>
+                      <p style={{ fontSize: 10, fontWeight: 300 }}>
+                        PDF, Word, PNG. (Tamaño max 30MB)
+                      </p>
+                    </Flex>
                   </Flex>
+                </Upload>
+              )}
+            </Flex>
+            <Upload
+              beforeUpload={handleUpload}
+              showUploadList={false}
+              style={{ justifySelf: "flex-end" }}
+            >
+              <Button
+                type="text"
+                icon={<Plus size={16} />}
+                style={{ padding: 0, justifyContent: "flex-end" }}
+              >
+                Agregar documento
+              </Button>
+            </Upload>
+            {templateUrl && (
+              <Link href={templateUrl} target="_blank" style={{ textDecoration: "underline" }}>
+                <Flex align="center" gap={4}>
+                  <FileArrowDown size={16} color="#1890FF" />
+                  Descargar plantilla
                 </Flex>
-              </Upload>
+              </Link>
             )}
           </Flex>
-          <Upload
-            beforeUpload={handleUpload}
-            showUploadList={false}
-            style={{ justifySelf: "flex-end" }}
-          >
-            <Button
-              type="text"
-              icon={<Plus size={16} />}
-              style={{ padding: 0, justifyContent: "flex-end" }}
-            >
-              Agregar documento
-            </Button>
-          </Upload>
-          {templateUrl && (
-            <Link href={templateUrl} target="_blank" style={{ textDecoration: "underline" }}>
-              <Flex align="center" gap={4}>
-                <FileArrowDown size={16} color="#1890FF" />
-                Descargar plantilla
-              </Flex>
-            </Link>
-          )}
-        </Flex>
-      }
-    />
+        }
+      />
+      <ModalConfirmAction
+        isOpen={docToDelete?.openConfirmation || false}
+        onClose={() => {
+          setDocToDelete({
+            openConfirmation: false,
+            id: 0,
+            loadingRemove: false
+          });
+        }}
+        onOk={handleDelete}
+        title="¿Está seguro de eliminar el documento?"
+        okText="Eliminar"
+        okLoading={docToDelete?.loadingRemove || false}
+      />
+    </>
   );
 };
 
