@@ -110,11 +110,13 @@ export const EventSection: React.FC<EventSectionProps> = ({
                   </Flex>
                   <p className="commentText">{event.comment}</p>
                 </div>
-                {event.is_approved ? (
-                  <CheckCircle size={24} color="#016630" />
-                ) : (
-                  <XCircle size={24} color="#EC003F" />
-                )}
+                {event.is_approved !== null ? (
+                  event.is_approved ? (
+                    <CheckCircle size={24} color="#016630" />
+                  ) : (
+                    <XCircle size={24} color="#EC003F" />
+                  )
+                ) : null}
               </Flex>
             }
             icon={
