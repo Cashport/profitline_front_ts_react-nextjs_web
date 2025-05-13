@@ -1,4 +1,9 @@
+@import "@styles/variables.scss";
+
 .event-section-drawerComponent {
+    overflow-y: auto;
+    scrollbar-width: thin;
+
     .event-header {
         display: flex;
         align-items: center;
@@ -72,23 +77,20 @@
             display: flex;
             flex-direction: column;
 
-            .ant-typography {
-                line-height: 1.4;
-                margin-bottom: 0;
+            .commentText {
+                font-size: 0.875rem;
+                font-weight: 300;
+            }
 
-                &:first-child {
-                    font-weight: bold;
-                }
+            .timeAgoText {
+                font-size: 0.75rem;
+                font-weight: 400;
+                color: $light-gray;
+            }
 
-                &:nth-child(2) {
-                    margin-top: 4px;
-                }
-
-                &:last-child {
-                    color: #8c8c8c;
-                    font-size: 12px;
-                    margin-top: 4px;
-                }
+            .username {
+                font-size: 0.875rem;
+                font-weight: 500;
             }
         }
 

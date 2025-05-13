@@ -5,7 +5,7 @@ import { DotOutline } from "@phosphor-icons/react";
 import { CaretDoubleRight, Files, ListChecks } from "phosphor-react";
 
 import { getStatusDetails } from "../../utils/documentStatusMap";
-import { useDocument } from "@/hooks/useDocument";
+import { useDocument, useDrawerDocumentEvents } from "@/hooks/useDocument";
 
 import DescriptionSection from "./sections/DescriptionSection";
 import ApproversSection from "./sections/ApproversSection";
@@ -35,12 +35,11 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   documentId,
   visible,
   onClose,
-  control,
-  errors,
   type,
   mutateSupplierInfo
 }) => {
   const { document, isLoading, mutate } = useDocument(subjectId, documentId);
+  const { events, mutate: mutateComments } = useDrawerDocumentEvents(subjectId, documentId);
   useEffect(() => {
     if (visible) {
       mutate();
@@ -96,7 +95,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
       className="drawerComponentProviders"
       mask={false}
     >
-      <Flex gap={8} vertical>
+      <Flex gap={8} vertical className="drawerContainer">
         <DescriptionSection
           description={document.documentTypeDescription}
           uploadedBy={document.createdBy}
@@ -148,7 +147,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           expirationDate={document.expiryDate}
         />
         <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
-        <EventSection />
+        <EventSection events={events} incidentId={documentId} mutateComments={mutateComments} />
       </Flex>
     </Drawer>
   );

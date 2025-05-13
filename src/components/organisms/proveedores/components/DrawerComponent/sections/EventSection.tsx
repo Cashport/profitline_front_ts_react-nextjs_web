@@ -1,53 +1,40 @@
 import React, { useState } from "react";
-import { Cloud, Hourglass } from "phosphor-react";
-import { Typography, Avatar, Steps, Button } from "antd";
+import { CheckCircle, Cloud, Sparkle, XCircle } from "phosphor-react";
+import { Avatar, Steps, Button, Flex } from "antd";
 
+import { formatTimeAgo } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
+import { IDocumentEvent } from "@/hooks/useDocument";
+
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
+import { createDocumentComment } from "@/services/documents/documents";
 
 import "./eventsection.scss";
 
-const { Text } = Typography;
 const { Step } = Steps;
 
-interface Event {
-  approved_by: string | null;
-  rejected_by: string | null;
-  created_at: string;
-  created_by: string;
-  comments: string;
-  files: any[];
-}
-
 interface EventSectionProps {
-  events?: Event[];
-  incidentId?: string;
+  events?: IDocumentEvent[];
+  incidentId?: number;
   currentUserAvatar?: string;
-  mutate?: () => void;
+  mutateComments: () => void;
 }
 export const EventSection: React.FC<EventSectionProps> = ({
   events,
   currentUserAvatar,
   incidentId,
-  mutate
+  mutateComments
 }) => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showMessage } = useMessageApi();
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
-  const getEventUser = (event: Event) => {
-    return event.created_by || event.approved_by || event.rejected_by || "Unknown User";
-  };
-
-  const getEventAction = (event: Event) => {
-    if (event.approved_by) return "Aprobado";
-    if (event.rejected_by) return "Rechazado";
-    return "Acción desconocida";
+  const getEventUser = (event: IDocumentEvent) => {
+    return event.is_ia ? (
+      <p className="cashportIATextGradient">CashportIA</p>
+    ) : (
+      event.username || "Unknown User"
+    );
   };
 
   const handleCommentSubmit = async () => {
@@ -57,11 +44,20 @@ export const EventSection: React.FC<EventSectionProps> = ({
     }
 
     setIsSubmitting(true);
+
+    if (!incidentId)
+      return (
+        showMessage(
+          "error",
+          "No se ha podido agregar el comentario, no está asociado a un incidente"
+        ),
+        setIsSubmitting(false)
+      );
     try {
-      console.log(incidentId || "1", { comments: comment });
+      await createDocumentComment(comment, incidentId);
       showMessage("success", "Comentario agregado exitosamente");
       setComment("");
-      mutate && mutate();
+      mutateComments && mutateComments();
     } catch (error) {
       showMessage("error", "Error al agregar el comentario");
       console.error("Error adding comment:", error);
@@ -76,22 +72,6 @@ export const EventSection: React.FC<EventSectionProps> = ({
         <IconLabel icon={<Cloud size={14} />} text={`Eventos`} />
       </div>
       <Steps direction="vertical" size="small" className="event-steps">
-        {events?.map((event, index) => (
-          <Step
-            key={index}
-            status="finish"
-            title={
-              <div className="event-content">
-                <Text strong>{getEventUser(event)}</Text>
-                <Text>{event.comments || getEventAction(event)}</Text>
-                <Text type="secondary">{formatDate(event.created_at)}</Text>
-              </div>
-            }
-            icon={
-              <div className="approval-avatar">{getEventUser(event).charAt(0).toUpperCase()}</div>
-            }
-          />
-        ))}
         <Step
           status="wait"
           icon={<Avatar src={currentUserAvatar} />}
@@ -115,6 +95,42 @@ export const EventSection: React.FC<EventSectionProps> = ({
             </div>
           }
         />
+        {events?.map((event, index) => (
+          <Step
+            key={index}
+            className="event-step"
+            status="finish"
+            title={
+              <Flex align="center" gap={8} justify="space-between">
+                <div className="event-content">
+                  <Flex gap={8} align="center">
+                    <h4 className="username">{getEventUser(event)}</h4>
+
+                    <p className="timeAgoText">Hace {formatTimeAgo(event.createdAt)}</p>
+                  </Flex>
+                  <p className="commentText">{event.comment}</p>
+                </div>
+                {event.is_approved !== null ? (
+                  event.is_approved ? (
+                    <CheckCircle size={24} color="#016630" />
+                  ) : (
+                    <XCircle size={24} color="#EC003F" />
+                  )
+                ) : null}
+              </Flex>
+            }
+            icon={
+              event.is_ia ? (
+                <Avatar
+                  style={{ backgroundColor: "#f5efff" }}
+                  icon={<Sparkle size={14} weight="fill" color="#5B21B6" />}
+                />
+              ) : (
+                <Avatar src={event.photo} />
+              )
+            }
+          />
+        ))}
       </Steps>
     </div>
   );
