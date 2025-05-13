@@ -7,6 +7,7 @@ import { useMessageApi } from "@/context/MessageContext";
 import { IDocumentEvent } from "@/hooks/useDocument";
 
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
+import { createDocumentComment } from "@/services/documents/documents";
 
 import "./eventsection.scss";
 
@@ -14,15 +15,15 @@ const { Step } = Steps;
 
 interface EventSectionProps {
   events?: IDocumentEvent[];
-  incidentId?: string;
+  incidentId?: number;
   currentUserAvatar?: string;
-  mutate?: () => void;
+  mutateComments: () => void;
 }
 export const EventSection: React.FC<EventSectionProps> = ({
   events,
   currentUserAvatar,
   incidentId,
-  mutate
+  mutateComments
 }) => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,11 +44,20 @@ export const EventSection: React.FC<EventSectionProps> = ({
     }
 
     setIsSubmitting(true);
+
+    if (!incidentId)
+      return (
+        showMessage(
+          "error",
+          "No se ha podido agregar el comentario, no está asociado a un incidente"
+        ),
+        setIsSubmitting(false)
+      );
     try {
-      console.log(incidentId || "1", { comments: comment });
+      await createDocumentComment(comment, incidentId);
       showMessage("success", "Comentario agregado exitosamente");
       setComment("");
-      mutate && mutate();
+      mutateComments && mutateComments();
     } catch (error) {
       showMessage("error", "Error al agregar el comentario");
       console.error("Error adding comment:", error);
