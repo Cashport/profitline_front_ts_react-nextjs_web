@@ -19,6 +19,7 @@ import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
 import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { ModalAddRequirement } from "../../projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import {
   Document,
@@ -218,6 +219,19 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     onChange: onSelectChange
   };
 
+  const handleDeleteDocument = async () => {
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        console.info("ids", ids);
+
+        // mutate();
+      } catch (error) {
+        console.error("Error deleting documents:", error);
+      }
+    }
+  };
+
   return (
     <div>
       <Container style={{ gap: 24 }}>
@@ -280,6 +294,16 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           mutate();
         }}
         selectedClientType={clientTypeId}
+      />
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 4}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={false}
       />
     </div>
   );
