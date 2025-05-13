@@ -104,9 +104,14 @@ const ThirdPartiesView: React.FC = () => {
             <Tag
               icon={<Circle color={status.color} weight="fill" size={6} />}
               style={{
-                border: `${status.color} 1px solid`,
+                border: "none",
+                whiteSpace: "nowrap",
+                backgroundColor: status.backgroundColor || " #F7F7F7",
+                color: status.color,
                 fontSize: 14,
-                fontWeight: 400
+                fontWeight: 400,
+                padding: "4px 12px",
+                paddingTop: "5px"
               }}
               content={status.name}
             />
