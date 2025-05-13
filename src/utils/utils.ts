@@ -419,6 +419,7 @@ export function formatTimeAgo(utcDateString: string): string {
   const months = Math.floor(days / 30);
   const years = Math.floor(days / 365);
 
+  if (minutes === 1) return "1 minuto";
   if (minutes < 60) return `${minutes} minutos`;
   if (hours < 24) return `${hours} horas`;
   if (days === 1) return `1 día`;
