@@ -39,7 +39,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   mutateSupplierInfo
 }) => {
   const { document, isLoading, mutate } = useDocument(subjectId, documentId);
-  const { events } = useDrawerDocumentEvents(subjectId, documentId);
+  const { events, mutate: mutateComments } = useDrawerDocumentEvents(subjectId, documentId);
   useEffect(() => {
     if (visible) {
       mutate();
@@ -147,7 +147,7 @@ const DrawerComponent: React.FC<DrawerProps> = ({
           expirationDate={document.expiryDate}
         />
         <hr style={{ borderTop: "1px solid #f7f7f7", margin: " 8px 0" }} />
-        <EventSection events={events} />
+        <EventSection events={events} incidentId={documentId} mutateComments={mutateComments} />
       </Flex>
     </Drawer>
   );
