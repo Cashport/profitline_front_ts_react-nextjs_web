@@ -7,6 +7,9 @@ import { CaretLeft } from "phosphor-react";
 import { FieldError } from "react-hook-form";
 
 import { fetcher } from "@/utils/api/api";
+import { deleteDocumentById } from "@/services/providers/providers";
+import { extractSingleParam } from "@/utils/utils";
+import { useMessageApi } from "@/context/MessageContext";
 
 import DrawerComponent from "../components/DrawerComponent/DrawerComponent";
 import { useParams, useRouter } from "next/navigation";
@@ -19,6 +22,7 @@ import { InputNumber } from "@/components/atoms/inputs/InputNumber/InputNumber";
 import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAuditRequirements";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { ModalAddRequirement } from "../../projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import {
   Document,
@@ -45,6 +49,8 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     disabled: false
   });
 
+  const { showMessage } = useMessageApi();
+
   const params = useParams();
   const router = useRouter();
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -56,6 +62,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     selected: 0
   });
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const handleOpenDrawer = () => setDrawerVisible(true);
   const handleCloseDrawer = () => setDrawerVisible(false);
@@ -69,7 +76,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     });
   const handleGoBack = () => router.back();
 
-  const supplierId = params?.id;
+  const supplierId = extractSingleParam(params?.id);
 
   const { data, error, mutate } = useSWR<ApiResponse>(
     supplierId ? `/subject/${supplierId}` : null,
@@ -218,6 +225,23 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
     onChange: onSelectChange
   };
 
+  const handleDeleteDocument = async () => {
+    setLoadingRequest(true);
+    if (selectedDocumentRows?.length) {
+      const ids = selectedDocumentRows.map((row) => row.id);
+      try {
+        await Promise.all(ids.map((id) => deleteDocumentById(supplierId ?? "0", id)));
+        showMessage("success", "Documentos eliminados correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedDocumentRows([]);
+        mutate();
+      } catch (error) {
+        showMessage("error", "Error al eliminar documentos");
+      }
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <div>
       <Container style={{ gap: 24 }}>
@@ -243,7 +267,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
       <DrawerComponent
         visible={drawerVisible}
         onClose={handleCloseDrawer}
-        subjectId={supplierId.toString()}
+        subjectId={supplierId?.toString() ?? ""}
         documentId={selectedDocument?.id ?? 0}
         control={control}
         errors={errors}
@@ -280,6 +304,16 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
           mutate();
         }}
         selectedClientType={clientTypeId}
+      />
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 4}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteDocument}
+        title={`¿Está seguro de eliminar ${selectedDocumentRows?.length ?? 0} documento${(selectedDocumentRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
     </div>
   );

@@ -62,20 +62,22 @@ export const ModalGenerateAction: React.FC<ModalGenerateActionProps> = ({
             if (handleOpenModal) handleOpenModal(2);
           }}
         />
-        <ButtonGenerateAction icon={<User size={20} />} title="Crear cliente" onClick={() => {}} />
+        <ButtonGenerateAction icon={<User size={20} />} disabled={true} title="Crear cliente" />
         <ButtonGenerateAction
           icon={<Trash size={20} />}
           title="Eliminar"
           onClick={() => {
-            console.log("Aplicar pagos clicked");
+            if (!selectedDocumentRows || selectedDocumentRows.length === 0) {
+              return showMessage("error", "No hay documentos seleccionados para eliminar.");
+            }
+
+            if (handleOpenModal) handleOpenModal(4);
           }}
         />
         <ButtonGenerateAction
           icon={<Megaphone size={20} />}
           title="Enviar recordatorio"
-          onClick={() => {
-            console.log("Cambiar de estado clicked");
-          }}
+          disabled={true}
         />
         <ButtonGenerateAction
           icon={<Envelope size={20} />}

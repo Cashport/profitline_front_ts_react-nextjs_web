@@ -51,3 +51,15 @@ export const createDocumentBySubjectId = async (subjectId: any, documentTypeId: 
     throw error;
   }
 };
+
+export const deleteDocumentById = async (subjectId: string, documentTypeId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `/subject/${subjectId}/documents-type/${documentTypeId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al eliminar documento por ID:", error);
+    throw error;
+  }
+};
