@@ -20,15 +20,7 @@ import ModalAuditRequirements from "../components/ModalAuditRequirements/ModalAu
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { ModalAddRequirement } from "../../projects/RequirementsView/components/ModalAddRequirement/ModalAddRequirement";
 
-import {
-  Document,
-  FormField,
-  Props,
-  ApiResponse,
-  IOption,
-  OPTIONS_TYPE_CLIENTS,
-  UserType
-} from "./types";
+import { Document, FormField, Props, ApiResponse, IOption, UserType } from "./types";
 
 import "./form.scss";
 
@@ -185,9 +177,7 @@ const SupplierForm: React.FC<Props> = ({ userType, clientTypeId }) => {
         return (
           <Flex justify="space-between" align="center">
             <Button type="text" onClick={handleGoBack} icon={<CaretLeft size={"1.3rem"} />}>
-              <Text
-                strong
-              >{`Crear ${OPTIONS_TYPE_CLIENTS.find((option) => option.value === clientTypeId)?.label}`}</Text>
+              <Text strong>{`Ver Proveedores`}</Text>
             </Button>
             <GenerateActionButton onClick={() => handleOpenModal(1)} />
           </Flex>
