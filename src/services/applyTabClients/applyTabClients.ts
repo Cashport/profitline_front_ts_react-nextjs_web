@@ -210,3 +210,21 @@ export const updateInvoiceOrPaymentAmount = async (
     throw error;
   }
 };
+
+export const applyWithCashportAI = async (projectId: number, clientId: string, files: File[]) => {
+  const formData = new FormData();
+  formData.append("client", clientId);
+  formData.append("project", String(projectId));
+  files.forEach((file) => {
+    formData.append("attachment", file);
+  });
+
+  try {
+    const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("error applyWithCashportAI", error);
+    throw error;
+  }
+};

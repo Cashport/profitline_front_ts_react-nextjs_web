@@ -1,0 +1,144 @@
+@import "@/styles/variables.scss";
+
+.modalApplyAI {
+    max-height: 90%;
+    .ant-modal-content {
+        padding: 1.5rem !important;
+
+        .ant-modal-close {
+            margin: 0rem;
+        }
+    }
+
+    .ant-modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    &__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    &__description {
+        font-weight: 300;
+    }
+
+    &__dragger {
+        .ant-upload {
+            min-height: 170px;
+            background-color: transparent !important;
+        }
+
+        .ant-upload-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 28vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .draggerIcon {
+            color: $gray;
+        }
+
+        .draggerText {
+            color: $gray;
+            font-weight: 500;
+            font-size: 0.75rem;
+            &.-small {
+                font-size: 0.625rem;
+            }
+        }
+
+        .draggerFileCard {
+            background-color: $light-gray-logistics;
+            border-radius: 16px;
+            padding: 1rem;
+        }
+
+        .fileInfo,
+        .fileIcon {
+            color: $darker-gray;
+        }
+        .fileInfo {
+            p {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 530px;
+            }
+        }
+
+        .fileIcon {
+            border: none;
+            box-shadow: none;
+            background-color: transparent;
+            padding: 0;
+            aspect-ratio: 1;
+
+            &.-error {
+                color: $error;
+            }
+
+            &:hover {
+                background-color: $background !important;
+            }
+        }
+    }
+
+    &__table {
+        .iconRow {
+            color: $darker-gray;
+            aspect-ratio: 1;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+
+        .iaButton {
+            border-radius: 42px;
+            height: 42px;
+            background-color: $light-blue;
+            border-color: #f0e7ff !important;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            &:hover {
+                background-color: $light-blue !important;
+                border-color: #af90e0 !important;
+            }
+
+            .textNormal {
+                font-size: 0.875rem;
+                font-weight: 400;
+                color: #5b21b6;
+                line-height: 16px;
+                pointer-events: none;
+            }
+        }
+
+        .cancelButton {
+            background-color: transparent;
+            color: $darker-gray;
+            height: 42px;
+            border: none;
+            box-shadow: none;
+            font-size: 1rem;
+            font-weight: 500;
+
+            &:hover {
+                background-color: transparent !important;
+                color: $black !important;
+            }
+        }
+    }
+}

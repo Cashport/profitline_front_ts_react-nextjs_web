@@ -38,8 +38,7 @@ type EvidenceModalProps = {
   commentary?: string;
   setCommentary: React.Dispatch<React.SetStateAction<string | undefined>>;
   isOpen: boolean;
-  setShowEvidenceModal: React.Dispatch<React.SetStateAction<boolean>>;
-  handleCancel?: () => void;
+  handleCancel: () => void;
   customTexts?: customTexts;
   multipleFiles?: boolean;
   noComment?: boolean;
@@ -51,7 +50,6 @@ const ModalAttachEvidence = ({
   setSelectedEvidence,
   handleAttachEvidence,
   isOpen,
-  setShowEvidenceModal,
   handleCancel,
   customTexts,
   noComment = false,
@@ -112,7 +110,7 @@ const ModalAttachEvidence = ({
     <Modal
       centered
       className="ModalAttachEvidence"
-      onCancel={() => setShowEvidenceModal(false)}
+      onCancel={handleCancel}
       width={"55%"}
       open={isOpen}
       footer={null}
@@ -120,7 +118,7 @@ const ModalAttachEvidence = ({
       destroyOnClose={true}
     >
       <div className={styles.content}>
-        <button className={styles.content__header} onClick={() => setShowEvidenceModal(false)}>
+        <button className={styles.content__header} onClick={handleCancel}>
           <CaretLeft size={"1.25rem"} />
           <h4>{customTexts?.title ? customTexts?.title : "Evidencia"}</h4>
         </button>
@@ -188,7 +186,7 @@ const ModalAttachEvidence = ({
 
         <FooterButtons
           handleOk={handleAttachEvidence}
-          onClose={() => handleCancel && handleCancel()}
+          onClose={handleCancel}
           titleConfirm={
             customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
           }

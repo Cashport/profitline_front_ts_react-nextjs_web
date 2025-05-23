@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { DotsThree, Plus } from "phosphor-react";
+import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
 import { useApplicationTable } from "@/hooks/useApplicationTable";
@@ -29,6 +29,7 @@ import ModalCreateAdjustment from "./Modals/ModalCreateAdjustment/ModalCreateAdj
 import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -82,7 +83,7 @@ const ApplyTab: React.FC = () => {
     discounts: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
-  const [openEvidenceModal, setOpenEvidenceModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
   const [commentary, setCommentary] = useState<string>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
 
@@ -191,7 +192,7 @@ const ApplyTab: React.FC = () => {
       await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
       showMessage("success", "Se ha guardado la aplicación correctamente");
       mutate();
-      setOpenEvidenceModal(false);
+      setIsModalOpen({ selected: 0 });
     } catch (error) {
       showMessage("error", "Ha ocurrido un error al guardar la aplicación");
     }
@@ -199,7 +200,7 @@ const ApplyTab: React.FC = () => {
   };
 
   const handleSave = () => {
-    setOpenEvidenceModal(true);
+    setIsModalOpen({ selected: 1 });
   };
 
   const filteredData = useMemo(() => {
@@ -284,7 +285,7 @@ const ApplyTab: React.FC = () => {
       />
       <div className="applyContainerTab">
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="search"
               placeholder="Buscar"
@@ -299,6 +300,20 @@ const ApplyTab: React.FC = () => {
               onClick={handlePrintSelectedRows}
             >
               Generar acción
+            </Button>
+            <Button className="iaButton" onClick={() => setIsModalOpen({ selected: 2 })}>
+              <Sparkle size={14} color="#5b21b6" weight="fill" />
+              <span className="textNormal">
+                Aplicar con{" "}
+                <span
+                  className="cashportIATextGradient"
+                  style={{
+                    fontWeight: 500
+                  }}
+                >
+                  CashportAI
+                </span>
+              </span>
             </Button>
           </Flex>
           <Button type="primary" className="save-btn" onClick={handleSave}>
@@ -477,10 +492,13 @@ const ApplyTab: React.FC = () => {
         handleAttachEvidence={saveApp}
         commentary={commentary}
         setCommentary={setCommentary}
-        isOpen={openEvidenceModal}
-        setShowEvidenceModal={setOpenEvidenceModal}
+        isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
-        handleCancel={() => setOpenEvidenceModal(false)}
+        handleCancel={() => setIsModalOpen({ selected: 0 })}
+      />
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === 2}
+        onClose={() => setIsModalOpen({ selected: 0 })}
       />
     </>
   );
