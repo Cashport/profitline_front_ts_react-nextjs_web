@@ -1,8 +1,13 @@
 "use client";
 import { useState } from "react";
+import { useParams } from "next/navigation";
 import { Button, Flex, message, Modal, Spin, UploadProps } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import { File, Sparkle, Trash, Upload, X } from "phosphor-react";
+
+import { useAppStore } from "@/lib/store/store";
+import { extractSingleParam } from "@/utils/utils";
+import { applyWithCashportAI } from "@/services/applyTabClients/applyTabClients";
 
 import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
@@ -24,16 +29,27 @@ interface Props {
 }
 
 const ModalApplyAI = ({ isOpen, onClose }: Props) => {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const params = useParams();
+  const clientId = extractSingleParam(params.clientId) || "";
+
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const closeModal = () => {
     onClose();
     setUploadedFiles([]);
   };
 
-  const handleAnalyzeFiles = () => {
-    console.log("handleAnalyzeFiles");
-    console.log(uploadedFiles);
+  const handleAnalyzeFiles = async () => {
+    setLoading(true);
+    try {
+      await applyWithCashportAI(projectId, clientId, uploadedFiles);
+      message.success("Archivos analizados con CashportAI");
+    } catch (error) {
+      message.error("Error al aplicar con CashportAI");
+    }
+    setLoading(false);
   };
 
   const props: UploadProps = {
@@ -151,6 +167,7 @@ const ModalApplyAI = ({ isOpen, onClose }: Props) => {
           className="iaButton"
           disabled={uploadedFiles.length === 0}
           onClick={handleAnalyzeFiles}
+          loading={loading}
         >
           <Sparkle size={14} color="#5b21b6" weight="fill" />
           <span className="textNormal">
