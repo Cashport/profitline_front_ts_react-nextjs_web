@@ -26,9 +26,10 @@ interface Props {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
+  mutate: () => void;
 }
 
-const ModalApplyAI = ({ isOpen, onClose }: Props) => {
+const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
@@ -46,6 +47,8 @@ const ModalApplyAI = ({ isOpen, onClose }: Props) => {
     try {
       await applyWithCashportAI(projectId, clientId, uploadedFiles);
       message.success("Archivos analizados con CashportAI");
+      mutate();
+      closeModal();
     } catch (error) {
       message.error("Error al aplicar con CashportAI");
     }
