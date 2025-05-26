@@ -499,6 +499,7 @@ const ApplyTab: React.FC = () => {
       <ModalUploadRequirements
         isOpen={isModalOpen.selected === 2}
         onClose={() => setIsModalOpen({ selected: 0 })}
+        mutate={mutate}
       />
     </>
   );
