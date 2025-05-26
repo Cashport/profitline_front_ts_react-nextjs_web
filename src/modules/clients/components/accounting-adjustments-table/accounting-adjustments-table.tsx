@@ -123,6 +123,16 @@ const AccountingAdjustmentsTable = ({
       showSorterTooltip: false
     },
     {
+      title: "Tipo de ajuste",
+      dataIndex: "motive_name",
+      key: "motive_name"
+    },
+    {
+      title: "Detalle",
+      dataIndex: "comments",
+      key: "comments"
+    },
+    {
       title: "Monto Inicial",
       key: "initial_value",
       dataIndex: "initial_value",
