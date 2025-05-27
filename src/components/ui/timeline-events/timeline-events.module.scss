@@ -8,7 +8,7 @@
     overflow-y: scroll;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    max-height: 42vh;
+    overflow: auto;
 
     &::-webkit-scrollbar {
         display: none;
@@ -116,11 +116,5 @@
                 }
             }
         }
-    }
-}
-
-@media (min-height: 800px) {
-    .content {
-        max-height: 46vh;
     }
 }

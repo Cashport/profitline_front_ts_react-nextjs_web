@@ -3,6 +3,10 @@
 .modalDetailPaymentEvents {
     height: auto;
     border-top: 1px solid #ddd;
+    overflow-y: scroll;
+    overflow: auto;
+    height: 100%;
+    scrollbar-width: thin;
 
     &__title {
         font-size: 1rem;
