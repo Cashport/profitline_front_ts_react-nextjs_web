@@ -3,6 +3,7 @@
 .event-section-drawerComponent {
     overflow-y: auto;
     scrollbar-width: thin;
+    min-height: 160px;
 
     .event-header {
         display: flex;

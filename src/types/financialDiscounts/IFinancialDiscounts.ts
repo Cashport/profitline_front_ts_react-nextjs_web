@@ -31,6 +31,7 @@ export interface FinancialDiscount {
   motive_name: string | null;
   financial_status_id: number;
   legalized?: boolean;
+  cp_id: string;
 }
 
 export interface StatusFinancialDiscounts {
@@ -41,7 +42,4 @@ export interface StatusFinancialDiscounts {
   total: number;
   legalized: boolean;
   count: number;
-}
-export interface FinancialDiscountsResponse {
-  data: StatusFinancialDiscounts[];
 }

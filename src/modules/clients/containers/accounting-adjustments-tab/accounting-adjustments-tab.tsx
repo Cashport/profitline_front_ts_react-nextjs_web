@@ -155,7 +155,12 @@ const AccountingAdjustmentsTab = () => {
             items={modifiedData?.map((financialState: StatusFinancialDiscounts) => ({
               key: financialState.status_id,
               label: (
-                <LabelCollapse status={financialState.status_name} color={financialState.color} />
+                <LabelCollapse
+                  status={financialState.status_name}
+                  color={financialState.color}
+                  total={financialState.total}
+                  quantity={financialState.count}
+                />
               ),
               children: (
                 <>

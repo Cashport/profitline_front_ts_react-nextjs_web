@@ -113,14 +113,17 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
                 <p className={styles.bank}>{paymentData?.bank_description}</p>
               </Flex>
             </div>
-
-            <ModalDetailPaymentEvents
-              paymentEvents={paymentData?.events}
-              handleOpenPaymentDetail={handleOpenPaymentDetail}
-            />
           </>
         )}
       </div>
+
+      {!loading && (
+        <ModalDetailPaymentEvents
+          paymentEvents={paymentData?.events}
+          handleOpenPaymentDetail={handleOpenPaymentDetail}
+        />
+      )}
+
       <div className={styles.footer}>
         <h4 className={styles.resume}>Resumen</h4>
         <div className={styles.bodyContent}>

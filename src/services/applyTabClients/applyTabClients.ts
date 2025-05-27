@@ -44,6 +44,22 @@ export const removeItemsFromTable = async (row_id: number) => {
   }
 };
 
+export const removeMultipleRows = async (rows_ids: number[]) => {
+  const body = {
+    application_ids: rows_ids
+  };
+  try {
+    const response: any = await API.delete(`${config.API_HOST}/paymentApplication/applications`, {
+      data: body
+    });
+
+    return response;
+  } catch (error) {
+    console.error("error removeMultipleRows", error);
+    throw error;
+  }
+};
+
 export interface ICreateGlobalAdjustment {
   amount: number;
   motive: number;
@@ -207,6 +223,24 @@ export const updateInvoiceOrPaymentAmount = async (
     return response.data;
   } catch (error) {
     console.error("error updateInvoiceOrPaymentAmount", error);
+    throw error;
+  }
+};
+
+export const applyWithCashportAI = async (projectId: number, clientId: string, files: File[]) => {
+  const formData = new FormData();
+  formData.append("client", clientId);
+  formData.append("project", String(projectId));
+  files.forEach((file) => {
+    formData.append("attachment", file);
+  });
+
+  try {
+    const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("error applyWithCashportAI", error);
     throw error;
   }
 };
