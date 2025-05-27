@@ -12,6 +12,7 @@ import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
   removeItemsFromTable,
+  removeMultipleRows,
   saveApplication
 } from "@/services/applyTabClients/applyTabClients";
 import { useMessageApi } from "@/context/MessageContext";
@@ -30,6 +31,8 @@ import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
+import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -64,6 +67,7 @@ const ApplyTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
   //TODO this is the context that is not being used
   // const { selectedPayments } = useSelectedPayments();
 
@@ -173,19 +177,6 @@ const ApplyTab: React.FC = () => {
     }
   });
 
-  const handlePrintSelectedRows = () => {
-    // I leave this here for future use
-    for (const key in selectedRowKeys) {
-      if (selectedRowKeys.hasOwnProperty(key)) {
-        const typedKey = key as keyof ISelectedRowKeys; // Type assertion to avoid TS error
-        const selectedRows = selectedRowKeys[typedKey];
-        if (selectedRows.length > 0) {
-          console.info(`Selected ${key}:`, selectedRows);
-        }
-      }
-    }
-  };
-
   const saveApp = async () => {
     setLoadingSave(true);
     try {
@@ -275,6 +266,35 @@ const ApplyTab: React.FC = () => {
     handleSelectChange("invoices", [openedRow.id]);
   };
 
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
+  const handleDeleteMultipleRows = async () => {
+    setLoadingRequest(true);
+    if (selectedRows && selectedRows.length > 0) {
+      try {
+        await removeMultipleRows(selectedRows.map((row) => row.id));
+        showMessage("success", "Se han eliminado las filas correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedRowKeys({
+          invoices: [],
+          payments: [],
+          discounts: []
+        });
+        setSelectedRows([]);
+        mutate();
+      } catch (error) {
+        showMessage(
+          "error",
+          `Error al eliminar ${selectedRows.length} fila${selectedRows.length > 1 ? "s" : ""} `
+        );
+      }
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <>
       <ModalResultAppy
@@ -297,7 +317,7 @@ const ApplyTab: React.FC = () => {
               className="button__actions"
               size="large"
               icon={<DotsThree size={"1.5rem"} />}
-              onClick={handlePrintSelectedRows}
+              onClick={() => handleOpenModal(3)}
             >
               Generar acción
             </Button>
@@ -500,6 +520,24 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 2}
         onClose={() => setIsModalOpen({ selected: 0 })}
         mutate={mutate}
+      />
+
+      <ModalGenerateActionApplyTab
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        handleOpenModal={handleOpenModal}
+        selectedRows={selectedRows?.map((row) => row.id)}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 4}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteMultipleRows}
+        title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
     </>
   );
