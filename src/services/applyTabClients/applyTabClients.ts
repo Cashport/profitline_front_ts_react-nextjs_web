@@ -44,6 +44,22 @@ export const removeItemsFromTable = async (row_id: number) => {
   }
 };
 
+export const removeMultipleRows = async (rows_ids: number[]) => {
+  const body = {
+    application_ids: rows_ids
+  };
+  try {
+    const response: any = await API.delete(`${config.API_HOST}/paymentApplication/applications`, {
+      data: body
+    });
+
+    return response;
+  } catch (error) {
+    console.error("error removeMultipleRows", error);
+    throw error;
+  }
+};
+
 export interface ICreateGlobalAdjustment {
   amount: number;
   motive: number;

@@ -10,9 +10,15 @@ interface Props {
   onClose: () => void;
   // eslint-disable-next-line no-unused-vars
   handleOpenModal: (modalNumber: number) => void;
+  selectedRows?: number[];
 }
 
-export const ModalGenerateActionApplyTab = ({ isOpen, onClose, handleOpenModal }: Props) => {
+export const ModalGenerateActionApplyTab = ({
+  isOpen,
+  onClose,
+  handleOpenModal,
+  selectedRows
+}: Props) => {
   return (
     <Modal
       className="modalGenerateActionApplyTab"
@@ -33,6 +39,7 @@ export const ModalGenerateActionApplyTab = ({ isOpen, onClose, handleOpenModal }
           }}
           icon={<Trash size={20} />}
           title="Eliminar filas"
+          disabled={!selectedRows || selectedRows.length === 0}
         />
       </Flex>
     </Modal>

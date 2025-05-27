@@ -12,6 +12,7 @@ import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
   removeItemsFromTable,
+  removeMultipleRows,
   saveApplication
 } from "@/services/applyTabClients/applyTabClients";
 import { useMessageApi } from "@/context/MessageContext";
@@ -66,6 +67,7 @@ const ApplyTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
   //TODO this is the context that is not being used
   // const { selectedPayments } = useSelectedPayments();
 
@@ -269,17 +271,27 @@ const ApplyTab: React.FC = () => {
       selected: modalNumber
     });
 
-  const handleDeleteRows = () => {
-    // I leave this here for future use
-    for (const key in selectedRowKeys) {
-      if (selectedRowKeys.hasOwnProperty(key)) {
-        const typedKey = key as keyof ISelectedRowKeys; // Type assertion to avoid TS error
-        const selectedRows = selectedRowKeys[typedKey];
-        if (selectedRows.length > 0) {
-          console.info(`Selected ${key}:`, selectedRows);
-        }
+  const handleDeleteMultipleRows = async () => {
+    setLoadingRequest(true);
+    if (selectedRows && selectedRows.length > 0) {
+      try {
+        await removeMultipleRows(selectedRows.map((row) => row.id));
+        showMessage("success", "Se han eliminado las filas correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedRowKeys({
+          invoices: [],
+          payments: [],
+          discounts: []
+        });
+        mutate();
+      } catch (error) {
+        showMessage(
+          "error",
+          `Error al eliminar ${selectedRows.length} fila${selectedRows.length > 1 ? "s" : ""} `
+        );
       }
     }
+    setLoadingRequest(false);
   };
 
   return (
@@ -513,6 +525,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 3}
         onClose={() => setIsModalOpen({ selected: 0 })}
         handleOpenModal={handleOpenModal}
+        selectedRows={selectedRows?.map((row) => row.id)}
       />
 
       <ModalConfirmAction
@@ -520,10 +533,10 @@ const ApplyTab: React.FC = () => {
         onClose={() => {
           setIsModalOpen({ selected: 0 });
         }}
-        onOk={handleDeleteRows}
+        onOk={handleDeleteMultipleRows}
         title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
         okText="Eliminar"
-        okLoading={false}
+        okLoading={loadingRequest}
       />
     </>
   );
