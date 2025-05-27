@@ -283,6 +283,7 @@ const ApplyTab: React.FC = () => {
           payments: [],
           discounts: []
         });
+        setSelectedRows([]);
         mutate();
       } catch (error) {
         showMessage(
