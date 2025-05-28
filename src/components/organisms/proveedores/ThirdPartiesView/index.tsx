@@ -1,25 +1,26 @@
 "use client";
 import React, { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import useSWR from "swr";
 import { Tabs, Table, Space, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { IThirdPartiesData } from "../interfaces/ThirdPartiesData";
+import { Circle, DotsThreeVertical, Eye } from "@phosphor-icons/react";
+
+import { useAppStore } from "@/lib/store/store";
+import { TabsEnum } from "@/lib/slices/providersViewSlice";
+import { fetcher } from "@/utils/api/api";
+
 import Container from "@/components/atoms/Container/Container";
 import UiSearchInput from "@/components/ui/search-input";
 import { FilterClients } from "@/components/atoms/Filters/FilterClients/FilterClients";
 import { Tag } from "@/components/atoms/Tag/Tag";
-import { Circle, DotsThreeVertical, Eye } from "@phosphor-icons/react";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import { ModalGenerateAction } from "../components/ModalGenerateAction";
-import { useRouter } from "next/navigation";
-import useSWR from "swr";
-import { fetcher } from "@/utils/api/api";
+
+import { IThirdPartiesData } from "../interfaces/ThirdPartiesData";
 import { GenericResponsePage } from "@/types/global/IGlobal";
 
-enum TabsEnum {
-  Clients = "clients",
-  Providers = "providers"
-}
 const formatDate = (isoString: string): string => {
   const date = new Date(isoString);
   const day = String(date.getDate()).padStart(2, "0");
@@ -29,7 +30,8 @@ const formatDate = (isoString: string): string => {
 };
 
 const ThirdPartiesView: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabsEnum>(TabsEnum.Clients);
+  // const { activeTab, setActiveTab } = useProviderViewContext();
+  const { activeTab, setActiveTab } = useAppStore();
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,9 +106,14 @@ const ThirdPartiesView: React.FC = () => {
             <Tag
               icon={<Circle color={status.color} weight="fill" size={6} />}
               style={{
-                border: `${status.color} 1px solid`,
+                border: "none",
+                whiteSpace: "nowrap",
+                backgroundColor: status.backgroundColor || " #F7F7F7",
+                color: status.color,
                 fontSize: 14,
-                fontWeight: 400
+                fontWeight: 400,
+                padding: "4px 12px",
+                paddingTop: "5px"
               }}
               content={status.name}
             />
@@ -137,7 +144,7 @@ const ThirdPartiesView: React.FC = () => {
   return (
     <Container style={{ gap: "1.5rem", overflowY: "auto" }}>
       <Tabs
-        defaultActiveKey="clients"
+        defaultActiveKey={activeTab}
         onChange={(key: string) => handleTabChange(key as TabsEnum)}
         size="large"
         style={{

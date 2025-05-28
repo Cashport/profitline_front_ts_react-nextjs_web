@@ -6,8 +6,15 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { formatMoneySlice, IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 import { createHidrationSlice, Hidration } from "../slices/hidratationSlice";
 import { setProjectInApi } from "@/utils/api/api";
+import { IProvidersViewStore, providersViewSlice } from "../slices/providersViewSlice";
 
-interface AppStore extends ProjectSlice, IUserSlice, ICommerceSlice, IFormatMoneyStore, Hidration {
+interface AppStore
+  extends ProjectSlice,
+    IUserSlice,
+    ICommerceSlice,
+    IFormatMoneyStore,
+    Hidration,
+    IProvidersViewStore {
   resetStore: () => void;
 }
 
@@ -19,6 +26,7 @@ export const useAppStore = create<AppStore>()(
       ...createCommerceSlice(set),
       ...formatMoneySlice(set, get),
       ...createHidrationSlice(set),
+      ...providersViewSlice(set),
       resetStore: () => {
         // Clear the session storage
         localStorage.removeItem("project");
@@ -28,7 +36,8 @@ export const useAppStore = create<AppStore>()(
           ...createProjectSlice(set),
           ...createCommerceSlice(set),
           ...formatMoneySlice(set, get),
-          ...createHidrationSlice(set)
+          ...createHidrationSlice(set),
+          ...providersViewSlice(set)
         });
       }
     }),

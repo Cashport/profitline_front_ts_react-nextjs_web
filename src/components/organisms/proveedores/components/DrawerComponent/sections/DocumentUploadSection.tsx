@@ -93,7 +93,7 @@ const DocumentUploadSection: React.FC<DocumentSectionProps> = ({
         icon={<Files size={16} color="#7B7B7B" />}
         content={
           <Flex vertical style={{ width: "100%", alignItems: "flex-end" }} gap={12}>
-            <Flex vertical gap={12} className={"document-section"}>
+            <Flex vertical gap={12} className="document-list">
               {!showEmptyState ? (
                 validDocuments.map((doc) => (
                   <Flex

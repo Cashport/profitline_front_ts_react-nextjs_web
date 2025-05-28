@@ -12,3 +12,20 @@ export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 // ---
 export const CREATED = 201;
 export const SUCCESS = 200;
+
+export const FILE_EXTENSIONS = [
+  ".pdf",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".xltm",
+  ".csv",
+  ".xml",
+  ".msg",
+  ".eml",
+  ".zip"
+];

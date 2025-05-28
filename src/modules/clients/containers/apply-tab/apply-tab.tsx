@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { DotsThree, Plus } from "phosphor-react";
+import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
 import { useApplicationTable } from "@/hooks/useApplicationTable";
@@ -12,6 +12,7 @@ import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
   removeItemsFromTable,
+  removeMultipleRows,
   saveApplication
 } from "@/services/applyTabClients/applyTabClients";
 import { useMessageApi } from "@/context/MessageContext";
@@ -29,6 +30,9 @@ import ModalCreateAdjustment from "./Modals/ModalCreateAdjustment/ModalCreateAdj
 import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
+import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -63,6 +67,7 @@ const ApplyTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingRequest, setLoadingRequest] = useState(false);
   //TODO this is the context that is not being used
   // const { selectedPayments } = useSelectedPayments();
 
@@ -82,7 +87,7 @@ const ApplyTab: React.FC = () => {
     discounts: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
-  const [openEvidenceModal, setOpenEvidenceModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
   const [commentary, setCommentary] = useState<string>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
 
@@ -172,26 +177,13 @@ const ApplyTab: React.FC = () => {
     }
   });
 
-  const handlePrintSelectedRows = () => {
-    // I leave this here for future use
-    for (const key in selectedRowKeys) {
-      if (selectedRowKeys.hasOwnProperty(key)) {
-        const typedKey = key as keyof ISelectedRowKeys; // Type assertion to avoid TS error
-        const selectedRows = selectedRowKeys[typedKey];
-        if (selectedRows.length > 0) {
-          console.info(`Selected ${key}:`, selectedRows);
-        }
-      }
-    }
-  };
-
   const saveApp = async () => {
     setLoadingSave(true);
     try {
       await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
       showMessage("success", "Se ha guardado la aplicación correctamente");
       mutate();
-      setOpenEvidenceModal(false);
+      setIsModalOpen({ selected: 0 });
     } catch (error) {
       showMessage("error", "Ha ocurrido un error al guardar la aplicación");
     }
@@ -199,7 +191,7 @@ const ApplyTab: React.FC = () => {
   };
 
   const handleSave = () => {
-    setOpenEvidenceModal(true);
+    setIsModalOpen({ selected: 1 });
   };
 
   const filteredData = useMemo(() => {
@@ -274,6 +266,35 @@ const ApplyTab: React.FC = () => {
     handleSelectChange("invoices", [openedRow.id]);
   };
 
+  const handleOpenModal = (modalNumber: number) =>
+    setIsModalOpen({
+      selected: modalNumber
+    });
+
+  const handleDeleteMultipleRows = async () => {
+    setLoadingRequest(true);
+    if (selectedRows && selectedRows.length > 0) {
+      try {
+        await removeMultipleRows(selectedRows.map((row) => row.id));
+        showMessage("success", "Se han eliminado las filas correctamente");
+        setIsModalOpen({ selected: 0 });
+        setSelectedRowKeys({
+          invoices: [],
+          payments: [],
+          discounts: []
+        });
+        setSelectedRows([]);
+        mutate();
+      } catch (error) {
+        showMessage(
+          "error",
+          `Error al eliminar ${selectedRows.length} fila${selectedRows.length > 1 ? "s" : ""} `
+        );
+      }
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <>
       <ModalResultAppy
@@ -284,7 +305,7 @@ const ApplyTab: React.FC = () => {
       />
       <div className="applyContainerTab">
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+          <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
               className="search"
               placeholder="Buscar"
@@ -296,9 +317,23 @@ const ApplyTab: React.FC = () => {
               className="button__actions"
               size="large"
               icon={<DotsThree size={"1.5rem"} />}
-              onClick={handlePrintSelectedRows}
+              onClick={() => handleOpenModal(3)}
             >
               Generar acción
+            </Button>
+            <Button className="iaButton" onClick={() => setIsModalOpen({ selected: 2 })}>
+              <Sparkle size={14} color="#5b21b6" weight="fill" />
+              <span className="textNormal">
+                Aplicar con{" "}
+                <span
+                  className="cashportIATextGradient"
+                  style={{
+                    fontWeight: 500
+                  }}
+                >
+                  CashportAI
+                </span>
+              </span>
             </Button>
           </Flex>
           <Button type="primary" className="save-btn" onClick={handleSave}>
@@ -477,10 +512,32 @@ const ApplyTab: React.FC = () => {
         handleAttachEvidence={saveApp}
         commentary={commentary}
         setCommentary={setCommentary}
-        isOpen={openEvidenceModal}
-        setShowEvidenceModal={setOpenEvidenceModal}
+        isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
-        handleCancel={() => setOpenEvidenceModal(false)}
+        handleCancel={() => setIsModalOpen({ selected: 0 })}
+      />
+      <ModalUploadRequirements
+        isOpen={isModalOpen.selected === 2}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        mutate={mutate}
+      />
+
+      <ModalGenerateActionApplyTab
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        handleOpenModal={handleOpenModal}
+        selectedRows={selectedRows?.map((row) => row.id)}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 4}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteMultipleRows}
+        title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
     </>
   );

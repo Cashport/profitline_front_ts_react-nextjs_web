@@ -11,5 +11,6 @@ export interface IThirdPartiesData {
     id: number;
     name: string;
     color: string;
+    backgroundColor: string;
   };
 }

@@ -9,14 +9,13 @@
     position: fixed;
     max-width: 630px;
     padding: 18px 24px;
+    padding-bottom: 0;
     flex-direction: column;
     transition: transform 0.3s;
     background-color: #ffffff;
-    justify-content: space-between;
+    justify-content: flex-start;
     box-shadow: 0px 4px 82px 0px #0000003d;
     z-index: 50;
-    overflow-y: auto;
-    scrollbar-width: thin;
 
     &.show {
         transform: translateX(0);
@@ -102,6 +101,9 @@
         display: flex;
         margin-bottom: 0px;
         flex-direction: column;
+        background-color: $white;
+        padding-bottom: 18px;
+        margin-top: auto;
 
         .resume {
             color: #141414;
