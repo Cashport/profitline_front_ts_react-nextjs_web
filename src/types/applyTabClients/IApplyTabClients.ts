@@ -37,6 +37,7 @@ export interface IApplyTabClients {
     total_payments: number;
     total_discounts: number;
     total_balance: number;
+    url_log: string;
   };
 }
 
