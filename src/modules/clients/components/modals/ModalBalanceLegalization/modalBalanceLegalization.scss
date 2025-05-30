@@ -24,4 +24,38 @@
     &__description {
         font-weight: 300;
     }
+
+    &__adjustmentInfo {
+        &__ncId {
+            color: $link;
+            text-decoration: underline;
+        }
+        &__devId {
+            font-size: 0.75rem;
+        }
+    }
+
+    &__invoiceId {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1e8ff3;
+    }
+
+    &__selectAdjustment {
+        height: 42px;
+        width: 180px;
+    }
+
+    &__selectDropText {
+        font-size: 0.75rem;
+
+        &.-small {
+            font-size: 0.625rem;
+            color: #505962;
+        }
+    }
+
+    .icon {
+        color: $gray;
+    }
 }
