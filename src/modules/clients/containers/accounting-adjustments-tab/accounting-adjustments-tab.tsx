@@ -109,6 +109,13 @@ const AccountingAdjustmentsTab = () => {
     }
   };
 
+  const handleOpenBalanceLegalization = () => {
+    setIsModalActionPaymentOpen(false);
+    openModal("balanceLegalization", {
+      financialDiscounts: selectedRows
+    });
+  };
+
   return (
     <>
       <div className="accountingAdjustmentsTab">
@@ -182,6 +189,7 @@ const AccountingAdjustmentsTab = () => {
           isOpen={isModalActionPaymentOpen}
           onClose={() => setIsModalActionPaymentOpen(false)}
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
+          balanceLegalization={handleOpenBalanceLegalization}
         />
       </div>
     </>
