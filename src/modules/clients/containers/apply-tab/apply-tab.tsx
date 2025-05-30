@@ -8,7 +8,7 @@ import LabelCollapse from "@/components/ui/label-collapse";
 import { useParams } from "next/navigation";
 
 import { useAppStore } from "@/lib/store/store";
-import { extractSingleParam } from "@/utils/utils";
+import { extractSingleParam, fetchFileFromUrl } from "@/utils/utils";
 import {
   addItemsToTable,
   removeItemsFromTable,
@@ -295,6 +295,20 @@ const ApplyTab: React.FC = () => {
     setLoadingRequest(false);
   };
 
+  const handleDownloadLog = async () => {
+    try {
+      if (applicationData?.summary?.url_log) {
+        await fetchFileFromUrl(applicationData?.summary?.url_log);
+        showMessage("success", "Log descargado correctamente");
+        setIsModalOpen({ selected: 0 });
+      } else {
+        showMessage("error", "No hay log disponible para descargar");
+      }
+    } catch (error) {
+      showMessage("error", "Error al descargar el log");
+    }
+  };
+
   return (
     <>
       <ModalResultAppy
@@ -527,6 +541,7 @@ const ApplyTab: React.FC = () => {
         onClose={() => setIsModalOpen({ selected: 0 })}
         handleOpenModal={handleOpenModal}
         selectedRows={selectedRows?.map((row) => row.id)}
+        downloadLog={handleDownloadLog}
       />
 
       <ModalConfirmAction
