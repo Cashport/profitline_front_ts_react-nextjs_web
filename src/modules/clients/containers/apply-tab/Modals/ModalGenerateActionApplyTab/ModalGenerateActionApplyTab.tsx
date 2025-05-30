@@ -1,6 +1,6 @@
 "use client";
 import { Flex, Modal, Typography } from "antd";
-import { DownloadSimple, Trash } from "@phosphor-icons/react";
+import { DownloadSimple, Pencil, Trash } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
 const { Title } = Typography;
@@ -42,6 +42,13 @@ export const ModalGenerateActionApplyTab = ({
           icon={<Trash size={20} />}
           title="Eliminar filas"
           disabled={!selectedRows || selectedRows.length === 0}
+        />
+        <ButtonGenerateAction
+          onClick={() => {
+            handleOpenModal(5);
+          }}
+          icon={<Pencil size={20} />}
+          title="Editar ajustes"
         />
         <ButtonGenerateAction
           onClick={downloadLog}
