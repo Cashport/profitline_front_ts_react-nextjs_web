@@ -341,7 +341,7 @@ const ApplyTab: React.FC = () => {
           </Button>
         </Flex>
 
-        {isLoading || isValidating ? (
+        {isLoading ? (
           <Flex justify="center" align="center" style={{ height: "3rem", marginTop: "1rem" }}>
             <Spin />
           </Flex>
