@@ -1,19 +1,21 @@
 import React from "react";
 import { Modal } from "antd";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { HandTap } from "@phosphor-icons/react";
+import { HandTap, Invoice } from "@phosphor-icons/react";
 import "./modalActionAccountingAdjustments.scss";
 
 type ModalActionPaymentProps = {
   isOpen: boolean;
   onClose: () => void;
   addAdjustmentsToApplicationTable: () => void;
+  balanceLegalization?: () => void;
 };
 
 export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps> = ({
   isOpen,
   onClose,
-  addAdjustmentsToApplicationTable
+  addAdjustmentsToApplicationTable,
+  balanceLegalization
 }) => {
   return (
     <Modal
@@ -32,6 +34,11 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
           onClick={() => {
             addAdjustmentsToApplicationTable();
           }}
+        />
+        <ButtonGenerateAction
+          icon={<Invoice size={16} />}
+          title="Legalizar saldo"
+          onClick={balanceLegalization}
         />
       </div>
     </Modal>
