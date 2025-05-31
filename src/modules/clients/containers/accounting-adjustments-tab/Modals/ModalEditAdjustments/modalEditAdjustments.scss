@@ -1,0 +1,71 @@
+@import "@/styles/variables.scss";
+
+.modalEditAdjustments {
+    max-height: 90%;
+    .ant-modal-content {
+        padding: 2rem !important;
+
+        .ant-modal-close {
+            margin: 1.2rem;
+        }
+    }
+
+    .ant-modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    &__adjustmentsTable {
+        .ant-table-body {
+            scrollbar-width: thin;
+        }
+        .selectAuditRequirements {
+            width: 170px;
+        }
+
+        .icon {
+            color: $light-gray;
+        }
+
+        .iconDocument {
+            &:hover {
+                border: 0.5px solid $light-gray;
+            }
+        }
+
+        .inputEditAdjustments {
+            background-color: $background-light;
+            height: 42px;
+            border-color: #f3f2f4;
+
+            &::placeholder {
+                color: #7d7c7c;
+            }
+
+            &:hover {
+                background-color: $background-light;
+            }
+
+            &__error {
+                background-color: $background-light;
+                border-color: $error;
+            }
+        }
+
+        .selectAuditRequirements {
+            height: 42px;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        height: 40px;
+    }
+
+    &__footerButtons {
+        max-width: 300px;
+    }
+}

@@ -21,6 +21,7 @@ import AccountingAdjustmentsFilter, {
   SelectedFiltersAccountingAdjustments
 } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
+import ModalEditAdjustments from "./Modals/ModalEditAdjustments/ModalEditAdjustments";
 
 import {
   FinancialDiscount,
@@ -197,6 +198,11 @@ const AccountingAdjustmentsTab = () => {
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
           balanceLegalization={handleOpenBalanceLegalization}
           handleOpenModal={handleOpenModal}
+        />
+        <ModalEditAdjustments
+          isOpen={isModalOpen.selected === 2}
+          onClose={() => setIsModalOpen({ selected: 0 })}
+          // selectedRows={selectedRows}
         />
       </div>
     </>

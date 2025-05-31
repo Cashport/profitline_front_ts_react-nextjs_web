@@ -45,7 +45,7 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
         />
         <ButtonGenerateAction
           onClick={() => {
-            handleOpenModal(1);
+            handleOpenModal(2);
           }}
           icon={<Pencil size={20} />}
           title="Editar ajustes"
