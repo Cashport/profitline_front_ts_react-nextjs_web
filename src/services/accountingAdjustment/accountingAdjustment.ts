@@ -258,8 +258,6 @@ export const createDigitalRecord = async (
 };
 
 export const editAccountingAdjustments = async (adjustmentData: IFinancialDiscountForm[]) => {
-  console.info("Submitting audit data:", adjustmentData);
-
   try {
     const body = {
       discounts: adjustmentData.map((item) => ({

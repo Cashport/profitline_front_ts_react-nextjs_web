@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { Input, Modal, Select, Table, TableProps, Typography } from "antd";
 import { Trash } from "phosphor-react";
 
@@ -47,15 +47,12 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
   const { showMessage } = useMessageApi();
   const { data: motives } = useFinancialDiscountMotives();
 
-  const motiveMap = useMemo(() => {
-    const map = new Map<string, number>();
-    motives?.forEach((motive) => {
-      map.set(motive.name, motive.id);
-    });
-    return map;
-  }, [motives]);
-
   const { control, handleSubmit, reset } = useForm<IEditAdjustment>();
+
+  const { fields, remove } = useFieldArray({
+    control,
+    name: "rows"
+  });
 
   useEffect(() => {
     return () => {
@@ -69,7 +66,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
         id: row.financial_discount_id || 0,
         adjustmentId: row.erp_id?.toString() || "",
         requirementType: {
-          value: motiveMap.get(row.motive_description || "") ?? "",
+          value: row.motive_id || 0,
           label: row.motive_description || ""
         },
         commentary: row.entity_description || "",
@@ -181,26 +178,16 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "",
       dataIndex: "actions",
       key: "actions",
-      render: () => {
-        return <IconButton icon={<Trash size={20} className="icon" />} className="iconDocument" />;
-      },
+      render: (_: any, __: any, index: number) => (
+        <IconButton
+          icon={<Trash size={20} className="icon" />}
+          className="iconDocument"
+          onClick={() => remove(index)}
+        />
+      ),
       width: 50
     }
   ];
-  const tableData = useMemo(() => {
-    if (!selectedRows) return [];
-
-    return selectedRows.map((row) => ({
-      id: row.id,
-      adjustmentId: row.erp_id?.toString() || "",
-      requirementType: {
-        value: row.motive_description || "", // Temporal hasta mapear por ID
-        label: row.motive_description || ""
-      },
-      commentary: row.entity_description || "",
-      amount: row.current_value ?? ""
-    }));
-  }, [selectedRows]);
 
   return (
     <Modal
@@ -216,7 +203,11 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       <Table
         className="modalEditAdjustments__adjustmentsTable"
         columns={columns}
-        dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
+        // dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
+        dataSource={fields.map((item, index) => ({
+          ...item,
+          key: item.id || item.adjustmentId || index
+        }))}
         pagination={false}
         scroll={{ y: height - 400 }}
       />

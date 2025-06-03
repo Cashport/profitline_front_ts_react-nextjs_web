@@ -27,6 +27,7 @@ export interface IApplyTabRecord {
   adjustments?: IApplyTabAdjustment[];
   erp_id: string | null;
   motive_description?: string;
+  motive_id?: number;
   cp_id: string;
 }
 
