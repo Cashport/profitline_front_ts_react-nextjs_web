@@ -1,5 +1,6 @@
 import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
 import config from "@/config";
+import { IFinancialDiscountForm } from "@/modules/clients/containers/accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentDetail } from "@/types/paymentAgreement/IPaymentAgreement";
@@ -252,6 +253,31 @@ export const createDigitalRecord = async (
     return response;
   } catch (error) {
     console.error("Error creating digital record", error);
+    throw error;
+  }
+};
+
+export const editAccountingAdjustments = async (adjustmentData: IFinancialDiscountForm[]) => {
+  console.info("Submitting audit data:", adjustmentData);
+
+  try {
+    const body = {
+      discounts: adjustmentData.map((item) => ({
+        id: item.id,
+        erp_id: item.adjustmentId || item.id,
+        motive_id: item.requirementType?.value,
+        comment: item.commentary,
+        amount: item.amount ? parseFloat(item.amount.toString()) : 0
+      }))
+    };
+    const response = await API.post(
+      `${config.API_HOST}/paymentApplication/financial-discounts/update`,
+      body
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error editing accounting adjustments", error);
     throw error;
   }
 };

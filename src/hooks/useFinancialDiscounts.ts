@@ -1,4 +1,4 @@
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
 import { StatusFinancialDiscounts } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { GenericResponse } from "@/types/global/IGlobal";
@@ -37,7 +37,11 @@ export const useFinancialDiscounts = ({
 
   const pathKey = `/financial-discount/project/${projectId}/client/${clientId}?page=${page}${idQuery}${lineQuery}${sublineQuery}${channelQuery}${zoneQuery}${searchQueryParam}`;
 
-  const { data, error } = useSWR<GenericResponse<StatusFinancialDiscounts[]>>(pathKey, fetcher, {});
+  const { data, error, mutate } = useSWR<GenericResponse<StatusFinancialDiscounts[]>>(
+    pathKey,
+    fetcher,
+    {}
+  );
 
   return {
     data: data?.data || [],

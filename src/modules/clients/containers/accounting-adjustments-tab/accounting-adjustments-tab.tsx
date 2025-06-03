@@ -48,7 +48,11 @@ const AccountingAdjustmentsTab = () => {
     zones: [],
     channels: []
   });
-  const { data, isLoading } = useFinancialDiscounts({
+  const {
+    data,
+    isLoading,
+    mutate: mutateFinancialDiscounts
+  } = useFinancialDiscounts({
     clientId,
     projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
@@ -202,7 +206,14 @@ const AccountingAdjustmentsTab = () => {
         />
         <ModalEditAdjustments
           isOpen={isModalOpen.selected === 2}
-          onClose={() => setIsModalOpen({ selected: 0 })}
+          onClose={(cancelClicked) => {
+            if (cancelClicked) {
+              setIsModalOpen({ selected: 1 });
+            } else {
+              setIsModalOpen({ selected: 0 });
+              mutateFinancialDiscounts();
+            }
+          }}
           selectedRows={selectedRows}
         />
       </div>

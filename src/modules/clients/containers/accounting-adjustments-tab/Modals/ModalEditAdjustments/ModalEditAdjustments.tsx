@@ -7,6 +7,7 @@ import { Trash } from "phosphor-react";
 import { useMessageApi } from "@/context/MessageContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
+import { editAccountingAdjustments } from "@/services/accountingAdjustment/accountingAdjustment";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
@@ -86,9 +87,9 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
     setIsSubmitting(true);
 
     try {
-      console.info("Submitting audit data:", data.rows);
+      await editAccountingAdjustments(data.rows);
       showMessage("success", "Ajustes editados correctamente");
-      // onClose();
+      onClose();
     } catch (error) {
       showMessage("error", "Error al editar ajustes");
     }
@@ -117,6 +118,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
               placeholder=" - "
               options={motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []}
               className="selectEditAdjustments"
+              labelInValue
             />
           )}
         />
