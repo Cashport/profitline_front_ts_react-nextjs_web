@@ -66,7 +66,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
   useEffect(() => {
     if (selectedRows) {
       const defaultRows = selectedRows.map((row) => ({
-        id: row.id,
+        id: row.financial_discount_id || 0,
         adjustmentId: row.erp_id?.toString() || "",
         requirementType: {
           value: motiveMap.get(row.motive_description || "") ?? "",

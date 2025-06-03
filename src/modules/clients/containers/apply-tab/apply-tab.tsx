@@ -279,12 +279,7 @@ const ApplyTab: React.FC = () => {
         await removeMultipleRows(selectedRows.map((row) => row.id));
         showMessage("success", "Se han eliminado las filas correctamente");
         setIsModalOpen({ selected: 0 });
-        setSelectedRowKeys({
-          invoices: [],
-          payments: [],
-          discounts: []
-        });
-        setSelectedRows([]);
+        deselectAllRows();
         mutate();
       } catch (error) {
         showMessage(
@@ -308,6 +303,15 @@ const ApplyTab: React.FC = () => {
     } catch (error) {
       showMessage("error", "Error al descargar el log");
     }
+  };
+
+  const deselectAllRows = () => {
+    setSelectedRowKeys({
+      invoices: [],
+      payments: [],
+      discounts: []
+    });
+    setSelectedRows([]);
   };
 
   return (
@@ -541,7 +545,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 3}
         onClose={() => setIsModalOpen({ selected: 0 })}
         handleOpenModal={handleOpenModal}
-        selectedRows={selectedRows?.map((row) => row.id)}
+        selectedRows={selectedRows}
         downloadLog={handleDownloadLog}
       />
 
@@ -563,6 +567,7 @@ const ApplyTab: React.FC = () => {
             setIsModalOpen({ selected: 3 });
           } else {
             setIsModalOpen({ selected: 0 });
+            deselectAllRows();
             mutate();
           }
         }}

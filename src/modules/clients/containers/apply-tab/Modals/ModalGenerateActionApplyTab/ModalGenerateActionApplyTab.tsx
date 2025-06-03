@@ -2,6 +2,7 @@
 import { Flex, message, Modal, Typography } from "antd";
 import { DownloadSimple, Pencil, Trash } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 const { Title } = Typography;
 
@@ -10,7 +11,7 @@ interface Props {
   onClose: () => void;
   // eslint-disable-next-line no-unused-vars
   handleOpenModal: (modalNumber: number) => void;
-  selectedRows?: number[];
+  selectedRows?: IApplyTabRecord[];
   downloadLog?: () => void;
 }
 
@@ -53,6 +54,14 @@ export const ModalGenerateActionApplyTab = ({
             if (!selectedRows || selectedRows.length === 0) {
               message.error("Debes seleccionar al menos un ajuste contable para editar");
               return;
+            }
+            // comprobar que de las selecteded rows tienen un financial_discount_id
+            if (selectedRows[0]) {
+              const hasFinancialDiscountId = selectedRows.some((row) => row.financial_discount_id);
+              if (!hasFinancialDiscountId) {
+                message.error("Debes seleccionar al menos un ajuste contable para editar");
+                return;
+              }
             }
             handleOpenModal(5);
           }}
