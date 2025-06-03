@@ -40,6 +40,10 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
           icon={<HandTap size={20} />}
           title="Aplicar ajustes contables"
           onClick={() => {
+            if (!selectedRows || selectedRows.length === 0) {
+              message.error("Debes seleccionar al menos un ajuste contable para aplicar");
+              return;
+            }
             addAdjustmentsToApplicationTable();
           }}
         />
@@ -47,17 +51,6 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
           icon={<Invoice size={16} />}
           title="Legalizar saldo"
           onClick={balanceLegalization}
-        />
-        <ButtonGenerateAction
-          onClick={() => {
-            if (!selectedRows || selectedRows.length === 0) {
-              message.error("Debes seleccionar al menos un ajuste contable para editar");
-              return;
-            }
-            handleOpenModal(2);
-          }}
-          icon={<Pencil size={20} />}
-          title="Editar ajustes"
         />
       </div>
     </Modal>

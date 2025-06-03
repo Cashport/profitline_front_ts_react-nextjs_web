@@ -1,6 +1,6 @@
 "use client";
-import { Flex, Modal, Typography } from "antd";
-import { DownloadSimple, Trash } from "@phosphor-icons/react";
+import { Flex, message, Modal, Typography } from "antd";
+import { DownloadSimple, Pencil, Trash } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
 const { Title } = Typography;
@@ -47,6 +47,17 @@ export const ModalGenerateActionApplyTab = ({
           onClick={downloadLog}
           icon={<DownloadSimple size={20} />}
           title="Descargar Log"
+        />
+        <ButtonGenerateAction
+          onClick={() => {
+            if (!selectedRows || selectedRows.length === 0) {
+              message.error("Debes seleccionar al menos un ajuste contable para editar");
+              return;
+            }
+            handleOpenModal(5);
+          }}
+          icon={<Pencil size={20} />}
+          title="Editar ajustes"
         />
       </Flex>
     </Modal>
