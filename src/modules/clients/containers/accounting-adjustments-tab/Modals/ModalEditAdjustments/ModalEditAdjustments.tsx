@@ -125,7 +125,8 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
             />
           )}
         />
-      )
+      ),
+      width: 250
     },
     {
       title: "Comentario",
