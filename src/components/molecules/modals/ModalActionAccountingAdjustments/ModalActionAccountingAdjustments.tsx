@@ -1,7 +1,10 @@
 import React from "react";
-import { Modal } from "antd";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { message, Modal } from "antd";
 import { HandTap, Invoice, Pencil } from "@phosphor-icons/react";
+
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+
 import "./modalActionAccountingAdjustments.scss";
 
 type ModalActionPaymentProps = {
@@ -11,6 +14,7 @@ type ModalActionPaymentProps = {
   balanceLegalization?: () => void;
   // eslint-disable-next-line no-unused-vars
   handleOpenModal: (selected: number) => void;
+  selectedRows?: FinancialDiscount[];
 };
 
 export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps> = ({
@@ -18,7 +22,8 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
   onClose,
   addAdjustmentsToApplicationTable,
   balanceLegalization,
-  handleOpenModal
+  handleOpenModal,
+  selectedRows
 }) => {
   return (
     <Modal
@@ -45,6 +50,10 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
         />
         <ButtonGenerateAction
           onClick={() => {
+            if (!selectedRows || selectedRows.length === 0) {
+              message.error("Debes seleccionar al menos un ajuste contable para editar");
+              return;
+            }
             handleOpenModal(2);
           }}
           icon={<Pencil size={20} />}

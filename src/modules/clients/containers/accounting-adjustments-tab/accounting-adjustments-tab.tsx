@@ -31,7 +31,7 @@ import {
 import "./accounting-adjustments-tab.scss";
 
 const AccountingAdjustmentsTab = () => {
-  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>(undefined);
+  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
@@ -198,11 +198,12 @@ const AccountingAdjustmentsTab = () => {
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
           balanceLegalization={handleOpenBalanceLegalization}
           handleOpenModal={handleOpenModal}
+          selectedRows={selectedRows}
         />
         <ModalEditAdjustments
           isOpen={isModalOpen.selected === 2}
           onClose={() => setIsModalOpen({ selected: 0 })}
-          // selectedRows={selectedRows}
+          selectedRows={selectedRows}
         />
       </div>
     </>

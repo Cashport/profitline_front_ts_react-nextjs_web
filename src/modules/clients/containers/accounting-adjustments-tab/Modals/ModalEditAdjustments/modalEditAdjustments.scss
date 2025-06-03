@@ -20,8 +20,9 @@
         .ant-table-body {
             scrollbar-width: thin;
         }
-        .selectAuditRequirements {
-            width: 170px;
+        .selectEditAdjustments {
+            width: 211px;
+            height: 43px;
         }
 
         .icon {
@@ -36,7 +37,7 @@
 
         .inputEditAdjustments {
             background-color: $background-light;
-            height: 42px;
+            height: 43px !important;
             border-color: #f3f2f4;
 
             &::placeholder {
