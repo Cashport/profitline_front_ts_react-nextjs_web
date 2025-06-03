@@ -21,7 +21,6 @@ import AccountingAdjustmentsFilter, {
   SelectedFiltersAccountingAdjustments
 } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
-import ModalEditAdjustments from "./Modals/ModalEditAdjustments/ModalEditAdjustments";
 
 import {
   FinancialDiscount,
@@ -49,11 +48,7 @@ const AccountingAdjustmentsTab = () => {
     channels: []
   });
   const JustOthersMotiveType = 2; // no trae ajustes financieros
-  const {
-    data,
-    isLoading,
-    mutate: mutateFinancialDiscounts
-  } = useFinancialDiscounts({
+  const { data, isLoading } = useFinancialDiscounts({
     clientId,
     projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
@@ -204,18 +199,6 @@ const AccountingAdjustmentsTab = () => {
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
           balanceLegalization={handleOpenBalanceLegalization}
           handleOpenModal={handleOpenModal}
-          selectedRows={selectedRows}
-        />
-        <ModalEditAdjustments
-          isOpen={isModalOpen.selected === 2}
-          onClose={(cancelClicked) => {
-            if (cancelClicked) {
-              setIsModalOpen({ selected: 1 });
-            } else {
-              setIsModalOpen({ selected: 0 });
-              mutateFinancialDiscounts();
-            }
-          }}
           selectedRows={selectedRows}
         />
       </div>

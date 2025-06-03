@@ -13,7 +13,7 @@ import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import InputMoney from "@/components/atoms/inputs/InputMoney/InputMoney";
 
-import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalEditAdjustments.scss";
 
@@ -38,16 +38,22 @@ interface Props {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
-  selectedRows?: FinancialDiscount[] | undefined;
+  selectedRows?: IApplyTabRecord[] | undefined;
 }
 
 const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [localSelectedRows, setLocalSelectedRows] = useState<IFinancialDiscountForm[]>([]);
   const height = useScreenHeight();
+  const { showMessage } = useMessageApi();
   const { data: motives } = useFinancialDiscountMotives();
 
-  const { showMessage } = useMessageApi();
+  const motiveMap = useMemo(() => {
+    const map = new Map<string, number>();
+    motives?.forEach((motive) => {
+      map.set(motive.name, motive.id);
+    });
+    return map;
+  }, [motives]);
 
   const { control, handleSubmit, reset } = useForm<IEditAdjustment>();
 
@@ -63,10 +69,10 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
         id: row.id,
         adjustmentId: row.erp_id?.toString() || "",
         requirementType: {
-          value: String(row.motive_id) || "",
-          label: row.motive_name || ""
+          value: motiveMap.get(row.motive_description || "") ?? "",
+          label: row.motive_description || ""
         },
-        commentary: row.comments || "",
+        commentary: row.entity_description || "",
         amount: String(row.current_value) || ""
       }));
 
@@ -74,20 +80,20 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
     }
   }, [selectedRows, reset]);
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
-    setLocalSelectedRows(newSelectedRow);
-  };
-
-  const rowSelection = {
-    selectedRowKeys: localSelectedRows.map((item) => item.id),
-    onChange: onSelectChange
-  };
-
   const onSubmit = async (data: IEditAdjustment) => {
     setIsSubmitting(true);
+    const rows = data.rows.map((row) => ({
+      ...row,
+      amount:
+        Number(
+          typeof row.amount === "string"
+            ? row.amount.replaceAll(".", "").replaceAll(",", ".")
+            : row.amount?.toString().replaceAll(".", "").replaceAll(",", ".")
+        ) || 0
+    }));
 
     try {
-      await editAccountingAdjustments(data.rows);
+      await editAccountingAdjustments(rows);
       showMessage("success", "Ajustes editados correctamente");
       onClose();
     } catch (error) {
@@ -101,7 +107,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "Ajuste contable",
       dataIndex: "adjustmentId",
       key: "adjustmentId",
-      width: 130
+      width: 150
     },
     {
       title: "Motivo",
@@ -146,8 +152,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
             )}
           />
         );
-      },
-      width: 300
+      }
     },
     {
       title: "Monto",
@@ -177,12 +182,11 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       dataIndex: "actions",
       key: "actions",
       render: () => {
-        return <IconButton icon={<Trash size={26} className="icon" />} className="iconDocument" />;
+        return <IconButton icon={<Trash size={20} className="icon" />} className="iconDocument" />;
       },
-      width: 60
+      width: 50
     }
   ];
-
   const tableData = useMemo(() => {
     if (!selectedRows) return [];
 
@@ -190,10 +194,10 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       id: row.id,
       adjustmentId: row.erp_id?.toString() || "",
       requirementType: {
-        value: row.motive_id ?? "",
-        label: row.motive_name || ""
+        value: row.motive_description || "", // Temporal hasta mapear por ID
+        label: row.motive_description || ""
       },
-      commentary: row.comments || "",
+      commentary: row.entity_description || "",
       amount: row.current_value ?? ""
     }));
   }, [selectedRows]);
@@ -213,7 +217,6 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
         className="modalEditAdjustments__adjustmentsTable"
         columns={columns}
         dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
-        rowSelection={rowSelection}
         pagination={false}
         scroll={{ y: height - 400 }}
       />

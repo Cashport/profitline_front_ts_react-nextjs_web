@@ -33,6 +33,7 @@ import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/Mod
 import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -553,6 +554,19 @@ const ApplyTab: React.FC = () => {
         title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
         okText="Eliminar"
         okLoading={loadingRequest}
+      />
+
+      <ModalEditAdjustments
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            setIsModalOpen({ selected: 3 });
+          } else {
+            setIsModalOpen({ selected: 0 });
+            mutate();
+          }
+        }}
+        selectedRows={selectedRows}
       />
     </>
   );

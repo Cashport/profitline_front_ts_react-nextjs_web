@@ -1,6 +1,6 @@
 import React from "react";
 import { message, Modal } from "antd";
-import { HandTap, Invoice, Pencil } from "@phosphor-icons/react";
+import { HandTap, Invoice } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
@@ -22,7 +22,6 @@ export const ModalActionAccountingAdjustments: React.FC<ModalActionPaymentProps>
   onClose,
   addAdjustmentsToApplicationTable,
   balanceLegalization,
-  handleOpenModal,
   selectedRows
 }) => {
   return (
