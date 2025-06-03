@@ -30,9 +30,11 @@ import {
 import "./accounting-adjustments-tab.scss";
 
 const AccountingAdjustmentsTab = () => {
-  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>(undefined);
+  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>();
   const [search, setSearch] = useState("");
-  const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
 
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -95,7 +97,7 @@ const AccountingAdjustmentsTab = () => {
         "discounts",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
-      setIsModalActionPaymentOpen(false);
+      setIsModalOpen({ selected: 0 });
       showMessage("success", "Ajuste(s) añadidos a la tabla de aplicación de pagos");
       // mutate Applytable data
       mutateApplyTabData();
@@ -112,10 +114,14 @@ const AccountingAdjustmentsTab = () => {
   };
 
   const handleOpenBalanceLegalization = () => {
-    setIsModalActionPaymentOpen(false);
+    setIsModalOpen({ selected: 0 });
     openModal("balanceLegalization", {
       financialDiscounts: selectedRows
     });
+  };
+
+  const handleOpenModal = (selected: number) => {
+    setIsModalOpen({ selected });
   };
 
   return (
@@ -139,7 +145,7 @@ const AccountingAdjustmentsTab = () => {
               size="large"
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
-              onClick={() => setIsModalActionPaymentOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })} // Open modal for actions
             >
               Generar acción
             </Button>
@@ -188,10 +194,12 @@ const AccountingAdjustmentsTab = () => {
         )}
 
         <ModalActionAccountingAdjustments
-          isOpen={isModalActionPaymentOpen}
-          onClose={() => setIsModalActionPaymentOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={() => setIsModalOpen({ selected: 0 })}
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
           balanceLegalization={handleOpenBalanceLegalization}
+          handleOpenModal={handleOpenModal}
+          selectedRows={selectedRows}
         />
       </div>
     </>

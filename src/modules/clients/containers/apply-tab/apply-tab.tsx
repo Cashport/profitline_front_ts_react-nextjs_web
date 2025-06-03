@@ -33,6 +33,7 @@ import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/Mod
 import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -278,12 +279,7 @@ const ApplyTab: React.FC = () => {
         await removeMultipleRows(selectedRows.map((row) => row.id));
         showMessage("success", "Se han eliminado las filas correctamente");
         setIsModalOpen({ selected: 0 });
-        setSelectedRowKeys({
-          invoices: [],
-          payments: [],
-          discounts: []
-        });
-        setSelectedRows([]);
+        deselectAllRows();
         mutate();
       } catch (error) {
         showMessage(
@@ -307,6 +303,15 @@ const ApplyTab: React.FC = () => {
     } catch (error) {
       showMessage("error", "Error al descargar el log");
     }
+  };
+
+  const deselectAllRows = () => {
+    setSelectedRowKeys({
+      invoices: [],
+      payments: [],
+      discounts: []
+    });
+    setSelectedRows([]);
   };
 
   return (
@@ -540,7 +545,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 3}
         onClose={() => setIsModalOpen({ selected: 0 })}
         handleOpenModal={handleOpenModal}
-        selectedRows={selectedRows?.map((row) => row.id)}
+        selectedRows={selectedRows}
         downloadLog={handleDownloadLog}
       />
 
@@ -553,6 +558,20 @@ const ApplyTab: React.FC = () => {
         title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
         okText="Eliminar"
         okLoading={loadingRequest}
+      />
+
+      <ModalEditAdjustments
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            setIsModalOpen({ selected: 3 });
+          } else {
+            setIsModalOpen({ selected: 0 });
+            deselectAllRows();
+            mutate();
+          }
+        }}
+        selectedRows={selectedRows}
       />
     </>
   );
