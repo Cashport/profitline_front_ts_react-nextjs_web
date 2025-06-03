@@ -48,6 +48,7 @@ const AccountingAdjustmentsTab = () => {
     zones: [],
     channels: []
   });
+  const JustOthersMotiveType = 2; // no trae ajustes financieros
   const {
     data,
     isLoading,
@@ -58,7 +59,8 @@ const AccountingAdjustmentsTab = () => {
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
     line: filters.lines,
     zone: filters.zones,
-    channel: filters.channels
+    channel: filters.channels,
+    motive_id: JustOthersMotiveType
   });
 
   const { mutate: mutateApplyTabData } = useApplicationTable();
