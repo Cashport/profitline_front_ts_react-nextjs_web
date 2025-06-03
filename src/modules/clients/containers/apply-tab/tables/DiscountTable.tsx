@@ -35,14 +35,14 @@ const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, ro
     },
     {
       title: "Tipo de ajuste",
-      dataIndex: "entity_description",
-      key: "entity_description",
-      render: (entity_description) => <p>{entity_description}</p>
+      dataIndex: "motive_description",
+      key: "motive_description",
+      render: (motive_description) => <p>{motive_description}</p>
     },
     {
-      title: "Facturas",
-      dataIndex: "invoices",
-      key: "invoices"
+      title: "Detalle",
+      dataIndex: "entity_description",
+      key: "entity_description"
     },
     {
       title: "Monto",

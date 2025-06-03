@@ -1,6 +1,6 @@
 "use client";
 import { Flex, Modal, Typography } from "antd";
-import { Trash } from "@phosphor-icons/react";
+import { DownloadSimple, Trash } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
 const { Title } = Typography;
@@ -11,13 +11,15 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   handleOpenModal: (modalNumber: number) => void;
   selectedRows?: number[];
+  downloadLog?: () => void;
 }
 
 export const ModalGenerateActionApplyTab = ({
   isOpen,
   onClose,
   handleOpenModal,
-  selectedRows
+  selectedRows,
+  downloadLog
 }: Props) => {
   return (
     <Modal
@@ -40,6 +42,11 @@ export const ModalGenerateActionApplyTab = ({
           icon={<Trash size={20} />}
           title="Eliminar filas"
           disabled={!selectedRows || selectedRows.length === 0}
+        />
+        <ButtonGenerateAction
+          onClick={downloadLog}
+          icon={<DownloadSimple size={20} />}
+          title="Descargar Log"
         />
       </Flex>
     </Modal>
