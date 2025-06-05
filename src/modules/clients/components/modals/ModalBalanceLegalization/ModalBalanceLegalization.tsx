@@ -2,15 +2,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Flex, Input, message, Modal, Select, Table, TableProps } from "antd";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
 
 import {
   getAvailableAdjustmentsForSelect,
   getFinancialRecordsToLegalize,
   IAdjustmentsForSelect,
-  IAdjustmentsToLegalize,
-  IFinancialRecordAsociate
+  IAdjustmentsToLegalize
 } from "@/services/accountingAdjustment/accountingAdjustment";
 import { extractSingleParam } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
@@ -25,7 +24,6 @@ import "./modalBalanceLegalization.scss";
 
 interface IAdjustmentRow {
   financialDiscountId: number;
-  financialDiscountIdBalance: number;
   difference?: number;
   financialRecords?: {
     id: number;
@@ -59,6 +57,12 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
 
   const { control, handleSubmit, reset, watch } = useForm<IBalanceLegalizationFormValues>();
+
+  const { fields, remove } = useFieldArray({
+    control,
+    name: "rows"
+  });
+
   const closeModal = () => {
     onClose();
   };
@@ -93,7 +97,6 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       const defaultRows: IAdjustmentRow[] = adjustmentsToLegalize.map((item) => {
         return {
           financialDiscountId: item.id,
-          financialDiscountIdBalance: item.id, // O ajústalo si es distinto
           observation: ""
         };
       });
@@ -101,25 +104,26 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       reset({ rows: defaultRows });
     }
   }, [adjustmentsToLegalize, selectedAdjustments, reset]);
-  const handleDeleteBalance = () => {
-    message.success("Funcionalidad en desarrollo");
-  };
 
   const onSubmit = (data: IBalanceLegalizationFormValues) => {
     console.info("Form data submitted:", data);
     message.success("Datos enviados correctamente");
   };
 
-  const columns: TableProps<IAdjustmentsToLegalize>["columns"] = [
+  const columns: TableProps<IAdjustmentRow>["columns"] = [
     {
       title: "Ajuste Cashport",
-      dataIndex: "id",
-      key: "id",
-      render: (_, row) => {
+      dataIndex: "financialDiscountId",
+      key: "financialDiscountId",
+      render: (_: any, row) => {
+        // Find the matching adjustment for display info
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
           <Flex vertical className="modalBalanceLegalization__adjustmentInfo">
-            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{row.id}</p>
-            <p className="modalBalanceLegalization__adjustmentInfo__devId">{row.comments}</p>
+            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{adjustment?.id}</p>
+            <p className="modalBalanceLegalization__adjustmentInfo__devId">
+              {adjustment?.comments}
+            </p>
           </Flex>
         );
       },
@@ -129,19 +133,25 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Monto",
       dataIndex: "ammount",
       key: "ammount",
-      render: (ammount) => {
-        return <span className="modalBalanceLegalization__amount">{formatMoney(ammount)}</span>;
+      render: (_: any, row) => {
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
+        return (
+          <span className="modalBalanceLegalization__amount">
+            {formatMoney(adjustment?.ammount ?? 0)}
+          </span>
+        );
       },
       align: "right"
     },
     {
       title: "Factura Asociada",
-      dataIndex: "financialRecordsAsociate",
+      dataIndex: "financialDiscountId",
       key: "financialRecordsAsociate",
-      render: (financialRecordsAsociate: IFinancialRecordAsociate[]) => {
+      render: (_: any, row) => {
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
           <>
-            {financialRecordsAsociate.map((record) => (
+            {adjustment?.financialRecordsAsociate?.map((record) => (
               <p key={record.id} className="modalBalanceLegalization__invoiceId">
                 {record.idErp ? record.idErp : " - "}
               </p>
@@ -155,7 +165,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Ajuste ERP",
       dataIndex: "adjustment",
       key: "adjustment",
-      render: (_: any, record: any, index: number) => (
+      render: (_: any, __, index) => (
         <Controller
           control={control}
           name={`rows.${index}.financialRecords`}
@@ -181,7 +191,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
                 const originalItem = option.title ? JSON.parse(option.title) : undefined;
                 const newOption = {
                   ...option,
-                  fullOption: originalItem // Guardamos el objeto original para poder usarlo después
+                  fullOption: originalItem
                 };
                 field.onChange(newOption);
               }}
@@ -197,12 +207,11 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Diferencia",
       dataIndex: "difference",
       key: "difference",
-      render: (_: any, __: any, index: number) => {
+      render: (_: any, row, index) => {
         const watchedRow = watch(`rows.${index}.financialRecords`);
-        const currentAdjustmentAmount = adjustmentsToLegalize[index].ammount;
-
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
+        const currentAdjustmentAmount = adjustment?.ammount ?? 0;
         const currentValueSelect = watchedRow?.fullOption?.current_value || 0;
-
         return <span>{formatMoney(currentAdjustmentAmount - currentValueSelect)} </span>;
       },
       align: "right"
@@ -211,7 +220,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Observación",
       dataIndex: "observation",
       key: "observation",
-      render: (_: any, record: any, index: number) => (
+      render: (_: any, row, index) => (
         <Controller
           control={control}
           name={`rows.${index}.observation`}
@@ -231,11 +240,11 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "",
       dataIndex: "",
       key: "actions",
-      render: () => {
+      render: (_: any, __, index) => {
         return (
           <span className="modalBalanceLegalization__iconActions">
             <IconButton
-              onClick={handleDeleteBalance}
+              onClick={() => remove(index)}
               icon={<Trash size={16} className="icon" />}
               className="iconDocument"
             />
@@ -277,7 +286,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       <Table
         className="modalBalanceLegalization__documentsTable"
         columns={columns}
-        dataSource={adjustmentsToLegalize.map((item) => ({ ...item, key: item.id }))}
+        dataSource={fields.map((item) => ({ ...item, key: item.id }))}
         pagination={false}
         scroll={{ y: height - 400 }}
       />
