@@ -124,7 +124,7 @@ export const WalletTab = () => {
   const handleOpenBalanceLegalization = () => {
     setisGenerateActionOpen(false);
     openModal("balanceLegalization", {
-      financialDiscounts: selectedRows
+      // selectedAdjustments: selectedRows
     });
   };
 

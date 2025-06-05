@@ -1,14 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { Flex, Input, message, Modal, Select, Table, TableProps } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
 
 import {
+  getAvailableAdjustmentsForSelect,
   getFinancialRecordsToLegalize,
+  IAdjustmentsForSelect,
   IAdjustmentsToLegalize,
   IFinancialRecordAsociate
 } from "@/services/accountingAdjustment/accountingAdjustment";
+import { extractSingleParam } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -19,8 +23,22 @@ import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscount
 
 import "./modalBalanceLegalization.scss";
 
+interface IAdjustmentRow {
+  financialDiscountId: number;
+  financialDiscountIdBalance: number;
+  difference?: number;
+  financialRecords?: {
+    id: number;
+    erp_id: string;
+    current_value: number;
+    fullOption?: IAdjustmentsForSelect; // Para guardar el objeto completo
+    title: string;
+  };
+  observation?: string;
+}
+
 interface IBalanceLegalizationFormValues {
-  rows: any[];
+  rows: IAdjustmentRow[];
 }
 interface Props {
   isOpen: boolean;
@@ -30,18 +48,23 @@ interface Props {
 }
 
 const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Props) => {
+  const params = useParams();
+  const clientIdParam = extractSingleParam(params.clientId);
+  const clientId = clientIdParam || "";
+
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
 
   const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentsToLegalize[]>([]);
+  const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
 
-  const { control, handleSubmit } = useForm<IBalanceLegalizationFormValues>();
+  const { control, handleSubmit, reset } = useForm<IBalanceLegalizationFormValues>();
   const closeModal = () => {
     onClose();
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchFinancialRecords = async () => {
       if (!selectedAdjustments?.length) return;
       try {
         const res = await getFinancialRecordsToLegalize(selectedAdjustments.map((item) => item.id));
@@ -51,10 +74,33 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         setAdjustmentsToLegalize(fakeAdjustments);
       }
     };
+    const fetchSelectAdjustments = async () => {
+      try {
+        const res = await getAvailableAdjustmentsForSelect(clientId);
+        setSelectAdjustments(res || []);
+      } catch (error) {
+        message.error("Error al cargar ajustes disponibles");
+        setSelectAdjustments(mockSelectAdjustments);
+      }
+    };
 
-    fetchData();
+    fetchFinancialRecords();
+    fetchSelectAdjustments();
   }, [selectedAdjustments]);
 
+  useEffect(() => {
+    if (adjustmentsToLegalize.length > 0 && selectedAdjustments?.length) {
+      const defaultRows: IAdjustmentRow[] = adjustmentsToLegalize.map((item) => {
+        return {
+          financialDiscountId: item.id,
+          financialDiscountIdBalance: item.id, // O ajústalo si es distinto
+          observation: ""
+        };
+      });
+
+      reset({ rows: defaultRows });
+    }
+  }, [adjustmentsToLegalize, selectedAdjustments, reset]);
   const handleDeleteBalance = () => {
     message.success("Funcionalidad en desarrollo");
   };
@@ -112,7 +158,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       render: (_: any, record: any, index: number) => (
         <Controller
           control={control}
-          name={`rows.${index}.adjustment`}
+          name={`rows.${index}.financialRecords`}
           rules={{ required: true }}
           render={({ field }) => (
             <Select
@@ -121,9 +167,10 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
               value={
                 field.value
                   ? {
-                      value: field.value,
+                      ...field.value,
                       label:
-                        mockSelect.find((item) => item.nc_id === field.value)?.nc_id || field.value
+                        selectAdjustments.find((item) => item.id === field.value?.id)?.erp_id ||
+                        field.value.fullOption?.erp_id
                     }
                   : undefined
               }
@@ -131,7 +178,12 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
               optionRender={(option) => option.label}
               className="modalBalanceLegalization__selectAdjustment"
               onChange={(option) => {
-                field.onChange(option.value); // Guardas solo el nc_id
+                const originalItem = option.title ? JSON.parse(option.title) : undefined;
+                const newOption = {
+                  ...option,
+                  fullOption: originalItem // Guardamos el objeto original para poder usarlo después
+                };
+                field.onChange(newOption);
               }}
               placeholder=" - "
               popupMatchSelectWidth={false}
@@ -157,7 +209,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       render: (_: any, record: any, index: number) => (
         <Controller
           control={control}
-          name={`rows.${index}.commentary`}
+          name={`rows.${index}.observation`}
           rules={{ required: false }}
           render={({ field, fieldState }) => (
             <Input
@@ -188,6 +240,20 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       width: 60
     }
   ];
+
+  const options = selectAdjustments.map((item) => ({
+    value: item.id,
+    label: (
+      <Flex justify="space-between" gap={"6rem"}>
+        <Flex vertical>
+          <p className="modalBalanceLegalization__selectDropText">{item.erp_id}</p>
+          <p className="modalBalanceLegalization__selectDropText -small">{item.comments}</p>
+        </Flex>
+        <p className="modalBalanceLegalization__selectDropText">{item.current_value}</p>
+      </Flex>
+    ),
+    title: JSON.stringify(item) // Guardamos los datos originales en title porque label inValue los borra
+  }));
 
   return (
     <Modal
@@ -256,34 +322,21 @@ const fakeAdjustments: IAdjustmentsToLegalize[] = [
   }
 ];
 
-const mockSelect = [
+const mockSelectAdjustments: IAdjustmentsForSelect[] = [
   {
-    nc_id: "NC1234567",
-    dev_id: "4324234234",
-    amount: "$4.850.000"
+    id: 1,
+    erp_id: "ERP-001",
+    initial_value: 1000.5,
+    current_value: 950.25,
+    document_type_name: "Factura",
+    comments: "Ajuste por diferencia de inventario"
   },
   {
-    nc_id: "NC8727829",
-    dev_id: "7654315151351",
-    amount: "$1.000.000"
-  },
-  {
-    nc_id: "NC9876543",
-    dev_id: "765431543534",
-    amount: "$5.000.000"
+    id: 2,
+    erp_id: "ERP-002",
+    initial_value: 2500.75,
+    current_value: 2600.0,
+    document_type_name: "Nota de crédito",
+    comments: "Ajuste por error en precio unitario"
   }
 ];
-
-const options = mockSelect.map((item) => ({
-  value: item.nc_id,
-  label: (
-    <Flex justify="space-between" gap={"6rem"}>
-      <Flex vertical>
-        <p className="modalBalanceLegalization__selectDropText">{item.nc_id}</p>
-        <p className="modalBalanceLegalization__selectDropText -small">{item.dev_id}</p>
-      </Flex>
-      <p className="modalBalanceLegalization__selectDropText">{item.amount}</p>
-    </Flex>
-  ),
-  data: item // Guardamos los datos originales por si los necesitas luego
-}));

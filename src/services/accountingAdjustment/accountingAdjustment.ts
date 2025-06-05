@@ -302,12 +302,35 @@ export const getFinancialRecordsToLegalize = async (
   };
   try {
     const response: GenericResponse<IAdjustmentsToLegalize[]> = await API.post(
-      `${config.API_HOST}/financial-discount/financial-records-asociate`,
+      `${config.API_HOST}/financial-discount/financial-records-asociates`,
       body
     );
     return response.data;
   } catch (error) {
     console.error("Error getting financial records to legalize", error);
+    throw error;
+  }
+};
+
+export interface IAdjustmentsForSelect {
+  id: number;
+  erp_id: string;
+  initial_value: number;
+  current_value: number;
+  document_type_name: string;
+  comments: string;
+}
+
+export const getAvailableAdjustmentsForSelect = async (
+  clientId: string
+): Promise<IAdjustmentsForSelect[]> => {
+  try {
+    const response: GenericResponse<IAdjustmentsForSelect[]> = await API.get(
+      `${config.API_HOST}/financial-discount/to-asociate/client/${clientId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting available adjustments to legalize", error);
     throw error;
   }
 };
