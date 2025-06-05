@@ -56,6 +56,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
 
   const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentToLegalize[]>([]);
   const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
 
   const { control, handleSubmit, reset, watch } = useForm<IBalanceLegalizationFormValues>();
 
@@ -113,7 +114,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   }, [adjustmentsToLegalize, selectedAdjustments, reset]);
 
   const onSubmit = async (data: IBalanceLegalizationFormValues) => {
-    console.info("Form data submitted:", data);
+    setLoadingRequest(true);
 
     try {
       const balances = data.rows.map((row) => ({
@@ -130,8 +131,8 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       message.success("Datos enviados correctamente");
     } catch (error) {
       message.error("Error al enviar los datos");
-      return;
     }
+    setLoadingRequest(false);
   };
 
   const columns: TableProps<IAdjustmentRow>["columns"] = [
@@ -327,7 +328,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         className="modalAuditRequirements__footerButtons"
         onClose={() => onClose(true)}
         handleOk={handleSubmit(onSubmit)}
-        isConfirmLoading={false}
+        isConfirmLoading={loadingRequest}
       />
     </Modal>
   );
