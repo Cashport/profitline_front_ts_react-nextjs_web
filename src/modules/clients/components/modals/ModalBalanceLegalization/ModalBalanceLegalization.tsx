@@ -58,7 +58,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentsToLegalize[]>([]);
   const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
 
-  const { control, handleSubmit, reset } = useForm<IBalanceLegalizationFormValues>();
+  const { control, handleSubmit, reset, watch } = useForm<IBalanceLegalizationFormValues>();
   const closeModal = () => {
     onClose();
   };
@@ -197,8 +197,13 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Diferencia",
       dataIndex: "difference",
       key: "difference",
-      render: () => {
-        return <span>{formatMoney(999999)}</span>;
+      render: (_: any, __: any, index: number) => {
+        const watchedRow = watch(`rows.${index}.financialRecords`);
+        const currentAdjustmentAmount = adjustmentsToLegalize[index].ammount;
+
+        const currentValueSelect = watchedRow?.fullOption?.current_value || 0;
+
+        return <span>{formatMoney(currentAdjustmentAmount - currentValueSelect)} </span>;
       },
       align: "right"
     },
