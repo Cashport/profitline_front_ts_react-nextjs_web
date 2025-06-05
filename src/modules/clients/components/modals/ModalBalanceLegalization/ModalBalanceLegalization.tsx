@@ -117,7 +117,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
     try {
       const balances = data.rows.map((row) => ({
         financialDiscountId: row.financialDiscountId,
-        financialDiscountIdBalance: row.financialRecords?.id || 0,
+        financialDiscountIdBalance: row.financialRecords?.fullOption?.id || 0,
         observation: row.observation || "",
         financialRecordIds:
           adjustmentsToLegalize
@@ -188,40 +188,63 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       title: "Ajuste ERP",
       dataIndex: "adjustment",
       key: "adjustment",
-      render: (_: any, __, index) => (
+      render: (_: any, __: any, index: number) => (
         <Controller
           control={control}
           name={`rows.${index}.financialRecords`}
           rules={{ required: true }}
-          render={({ field }) => (
-            <Select
-              {...field}
-              labelInValue
-              value={
-                field.value
-                  ? {
-                      ...field.value,
-                      label:
-                        selectAdjustments.find((item) => item.id === field.value?.id)?.erp_id ||
-                        field.value.fullOption?.erp_id
-                    }
-                  : undefined
-              }
-              options={options}
-              optionRender={(option) => option.label}
-              className="modalBalanceLegalization__selectAdjustment"
-              onChange={(option) => {
-                const originalItem = option.title ? JSON.parse(option.title) : undefined;
-                const newOption = {
-                  ...option,
-                  fullOption: originalItem
-                };
-                field.onChange(newOption);
-              }}
-              placeholder=" - "
-              popupMatchSelectWidth={false}
-            />
-          )}
+          render={({ field }) => {
+            const allSelectedIds = watch("rows")
+              .map((row, i) => (i !== index ? row.financialRecords?.fullOption?.id : undefined))
+              .filter((id) => id !== undefined && id !== null);
+
+            const filteredOptions = selectAdjustments.map((item) => ({
+              value: item.id,
+              label: (
+                <Flex justify="space-between" gap={"6rem"}>
+                  <Flex vertical>
+                    <p className="modalBalanceLegalization__selectDropText">{item.erp_id}</p>
+                    <p className="modalBalanceLegalization__selectDropText -small">
+                      {item.comments}
+                    </p>
+                  </Flex>
+                  <p className="modalBalanceLegalization__selectDropText">{item.current_value}</p>
+                </Flex>
+              ),
+              title: JSON.stringify(item),
+              disabled: allSelectedIds.includes(item.id)
+            }));
+
+            return (
+              <Select
+                {...field}
+                labelInValue
+                value={
+                  field.value
+                    ? {
+                        ...field.value,
+                        label:
+                          selectAdjustments.find((item) => item.id === field.value?.id)?.erp_id ||
+                          field.value.fullOption?.erp_id
+                      }
+                    : undefined
+                }
+                options={filteredOptions}
+                optionRender={(option) => option.label}
+                className="modalBalanceLegalization__selectAdjustment"
+                onChange={(option) => {
+                  const originalItem = option.title ? JSON.parse(option.title) : undefined;
+                  const newOption = {
+                    ...option,
+                    fullOption: originalItem
+                  };
+                  field.onChange(newOption);
+                }}
+                placeholder=" - "
+                popupMatchSelectWidth={false}
+              />
+            );
+          }}
         />
       ),
       width: 145
