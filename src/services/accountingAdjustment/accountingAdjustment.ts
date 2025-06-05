@@ -285,7 +285,7 @@ export interface IFinancialRecordAsociate {
   idErp: string;
 }
 
-export interface IAdjustmentsToLegalize {
+export interface IAdjustmentToLegalize {
   id: number;
   comments: string;
   documentType: string;
@@ -296,12 +296,12 @@ export interface IAdjustmentsToLegalize {
 
 export const getFinancialRecordsToLegalize = async (
   accountingAdjustmentsIds: number[]
-): Promise<IAdjustmentsToLegalize[]> => {
+): Promise<IAdjustmentToLegalize[]> => {
   const body = {
     financialDiscountsIds: accountingAdjustmentsIds
   };
   try {
-    const response: GenericResponse<IAdjustmentsToLegalize[]> = await API.post(
+    const response: GenericResponse<IAdjustmentToLegalize[]> = await API.post(
       `${config.API_HOST}/financial-discount/financial-records-asociates`,
       body
     );
@@ -331,6 +331,26 @@ export const getAvailableAdjustmentsForSelect = async (
     return response.data;
   } catch (error) {
     console.error("Error getting available adjustments to legalize", error);
+    throw error;
+  }
+};
+
+interface IBalances {
+  financialDiscountId: number;
+  financialDiscountIdBalance: number;
+  observation: string;
+  financialRecordIds: number[];
+}
+
+export const balanceLegalization = async (balances: IBalances[]): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.post(
+      `${config.API_HOST}/financial-discount/legalize-balance`,
+      { balances }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error during balance legalization", error);
     throw error;
   }
 };

@@ -6,10 +6,11 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
 
 import {
+  balanceLegalization,
   getAvailableAdjustmentsForSelect,
   getFinancialRecordsToLegalize,
   IAdjustmentsForSelect,
-  IAdjustmentsToLegalize
+  IAdjustmentToLegalize
 } from "@/services/accountingAdjustment/accountingAdjustment";
 import { extractSingleParam } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
@@ -53,7 +54,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
 
-  const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentsToLegalize[]>([]);
+  const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentToLegalize[]>([]);
   const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
 
   const { control, handleSubmit, reset, watch } = useForm<IBalanceLegalizationFormValues>();
@@ -72,16 +73,21 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       if (!selectedAdjustments?.length) return;
       try {
         const res = await getFinancialRecordsToLegalize(selectedAdjustments.map((item) => item.id));
-        setAdjustmentsToLegalize(res || []);
+        setAdjustmentsToLegalize(res);
+
+        if (res.length === 0) {
+          setAdjustmentsToLegalize(fakeAdjustments);
+
+          message.warning("No hay ajustes disponibles para legalizar");
+        }
       } catch (error) {
         message.error("Error al cargar ajustes a legalizar");
-        setAdjustmentsToLegalize(fakeAdjustments);
       }
     };
     const fetchSelectAdjustments = async () => {
       try {
         const res = await getAvailableAdjustmentsForSelect(clientId);
-        setSelectAdjustments(res || []);
+        setSelectAdjustments(res);
       } catch (error) {
         message.error("Error al cargar ajustes disponibles");
         setSelectAdjustments(mockSelectAdjustments);
@@ -105,9 +111,26 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
     }
   }, [adjustmentsToLegalize, selectedAdjustments, reset]);
 
-  const onSubmit = (data: IBalanceLegalizationFormValues) => {
+  const onSubmit = async (data: IBalanceLegalizationFormValues) => {
     console.info("Form data submitted:", data);
-    message.success("Datos enviados correctamente");
+
+    try {
+      const balances = data.rows.map((row) => ({
+        financialDiscountId: row.financialDiscountId,
+        financialDiscountIdBalance: row.financialRecords?.id || 0,
+        observation: row.observation || "",
+        financialRecordIds:
+          adjustmentsToLegalize
+            .find((item) => item.id === row.financialDiscountId)
+            ?.financialRecordsAsociate.map((record) => record.id) || []
+      }));
+
+      await balanceLegalization(balances);
+      message.success("Datos enviados correctamente");
+    } catch (error) {
+      message.error("Error al enviar los datos");
+      return;
+    }
   };
 
   const columns: TableProps<IAdjustmentRow>["columns"] = [
@@ -303,7 +326,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
 
 export default ModalBalanceLegalization;
 
-const fakeAdjustments: IAdjustmentsToLegalize[] = [
+const fakeAdjustments: IAdjustmentToLegalize[] = [
   {
     id: 101,
     comments: "Ajuste por nota de débito",
