@@ -131,7 +131,9 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       message.success("Saldos legalizados correctamente");
       onClose();
     } catch (error) {
-      message.error("Error al legalizar los saldos");
+      message.error(
+        `Error al legalizar los saldos: ${error instanceof Error ? error.message : "desconocido"}`
+      );
     }
     setLoadingRequest(false);
   };
