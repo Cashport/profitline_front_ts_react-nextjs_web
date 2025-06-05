@@ -1,14 +1,23 @@
 "use client";
+import { useEffect, useState } from "react";
 import { Flex, message, Modal, Select, Table, TableProps } from "antd";
-
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
-
-import "./modalBalanceLegalization.scss";
 import { Controller, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
-import IconButton from "@/components/atoms/IconButton/IconButton";
+
+import {
+  getFinancialRecordsToLegalize,
+  IAdjustmentsToLegalize,
+  IFinancialRecordAsociate
+} from "@/services/accountingAdjustment/accountingAdjustment";
 import { useAppStore } from "@/lib/store/store";
+
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import IconButton from "@/components/atoms/IconButton/IconButton";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+
+import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+
+import "./modalBalanceLegalization.scss";
 
 interface IBalanceLegalizationFormValues {
   rows: any[];
@@ -17,16 +26,35 @@ interface Props {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
+  selectedAdjustments?: FinancialDiscount[];
 }
 
-const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
+const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
+
+  const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentsToLegalize[]>([]);
 
   const { control, handleSubmit } = useForm<IBalanceLegalizationFormValues>();
   const closeModal = () => {
     onClose();
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!selectedAdjustments?.length) return;
+      try {
+        const res = await getFinancialRecordsToLegalize(selectedAdjustments.map((item) => item.id));
+        setAdjustmentsToLegalize(res || []);
+      } catch (error) {
+        message.error("Error al cargar ajustes a legalizar");
+        setAdjustmentsToLegalize(fakeAdjustments);
+      }
+    };
+
+    fetchData();
+  }, [selectedAdjustments]);
+
   const handleDeleteBalance = () => {
     message.success("Funcionalidad en desarrollo");
   };
@@ -36,18 +64,16 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
     message.success("Datos enviados correctamente");
   };
 
-  const columns: TableProps<any>["columns"] = [
+  const columns: TableProps<IAdjustmentsToLegalize>["columns"] = [
     {
       title: "Ajuste Cashport",
-      dataIndex: "adjustmentInfo",
-      key: "adjustmentInfo",
-      render: (adjustmentInfo) => {
+      dataIndex: "id",
+      key: "id",
+      render: (_, row) => {
         return (
           <Flex vertical className="modalBalanceLegalization__adjustmentInfo">
-            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{adjustmentInfo.NC_id}</p>
-            <p className="modalBalanceLegalization__adjustmentInfo__devId">
-              {adjustmentInfo.dev_id}
-            </p>
+            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{row.id}</p>
+            <p className="modalBalanceLegalization__adjustmentInfo__devId">{row.comments}</p>
           </Flex>
         );
       }
@@ -63,11 +89,17 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
     },
     {
       title: "Factura Asociada",
-      dataIndex: "commentary",
-      key: "commentary",
-      render: (invoiceId: any) => {
+      dataIndex: "financialRecordsAsociate",
+      key: "financialRecordsAsociate",
+      render: (financialRecordsAsociate: IFinancialRecordAsociate[]) => {
         return (
-          <p className="modalBalanceLegalization__invoiceId">{invoiceId ? invoiceId : " - "}</p>
+          <>
+            {financialRecordsAsociate.map((record) => (
+              <p key={record.id} className="modalBalanceLegalization__invoiceId">
+                {record.idErp ? record.idErp : " - "}
+              </p>
+            ))}
+          </>
         );
       }
     },
@@ -111,8 +143,8 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
       title: "Diferencia",
       dataIndex: "difference",
       key: "difference",
-      render: (difference) => {
-        return <span>{formatMoney(difference)}</span>;
+      render: () => {
+        return <span>{formatMoney(999999)}</span>;
       },
       align: "right"
     },
@@ -157,7 +189,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
       <Table
         className="modalBalanceLegalization__documentsTable"
         columns={columns}
-        dataSource={mockData.map((item) => ({ ...item, key: item.id }))}
+        dataSource={adjustmentsToLegalize.map((item) => ({ ...item, key: item.id }))}
         pagination={false}
         scroll={{ y: height - 400 }}
       />
@@ -174,30 +206,36 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
 
 export default ModalBalanceLegalization;
 
-const mockData = [
+const fakeAdjustments: IAdjustmentsToLegalize[] = [
   {
-    id: 1,
-    adjustmentInfo: {
-      NC_id: "NC-12345",
-      dev_id: "DEV-67890"
-    },
-    ammount: 102230,
-    commentary: "Factura 1",
-    audit: "Aprobar",
-    difference: 10000,
-    observation: "Observación 1"
+    id: 101,
+    comments: "Ajuste por nota de débito",
+    documentType: "Nota débito",
+    documentName: "ND-101",
+    ammount: 1250000,
+    financialRecordsAsociate: [
+      {
+        id: 201,
+        idErp: "INV-0001"
+      },
+      {
+        id: 202,
+        idErp: "INV-0002"
+      }
+    ]
   },
   {
-    id: 2,
-    adjustmentInfo: {
-      NC_id: "NC-54321",
-      dev_id: "DEV-09876"
-    },
-    ammount: 20421240,
-    commentary: "Factura 2",
-    audit: "Rechazar",
-    difference: 1234,
-    observation: "Observación 2"
+    id: 102,
+    comments: "Revisión de saldo pendiente",
+    documentType: "Nota crédito",
+    documentName: "NC-102",
+    ammount: 2395000,
+    financialRecordsAsociate: [
+      {
+        id: 203,
+        idErp: "INV-0003"
+      }
+    ]
   }
 ];
 

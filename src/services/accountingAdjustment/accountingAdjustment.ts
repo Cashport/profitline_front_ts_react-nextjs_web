@@ -279,3 +279,35 @@ export const editAccountingAdjustments = async (adjustmentData: IFinancialDiscou
     throw error;
   }
 };
+
+export interface IFinancialRecordAsociate {
+  id: number;
+  idErp: string;
+}
+
+export interface IAdjustmentsToLegalize {
+  id: number;
+  comments: string;
+  documentType: string;
+  documentName: string;
+  ammount: number;
+  financialRecordsAsociate: IFinancialRecordAsociate[];
+}
+
+export const getFinancialRecordsToLegalize = async (
+  accountingAdjustmentsIds: number[]
+): Promise<IAdjustmentsToLegalize[]> => {
+  const body = {
+    financialDiscountsIds: accountingAdjustmentsIds
+  };
+  try {
+    const response: GenericResponse<IAdjustmentsToLegalize[]> = await API.post(
+      `${config.API_HOST}/financial-discount/financial-records-asociate`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting financial records to legalize", error);
+    throw error;
+  }
+};
