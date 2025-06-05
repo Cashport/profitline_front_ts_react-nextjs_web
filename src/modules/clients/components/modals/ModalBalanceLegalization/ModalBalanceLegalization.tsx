@@ -270,7 +270,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         <Controller
           control={control}
           name={`rows.${index}.observation`}
-          rules={{ required: false }}
+          rules={{ required: true }}
           render={({ field, fieldState }) => (
             <Input
               {...field}
