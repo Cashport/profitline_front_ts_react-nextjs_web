@@ -116,7 +116,7 @@ const AccountingAdjustmentsTab = () => {
   const handleOpenBalanceLegalization = () => {
     setIsModalOpen({ selected: 0 });
     openModal("balanceLegalization", {
-      financialDiscounts: selectedRows
+      selectedAdjustments: selectedRows
     });
   };
 
