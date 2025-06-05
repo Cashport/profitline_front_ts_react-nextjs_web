@@ -302,7 +302,7 @@ export const getFinancialRecordsToLegalize = async (
   };
   try {
     const response: GenericResponse<IAdjustmentToLegalize[]> = await API.post(
-      `${config.API_HOST}/financial-discount/financial-records-asociates`,
+      `${config.API_HOST}/financial-discount/financial-records-asociate`,
       body
     );
     return response.data;
