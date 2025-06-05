@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Flex, message, Modal, Select, Table, TableProps } from "antd";
+import { Flex, Input, message, Modal, Select, Table, TableProps } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
 
@@ -76,7 +76,8 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
             <p className="modalBalanceLegalization__adjustmentInfo__devId">{row.comments}</p>
           </Flex>
         );
-      }
+      },
+      width: 150
     },
     {
       title: "Monto",
@@ -101,7 +102,8 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
             ))}
           </>
         );
-      }
+      },
+      width: 100
     },
     {
       title: "Ajuste ERP",
@@ -137,7 +139,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
           )}
         />
       ),
-      width: 200
+      width: 145
     },
     {
       title: "Diferencia",
@@ -151,7 +153,22 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
     {
       title: "Observación",
       dataIndex: "observation",
-      key: "observation"
+      key: "observation",
+      render: (_: any, record: any, index: number) => (
+        <Controller
+          control={control}
+          name={`rows.${index}.commentary`}
+          rules={{ required: false }}
+          render={({ field, fieldState }) => (
+            <Input
+              {...field}
+              placeholder="Agrega un comentario"
+              className={fieldState.invalid ? "inputText inputText__error" : "inputText"}
+            />
+          )}
+        />
+      ),
+      width: 300
     },
     {
       title: "",
@@ -175,7 +192,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   return (
     <Modal
       className="modalBalanceLegalization"
-      width={1020}
+      width={1050}
       footer={null}
       open={isOpen}
       onCancel={closeModal}
