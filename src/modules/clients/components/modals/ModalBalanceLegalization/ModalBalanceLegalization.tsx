@@ -128,9 +128,10 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       }));
 
       await balanceLegalization(balances);
-      message.success("Datos enviados correctamente");
+      message.success("Saldos legalizados correctamente");
+      onClose();
     } catch (error) {
-      message.error("Error al enviar los datos");
+      message.error("Error al legalizar los saldos");
     }
     setLoadingRequest(false);
   };
