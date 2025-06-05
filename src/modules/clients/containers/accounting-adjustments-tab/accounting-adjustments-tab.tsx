@@ -116,7 +116,7 @@ const AccountingAdjustmentsTab = () => {
   const handleOpenBalanceLegalization = () => {
     setIsModalOpen({ selected: 0 });
     openModal("balanceLegalization", {
-      selectedAdjustments: mockFinancialDiscounts
+      selectedAdjustments: selectedRows
     });
   };
 
@@ -207,76 +207,3 @@ const AccountingAdjustmentsTab = () => {
 };
 
 export default AccountingAdjustmentsTab;
-
-const mockFinancialDiscounts = [
-  {
-    id: 1,
-    sucursal_id: 101,
-    line_id: 2001,
-    sub_line_id: 3001,
-    project_id: 10,
-    dependecy_sucursal: 101,
-    initial_value: 100000,
-    current_value: 80000,
-    expiration_date: "2025-12-31T00:00:00Z",
-    comments: "First discount applied",
-    files: null,
-    create_at: "2025-01-01T10:00:00Z",
-    update_at: "2025-05-01T12:00:00Z",
-    delete_at: null,
-    status_id: 1,
-    document_type_id: 2,
-    client_id: "C123456789",
-    percentage: 20,
-    is_discount: 1,
-    date_of_issue: "2025-01-01T00:00:00Z",
-    erp_id: 5001,
-    motive_id: 301,
-    validity_range: "2025-01-01 to 2025-12-31",
-    earlypay_date: null,
-    is_legalized: 1,
-    is_deleted: 0,
-    status_name: "Approved",
-    project_name: "Project Alpha",
-    document_type_name: "Factura",
-    motive_name: "Descuento por pronto pago",
-    financial_status_id: 100,
-    legalized: true,
-    cp_id: "CP001"
-  },
-  {
-    id: 2,
-    sucursal_id: 102,
-    line_id: 2002,
-    sub_line_id: 3002,
-    project_id: 11,
-    dependecy_sucursal: 102,
-    initial_value: 200000,
-    current_value: 150000,
-    expiration_date: "2025-11-30T00:00:00Z",
-    comments: "Seasonal adjustment",
-    files: null,
-    create_at: "2025-02-15T09:30:00Z",
-    update_at: "2025-05-15T14:00:00Z",
-    delete_at: null,
-    status_id: 2,
-    document_type_id: 3,
-    client_id: "C987654321",
-    percentage: null,
-    is_discount: 0,
-    date_of_issue: "2025-02-10T00:00:00Z",
-    erp_id: 5002,
-    motive_id: 302,
-    validity_range: null,
-    earlypay_date: "2025-06-01T00:00:00Z",
-    is_legalized: 0,
-    is_deleted: 0,
-    status_name: "Pending",
-    project_name: "Project Beta",
-    document_type_name: "Nota Crédito",
-    motive_name: "Ajuste por volumen",
-    financial_status_id: 101,
-    legalized: false,
-    cp_id: "CP002"
-  }
-];

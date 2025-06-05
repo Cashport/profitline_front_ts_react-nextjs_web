@@ -76,8 +76,6 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         setAdjustmentsToLegalize(res);
 
         if (res.length === 0) {
-          setAdjustmentsToLegalize(fakeAdjustments);
-
           message.warning("No hay ajustes disponibles para legalizar");
         }
       } catch (error) {
@@ -88,9 +86,12 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       try {
         const res = await getAvailableAdjustmentsForSelect(clientId);
         setSelectAdjustments(res);
+
+        if (res.length === 0) {
+          message.warning("No hay ajustes disponibles para el select");
+        }
       } catch (error) {
         message.error("Error al cargar ajustes disponibles");
-        setSelectAdjustments(mockSelectAdjustments);
       }
     };
 
@@ -150,7 +151,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
           </Flex>
         );
       },
-      width: 150
+      width: 120
     },
     {
       title: "Monto",
@@ -181,8 +182,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
             ))}
           </>
         );
-      },
-      width: 100
+      }
     },
     {
       title: "Ajuste ERP",
@@ -301,20 +301,6 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
     }
   ];
 
-  const options = selectAdjustments.map((item) => ({
-    value: item.id,
-    label: (
-      <Flex justify="space-between" gap={"6rem"}>
-        <Flex vertical>
-          <p className="modalBalanceLegalization__selectDropText">{item.erp_id}</p>
-          <p className="modalBalanceLegalization__selectDropText -small">{item.comments}</p>
-        </Flex>
-        <p className="modalBalanceLegalization__selectDropText">{item.current_value}</p>
-      </Flex>
-    ),
-    title: JSON.stringify(item) // Guardamos los datos originales en title porque label inValue los borra
-  }));
-
   return (
     <Modal
       className="modalBalanceLegalization"
@@ -348,55 +334,3 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
 };
 
 export default ModalBalanceLegalization;
-
-const fakeAdjustments: IAdjustmentToLegalize[] = [
-  {
-    id: 101,
-    comments: "Ajuste por nota de débito",
-    documentType: "Nota débito",
-    documentName: "ND-101",
-    ammount: 1250000,
-    financialRecordsAsociate: [
-      {
-        id: 201,
-        idErp: "INV-0001"
-      },
-      {
-        id: 202,
-        idErp: "INV-0002"
-      }
-    ]
-  },
-  {
-    id: 102,
-    comments: "Revisión de saldo pendiente",
-    documentType: "Nota crédito",
-    documentName: "NC-102",
-    ammount: 2395000,
-    financialRecordsAsociate: [
-      {
-        id: 203,
-        idErp: "INV-0003"
-      }
-    ]
-  }
-];
-
-const mockSelectAdjustments: IAdjustmentsForSelect[] = [
-  {
-    id: 1,
-    erp_id: "ERP-001",
-    initial_value: 1000.5,
-    current_value: 950.25,
-    document_type_name: "Factura",
-    comments: "Ajuste por diferencia de inventario"
-  },
-  {
-    id: 2,
-    erp_id: "ERP-002",
-    initial_value: 2500.75,
-    current_value: 2600.0,
-    document_type_name: "Nota de crédito",
-    comments: "Ajuste por error en precio unitario"
-  }
-];
