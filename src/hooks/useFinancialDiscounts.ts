@@ -1,11 +1,11 @@
 import useSWR from "swr";
+import { useAppStore } from "@/lib/store/store";
 import { fetcher } from "@/utils/api/api";
 import { StatusFinancialDiscounts } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { GenericResponse } from "@/types/global/IGlobal";
 
 interface Props {
   clientId: string;
-  projectId: number;
   id?: number;
   line?: number[];
   subline?: number[];
@@ -18,7 +18,6 @@ interface Props {
 
 export const useFinancialDiscounts = ({
   clientId,
-  projectId,
   id,
   line,
   subline,
@@ -28,6 +27,8 @@ export const useFinancialDiscounts = ({
   motive_id,
   page = 1
 }: Props) => {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
   const idQuery = id ? `&id=${id}` : "";
   const lineQuery = line && line.length > 0 ? `&line=${line.join(",")}` : "";
   const sublineQuery = subline && subline.length > 0 ? `&subline=${subline.join(",")}` : "";
@@ -42,8 +43,7 @@ export const useFinancialDiscounts = ({
 
   const { data, error, mutate } = useSWR<GenericResponse<StatusFinancialDiscounts[]>>(
     pathKey,
-    fetcher,
-    {}
+    fetcher
   );
 
   return {

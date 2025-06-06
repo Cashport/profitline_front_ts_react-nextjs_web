@@ -3,7 +3,6 @@ import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
 import { CaretDoubleRight, DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
-import { mutate } from "swr";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
@@ -48,9 +47,12 @@ const AccountingAdjustmentsTab = () => {
     channels: []
   });
   const JustOthersMotiveType = 2; // no trae ajustes financieros
-  const { data, isLoading } = useFinancialDiscounts({
+  const {
+    data,
+    isLoading,
+    mutate: mutateFinancialDiscounts
+  } = useFinancialDiscounts({
     clientId,
-    projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
     line: filters.lines,
     zone: filters.zones,
@@ -86,7 +88,7 @@ const AccountingAdjustmentsTab = () => {
   };
 
   useEffect(() => {
-    mutate(`/financial-discount/project/${projectId}/client/${clientId}`);
+    mutateFinancialDiscounts();
   }, [modalType]);
 
   const handleAddSelectedAdjustmentsToApplicationTable = async () => {
