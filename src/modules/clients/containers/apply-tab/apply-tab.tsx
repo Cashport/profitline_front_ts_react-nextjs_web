@@ -8,7 +8,7 @@ import LabelCollapse from "@/components/ui/label-collapse";
 import { useParams } from "next/navigation";
 
 import { useAppStore } from "@/lib/store/store";
-import { extractSingleParam, fetchFileFromUrl } from "@/utils/utils";
+import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
   removeItemsFromTable,
@@ -294,7 +294,23 @@ const ApplyTab: React.FC = () => {
   const handleDownloadLog = async () => {
     try {
       if (applicationData?.summary?.url_log) {
-        await fetchFileFromUrl(applicationData?.summary?.url_log);
+        const response = await fetch(applicationData.summary.url_log);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const fileName = applicationData.summary.url_log.split("/").pop() || "log.txt";
+
+        // Crear un enlace invisible y disparar el click
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         showMessage("success", "Log descargado correctamente");
         setIsModalOpen({ selected: 0 });
       } else {
