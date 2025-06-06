@@ -12,6 +12,7 @@ import { editAccountingAdjustments } from "@/services/accountingAdjustment/accou
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import IconButton from "@/components/atoms/IconButton/IconButton";
 import InputMoney from "@/components/atoms/inputs/InputMoney/InputMoney";
+import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -28,6 +29,7 @@ export interface IFinancialDiscountForm {
   };
   commentary?: string;
   amount?: string | number;
+  applicationId?: number;
 }
 
 interface IEditAdjustment {
@@ -39,13 +41,18 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
   selectedRows?: IApplyTabRecord[] | undefined;
+  // eslint-disable-next-line no-unused-vars
+  handleDeleteRow?: (id: number) => void;
 }
 
-const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }: Props) => {
   const height = useScreenHeight();
   const { showMessage } = useMessageApi();
   const { data: motives } = useFinancialDiscountMotives();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeRow, setActiveRow] = useState<IFinancialDiscountForm>();
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<IEditAdjustment>();
 
@@ -70,7 +77,8 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
           label: row.motive_description || ""
         },
         commentary: row.entity_description || "",
-        amount: String(row.current_value) || ""
+        amount: String(row.current_value) || "",
+        applicationId: row.id
       }));
 
       reset({ rows: defaultRows });
@@ -97,6 +105,17 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       showMessage("error", "Error al editar ajustes");
     }
     setIsSubmitting(false);
+  };
+
+  const handleRemove = () => {
+    try {
+      handleDeleteRow && activeRow && handleDeleteRow(activeRow.applicationId || 0);
+      remove(fields.findIndex((field) => field.id === activeRow?.id));
+      setActiveRow(undefined);
+      setIsRemoveModalOpen(false);
+    } catch (error) {
+      console.error("Error al eliminar ajuste:", error);
+    }
   };
 
   const columns: TableProps<IFinancialDiscountForm>["columns"] = [
@@ -168,7 +187,6 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
             validate: (value) => parseFloat(value) != 0 || "El valor debe ser distinto a 0"
           }}
           allowNegative={true}
-          // error={errors?.rows?.[index]?.amount}
           fixedDecimalScale={true}
           customClassName="inputEditAdjustments"
         />
@@ -179,11 +197,14 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
       title: "",
       dataIndex: "actions",
       key: "actions",
-      render: (_: any, __: any, index: number) => (
+      render: (_: any, row) => (
         <IconButton
           icon={<Trash size={20} className="icon" />}
           className="iconDocument"
-          onClick={() => remove(index)}
+          onClick={() => {
+            setActiveRow(row);
+            setIsRemoveModalOpen(true);
+          }}
         />
       ),
       width: 50
@@ -191,39 +212,50 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows }: Props) => {
   ];
 
   return (
-    <Modal
-      className="modalEditAdjustments"
-      width="80%"
-      footer={null}
-      open={isOpen}
-      closable={false}
-      destroyOnClose
-    >
-      <Title level={4}>Edición de ajustes</Title>
+    <>
+      <Modal
+        className="modalEditAdjustments"
+        width="80%"
+        footer={null}
+        open={isOpen && !isRemoveModalOpen}
+        closable={false}
+        destroyOnClose
+      >
+        <Title level={4}>Edición de ajustes</Title>
 
-      <Table
-        className="modalEditAdjustments__adjustmentsTable"
-        columns={columns}
-        // dataSource={tableData.map((item) => ({ ...item, key: item.id }))}
-        dataSource={fields.map((item, index) => ({
-          ...item,
-          key: item.id || item.adjustmentId || index
-        }))}
-        pagination={false}
-        scroll={{ y: height - 400 }}
-      />
-
-      <div className="modalEditAdjustments__footer">
-        <FooterButtons
-          className="modalEditAdjustments__footerButtons"
-          titleCancel="Volver"
-          onClose={() => onClose(true)}
-          handleOk={handleSubmit(onSubmit)}
-          titleConfirm="Guardar"
-          isConfirmLoading={isSubmitting}
+        <Table
+          className="modalEditAdjustments__adjustmentsTable"
+          columns={columns}
+          dataSource={fields.map((item, index) => ({
+            ...item,
+            key: item.id || item.adjustmentId || index
+          }))}
+          pagination={false}
+          scroll={{ y: height - 400 }}
         />
-      </div>
-    </Modal>
+
+        <div className="modalEditAdjustments__footer">
+          <FooterButtons
+            className="modalEditAdjustments__footerButtons"
+            titleCancel="Volver"
+            onClose={() => onClose(true)}
+            handleOk={handleSubmit(onSubmit)}
+            titleConfirm="Guardar"
+            isConfirmLoading={isSubmitting}
+          />
+        </div>
+      </Modal>
+
+      <ModalRemove
+        name="ajuste"
+        isOpen={isRemoveModalOpen}
+        onClose={() => {
+          setActiveRow(undefined);
+          setIsRemoveModalOpen(false);
+        }}
+        onRemove={handleRemove}
+      />
+    </>
   );
 };
 
