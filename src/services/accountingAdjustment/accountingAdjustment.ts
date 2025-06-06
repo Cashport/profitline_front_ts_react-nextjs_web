@@ -279,3 +279,78 @@ export const editAccountingAdjustments = async (adjustmentData: IFinancialDiscou
     throw error;
   }
 };
+
+export interface IFinancialRecordAsociate {
+  id: number;
+  idErp: string;
+}
+
+export interface IAdjustmentToLegalize {
+  id: number;
+  comments: string;
+  documentType: string;
+  documentName: string;
+  ammount: number;
+  financialRecordsAsociate: IFinancialRecordAsociate[];
+}
+
+export const getFinancialRecordsToLegalize = async (
+  accountingAdjustmentsIds: number[]
+): Promise<IAdjustmentToLegalize[]> => {
+  const body = {
+    financialDiscountsIds: accountingAdjustmentsIds
+  };
+  try {
+    const response: GenericResponse<IAdjustmentToLegalize[]> = await API.post(
+      `${config.API_HOST}/financial-discount/financial-records-asociate`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting financial records to legalize", error);
+    throw error;
+  }
+};
+
+export interface IAdjustmentsForSelect {
+  id: number;
+  erp_id: string;
+  initial_value: number;
+  current_value: number;
+  document_type_name: string;
+  comments: string;
+}
+
+export const getAvailableAdjustmentsForSelect = async (
+  clientId: string
+): Promise<IAdjustmentsForSelect[]> => {
+  try {
+    const response: GenericResponse<IAdjustmentsForSelect[]> = await API.get(
+      `${config.API_HOST}/financial-discount/to-asociate/client/${clientId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting available adjustments to legalize", error);
+    throw error;
+  }
+};
+
+interface IBalances {
+  financialDiscountId: number;
+  financialDiscountIdBalance: number;
+  observation: string;
+  financialRecordIds: number[];
+}
+
+export const balanceLegalization = async (balances: IBalances[]): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.post(
+      `${config.API_HOST}/financial-discount/legalize-balance`,
+      { balances }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error during balance legalization", error);
+    throw error;
+  }
+};

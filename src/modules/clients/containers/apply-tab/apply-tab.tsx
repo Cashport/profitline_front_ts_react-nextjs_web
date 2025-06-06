@@ -588,6 +588,7 @@ const ApplyTab: React.FC = () => {
           }
         }}
         selectedRows={selectedRows}
+        handleDeleteRow={handleRemoveRow}
       />
     </>
   );

@@ -56,8 +56,7 @@ const AccountingAdjustmentsTab = () => {
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
     line: filters.lines,
     zone: filters.zones,
-    channel: filters.channels,
-    motive_id: JustOthersMotiveType
+    channel: filters.channels
   });
 
   const { mutate: mutateApplyTabData } = useApplicationTable();
@@ -118,7 +117,7 @@ const AccountingAdjustmentsTab = () => {
   const handleOpenBalanceLegalization = () => {
     setIsModalOpen({ selected: 0 });
     openModal("balanceLegalization", {
-      financialDiscounts: selectedRows
+      selectedAdjustments: selectedRows
     });
   };
 

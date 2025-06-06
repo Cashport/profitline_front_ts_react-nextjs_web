@@ -1,73 +1,192 @@
 "use client";
-import { Flex, message, Modal, Select, Table, TableProps } from "antd";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Flex, Input, message, Modal, Select, Table, TableProps, Tooltip } from "antd";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Trash } from "phosphor-react";
+
+import {
+  balanceLegalization,
+  getAvailableAdjustmentsForSelect,
+  getFinancialRecordsToLegalize,
+  IAdjustmentsForSelect,
+  IAdjustmentToLegalize
+} from "@/services/accountingAdjustment/accountingAdjustment";
+import { extractSingleParam } from "@/utils/utils";
+import { useAppStore } from "@/lib/store/store";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
-
-import "./modalBalanceLegalization.scss";
-import { Controller, useForm } from "react-hook-form";
-import { Trash } from "phosphor-react";
 import IconButton from "@/components/atoms/IconButton/IconButton";
-import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
+import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+
+import "./modalBalanceLegalization.scss";
+
+interface IAdjustmentRow {
+  financialDiscountId: number;
+  difference?: number;
+  financialRecords?: {
+    id: number;
+    erp_id: string;
+    current_value: number;
+    fullOption?: IAdjustmentsForSelect; // Para guardar el objeto completo
+    title: string;
+  };
+  observation?: string;
+}
+
 interface IBalanceLegalizationFormValues {
-  rows: any[];
+  rows: IAdjustmentRow[];
 }
 interface Props {
   isOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
+  selectedAdjustments?: FinancialDiscount[];
 }
 
-const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
+const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Props) => {
+  const params = useParams();
+  const clientIdParam = extractSingleParam(params.clientId);
+  const clientId = clientIdParam || "";
+
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
 
-  const { control, handleSubmit } = useForm<IBalanceLegalizationFormValues>();
+  const [adjustmentsToLegalize, setAdjustmentsToLegalize] = useState<IAdjustmentToLegalize[]>([]);
+  const [selectAdjustments, setSelectAdjustments] = useState<IAdjustmentsForSelect[]>([]);
+  const [loadingRequest, setLoadingRequest] = useState(false);
+
+  const { control, handleSubmit, reset, watch } = useForm<IBalanceLegalizationFormValues>();
+
+  const { fields, remove } = useFieldArray({
+    control,
+    name: "rows"
+  });
+
   const closeModal = () => {
     onClose();
   };
-  const handleDeleteBalance = () => {
-    message.success("Funcionalidad en desarrollo");
+
+  useEffect(() => {
+    const fetchFinancialRecords = async () => {
+      if (!selectedAdjustments?.length) return;
+      try {
+        const res = await getFinancialRecordsToLegalize(selectedAdjustments.map((item) => item.id));
+        setAdjustmentsToLegalize(res);
+
+        if (res.length === 0) {
+          message.warning("No hay ajustes disponibles para legalizar");
+        }
+      } catch (error) {
+        message.error("Error al cargar ajustes a legalizar");
+      }
+    };
+    const fetchSelectAdjustments = async () => {
+      try {
+        const res = await getAvailableAdjustmentsForSelect(clientId);
+        setSelectAdjustments(res);
+
+        if (res.length === 0) {
+          message.warning("No hay ajustes disponibles para el select");
+        }
+      } catch (error) {
+        message.error("Error al cargar ajustes disponibles");
+      }
+    };
+
+    fetchFinancialRecords();
+    fetchSelectAdjustments();
+  }, [selectedAdjustments]);
+
+  useEffect(() => {
+    if (adjustmentsToLegalize.length > 0 && selectedAdjustments?.length) {
+      const defaultRows: IAdjustmentRow[] = adjustmentsToLegalize.map((item) => {
+        return {
+          financialDiscountId: item.id,
+          observation: ""
+        };
+      });
+
+      reset({ rows: defaultRows });
+    }
+  }, [adjustmentsToLegalize, selectedAdjustments, reset]);
+
+  const onSubmit = async (data: IBalanceLegalizationFormValues) => {
+    setLoadingRequest(true);
+
+    try {
+      const balances = data.rows.map((row) => ({
+        financialDiscountId: row.financialDiscountId,
+        financialDiscountIdBalance: row.financialRecords?.fullOption?.id || 0,
+        observation: row.observation || "",
+        financialRecordIds:
+          adjustmentsToLegalize
+            .find((item) => item.id === row.financialDiscountId)
+            ?.financialRecordsAsociate.map((record) => record.id) || []
+      }));
+
+      await balanceLegalization(balances);
+      message.success("Saldos legalizados correctamente");
+      onClose();
+    } catch (error) {
+      message.error(
+        `Error al legalizar los saldos: ${error instanceof Error ? error.message : "desconocido"}`
+      );
+    }
+    setLoadingRequest(false);
   };
 
-  const onSubmit = (data: IBalanceLegalizationFormValues) => {
-    console.info("Form data submitted:", data);
-    message.success("Datos enviados correctamente");
-  };
-
-  const columns: TableProps<any>["columns"] = [
+  const columns: TableProps<IAdjustmentRow>["columns"] = [
     {
       title: "Ajuste Cashport",
-      dataIndex: "adjustmentInfo",
-      key: "adjustmentInfo",
-      render: (adjustmentInfo) => {
+      dataIndex: "financialDiscountId",
+      key: "financialDiscountId",
+      render: (_: any, row) => {
+        // Find the matching adjustment for display info
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
           <Flex vertical className="modalBalanceLegalization__adjustmentInfo">
-            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{adjustmentInfo.NC_id}</p>
-            <p className="modalBalanceLegalization__adjustmentInfo__devId">
-              {adjustmentInfo.dev_id}
-            </p>
+            <p className="modalBalanceLegalization__adjustmentInfo__id">{adjustment?.id}</p>
+            <Tooltip title={adjustment?.comments}>
+              <p className="modalBalanceLegalization__adjustmentInfo__comment">
+                {adjustment?.comments}
+              </p>
+            </Tooltip>
           </Flex>
         );
-      }
+      },
+      width: 147
     },
     {
       title: "Monto",
       dataIndex: "ammount",
       key: "ammount",
-      render: (ammount) => {
-        return <span className="modalBalanceLegalization__amount">{formatMoney(ammount)}</span>;
+      render: (_: any, row) => {
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
+        return (
+          <span className="modalBalanceLegalization__amount fontMonoSpace">
+            {formatMoney(adjustment?.ammount ?? 0)}
+          </span>
+        );
       },
       align: "right"
     },
     {
       title: "Factura Asociada",
-      dataIndex: "commentary",
-      key: "commentary",
-      render: (invoiceId: any) => {
+      dataIndex: "financialDiscountId",
+      key: "financialRecordsAsociate",
+      render: (_: any, row) => {
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
-          <p className="modalBalanceLegalization__invoiceId">{invoiceId ? invoiceId : " - "}</p>
+          <>
+            {adjustment?.financialRecordsAsociate?.map((record) => (
+              <p key={record.id} className="modalBalanceLegalization__invoiceId">
+                {record.idErp ? record.idErp : " - "}
+              </p>
+            ))}
+          </>
         );
       }
     },
@@ -75,61 +194,115 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
       title: "Ajuste ERP",
       dataIndex: "adjustment",
       key: "adjustment",
-      render: (_: any, record: any, index: number) => (
+      render: (_: any, __: any, index: number) => (
         <Controller
           control={control}
-          name={`rows.${index}.adjustment`}
+          name={`rows.${index}.financialRecords`}
           rules={{ required: true }}
-          render={({ field }) => (
-            <Select
-              {...field}
-              labelInValue
-              value={
-                field.value
-                  ? {
-                      value: field.value,
-                      label:
-                        mockSelect.find((item) => item.nc_id === field.value)?.nc_id || field.value
-                    }
-                  : undefined
-              }
-              options={options}
-              optionRender={(option) => option.label}
-              className="modalBalanceLegalization__selectAdjustment"
-              onChange={(option) => {
-                field.onChange(option.value); // Guardas solo el nc_id
-              }}
-              placeholder=" - "
-              popupMatchSelectWidth={false}
-            />
-          )}
+          render={({ field }) => {
+            const allSelectedIds = watch("rows")
+              .map((row, i) => (i !== index ? row.financialRecords?.fullOption?.id : undefined))
+              .filter((id) => id !== undefined && id !== null);
+
+            const filteredOptions = selectAdjustments.map((item) => ({
+              value: item.id,
+              label: (
+                <Flex justify="space-between" gap={"6rem"}>
+                  <Flex vertical>
+                    <p className="modalBalanceLegalization__selectDropText">{item.erp_id}</p>
+                    <p className="modalBalanceLegalization__selectDropText -small">
+                      {item.comments}
+                    </p>
+                  </Flex>
+                  <p className="modalBalanceLegalization__selectDropText fontMonoSpace">
+                    {formatMoney(item.current_value)}
+                  </p>
+                </Flex>
+              ),
+              title: JSON.stringify(item),
+              disabled: allSelectedIds.includes(item.id)
+            }));
+
+            return (
+              <Select
+                {...field}
+                labelInValue
+                value={
+                  field.value
+                    ? {
+                        ...field.value,
+                        label:
+                          selectAdjustments.find((item) => item.id === field.value?.id)?.erp_id ||
+                          field.value.fullOption?.erp_id
+                      }
+                    : undefined
+                }
+                options={filteredOptions}
+                optionRender={(option) => option.label}
+                className="modalBalanceLegalization__selectAdjustment"
+                onChange={(option) => {
+                  const originalItem = option.title ? JSON.parse(option.title) : undefined;
+                  const newOption = {
+                    ...option,
+                    fullOption: originalItem
+                  };
+                  field.onChange(newOption);
+                }}
+                placeholder=" - "
+                popupMatchSelectWidth={false}
+              />
+            );
+          }}
         />
       ),
-      width: 200
+      width: 145
     },
     {
       title: "Diferencia",
       dataIndex: "difference",
       key: "difference",
-      render: (difference) => {
-        return <span>{formatMoney(difference)}</span>;
+      render: (_: any, row, index) => {
+        const watchedRow = watch(`rows.${index}.financialRecords`);
+        const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
+        const currentAdjustmentAmount = adjustment?.ammount ?? 0;
+        const currentValueSelect = watchedRow?.fullOption?.current_value || 0;
+        return (
+          <span className="fontMonoSpace">
+            {formatMoney(currentAdjustmentAmount - currentValueSelect)}{" "}
+          </span>
+        );
       },
       align: "right"
     },
     {
       title: "Observación",
       dataIndex: "observation",
-      key: "observation"
+      key: "observation",
+      render: (_: any, row, index) => (
+        <Controller
+          control={control}
+          name={`rows.${index}.observation`}
+          rules={{ required: true }}
+          render={({ field, fieldState }) => (
+            <Input
+              {...field}
+              placeholder="Agrega un comentario"
+              className={fieldState.invalid ? "inputText inputText__error" : "inputText"}
+            />
+          )}
+        />
+      ),
+      width: 300
     },
     {
       title: "",
       dataIndex: "",
       key: "actions",
-      render: () => {
+      render: (_: any, __, index) => {
         return (
           <span className="modalBalanceLegalization__iconActions">
             <IconButton
-              onClick={handleDeleteBalance}
+              onClick={() => remove(index)}
               icon={<Trash size={16} className="icon" />}
               className="iconDocument"
             />
@@ -143,7 +316,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
   return (
     <Modal
       className="modalBalanceLegalization"
-      width={1020}
+      width={1080}
       footer={null}
       open={isOpen}
       onCancel={closeModal}
@@ -157,7 +330,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
       <Table
         className="modalBalanceLegalization__documentsTable"
         columns={columns}
-        dataSource={mockData.map((item) => ({ ...item, key: item.id }))}
+        dataSource={fields.map((item) => ({ ...item, key: item.id }))}
         pagination={false}
         scroll={{ y: height - 400 }}
       />
@@ -166,69 +339,10 @@ const ModalBalanceLegalization = ({ isOpen, onClose }: Props) => {
         className="modalAuditRequirements__footerButtons"
         onClose={() => onClose(true)}
         handleOk={handleSubmit(onSubmit)}
-        isConfirmLoading={false}
+        isConfirmLoading={loadingRequest}
       />
     </Modal>
   );
 };
 
 export default ModalBalanceLegalization;
-
-const mockData = [
-  {
-    id: 1,
-    adjustmentInfo: {
-      NC_id: "NC-12345",
-      dev_id: "DEV-67890"
-    },
-    ammount: 102230,
-    commentary: "Factura 1",
-    audit: "Aprobar",
-    difference: 10000,
-    observation: "Observación 1"
-  },
-  {
-    id: 2,
-    adjustmentInfo: {
-      NC_id: "NC-54321",
-      dev_id: "DEV-09876"
-    },
-    ammount: 20421240,
-    commentary: "Factura 2",
-    audit: "Rechazar",
-    difference: 1234,
-    observation: "Observación 2"
-  }
-];
-
-const mockSelect = [
-  {
-    nc_id: "NC1234567",
-    dev_id: "4324234234",
-    amount: "$4.850.000"
-  },
-  {
-    nc_id: "NC8727829",
-    dev_id: "7654315151351",
-    amount: "$1.000.000"
-  },
-  {
-    nc_id: "NC9876543",
-    dev_id: "765431543534",
-    amount: "$5.000.000"
-  }
-];
-
-const options = mockSelect.map((item) => ({
-  value: item.nc_id,
-  label: (
-    <Flex justify="space-between" gap={"6rem"}>
-      <Flex vertical>
-        <p className="modalBalanceLegalization__selectDropText">{item.nc_id}</p>
-        <p className="modalBalanceLegalization__selectDropText -small">{item.dev_id}</p>
-      </Flex>
-      <p className="modalBalanceLegalization__selectDropText">{item.amount}</p>
-    </Flex>
-  ),
-  data: item // Guardamos los datos originales por si los necesitas luego
-}));
