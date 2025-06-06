@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Flex, Input, message, Modal, Select, Table, TableProps } from "antd";
+import { Flex, Input, message, Modal, Select, Table, TableProps, Tooltip } from "antd";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Trash } from "phosphor-react";
 
@@ -148,14 +148,16 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
           <Flex vertical className="modalBalanceLegalization__adjustmentInfo">
-            <p className="modalBalanceLegalization__adjustmentInfo__ncId">{adjustment?.id}</p>
-            <p className="modalBalanceLegalization__adjustmentInfo__devId">
-              {adjustment?.comments}
-            </p>
+            <p className="modalBalanceLegalization__adjustmentInfo__id">{adjustment?.id}</p>
+            <Tooltip title={adjustment?.comments}>
+              <p className="modalBalanceLegalization__adjustmentInfo__comment">
+                {adjustment?.comments}
+              </p>
+            </Tooltip>
           </Flex>
         );
       },
-      width: 120
+      width: 147
     },
     {
       title: "Monto",
@@ -164,7 +166,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
       render: (_: any, row) => {
         const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         return (
-          <span className="modalBalanceLegalization__amount">
+          <span className="modalBalanceLegalization__amount fontMonoSpace">
             {formatMoney(adjustment?.ammount ?? 0)}
           </span>
         );
@@ -212,7 +214,9 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
                       {item.comments}
                     </p>
                   </Flex>
-                  <p className="modalBalanceLegalization__selectDropText">{item.current_value}</p>
+                  <p className="modalBalanceLegalization__selectDropText fontMonoSpace">
+                    {formatMoney(item.current_value)}
+                  </p>
                 </Flex>
               ),
               title: JSON.stringify(item),
@@ -262,7 +266,11 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
         const adjustment = adjustmentsToLegalize.find((a) => a.id === row.financialDiscountId);
         const currentAdjustmentAmount = adjustment?.ammount ?? 0;
         const currentValueSelect = watchedRow?.fullOption?.current_value || 0;
-        return <span>{formatMoney(currentAdjustmentAmount - currentValueSelect)} </span>;
+        return (
+          <span className="fontMonoSpace">
+            {formatMoney(currentAdjustmentAmount - currentValueSelect)}{" "}
+          </span>
+        );
       },
       align: "right"
     },
@@ -308,7 +316,7 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
   return (
     <Modal
       className="modalBalanceLegalization"
-      width={1050}
+      width={1080}
       footer={null}
       open={isOpen}
       onCancel={closeModal}
