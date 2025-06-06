@@ -26,12 +26,15 @@
     }
 
     &__adjustmentInfo {
-        &__ncId {
+        &__id {
             color: $link;
             text-decoration: underline;
         }
-        &__devId {
+        &__comment {
             font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     }
 
