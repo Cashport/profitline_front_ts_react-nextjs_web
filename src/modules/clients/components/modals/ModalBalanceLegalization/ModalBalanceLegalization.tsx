@@ -250,6 +250,16 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
                 }}
                 placeholder=" - "
                 popupMatchSelectWidth={false}
+                showSearch
+                filterOption={(input, option) => {
+                  const item: IAdjustmentsForSelect = option?.title
+                    ? JSON.parse(option.title)
+                    : undefined;
+                  return (
+                    item?.erp_id.toLowerCase().includes(input.toLowerCase()) ||
+                    item?.comments.toLowerCase().includes(input.toLowerCase())
+                  );
+                }}
               />
             );
           }}
