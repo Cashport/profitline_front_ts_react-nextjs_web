@@ -33,6 +33,7 @@ import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/Mod
 import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -278,12 +279,7 @@ const ApplyTab: React.FC = () => {
         await removeMultipleRows(selectedRows.map((row) => row.id));
         showMessage("success", "Se han eliminado las filas correctamente");
         setIsModalOpen({ selected: 0 });
-        setSelectedRowKeys({
-          invoices: [],
-          payments: [],
-          discounts: []
-        });
-        setSelectedRows([]);
+        deselectAllRows();
         mutate();
       } catch (error) {
         showMessage(
@@ -291,6 +287,65 @@ const ApplyTab: React.FC = () => {
           `Error al eliminar ${selectedRows.length} fila${selectedRows.length > 1 ? "s" : ""} `
         );
       }
+    }
+    setLoadingRequest(false);
+  };
+
+  const handleDownloadLog = async () => {
+    try {
+      if (applicationData?.summary?.url_log) {
+        const response = await fetch(applicationData.summary.url_log);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const fileName = applicationData.summary.url_log.split("/").pop() || "log.txt";
+
+        // Crear un enlace invisible y disparar el click
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showMessage("success", "Log descargado correctamente");
+        setIsModalOpen({ selected: 0 });
+      } else {
+        showMessage("error", "No hay log disponible para descargar");
+      }
+    } catch (error) {
+      showMessage("error", "Error al descargar el log");
+    }
+  };
+
+  const deselectAllRows = () => {
+    setSelectedRowKeys({
+      invoices: [],
+      payments: [],
+      discounts: []
+    });
+    setSelectedRows([]);
+  };
+
+  const handleDeleteAllRows = async () => {
+    setLoadingRequest(true);
+    const allRowsIds = [
+      ...(applicationData?.payments?.map((payment) => payment.id) ?? []),
+      ...(applicationData?.invoices?.map((invoice) => invoice.id) ?? []),
+      ...(applicationData?.discounts?.map((discount) => discount.id) ?? [])
+    ];
+
+    try {
+      await removeMultipleRows(allRowsIds);
+      showMessage("success", "Se ha eliminado todo correctamente");
+      setIsModalOpen({ selected: 0 });
+      deselectAllRows();
+      mutate();
+    } catch (error) {
+      showMessage("error", "Error al eliminar todo");
     }
     setLoadingRequest(false);
   };
@@ -341,7 +396,7 @@ const ApplyTab: React.FC = () => {
           </Button>
         </Flex>
 
-        {isLoading || isValidating ? (
+        {isLoading ? (
           <Flex justify="center" align="center" style={{ height: "3rem", marginTop: "1rem" }}>
             <Spin />
           </Flex>
@@ -526,7 +581,8 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 3}
         onClose={() => setIsModalOpen({ selected: 0 })}
         handleOpenModal={handleOpenModal}
-        selectedRows={selectedRows?.map((row) => row.id)}
+        selectedRows={selectedRows}
+        downloadLog={handleDownloadLog}
       />
 
       <ModalConfirmAction
@@ -536,6 +592,32 @@ const ApplyTab: React.FC = () => {
         }}
         onOk={handleDeleteMultipleRows}
         title={`¿Está seguro de eliminar ${selectedRows?.length ?? 0} fila${(selectedRows?.length ?? 0) > 1 ? "s" : ""}?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
+      />
+
+      <ModalEditAdjustments
+        isOpen={isModalOpen.selected === 5}
+        onClose={(cancelClicked) => {
+          if (cancelClicked) {
+            setIsModalOpen({ selected: 3 });
+          } else {
+            setIsModalOpen({ selected: 0 });
+            deselectAllRows();
+            mutate();
+          }
+        }}
+        selectedRows={selectedRows}
+        handleDeleteRow={handleRemoveRow}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteAllRows}
+        title={`¿Está seguro de eliminar todo?`}
         okText="Eliminar"
         okLoading={loadingRequest}
       />

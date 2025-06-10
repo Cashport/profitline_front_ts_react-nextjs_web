@@ -25,4 +25,8 @@
         font-weight: 400;
         margin: 0;
     }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
 }

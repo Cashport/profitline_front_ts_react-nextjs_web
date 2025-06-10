@@ -1,0 +1,83 @@
+@import "@/styles/variables.scss";
+
+.modalBalanceLegalization {
+    max-height: 90%;
+    .ant-modal-content {
+        padding: 1.5rem !important;
+
+        .ant-modal-close {
+            margin: 0rem;
+        }
+    }
+
+    .ant-modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    &__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    &__description {
+        font-weight: 300;
+    }
+
+    &__adjustmentInfo {
+        &__id {
+            color: $link;
+            text-decoration: underline;
+        }
+        &__comment {
+            font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__invoiceId {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1e8ff3;
+    }
+
+    &__selectAdjustment {
+        height: 42px !important;
+        width: 125px;
+    }
+
+    &__selectDropText {
+        font-size: 0.75rem;
+
+        &.-small {
+            font-size: 0.625rem;
+            color: #505962;
+        }
+    }
+
+    .inputText {
+        background-color: $background-light;
+        height: 42px;
+        border-color: #f3f2f4;
+
+        &::placeholder {
+            color: #7d7c7c;
+        }
+
+        &:hover {
+            background-color: $background-light;
+        }
+
+        &__error {
+            background-color: $background-light;
+            border-color: $error;
+        }
+    }
+
+    .icon {
+        color: $gray;
+    }
+}

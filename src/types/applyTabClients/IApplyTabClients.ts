@@ -26,6 +26,9 @@ export interface IApplyTabRecord {
   adjustments_breakdown: IAdjustmentBreakdown;
   adjustments?: IApplyTabAdjustment[];
   erp_id: string | null;
+  motive_description?: string;
+  motive_id?: number;
+  cp_id: string;
 }
 
 export interface IApplyTabClients {
@@ -37,6 +40,7 @@ export interface IApplyTabClients {
     total_payments: number;
     total_discounts: number;
     total_balance: number;
+    url_log: string;
   };
 }
 

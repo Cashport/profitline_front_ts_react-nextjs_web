@@ -519,15 +519,19 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   {item.payment_id && (
                                     <div className={styles.adjustment}>
                                       ID del pago:
-                                      <div className={styles.idAdjustment}>
-                                        {item.payment_id}
-                                      </div>
+                                      <div className={styles.idAdjustment}>{item.payment_id}</div>
                                     </div>
                                   )}
                                 </div>
                               ) : (
                                 ""
                               )}
+
+                              {item.event_type_name === "Saldo Confirmado" ? (
+                                <div
+                                  className={styles.name}
+                                >{`Valor: ${formatMoney(item.ammount)}`}</div>
+                              ) : null}
 
                               {item.comments && (
                                 <div className={styles.commentsContainer}>

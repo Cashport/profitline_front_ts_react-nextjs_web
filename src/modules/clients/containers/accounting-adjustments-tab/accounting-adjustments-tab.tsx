@@ -3,7 +3,6 @@ import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
 import { CaretDoubleRight, DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
-import { mutate } from "swr";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
@@ -30,9 +29,11 @@ import {
 import "./accounting-adjustments-tab.scss";
 
 const AccountingAdjustmentsTab = () => {
-  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>(undefined);
+  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>();
   const [search, setSearch] = useState("");
-  const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
 
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -46,9 +47,12 @@ const AccountingAdjustmentsTab = () => {
     channels: []
   });
   const JustOthersMotiveType = 2; // no trae ajustes financieros
-  const { data, isLoading } = useFinancialDiscounts({
+  const {
+    data,
+    isLoading,
+    mutate: mutateFinancialDiscounts
+  } = useFinancialDiscounts({
     clientId,
-    projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
     line: filters.lines,
     zone: filters.zones,
@@ -84,7 +88,7 @@ const AccountingAdjustmentsTab = () => {
   };
 
   useEffect(() => {
-    mutate(`/financial-discount/project/${projectId}/client/${clientId}`);
+    mutateFinancialDiscounts();
   }, [modalType]);
 
   const handleAddSelectedAdjustmentsToApplicationTable = async () => {
@@ -95,7 +99,7 @@ const AccountingAdjustmentsTab = () => {
         "discounts",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
-      setIsModalActionPaymentOpen(false);
+      setIsModalOpen({ selected: 0 });
       showMessage("success", "Ajuste(s) añadidos a la tabla de aplicación de pagos");
       // mutate Applytable data
       mutateApplyTabData();
@@ -109,6 +113,17 @@ const AccountingAdjustmentsTab = () => {
         showMessage("error", `Error al añadir ajuste(s) a la tabla de aplicación de pagos`);
       }
     }
+  };
+
+  const handleOpenBalanceLegalization = () => {
+    setIsModalOpen({ selected: 0 });
+    openModal("balanceLegalization", {
+      selectedAdjustments: selectedRows
+    });
+  };
+
+  const handleOpenModal = (selected: number) => {
+    setIsModalOpen({ selected });
   };
 
   return (
@@ -132,7 +147,7 @@ const AccountingAdjustmentsTab = () => {
               size="large"
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
-              onClick={() => setIsModalActionPaymentOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })} // Open modal for actions
             >
               Generar acción
             </Button>
@@ -181,9 +196,12 @@ const AccountingAdjustmentsTab = () => {
         )}
 
         <ModalActionAccountingAdjustments
-          isOpen={isModalActionPaymentOpen}
-          onClose={() => setIsModalActionPaymentOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={() => setIsModalOpen({ selected: 0 })}
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
+          balanceLegalization={handleOpenBalanceLegalization}
+          handleOpenModal={handleOpenModal}
+          selectedRows={selectedRows}
         />
       </div>
     </>

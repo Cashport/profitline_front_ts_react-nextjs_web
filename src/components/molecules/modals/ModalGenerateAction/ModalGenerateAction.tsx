@@ -12,7 +12,8 @@ import {
   HandTap,
   PaperPlaneTilt,
   Paperclip,
-  Link
+  Link,
+  Invoice
 } from "@phosphor-icons/react";
 
 import "./modalgenerateaction.scss";
@@ -35,6 +36,7 @@ interface Props {
   validateInvoiceIsSelected: () => boolean;
   setSelectOpen: Dispatch<SetStateAction<{ selected: number }>>;
   addInvoicesToApplicationTable: () => void;
+  balanceLegalization?: () => void;
 }
 
 export const ModalGenerateAction = ({
@@ -44,7 +46,8 @@ export const ModalGenerateAction = ({
   validateInvoiceIsSelected,
   setShowActionDetailModal,
   setSelectOpen,
-  addInvoicesToApplicationTable
+  addInvoicesToApplicationTable,
+  balanceLegalization
 }: Props) => {
   const router = useRouter();
   const handleActionDetail = (type: number) => {
@@ -152,6 +155,11 @@ export const ModalGenerateAction = ({
           onClick={() => {
             handleOpenModal(8);
           }}
+        />
+        <ButtonGenerateAction
+          icon={<Invoice size={16} />}
+          title="Legalizar saldo"
+          onClick={balanceLegalization}
         />
       </Flex>
     </Modal>
