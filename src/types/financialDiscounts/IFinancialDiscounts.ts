@@ -1,3 +1,5 @@
+import { Pagination } from "../global/IGlobal";
+
 export interface FinancialDiscount {
   id: number;
   sucursal_id: number | null;
@@ -42,4 +44,10 @@ export interface StatusFinancialDiscounts {
   total: number;
   legalized: boolean;
   count: number;
+  page: Pagination;
+}
+
+export interface IFinancialDiscountsResponse {
+  count: number;
+  rows: StatusFinancialDiscounts[];
 }

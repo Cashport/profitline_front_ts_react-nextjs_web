@@ -5,18 +5,23 @@ import { Eye } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 
-import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+import {
+  FinancialDiscount,
+  StatusFinancialDiscounts
+} from "@/types/financialDiscounts/IFinancialDiscounts";
 
 import "./accounting-adjustments-table.scss";
 
 const { Text } = Typography;
 
 interface PropsInvoicesTable {
-  dataAdjustmentsByStatus: FinancialDiscount[];
+  dataAdjustmentsByStatus: StatusFinancialDiscounts;
   setSelectedRows: Dispatch<SetStateAction<FinancialDiscount[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
   openAdjustmentDetail: (adjustment: FinancialDiscount) => void;
   financialStatusId: number;
+  // eslint-disable-next-line no-unused-vars
+  fetchData: (newPage: number) => void;
   legalized?: boolean;
   selectedRows?: FinancialDiscount[];
 }
@@ -26,12 +31,15 @@ const AccountingAdjustmentsTable = ({
   setSelectedRows,
   openAdjustmentDetail,
   financialStatusId,
+  fetchData,
   legalized,
   selectedRows
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     if (selectedRows) {
       const updatedKeys = selectedRowKeys.filter((key) =>
@@ -96,6 +104,11 @@ const AccountingAdjustmentsTable = ({
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange
+  };
+
+  const handleTableChange = (page: number) => {
+    setCurrentPage(page);
+    fetchData(page);
   };
 
   const columns: TableProps<FinancialDiscount>["columns"] = [
@@ -178,10 +191,16 @@ const AccountingAdjustmentsTable = ({
       <Table
         className="adjustmentsTable customSticky"
         columns={columns}
-        dataSource={data?.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data?.financial_discounts?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-        pagination={false}
+        pagination={{
+          current: currentPage,
+          pageSize: data.page.rowsperpage,
+          total: data.page.totalPages,
+          onChange: handleTableChange,
+          showSizeChanger: false
+        }}
         sticky={{ offsetHeader: 160 }}
       />
     </>

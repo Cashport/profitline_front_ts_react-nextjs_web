@@ -1,9 +1,12 @@
-import useSWR, { mutate } from "swr";
-import { fetcher } from "@/utils/api/api";
-import { StatusFinancialDiscounts } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { useCallback, useEffect, useState } from "react";
+import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
+import {
+  IFinancialDiscountsResponse,
+  StatusFinancialDiscounts
+} from "@/types/financialDiscounts/IFinancialDiscounts";
 
-interface Props {
+interface Params {
   clientId: string;
   projectId: number;
   id?: number;
@@ -14,37 +17,82 @@ interface Props {
   searchQuery?: string;
   page?: number;
   motive_id?: number;
+  statusId?: string | number;
 }
 
-export const useFinancialDiscounts = ({
-  clientId,
-  projectId,
-  id,
-  line,
-  subline,
-  channel,
-  zone,
-  searchQuery,
-  motive_id,
-  page = 1
-}: Props) => {
-  const idQuery = id ? `&id=${id}` : "";
-  const lineQuery = line && line.length > 0 ? `&line=${line.join(",")}` : "";
-  const sublineQuery = subline && subline.length > 0 ? `&subline=${subline.join(",")}` : "";
-  const channelQuery = channel && channel.length > 0 ? `&channel=${channel.join(",")}` : "";
-  const zoneQuery = zone && zone.length > 0 ? `&zone=${zone.join(",")}` : "";
-  const motiveQuery = motive_id ? `&motive_id=${motive_id}` : "";
-  const searchQueryParam = searchQuery
-    ? `&searchQuery=${encodeURIComponent(searchQuery.toLowerCase().trim())}`
-    : "";
+export const useFinancialDiscounts = (initialParams: Params) => {
+  const [data, setData] = useState<IFinancialDiscountsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
-  const pathKey = `/financial-discount/project/${projectId}/client/${clientId}?page=${page}${idQuery}${lineQuery}${sublineQuery}${channelQuery}${zoneQuery}${searchQueryParam}${motiveQuery}`;
+  const fetchData = useCallback(
+    async (overrideParams?: Partial<Params>, mergeByStatus = false) => {
+      setIsLoading(true);
+      try {
+        const params = { ...initialParams, ...overrideParams };
 
-  const { data, error } = useSWR<GenericResponse<StatusFinancialDiscounts[]>>(pathKey, fetcher, {});
+        const response: GenericResponse<IFinancialDiscountsResponse> = await API.post(
+          `/financial-discount/get-project/${params.projectId}/client/${params.clientId}`,
+          {
+            id: params.id,
+            line: params.line,
+            subline: params.subline,
+            channel: params.channel,
+            zone: params.zone,
+            searchQuery: params.searchQuery,
+            page: params.page,
+            motive_id: params.motive_id,
+            statusId: params.statusId
+          }
+        );
+
+        if (mergeByStatus && params.statusId && response.data?.rows?.length > 0) {
+          const updatedStatus: StatusFinancialDiscounts = response.data.rows[0];
+          setData((prev) => {
+            if (!prev) return response.data;
+            return {
+              ...prev,
+              rows: prev.rows.map((item) =>
+                item.status_id === updatedStatus.status_id ? updatedStatus : item
+              ),
+              count: prev.count
+            };
+          });
+        } else {
+          setData(response.data);
+        }
+
+        setError(null);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      initialParams.clientId,
+      initialParams.projectId,
+      initialParams.id,
+      initialParams.line?.join(","),
+      initialParams.subline?.join(","),
+      initialParams.channel?.join(","),
+      initialParams.zone?.join(","),
+      initialParams.searchQuery,
+      initialParams.page,
+      initialParams.motive_id,
+      initialParams.statusId
+    ]
+  );
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return {
-    data: data?.data || [],
-    isLoading: !error && !data,
-    mutate
+    data,
+    isLoading,
+    error,
+    refetchByStatus: (statusId: string | number, page?: number) =>
+      fetchData({ statusId, page }, true)
   };
 };

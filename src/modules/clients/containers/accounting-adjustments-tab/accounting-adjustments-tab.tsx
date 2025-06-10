@@ -46,29 +46,33 @@ const AccountingAdjustmentsTab = () => {
     channels: []
   });
   const JustOthersMotiveType = 2; // no trae ajustes financieros
-  const { data, isLoading } = useFinancialDiscounts({
+  const { data, isLoading, refetchByStatus } = useFinancialDiscounts({
     clientId,
     projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
-    line: filters.lines,
-    zone: filters.zones,
-    channel: filters.channels,
-    motive_id: JustOthersMotiveType
+    line: filters.lines.length > 0 ? filters.lines : undefined,
+    zone: filters.zones.length > 0 ? filters.zones : undefined,
+    channel: filters.channels.length > 0 ? filters.channels : undefined,
+    motive_id: JustOthersMotiveType,
+    searchQuery: debouncedSearchQuery.length > 0 ? debouncedSearchQuery : undefined
   });
 
   const { mutate: mutateApplyTabData } = useApplicationTable();
 
   // useMemo to add the key financial_status_id to each row in the data
   const modifiedData = useMemo(() => {
-    return data?.map((financialState: StatusFinancialDiscounts) => {
-      return {
-        ...financialState,
-        financial_discounts: financialState.financial_discounts.map((adjustment) => ({
-          ...adjustment,
-          financial_status_id: financialState.status_id
-        }))
-      };
-    });
+    if (data && !Array.isArray(data) && "rows" in data) {
+      return data.rows.map((financialState: StatusFinancialDiscounts) => {
+        return {
+          ...financialState,
+          financial_discounts: financialState.financial_discounts.map((adjustment) => ({
+            ...adjustment,
+            financial_status_id: financialState.status_id
+          }))
+        };
+      });
+    }
+    return [];
   }, [data]);
 
   const { openModal, modalType } = useModalDetail();
@@ -109,6 +113,12 @@ const AccountingAdjustmentsTab = () => {
         showMessage("error", `Error al añadir ajuste(s) a la tabla de aplicación de pagos`);
       }
     }
+  };
+
+  const getAccountingAdjustmentsById = async (statusId: string | number, newPage?: number) => {
+    console.log("Fetching adjustments by ID:", statusId, "Page:", newPage);
+    // Here you can implement the logic to fetch adjustments by status ID
+    await refetchByStatus(statusId, newPage);
   };
 
   return (
@@ -167,12 +177,15 @@ const AccountingAdjustmentsTab = () => {
               children: (
                 <>
                   <AccountingAdjustmentsTable
-                    dataAdjustmentsByStatus={financialState.financial_discounts}
+                    dataAdjustmentsByStatus={financialState}
                     setSelectedRows={setSelectedRows}
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
                     selectedRows={selectedRows}
+                    fetchData={(page: number) => {
+                      getAccountingAdjustmentsById(financialState.status_id, page);
+                    }}
                   />
                 </>
               )
