@@ -74,7 +74,6 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
     }
 
     if (activeKey === "3") {
-      console.log("Ajustes contables mutando");
       mutateFinancialDiscounts();
     }
   };
