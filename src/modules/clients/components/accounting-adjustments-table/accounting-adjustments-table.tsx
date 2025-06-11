@@ -38,7 +38,6 @@ const AccountingAdjustmentsTable = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (selectedRows) {
@@ -107,7 +106,6 @@ const AccountingAdjustmentsTable = ({
   };
 
   const handleTableChange = (page: number) => {
-    setCurrentPage(page);
     fetchData(page);
   };
 
@@ -189,15 +187,16 @@ const AccountingAdjustmentsTable = ({
   return (
     <>
       <Table
+        key={data.page.actualPage}
         className="adjustmentsTable customSticky"
         columns={columns}
         dataSource={data?.financial_discounts?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
         pagination={{
-          current: currentPage,
-          pageSize: data.page.rowsperpage,
-          total: data.page.totalPages,
+          current: data.page.actualPage,
+          pageSize: data.page.rowsPerPage,
+          total: data.page.totalRows,
           onChange: handleTableChange,
           showSizeChanger: false
         }}

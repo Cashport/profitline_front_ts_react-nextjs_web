@@ -116,8 +116,6 @@ const AccountingAdjustmentsTab = () => {
   };
 
   const getAccountingAdjustmentsById = async (statusId: string | number, newPage?: number) => {
-    console.log("Fetching adjustments by ID:", statusId, "Page:", newPage);
-    // Here you can implement the logic to fetch adjustments by status ID
     await refetchByStatus(statusId, newPage);
   };
 
@@ -165,7 +163,7 @@ const AccountingAdjustmentsTab = () => {
           <Collapse
             stickyLabel
             items={modifiedData?.map((financialState: StatusFinancialDiscounts) => ({
-              key: financialState.status_id,
+              key: `${financialState.status_id}${financialState.page.actualPage}`,
               label: (
                 <LabelCollapse
                   status={financialState.status_name}

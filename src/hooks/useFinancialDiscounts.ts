@@ -43,6 +43,7 @@ export const useFinancialDiscounts = (initialParams: Params) => {
             page: params.page,
             motive_id: params.motive_id,
             statusId: params.statusId
+            // rowsPerPage: 2 // Default value, can be adjusted as needed
           }
         );
 
@@ -54,8 +55,7 @@ export const useFinancialDiscounts = (initialParams: Params) => {
               ...prev,
               rows: prev.rows.map((item) =>
                 item.status_id === updatedStatus.status_id ? updatedStatus : item
-              ),
-              count: prev.count
+              )
             };
           });
         } else {
