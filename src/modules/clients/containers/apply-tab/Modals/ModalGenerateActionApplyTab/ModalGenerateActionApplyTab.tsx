@@ -38,6 +38,13 @@ export const ModalGenerateActionApplyTab = ({
       <Flex vertical gap={12}>
         <ButtonGenerateAction
           onClick={() => {
+            handleOpenModal(6);
+          }}
+          icon={<Trash size={20} />}
+          title="Eliminar todas las filas"
+        />
+        <ButtonGenerateAction
+          onClick={() => {
             handleOpenModal(4);
           }}
           icon={<Trash size={20} />}

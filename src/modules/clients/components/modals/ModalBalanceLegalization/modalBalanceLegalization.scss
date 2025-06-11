@@ -26,12 +26,15 @@
     }
 
     &__adjustmentInfo {
-        &__ncId {
+        &__id {
             color: $link;
             text-decoration: underline;
         }
-        &__devId {
+        &__comment {
             font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     }
 
@@ -42,8 +45,8 @@
     }
 
     &__selectAdjustment {
-        height: 42px;
-        width: 180px;
+        height: 42px !important;
+        width: 125px;
     }
 
     &__selectDropText {
@@ -52,6 +55,25 @@
         &.-small {
             font-size: 0.625rem;
             color: #505962;
+        }
+    }
+
+    .inputText {
+        background-color: $background-light;
+        height: 42px;
+        border-color: #f3f2f4;
+
+        &::placeholder {
+            color: #7d7c7c;
+        }
+
+        &:hover {
+            background-color: $background-light;
+        }
+
+        &__error {
+            background-color: $background-light;
+            border-color: $error;
         }
     }
 

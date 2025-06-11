@@ -1,10 +1,14 @@
-import { CaretLeft } from "phosphor-react";
 import { Dispatch, FC, SetStateAction, createContext, useEffect, useMemo, useState } from "react";
-import { Button, Flex, Spin } from "antd";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { Button, Flex, Spin } from "antd";
+import { CaretLeft } from "phosphor-react";
 
+import { extractSingleParam } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 import { useClientDetails } from "../../hooks/client-details/client-details.hook";
+import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
+
 import { WalletTab } from "@/components/organisms/Customers/WalletTab/WalletTab";
 import Dashboard from "../dashboard";
 import InvoiceActionsModal from "../invoice-actions-modal";
@@ -37,6 +41,9 @@ export const ClientDetailsContext = createContext<ClientDetailsContextType>(
 );
 
 export const ClientDetails: FC<ClientDetailsProps> = () => {
+  const params = useParams();
+  const clientId = extractSingleParam(params.clientId) || "";
+
   const [filters, setFilters] = useState<IClientPortfolioFilters>({
     zones: [],
     lines: [],
@@ -47,7 +54,9 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
   });
 
   const { data: portfolioData, error, mutate } = useClientDetails(filters);
+  const { mutate: mutateFinancialDiscounts } = useFinancialDiscounts({ clientId });
   const { showMessage } = useMessageApi();
+
   const [showInvoiceActionsModal, setShowInvoiceActionsModal] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<InvoiceAction>(InvoiceAction.GenerateAction);
   const [activeTab, setActiveTab] = useState<string>("1");
@@ -62,6 +71,10 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
     setActiveTab(activeKey);
     if (activeKey === "1") {
       mutate();
+    }
+
+    if (activeKey === "3") {
+      mutateFinancialDiscounts();
     }
   };
 

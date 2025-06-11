@@ -330,6 +330,26 @@ const ApplyTab: React.FC = () => {
     setSelectedRows([]);
   };
 
+  const handleDeleteAllRows = async () => {
+    setLoadingRequest(true);
+    const allRowsIds = [
+      ...(applicationData?.payments?.map((payment) => payment.id) ?? []),
+      ...(applicationData?.invoices?.map((invoice) => invoice.id) ?? []),
+      ...(applicationData?.discounts?.map((discount) => discount.id) ?? [])
+    ];
+
+    try {
+      await removeMultipleRows(allRowsIds);
+      showMessage("success", "Se ha eliminado todo correctamente");
+      setIsModalOpen({ selected: 0 });
+      deselectAllRows();
+      mutate();
+    } catch (error) {
+      showMessage("error", "Error al eliminar todo");
+    }
+    setLoadingRequest(false);
+  };
+
   return (
     <>
       <ModalResultAppy
@@ -588,6 +608,18 @@ const ApplyTab: React.FC = () => {
           }
         }}
         selectedRows={selectedRows}
+        handleDeleteRow={handleRemoveRow}
+      />
+
+      <ModalConfirmAction
+        isOpen={isModalOpen.selected === 6}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+        }}
+        onOk={handleDeleteAllRows}
+        title={`¿Está seguro de eliminar todo?`}
+        okText="Eliminar"
+        okLoading={loadingRequest}
       />
     </>
   );
