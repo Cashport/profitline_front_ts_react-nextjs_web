@@ -34,7 +34,6 @@ export const useFinancialDiscounts = (initialParams: Params) => {
         const response: GenericResponse<IFinancialDiscountsResponse> = await API.post(
           `/financial-discount/get-project/${params.projectId}/client/${params.clientId}`,
           {
-            id: params.id,
             line: params.line,
             subline: params.subline,
             channel: params.channel,
