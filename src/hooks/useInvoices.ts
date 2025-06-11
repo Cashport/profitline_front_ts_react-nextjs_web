@@ -40,6 +40,7 @@ export const useInvoices = (initialParams: Params = {}) => {
           {
             page: paramsToSend.page ?? 1,
             limit: paramsToSend.limit ?? 50,
+            searchQuery: paramsToSend.searchQuery,
             payment_agrement: paramsToSend.paymentAgreement,
             radication_type: paramsToSend.radicationType,
             line: paramsToSend.lines,
