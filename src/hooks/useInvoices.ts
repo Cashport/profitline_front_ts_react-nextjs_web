@@ -15,6 +15,7 @@ interface Params {
   zones?: number[];
   channels?: number[];
   searchQuery?: string;
+  statusId?: string | number;
 }
 
 export const useInvoices = (initialParams: Params = {}) => {
@@ -29,7 +30,7 @@ export const useInvoices = (initialParams: Params = {}) => {
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
 
   const fetchData = useCallback(
-    async (overrideParams?: Partial<Params>) => {
+    async (overrideParams?: Partial<Params>, mergeByStatus = false) => {
       setIsLoading(true);
       try {
         const paramsToSend = { ...initialParams, ...overrideParams };
@@ -44,12 +45,24 @@ export const useInvoices = (initialParams: Params = {}) => {
             line: paramsToSend.lines,
             subline: paramsToSend.sublines,
             zone: paramsToSend.zones,
-            channel: paramsToSend.channels
+            channel: paramsToSend.channels,
+            statusId: paramsToSend.statusId
             // rowsPerPage: 2 // Default value, can be adjusted as needed
           }
         );
 
-        setData(response.data);
+        if (mergeByStatus && paramsToSend.statusId && response.data?.length > 0) {
+          const updatedGroup = response.data[0];
+          setData((prev) => {
+            if (!prev) return response.data;
+            return prev.map((item) =>
+              item.status_id === updatedGroup.status_id ? updatedGroup : item
+            );
+          });
+        } else {
+          setData(response.data);
+        }
+
         setError(null);
       } catch (err) {
         setError(err);
@@ -68,7 +81,7 @@ export const useInvoices = (initialParams: Params = {}) => {
       initialParams.sublines?.join(","),
       initialParams.zones?.join(","),
       initialParams.channels?.join(","),
-      initialParams.searchQuery
+      initialParams.statusId
     ]
   );
 
@@ -80,7 +93,8 @@ export const useInvoices = (initialParams: Params = {}) => {
     data,
     isLoading,
     error,
-    refetch: fetchData,
+    refetchByStatus: (statusId: string | number, page?: number) =>
+      fetchData({ statusId, page }, true),
     mutate: () => fetchData()
   };
 };

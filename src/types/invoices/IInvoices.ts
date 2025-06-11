@@ -1,3 +1,5 @@
+import { Pagination } from "../global/IGlobal";
+
 export interface InvoicesData {
   status: string;
   color: string;
@@ -5,6 +7,7 @@ export interface InvoicesData {
   invoices: IInvoice[] | IApplicationInvoice[];
   total: number;
   count: number;
+  page: Pagination;
 }
 
 export interface IInvoice {
