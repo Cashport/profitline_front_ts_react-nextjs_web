@@ -1,7 +1,4 @@
-export interface IInvoices {
-  error: boolean;
-  data: InvoicesData[];
-}
+import { Pagination } from "../global/IGlobal";
 
 export interface InvoicesData {
   status: string;
@@ -10,6 +7,7 @@ export interface InvoicesData {
   invoices: IInvoice[] | IApplicationInvoice[];
   total: number;
   count: number;
+  page: Pagination;
 }
 
 export interface IInvoice {
