@@ -30,7 +30,7 @@ import ModalCreateAdjustment from "./Modals/ModalCreateAdjustment/ModalCreateAdj
 import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
-import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
+import ModalApplyAI from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
@@ -571,7 +571,7 @@ const ApplyTab: React.FC = () => {
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
       />
-      <ModalUploadRequirements
+      <ModalApplyAI
         isOpen={isModalOpen.selected === 2}
         onClose={() => setIsModalOpen({ selected: 0 })}
         mutate={mutate}
