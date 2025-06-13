@@ -227,13 +227,19 @@ export const updateInvoiceOrPaymentAmount = async (
   }
 };
 
-export const applyWithCashportAI = async (projectId: number, clientId: string, files: File[]) => {
+export const applyWithCashportAI = async (
+  projectId: number,
+  clientId: string,
+  files: File[],
+  comment: string
+) => {
   const formData = new FormData();
   formData.append("client", clientId);
   formData.append("project", String(projectId));
   files.forEach((file) => {
     formData.append("attachment", file);
   });
+  formData.append("comment", comment);
 
   try {
     const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
