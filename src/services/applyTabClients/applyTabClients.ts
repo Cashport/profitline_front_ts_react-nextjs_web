@@ -240,7 +240,7 @@ export const applyWithCashportAI = async (
     formData.append("attachment", file);
   });
 
-  if (comment) formData.append("comment", comment);
+  if (comment) formData.append("content", comment);
 
   try {
     const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
