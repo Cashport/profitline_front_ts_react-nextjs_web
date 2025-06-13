@@ -50,11 +50,7 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const handleAnalyzeFiles = async () => {
     setLoading(true);
     try {
-      if (!commentary)
-        return (
-          message.warning("Por favor, ingresa un comentario antes de continuar."), setLoading(false)
-        );
-      await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary || "");
+      await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary);
       message.success("Archivos analizados con CashportAI");
       mutate();
       closeModal();

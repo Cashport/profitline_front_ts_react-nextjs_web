@@ -231,7 +231,7 @@ export const applyWithCashportAI = async (
   projectId: number,
   clientId: string,
   files: File[],
-  comment: string
+  comment?: string
 ) => {
   const formData = new FormData();
   formData.append("client", clientId);
@@ -239,7 +239,8 @@ export const applyWithCashportAI = async (
   files.forEach((file) => {
     formData.append("attachment", file);
   });
-  formData.append("comment", comment);
+
+  if (comment) formData.append("comment", comment);
 
   try {
     const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
