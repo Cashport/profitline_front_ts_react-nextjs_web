@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 
 import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { ISelectedAccountingRows } from "../../containers/accounting-adjustments-tab/accounting-adjustments-tab";
 
 import "./accounting-adjustments-table.scss";
 
@@ -13,12 +14,12 @@ const { Text } = Typography;
 
 interface PropsInvoicesTable {
   dataAdjustmentsByStatus: FinancialDiscount[];
-  setSelectedRows: Dispatch<SetStateAction<FinancialDiscount[] | undefined>>;
+  setSelectedRows: Dispatch<SetStateAction<ISelectedAccountingRows[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
   openAdjustmentDetail: (adjustment: FinancialDiscount) => void;
   financialStatusId: number;
   legalized?: boolean;
-  selectedRows?: FinancialDiscount[];
+  selectedRows?: ISelectedAccountingRows[];
 }
 
 const AccountingAdjustmentsTable = ({
@@ -32,6 +33,7 @@ const AccountingAdjustmentsTable = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
   useEffect(() => {
     if (selectedRows) {
       const updatedKeys = selectedRowKeys.filter((key) =>
@@ -49,6 +51,11 @@ const AccountingAdjustmentsTable = ({
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: any) => {
+    if (newSelectedRowKeys.length === 0) {
+      setSelectedRowKeys([]);
+      setSelectedRows(undefined);
+    }
+
     setSelectedRowKeys(newSelectedRowKeys);
     if (newSelectedRowKeys.length >= 1) {
       // set the selected Rows but adding to the previous selected rows
@@ -61,10 +68,10 @@ const AccountingAdjustmentsTable = ({
           );
 
           //filters the unselected rows but only the ones that have the status_id equal to financialStatusId
+          // If we want to recover this we need in eachRow the label id
           const unCheckedRows = prevSelectedRows?.filter(
-            (prevSelectedRow) =>
-              !newSelectedRowKeys.includes(prevSelectedRow.id) &&
-              prevSelectedRow.financial_status_id === financialStatusId
+            (prevSelectedRow) => !newSelectedRowKeys.includes(prevSelectedRow.id)
+            // prevSelectedRow.label_status_id === financialStatusId
           );
 
           if (unCheckedRows.length > 0) {
@@ -176,6 +183,7 @@ const AccountingAdjustmentsTable = ({
   return (
     <>
       <Table
+        key={data?.length}
         className="adjustmentsTable customSticky"
         columns={columns}
         dataSource={data?.map((data) => ({ ...data, key: data.id }))}

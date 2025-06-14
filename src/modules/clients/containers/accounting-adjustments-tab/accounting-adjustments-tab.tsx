@@ -28,8 +28,12 @@ import {
 
 import "./accounting-adjustments-tab.scss";
 
+export interface ISelectedAccountingRows extends FinancialDiscount {
+  label_status_id: number;
+}
+
 const AccountingAdjustmentsTab = () => {
-  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>();
+  const [selectedRows, setSelectedRows] = useState<ISelectedAccountingRows[] | undefined>();
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
@@ -187,7 +191,10 @@ const AccountingAdjustmentsTab = () => {
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
-                    selectedRows={selectedRows}
+                    selectedRows={selectedRows?.map((item) => ({
+                      ...item,
+                      label_status_id: financialState.status_id
+                    }))}
                   />
                 </>
               )

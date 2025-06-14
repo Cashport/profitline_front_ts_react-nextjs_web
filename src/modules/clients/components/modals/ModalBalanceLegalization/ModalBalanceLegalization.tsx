@@ -102,16 +102,42 @@ const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Prop
 
   useEffect(() => {
     if (adjustmentsToLegalize.length > 0 && selectedAdjustments?.length) {
+      const usedIds = new Set<number>();
+
       const defaultRows: IAdjustmentRow[] = adjustmentsToLegalize.map((item) => {
+        const closestMatch = selectAdjustments.reduce<IAdjustmentsForSelect | null>(
+          (prev, curr) => {
+            if (usedIds.has(curr.id)) return prev;
+
+            const prevDiff = prev ? Math.abs(prev.current_value - item.ammount) : Infinity;
+            const currDiff = Math.abs(curr.current_value - item.ammount);
+            return currDiff < prevDiff ? curr : prev;
+          },
+          null
+        );
+
+        if (closestMatch) {
+          usedIds.add(closestMatch.id);
+        }
+
         return {
           financialDiscountId: item.id,
-          observation: ""
+          observation: "",
+          financialRecords: closestMatch
+            ? {
+                id: closestMatch.id,
+                erp_id: closestMatch.erp_id,
+                current_value: closestMatch.current_value,
+                fullOption: closestMatch,
+                title: closestMatch.comments || ""
+              }
+            : undefined
         };
       });
 
       reset({ rows: defaultRows });
     }
-  }, [adjustmentsToLegalize, selectedAdjustments, reset]);
+  }, [adjustmentsToLegalize, selectedAdjustments, reset, selectAdjustments]);
 
   const onSubmit = async (data: IBalanceLegalizationFormValues) => {
     setLoadingRequest(true);
