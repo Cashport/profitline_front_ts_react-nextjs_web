@@ -81,6 +81,12 @@
         cursor: pointer;
     }
 
+    &__description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .selectedRow {
         td {
             background-color: inherit !important;

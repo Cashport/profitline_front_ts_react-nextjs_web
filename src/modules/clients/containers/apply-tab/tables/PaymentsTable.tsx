@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { Button, Dropdown, Table, TableProps } from "antd";
+import { Button, Dropdown, Table, TableProps, Tooltip } from "antd";
 import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -48,6 +48,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       render: (date) => <p>{date ? formatDate(date) : "-"}</p>,
       sorter: (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
       showSorterTooltip: false
+    },
+    {
+      title: "Comentario",
+      dataIndex: "entity_description",
+      key: "entity_description",
+      render: (entity_description) => (
+        <Tooltip title={entity_description}>
+          <p className="sectionContainerTable__description">{entity_description}</p>
+        </Tooltip>
+      )
     },
     {
       title: "Monto",
