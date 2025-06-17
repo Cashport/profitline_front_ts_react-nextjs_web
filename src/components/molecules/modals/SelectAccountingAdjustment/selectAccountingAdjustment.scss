@@ -1,67 +1,68 @@
 .ant-modal-content {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .modalContentScroll {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  scrollbar-width: thin;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    scrollbar-width: thin;
+    max-height: 50vh;
 }
 
 .modalContent {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 0.5rem;
 
-  .subTitleModalAction {
-    font-size: 1rem;
-    font-style: normal;
-    font-weight: 300;
-    line-height: 1.25rem;
-  }
+    .subTitleModalAction {
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 300;
+        line-height: 1.25rem;
+    }
 }
 
 .conten_modal_select_ajust {
-  display: flex;
-  flex-direction: column;
-  height: 96%;
-  justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    height: 96%;
+    justify-content: space-between;
 }
 
 .button__create__action {
-  display: flex;
-  align-items: center;
-  font-size: 1.125rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  gap: 0.5rem;
-  padding: 1.5rem 0;
-  border: none;
-  background-color: #ffff;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+    border: none;
+    background-color: #ffff;
+    cursor: pointer;
 }
 
 .button__action__text {
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  padding: 0 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  flex-grow: 1;
-  border: none;
-  box-shadow: none;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    padding: 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    flex-grow: 1;
+    border: none;
+    box-shadow: none;
 
-  &__green {
-    background-color: #cbe71e;
-  }
+    &__green {
+        background-color: #cbe71e;
+    }
 
-  &__white {
-    background-color: #ffff;
-    border: solid 2px;
-  }
+    &__white {
+        background-color: #ffff;
+        border: solid 2px;
+    }
 }

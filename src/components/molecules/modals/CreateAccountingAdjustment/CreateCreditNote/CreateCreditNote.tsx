@@ -11,6 +11,8 @@ import { formatDateBars } from "@/utils/utils";
 import { InputDateRange } from "@/components/atoms/inputs/InputDateRange/InputDateRange";
 import { MessageInstance } from "antd/es/message/interface";
 import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+
 interface IformDiscount {
   motive: string;
   amount: number;
@@ -122,21 +124,14 @@ export const CreateCreditNote = ({ onClose, messageApi, projectIdParam, clientId
             error={errors.validity_range as FieldError}
             optional
           />
-          <button
-            type="button"
-            className="button__action__text button__action__text__white"
-            onClick={() => onClose()}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={`button__action__text ${isValid ? "button__action__text__green" : ""}`}
-            disabled={!isValid || isSubmitting}
-          >
-            {isSubmitting ? "Creando..." : "      Crear Nota Crédito"}
-          </button>
         </div>
+        <FooterButtons
+          className="createCreditCustom__footer"
+          handleOk={handleSubmit(handleSubmitForm)}
+          onClose={onClose}
+          isConfirmDisabled={!isValid || isSubmitting}
+          titleConfirm="Crear Nota Crédito"
+        />
       </form>
     </div>
   );

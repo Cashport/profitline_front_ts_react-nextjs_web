@@ -160,7 +160,12 @@ export const ConcilationTable = ({
               addSelectMotive(record.id, motives?.find((motive) => motive.name === value)?.id || 0)
             }
             value={motives?.find((motive) => motive.id === record.motive_id)?.name}
-            style={{ width: "100%" }}
+            style={{ width: "100%", height: "34px", maxWidth: "300px" }}
+            popupMatchSelectWidth={false}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
           />
         </div>
       ),

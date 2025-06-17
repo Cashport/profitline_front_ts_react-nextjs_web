@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { Button, Dropdown, Table, TableProps } from "antd";
+import { Button, Dropdown, Table, TableProps, Tooltip } from "antd";
 import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -50,6 +50,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       showSorterTooltip: false
     },
     {
+      title: "Comentario",
+      dataIndex: "entity_description",
+      key: "entity_description",
+      render: (entity_description) => (
+        <Tooltip title={entity_description}>
+          <p className="sectionContainerTable__description">{entity_description}</p>
+        </Tooltip>
+      )
+    },
+    {
       title: "Monto",
       dataIndex: "amount",
       key: "amount",
@@ -92,7 +102,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   handleEditRow(row, "payment");
                 }}
               >
-                Ver
+                Editar
               </Button>
             )
           },
@@ -108,14 +118,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 }}
               >
                 Eliminar
-              </Button>
-            )
-          },
-          {
-            key: "3",
-            label: (
-              <Button icon={<Eye size={20} />} className="buttonNoBorder">
-                Marcar como abono
               </Button>
             )
           }

@@ -90,14 +90,6 @@ const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, ro
                 Eliminar
               </Button>
             )
-          },
-          {
-            key: "3",
-            label: (
-              <Button icon={<Eye size={20} />} className="buttonNoBorder">
-                Marcar como abono
-              </Button>
-            )
           }
         ];
 

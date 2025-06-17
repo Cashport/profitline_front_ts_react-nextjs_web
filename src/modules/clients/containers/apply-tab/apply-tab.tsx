@@ -248,6 +248,11 @@ const ApplyTab: React.FC = () => {
     return [invoices, payments, discounts];
   }, [filteredData]);
 
+  const allRows = useMemo(
+    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts],
+    [filteredData]
+  );
+
   const handleCreateAdjustment = (openedRow: IApplyTabRecord) => {
     //close modal edit row
     setEditingRow({
@@ -391,7 +396,12 @@ const ApplyTab: React.FC = () => {
               </span>
             </Button>
           </Flex>
-          <Button type="primary" className="save-btn" onClick={handleSave}>
+          <Button
+            type="primary"
+            disabled={allRows.length === 0 || (applicationData?.summary.total_balance ?? 1) !== 0}
+            className="save-btn"
+            onClick={handleSave}
+          >
             Guardar
           </Button>
         </Flex>
