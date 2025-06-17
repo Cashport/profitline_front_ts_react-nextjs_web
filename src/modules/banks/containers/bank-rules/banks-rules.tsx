@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Bank, CaretLeft } from "phosphor-react";
 
 import { useBankRules } from "@/hooks/useBankRules";
+import { useBankPayments } from "@/hooks/useBankPayments";
 import { useDebounce } from "@/hooks/useDeabouce";
 
 import UiSearchInput from "@/components/ui/search-input";
@@ -39,6 +40,7 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
     page,
     search: debouncedSearchQuery
   });
+  const { mutate: mutatePayments } = useBankPayments({});
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -138,7 +140,10 @@ export const BanksRules = ({ onClickBack }: PropsBanksRules) => {
             ruleId: 0
           })
         }
-        mutate={mutate}
+        mutate={() => {
+          mutate();
+          mutatePayments();
+        }}
       />
     </div>
   );
