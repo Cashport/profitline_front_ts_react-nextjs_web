@@ -240,14 +240,6 @@ const WalletTabChangeStatusModal: React.FC<Props> = ({
         </div>
       }
       closable={false}
-      style={{
-        height: !isSecondView ? "calc(60vh - 20px)" : "auto",
-        padding: 0,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto"
-      }}
     >
       <Button
         onClick={isSecondView ? handlegoBackToFirstView : onClose}
