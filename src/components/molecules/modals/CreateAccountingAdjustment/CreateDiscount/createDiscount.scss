@@ -1,4 +1,8 @@
-.createDicountCustom {
+.createDiscountCustom {
+    &__footer {
+        margin-top: 0.5rem;
+    }
+
     .ant-modal-content {
         max-height: 80vh;
         display: flex;
@@ -14,7 +18,6 @@
     }
 
     .modalContent {
-
         .containterForm {
             display: grid;
             gap: 1rem;
@@ -55,7 +58,7 @@
             box-shadow: none;
 
             &__green {
-                background-color: #CBE71E;
+                background-color: #cbe71e;
             }
 
             &__white {
