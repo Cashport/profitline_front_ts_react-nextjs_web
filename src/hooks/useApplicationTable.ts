@@ -5,19 +5,21 @@ import { useAppStore } from "@/lib/store/store";
 import { IApplyTabClients } from "@/types/applyTabClients/IApplyTabClients";
 import { useParams } from "next/navigation";
 import { extractSingleParam } from "@/utils/utils";
+import { useState } from "react";
 
 export const useApplicationTable = () => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const clientId = clientIdParam || "";
+  const [preventRevalidation, setPreventRevalidation] = useState(false);
 
   const { ID } = useAppStore((state) => state.selectedProject);
 
   const pathKey = `/paymentApplication/applications/?project_id=${ID}&client_id=${clientId}`;
 
   const { data, error, mutate, isValidating } = useSWR<GenericResponse<IApplyTabClients>>(
-    pathKey,
-    fetcher
+    preventRevalidation ? null : pathKey, // No hay key -> no hay fetch
+    preventRevalidation ? null : fetcher
   );
 
   return {
@@ -25,6 +27,7 @@ export const useApplicationTable = () => {
     isLoading: !error && !data,
     error,
     mutate,
-    isValidating
+    isValidating,
+    setPreventRevalidation
   };
 };

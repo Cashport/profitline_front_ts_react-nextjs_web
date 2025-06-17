@@ -43,6 +43,7 @@ type EvidenceModalProps = {
   multipleFiles?: boolean;
   noComment?: boolean;
   loading?: boolean;
+  isValidating: boolean;
 };
 
 const ModalAttachEvidence = ({
@@ -56,7 +57,8 @@ const ModalAttachEvidence = ({
   commentary,
   setCommentary,
   multipleFiles = false,
-  loading = false
+  loading = false,
+  isValidating
 }: EvidenceModalProps) => {
   const isAttachButtonDisabled = !noComment
     ? !(commentary && selectedEvidence.length > 0)
@@ -190,8 +192,8 @@ const ModalAttachEvidence = ({
           titleConfirm={
             customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
           }
-          isConfirmLoading={loading}
-          isConfirmDisabled={isAttachButtonDisabled}
+          isConfirmLoading={loading || isValidating}
+          isConfirmDisabled={isAttachButtonDisabled || isValidating}
         />
       </div>
     </Modal>

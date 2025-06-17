@@ -92,7 +92,13 @@ const ApplyTab: React.FC = () => {
   const [commentary, setCommentary] = useState<string>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
 
-  const { data: applicationData, isLoading, mutate, isValidating } = useApplicationTable();
+  const {
+    data: applicationData,
+    isLoading,
+    mutate,
+    isValidating,
+    setPreventRevalidation
+  } = useApplicationTable();
   const showModal = (adding_type: "invoices" | "payments") => {
     setIsModalAddToTableOpen({
       isOpen: true,
@@ -179,6 +185,7 @@ const ApplyTab: React.FC = () => {
   });
 
   const saveApp = async () => {
+    setPreventRevalidation(true);
     setLoadingSave(true);
     try {
       await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
@@ -189,6 +196,7 @@ const ApplyTab: React.FC = () => {
       showMessage("error", "Ha ocurrido un error al guardar la aplicación");
     }
     setLoadingSave(false);
+    setPreventRevalidation(false);
   };
 
   const handleSave = () => {
@@ -580,6 +588,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
+        isValidating={isValidating}
       />
       <ModalApplyAI
         isOpen={isModalOpen.selected === 2}
