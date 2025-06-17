@@ -102,7 +102,7 @@ export const PopoverUserNotifications: React.FC<PopoverUserNotificationsProps> =
                 <Flex gap={"8px"} align="center">
                   <p className="item__title">
                     {item.notification_type_name}
-                    {item.id_erp && `-${item.id_erp}`}
+                    {item.id_erp && ` ${item.id_erp}`}
                   </p>
                   {item.is_read === 0 ? (
                     <div className="item__read">
