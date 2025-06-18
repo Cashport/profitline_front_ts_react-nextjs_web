@@ -117,7 +117,10 @@ export const WalletTab = () => {
       clientId: clientId,
       projectId: projectId,
       selectInvoice: invoice,
-      handleActionInDetail: handleActionInDetail
+      handleActionInDetail: handleActionInDetail,
+      deselectInvoices: () => {
+        setSelectedRows([]);
+      }
     });
   };
 

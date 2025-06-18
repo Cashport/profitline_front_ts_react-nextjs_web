@@ -34,6 +34,7 @@ interface InvoiceDetailModalProps {
   handleActionInDetail?: (invoice: IInvoice) => void;
   selectInvoice?: IInvoice;
   projectId?: number;
+  deselectInvoices?: () => void;
 }
 
 const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
@@ -45,7 +46,8 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
   hiddenActions,
   projectId = 0,
   selectInvoice,
-  handleActionInDetail
+  handleActionInDetail,
+  deselectInvoices
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -127,7 +129,8 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
     });
   };
   const handelOpenNoveltyDetail = (noveltyId: number) => {
-    openModal("novelty", { noveltyId: noveltyId });
+    // deselect invoices in wallet tab
+    openModal("novelty", { noveltyId: noveltyId, deselectInvoices });
   };
 
   return (

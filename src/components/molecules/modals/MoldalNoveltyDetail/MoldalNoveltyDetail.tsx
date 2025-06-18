@@ -19,9 +19,14 @@ interface MoldalNoveltyDetailProps {
   isOpen: boolean;
   onClose: () => void;
   noveltyId: number;
+  deselectInvoices?: () => void;
 }
 
-const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({ onClose, noveltyId }) => {
+const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
+  onClose,
+  noveltyId,
+  deselectInvoices
+}) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
   const { mutate: mutateWallet } = useInvoices({});
   const [incidentData, setIncidentData] = useState<IIncidentDetail | null>(null);
@@ -58,6 +63,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({ onClose, noveltyId 
       }
       setOpenResolveModal(false);
       mutateWallet();
+      deselectInvoices && deselectInvoices();
       mutateIncident();
       onClose(); // Cierra el modal principal después de resolver/rechazar
     } catch (error) {
