@@ -143,3 +143,12 @@
         }
     }
 }
+
+.ant-select-item-option {
+    .ant-select-item-option-content {
+        max-width: 24vw !important;
+        white-space: normal !important;
+        word-break: break-word;
+        max-width: 400px;
+    }
+}
