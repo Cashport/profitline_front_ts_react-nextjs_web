@@ -37,7 +37,7 @@
 
     &__select {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         padding: 1rem 0;
     }
 
@@ -141,5 +141,14 @@
                 color: black !important;
             }
         }
+    }
+}
+
+.ant-select-item-option {
+    .ant-select-item-option-content {
+        max-width: 24vw !important;
+        white-space: normal !important;
+        word-break: break-word;
+        max-width: 400px;
     }
 }
