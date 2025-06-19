@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "./selectAccountingAdjustment.scss";
 import { Flex, Spin } from "antd";
 import { ISelectedAccountingAdjustment } from "../ModalActionDiscountCredit/ModalActionDiscountCredit";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import ItemsActionsModal from "@/components/atoms/ItemsModal/ItemsActionsModal";
 import { Plus } from "phosphor-react";
 import { useAcountingAdjustment } from "@/hooks/useAcountingAdjustment";
@@ -94,24 +95,14 @@ export const SelectAccountingAdjustment = ({
           >
             <Plus /> Crear {typeMap[type || 1]}
           </button>
-          <Flex gap="8px">
-            <button
-              type="button"
-              className="button__action__text button__action__text__white"
-              onClick={() => onClose()}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className={`button__action__text ${selectedRows.length > 0 ? "button__action__text__green" : ""}`}
-              onClick={() => {
-                selectedRows.length > 0 && setCurrentView("apply");
-              }}
-            >
-              Continuar
-            </button>
-          </Flex>
+          <FooterButtons
+            handleOk={() => {
+              selectedRows.length > 0 && setCurrentView("apply");
+            }}
+            onClose={onClose}
+            isConfirmDisabled={!selectedRows.length}
+            titleConfirm="Continuar"
+          />
         </Flex>
       </Flex>
     </div>

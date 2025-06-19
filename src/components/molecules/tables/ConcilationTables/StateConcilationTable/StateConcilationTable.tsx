@@ -224,6 +224,11 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
             onChange={(value) => addSelectMotiveToAll(value)}
             style={{ width: "200px", marginRight: "10px" }}
             disabled={!selectedRows || selectedRows.length === 0}
+            popupMatchSelectWidth={false}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
           />
           <Text type="secondary" style={{ fontSize: "12px" }}>
             {selectedRows && selectedRows.length > 0

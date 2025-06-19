@@ -18,6 +18,7 @@ export const ModalRemove = ({ isOpen, name, onClose, onRemove, isMassiveAction }
       width={"60%"}
       open={isOpen}
       onCancel={onClose}
+      cancelText="Cancelar"
       okButtonProps={{ className: "acceptButton" }}
       okText="Aceptar"
       cancelButtonProps={{

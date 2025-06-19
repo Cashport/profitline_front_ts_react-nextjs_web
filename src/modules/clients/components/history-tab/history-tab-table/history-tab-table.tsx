@@ -97,7 +97,7 @@ const HistoryTable = ({
         dataSource={data?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         virtual
-        scroll={{ y: height - 400, x: 100 }}
+        scroll={{ y: height - 420, x: 100 }}
         pagination={{
           current: page,
           showSizeChanger: false,

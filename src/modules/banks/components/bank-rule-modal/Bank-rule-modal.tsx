@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Button, Modal } from "antd";
-import { Plus } from "phosphor-react";
-import { KeyedMutator } from "swr";
+import { Modal } from "antd";
 
 import { getClientsByProject } from "@/services/banksPayments/banksPayments";
 import { useAppStore } from "@/lib/store/store";
@@ -13,9 +11,6 @@ import SecondaryButton from "@/components/atoms/buttons/secondaryButton/Secondar
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import GeneralSelect from "@/components/ui/general-select";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-
-import { GenericResponse } from "@/types/global/IGlobal";
-import { IAllRules } from "@/types/banks/IBanks";
 
 import "./bank-rule-modal.scss";
 
@@ -31,7 +26,7 @@ interface Props {
     isOpen: boolean;
     ruleId: number;
   };
-  mutate: KeyedMutator<GenericResponse<IAllRules>>;
+  mutate: () => void;
 }
 
 export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => {
@@ -82,9 +77,11 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
   };
 
   const handleAddEditRule = async (data: any) => {
+    // If editing a rule, we need to pass the ruleId
     if (showBankRuleModal.ruleId) {
       console.info("Edit rule with id", showBankRuleModal.ruleId);
     } else {
+      // If creating a new rule, we need to prepare the data
       const modelData = {
         project_id: ID,
         description: data.rules[0].description,

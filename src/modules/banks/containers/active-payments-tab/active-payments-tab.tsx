@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { Button, Flex, Spin } from "antd";
 import { Bank, DotsThree } from "phosphor-react";
+import dayjs from "dayjs";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
@@ -8,7 +9,6 @@ import { useAppStore } from "@/lib/store/store";
 import { useBankPayments } from "@/hooks/useBankPayments";
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 
-import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
@@ -22,9 +22,15 @@ import ModalActionsSplitPayment from "../../components/modal-actions-split-payme
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
+import {
+  FilterActivePaymentsTab,
+  IActivePaymentsFilters
+} from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
+import { IFormFilterDates } from "../../components/modal-filter-select-dates/modal-filter-select-dates";
 
 import styles from "./active-payments-tab.module.scss";
 
@@ -37,11 +43,16 @@ export const ActivePaymentsTab: FC = () => {
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loadingApprove, setLoadingApprove] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<IActivePaymentsFilters>({
+    dates: [],
+    active: []
+  });
+  const [customDate, setCustomDate] = useState<string>("");
 
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = useBankPayments({ projectId: ID, like: searchQuery });
+  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery, selectedFilters });
 
   const handleOpenBankRules = () => {
     setShowBankRules(true);
@@ -102,6 +113,17 @@ export const ActivePaymentsTab: FC = () => {
     setSearchQuery(searchQuery);
   };
 
+  const handleFilterDates = (data: IFormFilterDates) => {
+    const { start_date, end_date } = data;
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dates: [`${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`]
+    }));
+    setCustomDate(
+      `${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`
+    );
+  };
+
   return (
     <>
       {showBankRules ? (
@@ -110,7 +132,12 @@ export const ActivePaymentsTab: FC = () => {
         <Flex className={styles.activePaymentsTab} vertical>
           <div className={`${styles.header} banksStickyHeader`}>
             <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterDiscounts />
+            <FilterActivePaymentsTab
+              setSelectedFilters={setSelectedFilters}
+              handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
+              customDate={customDate}
+              setCustomDate={setCustomDate}
+            />
             <Button
               className={styles.button__actions}
               icon={<DotsThree size={"1.5rem"} />}
@@ -229,6 +256,11 @@ export const ActivePaymentsTab: FC = () => {
             isOpen={isSelectOpen.selected === 6}
             onClose={onCloseModal}
             selectedRows={selectedRows}
+          />
+          <ModalFilterSelectDates
+            isOpen={isSelectOpen.selected === 7}
+            onClose={() => setIsSelectOpen({ selected: 0 })}
+            selectDates={handleFilterDates}
           />
         </Flex>
       )}

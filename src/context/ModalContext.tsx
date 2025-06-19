@@ -31,10 +31,12 @@ interface InvoiceModalProps {
   handleActionInDetail?: (invoice: IInvoice) => void;
   selectInvoice?: IInvoice;
   projectId?: number;
+  deselectInvoices?: () => void;
 }
 
 interface NoveltyModalProps {
   noveltyId: number;
+  deselectInvoices?: () => void;
 }
 
 interface AdjustmentModalProps {

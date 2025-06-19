@@ -178,6 +178,7 @@ const RegisterNews = ({
             loading={isLoading}
             isError={isError}
             placeholder="Seleccionar motivo"
+            popupMatchSelectWidth={false}
           />
           <InputFormMoney
             titleInput="Monto novedad"

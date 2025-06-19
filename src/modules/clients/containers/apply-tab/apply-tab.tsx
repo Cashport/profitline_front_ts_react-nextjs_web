@@ -30,7 +30,7 @@ import ModalCreateAdjustment from "./Modals/ModalCreateAdjustment/ModalCreateAdj
 import ModalEditRow from "./Modals/ModalEditRow/ModalEditRow";
 import ModalCreateAdjustmentByInvoice from "./Modals/ModalCreateAdjustmentByInvoice/ModalCreateAdjustmentByInvoice";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
-import ModalUploadRequirements from "./Modals/ModalApplyAI/ModalApplyAI";
+import ModalApplyAI from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
@@ -92,7 +92,13 @@ const ApplyTab: React.FC = () => {
   const [commentary, setCommentary] = useState<string>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
 
-  const { data: applicationData, isLoading, mutate, isValidating } = useApplicationTable();
+  const {
+    data: applicationData,
+    isLoading,
+    mutate,
+    isValidating,
+    setPreventRevalidation
+  } = useApplicationTable();
   const showModal = (adding_type: "invoices" | "payments") => {
     setIsModalAddToTableOpen({
       isOpen: true,
@@ -179,6 +185,7 @@ const ApplyTab: React.FC = () => {
   });
 
   const saveApp = async () => {
+    setPreventRevalidation(true);
     setLoadingSave(true);
     try {
       await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
@@ -189,6 +196,7 @@ const ApplyTab: React.FC = () => {
       showMessage("error", "Ha ocurrido un error al guardar la aplicación");
     }
     setLoadingSave(false);
+    setPreventRevalidation(false);
   };
 
   const handleSave = () => {
@@ -247,6 +255,11 @@ const ApplyTab: React.FC = () => {
 
     return [invoices, payments, discounts];
   }, [filteredData]);
+
+  const allRows = useMemo(
+    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts],
+    [filteredData]
+  );
 
   const handleCreateAdjustment = (openedRow: IApplyTabRecord) => {
     //close modal edit row
@@ -391,7 +404,12 @@ const ApplyTab: React.FC = () => {
               </span>
             </Button>
           </Flex>
-          <Button type="primary" className="save-btn" onClick={handleSave}>
+          <Button
+            type="primary"
+            disabled={allRows.length === 0 || (applicationData?.summary.total_balance ?? 1) !== 0}
+            className="save-btn"
+            onClick={handleSave}
+          >
             Guardar
           </Button>
         </Flex>
@@ -570,8 +588,9 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
+        isValidating={isValidating}
       />
-      <ModalUploadRequirements
+      <ModalApplyAI
         isOpen={isModalOpen.selected === 2}
         onClose={() => setIsModalOpen({ selected: 0 })}
         mutate={mutate}
