@@ -7,19 +7,19 @@ import { IActivePaymentsFilters } from "@/components/atoms/Filters/FilterActiveP
 
 interface Props {
   like?: string;
-  selectedFilters: IActivePaymentsFilters;
+  selectedFilters?: IActivePaymentsFilters;
 }
 
 export const useBankPayments = ({ like, selectedFilters }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
-  const startDate = selectedFilters.dates?.length
+  const startDate = selectedFilters?.dates?.length
     ? selectedFilters.dates[0].split("|")[0]
     : undefined;
-  const endDate = selectedFilters.dates?.length
+  const endDate = selectedFilters?.dates?.length
     ? selectedFilters.dates[0].split("|")[1]
     : undefined;
-  const status = selectedFilters.active?.length ? Number(selectedFilters.active[0]) : undefined;
+  const status = selectedFilters?.active?.length ? Number(selectedFilters.active[0]) : undefined;
 
   const likeQuery = `${like ? `&like=${like}` : ""}`;
   const startDateQuery = startDate ? `&start_date=${startDate}` : "";
