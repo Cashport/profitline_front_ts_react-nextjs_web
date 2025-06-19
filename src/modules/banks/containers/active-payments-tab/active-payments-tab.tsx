@@ -1,6 +1,7 @@
 import { FC, useState } from "react";
 import { Button, Flex, Spin } from "antd";
 import { Bank, DotsThree } from "phosphor-react";
+import dayjs from "dayjs";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
@@ -25,9 +26,11 @@ import {
   FilterActivePaymentsTab,
   IActivePaymentsFilters
 } from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
+import { IFormFilterDates } from "../../components/modal-filter-select-dates/modal-filter-select-dates";
 
 import styles from "./active-payments-tab.module.scss";
 
@@ -44,6 +47,7 @@ export const ActivePaymentsTab: FC = () => {
     dates: [],
     active: []
   });
+  const [customDate, setCustomDate] = useState<string>("");
 
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
@@ -109,6 +113,17 @@ export const ActivePaymentsTab: FC = () => {
     setSearchQuery(searchQuery);
   };
 
+  const handleFilterDates = (data: IFormFilterDates) => {
+    const { start_date, end_date } = data;
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dates: [`${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`]
+    }));
+    setCustomDate(
+      `${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`
+    );
+  };
+
   return (
     <>
       {showBankRules ? (
@@ -117,7 +132,12 @@ export const ActivePaymentsTab: FC = () => {
         <Flex className={styles.activePaymentsTab} vertical>
           <div className={`${styles.header} banksStickyHeader`}>
             <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterActivePaymentsTab setSelectedFilters={setSelectedFilters} />
+            <FilterActivePaymentsTab
+              setSelectedFilters={setSelectedFilters}
+              handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
+              customDate={customDate}
+              setCustomDate={setCustomDate}
+            />
             <Button
               className={styles.button__actions}
               icon={<DotsThree size={"1.5rem"} />}
@@ -236,6 +256,11 @@ export const ActivePaymentsTab: FC = () => {
             isOpen={isSelectOpen.selected === 6}
             onClose={onCloseModal}
             selectedRows={selectedRows}
+          />
+          <ModalFilterSelectDates
+            isOpen={isSelectOpen.selected === 7}
+            onClose={() => setIsSelectOpen({ selected: 0 })}
+            selectDates={handleFilterDates}
           />
         </Flex>
       )}

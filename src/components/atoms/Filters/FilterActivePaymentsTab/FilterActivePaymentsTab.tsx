@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState, ReactNode } from "react";
 import dayjs from "dayjs";
 import { Cascader } from "antd";
 
@@ -6,7 +6,7 @@ import "../filterCascader.scss";
 
 interface Option {
   value: string;
-  label: string;
+  label: string | ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];
@@ -19,11 +19,21 @@ export interface IActivePaymentsFilters {
 
 interface Props {
   setSelectedFilters: Dispatch<SetStateAction<IActivePaymentsFilters>>;
+  handleOpenCustomDate?: () => void;
+  // eslint-disable-next-line no-unused-vars
+  customDate: string;
+  setCustomDate: Dispatch<SetStateAction<string>>;
 }
 
-export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
+export const FilterActivePaymentsTab = ({
+  setSelectedFilters,
+  handleOpenCustomDate,
+  customDate,
+  setCustomDate
+}: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>(initialOptions);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
+  const [openOption, setOpenOption] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedValues.length === 0) {
@@ -44,14 +54,77 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
     });
   }, [selectedValues, setSelectedFilters]);
 
+  useEffect(() => {
+    if (customDate) {
+      // Formatear el label que quieres mostrar
+      const [start, end] = customDate.split("|");
+      const formattedLabel = `${dayjs(start).format("DD/MM/YYYY")} - ${dayjs(end).format("DD/MM/YYYY")}`;
+
+      // Si el customDate NO está entre las opciones regulares, agrégalo a las seleccionadas
+      setSelectedValues((prev) => {
+        // Elimina cualquier opción previa de Fechas (si hay)
+        const filtered = prev.filter((item) => item[0] !== "Fechas");
+        return [...filtered, ["Fechas", customDate]];
+      });
+
+      // Agrega la opción temporal a la lista de opciones si no está, esto es para que salga el tag
+      setOptionsList((prev) => {
+        // Solo modifica Fechas, el resto igual
+        return prev.map((option) => {
+          if (option.value === "Fechas") {
+            // Si ya existe esa opción, no agregues nada extra
+            if (option.children?.some((child) => child.value === customDate)) {
+              return option;
+            }
+            // Agrega la opción personalizada al final de los hijos
+            return {
+              ...option,
+              children: [
+                ...(option.children || []),
+                {
+                  label: formattedLabel,
+                  value: customDate,
+                  isLeaf: true
+                }
+              ]
+            };
+          }
+          return option;
+        });
+      });
+    } else {
+      // Elimina cualquier opción personalizada de la rama "Fechas" y deja solo las originales
+      setSelectedValues((prev) => prev.filter((item) => item[0] !== "Fechas"));
+
+      setOptionsList((prev) =>
+        prev.map((option) => {
+          if (option.value === "Fechas") {
+            return {
+              ...option,
+              children: dates.map((date) => ({
+                label: date.label,
+                value: date.value
+              }))
+            };
+          }
+          return option;
+        })
+      );
+    }
+  }, [customDate]);
+
   const loadData = async (selectedOptions: Option[]) => {
     const targetOption = selectedOptions[selectedOptions.length - 1];
 
+    setOpenOption(targetOption.value); // we check which option is open
+
     if (targetOption.value === "Fechas") {
-      targetOption.children = dates.map((date) => ({
-        label: date.label,
-        value: date.value
-      }));
+      targetOption.children = [
+        ...dates.map((date) => ({
+          label: date.label,
+          value: date.value
+        }))
+      ];
 
       setOptionsList([...optionsList]);
     }
@@ -139,8 +212,25 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
 
   return (
     <Cascader
+      dropdownRender={(menu) => {
+        return (
+          <div>
+            {menu}
+            {openOption === "Fechas" && (
+              <div style={{ padding: "8px", textAlign: "right", marginRight: "1.5rem" }}>
+                <p
+                  style={{ textDecoration: "underline", cursor: "pointer" }}
+                  onClick={handleOpenCustomDate}
+                >
+                  Fecha personalizada
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      }}
       className="filterCascader"
-      style={{ width: "15rem", height: "48px" }}
+      style={{ width: "16.5rem", height: "48px" }}
       multiple
       size="large"
       removeIcon
@@ -148,16 +238,20 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
       placeholder="Filtrar"
       placement="bottomLeft"
       changeOnSelect
-      onClear={() =>
+      onClear={() => {
         setSelectedFilters({
           dates: [],
           active: []
-        })
-      }
+        });
+        setCustomDate("");
+      }}
       loadData={loadData}
       value={selectedValues}
       onChange={onChange}
       options={optionsList}
+      dropdownStyle={{
+        zIndex: openOption === "Fechas" && handleOpenCustomDate ? 999 : 1000
+      }}
     />
   );
 };
