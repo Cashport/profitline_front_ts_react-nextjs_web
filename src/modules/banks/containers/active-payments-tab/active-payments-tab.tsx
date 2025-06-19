@@ -8,7 +8,6 @@ import { useAppStore } from "@/lib/store/store";
 import { useBankPayments } from "@/hooks/useBankPayments";
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 
-import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
@@ -22,6 +21,10 @@ import ModalActionsSplitPayment from "../../components/modal-actions-split-payme
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
+import {
+  FilterActivePaymentsTab,
+  IActivePaymentsFilters
+} from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
@@ -37,11 +40,15 @@ export const ActivePaymentsTab: FC = () => {
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loadingApprove, setLoadingApprove] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<IActivePaymentsFilters>({
+    dates: [],
+    active: []
+  });
 
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery });
+  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery, selectedFilters });
 
   const handleOpenBankRules = () => {
     setShowBankRules(true);
@@ -110,7 +117,7 @@ export const ActivePaymentsTab: FC = () => {
         <Flex className={styles.activePaymentsTab} vertical>
           <div className={`${styles.header} banksStickyHeader`}>
             <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterDiscounts />
+            <FilterActivePaymentsTab setSelectedFilters={setSelectedFilters} />
             <Button
               className={styles.button__actions}
               icon={<DotsThree size={"1.5rem"} />}
