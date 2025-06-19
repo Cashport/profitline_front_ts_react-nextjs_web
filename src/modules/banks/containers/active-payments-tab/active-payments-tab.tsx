@@ -48,7 +48,7 @@ export const ActivePaymentsTab: FC = () => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery });
+  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery, selectedFilters });
 
   const handleOpenBankRules = () => {
     setShowBankRules(true);

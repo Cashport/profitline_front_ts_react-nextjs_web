@@ -13,8 +13,8 @@ interface Option {
 }
 
 export interface IActivePaymentsFilters {
-  dates: string[];
-  active: string[];
+  dates?: string[];
+  active?: string[];
 }
 
 interface Props {
