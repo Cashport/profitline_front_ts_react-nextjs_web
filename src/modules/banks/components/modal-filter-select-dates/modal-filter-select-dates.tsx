@@ -55,14 +55,14 @@ const ModalFilterSelectDates = ({ isOpen, onClose, selectDates }: Props) => {
 
       <div className="modalFilterSelectDates__dates">
         <InputDateForm
-          titleInput="Fecha de creación"
+          titleInput="Desde"
           nameInput="start_date"
           control={control}
           error={errors.start_date}
         />
 
         <InputDateForm
-          titleInput="Fecha de vencimiento"
+          titleInput="Hasta"
           nameInput="end_date"
           control={control}
           error={errors.end_date}
