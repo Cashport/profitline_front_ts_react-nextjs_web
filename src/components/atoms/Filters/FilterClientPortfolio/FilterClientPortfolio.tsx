@@ -170,7 +170,10 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
       maxTagCount="responsive"
       placeholder="Filtrar"
       placement="bottomLeft"
-      onClear={() => setSelectedFilters(initValueFiltersData)}
+      onClear={() => {
+        setSelectOptions([]);
+        setSelectedFilters(initValueFiltersData);
+      }}
       options={optionsList}
       changeOnSelect
       loadData={loadData}
