@@ -25,6 +25,7 @@ import {
   FilterActivePaymentsTab,
   IActivePaymentsFilters
 } from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
@@ -117,7 +118,10 @@ export const ActivePaymentsTab: FC = () => {
         <Flex className={styles.activePaymentsTab} vertical>
           <div className={`${styles.header} banksStickyHeader`}>
             <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterActivePaymentsTab setSelectedFilters={setSelectedFilters} />
+            <FilterActivePaymentsTab
+              setSelectedFilters={setSelectedFilters}
+              handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
+            />
             <Button
               className={styles.button__actions}
               icon={<DotsThree size={"1.5rem"} />}
@@ -236,6 +240,13 @@ export const ActivePaymentsTab: FC = () => {
             isOpen={isSelectOpen.selected === 6}
             onClose={onCloseModal}
             selectedRows={selectedRows}
+          />
+          <ModalFilterSelectDates
+            isOpen={isSelectOpen.selected === 7}
+            onClose={() => setIsSelectOpen({ selected: 0 })}
+            selectDates={(data) => {
+              console.log("Selected Dates:", data);
+            }}
           />
         </Flex>
       )}

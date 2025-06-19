@@ -19,9 +19,10 @@ export interface IActivePaymentsFilters {
 
 interface Props {
   setSelectedFilters: Dispatch<SetStateAction<IActivePaymentsFilters>>;
+  handleOpenCustomDate?: () => void;
 }
 
-export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
+export const FilterActivePaymentsTab = ({ setSelectedFilters, handleOpenCustomDate }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>(initialOptions);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
   const [openOption, setOpenOption] = useState<string | null>(null);
@@ -154,7 +155,10 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
             {menu}
             {openOption === "Fechas" && (
               <div style={{ padding: "8px", textAlign: "right", marginRight: "1.5rem" }}>
-                <p style={{ textDecoration: "underline", cursor: "pointer" }}>
+                <p
+                  style={{ textDecoration: "underline", cursor: "pointer" }}
+                  onClick={handleOpenCustomDate}
+                >
                   Fecha personalizada
                 </p>
               </div>
@@ -181,7 +185,9 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
       value={selectedValues}
       onChange={onChange}
       options={optionsList}
-      open={true}
+      dropdownStyle={{
+        zIndex: openOption === "Fechas" && handleOpenCustomDate ? 999 : 1000
+      }}
     />
   );
 };
