@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState, ReactNode } from "react";
 import dayjs from "dayjs";
 import { Cascader } from "antd";
 
@@ -6,7 +6,7 @@ import "../filterCascader.scss";
 
 interface Option {
   value: string;
-  label: string;
+  label: string | ReactNode;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
   children?: Option[];
@@ -24,6 +24,7 @@ interface Props {
 export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>(initialOptions);
   const [selectedValues, setSelectedValues] = useState<string[][]>([]);
+  const [openOption, setOpenOption] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedValues.length === 0) {
@@ -47,11 +48,15 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
   const loadData = async (selectedOptions: Option[]) => {
     const targetOption = selectedOptions[selectedOptions.length - 1];
 
+    setOpenOption(targetOption.value); // we check which option is open
+
     if (targetOption.value === "Fechas") {
-      targetOption.children = dates.map((date) => ({
-        label: date.label,
-        value: date.value
-      }));
+      targetOption.children = [
+        ...dates.map((date) => ({
+          label: date.label,
+          value: date.value
+        }))
+      ];
 
       setOptionsList([...optionsList]);
     }
@@ -139,6 +144,24 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
 
   return (
     <Cascader
+      dropdownMenuColumnStyle={{
+        maxHeight: "calc(100vh - 200px)",
+        backgroundColor: "blue"
+      }}
+      dropdownRender={(menu) => {
+        return (
+          <div>
+            {menu}
+            {openOption === "Fechas" && (
+              <div style={{ padding: "8px", textAlign: "right", marginRight: "1.5rem" }}>
+                <p style={{ textDecoration: "underline", cursor: "pointer" }}>
+                  Fecha personalizada
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      }}
       className="filterCascader"
       style={{ width: "15rem", height: "48px" }}
       multiple
@@ -158,6 +181,7 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
       value={selectedValues}
       onChange={onChange}
       options={optionsList}
+      open={true}
     />
   );
 };
