@@ -8,7 +8,7 @@ import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm
 import "./modal-filter-select-dates.scss";
 const { Title } = Typography;
 
-interface IFormFilterDates {
+export interface IFormFilterDates {
   start_date: Date;
   end_date: Date;
 }
@@ -73,6 +73,7 @@ const ModalFilterSelectDates = ({ isOpen, onClose, selectDates }: Props) => {
         onClose={() => onClose()}
         handleOk={handleSubmit(onSubmit)}
         isConfirmDisabled={!isValid}
+        titleConfirm="Filtrar"
       />
     </Modal>
   );
