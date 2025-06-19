@@ -92,15 +92,15 @@ export const FilterActivePaymentsTab = ({ setSelectedFilters }: Props) => {
     () => [
       {
         label: "Últimos 7 días",
-        value: `${dayjs().utc().subtract(7, "day").format("YYYY-MM-DD")}|${dayjs().utc().format("YYYY-MM-DD")}`
+        value: `${dayjs().subtract(7, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
         label: "Últimos 30 días",
-        value: `${dayjs().utc().subtract(30, "day").format("YYYY-MM-DD")}|${dayjs().utc().format("YYYY-MM-DD")}`
+        value: `${dayjs().subtract(30, "day").format("YYYY-MM-DD")}|${dayjs().format("YYYY-MM-DD")}`
       },
       {
         label: "Este mes",
-        value: `${dayjs().utc().startOf("month").format("YYYY-MM-DD")}|${dayjs().utc().endOf("month").format("YYYY-MM-DD")}`
+        value: `${dayjs().startOf("month").format("YYYY-MM-DD")}|${dayjs().endOf("month").format("YYYY-MM-DD")}`
       },
       {
         label: "Este trimestre",
