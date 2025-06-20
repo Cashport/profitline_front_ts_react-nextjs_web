@@ -47,33 +47,20 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   ];
 
   useEffect(() => {
-    // Initialize the data array with default values
-    const initialData: history_chart[] = [];
-    for (let i = 0; i < 12; i++) {
-      const monthIndex = (currentMonth + i) % 12;
-      initialData.push({
-        name: monthNames[monthIndex],
-        month: monthIndex + 1,
-        value: 0
-      });
+    if (!history_dso) {
+      setData([]);
+      return;
     }
-
-    // Assign actual DSO values from the dataset
-    if (history_dso) {
-      history_dso.forEach((item: historic_dso) => {
-        const itemDate = dayjs(item.date).utc();
-        const itemMonth = itemDate.month(); // Get month index from date string
-        const foundIndex = initialData.findIndex((data) => data.month === itemMonth + 1);
-        if (foundIndex !== -1) {
-          initialData[foundIndex].value = item.dso;
-        }
-      });
-    }
-
-    // delete the months six months before the current month
-    initialData.splice(0, 6);
-
-    setData(initialData);
+    const chartData = history_dso.map((item) => {
+      const date = dayjs(item.date);
+      const monthIdx = date.month(); // 0-11
+      return {
+        name: monthNames[monthIdx],
+        month: monthIdx + 1,
+        value: item.dso
+      };
+    });
+    setData(chartData);
   }, [history_dso]);
 
   return (
