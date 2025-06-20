@@ -28,9 +28,6 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
 }) => {
   const [data, setData] = useState([] as history_chart[]);
 
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-
   const monthNames = [
     "Ene",
     "Feb",
