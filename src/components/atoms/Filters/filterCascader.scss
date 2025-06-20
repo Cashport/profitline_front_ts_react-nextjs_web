@@ -34,5 +34,12 @@
 
 .ant-cascader-menu {
     height: fit-content !important;
-    max-height: 180px !important;
+    max-height: 180px;
+}
+
+.filterActivePaymentsTab {
+    .ant-cascader-menu {
+        height: fit-content;
+        max-height: 250px;
+    }
 }
