@@ -24,7 +24,7 @@ const GeneralDashboardView: FC = () => {
 
   return (
     <div className={styles.generalDashboardView}>
-      <div>
+      <div className={styles.filterContainer}>
         <FilterClientPortfolio setSelectedFilters={setFilters} />
       </div>
       {loading ? (

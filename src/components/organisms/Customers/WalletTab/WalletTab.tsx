@@ -35,7 +35,7 @@ import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import "./wallettab.scss";
 
 export const WalletTab = () => {
-  const { portfolioData } = useContext(ClientDetailsContext);
+  const { portfolioData, clientFilters } = useContext(ClientDetailsContext);
   const { openModal } = useModalDetail();
   const [filters, setFilters] = useState<SelectedFiltersWallet>({
     lines: [],
@@ -86,6 +86,21 @@ export const WalletTab = () => {
       setInvoices(invoicesData);
     }
   }, [data]);
+
+  // useEffect for setting localFilters according to clientFilters
+  useEffect(() => {
+    if (clientFilters) {
+      console.log("Client Filters:", clientFilters);
+      setFilters({
+        lines: (clientFilters.lines || []).map(Number),
+        zones: (clientFilters.zones || []).map(Number),
+        channels: (clientFilters.channels || []).map(Number),
+        sublines: (clientFilters.sublines || []).map(Number),
+        paymentAgreement: null,
+        radicationType: null
+      });
+    }
+  }, [clientFilters]);
 
   const handleisGenerateActionOpen = () => {
     setisGenerateActionOpen(!isGenerateActionOpen);
