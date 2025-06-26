@@ -1,7 +1,11 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Modal } from "antd";
+import { message, Modal } from "antd";
+import { MagnifyingGlassPlus, HandTap, PushPin, QuestionMark } from "@phosphor-icons/react";
+
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { MagnifyingGlassPlus, HandTap, PushPin } from "@phosphor-icons/react";
+
+import { IClientPayment } from "@/types/clientPayments/IClientPayments";
+
 import "./modalActionPayment.scss";
 
 type ModalActionPaymentProps = {
@@ -16,6 +20,7 @@ type ModalActionPaymentProps = {
   >;
   setIsModalActionPaymentOpen: Dispatch<SetStateAction<boolean>>;
   addPaymentsToApplicationTable: () => void;
+  selectedPayments: IClientPayment[];
 };
 
 export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
@@ -24,7 +29,8 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   onChangeTab,
   setIsSelectedActionModalOpen,
   setIsModalActionPaymentOpen,
-  addPaymentsToApplicationTable
+  addPaymentsToApplicationTable,
+  selectedPayments
 }) => {
   return (
     <Modal
@@ -52,6 +58,10 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
           title="Aplicar pagos"
           onClick={() => {
             // onChangeTab("5");
+            if (selectedPayments.length === 0) {
+              message.info("No hay pagos seleccionados para aplicar.");
+              return;
+            }
             addPaymentsToApplicationTable();
           }}
         />
@@ -60,6 +70,20 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
           title="Cambiar de estado"
           onClick={() => {
             console.log("Cambiar de estado clicked");
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<QuestionMark size={20} />}
+          title="Marcar como no identificado"
+          onClick={() => {
+            if (selectedPayments.length === 0) {
+              message.info("No hay pagos seleccionados para marcar como no identificados.");
+              return;
+            }
+            setIsSelectedActionModalOpen({
+              selected: 2
+            });
+            setIsModalActionPaymentOpen((prev) => !prev);
           }}
         />
       </div>
