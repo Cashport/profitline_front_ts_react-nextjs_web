@@ -8,6 +8,7 @@ import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { useBankPayments } from "@/hooks/useBankPayments";
 import { approvePayment } from "@/services/banksPayments/banksPayments";
+import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import Collapse from "@/components/ui/collapse";
@@ -106,6 +107,21 @@ export const ActivePaymentsTab: FC = () => {
       showMessage("error", "Error al aprobar la asignación");
     }
     setLoadingApprove(false);
+  };
+
+  const handlePaymentUnidentified = async () => {
+    try {
+      await markPaymentsAsUnidentified(selectedRows?.map((payment) => payment.id) || []);
+      showMessage("success", "Pago(s) marcados como no identificados");
+      mutate();
+      setSelectedRows([]);
+    } catch (error) {
+      showMessage(
+        "error",
+        "Ha ocurrido un error al marcar los pagos seleccionados como no identificados"
+      );
+    }
+    setIsSelectOpen({ selected: 0 });
   };
 
   const handleSearch = (query: string) => {
@@ -261,6 +277,12 @@ export const ActivePaymentsTab: FC = () => {
             isOpen={isSelectOpen.selected === 7}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             selectDates={handleFilterDates}
+          />
+          <ModalConfirmAction
+            title="¿Marcar pagos seleccionados como sin identificar?"
+            isOpen={isSelectOpen.selected === 8}
+            onClose={() => setIsSelectOpen({ selected: 0 })}
+            onOk={handlePaymentUnidentified}
           />
         </Flex>
       )}

@@ -4,7 +4,10 @@ import { DotsThree, MagnifyingGlassPlus } from "phosphor-react";
 import { useParams } from "next/navigation";
 import { AxiosError } from "axios";
 
-import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
+import {
+  addItemsToTable,
+  markPaymentsAsUnidentified
+} from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
 import { useSelectedPayments } from "@/context/SelectedPaymentsContext";
 import { useClientsPayments } from "@/hooks/useClientsPayments";
@@ -19,6 +22,7 @@ import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import PaymentsTable from "@/modules/clients/components/payments-table";
 import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPayment/ModalActionPayment";
 import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { ISingleBank } from "@/types/banks/IBanks";
@@ -106,6 +110,22 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
       }
     }
   };
+
+  const handlePaymentUnidentified = async () => {
+    try {
+      await markPaymentsAsUnidentified(selectedPayments.map((payment) => payment.id));
+      showMessage("success", "Pago(s) marcados como no identificados");
+      mutate();
+      setSelectedPayments([]);
+    } catch (error) {
+      showMessage(
+        "error",
+        "Ha ocurrido un error al marcar los pagos seleccionados como no identificados"
+      );
+    }
+    setIsSelectedActionModalOpen({ selected: 0 });
+  };
+
   return (
     <>
       <div className="paymentsTab">
@@ -168,10 +188,17 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         setIsSelectedActionModalOpen={setIsSelectedActionModalOpen}
         setIsModalActionPaymentOpen={setIsModalActionPaymentOpen}
         addPaymentsToApplicationTable={handleAddSelectedPaymentsToApplicationTable}
+        selectedPayments={selectedPayments}
       />
       <ModalIdentifyPayment
         isOpen={isSelectedActionModalOpen.selected === 1}
         onClose={handleCloseActionModal}
+      />
+      <ModalConfirmAction
+        title="Se marcarán los pagos seleccionados como no identificados"
+        isOpen={isSelectedActionModalOpen.selected === 2}
+        onClose={handleCloseActionModal}
+        onOk={handlePaymentUnidentified}
       />
     </>
   );

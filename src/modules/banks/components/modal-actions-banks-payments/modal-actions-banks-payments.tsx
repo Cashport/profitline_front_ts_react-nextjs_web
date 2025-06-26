@@ -6,7 +6,8 @@ import {
   CheckCircle,
   CirclesFour,
   FileArrowUp,
-  ArrowsClockwise
+  ArrowsClockwise,
+  ArrowDownLeft
 } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -79,6 +80,13 @@ const ModalActionsBanksPayments = ({ isOpen, onClose, setSelectOpen }: Props) =>
           title="Cambiar de estado"
           onClick={() => {
             handleOpenModal(6);
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<ArrowDownLeft size={20} />}
+          title="Marcar como sin identificar"
+          onClick={() => {
+            handleOpenModal(8);
           }}
         />
       </Flex>

@@ -251,3 +251,17 @@ export const applyWithCashportAI = async (
     throw error;
   }
 };
+
+export const markPaymentsAsUnidentified = async (paymentIds: number[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/paymentApplication/unlink-client`,
+      { payments: paymentIds }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error in markAsUnidentified:", error);
+    throw error;
+  }
+};
