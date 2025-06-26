@@ -138,7 +138,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   setConfirmModal(true);
                 }}
               >
-                No identificado
+                Pago no es del cliente
               </Button>
             )
           }
@@ -192,7 +192,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       />
 
       <ModalConfirmAction
-        title="¿Marcar pago como no identificado?"
+        title="Se marcará el pago como no identificado"
         isOpen={confirmModal}
         onClose={() => setConfirmModal(false)}
         onOk={() => {

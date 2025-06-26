@@ -195,7 +195,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         onClose={handleCloseActionModal}
       />
       <ModalConfirmAction
-        title="¿Marcar pagos seleccionados como no identificados?"
+        title="Se marcarán los pagos seleccionados como no identificados"
         isOpen={isSelectedActionModalOpen.selected === 2}
         onClose={handleCloseActionModal}
         onOk={handlePaymentUnidentified}

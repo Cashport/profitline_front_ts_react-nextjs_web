@@ -74,10 +74,10 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
         />
         <ButtonGenerateAction
           icon={<ArrowDownLeft size={20} />}
-          title="Marcar como no identificado"
+          title="Pago no es del cliente"
           onClick={() => {
             if (selectedPayments.length === 0) {
-              message.info("No hay pagos seleccionados para marcar como no identificados.");
+              message.info("No hay pagos seleccionados para marcar como no identificados");
               return;
             }
             setIsSelectedActionModalOpen({
