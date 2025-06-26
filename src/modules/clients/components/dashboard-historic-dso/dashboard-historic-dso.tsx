@@ -73,7 +73,7 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
       </div>
       <div className={styles.chart}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart margin={{ right: 0, left: -3 }} barCategoryGap={10} data={data} barSize={20}>
+          <BarChart margin={{ right: 0, left: -3 }} barCategoryGap={10} data={data} barSize={30}>
             <XAxis padding={{ left: 20, right: 20 }} dataKey="name" scale="point" color="#CBE71E" />
             <YAxis tickFormatter={yAxisLabelFormatter} />
             <Tooltip />
