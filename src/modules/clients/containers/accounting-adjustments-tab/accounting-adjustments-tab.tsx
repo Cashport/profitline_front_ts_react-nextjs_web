@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
 import { CaretDoubleRight, DotsThree } from "phosphor-react";
@@ -11,6 +11,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { ClientDetailsContext } from "../client-details/client-details";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
@@ -64,6 +65,8 @@ const AccountingAdjustmentsTab = () => {
     motive_id: JustOthersMotiveType
   });
 
+  const { clientFilters } = useContext(ClientDetailsContext);
+
   const { mutate: mutateApplyTabData } = useApplicationTable();
 
   // useMemo to add the key financial_status_id to each row in the data
@@ -94,6 +97,18 @@ const AccountingAdjustmentsTab = () => {
   useEffect(() => {
     mutateFinancialDiscounts();
   }, [modalType]);
+
+  // useEffect for setting localFilters according to clientFilters
+  useEffect(() => {
+    if (clientFilters) {
+      console.log("Client Filters:", clientFilters);
+      setFilters({
+        lines: (clientFilters.lines || []).map(Number),
+        zones: (clientFilters.zones || []).map(Number),
+        channels: (clientFilters.channels || []).map(Number)
+      });
+    }
+  }, [clientFilters]);
 
   const handleAddSelectedAdjustmentsToApplicationTable = async () => {
     try {
