@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { message, Modal } from "antd";
-import { MagnifyingGlassPlus, HandTap, PushPin, QuestionMark } from "@phosphor-icons/react";
+import { MagnifyingGlassPlus, HandTap, PushPin, ArrowDownLeft } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -73,7 +73,7 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
           }}
         />
         <ButtonGenerateAction
-          icon={<QuestionMark size={20} />}
+          icon={<ArrowDownLeft size={20} />}
           title="Marcar como no identificado"
           onClick={() => {
             if (selectedPayments.length === 0) {

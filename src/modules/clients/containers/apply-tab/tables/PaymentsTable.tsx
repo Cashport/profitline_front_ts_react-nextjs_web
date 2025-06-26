@@ -1,7 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps, Tooltip } from "antd";
-import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
-import { QuestionMark } from "@phosphor-icons/react";
+import { ArrowDownLeft, DotsThreeVertical, Eye, Trash } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
@@ -132,7 +131,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             key: "3",
             label: (
               <Button
-                icon={<QuestionMark size={20} />}
+                icon={<ArrowDownLeft size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
                   setActiveRow(row);
