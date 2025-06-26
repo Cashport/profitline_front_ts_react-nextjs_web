@@ -1,10 +1,13 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps, Tooltip } from "antd";
 import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
+import { QuestionMark } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
+
 import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -19,18 +22,22 @@ interface PaymentsTableProps {
     // eslint-disable-next-line no-unused-vars
     onChange: (newSelectedRowKeys: React.Key[], selectedRows: any[]) => void;
   };
+  // eslint-disable-next-line no-unused-vars
+  markPaymentAsUnidentified?: (row: IApplyTabRecord) => void;
 }
 
 const PaymentsTable: React.FC<PaymentsTableProps> = ({
   data,
   handleDeleteRow,
   handleEditRow,
-  rowSelection
+  rowSelection,
+  markPaymentAsUnidentified
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
 
   const [removeModal, setRemoveModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(false);
 
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
@@ -120,6 +127,21 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 Eliminar
               </Button>
             )
+          },
+          {
+            key: "3",
+            label: (
+              <Button
+                icon={<QuestionMark size={20} />}
+                className="buttonNoBorder"
+                onClick={() => {
+                  setActiveRow(row);
+                  setConfirmModal(true);
+                }}
+              >
+                No identificado
+              </Button>
+            )
           }
         ];
 
@@ -167,6 +189,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           setActiveRow(null);
           setRemoveModal(false);
           handleDeleteRow && activeRow && handleDeleteRow(activeRow.id);
+        }}
+      />
+
+      <ModalConfirmAction
+        title="¿Marcar pago como no identificado?"
+        isOpen={confirmModal}
+        onClose={() => setConfirmModal(false)}
+        onOk={() => {
+          setConfirmModal(false);
+          markPaymentAsUnidentified && activeRow && markPaymentAsUnidentified(activeRow);
         }}
       />
     </>
