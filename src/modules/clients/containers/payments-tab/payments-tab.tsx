@@ -18,7 +18,6 @@ import { useApplicationTable } from "@/hooks/useApplicationTable";
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import Collapse from "@/components/ui/collapse";
-import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import PaymentsTable from "@/modules/clients/components/payments-table";
 import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPayment/ModalActionPayment";
 import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
@@ -132,7 +131,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         <Flex justify="space-between" className="paymentsTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setTimeout(() => {
@@ -140,7 +139,6 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
                 }, 1000);
               }}
             />
-            <UiFilterDropdown />
             <Button
               className="button__actions"
               size="large"
