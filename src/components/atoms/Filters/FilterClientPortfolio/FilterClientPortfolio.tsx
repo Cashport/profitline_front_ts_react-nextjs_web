@@ -9,7 +9,7 @@ import { getAllZones } from "@/services/zone/zones";
 import "../filterCascader.scss";
 
 interface Option {
-  value: string;
+  value: string | number;
   label: string;
   disableCheckbox?: boolean;
   isLeaf?: boolean;
@@ -23,6 +23,8 @@ export interface IClientPortfolioFilters {
   channels: string[];
   radicado: boolean;
   novedad: boolean;
+  paymentAgreement: number | null;
+  radicationType: number | null;
 }
 
 interface Props {
@@ -37,7 +39,7 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
     sublines: [] as { id: number; name: string }[]
   });
   const [optionsList, setOptionsList] = useState<Option[]>(options);
-  const [selectOptions, setSelectOptions] = useState<string[][]>([]);
+  const [selectOptions, setSelectOptions] = useState<(string | number)[][]>([]);
 
   useEffect(() => {
     if (selectOptions.length === 0) {
@@ -47,18 +49,27 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
         sublines: [],
         channels: [],
         radicado: false,
-        novedad: false
+        novedad: false,
+        paymentAgreement: null,
+        radicationType: null
       });
     }
 
-    const zonesFilters = selectOptions.filter((item) => item[0] === "Zona").map((item) => item[1]);
-    const lineFilters = selectOptions.filter((item) => item[0] === "Linea").map((item) => item[1]);
+    const zonesFilters = selectOptions
+      .filter((item) => item[0] === "Zona")
+      .map((item) => String(item[1]));
+    const lineFilters = selectOptions
+      .filter((item) => item[0] === "Linea")
+      .map((item) => String(item[1]));
     const sublineFilters = selectOptions
       .filter((item) => item[0] === "Sublinea")
-      .map((item) => item[1]);
+      .map((item) => String(item[1]));
     const channelsFilters = selectOptions
       .filter((item) => item[0] === "Canal")
-      .map((item) => item[1]);
+      .map((item) => String(item[1]));
+
+    const paymentAgreement = selectOptions.find((item) => item[0] === "paymentAgreement");
+    const radicationType = selectOptions.find((item) => item[0] === "radicationType");
 
     setSelectedFilters({
       zones: zonesFilters,
@@ -66,11 +77,13 @@ export const FilterClientPortfolio = ({ setSelectedFilters }: Props) => {
       sublines: sublineFilters,
       channels: channelsFilters,
       radicado: selectOptions.some((item) => item[0] === "radicado"),
-      novedad: selectOptions.some((item) => item[0] === "novedad")
+      novedad: selectOptions.some((item) => item[0] === "novedad"),
+      paymentAgreement: paymentAgreement ? Number(paymentAgreement[1]) : null,
+      radicationType: radicationType ? Number(radicationType[1]) : null
     });
   }, [selectOptions]);
 
-  const onChange = (value: string[][]) => {
+  const onChange = (value: (string | number)[][]) => {
     setSelectOptions(value);
   };
 
@@ -206,6 +219,23 @@ const options: Option[] = [
     disableCheckbox: true
   },
   {
+    value: "paymentAgreement",
+    label: "Acuerdo de pago",
+    children: [
+      { value: 1, label: "Sí" },
+      { value: 0, label: "No" }
+    ]
+  },
+  {
+    value: "radicationType",
+    label: "Tipo de radicación",
+    isLeaf: false,
+    children: [
+      { value: 1, label: "Sí" },
+      { value: 0, label: "No" }
+    ]
+  },
+  {
     value: "radicado",
     label: "Radicado"
   },
@@ -221,5 +251,7 @@ const initValueFiltersData = {
   lines: [],
   sublines: [],
   radicado: false,
-  novedad: false
+  novedad: false,
+  paymentAgreement: null,
+  radicationType: null
 };

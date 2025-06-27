@@ -24,10 +24,7 @@ import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalAc
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
 import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNews";
 import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
-import {
-  SelectedFiltersWallet,
-  WalletTabFilter
-} from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
+import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
@@ -90,14 +87,13 @@ export const WalletTab = () => {
   // useEffect for setting localFilters according to clientFilters
   useEffect(() => {
     if (clientFilters) {
-      console.log("Client Filters:", clientFilters);
       setFilters({
         lines: (clientFilters.lines || []).map(Number),
         zones: (clientFilters.zones || []).map(Number),
         channels: (clientFilters.channels || []).map(Number),
         sublines: (clientFilters.sublines || []).map(Number),
-        paymentAgreement: null,
-        radicationType: null
+        paymentAgreement: clientFilters.paymentAgreement ?? null,
+        radicationType: clientFilters.radicationType ?? null
       });
     }
   }, [clientFilters]);
@@ -196,7 +192,7 @@ export const WalletTab = () => {
               placeholder="Buscar por ID"
               onChange={handleSearchChange}
             />
-            <WalletTabFilter setSelectedFilters={setFilters} />
+            {/* <WalletTabFilter setSelectedFilters={setFilters} /> */}
             <Button
               className="button__actions"
               size="large"

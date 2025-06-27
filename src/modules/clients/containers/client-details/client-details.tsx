@@ -51,7 +51,9 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
     sublines: [],
     channels: [],
     radicado: false,
-    novedad: false
+    novedad: false,
+    paymentAgreement: null,
+    radicationType: null
   });
 
   const { data: portfolioData, error, mutate } = useClientDetails(filters);
@@ -138,7 +140,7 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
       portfolioData,
       clientFilters: filters
     }),
-    [portfolioData, selectedOption, showInvoiceActionsModal]
+    [portfolioData, selectedOption, showInvoiceActionsModal, filters]
   );
 
   return (
