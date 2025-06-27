@@ -37,6 +37,7 @@ export interface IDataSection {
   percentages: IPercentages;
   aplication_payments: IApplicationPayments;
   payments_vs_invoices: IPaymentsVsInvoices[];
+  unradicated_invoices: IUnradicatedInvoices;
 }
 
 interface IPaymentsVsInvoices {
@@ -52,6 +53,11 @@ interface IPaymentsVsInvoices {
   collections: string;
   residue: number;
   dso: number;
+}
+
+export interface IUnradicatedInvoices {
+  total_value: number;
+  count: number;
 }
 
 // Define the type for the full API response

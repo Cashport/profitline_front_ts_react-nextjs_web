@@ -36,6 +36,7 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
     pastDuePortfolio,
     expiredPercentage,
     budget,
+    budgetPercentage,
     invoiceAges,
     totalUnreconciled,
     totalUnreconciledCount,
@@ -57,7 +58,9 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
     quotaPercentage,
     dsoValue,
     sellsVsPaymentsData,
-    history_dso
+    history_dso,
+    sinRadicarValue,
+    sinRadicarCount,
   } = useDashboardInfo(portfolioData);
 
   return (
@@ -71,7 +74,11 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
               pastDuePortfolio={pastDuePortfolio}
               expiredPercentage={expiredPercentage}
             />
-            <DashboardBudget className={styles.item} budget={budget} />
+            <DashboardBudget
+              className={styles.item}
+              budget={budget}
+              budgetPercentage={budgetPercentage}
+            />
             <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
             <DashboardInvoiceStatus
               className={styles.item}
@@ -79,17 +86,17 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
               totalUnreconciledCount={totalUnreconciledCount}
               totalReconciled={totalReconciled}
               totalReconciledCount={totalReconciledCount}
-              totalBalance={totalBalance}
-              totalBalanceCount={totalBalanceCount}
+              sinRadicarValue={sinRadicarValue}
+              sinRadicarCount={sinRadicarCount}
             />
             <DashboardAlerts
               className={styles.item}
               openAlerts={openAlerts}
               openAlertsCount={openAlertsCount}
-              discount={discount}
-              discountCount={discountCount}
               creditNotes={creditNotes}
               creditNotesCount={creditNotesCount}
+              totalBalance={totalBalance}
+              totalBalanceCount={totalBalanceCount}
             />
           </div>
           <div className={styles.b}>
@@ -99,21 +106,11 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
                   name="R. aplicado"
                   value={appliedPayments}
                   unit="M"
-                  badgeText={
-                    appliedPaymentPercentage && appliedPaymentPercentage > 0
-                      ? `${appliedPaymentPercentage.toFixed(1)}%`
-                      : ""
-                  }
                 />
                 <DashboardGenericItem
                   name="Pagos no ap."
                   value={unappliedPayments}
                   unit="M"
-                  badgeText={
-                    unnappliedPaymentPercentage && parseInt(unnappliedPaymentPercentage) > 0
-                      ? `${parseFloat(unnappliedPaymentPercentage).toFixed(1)}%`
-                      : ""
-                  }
                 />
               </div>
             </div>

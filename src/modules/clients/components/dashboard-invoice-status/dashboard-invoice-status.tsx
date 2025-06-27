@@ -7,8 +7,8 @@ interface DashboardInvoiceStatusProps {
   totalUnreconciledCount: number | undefined;
   totalReconciled: string;
   totalReconciledCount: number | undefined;
-  totalBalance: string;
-  totalBalanceCount: number | undefined;
+  sinRadicarValue: string;
+  sinRadicarCount: number | undefined;
   className?: string;
 }
 
@@ -17,8 +17,8 @@ const DashboardInvoiceStatus: FC<DashboardInvoiceStatusProps> = ({
   totalUnreconciledCount,
   totalReconciled,
   totalReconciledCount,
-  totalBalance,
-  totalBalanceCount,
+  sinRadicarValue,
+  sinRadicarCount,
   className
 }) => {
   return (
@@ -38,10 +38,10 @@ const DashboardInvoiceStatus: FC<DashboardInvoiceStatusProps> = ({
           quantity={totalReconciledCount}
         />
         <DashboardGenericItem
-          name="Saldos"
-          value={totalBalance}
+          name="Sin radicar"
+          value={sinRadicarValue}
           unit="M"
-          quantity={totalBalanceCount}
+          quantity={sinRadicarCount}
         />
       </div>
     </div>
