@@ -5,7 +5,6 @@ import { Plus } from "phosphor-react";
 import UiSearchInput from "@/components/ui/search-input";
 import { extractSingleParam } from "@/utils/utils";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
-import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import ContactsTable from "../../components/contacts-tab-table";
 import { IContact } from "@/types/contacts/IContacts";
 import { useClientContacts } from "@/hooks/useClientContacts";
@@ -73,7 +72,6 @@ const ContactsTab = () => {
                   }, 1000);
                 }}
               />
-              <UiFilterDropdown />
               <DotsDropdown items={items} />
             </Flex>
 

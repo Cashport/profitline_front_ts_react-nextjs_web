@@ -224,7 +224,8 @@ const options: Option[] = [
     children: [
       { value: 1, label: "Sí" },
       { value: 0, label: "No" }
-    ]
+    ],
+    disableCheckbox: true
   },
   {
     value: "radicationType",
@@ -233,7 +234,8 @@ const options: Option[] = [
     children: [
       { value: 1, label: "Sí" },
       { value: 0, label: "No" }
-    ]
+    ],
+    disableCheckbox: true
   },
   {
     value: "radicado",

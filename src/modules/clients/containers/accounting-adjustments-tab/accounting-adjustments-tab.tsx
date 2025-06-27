@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
-import { CaretDoubleRight, DotsThree } from "phosphor-react";
+import { DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
@@ -17,9 +17,7 @@ import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-adjustments-table";
 import Collapse from "@/components/ui/collapse";
-import AccountingAdjustmentsFilter, {
-  SelectedFiltersAccountingAdjustments
-} from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
+import { SelectedFiltersAccountingAdjustments } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
 
 import {

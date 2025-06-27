@@ -8,7 +8,6 @@ import { useClientHistory } from "@/hooks/useClientHistory";
 import { useMessageApi } from "@/context/MessageContext";
 
 import UiSearchInput from "@/components/ui/search-input";
-import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import HistoryTable from "../../components/history-tab/history-tab-table";
 import ModalActionsHistoryTab from "../../components/history-tab/history-tab-modal-generate-action";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
@@ -65,7 +64,6 @@ const HistoryTab = () => {
                   }, 1000);
                 }}
               />
-              <UiFilterDropdown />
               <Button
                 className={styles.button__actions}
                 size="large"
