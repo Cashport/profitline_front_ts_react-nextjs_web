@@ -375,7 +375,7 @@ const ApplyTab: React.FC = () => {
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setSearchQuery(event.target.value.toLowerCase());

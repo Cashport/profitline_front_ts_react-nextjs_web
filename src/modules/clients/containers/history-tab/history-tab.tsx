@@ -57,7 +57,7 @@ const HistoryTab = () => {
           <Flex justify="space-between">
             <Flex gap={"0.5rem"}>
               <UiSearchInput
-                className="search"
+                className="standardSearch"
                 placeholder="Buscar"
                 onChange={(event) => {
                   setTimeout(() => {

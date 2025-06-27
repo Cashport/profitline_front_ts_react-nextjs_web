@@ -154,7 +154,7 @@ const AccountingAdjustmentsTab = () => {
         >
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setSearch(event.target.value);
@@ -171,14 +171,6 @@ const AccountingAdjustmentsTab = () => {
               Generar acción
             </Button>
           </Flex>
-          <Button
-            type="primary"
-            className="availableAdjustments"
-            onClick={() => console.log("click ajustes disponibles")}
-          >
-            Ajustes disponibles
-            <CaretDoubleRight size={16} style={{ marginLeft: "0.5rem" }} />
-          </Button>
         </Flex>
 
         {isLoading ? (

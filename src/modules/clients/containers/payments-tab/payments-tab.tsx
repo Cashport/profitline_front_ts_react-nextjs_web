@@ -112,7 +112,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         <Flex justify="space-between" className="paymentsTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setTimeout(() => {

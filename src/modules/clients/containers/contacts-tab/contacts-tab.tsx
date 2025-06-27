@@ -65,7 +65,7 @@ const ContactsTab = () => {
           <Flex justify="space-between" className="contactsTab__header">
             <Flex gap={"0.5rem"}>
               <UiSearchInput
-                className="search"
+                className="standardSearch"
                 placeholder="Buscar"
                 onChange={(event) => {
                   setTimeout(() => {

@@ -188,7 +188,7 @@ export const WalletTab = () => {
         <div className="walletTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar por ID"
               onChange={handleSearchChange}
             />
