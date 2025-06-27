@@ -17,7 +17,9 @@ const GeneralDashboardView: FC = () => {
     sublines: [],
     channels: [],
     radicado: false,
-    novedad: false
+    novedad: false,
+    paymentAgreement: null,
+    radicationType: null
   });
 
   const { data, loading } = useGeneralPortfolio(filters);

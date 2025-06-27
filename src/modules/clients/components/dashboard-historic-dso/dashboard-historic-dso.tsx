@@ -32,12 +32,12 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
 
   // Función para calcular el barSize dinámico
   const calculateBarSize = () => {
-    const MIN_BAR_SIZE = 30;
+    const MIN_BAR_SIZE = 28;
     const MAX_BAR_SIZE = 62;
     const BASE_SCREEN_WIDTH = 375;
 
     // Usamos una función logarítmica para suavizar el crecimiento
-    const growthFactor = Math.log(width / BASE_SCREEN_WIDTH + 1) * 20;
+    const growthFactor = Math.log(width / BASE_SCREEN_WIDTH + 1) * 17;
 
     return Math.min(MIN_BAR_SIZE + Math.floor(growthFactor), MAX_BAR_SIZE);
   };
@@ -105,7 +105,7 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
             data={data}
             barSize={calculateBarSize()}
           >
-            <XAxis padding={{ left: 32, right: 32 }} dataKey="name" scale="point" color="#CBE71E" />
+            <XAxis padding={{ left: 39, right: 39 }} dataKey="name" scale="point" color="#CBE71E" />
             <YAxis tickFormatter={yAxisLabelFormatter} />
             <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3" vertical={false} />

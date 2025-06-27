@@ -160,7 +160,7 @@ const AccountingAdjustmentsTab = () => {
                 setSearch(event.target.value);
               }}
             />
-            <AccountingAdjustmentsFilter onFilterChange={setFilters} />
+            {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
             <Button
               className="button__actions"
               size="large"
