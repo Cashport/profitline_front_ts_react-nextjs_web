@@ -21,6 +21,8 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   // Budget
   const formattedBudget = formatMillionNumber(portfolioData?.data_wallet?.budget_ammount);
   const budget = formatMoney(formattedBudget);
+  const budgetPercentage = portfolioData?.percentages?.budget_percentage || "0";
+
 
   // Portfolio Ages
   const invoiceAges = portfolioData?.invoice_ages
@@ -110,11 +112,19 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const quota = formatMoney(formattedQuota);
   const quotaPercentage = portfolioData?.percentages?.quota_percentage || "0";
 
+  const formattedSinRadicar = formatMillionNumber(
+    portfolioData?.unradicated_invoices?.total_value
+  );
+  const sinRadicarValue = formatMoney(formattedSinRadicar);
+  const sinRadicarCount = portfolioData?.unradicated_invoices?.count ?? 0;
+
+
   return {
     totalWallet,
     pastDuePortfolio,
     expiredPercentage,
     budget,
+    budgetPercentage,
     invoiceAges,
     totalUnreconciled,
     totalUnreconciledCount,
@@ -136,6 +146,8 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
     unnappliedPaymentPercentage,
     dsoValue,
     quota,
-    quotaPercentage
+    quotaPercentage,
+    sinRadicarValue,
+    sinRadicarCount
   };
 };
