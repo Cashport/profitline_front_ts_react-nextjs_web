@@ -1,28 +1,17 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect } from "react";
-import { Button, Flex, Modal, UploadFile } from "antd";
-import { CaretLeft, Plus } from "@phosphor-icons/react";
-import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
-import styles from "./modalAttachEvidence.module.scss";
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { Button, Flex, Modal } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
+import { CaretLeft, Plus } from "@phosphor-icons/react";
 
-interface FileFromDragger {
-  lastModified: number;
-  lastModifiedDate: Date;
-  name: string;
-  originFileObj: File;
-  percent: number;
-  size: number;
-  status: string;
-  type: string;
-  uid: string;
-}
+import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
-interface FileObjectFromButton {
-  file: FileFromDragger;
-  fileList: FileFromDragger[];
-}
+import styles from "./modalAttachEvidence.module.scss";
+
+type IsMandatoryType = {
+  commentary?: boolean;
+  evidence?: boolean;
+};
 
 type customTexts = {
   title?: string;
@@ -43,7 +32,9 @@ type EvidenceModalProps = {
   multipleFiles?: boolean;
   noComment?: boolean;
   loading?: boolean;
-  isValidating: boolean;
+  confirmDisabled?: boolean;
+  isMandatory?: IsMandatoryType;
+  noModal?: boolean;
 };
 
 const ModalAttachEvidence = ({
@@ -53,17 +44,13 @@ const ModalAttachEvidence = ({
   isOpen,
   handleCancel,
   customTexts,
-  noComment = false,
-  commentary,
   setCommentary,
   multipleFiles = false,
   loading = false,
-  isValidating
+  confirmDisabled,
+  isMandatory = { commentary: false, evidence: false },
+  noModal = false
 }: EvidenceModalProps) => {
-  const isAttachButtonDisabled = !noComment
-    ? !(commentary && selectedEvidence.length > 0)
-    : selectedEvidence.length === 0;
-
   const handleOnChangeDocument: any = (info: UploadChangeParam<File>) => {
     const { file } = info;
     if (file) {
@@ -108,17 +95,8 @@ const ModalAttachEvidence = ({
     };
   }, [isOpen, setCommentary, setSelectedEvidence]);
 
-  return (
-    <Modal
-      centered
-      className="ModalAttachEvidence"
-      onCancel={handleCancel}
-      width={"55%"}
-      open={isOpen}
-      footer={null}
-      closable={false}
-      destroyOnClose={true}
-    >
+  const renderView = () => {
+    return (
       <div className={styles.content}>
         <button className={styles.content__header} onClick={handleCancel}>
           <CaretLeft size={"1.25rem"} />
@@ -132,7 +110,10 @@ const ModalAttachEvidence = ({
         <div className={styles.content__evidence}>
           <Flex vertical>
             <p>Evidencia</p>
-            <em className="descriptionDocument">*Obligatorio</em>
+            <em className="descriptionDocument">
+              {" "}
+              *{isMandatory?.evidence ? "Obligatorio" : "Opcional"}
+            </em>
           </Flex>
           <DocumentButton
             title={selectedEvidence[0]?.name}
@@ -181,7 +162,9 @@ const ModalAttachEvidence = ({
 
           <Flex vertical>
             <p>Comentarios</p>
-            <em className="descriptionDocument">*Obligatorio</em>
+            <em className="descriptionDocument">
+              *{isMandatory?.commentary ? "Obligatorio" : "Opcional"}
+            </em>
           </Flex>
           <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
         </div>
@@ -192,10 +175,29 @@ const ModalAttachEvidence = ({
           titleConfirm={
             customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
           }
-          isConfirmLoading={loading || isValidating}
-          isConfirmDisabled={isAttachButtonDisabled || isValidating}
+          isConfirmLoading={loading || confirmDisabled}
+          isConfirmDisabled={confirmDisabled}
         />
       </div>
+    );
+  };
+
+  if (noModal) {
+    return renderView();
+  }
+
+  return (
+    <Modal
+      centered
+      className="ModalAttachEvidence"
+      onCancel={handleCancel}
+      width={"55%"}
+      open={isOpen}
+      footer={null}
+      closable={false}
+      destroyOnClose={true}
+    >
+      {renderView()}
     </Modal>
   );
 };

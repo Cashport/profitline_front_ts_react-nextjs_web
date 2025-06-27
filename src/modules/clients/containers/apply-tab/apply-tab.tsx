@@ -588,7 +588,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
-        isValidating={isValidating}
+        confirmDisabled={isValidating}
       />
       <ModalApplyAI
         isOpen={isModalOpen.selected === 2}
