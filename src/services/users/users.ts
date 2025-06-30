@@ -46,6 +46,20 @@ export const inviteUser = async (
     throw error;
   }
 };
+
+export const createPassword = async (token: string, password: string): Promise<any> => {
+  const modelData = {
+    password: password,
+    token: token
+  };
+  try {
+    const response = await API.post(`/user/accept-invitation`, modelData);
+    return response;
+  } catch (error) {
+    console.error("error creating password: ", error);
+    throw error;
+  }
+};
 //update
 export const updateUser = async (
   data: IUserForm,
