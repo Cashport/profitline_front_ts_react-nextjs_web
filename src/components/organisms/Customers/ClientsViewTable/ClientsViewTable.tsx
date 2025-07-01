@@ -115,7 +115,7 @@ export const ClientsViewTable = () => {
       dataIndex: "client_name",
       key: "client_name",
       render: (_, row: IClientsPortfolio) => (
-        <Link href={`/clientes/detail/${row.client_id}/project/${row.project_id}`}>
+        <Link href={`/clientes/detail/${row.client_uuid}/project/${row.project_id}`}>
           <Text className="text">{row.client_name}</Text>
         </Link>
       ),

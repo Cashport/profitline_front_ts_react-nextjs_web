@@ -13,6 +13,7 @@ export interface IClientsPortfolio {
   total_balances: any;
   id: number;
   client_id: string;
+  client_uuid: string;
   client_name: string;
   project_id: number;
   past_due_ammount: number;
