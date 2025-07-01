@@ -196,7 +196,6 @@ export const ModalSendEmail = ({ isOpen, onClose, event_id, onFinalOk, customOnR
       open={isOpen}
       onCancel={onClose}
       footer={null}
-      centered
     >
       {currentView === "sendEmail" && (
         <>
