@@ -269,6 +269,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
           loading={isSubmitting}
           handleCancel={() => setIsSecondView(false)}
           noModal
+          multipleFiles
         />
       )}
     </Modal>
