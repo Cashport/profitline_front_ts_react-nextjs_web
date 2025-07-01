@@ -5,18 +5,19 @@ import styles from "./dashboard-alerts.module.scss";
 interface DashboardAlertsProps {
   openAlerts: string;
   openAlertsCount: number | undefined;
-  discount: string;
-  discountCount: number | undefined;
   creditNotes: string;
   creditNotesCount: number | undefined;
+  totalBalance: string;
+  totalBalanceCount: number | undefined;
   className?: string;
 }
+
 
 const DashboardAlerts: FC<DashboardAlertsProps> = ({
   openAlerts,
   openAlertsCount,
-  discount,
-  discountCount,
+  totalBalance,
+  totalBalanceCount,
   creditNotes,
   creditNotesCount,
   className
@@ -32,10 +33,10 @@ const DashboardAlerts: FC<DashboardAlertsProps> = ({
           quantity={openAlertsCount}
         />
         <DashboardGenericItem
-          name="DPP disponibles"
-          value={discount}
+          name="Saldos"
+          value={totalBalance}
           unit="M"
-          quantity={discountCount}
+          quantity={totalBalanceCount}
         />
         <DashboardGenericItem
           name="NC disponibles"
