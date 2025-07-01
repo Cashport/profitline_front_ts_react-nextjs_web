@@ -12,7 +12,7 @@ export const useClientDetails = (filters: IClientPortfolioFilters) => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
-  const clientUUID = clientIdParam;
+  const clientId = clientIdParam;
   const projectId = projectIdParam ? parseInt(projectIdParam) : undefined;
 
   const queryParams = [
@@ -26,7 +26,7 @@ export const useClientDetails = (filters: IClientPortfolioFilters) => {
     .filter(Boolean)
     .join("&");
 
-  const pathKey = `/portfolio/project/${projectId}/client/${clientUUID}?${queryParams}`;
+  const pathKey = `/portfolio/project/${projectId}/client/${clientId}?${queryParams}`;
 
   const {
     data: portfolioData,
