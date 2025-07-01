@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Table, TableProps, DatePicker, Input } from "antd";
-import "./wallet-tab-payment-agreement-modal.scss";
-import { CaretLeft } from "phosphor-react";
-import EvidenceModal from "../wallet-tab-evidence-modal";
-import { IInvoice } from "@/types/invoices/IInvoices";
-import dayjs from "dayjs";
-import { formatCurrencyMoney, formatDate } from "@/utils/utils";
-
-import { createPaymentAgreement } from "@/services/accountingAdjustment/accountingAdjustment";
 import { MessageInstance } from "antd/es/message/interface";
+import { CaretLeft } from "phosphor-react";
+import dayjs from "dayjs";
+
+import { formatCurrencyMoney, formatDate } from "@/utils/utils";
+import { createPaymentAgreement } from "@/services/accountingAdjustment/accountingAdjustment";
+
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+
+import { IInvoice } from "@/types/invoices/IInvoices";
+
+import "./wallet-tab-payment-agreement-modal.scss";
 
 interface Props {
   isOpen: boolean;
@@ -29,10 +32,6 @@ interface ITableData {
   id_erp: string;
   [key: string]: any;
 }
-interface infoObject {
-  file: File;
-  fileList: File[];
-}
 
 const PaymentAgreementModal: React.FC<Props> = ({
   isOpen,
@@ -44,15 +43,11 @@ const PaymentAgreementModal: React.FC<Props> = ({
   onCloseAllModals
 }) => {
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
-  const [commentary, setCommentary] = useState<string>("");
+  const [commentary, setCommentary] = useState<string>();
   const [isSecondView, setIsSecondView] = useState(false);
   const [tableData, setTableData] = useState<ITableData[]>([]);
   const [globalDate, setGlobalDate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCommentary(e.target.value);
-  };
 
   const handleAttachEvidence = async () => {
     if (!clientId || !projectId) {
@@ -64,7 +59,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
       invoice_id: row.id,
       date_agreement: (row.newDate && dayjs(row.newDate).format("DD-MM-YYYY")) || "",
       amount: parseFloat(row.agreedValue),
-      comment: commentary
+      comment: commentary || ""
     }));
 
     try {
@@ -83,40 +78,6 @@ const PaymentAgreementModal: React.FC<Props> = ({
       messageShow.error("Error al crear el acuerdo de pago. Por favor, intente de nuevo.");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleOnChangeDocument: any = (info: infoObject) => {
-    const { file: rawFile } = info;
-    if (rawFile) {
-      const fileSizeInMB = rawFile.size / (1024 * 1024);
-      if (fileSizeInMB > 30) {
-        messageShow.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
-        return;
-      }
-      setSelectedEvidence(selectedEvidence ? [...selectedEvidence, rawFile] : [rawFile]);
-    }
-  };
-
-  const handleOnDeleteDocument = (fileName: string) => {
-    const updatedFiles = selectedEvidence?.filter((file) => file.name !== fileName);
-    setSelectedEvidence(updatedFiles);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      const fileSizeInMB = file.size / (1024 * 1024);
-      if (fileSizeInMB > 30) {
-        messageShow.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo dse menos de 30 MB."
-        );
-        return;
-      }
-      setSelectedEvidence(selectedEvidence ? [...selectedEvidence, file] : [file]);
     }
   };
 
@@ -288,22 +249,26 @@ const PaymentAgreementModal: React.FC<Props> = ({
             <Button className="cancelButton" onClick={onClenModal}>
               Cancelar
             </Button>
-            <Button className="acceptButton" onClick={() => setIsSecondView(true)}>
+            <Button
+              className="acceptButton"
+              disabled={globalDate === null}
+              onClick={() => setIsSecondView(true)}
+            >
               Guardar cambios
             </Button>
           </div>
         </>
       ) : (
-        <EvidenceModal
+        <ModalAttachEvidence
           selectedEvidence={selectedEvidence}
-          handleOnChangeDocument={handleOnChangeDocument}
-          handleOnDeleteDocument={handleOnDeleteDocument}
-          handleFileChange={handleFileChange}
-          handleOnChangeTextArea={handleOnChangeTextArea}
+          setSelectedEvidence={setSelectedEvidence}
           handleAttachEvidence={handleAttachEvidence}
           commentary={commentary}
-          isSubmitting={isSubmitting}
-          setIsSecondView={setIsSecondView}
+          setCommentary={setCommentary}
+          isOpen={true}
+          loading={isSubmitting}
+          handleCancel={() => setIsSecondView(false)}
+          noModal
         />
       )}
     </Modal>
