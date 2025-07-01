@@ -3,6 +3,8 @@ import { Button, Flex, Modal } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
 import { CaretLeft, Plus } from "@phosphor-icons/react";
 
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
+
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
@@ -35,6 +37,8 @@ type EvidenceModalProps = {
   confirmDisabled?: boolean;
   isMandatory?: IsMandatoryType;
   noModal?: boolean;
+  noTitle?: boolean;
+  noDescription?: boolean;
 };
 
 const ModalAttachEvidence = ({
@@ -45,11 +49,14 @@ const ModalAttachEvidence = ({
   handleCancel,
   customTexts,
   setCommentary,
+  commentary,
   multipleFiles = false,
   loading = false,
   confirmDisabled,
   isMandatory = { commentary: false, evidence: false },
-  noModal = false
+  noModal = false,
+  noTitle = false,
+  noDescription = false
 }: EvidenceModalProps) => {
   const handleOnChangeDocument: any = (info: UploadChangeParam<File>) => {
     const { file } = info;
@@ -98,15 +105,19 @@ const ModalAttachEvidence = ({
   const renderView = () => {
     return (
       <div className={styles.content}>
-        <button className={styles.content__header} onClick={handleCancel}>
-          <CaretLeft size={"1.25rem"} />
-          <h4>{customTexts?.title ? customTexts?.title : "Evidencia"}</h4>
-        </button>
-        <p className={styles.content__description}>
-          {customTexts?.description
-            ? customTexts?.description
-            : "Adjunta la evidencia e ingresa un comentario"}
-        </p>
+        {!noTitle && (
+          <button className={styles.content__header} onClick={handleCancel}>
+            <CaretLeft size={"1.25rem"} />
+            <h4>{customTexts?.title ? customTexts?.title : "Evidencia"}</h4>
+          </button>
+        )}
+        {!noDescription && (
+          <p className={styles.content__description}>
+            {customTexts?.description
+              ? customTexts?.description
+              : "Adjunta la evidencia e ingresa un comentario"}
+          </p>
+        )}
         <div className={styles.content__evidence}>
           <Flex vertical>
             <p>Evidencia</p>
@@ -115,27 +126,29 @@ const ModalAttachEvidence = ({
               *{isMandatory?.evidence ? "Obligatorio" : "Opcional"}
             </em>
           </Flex>
-          <DocumentButton
-            title={selectedEvidence[0]?.name}
-            handleOnChange={handleOnChangeDocument}
-            handleOnDelete={() => handleOnDeleteDocument(selectedEvidence[0]?.name)}
-            fileName={selectedEvidence[0]?.name}
-            fileSize={selectedEvidence[0]?.size}
-          />
-          {selectedEvidence.length > 0 &&
-            selectedEvidence
-              .slice(1)
-              .map((file) => (
-                <DocumentButton
-                  key={file.name}
-                  className={styles.documentButton}
-                  title={file.name}
-                  handleOnChange={handleOnChangeDocument}
-                  handleOnDelete={() => handleOnDeleteDocument(file.name)}
-                  fileName={file.name}
-                  fileSize={file.size}
-                />
-              ))}
+          <div className={styles.documentss}>
+            <DocumentButton
+              title={selectedEvidence[0]?.name}
+              handleOnChange={handleOnChangeDocument}
+              handleOnDelete={() => handleOnDeleteDocument(selectedEvidence[0]?.name)}
+              fileName={selectedEvidence[0]?.name}
+              fileSize={selectedEvidence[0]?.size}
+            />
+            {selectedEvidence.length > 0 &&
+              selectedEvidence
+                .slice(1)
+                .map((file) => (
+                  <DocumentButton
+                    key={file.name}
+                    className={styles.documentButton}
+                    title={file.name}
+                    handleOnChange={handleOnChangeDocument}
+                    handleOnDelete={() => handleOnDeleteDocument(file.name)}
+                    fileName={file.name}
+                    fileSize={file.size}
+                  />
+                ))}
+          </div>
           {multipleFiles && selectedEvidence.length > 0 && (
             <>
               <Button
@@ -155,7 +168,7 @@ const ModalAttachEvidence = ({
                 id="fileInput"
                 style={{ display: "none" }}
                 onChange={handleFileChange}
-                accept=".pdf,.png,.doc,.docx"
+                accept={FILE_EXTENSIONS.join(", ")}
               />
             </>
           )}
@@ -166,7 +179,11 @@ const ModalAttachEvidence = ({
               *{isMandatory?.commentary ? "Obligatorio" : "Opcional"}
             </em>
           </Flex>
-          <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
+          <textarea
+            value={commentary || ""}
+            onChange={handleOnChangeTextArea}
+            placeholder="Ingresar un comentario"
+          />
         </div>
 
         <FooterButtons
@@ -175,7 +192,7 @@ const ModalAttachEvidence = ({
           titleConfirm={
             customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
           }
-          isConfirmLoading={loading || confirmDisabled}
+          isConfirmLoading={loading}
           isConfirmDisabled={confirmDisabled}
         />
       </div>
@@ -188,7 +205,6 @@ const ModalAttachEvidence = ({
 
   return (
     <Modal
-      centered
       className="ModalAttachEvidence"
       onCancel={handleCancel}
       width={"55%"}

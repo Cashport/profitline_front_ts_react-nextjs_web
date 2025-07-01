@@ -1,11 +1,13 @@
 import { Button, Flex, Typography } from "antd";
-import { FileArrowUp, Trash } from "phosphor-react";
 import type { UploadFile, UploadProps } from "antd";
+import { UploadChangeParam } from "antd/es/upload";
 import { Upload } from "antd";
+import { FileArrowUp, Trash } from "phosphor-react";
 const { Dragger } = Upload;
 
+import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
+
 import "./documentbutton.scss";
-import { UploadChangeParam } from "antd/es/upload";
 
 const { Text } = Typography;
 
@@ -38,7 +40,7 @@ export const DocumentButton = ({
     name: title,
     onChange: handleOnChange,
     onDrop: handleOnDrop,
-    accept: ".pdf, .png, .doc, .docx, .xls, .xlsx, .msg,  .eml",
+    accept: FILE_EXTENSIONS.join(", "),
     showUploadList: false,
     customRequest: () => {
       return;
