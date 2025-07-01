@@ -10,7 +10,7 @@ interface RadicationData {
   invoices_id: number[];
   radication_type: string;
   accept_date: string;
-  comments: string;
+  comments?: string;
 }
 interface AdjustmentData {
   invoice_id: number;
@@ -118,7 +118,7 @@ export const radicateInvoice = async (
   formData.append("invoices_id", JSON.stringify(radicationData.invoices_id));
   formData.append("radication_type", radicationData.radication_type);
   formData.append("accept_date", radicationData.accept_date);
-  formData.append("comments", radicationData.comments);
+  radicationData.comments && formData.append("comments", radicationData.comments);
 
   files.forEach((file) => {
     formData.append("files", file);

@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { Button, Flex, Modal } from "antd";
-import { CaretLeft, Plus } from "@phosphor-icons/react";
-import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
+import React, { useEffect, useState } from "react";
+import { Flex, Modal } from "antd";
+import { CaretLeft } from "@phosphor-icons/react";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
 import { IInvoice } from "@/types/invoices/IInvoices";
 import { MessageInstance } from "antd/es/message/interface";
-import { useForm, Controller, FieldError } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import "./radicationInvoice.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { radicateInvoice } from "@/services/accountingAdjustment/accountingAdjustment";
+import ModalAttachEvidence from "../ModalEvidence/ModalAttachEvidence";
 
 interface RadicationInvoiceProps {
   isOpen: boolean;
@@ -21,27 +21,15 @@ interface RadicationInvoiceProps {
   messageShow: MessageInstance;
 }
 
-interface infoObject {
-  file: File;
-  fileList: File[];
-}
-
 interface IFormRadicationInvoice {
   radication_date: Date;
-  commentary: string;
-  evidence: File[];
 }
 
 const schema = yup.object().shape({
   radication_date: yup
     .date()
     .typeError("Debe ser una fecha válida")
-    .required("La fecha de radicación es requerida"),
-  commentary: yup.string().required("El comentario es requerido"),
-  evidence: yup
-    .array()
-    .min(1, "Se requiere al menos un archivo de evidencia")
-    .required("La evidencia es requerida")
+    .required("La fecha de radicación es requerida")
 });
 
 const RadicationInvoice = ({
@@ -55,71 +43,42 @@ const RadicationInvoice = ({
     control,
     handleSubmit,
     formState: { errors, isValid },
-    setValue,
-    reset,
-    watch,
-    trigger
+    reset
   } = useForm<IFormRadicationInvoice>({
     resolver: yupResolver(schema),
     defaultValues: {
-      commentary: "",
-      evidence: []
+      radication_date: undefined
     }
   });
+
+  const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
+  const [commentary, setCommentary] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const evidence = watch("evidence");
-
-  const handleOnChangeDocument: any = (info: infoObject) => {
-    const { file: rawFile } = info;
-    if (rawFile) {
-      const fileSizeInMB = rawFile.size / (1024 * 1024);
-      if (fileSizeInMB > 30) {
-        messageShow.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
-        return;
-      }
-      setValue("evidence", [...evidence, rawFile]);
-      trigger("evidence");
+  // Limpiar estados al cerrar modal
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedEvidence([]);
+      setCommentary("");
+      reset();
     }
-  };
-
-  const handleOnDeleteDocument = (fileName: string) => {
-    const updatedFiles = evidence.filter((file) => file.name !== fileName);
-    setValue("evidence", updatedFiles);
-    trigger("evidence");
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      const fileSizeInMB = file.size / (1024 * 1024);
-      if (fileSizeInMB > 30) {
-        messageShow.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
-        );
-        return;
-      }
-      setValue("evidence", [...evidence, file]);
-      trigger("evidence");
-    }
-  };
+  }, [isOpen, reset]);
 
   const onSubmit = async (data: IFormRadicationInvoice) => {
     setIsSubmitting(true);
     try {
       const radicationData = {
-        invoices_id: invoiceSelected?.map((invoice) => invoice.id) as number[], // Asumiendo que tienes el ID de la factura
+        invoices_id: invoiceSelected?.map((invoice) => invoice.id) as number[],
         radication_type: "1", // O el valor que corresponda
-        accept_date: data.radication_date.toISOString().split("T")[0], // Formato YYYY-MM-DD
-        comments: data.commentary
+        accept_date: data.radication_date ? data.radication_date.toISOString().split("T")[0] : "",
+        comments: commentary
       };
 
-      await radicateInvoice(radicationData, data.evidence, clientId);
+      await radicateInvoice(radicationData, selectedEvidence, clientId);
       messageShow.success("Factura radicada con éxito");
       reset();
+      setSelectedEvidence([]);
+      setCommentary("");
       onClose();
     } catch (error) {
       console.error("Error al radicar la factura:", error);
@@ -129,9 +88,16 @@ const RadicationInvoice = ({
     }
   };
 
+  const handleClose = () => {
+    reset();
+    setSelectedEvidence([]);
+    setCommentary("");
+    onClose();
+  };
+
   return (
     <Modal className="contentRegisterNews" width="50%" footer={null} open={isOpen} closable={false}>
-      <button className="contentRegisterNews__header" onClick={onClose}>
+      <button className="contentRegisterNews__header" onClick={handleClose}>
         <CaretLeft size="1.25rem" />
         <h4>Radicación</h4>
       </button>
@@ -154,88 +120,31 @@ const RadicationInvoice = ({
             titleInput="Fecha de radicación"
             nameInput="radication_date"
             control={control}
-            error={errors.radication_date as FieldError}
+            error={errors.radication_date}
           />
         </div>
-        <div className="contentRegisterNews__evidence">
-          <Flex vertical>
-            <p>Evidencia</p>
-            <em className="descriptionDocument">*Obligatorio</em>
-          </Flex>
-          <Flex vertical gap="0.7rem">
-            <DocumentButton
-              key={evidence[0]?.name}
-              title={evidence[0]?.name}
-              handleOnChange={handleOnChangeDocument}
-              handleOnDelete={() => handleOnDeleteDocument(evidence[0]?.name)}
-              fileName={evidence[0]?.name}
-              fileSize={evidence[0]?.size}
-            />
-            {evidence.slice(1).map((file, index) => (
-              <DocumentButton
-                key={file.name}
-                className={index > 0 ? "documentButton" : ""}
-                title={file.name}
-                handleOnChange={handleOnChangeDocument}
-                handleOnDelete={() => handleOnDeleteDocument(file.name)}
-                fileName={file.name}
-                fileSize={file.size}
-              />
-            ))}
-            {evidence.length > 0 && (
-              <>
-                <Button
-                  onClick={() => {
-                    const fileInput = document.getElementById("fileInput");
-                    if (fileInput) {
-                      fileInput.click();
-                    }
-                  }}
-                  className="addDocument"
-                  icon={<Plus size={"1rem"} />}
-                >
-                  <p>Cargar otro documento</p>
-                </Button>
-                <input
-                  type="file"
-                  id="fileInput"
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                  accept=".pdf, .png, .doc, .docx, .xls, .xlsx, .msg, .txt, .eml"
-                />
-              </>
-            )}
-            {errors.evidence && <p className="error">{errors.evidence.message}</p>}
-          </Flex>
-          <p>Comentarios</p>
-          <div>
-            <Controller
-              name="commentary"
-              control={control}
-              render={({ field }) => <textarea {...field} placeholder="Ingresar un comentario" />}
-            />
-            {errors.commentary && <p className="error">{errors.commentary.message}</p>}
-          </div>
-        </div>
-        <div className="footer">
-          <Button
-            className="cancelButton"
-            onClick={() => {
-              reset();
-              onClose();
-            }}
-          >
-            Cancelar
-          </Button>
-
-          <Button
-            className={`acceptButton ${isValid ? "acceptButton__green" : ""}`}
-            htmlType="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Enviando..." : "Adjuntar evidencia"}
-          </Button>
-        </div>
+        <ModalAttachEvidence
+          selectedEvidence={selectedEvidence}
+          setSelectedEvidence={setSelectedEvidence}
+          handleAttachEvidence={handleSubmit(onSubmit)}
+          commentary={commentary}
+          setCommentary={setCommentary}
+          isOpen={true}
+          handleCancel={handleClose}
+          customTexts={{
+            title: "Radicación",
+            description: "Adjunta la evidencia e ingresa un comentario",
+            cancelButtonText: "Cancelar",
+            acceptButtonText: isSubmitting ? "Enviando..." : "Adjuntar evidencia"
+          }}
+          noTitle
+          noDescription
+          multipleFiles
+          loading={isSubmitting}
+          confirmDisabled={!selectedEvidence.length || !isValid || isSubmitting}
+          isMandatory={{ evidence: true, commentary: false }}
+          noModal
+        />
       </form>
     </Modal>
   );
