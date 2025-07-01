@@ -227,7 +227,12 @@ export const updateInvoiceOrPaymentAmount = async (
   }
 };
 
-export const applyWithCashportAI = async (projectId: number, clientId: string, files: File[]) => {
+export const applyWithCashportAI = async (
+  projectId: number,
+  clientId: string,
+  files: File[],
+  comment?: string
+) => {
   const formData = new FormData();
   formData.append("client", clientId);
   formData.append("project", String(projectId));
@@ -235,12 +240,28 @@ export const applyWithCashportAI = async (projectId: number, clientId: string, f
     formData.append("attachment", file);
   });
 
+  if (comment) formData.append("content", comment);
+
   try {
     const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
 
     return response.data;
   } catch (error) {
     console.error("error applyWithCashportAI", error);
+    throw error;
+  }
+};
+
+export const markPaymentsAsUnidentified = async (paymentIds: number[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/paymentApplication/unlink-client`,
+      { payments: paymentIds }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error in markAsUnidentified:", error);
     throw error;
   }
 };

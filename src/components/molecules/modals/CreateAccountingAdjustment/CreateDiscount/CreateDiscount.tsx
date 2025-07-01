@@ -12,6 +12,7 @@ import { formatDateBars } from "@/utils/utils";
 import { InputDateRange } from "@/components/atoms/inputs/InputDateRange/InputDateRange";
 import { MessageInstance } from "antd/es/message/interface";
 import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 interface IformDiscount {
   motive: string;
@@ -91,7 +92,7 @@ export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdPa
   };
 
   return (
-    <div className="createDicountCustom">
+    <div className="createDiscountCustom">
       <p className="subTitleModalAction">Ingresa la información para crear el nuevo descuento</p>
       <form className="modalContent" onSubmit={handleSubmit(handleSubmitForm)}>
         <div className="containterForm">
@@ -138,21 +139,14 @@ export const CreateDiscount = ({ onClose, messageApi, projectIdParam, clientIdPa
             error={errors.validity_range as FieldError}
             optional
           />
-          <button
-            type="button"
-            className="button__action__text button__action__text__white"
-            onClick={() => onClose()}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={`button__action__text ${isValid ? "button__action__text__green" : ""}`}
-            disabled={!isValid || isSubmitting}
-          >
-            {isSubmitting ? "Creando..." : "Crear descuento"}
-          </button>
         </div>
+        <FooterButtons
+          handleOk={handleSubmit(handleSubmitForm)}
+          onClose={onClose}
+          isConfirmDisabled={!isValid || isSubmitting}
+          titleConfirm="Crear Descuento"
+          className="createDiscountCustom__footer"
+        />
       </form>
     </div>
   );

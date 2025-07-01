@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
-import { CaretDoubleRight, DotsThree } from "phosphor-react";
+import { DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
-import { mutate } from "swr";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import { extractSingleParam } from "@/utils/utils";
@@ -12,14 +11,13 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { ClientDetailsContext } from "../client-details/client-details";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-adjustments-table";
 import Collapse from "@/components/ui/collapse";
-import AccountingAdjustmentsFilter, {
-  SelectedFiltersAccountingAdjustments
-} from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
+import { SelectedFiltersAccountingAdjustments } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
 
 import {
@@ -29,10 +27,16 @@ import {
 
 import "./accounting-adjustments-tab.scss";
 
+export interface ISelectedAccountingRows extends FinancialDiscount {
+  label_status_id: number;
+}
+
 const AccountingAdjustmentsTab = () => {
-  const [selectedRows, setSelectedRows] = useState<FinancialDiscount[] | undefined>(undefined);
+  const [selectedRows, setSelectedRows] = useState<ISelectedAccountingRows[] | undefined>();
   const [search, setSearch] = useState("");
-  const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
 
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -46,33 +50,34 @@ const AccountingAdjustmentsTab = () => {
     channels: []
   });
   const JustOthersMotiveType = 2; // no trae ajustes financieros
-  const { data, isLoading, refetchByStatus } = useFinancialDiscounts({
+  const {
+    data,
+    isLoading,
+    mutate: mutateFinancialDiscounts
+  } = useFinancialDiscounts({
     clientId,
-    projectId,
     id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
-    line: filters.lines.length > 0 ? filters.lines : undefined,
-    zone: filters.zones.length > 0 ? filters.zones : undefined,
-    channel: filters.channels.length > 0 ? filters.channels : undefined,
-    motive_id: JustOthersMotiveType,
-    searchQuery: debouncedSearchQuery.length > 0 ? debouncedSearchQuery : undefined
+    line: filters.lines,
+    zone: filters.zones,
+    channel: filters.channels,
+    motive_id: JustOthersMotiveType
   });
+
+  const { clientFilters } = useContext(ClientDetailsContext);
 
   const { mutate: mutateApplyTabData } = useApplicationTable();
 
   // useMemo to add the key financial_status_id to each row in the data
   const modifiedData = useMemo(() => {
-    if (data && !Array.isArray(data) && "rows" in data) {
-      return data.rows.map((financialState: StatusFinancialDiscounts) => {
-        return {
-          ...financialState,
-          financial_discounts: financialState.financial_discounts.map((adjustment) => ({
-            ...adjustment,
-            financial_status_id: financialState.status_id
-          }))
-        };
-      });
-    }
-    return [];
+    return data?.map((financialState: StatusFinancialDiscounts) => {
+      return {
+        ...financialState,
+        financial_discounts: financialState.financial_discounts.map((adjustment) => ({
+          ...adjustment,
+          financial_status_id: financialState.status_id
+        }))
+      };
+    });
   }, [data]);
 
   const { openModal, modalType } = useModalDetail();
@@ -88,8 +93,20 @@ const AccountingAdjustmentsTab = () => {
   };
 
   useEffect(() => {
-    mutate(`/financial-discount/project/${projectId}/client/${clientId}`);
+    mutateFinancialDiscounts();
   }, [modalType]);
+
+  // useEffect for setting localFilters according to clientFilters
+  useEffect(() => {
+    if (clientFilters) {
+      console.log("Client Filters:", clientFilters);
+      setFilters({
+        lines: (clientFilters.lines || []).map(Number),
+        zones: (clientFilters.zones || []).map(Number),
+        channels: (clientFilters.channels || []).map(Number)
+      });
+    }
+  }, [clientFilters]);
 
   const handleAddSelectedAdjustmentsToApplicationTable = async () => {
     try {
@@ -99,7 +116,7 @@ const AccountingAdjustmentsTab = () => {
         "discounts",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
-      setIsModalActionPaymentOpen(false);
+      setIsModalOpen({ selected: 0 });
       showMessage("success", "Ajuste(s) añadidos a la tabla de aplicación de pagos");
       // mutate Applytable data
       mutateApplyTabData();
@@ -115,8 +132,15 @@ const AccountingAdjustmentsTab = () => {
     }
   };
 
-  const getAccountingAdjustmentsById = async (statusId: string | number, newPage?: number) => {
-    await refetchByStatus(statusId, newPage);
+  const handleOpenBalanceLegalization = () => {
+    setIsModalOpen({ selected: 0 });
+    openModal("balanceLegalization", {
+      selectedAdjustments: selectedRows
+    });
+  };
+
+  const handleOpenModal = (selected: number) => {
+    setIsModalOpen({ selected });
   };
 
   return (
@@ -128,31 +152,23 @@ const AccountingAdjustmentsTab = () => {
         >
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
             />
-            <AccountingAdjustmentsFilter onFilterChange={setFilters} />
+            {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
             <Button
               className="button__actions"
               size="large"
               icon={<DotsThree size={"1.5rem"} />}
               disabled={false}
-              onClick={() => setIsModalActionPaymentOpen(true)}
+              onClick={() => setIsModalOpen({ selected: 1 })} // Open modal for actions
             >
               Generar acción
             </Button>
           </Flex>
-          <Button
-            type="primary"
-            className="availableAdjustments"
-            onClick={() => console.log("click ajustes disponibles")}
-          >
-            Ajustes disponibles
-            <CaretDoubleRight size={16} style={{ marginLeft: "0.5rem" }} />
-          </Button>
         </Flex>
 
         {isLoading ? (
@@ -163,7 +179,7 @@ const AccountingAdjustmentsTab = () => {
           <Collapse
             stickyLabel
             items={modifiedData?.map((financialState: StatusFinancialDiscounts) => ({
-              key: `${financialState.status_id}${financialState.page.actualPage}`,
+              key: financialState.status_id,
               label: (
                 <LabelCollapse
                   status={financialState.status_name}
@@ -175,15 +191,15 @@ const AccountingAdjustmentsTab = () => {
               children: (
                 <>
                   <AccountingAdjustmentsTable
-                    dataAdjustmentsByStatus={financialState}
+                    dataAdjustmentsByStatus={financialState.financial_discounts}
                     setSelectedRows={setSelectedRows}
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
-                    selectedRows={selectedRows}
-                    fetchData={(page: number) => {
-                      getAccountingAdjustmentsById(financialState.status_id, page);
-                    }}
+                    selectedRows={selectedRows?.map((item) => ({
+                      ...item,
+                      label_status_id: financialState.status_id
+                    }))}
                   />
                 </>
               )
@@ -192,9 +208,12 @@ const AccountingAdjustmentsTab = () => {
         )}
 
         <ModalActionAccountingAdjustments
-          isOpen={isModalActionPaymentOpen}
-          onClose={() => setIsModalActionPaymentOpen(false)}
+          isOpen={isModalOpen.selected === 1}
+          onClose={() => setIsModalOpen({ selected: 0 })}
           addAdjustmentsToApplicationTable={handleAddSelectedAdjustmentsToApplicationTable}
+          balanceLegalization={handleOpenBalanceLegalization}
+          handleOpenModal={handleOpenModal}
+          selectedRows={selectedRows}
         />
       </div>
     </>

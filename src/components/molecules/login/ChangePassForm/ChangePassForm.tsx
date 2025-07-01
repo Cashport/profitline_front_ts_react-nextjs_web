@@ -11,6 +11,8 @@ import "./changePassForm.scss";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword } from "../../../../../firebase-utils";
 import { openNotification } from "@/components/atoms/Notification/Notification";
+import { createPassword } from "@/services/users/users";
+import { ApiError } from "@/utils/api/api";
 
 interface IChangePassForm {
   password: string;
@@ -25,10 +27,20 @@ const schema = yup.object().shape({
     .required()
 });
 
-export const ChangePassForm = () => {
+export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const oobCode = searchParams.get("oobCode");
+  const token = searchParams.get(mode === "accept" ? "token" : "oobCode");
+  const copyText =
+    mode === "accept"
+      ? {
+          title: "Crea una nueva contraseña",
+          text: "Ingresa tu nueva contraseña"
+        }
+      : {
+          title: "Restablece tu contraseña",
+          text: "Ingresa tu nueva contraseña"
+        };
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
 
@@ -49,11 +61,11 @@ export const ChangePassForm = () => {
     confirmPassword: false
   });
 
-  const onSubmitHandler = async ({ password }: IChangePassForm) => {
-    if (!oobCode) return;
+  const onSubmitResetHandler = async ({ password }: IChangePassForm) => {
+    if (!token) return;
     setIsLoading(true);
     try {
-      await resetPassword(oobCode, password);
+      await resetPassword(token, password);
       openNotification({
         api: api,
         type: "success",
@@ -73,13 +85,43 @@ export const ChangePassForm = () => {
     }
     setIsLoading(false);
   };
-  if (!oobCode) return;
+
+  const onSubmitHandlerCreatePass = async ({ password }: IChangePassForm) => {
+    if (!token) return;
+    setIsLoading(true);
+    try {
+      await createPassword(token, password);
+      openNotification({
+        api: api,
+        type: "success",
+        title: "Contraseña creada",
+        message: "Tu contraseña ha sido creada"
+      });
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 1500);
+    } catch (error) {
+      let message = "Hubo un error al crear la contraseña, pruebe mandar otro correo";
+      if (error instanceof ApiError) {
+        message = error.message;
+      }
+      openNotification({
+        api: api,
+        type: "error",
+        title: "Error",
+        message: message
+      });
+    }
+    setIsLoading(false);
+  };
+  const onSubmitHandler = mode === "accept" ? onSubmitHandlerCreatePass : onSubmitResetHandler;
+  if (!token) return;
   return (
     <form className="changePassForm" onSubmit={handleSubmit(onSubmitHandler)}>
       {contextHolder}
       <Flex vertical gap={"0.5rem"}>
-        <h4 className="changePassForm__title">Restablece tu contraseña</h4>
-        <p>Ingresa tu nueva contraseña</p>
+        <h4 className="changePassForm__title">{copyText.title}</h4>
+        <p>{copyText.text}</p>
       </Flex>
 
       <Flex vertical gap={"1.5rem"} className="changePassForm__content">

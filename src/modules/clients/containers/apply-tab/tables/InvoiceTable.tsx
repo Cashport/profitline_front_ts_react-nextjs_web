@@ -103,7 +103,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                   handleEditRow(row, "invoice");
                 }}
               >
-                Ver
+                Editar
               </Button>
             )
           },
@@ -119,14 +119,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 }}
               >
                 Eliminar
-              </Button>
-            )
-          },
-          {
-            key: "3",
-            label: (
-              <Button icon={<Eye size={20} />} className="buttonNoBorder">
-                Marcar como abono
               </Button>
             )
           }

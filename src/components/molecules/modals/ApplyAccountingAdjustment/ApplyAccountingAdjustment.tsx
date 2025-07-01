@@ -11,6 +11,7 @@ import { applyAccountingAdjustment } from "@/services/accountingAdjustment/accou
 import { useParams } from "next/navigation";
 import { extractSingleParam } from "@/utils/utils";
 import { MessageInstance } from "antd/es/message/interface";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 interface Props {
   type: number;
@@ -284,22 +285,14 @@ export const ApplyAccountingAdjustment = ({
         availableValue={currentAdjustment[selectTab]}
       />
       <Table dataSource={currentInvoices} columns={columns} pagination={false} />
-      <Flex gap="8px">
-        <button
-          type="button"
-          className="button__action__text button__action__text__white"
-          onClick={() => setCurrentView("select")}
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          className={`button__action__text ${selectedNotes.length > 0 ? "button__action__text__green" : ""}`}
-          onClick={() => setOpenEvidenceModal(true)}
-        >
-          Continuar
-        </button>
-      </Flex>
+
+      <FooterButtons
+        handleOk={() => setOpenEvidenceModal(true)}
+        onClose={() => setCurrentView("select")}
+        isConfirmDisabled={!selectedNotes.length}
+        titleConfirm="Continuar"
+      />
+
       <Modal
         width={"50%"}
         open={openEvidenceModal}

@@ -35,6 +35,7 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const clientId = extractSingleParam(params.clientId) || "";
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [commentary, setCommentary] = useState<string>();
   const [loading, setLoading] = useState(false);
 
   const closeModal = () => {
@@ -42,10 +43,14 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
     setUploadedFiles([]);
   };
 
+  const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCommentary(e.target.value);
+  };
+
   const handleAnalyzeFiles = async () => {
     setLoading(true);
     try {
-      await applyWithCashportAI(projectId, clientId, uploadedFiles);
+      await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary);
       message.success("Archivos analizados con CashportAI");
       mutate();
       closeModal();
@@ -162,6 +167,12 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
         <p className="draggerText">Arrastra y suelta tu archivo aquí o haz clic para subirlo</p>
         <p className="draggerText -small">Tamaño máximo 5MB</p>
       </Dragger>
+
+      <div className="modalApplyAI__commentary">
+        <p>Comentario</p>
+        <textarea onChange={handleOnChangeTextArea} placeholder="Ingresar un comentario" />
+      </div>
+
       <div className="modalApplyAI__footer">
         <Button className="cancelButton" onClick={() => onClose(true)}>
           Cancelar

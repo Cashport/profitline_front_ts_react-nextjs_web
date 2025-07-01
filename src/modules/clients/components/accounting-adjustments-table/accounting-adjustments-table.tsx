@@ -5,25 +5,21 @@ import { Eye } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 
-import {
-  FinancialDiscount,
-  StatusFinancialDiscounts
-} from "@/types/financialDiscounts/IFinancialDiscounts";
+import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { ISelectedAccountingRows } from "../../containers/accounting-adjustments-tab/accounting-adjustments-tab";
 
 import "./accounting-adjustments-table.scss";
 
 const { Text } = Typography;
 
 interface PropsInvoicesTable {
-  dataAdjustmentsByStatus: StatusFinancialDiscounts;
-  setSelectedRows: Dispatch<SetStateAction<FinancialDiscount[] | undefined>>;
+  dataAdjustmentsByStatus: FinancialDiscount[];
+  setSelectedRows: Dispatch<SetStateAction<ISelectedAccountingRows[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
   openAdjustmentDetail: (adjustment: FinancialDiscount) => void;
   financialStatusId: number;
-  // eslint-disable-next-line no-unused-vars
-  fetchData: (newPage: number) => void;
   legalized?: boolean;
-  selectedRows?: FinancialDiscount[];
+  selectedRows?: ISelectedAccountingRows[];
 }
 
 const AccountingAdjustmentsTable = ({
@@ -31,7 +27,6 @@ const AccountingAdjustmentsTable = ({
   setSelectedRows,
   openAdjustmentDetail,
   financialStatusId,
-  fetchData,
   legalized,
   selectedRows
 }: PropsInvoicesTable) => {
@@ -56,6 +51,11 @@ const AccountingAdjustmentsTable = ({
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: any) => {
+    if (newSelectedRowKeys.length === 0) {
+      setSelectedRowKeys([]);
+      setSelectedRows(undefined);
+    }
+
     setSelectedRowKeys(newSelectedRowKeys);
     if (newSelectedRowKeys.length >= 1) {
       // set the selected Rows but adding to the previous selected rows
@@ -68,10 +68,10 @@ const AccountingAdjustmentsTable = ({
           );
 
           //filters the unselected rows but only the ones that have the status_id equal to financialStatusId
+          // If we want to recover this we need in eachRow the label id
           const unCheckedRows = prevSelectedRows?.filter(
-            (prevSelectedRow) =>
-              !newSelectedRowKeys.includes(prevSelectedRow.id) &&
-              prevSelectedRow.financial_status_id === financialStatusId
+            (prevSelectedRow) => !newSelectedRowKeys.includes(prevSelectedRow.id)
+            // prevSelectedRow.label_status_id === financialStatusId
           );
 
           if (unCheckedRows.length > 0) {
@@ -103,10 +103,6 @@ const AccountingAdjustmentsTable = ({
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange
-  };
-
-  const handleTableChange = (page: number) => {
-    fetchData(page);
   };
 
   const columns: TableProps<FinancialDiscount>["columns"] = [
@@ -187,19 +183,13 @@ const AccountingAdjustmentsTable = ({
   return (
     <>
       <Table
-        key={data.page.actualPage}
+        key={data?.length}
         className="adjustmentsTable customSticky"
         columns={columns}
-        dataSource={data?.financial_discounts?.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-        pagination={{
-          current: data.page.actualPage,
-          pageSize: data.page.rowsPerPage,
-          total: data.page.totalRows,
-          onChange: handleTableChange,
-          showSizeChanger: false
-        }}
+        pagination={false}
         sticky={{ offsetHeader: 160 }}
       />
     </>

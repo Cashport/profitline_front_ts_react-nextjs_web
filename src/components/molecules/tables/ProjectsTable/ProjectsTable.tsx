@@ -11,6 +11,7 @@ import { countries } from "@/utils/countries";
 import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import UiSearchInput from "@/components/ui/search-input";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import { IProject } from "@/types/projects/IProjects";
 
@@ -31,6 +32,8 @@ export const ProjectTable = () => {
     countryId: selectFilters.country,
     searchQuery: search
   });
+
+  const height = useScreenHeight();
 
   const projects = useAppStore((state) => state.projects);
   const setProjects = useAppStore((state) => state.setProjects);
@@ -210,7 +213,7 @@ export const ProjectTable = () => {
       </Flex>
       <Table
         loading={loading}
-        scroll={{ y: "61dvh", x: undefined }}
+        scroll={{ y: height - 310 }}
         columns={columns as TableProps<any>["columns"]}
         pagination={{
           pageSize: 25,

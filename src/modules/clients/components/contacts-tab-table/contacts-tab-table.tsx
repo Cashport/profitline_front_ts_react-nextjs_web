@@ -121,7 +121,7 @@ const ContactsTable = ({
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
         virtual
-        scroll={{ y: height - 400, x: 100 }}
+        scroll={{ y: height - 420, x: 100 }}
         pagination={{
           current: page,
           showSizeChanger: false,

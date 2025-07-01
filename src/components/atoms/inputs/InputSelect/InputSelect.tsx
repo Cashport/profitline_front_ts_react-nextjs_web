@@ -23,6 +23,10 @@ interface InputSelectProps {
   loading?: boolean;
   isError?: boolean;
   mode?: "multiple" | "tags";
+  popupMatchSelectWidth?: boolean;
+  showSearch?: boolean;
+  // eslint-disable-next-line no-unused-vars
+  filterOption?: (input: string, option?: Option | any) => boolean;
 }
 
 export const InputSelect = ({
@@ -38,7 +42,10 @@ export const InputSelect = ({
   className,
   loading = false,
   isError = false,
-  mode
+  mode,
+  popupMatchSelectWidth = true,
+  showSearch = false,
+  filterOption
 }: InputSelectProps) => {
   return (
     <Flex vertical className={`selectContainer ${className}`}>
@@ -65,6 +72,9 @@ export const InputSelect = ({
               onChange={(value) => field.onChange(value)}
               value={field.value}
               mode={mode}
+              popupMatchSelectWidth={popupMatchSelectWidth}
+              showSearch={showSearch}
+              filterOption={filterOption}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

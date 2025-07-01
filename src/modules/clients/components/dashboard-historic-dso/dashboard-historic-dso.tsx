@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import styles from "./dashboard-historic-dso.module.scss";
 import dayjs from "dayjs";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+import styles from "./dashboard-historic-dso.module.scss";
 
 interface DashboardHistoricDsoProps {
   history_dso: historic_dso[] | undefined;
@@ -27,9 +28,19 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   yAxisLabelFormatter
 }) => {
   const [data, setData] = useState([] as history_chart[]);
+  const width = useScreenWidth();
 
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
+  // Función para calcular el barSize dinámico
+  const calculateBarSize = () => {
+    const MIN_BAR_SIZE = 28;
+    const MAX_BAR_SIZE = 62;
+    const BASE_SCREEN_WIDTH = 375;
+
+    // Usamos una función logarítmica para suavizar el crecimiento
+    const growthFactor = Math.log(width / BASE_SCREEN_WIDTH + 1) * 17;
+
+    return Math.min(MIN_BAR_SIZE + Math.floor(growthFactor), MAX_BAR_SIZE);
+  };
 
   const monthNames = [
     "Ene",
@@ -47,34 +58,33 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
   ];
 
   useEffect(() => {
-    // Initialize the data array with default values
-    const initialData: history_chart[] = [];
-    for (let i = 0; i < 12; i++) {
-      const monthIndex = (currentMonth + i) % 12;
-      initialData.push({
-        name: monthNames[monthIndex],
-        month: monthIndex + 1,
-        value: 0
-      });
+    if (!history_dso) {
+      setData([]);
+      return;
     }
-
-    // Assign actual DSO values from the dataset
-    if (history_dso) {
-      history_dso.forEach((item: historic_dso) => {
-        const itemDate = dayjs(item.date).utc();
-        const itemMonth = itemDate.month(); // Get month index from date string
-        const foundIndex = initialData.findIndex((data) => data.month === itemMonth + 1);
-        if (foundIndex !== -1) {
-          initialData[foundIndex].value = item.dso;
-        }
-      });
-    }
-
-    // delete the months six months before the current month
-    initialData.splice(0, 6);
-
-    setData(initialData);
+    const chartData = history_dso.map((item) => {
+      const date = dayjs(item.date);
+      const monthIdx = date.month(); // 0-11
+      return {
+        name: monthNames[monthIdx],
+        month: monthIdx + 1,
+        value: item.dso
+      };
+    });
+    setData(chartData);
   }, [history_dso]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={styles.customTooltip}>
+          <p>{label}</p>
+          <p className={styles.dsoValue}>DSO: {payload[0].value}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className={`${styles.wrapper} ${className}`}>
@@ -89,10 +99,15 @@ const DashboardHistoricDso: FC<DashboardHistoricDsoProps> = ({
       </div>
       <div className={styles.chart}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart margin={{ right: 0, left: -3 }} barCategoryGap={10} data={data} barSize={20}>
-            <XAxis padding={{ left: 20, right: 20 }} dataKey="name" scale="point" color="#CBE71E" />
+          <BarChart
+            margin={{ right: 0, left: -3 }}
+            barCategoryGap={10}
+            data={data}
+            barSize={calculateBarSize()}
+          >
+            <XAxis padding={{ left: 39, right: 39 }} dataKey="name" scale="point" color="#CBE71E" />
             <YAxis tickFormatter={yAxisLabelFormatter} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3" vertical={false} />
             <Bar dataKey="value" fill="#CBE71E" />
           </BarChart>

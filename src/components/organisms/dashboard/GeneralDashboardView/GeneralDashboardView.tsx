@@ -17,14 +17,16 @@ const GeneralDashboardView: FC = () => {
     sublines: [],
     channels: [],
     radicado: false,
-    novedad: false
+    novedad: false,
+    paymentAgreement: null,
+    radicationType: null
   });
 
   const { data, loading } = useGeneralPortfolio(filters);
 
   return (
     <div className={styles.generalDashboardView}>
-      <div>
+      <div className={styles.filterContainer}>
         <FilterClientPortfolio setSelectedFilters={setFilters} />
       </div>
       {loading ? (

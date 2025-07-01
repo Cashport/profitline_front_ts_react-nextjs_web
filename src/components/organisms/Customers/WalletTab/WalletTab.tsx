@@ -24,10 +24,7 @@ import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalAc
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
 import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNews";
 import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
-import {
-  SelectedFiltersWallet,
-  WalletTabFilter
-} from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
+import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
@@ -35,7 +32,7 @@ import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import "./wallettab.scss";
 
 export const WalletTab = () => {
-  const { portfolioData } = useContext(ClientDetailsContext);
+  const { portfolioData, clientFilters } = useContext(ClientDetailsContext);
   const { openModal } = useModalDetail();
   const [filters, setFilters] = useState<SelectedFiltersWallet>({
     lines: [],
@@ -87,6 +84,20 @@ export const WalletTab = () => {
     }
   }, [data]);
 
+  // useEffect for setting localFilters according to clientFilters
+  useEffect(() => {
+    if (clientFilters) {
+      setFilters({
+        lines: (clientFilters.lines || []).map(Number),
+        zones: (clientFilters.zones || []).map(Number),
+        channels: (clientFilters.channels || []).map(Number),
+        sublines: (clientFilters.sublines || []).map(Number),
+        paymentAgreement: clientFilters.paymentAgreement ?? null,
+        radicationType: clientFilters.radicationType ?? null
+      });
+    }
+  }, [clientFilters]);
+
   const handleisGenerateActionOpen = () => {
     setisGenerateActionOpen(!isGenerateActionOpen);
     mutate();
@@ -117,9 +128,20 @@ export const WalletTab = () => {
       clientId: clientId,
       projectId: projectId,
       selectInvoice: invoice,
-      handleActionInDetail: handleActionInDetail
+      handleActionInDetail: handleActionInDetail,
+      deselectInvoices: () => {
+        setSelectedRows([]);
+      }
     });
   };
+
+  const handleOpenBalanceLegalization = () => {
+    setisGenerateActionOpen(false);
+    openModal("balanceLegalization", {
+      // selectedAdjustments: selectedRows
+    });
+  };
+
   const validateInvoiceIsSelected = (): boolean => {
     if (!selectedRows || selectedRows.length === 0) {
       messageShow.error("Seleccione al menos una factura");
@@ -170,11 +192,11 @@ export const WalletTab = () => {
         <div className="walletTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar por ID"
               onChange={handleSearchChange}
             />
-            <WalletTabFilter setSelectedFilters={setFilters} />
+            {/* <WalletTabFilter setSelectedFilters={setFilters} /> */}
             <Button
               className="button__actions"
               size="large"
@@ -234,6 +256,7 @@ export const WalletTab = () => {
         }}
         validateInvoiceIsSelected={validateInvoiceIsSelected}
         addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
+        balanceLegalization={handleOpenBalanceLegalization}
       />
       <PaymentAgreementModal
         invoiceSelected={selectedRows}
