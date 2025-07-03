@@ -11,6 +11,7 @@ import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
+  markPaymentsAsUnidentified,
   removeItemsFromTable,
   removeMultipleRows,
   saveApplication
@@ -159,6 +160,16 @@ const ApplyTab: React.FC = () => {
       row: row,
       editing_type
     });
+  };
+
+  const handlePaymentUnidentified = async (row: IApplyTabRecord) => {
+    try {
+      await markPaymentsAsUnidentified([row.payment_id]);
+      showMessage("success", "Pago marcado como no identificado");
+      mutate();
+    } catch (error) {
+      showMessage("error", "Ha ocurrido un error al marcar el pago como no identificado");
+    }
   };
 
   const handleSelectChange = useCallback(
@@ -375,7 +386,7 @@ const ApplyTab: React.FC = () => {
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setSearchQuery(event.target.value.toLowerCase());
@@ -471,6 +482,7 @@ const ApplyTab: React.FC = () => {
                       handleDeleteRow={handleRemoveRow}
                       handleEditRow={handleEditRow}
                       rowSelection={rowSelection("payments")}
+                      markPaymentAsUnidentified={handlePaymentUnidentified}
                     />
                   )}
                   {section.statusName === "ajustes" && (
@@ -588,7 +600,8 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
-        isValidating={isValidating}
+        confirmDisabled={isValidating || !selectedEvidence.length || !commentary}
+        isMandatory={{ evidence: true, commentary: true }}
       />
       <ModalApplyAI
         isOpen={isModalOpen.selected === 2}

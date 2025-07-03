@@ -48,6 +48,7 @@ export const FilterActivePaymentsTab = ({
     const activeFilters = selectedValues
       .filter((item) => item[0] === "Activo")
       .map((item) => item[1]);
+
     setSelectedFilters({
       dates: datesFilters,
       active: activeFilters
@@ -210,6 +211,16 @@ export const FilterActivePaymentsTab = ({
     []
   );
 
+  const defaultDateValue = useMemo(() => {
+    return dates.find((d) => d.label === "Últimos 30 días")?.value;
+  }, [dates]);
+
+  useEffect(() => {
+    if (selectedValues.length === 0 && defaultDateValue) {
+      setSelectedValues([["Fechas", defaultDateValue]]);
+    }
+  }, [defaultDateValue]);
+
   return (
     <Cascader
       dropdownRender={(menu) => {
@@ -217,7 +228,14 @@ export const FilterActivePaymentsTab = ({
           <div>
             {menu}
             {openOption === "Fechas" && (
-              <div style={{ padding: "8px", textAlign: "right", marginRight: "1.5rem" }}>
+              <div
+                style={{
+                  padding: "8px",
+                  paddingTop: "0px",
+                  textAlign: "right",
+                  marginRight: "0.5rem"
+                }}
+              >
                 <p
                   style={{ textDecoration: "underline", cursor: "pointer" }}
                   onClick={handleOpenCustomDate}
@@ -230,6 +248,7 @@ export const FilterActivePaymentsTab = ({
         );
       }}
       className="filterCascader"
+      popupClassName="filterActivePaymentsTab"
       style={{ width: "16.5rem", height: "48px" }}
       multiple
       size="large"

@@ -23,6 +23,7 @@ export async function POST() {
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
       permissions: compressedClaims
     });
+    console.log(idCustomToken)
     const idCustomTokenSession = await auth().createCustomToken(decodedToken.uid);
     token = idCustomToken;
     const customToken = await customGetAuth(idCustomTokenSession);

@@ -34,6 +34,7 @@ type ClientDetailsContextType = {
   showInvoiceActionsModal: boolean;
   setShowInvoiceActionsModal: Dispatch<SetStateAction<boolean>>;
   portfolioData: IDataSection | undefined;
+  clientFilters: IClientPortfolioFilters;
 };
 interface ClientDetailsProps {}
 export const ClientDetailsContext = createContext<ClientDetailsContextType>(
@@ -50,7 +51,9 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
     sublines: [],
     channels: [],
     radicado: false,
-    novedad: false
+    novedad: false,
+    paymentAgreement: null,
+    radicationType: null
   });
 
   const { data: portfolioData, error, mutate } = useClientDetails(filters);
@@ -134,9 +137,10 @@ export const ClientDetails: FC<ClientDetailsProps> = () => {
       setSelectedOption,
       showInvoiceActionsModal,
       setShowInvoiceActionsModal,
-      portfolioData
+      portfolioData,
+      clientFilters: filters
     }),
-    [portfolioData, selectedOption, showInvoiceActionsModal]
+    [portfolioData, selectedOption, showInvoiceActionsModal, filters]
   );
 
   return (

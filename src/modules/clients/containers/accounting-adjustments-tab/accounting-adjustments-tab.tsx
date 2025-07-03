@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, Spin } from "antd";
-import { CaretDoubleRight, DotsThree } from "phosphor-react";
+import { DotsThree } from "phosphor-react";
 import { AxiosError } from "axios";
 
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
@@ -11,14 +11,13 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { ClientDetailsContext } from "../client-details/client-details";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
 import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-adjustments-table";
 import Collapse from "@/components/ui/collapse";
-import AccountingAdjustmentsFilter, {
-  SelectedFiltersAccountingAdjustments
-} from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
+import { SelectedFiltersAccountingAdjustments } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
 
 import {
@@ -64,6 +63,8 @@ const AccountingAdjustmentsTab = () => {
     motive_id: JustOthersMotiveType
   });
 
+  const { clientFilters } = useContext(ClientDetailsContext);
+
   const { mutate: mutateApplyTabData } = useApplicationTable();
 
   // useMemo to add the key financial_status_id to each row in the data
@@ -94,6 +95,18 @@ const AccountingAdjustmentsTab = () => {
   useEffect(() => {
     mutateFinancialDiscounts();
   }, [modalType]);
+
+  // useEffect for setting localFilters according to clientFilters
+  useEffect(() => {
+    if (clientFilters) {
+      console.log("Client Filters:", clientFilters);
+      setFilters({
+        lines: (clientFilters.lines || []).map(Number),
+        zones: (clientFilters.zones || []).map(Number),
+        channels: (clientFilters.channels || []).map(Number)
+      });
+    }
+  }, [clientFilters]);
 
   const handleAddSelectedAdjustmentsToApplicationTable = async () => {
     try {
@@ -139,13 +152,13 @@ const AccountingAdjustmentsTab = () => {
         >
           <Flex gap={"0.5rem"}>
             <UiSearchInput
-              className="search"
+              className="standardSearch"
               placeholder="Buscar"
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
             />
-            <AccountingAdjustmentsFilter onFilterChange={setFilters} />
+            {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
             <Button
               className="button__actions"
               size="large"
@@ -156,14 +169,6 @@ const AccountingAdjustmentsTab = () => {
               Generar acción
             </Button>
           </Flex>
-          <Button
-            type="primary"
-            className="availableAdjustments"
-            onClick={() => console.log("click ajustes disponibles")}
-          >
-            Ajustes disponibles
-            <CaretDoubleRight size={16} style={{ marginLeft: "0.5rem" }} />
-          </Button>
         </Flex>
 
         {isLoading ? (

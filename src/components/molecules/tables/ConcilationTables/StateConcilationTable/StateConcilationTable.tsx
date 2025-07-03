@@ -1,20 +1,26 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { useModalDetail } from "@/context/ModalContext";
+import { useAppStore } from "@/lib/store/store";
+import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
+import { invoiceCreateIncident } from "@/services/concilation/concilation";
+
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { Button, Collapse, Flex, message, Select, Typography } from "antd";
 import { ConcilationTable } from "../ConcilationTable/ConcilationTable";
+import { ModalEstimatedConcilation } from "@/components/molecules/modals/ModalEstimatedConcilation/ModalEstimatedConcilation";
+import InvoiceDetailModal from "@/modules/clients/containers/invoice-detail-modal";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+
 import {
   IInvoiceConcilation,
   InfoConcilation,
   InvoicesConcilation
 } from "@/types/concilation/concilation";
-import "./stateConcilationTable.scss";
-import { ModalEstimatedConcilation } from "@/components/molecules/modals/ModalEstimatedConcilation/ModalEstimatedConcilation";
-import InvoiceDetailModal from "@/modules/clients/containers/invoice-detail-modal";
 
-import RegisterNewsConcilation from "@/components/molecules/modals/RegisterNewsConcilation/RegisterNewsConcilation";
-import { useAppStore } from "@/lib/store/store";
-import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
+import "./stateConcilationTable.scss";
 
 const { Text } = Typography;
 
@@ -30,6 +36,9 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [IdErp, setIderp] = useState<string>("");
   const [isRegisterNewsOpen, setIsRegisterNewsOpen] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
+  const [commentary, setCommentary] = useState<string>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [showInvoiceDetailModal, setShowInvoiceDetailModal] = useState({
     isOpen: false,
@@ -39,6 +48,8 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const { ID } = useAppStore((state) => state.selectedProject);
   const { data: motives, isLoading } = useInvoiceIncidentMotives();
+  const { openModal } = useModalDetail();
+  const router = useRouter();
 
   // Función auxiliar para obtener todas las facturas
   useEffect(() => {
@@ -182,6 +193,63 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
     setIsValid(allInvoicesHaveMotive);
   }, [invoices]);
 
+  useEffect(() => {
+    if (!isRegisterNewsOpen) {
+      setSelectedEvidence([]);
+      setCommentary(undefined);
+    }
+  }, [isRegisterNewsOpen]);
+
+  const handleSubmitConcilationEvidence = async () => {
+    setIsSubmitting(true);
+
+    if (!invoices) return;
+    const invoiceList = Object.entries(invoices).flatMap(([key, category]) =>
+      category.invoices.map(
+        (invoice: {
+          id: string;
+          motive_id: string;
+          difference_amount: string;
+          observation?: string;
+        }) => ({
+          invoice_id: invoice.id,
+          motive_id: invoice.motive_id,
+          difference: invoice.difference_amount,
+          status: key,
+          observation: invoice.observation
+        })
+      )
+    );
+    try {
+      const response = await invoiceCreateIncident(
+        selectedEvidence,
+        invoiceList,
+        commentary || "",
+        clientId || ""
+      );
+
+      if (response.status == 200) {
+        setIsRegisterNewsOpen(false);
+        setSelectedEvidence([]);
+        setCommentary("");
+
+        openModal("sendEmail", {
+          event_id: "massConciliation",
+          onFinalOk: () => {
+            router.push(`/clientes/detail/${clientId}/project/${ID}`);
+          },
+          customOnReject: () => {
+            router.push(`/clientes/detail/${clientId}/project/${ID}`);
+          }
+        });
+      }
+    } catch (err) {
+      messageApi.error("Error al adjuntar la evidencia");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="concilation_table">
       {contextHolder}
@@ -284,12 +352,29 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
           projectId={ID}
         />
       )}
-      <RegisterNewsConcilation
+
+      <ModalAttachEvidence
         isOpen={isRegisterNewsOpen}
-        onClose={() => setIsRegisterNewsOpen(false)}
-        invoices={invoices}
-        clientId={clientId}
-        messageShow={messageApi}
+        handleCancel={() => {
+          setIsRegisterNewsOpen(false);
+          setSelectedEvidence([]);
+          setCommentary("");
+        }}
+        handleAttachEvidence={handleSubmitConcilationEvidence}
+        selectedEvidence={selectedEvidence}
+        setSelectedEvidence={setSelectedEvidence}
+        commentary={commentary}
+        setCommentary={setCommentary}
+        multipleFiles
+        loading={isSubmitting}
+        confirmDisabled={!commentary || !selectedEvidence.length || isSubmitting}
+        isMandatory={{ evidence: true, commentary: true }}
+        customTexts={{
+          title: "Finalizar conciliación",
+          description: "Adjunta la evidencia y agrega un comentario",
+          cancelButtonText: "Cancelar",
+          acceptButtonText: "Finalizar conciliación"
+        }}
       />
     </div>
   );

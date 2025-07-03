@@ -103,7 +103,8 @@ instance.interceptors.request.use(async (request) => {
 
 API.interceptors.request.use(async (request) => {
   request.headers.set("Accept", "application/json, text/plain, */*");
-  request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
+  if (!request?.url?.includes("/user/accept-invitation"))
+    request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
   return request;
 });
 
@@ -119,9 +120,19 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    throw error;
+    throw new ApiError(response?.status, error.message);
   }
 );
+
+export class ApiError extends Error {
+  status: number;
+  message: string;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.message = message;
+  }
+}
 
 export { API };
 export default instance;
