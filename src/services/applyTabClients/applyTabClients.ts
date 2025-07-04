@@ -265,3 +265,40 @@ export const markPaymentsAsUnidentified = async (paymentIds: number[]) => {
     throw error;
   }
 };
+
+export const uploadPaymentAttachment = async (
+  projectId: number,
+  clientId: string,
+  files: File[],
+  comment?: string
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('project_id', String(projectId));
+    formData.append('client_id', clientId);
+
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    if (comment) {
+      formData.append('comments', comment);
+    }
+
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/paymentApplication/save-attachment-current-application`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Error in uploadPaymentAttachment:', error);
+    throw error;
+  }
+};
+
