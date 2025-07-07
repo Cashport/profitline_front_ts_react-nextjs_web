@@ -82,7 +82,10 @@ export const DocumentButton = ({
           <Flex align="left" vertical>
             <Flex>
               <FileArrowUp size={"25px"} />
-              <Text onClick={onFileNameClick} className="nameFile">
+              <Text
+                onClick={onFileNameClick}
+                className={`nameFile ${onFileNameClick ? "clickable" : ""}`}
+              >
                 {fileName}
               </Text>
             </Flex>
