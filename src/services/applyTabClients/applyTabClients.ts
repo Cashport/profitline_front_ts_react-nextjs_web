@@ -130,26 +130,33 @@ export const addSpecificAdjustments = async (
   }
 };
 
-export const saveApplication = async (
-  project_id: number,
-  client_id: string,
-  comment: string,
-  file: File
-) => {
-  const modelData = {
-    project_id,
-    client_id,
-    comments: comment,
-    files: file
-  };
+interface ISaveApplication {
+  project_id: number;
+  client_id: string;
+  comment: string;
+  file?: File;
+  useExistingFile?: boolean;
+}
 
+export const saveApplication = async ({
+  project_id,
+  client_id,
+  comment,
+  file,
+  useExistingFile
+}: ISaveApplication) => {
   const formData = new FormData();
-  for (const key in modelData) {
-    const value = modelData[key as keyof typeof modelData];
-    formData.append(
-      key,
-      typeof value === "string" || value instanceof File ? value : String(value)
-    );
+
+  formData.append("project_id", String(project_id));
+  formData.append("client_id", client_id);
+  formData.append("comments", comment);
+
+  if (useExistingFile) {
+    // Adjunta el flag, pero NO el archivo
+    formData.append("useExistingFile", "true"); // O "1"
+  } else if (file) {
+    // Adjunta el archivo, pero NO el flag
+    formData.append("files", file);
   }
 
   try {
