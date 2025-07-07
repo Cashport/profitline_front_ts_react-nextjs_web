@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Flex, Modal } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
 import { CaretLeft, Plus } from "@phosphor-icons/react";
@@ -39,6 +39,12 @@ type EvidenceModalProps = {
   noModal?: boolean;
   noTitle?: boolean;
   noDescription?: boolean;
+  defaultEvidenceFile?: {
+    name: string;
+    url: string;
+  };
+  showDefaultFile?: boolean;
+  setShowDefaultFile?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ModalAttachEvidence = ({
@@ -56,7 +62,10 @@ const ModalAttachEvidence = ({
   isMandatory = { commentary: false, evidence: false },
   noModal = false,
   noTitle = false,
-  noDescription = false
+  noDescription = false,
+  defaultEvidenceFile,
+  setShowDefaultFile,
+  showDefaultFile
 }: EvidenceModalProps) => {
   const handleOnChangeDocument: any = (info: UploadChangeParam<File>) => {
     const { file } = info;
@@ -102,6 +111,10 @@ const ModalAttachEvidence = ({
     };
   }, [isOpen, setCommentary, setSelectedEvidence]);
 
+  const handleDeleteDefault = () => {
+    setShowDefaultFile && setShowDefaultFile(false);
+  };
+
   const renderView = () => {
     return (
       <div className={styles.content}>
@@ -126,29 +139,44 @@ const ModalAttachEvidence = ({
               *{isMandatory?.evidence ? "Obligatorio" : "Opcional"}
             </em>
           </Flex>
+
           <div className={styles.documentss}>
-            <DocumentButton
-              title={selectedEvidence[0]?.name}
-              handleOnChange={handleOnChangeDocument}
-              handleOnDelete={() => handleOnDeleteDocument(selectedEvidence[0]?.name)}
-              fileName={selectedEvidence[0]?.name}
-              fileSize={selectedEvidence[0]?.size}
-            />
-            {selectedEvidence.length > 0 &&
-              selectedEvidence
-                .slice(1)
-                .map((file) => (
-                  <DocumentButton
-                    key={file.name}
-                    className={styles.documentButton}
-                    title={file.name}
-                    handleOnChange={handleOnChangeDocument}
-                    handleOnDelete={() => handleOnDeleteDocument(file.name)}
-                    fileName={file.name}
-                    fileSize={file.size}
-                  />
-                ))}
+            {defaultEvidenceFile && showDefaultFile ? (
+              <DocumentButton
+                title={defaultEvidenceFile.name}
+                fileName={defaultEvidenceFile.name}
+                fileSize={undefined}
+                onFileNameClick={() => window.open(defaultEvidenceFile.url, "_blank")}
+                handleOnDelete={handleDeleteDefault}
+                handleOnChange={undefined}
+              />
+            ) : (
+              <>
+                <DocumentButton
+                  title={selectedEvidence[0]?.name}
+                  handleOnChange={handleOnChangeDocument}
+                  handleOnDelete={() => handleOnDeleteDocument(selectedEvidence[0]?.name)}
+                  fileName={selectedEvidence[0]?.name}
+                  fileSize={selectedEvidence[0]?.size}
+                />
+                {selectedEvidence.length > 0 &&
+                  selectedEvidence
+                    .slice(1)
+                    .map((file) => (
+                      <DocumentButton
+                        key={file.name}
+                        className={styles.documentButton}
+                        title={file.name}
+                        handleOnChange={handleOnChangeDocument}
+                        handleOnDelete={() => handleOnDeleteDocument(file.name)}
+                        fileName={file.name}
+                        fileSize={file.size}
+                      />
+                    ))}
+              </>
+            )}
           </div>
+
           {multipleFiles && selectedEvidence.length > 0 && (
             <>
               <Button

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
@@ -92,6 +92,7 @@ const ApplyTab: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
   const [commentary, setCommentary] = useState<string>();
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
+  const [useDefaultFileInEvidence, setUseDefaultFileInEvidence] = useState(false);
 
   const {
     data: applicationData,
@@ -106,6 +107,12 @@ const ApplyTab: React.FC = () => {
       adding: adding_type
     });
   };
+
+  useEffect(() => {
+    if (applicationData?.summary.url_attachment) {
+      setUseDefaultFileInEvidence(true);
+    }
+  }, [applicationData?.summary]);
 
   const handleCancel = () => {
     setIsModalAddToTableOpen({
@@ -199,7 +206,13 @@ const ApplyTab: React.FC = () => {
     setPreventRevalidation(true);
     setLoadingSave(true);
     try {
-      await saveApplication(projectId, clientId, commentary ?? "", selectedEvidence[0]);
+      await saveApplication({
+        project_id: projectId,
+        client_id: clientId,
+        comment: commentary ?? "",
+        file: selectedEvidence[0],
+        useExistingFile: useDefaultFileInEvidence
+      });
       showMessage("success", "Se ha guardado la aplicación correctamente");
       mutate();
       setIsModalOpen({ selected: 0 });
@@ -602,6 +615,16 @@ const ApplyTab: React.FC = () => {
         handleCancel={() => setIsModalOpen({ selected: 0 })}
         confirmDisabled={isValidating || !selectedEvidence.length || !commentary}
         isMandatory={{ evidence: true, commentary: true }}
+        defaultEvidenceFile={
+          applicationData?.summary?.attachment_name && applicationData?.summary?.url_attachment
+            ? {
+                name: applicationData.summary.attachment_name,
+                url: applicationData.summary.url_attachment
+              }
+            : undefined
+        }
+        showDefaultFile={useDefaultFileInEvidence}
+        setShowDefaultFile={setUseDefaultFileInEvidence}
       />
       <ModalApplyAI
         isOpen={isModalOpen.selected === 2}
