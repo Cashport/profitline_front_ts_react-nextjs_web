@@ -112,7 +112,7 @@ const ApplyTab: React.FC = () => {
     if (applicationData?.summary.url_attachment) {
       setUseDefaultFileInEvidence(true);
     }
-  }, [applicationData?.summary]);
+  }, [applicationData?.summary, isModalOpen.selected]);
 
   const handleCancel = () => {
     setIsModalAddToTableOpen({
@@ -387,6 +387,13 @@ const ApplyTab: React.FC = () => {
     setLoadingRequest(false);
   };
 
+  const isConfirmDisabled = useMemo(() => {
+    if (useDefaultFileInEvidence) {
+      return isValidating || !commentary;
+    }
+    return isValidating || !selectedEvidence.length || !commentary;
+  }, [isValidating, selectedEvidence.length, commentary, useDefaultFileInEvidence]);
+
   return (
     <>
       <ModalResultAppy
@@ -613,7 +620,7 @@ const ApplyTab: React.FC = () => {
         isOpen={isModalOpen.selected === 1}
         loading={loadingSave}
         handleCancel={() => setIsModalOpen({ selected: 0 })}
-        confirmDisabled={isValidating || !selectedEvidence.length || !commentary}
+        confirmDisabled={isConfirmDisabled}
         isMandatory={{ evidence: true, commentary: true }}
         defaultEvidenceFile={
           applicationData?.summary?.attachment_name && applicationData?.summary?.url_attachment
