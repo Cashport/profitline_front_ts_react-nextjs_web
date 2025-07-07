@@ -7,7 +7,7 @@ import { File, Sparkle, Trash, Upload, X } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
-import { applyWithCashportAI } from "@/services/applyTabClients/applyTabClients";
+import { applyWithCashportAI, uploadPaymentAttachment } from "@/services/applyTabClients/applyTabClients";
 
 import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
 
@@ -50,6 +50,7 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const handleAnalyzeFiles = async () => {
     setLoading(true);
     try {
+      await uploadPaymentAttachment(projectId, clientId, uploadedFiles, commentary);
       await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary);
       message.success("Archivos analizados con CashportAI");
       mutate();

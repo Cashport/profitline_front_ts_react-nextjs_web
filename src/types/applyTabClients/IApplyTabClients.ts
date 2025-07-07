@@ -41,6 +41,8 @@ export interface IApplyTabClients {
     total_discounts: number;
     total_balance: number;
     url_log: string;
+    url_attachment: string | null;
+    attachment_name: string | null;
   };
 }
 
