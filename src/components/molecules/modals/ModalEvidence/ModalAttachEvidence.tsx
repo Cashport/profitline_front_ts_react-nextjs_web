@@ -217,9 +217,7 @@ const ModalAttachEvidence = ({
         <FooterButtons
           handleOk={handleAttachEvidence}
           onClose={handleCancel}
-          titleConfirm={
-            customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Adjuntar evidencia"
-          }
+          titleConfirm={customTexts?.acceptButtonText ? customTexts?.acceptButtonText : "Guardar"}
           isConfirmLoading={loading}
           isConfirmDisabled={confirmDisabled}
         />
