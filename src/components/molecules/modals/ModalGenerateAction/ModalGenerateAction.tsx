@@ -1,6 +1,7 @@
 "use client";
+import { Dispatch, SetStateAction } from "react";
+import { useRouter } from "next/navigation";
 import { Collapse, Flex, Modal, Typography } from "antd";
-
 import {
   ArrowsClockwise,
   Calculator,
@@ -13,13 +14,13 @@ import {
   PaperPlaneTilt,
   Paperclip,
   Link,
-  Invoice
+  Invoice,
+  PencilLine
 } from "@phosphor-icons/react";
 
-import "./modalgenerateaction.scss";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { Dispatch, SetStateAction } from "react";
-import { useRouter } from "next/navigation";
+
+import "./modalgenerateaction.scss";
 
 const { Title, Text } = Typography;
 
@@ -57,7 +58,7 @@ export const ModalGenerateAction = ({
   };
 
   const handleOpenModal = (type: number) => {
-    const noNeedForValidation = [8];
+    const noNeedForValidation = [8, 9];
     if (noNeedForValidation.includes(type)) {
       setSelectOpen({
         selected: type
@@ -160,6 +161,13 @@ export const ModalGenerateAction = ({
           icon={<Invoice size={16} />}
           title="Legalizar saldo"
           onClick={balanceLegalization}
+        />
+        <ButtonGenerateAction
+          icon={<PencilLine size={16} />}
+          title="Ingresar gestión"
+          onClick={() => {
+            handleOpenModal(9);
+          }}
         />
       </Flex>
     </Modal>

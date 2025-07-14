@@ -223,7 +223,6 @@ export const getDigitalRecordFormInfo = async (
 
 export const createDigitalRecord = async (
   data: IFormDigitalRecordModal,
-
   project_id: number,
   user_id: number,
   clientId: string
@@ -351,6 +350,26 @@ export const balanceLegalization = async (balances: IBalances[]): Promise<Generi
     return response;
   } catch (error) {
     console.error("Error during balance legalization", error);
+    throw error;
+  }
+};
+
+export const addCommentHistoricAction = async (
+  clientId: string,
+  project_id: number,
+  comment: string
+): Promise<GenericResponse> => {
+  const body = {
+    comment: comment
+  };
+  try {
+    const response: GenericResponse = await API.post(
+      `${config.API_HOST}/portfolio/add-comment-history/client/${clientId}/project/${project_id}`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error adding comment to historic action", error);
     throw error;
   }
 };

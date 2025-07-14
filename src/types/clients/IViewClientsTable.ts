@@ -9,6 +9,12 @@ export interface IData {
   clientsPortfolio: IClientsPortfolio[];
   grandTotal: IGrandTotal;
 }
+export interface IClientEvent {
+  event_type: string;
+  event_date: string | null;
+  event_content: string | null;
+  event_order?: number;
+}
 export interface IClientsPortfolio {
   total_balances: any;
   id: number;
@@ -23,6 +29,7 @@ export interface IClientsPortfolio {
   holding_name: string;
   total_portfolio: number;
   executed_percentage: number;
+  events: IClientEvent[];
 }
 export interface IGrandTotal {
   total_wallet: number;
