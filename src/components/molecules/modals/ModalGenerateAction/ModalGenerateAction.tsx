@@ -13,7 +13,8 @@ import {
   PaperPlaneTilt,
   Paperclip,
   Link,
-  Invoice
+  Invoice,
+  ExclamationMark
 } from "@phosphor-icons/react";
 
 import "./modalgenerateaction.scss";
@@ -160,6 +161,13 @@ export const ModalGenerateAction = ({
           icon={<Invoice size={16} />}
           title="Legalizar saldo"
           onClick={balanceLegalization}
+        />
+        <ButtonGenerateAction
+          icon={<ExclamationMark size={16} />}
+          title="Ingresar gestión"
+          onClick={() => {
+            handleOpenModal(9);
+          }}
         />
       </Flex>
     </Modal>

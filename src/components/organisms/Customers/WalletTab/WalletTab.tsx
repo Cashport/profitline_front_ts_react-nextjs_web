@@ -26,11 +26,11 @@ import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNew
 import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
 import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
+import ModalEnterProcess from "@/components/molecules/modals/ModalEnterProcess/ModalEnterProcess";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
 import "./wallettab.scss";
-
 export const WalletTab = () => {
   const { portfolioData, clientFilters } = useContext(ClientDetailsContext);
   const { openModal } = useModalDetail();
@@ -322,6 +322,8 @@ export const WalletTab = () => {
         clientId={clientId}
         onCloseAllModals={closeAllModal}
       />
+
+      <ModalEnterProcess isOpen={isSelectOpen.selected === 9} onClose={onCloseModal} />
     </>
   );
   {
