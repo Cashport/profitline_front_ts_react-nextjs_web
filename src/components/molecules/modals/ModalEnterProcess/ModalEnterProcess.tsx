@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { message, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
 
+import { useAppStore } from "@/lib/store/store";
+import { addCommentHistoricAction } from "@/services/accountingAdjustment/accountingAdjustment";
+
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 import "./modalEnterProcess.scss";
@@ -9,13 +12,15 @@ import "./modalEnterProcess.scss";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  clientId?: string;
 }
 
-const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose }) => {
+const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
   const [observations, setObservations] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // Lógica para resetear estados al cerrar modal
   useEffect(() => {
     if (!isOpen) {
       setObservations("");
@@ -26,11 +31,10 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose }) => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Por ahora solo imprimimos
-      console.log("Observaciones:", observations);
+      await addCommentHistoricAction(clientId || "", projectId, observations);
 
       message.success("Gestión ingresada correctamente.");
-      //   onClose();
+      onClose();
     } catch (error) {
       message.error("Error al ingresar la gestión. Inténtalo de nuevo.");
     }

@@ -323,7 +323,11 @@ export const WalletTab = () => {
         onCloseAllModals={closeAllModal}
       />
 
-      <ModalEnterProcess isOpen={isSelectOpen.selected === 9} onClose={onCloseModal} />
+      <ModalEnterProcess
+        isOpen={isSelectOpen.selected === 9}
+        onClose={onCloseModal}
+        clientId={clientId}
+      />
     </>
   );
   {
