@@ -387,6 +387,11 @@ const ApplyTab: React.FC = () => {
     setLoadingRequest(false);
   };
 
+  const handleEditAdjustment = (record: IApplyTabRecord) => {
+    setIsModalOpen({ selected: 5 });
+    setSelectedRows([record]);
+  };
+
   const isConfirmDisabled = useMemo(() => {
     if (useDefaultFileInEvidence) {
       return isValidating || !commentary;
@@ -510,6 +515,7 @@ const ApplyTab: React.FC = () => {
                       data={section.itemsList}
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
+                      handleEditRow={handleEditAdjustment}
                     />
                   )}
                 </div>
