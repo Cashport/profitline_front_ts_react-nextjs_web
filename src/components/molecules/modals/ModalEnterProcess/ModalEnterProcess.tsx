@@ -55,6 +55,10 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
         Ingresar gestión
       </button>
 
+      <p style={{ fontSize: "1rem", fontWeight: 300 }}>
+        Ingresa una observación de máximo 140 caracteres
+      </p>
+
       <div className="modalEnterProcess__textArea">
         <p className="modalEnterProcess__textArea__label">Observación</p>
         <textarea
@@ -62,6 +66,7 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
           onChange={(e) => setObservations(e.target.value)}
           placeholder=""
           className="modalEnterProcess__textArea__input"
+          maxLength={140}
         />
       </div>
 
