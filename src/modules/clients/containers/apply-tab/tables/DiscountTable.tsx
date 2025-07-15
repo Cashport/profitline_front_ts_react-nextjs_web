@@ -44,7 +44,9 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       title: "Tipo de ajuste",
       dataIndex: "motive_description",
       key: "motive_description",
-      render: (motive_description) => <p>{motive_description}</p>
+      render: (motive_description) => <p>{motive_description}</p>,
+      showSorterTooltip: false,
+      sorter: (a, b) => (b.motive_description ?? "").localeCompare(a.motive_description ?? "")
     },
     {
       title: "Detalle",
