@@ -139,7 +139,7 @@ const RegisterNews = ({
             title: "Registrar novedad",
             description: "Adjunta la evidencia e ingresa un comentario",
             cancelButtonText: "Cancelar",
-            acceptButtonText: isSubmitting ? "Enviando..." : "Adjuntar evidencia"
+            acceptButtonText: isSubmitting ? "Enviando..." : "Guardar"
           }}
           noTitle
           noDescription

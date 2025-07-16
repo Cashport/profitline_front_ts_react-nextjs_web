@@ -27,6 +27,8 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
       isSuperAdmin: project.isSuperAdmin
     };
     setSelectedProject(projectInfo);
+    // set session storage for selectedProjectId, used in the useNotificationStore
+    sessionStorage.setItem("projectId", project.ID.toString());
     if (path.startsWith("/proyectos/review")) {
       router.push(`/proyectos/review/${project.ID}/detail`);
     } else if (path.startsWith("/clientes/all")) {

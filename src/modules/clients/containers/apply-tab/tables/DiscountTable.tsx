@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { Button, Dropdown, Table, TableProps } from "antd";
-import { Eye, Trash, DotsThreeVertical } from "phosphor-react";
+import { Trash, DotsThreeVertical, Pencil } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 
@@ -18,9 +18,16 @@ interface DiscountTableProps {
     // eslint-disable-next-line no-unused-vars
     onChange: (newSelectedRowKeys: React.Key[], selectedRows: any[]) => void;
   };
+  // eslint-disable-next-line no-unused-vars
+  handleEditRow?: (record: IApplyTabRecord) => void;
 }
 
-const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, rowSelection }) => {
+const DiscountTable: React.FC<DiscountTableProps> = ({
+  data,
+  handleDeleteRow,
+  rowSelection,
+  handleEditRow
+}) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
   const [removeModal, setRemoveModal] = useState(false);
@@ -37,7 +44,9 @@ const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, ro
       title: "Tipo de ajuste",
       dataIndex: "motive_description",
       key: "motive_description",
-      render: (motive_description) => <p>{motive_description}</p>
+      render: (motive_description) => <p>{motive_description}</p>,
+      showSorterTooltip: false,
+      sorter: (a, b) => (b.motive_description ?? "").localeCompare(a.motive_description ?? "")
     },
     {
       title: "Detalle",
@@ -76,6 +85,21 @@ const DiscountTable: React.FC<DiscountTableProps> = ({ data, handleDeleteRow, ro
       width: 76,
       render: (_, row) => {
         const items = [
+          {
+            key: "1",
+            label: (
+              <Button
+                icon={<Pencil size={20} />}
+                className="buttonNoBorder"
+                onClick={() => {
+                  // Logic to edit the row
+                  handleEditRow && handleEditRow(row);
+                }}
+              >
+                Editar
+              </Button>
+            )
+          },
           {
             key: "2",
             label: (
