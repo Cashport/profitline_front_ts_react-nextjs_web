@@ -112,7 +112,7 @@ export const createDiscount = async (
   body = form;
 
   const token = await getIdToken();
-  const response = await API.post<GenericResponse<DiscountCreateResponse>>(
+  const response = await API.post(
     `/discount`,
     body,
     {
@@ -123,7 +123,7 @@ export const createDiscount = async (
         "projectid": idProject
       }
     }
-  );
+  ) as GenericResponse<DiscountCreateResponse>;
   return response.data;
 };
 
