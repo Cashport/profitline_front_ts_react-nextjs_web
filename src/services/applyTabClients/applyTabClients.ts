@@ -13,7 +13,7 @@ export const addItemsToTable = async (
 ) => {
   const modelData = {
     project_id,
-    client_id,
+    clientUUID: client_id,
     ...(adding_type === "invoices" && { invoice_ids: selected_items_ids }),
     ...(adding_type === "payments" && { payment_ids: selected_items_ids }),
     ...(adding_type === "discounts" && { discount_ids: selected_items_ids })
@@ -74,7 +74,7 @@ export const createGlobalAdjustment = async (
 ) => {
   const modelData = {
     project_id,
-    client_id,
+    clientUUID: client_id,
     discounts: adjustments
   };
 

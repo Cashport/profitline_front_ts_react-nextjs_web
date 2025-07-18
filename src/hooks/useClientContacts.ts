@@ -17,7 +17,7 @@ export const useClientContacts = (clientId: string) => {
     showMessage: (type: MessageType, content: string) => void
   ) => {
     const contact = {
-      client_id: clientId,
+      clientUUID: clientId,
       contact_name: contactInfo.name,
       contact_lastname: contactInfo.lastname,
       contact_email: contactInfo.email,
@@ -47,7 +47,7 @@ export const useClientContacts = (clientId: string) => {
     showMessage: (type: MessageType, content: string) => void
   ) => {
     const contact = {
-      client_id: clientId,
+      clientUUID: clientId,
       contact_name: contactInfo.name,
       contact_lastname: contactInfo.lastname,
       contact_email: contactInfo.email,
