@@ -18,7 +18,7 @@ interface PropsInvoicesTable {
   // eslint-disable-next-line no-unused-vars
   openInvoiceDetail: (invoice: IInvoice) => void;
   // eslint-disable-next-line no-unused-vars
-  fetchData: (newPage: number) => void;
+  fetchData?: (newPage: number) => void;
 
   selectedRows?: IInvoice[];
 }
@@ -51,9 +51,9 @@ export const InvoicesTable = ({
     openInvoiceDetail(invoice);
   };
 
-  const handleTableChange = (page: number) => {
-    fetchData(page);
-  };
+  // const handleTableChange = (page: number) => {
+  //   fetchData(page);
+  // };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: any) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -285,7 +285,6 @@ export const InvoicesTable = ({
     }
   ];
 
-  console.log("data", data);
   return (
     <>
       <Table
@@ -294,13 +293,19 @@ export const InvoicesTable = ({
         dataSource={data.invoices.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-        pagination={{
-          current: data.page.actualPage,
-          pageSize: data.page.rowsPerPage,
-          total: data.page.totalRows,
-          onChange: handleTableChange,
-          showSizeChanger: false
-        }}
+        pagination={
+          //   {
+          //   current: data.page.actualPage,
+          //   pageSize: data.page.rowsPerPage,
+          //   total: data.page.totalRows,
+          //   onChange: handleTableChange,
+          //   showSizeChanger: false
+          // }
+          {
+            pageSize: 25,
+            showSizeChanger: false
+          }
+        }
         size="small"
         sticky={
           {

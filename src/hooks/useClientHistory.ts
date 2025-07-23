@@ -19,7 +19,7 @@ interface IDetailResponse {
 export const useClientHistory = ({ clientId }: useBankRulesProps) => {
   const { ID } = useAppStore((state) => state.selectedProject);
 
-  const pathKey = `/history/get-history?project_id=${ID}&client_id=${clientId}`;
+  const pathKey = `/history/get-history?project_id=${ID}&clientUUID=${clientId}`;
 
   const { data, error, mutate } = useSWR<GenericResponse<IDetailResponse>>(pathKey, fetcher);
 

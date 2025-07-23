@@ -65,7 +65,7 @@ export const WalletTab = () => {
   const clientId = clientIdParam || "";
   const projectId = projectIdParam ? parseInt(projectIdParam) : 0;
 
-  const { data, isLoading, mutate, refetchByStatus } = useInvoices({
+  const { data, isLoading, mutate } = useInvoices({
     searchQuery: debouncedSearchQuery,
     paymentAgreement: filters.paymentAgreement !== null ? filters.paymentAgreement : undefined,
     radicationType: filters.radicationType !== null ? filters.radicationType : undefined,
@@ -178,10 +178,6 @@ export const WalletTab = () => {
     }
   };
 
-  const getAccountingAdjustmentsById = async (statusId: string | number, newPage?: number) => {
-    await refetchByStatus(statusId, newPage);
-  };
-
   return (
     <>
       {contextHolder}
@@ -232,9 +228,9 @@ export const WalletTab = () => {
                   stateId={invoiceState.status_id}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
-                  fetchData={(page: number) => {
-                    getAccountingAdjustmentsById(invoiceState.status_id, page);
-                  }}
+                  // fetchData={(page: number) => {
+                  //   getAccountingAdjustmentsById(invoiceState.status_id, page);
+                  // }}
                 />
               )
             }))}

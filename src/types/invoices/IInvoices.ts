@@ -1,5 +1,10 @@
 import { Pagination } from "../global/IGlobal";
 
+export interface IInvoices {
+  error: boolean;
+  data: InvoicesData[];
+}
+
 export interface InvoicesData {
   status: string;
   color: string;

@@ -54,7 +54,7 @@ interface IContactPosition {
 }
 
 export interface ICreateEditContact {
-  client_id: string;
+  clientUUID: string;
   contact_name: string;
   contact_lastname: string;
   contact_email: string;
