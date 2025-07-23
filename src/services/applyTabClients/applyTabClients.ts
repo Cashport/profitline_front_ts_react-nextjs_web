@@ -130,26 +130,33 @@ export const addSpecificAdjustments = async (
   }
 };
 
-export const saveApplication = async (
-  project_id: number,
-  client_id: string,
-  comment: string,
-  file: File
-) => {
-  const modelData = {
-    project_id,
-    client_id,
-    comments: comment,
-    files: file
-  };
+interface ISaveApplication {
+  project_id: number;
+  client_id: string;
+  comment: string;
+  file?: File;
+  useExistingFile?: boolean;
+}
 
+export const saveApplication = async ({
+  project_id,
+  client_id,
+  comment,
+  file,
+  useExistingFile
+}: ISaveApplication) => {
   const formData = new FormData();
-  for (const key in modelData) {
-    const value = modelData[key as keyof typeof modelData];
-    formData.append(
-      key,
-      typeof value === "string" || value instanceof File ? value : String(value)
-    );
+
+  formData.append("project_id", String(project_id));
+  formData.append("client_id", client_id);
+  formData.append("comments", comment);
+
+  if (useExistingFile) {
+    // Adjunta el flag, pero NO el archivo
+    formData.append("useExistingFile", "true"); // O "1"
+  } else if (file) {
+    // Adjunta el archivo, pero NO el flag
+    formData.append("files", file);
   }
 
   try {
@@ -265,3 +272,40 @@ export const markPaymentsAsUnidentified = async (paymentIds: number[]) => {
     throw error;
   }
 };
+
+export const uploadPaymentAttachment = async (
+  projectId: number,
+  clientId: string,
+  files: File[],
+  comment?: string
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('project_id', String(projectId));
+    formData.append('client_id', clientId);
+
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    if (comment) {
+      formData.append('comments', comment);
+    }
+
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/paymentApplication/save-attachment-current-application`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Error in uploadPaymentAttachment:', error);
+    throw error;
+  }
+};
+

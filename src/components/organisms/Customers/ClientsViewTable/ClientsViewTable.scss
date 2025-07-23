@@ -26,8 +26,15 @@
         text-overflow: ellipsis;
     }
 
-    .text {
+    .nameColumn {
+        position: relative;
+    }
+
+    .linkName {
         color: #0085ff;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .mainClientsTable_header {
@@ -71,4 +78,43 @@
             color: black !important;
         }
     }
+}
+
+.tooltipHistoricEvents {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: $black;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 15px 8px;
+
+    &__event {
+        width: fit-content;
+        &__title {
+            font-weight: 500;
+            height: 8px;
+        }
+
+        &__time {
+            font-weight: 400;
+            color: $gray;
+        }
+
+        &__content {
+            font-weight: 300;
+            line-height: 1.1;
+            min-width: 290px;
+            max-width: 400px;
+        }
+    }
+
+    &__icon {
+        position: absolute;
+        right: 0;
+    }
+}
+
+.ant-tooltip-content {
+    width: fit-content;
 }

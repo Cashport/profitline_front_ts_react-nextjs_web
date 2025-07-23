@@ -23,6 +23,7 @@ interface Props {
   handleOnDelete?: (_: React.MouseEvent<HTMLElement>) => void;
   disabled?: boolean;
   children?: React.ReactNode;
+  onFileNameClick?: () => void;
 }
 
 export const DocumentButton = ({
@@ -34,7 +35,8 @@ export const DocumentButton = ({
   handleOnDelete,
   disabled,
   className,
-  children
+  children,
+  onFileNameClick
 }: Props) => {
   const props: UploadProps = {
     name: title,
@@ -80,7 +82,12 @@ export const DocumentButton = ({
           <Flex align="left" vertical>
             <Flex>
               <FileArrowUp size={"25px"} />
-              <Text className="nameFile">{fileName}</Text>
+              <Text
+                onClick={onFileNameClick}
+                className={`nameFile ${onFileNameClick ? "clickable" : ""}`}
+              >
+                {fileName}
+              </Text>
             </Flex>
             <Text className="sizeFile">{fileSize}</Text>
           </Flex>
