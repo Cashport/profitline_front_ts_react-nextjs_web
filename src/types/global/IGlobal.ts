@@ -5,6 +5,7 @@ export type Pagination = {
   rowsperpage: number;
   totalPages: number;
   totalRows: number;
+  rowsPerPage?: number;
 };
 
 export interface GenericResponsePage<T = any> {

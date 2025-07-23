@@ -53,7 +53,8 @@ export const putContact = async (
 
 export const deleteContact = async (
   contactsIds: { contacts_ids: number[] },
-  clientId: string
+  clientId: string,
+  projectId: number
 ): Promise<genericResponse> => {
   try {
     const customConfig = {
@@ -61,7 +62,7 @@ export const deleteContact = async (
     };
 
     const response: genericResponse = await API.delete(
-      `${config.API_HOST}/client/${clientId}/contact`,
+      `${config.API_HOST}/client/${clientId}/contact/project/${projectId}`,
       customConfig
     );
 

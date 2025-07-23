@@ -4,7 +4,7 @@ import { IInvoices } from "@/types/invoices/IInvoices";
 import { useParams } from "next/navigation";
 import { extractSingleParam } from "@/utils/utils";
 
-interface Props {
+interface Params {
   page?: number;
   limit?: number;
   paymentAgreement?: number;
@@ -14,6 +14,7 @@ interface Props {
   zones?: number[];
   channels?: number[];
   searchQuery?: string;
+  statusId?: string | number;
 }
 
 export const useInvoices = ({
@@ -26,7 +27,7 @@ export const useInvoices = ({
   searchQuery,
   page = 1,
   limit = 50
-}: Props) => {
+}: Params) => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const projectIdParam = extractSingleParam(params.projectId);
