@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
-import { Spin, TableProps, Button, Col, Flex, Row, Table, Typography } from "antd";
+import { Spin, TableProps, Button, Col, Flex, Row, Table, Typography, Tooltip } from "antd";
 import {
   CalendarBlank,
   CalendarX,
@@ -12,7 +12,8 @@ import {
   Calendar,
   Receipt,
   XCircle,
-  MagnifyingGlassMinus
+  MagnifyingGlassMinus,
+  Info
 } from "phosphor-react";
 import CardsClients from "../../../molecules/modals/CardsClients/CardsClients";
 
@@ -29,6 +30,7 @@ import { useInfiniteQuery } from "react-query";
 import { useAppStore } from "@/lib/store/store";
 
 import "./ClientsViewTable.scss";
+import { formatTimeAgo } from "@/utils/utils";
 
 const { Text } = Typography;
 
@@ -114,10 +116,47 @@ export const ClientsViewTable = () => {
       title: "Nombre",
       dataIndex: "client_name",
       key: "client_name",
+      className: "nameColumn",
       render: (_, row: IClientsPortfolio) => (
-        <Link href={`/clientes/detail/${row.client_uuid}/project/${row.project_id}`}>
-          <Text className="text">{row.client_name}</Text>
-        </Link>
+        <Flex gap="0.5rem" align="center">
+          <Link
+            className="linkName"
+            href={`/clientes/detail/${row.client_id}/project/${row.project_id}`}
+          >
+            {row.client_name}
+          </Link>
+          {row.events.length > 0 && (
+            <Tooltip
+              color={"#f7f7f7"}
+              className="tooltipHistoricEvents__icon"
+              title={
+                <div className="tooltipHistoricEvents">
+                  {row.events.map((event, index) => (
+                    <Flex
+                      className="tooltipHistoricEvents__event"
+                      vertical
+                      gap={"0.5rem"}
+                      key={event.event_order || index}
+                    >
+                      <Flex gap="0.5rem">
+                        <h4 className="tooltipHistoricEvents__event__title">{event.event_type}</h4>
+                        {event.event_date !== null && (
+                          <p className="tooltipHistoricEvents__event__time">
+                            Hace {formatTimeAgo(event.event_date)}
+                          </p>
+                        )}
+                      </Flex>
+
+                      <p className="tooltipHistoricEvents__event__content">{event.event_content}</p>
+                    </Flex>
+                  ))}
+                </div>
+              }
+            >
+              <Info size={"1rem"} />
+            </Tooltip>
+          )}
+        </Flex>
       ),
       width: "20%",
       sorter: (a, b) => a.client_name.localeCompare(b.client_name),

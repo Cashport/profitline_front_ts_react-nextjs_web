@@ -146,8 +146,9 @@ const PaymentAgreementModal: React.FC<Props> = ({
       dataIndex: "pending",
       key: "pending",
       render: (text) => {
-        return <span>{formatCurrencyMoney(text)}</span>;
-      }
+        return <span className="fontMonoSpace">{formatCurrencyMoney(text)}</span>;
+      },
+      align: "end"
     },
     {
       title: "Valor acordado",
@@ -166,7 +167,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
               handleCellChange("agreedValue", index, record.pending.toString());
             }
           }}
-          className="number__input"
+          className="number__input fontMonoSpace"
         />
       ),
       align: "center"
@@ -212,7 +213,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
   return (
     <Modal
       className="wrapper_payment"
-      width={"50%"}
+      width={"60%"}
       open={isOpen}
       onCancel={onClenModal}
       footer={null}
