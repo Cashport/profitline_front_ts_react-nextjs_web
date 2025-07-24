@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
     return res;
   }
   if (request.nextUrl.pathname === "/") {
-    const res = NextResponse.redirect(new URL("/clients/all", request.url), {
+    const res = NextResponse.redirect(new URL("/clientes/all", request.url), {
       headers: requestHeaders
     });
     res.headers.set("Content-Security-Policy", contentSecurityPolicyHeaderValue);
