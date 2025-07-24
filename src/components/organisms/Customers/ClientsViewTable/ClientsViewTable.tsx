@@ -121,11 +121,11 @@ export const ClientsViewTable = () => {
         <Flex gap="0.5rem" align="center">
           <Link
             className="linkName"
-            href={`/clientes/detail/${row.client_id}/project/${row.project_id}`}
+            href={`/clientes/detail/${row.client_uuid}/project/${row.project_id}`}
           >
             {row.client_name}
           </Link>
-          {row.events.length > 0 && (
+          {row?.events?.length > 0 && (
             <Tooltip
               color={"#f7f7f7"}
               className="tooltipHistoricEvents__icon"
