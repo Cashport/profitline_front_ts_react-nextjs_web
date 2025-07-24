@@ -12,6 +12,7 @@ import { useAppStore } from "@/lib/store/store";
 interface ResolveNoveltyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line no-unused-vars
   onResolve: (data: { file?: File; comment: string }) => void;
   isResolving: boolean;
   novelty: IIncidentDetail;
@@ -184,7 +185,7 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
           )}
           <div className="footer">
             <Button onClick={onCloseAll}>Cancelar</Button>
-            <Button type="primary" disabled={file === null} onClick={handleResolve}>
+            <Button type="primary" onClick={handleResolve}>
               {isResolving ? "Resolver" : "Rechazar"}
             </Button>
           </div>
