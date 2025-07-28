@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Permitir acceso sin autenticación a rutas que empiecen con /mobile
+  if (request.nextUrl.pathname.startsWith("/mobile")) {
+    return NextResponse.next();
+  }
+
   const session = request.cookies.get(process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME ?? "");
-  //TODO: logic to return us to projects if we log in if we are logged in and with a tokenos logeados y con token
 
   //Return to /login if there is no session cookie
   if (!session) {
