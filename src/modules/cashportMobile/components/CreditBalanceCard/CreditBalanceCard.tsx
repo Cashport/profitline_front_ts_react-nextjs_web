@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
-import { Flex } from "antd";
 import { ArrowUUpLeft } from "@phosphor-icons/react";
-import "./creditBalanceCard.scss";
+import BaseCard from "../atoms/BaseCard/BaseCard";
 
 export interface CreditBalanceCardProps {
   credit: {
@@ -13,23 +12,19 @@ export interface CreditBalanceCardProps {
   };
 }
 
-const CreditBalanceCard: React.FC<CreditBalanceCardProps> = ({ credit }) => (
-  <Flex justify="space-between" align="center" className="creditBalanceCard__credit-item">
-    <Flex gap={"0.5rem"} align="center">
-      <ArrowUUpLeft className="creditBalanceCard__credit-icon" size={16} weight="light" />
-
-      <Flex vertical>
-        <p className="creditBalanceCard__credit-description">{credit.description}</p>
-        <p className="creditBalanceCard__credit-date">{credit.date}</p>
-      </Flex>
-    </Flex>
-
-    <Flex vertical align="end">
-      <p className="creditBalanceCard__credit-amount">
-        <span className="creditBalanceCard__currency">$</span> {credit.formattedAmount}
-      </p>
-    </Flex>
-  </Flex>
-);
+const CreditBalanceCard: React.FC<CreditBalanceCardProps> = ({ credit }) => {
+  return (
+    <BaseCard
+      icon={<ArrowUUpLeft size={16} weight="light" />}
+      iconBackgroundColor="#e8e2ff"
+      iconColor="#6b47dc"
+      title={credit.description}
+      subtitle={credit.date}
+      amount={credit.formattedAmount}
+      isInteractive={false}
+      className="creditBalanceCard"
+    />
+  );
+};
 
 export default CreditBalanceCard;

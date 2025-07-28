@@ -1,6 +1,6 @@
 @import "@/styles/variables.scss";
 
-.cashport-mobile {
+.cashportMobileView {
     max-width: 430px;
     margin: 0 auto;
     min-height: 100vh;
@@ -55,20 +55,6 @@
 
     &__custom-tab-bar {
         margin-bottom: 0 !important;
-    }
-
-    .pendingInvoicesTab {
-        &__title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: $cashportMobileBlue;
-        }
-    }
-
-    &__payments-empty {
-        text-align: center;
-        padding: 40px 20px;
-        color: #999;
     }
 
     // // Responsive adjustments

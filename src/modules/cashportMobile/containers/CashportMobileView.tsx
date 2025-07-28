@@ -1,13 +1,12 @@
 "use client";
 import React from "react";
-import { Flex, Tabs, Typography } from "antd";
+import { Tabs, Typography } from "antd";
 import type { TabsProps } from "antd";
 
-import CreditBalanceCard from "../components/CreditBalanceCard/CreditBalanceCard";
 import TotalDebtCard from "../components/TotalDebtCard/TotalDebtCard";
-import PendingInvoiceCard from "../components/PendingInvoiceCard/PendingInvoiceCard";
+import PendingInvoicesTab from "./tabs/PendingInvoicesTab/PendingInvoicesTab";
 
-import "./cashportMobile.scss";
+import "./cashportMobileView.scss";
 
 const { Text } = Typography;
 
@@ -22,7 +21,7 @@ interface Invoice {
   isPastDue?: boolean;
 }
 
-const CashportMobile: React.FC = () => {
+const CashportMobileView: React.FC = () => {
   // Mock data
   const totalDebt = 32487323;
   const readyToPay = 29267390;
@@ -76,33 +75,7 @@ const CashportMobile: React.FC = () => {
       key: "pending",
       label: "Facturas pendientes",
       children: (
-        <Flex vertical gap="2rem">
-          <Flex vertical gap="0.5rem">
-            {pendingInvoices.map((invoice: Invoice) => (
-              <PendingInvoiceCard
-                key={invoice.id}
-                invoice={{
-                  id: invoice.id,
-                  code: invoice.code,
-                  date: invoice.date,
-                  isPastDue: invoice.isPastDue || false,
-                  formattedAmount: invoice.formattedAmount,
-                  formattedOriginalAmount: invoice.formattedOriginalAmount
-                }}
-              />
-            ))}
-          </Flex>
-
-          <Flex vertical gap="1rem">
-            <h4 className="pendingInvoicesTab__title">Saldo a favor</h4>
-
-            <Flex vertical gap="0.5rem">
-              {creditBalances.map((credit) => (
-                <CreditBalanceCard key={credit.id} credit={credit} />
-              ))}
-            </Flex>
-          </Flex>
-        </Flex>
+        <PendingInvoicesTab pendingInvoices={pendingInvoices} creditBalances={creditBalances} />
       )
     },
     {
@@ -117,16 +90,16 @@ const CashportMobile: React.FC = () => {
   ];
 
   return (
-    <div className="cashport-mobile">
+    <div className="cashportMobileView">
       <TotalDebtCard totalDebt={totalDebt} readyToPay={readyToPay} onPay={() => {}} />
 
-      <div className="cashport-mobile__tabs-section">
+      <div className="cashportMobileView__tabs-section">
         <Tabs
           defaultActiveKey="pending"
           items={tabItems}
-          className="cashport-mobile__tabs"
+          className="cashportMobileView__tabs"
           renderTabBar={(props, DefaultTabBar) => (
-            <DefaultTabBar {...props} className="cashport-mobile__custom-tab-bar" />
+            <DefaultTabBar {...props} className="cashportMobileView__custom-tab-bar" />
           )}
         />
       </div>
@@ -134,4 +107,4 @@ const CashportMobile: React.FC = () => {
   );
 };
 
-export default CashportMobile;
+export default CashportMobileView;
