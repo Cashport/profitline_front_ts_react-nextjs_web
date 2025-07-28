@@ -29,15 +29,9 @@
         }
     }
 
-    &__tabs-section {
-        margin: -20px -20px -20px;
-        padding: 0;
-    }
-
     &__custom-tab-bar {
         background: $white;
         margin-top: 1rem !important;
-        padding: 0 1rem;
 
         .ant-tabs-nav-list {
             width: 100%;
@@ -88,11 +82,6 @@
         .ant-tabs-ink-bar {
             display: none;
         }
-    }
-
-    // Contenido de los tabs
-    .ant-tabs-content-holder {
-        padding: 0 16px;
     }
 
     .ant-tabs-tabpane {
