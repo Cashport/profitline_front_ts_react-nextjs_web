@@ -91,6 +91,7 @@ const CashportMobileView: React.FC = () => {
       <div className="cashportMobileView__tabs-section">
         <Tabs
           defaultActiveKey="pending"
+          centered
           items={tabItems}
           className="cashportMobileView__tabs"
           renderTabBar={(props, DefaultTabBar) => (
