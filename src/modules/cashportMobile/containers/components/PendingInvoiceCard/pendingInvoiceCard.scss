@@ -1,0 +1,68 @@
+@import "@/styles/variables.scss";
+
+.pendingInvoiceCard {
+    &__invoice-item {
+        border-radius: 4px;
+        padding: 16px;
+        border: 1px solid #eef1f1;
+        transition: all 0.3s ease;
+
+        &:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: #e0e0e0;
+        }
+    }
+
+    &__invoice-icon {
+        color: $cashportMobileBlue;
+        padding: 8px;
+        background-color: #d6faff;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+    }
+
+    &__invoice-code {
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: $cashportMobileBlue;
+    }
+
+    &__invoice-date {
+        font-size: 0.75rem;
+        font-weight: 300;
+        color: $cashportMobileBlue;
+    }
+
+    &__invoice-text-overdue {
+        color: #ff0010 !important;
+        font-size: 0.625rem;
+        font-weight: 300;
+    }
+
+    &__invoice-amount {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $cashportMobileBlue;
+
+        &--overdue {
+            color: #ff0010;
+        }
+    }
+
+    &__invoice-original-amount {
+        font-size: 0.75rem;
+        color: $cashportMobileGray;
+        text-decoration: line-through;
+    }
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
+    &__caret-icon {
+        color: $cashportMobileBlue;
+    }
+}

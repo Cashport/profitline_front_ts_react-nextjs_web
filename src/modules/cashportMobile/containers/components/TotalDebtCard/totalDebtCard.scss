@@ -1,0 +1,98 @@
+@import "@/styles/variables.scss";
+
+.TotalDebtCard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: $white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 14px 18px #4c60981a;
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
+    &__total-section {
+        flex: 1;
+    }
+
+    &__label {
+        color: $cashportMobileBlue;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 300;
+
+        &-note {
+            color: #ff0010;
+            font-size: 0.625rem;
+        }
+
+        &-400 {
+            font-weight: 400;
+        }
+    }
+
+    &__total-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__total-amount {
+        margin: 0 !important;
+        font-weight: 600;
+        color: $cashportMobileBlue !important;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    &__brand-logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    &__divider {
+        height: 1px;
+        background-color: $dark-gray;
+        border-top: 1px solid $dark-gray;
+    }
+
+    &__ready-to-pay {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    &__ready-to-pay-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &__ready-amount {
+        margin: 0 !important;
+        font-weight: 600;
+        color: $cashportMobileBlue !important;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    &__pay-button {
+        box-shadow: none !important;
+        background-color: #2aaa3b !important;
+        height: 40px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px;
+        padding: 11px !important;
+    }
+}

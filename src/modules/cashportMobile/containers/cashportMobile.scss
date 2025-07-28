@@ -1,0 +1,74 @@
+@import "@/styles/variables.scss";
+
+.cashport-mobile {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 116px;
+        background-color: $cashportMobileBlue;
+        z-index: -1;
+    }
+
+    &__tabs-section {
+        margin: -20px -20px -20px;
+        padding: 0;
+    }
+
+    &__tabs {
+        .ant-tabs-nav {
+            margin: 0;
+            padding: 0 20px;
+
+            &::before {
+                border-bottom: 1px solid #e8e8e8;
+            }
+        }
+
+        .ant-tabs-tab {
+            padding: 16px 0;
+            margin: 0 16px 0 0;
+            font-size: 15px;
+            color: #999;
+
+            &.ant-tabs-tab-active {
+                color: #333;
+                font-weight: 500;
+            }
+        }
+
+        .ant-tabs-content {
+            padding: 16px 20px 20px;
+        }
+    }
+
+    &__invoices-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    &__payments-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+
+    // // Responsive adjustments
+    @media (min-width: 430px) {
+        border: 1px solid rgba(0, 0, 0, 0.144);
+        border-top: none;
+        border-bottom: none;
+    }
+}
