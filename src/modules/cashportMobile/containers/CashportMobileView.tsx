@@ -1,14 +1,13 @@
 "use client";
 import React from "react";
-import { Tabs, Typography } from "antd";
+import { Tabs } from "antd";
 import type { TabsProps } from "antd";
 
 import TotalDebtCard from "../components/TotalDebtCard/TotalDebtCard";
 import PendingInvoicesTab from "./tabs/PendingInvoicesTab/PendingInvoicesTab";
+import MyPaymentsTab from "./tabs/MyPaymentsTab/MyPaymentsTab";
 
 import "./cashportMobileView.scss";
-
-const { Text } = Typography;
 
 interface Invoice {
   id: string;
@@ -81,11 +80,7 @@ const CashportMobileView: React.FC = () => {
     {
       key: "my-payments",
       label: "Mis pagos",
-      children: (
-        <div className="cashport-mobile__payments-empty">
-          <Text>No hay pagos registrados</Text>
-        </div>
-      )
+      children: <MyPaymentsTab availablePayments={creditBalances} />
     }
   ];
 

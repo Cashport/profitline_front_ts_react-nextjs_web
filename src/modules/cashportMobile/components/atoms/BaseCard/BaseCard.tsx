@@ -9,8 +9,8 @@ export interface BaseCardProps {
   icon: React.ReactNode;
   iconBackgroundColor?: string;
   iconColor?: string;
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
   extra?: React.ReactNode;
   amount: string;
   originalAmount?: string;
@@ -53,7 +53,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
           {icon}
         </div>
 
-        <Flex vertical>
+        <Flex vertical gap={"0.125rem"}>
           <p className="base-card__title">{title}</p>
           <p className="base-card__subtitle">{subtitle}</p>
           {extra && <div className="base-card__extra">{extra}</div>}
