@@ -5,7 +5,7 @@ import { customInitApp } from "../../../../firebase-admin-config";
 import { COOKIE_NAME } from "@/utils/constants/globalConstants";
 import { customGetAuth } from "../../../../firebase";
 import { getPermissions } from "@/utils/permissions/getPermissions";
-import { deflateSync, inflateSync } from "zlib";
+import { deflateSync } from "zlib";
 import { Buffer } from "buffer";
 
 customInitApp();
@@ -51,7 +51,7 @@ export async function POST() {
   return NextResponse.json({ data: { token } }, { status: 200 });
 }
 export async function GET() {
-  const pathname = headers().get("x-pathname") || ""; // You may need to pass this header from the client
+  const pathname = headers().get("x-pathname") || "";
 
   // If the path starts with /mobile, skip authentication
   if (pathname.startsWith("/mobile")) {
