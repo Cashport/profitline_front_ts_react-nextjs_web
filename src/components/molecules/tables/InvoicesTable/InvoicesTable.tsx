@@ -6,24 +6,28 @@ import dayjs from "dayjs";
 import { useAppStore } from "@/lib/store/store";
 import { calculateDaysDifference, daysLeft, formatDate } from "@/utils/utils";
 
-import { IInvoice } from "@/types/invoices/IInvoices";
+import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
 const { Text } = Typography;
 import "./invoicestable.scss";
 
 interface PropsInvoicesTable {
   stateId: number;
-  dataSingleInvoice: IInvoice[];
+  dataInvoiceByStatus: InvoicesData;
   setSelectedRows: Dispatch<SetStateAction<IInvoice[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
   openInvoiceDetail: (invoice: IInvoice) => void;
+  // eslint-disable-next-line no-unused-vars
+  fetchData?: (newPage: number) => void;
+
   selectedRows?: IInvoice[];
 }
 
 export const InvoicesTable = ({
   stateId,
-  dataSingleInvoice: data,
+  dataInvoiceByStatus: data,
   setSelectedRows,
+  fetchData,
   selectedRows,
   openInvoiceDetail
 }: PropsInvoicesTable) => {
@@ -46,6 +50,10 @@ export const InvoicesTable = ({
   const handleOpenDetail = (invoice: IInvoice) => {
     openInvoiceDetail(invoice);
   };
+
+  // const handleTableChange = (page: number) => {
+  //   fetchData(page);
+  // };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: any) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -282,13 +290,22 @@ export const InvoicesTable = ({
       <Table
         className="invoicesTable customSticky"
         columns={columns}
-        dataSource={data.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data.invoices.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
         rowClassName={(record) => (selectedRowKeys.includes(record.id) ? "selectedRow" : "")}
-        pagination={{
-          pageSize: 25,
-          showSizeChanger: false
-        }}
+        pagination={
+          //   {
+          //   current: data.page.actualPage,
+          //   pageSize: data.page.rowsPerPage,
+          //   total: data.page.totalRows,
+          //   onChange: handleTableChange,
+          //   showSizeChanger: false
+          // }
+          {
+            pageSize: 25,
+            showSizeChanger: false
+          }
+        }
         size="small"
         sticky={
           {

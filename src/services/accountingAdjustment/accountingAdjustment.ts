@@ -238,7 +238,7 @@ export const createDigitalRecord = async (
   formData.append("commentary", data.comment);
   formData.append("user_id", user_id.toString());
   formData.append("project_id", project_id.toString());
-  formData.append("client_id", clientId.toString());
+  formData.append("clientUUID", clientId.toString());
   data.attachments.forEach((file) => {
     formData.append("attachments", file);
   });
