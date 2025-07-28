@@ -1,0 +1,97 @@
+@import "@/styles/variables.scss";
+
+.cashportMobileView {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 116px;
+        background-color: $cashportMobileBlue;
+        z-index: -1;
+    }
+
+    .ant-tabs-nav {
+        margin-bottom: 0;
+
+        &::before {
+            display: none; // Elimina la línea inferior por defecto
+        }
+    }
+
+    &__custom-tab-bar {
+        background: $white;
+        margin-top: 1rem !important;
+
+        .ant-tabs-nav-list {
+            width: 100%;
+            display: flex;
+        }
+
+        .ant-tabs-tab {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            border: none;
+            background: transparent;
+            transition: all 0.3s ease;
+            z-index: 2;
+
+            &:hover {
+                color: inherit;
+                background: transparent;
+            }
+
+            .ant-tabs-tab-btn {
+                color: $cashportMobileBlue !important;
+                font-weight: 700 !important;
+                font-size: 0.75rem !important;
+                transition: color 0.3s ease;
+                width: 100%;
+                text-align: center;
+            }
+
+            &.ant-tabs-tab {
+                height: 34px !important;
+                margin: 4px !important;
+            }
+
+            &.ant-tabs-tab-active {
+                background: #eef1f1;
+                border-radius: 8px;
+                height: 34px !important;
+
+                .ant-tabs-tab-btn {
+                    color: #262626;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        // Elimina la línea indicadora por defecto
+        .ant-tabs-ink-bar {
+            display: none;
+        }
+    }
+
+    .ant-tabs-tabpane {
+        padding: 0;
+    }
+
+    // // Responsive adjustments
+    @media (min-width: 430px) {
+        border: 1px solid rgba(0, 0, 0, 0.144);
+        border-top: none;
+        border-bottom: none;
+    }
+}
