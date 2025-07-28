@@ -71,20 +71,6 @@ const CashportMobile: React.FC = () => {
     }
   ];
 
-  const renderInvoiceItem = (invoice: Invoice) => (
-    <PendingInvoiceCard
-      key={invoice.id}
-      invoice={{
-        id: invoice.id,
-        code: invoice.code,
-        date: invoice.date,
-        isPastDue: invoice.isPastDue || false,
-        formattedAmount: invoice.formattedAmount,
-        formattedOriginalAmount: invoice.formattedOriginalAmount
-      }}
-    />
-  );
-
   const tabItems: TabsProps["items"] = [
     {
       key: "pending",
@@ -92,7 +78,19 @@ const CashportMobile: React.FC = () => {
       children: (
         <Flex vertical gap="2rem">
           <Flex vertical gap="0.5rem">
-            {pendingInvoices.map(renderInvoiceItem)}
+            {pendingInvoices.map((invoice: Invoice) => (
+              <PendingInvoiceCard
+                key={invoice.id}
+                invoice={{
+                  id: invoice.id,
+                  code: invoice.code,
+                  date: invoice.date,
+                  isPastDue: invoice.isPastDue || false,
+                  formattedAmount: invoice.formattedAmount,
+                  formattedOriginalAmount: invoice.formattedOriginalAmount
+                }}
+              />
+            ))}
           </Flex>
 
           <Flex vertical gap="1rem">

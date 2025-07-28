@@ -44,6 +44,9 @@
         font-size: 0.875rem;
         font-weight: 600;
         color: $cashportMobileBlue;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
 
         &--overdue {
             color: #ff0010;
@@ -57,7 +60,7 @@
     }
 
     &__currency {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         font-weight: 300;
         color: $cashportMobileGray;
     }
