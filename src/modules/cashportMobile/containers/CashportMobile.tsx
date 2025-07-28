@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
-import { Tabs, Typography } from "antd";
+import { Flex, Tabs, Typography } from "antd";
 import type { TabsProps } from "antd";
 
-import TotalDebtCard from "./components/TotalDebtCard/TotalDebtCard";
+import CreditBalanceCard from "../components/CreditBalanceCard/CreditBalanceCard";
+import TotalDebtCard from "../components/TotalDebtCard/TotalDebtCard";
+import PendingInvoiceCard from "../components/PendingInvoiceCard/PendingInvoiceCard";
 
 import "./cashportMobile.scss";
-import PendingInvoiceCard from "./components/PendingInvoiceCard/PendingInvoiceCard";
 
 const { Text } = Typography;
 
@@ -55,6 +56,21 @@ const CashportMobile: React.FC = () => {
     }
   ];
 
+  const creditBalances = [
+    {
+      id: "1",
+      description: "Devolución de producto",
+      date: "Jun 3, 2025",
+      formattedAmount: "1.000.000"
+    },
+    {
+      id: "2",
+      description: "Producto dañado",
+      date: "Jun 1, 2025",
+      formattedAmount: "500.000"
+    }
+  ];
+
   const renderInvoiceItem = (invoice: Invoice) => (
     <PendingInvoiceCard
       key={invoice.id}
@@ -74,9 +90,21 @@ const CashportMobile: React.FC = () => {
       key: "pending",
       label: "Facturas pendientes",
       children: (
-        <div className="cashport-mobile__invoices-list">
-          {pendingInvoices.map(renderInvoiceItem)}
-        </div>
+        <Flex vertical gap="2rem">
+          <Flex vertical gap="0.5rem">
+            {pendingInvoices.map(renderInvoiceItem)}
+          </Flex>
+
+          <Flex vertical gap="1rem">
+            <h4 className="pendingInvoicesTab__title">Saldo a favor</h4>
+
+            <Flex vertical gap="0.5rem">
+              {creditBalances.map((credit) => (
+                <CreditBalanceCard key={credit.id} credit={credit} />
+              ))}
+            </Flex>
+          </Flex>
+        </Flex>
       )
     },
     {

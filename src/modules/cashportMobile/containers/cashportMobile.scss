@@ -53,10 +53,16 @@
         }
     }
 
-    &__invoices-list {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+    &__custom-tab-bar {
+        margin-bottom: 0 !important;
+    }
+
+    .pendingInvoicesTab {
+        &__title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: $cashportMobileBlue;
+        }
     }
 
     &__payments-empty {
