@@ -44,6 +44,27 @@ const MyPaymentsTab: React.FC<MyPaymentsTabProps> = ({ availablePayments }) => {
           </button>
         </Flex>
       )}
+
+      {availablePayments.length > 0 && (
+        <Flex vertical gap="1rem">
+          <h4 className="myPaymentsTab__title">Últimos pagos</h4>
+
+          <Flex vertical gap="0.5rem">
+            {availablePayments.map((payment) => (
+              <BaseCard
+                key={payment.id}
+                icon={<CurrencyDollarSimple size={16} weight="light" />}
+                iconBackgroundColor="#E5FFE0"
+                iconColor="#334455"
+                subtitle={payment.date}
+                amount={payment.formattedAmount}
+                isInteractive={false}
+                className="creditBalanceCard"
+              />
+            ))}
+          </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 };
