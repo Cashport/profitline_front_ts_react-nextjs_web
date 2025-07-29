@@ -21,7 +21,7 @@ const MobileConfirmPayment: React.FC = () => {
   return (
     <MobileNavBar title={"Detalles del pago"} onBack={handleGoBack}>
       <Flex vertical gap={"2rem"} className="mobileConfirmPayment">
-        <PaymentSummaryCard billed={288000} discount={10000} total={278000} />
+        <PaymentSummaryCard billed={32487323} discount={3219933} total={29267390} />
 
         <Flex vertical gap="1rem">
           <h4 className="mobileConfirmPayment__title">Facturas incluidas</h4>
