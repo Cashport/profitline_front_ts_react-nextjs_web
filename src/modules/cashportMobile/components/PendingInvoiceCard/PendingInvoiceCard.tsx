@@ -16,9 +16,14 @@ export interface PendingInvoiceCardProps {
     formattedOriginalAmount?: string;
   };
   onClick?: () => void;
+  isInteractive?: boolean;
 }
 
-const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({ invoice, onClick }) => {
+const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
+  invoice,
+  onClick,
+  isInteractive = true
+}) => {
   const extra = invoice.isPastDue ? (
     <Flex gap={"0.25rem"} align="center">
       <CalendarSlash color="#ff0010" size={12} weight="light" />
@@ -37,7 +42,7 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({ invoice, onClic
       amount={invoice.formattedAmount}
       originalAmount={invoice.formattedOriginalAmount}
       amountColor={invoice.isPastDue ? "#ff0010" : undefined}
-      isInteractive={true}
+      isInteractive={isInteractive}
       onClick={onClick}
       className="pendingInvoiceCard"
     />
