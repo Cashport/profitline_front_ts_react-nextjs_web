@@ -32,7 +32,10 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
         </div>
 
         <Image
-          src={"/images/logistics/cokeLogo.png" || "https://picsum.photos/60/60"}
+          src={
+            "https://www.cocacolaep.com/assets/legacy-assets/Uploads/resources/Coca-Cola-1210.jpg" ||
+            "https://picsum.photos/60/60"
+          }
           alt="Brand"
           width={60}
           height={60}
