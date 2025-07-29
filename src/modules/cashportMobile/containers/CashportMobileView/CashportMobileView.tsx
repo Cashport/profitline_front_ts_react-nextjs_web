@@ -1,11 +1,12 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Tabs } from "antd";
 import type { TabsProps } from "antd";
 
-import TotalDebtCard from "../components/TotalDebtCard/TotalDebtCard";
-import PendingInvoicesTab from "./tabs/PendingInvoicesTab/PendingInvoicesTab";
-import MyPaymentsTab from "./tabs/MyPaymentsTab/MyPaymentsTab";
+import TotalDebtCard from "../../components/TotalDebtCard/TotalDebtCard";
+import PendingInvoicesTab from "../tabs/PendingInvoicesTab/PendingInvoicesTab";
+import MyPaymentsTab from "../tabs/MyPaymentsTab/MyPaymentsTab";
 
 import "./cashportMobileView.scss";
 
@@ -21,6 +22,8 @@ interface Invoice {
 }
 
 const CashportMobileView: React.FC = () => {
+  const router = useRouter();
+
   // Mock data
   const totalDebt = 32487323;
   const readyToPay = 29267390;
@@ -84,9 +87,15 @@ const CashportMobileView: React.FC = () => {
     }
   ];
 
+  const handlePay = () => {
+    console.log("Initiating payment...");
+    // a push to host/mobile/confirmPayment
+    router.push("/mobile/confirmPayment");
+  };
+
   return (
     <div className="cashportMobileView">
-      <TotalDebtCard totalDebt={totalDebt} readyToPay={readyToPay} onPay={() => {}} />
+      <TotalDebtCard totalDebt={totalDebt} readyToPay={readyToPay} onPay={handlePay} />
 
       <div className="cashportMobileView__tabs-section">
         <Tabs
