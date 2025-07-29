@@ -1,0 +1,41 @@
+@import "@/styles/variables.scss";
+
+.paymentSummaryCard {
+    padding: 24px 16px;
+    border: 1px solid $cashportMobileLightGray;
+    border-radius: 8px;
+
+    &__label {
+        color: $cashportMobileBlue;
+        font-size: 0.875rem;
+        font-weight: 400;
+    }
+
+    &__amount {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: $cashportMobileBlue;
+    }
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
+    &__divider {
+        border: none;
+        border-top: 1px solid $cashportMobileLightGray;
+    }
+
+    &__pay-button {
+        box-shadow: none !important;
+        background-color: $cashportMobileBlue !important;
+        height: 40px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px;
+        padding: 11px !important;
+    }
+}

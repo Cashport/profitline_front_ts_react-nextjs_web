@@ -33,6 +33,9 @@ const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
   pendingInvoices,
   creditBalances
 }) => {
+  const handleClickInvoice = (invoiceId: string | number) => {
+    console.log(`Clicked on invoice ${invoiceId}`);
+  };
   return (
     <Flex className="pendingInvoicesTab" vertical gap="2rem">
       <Flex vertical gap="0.5rem">
@@ -47,7 +50,7 @@ const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
               formattedAmount: invoice.formattedAmount,
               formattedOriginalAmount: invoice.formattedOriginalAmount
             }}
-            onClick={() => console.log(`Clicked on invoice ${invoice.id}`)}
+            onClick={() => handleClickInvoice(invoice.id)}
           />
         ))}
       </Flex>
