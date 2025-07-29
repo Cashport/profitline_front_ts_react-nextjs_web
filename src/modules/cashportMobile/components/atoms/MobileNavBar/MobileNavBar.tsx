@@ -20,7 +20,7 @@ const MobileNavBar = ({ title, onBack, children }: MobileNavBarProps) => {
         <p className={styles.navBar__title}>{title}</p>
       </div>
 
-      <div style={{ marginTop: "46px" }}>{children}</div>
+      <div style={{ marginTop: "56px" }}>{children}</div>
     </div>
   );
 };

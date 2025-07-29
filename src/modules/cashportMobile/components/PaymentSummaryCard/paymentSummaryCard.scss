@@ -11,6 +11,19 @@
         font-weight: 400;
     }
 
+    &__amount {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: $cashportMobileBlue;
+    }
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
     &__divider {
         border: none;
         border-top: 1px solid $cashportMobileLightGray;
