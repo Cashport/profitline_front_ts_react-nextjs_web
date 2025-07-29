@@ -1,37 +1,41 @@
 "use client";
 import React from "react";
 import { Flex } from "antd";
-import { CurrencyDollarSimple } from "phosphor-react";
-import BaseCard from "../../components/atoms/BaseCard/BaseCard";
+
+import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
+import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoiceCard";
+import PaymentSummaryCard from "../../components/PaymentSummaryCard/PaymentSummaryCard";
+
 import "./mobileConfirmPayment.scss";
 
 const MobileConfirmPayment: React.FC = () => {
   return (
-    <div className="mobileConfirmPayment">
-      <h1>Detalle del pago</h1>
-      <Flex vertical>
-        {/* PaymentDetailCard */}
+    <MobileNavBar title={"Detalles del pago"}>
+      <Flex vertical gap={"2rem"} className="mobileConfirmPayment">
+        <PaymentSummaryCard billed={288000} discount={10000} total={278000} />
 
         <Flex vertical gap="1rem">
-          <h4 className="myPaymentsTab__title">Facturas incluidas</h4>
+          <h4 className="mobileConfirmPayment__title">Facturas incluidas</h4>
 
           <Flex vertical gap="0.5rem">
-            {pendingInvoices.map((payment) => (
-              <BaseCard
-                key={payment.id}
-                icon={<CurrencyDollarSimple size={16} weight="light" />}
-                iconBackgroundColor="#E5FFE0"
-                iconColor="#334455"
-                subtitle={payment.date}
-                amount={payment.formattedAmount}
-                isInteractive={false}
-                className="creditBalanceCard"
+            {pendingInvoices.map((invoice) => (
+              <PendingInvoiceCard
+                key={invoice.id}
+                invoice={{
+                  id: invoice.id,
+                  code: invoice.code,
+                  date: invoice.date,
+                  isPastDue: invoice.isPastDue || false,
+                  formattedAmount: invoice.formattedAmount,
+                  formattedOriginalAmount: invoice.formattedOriginalAmount
+                }}
+                onClick={() => console.log(invoice.id)}
               />
             ))}
           </Flex>
         </Flex>
       </Flex>
-    </div>
+    </MobileNavBar>
   );
 };
 

@@ -1,0 +1,29 @@
+@import "@/styles/variables.scss";
+
+.mobileNavBarWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.navBar {
+    border-bottom: 1px solid #eef1f1;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__icon {
+        color: $cashportMobileBlue !important;
+        position: absolute !important;
+        left: 1rem !important;
+        padding: 0 !important;
+        background-color: transparent !important;
+    }
+
+    &__title {
+        text-align: center;
+        font-weight: 300;
+        font-size: 0.875rem;
+        color: $cashportMobileBlue;
+    }
+}

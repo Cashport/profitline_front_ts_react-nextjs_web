@@ -30,7 +30,7 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({ invoice, onClic
     <BaseCard
       icon={<Invoice size={16} weight="light" />}
       iconBackgroundColor="#d6faff"
-      iconColor="#0066CC"
+      iconColor="#334455"
       title={invoice.code}
       subtitle={invoice.date}
       extra={extra}

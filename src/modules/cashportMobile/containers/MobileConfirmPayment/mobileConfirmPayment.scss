@@ -1,1 +1,12 @@
 @import "@/styles/variables.scss";
+
+.mobileConfirmPayment {
+    padding: 24px 16px;
+
+    &__title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $cashportMobileBlue;
+        margin: 0;
+    }
+}
