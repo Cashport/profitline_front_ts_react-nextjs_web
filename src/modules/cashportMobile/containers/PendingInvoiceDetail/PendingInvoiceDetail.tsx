@@ -6,7 +6,7 @@ import { Basket } from "@phosphor-icons/react";
 
 import BaseCard from "../../components/atoms/BaseCard/BaseCard";
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
-import PaymentSummaryCard from "../../components/PaymentSummaryCard/PaymentSummaryCard";
+import InvoiceSummaryCard from "../../components/InvoiceSummaryCard/InvoiceSummaryCard";
 
 import "./pendingInvoiceDetail.scss";
 
@@ -21,22 +21,27 @@ const PendingInvoiceDetail: React.FC = () => {
   return (
     <MobileNavBar title={"Detalle"} onBack={handleGoBack}>
       <Flex vertical gap={"2rem"} className="pendingInvoiceDetail">
-        <PaymentSummaryCard billed={32487323} discount={3219933} total={29267390} />
+        <InvoiceSummaryCard />
 
         <Flex vertical>
           <h4 className="pendingInvoiceDetail__title">Productos</h4>
 
-          {mockProducts.map((product) => (
-            <BaseCard
-              key={product.id}
-              icon={<Basket size={16} weight="light" />}
-              iconBackgroundColor="#EEF1F1"
-              iconColor="#334455"
-              title={product.code}
-              subtitle={`${product.quantity} uds.`}
-              amount={product.formattedAmount}
-              className="productCard"
-            />
+          {mockProducts.map((product, index) => (
+            <>
+              <BaseCard
+                key={product.id}
+                icon={<Basket size={16} weight="light" />}
+                iconBackgroundColor="#EEF1F1"
+                iconColor="#334455"
+                title={product.code}
+                subtitle={`${product.quantity} uds.`}
+                amount={product.formattedAmount}
+                className="productCard"
+              />
+              {index !== mockProducts.length - 1 && (
+                <hr className="pendingInvoiceDetail__divider" />
+              )}
+            </>
           ))}
         </Flex>
       </Flex>

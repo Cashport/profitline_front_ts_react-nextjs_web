@@ -8,14 +8,19 @@
         font-weight: 600;
         color: $cashportMobileBlue;
         margin: 0;
-        margin-bottom: 1rem;
+        margin-bottom: 0.875rem;
     }
 
     .productCard {
         border: none;
-        border-bottom: 1px solid $cashportMobileLightGray;
         border-radius: 0px;
         box-shadow: none;
         padding: 1rem 0;
+    }
+
+    &__divider {
+        border: none;
+        border-top: 1px solid $cashportMobileLightGray;
+        background-color: transparent;
     }
 }

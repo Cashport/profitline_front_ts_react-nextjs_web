@@ -14,7 +14,6 @@ const MobileConfirmPayment: React.FC = () => {
   const router = useRouter();
 
   const handleGoBack = () => {
-    console.log("Going back");
     router.push("/mobile");
   };
 
@@ -22,7 +21,6 @@ const MobileConfirmPayment: React.FC = () => {
     <MobileNavBar title={"Detalles del pago"} onBack={handleGoBack}>
       <Flex vertical gap={"2rem"} className="mobileConfirmPayment">
         <PaymentSummaryCard billed={32487323} discount={3219933} total={29267390} />
-        {/* InvoiceSummaryCard */}
 
         <Flex vertical gap="1rem">
           <h4 className="mobileConfirmPayment__title">Facturas incluidas</h4>
