@@ -1,0 +1,21 @@
+@import "@/styles/variables.scss";
+
+.pendingInvoiceDetail {
+    padding: 24px 16px;
+
+    &__title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $cashportMobileBlue;
+        margin: 0;
+        margin-bottom: 1rem;
+    }
+
+    .productCard {
+        border: none;
+        border-bottom: 1px solid $cashportMobileLightGray;
+        border-radius: 0px;
+        box-shadow: none;
+        padding: 1rem 0;
+    }
+}
