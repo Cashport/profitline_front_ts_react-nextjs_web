@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Flex } from "antd";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { NumericFormat } from "react-number-format";
+import { Flex, Input } from "antd";
 import { PlusCircle } from "@phosphor-icons/react";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
@@ -9,12 +11,55 @@ import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoi
 
 import "./modifyPayments.scss";
 
+type IInvoiceFormItem = {
+  id: string;
+  code: string;
+  date: string;
+  modifiedValue: string;
+  isPastDue?: boolean;
+  formattedOriginalAmount?: string;
+};
+
+type IPaymentFormValues = {
+  invoices: IInvoiceFormItem[];
+};
+
 const ModifyPayments: React.FC = () => {
   const router = useRouter();
 
+  // Inicializar react-hook-form con el arreglo de invoices
+  const { control, handleSubmit } = useForm<IPaymentFormValues>({
+    defaultValues: {
+      invoices: pendingInvoices.map((invoice) => ({
+        id: invoice.id,
+        code: invoice.code,
+        date: invoice.date,
+        modifiedValue: invoice.originalAmount?.toString() || invoice.amount.toString(),
+        isPastDue: invoice.isPastDue,
+        formattedOriginalAmount: invoice.formattedOriginalAmount
+      }))
+    }
+  });
+
+  // Hook para manejar el array de invoices
+  const { fields } = useFieldArray({
+    control,
+    name: "invoices"
+  });
+
   const handleGoBack = () => {
-    router.push("/confirmPayment");
+    router.push("/mobile/confirmPayment");
   };
+
+  const onSubmit = (data: IPaymentFormValues) => {
+    console.info("Submitted data (raw):", data);
+  };
+
+  // Componente personalizado para el input con formato
+  const CustomNumberInput = React.forwardRef<HTMLInputElement, any>((props, ref) => {
+    return <Input {...props} ref={ref} className="modifyPayments__input" />;
+  });
+  CustomNumberInput.displayName = "CustomNumberInput";
 
   return (
     <MobileNavBar title={"Modificar y pagar"} onBack={handleGoBack}>
@@ -25,19 +70,40 @@ const ModifyPayments: React.FC = () => {
           </p>
 
           <Flex vertical gap="0.5rem">
-            {pendingInvoices.map((invoice) => (
+            {fields.map((field, index) => (
               <PendingInvoiceCard
-                key={invoice.id}
+                key={field.id}
                 invoice={{
-                  id: invoice.id,
-                  code: invoice.code,
-                  date: invoice.date,
-                  isPastDue: invoice.isPastDue || false,
-                  formattedOriginalAmount: invoice.formattedOriginalAmount
+                  id: field.id,
+                  code: field.code,
+                  date: field.date,
+                  isPastDue: field.isPastDue || false,
+                  formattedOriginalAmount: field.formattedOriginalAmount
                 }}
-                onClick={() => console.log(invoice.id)}
+                onClick={() => console.log(field.id)}
                 isInteractive={false}
-                rightColumnNode={<p className="modifyPayments__amount">ACA VA EL INPUT</p>}
+                rightColumnNode={
+                  <Controller
+                    name={`invoices.${index}.modifiedValue`}
+                    control={control}
+                    render={({ field: { onChange, value, onBlur } }) => (
+                      <NumericFormat
+                        value={value}
+                        onValueChange={(values) => {
+                          onChange(values.value);
+                        }}
+                        onBlur={onBlur}
+                        customInput={CustomNumberInput}
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        prefix="$ "
+                        allowNegative={false}
+                        decimalScale={0}
+                        placeholder="$ 0"
+                      />
+                    )}
+                  />
+                }
               />
             ))}
           </Flex>

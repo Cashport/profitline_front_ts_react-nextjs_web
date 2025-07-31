@@ -8,6 +8,14 @@
         color: $cashportMobileBlue;
     }
 
+    &__input {
+        width: 115px !important;
+        text-align: right;
+        color: $cashportMobileBlue !important;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
     &__addDocument {
         display: flex;
         align-items: center;
