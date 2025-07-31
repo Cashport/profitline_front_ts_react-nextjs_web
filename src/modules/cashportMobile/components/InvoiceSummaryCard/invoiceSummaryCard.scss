@@ -1,0 +1,94 @@
+@import "@/styles/variables.scss";
+
+.invoiceSummaryCard {
+    padding: 24px 16px;
+    border: 1px solid $cashportMobileLightGray;
+    border-radius: 8px;
+
+    &__icon {
+        background-color: #d6faff;
+        color: $cashportMobileBlue;
+        width: 48px;
+        height: 48px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    &__label {
+        color: $cashportMobileBlue;
+        font-size: 0.875rem;
+        font-weight: 400;
+
+        strong {
+            font-weight: 500;
+        }
+    }
+
+    &__amount {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: $cashportMobileBlue;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
+    &__divider {
+        border: none;
+        border-top: 1px solid $cashportMobileLightGray;
+    }
+
+    &__credit-button {
+        box-shadow: none !important;
+        background-color: $white !important;
+        height: 40px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px;
+        padding: 11px !important;
+        border: 1px solid #ff5500 !important;
+        color: $cashportMobileBlue !important;
+    }
+
+    &__pay-button {
+        box-shadow: none !important;
+        background-color: $cashportMobileBlue !important;
+        height: 40px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px;
+        padding: 11px !important;
+    }
+
+    &__label {
+        color: $cashportMobileBlue;
+        font-size: 14px;
+        display: block;
+        font-weight: 300;
+
+        &-note {
+            color: #ff0010;
+            font-size: 0.625rem;
+        }
+
+        &.--400 {
+            font-weight: 400;
+        }
+    }
+
+    &__ready-amount {
+        margin: 0 !important;
+        font-weight: 600;
+        color: $cashportMobileBlue !important;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+}

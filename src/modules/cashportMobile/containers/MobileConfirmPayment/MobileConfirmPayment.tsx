@@ -2,20 +2,23 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Flex } from "antd";
+import { PencilSimpleLine } from "@phosphor-icons/react";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
 import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoiceCard";
 import PaymentSummaryCard from "../../components/PaymentSummaryCard/PaymentSummaryCard";
 
 import "./mobileConfirmPayment.scss";
-import { PencilSimpleLine } from "@phosphor-icons/react";
 
 const MobileConfirmPayment: React.FC = () => {
   const router = useRouter();
 
   const handleGoBack = () => {
-    console.log("Going back");
     router.push("/mobile");
+  };
+
+  const handleModifyPayment = () => {
+    router.push("/mobile/confirmPayment/modify");
   };
 
   return (
@@ -44,7 +47,7 @@ const MobileConfirmPayment: React.FC = () => {
             ))}
           </Flex>
 
-          <button className="mobileConfirmPayment__modifyButton">
+          <button className="mobileConfirmPayment__modifyButton" onClick={handleModifyPayment}>
             Modificar pago
             <PencilSimpleLine size={14} />
           </button>

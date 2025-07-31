@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Flex } from "antd";
 import { PlusCircle } from "@phosphor-icons/react";
 
@@ -28,14 +29,16 @@ export interface PendingInvoicesTabProps {
   pendingInvoices: Invoice[];
   creditBalances: CreditBalance[];
 }
-
 const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
   pendingInvoices,
   creditBalances
 }) => {
+  const router = useRouter();
+
   const handleClickInvoice = (invoiceId: string | number) => {
-    console.log(`Clicked on invoice ${invoiceId}`);
+    router.push(`/mobile/invoice/${invoiceId}`);
   };
+
   return (
     <Flex className="pendingInvoicesTab" vertical gap="2rem">
       <Flex vertical gap="0.5rem">
