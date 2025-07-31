@@ -12,12 +12,13 @@ export interface BaseCardProps {
   title?: string;
   subtitle?: string;
   extra?: React.ReactNode;
-  amount: string;
+  amount?: string;
   originalAmount?: string;
   amountColor?: string;
   isInteractive?: boolean;
   onClick?: () => void;
   className?: string;
+  rightColumnNode?: React.ReactNode;
 }
 
 const BaseCard: React.FC<BaseCardProps> = ({
@@ -32,6 +33,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
   amountColor,
   isInteractive = false,
   onClick,
+  rightColumnNode,
   className = ""
 }) => {
   return (
@@ -62,9 +64,12 @@ const BaseCard: React.FC<BaseCardProps> = ({
 
       <Flex align="center" gap={"1rem"}>
         <Flex vertical align="end">
-          <p className="base-card__amount" style={{ color: amountColor }}>
-            <span className="base-card__currency">$</span> {amount}
-          </p>
+          {rightColumnNode}
+          {amount && (
+            <p className="base-card__amount" style={{ color: amountColor }}>
+              <span className="base-card__currency">$</span> {amount}
+            </p>
+          )}
           {originalAmount && (
             <p className="base-card__original-amount">
               <span className="base-card__currency">$</span> {originalAmount}

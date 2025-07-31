@@ -2,32 +2,27 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Flex } from "antd";
-import { PencilSimpleLine } from "@phosphor-icons/react";
+import { PlusCircle } from "@phosphor-icons/react";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
 import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoiceCard";
-import PaymentSummaryCard from "../../components/PaymentSummaryCard/PaymentSummaryCard";
 
-import "./mobileConfirmPayment.scss";
+import "./modifyPayments.scss";
 
-const MobileConfirmPayment: React.FC = () => {
+const ModifyPayments: React.FC = () => {
   const router = useRouter();
 
   const handleGoBack = () => {
-    router.push("/mobile");
-  };
-
-  const handleModifyPayment = () => {
-    router.push("/mobile/confirmPayment/modify");
+    router.push("/confirmPayment");
   };
 
   return (
-    <MobileNavBar title={"Detalles del pago"} onBack={handleGoBack}>
-      <Flex vertical gap={"2rem"} className="mobileConfirmPayment">
-        <PaymentSummaryCard billed={32487323} discount={3219933} total={29267390} />
-
+    <MobileNavBar title={"Modificar y pagar"} onBack={handleGoBack}>
+      <Flex vertical gap={"0.625rem"} className="modifyPayments">
         <Flex vertical gap="1rem">
-          <h4 className="mobileConfirmPayment__title">Facturas incluidas</h4>
+          <p className="modifyPayments__description">
+            Ingresa los valores que deseas pagar por cada factura
+          </p>
 
           <Flex vertical gap="0.5rem">
             {pendingInvoices.map((invoice) => (
@@ -38,26 +33,26 @@ const MobileConfirmPayment: React.FC = () => {
                   code: invoice.code,
                   date: invoice.date,
                   isPastDue: invoice.isPastDue || false,
-                  formattedAmount: invoice.formattedAmount,
                   formattedOriginalAmount: invoice.formattedOriginalAmount
                 }}
                 onClick={() => console.log(invoice.id)}
                 isInteractive={false}
+                rightColumnNode={<p className="modifyPayments__amount">ACA VA EL INPUT</p>}
               />
             ))}
           </Flex>
-
-          <button className="mobileConfirmPayment__modifyButton" onClick={handleModifyPayment}>
-            Modificar pago
-            <PencilSimpleLine size={14} />
-          </button>
         </Flex>
+
+        <button className="modifyPayments__addDocument">
+          Agregar documento
+          <PlusCircle size={14} />
+        </button>
       </Flex>
     </MobileNavBar>
   );
 };
 
-export default MobileConfirmPayment;
+export default ModifyPayments;
 
 const pendingInvoices = [
   {

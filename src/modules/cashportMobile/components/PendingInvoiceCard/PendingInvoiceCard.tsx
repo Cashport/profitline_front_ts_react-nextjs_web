@@ -12,16 +12,18 @@ export interface PendingInvoiceCardProps {
     code: string;
     date: string;
     isPastDue: boolean;
-    formattedAmount: string;
+    formattedAmount?: string;
     formattedOriginalAmount?: string;
   };
   onClick?: () => void;
   isInteractive?: boolean;
+  rightColumnNode?: React.ReactNode;
 }
 
 const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
   invoice,
   onClick,
+  rightColumnNode,
   isInteractive = true
 }) => {
   const extra = invoice.isPastDue ? (
@@ -45,6 +47,7 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
       isInteractive={isInteractive}
       onClick={onClick}
       className="pendingInvoiceCard"
+      rightColumnNode={rightColumnNode}
     />
   );
 };
