@@ -8,6 +8,7 @@ import { PlusCircle } from "@phosphor-icons/react";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
 import PendingInvoiceCard from "../../components/PendingInvoiceCard/PendingInvoiceCard";
+import PaymentSummaryConfirm from "../../components/PaymentSummaryConfirm/PaymentSummaryConfirm";
 
 import "./modifyPayments.scss";
 
@@ -63,57 +64,62 @@ const ModifyPayments: React.FC = () => {
 
   return (
     <MobileNavBar title={"Modificar y pagar"} onBack={handleGoBack}>
-      <Flex vertical gap={"0.625rem"} className="modifyPayments">
-        <Flex vertical gap="1rem">
-          <p className="modifyPayments__description">
-            Ingresa los valores que deseas pagar por cada factura
-          </p>
+      {/* Margin based on PaymentSummaryConfirm at the bottom */}
+      <div style={{ marginBottom: "115px" }}>
+        <Flex vertical gap={"0.625rem"} className="modifyPayments">
+          <Flex vertical gap="1rem">
+            <p className="modifyPayments__description">
+              Ingresa los valores que deseas pagar por cada factura
+            </p>
 
-          <Flex vertical gap="0.5rem">
-            {fields.map((field, index) => (
-              <PendingInvoiceCard
-                key={field.id}
-                invoice={{
-                  id: field.id,
-                  code: field.code,
-                  date: field.date,
-                  isPastDue: field.isPastDue || false,
-                  formattedOriginalAmount: field.formattedOriginalAmount
-                }}
-                onClick={() => console.log(field.id)}
-                isInteractive={false}
-                rightColumnNode={
-                  <Controller
-                    name={`invoices.${index}.modifiedValue`}
-                    control={control}
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <NumericFormat
-                        value={value}
-                        onValueChange={(values) => {
-                          onChange(values.value);
-                        }}
-                        onBlur={onBlur}
-                        customInput={CustomNumberInput}
-                        thousandSeparator="."
-                        decimalSeparator=","
-                        prefix="$ "
-                        allowNegative={false}
-                        decimalScale={0}
-                        placeholder="$ 0"
-                      />
-                    )}
-                  />
-                }
-              />
-            ))}
+            <Flex vertical gap="0.5rem">
+              {fields.map((field, index) => (
+                <PendingInvoiceCard
+                  key={field.id}
+                  invoice={{
+                    id: field.id,
+                    code: field.code,
+                    date: field.date,
+                    isPastDue: field.isPastDue || false,
+                    formattedOriginalAmount: field.formattedOriginalAmount
+                  }}
+                  onClick={() => console.log(field.id)}
+                  isInteractive={false}
+                  rightColumnNode={
+                    <Controller
+                      name={`invoices.${index}.modifiedValue`}
+                      control={control}
+                      render={({ field: { onChange, value, onBlur } }) => (
+                        <NumericFormat
+                          value={value}
+                          onValueChange={(values) => {
+                            onChange(values.value);
+                          }}
+                          onBlur={onBlur}
+                          customInput={CustomNumberInput}
+                          thousandSeparator="."
+                          decimalSeparator=","
+                          prefix="$ "
+                          allowNegative={false}
+                          decimalScale={0}
+                          placeholder="$ 0"
+                        />
+                      )}
+                    />
+                  }
+                />
+              ))}
+            </Flex>
           </Flex>
+
+          <button className="modifyPayments__addDocument">
+            Agregar documento
+            <PlusCircle size={14} />
+          </button>
         </Flex>
 
-        <button className="modifyPayments__addDocument">
-          Agregar documento
-          <PlusCircle size={14} />
-        </button>
-      </Flex>
+        <PaymentSummaryConfirm total={1221212} onConfirm={handleSubmit(onSubmit)} />
+      </div>
     </MobileNavBar>
   );
 };
