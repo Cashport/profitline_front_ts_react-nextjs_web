@@ -40,3 +40,19 @@ export const getNotificationTypes = async () => {
     throw error;
   }
 };
+
+export const uploadNotificationEvidence = async (
+  notificationId: number,
+  file: File
+): Promise<GenericResponse<any>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const url = `${config.API_HOST}/notification/${notificationId}/upload-evidence`;
+    const response: GenericResponse<any> = await API.post(url, formData);
+    return response;
+  } catch (error) {
+    console.error("Error uploading notification evidence", error);
+    throw error;
+  }
+};

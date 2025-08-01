@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex, Radio, RadioChangeEvent } from "antd";
+import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
 import { OrderViewContext } from "../../containers/create-order/create-order";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -160,14 +160,9 @@ const CreateOrderCheckout: FC = ({}) => {
       return;
     }
 
-    const response = (await createOrder(
-      projectId,
-      client.id,
-      createOrderModelData,
-      showMessage
-    )) as GenericResponse<{ id_order: number }>;
+    const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
     if (response.status === 200) {
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}`;
+      const url = `/comercio/pedidoConfirmado/${response.data.id_order}?notification=${response.data.notificationId}`;
       router.prefetch(url);
       router.push(url);
     }
