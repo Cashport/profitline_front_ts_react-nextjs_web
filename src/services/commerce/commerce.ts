@@ -90,9 +90,9 @@ export const createOrder = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void
-) => {
+): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
   try {
-    const response: GenericResponse<{ id_order: number }> = await API.post(
+    const response: GenericResponse<{ id_order: number; notificationId: number }> = await API.post(
       `/marketplace/projects/${projectId}/clients/${clientId}/create-order`,
       data
     );
@@ -103,7 +103,7 @@ export const createOrder = async (
     return response;
   } catch (error) {
     showMessage("error", "Error al crear orden");
-    return error;
+    throw error;
   }
 };
 
