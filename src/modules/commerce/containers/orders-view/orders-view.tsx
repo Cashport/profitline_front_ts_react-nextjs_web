@@ -5,6 +5,10 @@ import { Button, Flex, MenuProps } from "antd";
 import { useAppStore } from "@/lib/store/store";
 import { deleteOrders, getAllOrders } from "@/services/commerce/commerce";
 import { useMessageApi } from "@/context/MessageContext";
+
+import useScreenWidth from "@/components/hooks/useScreenWidth";
+import { useDebounce } from "@/hooks/useSearch";
+
 import UiSearchInput from "@/components/ui/search-input";
 import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
@@ -18,7 +22,6 @@ import { OrdersGenerateActionModal } from "../../components/orders-generate-acti
 import { IOrder } from "@/types/commerce/ICommerce";
 
 import styles from "./orders-view.module.scss";
-import { useDebounce } from "@/hooks/useSearch";
 
 interface IOrdersByCategory {
   status: string;
@@ -40,6 +43,7 @@ export const OrdersView: FC = () => {
   const [fetchMutate, setFetchMutate] = useState<boolean>(false);
 
   const { showMessage } = useMessageApi();
+  const width = useScreenWidth();
 
   const fetchOrders = async () => {
     const response = await getAllOrders(projectId);
@@ -126,7 +130,6 @@ export const OrdersView: FC = () => {
             placeholder="Buscar"
             onChange={(event) => setSearchTerm(event.target.value)}
           />
-          <FilterDiscounts />
           <DotsDropdown items={items} />
           <Link href="/comercio/pedido" className={styles.ctaButton}>
             <PrincipalButton>Crear orden</PrincipalButton>
@@ -151,6 +154,7 @@ export const OrdersView: FC = () => {
                 setSelectedRowKeys={setSelectedRowKeys}
                 orderStatus={order.status}
                 setFetchMutate={setFetchMutate}
+                onlyKeyInfo={width < 900}
               />
             )
           }))}
