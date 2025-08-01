@@ -154,6 +154,7 @@ export const OrdersView: FC = () => {
               />
             )
           }))}
+          defaultActiveKey="Pedidos creados"
         />
       </Flex>
       <ModalRemove
