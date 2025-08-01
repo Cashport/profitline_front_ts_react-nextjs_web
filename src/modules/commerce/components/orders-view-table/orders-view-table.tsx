@@ -9,8 +9,8 @@ import { formatDateDMY } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
-import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
-import { Tag } from "@/components/atoms/Tag/Tag";
+// import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
+// import { Tag } from "@/components/atoms/Tag/Tag";
 
 import { IOrder } from "@/types/commerce/ICommerce";
 

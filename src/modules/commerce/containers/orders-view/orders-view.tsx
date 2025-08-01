@@ -1,6 +1,7 @@
 import { FC, Key, useEffect, useState } from "react";
 import Link from "next/link";
-import { Button, Flex, MenuProps } from "antd";
+import { Button, Flex } from "antd";
+import { DotsThree } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { deleteOrders, getAllOrders } from "@/services/commerce/commerce";
@@ -10,8 +11,6 @@ import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { useDebounce } from "@/hooks/useSearch";
 
 import UiSearchInput from "@/components/ui/search-input";
-import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
-import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
@@ -95,32 +94,13 @@ export const OrdersView: FC = () => {
     fetchOrders();
   };
 
-  const handleisGenerateActionOpen = () => {
+  const handleIsGenerateActionOpen = () => {
     if (selectedRows && selectedRows?.length > 0) {
       setIsGenerateActionModalOpen(!isGenerateActionModalOpen);
       return;
     }
     showMessage("error", "Selecciona al menos un pedido");
   };
-
-  const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <Button className="buttonOutlined" onClick={() => setIsOpenModalRemove(true)}>
-          Eliminar
-        </Button>
-      )
-    },
-    {
-      key: "2",
-      label: (
-        <Button className="buttonOutlined" onClick={handleisGenerateActionOpen}>
-          Generar acción
-        </Button>
-      )
-    }
-  ];
 
   return (
     <div className={styles.ordersView}>
@@ -130,7 +110,15 @@ export const OrdersView: FC = () => {
             placeholder="Buscar"
             onChange={(event) => setSearchTerm(event.target.value)}
           />
-          <DotsDropdown items={items} />
+          <Button
+            className={styles.generateActionButton}
+            size="large"
+            icon={<DotsThree size={"1.5rem"} />}
+            disabled={false}
+            onClick={handleIsGenerateActionOpen}
+          >
+            Generar acción
+          </Button>
           <Link href="/comercio/pedido" className={styles.ctaButton}>
             <PrincipalButton>Crear orden</PrincipalButton>
           </Link>
@@ -175,6 +163,10 @@ export const OrdersView: FC = () => {
         setFetchMutate={setFetchMutate}
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}
+        handleDeleteRows={() => {
+          setIsGenerateActionModalOpen(false);
+          setIsOpenModalRemove(true);
+        }}
       />
     </div>
   );

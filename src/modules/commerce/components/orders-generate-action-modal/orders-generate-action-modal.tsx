@@ -1,7 +1,7 @@
 "use client";
 import { Dispatch, Key, SetStateAction, useState } from "react";
 import { Flex, Modal, Typography } from "antd";
-import { DownloadSimple, NewspaperClipping } from "@phosphor-icons/react";
+import { DownloadSimple, NewspaperClipping, Trash } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -21,6 +21,7 @@ interface Props {
   setFetchMutate: Dispatch<SetStateAction<boolean>>;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
+  handleDeleteRows: () => void;
 }
 
 export const OrdersGenerateActionModal = ({
@@ -29,7 +30,8 @@ export const OrdersGenerateActionModal = ({
   ordersId,
   setFetchMutate,
   setSelectedRows,
-  setSelectedRowKeys
+  setSelectedRowKeys,
+  handleDeleteRows
 }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
@@ -77,7 +79,6 @@ export const OrdersGenerateActionModal = ({
         className="ordersGenerateActionModal"
         width={"45%"}
         open={isOpen}
-        centered
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
             Generar acción
@@ -99,6 +100,11 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadCSV}
             icon={<DownloadSimple size={16} />}
             title="Descargar CSV"
+          />
+          <ButtonGenerateAction
+            onClick={handleDeleteRows}
+            icon={<Trash size={16} />}
+            title="Eliminar"
           />
         </Flex>
       </Modal>
