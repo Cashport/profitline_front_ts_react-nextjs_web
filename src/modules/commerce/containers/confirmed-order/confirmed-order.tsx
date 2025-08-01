@@ -32,7 +32,6 @@ export const ConfirmedOrderView: FC = () => {
     const fetchOrder = async () => {
       setLoading(true);
       const response = await getSingleOrder(projectId, parseInt(orderIdParam));
-      console.log("Order response:", response);
       setOrder(response?.data[0]);
       if (response.data[0].detail?.discounts?.discountItems?.length > 0)
         setAppliedDiscounts(response.data[0].detail?.discounts?.discountItems);
@@ -50,7 +49,9 @@ export const ConfirmedOrderView: FC = () => {
         <Spin size="large" style={{ margin: "auto" }} />
       ) : (
         <>
-          {order?.block_flag && <ConfirmedOrderModalBlocked />}
+          {order?.block_flag && (
+            <ConfirmedOrderModalBlocked notificationId={Number(notificationId)} />
+          )}
           <div className={styles.confirmedOrderView}>
             <div className={styles.confirmedOrderView__content}>
               <div className={styles.confirmedOrderView__content__header}>

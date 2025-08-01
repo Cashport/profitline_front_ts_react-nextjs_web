@@ -1,18 +1,24 @@
 import { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flex, message, Modal } from "antd";
-
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
-
-import "./confirmed-order-modalBlocked.scss";
 import { CaretLeft } from "phosphor-react";
+
+import { uploadNotificationEvidence } from "@/services/notifications/notification";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
+import "./confirmed-order-modalBlocked.scss";
+
 export interface IConfirmedOrderModalBlocked {
+  notificationId: number;
   customStyles?: React.CSSProperties;
 }
 
-const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({ customStyles }) => {
+const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
+  customStyles,
+  notificationId
+}) => {
+  const [loadingRequest, setLoadingRequest] = useState(false);
   const [view, setView] = useState("blocked");
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const router = useRouter();
@@ -27,14 +33,20 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({ customSty
     setView("paid");
   };
 
-  const handleAddSupport = () => {
+  const handleAddSupport = async () => {
+    setLoadingRequest(true);
     if (selectedEvidence.length === 0) {
       message.error("Por favor, adjunta el soporte de pago.");
       return;
     }
-
-    // TO DO: Logic to handle adding support
-    message.success("Soporte de pago agregado exitosamente.");
+    try {
+      await uploadNotificationEvidence(notificationId, selectedEvidence[0]);
+      message.success("Soporte de pago agregado exitosamente");
+      router.push("/comercio");
+    } catch (error) {
+      message.error("Error al agregar soporte de pago.");
+    }
+    setLoadingRequest(false);
   };
 
   const renderView = (view: string) => {
@@ -57,8 +69,13 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({ customSty
       case "paid":
         return (
           <Flex vertical align="flex-start" gap={"1.5rem"} className="paidView">
-            <Flex align="center" gap={"0.5rem"} style={{ alignSelf: "flex-start" }}>
-              <CaretLeft size={20} onClick={() => setView("blocked")} />
+            <Flex
+              align="center"
+              gap={"0.5rem"}
+              style={{ alignSelf: "flex-start" }}
+              onClick={() => setView("blocked")}
+            >
+              <CaretLeft size={20} />
               <h4 className="title">Cargar soporte de pago</h4>
             </Flex>
             <p className="paidView__description" style={{ textAlign: "left" }}>
@@ -83,6 +100,7 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({ customSty
               noTitle={true}
               noDescription={true}
               isMandatory={{ evidence: true }}
+              loading={loadingRequest}
             />
           </Flex>
         );
