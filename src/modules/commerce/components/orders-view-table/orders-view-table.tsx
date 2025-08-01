@@ -1,20 +1,20 @@
 import { Dispatch, Key, SetStateAction, useState } from "react";
-import { Button, Flex, Table, TableProps, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import { Button, Flex, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
+import { WarningDiamond } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDateDMY } from "@/utils/utils";
 
-import { IOrder } from "@/types/commerce/ICommerce";
-import "./orders-view-table.scss";
-import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
-import { WarningDiamond } from "@phosphor-icons/react";
-import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
-import { Tag } from "@/components/atoms/Tag/Tag";
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
-import { set } from "react-hook-form";
+import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
+// import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
+// import { Tag } from "@/components/atoms/Tag/Tag";
 
+import { IOrder } from "@/types/commerce/ICommerce";
+
+import "./orders-view-table.scss";
 const { Text } = Typography;
 
 interface PropsOrdersViewTable {
@@ -24,6 +24,7 @@ interface PropsOrdersViewTable {
   selectedRowKeys: Key[];
   orderStatus: string;
   setFetchMutate: Dispatch<SetStateAction<boolean>>;
+  onlyKeyInfo?: boolean;
 }
 
 const OrdersViewTable = ({
@@ -32,7 +33,8 @@ const OrdersViewTable = ({
   setSelectedRowKeys,
   selectedRowKeys,
   orderStatus,
-  setFetchMutate
+  setFetchMutate,
+  onlyKeyInfo = false
 }: PropsOrdersViewTable) => {
   const router = useRouter();
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
@@ -48,17 +50,17 @@ const OrdersViewTable = ({
     const { id: orderId, order_status } = order;
 
     console.log(order);
-    if (order_status === "En proceso") {
-      const url = `/comercio/pedidoConfirmado/${orderId}`;
-      router.prefetch(url);
-      router.push(url);
-    } else if (order_status === "Borrador") {
+    if (order_status === "Borrador") {
       const draftInfo = {
         id: orderId,
         client_name: order.client_name
       };
       setDraftInfo(draftInfo);
       router.push("/comercio/pedido");
+    } else {
+      const url = `/comercio/pedidoConfirmado/${orderId}`;
+      router.prefetch(url);
+      router.push(url);
     }
   };
 
@@ -104,12 +106,16 @@ const OrdersViewTable = ({
     onChange: onSelectChange
   };
 
-  const columns: TableProps<IOrder>["columns"] = [
+  const allColumns: TableProps<IOrder>["columns"] = [
     {
       title: "TR",
       dataIndex: "id",
       key: "id",
-      render: (invoiceId) => <Text className="ordersViewTable__id">{invoiceId}</Text>,
+      render: (invoiceId, row) => (
+        <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
+          {invoiceId}
+        </Text>
+      ),
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false
     },
@@ -151,54 +157,55 @@ const OrdersViewTable = ({
       dataIndex: "contacto",
       render: (text) => <Text className="cell">{text}</Text>
     },
-    {
-      title: "Estado",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        if (!status) status = "En tránsito";
-        const getTagColor = (status: string) => {
-          let color;
-          switch (status) {
-            case "En tránsito":
-              color = "#0085FF";
-              break;
-            case "Entregado":
-              color = "#00DE16";
-              break;
-            case "Rechazado":
-              color = "#E53261";
-              break;
-            case "Alistando":
-              color = "#FF6A00";
-              break;
-            default:
-              color = "black";
-          }
-          return color;
-        };
-        const color = getTagColor(status);
+    // TO DO: Uncomment when the status column is needed
+    // {
+    //   title: "Estado",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status: string) => {
+    //     if (!status) status = "En tránsito";
+    //     const getTagColor = (status: string) => {
+    //       let color;
+    //       switch (status) {
+    //         case "En tránsito":
+    //           color = "#0085FF";
+    //           break;
+    //         case "Entregado":
+    //           color = "#00DE16";
+    //           break;
+    //         case "Rechazado":
+    //           color = "#E53261";
+    //           break;
+    //         case "Alistando":
+    //           color = "#FF6A00";
+    //           break;
+    //         default:
+    //           color = "black";
+    //       }
+    //       return color;
+    //     };
+    //     const color = getTagColor(status);
 
-        return (
-          <Flex wrap={false}>
-            <Button onClick={() => setIsOrderTrackingModalOpen(true)}>
-              <Tag
-                color={color}
-                content={status}
-                style={{ fontSize: 14, fontWeight: 400 }}
-                icon={
-                  <div
-                    style={{ backgroundColor: color, width: 6, height: 6, borderRadius: "50%" }}
-                  />
-                }
-                iconPosition="left"
-                withBorder={false}
-              />
-            </Button>
-          </Flex>
-        );
-      }
-    },
+    //     return (
+    //       <Flex wrap={false}>
+    //         <Button onClick={() => setIsOrderTrackingModalOpen(true)}>
+    //           <Tag
+    //             color={color}
+    //             content={status}
+    //             style={{ fontSize: 14, fontWeight: 400 }}
+    //             icon={
+    //               <div
+    //                 style={{ backgroundColor: color, width: 6, height: 6, borderRadius: "50%" }}
+    //               />
+    //             }
+    //             iconPosition="left"
+    //             withBorder={false}
+    //           />
+    //         </Button>
+    //       </Flex>
+    //     );
+    //   }
+    // },
     {
       title: "Total",
       key: "total",
@@ -241,6 +248,10 @@ const OrdersViewTable = ({
       )
     }
   ];
+
+  const columns = onlyKeyInfo
+    ? allColumns.filter((col) => ["id", "client_name", "total"].includes(col.key as string))
+    : allColumns;
 
   return (
     <>

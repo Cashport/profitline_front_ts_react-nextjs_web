@@ -189,6 +189,7 @@ export interface IOrderData {
   status: string;
   count: number;
   orders: IOrder[];
+  total: number;
 }
 
 export interface IOrder {
