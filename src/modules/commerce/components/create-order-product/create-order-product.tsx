@@ -37,8 +37,8 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           className={styles.imageContainer__img}
           src={product.image}
           alt="product image"
-          width={100}
-          height={100}
+          width={400}
+          height={400}
         />
       </div>
 
