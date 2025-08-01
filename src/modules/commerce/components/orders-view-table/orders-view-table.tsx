@@ -13,7 +13,6 @@ import { WarningDiamond } from "@phosphor-icons/react";
 import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
-import { set } from "react-hook-form";
 
 const { Text } = Typography;
 
@@ -151,54 +150,55 @@ const OrdersViewTable = ({
       dataIndex: "contacto",
       render: (text) => <Text className="cell">{text}</Text>
     },
-    {
-      title: "Estado",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        if (!status) status = "En tránsito";
-        const getTagColor = (status: string) => {
-          let color;
-          switch (status) {
-            case "En tránsito":
-              color = "#0085FF";
-              break;
-            case "Entregado":
-              color = "#00DE16";
-              break;
-            case "Rechazado":
-              color = "#E53261";
-              break;
-            case "Alistando":
-              color = "#FF6A00";
-              break;
-            default:
-              color = "black";
-          }
-          return color;
-        };
-        const color = getTagColor(status);
+    // TO DO: Uncomment when the status column is needed
+    // {
+    //   title: "Estado",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (status: string) => {
+    //     if (!status) status = "En tránsito";
+    //     const getTagColor = (status: string) => {
+    //       let color;
+    //       switch (status) {
+    //         case "En tránsito":
+    //           color = "#0085FF";
+    //           break;
+    //         case "Entregado":
+    //           color = "#00DE16";
+    //           break;
+    //         case "Rechazado":
+    //           color = "#E53261";
+    //           break;
+    //         case "Alistando":
+    //           color = "#FF6A00";
+    //           break;
+    //         default:
+    //           color = "black";
+    //       }
+    //       return color;
+    //     };
+    //     const color = getTagColor(status);
 
-        return (
-          <Flex wrap={false}>
-            <Button onClick={() => setIsOrderTrackingModalOpen(true)}>
-              <Tag
-                color={color}
-                content={status}
-                style={{ fontSize: 14, fontWeight: 400 }}
-                icon={
-                  <div
-                    style={{ backgroundColor: color, width: 6, height: 6, borderRadius: "50%" }}
-                  />
-                }
-                iconPosition="left"
-                withBorder={false}
-              />
-            </Button>
-          </Flex>
-        );
-      }
-    },
+    //     return (
+    //       <Flex wrap={false}>
+    //         <Button onClick={() => setIsOrderTrackingModalOpen(true)}>
+    //           <Tag
+    //             color={color}
+    //             content={status}
+    //             style={{ fontSize: 14, fontWeight: 400 }}
+    //             icon={
+    //               <div
+    //                 style={{ backgroundColor: color, width: 6, height: 6, borderRadius: "50%" }}
+    //               />
+    //             }
+    //             iconPosition="left"
+    //             withBorder={false}
+    //           />
+    //         </Button>
+    //       </Flex>
+    //     );
+    //   }
+    // },
     {
       title: "Total",
       key: "total",
