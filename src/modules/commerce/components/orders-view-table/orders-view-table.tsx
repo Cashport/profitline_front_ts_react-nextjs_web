@@ -111,7 +111,11 @@ const OrdersViewTable = ({
       title: "TR",
       dataIndex: "id",
       key: "id",
-      render: (invoiceId) => <Text className="ordersViewTable__id">{invoiceId}</Text>,
+      render: (invoiceId, row) => (
+        <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
+          {invoiceId}
+        </Text>
+      ),
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false
     },
