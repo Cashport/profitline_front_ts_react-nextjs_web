@@ -27,6 +27,7 @@ interface IOrdersByCategory {
   color: string;
   count: number;
   orders: IOrder[];
+  total: number;
 }
 
 export const OrdersView: FC = () => {
@@ -130,8 +131,8 @@ export const OrdersView: FC = () => {
               <LabelCollapse
                 status={order.status}
                 quantity={order.count}
+                total={order.total}
                 color={order.color}
-                removeIcons
               />
             ),
             children: (

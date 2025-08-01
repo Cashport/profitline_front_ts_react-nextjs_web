@@ -49,7 +49,7 @@ export const ConfirmedOrderView: FC = () => {
         <Spin size="large" style={{ margin: "auto" }} />
       ) : (
         <>
-          {order?.block_flag && (
+          {order?.block_flag && notificationId !== null && (
             <ConfirmedOrderModalBlocked notificationId={Number(notificationId)} />
           )}
           <div className={styles.confirmedOrderView}>

@@ -50,17 +50,17 @@ const OrdersViewTable = ({
     const { id: orderId, order_status } = order;
 
     console.log(order);
-    if (order_status === "En proceso") {
-      const url = `/comercio/pedidoConfirmado/${orderId}`;
-      router.prefetch(url);
-      router.push(url);
-    } else if (order_status === "Borrador") {
+    if (order_status === "Borrador") {
       const draftInfo = {
         id: orderId,
         client_name: order.client_name
       };
       setDraftInfo(draftInfo);
       router.push("/comercio/pedido");
+    } else {
+      const url = `/comercio/pedidoConfirmado/${orderId}`;
+      router.prefetch(url);
+      router.push(url);
     }
   };
 
