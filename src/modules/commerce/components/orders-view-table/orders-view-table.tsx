@@ -207,14 +207,6 @@ const OrdersViewTable = ({
     //   }
     // },
     {
-      title: "Total",
-      key: "total",
-      dataIndex: "total",
-      render: (amount) => <Text className="cell">{formatMoney(amount)}</Text>,
-      sorter: (a, b) => a.total - b.total,
-      showSorterTooltip: false
-    },
-    {
       title: "Total pronto pago",
       key: "total_pronto_pago",
       dataIndex: "total_pronto_pago",
@@ -222,6 +214,14 @@ const OrdersViewTable = ({
       sorter: (a, b) => a.total_pronto_pago - b.total_pronto_pago,
       showSorterTooltip: false,
       align: "right"
+    },
+    {
+      title: "Total",
+      key: "total",
+      dataIndex: "total",
+      render: (amount) => <Text className="cell">{formatMoney(amount)}</Text>,
+      sorter: (a, b) => a.total - b.total,
+      showSorterTooltip: false
     },
     {
       title: "",

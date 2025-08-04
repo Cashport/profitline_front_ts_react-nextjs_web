@@ -226,6 +226,21 @@ const CreateOrderCheckout: FC = ({}) => {
             control={control}
             nameInput="phone"
             error={errors.phone}
+            changeInterceptor={(value) => {
+              // Eliminar caracteres no numéricos
+              const numericValue = value.replace(/\D/g, "");
+              // Limitar a 10 dígitos
+              const truncatedValue = numericValue.slice(0, 10);
+              // Actualizar el valor en el formulario
+              setValue("phone", truncatedValue);
+            }}
+            validationRules={{
+              required: "El teléfono es obligatorio",
+              pattern: {
+                value: /^\d{10}$/,
+                message: "El teléfono debe tener exactamente 10 dígitos"
+              }
+            }}
           />
           <Controller
             name="comment"
