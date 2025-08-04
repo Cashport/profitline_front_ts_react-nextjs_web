@@ -27,7 +27,7 @@ type EvidenceModalProps = {
   setSelectedEvidence: React.Dispatch<React.SetStateAction<File[]>>;
   handleAttachEvidence: () => void;
   commentary?: string;
-  setCommentary: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setCommentary?: React.Dispatch<React.SetStateAction<string | undefined>>;
   isOpen: boolean;
   handleCancel: () => void;
   customTexts?: customTexts;
@@ -57,6 +57,7 @@ const ModalAttachEvidence = ({
   setCommentary,
   commentary,
   multipleFiles = false,
+  noComment = false,
   loading = false,
   confirmDisabled,
   isMandatory = { commentary: false, evidence: false },
@@ -100,13 +101,13 @@ const ModalAttachEvidence = ({
   };
 
   const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCommentary(e.target.value);
+    setCommentary && setCommentary(e.target.value);
   };
 
   //useEffect for cleaning the states when the modal is closed
   useEffect(() => {
     return () => {
-      setCommentary("");
+      setCommentary && setCommentary("");
       setSelectedEvidence([]);
     };
   }, [isOpen, setCommentary, setSelectedEvidence]);
@@ -201,17 +202,21 @@ const ModalAttachEvidence = ({
             </>
           )}
 
-          <Flex vertical>
-            <p>Comentarios</p>
-            <em className="descriptionDocument">
-              *{isMandatory?.commentary ? "Obligatorio" : "Opcional"}
-            </em>
-          </Flex>
-          <textarea
-            value={commentary || ""}
-            onChange={handleOnChangeTextArea}
-            placeholder="Ingresar un comentario"
-          />
+          {noComment ? null : (
+            <>
+              <Flex vertical>
+                <p>Comentarios</p>
+                <em className="descriptionDocument">
+                  *{isMandatory?.commentary ? "Obligatorio" : "Opcional"}
+                </em>
+              </Flex>
+              <textarea
+                value={commentary || ""}
+                onChange={handleOnChangeTextArea}
+                placeholder="Ingresar un comentario"
+              />
+            </>
+          )}
         </div>
 
         <FooterButtons
