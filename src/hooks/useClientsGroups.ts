@@ -56,6 +56,7 @@ export const useClientsGroups = ({
   };
 
   return {
+    clients: data?.data || [],
     data: data,
     loading: isLoading,
     error,

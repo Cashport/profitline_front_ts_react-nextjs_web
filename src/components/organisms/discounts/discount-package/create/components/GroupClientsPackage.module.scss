@@ -1,0 +1,20 @@
+@import "@/styles/variables.scss";
+
+.principalContainer {
+    background-color: $background;
+    padding: 1rem;
+    border-radius: 10px;
+    max-height: 350px;
+    overflow-y: scroll;
+}
+
+.groupClients {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    background-color: $white;
+    border-radius: 10px;
+    padding: 1rem;
+    min-width: 10rem;
+}
