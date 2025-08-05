@@ -4,7 +4,6 @@ import { CaretLeft } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
-import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import UiTab from "@/components/ui/ui-tab";
 import { OrderViewContext } from "../../containers/create-order/create-order";
 import CreateOrderProduct from "../create-order-product";
@@ -167,7 +166,6 @@ const CreateOrderMarket: FC = () => {
           placeholder="Buscar"
           onChange={(event) => setSearchTerm(event.target.value)}
         />
-        <FilterDiscounts />
       </Flex>
 
       <UiTab tabs={categoryTabs} activeKey={activeTab} onChangeTab={setActiveTab} />
