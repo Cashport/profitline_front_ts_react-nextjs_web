@@ -102,7 +102,7 @@ export default function useCreateDiscountView({ params }: Props) {
     try {
       const res = await createDiscount({ ...e, project_id: ID }, files);
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/regla/${res.data.idDiscount}`);
+      router.push(`/descuentos/regla/${res.idDiscount}`);
     } catch (e: any) {
       messageApi.error(e.response.data.message);
       console.error(e);

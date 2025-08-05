@@ -163,6 +163,7 @@ export interface ISingleOrder {
   is_deleted: number;
   is_draft: number;
   client_name: string;
+  block_flag: boolean;
 }
 
 interface IDetailOrder {
@@ -188,6 +189,7 @@ export interface IOrderData {
   status: string;
   count: number;
   orders: IOrder[];
+  total: number;
 }
 
 export interface IOrder {

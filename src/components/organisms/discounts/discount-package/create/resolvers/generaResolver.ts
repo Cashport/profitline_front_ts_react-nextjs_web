@@ -72,7 +72,13 @@ export const generalResolver: ObjectSchema<DiscountPackageSchema> = yup.object({
     .min(1, "Debe haber al menos un descuento primario")
     .optional()
     .default([]),
-  secondaryDiscounts: yup.array().of(discountBasicsSchema).optional().default([])
+  secondaryDiscounts: yup.array().of(discountBasicsSchema).optional().default([]),
+  client_groups: yup
+    .array()
+    .min(1, "Debe haber al menos un grupo de clientes")
+    .of(yup.number().required())
+    .required()
+    .default([])
 });
 
 export interface DiscountPackageSchema {
@@ -83,6 +89,7 @@ export interface DiscountPackageSchema {
   is_active?: boolean;
   primaryDiscounts?: Discount[];
   secondaryDiscounts?: Discount[];
+  client_groups: number[];
 }
 
 export type DiscountResolverShape = UseFormReturn<DiscountPackageSchema, any, undefined>;

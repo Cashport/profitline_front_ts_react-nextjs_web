@@ -12,6 +12,7 @@ import { DividerCustom } from "@/components/atoms/DividerCustom/DividerCustom";
 import AddDiscountModal from "@/components/molecules/modals/AddDiscountModal/AddDiscountModal";
 import { useMemo, useState } from "react";
 import { Discount } from "@/types/discount/DiscountPackage";
+import GroupClientsPackage from "./components/GroupClientsPackage";
 
 type Props = {
   params?: { id: string };
@@ -41,7 +42,10 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     optionsDiscounts,
     discountList,
     //discountId,
-    isFormDisabled
+    isFormDisabled,
+    form,
+    clients,
+    isLoadingClients
   } = useCreateDiscountPackage({ params });
 
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
@@ -191,6 +195,14 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           <Flex gap={20} vertical>
             <Flex vertical gap={24}>
               <Title level={4}>Descuento</Title>
+              <Title level={5}>Selecciona un grupo de clientes</Title>
+              <GroupClientsPackage
+                error={errors.client_groups}
+                form={form}
+                loading={isLoadingClients}
+                statusForm={statusForm}
+                clients={clients}
+              />
               <>
                 <Table
                   dataSource={primaryDiscountsFields}

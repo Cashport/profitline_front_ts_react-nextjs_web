@@ -112,7 +112,7 @@ export const createDiscount = async (
   body = form;
 
   const token = await getIdToken();
-  const response = await API.post<GenericResponse<DiscountCreateResponse>>(
+  const response = await API.post(
     `/discount`,
     body,
     {
@@ -123,7 +123,7 @@ export const createDiscount = async (
         "projectid": idProject
       }
     }
-  );
+  ) as GenericResponse<DiscountCreateResponse>;
   return response.data;
 };
 
@@ -180,7 +180,7 @@ export const createDiscountPackage = async (
   body.primaryDiscounts = body.primaryDiscounts?.map((x: Discount) => x.id);
   body.secondaryDiscounts = body.secondaryDiscounts?.map((x: Discount) => x.id);
 
-  const response = await API.post<GenericResponse<DiscountPackageCreateResponse>>(
+  const response: GenericResponse<DiscountPackageCreateResponse> = await API.post(
     `/discount/discount-package`,
     body
   );

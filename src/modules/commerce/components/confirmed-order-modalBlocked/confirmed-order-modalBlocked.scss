@@ -1,0 +1,31 @@
+@import "@/styles/variables.scss";
+
+.confirmedOrderModal {
+    .ant-modal-content {
+        padding: 2rem !important;
+    }
+
+    .title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .description {
+        font-size: 1rem;
+        font-weight: 300;
+        max-width: 347px;
+        text-align: center;
+
+        .--paid {
+            text-align: left;
+            width: 100%;
+        }
+    }
+
+    .paidView {
+        &__description {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+    }
+}

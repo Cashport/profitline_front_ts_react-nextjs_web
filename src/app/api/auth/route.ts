@@ -5,7 +5,7 @@ import { customInitApp } from "../../../../firebase-admin-config";
 import { COOKIE_NAME } from "@/utils/constants/globalConstants";
 import { customGetAuth } from "../../../../firebase";
 import { getPermissions } from "@/utils/permissions/getPermissions";
-import { deflateSync, inflateSync } from "zlib";
+import { deflateSync } from "zlib";
 import { Buffer } from "buffer";
 
 customInitApp();
@@ -23,7 +23,7 @@ export async function POST() {
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
       permissions: compressedClaims
     });
-    console.log(idCustomToken)
+    console.log(idCustomToken);
     const idCustomTokenSession = await auth().createCustomToken(decodedToken.uid);
     token = idCustomToken;
     const customToken = await customGetAuth(idCustomTokenSession);
@@ -50,8 +50,14 @@ export async function POST() {
 
   return NextResponse.json({ data: { token } }, { status: 200 });
 }
-
 export async function GET() {
+  const pathname = headers().get("x-pathname") || "";
+
+  // If the path starts with /mobile, skip authentication
+  if (pathname.startsWith("/mobile")) {
+    return NextResponse.json({ isLogged: true }, { status: 200 });
+  }
+
   const session = cookies().get(COOKIE_NAME || "")?.value || "";
 
   if (!session) {

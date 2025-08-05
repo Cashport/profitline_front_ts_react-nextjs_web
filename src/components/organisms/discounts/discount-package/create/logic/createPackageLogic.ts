@@ -18,6 +18,7 @@ export const mapGetOneToDiscountPackageSchema: (
     secondaryDiscounts: discount.secondaryDiscounts.map((discount) => ({
       ...discount,
       packageId: discount.id
-    }))
+    })),
+    client_groups: discount.clientGroupIds
   };
 };
