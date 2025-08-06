@@ -1,14 +1,15 @@
 import { Dispatch, FC, SetStateAction, useContext, useEffect, useState } from "react";
 import { Spin } from "antd";
 import { WarningDiamond, X } from "@phosphor-icons/react";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
+import { OrderViewContext } from "../../containers/create-order/create-order";
+
+import { IDiscountPackageAvailable } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-discounts-modal.module.scss";
-import { getDiscounts } from "@/services/commerce/commerce";
-import { IDiscountPackageAvailable } from "@/types/commerce/ICommerce";
-import { OrderViewContext } from "../../containers/create-order/create-order";
-import { useAppStore } from "@/lib/store/store";
+
 export interface CreateOrderDiscountsModalProps {
   setOpenDiscountsModal: Dispatch<SetStateAction<boolean>>;
 }
@@ -16,30 +17,19 @@ export interface CreateOrderDiscountsModalProps {
 const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
   setOpenDiscountsModal
 }) => {
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [radioValue, setRadioValue] = useState<IDiscountPackageAvailable>();
-  const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
-  const { client, discountId, setDiscountId } = useContext(OrderViewContext);
-  const [loading, setLoading] = useState(false);
+  const { selectedDiscount, setSelectedDiscount, discounts, discountsLoading } =
+    useContext(OrderViewContext);
 
   useEffect(() => {
-    const fetchDiscounts = async () => {
-      setLoading(true);
-      const response = await getDiscounts(projectId, client.id);
-      if (response.data) {
-        setDiscounts(response.data);
-      }
-      setLoading(false);
-    };
-    fetchDiscounts();
-
-    if (discountId) {
-      setRadioValue(discountId);
+    // If a discount is already selected, set it as the initial radio value
+    if (selectedDiscount) {
+      setRadioValue(selectedDiscount);
     }
-  }, [projectId, client]);
+  }, [selectedDiscount]);
 
   const handleApplyDiscounts = () => {
-    setDiscountId(radioValue);
+    setSelectedDiscount(radioValue);
     setOpenDiscountsModal(false);
   };
 
@@ -72,8 +62,11 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
         <WarningDiamond size={20} />
         <p>Recuerda que algunos descuentos no son acumulables</p>
       </div>
-      {loading ? (
-        <Spin size="small" />
+
+      {discountsLoading ? (
+        <div className={styles.spinnerContainer}>
+          <Spin size="small" />
+        </div>
       ) : (
         <div className={styles.radioGroup}>
           {discounts.map((discountPackage, index) => (

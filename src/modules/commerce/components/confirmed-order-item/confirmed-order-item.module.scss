@@ -4,6 +4,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr minmax(1fr, 2fr) 1fr 1fr;
     gap: 0.5rem;
+    row-gap: 1.5rem;
     padding: 1rem;
     border-bottom: 1px solid $dark-gray;
 
@@ -11,6 +12,8 @@
         display: flex;
         justify-content: center;
         grid-column: 1;
+        grid-row: 1/3;
+        align-items: center;
         max-width: 80px;
         min-width: 50px;
 
@@ -18,6 +21,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain !important;
+            aspect-ratio: 16/9;
         }
     }
 
@@ -32,6 +36,7 @@
         font-weight: 800;
         grid-column: 2/4;
         grid-row: 2;
+        align-self: end;
 
         &__amount {
             font-size: 1.25rem;
@@ -59,5 +64,6 @@
         grid-column: 5/6;
         grid-row: 2;
         text-align: right;
+        align-self: end;
     }
 }
