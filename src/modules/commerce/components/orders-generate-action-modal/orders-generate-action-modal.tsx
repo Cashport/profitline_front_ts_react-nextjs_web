@@ -18,7 +18,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   ordersId: number[];
-  setFetchMutate: Dispatch<SetStateAction<boolean>>;
+  setFetchMutate: () => void;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   handleDeleteRows: () => void;
@@ -42,7 +42,7 @@ export const OrdersGenerateActionModal = ({
   const handleChangeOrderState = async () => {
     try {
       await changeOrderState(ordersId, showMessage);
-      setFetchMutate((prev) => !prev);
+      setFetchMutate();
       setSelectedRows([]);
       setSelectedRowKeys([]);
       onClose();
@@ -64,7 +64,7 @@ export const OrdersGenerateActionModal = ({
         setErrorMessage(res?.message);
         setIsErrorModalOpen(true);
       }
-      setFetchMutate((prev) => !prev);
+      setFetchMutate();
       setSelectedRows([]);
       setSelectedRowKeys([]);
       onClose();
