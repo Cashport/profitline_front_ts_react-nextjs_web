@@ -100,6 +100,7 @@ export const OrdersView: FC = () => {
         <Flex className={styles.header}>
           <UiSearchInput
             placeholder="Buscar"
+            className={styles.searchInput}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
           <Button
