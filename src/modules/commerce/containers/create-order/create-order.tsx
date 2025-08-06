@@ -1,8 +1,13 @@
 import { Dispatch, FC, createContext, useEffect, useState } from "react";
+
+import { useAppStore } from "@/lib/store/store";
+import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
 import CreateOrderCart from "../../components/create-order-cart";
 import CreateOrderCheckout from "../../components/create-order-checkout";
+
 import {
   IDiscountPackageAvailable,
   IFetchedCategories,
@@ -10,9 +15,8 @@ import {
   ISelectedProduct,
   IShippingInformation
 } from "@/types/commerce/ICommerce";
-import { useAppStore } from "@/lib/store/store";
+
 import styles from "./create-order.module.scss";
-import { getSingleOrder } from "@/services/commerce/commerce";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -41,6 +45,9 @@ interface IOrderViewContext {
   setDiscountId: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];
   setCategories: Dispatch<IFetchedCategories[]>;
+  discounts: IDiscountPackageAvailable[];
+  setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
+  discountsLoading: boolean;
 }
 
 export const OrderViewContext = createContext<IOrderViewContext>({} as IOrderViewContext);
@@ -53,7 +60,35 @@ export const CreateOrderView: FC = () => {
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
   const [discountId, setDiscountId] = useState<IDiscountPackageAvailable | undefined>(undefined);
+  const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
+  const [discountsLoading, setDiscountsLoading] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+
+  // Fetch discounts cuando el cliente cambia
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      if (!client?.id || !selectedProject?.ID) return;
+
+      setDiscountsLoading(true);
+      try {
+        const response = await getDiscounts(selectedProject.ID, client.id);
+        console.log("Discounts response:", response);
+
+        if (response.data && response.data.length > 0) {
+          setDiscounts(response.data);
+          // Seleccionar el primer descuento por defecto
+          console.log("Setting default discount:", response.data[0]);
+          setDiscountId(response.data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching discounts:", error);
+      } finally {
+        setDiscountsLoading(false);
+      }
+    };
+
+    fetchDiscounts();
+  }, [client?.id, selectedProject?.ID]);
 
   useEffect(() => {
     if (draftInfo.client_name) {
@@ -110,7 +145,10 @@ export const CreateOrderView: FC = () => {
         discountId,
         setDiscountId,
         categories,
-        setCategories
+        setCategories,
+        discounts,
+        setDiscounts,
+        discountsLoading
       }}
     >
       <div className={styles.ordersView}>
