@@ -220,3 +220,22 @@ export interface IDiscountPackageAvailable {
   name: string;
   description: string;
 }
+
+// Define la interfaz para los vendedores individuales.
+interface ISeller {
+  id: number;
+  name: string;
+  checked: boolean;
+}
+
+// Define la interfaz para los grupos de vendedores.
+interface ISellerGroup {
+  id: number;
+  name: string;
+  sellers: ISeller[];
+}
+
+// Define la interfaz principal que contiene el filtro de vendedores.
+export interface IMarketplaceOrdersFilters {
+  sellerFilter: ISellerGroup[];
+}

@@ -6,6 +6,7 @@ import {
   ICreateOrderData,
   IDiscountPackageAvailable,
   IEcommerceClient,
+  IMarketplaceOrdersFilters,
   IOrderConfirmedResponse,
   IOrderData,
   IProductData,
@@ -288,5 +289,15 @@ export const updateWarehouse = async (orderIds: number[], warehouseId: number) =
     return response.success;
   } else {
     throw new Error(response.message || `Error al actualizar bodega`);
+  }
+};
+
+export const getOrdersFilter = async () => {
+  try {
+    const response: GenericResponse<IMarketplaceOrdersFilters> =
+      await API.get(`/marketplace/filter`);
+    return response.data;
+  } catch (error) {
+    throw new Error("Error al obtener los filtros de órdenes");
   }
 };

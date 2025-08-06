@@ -23,7 +23,7 @@ interface PropsOrdersViewTable {
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   selectedRowKeys: Key[];
   orderStatus: string;
-  setFetchMutate: Dispatch<SetStateAction<boolean>>;
+  setFetchMutate: () => void;
   onlyKeyInfo?: boolean;
 }
 

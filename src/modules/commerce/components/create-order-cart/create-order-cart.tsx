@@ -32,7 +32,7 @@ const CreateOrderCart: FC = ({}) => {
     client,
     confirmOrderData,
     setConfirmOrderData,
-    discountId,
+    selectedDiscount,
     categories,
     setCategories
   } = useContext(OrderViewContext);
@@ -59,7 +59,7 @@ const CreateOrderCart: FC = ({}) => {
             quantity: product.quantity
           }));
         const confirmOrderData = {
-          discount_package: discountId,
+          discount_package: selectedDiscount,
           order_summary: products
         };
         try {
@@ -86,7 +86,7 @@ const CreateOrderCart: FC = ({}) => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, discountId]);
+  }, [selectedCategories, selectedDiscount]);
 
   useEffect(() => {
     const newState = selectedCategories.map((category) => ({
@@ -177,8 +177,8 @@ const CreateOrderCart: FC = ({}) => {
               <p>Subtotal</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </Flex>
-            <Flex justify="space-between">
-              <p>Descuentos</p>
+            <Flex justify="space-between" gap={"0.25rem"}>
+              <p>Descuentos ({selectedDiscount?.name})</p>
               {confirmOrderData.discounts ? (
                 <p>-${formatNumber(confirmOrderData.discounts?.totalDiscount)}</p>
               ) : (
