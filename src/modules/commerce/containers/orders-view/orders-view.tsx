@@ -17,6 +17,10 @@ import Collapse from "@/components/ui/collapse";
 import OrdersViewTable from "../../components/orders-view-table/orders-view-table";
 import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
 import { OrdersGenerateActionModal } from "../../components/orders-generate-action-modal/orders-generate-action-modal";
+import {
+  FilterMarketplaceOrders,
+  IMarketplaceOrderFilters
+} from "@/components/atoms/Filters/FilterMarketplaceOrders/FilterMarketplaceOrders";
 
 import { IOrder } from "@/types/commerce/ICommerce";
 
@@ -41,6 +45,11 @@ export const OrdersView: FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<IOrder[] | undefined>([]);
   const [fetchMutate, setFetchMutate] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<IMarketplaceOrderFilters>({
+    sellers: []
+  });
+
+  console.log("Selected Filters:", selectedFilters);
 
   const { showMessage } = useMessageApi();
   const width = useScreenWidth();
@@ -120,6 +129,7 @@ export const OrdersView: FC = () => {
           >
             Generar acción
           </Button>
+          <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} />
           <Link href="/comercio/pedido" className={styles.ctaButton}>
             <PrincipalButton>Crear orden</PrincipalButton>
           </Link>
