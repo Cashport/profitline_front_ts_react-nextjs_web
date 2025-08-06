@@ -13,8 +13,7 @@ import {
   createDraft,
   createOrder,
   createOrderFromDraft,
-  getAdresses,
-  getDiscounts
+  getAdresses
 } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -39,13 +38,19 @@ interface IShippingInfoForm {
 }
 
 const CreateOrderCheckout: FC = ({}) => {
-  const { setCheckingOut, client, confirmOrderData, shippingInfo, discountId, setDiscountId } =
-    useContext(OrderViewContext);
+  const {
+    setCheckingOut,
+    client,
+    confirmOrderData,
+    shippingInfo,
+    discountId,
+    setDiscountId,
+    discounts
+  } = useContext(OrderViewContext);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { draftInfo } = useAppStore((state) => state);
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
-  const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -78,18 +83,6 @@ const CreateOrderCheckout: FC = ({}) => {
     };
     fetchAdresses();
   }, []);
-
-  useEffect(() => {
-    const fetchDiscounts = async () => {
-      setLoading(true);
-      const response = await getDiscounts(projectId, client.id);
-      if (response.data) {
-        setDiscounts(response.data);
-      }
-      setLoading(false);
-    };
-    fetchDiscounts();
-  }, [projectId, client]);
 
   const handleGoBack = () => {
     setCheckingOut(false);

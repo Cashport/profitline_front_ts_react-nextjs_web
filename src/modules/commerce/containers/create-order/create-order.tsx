@@ -72,12 +72,10 @@ export const CreateOrderView: FC = () => {
       setDiscountsLoading(true);
       try {
         const response = await getDiscounts(selectedProject.ID, client.id);
-        console.log("Discounts response:", response);
 
         if (response.data && response.data.length > 0) {
           setDiscounts(response.data);
           // Seleccionar el primer descuento por defecto
-          console.log("Setting default discount:", response.data[0]);
           setDiscountId(response.data[0]);
         }
       } catch (error) {
