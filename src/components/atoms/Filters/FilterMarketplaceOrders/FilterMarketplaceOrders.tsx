@@ -59,8 +59,6 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
         // Transformar directamente a opciones del Cascader
         const sellersOptions = transformSellersToOptions(sellerGroups);
         setOptionsList(sellersOptions);
-
-        console.log("Mock data loaded:", sellerGroups);
       } catch (error) {
         console.error("Error al cargar los filtros:", error);
       }
@@ -158,7 +156,7 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
       }
     });
 
-    return sellerNames.join(", ");
+    return sellerNames.join(",");
   };
 
   return (
