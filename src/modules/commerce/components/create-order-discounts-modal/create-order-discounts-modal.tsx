@@ -18,17 +18,18 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
   setOpenDiscountsModal
 }) => {
   const [radioValue, setRadioValue] = useState<IDiscountPackageAvailable>();
-  const { discountId, setDiscountId, discounts, discountsLoading } = useContext(OrderViewContext);
+  const { selectedDiscount, setSelectedDiscount, discounts, discountsLoading } =
+    useContext(OrderViewContext);
 
   useEffect(() => {
     // If a discount is already selected, set it as the initial radio value
-    if (discountId) {
-      setRadioValue(discountId);
+    if (selectedDiscount) {
+      setRadioValue(selectedDiscount);
     }
-  }, [discountId]);
+  }, [selectedDiscount]);
 
   const handleApplyDiscounts = () => {
-    setDiscountId(radioValue);
+    setSelectedDiscount(radioValue);
     setOpenDiscountsModal(false);
   };
 

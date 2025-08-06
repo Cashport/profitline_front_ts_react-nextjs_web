@@ -41,8 +41,8 @@ interface IOrderViewContext {
   setConfirmOrderData: Dispatch<IOrderConfirmedResponse>;
   shippingInfo: IShippingInformation | undefined;
   setShippingInfo: Dispatch<IShippingInformation>;
-  discountId: IDiscountPackageAvailable | undefined;
-  setDiscountId: Dispatch<IDiscountPackageAvailable | undefined>;
+  selectedDiscount: IDiscountPackageAvailable | undefined;
+  setSelectedDiscount: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];
   setCategories: Dispatch<IFetchedCategories[]>;
   discounts: IDiscountPackageAvailable[];
@@ -59,7 +59,9 @@ export const CreateOrderView: FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
-  const [discountId, setDiscountId] = useState<IDiscountPackageAvailable | undefined>(undefined);
+  const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
+    undefined
+  );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
@@ -76,7 +78,7 @@ export const CreateOrderView: FC = () => {
         if (response.data && response.data.length > 0) {
           setDiscounts(response.data);
           // Seleccionar el primer descuento por defecto
-          setDiscountId(response.data[0]);
+          setSelectedDiscount(response.data[0]);
         }
       } catch (error) {
         console.error("Error fetching discounts:", error);
@@ -140,8 +142,8 @@ export const CreateOrderView: FC = () => {
         setConfirmOrderData,
         shippingInfo,
         setShippingInfo,
-        discountId,
-        setDiscountId,
+        selectedDiscount,
+        setSelectedDiscount,
         categories,
         setCategories,
         discounts,

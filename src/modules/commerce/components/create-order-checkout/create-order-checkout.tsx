@@ -43,8 +43,8 @@ const CreateOrderCheckout: FC = ({}) => {
     client,
     confirmOrderData,
     shippingInfo,
-    discountId,
-    setDiscountId,
+    selectedDiscount,
+    setSelectedDiscount,
     discounts
   } = useContext(OrderViewContext);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -89,8 +89,8 @@ const CreateOrderCheckout: FC = ({}) => {
   };
 
   const handleRadioClick = (value: IDiscountPackageAvailable) => {
-    if (discountId === value) setDiscountId(undefined);
-    else setDiscountId(value);
+    if (selectedDiscount === value) setSelectedDiscount(undefined);
+    else setSelectedDiscount(value);
   };
 
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
@@ -262,9 +262,9 @@ const CreateOrderCheckout: FC = ({}) => {
                 customStyles={{ border: "2px solid #e0e0e0", borderRadius: "8px", padding: "1rem" }}
                 onClick={() => handleRadioClick(discountPackage)}
                 checked={
-                  discountId &&
-                  discountId.id === discountPackage.id &&
-                  discountId.idAnnualDiscount === discountPackage.idAnnualDiscount
+                  selectedDiscount &&
+                  selectedDiscount.id === discountPackage.id &&
+                  selectedDiscount.idAnnualDiscount === discountPackage.idAnnualDiscount
                 }
               >
                 <div className={styles.radioGroup__label}>
