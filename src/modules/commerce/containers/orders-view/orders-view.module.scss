@@ -74,3 +74,11 @@
     align-items: center !important;
     height: 3rem !important;
 }
+
+@media (max-width: 900px) {
+    .ordersView {
+        .searchInput {
+            width: 130px;
+        }
+    }
+}
