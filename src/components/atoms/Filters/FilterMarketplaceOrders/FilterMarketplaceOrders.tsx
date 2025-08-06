@@ -169,7 +169,7 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
       size="large"
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar vendedores"
+      placeholder="Filtrar"
       placement="bottomLeft"
       onClear={() => {
         setSelectOptions([]);

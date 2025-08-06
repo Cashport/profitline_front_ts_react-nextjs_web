@@ -1,10 +1,9 @@
-import { FC, Key, useEffect, useState } from "react";
+import { FC, Key, useState, useMemo } from "react";
 import Link from "next/link";
-import { Button, Flex } from "antd";
+import { Button, Flex, Spin } from "antd";
 import { DotsThree } from "@phosphor-icons/react";
 
-import { useAppStore } from "@/lib/store/store";
-import { deleteOrders, getAllOrders } from "@/services/commerce/commerce";
+import { deleteOrders } from "@/services/commerce/commerce";
 import { useMessageApi } from "@/context/MessageContext";
 
 import useScreenWidth from "@/components/hooks/useScreenWidth";
@@ -25,83 +24,66 @@ import {
 import { IOrder } from "@/types/commerce/ICommerce";
 
 import styles from "./orders-view.module.scss";
-
-interface IOrdersByCategory {
-  status: string;
-  color: string;
-  count: number;
-  orders: IOrder[];
-  total: number;
-}
+import { useOrders } from "../../hooks/orders-view/useOrders";
 
 export const OrdersView: FC = () => {
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const [ordersByCategory, setOrdersByCategory] = useState<IOrdersByCategory[]>();
-  const [filteredOrdersByCategory, setFilteredOrdersByCategory] = useState<IOrdersByCategory[]>();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isOpenModalRemove, setIsOpenModalRemove] = useState<boolean>(false);
   const [isGenerateActionModalOpen, setIsGenerateActionModalOpen] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<IOrder[] | undefined>([]);
-  const [fetchMutate, setFetchMutate] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<IMarketplaceOrderFilters>({
     sellers: []
   });
 
-  console.log("Selected Filters:", selectedFilters);
+  // Usar el nuevo hook useOrders
+  const { ordersByCategory, isLoading, mutate } = useOrders({
+    selectedFilters
+  });
 
   const { showMessage } = useMessageApi();
   const width = useScreenWidth();
 
-  const fetchOrders = async () => {
-    const response = await getAllOrders(projectId);
-    if (response.status === 200) {
-      setOrdersByCategory(response.data);
-      setFilteredOrdersByCategory(response.data);
-    }
-  };
-
-  useEffect(() => {
-    if (!projectId) return;
-    fetchOrders();
-  }, [projectId, fetchMutate]);
-
-  useEffect(() => {
-    if (!ordersByCategory) return;
+  // Filtrar las órdenes basándose en el término de búsqueda
+  const filteredOrdersByCategory = useMemo(() => {
+    if (!ordersByCategory) return undefined;
 
     if (!debouncedSearchTerm) {
-      setFilteredOrdersByCategory(ordersByCategory);
-      return;
+      return ordersByCategory;
     }
 
     const searchTermLower = debouncedSearchTerm.toLowerCase();
-    const filtered = ordersByCategory.map((category) => ({
-      ...category,
-      orders: category.orders.filter((order) => {
+    return ordersByCategory.map((category) => {
+      const filteredOrders = category.orders.filter((order) => {
         // Add more fields to search through as needed
         return (
           order.id?.toString().toLowerCase().includes(searchTermLower) ||
           order.client_name?.toLowerCase().includes(searchTermLower)
         );
-      }),
-      count: category.orders.filter((order) => {
-        return (
-          order.id?.toString().toLowerCase().includes(searchTermLower) ||
-          order.client_name?.toLowerCase().includes(searchTermLower)
-        );
-      }).length
-    }));
+      });
 
-    setFilteredOrdersByCategory(filtered);
+      return {
+        ...category,
+        orders: filteredOrders,
+        count: filteredOrders.length
+      };
+    });
   }, [debouncedSearchTerm, ordersByCategory]);
 
   const handleDeleteOrders = async () => {
     const selectedOrdersIds = selectedRows?.map((order) => order.id);
     if (!selectedOrdersIds) return;
+
     await deleteOrders(selectedOrdersIds, showMessage);
     setIsOpenModalRemove(false);
-    fetchOrders();
+
+    // Revalidar los datos después de eliminar
+    mutate();
+
+    // Limpiar la selección
+    setSelectedRows([]);
+    setSelectedRowKeys([]);
   };
 
   const handleIsGenerateActionOpen = () => {
@@ -134,31 +116,35 @@ export const OrdersView: FC = () => {
             <PrincipalButton>Crear orden</PrincipalButton>
           </Link>
         </Flex>
-        <Collapse
-          items={filteredOrdersByCategory?.map((order) => ({
-            key: order.status,
-            label: (
-              <LabelCollapse
-                status={order.status}
-                quantity={order.count}
-                total={order.total}
-                color={order.color}
-              />
-            ),
-            children: (
-              <OrdersViewTable
-                dataSingleOrder={order.orders}
-                setSelectedRows={setSelectedRows}
-                selectedRowKeys={selectedRowKeys}
-                setSelectedRowKeys={setSelectedRowKeys}
-                orderStatus={order.status}
-                setFetchMutate={setFetchMutate}
-                onlyKeyInfo={width < 900}
-              />
-            )
-          }))}
-          defaultActiveKey="Pedidos creados"
-        />
+        {isLoading ? (
+          <Spin style={{ margin: "2rem 0" }} />
+        ) : (
+          <Collapse
+            items={filteredOrdersByCategory?.map((order) => ({
+              key: order.status,
+              label: (
+                <LabelCollapse
+                  status={order.status}
+                  quantity={order.count}
+                  total={order.total}
+                  color={order.color}
+                />
+              ),
+              children: (
+                <OrdersViewTable
+                  dataSingleOrder={order.orders}
+                  setSelectedRows={setSelectedRows}
+                  selectedRowKeys={selectedRowKeys}
+                  setSelectedRowKeys={setSelectedRowKeys}
+                  orderStatus={order.status}
+                  setFetchMutate={mutate}
+                  onlyKeyInfo={width < 900}
+                />
+              )
+            }))}
+            defaultActiveKey="Pedidos creados"
+          />
+        )}
       </Flex>
       <ModalRemove
         isMassiveAction={true}
@@ -171,7 +157,7 @@ export const OrdersView: FC = () => {
         isOpen={isGenerateActionModalOpen}
         onClose={() => setIsGenerateActionModalOpen((prev) => !prev)}
         ordersId={selectedRows?.map((order) => order.id) || []}
-        setFetchMutate={setFetchMutate}
+        setFetchMutate={mutate}
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}
         handleDeleteRows={() => {
