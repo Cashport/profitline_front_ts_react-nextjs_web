@@ -42,57 +42,17 @@ const initValueFiltersData = {
   sellers: []
 };
 
-// Mock data para pruebas
-const mockSellersData: ISellerGroup[] = [
-  {
-    id: 1,
-    name: "Grupo Premium",
-    sellers: [
-      {
-        id: 101,
-        name: "Vendedor Premium A",
-        checked: false
-      },
-      {
-        id: 102,
-        name: "Vendedor Premium B",
-        checked: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Grupo Estándar",
-    sellers: [
-      {
-        id: 201,
-        name: "Vendedor Estándar X",
-        checked: false
-      },
-      {
-        id: 202,
-        name: "Vendedor Estándar Y",
-        checked: false
-      }
-    ]
-  }
-];
-
 export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>([]);
   const [selectOptions, setSelectOptions] = useState<(string | number)[][]>([]);
   const [sellersData, setSellersData] = useState<ISellerGroup[]>([]);
 
-  // Efecto para cargar los datos al montar el componente
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // TODO: Descomentar cuando el endpoint funcione
-        // const response = await getOrdersFilter();
-        // const sellerGroups = response.sellerFilter;
+        const response = await getOrdersFilter();
 
-        // Usar mock data por ahora
-        const sellerGroups = mockSellersData;
+        const sellerGroups = response.sellerFilter;
 
         setSellersData(sellerGroups);
 
