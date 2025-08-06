@@ -38,7 +38,7 @@ export const SideBar = () => {
   const path = usePathname();
   const height = useScreenHeight();
   const STANDARD_LOGO_SIZE = 26;
-  const SMALL_LOGO_SIZE = 26;
+  const SMALL_LOGO_SIZE = 23;
 
   const project = useStore(useAppStore, (state) => state.selectedProject);
   const {
