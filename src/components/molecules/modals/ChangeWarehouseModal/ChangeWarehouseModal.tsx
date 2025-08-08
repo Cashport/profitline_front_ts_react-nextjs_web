@@ -128,8 +128,8 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
   const columnsDetails: ColumnsType<WarehouseProductsStock> = [
     {
       title: "Producto",
-      dataIndex: "sku",
-      key: "sku"
+      dataIndex: "description",
+      key: "description"
     },
     {
       title: "Pedido",

@@ -28,7 +28,10 @@ export const useBankPayments = ({ like, selectedFilters }: Props) => {
 
   const pathKey = `/bank/get-payments?project_id=${projectId}${likeQuery}${startDateQuery}${endDateQuery}${statusQuery}`;
 
-  const { data, error, mutate } = useSWR<GenericResponse<IPaymentsByStatus[]>>(pathKey, fetcher);
+  const { data, error, mutate } = useSWR<GenericResponse<IPaymentsByStatus[]>>(pathKey, fetcher, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: false
+  });
 
   return {
     data: data?.data,
