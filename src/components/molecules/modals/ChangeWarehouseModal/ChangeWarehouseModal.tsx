@@ -164,7 +164,6 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     }
   };
 
-  console.log("warehouseProductsStock", warehouseProductsStock);
   const renderView = () => {
     const viewMap = {
       "change-warehouse": (
