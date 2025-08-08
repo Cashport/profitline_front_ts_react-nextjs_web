@@ -128,8 +128,8 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
   const columnsDetails: ColumnsType<WarehouseProductsStock> = [
     {
       title: "Producto",
-      dataIndex: "sku",
-      key: "sku"
+      dataIndex: "description",
+      key: "description"
     },
     {
       title: "Pedido",
@@ -164,6 +164,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     }
   };
 
+  console.log("warehouseProductsStock", warehouseProductsStock);
   const renderView = () => {
     const viewMap = {
       "change-warehouse": (
