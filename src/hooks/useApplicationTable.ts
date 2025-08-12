@@ -15,7 +15,7 @@ export const useApplicationTable = () => {
 
   const { ID } = useAppStore((state) => state.selectedProject);
 
-  const pathKey = `/paymentApplication/applications/?project_id=${ID}&client_id=${clientId}`;
+  const pathKey = `/paymentApplication/applications/?project_id=${ID}&clientUUID=${clientId}`;
 
   const { data, error, mutate, isValidating } = useSWR<GenericResponse<IApplyTabClients>>(
     preventRevalidation ? null : pathKey, // No hay key -> no hay fetch

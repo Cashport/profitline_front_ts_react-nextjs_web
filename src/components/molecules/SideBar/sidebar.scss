@@ -14,12 +14,16 @@
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
 
-    .containerButtons {
+    .topNavBar {
         display: flex;
         padding: 10px 14px;
         align-items: center;
         row-gap: 6px;
+        height: fit-content;
 
+        .containerButtons {
+            gap: 6px;
+        }
         .logoContainer {
             display: flex;
             border: none;
@@ -132,6 +136,62 @@
             align-items: center;
             box-shadow: none;
             justify-content: center;
+        }
+    }
+}
+
+@media screen and (max-height: 690px) {
+    .main {
+        width: 80px;
+        padding: 2rem 0;
+
+        .topNavBar {
+            gap: 0.125rem;
+            .logoContainer {
+                margin-bottom: 1rem;
+            }
+
+            .buttonIcon {
+                width: fit-content;
+                height: fit-content;
+                padding: 0.25rem 0.375rem;
+            }
+
+            .buttonIconActive {
+                width: fit-content;
+                height: fit-content;
+                padding: 0.25rem 0.375rem;
+            }
+
+            .containerButtons {
+                overflow-y: auto;
+                row-gap: 0.125rem;
+                &::-webkit-scrollbar {
+                    width: 2px;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background-color: rgba(0, 0, 0, 0.2);
+                    border-radius: 3px;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-height: 600px) {
+    .main {
+        width: 75px;
+        padding: 0.875rem 0;
+
+        .topNavBar {
+            height: 90%;
+            .logoContainer {
+                margin-bottom: 0.25rem;
+            }
+
+            .containerButtons {
+                max-height: 100%;
+            }
         }
     }
 }

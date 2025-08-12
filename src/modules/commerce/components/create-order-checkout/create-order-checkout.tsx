@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex, Radio, RadioChangeEvent } from "antd";
+import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
 import { OrderViewContext } from "../../containers/create-order/create-order";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -13,8 +13,7 @@ import {
   createDraft,
   createOrder,
   createOrderFromDraft,
-  getAdresses,
-  getDiscounts
+  getAdresses
 } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -39,13 +38,19 @@ interface IShippingInfoForm {
 }
 
 const CreateOrderCheckout: FC = ({}) => {
-  const { setCheckingOut, client, confirmOrderData, shippingInfo, discountId, setDiscountId } =
-    useContext(OrderViewContext);
+  const {
+    setCheckingOut,
+    client,
+    confirmOrderData,
+    shippingInfo,
+    selectedDiscount,
+    setSelectedDiscount,
+    discounts
+  } = useContext(OrderViewContext);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { draftInfo } = useAppStore((state) => state);
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
-  const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -79,25 +84,13 @@ const CreateOrderCheckout: FC = ({}) => {
     fetchAdresses();
   }, []);
 
-  useEffect(() => {
-    const fetchDiscounts = async () => {
-      setLoading(true);
-      const response = await getDiscounts(projectId, client.id);
-      if (response.data) {
-        setDiscounts(response.data);
-      }
-      setLoading(false);
-    };
-    fetchDiscounts();
-  }, [projectId, client]);
-
   const handleGoBack = () => {
     setCheckingOut(false);
   };
 
   const handleRadioClick = (value: IDiscountPackageAvailable) => {
-    if (discountId === value) setDiscountId(undefined);
-    else setDiscountId(value);
+    if (selectedDiscount === value) setSelectedDiscount(undefined);
+    else setSelectedDiscount(value);
   };
 
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
@@ -160,14 +153,9 @@ const CreateOrderCheckout: FC = ({}) => {
       return;
     }
 
-    const response = (await createOrder(
-      projectId,
-      client.id,
-      createOrderModelData,
-      showMessage
-    )) as GenericResponse<{ id_order: number }>;
+    const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
     if (response.status === 200) {
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}`;
+      const url = `/comercio/pedidoConfirmado/${response.data.id_order}?notification=${response.data.notificationId}`;
       router.prefetch(url);
       router.push(url);
     }
@@ -231,6 +219,21 @@ const CreateOrderCheckout: FC = ({}) => {
             control={control}
             nameInput="phone"
             error={errors.phone}
+            changeInterceptor={(value) => {
+              // Eliminar caracteres no numéricos
+              const numericValue = value.replace(/\D/g, "");
+              // Limitar a 10 dígitos
+              const truncatedValue = numericValue.slice(0, 10);
+              // Actualizar el valor en el formulario
+              setValue("phone", truncatedValue);
+            }}
+            validationRules={{
+              required: "El teléfono es obligatorio",
+              pattern: {
+                value: /^\d{10}$/,
+                message: "El teléfono debe tener exactamente 10 dígitos"
+              }
+            }}
           />
           <Controller
             name="comment"
@@ -259,9 +262,9 @@ const CreateOrderCheckout: FC = ({}) => {
                 customStyles={{ border: "2px solid #e0e0e0", borderRadius: "8px", padding: "1rem" }}
                 onClick={() => handleRadioClick(discountPackage)}
                 checked={
-                  discountId &&
-                  discountId.id === discountPackage.id &&
-                  discountId.idAnnualDiscount === discountPackage.idAnnualDiscount
+                  selectedDiscount &&
+                  selectedDiscount.id === discountPackage.id &&
+                  selectedDiscount.idAnnualDiscount === discountPackage.idAnnualDiscount
                 }
               >
                 <div className={styles.radioGroup__label}>

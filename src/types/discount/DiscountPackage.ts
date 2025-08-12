@@ -36,6 +36,7 @@ export interface DiscountPackageGetOne {
   description: string;
   startDate: string;
   endDate?: string;
+  clientGroupIds: number[];
   primaryDiscounts: Discount[];
   secondaryDiscounts: Discount[];
 }

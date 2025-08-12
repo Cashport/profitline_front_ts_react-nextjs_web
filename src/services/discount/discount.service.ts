@@ -180,7 +180,7 @@ export const createDiscountPackage = async (
   body.primaryDiscounts = body.primaryDiscounts?.map((x: Discount) => x.id);
   body.secondaryDiscounts = body.secondaryDiscounts?.map((x: Discount) => x.id);
 
-  const response = await API.post<GenericResponse<DiscountPackageCreateResponse>>(
+  const response: GenericResponse<DiscountPackageCreateResponse> = await API.post(
     `/discount/discount-package`,
     body
   );

@@ -1,0 +1,42 @@
+@import "@/styles/variables.scss";
+
+.paymentSummaryConfirm {
+    padding: 16px;
+    background-color: $cashportMobileLightGray;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    margin: 0 auto;
+    max-width: 430px;
+
+    &__label {
+        color: $cashportMobileBlue;
+        font-size: 0.875rem;
+        font-weight: 400;
+    }
+
+    &__amount {
+        display: flex;
+        align-items: center;
+        font-size: 1.125rem;
+        font-weight: 600;
+        gap: 4px;
+        color: $cashportMobileBlue;
+    }
+
+    &__currency {
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: $cashportMobileGray;
+    }
+
+    &__pay-button {
+        box-shadow: none !important;
+        background-color: $cashportMobileBlue !important;
+        height: 40px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px;
+        padding: 11px !important;
+    }
+}

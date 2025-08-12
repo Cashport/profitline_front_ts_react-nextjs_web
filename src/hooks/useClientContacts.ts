@@ -1,10 +1,13 @@
 import { MessageType } from "@/context/MessageContext";
+import { useAppStore } from "@/lib/store/store";
 import { deleteContact, postContact, putContact } from "@/services/contacts/contacts";
 import { IContactForm, IGetContacts } from "@/types/contacts/IContacts";
 import { fetcher } from "@/utils/api/api";
 import useSWR from "swr";
 
 export const useClientContacts = (clientId: string) => {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
   const { data, isLoading, mutate } = useSWR<IGetContacts>(
     `client/${clientId}/contact`,
     fetcher,
@@ -17,7 +20,7 @@ export const useClientContacts = (clientId: string) => {
     showMessage: (type: MessageType, content: string) => void
   ) => {
     const contact = {
-      client_id: clientId,
+      clientUUID: clientId,
       contact_name: contactInfo.name,
       contact_lastname: contactInfo.lastname,
       contact_email: contactInfo.email,
@@ -47,7 +50,7 @@ export const useClientContacts = (clientId: string) => {
     showMessage: (type: MessageType, content: string) => void
   ) => {
     const contact = {
-      client_id: clientId,
+      clientUUID: clientId,
       contact_name: contactInfo.name,
       contact_lastname: contactInfo.lastname,
       contact_email: contactInfo.email,
@@ -78,7 +81,7 @@ export const useClientContacts = (clientId: string) => {
     const formattedIds = { contacts_ids: contactsIds };
 
     try {
-      const response = await deleteContact(formattedIds, clientId);
+      const response = await deleteContact(formattedIds, clientId, projectId);
       if (response.status === 200) {
         showMessage("success", "Contactos eliminados exitosamente");
       }

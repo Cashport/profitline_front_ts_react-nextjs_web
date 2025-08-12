@@ -18,7 +18,6 @@
         overflow-y: auto;
         border-radius: 0.5rem;
 
-
         .header {
             height: 48px;
             gap: 0.5rem;
@@ -62,6 +61,24 @@
     .ant-collapse-content {
         &-box {
             padding: 0.75rem 0.5rem !important;
+        }
+    }
+}
+
+.generateActionButton {
+    padding: 0.75rem 1rem !important;
+    background-color: $background !important;
+    border: solid 1px transparent !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 3rem !important;
+}
+
+@media (max-width: 900px) {
+    .ordersView {
+        .searchInput {
+            width: 130px;
         }
     }
 }

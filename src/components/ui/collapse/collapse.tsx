@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Collapse, CollapsePanelProps } from "antd";
+import { Collapse, CollapsePanelProps, CollapseProps } from "antd";
 import "./collapse.scss";
 
 interface ItemCollapse {
@@ -8,27 +8,30 @@ interface ItemCollapse {
   children?: CollapsePanelProps["children"];
 }
 
-interface CollapseProps {
+// Extender los props de Ant Design Collapse y agregar los personalizados
+interface ICollapseProps extends Omit<CollapseProps, "items"> {
   items: ItemCollapse[] | undefined;
-  accordion?: boolean;
   stickyLabel?: boolean;
   labelStickyOffset?: string;
 }
 
-const GenericCollapse: FC<CollapseProps> = ({
+const GenericCollapse: FC<ICollapseProps> = ({
   items,
   accordion,
   stickyLabel,
-  labelStickyOffset
+  labelStickyOffset,
+  ...restProps
 }) => {
   return (
     <Collapse
+      {...restProps} // Pasar todos los props adicionales
       style={
         {
+          ...restProps.style, // Mantener estilos existentes si los hay
           "--sticky-offset": `${labelStickyOffset ? labelStickyOffset : "8.3rem"}`
         } as React.CSSProperties
       }
-      className={`genericCollapse ${stickyLabel ? "sticky" : ""}`}
+      className={`genericCollapse ${stickyLabel ? "sticky" : ""} ${restProps.className || ""}`}
       ghost
       items={items}
       accordion={accordion}

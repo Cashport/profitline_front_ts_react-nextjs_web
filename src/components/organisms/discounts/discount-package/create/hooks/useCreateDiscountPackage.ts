@@ -10,6 +10,7 @@ import { fetcher } from "@/utils/api/api";
 import { createDiscountPackage, getOneDiscountPackage } from "@/services/discount/discount.service";
 import { Discount } from "@/types/discount/DiscountPackage";
 import { mapGetOneToDiscountPackageSchema } from "../logic/createPackageLogic";
+import { useClientsGroups } from "@/hooks/useClientsGroups";
 
 type Props = {
   params?: { id: string };
@@ -41,7 +42,8 @@ export default function useCreateDiscountPackage({ params }: Props) {
     endDate: undefined,
     is_active: false,
     primaryDiscounts: [],
-    secondaryDiscounts: []
+    secondaryDiscounts: [],
+    client_groups: []
   });
 
   const fetchDiscountPackage: () => Promise<DiscountPackageSchema> = async () => {
@@ -93,6 +95,10 @@ export default function useCreateDiscountPackage({ params }: Props) {
     name: "secondaryDiscounts"
   });
 
+    const { clients, loading: isLoadingClients } = useClientsGroups({
+      noLimit: true
+    });
+
   const { data: dataDiscountList, isLoading: isLoadingSelect } = useSWR<DiscountListData>(
     `/discount/discounts-to-apply/project/${projectId}`,
     fetcher,
@@ -138,7 +144,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
     try {
       const res = await createDiscountPackage({ ...e, project_id: projectId });
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/paquete/${res.data.id}`);
+      router.push(`/descuentos/paquete/${res.id}`);
     } catch (e: any) {
       messageApi.error(e.response.data.message);
       console.error(e);
@@ -146,21 +152,6 @@ export default function useCreateDiscountPackage({ params }: Props) {
       setLoading(false);
     }
   };
-
-  // const handleUpdateDiscount = async (e: DiscountPackageSchema) => {
-  //   setLoading(true);
-  //   try {
-  //     const { data } = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
-  //     messageApi.success("Descuento actualizado exitosamente");
-  //     setDefaultDiscount(mapDiscountGetOneToDiscountSchema(data));
-  //     setStatusForm("review");
-  //     form.reset(mapDiscountGetOneToDiscountSchema(data));
-  //   } catch (e: any) {
-  //     messageApi.error(e.response.data.message);
-  //     console.error(e);
-  //   }
-  //   setLoading(false);
-  // };
 
   const handleExecCallback = form.handleSubmit(
     handlePostDiscount
@@ -192,6 +183,8 @@ export default function useCreateDiscountPackage({ params }: Props) {
     isLoadingSelect,
     discountList,
     discountId: discountPackageId,
-    isFormDisabled: disabled
+    isFormDisabled: disabled,
+    clients,
+    isLoadingClients
   };
 }

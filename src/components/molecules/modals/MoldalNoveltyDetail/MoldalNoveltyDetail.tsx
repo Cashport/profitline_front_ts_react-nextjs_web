@@ -3,6 +3,8 @@ import { CaretDoubleRight, Check, X } from "phosphor-react";
 import { Button, message, Typography } from "antd";
 
 import { approveIncident, rejectIncident } from "@/services/resolveNovelty/resolveNovelty";
+import { useInvoices } from "@/hooks/useInvoices";
+import { useGeneralPortfolio } from "@/hooks/useGeneralPortfolio";
 
 import { InfoSection } from "./components/infoSection/InfoSection";
 import { InfoInvoice } from "./components/infoInvoice/InfoInvoice";
@@ -12,7 +14,6 @@ import { IIncidentDetail, useIncidentDetail } from "@/hooks/useNoveltyDetail";
 import ResolveNoveltyModal from "../ResolveNoveltyModal/ResolveNoveltyModal";
 
 import "./moldalnoveltydetail.scss";
-import { useInvoices } from "@/hooks/useInvoices";
 const { Title } = Typography;
 
 interface MoldalNoveltyDetailProps {
@@ -29,6 +30,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
 }) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
   const { mutate: mutateWallet } = useInvoices({});
+  const { mutate: mutateGeneralDashboardData } = useGeneralPortfolio();
   const [incidentData, setIncidentData] = useState<IIncidentDetail | null>(null);
   const [openResolveModal, setOpenResolveModal] = useState(false);
   const [isResolving, setIsResolving] = useState(true);
@@ -63,6 +65,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       }
       setOpenResolveModal(false);
       mutateWallet();
+      mutateGeneralDashboardData();
       deselectInvoices && deselectInvoices();
       mutateIncident();
       onClose(); // Cierra el modal principal después de resolver/rechazar

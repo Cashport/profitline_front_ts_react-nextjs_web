@@ -163,6 +163,7 @@ export interface ISingleOrder {
   is_deleted: number;
   is_draft: number;
   client_name: string;
+  block_flag: boolean;
 }
 
 interface IDetailOrder {
@@ -188,6 +189,7 @@ export interface IOrderData {
   status: string;
   count: number;
   orders: IOrder[];
+  total: number;
 }
 
 export interface IOrder {
@@ -217,4 +219,23 @@ export interface IDiscountPackageAvailable {
   idAnnualDiscount: number;
   name: string;
   description: string;
+}
+
+// Define la interfaz para los vendedores individuales.
+interface ISeller {
+  id: number;
+  name: string;
+  checked: boolean;
+}
+
+// Define la interfaz para los grupos de vendedores.
+interface ISellerGroup {
+  id: number;
+  name: string;
+  sellers: ISeller[];
+}
+
+// Define la interfaz principal que contiene el filtro de vendedores.
+export interface IMarketplaceOrdersFilters {
+  sellerFilter: ISellerGroup[];
 }

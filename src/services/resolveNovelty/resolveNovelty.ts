@@ -2,7 +2,7 @@ import config from "@/config";
 import { API } from "@/utils/api/api";
 
 interface IncidentActionData {
-  comments: string;
+  comments?: string;
   files?: File[];
 }
 
@@ -12,7 +12,7 @@ export const approveIncident = async (
   actionData: IncidentActionData
 ): Promise<any> => {
   const formData = new FormData();
-  formData.append("comments", actionData.comments);
+  actionData.comments && formData.append("comments", actionData.comments);
 
   if (actionData.files) {
     actionData.files.forEach((file) => {
@@ -34,7 +34,7 @@ export const rejectIncident = async (
   actionData: IncidentActionData
 ): Promise<any> => {
   const formData = new FormData();
-  formData.append("comments", actionData.comments);
+  actionData.comments && formData.append("comments", actionData.comments);
 
   if (actionData.files) {
     actionData.files.forEach((file) => {

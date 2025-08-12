@@ -223,11 +223,14 @@ export const WalletTab = () => {
               ),
               children: (
                 <InvoicesTable
+                  dataInvoiceByStatus={invoiceState}
                   openInvoiceDetail={handleOpenInvoiceDetail}
                   stateId={invoiceState.status_id}
-                  dataSingleInvoice={invoiceState.invoices}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
+                  // fetchData={(page: number) => {
+                  //   getAccountingAdjustmentsById(invoiceState.status_id, page);
+                  // }}
                 />
               )
             }))}

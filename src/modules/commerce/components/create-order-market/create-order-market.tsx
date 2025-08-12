@@ -4,7 +4,6 @@ import { CaretLeft } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
-import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import UiTab from "@/components/ui/ui-tab";
 import { OrderViewContext } from "../../containers/create-order/create-order";
 import CreateOrderProduct from "../create-order-product";
@@ -32,7 +31,8 @@ interface CategoryMap {
 
 const CreateOrderMarket: FC = () => {
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { client, setClient, categories, setCategories } = useContext(OrderViewContext);
+  const { client, setClient, categories, setCategories, setSelectedCategories } =
+    useContext(OrderViewContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 800);
@@ -154,7 +154,10 @@ const CreateOrderMarket: FC = () => {
         size="large"
         className={styles.buttonGoBack}
         icon={<CaretLeft size={"1.3rem"} />}
-        onClick={() => setClient(undefined as any)}
+        onClick={() => {
+          setSelectedCategories([]);
+          setClient(undefined as any);
+        }}
       >
         {client.name}
       </Button>
@@ -163,7 +166,6 @@ const CreateOrderMarket: FC = () => {
           placeholder="Buscar"
           onChange={(event) => setSearchTerm(event.target.value)}
         />
-        <FilterDiscounts />
       </Flex>
 
       <UiTab tabs={categoryTabs} activeKey={activeTab} onChangeTab={setActiveTab} />

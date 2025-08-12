@@ -1,0 +1,9 @@
+@import "@/styles/variables.scss";
+
+.pendingInvoiceCard {
+    &__text-overdue {
+        color: #ff0010 !important;
+        font-size: 0.625rem;
+        font-weight: 300;
+    }
+}

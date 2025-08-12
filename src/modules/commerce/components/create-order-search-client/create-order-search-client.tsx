@@ -5,10 +5,10 @@ import { Controller, useForm } from "react-hook-form";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { OrderViewContext } from "../../containers/create-order/create-order";
-import styles from "./create-order-search-client.module.scss";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import SelectClient from "../create-order-select-client";
-import { ISelectType } from "@/types/clients/IClients";
+
+import styles from "./create-order-search-client.module.scss";
 
 export interface selectClientForm {
   client: {
