@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import env from "./config";
 
 export async function middleware(request: NextRequest) {
   // content-security-policy
   const apiHost = process.env.NEXT_PUBLIC_API_HOST?.slice(0, -4) ?? "";
+  const apin8nHost = env.API_APPLY_TAB_AI?.slice(0, -45) ?? "";
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
@@ -10,7 +12,7 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost};
+    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost};
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com;
     object-src 'none';
     frame-ancestors 'self';
