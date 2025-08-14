@@ -132,6 +132,7 @@ export interface IShippingInformation {
   email: string;
   phone_number: string;
   comments: string;
+  id_address?: string;
 }
 
 export interface ICreateOrderData {

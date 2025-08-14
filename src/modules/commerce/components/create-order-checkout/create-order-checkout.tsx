@@ -78,10 +78,11 @@ const CreateOrderCheckout: FC = ({}) => {
     if (!selectedAddress) return;
     setValue("city", selectedAddress?.city);
     setValue("address", selectedAddress?.address);
-    setValue("email", selectedAddress?.email);
   }, [watchSelectAddress, addresses, setValue]);
 
+  // when mounting
   useEffect(() => {
+    setValue("email", client.email);
     const fetchAdresses = async () => {
       const response = await getAdresses(client.id);
       setAddresses(response.data);
@@ -137,7 +138,8 @@ const CreateOrderCheckout: FC = ({}) => {
         dispatch_address: data.address,
         email: data.email,
         phone_number: `${indicative}${data.phone}`,
-        comments: data.comment
+        comments: data.comment,
+        id_address: data.addresses.value
       },
       order_summary: confirmOrderData
     };
@@ -195,7 +197,12 @@ const CreateOrderCheckout: FC = ({}) => {
                 field={field}
                 title="Direcciones"
                 placeholder="Seleccione una dirección"
-                options={addresses?.map((address) => address.address)}
+                options={addresses?.map((address) => {
+                  return {
+                    label: address.address,
+                    value: address.id
+                  };
+                })}
                 customStyleContainer={{ gridColumn: "1 / span 2" }}
               />
             )}
@@ -214,13 +221,7 @@ const CreateOrderCheckout: FC = ({}) => {
             nameInput="address"
             error={errors.address}
           />
-          <InputForm
-            readOnly={true}
-            titleInput="Email"
-            control={control}
-            nameInput="email"
-            error={errors.email}
-          />
+          <InputForm titleInput="Email" control={control} nameInput="email" error={errors.email} />
           <Flex gap={"0.5rem"} align="flex-start">
             <Flex vertical>
               <p className={styles.inputLabel}>Indicativo</p>
