@@ -1,6 +1,7 @@
 export interface IEcommerceClient {
   client_id: string;
   client_name: string;
+  client_email: string;
 }
 
 export interface IProductData {
@@ -131,6 +132,8 @@ export interface IShippingInformation {
   email: string;
   phone_number: string;
   comments: string;
+  // selected id address
+  id?: string;
 }
 
 export interface ICreateOrderData {

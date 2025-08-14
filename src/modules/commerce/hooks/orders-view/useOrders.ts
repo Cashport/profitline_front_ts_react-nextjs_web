@@ -22,7 +22,7 @@ export const useOrders = ({ selectedFilters }: UseOrdersProps) => {
   const pathKey = `/marketplace/projects/${projectId}/orders${sellersQuery}`;
 
   const { data, error, mutate } = useSWR<GenericResponse<IOrderData[]>>(pathKey, fetcher, {
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     revalidateOnReconnect: false
   });
 
