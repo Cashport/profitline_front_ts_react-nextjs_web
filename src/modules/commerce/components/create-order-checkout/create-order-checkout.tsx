@@ -127,7 +127,6 @@ const CreateOrderCheckout: FC = ({}) => {
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
     setLoading(true);
     router.prefetch("/comercio");
-    console.log("onSubmitSaveDraft", data);
     const createOrderModelData = {
       shipping_information: {
         address: data.address,
@@ -135,12 +134,11 @@ const CreateOrderCheckout: FC = ({}) => {
         dispatch_address: data.address,
         email: data.email,
         phone_number: `${data.indicative}${data.phone}`,
-        comments: data.comment
+        comments: data.comment,
+        id: data.addresses.value
       },
       order_summary: confirmOrderData
     };
-
-    console.log("createOrderModelDataDRAFT", createOrderModelData);
 
     try {
       const response = (await createDraft(
@@ -173,7 +171,7 @@ const CreateOrderCheckout: FC = ({}) => {
         comments: data.comment,
         // Solo incluir id_address si NO es una nueva dirección
         ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
-          id_address: data.addresses.value
+          id: data.addresses.value
         })
       },
       order_summary: confirmOrderData
