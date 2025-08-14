@@ -90,16 +90,8 @@ const Dashboard: FC<DashboardProps> = () => {
       <div className={styles.b}>
         <div className={styles.item}>
           <div className={styles.list}>
-            <DashboardGenericItem
-              name="R. aplicado"
-              value={appliedPayments}
-              unit="M"
-            />
-            <DashboardGenericItem
-              name="Pagos no ap."
-              value={unappliedPayments}
-              unit="M"
-            />
+            <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
+            <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
           </div>
         </div>
         <div className={styles.item}>
