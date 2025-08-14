@@ -28,10 +28,12 @@ interface IOrderViewContext {
   client: {
     name: string;
     id: string;
+    email: string;
   };
   setClient: Dispatch<{
     name: string;
     id: string;
+    email: string;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;

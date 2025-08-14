@@ -1,6 +1,7 @@
 export interface IEcommerceClient {
   client_id: string;
   client_name: string;
+  client_email: string;
 }
 
 export interface IProductData {

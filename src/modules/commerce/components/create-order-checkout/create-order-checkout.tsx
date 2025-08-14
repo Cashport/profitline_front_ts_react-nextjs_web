@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
@@ -24,6 +24,7 @@ import {
 import { useMessageApi } from "@/context/MessageContext";
 import { GenericResponse } from "@/types/global/IGlobal";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
+import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 
 interface IShippingInfoForm {
   addresses: {
@@ -33,6 +34,10 @@ interface IShippingInfoForm {
   city: string;
   address: string;
   email: string;
+  indicative: {
+    value: string;
+    label: string;
+  };
   phone: string;
   comment: string;
 }
@@ -54,6 +59,14 @@ const CreateOrderCheckout: FC = ({}) => {
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
+  const defaultValues = useMemo(() => {
+    return shippingInfo
+      ? shippingInfoToForm(shippingInfo)
+      : {
+          indicative: "+57" // Valor por defecto para Colombia
+        };
+  }, [shippingInfo]);
+
   const {
     control,
     handleSubmit,
@@ -74,7 +87,7 @@ const CreateOrderCheckout: FC = ({}) => {
     setValue("city", selectedAddress?.city);
     setValue("address", selectedAddress?.address);
     setValue("email", selectedAddress?.email);
-  }, [watchSelectAddress]);
+  }, [watchSelectAddress, addresses, setValue]);
 
   useEffect(() => {
     const fetchAdresses = async () => {
@@ -102,7 +115,7 @@ const CreateOrderCheckout: FC = ({}) => {
         city: data.city,
         dispatch_address: data.address,
         email: data.email,
-        phone_number: data.phone,
+        phone_number: `${data.indicative}${data.phone}`, // Combinar indicativo con teléfono
         comments: data.comment
       },
       order_summary: confirmOrderData
@@ -123,13 +136,15 @@ const CreateOrderCheckout: FC = ({}) => {
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
     setLoading(true);
+
+    const indicative = data.indicative.label.split(" ")[0];
     const createOrderModelData = {
       shipping_information: {
         address: data.address,
         city: data.city,
         dispatch_address: data.address,
         email: data.email,
-        phone_number: data.phone,
+        phone_number: `${indicative}${data.phone}`,
         comments: data.comment
       },
       order_summary: confirmOrderData
@@ -214,27 +229,41 @@ const CreateOrderCheckout: FC = ({}) => {
             nameInput="email"
             error={errors.email}
           />
-          <InputForm
-            titleInput="Teléfono de contacto"
-            control={control}
-            nameInput="phone"
-            error={errors.phone}
-            changeInterceptor={(value) => {
-              // Eliminar caracteres no numéricos
-              const numericValue = value.replace(/\D/g, "");
-              // Limitar a 10 dígitos
-              const truncatedValue = numericValue.slice(0, 10);
-              // Actualizar el valor en el formulario
-              setValue("phone", truncatedValue);
-            }}
-            validationRules={{
-              required: "El teléfono es obligatorio",
-              pattern: {
-                value: /^\d{10}$/,
-                message: "El teléfono debe tener exactamente 10 dígitos"
-              }
-            }}
-          />
+          <Flex gap={10} align="flex-start">
+            <Controller
+              name="indicative"
+              control={control}
+              rules={{ required: "El indicativo es obligatorio" }}
+              render={({ field }) => (
+                <SelectContactIndicative
+                  errors={errors.indicative}
+                  field={field}
+                  readOnly={false}
+                />
+              )}
+            />
+            <InputForm
+              titleInput="Teléfono de contacto"
+              control={control}
+              nameInput="phone"
+              error={errors.phone}
+              changeInterceptor={(value) => {
+                // Eliminar caracteres no numéricos
+                const numericValue = value.replace(/\D/g, "");
+                // Limitar a 10 dígitos
+                const truncatedValue = numericValue.slice(0, 10);
+                // Actualizar el valor en el formulario
+                setValue("phone", truncatedValue);
+              }}
+              validationRules={{
+                required: "El teléfono es obligatorio",
+                pattern: {
+                  value: /^\d{10}$/,
+                  message: "El teléfono debe tener exactamente 10 dígitos"
+                }
+              }}
+            />
+          </Flex>
           <Controller
             name="comment"
             control={control}
@@ -301,6 +330,11 @@ const CreateOrderCheckout: FC = ({}) => {
 export default CreateOrderCheckout;
 
 const shippingInfoToForm = (shippingInfo: IShippingInformation) => {
+  // Extraer el indicativo y el número del phone_number
+  const phoneMatch = shippingInfo.phone_number?.match(/^(\+\d{1,3})(\d+)$/);
+  const indicative = phoneMatch ? phoneMatch[1] : "+57"; // Por defecto Colombia
+  const phoneNumber = phoneMatch ? phoneMatch[2] : shippingInfo.phone_number;
+
   return {
     addresses: {
       label: shippingInfo.address,
@@ -309,7 +343,11 @@ const shippingInfoToForm = (shippingInfo: IShippingInformation) => {
     city: shippingInfo.city,
     address: shippingInfo.address,
     email: shippingInfo.email,
-    phone: shippingInfo.phone_number,
+    indicative: {
+      label: indicative,
+      value: indicative
+    },
+    phone: phoneNumber || "",
     comment: shippingInfo.comments
   };
 };
