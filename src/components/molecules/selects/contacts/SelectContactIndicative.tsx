@@ -65,9 +65,7 @@ export const SelectContactIndicative = <T extends FieldValues>({
         open={readOnly ? false : undefined}
         popupMatchSelectWidth={false}
       />
-      {errors && (
-        <Typography.Text className="textError">El indicativo es obligatorio *</Typography.Text>
-      )}
+      {errors && <Typography.Text className="textError">Obligatorio *</Typography.Text>}
     </>
   );
 };

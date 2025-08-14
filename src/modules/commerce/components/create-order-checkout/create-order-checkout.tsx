@@ -25,13 +25,17 @@ import { useMessageApi } from "@/context/MessageContext";
 import { GenericResponse } from "@/types/global/IGlobal";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
+import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
 
 interface IShippingInfoForm {
   addresses: {
     value: string;
     label: string;
   };
-  city: string;
+  city: {
+    value: string;
+    label: string;
+  };
   address: string;
   email: string;
   indicative: {
@@ -83,7 +87,7 @@ const CreateOrderCheckout: FC = ({}) => {
     if (watchSelectAddress?.value === NEW_ADDRESS_OPTION.value) {
       setIsNewAddress(true);
       // Limpiar los campos para permitir entrada manual
-      setValue("city", "");
+      setValue("city", { label: "", value: "" });
       setValue("address", "");
     } else if (watchSelectAddress) {
       setIsNewAddress(false);
@@ -92,7 +96,10 @@ const CreateOrderCheckout: FC = ({}) => {
         (address) => address.address === watchSelectAddress.label
       );
       if (selectedAddress) {
-        setValue("city", selectedAddress.city);
+        setValue("city", {
+          label: selectedAddress.city,
+          value: selectedAddress.city
+        });
         setValue("address", selectedAddress.address);
       }
     }
@@ -120,10 +127,11 @@ const CreateOrderCheckout: FC = ({}) => {
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
     setLoading(true);
     router.prefetch("/comercio");
+    console.log("onSubmitSaveDraft", data);
     const createOrderModelData = {
       shipping_information: {
         address: data.address,
-        city: data.city,
+        city: data.city.label,
         dispatch_address: data.address,
         email: data.email,
         phone_number: `${data.indicative}${data.phone}`,
@@ -132,15 +140,21 @@ const CreateOrderCheckout: FC = ({}) => {
       order_summary: confirmOrderData
     };
 
-    const response = (await createDraft(
-      projectId,
-      client.id,
-      createOrderModelData,
-      showMessage
-    )) as GenericResponse<{ id_order: number }>;
+    console.log("createOrderModelDataDRAFT", createOrderModelData);
 
-    if (response.status === 200) {
-      router.push(`/comercio`);
+    try {
+      const response = (await createDraft(
+        projectId,
+        client.id,
+        createOrderModelData,
+        showMessage
+      )) as GenericResponse<{ id_order: number }>;
+
+      if (response.status === 200) {
+        router.push(`/comercio`);
+      }
+    } catch (error) {
+      showMessage("error", "Error creating draft");
     }
     setLoading(false);
   };
@@ -152,7 +166,7 @@ const CreateOrderCheckout: FC = ({}) => {
     const createOrderModelData = {
       shipping_information: {
         address: data.address,
-        city: data.city,
+        city: data.city.label,
         dispatch_address: data.address,
         email: data.email,
         phone_number: `${indicative}${data.phone}`,
@@ -232,13 +246,10 @@ const CreateOrderCheckout: FC = ({}) => {
               />
             )}
           />
-          <InputForm
-            readOnly={!isNewAddress}
-            titleInput="Ciudad"
+          <Controller
+            name="city"
             control={control}
-            nameInput="city"
-            error={errors.city}
-            validationRules={
+            rules={
               isNewAddress
                 ? {
                     required: "La ciudad es obligatoria",
@@ -249,6 +260,9 @@ const CreateOrderCheckout: FC = ({}) => {
                   }
                 : undefined
             }
+            render={({ field }) => (
+              <SelectLocations errors={errors?.city} field={field} disabled={!isNewAddress} />
+            )}
           />
           <InputForm
             readOnly={!isNewAddress}
@@ -386,7 +400,10 @@ const shippingInfoToForm = (shippingInfo: IShippingInformation) => {
       label: shippingInfo.address,
       value: shippingInfo.address
     },
-    city: shippingInfo.city,
+    city: {
+      label: shippingInfo.city,
+      value: shippingInfo.city
+    },
     address: shippingInfo.address,
     email: shippingInfo.email,
     indicative: {
