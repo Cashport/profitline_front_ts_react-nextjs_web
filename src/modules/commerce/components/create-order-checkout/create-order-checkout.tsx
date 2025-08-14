@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useState, useMemo } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
@@ -58,14 +58,6 @@ const CreateOrderCheckout: FC = ({}) => {
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
-
-  const defaultValues = useMemo(() => {
-    return shippingInfo
-      ? shippingInfoToForm(shippingInfo)
-      : {
-          indicative: "+57" // Valor por defecto para Colombia
-        };
-  }, [shippingInfo]);
 
   const {
     control,
@@ -229,19 +221,24 @@ const CreateOrderCheckout: FC = ({}) => {
             nameInput="email"
             error={errors.email}
           />
-          <Flex gap={10} align="flex-start">
-            <Controller
-              name="indicative"
-              control={control}
-              rules={{ required: "El indicativo es obligatorio" }}
-              render={({ field }) => (
-                <SelectContactIndicative
-                  errors={errors.indicative}
-                  field={field}
-                  readOnly={false}
-                />
-              )}
-            />
+          <Flex gap={"0.5rem"} align="flex-start">
+            <Flex vertical>
+              <p className={styles.inputLabel}>Indicativo</p>
+
+              <Controller
+                name="indicative"
+                control={control}
+                rules={{ required: "El indicativo es obligatorio" }}
+                render={({ field }) => (
+                  <SelectContactIndicative
+                    errors={errors.indicative}
+                    field={field}
+                    readOnly={false}
+                    className={styles.selectIndicative}
+                  />
+                )}
+              />
+            </Flex>
             <InputForm
               titleInput="Teléfono de contacto"
               control={control}
@@ -262,6 +259,7 @@ const CreateOrderCheckout: FC = ({}) => {
                   message: "El teléfono debe tener exactamente 10 dígitos"
                 }
               }}
+              customStyle={{ width: "100%" }}
             />
           </Flex>
           <Controller

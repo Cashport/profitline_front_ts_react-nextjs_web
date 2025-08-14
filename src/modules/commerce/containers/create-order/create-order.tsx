@@ -99,7 +99,8 @@ export const CreateOrderView: FC = () => {
         const response = await getSingleOrder(selectedProject.ID, draftInfo.id);
         setClient({
           name: response.data[0].client_name,
-          id: response.data[0].client_id
+          id: response.data[0].client_id,
+          email: ""
         });
 
         const selectedCategories = response.data[0].detail.products.map((category) => ({
