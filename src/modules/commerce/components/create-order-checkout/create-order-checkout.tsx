@@ -42,6 +42,12 @@ interface IShippingInfoForm {
   comment: string;
 }
 
+// Constante para identificar la opción de nueva dirección
+const NEW_ADDRESS_OPTION = {
+  value: "new_address",
+  label: "+ Nueva dirección"
+};
+
 const CreateOrderCheckout: FC = ({}) => {
   const {
     setCheckingOut,
@@ -56,6 +62,7 @@ const CreateOrderCheckout: FC = ({}) => {
   const { draftInfo } = useAppStore((state) => state);
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
+  const [isNewAddress, setIsNewAddress] = useState(false);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -72,12 +79,23 @@ const CreateOrderCheckout: FC = ({}) => {
   const watchSelectAddress = watch("addresses");
 
   useEffect(() => {
-    const selectedAddress =
-      watchSelectAddress &&
-      addresses.find((address) => address.address === watchSelectAddress.label);
-    if (!selectedAddress) return;
-    setValue("city", selectedAddress?.city);
-    setValue("address", selectedAddress?.address);
+    // Verificar si se seleccionó "Nueva dirección"
+    if (watchSelectAddress?.value === NEW_ADDRESS_OPTION.value) {
+      setIsNewAddress(true);
+      // Limpiar los campos para permitir entrada manual
+      setValue("city", "");
+      setValue("address", "");
+    } else if (watchSelectAddress) {
+      setIsNewAddress(false);
+      // Buscar la dirección seleccionada en el array de direcciones
+      const selectedAddress = addresses.find(
+        (address) => address.address === watchSelectAddress.label
+      );
+      if (selectedAddress) {
+        setValue("city", selectedAddress.city);
+        setValue("address", selectedAddress.address);
+      }
+    }
   }, [watchSelectAddress, addresses, setValue]);
 
   // when mounting
@@ -108,7 +126,7 @@ const CreateOrderCheckout: FC = ({}) => {
         city: data.city,
         dispatch_address: data.address,
         email: data.email,
-        phone_number: `${data.indicative}${data.phone}`, // Combinar indicativo con teléfono
+        phone_number: `${data.indicative}${data.phone}`,
         comments: data.comment
       },
       order_summary: confirmOrderData
@@ -139,7 +157,10 @@ const CreateOrderCheckout: FC = ({}) => {
         email: data.email,
         phone_number: `${indicative}${data.phone}`,
         comments: data.comment,
-        id_address: data.addresses.value
+        // Solo incluir id_address si NO es una nueva dirección
+        ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
+          id_address: data.addresses.value
+        })
       },
       order_summary: confirmOrderData
     };
@@ -172,6 +193,15 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
+  // Preparar opciones del select con "Nueva dirección" al principio
+  const addressOptions = [
+    NEW_ADDRESS_OPTION,
+    ...addresses.map((address) => ({
+      label: address.address,
+      value: address.id
+    }))
+  ];
+
   return (
     <div className={styles.checkoutContainer}>
       <Button
@@ -197,29 +227,46 @@ const CreateOrderCheckout: FC = ({}) => {
                 field={field}
                 title="Direcciones"
                 placeholder="Seleccione una dirección"
-                options={addresses?.map((address) => {
-                  return {
-                    label: address.address,
-                    value: address.id
-                  };
-                })}
+                options={addressOptions}
                 customStyleContainer={{ gridColumn: "1 / span 2" }}
               />
             )}
           />
           <InputForm
-            readOnly={true}
+            readOnly={!isNewAddress}
             titleInput="Ciudad"
             control={control}
             nameInput="city"
             error={errors.city}
+            validationRules={
+              isNewAddress
+                ? {
+                    required: "La ciudad es obligatoria",
+                    minLength: {
+                      value: 2,
+                      message: "La ciudad debe tener al menos 2 caracteres"
+                    }
+                  }
+                : undefined
+            }
           />
           <InputForm
-            readOnly={true}
+            readOnly={!isNewAddress}
             titleInput="Dirección de despacho"
             control={control}
             nameInput="address"
             error={errors.address}
+            validationRules={
+              isNewAddress
+                ? {
+                    required: "La dirección es obligatoria",
+                    minLength: {
+                      value: 5,
+                      message: "La dirección debe tener al menos 5 caracteres"
+                    }
+                  }
+                : undefined
+            }
           />
           <InputForm titleInput="Email" control={control} nameInput="email" error={errors.email} />
           <Flex gap={"0.5rem"} align="flex-start">
