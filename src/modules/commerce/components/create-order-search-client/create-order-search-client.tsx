@@ -14,6 +14,7 @@ export interface selectClientForm {
   client: {
     value: string;
     label: string;
+    email: string;
   };
 }
 
@@ -27,7 +28,7 @@ const CreateOrderSearchClient: FC = ({}) => {
   } = useForm<selectClientForm>({});
 
   const handleCreateOrder = (data: selectClientForm) => {
-    setClient({ name: data.client.label, id: data.client.value });
+    setClient({ name: data.client.label, id: data.client.value, email: data.client.email });
   };
 
   return (
