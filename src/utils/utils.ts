@@ -3,6 +3,9 @@ import { IChanel } from "@/types/bre/IBRE";
 import { ISelectStringType } from "@/types/communications/ICommunications";
 import utc from "dayjs/plugin/utc";
 import dayjs from "dayjs";
+import clsx, { ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 dayjs.extend(utc);
 
 interface Subline {
@@ -428,4 +431,8 @@ export function formatTimeAgo(utcDateString: string): string {
   if (months < 12) return `${months} meses`;
   if (years === 1) return `1 año`;
   return `${years} años`;
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
