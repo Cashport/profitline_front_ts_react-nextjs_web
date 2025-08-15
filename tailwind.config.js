@@ -9,27 +9,62 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Define los colores que usa el Badge y otros componentes
+        // Simply reference the CSS variables - no color function needed
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)"
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)"
+        },
         primary: {
-          DEFAULT: "hsl(222.2, 47.4%, 11.2%)",
-          foreground: "hsl(210, 40%, 98%)"
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)"
         },
         secondary: {
-          DEFAULT: "hsl(210, 40%, 96.1%)",
-          foreground: "hsl(222.2, 47.4%, 11.2%)"
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)"
         },
-        destructive: {
-          DEFAULT: "hsl(0, 84.2%, 60.2%)",
-          foreground: "hsl(210, 40%, 98%)"
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)"
         },
         accent: {
-          DEFAULT: "hsl(210, 40%, 96.1%)",
-          foreground: "hsl(222.2, 47.4%, 11.2%)"
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)"
         },
-        ring: "hsl(222.2, 84%, 60.2%)"
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)"
+        },
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+
+        // Chart colors
+        "chart-1": "var(--chart-1)",
+        "chart-2": "var(--chart-2)",
+        "chart-3": "var(--chart-3)",
+        "chart-4": "var(--chart-4)",
+        "chart-5": "var(--chart-5)",
+
+        // Sidebar colors
+        sidebar: {
+          DEFAULT: "var(--sidebar)",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)"
+        }
       },
-      fontFamily: {
-        sans: ["var(--font-poppins)", "system-ui", "sans-serif"]
+      borderRadius: {
+        DEFAULT: "var(--radius)"
       }
     }
   },

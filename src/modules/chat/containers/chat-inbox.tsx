@@ -20,6 +20,8 @@ import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
 import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
 
+import "@/modules/chat/styles/chatStyles.css";
+
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
   if (days <= 7)
