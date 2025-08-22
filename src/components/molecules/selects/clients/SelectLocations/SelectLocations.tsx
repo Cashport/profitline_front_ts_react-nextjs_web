@@ -18,10 +18,11 @@ type ExtendedFieldError =
 interface Props<T extends FieldValues> {
   errors: ExtendedFieldError | undefined;
   field: ControllerRenderProps<T, any>;
+  disabled?: boolean;
 }
 
-export const SelectLocations = <T extends FieldValues>({ errors, field }: Props<T>) => {
-  const { data, isLoading, error } = useLocations();
+export const SelectLocations = <T extends FieldValues>({ errors, field, disabled }: Props<T>) => {
+  const { data, isLoading } = useLocations();
   if (axios.isAxiosError(data)) {
     return null;
   }
@@ -51,6 +52,7 @@ export const SelectLocations = <T extends FieldValues>({ errors, field }: Props<
         options={options}
         labelInValue
         filterOption={filterOption}
+        disabled={disabled}
       />
       {errors && (
         <Typography.Text className="textError">La ciudad es obligatoria *</Typography.Text>

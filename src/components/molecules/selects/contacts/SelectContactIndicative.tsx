@@ -20,12 +20,14 @@ interface Props<T extends FieldValues> {
   errors: ExtendedFieldError | undefined;
   field: ControllerRenderProps<T, any>;
   readOnly?: boolean;
+  className?: string;
 }
 
 export const SelectContactIndicative = <T extends FieldValues>({
   errors,
   field,
-  readOnly
+  readOnly,
+  className
 }: Props<T>) => {
   const { data, isLoading } = useSWR<IResponseContactOptions>(
     "/client/contact/options",
@@ -49,8 +51,10 @@ export const SelectContactIndicative = <T extends FieldValues>({
   return (
     <>
       <Select
-        placeholder="Seleccione el tipo de radicado"
-        className={errors ? "selectInputError" : `selectInputCustom ${readOnly && "--readOnly"}`}
+        placeholder="Seleccione indicativo"
+        className={
+          errors ? "selectInputError" : `selectInputCustom ${readOnly && "--readOnly"} ${className}`
+        }
         loading={isLoading}
         variant="borderless"
         optionLabelProp="label"
@@ -59,10 +63,9 @@ export const SelectContactIndicative = <T extends FieldValues>({
         options={options}
         labelInValue
         open={readOnly ? false : undefined}
+        popupMatchSelectWidth={false}
       />
-      {errors && (
-        <Typography.Text className="textError">El indicativo es obligatorio *</Typography.Text>
-      )}
+      {errors && <Typography.Text className="textError">Obligatorio *</Typography.Text>}
     </>
   );
 };

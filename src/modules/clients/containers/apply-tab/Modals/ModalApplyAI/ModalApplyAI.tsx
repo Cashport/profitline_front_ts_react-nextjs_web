@@ -56,10 +56,10 @@ const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
       await uploadPaymentAttachment(projectId, clientId, uploadedFiles, commentary);
       await applyWithCashportAI(projectId, clientId, uploadedFiles, commentary);
       message.success("Archivos analizados con CashportAI");
-      closeModal();
     } catch (error) {
       message.error("Error al aplicar con CashportAI");
     }
+    closeModal();
     mutate();
     setLoading(false);
   };
