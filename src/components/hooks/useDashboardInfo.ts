@@ -84,7 +84,8 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
     return {
       name: capitalize(dayjs(item.month).utc().locale("es").format("MMM YY")),
       ventas: item.sales,
-      pagos: item.payments
+      bancos: item.banks,
+      recaudo: item.collections
     };
   });
 

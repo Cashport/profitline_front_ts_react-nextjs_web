@@ -20,7 +20,8 @@ interface DashboardSellsVsPaymentsProps {
   chartData: {
     name: string;
     ventas: any;
-    pagos: any;
+    bancos: any;
+    recaudo: any;
   }[];
   className?: string;
 }
@@ -43,7 +44,6 @@ const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData
         </div>
       );
     }
-
     return null;
   };
 
@@ -53,8 +53,12 @@ const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData
         Histórico ventas vs pagos
         <div className={styles.legends}>
           <div className={styles.legend}>
-            <div className={styles.circle} style={{ backgroundColor: "#0085FF" }}></div>
+            <div className={styles.circle} style={{ backgroundColor: "#000000" }}></div>
             Facturación
+          </div>
+          <div className={styles.legend}>
+            <div className={styles.circle} style={{ backgroundColor: "#0085FF" }}></div>
+            Recaudo
           </div>
           <div className={styles.legend}>
             <div className={styles.circle} style={{ backgroundColor: "#CBE71E" }}></div>
@@ -79,8 +83,15 @@ const DashboardSellsVsPayments: FC<DashboardSellsVsPaymentsProps> = ({ chartData
             />
             <Tooltip content={<CustomTooltip />} />
             <CartesianGrid strokeDasharray="3 3" />
-            <Line type="monotone" dataKey="ventas" stroke="#0085FF" strokeWidth={4} />
-            <Line type="monotone" dataKey="pagos" stroke="#CBE71E" strokeWidth={4} />
+            
+            {/* Línea negra para Facturación */}
+            <Line type="monotone" dataKey="ventas" stroke="#000000" strokeWidth={4} />
+
+            {/* Línea azul para Recaudo */}
+            <Line type="monotone" dataKey="recaudo" stroke="#0085FF" strokeWidth={4} />
+
+            {/* Línea verde para Pagos */}
+            <Line type="monotone" dataKey="bancos" stroke="#CBE71E" strokeWidth={4} />
           </LineChart>
         </ResponsiveContainer>
       </div>
