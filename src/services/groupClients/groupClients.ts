@@ -64,10 +64,7 @@ export const deleteGroups = async (groupsId: number[], project_id: number): Prom
   };
 
   try {
-    const response = await API.put(
-      `${config.API_HOST}/group-client/delete`,
-      modelData
-    );
+    const response = await API.put(`${config.API_HOST}/group-client/delete`, modelData);
 
     return response;
   } catch (error) {
@@ -87,10 +84,7 @@ export const changeGroupState = async (
   };
 
   try {
-    const response = await API.put(
-      `${config.API_HOST}/group-client/change-status`,
-      modelData
-    );
+    const response = await API.put(`${config.API_HOST}/group-client/change-status`, modelData);
 
     return response;
   } catch (error) {
@@ -98,16 +92,9 @@ export const changeGroupState = async (
   }
 };
 
-export const getClientGroups = async (
-  projectId: number,
-  name?: string,
-  status?: number
-): Promise<IClientsGroupsFull> => {
+export const getClientGroups = async (): Promise<IClientsGroupsFull> => {
   try {
-    let url = `${config.API_HOST}/group-client/?project_id=${projectId}`;
-    if (name) url += `&name=${encodeURIComponent(name)}`;
-    if (status !== undefined) url += `&status=${status}`;
-
+    const url = `/group-client/filter`;
     const response: IClientsGroupsFull = await API.get(url);
     return response;
   } catch (error) {
