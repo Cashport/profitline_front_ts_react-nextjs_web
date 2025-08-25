@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
+import { markInvoiceAsBalance } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -178,6 +179,21 @@ export const WalletTab = () => {
     }
   };
 
+  const handleMarkAsBalance = async () => {
+    try {
+      await markInvoiceAsBalance(
+        projectId,
+        clientId,
+        selectedRows?.map((invoice) => invoice.id) || []
+      );
+      messageShow.success("La(s) factura(s) se han marcado como saldo correctamente");
+    } catch (error) {
+      messageShow.error("Error al marcar la(s) factura(s) como saldo");
+    }
+    setisGenerateActionOpen(false);
+    closeAllModal();
+  };
+
   return (
     <>
       {contextHolder}
@@ -253,6 +269,7 @@ export const WalletTab = () => {
         validateInvoiceIsSelected={validateInvoiceIsSelected}
         addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
         balanceLegalization={handleOpenBalanceLegalization}
+        markAsBalance={handleMarkAsBalance}
       />
       <PaymentAgreementModal
         invoiceSelected={selectedRows}

@@ -373,3 +373,22 @@ export const addCommentHistoricAction = async (
     throw error;
   }
 };
+
+export const markInvoiceAsBalance = async (
+  projectId: number,
+  clientUUID: string,
+  invoices: number[]
+): Promise<GenericResponse> => {
+  const body = new FormData();
+  body.append("invoice_ids", JSON.stringify(invoices));
+  try {
+    const response: GenericResponse = await API.post(
+      `${config.API_HOST}/invoice/project/${projectId}/client/${clientUUID}/set_residue`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error marking invoice as balance", error);
+    throw error;
+  }
+};
