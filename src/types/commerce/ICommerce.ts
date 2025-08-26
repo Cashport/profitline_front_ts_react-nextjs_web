@@ -207,6 +207,7 @@ export interface IOrder {
   client_name: string;
   warehousename: string;
   warehouseid: number;
+  last_datestamp: string | null;
 }
 
 export interface IDiscount {
