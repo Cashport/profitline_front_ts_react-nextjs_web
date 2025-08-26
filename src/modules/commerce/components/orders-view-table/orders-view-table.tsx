@@ -5,7 +5,7 @@ import { Eye } from "phosphor-react";
 import { WarningDiamond } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
-import { formatDateDMY } from "@/utils/utils";
+import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
@@ -156,6 +156,20 @@ const OrdersViewTable = ({
       key: "contacto",
       dataIndex: "contacto",
       render: (text) => <Text className="cell">{text}</Text>
+    },
+    {
+      title: "Tiempo transcurrido",
+      key: "last_datestamp",
+      dataIndex: "last_datestamp",
+      render: (date: string | null) => (
+        <Text className="cell">{`${date ? formatTimeAgo(date) : ""}`}</Text>
+      ),
+      sorter: (a, b) => {
+        const dateA = a.last_datestamp ? new Date(a.last_datestamp).getTime() : 0;
+        const dateB = b.last_datestamp ? new Date(b.last_datestamp).getTime() : 0;
+        return dateA - dateB;
+      },
+      showSorterTooltip: false
     },
     // TO DO: Uncomment when the status column is needed
     // {
