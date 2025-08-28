@@ -47,7 +47,8 @@ const HistoryTable = ({
       key: "created_at",
       render: (created_at) => <Text className="cell">{formatDate(created_at)}</Text>,
       sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-      showSorterTooltip: false
+      showSorterTooltip: false,
+      width: 120
     },
     {
       title: "Evento",
