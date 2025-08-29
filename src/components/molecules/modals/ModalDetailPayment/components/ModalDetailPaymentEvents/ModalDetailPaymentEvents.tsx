@@ -37,14 +37,21 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
 
   const items = paymentEvents?.map((event) => {
     const leftIcon =
-      event.files && Array.isArray(event.files) ? (
-        <ArrowLineDown
-          size={14}
-          onClick={() => {
-            handleDocumentClick(event?.files[0] || "");
-          }}
-        />
-      ) : null;
+      event.files && Array.isArray(event.files)
+        ? {
+            children: <ArrowLineDown size={14} />,
+            onClick: () => {
+              handleDocumentClick(event?.files[0] || "");
+            }
+          }
+        : event.url_aplication_payment
+          ? {
+              children: <ArrowLineDown size={14} />,
+              onClick: () => {
+                handleDocumentClick(event?.url_aplication_payment || "");
+              }
+            }
+          : undefined;
 
     const content = (
       <div className={styles.modalDetailPaymentEvents__eventContent}>
@@ -77,34 +84,39 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
           <p className={styles.regularEntry}>Nuevo cliente: {event.client_name}</p>
         )}
 
-        {event.payments_events_types_name === "Aplicacion de pagos" && (
+        {event.payments_events_types_name === "Aplicación de pagos" && (
           <>
-            <Flex gap={"0.2rem"} wrap="wrap">
-              <p className={styles.regularEntry}>Id de la aplicación:</p>
-              <p className={styles.linkEntry} style={{ cursor: "default" }}>
-                {event.id}
-              </p>
-            </Flex>
+            {event.id_aplication_payment && (
+              <Flex gap={"0.2rem"} wrap="wrap">
+                <p className={styles.regularEntry}>Id de la aplicación:</p>
+                <p className={styles.linkEntry} style={{ cursor: "default" }}>
+                  {event.id_aplication_payment}
+                </p>
+              </Flex>
+            )}
 
             <p className={styles.regularEntry}>
               Valor aplicado: {formatMoney(event.ammount_applied)}
             </p>
-            <Flex gap={"0.2rem"} wrap="wrap">
-              <p className={styles.regularEntry}>Id de las facturas:</p>
 
-              {event.ids_split_payment?.map((id, index) => (
-                <p
-                  key={id}
-                  className={styles.linkEntry}
-                  onClick={() => handleOpenPaymentDetail && handleOpenPaymentDetail(id)}
-                >
-                  {id}
-                  {event.ids_split_payment && index === event.ids_split_payment.length - 1
-                    ? ""
-                    : ","}
-                </p>
-              ))}
-            </Flex>
+            {event.ids_split_payment && (
+              <Flex gap={"0.2rem"} wrap="wrap">
+                <p className={styles.regularEntry}>Id de las facturas:</p>
+
+                {event.ids_split_payment?.map((id, index) => (
+                  <p
+                    key={id}
+                    className={styles.linkEntry}
+                    onClick={() => handleOpenPaymentDetail && handleOpenPaymentDetail(id)}
+                  >
+                    {id}
+                    {event.ids_split_payment && index === event.ids_split_payment.length - 1
+                      ? ""
+                      : ","}
+                  </p>
+                ))}
+              </Flex>
+            )}
           </>
         )}
 

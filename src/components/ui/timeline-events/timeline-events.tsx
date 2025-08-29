@@ -13,7 +13,7 @@ interface TimelineEventsProps {
         title: string;
         date?: string;
         content?: React.ReactNode;
-        leftIcon?: React.ReactNode;
+        leftIcon?: { children: React.ReactNode; onClick?: () => void };
       }[]
     | undefined;
 }
@@ -30,7 +30,11 @@ const TimelineEvents: FC<TimelineEventsProps> = ({ events }) => {
         ) : (
           events?.map((event, index, arr) => (
             <div key={event.id} className={styles.mainStep}>
-              {event.leftIcon ? <div className={styles.leftIcon}> {event.leftIcon}</div> : null}
+              {event.leftIcon ? (
+                <div className={styles.leftIcon} onClick={event.leftIcon.onClick}>
+                  {event.leftIcon.children}
+                </div>
+              ) : null}
 
               <div
                 className={`${styles.stepLine} ${index === arr.length - 1 ? styles.inactive : styles.active}`}
