@@ -39,7 +39,7 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
       }
     };
     fetchMont();
-  }, []);
+  }, [isOpen, ID]);
 
   const handleClosePeriod = async () => {
     setLoadingRequest(true);
