@@ -64,6 +64,7 @@ export interface IEvent {
   previous_name_client: string;
   ammount_applied: number;
   id_payment_parent: number;
+  url_aplication_payment: string | null;
 }
 
 export interface IClientsByProject {
