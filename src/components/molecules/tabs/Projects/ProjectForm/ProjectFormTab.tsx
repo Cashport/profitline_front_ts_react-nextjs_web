@@ -21,6 +21,7 @@ import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ModalGenerateActionProjectForm } from "@/components/molecules/modals/ModalGenerateActionProjectForm/ModalGenerateActionProjectForm";
+import { ModalMonthlyClosing } from "@/components/molecules/modals/ModalMonthlyClosing/ModalMonthlyClosing";
 
 import {
   _onSubmit,
@@ -388,6 +389,10 @@ export const ProjectFormTab = ({
         onClose={() => setIsOpenModal({ selected: 0 })}
         onActive={onActiveProject}
         onDesactivate={onDesactivateProject}
+      />
+      <ModalMonthlyClosing
+        isOpen={isOpenModal.selected === 3}
+        onClose={() => setIsOpenModal({ selected: 0 })}
       />
     </>
   );
