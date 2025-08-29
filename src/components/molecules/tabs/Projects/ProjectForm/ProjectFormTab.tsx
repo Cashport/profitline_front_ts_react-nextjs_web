@@ -19,6 +19,9 @@ import "./projectformtab.scss";
 import { ModalBillingPeriod } from "@/components/molecules/modals/ModalBillingPeriod/ModalBillingPeriod";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { ModalGenerateActionProjectForm } from "@/components/molecules/modals/ModalGenerateActionProjectForm/ModalGenerateActionProjectForm";
+
 import {
   _onSubmit,
   dataToProjectFormData,
@@ -38,7 +41,9 @@ export const ProjectFormTab = ({
   onActiveProject = () => {},
   onDesactivateProject = () => {}
 }: ProjectFormTabProps) => {
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState({
+    selected: 0
+  });
   const [isBillingPeriodOpen, setIsBillingPeriodOpen] = useState(false);
   const [imageFile, setImageFile] = useState(data.LOGO);
   const [loading, setLoading] = useState(false);
@@ -79,9 +84,13 @@ export const ProjectFormTab = ({
     }
   };
 
+  const handleOpenModal = (type: number) => {
+    setIsOpenModal({ selected: type });
+  };
+
   return (
     <>
-      <form className="mainProyectsForm" onSubmit={handleSubmit(onSubmit)}>
+      <div className="mainProyectsForm">
         <Flex component={"header"} className="headerProyectsForm">
           <Link href="/settings">
             <Button
@@ -95,32 +104,11 @@ export const ProjectFormTab = ({
           </Link>
           <Flex gap={"1rem"}>
             {(statusForm === "review" || statusForm === "edit") && (
-              <Button
-                className="buttons"
-                htmlType="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsOpenModal(true);
+              <GenerateActionButton
+                onClick={() => {
+                  setIsOpenModal({ selected: 1 });
                 }}
-              >
-                Cambiar Estado
-                <ArrowsClockwise size={"1.2rem"} />
-              </Button>
-            )}
-            {statusForm === "review" ? (
-              <Button
-                className="buttons -edit"
-                htmlType="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onEditProject();
-                }}
-              >
-                {validationButtonText(statusForm)}
-                <Pencil size={"1.2rem"} />
-              </Button>
-            ) : (
-              ""
+              />
             )}
           </Flex>
         </Flex>
@@ -380,17 +368,24 @@ export const ProjectFormTab = ({
             )}
           </Flex>
         </Flex>
-      </form>
+      </div>
       <ModalBillingPeriod
         isOpen={isBillingPeriodOpen}
         setIsBillingPeriodOpen={setIsBillingPeriodOpen}
         setBillingPeriod={setBillingPeriod}
         billingPeriod={data.BILLING_PERIOD_CONFIG}
       />
+      <ModalGenerateActionProjectForm
+        isOpen={isOpenModal.selected === 1}
+        onClose={() => setIsOpenModal({ selected: 0 })}
+        handleOpenModal={handleOpenModal}
+        handleEditProject={onEditProject}
+        statusForm={statusForm}
+      />
       <ModalChangeStatus
         isActiveStatus={data?.IS_ACTIVE!}
-        isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
+        isOpen={isOpenModal.selected === 2}
+        onClose={() => setIsOpenModal({ selected: 0 })}
         onActive={onActiveProject}
         onDesactivate={onDesactivateProject}
       />
