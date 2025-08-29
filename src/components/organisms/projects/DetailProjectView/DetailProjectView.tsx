@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Flex, Spin, Typography } from "antd";
+import { Flex, Spin } from "antd";
 import { useParams } from "next/navigation";
 
 // Hooks & Services

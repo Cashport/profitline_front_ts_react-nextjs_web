@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, ColorPicker, Flex, Input, Select, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { ArrowsClockwise, CaretLeft, CaretRight, Pencil } from "phosphor-react";
+import { CaretLeft, CaretRight } from "phosphor-react";
 import Link from "next/link";
 
 // components

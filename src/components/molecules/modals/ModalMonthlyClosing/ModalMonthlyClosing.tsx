@@ -1,6 +1,11 @@
 "use client";
-import { useState } from "react";
-import { Flex, Input, Modal, Typography } from "antd";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { Flex, Input, message, Modal, Typography } from "antd";
+
+import { getCloseMonthByProject, IGetCloseMonth } from "@/services/projects/projects";
+import { useAppStore } from "@/lib/store/store";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
 import "./modalMonthlyClosing.scss";
@@ -14,12 +19,26 @@ interface Props {
 
 export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
   const [confirmationText, setConfirmationText] = useState<string>();
+  const [closeMonthData, setCloseMonthData] = useState<IGetCloseMonth>();
+  const [noCloseMonths, setNoCloseMonths] = useState<boolean>(false);
+  const { ID } = useAppStore((state) => state.selectedProject);
+
+  useEffect(() => {
+    const fetchMont = async () => {
+      try {
+        const closeMonths = await getCloseMonthByProject(ID);
+        setCloseMonthData(closeMonths);
+      } catch (error) {
+        message.error("Error al obtener el cierre de mes");
+        setNoCloseMonths(true);
+      }
+    };
+    fetchMont();
+  }, []);
 
   const handleClosePeriod = () => {
-    // Imprime el valor del input
     console.log("Texto de confirmación:", confirmationText);
 
-    // Aquí puedes agregar validación si lo necesitas
     if (confirmationText === "08-2025") {
       console.log("Periodo cerrado correctamente");
       // Aquí puedes agregar la lógica para cerrar el periodo
@@ -53,34 +72,48 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
       footer={null}
       onCancel={handleCancel}
     >
-      <Flex vertical gap="1.25rem" align="center">
-        <p className="modalMonthlyClosing__description">
-          Vas a cerrar el periodo <strong>08-2025</strong> que va desde el{" "}
-          <strong>01/08/2025</strong> hasta hoy
-          <strong> 27/02/2025</strong>
-        </p>
-        <p className="modalMonthlyClosing__description">
-          Si estás seguro escribe el mes que vas a cerrar <strong>&quot;08-2025&quot;</strong>
-        </p>
+      {noCloseMonths ? (
+        <p className="modalMonthlyClosing__description">No hay cierre para este proyecto</p>
+      ) : (
+        <Flex vertical gap="1.25rem" align="center">
+          <p className="modalMonthlyClosing__description">
+            Vas a cerrar el periodo <strong>{closeMonthData?.collection_period}</strong> que va
+            desde el{" "}
+            <strong>
+              {closeMonthData?.start_date
+                ? dayjs(closeMonthData.start_date).format("DD/MM/YYYY")
+                : ""}
+            </strong>{" "}
+            hasta hoy
+            <strong>
+              {" "}
+              {closeMonthData?.end_date ? dayjs(closeMonthData.end_date).format("DD/MM/YYYY") : ""}
+            </strong>
+          </p>
+          <p className="modalMonthlyClosing__description">
+            Si estás seguro escribe el mes que vas a cerrar{" "}
+            <strong>&quot;{closeMonthData?.collection_period}&quot;</strong>
+          </p>
 
-        <Input
-          className="modalMonthlyClosing__input"
-          value={confirmationText}
-          onChange={(e) => setConfirmationText(e.target.value)}
-        />
+          <Input
+            className="modalMonthlyClosing__input"
+            value={confirmationText}
+            onChange={(e) => setConfirmationText(e.target.value)}
+          />
 
-        <div style={{ height: "48px" }}>
-          <PrincipalButton
-            onClick={handleClosePeriod}
-            disabled={confirmationText !== "08-2025"}
-            customStyles={{
-              width: "320px"
-            }}
-          >
-            Cerrar periodo
-          </PrincipalButton>
-        </div>
-      </Flex>
+          <div style={{ height: "48px" }}>
+            <PrincipalButton
+              onClick={handleClosePeriod}
+              disabled={confirmationText !== closeMonthData?.collection_period}
+              customStyles={{
+                width: "320px"
+              }}
+            >
+              Cerrar periodo
+            </PrincipalButton>
+          </div>
+        </Flex>
+      )}
     </Modal>
   );
 };
