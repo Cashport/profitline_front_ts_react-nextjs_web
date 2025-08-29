@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { Flex, Input, message, Modal, Typography } from "antd";
 
-import { getCloseMonthByProject, IGetCloseMonth } from "@/services/projects/projects";
+import {
+  closeMonthByProject,
+  getCloseMonthByProject,
+  IGetCloseMonth
+} from "@/services/projects/projects";
 import { useAppStore } from "@/lib/store/store";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -21,6 +25,7 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
   const [confirmationText, setConfirmationText] = useState<string>();
   const [closeMonthData, setCloseMonthData] = useState<IGetCloseMonth>();
   const [noCloseMonths, setNoCloseMonths] = useState<boolean>(false);
+  const [loadingRequest, setLoadingRequest] = useState<boolean>(false);
   const { ID } = useAppStore((state) => state.selectedProject);
 
   useEffect(() => {
@@ -36,25 +41,28 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
     fetchMont();
   }, []);
 
-  const handleClosePeriod = () => {
-    console.log("Texto de confirmación:", confirmationText);
+  const handleClosePeriod = async () => {
+    setLoadingRequest(true);
 
-    if (confirmationText === "08-2025") {
-      console.log("Periodo cerrado correctamente");
-      // Aquí puedes agregar la lógica para cerrar el periodo
-      // Por ejemplo: llamar a una API, mostrar una notificación, etc.
-
-      // Limpiar el estado y cerrar el modal
-      setConfirmationText("");
-      onClose();
+    if (confirmationText === closeMonthData?.collection_period) {
+      try {
+        await closeMonthByProject(ID, confirmationText || "");
+        message.success("Periodo contable cerrado con éxito");
+        handleCancel();
+      } catch (error) {
+        message.error("Error al cerrar periodo contable");
+      }
     } else {
-      console.log("El texto de confirmación no coincide");
+      message.error("El texto de confirmación no coincide");
     }
+    setLoadingRequest(false);
   };
 
   // Limpiar el estado cuando el modal se cierre
   const handleCancel = () => {
     setConfirmationText(undefined);
+    setCloseMonthData(undefined);
+    setNoCloseMonths(false);
     onClose();
   };
 
@@ -108,6 +116,7 @@ export const ModalMonthlyClosing = ({ isOpen, onClose }: Props) => {
               customStyles={{
                 width: "320px"
               }}
+              loading={loadingRequest}
             >
               Cerrar periodo
             </PrincipalButton>
