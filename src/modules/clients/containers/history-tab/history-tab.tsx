@@ -35,12 +35,12 @@ const HistoryTab = () => {
     setOpenModal({ selected: 0 });
   };
 
-  const handleOpenDetail = (row: IHistoryRow) => {
-    if (row.payment_identification_url && row.payment_identification_url !== null) {
-      window.open(row.payment_identification_url, "_blank");
+  const handleOpenDetail = (row: IHistoryRow, url: string | null) => {
+    if (url && url !== null) {
+      window.open(url, "_blank");
       return;
     }
-    if (!row.id_mongo_log) return showMessage("info", "No hay detalle para esta comunicación");
+    if (!row.id_mongo_log) return showMessage("info", "No hay detalle de esta comunicación");
     setRowDetailID(row.id_mongo_log);
     setOpenModal({ selected: 3 });
   };

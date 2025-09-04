@@ -11,6 +11,7 @@ export interface IHistoryRow {
   id_mongo_log: string | null;
   user_name: string;
   payment_identification_url: string | null;
+  payment_identification_excel_url: string | null;
 }
 
 export interface IHistoryCommunicationDetail {

@@ -17,7 +17,7 @@ interface PropsHistoryTable {
   dataAllRecords?: IHistoryRow[];
   setSelectedRows: Dispatch<SetStateAction<IHistoryRow[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
-  handleOpenDetail: (row: IHistoryRow) => void;
+  handleOpenDetail: (row: IHistoryRow, url: string | null) => void;
 }
 
 const HistoryTable = ({
@@ -86,7 +86,7 @@ const HistoryTable = ({
                 icon={<FileXls size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
-                  handleOpenDetail(row);
+                  handleOpenDetail(row, row.payment_identification_excel_url);
                 }}
               >
                 Descargar plano
@@ -100,7 +100,7 @@ const HistoryTable = ({
                 icon={<FileText size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
-                  handleOpenDetail(row);
+                  handleOpenDetail(row, row.payment_identification_url);
                 }}
               >
                 Ver pdf
