@@ -515,7 +515,7 @@ const ApplyTab: React.FC = () => {
                       data={section.itemsList}
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
-                      handleEditRow={handleEditAdjustment}
+                      handleEditRow={(row) => handleEditRow(row, "discount")}
                     />
                   )}
                 </div>
