@@ -35,6 +35,7 @@ import ModalApplyAI from "./Modals/ModalApplyAI/ModalApplyAI";
 import { ModalGenerateActionApplyTab } from "./Modals/ModalGenerateActionApplyTab/ModalGenerateActionApplyTab";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ModalEditAdjustments from "../accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
+import { ModalChangeAIPrompt } from "./Modals/ModalChangeAIPrompt/ModalChangeAIPrompt";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -688,6 +689,10 @@ const ApplyTab: React.FC = () => {
         title={`¿Está seguro de eliminar todo?`}
         okText="Eliminar"
         okLoading={loadingRequest}
+      />
+      <ModalChangeAIPrompt
+        isOpen={isModalOpen.selected === 7}
+        onClose={() => setIsModalOpen({ selected: 0 })}
       />
     </>
   );

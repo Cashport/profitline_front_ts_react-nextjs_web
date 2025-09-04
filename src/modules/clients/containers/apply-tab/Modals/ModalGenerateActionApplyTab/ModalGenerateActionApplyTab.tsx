@@ -1,6 +1,6 @@
 "use client";
 import { Flex, message, Modal, Typography } from "antd";
-import { DownloadSimple, Pencil, Trash } from "@phosphor-icons/react";
+import { DownloadSimple, Pencil, Robot, Trash } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
@@ -74,6 +74,13 @@ export const ModalGenerateActionApplyTab = ({
           }}
           icon={<Pencil size={20} />}
           title="Editar ajustes"
+        />
+        <ButtonGenerateAction
+          onClick={() => {
+            handleOpenModal(7);
+          }}
+          icon={<Robot size={20} />}
+          title="Cambiar Prompt CahsportAI"
         />
       </Flex>
     </Modal>
