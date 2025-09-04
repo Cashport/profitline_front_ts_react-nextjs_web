@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { Button, Flex, Table, TableProps, Typography } from "antd";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import { Button, Dropdown, Flex, Table, TableProps, Typography } from "antd";
 import { Eye, Triangle } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
@@ -9,6 +9,7 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { IHistoryRow } from "@/types/clientHistory/IClientHistory";
 
 import "./history-tab-table.scss";
+import { DotsThreeVertical, FileText, FileXls } from "@phosphor-icons/react";
 
 const { Text } = Typography;
 
@@ -16,7 +17,7 @@ interface PropsHistoryTable {
   dataAllRecords?: IHistoryRow[];
   setSelectedRows: Dispatch<SetStateAction<IHistoryRow[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
-  handleOpenDetail: (row: IHistoryRow) => void;
+  handleOpenDetail: (row: IHistoryRow, url: string | null) => void;
 }
 
 const HistoryTable = ({
@@ -75,17 +76,56 @@ const HistoryTable = ({
       showSorterTooltip: false
     },
     {
-      title: "",
-      render: (_, row) => (
-        <Flex gap="0.5rem">
-          <Button
-            className="eyeButton"
-            onClick={() => handleOpenDetail(row)}
-            icon={<Eye size={"1.2rem"} />}
-          />
-        </Flex>
-      ),
-      width: 65
+      width: 76,
+      render: (_, row) => {
+        const items = [
+          {
+            key: "1",
+            label: (
+              <Button
+                icon={<FileXls size={20} />}
+                className="buttonNoBorder"
+                onClick={() => {
+                  handleOpenDetail(row, row.payment_identification_excel_url);
+                }}
+              >
+                Descargar plano
+              </Button>
+            )
+          },
+          {
+            key: "2",
+            label: (
+              <Button
+                icon={<FileText size={20} />}
+                className="buttonNoBorder"
+                onClick={() => {
+                  handleOpenDetail(row, row.payment_identification_url);
+                }}
+              >
+                Ver pdf
+              </Button>
+            )
+          }
+        ];
+
+        const customDropdown = (menu: ReactNode) => (
+          <div className="dropdownApplicationTable">{menu}</div>
+        );
+
+        return (
+          <Dropdown
+            dropdownRender={customDropdown}
+            menu={{ items }}
+            placement="bottomLeft"
+            trigger={["click"]}
+          >
+            <Button className="dotsBtn">
+              <DotsThreeVertical size={16} />
+            </Button>
+          </Dropdown>
+        );
+      }
     }
   ];
 
