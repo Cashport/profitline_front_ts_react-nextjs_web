@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Flex, Result, Spin, Typography } from "antd";
+import { Flex, Spin } from "antd";
 import { useParams } from "next/navigation";
 
 // Hooks & Services
@@ -17,8 +17,6 @@ import { useMessageApi } from "@/context/MessageContext";
 
 // Styles
 import "./detailproject.scss";
-
-const { Text } = Typography;
 
 export const DetailsProjectView = () => {
   const params = useParams();
@@ -74,7 +72,7 @@ export const DetailsProjectView = () => {
         ) : (
           <ProjectFormTab
             onSubmitForm={onUpdateProject}
-            onEditProject={() => setIsEditProject(true)}
+            onEditProject={() => setIsEditProject((prev) => !prev)}
             data={data}
             statusForm={isEditProject ? "edit" : "review"}
             onActiveProject={onActiveProject}

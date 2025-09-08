@@ -15,7 +15,8 @@ import {
   Paperclip,
   Link,
   Invoice,
-  PencilLine
+  PencilLine,
+  FileMinus
 } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -38,6 +39,7 @@ interface Props {
   setSelectOpen: Dispatch<SetStateAction<{ selected: number }>>;
   addInvoicesToApplicationTable: () => void;
   balanceLegalization?: () => void;
+  markAsBalance: () => void;
 }
 
 export const ModalGenerateAction = ({
@@ -48,7 +50,8 @@ export const ModalGenerateAction = ({
   setShowActionDetailModal,
   setSelectOpen,
   addInvoicesToApplicationTable,
-  balanceLegalization
+  balanceLegalization,
+  markAsBalance
 }: Props) => {
   const router = useRouter();
   const handleActionDetail = (type: number) => {
@@ -167,6 +170,15 @@ export const ModalGenerateAction = ({
           title="Ingresar gestión"
           onClick={() => {
             handleOpenModal(9);
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<FileMinus size={16} />}
+          title="Marcar como saldo"
+          onClick={() => {
+            if (validateInvoiceIsSelected()) {
+              markAsBalance();
+            }
           }}
         />
       </Flex>

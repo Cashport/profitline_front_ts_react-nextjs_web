@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button, Flex, Spin } from "antd";
 import { DotsThree, MagnifyingGlassPlus } from "phosphor-react";
 import { useParams } from "next/navigation";
@@ -14,6 +14,7 @@ import { useClientsPayments } from "@/hooks/useClientsPayments";
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
+import { useDebounce } from "@/hooks/useSearch";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
@@ -23,7 +24,7 @@ import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPay
 import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
-import { IClientPayment } from "@/types/clientPayments/IClientPayments";
+import { IClientPayment, IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { ISingleBank } from "@/types/banks/IBanks";
 
 import "./payments-tab.scss";
@@ -42,6 +43,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
     selected: 0
   });
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
 
@@ -50,6 +52,36 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
 
   const { data, isLoading, mutate } = useClientsPayments();
   const { mutate: mutateApplyTabData } = useApplicationTable();
+
+  // Función para filtrar pagos por descripción y monto
+  const filterPayments = (payments: IClientPayment[], searchTerm: string): IClientPayment[] => {
+    if (!searchTerm.trim()) return payments;
+
+    const normalizedSearch = searchTerm.toLowerCase().trim();
+
+    return payments.filter((payment) => {
+      const description = payment.description?.toLowerCase() || "";
+      const currentValue = payment.current_value?.toString() || "";
+      const initialValue = payment.initial_value?.toString() || "";
+
+      return (
+        description.includes(normalizedSearch) ||
+        currentValue.includes(normalizedSearch) ||
+        initialValue.includes(normalizedSearch)
+      );
+    });
+  };
+
+  const filteredData = useMemo(() => {
+    if (!data || !debouncedSearch.trim()) return data;
+
+    return data
+      .map((paymentStatus: IClientPaymentStatus) => ({
+        ...paymentStatus,
+        payments: filterPayments(paymentStatus.payments, debouncedSearch)
+      }))
+      .filter((paymentStatus) => paymentStatus.payments.length > 0);
+  }, [data, debouncedSearch]);
 
   const handleActionInDetail = (selectedPayment: IClientPayment | ISingleBank): void => {
     setIsModalActionPaymentOpen((prev) => !prev);
@@ -133,11 +165,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"
-              onChange={(event) => {
-                setTimeout(() => {
-                  setSearch(event.target.value);
-                }, 1000);
-              }}
+              onChange={(event) => setSearch(event.target.value)}
             />
             <Button
               className="button__actions"
@@ -163,7 +191,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
         ) : (
           <Collapse
             stickyLabel
-            items={data?.map((PaymentStatus) => ({
+            items={filteredData?.map((PaymentStatus) => ({
               key: PaymentStatus.payments_status_id,
               label: (
                 <LabelCollapse status={PaymentStatus.payments_status} color={PaymentStatus.color} />

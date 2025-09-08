@@ -192,3 +192,36 @@ export const getProjectDetails = async (id: string) => {
     throw error;
   }
 };
+export interface IGetCloseMonth {
+  collection_period: string;
+  start_date: string;
+  end_date: string;
+}
+
+export const getCloseMonthByProject = async (projectId: number) => {
+  try {
+    const response: GenericResponse<IGetCloseMonth> = await API.get(
+      `${config.API_HOST}/project/${projectId}/active-period`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error getting close month by project: ", error);
+    throw error;
+  }
+};
+
+export const closeMonthByProject = async (projectId: number, collection_period: string) => {
+  const formData = new FormData();
+  formData.append("collection_period", collection_period);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/project/close-month/project/${projectId}`,
+      formData
+    );
+    console.log("response close month: ", response);
+    return response.data;
+  } catch (error) {
+    console.error("error closing month by project: ", error);
+    throw error;
+  }
+};
