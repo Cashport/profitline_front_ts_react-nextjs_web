@@ -25,6 +25,24 @@
         font-weight: 300;
     }
 
+    &__label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $gray;
+        margin-top: -16px;
+    }
+
+    &__textArea {
+        background-color: $background;
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 100px;
+        resize: none;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 300;
+    }
+
     &__footer {
         display: flex;
         justify-content: flex-end;
