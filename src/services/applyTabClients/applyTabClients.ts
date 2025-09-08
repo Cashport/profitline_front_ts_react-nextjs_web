@@ -316,12 +316,15 @@ export const createPrompt = async (
   prompt: string
 ) => {
   try {
-    const response: GenericResponse<any> = await API.post(`${config.API_HOST}/prompt/create`, {
-      id_project: projectId,
-      clientUUID: clientUUID,
-      id_ai_type_task: aiTypeTaskId,
-      prompt: prompt
-    });
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/prompt/create-client-prompt`,
+      {
+        id_project: projectId,
+        clientUUID: clientUUID,
+        id_ai_type_task: aiTypeTaskId,
+        prompt: prompt
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("error createPrompt", error);

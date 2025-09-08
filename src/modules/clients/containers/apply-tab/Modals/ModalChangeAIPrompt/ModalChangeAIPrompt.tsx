@@ -38,7 +38,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
         try {
           const response = await getPromptByClientAndAITask(projectId, clientId, 1);
 
-          if (response.status === 404) {
+          if (response.data === null) {
             setNotFound(true);
             message.info("No se encontró un prompt para este cliente, por favor crea uno.");
             return;
