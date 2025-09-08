@@ -359,3 +359,18 @@ export const getPromptByClientAndAITask = async (
     throw error;
   }
 };
+
+export const updatePrompt = async (id: number, prompt: string, updatedBy: string) => {
+  try {
+    const response: GenericResponse<any> = await API.put(`${config.API_HOST}/prompt/update-by-id`, {
+      id: id,
+      prompt: prompt,
+      updated_by: updatedBy
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("error updatePrompt", error);
+    throw error;
+  }
+};

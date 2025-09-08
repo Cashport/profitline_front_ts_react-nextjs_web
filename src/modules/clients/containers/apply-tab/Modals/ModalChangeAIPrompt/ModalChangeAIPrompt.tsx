@@ -6,7 +6,9 @@ import { Sparkle } from "@phosphor-icons/react";
 
 import {
   createPrompt,
-  getPromptByClientAndAITask
+  getPromptByClientAndAITask,
+  IPrompt,
+  updatePrompt
 } from "@/services/applyTabClients/applyTabClients";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
@@ -22,6 +24,7 @@ interface Props {
 export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [promptData, setPromptData] = useState<IPrompt>();
   const [notFound, setNotFound] = useState(false);
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -41,6 +44,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
             return;
           }
           setPrompt(response?.data.prompt || "");
+          setPromptData(response?.data);
         } catch (error) {
           message.error("Error al obtener el prompt del cliente");
         }
@@ -65,6 +69,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       }
     } else {
       // TO DO: Aca entonces lo editamos
+      await updatePrompt(promptData?.id || 0, prompt, "USERTEST");
     }
   };
 
