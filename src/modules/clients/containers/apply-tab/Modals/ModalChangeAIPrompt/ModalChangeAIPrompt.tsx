@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button, Flex, message, Modal, Skeleton, Typography } from "antd";
 import { Sparkle } from "@phosphor-icons/react";
+import { auth } from "../../../../../../../firebase";
 
 import {
   createPrompt,
@@ -78,7 +79,8 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       }
     } else {
       try {
-        await updatePrompt(promptData?.id || 0, prompt, "USERTEST");
+        const currentUserEmail = auth.currentUser?.email || "";
+        await updatePrompt(promptData?.id || 0, prompt, currentUserEmail);
         message.success("Prompt actualizado con éxito");
         onClose();
       } catch (error) {
