@@ -281,15 +281,15 @@ export const uploadPaymentAttachment = async (
 ) => {
   try {
     const formData = new FormData();
-    formData.append('project_id', String(projectId));
-    formData.append('client_id', clientId);
+    formData.append("project_id", String(projectId));
+    formData.append("client_id", clientId);
 
     files.forEach((file) => {
-      formData.append('files', file);
+      formData.append("files", file);
     });
 
     if (comment) {
-      formData.append('comments', comment);
+      formData.append("comments", comment);
     }
 
     const response: GenericResponse<any> = await API.post(
@@ -297,15 +297,83 @@ export const uploadPaymentAttachment = async (
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          "Content-Type": "multipart/form-data"
+        }
       }
     );
 
     return response;
   } catch (error) {
-    console.error('Error in uploadPaymentAttachment:', error);
+    console.error("Error in uploadPaymentAttachment:", error);
     throw error;
   }
 };
 
+export const createPrompt = async (
+  projectId: number,
+  clientUUID: string,
+  aiTypeTaskId: number,
+  prompt: string
+) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/prompt/create-client-prompt`,
+      {
+        id_project: projectId,
+        clientUUID: clientUUID,
+        id_ai_type_task: aiTypeTaskId,
+        prompt: prompt
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error createPrompt", error);
+    throw error;
+  }
+};
+
+export interface IPrompt {
+  id: number;
+  id_project: number;
+  id_client: string;
+  id_ai_type_task: number;
+  prompt: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const getPromptByClientAndAITask = async (
+  projectId: number,
+  clientUUID: string,
+  aiTypeTaskId: number
+) => {
+  try {
+    const response: GenericResponse<IPrompt> = await API.post(
+      `${config.API_HOST}/prompt/get-by-criteria`,
+      {
+        id_project: projectId,
+        clientUUID: clientUUID,
+        id_ai_type_task: aiTypeTaskId
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("error getPromptByCriteria", error);
+    throw error;
+  }
+};
+
+export const updatePrompt = async (id: number, prompt: string, updatedBy: string) => {
+  try {
+    const response: GenericResponse<any> = await API.put(`${config.API_HOST}/prompt/update-by-id`, {
+      id: id,
+      prompt: prompt,
+      updated_by: updatedBy
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("error updatePrompt", error);
+    throw error;
+  }
+};
