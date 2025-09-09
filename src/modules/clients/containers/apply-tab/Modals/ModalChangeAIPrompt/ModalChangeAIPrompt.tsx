@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Button, Flex, message, Modal, Typography } from "antd";
+import { Button, Flex, message, Modal, Skeleton, Typography } from "antd";
 import { Sparkle } from "@phosphor-icons/react";
 
 import {
@@ -26,6 +26,10 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
   const [prompt, setPrompt] = useState("");
   const [promptData, setPromptData] = useState<IPrompt>();
   const [notFound, setNotFound] = useState(false);
+  const [loadingReqRes, setLoadingReqRes] = useState({
+    request: false,
+    response: false
+  });
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
@@ -35,12 +39,14 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
     if (isOpen) {
       // 1 es aplicación de pagos
       (async () => {
+        setLoadingReqRes((prev) => ({ ...prev, response: true }));
         try {
           const response = await getPromptByClientAndAITask(projectId, clientId, 1);
 
           if (response.data === null) {
             setNotFound(true);
             message.info("No se encontró un prompt para este cliente, por favor crea uno.");
+            setLoadingReqRes((prev) => ({ ...prev, response: false }));
             return;
           }
           setPrompt(response?.data.prompt || "");
@@ -48,6 +54,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
         } catch (error) {
           message.error("Error al obtener el prompt del cliente");
         }
+        setLoadingReqRes((prev) => ({ ...prev, response: false }));
       })();
     }
 
@@ -59,18 +66,26 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
   }, [isOpen]);
 
   const onSubmitPrompt = async () => {
+    setLoadingReqRes((prev) => ({ ...prev, request: true }));
     // Si no existe el prompt entonces se crea
     if (notFound) {
       try {
         await createPrompt(projectId, clientId, 1, prompt);
         message.success("Prompt creado con éxito");
+        onClose();
       } catch (error) {
         message.error("Error al crear el prompt");
       }
     } else {
-      // TO DO: Aca entonces lo editamos
-      await updatePrompt(promptData?.id || 0, prompt, "USERTEST");
+      try {
+        await updatePrompt(promptData?.id || 0, prompt, "USERTEST");
+        message.success("Prompt actualizado con éxito");
+        onClose();
+      } catch (error) {
+        message.error("Error al actualizar el prompt");
+      }
     }
+    setLoadingReqRes((prev) => ({ ...prev, request: false }));
   };
 
   return (
@@ -80,7 +95,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       centered
       title={
         <Title className="modalChangeAIPrompt__title" level={4}>
-          Promtp de cliente para{" "}
+          Prompt de cliente para{" "}
           <span
             className="cashportIATextGradient"
             style={{
@@ -110,21 +125,30 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
           los tendrá en cuenta en el proceso para la extracción de data
         </p>
 
-        <Flex vertical>
-          <p className="modalChangeAIPrompt__label">Prompt</p>
-          <textarea
-            defaultValue={prompt}
-            className="modalChangeAIPrompt__textArea"
-            onChange={(e) => setPrompt(e.target.value)}
-            disabled={!isEditing}
-          />
-        </Flex>
+        {loadingReqRes.response ? (
+          <Skeleton active />
+        ) : (
+          <Flex vertical>
+            <p className="modalChangeAIPrompt__label">Prompt</p>
+            <textarea
+              defaultValue={prompt}
+              className="modalChangeAIPrompt__textArea"
+              onChange={(e) => setPrompt(e.target.value)}
+              disabled={!isEditing}
+            />
+          </Flex>
+        )}
 
         <div className="modalChangeAIPrompt__footer">
           <Button className="cancelButton" onClick={() => setIsEditing(!isEditing)}>
-            Editar
+            {isEditing ? "Cancelar edición" : "Editar"}
           </Button>
-          <Button className="iaButton" onClick={onSubmitPrompt}>
+          <Button
+            className="iaButton"
+            onClick={onSubmitPrompt}
+            loading={loadingReqRes.request}
+            disabled={!isEditing || prompt.trim() === ""}
+          >
             <Sparkle size={14} color="#5b21b6" weight="fill" />
             <span className="textNormal">
               Guardar{" "}
