@@ -23,8 +23,16 @@ export interface ITask {
   total_portfolio: number;
   task_type: string;
 }
-export const useTasks = () => {
-  const { data, isLoading, mutate } = useSWR<GenericResponse<ITask[]>>(`/task/get-all`, fetcher);
+export const useTasks = (searchQuery?: string) => {
+  const requestUrl = ["/task/get-all"];
+  if (searchQuery) {
+    requestUrl.push(`?searchQuery=${searchQuery}`);
+  }
+
+  const { data, isLoading, mutate } = useSWR<GenericResponse<ITask[]>>(
+    requestUrl.join(""),
+    fetcher
+  );
 
   return {
     data: data?.data || [],

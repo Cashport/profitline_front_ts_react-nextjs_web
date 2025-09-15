@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Flex, Spin } from "antd";
+
+import { useTasks } from "@/hooks/useTasks";
+import { useDebounce } from "@/hooks/useSearch";
+
 import UiSearchInput from "@/components/ui/search-input";
 import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import Container from "@/components/atoms/Container/Container";
@@ -8,16 +12,16 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import TaskTable from "../TaskManagerTable";
 import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
 import MakeCallModal from "@/components/molecules/modals/MakeCallModal";
-import { useTasks } from "@/hooks/useTasks";
 
 const TaskManagerView = () => {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
   const isLoading = false;
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [modalSendEmailVisible, setModalSendEmailVisible] = useState(false);
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
 
-  const { data } = useTasks();
+  const { data } = useTasks(debouncedSearch);
 
   const rowSelection = {
     selectedRowKeys,
@@ -53,11 +57,7 @@ const TaskManagerView = () => {
               <UiSearchInput
                 className="search"
                 placeholder="Buscar tarea"
-                onChange={(event) => {
-                  setTimeout(() => {
-                    setSearch(event.target.value);
-                  }, 1000);
-                }}
+                onChange={(event) => setSearch(event.target.value)}
               />
               <UiFilterDropdown />
               <GenerateActionButton onClick={() => {}} disabled={selectedRowKeys.length === 0} />
