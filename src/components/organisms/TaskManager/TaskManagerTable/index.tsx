@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Table, Button, Flex, Dropdown, Menu, Modal } from "antd";
+import React from "react";
+import { Table, Flex, Dropdown, Menu } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import {
@@ -7,26 +7,15 @@ import {
   PhoneOutlined,
   WhatsAppOutlined,
   CalendarOutlined,
-  SyncOutlined,
   CreditCardOutlined,
   FileTextOutlined,
   FileDoneOutlined
 } from "@ant-design/icons";
 import { Circle, DotsThree, Users } from "phosphor-react";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import IconButton from "@/components/atoms/IconButton/IconButton";
-import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
+import { ITask } from "@/hooks/useTasks";
+import { useAppStore } from "@/lib/store/store";
 
-export interface Task {
-  key: string;
-  client: string;
-  taskType: string;
-  description: string;
-  status: "En curso" | "Completado" | "Sin empezar";
-  responsible: string;
-  portfolio: string;
-  impact: string;
-}
 interface IMenuItem {
   key: string;
   icon: JSX.Element;
@@ -39,16 +28,12 @@ const MenuItemCustom = ({ key, icon, title, onClick }: IMenuItem) => (
   </Menu.Item>
 );
 
-const statusColors: Record<Task["status"], string> = {
-  "En curso": "#0085FF",
-  Completado: "#00DE16",
-  "Sin empezar": "#DDDDDD"
-};
-
-const TaskTable: React.FC<{ data: Task[]; modalAction: (() => void)[] }> = ({
+const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
   data,
   modalAction
 }) => {
+  const formatMoney = useAppStore((state) => state.formatMoney);
+
   const menu = (
     <Menu
       style={{
@@ -88,9 +73,9 @@ const TaskTable: React.FC<{ data: Task[]; modalAction: (() => void)[] }> = ({
     </Menu>
   );
 
-  const columns: ColumnsType<Task> = [
-    { title: "Cliente", dataIndex: "client", key: "client", fixed: "left", width: 180 },
-    { title: "Tipo de tarea", dataIndex: "taskType", key: "taskType", width: 150 },
+  const columns: ColumnsType<ITask> = [
+    { title: "Cliente", dataIndex: "client_name", key: "client_name", fixed: "left", width: 180 },
+    { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 150 },
     {
       title: "Descripción",
       dataIndex: "description",
@@ -103,20 +88,26 @@ const TaskTable: React.FC<{ data: Task[]; modalAction: (() => void)[] }> = ({
       dataIndex: "status",
       key: "status",
       width: 120,
-      render: (status: Task["status"]) => (
+      render: (status: ITask["status"]) => (
         <Flex>
           <Tag
-            icon={<Circle color={statusColors[status]} weight="fill" size={6} />}
-            content={status}
-            color={statusColors[status]}
+            icon={<Circle color={status.color} weight="fill" size={6} />}
+            content={status.name}
+            style={{ backgroundColor: status.backgroundColor }}
+            color={status.color}
             withBorder={false}
           />
         </Flex>
       )
     },
-    { title: "Responsable", dataIndex: "responsible", key: "responsible", width: 120 },
-    { title: "Cartera", dataIndex: "portfolio", key: "portfolio", width: 150 },
-    { title: "Impacto", dataIndex: "impact", key: "impact", width: 150 },
+    { title: "Responsable", dataIndex: "user_name", key: "user_name", width: 120 },
+    {
+      title: "Cartera",
+      dataIndex: "total_portfolio",
+      key: "total_portfolio",
+      render: (value) => `${formatMoney(value)}`
+    },
+    { title: "Impacto", dataIndex: "amount", key: "amount", width: 150 },
     {
       title: "Acción",
       key: "action",

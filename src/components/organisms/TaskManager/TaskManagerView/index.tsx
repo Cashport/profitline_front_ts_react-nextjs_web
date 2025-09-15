@@ -1,24 +1,23 @@
 "use client";
 import { useState } from "react";
 import { Flex, Spin } from "antd";
-import { useParams } from "next/navigation";
 import UiSearchInput from "@/components/ui/search-input";
 import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import TaskTable from "../TaskManagerTable";
-import data from "../TaskManagerTable/data-mocked";
 import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
 import MakeCallModal from "@/components/molecules/modals/MakeCallModal";
+import { useTasks } from "@/hooks/useTasks";
 
 const TaskManagerView = () => {
-  const params = useParams();
-
   const [search, setSearch] = useState("");
   const isLoading = false;
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [modalSendEmailVisible, setModalSendEmailVisible] = useState(false);
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
+
+  const { data } = useTasks();
 
   const rowSelection = {
     selectedRowKeys,
@@ -26,6 +25,7 @@ const TaskManagerView = () => {
       setSelectedRowKeys(selectedKeys);
     }
   };
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
@@ -39,6 +39,7 @@ const TaskManagerView = () => {
   const openMakeCalllModal = () => {
     setModalMakeCallVisible(true);
   };
+
   return (
     <>
       {isLoading ? (
