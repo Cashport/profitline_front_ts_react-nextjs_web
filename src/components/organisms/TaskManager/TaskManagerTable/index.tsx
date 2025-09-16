@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, Dispatch, SetStateAction } from "react";
 import { Table, Flex, Dropdown, MenuProps, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Tag } from "@/components/atoms/Tag/Tag";
@@ -20,12 +20,22 @@ import { ITask } from "@/types/tasks/ITasks";
 
 import "./taskManagerTable.scss";
 
-const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
-  data,
-  modalAction
-}) => {
+const TaskTable: React.FC<{
+  data: ITask[];
+  modalAction: (() => void)[];
+  setSelectedRows: Dispatch<SetStateAction<ITask[] | undefined>>;
+}> = ({ data, modalAction, setSelectedRows }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
+
+  const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setSelectedRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    columnWidth: 30,
+    onChange: onSelectChange
+  };
 
   const menuItems: MenuProps["items"] = [
     {
@@ -105,13 +115,27 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
       title: "Cartera",
       dataIndex: "total_portfolio",
       key: "total_portfolio",
-      render: (value) => `${formatMoney(value)}`
+      align: "right",
+      render: (value) => (
+        <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
+          {formatMoney(value)}
+        </p>
+      ),
+      sorter: (a, b) => a.total_portfolio - b.total_portfolio,
+      showSorterTooltip: false
     },
     {
       title: "Impacto",
       dataIndex: "amount",
       key: "amount",
-      render: (value) => `${formatMoney(value)}`
+      align: "right",
+      render: (value) => (
+        <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
+          {formatMoney(value)}
+        </p>
+      ),
+      sorter: (a, b) => a.total_portfolio - b.total_portfolio,
+      showSorterTooltip: false
     },
     {
       title: "",
@@ -132,7 +156,8 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
     <Table
       className="taskManagerTable"
       columns={columns}
-      dataSource={data}
+      dataSource={data?.map((task) => ({ ...task, key: task.id }))}
+      rowSelection={rowSelection}
       pagination={false}
       scroll={{ y: height - 300, x: 100 }}
     />

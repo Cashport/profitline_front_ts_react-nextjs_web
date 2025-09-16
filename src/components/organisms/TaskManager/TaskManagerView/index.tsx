@@ -15,11 +15,13 @@ import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 
+import { ITask } from "@/types/tasks/ITasks";
+
 const TaskManagerView = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 1000);
   const isLoading = false;
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRows, setSelectedRows] = useState<ITask[] | undefined>(undefined);
   const [modalSendEmailVisible, setModalSendEmailVisible] = useState(false);
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
@@ -29,12 +31,6 @@ const TaskManagerView = () => {
 
   const { data } = useTasks(selectedFilters, debouncedSearch);
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedKeys: React.Key[]) => {
-      setSelectedRowKeys(selectedKeys);
-    }
-  };
 
   const openSendEmailModal = () => {
     setModalSendEmailVisible(true);
@@ -59,9 +55,9 @@ const TaskManagerView = () => {
                 onChange={(event) => setSearch(event.target.value)}
               />
               <FiltersTasks setSelectedFilters={setSelectedFilters} />
-              <GenerateActionButton onClick={() => {}} disabled={selectedRowKeys.length === 0} />
+              <GenerateActionButton onClick={() => {}} disabled={!selectedRows || selectedRows.length === 0} />
             </Flex>
-            <TaskTable data={data} modalAction={[openSendEmailModal, openMakeCalllModal]} />
+            <TaskTable data={data} modalAction={[openSendEmailModal, openMakeCalllModal]} setSelectedRows={setSelectedRows} />
           </Flex>
           <SendEmailModal
             visible={modalSendEmailVisible}
