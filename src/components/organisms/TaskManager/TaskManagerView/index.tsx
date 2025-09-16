@@ -31,7 +31,6 @@ const TaskManagerView = () => {
 
   const { data } = useTasks(selectedFilters, debouncedSearch);
 
-
   const openSendEmailModal = () => {
     setModalSendEmailVisible(true);
   };
@@ -47,7 +46,7 @@ const TaskManagerView = () => {
         </Flex>
       ) : (
         <Container style={{ overflowY: "auto" }}>
-          <Flex gap={"2rem"} vertical>
+          <Flex gap={"1rem"} vertical>
             <Flex gap={"0.5rem"}>
               <UiSearchInput
                 className="search"
@@ -55,9 +54,16 @@ const TaskManagerView = () => {
                 onChange={(event) => setSearch(event.target.value)}
               />
               <FiltersTasks setSelectedFilters={setSelectedFilters} />
-              <GenerateActionButton onClick={() => {}} disabled={!selectedRows || selectedRows.length === 0} />
+              <GenerateActionButton
+                onClick={() => {}}
+                disabled={!selectedRows || selectedRows.length === 0}
+              />
             </Flex>
-            <TaskTable data={data} modalAction={[openSendEmailModal, openMakeCalllModal]} setSelectedRows={setSelectedRows} />
+            <TaskTable
+              data={data}
+              modalAction={[openSendEmailModal, openMakeCalllModal]}
+              setSelectedRows={setSelectedRows}
+            />
           </Flex>
           <SendEmailModal
             visible={modalSendEmailVisible}

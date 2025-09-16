@@ -159,7 +159,7 @@ const TaskTable: React.FC<{
       dataSource={data?.map((task) => ({ ...task, key: task.id }))}
       rowSelection={rowSelection}
       pagination={false}
-      scroll={{ y: height - 300, x: 100 }}
+      scroll={{ y: height - 270, x: 100 }}
     />
   );
 };
