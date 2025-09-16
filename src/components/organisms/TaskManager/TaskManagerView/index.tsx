@@ -28,7 +28,7 @@ const TaskManagerView = () => {
     taskTypes: []
   });
 
-  const { data } = useTasks(debouncedSearch);
+  const { data } = useTasks(selectedFilters, debouncedSearch);
 
   const rowSelection = {
     selectedRowKeys,
