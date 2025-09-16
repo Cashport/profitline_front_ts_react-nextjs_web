@@ -1,7 +1,8 @@
 import React, { ReactNode } from "react";
-import { Table, Flex, Dropdown, MenuProps } from "antd";
+import { Table, Flex, Dropdown, MenuProps, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Tag } from "@/components/atoms/Tag/Tag";
+import { Circle, DotsThree, Users } from "phosphor-react";
 import {
   MailOutlined,
   PhoneOutlined,
@@ -11,9 +12,10 @@ import {
   FileTextOutlined,
   FileDoneOutlined
 } from "@ant-design/icons";
-import { Circle, DotsThree, Users } from "phosphor-react";
-import IconButton from "@/components/atoms/IconButton/IconButton";
+
 import { useAppStore } from "@/lib/store/store";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+
 import { ITask } from "@/types/tasks/ITasks";
 
 import "./taskManagerTable.scss";
@@ -23,6 +25,7 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
   modalAction
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const height = useScreenHeight();
 
   const menuItems: MenuProps["items"] = [
     {
@@ -114,10 +117,12 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
       title: "",
       key: "action",
       fixed: "right",
-      width: 50,
+      width: 70,
       render: () => (
         <Dropdown dropdownRender={customDropdown} menu={{ items: menuItems }} trigger={["click"]}>
-          <IconButton icon={<DotsThree size={20} />} />
+          <Button className="dotsBtn">
+            <DotsThree size={20} />
+          </Button>
         </Dropdown>
       )
     }
@@ -125,10 +130,11 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
 
   return (
     <Table
+      className="taskManagerTable"
       columns={columns}
       dataSource={data}
       pagination={false}
-      // scroll={{ x: "max-content", y: "calc(100vh - 300px)" }}
+      scroll={{ y: height - 300, x: 100 }}
     />
   );
 };
