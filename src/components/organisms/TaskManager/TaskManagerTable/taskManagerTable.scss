@@ -1,0 +1,20 @@
+@import "@styles/variables.scss";
+
+.dropdownTaskManagerTable {
+    ul {
+        background-color: $white !important;
+        padding: 12px !important;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    li {
+        background-color: $background !important;
+        border: 1px solid transparent;
+
+        &:hover {
+            border: 1px solid $black !important;
+        }
+    }
+}

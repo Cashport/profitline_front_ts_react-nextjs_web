@@ -37,13 +37,6 @@ const TaskManagerView = () => {
     }
   };
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
-
-  const handleMenuClick = ({ key }: { key: string }) => {
-    setSelectedAction(key);
-    setModalVisible(true);
-  };
   const openSendEmailModal = () => {
     setModalSendEmailVisible(true);
   };
