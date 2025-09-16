@@ -74,45 +74,47 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
   );
 
   const columns: ColumnsType<ITask> = [
-    { title: "Cliente", dataIndex: "client_name", key: "client_name", fixed: "left", width: 180 },
-    { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 150 },
+    { title: "Cliente", dataIndex: "client_name", key: "client_name" },
+    { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 130 },
     {
       title: "Descripción",
       dataIndex: "description",
-      key: "description",
-      width: 300,
-      ellipsis: true
+      key: "description"
     },
     {
       title: "Estado",
       dataIndex: "status",
       key: "status",
-      width: 120,
       render: (status: ITask["status"]) => (
         <Flex>
           <Tag
             icon={<Circle color={status.color} weight="fill" size={6} />}
             content={status.name}
-            style={{ backgroundColor: status.backgroundColor }}
+            style={{ backgroundColor: status.backgroundColor, textWrap: "nowrap" }}
             color={status.color}
             withBorder={false}
           />
         </Flex>
       )
     },
-    { title: "Responsable", dataIndex: "user_name", key: "user_name", width: 120 },
+    { title: "Responsable", dataIndex: "user_name", key: "user_name" },
     {
       title: "Cartera",
       dataIndex: "total_portfolio",
       key: "total_portfolio",
       render: (value) => `${formatMoney(value)}`
     },
-    { title: "Impacto", dataIndex: "amount", key: "amount", width: 150 },
     {
-      title: "Acción",
+      title: "Impacto",
+      dataIndex: "amount",
+      key: "amount",
+      render: (value) => `${formatMoney(value)}`
+    },
+    {
+      title: "",
       key: "action",
       fixed: "right",
-      width: 100,
+      width: 50,
       render: () => (
         <Dropdown dropdownRender={customDropdown} menu={{ items: menuItems }} trigger={["click"]}>
           <IconButton icon={<DotsThree size={20} />} />
@@ -126,8 +128,7 @@ const TaskTable: React.FC<{ data: ITask[]; modalAction: (() => void)[] }> = ({
       columns={columns}
       dataSource={data}
       pagination={false}
-      scroll={{ x: "max-content", y: "calc(100vh - 300px)" }}
-      bordered
+      // scroll={{ x: "max-content", y: "calc(100vh - 300px)" }}
     />
   );
 };

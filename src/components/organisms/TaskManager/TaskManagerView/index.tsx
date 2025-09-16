@@ -6,7 +6,6 @@ import { useTasks } from "@/hooks/useTasks";
 import { useDebounce } from "@/hooks/useSearch";
 
 import UiSearchInput from "@/components/ui/search-input";
-import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 import Container from "@/components/atoms/Container/Container";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import TaskTable from "../TaskManagerTable";
