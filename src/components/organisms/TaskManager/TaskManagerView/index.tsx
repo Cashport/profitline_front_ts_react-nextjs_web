@@ -12,6 +12,9 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import TaskTable from "../TaskManagerTable";
 import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
 import MakeCallModal from "@/components/molecules/modals/MakeCallModal";
+import FiltersTasks, {
+  ISelectFilterTasks
+} from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 
 const TaskManagerView = () => {
   const [search, setSearch] = useState("");
@@ -20,6 +23,10 @@ const TaskManagerView = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [modalSendEmailVisible, setModalSendEmailVisible] = useState(false);
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
+    statuses: [],
+    taskTypes: []
+  });
 
   const { data } = useTasks(debouncedSearch);
 
@@ -59,7 +66,7 @@ const TaskManagerView = () => {
                 placeholder="Buscar tarea"
                 onChange={(event) => setSearch(event.target.value)}
               />
-              <UiFilterDropdown />
+              <FiltersTasks setSelectedFilters={setSelectedFilters} />
               <GenerateActionButton onClick={() => {}} disabled={selectedRowKeys.length === 0} />
             </Flex>
             <TaskTable data={data} modalAction={[openSendEmailModal, openMakeCalllModal]} />
