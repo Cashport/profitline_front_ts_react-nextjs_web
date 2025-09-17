@@ -193,7 +193,7 @@ export const generalResolver: ObjectSchema<DiscountSchema> = yup.object({
       is: (discount_type: number) => discountTypeByAnnual.includes(discount_type),
       then: () =>
         yup
-          .number()
+          .string()
           .typeError("Tipo de dato invalido")
           .nonNullable("El cliente es requerido")
           .required("El cliente es requerido")
@@ -205,7 +205,7 @@ export const generalResolver: ObjectSchema<DiscountSchema> = yup.object({
               });
             return true;
           }),
-      otherwise: () => yup.number().optional().nullable()
+      otherwise: () => yup.string().optional().nullable()
     }),
   client_name: yup.string().optional(),
   annual_ranges: yup.array().when("discount_type", {

@@ -107,6 +107,8 @@ export interface DiscountOrder {
 }
 export interface OrderDiscount {
   totalDiscount: number;
+  totalOrderDiscount: number;
+  totalProductDiscount: number;
   discountOrder: DiscountOrder[];
   discountItems: DiscountItem[];
 }
