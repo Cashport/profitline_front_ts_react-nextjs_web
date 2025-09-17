@@ -3,6 +3,7 @@ import { Table, Flex, Dropdown, MenuProps, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Tag } from "@/components/atoms/Tag/Tag";
 import { Circle, DotsThree, Users } from "phosphor-react";
+import { Invoice } from "@phosphor-icons/react";
 import {
   MailOutlined,
   PhoneOutlined,
@@ -14,6 +15,7 @@ import {
 } from "@ant-design/icons";
 
 import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 import { ITask } from "@/types/tasks/ITasks";
@@ -27,6 +29,13 @@ const TaskTable: React.FC<{
 }> = ({ data, modalAction, setSelectedRows }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
+  const { openModal } = useModalDetail();
+
+  const handleOpenBalanceLegalization = () => {
+    openModal("balanceLegalization", {
+      // selectedAdjustments: selectedRows
+    });
+  };
 
   const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
     setSelectedRows(newSelectedRow);
@@ -37,50 +46,66 @@ const TaskTable: React.FC<{
     onChange: onSelectChange
   };
 
-  const menuItems: MenuProps["items"] = [
-    {
-      key: "Enviar correo",
-      icon: <MailOutlined size={12} />,
-      label: "Enviar correo",
-      onClick: modalAction[0]
-    },
-    {
-      key: "Llamar",
-      icon: <PhoneOutlined size={12} />,
-      label: "Llamar",
-      onClick: modalAction[1]
-    },
-    {
-      key: "WhatsApp",
-      icon: <WhatsAppOutlined size={12} />,
-      label: "WhatsApp"
-    },
-    {
-      key: "Agendar visita",
-      icon: <Users size={12} />,
-      label: "Agendar visita"
-    },
-    {
-      key: "Conciliar",
-      icon: <CalendarOutlined size={12} />,
-      label: "Conciliar"
-    },
-    {
-      key: "Aplicar pago",
-      icon: <CreditCardOutlined size={12} />,
-      label: "Aplicar pago"
-    },
-    {
-      key: "Radicar",
-      icon: <FileTextOutlined size={12} />,
-      label: "Radicar"
-    },
-    {
-      key: "Reportar pago",
-      icon: <FileDoneOutlined size={12} />,
-      label: "Reportar pago"
+  const getMenuItems = (row: ITask): MenuProps["items"] => {
+    const baseItems: MenuProps["items"] = [
+      {
+        key: "Enviar correo",
+        icon: <MailOutlined size={12} />,
+        label: "Enviar correo",
+        onClick: modalAction[0]
+      },
+      {
+        key: "Llamar",
+        icon: <PhoneOutlined size={12} />,
+        label: "Llamar",
+        onClick: modalAction[1]
+      },
+      {
+        key: "WhatsApp",
+        icon: <WhatsAppOutlined size={12} />,
+        label: "WhatsApp"
+      },
+      {
+        key: "Agendar visita",
+        icon: <Users size={12} />,
+        label: "Agendar visita"
+      },
+      {
+        key: "Conciliar",
+        icon: <CalendarOutlined size={12} />,
+        label: "Conciliar"
+      },
+      {
+        key: "Aplicar pago",
+        icon: <CreditCardOutlined size={12} />,
+        label: "Aplicar pago"
+      },
+      {
+        key: "Radicar",
+        icon: <FileTextOutlined size={12} />,
+        label: "Radicar"
+      },
+      {
+        key: "Reportar pago",
+        icon: <FileDoneOutlined size={12} />,
+        label: "Reportar pago"
+      }
+    ];
+
+    if (row.task_type === "Saldo") {
+      return [
+        ...baseItems,
+        {
+          key: "Legalizar saldo",
+          icon: <Invoice size={12} />,
+          label: "Legalizar saldo",
+          onClick: handleOpenBalanceLegalization
+        }
+      ];
     }
-  ];
+
+    return baseItems;
+  };
 
   const customDropdown = (menu: ReactNode) => (
     <div className="dropdownTaskManagerTable">{menu}</div>
@@ -142,13 +167,19 @@ const TaskTable: React.FC<{
       key: "action",
       fixed: "right",
       width: 70,
-      render: () => (
-        <Dropdown dropdownRender={customDropdown} menu={{ items: menuItems }} trigger={["click"]}>
-          <Button className="dotsBtn">
-            <DotsThree size={20} />
-          </Button>
-        </Dropdown>
-      )
+      render: (_, row) => {
+        return (
+          <Dropdown
+            dropdownRender={customDropdown}
+            menu={{ items: getMenuItems(row) }}
+            trigger={["click"]}
+          >
+            <Button className="dotsBtn">
+              <DotsThree size={20} />
+            </Button>
+          </Dropdown>
+        );
+      }
     }
   ];
 

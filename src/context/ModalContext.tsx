@@ -64,6 +64,7 @@ interface ModalSendEmailProps {
 
 interface ModalBalanceLegalizationProps {
   selectedAdjustments?: FinancialDiscount[];
+  clientUUIDProp?: string;
 }
 
 type ModalProps =
