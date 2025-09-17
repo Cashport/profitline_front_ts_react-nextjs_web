@@ -200,6 +200,22 @@ const CreateOrderCart: FC = ({}) => {
                 <p>-$0</p>
               )}
             </Flex>
+            <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
+              <p>Descuentos de la orden</p>
+              {confirmOrderData.discounts ? (
+                <small>-${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}</small>
+              ) : (
+                <small>-$0</small>
+              )}
+            </Flex>
+            <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
+              <p>Descuentos de productos</p>
+              {confirmOrderData.discounts ? (
+                <small>-${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}</small>
+              ) : (
+                <small>-$0</small>
+              )}
+            </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
               <strong>Total</strong>
               <strong>${formatNumber(confirmOrderData?.total)}</strong>
