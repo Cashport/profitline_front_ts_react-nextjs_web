@@ -20,7 +20,6 @@ import { ITask } from "@/types/tasks/ITasks";
 const TaskManagerView = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 1000);
-  const isLoading = false;
   const [selectedRows, setSelectedRows] = useState<ITask[] | undefined>(undefined);
   const [modalSendEmailVisible, setModalSendEmailVisible] = useState(false);
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
@@ -29,7 +28,7 @@ const TaskManagerView = () => {
     taskTypes: []
   });
 
-  const { data } = useTasks(selectedFilters, debouncedSearch);
+  const { data, isLoading } = useTasks(selectedFilters, debouncedSearch);
 
   const openSendEmailModal = () => {
     setModalSendEmailVisible(true);
@@ -40,43 +39,43 @@ const TaskManagerView = () => {
 
   return (
     <>
-      {isLoading ? (
-        <Flex justify="center" align="center" style={{ height: "3rem" }}>
-          <Spin />
-        </Flex>
-      ) : (
-        <Container style={{ overflowY: "auto" }}>
-          <Flex gap={"1rem"} vertical>
-            <Flex gap={"0.5rem"}>
-              <UiSearchInput
-                className="search"
-                placeholder="Buscar tarea"
-                onChange={(event) => setSearch(event.target.value)}
-              />
-              <FiltersTasks setSelectedFilters={setSelectedFilters} />
-              <GenerateActionButton
-                onClick={() => {}}
-                disabled={!selectedRows || selectedRows.length === 0}
-              />
+      <Container style={{ overflowY: "auto" }}>
+        <Flex gap={"1rem"} vertical>
+          <Flex gap={"0.5rem"}>
+            <UiSearchInput
+              className="search"
+              placeholder="Buscar tarea"
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <FiltersTasks setSelectedFilters={setSelectedFilters} />
+            <GenerateActionButton
+              onClick={() => {}}
+              disabled={!selectedRows || selectedRows.length === 0}
+            />
+          </Flex>
+          {isLoading ? (
+            <Flex justify="center" align="center" style={{ height: "3rem" }}>
+              <Spin />
             </Flex>
+          ) : (
             <TaskTable
               data={data}
               modalAction={[openSendEmailModal, openMakeCalllModal]}
               setSelectedRows={setSelectedRows}
             />
-          </Flex>
-          <SendEmailModal
-            visible={modalSendEmailVisible}
-            onClose={() => setModalSendEmailVisible(false)}
-            onSend={() => {}}
-          />
-          <MakeCallModal
-            visible={modalMakeCallVisible}
-            onClose={() => setModalMakeCallVisible(false)}
-            onSend={() => {}}
-          />
-        </Container>
-      )}
+          )}
+        </Flex>
+        <SendEmailModal
+          visible={modalSendEmailVisible}
+          onClose={() => setModalSendEmailVisible(false)}
+          onSend={() => {}}
+        />
+        <MakeCallModal
+          visible={modalMakeCallVisible}
+          onClose={() => setModalMakeCallVisible(false)}
+          onSend={() => {}}
+        />
+      </Container>
     </>
   );
 };
