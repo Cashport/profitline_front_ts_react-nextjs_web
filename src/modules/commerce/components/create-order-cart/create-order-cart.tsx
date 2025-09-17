@@ -10,6 +10,7 @@ import { OrderViewContext } from "../../containers/create-order/create-order";
 import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { ISelectType } from "@/types/clients/IClients";
 
@@ -23,6 +24,7 @@ const CreateOrderCart: FC = ({}) => {
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const {
     selectedCategories,
@@ -46,7 +48,20 @@ const CreateOrderCart: FC = ({}) => {
   };
 
   const handleContinuePurchase = () => {
+    if (confirmOrderData?.total && confirmOrderData.total < 1500000) {
+      setShowConfirmModal(true);
+    } else {
+      setCheckingOut(true);
+    }
+  };
+
+  const handleConfirmPurchase = () => {
+    setShowConfirmModal(false);
     setCheckingOut(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowConfirmModal(false);
   };
 
   useEffect(() => {
@@ -208,6 +223,16 @@ const CreateOrderCart: FC = ({}) => {
       {openDiscountsModal && (
         <CreateOrderDiscountsModal setOpenDiscountsModal={setOpenDiscountsModal} />
       )}
+
+      <ModalConfirmAction
+        isOpen={showConfirmModal}
+        onClose={handleCloseModal}
+        onOk={handleConfirmPurchase}
+        title="¿Está seguro que desea continuar?"
+        content="El pedido es inferior a $1.500.000 ¿Está seguro que desea continuar?"
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 };
