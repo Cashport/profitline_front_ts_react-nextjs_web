@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Flex, Spin } from "antd";
+import { Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import ConfirmedOrderItem from "../../components/confirmed-order-item";
 import { CheckCircle } from "phosphor-react";
@@ -12,6 +12,8 @@ import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import { DiscountItem, ISingleOrder } from "@/types/commerce/ICommerce";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
+
+const { Text } = Typography;
 
 export const ConfirmedOrderView: FC = () => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -49,7 +51,7 @@ export const ConfirmedOrderView: FC = () => {
         <Spin size="large" style={{ margin: "auto" }} />
       ) : (
         <>
-          {order?.block_flag && notificationId !== null && (
+          {!!order?.block_flag && notificationId !== null && (
             <ConfirmedOrderModalBlocked notificationId={Number(notificationId)} />
           )}
           <div className={styles.confirmedOrderView}>
@@ -154,6 +156,22 @@ export const ConfirmedOrderView: FC = () => {
                   <Flex justify="space-between">
                     <p>Descuentos</p>
                     <p>-${formatNumber(order?.detail?.discounts?.totalDiscount ?? 0)}</p>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text className={styles.footer__discountExplanation}>
+                      Descuentos de la orden
+                    </Text>
+                    <Text className={styles.footer__discountExplanation}>
+                      -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
+                    </Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text className={styles.footer__discountExplanation}>
+                      Descuentos de productos
+                    </Text>
+                    <Text className={styles.footer__discountExplanation}>
+                      -${formatNumber(order?.detail?.discounts?.totalProductDiscount ?? 0)}
+                    </Text>
                   </Flex>
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
                     <strong>Total</strong>
