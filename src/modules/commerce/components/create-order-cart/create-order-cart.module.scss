@@ -80,6 +80,11 @@
         background-color: #fcffed;
         border-radius: 7px;
 
+        &__discountExplanation {
+            font-size: 0.875rem;
+            color: $gray;
+        }
+
         p {
             font-weight: 500;
         }
