@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useState } from "react";
-import { Flex } from "antd";
+import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple } from "phosphor-react";
 import { formatNumber } from "@/utils/utils";
@@ -18,6 +18,8 @@ import styles from "./create-order-cart.module.scss";
 export interface selectClientForm {
   client: ISelectType;
 }
+
+const { Text } = Typography;
 
 const CreateOrderCart: FC = ({}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -201,19 +203,27 @@ const CreateOrderCart: FC = ({}) => {
               )}
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
-              <p>Descuentos de la orden</p>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                Descuentos de la orden
+              </p>
               {confirmOrderData.discounts ? (
-                <small>-${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}</small>
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
+                </Text>
               ) : (
-                <small>-$0</small>
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
               )}
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
-              <p>Descuentos de productos</p>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                Descuentos de productos
+              </p>
               {confirmOrderData.discounts ? (
-                <small>-${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}</small>
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}
+                </Text>
               ) : (
-                <small>-$0</small>
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
               )}
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>

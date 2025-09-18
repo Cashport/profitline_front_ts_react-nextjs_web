@@ -148,6 +148,10 @@
             p {
                 font-weight: 500;
             }
+            &__discountExplanation {
+                font-size: 0.875rem;
+                color: $gray;
+            }
             strong {
                 font-weight: 800;
                 font-size: 2rem;
