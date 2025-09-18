@@ -44,12 +44,18 @@ interface Props {
   // eslint-disable-next-line no-unused-vars
   onClose: (cancelClicked?: boolean) => void;
   selectedAdjustments?: FinancialDiscount[];
+  clientUUIDProp?: string;
 }
 
-const ModalBalanceLegalization = ({ isOpen, onClose, selectedAdjustments }: Props) => {
+const ModalBalanceLegalization = ({
+  isOpen,
+  onClose,
+  selectedAdjustments,
+  clientUUIDProp
+}: Props) => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
-  const clientId = clientIdParam || "";
+  const clientId = clientIdParam || clientUUIDProp || "";
 
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
