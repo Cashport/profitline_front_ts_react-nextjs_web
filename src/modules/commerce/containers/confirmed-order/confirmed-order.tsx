@@ -159,18 +159,18 @@ export const ConfirmedOrderView: FC = () => {
                   </Flex>
                   <Flex justify="space-between">
                     <Text className={styles.footer__discountExplanation}>
-                      Descuentos de la orden
-                    </Text>
-                    <Text className={styles.footer__discountExplanation}>
-                      -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
-                    </Text>
-                  </Flex>
-                  <Flex justify="space-between">
-                    <Text className={styles.footer__discountExplanation}>
                       Descuentos de productos
                     </Text>
                     <Text className={styles.footer__discountExplanation}>
                       -${formatNumber(order?.detail?.discounts?.totalProductDiscount ?? 0)}
+                    </Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text className={styles.footer__discountExplanation}>
+                      Descuentos de la orden
+                    </Text>
+                    <Text className={styles.footer__discountExplanation}>
+                      -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
