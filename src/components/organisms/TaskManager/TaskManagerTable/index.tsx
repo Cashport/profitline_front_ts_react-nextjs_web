@@ -1,142 +1,196 @@
-import React, { useState } from "react";
-import { Table, Button, Flex, Dropdown, Menu, Modal } from "antd";
+import React, { ReactNode, Dispatch, SetStateAction } from "react";
+import { Table, Flex, Dropdown, MenuProps, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Tag } from "@/components/atoms/Tag/Tag";
+import { Circle, DotsThree, Users } from "phosphor-react";
+import { Invoice } from "@phosphor-icons/react";
 import {
   MailOutlined,
   PhoneOutlined,
   WhatsAppOutlined,
   CalendarOutlined,
-  SyncOutlined,
   CreditCardOutlined,
   FileTextOutlined,
   FileDoneOutlined
 } from "@ant-design/icons";
-import { Circle, DotsThree, Users } from "phosphor-react";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import IconButton from "@/components/atoms/IconButton/IconButton";
-import SendEmailModal from "@/components/molecules/modals/SendEmailModal";
 
-export interface Task {
-  key: string;
-  client: string;
-  taskType: string;
-  description: string;
-  status: "En curso" | "Completado" | "Sin empezar";
-  responsible: string;
-  portfolio: string;
-  impact: string;
-}
-interface IMenuItem {
-  key: string;
-  icon: JSX.Element;
-  title: string;
-  onClick?: () => void;
-}
-const MenuItemCustom = ({ key, icon, title, onClick }: IMenuItem) => (
-  <Menu.Item key={key} style={{ backgroundColor: "#F7F7F7" }} icon={icon} onClick={onClick}>
-    {title}
-  </Menu.Item>
-);
+import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
-const statusColors: Record<Task["status"], string> = {
-  "En curso": "#0085FF",
-  Completado: "#00DE16",
-  "Sin empezar": "#DDDDDD"
-};
+import { ITask } from "@/types/tasks/ITasks";
 
-const TaskTable: React.FC<{ data: Task[]; modalAction: (() => void)[] }> = ({
-  data,
-  modalAction
-}) => {
-  const menu = (
-    <Menu
-      style={{
-        backgroundColor: "white",
-        padding: 12,
-        gap: 10,
-        display: "flex",
-        flexDirection: "column"
-      }}
-    >
-      <MenuItemCustom
-        key="Enviar correo"
-        icon={<MailOutlined size={12} />}
-        title="Enviar correo"
-        onClick={modalAction[0]}
-      />
-      <MenuItemCustom
-        key="Llamar"
-        icon={<PhoneOutlined size={12} />}
-        title="Llamar"
-        onClick={modalAction[1]}
-      />
-      <MenuItemCustom key="WhatsApp" icon={<WhatsAppOutlined size={12} />} title="WhatsApp" />
-      <MenuItemCustom key="Agendar visita" icon={<Users size={12} />} title="Agendar visita" />
-      <MenuItemCustom key="Conciliar" icon={<CalendarOutlined size={12} />} title="Conciliar" />
-      <MenuItemCustom
-        key="Aplicar pago"
-        icon={<CreditCardOutlined size={12} />}
-        title="Aplicar pago"
-      />
-      <MenuItemCustom key="Radicar" icon={<FileTextOutlined size={12} />} title="Radicar" />
-      <MenuItemCustom
-        key="Reportar pago"
-        icon={<FileDoneOutlined size={12} />}
-        title="Reportar pago"
-      />
-    </Menu>
+import "./taskManagerTable.scss";
+
+const TaskTable: React.FC<{
+  data: ITask[];
+  modalAction: (() => void)[];
+  setSelectedRows: Dispatch<SetStateAction<ITask[] | undefined>>;
+}> = ({ data, modalAction, setSelectedRows }) => {
+  const formatMoney = useAppStore((state) => state.formatMoney);
+  const height = useScreenHeight();
+  const { openModal } = useModalDetail();
+
+  const handleOpenBalanceLegalization = () => {
+    openModal("balanceLegalization", {
+      // selectedAdjustments: selectedRows
+    });
+  };
+
+  const onSelectChange = (_newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
+    setSelectedRows(newSelectedRow);
+  };
+
+  const rowSelection = {
+    columnWidth: 30,
+    onChange: onSelectChange
+  };
+
+  const getMenuItems = (row: ITask): MenuProps["items"] => {
+    const baseItems: MenuProps["items"] = [
+      {
+        key: "Enviar correo",
+        icon: <MailOutlined size={12} />,
+        label: "Enviar correo",
+        onClick: modalAction[0]
+      },
+      {
+        key: "Llamar",
+        icon: <PhoneOutlined size={12} />,
+        label: "Llamar",
+        onClick: modalAction[1]
+      },
+      {
+        key: "WhatsApp",
+        icon: <WhatsAppOutlined size={12} />,
+        label: "WhatsApp"
+      },
+      {
+        key: "Agendar visita",
+        icon: <Users size={12} />,
+        label: "Agendar visita"
+      },
+      {
+        key: "Conciliar",
+        icon: <CalendarOutlined size={12} />,
+        label: "Conciliar"
+      },
+      {
+        key: "Aplicar pago",
+        icon: <CreditCardOutlined size={12} />,
+        label: "Aplicar pago"
+      },
+      {
+        key: "Radicar",
+        icon: <FileTextOutlined size={12} />,
+        label: "Radicar"
+      },
+      {
+        key: "Reportar pago",
+        icon: <FileDoneOutlined size={12} />,
+        label: "Reportar pago"
+      }
+    ];
+
+    if (row.task_type === "Saldo") {
+      return [
+        ...baseItems,
+        {
+          key: "Legalizar saldo",
+          icon: <Invoice size={12} />,
+          label: "Legalizar saldo",
+          onClick: handleOpenBalanceLegalization
+        }
+      ];
+    }
+
+    return baseItems;
+  };
+
+  const customDropdown = (menu: ReactNode) => (
+    <div className="dropdownTaskManagerTable">{menu}</div>
   );
 
-  const columns: ColumnsType<Task> = [
-    { title: "Cliente", dataIndex: "client", key: "client", fixed: "left", width: 180 },
-    { title: "Tipo de tarea", dataIndex: "taskType", key: "taskType", width: 150 },
+  const columns: ColumnsType<ITask> = [
+    { title: "Cliente", dataIndex: "client_name", key: "client_name" },
+    { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 130 },
     {
       title: "Descripción",
       dataIndex: "description",
-      key: "description",
-      width: 300,
-      ellipsis: true
+      key: "description"
     },
     {
       title: "Estado",
       dataIndex: "status",
       key: "status",
-      width: 120,
-      render: (status: Task["status"]) => (
+      render: (status: ITask["status"]) => (
         <Flex>
           <Tag
-            icon={<Circle color={statusColors[status]} weight="fill" size={6} />}
-            content={status}
-            color={statusColors[status]}
+            icon={<Circle color={status.color} weight="fill" size={6} />}
+            content={status.name}
+            style={{ backgroundColor: status.backgroundColor, textWrap: "nowrap" }}
+            color={status.color}
             withBorder={false}
           />
         </Flex>
       )
     },
-    { title: "Responsable", dataIndex: "responsible", key: "responsible", width: 120 },
-    { title: "Cartera", dataIndex: "portfolio", key: "portfolio", width: 150 },
-    { title: "Impacto", dataIndex: "impact", key: "impact", width: 150 },
+    { title: "Responsable", dataIndex: "user_name", key: "user_name" },
     {
-      title: "Acción",
+      title: "Cartera",
+      dataIndex: "total_portfolio",
+      key: "total_portfolio",
+      align: "right",
+      render: (value) => (
+        <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
+          {formatMoney(value)}
+        </p>
+      ),
+      sorter: (a, b) => a.total_portfolio - b.total_portfolio,
+      showSorterTooltip: false
+    },
+    {
+      title: "Impacto",
+      dataIndex: "amount",
+      key: "amount",
+      align: "right",
+      render: (value) => (
+        <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
+          {formatMoney(value)}
+        </p>
+      ),
+      sorter: (a, b) => a.total_portfolio - b.total_portfolio,
+      showSorterTooltip: false
+    },
+    {
+      title: "",
       key: "action",
       fixed: "right",
-      width: 100,
-      render: () => (
-        <Dropdown overlay={menu} trigger={["click"]}>
-          <IconButton icon={<DotsThree size={20} />} />
-        </Dropdown>
-      )
+      width: 70,
+      render: (_, row) => {
+        return (
+          <Dropdown
+            dropdownRender={customDropdown}
+            menu={{ items: getMenuItems(row) }}
+            trigger={["click"]}
+          >
+            <Button className="dotsBtn">
+              <DotsThree size={20} />
+            </Button>
+          </Dropdown>
+        );
+      }
     }
   ];
 
   return (
     <Table
+      className="taskManagerTable"
       columns={columns}
-      dataSource={data}
+      dataSource={data?.map((task) => ({ ...task, key: task.id }))}
+      rowSelection={rowSelection}
       pagination={false}
-      scroll={{ x: "max-content", y: "calc(100vh - 300px)" }}
-      bordered
+      scroll={{ y: height - 270, x: 100 }}
     />
   );
 };

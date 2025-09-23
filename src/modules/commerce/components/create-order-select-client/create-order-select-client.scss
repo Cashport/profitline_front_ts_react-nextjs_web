@@ -1,14 +1,10 @@
 @import "@/styles/variables.scss";
 
-@import "@styles/variables.scss";
-
-.selectInputClientCustom {
+// Base styles for select input client
+.selectInputClientBase {
     height: 3rem !important;
-    margin-bottom: 1rem;
     background-color: $background;
     border-radius: 0.25rem;
-    width: 100% !important;
-    max-width: 300px;
     font-size: 1rem !important;
 
     .ant-select-selector {
@@ -21,25 +17,23 @@
 
         .ant-select-selection-placeholder {
             color: $dark-gray;
-        }
-    }
-}
-.selectInputClientError {
-    width: 100%;
-    border: 1px dashed red;
-    height: 3rem !important;
-    margin-bottom: 0.2rem;
-    background-color: $background;
-    padding: 0.45rem;
-    border-radius: 0.25rem;
-    font-weight: 300;
-
-    .ant-select-selector {
-        .ant-select-selection-placeholder {
-            color: $dark-gray;
             font-size: 1rem;
         }
     }
+}
+
+.selectInputClientCustom {
+    @extend .selectInputClientBase;
+    margin-bottom: 1rem;
+    max-width: 450px;
+}
+
+.selectInputClientError {
+    @extend .selectInputClientBase;
+    border: 1px dashed red;
+    margin-bottom: 0.2rem;
+    padding: 0.45rem;
+    font-weight: 300;
 }
 
 .selectDrop {

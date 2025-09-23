@@ -1,6 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { Button, Dropdown, Flex, Table, TableProps, Typography } from "antd";
-import { Eye, Triangle } from "phosphor-react";
+import { Triangle } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
 
