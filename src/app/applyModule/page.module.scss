@@ -1,0 +1,10 @@
+@import "@styles/variables.scss";
+
+.applyModule {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: $white !important;
+    border-radius: 0.5rem;
+    padding: 1rem 2rem; 
+}

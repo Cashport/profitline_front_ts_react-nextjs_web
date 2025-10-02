@@ -63,7 +63,17 @@ interface IEditingRowState {
   editing_type?: "invoice" | "payment" | "discount";
 }
 
-const ApplyTab: React.FC = () => {
+interface IApplyTabProps {
+  className?: string;
+  defaultPositionDragModal?: { x: number; y: number };
+  isInApplyModule?: boolean;
+}
+
+const ApplyTab: React.FC<IApplyTabProps> = ({
+  className,
+  defaultPositionDragModal,
+  isInApplyModule = false
+}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
@@ -407,8 +417,9 @@ const ApplyTab: React.FC = () => {
         desconts={applicationData?.summary.total_discounts}
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
+        defaultPosition={defaultPositionDragModal}
       />
-      <div className="applyContainerTab">
+      <div className={`applyContainerTab ${className}`}>
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
@@ -468,28 +479,29 @@ const ApplyTab: React.FC = () => {
                     total={section.total}
                     quantity={section.count}
                   />
-
-                  <Flex
-                    className="buttonActionApply"
-                    onClick={() => {
-                      if (section.statusName === "facturas") {
-                        showModal("invoices");
-                      }
-                      if (section.statusName === "pagos") {
-                        showModal("payments");
-                      }
-                      if (section.statusName === "ajustes") {
-                        setModalAdjustmentsState(
-                          modalAdjustmentsState.isOpen
-                            ? { isOpen: false, modal: 1 }
-                            : { isOpen: true, modal: 1 }
-                        );
-                      }
-                    }}
-                  >
-                    <Plus />
-                    <h5 className="">Agregar {`${section.statusName}`}</h5>
-                  </Flex>
+                  {!isInApplyModule ? (
+                    <button
+                      className="buttonActionApply"
+                      onClick={() => {
+                        if (section.statusName === "facturas") {
+                          showModal("invoices");
+                        }
+                        if (section.statusName === "pagos") {
+                          showModal("payments");
+                        }
+                        if (section.statusName === "ajustes") {
+                          setModalAdjustmentsState(
+                            modalAdjustmentsState.isOpen
+                              ? { isOpen: false, modal: 1 }
+                              : { isOpen: true, modal: 1 }
+                          );
+                        }
+                      }}
+                    >
+                      <Plus />
+                      <p>Agregar {`${section.statusName}`}</p>
+                    </button>
+                  ) : null}
                 </Flex>
               ),
               children: (
