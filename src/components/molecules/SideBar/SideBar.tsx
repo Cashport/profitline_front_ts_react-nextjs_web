@@ -244,7 +244,7 @@ export const SideBar = () => {
               </Button>
             </Link>
           )}
-          {true && (
+          {path === "/applyModule" && (
             <Link href="/applyModule" passHref legacyBehavior>
               <Button
                 type="primary"
