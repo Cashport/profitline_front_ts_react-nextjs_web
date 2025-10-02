@@ -65,9 +65,10 @@ interface IEditingRowState {
 
 interface IApplyTabProps {
   className?: string;
+  defaultPositionDragModal?: { x: number; y: number };
 }
 
-const ApplyTab: React.FC<IApplyTabProps> = ({ className }) => {
+const ApplyTab: React.FC<IApplyTabProps> = ({ className, defaultPositionDragModal }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
@@ -411,6 +412,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({ className }) => {
         desconts={applicationData?.summary.total_discounts}
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
+        defaultPosition={defaultPositionDragModal}
       />
       <div className={`applyContainerTab ${className}`}>
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
