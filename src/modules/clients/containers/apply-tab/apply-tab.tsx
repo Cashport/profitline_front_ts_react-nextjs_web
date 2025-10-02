@@ -66,9 +66,14 @@ interface IEditingRowState {
 interface IApplyTabProps {
   className?: string;
   defaultPositionDragModal?: { x: number; y: number };
+  isInApplyModule?: boolean;
 }
 
-const ApplyTab: React.FC<IApplyTabProps> = ({ className, defaultPositionDragModal }) => {
+const ApplyTab: React.FC<IApplyTabProps> = ({
+  className,
+  defaultPositionDragModal,
+  isInApplyModule = false
+}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
@@ -474,28 +479,29 @@ const ApplyTab: React.FC<IApplyTabProps> = ({ className, defaultPositionDragModa
                     total={section.total}
                     quantity={section.count}
                   />
-
-                  <Flex
-                    className="buttonActionApply"
-                    onClick={() => {
-                      if (section.statusName === "facturas") {
-                        showModal("invoices");
-                      }
-                      if (section.statusName === "pagos") {
-                        showModal("payments");
-                      }
-                      if (section.statusName === "ajustes") {
-                        setModalAdjustmentsState(
-                          modalAdjustmentsState.isOpen
-                            ? { isOpen: false, modal: 1 }
-                            : { isOpen: true, modal: 1 }
-                        );
-                      }
-                    }}
-                  >
-                    <Plus />
-                    <h5 className="">Agregar {`${section.statusName}`}</h5>
-                  </Flex>
+                  {!isInApplyModule ? (
+                    <button
+                      className="buttonActionApply"
+                      onClick={() => {
+                        if (section.statusName === "facturas") {
+                          showModal("invoices");
+                        }
+                        if (section.statusName === "pagos") {
+                          showModal("payments");
+                        }
+                        if (section.statusName === "ajustes") {
+                          setModalAdjustmentsState(
+                            modalAdjustmentsState.isOpen
+                              ? { isOpen: false, modal: 1 }
+                              : { isOpen: true, modal: 1 }
+                          );
+                        }
+                      }}
+                    >
+                      <Plus />
+                      <p>Agregar {`${section.statusName}`}</p>
+                    </button>
+                  ) : null}
                 </Flex>
               ),
               children: (
