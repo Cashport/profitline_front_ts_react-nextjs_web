@@ -63,7 +63,11 @@ interface IEditingRowState {
   editing_type?: "invoice" | "payment" | "discount";
 }
 
-const ApplyTab: React.FC = () => {
+interface IApplyTabProps {
+  className?: string;
+}
+
+const ApplyTab: React.FC<IApplyTabProps> = ({ className }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const clientId = extractSingleParam(params.clientId) || "";
@@ -408,7 +412,7 @@ const ApplyTab: React.FC = () => {
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
       />
-      <div className="applyContainerTab">
+      <div className={`applyContainerTab ${className}`}>
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
