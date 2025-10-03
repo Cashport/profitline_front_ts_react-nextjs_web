@@ -44,7 +44,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
 
       <hr className={styles.separator} />
       <h4 className={styles.name}>
-        {product.name}{" "}
+        {product.name} {`(Uds: ${product.shipment_unit})`}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"
