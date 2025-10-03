@@ -28,6 +28,10 @@
         font-size: 1rem;
         font-weight: 400;
         grid-column: 2/6;
+
+        &__uds {
+            font-size: 0.875rem;
+        }
     }
 
     .price {
