@@ -27,6 +27,7 @@ const CreateOrderCart: FC = ({}) => {
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCanulasModal, setShowCanulasModal] = useState(false);
 
   const {
     selectedCategories,
@@ -54,9 +55,17 @@ const CreateOrderCart: FC = ({}) => {
     [confirmOrderData]
   );
 
+  const hasNoCanulas = useMemo(() => {
+    return !selectedCategories.some((category) =>
+      category.products.some((product) => product.name?.toLowerCase().includes("canula"))
+    );
+  }, [selectedCategories]);
+
   const handleContinuePurchase = () => {
     if (isTotalLessThanMinimum) {
       setShowConfirmModal(true);
+    } else if (hasNoCanulas) {
+      setShowCanulasModal(true);
     } else {
       setCheckingOut(true);
     }
@@ -64,11 +73,24 @@ const CreateOrderCart: FC = ({}) => {
 
   const handleConfirmPurchase = () => {
     setShowConfirmModal(false);
+    if (hasNoCanulas) {
+      setShowCanulasModal(true);
+    } else {
+      setCheckingOut(true);
+    }
+  };
+
+  const handleConfirmCanulas = () => {
+    setShowCanulasModal(false);
     setCheckingOut(true);
   };
 
   const handleCloseModal = () => {
     setShowConfirmModal(false);
+  };
+
+  const handleCloseCanulasModal = () => {
+    setShowCanulasModal(false);
   };
 
   useEffect(() => {
@@ -264,6 +286,23 @@ const CreateOrderCart: FC = ({}) => {
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
               El pedido es inferior a $1.500.000
+            </p>
+            <p>¿Desea continuar?</p>
+          </Flex>
+        }
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={showCanulasModal}
+        onClose={handleCloseCanulasModal}
+        onOk={handleConfirmCanulas}
+        title="¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              No has seleccionado Canulas
             </p>
             <p>¿Desea continuar?</p>
           </Flex>

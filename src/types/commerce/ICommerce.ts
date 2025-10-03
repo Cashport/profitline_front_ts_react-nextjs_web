@@ -69,6 +69,7 @@ export interface IProductInDetail {
   category_name: string;
   discount: number;
   discount_percentage: number;
+  shipment_unit: number;
 }
 export interface DiscountApplied {
   id: number;
