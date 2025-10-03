@@ -233,11 +233,7 @@ const CreateOrderCart: FC = ({}) => {
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
               <strong>Total</strong>
-              <strong
-                className={isTotalLessThanMinimum ? styles.cartContainer__footer__totalLabel : ""}
-              >
-                ${formatNumber(confirmOrderData?.total)}
-              </strong>
+              <strong>${formatNumber(confirmOrderData?.total)}</strong>
             </Flex>
             <Flex justify="space-between">
               <p>IVA</p>
@@ -264,7 +260,14 @@ const CreateOrderCart: FC = ({}) => {
         onClose={handleCloseModal}
         onOk={handleConfirmPurchase}
         title="¿Está seguro que desea continuar?"
-        content="El pedido es inferior a $1.500.000 ¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              El pedido es inferior a $1.500.000
+            </p>
+            <p>¿Desea continuar?</p>
+          </Flex>
+        }
         okText="Confirmar"
         cancelText="Cancelar"
       />
