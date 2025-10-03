@@ -40,8 +40,12 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
           height={100}
         />
       </div>
+
       <h4 className={styles.name}>
         {product.name}{" "}
+        {product.shipment_unit > 1 && (
+          <span className={styles.name__uds}>(Uds:${product.shipment_unit})</span>
+        )}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"
