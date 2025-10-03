@@ -85,6 +85,10 @@
             color: $gray;
         }
 
+        &__totalLabel {
+            color: $error;
+        }
+
         p {
             font-weight: 500;
         }

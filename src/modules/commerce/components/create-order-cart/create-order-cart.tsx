@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple } from "phosphor-react";
@@ -49,8 +49,13 @@ const CreateOrderCart: FC = ({}) => {
     setOpenDiscountsModal(true);
   };
 
+  const isTotalLessThanMinimum = useMemo(
+    () => confirmOrderData?.total && confirmOrderData.total < 1500000,
+    [confirmOrderData]
+  );
+
   const handleContinuePurchase = () => {
-    if (confirmOrderData?.total && confirmOrderData.total < 1500000) {
+    if (isTotalLessThanMinimum) {
       setShowConfirmModal(true);
     } else {
       setCheckingOut(true);
@@ -228,7 +233,11 @@ const CreateOrderCart: FC = ({}) => {
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
               <strong>Total</strong>
-              <strong>${formatNumber(confirmOrderData?.total)}</strong>
+              <strong
+                className={isTotalLessThanMinimum ? styles.cartContainer__footer__totalLabel : ""}
+              >
+                ${formatNumber(confirmOrderData?.total)}
+              </strong>
             </Flex>
             <Flex justify="space-between">
               <p>IVA</p>
