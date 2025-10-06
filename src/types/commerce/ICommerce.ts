@@ -26,6 +26,7 @@ export interface IProduct {
   price: number;
   line_name: string;
   category_name: string;
+  shipment_unit: number;
 }
 
 export interface ISelectedProduct {
@@ -40,6 +41,7 @@ export interface ISelectedProduct {
   category_name: string;
   SKU: string;
   stock: boolean;
+  shipment_unit: number;
 }
 
 export interface IFetchedCategories {
@@ -67,6 +69,7 @@ export interface IProductInDetail {
   category_name: string;
   discount: number;
   discount_percentage: number;
+  shipment_unit: number;
 }
 export interface DiscountApplied {
   id: number;

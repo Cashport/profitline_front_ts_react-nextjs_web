@@ -155,3 +155,10 @@
     height: 1px;
     background-color: $dark-gray;
 }
+
+.confirmationModalContent {
+    &__totalLabel {
+        color: $error;
+        font-weight: 600;
+    }
+}

@@ -117,7 +117,8 @@ export const CreateOrderView: FC = () => {
             category_id: product.id_category,
             SKU: product.product_sku,
             stock: true,
-            category_name: product.category_name
+            category_name: product.category_name,
+            shipment_unit: product.shipment_unit
           }))
         }));
         setSelectedCategories(selectedCategories);
