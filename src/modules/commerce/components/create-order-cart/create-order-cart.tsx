@@ -243,7 +243,7 @@ const CreateOrderCart: FC = ({}) => {
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
               <p className={styles.cartContainer__footer__discountExplanation}>
-                Descuentos de la orden (Crosseling)
+                Descuentos de la orden (Crosselling)
               </p>
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
