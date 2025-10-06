@@ -339,27 +339,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     setLoadingRequest(false);
   };
 
-  const handleDownloadLog = async () => {
+  const handleDownloadLog = () => {
     try {
       if (applicationData?.summary?.url_log) {
-        const response = await fetch(applicationData.summary.url_log);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const fileName = applicationData.summary.url_log.split("/").pop() || "log.txt";
-
-        // Crear un enlace invisible y disparar el click
-        const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showMessage("success", "Log descargado correctamente");
+        window.open(applicationData.summary.url_log, "_blank");
         setIsModalOpen({ selected: 0 });
       } else {
         showMessage("error", "No hay log disponible para descargar");
