@@ -94,6 +94,11 @@
         @media (max-width: 1200px) {
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto;
+
+            .portfolioAges {
+                grid-column: 1 / -1;
+                order: 999;
+            }
         }
 
         @media (max-width: 768px) {

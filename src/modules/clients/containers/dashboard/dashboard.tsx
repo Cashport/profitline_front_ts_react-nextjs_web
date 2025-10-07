@@ -66,7 +66,7 @@ const Dashboard: FC<DashboardProps> = () => {
           countBalances={totalBalanceCount}
         />
         <DynamicPortfoliAges
-          className={styles.card}
+          className={`${styles.card} ${styles.portfolioAges}`}
           invoiceAges={invoiceAges}
           pastDuePortfolio={pastDuePortfolio}
         />
