@@ -17,9 +17,14 @@ interface DashboardPortfolioAgesProps {
       }[]
     | undefined;
   className?: string;
+  pastDuePortfolio?: string;
 }
 
-const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({ invoiceAges, className }) => {
+const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({
+  invoiceAges,
+  className,
+  pastDuePortfolio = "0"
+}) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const options: ApexOptions = {
@@ -79,7 +84,7 @@ const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({ invoiceAges, 
 
   return (
     <div className={`${styles.wrapper} ${className}`}>
-      <DashboardGenericItem name="Cartera vencida" value={"1.2345"} unit="M" />
+      <DashboardGenericItem name="Cartera vencida" value={pastDuePortfolio} unit="M" />
       <div className={styles.chart}>
         <ReactApexChart
           className=""
