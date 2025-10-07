@@ -66,8 +66,10 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
         ) : (
           <Flex gap={"0.5rem"} align="baseline">
             <h5 className={styles.price__amount}>{formatMoney(product.price)}</h5>
-            {product.shipment_unit > 1 && (
-              <span className={styles.units}>{product.shipment_unit} und</span>
+            {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
+              <span className={styles.units}>
+                {product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und
+              </span>
             )}
           </Flex>
         )}
