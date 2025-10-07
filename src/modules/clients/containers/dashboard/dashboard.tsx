@@ -94,8 +94,8 @@ const Dashboard: FC<DashboardProps> = () => {
           />
         </div>
         <div className={styles.card}>
-          <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
-          <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
+          <DashboardGenericItem name="Sin conciliar" value={appliedPayments} unit="M" />
+          <DashboardGenericItem name="Novedades" value={unappliedPayments} unit="M" />
         </div>
         <div className={styles.dso}>
           <div className={styles.label}>DSO</div>

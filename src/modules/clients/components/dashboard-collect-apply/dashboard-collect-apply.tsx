@@ -13,7 +13,7 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({ className }) =>
     <div className={`${className}`}>
       <DashboardGenericItem name="Meta de recaudo" value={"100.000"} unit="M" badgeText="162%" />
 
-      <DashboardColorBar values={colorBarValues} />
+      <DashboardColorBar values={colorBarValues} percentage={70} />
 
       <DashboardGenericItem name="Total aplicado" value={"162.370"} unit="M" />
 
