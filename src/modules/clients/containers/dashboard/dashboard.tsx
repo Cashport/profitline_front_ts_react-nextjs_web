@@ -71,29 +71,6 @@ const Dashboard: FC<DashboardProps> = () => {
           pastDuePortfolio={pastDuePortfolio}
         />
         <DashboardCollectApply className={styles.card} />
-        {/* <DashboardBudget
-          className={styles.card}
-          budget={budget}
-          budgetPercentage={budgetPercentage}
-        />
-        <DashboardInvoiceStatus
-          className={styles.card}
-          totalUnreconciled={totalUnreconciled}
-          totalUnreconciledCount={totalUnreconciledCount}
-          totalReconciled={totalReconciled}
-          totalReconciledCount={totalReconciledCount}
-          sinRadicarValue={sinRadicarValue}
-          sinRadicarCount={sinRadicarCount}
-        />
-        <DashboardAlerts
-          className={styles.card}
-          openAlerts={openAlerts}
-          openAlertsCount={openAlertsCount}
-          creditNotes={creditNotes}
-          creditNotesCount={creditNotesCount}
-          totalBalance={totalBalance}
-          totalBalanceCount={totalBalanceCount}
-        /> */}
       </div>
       <div className={styles.b}>
         <div className={styles.card}>
@@ -105,8 +82,18 @@ const Dashboard: FC<DashboardProps> = () => {
           />
         </div>
         <div className={styles.card}>
-          <DashboardGenericItem name="Sin conciliar" value={appliedPayments} unit="M" />
-          <DashboardGenericItem name="Novedades" value={unappliedPayments} unit="M" />
+          <DashboardGenericItem
+            name="Sin conciliar"
+            value={totalUnreconciled}
+            unit="M"
+            quantity={totalUnreconciledCount}
+          />
+          <DashboardGenericItem
+            name="Novedades"
+            value={openAlerts}
+            unit="M"
+            quantity={openAlertsCount}
+          />
         </div>
         <div className={styles.dso}>
           <div className={styles.label}>DSO</div>

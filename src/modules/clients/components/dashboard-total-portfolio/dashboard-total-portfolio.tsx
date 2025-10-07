@@ -16,9 +16,9 @@ interface DashboardTotalPortfolioProps {
 const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
   totalWallet,
   className,
-  totalInvoices = "0",
-  totalCreditNotes = "0",
-  totalBalances = "0",
+  totalInvoices = "$0",
+  totalCreditNotes = "$0",
+  totalBalances = "$0",
   countInvoices = 0,
   countCreditNotes = 0,
   countBalances = 0

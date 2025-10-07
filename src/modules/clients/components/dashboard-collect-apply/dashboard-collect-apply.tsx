@@ -11,15 +11,15 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({ className }) =>
 
   return (
     <div className={`${className}`}>
-      <DashboardGenericItem name="Meta de recaudo" value={"100.000"} unit="M" badgeText="162%" />
+      <DashboardGenericItem name="Meta de recaudo" value={"$0"} unit="M" badgeText="0%" />
 
       <DashboardColorBar values={colorBarValues} percentage={70} />
 
-      <DashboardGenericItem name="Total aplicado" value={"162.370"} unit="M" />
+      <DashboardGenericItem name="Total aplicado" value={"$0"} unit="M" />
 
-      <DashboardGenericItem name="Pend. Aplicación" value={"29.680"} unit="M" quantity={628} />
+      <DashboardGenericItem name="Pend. Aplicación" value={"$0"} unit="M" quantity={0} />
 
-      <DashboardGenericItem name="Pagos no aplicados" value={"30.945"} unit="M" quantity={751} />
+      <DashboardGenericItem name="Pagos no aplicados" value={"$0"} unit="M" quantity={0} />
     </div>
   );
 };
