@@ -5,9 +5,24 @@ import DashboardColorBar from "../dashboard-color-bar";
 interface DashboardTotalPortfolioProps {
   totalWallet: string;
   className?: string;
+  totalInvoices?: string;
+  countInvoices?: number;
+  totalCreditNotes?: string;
+  countCreditNotes?: number;
+  totalBalances?: string;
+  countBalances?: number;
 }
 
-const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({ totalWallet, className }) => {
+const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
+  totalWallet,
+  className,
+  totalInvoices = "0",
+  totalCreditNotes = "0",
+  totalBalances = "0",
+  countInvoices = 0,
+  countCreditNotes = 0,
+  countBalances = 0
+}) => {
   const colorBarValues = [
     { color: "#cbe71e", percentage: 50 },
     { color: "#9ab916", percentage: 30 },
@@ -22,21 +37,27 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({ totalWallet
 
       <DashboardGenericItem
         name="Facturas"
-        value={"1.234"}
+        value={totalInvoices}
         unit="M"
-        quantity={123}
+        quantity={countInvoices}
         color="#cbe71e"
       />
 
       <DashboardGenericItem
         name="Notas crédito"
-        value={"1.234"}
+        value={totalCreditNotes}
         unit="M"
-        quantity={123}
+        quantity={countCreditNotes}
         color="green"
       />
 
-      <DashboardGenericItem name="Saldos" value={"1.234"} unit="M" quantity={123} color="black" />
+      <DashboardGenericItem
+        name="Saldos"
+        value={totalBalances}
+        unit="M"
+        quantity={countBalances}
+        color="black"
+      />
     </div>
   );
 };

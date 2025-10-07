@@ -57,7 +57,14 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.a}>
-        <DashboardTotalPortfolio className={styles.card} totalWallet={totalWallet} />
+        <DashboardTotalPortfolio
+          className={styles.card}
+          totalWallet={totalWallet}
+          totalCreditNotes={creditNotes}
+          countCreditNotes={creditNotesCount}
+          totalBalances={totalBalance}
+          countBalances={totalBalanceCount}
+        />
         <DynamicPortfoliAges className={styles.card} invoiceAges={invoiceAges} />
         <DashboardCollectApply className={styles.card} />
         {/* <DashboardBudget
