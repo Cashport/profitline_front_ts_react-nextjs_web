@@ -23,6 +23,7 @@ const { Text } = Typography;
 
 const CreateOrderCart: FC = ({}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const formatMoney = useAppStore((state) => state.formatMoney);
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
@@ -50,21 +51,26 @@ const CreateOrderCart: FC = ({}) => {
     setOpenDiscountsModal(true);
   };
 
+  const MINIMUM_ORDER_AMOUNT = 1600000;
   const isTotalLessThanMinimum = useMemo(
-    () => confirmOrderData?.total && confirmOrderData.total < 1500000,
+    () => confirmOrderData?.total && confirmOrderData.total < MINIMUM_ORDER_AMOUNT,
     [confirmOrderData]
   );
 
-  const hasNoCanulas = useMemo(() => {
+  const hasNoCanulasOrAgua = useMemo(() => {
     return !selectedCategories.some((category) =>
-      category.products.some((product) => product.name?.toLowerCase().includes("canula"))
+      category.products.some(
+        (product) =>
+          product.name?.toLowerCase().includes("canula") ||
+          product.name?.toLowerCase().includes("agua")
+      )
     );
   }, [selectedCategories]);
 
   const handleContinuePurchase = () => {
     if (isTotalLessThanMinimum) {
       setShowConfirmModal(true);
-    } else if (hasNoCanulas) {
+    } else if (hasNoCanulasOrAgua) {
       setShowCanulasModal(true);
     } else {
       setCheckingOut(true);
@@ -73,7 +79,7 @@ const CreateOrderCart: FC = ({}) => {
 
   const handleConfirmPurchase = () => {
     setShowConfirmModal(false);
-    if (hasNoCanulas) {
+    if (hasNoCanulasOrAgua) {
       setShowCanulasModal(true);
     } else {
       setCheckingOut(true);
@@ -285,9 +291,9 @@ const CreateOrderCart: FC = ({}) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El pedido es inferior a $1.500.000
+              El pedido es inferior a {formatMoney(MINIMUM_ORDER_AMOUNT)}
             </p>
-            <p>¿Desea continuar?</p>
+            <p>Te sugerimos que incrementes la compra</p>
           </Flex>
         }
         okText="Confirmar"
@@ -302,9 +308,9 @@ const CreateOrderCart: FC = ({}) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              No has seleccionado Canulas
+              No has seleccionado Canulas y/o Agua estéril
             </p>
-            <p>¿Desea continuar?</p>
+            <p>Te recomendamos revisar la orden</p>
           </Flex>
         }
         okText="Confirmar"
