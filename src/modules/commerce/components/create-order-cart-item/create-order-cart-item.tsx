@@ -43,8 +43,10 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
 
       <h4 className={styles.name}>
         {product.name}{" "}
-        {product.shipment_unit > 1 && (
-          <span className={styles.name__uds}>({product.shipment_unit} und)</span>
+        {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
+          <span className={styles.name__uds}>
+            ({product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und)
+          </span>
         )}
         {!product.stock && (
           <SimpleTag
