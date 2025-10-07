@@ -57,16 +57,16 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.a}>
-        <DashboardTotalPortfolio className={styles.item} totalWallet={totalWallet} />
-        <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
-        <DashboardCollectApply className={styles.item} />
+        <DashboardTotalPortfolio className={styles.card} totalWallet={totalWallet} />
+        <DynamicPortfoliAges className={styles.card} invoiceAges={invoiceAges} />
+        <DashboardCollectApply className={styles.card} />
         {/* <DashboardBudget
-          className={styles.item}
+          className={styles.card}
           budget={budget}
           budgetPercentage={budgetPercentage}
         />
         <DashboardInvoiceStatus
-          className={styles.item}
+          className={styles.card}
           totalUnreconciled={totalUnreconciled}
           totalUnreconciledCount={totalUnreconciledCount}
           totalReconciled={totalReconciled}
@@ -75,7 +75,7 @@ const Dashboard: FC<DashboardProps> = () => {
           sinRadicarCount={sinRadicarCount}
         />
         <DashboardAlerts
-          className={styles.item}
+          className={styles.card}
           openAlerts={openAlerts}
           openAlertsCount={openAlertsCount}
           creditNotes={creditNotes}
@@ -85,30 +85,26 @@ const Dashboard: FC<DashboardProps> = () => {
         /> */}
       </div>
       <div className={styles.b}>
-        {/* <div className={styles.item}>
-          <div className={styles.list}>
-            <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
-            <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
-          </div>
+        <div className={styles.card}>
+          <DashboardGenericItem
+            name="Cupo"
+            value={quota}
+            unit="M"
+            badgeText={`${parseFloat(quotaPercentage).toFixed(1)}%`}
+          />
         </div>
-        <div className={styles.item}>
-          <div className={styles.list}>
-            <DashboardGenericItem
-              name="Cupo"
-              value={quota}
-              unit="M"
-              badgeText={`${parseFloat(quotaPercentage).toFixed(1)}%`}
-            />
-          </div>
+        <div className={styles.card}>
+          <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
+          <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
         </div>
         <div className={styles.dso}>
           <div className={styles.label}>DSO</div>
           <div className={styles.value}>{dsoValue}</div>
-        </div> */}
+        </div>
       </div>
       <div className={styles.c}>
-        <DashboardSellsVsPayments className={styles.item} chartData={sellsVsPaymentsData} />
-        <DashboardHistoricDso className={styles.item} history_dso={history_dso} />
+        <DashboardSellsVsPayments className={styles.card} chartData={sellsVsPaymentsData} />
+        <DashboardHistoricDso className={styles.card} history_dso={history_dso} />
       </div>
     </div>
   );

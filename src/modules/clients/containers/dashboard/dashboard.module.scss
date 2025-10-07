@@ -1,3 +1,5 @@
+@import "@/styles/variables.scss";
+
 .wrapper {
     gap: 16px;
     display: grid;
@@ -6,9 +8,14 @@
         "a a a b"
         "c c c c";
 
-    .item {
+    .card {
         border-radius: 8px;
-        background-color: #f7f7f7;
+        background-color: $background;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        justify-content: space-between;
 
         .list {
             height: 100%;
@@ -54,7 +61,7 @@
         grid-area: b;
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 186px 1fr 186px;
+        grid-template-rows: auto 1fr 100px;
     }
 
     .c {

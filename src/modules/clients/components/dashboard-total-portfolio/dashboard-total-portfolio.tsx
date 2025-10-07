@@ -1,9 +1,6 @@
 import { FC } from "react";
-import Image from "next/image";
 import DashboardGenericItem from "../dashboard-generic-item";
 import DashboardColorBar from "../dashboard-color-bar";
-
-import styles from "./dashboard-total-portfolio.module.scss";
 
 interface DashboardTotalPortfolioProps {
   totalWallet: string;
@@ -14,11 +11,11 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({ totalWallet
   const colorBarValues = [
     { color: "#cbe71e", percentage: 50 },
     { color: "#9ab916", percentage: 30 },
-    { color: "#000000", percentage: 20 },
+    { color: "#000000", percentage: 20 }
   ];
 
   return (
-    <div className={`${styles.wrapper} ${className}`}>
+    <div className={`${className}`}>
       <DashboardGenericItem name="Total cartera neta" value={totalWallet} unit="M" />
 
       <DashboardColorBar values={colorBarValues} />
