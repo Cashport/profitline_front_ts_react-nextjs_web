@@ -1,5 +1,5 @@
 .wrapper {
-    height: 100%;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -8,6 +8,13 @@
         column-gap: 18px;
         line-height: 24px;
         align-items: center;
+
+        .coloredCircle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
 
         .text {
             font-size: 1rem;

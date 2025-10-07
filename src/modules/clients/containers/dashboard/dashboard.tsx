@@ -57,17 +57,17 @@ const Dashboard: FC<DashboardProps> = () => {
     <div className={styles.wrapper}>
       <div className={styles.a}>
         <DashboardTotalPortfolio className={styles.item} totalWallet={totalWallet} />
-        <DashboardExpiredPortfolio
+        {/* <DashboardExpiredPortfolio
           className={styles.item}
           pastDuePortfolio={pastDuePortfolio}
           expiredPercentage={expiredPercentage}
-        />
-        <DashboardBudget
+        /> */}
+        <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
+        {/* <DashboardBudget
           className={styles.item}
           budget={budget}
           budgetPercentage={budgetPercentage}
         />
-        <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
         <DashboardInvoiceStatus
           className={styles.item}
           totalUnreconciled={totalUnreconciled}
@@ -85,10 +85,10 @@ const Dashboard: FC<DashboardProps> = () => {
           creditNotesCount={creditNotesCount}
           totalBalance={totalBalance}
           totalBalanceCount={totalBalanceCount}
-        />
+        /> */}
       </div>
       <div className={styles.b}>
-        <div className={styles.item}>
+        {/* <div className={styles.item}>
           <div className={styles.list}>
             <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
             <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
@@ -107,7 +107,7 @@ const Dashboard: FC<DashboardProps> = () => {
         <div className={styles.dso}>
           <div className={styles.label}>DSO</div>
           <div className={styles.value}>{dsoValue}</div>
-        </div>
+        </div> */}
       </div>
       <div className={styles.c}>
         <DashboardSellsVsPayments className={styles.item} chartData={sellsVsPaymentsData} />

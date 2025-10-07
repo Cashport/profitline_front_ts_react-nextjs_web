@@ -1,106 +1,104 @@
 .wrapper {
-  gap: 16px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 104px 294px 294px;
-  grid-template-areas:
-    "a a a b"
-    "a a a b"
-    "c c c c";
-
-  .item {
-    border-radius: 8px;
-    background-color: #F7F7F7;
-
-    .list {
-      height: 100%;
-      display: flex;
-      padding: 0 24px;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-  }
-
-  .dso {
-    display: flex;
-    padding: 0 24px;
-    border-radius: 8px;
-    align-items: center;
-    background-color: #CBE71E;
-    justify-content: space-between;
-
-    .label {
-      font-size: 40px;
-      font-weight: 300;
-      line-height: 60px;
-    }
-
-    .value {
-      font-size: 48px;
-      font-weight: 500;
-      line-height: 72px;
-      letter-spacing: -0.02em;
-    }
-  }
-
-  .a {
     gap: 16px;
-    grid-area: a;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 104px 294px;
-  }
-
-  .b {
-    gap: 16px;
-    grid-area: b;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 186px 98px 98px;
-  }
-
-  .c {
-    gap: 16px;
-    grid-area: c;
-    display: grid;
-    grid-template-columns: calc(65% - 8px) calc(35% - 8px);
-    grid-template-rows: 294px;
-  }
-
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-areas:
-      "a a a"
-      "b b b"
-      "c c c";
-  }
+        "a a a b"
+        "c c c c";
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    grid-template-areas:
-      "a"
-      "b"
-      "c";
-  }
+    .item {
+        border-radius: 8px;
+        background-color: #f7f7f7;
 
-  .a {
+        .list {
+            height: 100%;
+            display: flex;
+            padding: 0 24px;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    }
+
+    .dso {
+        display: flex;
+        padding: 0 24px;
+        border-radius: 8px;
+        align-items: center;
+        background-color: #cbe71e;
+        justify-content: space-between;
+
+        .label {
+            font-size: 40px;
+            font-weight: 300;
+            line-height: 60px;
+        }
+
+        .value {
+            font-size: 48px;
+            font-weight: 500;
+            line-height: 72px;
+            letter-spacing: -0.02em;
+        }
+    }
+
+    .a {
+        gap: 16px;
+        grid-area: a;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        height: 100%;
+    }
+
+    .b {
+        gap: 16px;
+        grid-area: b;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 186px 1fr 186px;
+    }
+
+    .c {
+        gap: 16px;
+        grid-area: c;
+        display: grid;
+        grid-template-columns: calc(65% - 8px) calc(35% - 8px);
+        grid-template-rows: 294px;
+    }
+
     @media (max-width: 1200px) {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "a a a"
+            "b b b"
+            "c c c";
     }
 
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "a"
+            "b"
+            "c";
     }
-  }
 
-  .c {
-    @media (max-width: 1200px) {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
+    .a {
+        @media (max-width: 1200px) {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto;
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
     }
-  }
+
+    .c {
+        @media (max-width: 1200px) {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
+    }
 }

@@ -6,6 +6,7 @@ import { ApexOptions } from "apexcharts";
 import { useAppStore } from "@/lib/store/store";
 
 import styles from "./dashboard-porfolio-ages.module.scss";
+import DashboardGenericItem from "../dashboard-generic-item";
 const poppins = Poppins({ weight: "400", style: "normal", subsets: ["latin"] });
 
 interface DashboardPortfolioAgesProps {
@@ -78,14 +79,14 @@ const DashboardPortfolioAges: FC<DashboardPortfolioAgesProps> = ({ invoiceAges, 
 
   return (
     <div className={`${styles.wrapper} ${className}`}>
-      <div className={styles.name}>Edades de la cartera</div>
+      <DashboardGenericItem name="Cartera vencida" value={"1.2345"} unit="M" />
       <div className={styles.chart}>
         <ReactApexChart
           className=""
           options={options}
           series={invoiceAges}
           type="bar"
-          height={210}
+          height={270}
           key={Math.random()}
         />
       </div>
