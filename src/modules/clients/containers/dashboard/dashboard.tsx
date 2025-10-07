@@ -11,6 +11,7 @@ import DashboardSellsVsPayments from "../../components/dashboard-sells-vs-paymen
 import DashboardHistoricDso from "../../components/dashboard-historic-dso";
 import { ClientDetailsContext } from "../client-details/client-details";
 import { useDashboardInfo } from "@/components/hooks/useDashboardInfo";
+import DashboardCollectApply from "../../components/dashboard-collect-apply";
 
 import styles from "./dashboard.module.scss";
 
@@ -57,12 +58,8 @@ const Dashboard: FC<DashboardProps> = () => {
     <div className={styles.wrapper}>
       <div className={styles.a}>
         <DashboardTotalPortfolio className={styles.item} totalWallet={totalWallet} />
-        {/* <DashboardExpiredPortfolio
-          className={styles.item}
-          pastDuePortfolio={pastDuePortfolio}
-          expiredPercentage={expiredPercentage}
-        /> */}
         <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
+        <DashboardCollectApply className={styles.item} />
         {/* <DashboardBudget
           className={styles.item}
           budget={budget}
