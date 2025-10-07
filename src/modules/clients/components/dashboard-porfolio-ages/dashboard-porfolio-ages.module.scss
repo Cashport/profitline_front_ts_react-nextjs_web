@@ -1,7 +1,4 @@
 .wrapper {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
     .name {
         font-size: 16px;
         font-weight: 300;
@@ -16,6 +13,7 @@
     .chart {
         margin-left: -1.5rem;
         margin-top: -0.8rem;
+        margin-bottom: -1.25rem;
 
         .yAxis {
             font-size: 0.5rem;
@@ -28,6 +26,7 @@
         height: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 20px 20px;
         row-gap: 0.3rem;
         align-items: center;
         justify-items: center;
