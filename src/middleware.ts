@@ -36,8 +36,11 @@ export async function middleware(request: NextRequest) {
     "camera=(), microphone=(), geolocation=(), interest-cohort=(), accelerometer=(), gyroscope=()"
   );
 
-  // Permitir acceso sin autenticación a rutas que empiecen con /mobile
-  if (request.nextUrl.pathname.startsWith("/mobile")) {
+  // Permitir acceso sin autenticación a rutas que empiecen con /mobile o /cetaphil
+  if (
+    request.nextUrl.pathname.startsWith("/mobile") ||
+    request.nextUrl.pathname.startsWith("/cetaphil")
+  ) {
     return NextResponse.next();
   }
 
