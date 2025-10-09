@@ -110,7 +110,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
       }
       footer={null}
       onCancel={onClose}
-      width={660}
+      width={800}
       destroyOnClose
     >
       <Flex vertical gap={"24px"}>
