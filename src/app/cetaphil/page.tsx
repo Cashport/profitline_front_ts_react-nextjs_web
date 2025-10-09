@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@cetaphilUI/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@cetaphilUI/card";
 import { Input } from "@cetaphilUI/input";
@@ -60,9 +61,9 @@ export default function CetaphilLanding() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
-              <img src="/images/cetaphil/cashport-logo.png" alt="Cashport" className="h-8 w-auto" />
+              <Image src="/images/cetaphil/cashport-logo.png" alt="Cashport" width={120} height={32} className="h-8 w-auto" />
               <div className="h-6 w-px bg-border" />
-              <img src="/images/cetaphil/galderma-logo.png" alt="Galderma" className="h-7 w-auto" />
+              <Image src="/images/cetaphil/galderma-logo.png" alt="Galderma" width={120} height={28} className="h-7 w-auto" />
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -282,10 +283,12 @@ export default function CetaphilLanding() {
                 index === currentBanner ? "opacity-100" : "opacity-0"
               }`}
             >
-              <img
+              <Image
                 src={banner || "/placeholder.svg"}
                 alt={`Cetaphil Banner ${index + 1}`}
-                className="w-full h-full object-cover object-center"
+                fill
+                className="object-cover object-center"
+                priority={index === 0}
               />
             </div>
           ))}
@@ -328,10 +331,12 @@ export default function CetaphilLanding() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
-              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
+                <Image
                   src="/images/cetaphil/cetaphil-cleanser-bottle.jpg"
                   alt="Limpiador Cetaphil"
+                  width={300}
+                  height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
@@ -342,10 +347,12 @@ export default function CetaphilLanding() {
             </Card>
 
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
-              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
+                <Image
                   src="/images/cetaphil/cetaphil-moisturizer-bottle.jpg"
                   alt="Humectante Cetaphil"
+                  width={300}
+                  height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
@@ -356,10 +363,12 @@ export default function CetaphilLanding() {
             </Card>
 
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
-              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
+                <Image
                   src="/images/cetaphil/cetaphil-sunscreen-bottle.jpg"
                   alt="Protector Solar Cetaphil"
+                  width={300}
+                  height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
