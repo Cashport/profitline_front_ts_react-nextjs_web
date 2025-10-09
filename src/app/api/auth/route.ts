@@ -53,8 +53,8 @@ export async function POST() {
 export async function GET() {
   const pathname = headers().get("x-pathname") || "";
 
-  // If the path starts with /mobile, skip authentication
-  if (pathname.startsWith("/mobile")) {
+  // If the path starts with /mobile or /cetaphil, skip authentication
+  if (pathname.startsWith("/mobile") || pathname.startsWith("/cetaphil")) {
     return NextResponse.json({ isLogged: true }, { status: 200 });
   }
 
