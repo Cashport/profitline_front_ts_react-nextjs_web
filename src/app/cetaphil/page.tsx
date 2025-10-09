@@ -27,7 +27,10 @@ export default function CetaphilLanding() {
   const [loginStep, setLoginStep] = useState<"email" | "otp">("email");
   const [loginEmail, setLoginEmail] = useState("");
   const [currentBanner, setCurrentBanner] = useState(0);
-  const banners = ["/images/cetaphil/cetaphil-banner.jpeg", "/images/cetaphil/cetaphil-serums-banner.png"];
+  const banners = [
+    "/images/cetaphil/cetaphil-banner.jpeg",
+    "/images/cetaphil/cetaphil-serums-banner.png"
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -57,13 +60,25 @@ export default function CetaphilLanding() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
-              <Image src="/images/cetaphil/cashport-logo.png" alt="Cashport" width={120} height={32} className="h-8 w-auto" />
+              <Image
+                src="/images/cetaphil/cashport-logo.png"
+                alt="Cashport"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+              />
               <div className="h-6 w-px bg-border" />
-              <Image src="/images/cetaphil/galderma-logo.png" alt="Galderma" width={120} height={28} className="h-7 w-auto" />
+              <Image
+                src="/images/cetaphil/galderma-logo.png"
+                alt="Galderma"
+                width={120}
+                height={28}
+                className="h-7 w-auto"
+              />
             </div>
           </div>
           <div className="flex items-center gap-3">
