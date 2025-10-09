@@ -26,7 +26,7 @@ export default function CetaphilLanding() {
   const [loginStep, setLoginStep] = useState<"email" | "otp">("email");
   const [loginEmail, setLoginEmail] = useState("");
   const [currentBanner, setCurrentBanner] = useState(0);
-  const banners = ["/cetaphil-banner.jpeg", "/cetaphil-serums-banner.png"];
+  const banners = ["/images/cetaphil/cetaphil-banner.jpeg", "/images/cetaphil/cetaphil-serums-banner.png"];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,9 +60,9 @@ export default function CetaphilLanding() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
-              <img src="/cashport-logo.png" alt="Cashport" className="h-8 w-auto" />
+              <img src="/images/cetaphil/cashport-logo.png" alt="Cashport" className="h-8 w-auto" />
               <div className="h-6 w-px bg-border" />
-              <img src="/galderma-logo.png" alt="Galderma" className="h-7 w-auto" />
+              <img src="/images/cetaphil/galderma-logo.png" alt="Galderma" className="h-7 w-auto" />
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -330,7 +330,7 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
                 <img
-                  src="/cetaphil-cleanser-bottle.jpg"
+                  src="/images/cetaphil/cetaphil-cleanser-bottle.jpg"
                   alt="Limpiador Cetaphil"
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
@@ -344,7 +344,7 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
                 <img
-                  src="/cetaphil-moisturizer-bottle.jpg"
+                  src="/images/cetaphil/cetaphil-moisturizer-bottle.jpg"
                   alt="Humectante Cetaphil"
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
@@ -358,7 +358,7 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
                 <img
-                  src="/cetaphil-sunscreen-bottle.jpg"
+                  src="/images/cetaphil/cetaphil-sunscreen-bottle.jpg"
                   alt="Protector Solar Cetaphil"
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
                 />
