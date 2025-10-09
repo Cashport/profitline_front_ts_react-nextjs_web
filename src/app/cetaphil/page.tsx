@@ -69,7 +69,7 @@ export default function CetaphilLanding() {
                 alt="Cashport"
                 width={120}
                 height={32}
-                className="h-8 w-auto"
+                className="!h-8 !w-auto"
               />
               <div className="h-6 w-px bg-border" />
               <Image
@@ -77,7 +77,7 @@ export default function CetaphilLanding() {
                 alt="Galderma"
                 width={120}
                 height={28}
-                className="h-7 w-auto"
+                className="!h-7 !w-auto -mb-[5px]"
               />
             </div>
           </div>
