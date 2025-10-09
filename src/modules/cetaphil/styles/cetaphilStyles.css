@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  /* Updated to use Cashport color palette */
-  --cashport-black: #141414;
-  --cashport-green: #cbe71e;
-  --cashport-gray-light: #dddddd;
-  --cashport-gray-lighter: #f7f7f7;
-  --cashport-white: #ffffff;
-  --cetaphil-blue: #0067b1;
+  /* Updated to use Cashport color palette - RGB format */
+  --cashport-black: 20 20 20;
+  --cashport-green: 203 231 30;
+  --cashport-gray-light: 221 221 221;
+  --cashport-gray-lighter: 247 247 247;
+  --cashport-white: 255 255 255;
+  --cetaphil-blue: 0 103 177;
 
   /* Theme tokens using Cashport colors */
   --background: var(--cashport-white);
@@ -23,7 +23,7 @@
   --secondary: var(--cashport-gray-lighter);
   --secondary-foreground: var(--cashport-black);
   --muted: var(--cashport-gray-lighter);
-  --muted-foreground: #666666;
+  --muted-foreground: 102 102 102;
   --accent: var(--cashport-green);
   --accent-foreground: var(--cashport-black);
   --destructive: oklch(0.577 0.245 27.325);
@@ -50,23 +50,23 @@
 .dark {
   --background: var(--cashport-black);
   --foreground: var(--cashport-white);
-  --card: #1a1a1a;
+  --card: 26 26 26;
   --card-foreground: var(--cashport-white);
-  --popover: #1a1a1a;
+  --popover: 26 26 26;
   --popover-foreground: var(--cashport-white);
   --primary: var(--cetaphil-blue);
   --primary-foreground: var(--cashport-white);
-  --secondary: #2a2a2a;
+  --secondary: 42 42 42;
   --secondary-foreground: var(--cashport-white);
-  --muted: #2a2a2a;
-  --muted-foreground: #999999;
+  --muted: 42 42 42;
+  --muted-foreground: 153 153 153;
   --accent: var(--cashport-green);
   --accent-foreground: var(--cashport-black);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: #333333;
-  --input: #333333;
-  --ring: #333333;
+  --border: 51 51 51;
+  --input: 51 51 51;
+  --ring: 51 51 51;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -76,10 +76,10 @@
   --sidebar-foreground: var(--cashport-white);
   --sidebar-primary: var(--cashport-green);
   --sidebar-primary-foreground: var(--cashport-black);
-  --sidebar-accent: #2a2a2a;
+  --sidebar-accent: 42 42 42;
   --sidebar-accent-foreground: var(--cashport-white);
-  --sidebar-border: #333333;
-  --sidebar-ring: #333333;
+  --sidebar-border: 51 51 51;
+  --sidebar-ring: 51 51 51;
 }
 
 @layer base {
