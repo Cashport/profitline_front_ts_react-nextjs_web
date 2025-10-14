@@ -67,8 +67,8 @@ export default function CetaphilLanding() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/55 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+        <div className="container mx-auto px-4 py-4 flex flex-col min-[550px]:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-8 max-[549px]:self-start">
             <div className="flex items-center gap-4">
               <Image
                 src={cashportLogo}
@@ -89,7 +89,7 @@ export default function CetaphilLanding() {
               />
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 max-[549px]:self-end">
             <Dialog open={showLogin} onOpenChange={handleLoginClose}>
               <DialogTrigger asChild>
                 <Button variant="ghost" className="text-foreground hover:text-primary">
@@ -334,7 +334,7 @@ export default function CetaphilLanding() {
 
       {/* Marketplace Badge */}
       <section className="py-8 bg-background flex justify-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-center">
           <ShieldCheck className="w-4 h-4 text-blue-600" />
           <span className="text-sm font-medium text-blue-600">
             Marketplace Exclusivo para trabajadores de Galderma
