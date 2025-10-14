@@ -197,7 +197,12 @@ const CreateOrderCheckout: FC = ({}) => {
 
     const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
     if (response.status === 200) {
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}?notification=${response.data.notificationId}`;
+      const queryParams = [];
+      if (!response.data?.notificationId) {
+        queryParams.push(`notification=${response.data.id_order}`);
+      }
+      const queryParamsString = queryParams.join("&");
+      const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
       router.prefetch(url);
       router.push(url);
     }
