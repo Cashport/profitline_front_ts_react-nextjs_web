@@ -221,10 +221,7 @@ export const dowloadOrderCSV = async (
       `/marketplace/projects/${projectId}/downloadtxtorders`,
       formData
     );
-    if (response.success) {
-      return { message: response.message, data: response.data };
-    }
-    return null;
+    return { message: response.message, data: response.data };
   } catch (error) {
     return null;
   }
