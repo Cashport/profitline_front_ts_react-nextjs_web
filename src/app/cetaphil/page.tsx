@@ -21,16 +21,22 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 
+// Static image imports for Next optimization
+import cashportLogo from "@public/images/cetaphil/cashport-logo.png";
+import galdermaLogo from "@public/images/cetaphil/galderma-logo.png";
+import cetaphilBanner from "@public/images/cetaphil/cetaphil-banner.jpeg";
+import cetaphilSerumsBanner from "@public/images/cetaphil/cetaphil-serums-banner.png";
+import cetaphilCleanser from "@public/images/cetaphil/cetaphil-cleanser-bottle.jpg";
+import cetaphilMoisturizer from "@public/images/cetaphil/cetaphil-moisturizer-bottle.jpg";
+import cetaphilSunscreen from "@public/images/cetaphil/cetaphil-sunscreen-bottle.jpg";
+
 export default function CetaphilLanding() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loginStep, setLoginStep] = useState<"email" | "otp">("email");
   const [loginEmail, setLoginEmail] = useState("");
   const [currentBanner, setCurrentBanner] = useState(0);
-  const banners = [
-    "/images/cetaphil/cetaphil-banner.jpeg",
-    "/images/cetaphil/cetaphil-serums-banner.png"
-  ];
+  const banners = [cetaphilBanner, cetaphilSerumsBanner];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,27 +67,29 @@ export default function CetaphilLanding() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/55 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+        <div className="container mx-auto px-4 py-4 flex flex-col min-[550px]:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-8 max-[549px]:self-start">
             <div className="flex items-center gap-4">
               <Image
-                src="/images/cetaphil/cashport-logo.png"
+                src={cashportLogo}
                 alt="Cashport"
                 width={120}
                 height={32}
                 className="!h-8 !w-auto"
+                placeholder="blur"
               />
               <div className="h-6 w-px bg-border" />
               <Image
-                src="/images/cetaphil/galderma-logo.png"
+                src={galdermaLogo}
                 alt="Galderma"
                 width={120}
                 height={28}
                 className="!h-7 !w-auto -mb-[5px]"
+                placeholder="blur"
               />
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 max-[549px]:self-end">
             <Dialog open={showLogin} onOpenChange={handleLoginClose}>
               <DialogTrigger asChild>
                 <Button variant="ghost" className="text-foreground hover:text-primary">
@@ -293,17 +301,18 @@ export default function CetaphilLanding() {
         <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
           {banners.map((banner, index) => (
             <div
-              key={banner}
+              key={index}
               className={`absolute inset-0 transition-opacity duration-1000 ${
                 index === currentBanner ? "opacity-100" : "opacity-0"
               }`}
             >
               <Image
-                src={banner || "/placeholder.svg"}
+                src={banner}
                 alt={`Cetaphil Banner ${index + 1}`}
                 fill
                 className="object-cover object-center"
                 priority={index === 0}
+                placeholder="blur"
               />
             </div>
           ))}
@@ -325,7 +334,7 @@ export default function CetaphilLanding() {
 
       {/* Marketplace Badge */}
       <section className="py-8 bg-background flex justify-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-center">
           <ShieldCheck className="w-4 h-4 text-blue-600" />
           <span className="text-sm font-medium text-blue-600">
             Marketplace Exclusivo para trabajadores de Galderma
@@ -348,11 +357,13 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
-                  src="/images/cetaphil/cetaphil-cleanser-bottle.jpg"
+                  src={cetaphilCleanser}
                   alt="Limpiador Cetaphil"
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
+                  placeholder="blur"
+                  loading="lazy"
                 />
               </div>
               <CardHeader>
@@ -364,11 +375,13 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
-                  src="/images/cetaphil/cetaphil-moisturizer-bottle.jpg"
+                  src={cetaphilMoisturizer}
                   alt="Humectante Cetaphil"
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
+                  placeholder="blur"
+                  loading="lazy"
                 />
               </div>
               <CardHeader>
@@ -380,11 +393,13 @@ export default function CetaphilLanding() {
             <Card className="bg-card border-border overflow-hidden group hover:border-primary/50 transition-all">
               <div className="aspect-square bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center relative">
                 <Image
-                  src="/images/cetaphil/cetaphil-sunscreen-bottle.jpg"
+                  src={cetaphilSunscreen}
                   alt="Protector Solar Cetaphil"
                   width={300}
                   height={300}
                   className="w-3/4 h-3/4 object-contain group-hover:scale-105 transition-transform"
+                  placeholder="blur"
+                  loading="lazy"
                 />
               </div>
               <CardHeader>
