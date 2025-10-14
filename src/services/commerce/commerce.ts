@@ -1,5 +1,5 @@
 import { GenericResponse } from "@/types/global/IGlobal";
-import { API } from "@/utils/api/api";
+import { API, ApiError } from "@/utils/api/api";
 import {
   ICommerceAdresses,
   IConfirmOrderData,
@@ -223,6 +223,9 @@ export const dowloadOrderCSV = async (
     );
     return { message: response.message, data: response.data };
   } catch (error) {
+    if (error instanceof ApiError) {
+      return { message: error.message, data: "" };
+    }
     return null;
   }
 };
