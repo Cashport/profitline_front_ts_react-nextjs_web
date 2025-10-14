@@ -167,7 +167,7 @@ export const ConfirmedOrderView: FC = () => {
                   </Flex>
                   <Flex justify="space-between">
                     <Text className={styles.footer__discountExplanation}>
-                      Descuentos de la orden (Crosselling)
+                      Descuentos de la orden (Cross selling)
                     </Text>
                     <Text className={styles.footer__discountExplanation}>
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
