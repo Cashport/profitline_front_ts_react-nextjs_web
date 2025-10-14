@@ -54,8 +54,10 @@ export const OrdersGenerateActionModal = ({
   const handleDownloadCSV = async () => {
     try {
       const res = await dowloadOrderCSV(ordersId, projectId);
-      if (!res) {
-        return showMessage("error", "Error al descargar CSV");
+      if (!res || !res.data) {
+        if (res?.message) {
+          return showMessage("error", res.message);
+        } else return showMessage("error", "Error al descargar CSV");
       }
       createAndDownloadTxt(res.data);
       if (res.message == "") {
