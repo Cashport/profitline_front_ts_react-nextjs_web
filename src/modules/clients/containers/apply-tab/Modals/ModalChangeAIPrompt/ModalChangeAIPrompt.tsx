@@ -13,9 +13,9 @@ import {
 } from "@/services/applyTabClients/applyTabClients";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
-export const CLIENTUUID_DEMO = "903399c4062f4d49974d7187babc9acd";
 
 import "./modalChangeAIPrompt.scss";
+import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 const { Title } = Typography;
 
 interface Props {
