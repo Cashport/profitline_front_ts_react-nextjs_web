@@ -68,17 +68,19 @@ interface IApplyTabProps {
   className?: string;
   defaultPositionDragModal?: { x: number; y: number };
   isInApplyModule?: boolean;
+  clientUUID?: string;
 }
 
 const ApplyTab: React.FC<IApplyTabProps> = ({
   className,
   defaultPositionDragModal,
-  isInApplyModule = false
+  isInApplyModule = false,
+  clientUUID,
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
   const rawClientId = extractSingleParam(params?.clientId);
-  const clientId = isInApplyModule || !rawClientId ? CLIENTUUID_DEMO : rawClientId;
+  const clientId = isInApplyModule ? clientUUID || CLIENTUUID_DEMO : rawClientId || CLIENTUUID_DEMO;
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
