@@ -12,7 +12,7 @@ import {
   uploadPaymentAttachment
 } from "@/services/applyTabClients/applyTabClients";
 
-import { FILE_EXTENSIONS } from "@/utils/constants/globalConstants";
+import { FILE_EXTENSIONS,CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 
 import "./modalApplyAI.scss";
 
@@ -35,7 +35,7 @@ interface Props {
 const ModalApplyAI = ({ isOpen, onClose, mutate }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || "";
+  const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
