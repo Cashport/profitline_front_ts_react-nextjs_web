@@ -328,7 +328,7 @@ export const createPrompt = async (
       `${config.API_HOST}/prompt/create-client-prompt`,
       {
         id_project: projectId,
-        clientUUID: clientUUID,
+        clientUUID: clientUUID || CLIENTUUID_DEMO,
         id_ai_type_task: aiTypeTaskId,
         prompt: prompt
       }
@@ -360,7 +360,7 @@ export const getPromptByClientAndAITask = async (
       `${config.API_HOST}/prompt/get-by-criteria`,
       {
         id_project: projectId,
-        clientUUID: clientUUID,
+        clientUUID: clientUUID || CLIENTUUID_DEMO,
         id_ai_type_task: aiTypeTaskId
       }
     );
