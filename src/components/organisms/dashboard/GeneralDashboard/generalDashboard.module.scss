@@ -1,16 +1,21 @@
+@import "@/styles/variables.scss";
+
 .wrapper {
     gap: 16px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 104px 294px 310px;
     grid-template-areas:
-        "a a a b"
         "a a a b"
         "c c c c";
 
-    .item {
+    .card {
         border-radius: 8px;
-        background-color: #f7f7f7;
+        background-color: $background;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.125rem;
+        justify-content: space-between;
 
         .list {
             height: 100%;
@@ -52,7 +57,7 @@
         grid-area: a;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 104px 294px;
+        height: 100%;
     }
 
     .b {
@@ -60,15 +65,15 @@
         grid-area: b;
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 186px 98px 98px;
+        grid-template-rows: auto 1fr 100px;
     }
 
     .c {
         gap: 16px;
         grid-area: c;
         display: grid;
-        grid-template-columns: calc(60% - 8px) calc(40% - 8px);
-        grid-template-rows: auto;
+        grid-template-columns: calc(65% - 8px) calc(35% - 8px);
+        grid-template-rows: 294px;
     }
 
     @media (max-width: 1200px) {
@@ -93,6 +98,11 @@
         @media (max-width: 1200px) {
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto;
+
+            .portfolioAges {
+                grid-column: 1 / -1;
+                order: 999;
+            }
         }
 
         @media (max-width: 768px) {

@@ -16,7 +16,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@styles/*": ["./src/styles/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@cetaphilUI/*": ["./src/modules/cetaphil/components/ui/*"],
+      "@public/*": ["./public/*"]
     },
     "plugins": [
       {

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import styles from "./dashboard-generic-item.module.scss";
+import { Flex } from "antd";
 
 interface DashboardGenericItemProps {
   name: string;
@@ -7,6 +8,7 @@ interface DashboardGenericItemProps {
   badgeText?: string;
   unit?: string;
   quantity?: number;
+  color?: string;
 }
 
 const DashboardGenericItem: FC<DashboardGenericItemProps> = ({
@@ -14,13 +16,16 @@ const DashboardGenericItem: FC<DashboardGenericItemProps> = ({
   badgeText,
   value,
   unit,
-  quantity
+  quantity,
+  color
 }) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.label}>
-        <p className={styles.text}>{name}</p>
-
+        <Flex align="center" gap={"8px"}>
+          {color && <span className={styles.coloredCircle} style={{ backgroundColor: color }} />}
+          <p className={styles.text}>{name}</p>
+        </Flex>
         {badgeText && <div className={styles.percentageBadge}>{badgeText}</div>}
       </div>
       <div className={styles.value}>

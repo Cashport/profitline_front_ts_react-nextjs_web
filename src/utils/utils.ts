@@ -1,3 +1,5 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 import { IChanel } from "@/types/bre/IBRE";
 import { ISelectStringType } from "@/types/communications/ICommunications";
@@ -428,4 +430,8 @@ export function formatTimeAgo(utcDateString: string): string {
   if (months < 12) return `${months} meses`;
   if (years === 1) return `1 año`;
   return `${years} años`;
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

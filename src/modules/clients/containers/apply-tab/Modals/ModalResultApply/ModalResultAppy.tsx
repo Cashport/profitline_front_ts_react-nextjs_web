@@ -13,9 +13,16 @@ interface Props {
   desconts?: number;
   payments?: number;
   total?: number;
+  defaultPosition?: { x: number; y: number };
 }
 
-export const ModalResultAppy = ({ invoices, desconts, payments, total }: Props) => {
+export const ModalResultAppy = ({
+  invoices,
+  desconts,
+  payments,
+  total,
+  defaultPosition: defaultPositionProp
+}: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const updateDefaultPosition = () => {
     const modalWidth = draggleRef.current?.offsetWidth || 240;
@@ -30,7 +37,9 @@ export const ModalResultAppy = ({ invoices, desconts, payments, total }: Props) 
 
   const draggleRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-  const [defaultPosition, setDefaultPosition] = useState({ x: 0, y: -160 });
+  const [defaultPosition, setDefaultPosition] = useState(
+    defaultPositionProp ?? { x: 0, y: -160 }
+  );
 
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;

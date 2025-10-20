@@ -3,6 +3,7 @@ import { fetcher } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { useAppStore } from "@/lib/store/store";
 import { IApplyTabClients } from "@/types/applyTabClients/IApplyTabClients";
+import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 import { useParams } from "next/navigation";
 import { extractSingleParam } from "@/utils/utils";
 import { useState } from "react";
@@ -10,7 +11,7 @@ import { useState } from "react";
 export const useApplicationTable = () => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
-  const clientId = clientIdParam || "";
+  const clientId = clientIdParam || CLIENTUUID_DEMO;
   const [preventRevalidation, setPreventRevalidation] = useState(false);
 
   const { ID } = useAppStore((state) => state.selectedProject);

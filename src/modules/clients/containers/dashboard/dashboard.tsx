@@ -11,6 +11,7 @@ import DashboardSellsVsPayments from "../../components/dashboard-sells-vs-paymen
 import DashboardHistoricDso from "../../components/dashboard-historic-dso";
 import { ClientDetailsContext } from "../client-details/client-details";
 import { useDashboardInfo } from "@/components/hooks/useDashboardInfo";
+import DashboardCollectApply from "../../components/dashboard-collect-apply";
 
 import styles from "./dashboard.module.scss";
 
@@ -56,53 +57,43 @@ const Dashboard: FC<DashboardProps> = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.a}>
-        <DashboardTotalPortfolio className={styles.item} totalWallet={totalWallet} />
-        <DashboardExpiredPortfolio
-          className={styles.item}
+        <DashboardTotalPortfolio
+          className={styles.card}
+          totalWallet={totalWallet}
+          totalCreditNotes={creditNotes}
+          countCreditNotes={creditNotesCount}
+          totalBalances={totalBalance}
+          countBalances={totalBalanceCount}
+        />
+        <DynamicPortfoliAges
+          className={`${styles.card} ${styles.portfolioAges}`}
+          invoiceAges={invoiceAges}
           pastDuePortfolio={pastDuePortfolio}
-          expiredPercentage={expiredPercentage}
         />
-        <DashboardBudget
-          className={styles.item}
-          budget={budget}
-          budgetPercentage={budgetPercentage}
-        />
-        <DynamicPortfoliAges className={styles.item} invoiceAges={invoiceAges} />
-        <DashboardInvoiceStatus
-          className={styles.item}
-          totalUnreconciled={totalUnreconciled}
-          totalUnreconciledCount={totalUnreconciledCount}
-          totalReconciled={totalReconciled}
-          totalReconciledCount={totalReconciledCount}
-          sinRadicarValue={sinRadicarValue}
-          sinRadicarCount={sinRadicarCount}
-        />
-        <DashboardAlerts
-          className={styles.item}
-          openAlerts={openAlerts}
-          openAlertsCount={openAlertsCount}
-          creditNotes={creditNotes}
-          creditNotesCount={creditNotesCount}
-          totalBalance={totalBalance}
-          totalBalanceCount={totalBalanceCount}
-        />
+        <DashboardCollectApply className={styles.card} />
       </div>
       <div className={styles.b}>
-        <div className={styles.item}>
-          <div className={styles.list}>
-            <DashboardGenericItem name="R. aplicado" value={appliedPayments} unit="M" />
-            <DashboardGenericItem name="Pagos no ap." value={unappliedPayments} unit="M" />
-          </div>
+        <div className={styles.card}>
+          <DashboardGenericItem
+            name="Cupo"
+            value={quota}
+            unit="M"
+            badgeText={`${parseFloat(quotaPercentage).toFixed(1)}%`}
+          />
         </div>
-        <div className={styles.item}>
-          <div className={styles.list}>
-            <DashboardGenericItem
-              name="Cupo"
-              value={quota}
-              unit="M"
-              badgeText={`${parseFloat(quotaPercentage).toFixed(1)}%`}
-            />
-          </div>
+        <div className={styles.card}>
+          <DashboardGenericItem
+            name="Sin conciliar"
+            value={totalUnreconciled}
+            unit="M"
+            quantity={totalUnreconciledCount}
+          />
+          <DashboardGenericItem
+            name="Novedades"
+            value={openAlerts}
+            unit="M"
+            quantity={openAlertsCount}
+          />
         </div>
         <div className={styles.dso}>
           <div className={styles.label}>DSO</div>
@@ -110,8 +101,8 @@ const Dashboard: FC<DashboardProps> = () => {
         </div>
       </div>
       <div className={styles.c}>
-        <DashboardSellsVsPayments className={styles.item} chartData={sellsVsPaymentsData} />
-        <DashboardHistoricDso className={styles.item} history_dso={history_dso} />
+        <DashboardSellsVsPayments className={styles.card} chartData={sellsVsPaymentsData} />
+        <DashboardHistoricDso className={styles.card} history_dso={history_dso} />
       </div>
     </div>
   );
