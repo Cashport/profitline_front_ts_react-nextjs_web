@@ -77,7 +77,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
+  const rawClientId = extractSingleParam(params?.clientId);
+  const clientId = isInApplyModule || !rawClientId ? CLIENTUUID_DEMO : rawClientId;
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
