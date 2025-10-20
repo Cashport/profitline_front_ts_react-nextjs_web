@@ -13,6 +13,7 @@ import {
 } from "@/services/applyTabClients/applyTabClients";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
+export const CLIENTUUID_DEMO = "903399c4062f4d49974d7187babc9acd";
 
 import "./modalChangeAIPrompt.scss";
 const { Title } = Typography;
@@ -34,7 +35,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || "";
+  const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
 
   useEffect(() => {
     if (isOpen) {
