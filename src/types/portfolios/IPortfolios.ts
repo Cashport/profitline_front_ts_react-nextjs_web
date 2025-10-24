@@ -21,7 +21,7 @@ interface IDataWallet {
   budget_ammount: number | null;
   applied_payments_ammount: number;
   unapplied_payments_ammount: number;
-  unidentified_payment_amount: number;
+  unidentified_payment_ammount: number;
   quota: number;
   uuid: string;
 }
