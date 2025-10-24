@@ -41,6 +41,17 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
     dsoValue,
     sellsVsPaymentsData,
     history_dso,
+    totalInvoices,
+    countInvoices,
+    totalBalancesNew,
+    countBalancesNew,
+    totalCreditNotes,
+    countCreditNotes,
+    grandTotalWallet,
+    collection,
+    appliedPayments,
+    unappliedPayments,
+    unidentifiedPayments
   } = useDashboardInfo(portfolioData);
 
   return (
@@ -51,17 +62,25 @@ const GeneralDashboard: FC<GeneralDashboardViewProps> = ({ portfolioData }) => {
             <DashboardTotalPortfolio
               className={styles.card}
               totalWallet={totalWallet}
-              totalCreditNotes={creditNotes}
-              countCreditNotes={creditNotesCount}
-              totalBalances={totalBalance}
-              countBalances={totalBalanceCount}
+              totalInvoices={totalInvoices}
+              countInvoices={countInvoices}
+              totalCreditNotes={totalCreditNotes}
+              countCreditNotes={countCreditNotes}
+              totalBalances={totalBalancesNew}
+              countBalances={countBalancesNew}
             />
             <DynamicPortfoliAges
               className={`${styles.card} ${styles.portfolioAges}`}
               invoiceAges={invoiceAges}
               pastDuePortfolio={pastDuePortfolio}
             />
-            <DashboardCollectApply className={styles.card} />
+            <DashboardCollectApply
+              className={styles.card}
+              collection={collection}
+              totalApplied={appliedPayments}
+              pendingApplication={unappliedPayments}
+              unidentifiedPayments={unidentifiedPayments}
+            />
           </div>
           <div className={styles.b}>
             <div className={styles.card}>
