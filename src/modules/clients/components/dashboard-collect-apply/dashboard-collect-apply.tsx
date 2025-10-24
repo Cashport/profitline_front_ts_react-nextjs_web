@@ -25,7 +25,7 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({
   const percentage =
     collectionValue > 0 ? Math.min((totalAppliedValue / collectionValue) * 100, 100) : 0;
 
-  const colorBarValues = [{ color: "#cbe71e", percentage }];
+  const colorBarValues = [{ color: "#cbe71e", percentage: 100 }];
 
   return (
     <div className={`${className}`}>
