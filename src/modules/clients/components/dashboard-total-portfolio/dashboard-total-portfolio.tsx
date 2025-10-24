@@ -23,10 +23,13 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
   countCreditNotes = 0,
   countBalances = 0
 }) => {
+  const total =
+    parseFloat(totalInvoices) + parseFloat(totalCreditNotes) + parseFloat(totalBalances);
+
   const colorBarValues = [
-    { color: "#cbe71e", percentage: 50 },
-    { color: "#9ab916", percentage: 30 },
-    { color: "#000000", percentage: 20 }
+    { color: "#cbe71e", percentage: (parseFloat(totalInvoices) / total) * 100 },
+    { color: "#9ab916", percentage: (parseFloat(totalCreditNotes) / total) * 100 },
+    { color: "#000000", percentage: (parseFloat(totalBalances) / total) * 100 }
   ];
 
   return (
