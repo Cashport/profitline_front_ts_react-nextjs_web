@@ -56,7 +56,7 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
 
       <DashboardGenericItem
         name="Notas crédito"
-        value={totalCreditNotes}
+        value={`-${totalCreditNotes}`}
         unit="M"
         quantity={countCreditNotes}
         color="green"

@@ -132,7 +132,7 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const collection = formatMoney(formattedCollection);
 
   const formattedUnidentifiedPayments = formatMillionNumber(
-    portfolioData?.data_wallet?.unidentified_payment_amount
+    portfolioData?.data_wallet?.unidentified_payment_ammount
   );
   const unidentifiedPayments = formatMoney(formattedUnidentifiedPayments);
   const countInvoices = portfolioData?.count_invoices ?? 0;
