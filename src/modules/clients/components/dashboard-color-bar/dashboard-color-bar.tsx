@@ -8,8 +8,7 @@ interface DashboardColorBarProps {
 }
 
 const DashboardColorBar: FC<DashboardColorBarProps> = ({ values, className, percentage }) => {
-  const totalPercentage = values.reduce((acc, item) => acc + item.percentage, 0);
-  const markerPosition = percentage !== undefined ? (percentage / totalPercentage) * 100 : null;
+  const markerPosition = percentage ?? null;
 
   return (
     <div className={`${styles.colorBar} ${className}`}>

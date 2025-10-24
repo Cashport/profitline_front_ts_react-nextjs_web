@@ -23,14 +23,22 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
   countCreditNotes = 0,
   countBalances = 0
 }) => {
-  const total =
-    parseFloat(totalInvoices) + parseFloat(totalCreditNotes) + parseFloat(totalBalances);
+  const parseValue = (val: string) => parseFloat(val.replace(/[^0-9.-]+/g, "")) || 0;
 
-  const colorBarValues = [
-    { color: "#cbe71e", percentage: (parseFloat(totalInvoices) / total) * 100 },
-    { color: "#9ab916", percentage: (parseFloat(totalCreditNotes) / total) * 100 },
-    { color: "#000000", percentage: (parseFloat(totalBalances) / total) * 100 }
-  ];
+  const totalInvoicesNum = parseValue(totalInvoices);
+  const totalCreditNotesNum = parseValue(totalCreditNotes);
+  const totalBalancesNum = parseValue(totalBalances);
+
+  const total = totalInvoicesNum + totalCreditNotesNum + totalBalancesNum;
+
+  const colorBarValues =
+    total > 0
+      ? [
+          { color: "#cbe71e", percentage: (totalInvoicesNum / total) * 100 },
+          { color: "#9ab916", percentage: (totalCreditNotesNum / total) * 100 },
+          { color: "#000000", percentage: (totalBalancesNum / total) * 100 }
+        ]
+      : [];
 
   return (
     <div className={`${className}`}>
