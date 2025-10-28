@@ -104,6 +104,12 @@ export const OrdersGenerateActionModal = ({
             title="Descargar CSV"
           />
           <ButtonGenerateAction
+            onClick={handleDownloadCSV}
+            icon={<DownloadSimple size={16} />}
+            title="Descarga parcial CSV"
+            disabled={ordersId.length !== 1}
+          />
+          <ButtonGenerateAction
             onClick={handleDeleteRows}
             icon={<Trash size={16} />}
             title="Eliminar"
