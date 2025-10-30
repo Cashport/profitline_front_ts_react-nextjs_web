@@ -12,7 +12,7 @@ import {
   uploadPaymentAttachment
 } from "@/services/applyTabClients/applyTabClients";
 
-import { FILE_EXTENSIONS,CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
+import { FILE_EXTENSIONS, CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 
 import "./modalApplyAI.scss";
 

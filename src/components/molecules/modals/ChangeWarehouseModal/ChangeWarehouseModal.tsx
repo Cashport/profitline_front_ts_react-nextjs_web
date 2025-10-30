@@ -21,6 +21,7 @@ interface Props {
 export interface InventoriesByWarehouse {
   id: number;
   warehouse: string;
+  warehouse_description?: string;
   availability: boolean;
   availability_msg: string;
 }
@@ -96,7 +97,15 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
             checked={warehouseSelected === record.id}
             onChange={() => setWarehouseSelected(record.id)}
           />
-          <Text>{warehouse}</Text>
+          {record.warehouse_description ? (
+            <>
+              <Text strong>{warehouse}</Text>
+              {" - "}
+              <Text type="secondary">{record.warehouse_description}</Text>
+            </>
+          ) : (
+            <Text>{warehouse}</Text>
+          )}
         </Flex>
       )
     },

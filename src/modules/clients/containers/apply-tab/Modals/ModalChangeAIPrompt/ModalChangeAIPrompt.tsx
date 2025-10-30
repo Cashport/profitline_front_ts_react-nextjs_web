@@ -15,6 +15,7 @@ import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
 
 import "./modalChangeAIPrompt.scss";
+import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 const { Title } = Typography;
 
 interface Props {
@@ -34,7 +35,7 @@ export const ModalChangeAIPrompt = ({ isOpen, onClose }: Props) => {
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || "";
+  const clientId = extractSingleParam(params.clientId) || CLIENTUUID_DEMO;
 
   useEffect(() => {
     if (isOpen) {

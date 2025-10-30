@@ -9,6 +9,10 @@ export const STORAGE_TOKEN = "token";
 export const CLIENTUUID_DEMO = "903399c4062f4d49974d7187babc9acd";
 export const PROJECTID_DEMO = 171;
 
+export const CLIENTUUID_DEMO = "903399c4062f4d49974d7187babc9acd";
+export const PROJECTID_DEMO = 171;
+
+
 export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 
 // ---
