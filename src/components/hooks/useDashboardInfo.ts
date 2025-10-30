@@ -23,7 +23,6 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const budget = formatMoney(formattedBudget);
   const budgetPercentage = portfolioData?.percentages?.budget_percentage || "0";
 
-
   // Portfolio Ages
   const invoiceAges = portfolioData?.invoice_ages
     ?.map((item) => {
@@ -113,11 +112,32 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
   const quota = formatMoney(formattedQuota);
   const quotaPercentage = portfolioData?.percentages?.quota_percentage || "0";
 
-  const formattedSinRadicar = formatMillionNumber(
-    portfolioData?.unradicated_invoices?.total_value
-  );
+  const formattedSinRadicar = formatMillionNumber(portfolioData?.unradicated_invoices?.total_value);
   const sinRadicarValue = formatMoney(formattedSinRadicar);
   const sinRadicarCount = portfolioData?.unradicated_invoices?.count ?? 0;
+
+  const formattedTotalInvoices = formatMillionNumber(portfolioData?.total_invoices);
+  const totalInvoices = formatMoney(formattedTotalInvoices);
+
+  const formattedTotalBalancesNew = formatMillionNumber(portfolioData?.total_balances_new);
+  const totalBalancesNew = formatMoney(formattedTotalBalancesNew);
+
+  const formattedTotalCreditNotes = formatMillionNumber(portfolioData?.total_credit_notes);
+  const totalCreditNotes = formatMoney(formattedTotalCreditNotes);
+
+  const formattedGrandTotalWallet = formatMillionNumber(portfolioData?.grand_total_wallet);
+  const grandTotalWallet = formatMoney(formattedGrandTotalWallet);
+
+  const formattedCollection = formatMillionNumber(portfolioData?.data_wallet?.budget_ammount);
+  const collection = formatMoney(formattedCollection);
+
+  const formattedUnidentifiedPayments = formatMillionNumber(
+    portfolioData?.data_wallet?.unidentified_payment_ammount
+  );
+  const unidentifiedPayments = formatMoney(formattedUnidentifiedPayments);
+  const countInvoices = portfolioData?.count_invoices ?? 0;
+  const countBalancesNew = portfolioData?.count_balances_new ?? 0;
+  const countCreditNotes = portfolioData?.count_credit_notes ?? 0;
 
 
   return {
@@ -127,6 +147,14 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
     budget,
     budgetPercentage,
     invoiceAges,
+    totalInvoices,
+    countInvoices,
+    totalBalancesNew,
+    countBalancesNew,
+    totalCreditNotes,
+    countCreditNotes,
+    grandTotalWallet,
+    collection,
     totalUnreconciled,
     totalUnreconciledCount,
     totalReconciled,
@@ -144,6 +172,7 @@ export const useDashboardInfo = (portfolioData: IDataSection | undefined) => {
     appliedPayments,
     appliedPaymentPercentage,
     unappliedPayments,
+    unidentifiedPayments,
     unnappliedPaymentPercentage,
     dsoValue,
     quota,

@@ -40,7 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <ConfigProvider theme={theme}>
       <html lang="es" className={`${poppins.variable} ${aptosNarrow.variable}`}>
         <QueryClientProvider client={queryClient}>
-          <body className={poppins.className}>
+          <body className={poppins.className} suppressHydrationWarning>
             <AntdRegistry>
               {loading ? (
                 <Loader />

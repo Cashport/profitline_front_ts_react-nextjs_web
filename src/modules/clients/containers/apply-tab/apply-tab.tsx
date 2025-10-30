@@ -40,6 +40,7 @@ import { ModalChangeAIPrompt } from "./Modals/ModalChangeAIPrompt/ModalChangeAIP
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./apply-tab.scss";
+import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 
 interface ISelectedRowKeys {
   invoices: React.Key[];
@@ -67,16 +68,19 @@ interface IApplyTabProps {
   className?: string;
   defaultPositionDragModal?: { x: number; y: number };
   isInApplyModule?: boolean;
+  clientUUID?: string;
 }
 
 const ApplyTab: React.FC<IApplyTabProps> = ({
   className,
   defaultPositionDragModal,
-  isInApplyModule = false
+  isInApplyModule = false,
+  clientUUID,
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || "";
+  const rawClientId = extractSingleParam(params?.clientId);
+  const clientId = isInApplyModule ? clientUUID || CLIENTUUID_DEMO : rawClientId || CLIENTUUID_DEMO;
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);

@@ -21,6 +21,7 @@ interface IDataWallet {
   budget_ammount: number | null;
   applied_payments_ammount: number;
   unapplied_payments_ammount: number;
+  unidentified_payment_ammount: number;
   quota: number;
   uuid: string;
 }
@@ -29,6 +30,15 @@ interface IDataWallet {
 export interface IDataSection {
   data_wallet: IDataWallet;
   total_wallet: number;
+  total_budget:number;
+  total_balances: number;
+  grand_total_wallet: number;
+  total_invoices: number;
+  count_invoices: number;
+  total_balances_new: number;
+  count_balances_new: number;
+  total_credit_notes: number;
+  count_credit_notes: number;
   info_invioce: IInvoiceInfo;
   invoice_alerts: IInvoiceAlerts;
   dso: number;

@@ -1,13 +1,21 @@
 .wrapper {
-    height: 100%;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
     .label {
         display: flex;
         column-gap: 18px;
         line-height: 24px;
         align-items: center;
+
+        .coloredCircle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
 
         .text {
             font-size: 1rem;
@@ -17,6 +25,9 @@
             text-overflow: ellipsis;
         }
         .percentageBadge {
+            position: absolute;
+            top: 0;
+            right: 0;
             height: 32px;
             display: flex;
             padding: 0 8px;
@@ -62,6 +73,16 @@
 }
 
 @media screen and (min-width: 1340px) {
+    .wrapper {
+        .value {
+            .total {
+                max-width: 100%;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 1200px) {
     .wrapper {
         .value {
             .total {
