@@ -38,14 +38,18 @@ const CashportMobileView: React.FC = () => {
 
   const fetchToken = async (id: string) => {
     try {
-      // Call the service to get the mobile token
-      console.log("fetching with", id);
+      // After testing this will be removed because token will arrive on the url
       const token = await getMobileToken(id);
-      console.log("Mobile token fetched successfully:", token);
-
       try {
         const res = await signInWithCustomToken(auth, token);
-        console.log("res", res);
+        const idToken = await res.user.getIdToken();
+        console.log("User will use token:", idToken);
+
+        try {
+          await getClientWallet(idToken);
+        } catch (error) {
+          console.error("Error fetching client wallet:", error);
+        }
       } catch (error) {
         console.error("Error fetching client wallet:", error);
       }
