@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs } from "antd";
 import type { TabsProps } from "antd";
 
@@ -9,6 +9,9 @@ import PendingInvoicesTab from "../tabs/PendingInvoicesTab/PendingInvoicesTab";
 import MyPaymentsTab from "../tabs/MyPaymentsTab/MyPaymentsTab";
 
 import "./cashportMobileView.scss";
+import { getClientWallet, getMobileToken } from "@/services/clients/clients";
+import { signInWithCustomToken } from "@firebase/auth";
+import { auth } from "../../../../../firebase";
 
 interface Invoice {
   id: string;
@@ -23,6 +26,33 @@ interface Invoice {
 
 const CashportMobileView: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // const clientID = searchParams.get("id");
+  const clientID = "57aefbf0568311f09abb06e6795ff363"; // Temporary hardcoded client ID for testing
+
+  useEffect(() => {
+    if (clientID) {
+      fetchToken(clientID);
+    }
+  }, [clientID]);
+
+  const fetchToken = async (id: string) => {
+    try {
+      // Call the service to get the mobile token
+      console.log("fetching with", id);
+      const token = await getMobileToken(id);
+      console.log("Mobile token fetched successfully:", token);
+
+      try {
+        const res = await signInWithCustomToken(auth, token);
+        console.log("res", res);
+      } catch (error) {
+        console.error("Error fetching client wallet:", error);
+      }
+    } catch (error) {
+      console.error("Error fetching mobile token:", error);
+    }
+  };
 
   // Mock data
   const totalDebt = 32487323;
