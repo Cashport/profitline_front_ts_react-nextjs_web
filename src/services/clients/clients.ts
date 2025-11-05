@@ -1,6 +1,13 @@
+import axios, { AxiosResponse } from "axios";
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { ClientFormType, IClient, ICreateClient, IUpdateClient } from "@/types/clients/IClients";
+import {
+  ClientFormType,
+  IClient,
+  IClientWalletData,
+  ICreateClient,
+  IUpdateClient
+} from "@/types/clients/IClients";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 
 import { SUCCESS } from "@/utils/constants/globalConstants";
@@ -8,7 +15,6 @@ import { IAddAddressData } from "@/types/locations/ILocations";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { MessageType } from "@/context/MessageContext";
 import { stringToBoolean } from "@/utils/utils";
-import axios from "axios";
 
 // create
 
@@ -287,14 +293,18 @@ export const getMobileToken = async (clientUUID: string): Promise<string> => {
   }
 };
 
-export const getClientWallet = async (token: string): Promise<any> => {
+export const getClientWallet = async (token: string): Promise<IClientWalletData> => {
   try {
-    const response: GenericResponse<any> = await axios.get(`${config.API_HOST}/client/cartera`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response: AxiosResponse<GenericResponse<IClientWalletData>> = await axios.get(
+      `${config.API_HOST}/client/cartera`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
-    return response.data;
+    );
+    console.log("response client wallet: ", response);
+    return response.data.data;
   } catch (error) {
     console.error("error getting client wallet: ", error);
     throw error;
