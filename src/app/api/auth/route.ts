@@ -18,12 +18,29 @@ export async function POST() {
     const idToken = authorization.split("Bearer ")[1];
     const decodedToken = await auth().verifyIdToken(idToken);
     const permissions = await getPermissions(idToken);
+    console.log(permissions);
+    let extraPermissions: {
+      guestName?: string;
+      guestId?: string;
+      guestDocument?: string;
+      guestEmail?: string;
+      isMarketplaceGuest?: boolean;
+    } = {};
+    if (permissions?.isMarketplaceGuest) {
+      extraPermissions = {
+        guestName: permissions.guestName,
+        guestId: permissions.guestId,
+        guestDocument: permissions.guestDocument,
+        guestEmail: permissions.guestEmail,
+        isMarketplaceGuest: permissions.isMarketplaceGuest
+      };
+    }
     const buffer = Buffer.from(JSON.stringify(permissions)) as any;
     const compressedClaims = deflateSync(buffer).toString("base64");
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
+      ...extraPermissions,
       permissions: compressedClaims
     });
-    console.log(idCustomToken);
     const idCustomTokenSession = await auth().createCustomToken(decodedToken.uid);
     token = idCustomToken;
     const customToken = await customGetAuth(idCustomTokenSession);

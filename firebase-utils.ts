@@ -3,7 +3,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
-  confirmPasswordReset
+  confirmPasswordReset,
+  signInWithCustomToken
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
 import { auth } from "./firebase";
@@ -89,7 +90,20 @@ const getAuth = async (
   }
 };
 
+export const getIdTokenWithToken = async (token: string) => {
+  try {
+    const idToken = await signInWithCustomToken(auth, token);
+    return idToken;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
 const logOut = (router?: AppRouterInstance) => {
+  if (window.location.pathname === "/comercio/cetaphil") {
+    window.location.href = "/cetaphil";
+    return;
+  }
   window.location.href = "/auth/login";
   signOut(auth);
   localStorage.removeItem(STORAGE_TOKEN);

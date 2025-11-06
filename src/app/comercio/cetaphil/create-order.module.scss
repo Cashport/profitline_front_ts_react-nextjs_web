@@ -1,0 +1,19 @@
+@import "@/styles/variables.scss";
+
+.ordersView {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .marketView {
+        display: grid;
+        grid-template-columns: 5fr 3fr;
+        gap: 1.5rem;
+        height: 100%;
+    }
+}
