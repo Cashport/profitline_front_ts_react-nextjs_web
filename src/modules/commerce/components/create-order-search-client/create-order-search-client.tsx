@@ -1,5 +1,5 @@
 import { FC, useContext, useState } from "react";
-import { Flex } from "antd";
+import { Flex, message } from "antd";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 
@@ -11,6 +11,8 @@ import {
   type RegistrationFormData
 } from "@/modules/cetaphil/components/registration-dialog";
 import { OrderViewContext } from "../../contexts/orderViewContext";
+import { registerNewClient } from "@/services/commerce/commerce";
+import { getDocumentTypeId } from "@/constants/documentTypes";
 
 import styles from "./create-order-search-client.module.scss";
 
@@ -25,6 +27,7 @@ export interface selectClientForm {
 const CreateOrderSearchClient: FC = ({}) => {
   const { setClient } = useContext(OrderViewContext);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const {
     control,
@@ -40,9 +43,34 @@ const CreateOrderSearchClient: FC = ({}) => {
     setShowNewClientDialog(true);
   };
 
-  const handleSaveClient = async (data: any) => {
-    console.log("Guardar nuevo cliente:", data);
-    setShowNewClientDialog(false);
+  const handleSaveClient = async (data: RegistrationFormData) => {
+    try {
+      setIsRegistering(true);
+
+      const documentTypeId = getDocumentTypeId(data.documentType);
+
+      if (!documentTypeId) {
+        message.error("Tipo de documento inválido");
+        return;
+      }
+
+      const guestData = {
+        email: data.email,
+        name: data.fullName,
+        documentType: documentTypeId,
+        document: data.documentNumber,
+        phoneNumber: data.phone
+      };
+
+      await registerNewClient(guestData);
+
+      message.success("Cliente registrado exitosamente");
+      setShowNewClientDialog(false);
+    } catch (error) {
+      message.error("Error al registrar el cliente. Por favor intente nuevamente.");
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -75,6 +103,7 @@ const CreateOrderSearchClient: FC = ({}) => {
         description="Complete los datos del cliente para crear la orden"
         submitButtonText="Guardar Cliente"
         showReferralEmail={false}
+        isSubmitting={isRegistering}
       />
     </>
   );
