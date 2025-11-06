@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Tabs } from "antd";
+import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
 
 import { signInWithCustomToken } from "@firebase/auth";
@@ -76,24 +76,22 @@ const mapCreditBalances = (saldosAFavor?: any[]): CreditBalance[] => {
 const CashportMobileView: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // const clientID = searchParams.get("id");
-  const clientID = "57aefbf0568311f09abb06e6795ff363"; // Temporary hardcoded client ID for testing
+  const paramsToken = searchParams.get("token");
   const [data, setData] = useState<IClientWalletData | null>(null);
 
   useEffect(() => {
-    if (clientID) {
-      fetchToken(clientID);
+    if (paramsToken) {
+      signInAndGetWallet(paramsToken);
+    } else {
+      message.error("Token no proporcionado");
     }
-  }, [clientID]);
+  }, [paramsToken]);
 
-  const fetchToken = async (id: string) => {
+  const signInAndGetWallet = async (paramsToken: string) => {
     try {
-      // After testing this will be removed because token will arrive on the url
-      const token = await getMobileToken(id);
       try {
-        const res = await signInWithCustomToken(auth, token);
+        const res = await signInWithCustomToken(auth, paramsToken);
         const idToken = await res.user.getIdToken();
-        console.log("User will use token:", idToken);
 
         try {
           const walletData = await getClientWallet(idToken);
