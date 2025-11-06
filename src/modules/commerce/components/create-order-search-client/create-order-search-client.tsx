@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import { OrderViewContext } from "../../containers/create-order/create-order";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import SelectClient from "../create-order-select-client";
 
 import styles from "./create-order-search-client.module.scss";
-import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export interface selectClientForm {
   client: {

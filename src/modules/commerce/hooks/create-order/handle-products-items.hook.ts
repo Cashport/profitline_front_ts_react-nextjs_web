@@ -1,6 +1,6 @@
 import { useCallback, useContext } from "react";
+import { OrderViewContext } from "../../containers/create-order/create-order";
 import { ISelectedProduct } from "@/types/commerce/ICommerce";
-import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export const useHandleProductsItems = (product: ISelectedProduct, categoryName: string) => {
   const { selectedCategories, setSelectedCategories } = useContext(OrderViewContext);
