@@ -8,7 +8,6 @@ import { Button } from "@cetaphilUI/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@cetaphilUI/card";
 import { Input } from "@cetaphilUI/input";
 import { Label } from "@cetaphilUI/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cetaphilUI/select";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,7 @@ import {
   DialogTrigger
 } from "@cetaphilUI/dialog";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { RegistrationDialog, type RegistrationFormData } from "@/modules/cetaphil/components/registration-dialog";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 
@@ -61,6 +61,18 @@ export default function CetaphilLanding() {
   const handleVerifyOTP = (e: React.FormEvent) => {
     e.preventDefault();
     setShowLogin(false);
+  };
+
+  const handleCreateAccount = (data: RegistrationFormData) => {
+    console.log("Crear cuenta:", data);
+    // TODO: Implementar lógica de creación de cuenta
+    setShowRegister(false);
+  };
+
+  const handleContinue = (data: RegistrationFormData) => {
+    console.log("Continuar:", data);
+    // TODO: Implementar lógica de continuar
+    setShowRegister(false);
   };
 
   return (
@@ -180,118 +192,18 @@ export default function CetaphilLanding() {
                 )}
               </DialogContent>
             </Dialog>
-            <Dialog open={showRegister} onOpenChange={setShowRegister}>
-              <DialogTrigger asChild>
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
-                  Solicitar Acceso
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-card">
-                <DialogHeader className="space-y-2">
-                  <DialogTitle className="text-xl font-semibold text-foreground">
-                    Solicitud de Registro
-                  </DialogTitle>
-                  <DialogDescription className="text-sm text-muted-foreground">
-                    Complete el formulario para acceder al marketplace de distribuidores
-                  </DialogDescription>
-                </DialogHeader>
-                <form className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="nombre-apellido"
-                      className="text-sm font-medium text-foreground"
-                    >
-                      Nombre y Apellido
-                    </Label>
-                    <Input
-                      id="nombre-apellido"
-                      placeholder="Ingresa tu nombre"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="tipo-documento" className="text-sm font-medium text-foreground">
-                      Tipo de documento
-                    </Label>
-                    <Select>
-                      <SelectTrigger
-                        id="tipo-documento"
-                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus:ring-0 focus:ring-offset-0 transition-colors w-full"
-                      >
-                        <SelectValue placeholder="Seleccione su tipo de identificación" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card border-border">
-                        <SelectItem value="cc">Cédula de Ciudadanía</SelectItem>
-                        <SelectItem value="ce">Cédula de Extranjería</SelectItem>
-                        <SelectItem value="nit">NIT</SelectItem>
-                        <SelectItem value="pasaporte">Pasaporte</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="documento" className="text-sm font-medium text-foreground">
-                      N° de identificación
-                    </Label>
-                    <Input
-                      id="documento"
-                      placeholder="Número de identificación"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                      Correo electrónico
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Ingresa tu correo"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="celular" className="text-sm font-medium text-foreground">
-                      Celular
-                    </Label>
-                    <div className="flex gap-2">
-                      <div className="w-16 flex items-center justify-center border border-[#DDDDDD] rounded-md bg-[#F7F7F7] text-sm font-medium text-foreground">
-                        +57
-                      </div>
-                      <Input
-                        id="celular"
-                        type="tel"
-                        placeholder="Ingresa tu celular"
-                        required
-                        className="flex-1 bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium border-2 border-accent"
-                    >
-                      Crear mi cuenta
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium"
-                    >
-                      Continuar
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button
+              onClick={() => setShowRegister(true)}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
+            >
+              Solicitar Acceso
+            </Button>
+            <RegistrationDialog
+              open={showRegister}
+              onOpenChange={setShowRegister}
+              onCreateAccount={handleCreateAccount}
+              onContinue={handleContinue}
+            />
           </div>
         </div>
       </header>
