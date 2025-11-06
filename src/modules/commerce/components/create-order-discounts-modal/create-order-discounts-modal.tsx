@@ -4,11 +4,11 @@ import { WarningDiamond, X } from "@phosphor-icons/react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 
 import { IDiscountPackageAvailable } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-discounts-modal.module.scss";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export interface CreateOrderDiscountsModalProps {
   setOpenDiscountsModal: Dispatch<SetStateAction<boolean>>;

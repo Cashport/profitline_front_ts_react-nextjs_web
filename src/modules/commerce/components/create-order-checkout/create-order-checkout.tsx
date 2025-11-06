@@ -2,7 +2,6 @@ import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { Controller, useForm } from "react-hook-form";
@@ -26,6 +25,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 interface IShippingInfoForm {
   addresses: {
