@@ -1,12 +1,16 @@
-import { FC, useContext } from "react";
+import { FC, useContext, useState } from "react";
 import { Flex } from "antd";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import SelectClient from "../create-order-select-client";
+import {
+  RegistrationDialog,
+  type RegistrationFormData
+} from "@/modules/cetaphil/components/registration-dialog";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 import styles from "./create-order-search-client.module.scss";
 
@@ -20,6 +24,7 @@ export interface selectClientForm {
 
 const CreateOrderSearchClient: FC = ({}) => {
   const { setClient } = useContext(OrderViewContext);
+  const [showNewClientDialog, setShowNewClientDialog] = useState(false);
 
   const {
     control,
@@ -31,10 +36,22 @@ const CreateOrderSearchClient: FC = ({}) => {
     setClient({ name: data.client.label, id: data.client.value, email: data.client.email });
   };
 
+  const handleClickNewClient = () => {
+    setShowNewClientDialog(true);
+  };
+
+  const handleSaveClient = async (data: any) => {
+    console.log("Guardar nuevo cliente:", data);
+    setShowNewClientDialog(false);
+  };
+
   return (
     <>
-      <Flex className={styles.FlexContainer} vertical>
-        <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
+      <Flex className={styles.FlexContainer} vertical gap={"1.5rem"}>
+        <Flex justify="space-between" align="center" className={styles.FlexContainer__header}>
+          <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
+          <PrincipalButton onClick={handleClickNewClient}>Nuevo cliente</PrincipalButton>
+        </Flex>
         <Controller
           name="client"
           control={control}
@@ -50,6 +67,15 @@ const CreateOrderSearchClient: FC = ({}) => {
           Crear orden
         </PrincipalButton>
       </Flex>
+      <RegistrationDialog
+        open={showNewClientDialog}
+        onOpenChange={setShowNewClientDialog}
+        onSubmit={handleSaveClient}
+        title="Registrar Nuevo Cliente"
+        description="Complete los datos del cliente para crear la orden"
+        submitButtonText="Guardar Cliente"
+        showReferralEmail={false}
+      />
     </>
   );
 };
