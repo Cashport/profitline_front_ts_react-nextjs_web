@@ -6,6 +6,9 @@ export const FIREBASE_MESSAGING_SENDER_ID = process.env.NEXT_PUBLIC_FIREBASE_MES
 export const FIREBASE_APP_ID = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 export const FIREBASE_MEASUREMENT_ID = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
 export const STORAGE_TOKEN = "token";
+export const CLIENTUUID_DEMO = "903399c4062f4d49974d7187babc9acd";
+export const PROJECTID_DEMO = 171;
+
 
 export const COOKIE_NAME = process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME;
 

@@ -80,6 +80,11 @@
         background-color: #fcffed;
         border-radius: 7px;
 
+        &__discountExplanation {
+            font-size: 0.875rem;
+            color: $gray;
+        }
+
         p {
             font-weight: 500;
         }
@@ -149,4 +154,11 @@
     border: none;
     height: 1px;
     background-color: $dark-gray;
+}
+
+.confirmationModalContent {
+    &__totalLabel {
+        color: $error;
+        font-weight: 600;
+    }
 }

@@ -85,7 +85,7 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
       showSearch
       optionFilterProp="label"
       placeholder="Seleccione un cliente"
-      className={errors ? "selectInputClientError" : "selectInputClientCustom"}
+      className={`selectInputClientBase ${errors ? "selectInputClientError" : "selectInputClientCustom"}`}
       loading={loading}
       variant="borderless"
       optionLabelProp="label"

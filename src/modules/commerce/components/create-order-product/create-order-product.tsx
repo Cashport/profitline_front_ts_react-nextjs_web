@@ -44,7 +44,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
 
       <hr className={styles.separator} />
       <h4 className={styles.name}>
-        {product.name}{" "}
+        {product.name}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"
@@ -64,7 +64,14 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
             </Flex>
           </>
         ) : (
-          <h5 className={styles.price__amount}>{formatMoney(product.price)}</h5>
+          <Flex gap={"0.5rem"} align="baseline">
+            <h5 className={styles.price__amount}>{formatMoney(product.price)}</h5>
+            {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
+              <span className={styles.units}>
+                {product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und
+              </span>
+            )}
+          </Flex>
         )}
       </div>
       {alreadySelectedProduct ? (

@@ -1,5 +1,5 @@
-import { FC, useContext, useEffect, useState } from "react";
-import { Flex } from "antd";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple } from "phosphor-react";
 import { formatNumber } from "@/utils/utils";
@@ -10,6 +10,7 @@ import { OrderViewContext } from "../../containers/create-order/create-order";
 import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { ISelectType } from "@/types/clients/IClients";
 
@@ -18,11 +19,16 @@ export interface selectClientForm {
   client: ISelectType;
 }
 
+const { Text } = Typography;
+
 const CreateOrderCart: FC = ({}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const formatMoney = useAppStore((state) => state.formatMoney);
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCanulasModal, setShowCanulasModal] = useState(false);
 
   const {
     selectedCategories,
@@ -45,8 +51,52 @@ const CreateOrderCart: FC = ({}) => {
     setOpenDiscountsModal(true);
   };
 
+  const MINIMUM_ORDER_AMOUNT = 1600000;
+  const isTotalLessThanMinimum = useMemo(
+    () => confirmOrderData?.total && confirmOrderData.total < MINIMUM_ORDER_AMOUNT,
+    [confirmOrderData]
+  );
+
+  const hasNoCanulasOrAgua = useMemo(() => {
+    return !selectedCategories.some((category) =>
+      category.products.some(
+        (product) =>
+          product.name?.toLowerCase().includes("canula") ||
+          product.name?.toLowerCase().includes("agua")
+      )
+    );
+  }, [selectedCategories]);
+
   const handleContinuePurchase = () => {
+    if (isTotalLessThanMinimum) {
+      setShowConfirmModal(true);
+    } else if (hasNoCanulasOrAgua) {
+      setShowCanulasModal(true);
+    } else {
+      setCheckingOut(true);
+    }
+  };
+
+  const handleConfirmPurchase = () => {
+    setShowConfirmModal(false);
+    if (hasNoCanulasOrAgua) {
+      setShowCanulasModal(true);
+    } else {
+      setCheckingOut(true);
+    }
+  };
+
+  const handleConfirmCanulas = () => {
+    setShowCanulasModal(false);
     setCheckingOut(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowConfirmModal(false);
+  };
+
+  const handleCloseCanulasModal = () => {
+    setShowCanulasModal(false);
   };
 
   useEffect(() => {
@@ -185,6 +235,31 @@ const CreateOrderCart: FC = ({}) => {
                 <p>-$0</p>
               )}
             </Flex>
+            <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                Descuentos de productos
+              </p>
+              {confirmOrderData.discounts ? (
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}
+                </Text>
+              ) : (
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
+              )}
+            </Flex>
+
+            <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                Descuentos de la orden (Cross selling)
+              </p>
+              {confirmOrderData.discounts ? (
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
+                </Text>
+              ) : (
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
+              )}
+            </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
               <strong>Total</strong>
               <strong>${formatNumber(confirmOrderData?.total)}</strong>
@@ -208,6 +283,40 @@ const CreateOrderCart: FC = ({}) => {
       {openDiscountsModal && (
         <CreateOrderDiscountsModal setOpenDiscountsModal={setOpenDiscountsModal} />
       )}
+
+      <ModalConfirmAction
+        isOpen={showConfirmModal}
+        onClose={handleCloseModal}
+        onOk={handleConfirmPurchase}
+        title="¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              El pedido es inferior a {formatMoney(MINIMUM_ORDER_AMOUNT)}
+            </p>
+            <p>Te sugerimos que incrementes la compra</p>
+          </Flex>
+        }
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={showCanulasModal}
+        onClose={handleCloseCanulasModal}
+        onOk={handleConfirmCanulas}
+        title="¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              No has seleccionado Canulas y/o Agua estéril
+            </p>
+            <p>Te recomendamos revisar la orden</p>
+          </Flex>
+        }
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 };

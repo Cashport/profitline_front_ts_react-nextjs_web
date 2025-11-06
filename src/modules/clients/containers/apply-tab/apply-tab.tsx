@@ -40,6 +40,7 @@ import { ModalChangeAIPrompt } from "./Modals/ModalChangeAIPrompt/ModalChangeAIP
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./apply-tab.scss";
+import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
 
 interface ISelectedRowKeys {
   invoices: React.Key[];
@@ -63,10 +64,23 @@ interface IEditingRowState {
   editing_type?: "invoice" | "payment" | "discount";
 }
 
-const ApplyTab: React.FC = () => {
+interface IApplyTabProps {
+  className?: string;
+  defaultPositionDragModal?: { x: number; y: number };
+  isInApplyModule?: boolean;
+  clientUUID?: string;
+}
+
+const ApplyTab: React.FC<IApplyTabProps> = ({
+  className,
+  defaultPositionDragModal,
+  isInApplyModule = false,
+  clientUUID,
+}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
-  const clientId = extractSingleParam(params.clientId) || "";
+  const rawClientId = extractSingleParam(params?.clientId);
+  const clientId = isInApplyModule ? clientUUID || CLIENTUUID_DEMO : rawClientId || CLIENTUUID_DEMO;
   const [searchQuery, setSearchQuery] = useState("");
   const { showMessage } = useMessageApi();
   const [loadingSave, setLoadingSave] = useState(false);
@@ -329,27 +343,10 @@ const ApplyTab: React.FC = () => {
     setLoadingRequest(false);
   };
 
-  const handleDownloadLog = async () => {
+  const handleDownloadLog = () => {
     try {
       if (applicationData?.summary?.url_log) {
-        const response = await fetch(applicationData.summary.url_log);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const fileName = applicationData.summary.url_log.split("/").pop() || "log.txt";
-
-        // Crear un enlace invisible y disparar el click
-        const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showMessage("success", "Log descargado correctamente");
+        window.open(applicationData.summary.url_log, "_blank");
         setIsModalOpen({ selected: 0 });
       } else {
         showMessage("error", "No hay log disponible para descargar");
@@ -407,8 +404,9 @@ const ApplyTab: React.FC = () => {
         desconts={applicationData?.summary.total_discounts}
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
+        defaultPosition={defaultPositionDragModal}
       />
-      <div className="applyContainerTab">
+      <div className={`applyContainerTab ${className}`}>
         <Flex justify="space-between" className="applyContainerTab__header clientStickyHeader">
           <Flex gap={"0.5rem"} align="center">
             <UiSearchInput
@@ -468,28 +466,29 @@ const ApplyTab: React.FC = () => {
                     total={section.total}
                     quantity={section.count}
                   />
-
-                  <Flex
-                    className="buttonActionApply"
-                    onClick={() => {
-                      if (section.statusName === "facturas") {
-                        showModal("invoices");
-                      }
-                      if (section.statusName === "pagos") {
-                        showModal("payments");
-                      }
-                      if (section.statusName === "ajustes") {
-                        setModalAdjustmentsState(
-                          modalAdjustmentsState.isOpen
-                            ? { isOpen: false, modal: 1 }
-                            : { isOpen: true, modal: 1 }
-                        );
-                      }
-                    }}
-                  >
-                    <Plus />
-                    <h5 className="">Agregar {`${section.statusName}`}</h5>
-                  </Flex>
+                  {!isInApplyModule ? (
+                    <button
+                      className="buttonActionApply"
+                      onClick={() => {
+                        if (section.statusName === "facturas") {
+                          showModal("invoices");
+                        }
+                        if (section.statusName === "pagos") {
+                          showModal("payments");
+                        }
+                        if (section.statusName === "ajustes") {
+                          setModalAdjustmentsState(
+                            modalAdjustmentsState.isOpen
+                              ? { isOpen: false, modal: 1 }
+                              : { isOpen: true, modal: 1 }
+                          );
+                        }
+                      }}
+                    >
+                      <Plus />
+                      <p>Agregar {`${section.statusName}`}</p>
+                    </button>
+                  ) : null}
                 </Flex>
               ),
               children: (

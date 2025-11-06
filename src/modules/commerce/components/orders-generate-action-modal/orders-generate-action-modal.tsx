@@ -6,7 +6,11 @@ import { DownloadSimple, NewspaperClipping, Trash } from "@phosphor-icons/react"
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { createAndDownloadTxt } from "@/utils/utils";
-import { changeOrderState, dowloadOrderCSV } from "@/services/commerce/commerce";
+import {
+  changeOrderState,
+  dowloadOrderCSV,
+  downloadPartialOrderCSV
+} from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
 import { IOrder } from "@/types/commerce/ICommerce";
@@ -54,8 +58,10 @@ export const OrdersGenerateActionModal = ({
   const handleDownloadCSV = async () => {
     try {
       const res = await dowloadOrderCSV(ordersId, projectId);
-      if (!res) {
-        return showMessage("error", "Error al descargar CSV");
+      if (!res || !res.data) {
+        if (res?.message) {
+          return showMessage("error", res.message);
+        } else return showMessage("error", "Error al descargar CSV");
       }
       createAndDownloadTxt(res.data);
       if (res.message == "") {
@@ -71,6 +77,44 @@ export const OrdersGenerateActionModal = ({
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleDownloadCsvPartial = async (createBackorder: boolean) => {
+    try {
+      const res = await downloadPartialOrderCSV(ordersId[0], createBackorder);
+      createAndDownloadTxt(res.txtContent);
+      if (res.createdBackorderId) {
+        showMessage(
+          "success",
+          `Se ha creado una orden de backorder con ID: ${res.createdBackorderId}`
+        );
+      } else {
+        showMessage("success", "Descarga exitosa");
+      }
+      setFetchMutate();
+      setSelectedRows([]);
+      setSelectedRowKeys([]);
+      onClose();
+    } catch (error: any) {
+      showMessage("error", error?.message || "Error al descargar el CSV parcial");
+      console.error(error);
+    }
+  };
+
+  const handleDownloadPartialCsvShowQuestion = () => {
+    Modal.confirm({
+      title: "Descarga parcial CSV",
+      content: "¿Deseas crear una orden de backorder?",
+      okText: "Sí",
+      cancelText: "No",
+      closable: true,
+      onOk() {
+        handleDownloadCsvPartial(true);
+      },
+      onCancel() {
+        handleDownloadCsvPartial(false);
+      }
+    });
   };
 
   return (
@@ -100,6 +144,12 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadCSV}
             icon={<DownloadSimple size={16} />}
             title="Descargar CSV"
+          />
+          <ButtonGenerateAction
+            onClick={handleDownloadPartialCsvShowQuestion}
+            icon={<DownloadSimple size={16} />}
+            title="Descarga parcial CSV"
+            disabled={ordersId.length !== 1}
           />
           <ButtonGenerateAction
             onClick={handleDeleteRows}

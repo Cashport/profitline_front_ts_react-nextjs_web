@@ -1,5 +1,5 @@
 import { GenericResponse } from "@/types/global/IGlobal";
-import { API } from "@/utils/api/api";
+import { API, ApiError } from "@/utils/api/api";
 import {
   ICommerceAdresses,
   IConfirmOrderData,
@@ -221,15 +221,32 @@ export const dowloadOrderCSV = async (
       `/marketplace/projects/${projectId}/downloadtxtorders`,
       formData
     );
-    if (response.success) {
-      return { message: response.message, data: response.data };
-    }
-    return null;
+    return { message: response.message, data: response.data };
   } catch (error) {
+    if (error instanceof ApiError) {
+      return { message: error.message, data: "" };
+    }
     return null;
   }
 };
 
+export const downloadPartialOrderCSV = async (orderId: number, sendToBackorder: boolean) => {
+  try {
+    const payload = { sendToBackorder };
+    const formData = new FormData();
+    formData.append("request", JSON.stringify(payload));
+    const response: GenericResponse<{
+      txtContent: string;
+      createdBackorderId: number | undefined;
+    }> = await API.post(`/marketplace/orders/${orderId}/download-csv`, formData);
+    return response.data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw new Error(error.message || "Error al descargar el CSV parcial");
+    }
+    throw new Error("Error desconocido al descargar el CSV parcial");
+  }
+};
 export const getInventoriesWarehouse = async (projectId: number, orderIds: number[]) => {
   try {
     const form = {

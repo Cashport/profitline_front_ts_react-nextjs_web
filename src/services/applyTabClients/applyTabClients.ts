@@ -4,6 +4,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IApplicationInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import { IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { StatusGroup } from "@/hooks/useAcountingAdjustment";
+import { CLIENTUUID_DEMO, PROJECTID_DEMO } from "@/utils/constants/globalConstants";
 
 export const addItemsToTable = async (
   project_id: number,
@@ -250,7 +251,14 @@ export const applyWithCashportAI = async (
   if (comment) formData.append("content", comment);
 
   try {
-    const response: GenericResponse<any> = await API.post(`${config.API_APPLY_TAB_AI}`, formData);
+    const isDemo =
+      projectId === PROJECTID_DEMO && clientId === CLIENTUUID_DEMO;
+
+    const endpoint = isDemo
+      ? config.API_APPLY_TAB_AI_DEMO!
+      : config.API_APPLY_TAB_AI!;
+
+    const response: GenericResponse<any> = await API.post(endpoint, formData);
 
     return response.data;
   } catch (error) {
@@ -311,26 +319,33 @@ export const uploadPaymentAttachment = async (
 
 export const createPrompt = async (
   projectId: number,
-  clientUUID: string,
+  clientUUID: string | null | undefined,
   aiTypeTaskId: number,
   prompt: string
 ) => {
   try {
+    const isInvalidClientUUID =
+      clientUUID == null || clientUUID === "" || clientUUID === "0";
+
+    const validClientUUID = isInvalidClientUUID ? CLIENTUUID_DEMO : clientUUID;
+
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/prompt/create-client-prompt`,
       {
         id_project: projectId,
-        clientUUID: clientUUID,
+        clientUUID: validClientUUID,
         id_ai_type_task: aiTypeTaskId,
-        prompt: prompt
+        prompt: prompt,
       }
     );
+
     return response.data;
   } catch (error) {
     console.error("error createPrompt", error);
     throw error;
   }
 };
+
 
 export interface IPrompt {
   id: number;
@@ -344,24 +359,34 @@ export interface IPrompt {
 
 export const getPromptByClientAndAITask = async (
   projectId: number,
-  clientUUID: string,
+  clientUUID: string | null | undefined,
   aiTypeTaskId: number
 ) => {
   try {
+    const validClientUUID =
+      clientUUID === undefined ||
+      clientUUID === null ||
+      clientUUID === "" ||
+      clientUUID === "0"
+        ? CLIENTUUID_DEMO
+        : clientUUID;
+
     const response: GenericResponse<IPrompt> = await API.post(
       `${config.API_HOST}/prompt/get-by-criteria`,
       {
         id_project: projectId,
-        clientUUID: clientUUID,
-        id_ai_type_task: aiTypeTaskId
+        clientUUID: validClientUUID,
+        id_ai_type_task: aiTypeTaskId,
       }
     );
+
     return response;
   } catch (error) {
     console.error("error getPromptByCriteria", error);
     throw error;
   }
 };
+
 
 export const updatePrompt = async (id: number, prompt: string, updatedBy: string) => {
   try {

@@ -16,7 +16,7 @@ import {
   Stack,
   ClipboardText
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent } from "@phosphor-icons/react";
+import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
 
 import { logOut } from "../../../../firebase-utils";
 import { useAppStore } from "@/lib/store/store";
@@ -24,8 +24,8 @@ import useStore from "@/lib/hook/useStore";
 import { getUserPermissions } from "@/services/permissions/userPermissions";
 import { checkUserViewPermissions } from "@/utils/utils";
 import { setProjectInApi } from "@/utils/api/api";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
 
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
 
 import "./sidebar.scss";
@@ -241,6 +241,18 @@ export const SideBar = () => {
                 className={path === "/gestor-tareas" ? "buttonIcon" : "buttonIconActive"}
               >
                 {isSideBarLarge && "Gestor de tareas"}
+              </Button>
+            </Link>
+          )}
+          {path === "/applyModule" && (
+            <Link href="/applyModule" passHref legacyBehavior>
+              <Button
+                type="primary"
+                size="large"
+                icon={<HandTap size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
+                className={path === "/applyModule" ? "buttonIcon" : "buttonIconActive"}
+              >
+                {isSideBarLarge && "Apply Module"}
               </Button>
             </Link>
           )}
