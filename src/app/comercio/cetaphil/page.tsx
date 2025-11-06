@@ -28,7 +28,7 @@ export interface ISelectedCategories {
 }
 
 export interface IOrderViewContext {
-  client?: {
+  client: {
     name: string;
     id: string;
     email: string;
@@ -56,7 +56,9 @@ export interface IOrderViewContext {
 }
 
 const CreateOrderView: FC = () => {
-  const [client, setClient] = useState<IOrderViewContext["client"] | undefined>(undefined);
+  const [client, setClient] = useState<IOrderViewContext["client"]>(
+    {} as IOrderViewContext["client"]
+  );
   const [isLoadingLocalClient, setIsLoadingLocalClient] = useState(true);
   const [categories, setCategories] = useState<IFetchedCategories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ISelectedCategories[]>([]);
