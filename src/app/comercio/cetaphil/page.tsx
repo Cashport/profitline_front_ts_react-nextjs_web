@@ -28,7 +28,7 @@ export interface ISelectedCategories {
 }
 
 export interface IOrderViewContext {
-  client?: {
+  client: {
     name: string;
     id: string;
     email: string;
@@ -55,9 +55,10 @@ export interface IOrderViewContext {
   discountsLoading: boolean;
 }
 
-
-export const CreateOrderView: FC = () => {
-  const [client, setClient] = useState<IOrderViewContext["client"] | undefined>(undefined);
+const CreateOrderView: FC = () => {
+  const [client, setClient] = useState<IOrderViewContext["client"]>(
+    {} as IOrderViewContext["client"]
+  );
   const [isLoadingLocalClient, setIsLoadingLocalClient] = useState(true);
   const [categories, setCategories] = useState<IFetchedCategories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ISelectedCategories[]>([]);
@@ -115,7 +116,6 @@ export const CreateOrderView: FC = () => {
     }
   }, []);
 
-
   return (
     <OrderViewContext.Provider
       value={{
@@ -141,7 +141,7 @@ export const CreateOrderView: FC = () => {
       <div className={styles.ordersView}>
         <h2 className={styles.title}>Crear orden</h2>
         <div className={styles.marketView}>
-          { !isLoadingLocalClient && client ? (
+          {!isLoadingLocalClient && client ? (
             <>
               {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
               <CreateOrderCart />
