@@ -6,7 +6,7 @@ import { formatNumber } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
 import { confirmOrder } from "@/services/commerce/commerce";
 
-import { OrderViewContext } from "../../containers/create-order/create-order";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
@@ -113,7 +113,7 @@ const CreateOrderCart: FC = ({}) => {
           order_summary: products
         };
         try {
-          const response = await confirmOrder(projectId, client.id, confirmOrderData);
+          const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
           if (response.status === 200) {
             setConfirmOrderData(response.data);
             setInsufficientStockProducts(response.data.insufficientStockProducts);

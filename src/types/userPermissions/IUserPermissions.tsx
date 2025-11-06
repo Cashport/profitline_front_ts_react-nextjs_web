@@ -8,6 +8,11 @@ interface IPermissionData {
   permissions: IPermissionsByProject[];
   id_user: number;
   preferences: IPreferences;
+  isMarketplaceGuest?: boolean;
+  guestName?: string;
+  guestId?: string;
+  guestDocument?: string;
+  guestEmail?: string;
 }
 
 interface IPreferences {

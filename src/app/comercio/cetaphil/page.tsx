@@ -1,12 +1,12 @@
+"use client";
 import { Dispatch, FC, createContext, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
 
-import SearchClient from "../../components/create-order-search-client/create-order-search-client";
-import CreateOrderMarket from "../../components/create-order-market";
-import CreateOrderCart from "../../components/create-order-cart";
-import CreateOrderCheckout from "../../components/create-order-checkout";
+import CreateOrderMarket from "@/modules/commerce/components/create-order-market";
+import CreateOrderCart from "@/modules/commerce/components/create-order-cart";
+import CreateOrderCheckout from "@/modules/commerce/components/create-order-checkout";
 
 import {
   IDiscountPackageAvailable,
@@ -17,7 +17,9 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
-import { OrderViewContext } from "../../contexts/orderViewContext";
+import { useDecodeToken } from "@/hooks/useDecodeToken";
+import { STORAGE_TOKEN } from "@/utils/constants/globalConstants";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -25,8 +27,8 @@ export interface ISelectedCategories {
   products: ISelectedProduct[];
 }
 
-interface IOrderViewContext {
-  client: {
+export interface IOrderViewContext {
+  client?: {
     name: string;
     id: string;
     email: string;
@@ -53,8 +55,10 @@ interface IOrderViewContext {
   discountsLoading: boolean;
 }
 
+
 export const CreateOrderView: FC = () => {
-  const [client, setClient] = useState({} as IOrderViewContext["client"]);
+  const [client, setClient] = useState<IOrderViewContext["client"] | undefined>(undefined);
+  const [isLoadingLocalClient, setIsLoadingLocalClient] = useState(true);
   const [categories, setCategories] = useState<IFetchedCategories[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ISelectedCategories[]>([]);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -66,6 +70,8 @@ export const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+  const decoder = useDecodeToken();
+  const token = localStorage.getItem(STORAGE_TOKEN);
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
@@ -92,45 +98,23 @@ export const CreateOrderView: FC = () => {
   }, [client?.id, selectedProject?.ID]);
 
   useEffect(() => {
-    if (draftInfo.client_name) {
-      const fetchDraft = async () => {
-        if (!selectedProject.ID || !draftInfo.id) return;
-        const response = await getSingleOrder(selectedProject.ID, draftInfo.id);
-        setClient({
-          name: response.data[0].client_name,
-          id: response.data[0].client_id,
-          email: ""
-        });
+    console.log("Draft Info changed:", client);
+  }, [client]);
 
-        const selectedCategories = response.data[0].detail.products.map((category) => ({
-          category_id: category.id_category,
-          category: category.category,
-          products: category.products.map((product) => ({
-            id: product.id,
-            name: product.product_name,
-            price: product.price,
-            discount: product.discount,
-            discount_percentage: product.discount_percentage,
-            quantity: product.quantity,
-            image: product.image,
-            category_id: product.id_category,
-            SKU: product.product_sku,
-            stock: true,
-            category_name: product.category_name,
-            shipment_unit: product.shipment_unit
-          }))
-        }));
-        setSelectedCategories(selectedCategories);
-        setShippingInfo(response.data[0].shipping_info);
-      };
-      fetchDraft();
-      setCheckingOut(true);
+  useEffect(() => {
+    if (client?.id) return;
+    const decodedToken = decoder(token || "");
+    console.log("Decoded Token in CreateOrderView:", decodedToken);
+    if (decodedToken) {
+      setClient({
+        name: decodedToken?.claims?.guestName || "",
+        id: decodedToken?.claims?.guestDocument || "",
+        email: decodedToken?.claims?.guestEmail || ""
+      });
+      setIsLoadingLocalClient(false);
     }
-
-    return () => {
-      setDraftInfo({ id: 0, client_name: undefined });
-    };
   }, []);
+
 
   return (
     <OrderViewContext.Provider
@@ -156,14 +140,16 @@ export const CreateOrderView: FC = () => {
     >
       <div className={styles.ordersView}>
         <h2 className={styles.title}>Crear orden</h2>
-        {!client?.name ? (
-          <SearchClient />
-        ) : (
-          <div className={styles.marketView}>
-            {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
-            <CreateOrderCart />
-          </div>
-        )}
+        <div className={styles.marketView}>
+          { !isLoadingLocalClient && client ? (
+            <>
+              {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
+              <CreateOrderCart />
+            </>
+          ) : (
+            <p>No hay cliente seleccionado</p>
+          )}
+        </div>
       </div>
     </OrderViewContext.Provider>
   );

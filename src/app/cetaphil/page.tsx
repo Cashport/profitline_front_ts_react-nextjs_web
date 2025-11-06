@@ -2,8 +2,9 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
+import { useForm, Controller } from "react-hook-form";
 import { Button } from "@cetaphilUI/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@cetaphilUI/card";
 import { Input } from "@cetaphilUI/input";
@@ -20,6 +21,8 @@ import {
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
+import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
+import { DOCUMENT_TYPES, getDocumentTypeId } from "@/constants/documentTypes";
 
 // Static image imports for Next optimization
 import cashportLogo from "@public/images/cetaphil/cashport-logo.png";
@@ -29,14 +32,45 @@ import cetaphilSerumsBanner from "@public/images/cetaphil/cetaphil-serums-banner
 import cetaphilCleanser from "@public/images/cetaphil/cetaphil-cleanser-bottle.jpg";
 import cetaphilMoisturizer from "@public/images/cetaphil/cetaphil-moisturizer-bottle.jpg";
 import cetaphilSunscreen from "@public/images/cetaphil/cetaphil-sunscreen-bottle.jpg";
+import { useSearchParams } from "next/navigation";
+import { useDecodeToken } from "@/hooks/useDecodeToken";
+import { useMessageApi } from "@/context/MessageContext";
+import { sendMailLink } from "@/services/externalAuth/externalAuth";
+import axios from "axios";
+import { useLoginCetaphil } from "@/hooks/useLoginCetaphil";
+
+interface RegisterFormData {
+  fullName: string;
+  documentType: string;
+  documentNumber: string;
+  email: string;
+  referralEmail: string;
+  phone: string;
+}
 
 export default function CetaphilLanding() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const { isLoading: isLoadingLogin } = useLoginCetaphil(token);
+  const decoder = useDecodeToken();
+  const decodedToken = decoder(token || "");
+  const { showMessage } = useMessageApi();
+
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [loginStep, setLoginStep] = useState<"email" | "otp">("email");
   const [loginEmail, setLoginEmail] = useState("");
   const [currentBanner, setCurrentBanner] = useState(0);
-  const banners = [cetaphilBanner, cetaphilSerumsBanner];
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const banners = useMemo(() => [cetaphilBanner, cetaphilSerumsBanner], []);
+
+  const {
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<RegisterFormData>();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,23 +79,120 @@ export default function CetaphilLanding() {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  const handleLoginClose = (open: boolean) => {
-    setShowLogin(open);
-    if (!open) {
-      setLoginStep("email");
-      setLoginEmail("");
+  // Actualizar los valores del formulario cuando cambien los valores por defecto
+  useEffect(() => {
+    const decodedToken = decoder(token || "");
+    reset({
+      email: decodedToken?.claims?.guestEmail || "",
+      referralEmail: decodedToken?.claims?.userInvitingEmail || ""
+    });
+    const guestEmail = decodedToken?.claims?.guestEmail || "";
+    if (guestEmail) {
+      if (token && decodedToken?.claims?.mode === "invite") {
+        setShowRegister(true);
+        setLoginEmail(guestEmail);
+      }
+      if (token && decodedToken?.claims?.mode === "login") {
+        setLoginEmail(guestEmail);
+        setShowLogin(true);
+      }
     }
-  };
+  }, [token]);
 
-  const handleSendOTP = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginStep("otp");
-  };
+  const handleLoginClose = useCallback((open: boolean) => {
+    setShowLogin(open);
+  }, []);
 
-  const handleVerifyOTP = (e: React.FormEvent) => {
+  /*   const handleSendOtpWithEmail = useCallback(async (email: string) => {
+    try {
+      const bearer = `Bearer ${token}`;
+      await sendOtp(email, bearer);
+      setLoginStep("otp");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message;
+        showMessage("error", (typeof message === "string" && message) || "Error al enviar el OTP");
+      } else {
+        showMessage("error", "Error desconocido");
+      }
+    }
+  }, []); */
+
+  /*   const handleSendOTP = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    await handleSendOtpWithEmail(loginEmail);
+  }, []); */
+
+  const handleSendMailLink = useCallback(async (e: React.FormEvent) => {
+    try {
+      console.log("Sending mail link to:", loginEmail);
+      e.preventDefault();
+      setIsLoading(true);
+      await sendMailLink(loginEmail);
+      showMessage(
+        "success",
+        "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada."
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message;
+        const data = error.response?.data?.data;
+        if (message === "Invalid params" && Array.isArray(data)) {
+          const errorMessages = data.map((item: any) => item.msg).join(", ");
+          showMessage("error", errorMessages);
+        } else {
+          showMessage(
+            "error",
+            (typeof message === "string" && message) || "Error al enviar el enlace de correo"
+          );
+        }
+      }
+    }
     setShowLogin(false);
-  };
+  }, [loginEmail]);
+
+  /*   const handleVerifyOTP = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const bearer = `Bearer ${token}`;
+    await validateOtp(loginEmail, otp, bearer);
+    setShowLogin(false);
+  }, []); */
+
+  const onSubmitRegister = useCallback(
+    async (data: RegisterFormData) => {
+      try {
+        const documentTypeId = getDocumentTypeId(data.documentType);
+
+        if (!documentTypeId) {
+          showMessage("error", "Tipo de documento inválido");
+          return;
+        }
+
+        const payload: AcceptInvitationRequest = {
+          guestData: {
+            document: data.documentNumber,
+            documentType: documentTypeId,
+            email: data.email,
+            name: data.fullName,
+            phoneNumber: data.phone,
+            projectId: decodedToken?.claims?.projectId || 0,
+            uuid: decodedToken?.claims?.uuid || ""
+          },
+          token: token || ""
+        };
+
+        await acceptInvitation(payload);
+
+        setShowRegister(false);
+        setShowLogin(true);
+        reset();
+      } catch (error: any) {
+        console.error("Error:", error);
+        showMessage("error", error.message || "Error al aceptar la invitación");
+      }
+    },
+    [token, reset, showMessage]
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,97 +223,56 @@ export default function CetaphilLanding() {
           <div className="flex items-center gap-3 max-[549px]:self-end">
             <Dialog open={showLogin} onOpenChange={handleLoginClose}>
               <DialogTrigger asChild>
-                <Button variant="ghost" className="text-foreground hover:text-primary">
+                <Button
+                  variant="ghost"
+                  className="text-foreground hover:text-primary"
+                  disabled={isLoadingLogin}
+                >
                   Iniciar Sesión
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card">
                 <DialogHeader className="space-y-2">
                   <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-                    {loginStep === "email" ? (
-                      "Iniciar Sesión"
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setLoginStep("email")}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        Verificar Código
-                      </>
-                    )}
+                    Iniciar Sesión
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    {loginStep === "email"
-                      ? "Ingresa tu email para recibir un código de acceso"
-                      : `Ingresa el código enviado a ${loginEmail}`}
+                    Ingresa tu email para recibir un código de acceso
                   </DialogDescription>
                 </DialogHeader>
 
-                {loginStep === "email" ? (
-                  <form onSubmit={handleSendOTP} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
-                        Email
-                      </Label>
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="tu@email.com"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        required
-                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
-                    >
-                      Enviar Código
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyOTP} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp-code" className="text-sm font-medium text-foreground">
-                        Código OTP
-                      </Label>
-                      <Input
-                        id="otp-code"
-                        type="text"
-                        placeholder="000000"
-                        maxLength={6}
-                        className="text-center text-2xl tracking-widest font-mono bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground text-center">
-                        Revisa tu correo electrónico
-                      </p>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
-                    >
-                      Verificar e Ingresar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="w-full text-sm text-muted-foreground hover:text-foreground"
-                      onClick={handleSendOTP}
-                    >
-                      ¿No recibiste el código? Reenviar
-                    </Button>
-                  </form>
-                )}
+                <form onSubmit={handleSendMailLink} className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                      Email
+                    </Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
+                    disabled={isLoading}
+                  >
+                    Enviar Código
+                  </Button>
+                </form>
               </DialogContent>
             </Dialog>
             <Dialog open={showRegister} onOpenChange={setShowRegister}>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
+                <Button
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
+                  disabled={isLoadingLogin}
+                >
                   Solicitar Acceso
                 </Button>
               </DialogTrigger>
@@ -195,7 +285,7 @@ export default function CetaphilLanding() {
                     Complete el formulario para acceder al marketplace de distribuidores
                   </DialogDescription>
                 </DialogHeader>
-                <form className="space-y-4 py-4">
+                <form className="space-y-4 py-4" onSubmit={handleSubmit(onSubmitRegister)}>
                   <div className="space-y-2">
                     <Label
                       htmlFor="nombre-apellido"
@@ -203,57 +293,133 @@ export default function CetaphilLanding() {
                     >
                       Nombre y Apellido
                     </Label>
-                    <Input
-                      id="nombre-apellido"
-                      placeholder="Ingresa tu nombre"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    <Controller
+                      name="fullName"
+                      control={control}
+                      rules={{ required: "Este campo es requerido" }}
+                      render={({ field }) => (
+                        <Input
+                          id="nombre-apellido"
+                          placeholder="Ingresa tu nombre"
+                          {...field}
+                          className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                        />
+                      )}
                     />
+                    {errors.fullName && (
+                      <p className="text-xs text-red-500">{errors.fullName.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="tipo-documento" className="text-sm font-medium text-foreground">
                       Tipo de documento
                     </Label>
-                    <Select>
-                      <SelectTrigger
-                        id="tipo-documento"
-                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus:ring-0 focus:ring-offset-0 transition-colors w-full"
-                      >
-                        <SelectValue placeholder="Seleccione su tipo de identificación" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card border-border">
-                        <SelectItem value="cc">Cédula de Ciudadanía</SelectItem>
-                        <SelectItem value="ce">Cédula de Extranjería</SelectItem>
-                        <SelectItem value="nit">NIT</SelectItem>
-                        <SelectItem value="pasaporte">Pasaporte</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="documentType"
+                      control={control}
+                      rules={{ required: "Este campo es requerido" }}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger
+                            id="tipo-documento"
+                            className="bg-white border-[#DDDDDD] focus:border-[#141414] focus:ring-0 focus:ring-offset-0 transition-colors w-full"
+                          >
+                            <SelectValue placeholder="Seleccione su tipo de identificación" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card border-border">
+                            {DOCUMENT_TYPES.map((docType) => (
+                              <SelectItem key={docType.id} value={docType.value}>
+                                {docType.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.documentType && (
+                      <p className="text-xs text-red-500">{errors.documentType.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="documento" className="text-sm font-medium text-foreground">
                       N° de identificación
                     </Label>
-                    <Input
-                      id="documento"
-                      placeholder="Número de identificación"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    <Controller
+                      name="documentNumber"
+                      control={control}
+                      rules={{ required: "Este campo es requerido" }}
+                      render={({ field }) => (
+                        <Input
+                          id="documento"
+                          placeholder="Número de identificación"
+                          {...field}
+                          className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                        />
+                      )}
                     />
+                    {errors.documentNumber && (
+                      <p className="text-xs text-red-500">{errors.documentNumber.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium text-foreground">
                       Correo electrónico
                     </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Ingresa tu correo"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    <Controller
+                      name="email"
+                      control={control}
+                      rules={{
+                        required: "Este campo es requerido",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Email inválido"
+                        }
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="Ingresa tu correo"
+                          {...field}
+                          disabled={!!decodedToken?.claims?.guestEmail}
+                          className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        />
+                      )}
                     />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="referral-email" className="text-sm font-medium text-foreground">
+                      Correo electrónico de referido
+                    </Label>
+                    <Controller
+                      name="referralEmail"
+                      control={control}
+                      rules={{
+                        required: "Este campo es requerido",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Email inválido"
+                        }
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          id="referral-email"
+                          type="email"
+                          placeholder="Ingresa tu correo"
+                          {...field}
+                          disabled={!!decodedToken?.claims?.userInvitingEmail}
+                          className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        />
+                      )}
+                    />
+                    {errors.referralEmail && (
+                      <p className="text-xs text-red-500">{errors.referralEmail.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -264,29 +430,37 @@ export default function CetaphilLanding() {
                       <div className="w-16 flex items-center justify-center border border-[#DDDDDD] rounded-md bg-[#F7F7F7] text-sm font-medium text-foreground">
                         +57
                       </div>
-                      <Input
-                        id="celular"
-                        type="tel"
-                        placeholder="Ingresa tu celular"
-                        required
-                        className="flex-1 bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                      <Controller
+                        name="phone"
+                        control={control}
+                        rules={{
+                          required: "Este campo es requerido",
+                          pattern: {
+                            value: /^[0-9]{10}$/,
+                            message: "Debe contener 10 dígitos"
+                          }
+                        }}
+                        render={({ field }) => (
+                          <Input
+                            id="celular"
+                            type="tel"
+                            placeholder="Ingresa tu celular"
+                            {...field}
+                            className="flex-1 bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                          />
+                        )}
                       />
                     </div>
+                    {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
                   </div>
 
                   <div className="flex gap-3 pt-2">
                     <Button
                       type="submit"
-                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium border-2 border-accent"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium border-2 border-accent disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Crear mi cuenta
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium"
-                    >
-                      Continuar
+                      {isSubmitting ? "Enviando..." : "Crear mi cuenta"}
                     </Button>
                   </div>
                 </form>

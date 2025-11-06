@@ -37,18 +37,10 @@ export async function middleware(request: NextRequest) {
     "camera=(), microphone=(), geolocation=(), interest-cohort=(), accelerometer=(), gyroscope=()"
   );
 
-  // Permitir acceso sin autenticación a rutas que empiecen con /mobile o /cetaphil
-  if (
-    request.nextUrl.pathname.startsWith("/mobile") ||
-    request.nextUrl.pathname.startsWith("/cetaphil")
-  ) {
-    return NextResponse.next();
-  }
-
   const session = request.cookies.get(process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME ?? "");
 
   const { pathname } = request.nextUrl;
-  const noAuthRoutes = ["/auth"];
+  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil"];
   //Return to /login if there is no session cookie
   if (noAuthRoutes.some((route) => pathname.startsWith(route))) {
     const res = NextResponse.next({
@@ -57,6 +49,10 @@ export async function middleware(request: NextRequest) {
     });
     res.headers.set("Content-Security-Policy", contentSecurityPolicyHeaderValue);
     return res;
+  }
+
+  if (!session && pathname === "/comercio/cetaphil") {
+    return NextResponse.redirect(new URL("/cetaphil", request.url));
   }
   if (!session) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
