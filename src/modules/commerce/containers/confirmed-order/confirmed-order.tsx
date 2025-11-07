@@ -1,17 +1,21 @@
 import { FC, useEffect, useState } from "react";
 import { Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import ConfirmedOrderItem from "../../components/confirmed-order-item";
 import { CheckCircle } from "phosphor-react";
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
-import { extractSingleParam, formatNumber } from "@/utils/utils";
 
-import styles from "./confirmed-order.module.scss";
+import { extractSingleParam, formatNumber } from "@/utils/utils";
 import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
-import { DiscountItem, ISingleOrder } from "@/types/commerce/ICommerce";
+
+import ConfirmedOrderItem from "../../components/confirmed-order-item";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
+
+import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
+import { DiscountItem, ISingleOrder } from "@/types/commerce/ICommerce";
+
+import styles from "./confirmed-order.module.scss";
 
 const { Text } = Typography;
 
@@ -51,7 +55,7 @@ export const ConfirmedOrderView: FC = () => {
         <Spin size="large" style={{ margin: "auto" }} />
       ) : (
         <>
-          {!!order?.block_flag && notificationId !== null && (
+          {!!order?.block_flag && notificationId !== null && projectId === GALDERMA_PROJECT_ID && (
             <ConfirmedOrderModalBlocked notificationId={Number(notificationId)} />
           )}
           <div className={styles.confirmedOrderView}>
