@@ -109,6 +109,7 @@ export const CreateOrderView: FC = () => {
             id: product.id,
             name: product.product_name,
             price: product.price,
+            price_taxes: product.price_taxes,
             discount: product.discount,
             discount_percentage: product.discount_percentage,
             quantity: product.quantity,
