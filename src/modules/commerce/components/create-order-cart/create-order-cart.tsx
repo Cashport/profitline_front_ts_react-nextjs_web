@@ -190,7 +190,6 @@ const CreateOrderCart: FC = ({}) => {
                 <p>SKUs: {category.products.length}</p>
               </Flex>
               {category.products.map((product) => {
-                console.log(product)
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
