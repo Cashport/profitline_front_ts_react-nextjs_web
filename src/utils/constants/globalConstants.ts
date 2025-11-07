@@ -33,3 +33,5 @@ export const FILE_EXTENSIONS = [
 ];
 
 export const GALDERMA_PROJECT_ID = 165;
+
+export const CETAPHIL_PROJECT_ID = 175;
