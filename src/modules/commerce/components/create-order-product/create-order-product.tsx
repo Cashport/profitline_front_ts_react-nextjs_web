@@ -41,7 +41,6 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           height={400}
         />
       </div>
-
       <hr className={styles.separator} />
       <h4 className={styles.name}>
         {product.name}
@@ -57,7 +56,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
       <div className={styles.price}>
         {product.discount ? (
           <>
-            <h5 className={styles.oldPrice}>{formatMoney(product.price)}</h5>
+            <h5 className={styles.oldPrice}>{formatMoney(product.price_taxes)}</h5>
             <Flex gap={4}>
               <h5 className={styles.price__amount}>{formatMoney(product.discount)}</h5>
               <p className={styles.discountPercentage}>-%{product.discount_percentage}</p>
@@ -65,7 +64,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           </>
         ) : (
           <Flex gap={"0.5rem"} align="baseline">
-            <h5 className={styles.price__amount}>{formatMoney(product.price)}</h5>
+            <h5 className={styles.price__amount}>{formatMoney(product.price_taxes)}</h5>
             {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
               <span className={styles.units}>
                 {product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und

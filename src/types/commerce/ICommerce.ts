@@ -24,6 +24,7 @@ export interface IProduct {
   EAN: string;
   project_id: number;
   price: number;
+  price_taxes: number;
   line_name: string;
   category_name: string;
   shipment_unit: number;
@@ -33,6 +34,7 @@ export interface ISelectedProduct {
   id: number;
   name: string;
   price: number;
+  price_taxes: number;
   discount: number | undefined;
   discount_percentage: number | undefined;
   quantity: number;
@@ -63,6 +65,7 @@ export interface IProductInDetail {
   product_name: string;
   quantity: number;
   price: number;
+  price_taxes: number;
   taxes: number;
   image: string;
   id_category: number;

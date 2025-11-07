@@ -190,6 +190,7 @@ const CreateOrderCart: FC = ({}) => {
                 <p>SKUs: {category.products.length}</p>
               </Flex>
               {category.products.map((product) => {
+                console.log(product)
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
@@ -197,7 +198,7 @@ const CreateOrderCart: FC = ({}) => {
                   productDiscount && productDiscount.subtotalDiscount > 0
                     ? {
                         discountPercentage: productDiscount.primary?.discount_applied?.discount,
-                        subtotal: productDiscount.primary?.new_price
+                        subtotal: (productDiscount.primary?.new_price_taxes || productDiscount.primary?.new_price)
                       }
                     : undefined;
                 return (
