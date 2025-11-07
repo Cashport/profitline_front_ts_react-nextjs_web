@@ -255,6 +255,7 @@ const CreateOrderCheckout: FC = ({}) => {
                 placeholder="Seleccione una dirección"
                 options={addressOptions}
                 customStyleContainer={{ gridColumn: "1 / span 2" }}
+                autoSelectFirst={true}
               />
             )}
           />

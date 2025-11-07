@@ -26,6 +26,7 @@ interface PropsGeneralSelect<T extends FieldValues> {
   errorSmall?: boolean;
   readOnly?: boolean;
   showSearch?: boolean;
+  autoSelectFirst?: boolean;
 }
 
 const GeneralSelect = <T extends FieldValues>({
@@ -40,7 +41,8 @@ const GeneralSelect = <T extends FieldValues>({
   titleAbsolute,
   errorSmall,
   readOnly,
-  showSearch = false
+  showSearch = false,
+  autoSelectFirst = false
 }: PropsGeneralSelect<T>) => {
   const [usedOptions, setUsedOptions] = useState<
     {
@@ -77,6 +79,13 @@ const GeneralSelect = <T extends FieldValues>({
       setUsedOptions(formattedOptions);
     }
   }, [options]);
+
+  useEffect(() => {
+    if (autoSelectFirst && usedOptions && usedOptions.length > 1 && !field.value) {
+      const firstRealOption = usedOptions[1];
+      field.onChange({ value: firstRealOption.value, label: firstRealOption.label });
+    }
+  }, [autoSelectFirst, usedOptions, field]);
 
   return (
     <Flex vertical style={customStyleContainer} className="generalSelectContainer">
