@@ -41,6 +41,7 @@ export interface RegistrationDialogProps {
 
   // Campos opcionales
   showReferralEmail?: boolean;
+  showEmail?: boolean;
 
   // Valores por defecto y estado disabled
   defaultValues?: Partial<RegistrationFormData>;
@@ -61,6 +62,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
   description = "Complete el formulario para acceder al marketplace de distribuidores",
   submitButtonText = "Crear mi cuenta",
   showReferralEmail = false,
+  showEmail = true,
   defaultValues,
   disabledFields,
   isSubmitting = false
@@ -94,7 +96,7 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
         phone: defaultValues.phone || ""
       });
     }
-  }, [defaultValues, reset]);
+  }, [defaultValues?.email, defaultValues?.referralEmail]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -206,33 +208,35 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
           </div>
 
           {/* Correo electrónico */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground">
-              Correo electrónico
-            </Label>
-            <Controller
-              name="email"
-              control={control}
-              rules={{
-                required: "Este campo es requerido",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Correo electrónico inválido"
-                }
-              }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  id="email"
-                  type="email"
-                  placeholder="Ingresa tu correo"
-                  disabled={disabledFields?.email}
-                  className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                />
-              )}
-            />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-          </div>
+          {showEmail && (
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Correo electrónico
+              </Label>
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: "Este campo es requerido",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Correo electrónico inválido"
+                  }
+                }}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    id="email"
+                    type="email"
+                    placeholder="Ingresa tu correo"
+                    disabled={disabledFields?.email}
+                    className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                )}
+              />
+              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            </div>
+          )}
 
           {/* Correo electrónico de referido (condicional) */}
           {showReferralEmail && (

@@ -17,7 +17,10 @@ import {
   DialogTrigger
 } from "@cetaphilUI/dialog";
 import { ShieldCheck } from "lucide-react";
-import { RegistrationDialog, type RegistrationFormData } from "@/modules/cetaphil/components/registration-dialog";
+import {
+  RegistrationDialog,
+  type RegistrationFormData
+} from "@/modules/cetaphil/components/registration-dialog";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
@@ -43,12 +46,13 @@ export default function CetaphilLanding() {
   const token = searchParams.get("token");
   const { isLoading: isLoadingLogin } = useLoginCetaphil(token);
   const decoder = useDecodeToken();
-  const decodedToken = decoder(token || "");
+  const [decodedToken, setDecodedToken] = useState<any>(null);
   const { showMessage } = useMessageApi();
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
+  const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +71,7 @@ export default function CetaphilLanding() {
   // Actualizar estados según el token
   useEffect(() => {
     const decodedToken = decoder(token || "");
+    setDecodedToken(decodedToken);
     const guestEmail = decodedToken?.claims?.guestEmail || "";
     if (guestEmail) {
       if (token && decodedToken?.claims?.mode === "invite") {
@@ -78,69 +83,46 @@ export default function CetaphilLanding() {
         setShowLogin(true);
       }
     }
-  }, [token, decoder]);
+  }, []);
 
   const handleLoginClose = useCallback((open: boolean) => {
     setShowLogin(open);
   }, []);
 
-  /*   const handleSendOtpWithEmail = useCallback(async (email: string) => {
+  const handleSendMailLinkWithMail = async (loginEmail: string) => {
     try {
-      const bearer = `Bearer ${token}`;
-      await sendOtp(email, bearer);
-      setLoginStep("otp");
+      setIsLoading(true);
+      await sendMailLink(loginEmail);
+      showMessage(
+        "success",
+        "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada."
+      );
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message;
-        showMessage("error", (typeof message === "string" && message) || "Error al enviar el OTP");
-      } else {
-        showMessage("error", "Error desconocido");
+        const data = error.response?.data?.data;
+        if (message === "Invalid params" && Array.isArray(data)) {
+          const errorMessages = data.map((item: any) => item.msg).join(", ");
+          showMessage("error", errorMessages);
+        } else {
+          showMessage(
+            "error",
+            (typeof message === "string" && message) || "Error al enviar el enlace de correo"
+          );
+        }
       }
     }
-  }, []); */
-
-  /*   const handleSendOTP = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleSendOtpWithEmail(loginEmail);
-  }, []); */
+    setShowLogin(false);
+  };
 
   const handleSendMailLink = useCallback(
     async (e: React.FormEvent) => {
-      try {
-        console.log("Sending mail link to:", loginEmail);
-        e.preventDefault();
-        setIsLoading(true);
-        await sendMailLink(loginEmail);
-        showMessage(
-          "success",
-          "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada."
-        );
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.message;
-          const data = error.response?.data?.data;
-          if (message === "Invalid params" && Array.isArray(data)) {
-            const errorMessages = data.map((item: any) => item.msg).join(", ");
-            showMessage("error", errorMessages);
-          } else {
-            showMessage(
-              "error",
-              (typeof message === "string" && message) || "Error al enviar el enlace de correo"
-            );
-          }
-        }
-      }
-      setShowLogin(false);
+      console.log("Sending mail link to:", loginEmail);
+      e.preventDefault();
+      handleSendMailLinkWithMail(loginEmail);
     },
     [loginEmail]
   );
-
-  /*   const handleVerifyOTP = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    const bearer = `Bearer ${token}`;
-    await validateOtp(loginEmail, otp, bearer);
-    setShowLogin(false);
-  }, []); */
 
   const onSubmitRegister = useCallback(
     async (data: RegistrationFormData) => {
@@ -167,6 +149,9 @@ export default function CetaphilLanding() {
         };
 
         await acceptInvitation(payload);
+        await handleSendMailLinkWithMail(data.email);
+        setShowLogin(false);
+        setShowRegisterSuccess(true);
 
         setShowRegister(false);
         setShowLogin(true);
@@ -253,6 +238,40 @@ export default function CetaphilLanding() {
                 </form>
               </DialogContent>
             </Dialog>
+            <Dialog open={showRegisterSuccess} onOpenChange={setShowRegisterSuccess}>
+              <DialogContent className="sm:max-w-md bg-card">
+                <DialogHeader className="space-y-2">
+                  <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    Revisa tu correo
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Hemos enviado a tu correo un link para acceder al marketplace
+                  </DialogDescription>
+                </DialogHeader>
+
+                <form
+                  onSubmit={(e: any) => {
+                    e.preventDefault();
+                  }}
+                  className="space-y-4 py-4"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                      Email
+                    </Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={loginEmail}
+                      required
+                      disabled={true}
+                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    />
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
             <Button
               onClick={() => setShowRegister(true)}
               className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
@@ -267,14 +286,15 @@ export default function CetaphilLanding() {
               title="Solicitud de Registro"
               description="Complete el formulario para acceder al marketplace de distribuidores"
               submitButtonText="Crear mi cuenta"
-              showReferralEmail={true}
+              showReferralEmail={!decodedToken?.claims?.userInvitingEmail ? true : false}
+              showEmail={!decodedToken?.claims?.guestEmail ? true : false}
               defaultValues={{
                 email: decodedToken?.claims?.guestEmail || "",
-                referralEmail: decodedToken?.claims?.userInvitingEmail || "",
+                referralEmail: decodedToken?.claims?.userInvitingEmail || ""
               }}
               disabledFields={{
                 email: !!decodedToken?.claims?.guestEmail,
-                referralEmail: !!decodedToken?.claims?.userInvitingEmail,
+                referralEmail: !!decodedToken?.claims?.userInvitingEmail
               }}
               isSubmitting={isSubmitting}
             />
