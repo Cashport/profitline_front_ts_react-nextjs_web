@@ -12,7 +12,7 @@ import {
   createDraft,
   createOrder,
   createOrderFromDraft,
-  getAdresses
+  getAdresses as getAdressesAndNumber
 } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -110,8 +110,11 @@ const CreateOrderCheckout: FC = ({}) => {
     if (!client) return;
     setValue("email", client.email);
     const fetchAdresses = async () => {
-      const response = await getAdresses(client.id);
+      const response = await getAdressesAndNumber(client.id);
       setAddresses(response.otherAddresses);
+      if (response.phone) {
+        setValue("phone", response.phone);
+      }
     };
     fetchAdresses();
   }, []);
