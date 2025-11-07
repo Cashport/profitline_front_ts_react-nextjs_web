@@ -21,6 +21,7 @@ export interface selectClientForm {
     value: string;
     label: string;
     email: string;
+    payment_type: number;
   };
 }
 
@@ -36,7 +37,7 @@ const CreateOrderSearchClient: FC = ({}) => {
   } = useForm<selectClientForm>({});
 
   const handleCreateOrder = (data: selectClientForm) => {
-    setClient({ name: data.client.label, id: data.client.value, email: data.client.email });
+    setClient({ name: data.client.label, id: data.client.value, email: data.client.email, payment_type: data.client.payment_type });
   };
 
   const handleClickNewClient = () => {
@@ -66,7 +67,8 @@ const CreateOrderSearchClient: FC = ({}) => {
       setClient({
         name: responseNewClient.name,
         id: responseNewClient.document,
-        email: responseNewClient.email
+        email: responseNewClient.email,
+        payment_type: 1
       });
 
       message.success("Cliente registrado exitosamente");

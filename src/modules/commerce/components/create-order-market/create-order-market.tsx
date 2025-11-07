@@ -61,6 +61,7 @@ const CreateOrderMarket: FC = () => {
             id: Number(product.id),
             name: product.description,
             price: product.price,
+            price_taxes: product.price_taxes,
             discount: 0,
             discount_percentage: 0,
             quantity: 0,

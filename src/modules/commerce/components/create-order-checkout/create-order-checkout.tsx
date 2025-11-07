@@ -28,6 +28,7 @@ import { SelectLocations } from "@/components/molecules/selects/clients/SelectLo
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
+import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 
 interface IShippingInfoForm {
   addresses: {
@@ -132,6 +133,22 @@ const CreateOrderCheckout: FC = ({}) => {
     else setSelectedDiscount(value);
   };
 
+  const [showWompiModal, setShowWompiModal] = useState(false);
+
+  const handleWompiClose = async (transactionResult?: any) => {
+    setShowWompiModal(false); // cerramos modal
+
+    if (!pendingFormData) return;
+
+    if (transactionResult?.transaction?.status === "APPROVED") {
+      await processOrderCreation(pendingFormData);
+    } else {
+      showMessage("info", "Pago no completado, orden no generada");
+    }
+
+    setPendingFormData(null); // limpiamos después de procesar
+  };
+
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
     setLoading(true);
     router.prefetch("/comercio");
@@ -228,31 +245,25 @@ const CreateOrderCheckout: FC = ({}) => {
   };
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
-    // Si es proyecto Cetaphil, mostrar modal de facturación electrónica
+    if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
+      setPendingFormData(data);
+      setShowWompiModal(true);
+      return;
+    }
+
     if (CETAPHIL_PROJECT_ID === projectId) {
       setPendingFormData(data);
       setIsElectronicBillingModalOpen(true);
       return;
     }
 
-    // Si no es Cetaphil, proceder con la creación directamente
     await processOrderCreation(data);
   };
 
-  // Handlers del modal de facturación electrónica
-  const handleElectronicBillingConfirm = () => {
-    console.log("Sí necesita facturación electrónica");
-    setIsElectronicBillingModalOpen(false);
-    setPendingFormData(null);
-  };
-
   const handleElectronicBillingClose = async (cancelClicked?: boolean) => {
-    if (cancelClicked && pendingFormData) {
-      // Usuario hizo click en "No" - proceder con la creación de orden
-      console.log("No necesita facturación electrónica");
-      // Mantener el modal abierto mientras procesa (loading se maneja con cancelLoading)
+    if (pendingFormData && cancelClicked !== false) {
+      // Usuario hizo click en "Sí" o "No" - proceder con la creación de orden
       await processOrderCreation(pendingFormData);
-      // Cerrar modal después de que termine el proceso
       setIsElectronicBillingModalOpen(false);
       setPendingFormData(null);
     } else {
@@ -443,12 +454,30 @@ const CreateOrderCheckout: FC = ({}) => {
       <ModalConfirmAction
         isOpen={isElectronicBillingModalOpen}
         onClose={handleElectronicBillingClose}
-        onOk={handleElectronicBillingConfirm}
+        onOk={handleElectronicBillingClose}
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
         cancelLoading={loading}
       />
+      {showWompiModal && pendingFormData && (
+        <>
+          <WompiModal
+            visible={showWompiModal}
+            onClose={handleWompiClose}
+            client={{
+              name: client.name,
+              email: pendingFormData.email || client.email,
+              phone: pendingFormData.phone || "",
+              indicative: {
+                value: pendingFormData.indicative?.label || "+57"
+              }
+            }}
+            amountInCents={(confirmOrderData.total || 0) * 100}
+            orderId={draftInfo?.id?.toString() || Date.now().toString()}
+          />
+        </>
+      )}
     </div>
   );
 };
