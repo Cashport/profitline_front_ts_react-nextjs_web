@@ -111,7 +111,7 @@ const CreateOrderCheckout: FC = ({}) => {
     setValue("email", client.email);
     const fetchAdresses = async () => {
       const response = await getAdresses(client.id);
-      setAddresses(response.data);
+      setAddresses(response.otherAddresses);
     };
     fetchAdresses();
   }, []);

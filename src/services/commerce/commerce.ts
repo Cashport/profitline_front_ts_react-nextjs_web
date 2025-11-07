@@ -1,7 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
-  ICommerceAdresses,
+  ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
   IDiscountPackageAvailable,
@@ -47,10 +47,15 @@ export const getProductsByClient = async (projectId: number, clientId: string) =
 };
 
 export const getAdresses = async (clientId: string) => {
-  const response: GenericResponse<ICommerceAdresses[]> = await API.get(
-    `/marketplace/clients/${clientId}/other-addresses`
-  );
-  return response;
+  try {
+    const response: GenericResponse<ICommerceAddressesData> = await API.get(
+      `/marketplace/clients/${clientId}/other-addresses`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener las direcciones del cliente:", error);
+    throw Error("Error al obtener las direcciones del cliente");
+  }
 };
 
 export const getDiscounts = async (

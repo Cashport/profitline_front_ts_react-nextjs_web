@@ -65,7 +65,7 @@ const CreateOrderSearchClient: FC = ({}) => {
       const responseNewClient = await registerNewClient(guestData);
       setClient({
         name: responseNewClient.name,
-        id: responseNewClient.uuid,
+        id: responseNewClient.document,
         email: responseNewClient.email
       });
 
