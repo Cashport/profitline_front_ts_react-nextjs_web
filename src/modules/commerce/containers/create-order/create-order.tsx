@@ -30,6 +30,7 @@ interface IOrderViewContext {
     name: string;
     id: string;
     email: string;
+    payment_type: number;
   };
   setClient: Dispatch<{
     name: string;
@@ -99,7 +100,8 @@ export const CreateOrderView: FC = () => {
         setClient({
           name: response.data[0].client_name,
           id: response.data[0].client_id,
-          email: ""
+          email: "",
+          payment_type: 1
         });
 
         const selectedCategories = response.data[0].detail.products.map((category) => ({
