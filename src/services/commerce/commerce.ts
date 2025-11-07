@@ -1,6 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
+  ICommerceAddressAndDetails,
   ICommerceAdresses,
   IConfirmOrderData,
   ICreateOrderData,
@@ -47,7 +48,7 @@ export const getProductsByClient = async (projectId: number, clientId: string) =
 };
 
 export const getAdresses = async (clientId: string) => {
-  const response: GenericResponse<ICommerceAdresses[]> = await API.get(
+  const response: GenericResponse<ICommerceAddressAndDetails> = await API.get(
     `/marketplace/clients/${clientId}/other-addresses`
   );
   return response;
