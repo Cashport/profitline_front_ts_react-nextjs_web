@@ -156,6 +156,10 @@ export interface ICommerceAdresses {
   email: string;
   id: number;
 }
+export interface ICommerceAddressesData {
+  otherAddresses: ICommerceAdresses[];
+  phone: string;
+}
 
 export interface ISingleOrder {
   id: number;

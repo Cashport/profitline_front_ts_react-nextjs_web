@@ -34,7 +34,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       <div className={styles.imageContainer}>
         <Image
           className={styles.imageContainer__img}
-          src={product.image}
+          src={product.image || "/images/watermark.svg"}
           alt="product image"
           width={100}
           height={100}

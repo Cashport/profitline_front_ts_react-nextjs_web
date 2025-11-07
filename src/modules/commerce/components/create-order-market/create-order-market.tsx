@@ -39,7 +39,6 @@ const CreateOrderMarket: FC = () => {
 
   const [productsMap, setProductsMap] = useState<Map<number, ISelectedProduct>>(new Map());
   const [categoriesMap, setCategoriesMap] = useState<Map<string, CategoryMap>>(new Map());
-  console.log("client market:", client);
 
   useEffect(() => {
     const fetchProducts = async () => {
