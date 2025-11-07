@@ -309,6 +309,7 @@ const CreateOrderCheckout: FC = ({}) => {
                     field={field}
                     readOnly={false}
                     className={styles.selectIndicative}
+                    isColombia
                   />
                 )}
               />
