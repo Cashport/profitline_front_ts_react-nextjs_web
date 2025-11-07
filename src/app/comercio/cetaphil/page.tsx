@@ -32,11 +32,13 @@ export interface IOrderViewContext {
     name: string;
     id: string;
     email: string;
+    payment_type: number;
   };
   setClient: Dispatch<{
     name: string;
     id: string;
     email: string;
+    payment_type: number;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;
@@ -110,7 +112,8 @@ const CreateOrderView: FC = () => {
       setClient({
         name: decodedToken?.claims?.guestName || "",
         id: decodedToken?.claims?.guestDocument || "",
-        email: decodedToken?.claims?.guestEmail || ""
+        email: decodedToken?.claims?.guestEmail || "",
+        payment_type: client?.payment_type || 1
       });
       setIsLoadingLocalClient(false);
     }

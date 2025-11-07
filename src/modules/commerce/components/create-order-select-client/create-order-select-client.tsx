@@ -7,10 +7,11 @@ import {
 } from "react-hook-form";
 import { selectClientForm } from "../create-order-search-client/create-order-search-client";
 import { useAppStore } from "@/lib/store/store";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import { getClients } from "@/services/commerce/commerce";
 import "./create-order-select-client.scss";
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 type ExtendedFieldError =
   | OriginalFieldError
@@ -25,6 +26,7 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
+  const { setClient } = useContext(OrderViewContext); // Obtenemos la función del contexto
 
   useEffect(() => {
     if (!ID) return;
@@ -50,7 +52,8 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
         value: client.client_id,
         label: client.client_name,
         // Almacenar el email en la metadata de la opción
-        email: client.client_email
+        email: client.client_email,
+        payment_type: client.payment_type
       })),
     [clients]
   );
@@ -68,17 +71,36 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
     [clients]
   );
 
+  const clientPaymentTypeMap = useMemo(
+    () =>
+      clients.reduce(
+        (acc, client) => ({
+          ...acc,
+          [client.client_id]: client.payment_type
+        }),
+        {} as Record<string, number>
+      ),
+    [clients]
+  );
+
   const handleChange = (value: { value: string; label: string } | null) => {
     if (value) {
-      // Enriquecer el valor con el email
-      field.onChange({
+      const enrichedValue = {
         ...value,
-        email: clientEmailMap[value.value] || ""
-      });
+        email: clientEmailMap[value.value] || "",
+        payment_type: clientPaymentTypeMap[value.value] || ""
+      };
+
+      console.log("Cliente seleccionado:", enrichedValue); // <-- aquí
+
+      // Enviar al formulario
+      field.onChange(enrichedValue);
     } else {
       field.onChange(null);
+      console.log("Cliente deseleccionado");
     }
   };
+
 
   return (
     <Select

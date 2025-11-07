@@ -28,3 +28,21 @@ export const getDocumentTypeValue = (id: number): string | undefined => {
 export const getDocumentTypeLabel = (id: number): string | undefined => {
   return DOCUMENT_TYPES.find((type) => type.id === id)?.label;
 };
+
+export interface PaymentType {
+  id: number;
+  value: string;
+  label: string;
+}
+
+export const PAYMENT_TYPES: PaymentType[] = [
+  { id: 1, value: "cupo", label: "Cupo" },
+  { id: 2, value: "contado", label: "Contado" },
+  { id: 3, value: "pasarela", label: "Pasarela" }
+];
+
+export const getPaymentTypeById = (id: number) =>
+  PAYMENT_TYPES.find((type) => type.id === id);
+
+export const getPaymentTypeByValue = (value: string) =>
+  PAYMENT_TYPES.find((type) => type.value === value);

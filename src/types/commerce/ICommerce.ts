@@ -2,6 +2,7 @@ export interface IEcommerceClient {
   client_id: string;
   client_name: string;
   client_email: string;
+  payment_type: number;
 }
 
 export interface IProductData {
