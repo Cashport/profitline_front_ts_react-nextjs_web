@@ -318,3 +318,25 @@ export const getOrdersFilter = async () => {
     throw new Error("Error al obtener los filtros de órdenes");
   }
 };
+
+export const registerNewClient = async (guestData: {
+  email: string;
+  name: string;
+  documentType: number;
+  document: string;
+  phoneNumber: string;
+}) => {
+  const body = {
+    guestData
+  };
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace-guest/register-guest`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al registrar nuevo cliente:", error);
+    throw new Error("Error al registrar nuevo cliente");
+  }
+};

@@ -82,20 +82,6 @@ export const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
     }
   });
 
-  // Actualizar valores por defecto cuando cambien
-  useEffect(() => {
-    if (defaultValues) {
-      reset({
-        fullName: defaultValues.fullName || "",
-        documentType: defaultValues.documentType || "",
-        documentNumber: defaultValues.documentNumber || "",
-        email: defaultValues.email || "",
-        referralEmail: defaultValues.referralEmail || "",
-        phone: defaultValues.phone || ""
-      });
-    }
-  }, [defaultValues, reset]);
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       reset();

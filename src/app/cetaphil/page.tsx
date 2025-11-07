@@ -17,7 +17,10 @@ import {
   DialogTrigger
 } from "@cetaphilUI/dialog";
 import { ShieldCheck } from "lucide-react";
-import { RegistrationDialog, type RegistrationFormData } from "@/modules/cetaphil/components/registration-dialog";
+import {
+  RegistrationDialog,
+  type RegistrationFormData
+} from "@/modules/cetaphil/components/registration-dialog";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
@@ -43,7 +46,7 @@ export default function CetaphilLanding() {
   const token = searchParams.get("token");
   const { isLoading: isLoadingLogin } = useLoginCetaphil(token);
   const decoder = useDecodeToken();
-  const decodedToken = decoder(token || "");
+  const [decodedToken, setDecodedToken] = useState<any>(null);
   const { showMessage } = useMessageApi();
 
   const [showLogin, setShowLogin] = useState(false);
@@ -67,6 +70,7 @@ export default function CetaphilLanding() {
   // Actualizar estados según el token
   useEffect(() => {
     const decodedToken = decoder(token || "");
+    setDecodedToken(decodedToken);
     const guestEmail = decodedToken?.claims?.guestEmail || "";
     if (guestEmail) {
       if (token && decodedToken?.claims?.mode === "invite") {
@@ -78,31 +82,11 @@ export default function CetaphilLanding() {
         setShowLogin(true);
       }
     }
-  }, [token, decoder]);
+  }, []);
 
   const handleLoginClose = useCallback((open: boolean) => {
     setShowLogin(open);
   }, []);
-
-  /*   const handleSendOtpWithEmail = useCallback(async (email: string) => {
-    try {
-      const bearer = `Bearer ${token}`;
-      await sendOtp(email, bearer);
-      setLoginStep("otp");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message;
-        showMessage("error", (typeof message === "string" && message) || "Error al enviar el OTP");
-      } else {
-        showMessage("error", "Error desconocido");
-      }
-    }
-  }, []); */
-
-  /*   const handleSendOTP = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleSendOtpWithEmail(loginEmail);
-  }, []); */
 
   const handleSendMailLink = useCallback(
     async (e: React.FormEvent) => {
@@ -134,13 +118,6 @@ export default function CetaphilLanding() {
     },
     [loginEmail]
   );
-
-  /*   const handleVerifyOTP = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    const bearer = `Bearer ${token}`;
-    await validateOtp(loginEmail, otp, bearer);
-    setShowLogin(false);
-  }, []); */
 
   const onSubmitRegister = useCallback(
     async (data: RegistrationFormData) => {
@@ -270,11 +247,11 @@ export default function CetaphilLanding() {
               showReferralEmail={true}
               defaultValues={{
                 email: decodedToken?.claims?.guestEmail || "",
-                referralEmail: decodedToken?.claims?.userInvitingEmail || "",
+                referralEmail: decodedToken?.claims?.userInvitingEmail || ""
               }}
               disabledFields={{
                 email: !!decodedToken?.claims?.guestEmail,
-                referralEmail: !!decodedToken?.claims?.userInvitingEmail,
+                referralEmail: !!decodedToken?.claims?.userInvitingEmail
               }}
               isSubmitting={isSubmitting}
             />

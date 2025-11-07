@@ -8,10 +8,11 @@ import {
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
 import { auth } from "./firebase";
-import { STORAGE_TOKEN } from "@/utils/constants/globalConstants";
+import { COOKIE_NAME, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppStore } from "@/lib/store/store";
 import { NotificationInstance } from "antd/es/notification/interface";
+import axios from "axios";
 
 const getAuth = async (
   email: string,
@@ -99,16 +100,28 @@ export const getIdTokenWithToken = async (token: string) => {
   }
 };
 
-const logOut = (router?: AppRouterInstance) => {
-  if (window.location.pathname === "/comercio/cetaphil") {
-    window.location.href = "/cetaphil";
-    return;
+const logOut = async (router?: AppRouterInstance) => {
+  try {
+    localStorage.removeItem(STORAGE_TOKEN);
+
+    // Enviar el pathname actual al endpoint de logout para que maneje el redireccionamiento
+    const response = await axios.post("/api/auth/logout", {
+      currentPath: window.location.pathname
+    });
+
+    signOut(auth);
+    const { resetStore } = useAppStore.getState();
+    resetStore();
+
+    // El servidor responde con la URL de redirección
+    if (response.data?.redirectUrl) {
+      window.location.href = response.data.redirectUrl;
+    }
+  } catch (error) {
+    console.error("Error during logout:", error);
+    // Fallback en caso de error
+    window.location.href = "/auth/login";
   }
-  window.location.href = "/auth/login";
-  signOut(auth);
-  localStorage.removeItem(STORAGE_TOKEN);
-  const { resetStore } = useAppStore.getState();
-  resetStore();
 };
 
 const sendEmailResetPassword = async (email: string) => {
