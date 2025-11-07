@@ -3,6 +3,7 @@ import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple } from "phosphor-react";
 import { formatNumber } from "@/utils/utils";
+import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
 import { confirmOrder } from "@/services/commerce/commerce";
 
@@ -68,13 +69,17 @@ const CreateOrderCart: FC = ({}) => {
   }, [selectedCategories]);
 
   const handleContinuePurchase = () => {
-    if (isTotalLessThanMinimum) {
-      setShowConfirmModal(true);
-    } else if (hasNoCanulasOrAgua) {
-      setShowCanulasModal(true);
-    } else {
-      setCheckingOut(true);
+    if (projectId === GALDERMA_PROJECT_ID) {
+      if (isTotalLessThanMinimum) {
+        setShowConfirmModal(true);
+      } else if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+      } else {
+        setCheckingOut(true);
+      }
     }
+
+    setCheckingOut(true);
   };
 
   const handleConfirmPurchase = () => {
