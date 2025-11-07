@@ -62,7 +62,12 @@ const CreateOrderSearchClient: FC = ({}) => {
         phoneNumber: data.phone
       };
 
-      await registerNewClient(guestData);
+      const responseNewClient = await registerNewClient(guestData);
+      setClient({
+        name: responseNewClient.name,
+        id: responseNewClient.uuid,
+        email: responseNewClient.email
+      });
 
       message.success("Cliente registrado exitosamente");
       setShowNewClientDialog(false);

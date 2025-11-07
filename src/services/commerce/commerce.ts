@@ -330,10 +330,15 @@ export const registerNewClient = async (guestData: {
     guestData
   };
   try {
-    const response: GenericResponse<any> = await API.post(
-      `/marketplace-guest/register-guest`,
-      body
-    );
+    const response: GenericResponse<{
+      email: string;
+      name: string;
+      documentType: number;
+      document: string;
+      phoneNumber: string;
+      projectId: number;
+      uuid: string;
+    }> = await API.post(`/marketplace-guest/register-guest`, body);
     return response.data;
   } catch (error) {
     console.error("Error al registrar nuevo cliente:", error);
