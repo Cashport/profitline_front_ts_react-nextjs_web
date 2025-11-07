@@ -250,8 +250,10 @@ const CreateOrderCheckout: FC = ({}) => {
     if (cancelClicked && pendingFormData) {
       // Usuario hizo click en "No" - proceder con la creación de orden
       console.log("No necesita facturación electrónica");
-      setIsElectronicBillingModalOpen(false);
+      // Mantener el modal abierto mientras procesa (loading se maneja con cancelLoading)
       await processOrderCreation(pendingFormData);
+      // Cerrar modal después de que termine el proceso
+      setIsElectronicBillingModalOpen(false);
       setPendingFormData(null);
     } else {
       // Usuario cerró el modal con X o click fuera - solo cerrar
@@ -445,6 +447,7 @@ const CreateOrderCheckout: FC = ({}) => {
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
+        cancelLoading={loading}
       />
     </div>
   );

@@ -12,6 +12,7 @@ interface Props {
   okText?: string;
   cancelText?: string;
   okLoading?: boolean;
+  cancelLoading?: boolean;
 }
 export const ModalConfirmAction = ({
   isOpen,
@@ -21,7 +22,8 @@ export const ModalConfirmAction = ({
   content,
   okText = "Aceptar",
   cancelText = "Cancelar",
-  okLoading
+  okLoading,
+  cancelLoading
 }: Props) => {
   // Handler para cerrar con X o clic fuera (cancelClicked = false)
   const handleClose = () => {
@@ -43,7 +45,8 @@ export const ModalConfirmAction = ({
       okText={okText}
       cancelButtonProps={{
         className: "cancelButton",
-        onClick: handleCancel
+        onClick: handleCancel,
+        loading: cancelLoading
       }}
       cancelText={cancelText}
       title={title}
