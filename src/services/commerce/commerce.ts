@@ -1,7 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
-  ICommerceAdresses,
+  ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
   IDiscountPackageAvailable,
@@ -47,10 +47,15 @@ export const getProductsByClient = async (projectId: number, clientId: string) =
 };
 
 export const getAdresses = async (clientId: string) => {
-  const response: GenericResponse<ICommerceAdresses[]> = await API.get(
-    `/marketplace/clients/${clientId}/other-addresses`
-  );
-  return response;
+  try {
+    const response: GenericResponse<ICommerceAddressesData> = await API.get(
+      `/marketplace/clients/${clientId}/other-addresses`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener las direcciones del cliente:", error);
+    throw Error("Error al obtener las direcciones del cliente");
+  }
 };
 
 export const getDiscounts = async (
@@ -316,5 +321,32 @@ export const getOrdersFilter = async () => {
     return response.data;
   } catch (error) {
     throw new Error("Error al obtener los filtros de órdenes");
+  }
+};
+
+export const registerNewClient = async (guestData: {
+  email: string;
+  name: string;
+  documentType: number;
+  document: string;
+  phoneNumber: string;
+}) => {
+  const body = {
+    guestData
+  };
+  try {
+    const response: GenericResponse<{
+      email: string;
+      name: string;
+      documentType: number;
+      document: string;
+      phoneNumber: string;
+      projectId: number;
+      uuid: string;
+    }> = await API.post(`/marketplace-guest/register-guest`, body);
+    return response.data;
+  } catch (error) {
+    console.error("Error al registrar nuevo cliente:", error);
+    throw new Error("Error al registrar nuevo cliente");
   }
 };

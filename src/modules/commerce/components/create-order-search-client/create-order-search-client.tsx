@@ -1,12 +1,18 @@
-import { FC, useContext } from "react";
-import { Flex } from "antd";
+import { FC, useContext, useState } from "react";
+import { Flex, message } from "antd";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import SelectClient from "../create-order-select-client";
+import {
+  RegistrationDialog,
+  type RegistrationFormData
+} from "@/modules/cetaphil/components/registration-dialog";
+import { OrderViewContext } from "../../contexts/orderViewContext";
+import { registerNewClient } from "@/services/commerce/commerce";
+import { getDocumentTypeId } from "@/constants/documentTypes";
 
 import styles from "./create-order-search-client.module.scss";
 
@@ -20,6 +26,8 @@ export interface selectClientForm {
 
 const CreateOrderSearchClient: FC = ({}) => {
   const { setClient } = useContext(OrderViewContext);
+  const [showNewClientDialog, setShowNewClientDialog] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const {
     control,
@@ -31,10 +39,52 @@ const CreateOrderSearchClient: FC = ({}) => {
     setClient({ name: data.client.label, id: data.client.value, email: data.client.email });
   };
 
+  const handleClickNewClient = () => {
+    setShowNewClientDialog(true);
+  };
+
+  const handleSaveClient = async (data: RegistrationFormData) => {
+    try {
+      setIsRegistering(true);
+
+      const documentTypeId = getDocumentTypeId(data.documentType);
+
+      if (!documentTypeId) {
+        message.error("Tipo de documento inválido");
+        return;
+      }
+
+      const guestData = {
+        email: data.email,
+        name: data.fullName,
+        documentType: documentTypeId,
+        document: data.documentNumber,
+        phoneNumber: data.phone
+      };
+
+      const responseNewClient = await registerNewClient(guestData);
+      setClient({
+        name: responseNewClient.name,
+        id: responseNewClient.document,
+        email: responseNewClient.email
+      });
+
+      message.success("Cliente registrado exitosamente");
+      setShowNewClientDialog(false);
+    } catch (error) {
+      message.error("Error al registrar el cliente. Por favor intente nuevamente.");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
   return (
     <>
-      <Flex className={styles.FlexContainer} vertical>
-        <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
+      <Flex className={styles.FlexContainer} vertical gap={"1.5rem"}>
+        <Flex justify="space-between" align="center" className={styles.FlexContainer__header}>
+          <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
+          <PrincipalButton onClick={handleClickNewClient}>Nuevo cliente</PrincipalButton>
+        </Flex>
         <Controller
           name="client"
           control={control}
@@ -50,6 +100,16 @@ const CreateOrderSearchClient: FC = ({}) => {
           Crear orden
         </PrincipalButton>
       </Flex>
+      <RegistrationDialog
+        open={showNewClientDialog}
+        onOpenChange={setShowNewClientDialog}
+        onSubmit={handleSaveClient}
+        title="Registrar Nuevo Cliente"
+        description="Complete los datos del cliente para crear la orden"
+        submitButtonText="Guardar Cliente"
+        showReferralEmail={false}
+        isSubmitting={isRegistering}
+      />
     </>
   );
 };

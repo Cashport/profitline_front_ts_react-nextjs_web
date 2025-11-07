@@ -2,7 +2,6 @@ import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { Controller, useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import {
   createDraft,
   createOrder,
   createOrderFromDraft,
-  getAdresses
+  getAdresses as getAdressesAndNumber
 } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -26,6 +25,9 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
+import { OrderViewContext } from "../../contexts/orderViewContext";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 
 interface IShippingInfoForm {
   addresses: {
@@ -67,6 +69,8 @@ const CreateOrderCheckout: FC = ({}) => {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const [isNewAddress, setIsNewAddress] = useState(false);
+  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -107,10 +111,14 @@ const CreateOrderCheckout: FC = ({}) => {
 
   // when mounting
   useEffect(() => {
+    if (!client) return;
     setValue("email", client.email);
     const fetchAdresses = async () => {
-      const response = await getAdresses(client.id);
-      setAddresses(response.data);
+      const response = await getAdressesAndNumber(client.id);
+      setAddresses(response.otherAddresses);
+      if (response.phone) {
+        setValue("phone", response.phone);
+      }
     };
     fetchAdresses();
   }, []);
@@ -140,6 +148,8 @@ const CreateOrderCheckout: FC = ({}) => {
       order_summary: confirmOrderData
     };
 
+    if (!client) return;
+
     try {
       const response = (await createDraft(
         projectId,
@@ -157,8 +167,15 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
-  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+  // Función helper para procesar la creación de la orden
+  const processOrderCreation = async (data: IShippingInfoForm) => {
     setLoading(true);
+
+    if (!client) {
+      showMessage("error", "Cliente no encontrado");
+      setLoading(false);
+      return;
+    }
 
     const indicative = data.indicative.label.split(" ")[0];
     const createOrderModelData = {
@@ -210,6 +227,40 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
+  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+    // Si es proyecto Cetaphil, mostrar modal de facturación electrónica
+    if (CETAPHIL_PROJECT_ID === projectId) {
+      setPendingFormData(data);
+      setIsElectronicBillingModalOpen(true);
+      return;
+    }
+
+    // Si no es Cetaphil, proceder con la creación directamente
+    await processOrderCreation(data);
+  };
+
+  // Handlers del modal de facturación electrónica
+  const handleElectronicBillingConfirm = () => {
+    console.log("Sí necesita facturación electrónica");
+    setIsElectronicBillingModalOpen(false);
+    setPendingFormData(null);
+  };
+
+  const handleElectronicBillingClose = async (cancelClicked?: boolean) => {
+    if (cancelClicked && pendingFormData) {
+      // Usuario hizo click en "No" - proceder con la creación de orden
+      console.log("No necesita facturación electrónica");
+      // Mantener el modal abierto mientras procesa (loading se maneja con cancelLoading)
+      await processOrderCreation(pendingFormData);
+      // Cerrar modal después de que termine el proceso
+      setIsElectronicBillingModalOpen(false);
+      setPendingFormData(null);
+    } else {
+      // Usuario cerró el modal con X o click fuera - solo cerrar
+      setIsElectronicBillingModalOpen(false);
+    }
+  };
+
   // Preparar opciones del select con "Nueva dirección" al principio
   const addressOptions = [
     NEW_ADDRESS_OPTION,
@@ -246,6 +297,7 @@ const CreateOrderCheckout: FC = ({}) => {
                 placeholder="Seleccione una dirección"
                 options={addressOptions}
                 customStyleContainer={{ gridColumn: "1 / span 2" }}
+                autoSelectFirst={true}
               />
             )}
           />
@@ -300,6 +352,7 @@ const CreateOrderCheckout: FC = ({}) => {
                     field={field}
                     readOnly={false}
                     className={styles.selectIndicative}
+                    isColombia
                   />
                 )}
               />
@@ -386,6 +439,16 @@ const CreateOrderCheckout: FC = ({}) => {
           </PrincipalButton>
         </Flex>
       </div>
+
+      <ModalConfirmAction
+        isOpen={isElectronicBillingModalOpen}
+        onClose={handleElectronicBillingClose}
+        onOk={handleElectronicBillingConfirm}
+        title="¿Necesita facturación electrónica?"
+        okText="Sí, necesito"
+        cancelText="No"
+        cancelLoading={loading}
+      />
     </div>
   );
 };

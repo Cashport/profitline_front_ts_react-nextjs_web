@@ -146,11 +146,19 @@ export interface ICreateOrderData {
   order_summary: IOrderConfirmedResponse;
 }
 
+export interface ICommerceAddressAndDetails {
+  addresses: ICommerceAdresses[];
+  phone: string;
+}
 export interface ICommerceAdresses {
   address: string;
   city: string;
   email: string;
   id: number;
+}
+export interface ICommerceAddressesData {
+  otherAddresses: ICommerceAdresses[];
+  phone: string;
 }
 
 export interface ISingleOrder {

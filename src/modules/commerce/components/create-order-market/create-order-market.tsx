@@ -5,7 +5,6 @@ import { CaretLeft } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
 import UiTab from "@/components/ui/ui-tab";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import CreateOrderProduct from "../create-order-product";
 import { getProductsByClient } from "@/services/commerce/commerce";
 
@@ -14,6 +13,7 @@ import { ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-market.module.scss";
 import { useDebounce } from "@/hooks/useSearch";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export interface selectClientForm {
   client: ISelectType;
@@ -42,7 +42,7 @@ const CreateOrderMarket: FC = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!client.id) return;
+      if (!client?.id) return;
 
       const response = await getProductsByClient(ID, client.id);
       if (!response.data) return;
@@ -98,7 +98,7 @@ const CreateOrderMarket: FC = () => {
     };
 
     fetchProducts();
-  }, [client.id, ID]);
+  }, [client?.id, ID]);
 
   const filteredCategories = useMemo(() => {
     if (!categories || categoriesMap.size === 0) return [];
@@ -160,7 +160,7 @@ const CreateOrderMarket: FC = () => {
           setClient(undefined as any);
         }}
       >
-        {client.name}
+        {client?.name}
       </Button>
       <Flex gap={"0.5rem"}>
         <UiSearchInput

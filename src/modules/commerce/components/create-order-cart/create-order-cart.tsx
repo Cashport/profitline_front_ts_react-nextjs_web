@@ -3,10 +3,11 @@ import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple } from "phosphor-react";
 import { formatNumber } from "@/utils/utils";
+import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
 import { confirmOrder } from "@/services/commerce/commerce";
 
-import { OrderViewContext } from "../../containers/create-order/create-order";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
@@ -68,13 +69,17 @@ const CreateOrderCart: FC = ({}) => {
   }, [selectedCategories]);
 
   const handleContinuePurchase = () => {
-    if (isTotalLessThanMinimum) {
-      setShowConfirmModal(true);
-    } else if (hasNoCanulasOrAgua) {
-      setShowCanulasModal(true);
-    } else {
-      setCheckingOut(true);
+    if (projectId === GALDERMA_PROJECT_ID) {
+      if (isTotalLessThanMinimum) {
+        setShowConfirmModal(true);
+      } else if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+      } else {
+        setCheckingOut(true);
+      }
     }
+
+    setCheckingOut(true);
   };
 
   const handleConfirmPurchase = () => {
@@ -113,7 +118,7 @@ const CreateOrderCart: FC = ({}) => {
           order_summary: products
         };
         try {
-          const response = await confirmOrder(projectId, client.id, confirmOrderData);
+          const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
           if (response.status === 200) {
             setConfirmOrderData(response.data);
             setInsufficientStockProducts(response.data.insufficientStockProducts);

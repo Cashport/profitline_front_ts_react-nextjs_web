@@ -3,14 +3,16 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
-  confirmPasswordReset
+  confirmPasswordReset,
+  signInWithCustomToken
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
 import { auth } from "./firebase";
-import { STORAGE_TOKEN } from "@/utils/constants/globalConstants";
+import { COOKIE_NAME, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppStore } from "@/lib/store/store";
 import { NotificationInstance } from "antd/es/notification/interface";
+import axios from "axios";
 
 const getAuth = async (
   email: string,
@@ -89,12 +91,37 @@ const getAuth = async (
   }
 };
 
-const logOut = (router?: AppRouterInstance) => {
-  window.location.href = "/auth/login";
-  signOut(auth);
-  localStorage.removeItem(STORAGE_TOKEN);
-  const { resetStore } = useAppStore.getState();
-  resetStore();
+export const getIdTokenWithToken = async (token: string) => {
+  try {
+    const idToken = await signInWithCustomToken(auth, token);
+    return idToken;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const logOut = async (router?: AppRouterInstance) => {
+  try {
+    localStorage.removeItem(STORAGE_TOKEN);
+
+    // Enviar el pathname actual al endpoint de logout para que maneje el redireccionamiento
+    const response = await axios.post("/api/auth/logout", {
+      currentPath: window.location.pathname
+    });
+
+    signOut(auth);
+    const { resetStore } = useAppStore.getState();
+    resetStore();
+
+    // El servidor responde con la URL de redirección
+    if (response.data?.redirectUrl) {
+      window.location.href = response.data.redirectUrl;
+    }
+  } catch (error) {
+    console.error("Error during logout:", error);
+    // Fallback en caso de error
+    window.location.href = "/auth/login";
+  }
 };
 
 const sendEmailResetPassword = async (email: string) => {

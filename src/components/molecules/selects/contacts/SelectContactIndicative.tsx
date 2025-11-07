@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Select, Typography } from "antd";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
@@ -9,8 +10,9 @@ import {
   FieldValues
 } from "react-hook-form";
 
-import "./commonInputStyles.scss";
 import { IResponseContactOptions } from "@/types/contacts/IContacts";
+
+import "./commonInputStyles.scss";
 
 type ExtendedFieldError =
   | OriginalFieldError
@@ -21,13 +23,15 @@ interface Props<T extends FieldValues> {
   field: ControllerRenderProps<T, any>;
   readOnly?: boolean;
   className?: string;
+  isColombia?: boolean;
 }
 
 export const SelectContactIndicative = <T extends FieldValues>({
   errors,
   field,
   readOnly,
-  className
+  className,
+  isColombia = false
 }: Props<T>) => {
   const { data, isLoading } = useSWR<IResponseContactOptions>(
     "/client/contact/options",
@@ -47,6 +51,15 @@ export const SelectContactIndicative = <T extends FieldValues>({
           })
         : []
       : [];
+
+  useEffect(() => {
+    if (isColombia && options.length > 0 && !field.value) {
+      const colombiaOption = options.find((option) => option.value === 1);
+      if (colombiaOption) {
+        field.onChange(colombiaOption);
+      }
+    }
+  }, [isColombia, options, field]);
 
   return (
     <>

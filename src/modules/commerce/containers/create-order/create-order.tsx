@@ -1,4 +1,4 @@
-import { Dispatch, FC, createContext, useEffect, useState } from "react";
+import { Dispatch, FC, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
@@ -17,6 +17,7 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -51,8 +52,6 @@ interface IOrderViewContext {
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
 }
-
-export const OrderViewContext = createContext<IOrderViewContext>({} as IOrderViewContext);
 
 export const CreateOrderView: FC = () => {
   const [client, setClient] = useState({} as IOrderViewContext["client"]);
