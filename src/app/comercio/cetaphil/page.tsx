@@ -113,7 +113,7 @@ const CreateOrderView: FC = () => {
         name: decodedToken?.claims?.guestName || "",
         id: decodedToken?.claims?.guestDocument || "",
         email: decodedToken?.claims?.guestEmail || "",
-        payment_type: client?.payment_type || 1
+        payment_type: client?.payment_type || 3
       });
       setIsLoadingLocalClient(false);
     }
