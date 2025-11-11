@@ -26,6 +26,7 @@ interface Props {
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   handleDeleteRows: () => void;
+  handleSendInvite: () => void;
 }
 
 export const OrdersGenerateActionModal = ({
@@ -35,7 +36,8 @@ export const OrdersGenerateActionModal = ({
   setFetchMutate,
   setSelectedRows,
   setSelectedRowKeys,
-  handleDeleteRows
+  handleDeleteRows,
+  handleSendInvite
 }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
@@ -127,8 +129,6 @@ export const OrdersGenerateActionModal = ({
       }
     });
   };
-
-  const handleSendInvite = () => {};
 
   return (
     <>
