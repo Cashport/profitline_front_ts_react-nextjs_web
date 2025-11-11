@@ -125,3 +125,17 @@ export interface ISelectType {
   value: number;
   label: string;
 }
+
+export interface IClientInvoice {
+  factura: string;
+  valor: number;
+  expiration_date: string;
+  estado: string;
+}
+
+export interface IClientWalletData {
+  deuda_total: number;
+  descuento_pronto_pago: number;
+  listado_facturas: IClientInvoice[];
+  saldos_a_favor: any[];
+}

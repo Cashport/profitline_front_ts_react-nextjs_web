@@ -1,6 +1,13 @@
+import axios, { AxiosResponse } from "axios";
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { ClientFormType, IClient, ICreateClient, IUpdateClient } from "@/types/clients/IClients";
+import {
+  ClientFormType,
+  IClient,
+  IClientWalletData,
+  ICreateClient,
+  IUpdateClient
+} from "@/types/clients/IClients";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 
 import { SUCCESS } from "@/utils/constants/globalConstants";
@@ -255,6 +262,51 @@ export const editClientDocument = async ({
     console.warn("Error editando documentos cliente: ", error);
     showMessage("error", "Oops, ocurrió un error editando el documento del cliente.");
     alert("error");
+    throw error;
+  }
+};
+
+export const getMobileToken = async (clientUUID: string): Promise<string> => {
+  const body = {
+    clientUUID
+  };
+  try {
+    console.log("entrando uuid", clientUUID);
+    const response: { status: number; message: string; token: string } = await API.post(
+      `${config.API_HOST}/client/create-mobile-token`,
+      body,
+      {
+        headers: {
+          projectId: "165"
+        }
+      }
+    );
+    console.log("saliendo", response);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to get mobile token: ${response.message}`);
+    }
+    return response.token;
+  } catch (error) {
+    console.error("error getting mobile token: ", error);
+    throw error;
+  }
+};
+
+export const getClientWallet = async (token: string): Promise<IClientWalletData> => {
+  try {
+    const response: AxiosResponse<GenericResponse<IClientWalletData>> = await axios.get(
+      `${config.API_HOST}/client/cartera`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    console.log("response client wallet: ", response);
+    return response.data.data;
+  } catch (error) {
+    console.error("error getting client wallet: ", error);
     throw error;
   }
 };

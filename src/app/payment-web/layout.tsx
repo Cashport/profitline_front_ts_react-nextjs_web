@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Header from "@/components/organisms/header";
 import { SideBar } from "@/components/molecules/SideBar/SideBar";
 import PaymentWebPage from "./page";
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 
 export const metadata: Metadata = {
   title: "Pago",
@@ -10,13 +11,9 @@ export const metadata: Metadata = {
 
 const PaymentWebLayout = () => {
   return (
-    <div className="page">
-      <SideBar />
-      <div className="mainContent">
-        <Header title="Pago" />
-        <PaymentWebPage />
-      </div>
-    </div>
+    <ViewWrapper headerTitle="Pago">
+      <PaymentWebPage />
+    </ViewWrapper>
   );
 };
 
