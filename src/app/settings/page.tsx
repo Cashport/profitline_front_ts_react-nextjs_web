@@ -1,9 +1,6 @@
-import { ProjectsView } from "@/components/organisms/projects/ProjectsView/ProjectsView";
-import { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Profitline"
-};
+"use client";
+import { ProjectTable } from "@/components/molecules/tables/ProjectsTable/ProjectsTable";
 
 export default function Home() {
-  return <ProjectsView />;
+  return <ProjectTable />;
 }

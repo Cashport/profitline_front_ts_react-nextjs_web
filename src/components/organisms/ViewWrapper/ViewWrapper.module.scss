@@ -17,3 +17,10 @@
         overflow-y: auto;
     }
 }
+
+// media queries
+@media (max-width: 768px) {
+    .mainWrapper {
+        flex-direction: column;
+    }
+}

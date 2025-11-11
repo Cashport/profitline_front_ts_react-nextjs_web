@@ -4,8 +4,7 @@ import { Tabs, Flex, Skeleton, Typography } from "antd";
 
 import { extractSingleParam } from "@/utils/utils";
 import { useProject } from "@/hooks/useProject";
-
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 
 import "./layoutProjectDetail.scss";
 
@@ -42,8 +41,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <main className="layoutProjectDetail">
-      <SideBar />
+    <ViewWrapper headerTitle="">
       <Flex vertical className="containerTabsAndContent">
         {/* Title Section */}
         <Flex component={"navbar"} align="center" justify="space-between">
@@ -77,6 +75,6 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
         {/* Render the active tab's content */}
         <div className="tabContent">{children}</div>
       </Flex>
-    </main>
+    </ViewWrapper>
   );
 }
