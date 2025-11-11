@@ -1,7 +1,9 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Typography, message } from "antd";
 import { useForm } from "react-hook-form";
+
+import { sendInvitationMarketplace } from "@/services/commerce/commerce";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -20,6 +22,7 @@ interface ISendInviteForm {
 }
 
 export const SendInviteModal = ({ isOpen, onClose }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -30,11 +33,15 @@ export const SendInviteModal = ({ isOpen, onClose }: Props) => {
   });
 
   const onSubmit = async (data: ISendInviteForm) => {
+    setIsLoading(true);
     try {
-      console.log("Email a enviar:", data.email);
+      await sendInvitationMarketplace(data.email);
+      message.success("Invitación enviada correctamente");
       onClose();
     } catch (error) {
       message.error("Error al enviar la invitación");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,7 +84,12 @@ export const SendInviteModal = ({ isOpen, onClose }: Props) => {
         }}
       />
 
-      <PrincipalButton onClick={handleSubmit(onSubmit)} disabled={!isValid} fullWidth>
+      <PrincipalButton
+        onClick={handleSubmit(onSubmit)}
+        disabled={!isValid}
+        fullWidth
+        loading={isLoading}
+      >
         Enviar Código
       </PrincipalButton>
     </Modal>

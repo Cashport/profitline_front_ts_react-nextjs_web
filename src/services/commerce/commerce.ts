@@ -350,3 +350,16 @@ export const registerNewClient = async (guestData: {
     throw new Error("Error al registrar nuevo cliente");
   }
 };
+
+export const sendInvitationMarketplace = async (email: string) => {
+  const body = {
+    email
+  };
+  try {
+    const response: GenericResponse<any> = await API.post(`/marketplace/invite-guest`, body);
+    return response.data;
+  } catch (error) {
+    console.error("Error al enviar invitación:", error);
+    throw new Error("Error al enviar invitación");
+  }
+};
