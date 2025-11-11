@@ -2,6 +2,7 @@ export interface IEcommerceClient {
   client_id: string;
   client_name: string;
   client_email: string;
+  payment_type: number;
 }
 
 export interface IProductData {
@@ -24,6 +25,7 @@ export interface IProduct {
   EAN: string;
   project_id: number;
   price: number;
+  price_taxes: number;
   line_name: string;
   category_name: string;
   shipment_unit: number;
@@ -33,6 +35,7 @@ export interface ISelectedProduct {
   id: number;
   name: string;
   price: number;
+  price_taxes: number;
   discount: number | undefined;
   discount_percentage: number | undefined;
   quantity: number;
@@ -63,6 +66,7 @@ export interface IProductInDetail {
   product_name: string;
   quantity: number;
   price: number;
+  price_taxes: number;
   taxes: number;
   image: string;
   id_category: number;
@@ -146,11 +150,19 @@ export interface ICreateOrderData {
   order_summary: IOrderConfirmedResponse;
 }
 
+export interface ICommerceAddressAndDetails {
+  addresses: ICommerceAdresses[];
+  phone: string;
+}
 export interface ICommerceAdresses {
   address: string;
   city: string;
   email: string;
   id: number;
+}
+export interface ICommerceAddressesData {
+  otherAddresses: ICommerceAdresses[];
+  phone: string;
 }
 
 export interface ISingleOrder {

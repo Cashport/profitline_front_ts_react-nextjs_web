@@ -16,7 +16,7 @@ import {
   Stack,
   ClipboardText
 } from "phosphor-react";
-import { SealPercent, HandTap } from "@phosphor-icons/react";
+import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
 
 import { logOut } from "../../../../firebase-utils";
 import { useAppStore } from "@/lib/store/store";
@@ -263,6 +263,18 @@ export const SideBar = () => {
                 size="large"
                 icon={<Stack size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
                 className={path === "/client-management" ? "buttonIcon" : "buttonIconActive"}
+              >
+                {isSideBarLarge && "Ajustes"}
+              </Button>
+            </Link>
+          )}
+          {true && (
+            <Link href="/chat" passHref legacyBehavior>
+              <Button
+                type="primary"
+                size="large"
+                icon={<ChatCircleDots size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
+                className={path === "/chat" ? "buttonIcon" : "buttonIconActive"}
               >
                 {isSideBarLarge && "Ajustes"}
               </Button>

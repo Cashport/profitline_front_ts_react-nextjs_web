@@ -2,13 +2,12 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@cetaphilUI/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@cetaphilUI/card";
 import { Input } from "@cetaphilUI/input";
 import { Label } from "@cetaphilUI/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cetaphilUI/select";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +16,15 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@cetaphilUI/dialog";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import {
+  RegistrationDialog,
+  type RegistrationFormData
+} from "@/modules/cetaphil/components/registration-dialog";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
+import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
+import { getDocumentTypeId } from "@/constants/documentTypes";
 
 // Static image imports for Next optimization
 import cashportLogo from "@public/images/cetaphil/cashport-logo.png";
@@ -29,14 +34,32 @@ import cetaphilSerumsBanner from "@public/images/cetaphil/cetaphil-serums-banner
 import cetaphilCleanser from "@public/images/cetaphil/cetaphil-cleanser-bottle.jpg";
 import cetaphilMoisturizer from "@public/images/cetaphil/cetaphil-moisturizer-bottle.jpg";
 import cetaphilSunscreen from "@public/images/cetaphil/cetaphil-sunscreen-bottle.jpg";
+import { useSearchParams } from "next/navigation";
+import { useDecodeToken } from "@/hooks/useDecodeToken";
+import { useMessageApi } from "@/context/MessageContext";
+import { sendMailLink } from "@/services/externalAuth/externalAuth";
+import axios from "axios";
+import { useLoginCetaphil } from "@/hooks/useLoginCetaphil";
 
 export default function CetaphilLanding() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const { isLoading: isLoadingLogin } = useLoginCetaphil(token);
+  const decoder = useDecodeToken();
+  const [decodedToken, setDecodedToken] = useState<any>(null);
+  const { showMessage } = useMessageApi();
+
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [loginStep, setLoginStep] = useState<"email" | "otp">("email");
   const [loginEmail, setLoginEmail] = useState("");
+  const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
   const [currentBanner, setCurrentBanner] = useState(0);
-  const banners = [cetaphilBanner, cetaphilSerumsBanner];
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const banners = useMemo(() => [cetaphilBanner, cetaphilSerumsBanner], []);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,23 +68,102 @@ export default function CetaphilLanding() {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  const handleLoginClose = (open: boolean) => {
-    setShowLogin(open);
-    if (!open) {
-      setLoginStep("email");
-      setLoginEmail("");
+  // Actualizar estados según el token
+  useEffect(() => {
+    const decodedToken = decoder(token || "");
+    setDecodedToken(decodedToken);
+    const guestEmail = decodedToken?.claims?.guestEmail || "";
+    if (guestEmail) {
+      if (token && decodedToken?.claims?.mode === "invite") {
+        setShowRegister(true);
+        setLoginEmail(guestEmail);
+      }
+      if (token && decodedToken?.claims?.mode === "login") {
+        setLoginEmail(guestEmail);
+        setShowLogin(true);
+      }
     }
-  };
+  }, []);
 
-  const handleSendOTP = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginStep("otp");
-  };
+  const handleLoginClose = useCallback((open: boolean) => {
+    setShowLogin(open);
+  }, []);
 
-  const handleVerifyOTP = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendMailLinkWithMail = async (loginEmail: string) => {
+    try {
+      setIsLoading(true);
+      await sendMailLink(loginEmail);
+      showMessage(
+        "success",
+        "Enlace de correo enviado exitosamente. Revisa tu bandeja de entrada."
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message;
+        const data = error.response?.data?.data;
+        if (message === "Invalid params" && Array.isArray(data)) {
+          const errorMessages = data.map((item: any) => item.msg).join(", ");
+          showMessage("error", errorMessages);
+        } else {
+          showMessage(
+            "error",
+            (typeof message === "string" && message) || "Error al enviar el enlace de correo"
+          );
+        }
+      }
+    }
     setShowLogin(false);
   };
+
+  const handleSendMailLink = useCallback(
+    async (e: React.FormEvent) => {
+      console.log("Sending mail link to:", loginEmail);
+      e.preventDefault();
+      handleSendMailLinkWithMail(loginEmail);
+    },
+    [loginEmail]
+  );
+
+  const onSubmitRegister = useCallback(
+    async (data: RegistrationFormData) => {
+      try {
+        setIsSubmitting(true);
+        const documentTypeId = getDocumentTypeId(data.documentType);
+
+        if (!documentTypeId) {
+          showMessage("error", "Tipo de documento inválido");
+          return;
+        }
+
+        const payload: AcceptInvitationRequest = {
+          guestData: {
+            document: data.documentNumber,
+            documentType: documentTypeId,
+            email: data.email,
+            name: data.fullName,
+            phoneNumber: data.phone,
+            projectId: decodedToken?.claims?.projectId || 0,
+            uuid: decodedToken?.claims?.uuid || ""
+          },
+          token: token || ""
+        };
+
+        await acceptInvitation(payload);
+        await handleSendMailLinkWithMail(data.email);
+        setShowLogin(false);
+        setShowRegisterSuccess(true);
+
+        setShowRegister(false);
+        setShowLogin(true);
+      } catch (error: any) {
+        console.error("Error:", error);
+        showMessage("error", error.message || "Error al aceptar la invitación");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [token, showMessage, decodedToken]
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,206 +194,110 @@ export default function CetaphilLanding() {
           <div className="flex items-center gap-3 max-[549px]:self-end">
             <Dialog open={showLogin} onOpenChange={handleLoginClose}>
               <DialogTrigger asChild>
-                <Button variant="ghost" className="text-foreground hover:text-primary">
+                <Button
+                  variant="ghost"
+                  className="text-foreground hover:text-primary"
+                  disabled={isLoadingLogin}
+                >
                   Iniciar Sesión
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-card">
                 <DialogHeader className="space-y-2">
                   <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-                    {loginStep === "email" ? (
-                      "Iniciar Sesión"
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setLoginStep("email")}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        Verificar Código
-                      </>
-                    )}
+                    Iniciar Sesión
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    {loginStep === "email"
-                      ? "Ingresa tu email para recibir un código de acceso"
-                      : `Ingresa el código enviado a ${loginEmail}`}
+                    Ingresa tu email para recibir un código de acceso
                   </DialogDescription>
                 </DialogHeader>
 
-                {loginStep === "email" ? (
-                  <form onSubmit={handleSendOTP} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
-                        Email
-                      </Label>
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="tu@email.com"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        required
-                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
-                    >
-                      Enviar Código
-                    </Button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleVerifyOTP} className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="otp-code" className="text-sm font-medium text-foreground">
-                        Código OTP
-                      </Label>
-                      <Input
-                        id="otp-code"
-                        type="text"
-                        placeholder="000000"
-                        maxLength={6}
-                        className="text-center text-2xl tracking-widest font-mono bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground text-center">
-                        Revisa tu correo electrónico
-                      </p>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
-                    >
-                      Verificar e Ingresar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="w-full text-sm text-muted-foreground hover:text-foreground"
-                      onClick={handleSendOTP}
-                    >
-                      ¿No recibiste el código? Reenviar
-                    </Button>
-                  </form>
-                )}
+                <form onSubmit={handleSendMailLink} className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                      Email
+                    </Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#CBE71E] hover:bg-[#CBE71E]/90 text-[#141414] font-medium"
+                    disabled={isLoading}
+                  >
+                    Enviar Código
+                  </Button>
+                </form>
               </DialogContent>
             </Dialog>
-            <Dialog open={showRegister} onOpenChange={setShowRegister}>
-              <DialogTrigger asChild>
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium">
-                  Solicitar Acceso
-                </Button>
-              </DialogTrigger>
+            <Dialog open={showRegisterSuccess} onOpenChange={setShowRegisterSuccess}>
               <DialogContent className="sm:max-w-md bg-card">
                 <DialogHeader className="space-y-2">
-                  <DialogTitle className="text-xl font-semibold text-foreground">
-                    Solicitud de Registro
+                  <DialogTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+                    Revisa tu correo
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    Complete el formulario para acceder al marketplace de distribuidores
+                    Hemos enviado a tu correo un link para acceder al marketplace
                   </DialogDescription>
                 </DialogHeader>
-                <form className="space-y-4 py-4">
+
+                <form
+                  onSubmit={(e: any) => {
+                    e.preventDefault();
+                  }}
+                  className="space-y-4 py-4"
+                >
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="nombre-apellido"
-                      className="text-sm font-medium text-foreground"
-                    >
-                      Nombre y Apellido
+                    <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                      Email
                     </Label>
                     <Input
-                      id="nombre-apellido"
-                      placeholder="Ingresa tu nombre"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="tipo-documento" className="text-sm font-medium text-foreground">
-                      Tipo de documento
-                    </Label>
-                    <Select>
-                      <SelectTrigger
-                        id="tipo-documento"
-                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus:ring-0 focus:ring-offset-0 transition-colors w-full"
-                      >
-                        <SelectValue placeholder="Seleccione su tipo de identificación" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card border-border">
-                        <SelectItem value="cc">Cédula de Ciudadanía</SelectItem>
-                        <SelectItem value="ce">Cédula de Extranjería</SelectItem>
-                        <SelectItem value="nit">NIT</SelectItem>
-                        <SelectItem value="pasaporte">Pasaporte</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="documento" className="text-sm font-medium text-foreground">
-                      N° de identificación
-                    </Label>
-                    <Input
-                      id="documento"
-                      placeholder="Número de identificación"
-                      required
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                      Correo electrónico
-                    </Label>
-                    <Input
-                      id="email"
+                      id="login-email"
                       type="email"
-                      placeholder="Ingresa tu correo"
+                      placeholder="tu@email.com"
+                      value={loginEmail}
                       required
+                      disabled={true}
                       className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="celular" className="text-sm font-medium text-foreground">
-                      Celular
-                    </Label>
-                    <div className="flex gap-2">
-                      <div className="w-16 flex items-center justify-center border border-[#DDDDDD] rounded-md bg-[#F7F7F7] text-sm font-medium text-foreground">
-                        +57
-                      </div>
-                      <Input
-                        id="celular"
-                        type="tel"
-                        placeholder="Ingresa tu celular"
-                        required
-                        className="flex-1 bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      type="submit"
-                      className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 font-medium border-2 border-accent"
-                    >
-                      Crear mi cuenta
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="flex-1 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium"
-                    >
-                      Continuar
-                    </Button>
                   </div>
                 </form>
               </DialogContent>
             </Dialog>
+            <Button
+              onClick={() => setShowRegister(true)}
+              className="bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
+              disabled={isLoadingLogin}
+            >
+              Solicitar Acceso
+            </Button>
+            <RegistrationDialog
+              open={showRegister}
+              onOpenChange={setShowRegister}
+              onSubmit={onSubmitRegister}
+              title="Solicitud de Registro"
+              description="Complete el formulario para acceder al marketplace de distribuidores"
+              submitButtonText="Crear mi cuenta"
+              showReferralEmail={!decodedToken?.claims?.userInvitingEmail ? true : false}
+              showEmail={!decodedToken?.claims?.guestEmail ? true : false}
+              defaultValues={{
+                email: decodedToken?.claims?.guestEmail || "",
+                referralEmail: decodedToken?.claims?.userInvitingEmail || ""
+              }}
+              disabledFields={{
+                email: !!decodedToken?.claims?.guestEmail,
+                referralEmail: !!decodedToken?.claims?.userInvitingEmail
+              }}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
       </header>

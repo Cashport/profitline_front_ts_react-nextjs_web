@@ -4,7 +4,7 @@ import { WarningDiamond, X } from "@phosphor-icons/react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
-import { OrderViewContext } from "../../containers/create-order/create-order";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 import { IDiscountPackageAvailable } from "@/types/commerce/ICommerce";
 

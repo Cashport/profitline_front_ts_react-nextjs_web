@@ -20,8 +20,8 @@ export const sendOtp = async (email: string, token: string): Promise<ISendOtpRes
 
     return response.data;
   } catch (error) {
-    console.warn("error sending otp: ", error);
-    return error as any;
+    console.error("error sending otp: ", error);
+    throw error;
   }
 };
 
@@ -49,7 +49,23 @@ export const validateOtp = async (
 
     return response.data;
   } catch (error) {
-    console.warn("error sending otp: ", error);
-    return error as any;
+    console.error("error validating otp: ", error);
+    throw error;
+  }
+};
+
+export const sendMailLink = async (email: string): Promise<{ message: string }> => {
+  try {
+    const response: AxiosResponse<{ message: string }> = await axios.post(
+      `${config.API_HOST}/email-otp/send-mail`,
+      {
+        email
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("error sending mail link: ", error);
+    throw error;
   }
 };

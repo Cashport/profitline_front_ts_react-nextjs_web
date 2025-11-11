@@ -2,7 +2,6 @@ import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
-import { OrderViewContext } from "../../containers/create-order/create-order";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { Controller, useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import {
   createDraft,
   createOrder,
   createOrderFromDraft,
-  getAdresses
+  getAdresses as getAdressesAndNumber
 } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 import {
@@ -26,6 +25,10 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import InputRadioRightSide from "@/components/ui/input-radio-right-side";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
+import { OrderViewContext } from "../../contexts/orderViewContext";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
+import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 
 interface IShippingInfoForm {
   addresses: {
@@ -67,6 +70,8 @@ const CreateOrderCheckout: FC = ({}) => {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const [isNewAddress, setIsNewAddress] = useState(false);
+  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -107,10 +112,14 @@ const CreateOrderCheckout: FC = ({}) => {
 
   // when mounting
   useEffect(() => {
+    if (!client) return;
     setValue("email", client.email);
     const fetchAdresses = async () => {
-      const response = await getAdresses(client.id);
-      setAddresses(response.data);
+      const response = await getAdressesAndNumber(client.id);
+      setAddresses(response.otherAddresses);
+      if (response.phone) {
+        setValue("phone", response.phone);
+      }
     };
     fetchAdresses();
   }, []);
@@ -122,6 +131,22 @@ const CreateOrderCheckout: FC = ({}) => {
   const handleRadioClick = (value: IDiscountPackageAvailable) => {
     if (selectedDiscount === value) setSelectedDiscount(undefined);
     else setSelectedDiscount(value);
+  };
+
+  const [showWompiModal, setShowWompiModal] = useState(false);
+
+  const handleWompiClose = async (transactionResult?: any) => {
+    setShowWompiModal(false); // cerramos modal
+
+    if (!pendingFormData) return;
+
+    if (transactionResult?.transaction?.status === "APPROVED") {
+      await processOrderCreation(pendingFormData);
+    } else {
+      showMessage("info", "Pago no completado, orden no generada");
+    }
+
+    setPendingFormData(null); // limpiamos después de procesar
   };
 
   const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
@@ -140,6 +165,8 @@ const CreateOrderCheckout: FC = ({}) => {
       order_summary: confirmOrderData
     };
 
+    if (!client) return;
+
     try {
       const response = (await createDraft(
         projectId,
@@ -157,8 +184,15 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
-  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+  // Función helper para procesar la creación de la orden
+  const processOrderCreation = async (data: IShippingInfoForm) => {
     setLoading(true);
+
+    if (!client) {
+      showMessage("error", "Cliente no encontrado");
+      setLoading(false);
+      return;
+    }
 
     const indicative = data.indicative.label.split(" ")[0];
     const createOrderModelData = {
@@ -210,6 +244,34 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
+  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+    if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
+      setPendingFormData(data);
+      setShowWompiModal(true);
+      return;
+    }
+
+    if (CETAPHIL_PROJECT_ID === projectId) {
+      setPendingFormData(data);
+      setIsElectronicBillingModalOpen(true);
+      return;
+    }
+
+    await processOrderCreation(data);
+  };
+
+  const handleElectronicBillingClose = async (cancelClicked?: boolean) => {
+    if (pendingFormData && cancelClicked !== false) {
+      // Usuario hizo click en "Sí" o "No" - proceder con la creación de orden
+      await processOrderCreation(pendingFormData);
+      setIsElectronicBillingModalOpen(false);
+      setPendingFormData(null);
+    } else {
+      // Usuario cerró el modal con X o click fuera - solo cerrar
+      setIsElectronicBillingModalOpen(false);
+    }
+  };
+
   // Preparar opciones del select con "Nueva dirección" al principio
   const addressOptions = [
     NEW_ADDRESS_OPTION,
@@ -246,6 +308,7 @@ const CreateOrderCheckout: FC = ({}) => {
                 placeholder="Seleccione una dirección"
                 options={addressOptions}
                 customStyleContainer={{ gridColumn: "1 / span 2" }}
+                autoSelectFirst={true}
               />
             )}
           />
@@ -300,6 +363,7 @@ const CreateOrderCheckout: FC = ({}) => {
                     field={field}
                     readOnly={false}
                     className={styles.selectIndicative}
+                    isColombia
                   />
                 )}
               />
@@ -386,6 +450,34 @@ const CreateOrderCheckout: FC = ({}) => {
           </PrincipalButton>
         </Flex>
       </div>
+
+      <ModalConfirmAction
+        isOpen={isElectronicBillingModalOpen}
+        onClose={handleElectronicBillingClose}
+        onOk={handleElectronicBillingClose}
+        title="¿Necesita facturación electrónica?"
+        okText="Sí, necesito"
+        cancelText="No"
+        cancelLoading={loading}
+      />
+      {showWompiModal && pendingFormData && (
+        <>
+          <WompiModal
+            visible={showWompiModal}
+            onClose={handleWompiClose}
+            client={{
+              name: client.name,
+              email: pendingFormData.email || client.email,
+              phone: pendingFormData.phone || "",
+              indicative: {
+                value: pendingFormData.indicative?.label || "+57"
+              }
+            }}
+            amountInCents={(confirmOrderData.total || 0) * 100}
+            orderId={draftInfo?.id?.toString() || Date.now().toString()}
+          />
+        </>
+      )}
     </div>
   );
 };

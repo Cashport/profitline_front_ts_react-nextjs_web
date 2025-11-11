@@ -34,7 +34,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       <div className={styles.imageContainer}>
         <Image
           className={styles.imageContainer__img}
-          src={product.image}
+          src={product.image || "/images/watermark.svg"}
           alt="product image"
           width={100}
           height={100}
@@ -61,7 +61,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       <div className={styles.price}>
         {productDiscount ? (
           <Flex vertical gap={4}>
-            <h5 className={styles.oldPrice}>${formatNumber(product.price ?? 0)}</h5>
+            <h5 className={styles.oldPrice}>${formatNumber(product.price_taxes ?? 0)}</h5>
             <Flex gap={8} align="baseline">
               <h5 className={styles.price__amount}>
                 ${formatNumber(productDiscount.subtotal ?? 0)}
@@ -70,7 +70,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
             </Flex>
           </Flex>
         ) : (
-          <h5 className={styles.price}>${formatNumber(product.price ?? 0)}</h5>
+          <h5 className={styles.price}>${formatNumber(product.price_taxes ?? 0)}</h5>
         )}
       </div>
 

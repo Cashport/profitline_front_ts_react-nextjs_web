@@ -1,4 +1,4 @@
-import { Dispatch, FC, createContext, useEffect, useState } from "react";
+import { Dispatch, FC, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
@@ -17,6 +17,7 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -29,6 +30,7 @@ interface IOrderViewContext {
     name: string;
     id: string;
     email: string;
+    payment_type: number;
   };
   setClient: Dispatch<{
     name: string;
@@ -51,8 +53,6 @@ interface IOrderViewContext {
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
 }
-
-export const OrderViewContext = createContext<IOrderViewContext>({} as IOrderViewContext);
 
 export const CreateOrderView: FC = () => {
   const [client, setClient] = useState({} as IOrderViewContext["client"]);
@@ -100,7 +100,8 @@ export const CreateOrderView: FC = () => {
         setClient({
           name: response.data[0].client_name,
           id: response.data[0].client_id,
-          email: ""
+          email: "",
+          payment_type: 1
         });
 
         const selectedCategories = response.data[0].detail.products.map((category) => ({
@@ -110,6 +111,7 @@ export const CreateOrderView: FC = () => {
             id: product.id,
             name: product.product_name,
             price: product.price,
+            price_taxes: product.price_taxes,
             discount: product.discount,
             discount_percentage: product.discount_percentage,
             quantity: product.quantity,
