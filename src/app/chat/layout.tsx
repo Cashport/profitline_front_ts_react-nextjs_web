@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { SocketProvider } from "@/context/ChatContext";
 
 export const metadata: Metadata = {
   title: "Chat",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ViewWrapper headerTitle="">{children}</ViewWrapper>;
+  return (
+    <SocketProvider>
+      <ViewWrapper headerTitle="">{children}</ViewWrapper>
+    </SocketProvider>
+  );
 }
