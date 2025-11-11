@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 
 export const metadata: Metadata = {
   title: "Chat",
@@ -7,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="page">
-      <SideBar />
-      <div className="mainContent">{children}</div>
-    </div>
-  );
+  return <ViewWrapper headerTitle="">{children}</ViewWrapper>;
 }
