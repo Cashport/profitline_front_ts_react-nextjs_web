@@ -4,7 +4,7 @@
     width: 90px;
     height: 100%;
     background-color: $white;
-    border-radius: 1rem;
+    border-radius: 0 1rem 1rem 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -14,66 +14,33 @@
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
 
-    .topNavBar {
+    .logoContainer {
         display: flex;
-        padding: 10px 14px;
-        align-items: center;
-        row-gap: 6px;
-        height: fit-content;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 2rem;
+        border: 1px solid transparent;
+        transition: all 0.3s ease;
+        border-radius: 8px;
 
-        .containerButtons {
-            gap: 6px;
-        }
-        .logoContainer {
-            display: flex;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 2rem;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-
-            &__image {
-                border-radius: inherit;
-                width: 50px;
-                height: 50px;
-                object-fit: scale-down;
-                background-color: $white;
-            }
-
-            &:hover {
-                opacity: 0.9;
-                border: 1px solid $black;
-            }
+        &__image {
+            border-radius: inherit;
+            width: 50px;
+            height: 50px;
+            object-fit: scale-down;
+            background-color: $white;
         }
 
-        .buttonIcon {
-            background-color: $secondary;
-            box-shadow: none;
-            color: black;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
+        &:hover {
+            opacity: 0.9;
+            border: 1px solid $black;
         }
+    }
 
-        .buttonIconActive {
-            background-color: transparent;
-            color: black;
-            box-shadow: none;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-
-        .imageWithoutImage {
-            background-color: $secondary !important;
-        }
+    .buttonMenu,
+    .buttonExit {
+        aspect-ratio: 1 / 1 !important;
+        padding: 12px 6px;
     }
 }
 
@@ -81,7 +48,7 @@
     width: 272px;
     height: 100%;
     background-color: $white;
-    border-radius: 1rem;
+    border-radius: 0 1rem 1rem 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -90,108 +57,68 @@
     padding-top: 5rem;
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
+}
 
-    .containerButtons {
-        display: flex;
-        width: 90%;
-        padding: 10px 14px;
+// Mobile menu wrapper styles
+.mobileMenuWrapper {
+    position: absolute;
+    top: 90%;
+    left: 0;
+    right: 0;
+    background-color: $white;
+    box-shadow: 1px 25px 58px -29px #f0f0f0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    animation: slideInFromTop 250ms ease-out;
+    border-top: 1px solid $light-gray;
+    z-index: 50;
+}
+
+// Animation for mobile menu slide-in
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 1rem 2rem;
         align-items: center;
-        row-gap: 6px;
+        border-radius: 0 0 1rem 1rem;
+        box-shadow: 0px 5px 16px -3px #f0f0f0;
+        position: relative;
+
         .logoContainer {
-            margin-bottom: 2rem;
-        }
-
-        .buttonIcon {
-            background-color: $secondary;
-            box-shadow: none;
-            display: flex;
-            width: 100%;
-            color: black;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
-        }
-
-        .buttonIconActive {
-            width: 100%;
-            background-color: transparent;
-            color: black;
-            box-shadow: none;
-            display: flex;
-            align-items: center;
-
-            &:hover {
-                background-color: $secondary !important;
-                color: black;
-            }
+            margin: 0;
         }
     }
-    .exit {
-        display: flex;
+}
+
+@media (max-height: 1000px) and (max-width: 768px) {
+    .main {
+        max-height: 42px;
+        padding: 6px 16px;
+        align-content: center;
+        .logoContainer {
+            &__image {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        .buttonMenu,
         .buttonExit {
-            display: flex;
-            align-items: center;
-            box-shadow: none;
-            justify-content: center;
-        }
-    }
-}
-
-@media screen and (max-height: 690px) {
-    .main {
-        width: 80px;
-        padding: 2rem 0;
-
-        .topNavBar {
-            gap: 0.125rem;
-            .logoContainer {
-                margin-bottom: 1rem;
-            }
-
-            .buttonIcon {
-                width: fit-content;
-                height: fit-content;
-                padding: 0.25rem 0.375rem;
-            }
-
-            .buttonIconActive {
-                width: fit-content;
-                height: fit-content;
-                padding: 0.25rem 0.375rem;
-            }
-
-            .containerButtons {
-                overflow-y: auto;
-                row-gap: 0.125rem;
-                &::-webkit-scrollbar {
-                    width: 2px;
-                }
-                &::-webkit-scrollbar-thumb {
-                    background-color: rgba(0, 0, 0, 0.2);
-                    border-radius: 3px;
-                }
-            }
-        }
-    }
-}
-
-@media screen and (max-height: 600px) {
-    .main {
-        width: 75px;
-        padding: 0.875rem 0;
-
-        .topNavBar {
-            height: 90%;
-            .logoContainer {
-                margin-bottom: 0.25rem;
-            }
-
-            .containerButtons {
-                max-height: 100%;
-            }
+            padding: 4px 2px;
         }
     }
 }

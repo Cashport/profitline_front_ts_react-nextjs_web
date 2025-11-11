@@ -1,32 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Avatar, Button, Flex } from "antd";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import {
-  ArrowLineRight,
-  BellSimpleRinging,
-  Gear,
-  User,
-  Clipboard,
-  Bank,
-  SquaresFour,
-  Storefront,
-  UsersFour,
-  Stack,
-  ClipboardText
-} from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
+import { ArrowLineRight, Clipboard, List } from "phosphor-react";
 
 import { logOut } from "../../../../firebase-utils";
 import { useAppStore } from "@/lib/store/store";
 import useStore from "@/lib/hook/useStore";
 import { getUserPermissions } from "@/services/permissions/userPermissions";
-import { checkUserViewPermissions } from "@/utils/utils";
 import { setProjectInApi } from "@/utils/api/api";
 
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
+import { ModulesButtons } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
 
 import "./sidebar.scss";
 
@@ -34,11 +21,19 @@ export const SideBar = () => {
   const [isSideBarLarge, setIsSideBarLarge] = useState(false);
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
+  const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
+
   const router = useRouter();
   const path = usePathname();
   const height = useScreenHeight();
-  const STANDARD_LOGO_SIZE = 26;
-  const SMALL_LOGO_SIZE = 23;
+  const width = useScreenWidth();
+
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
+  const MOBILE_BREAKPOINT = 768;
+
+  const isMobile = width <= MOBILE_BREAKPOINT;
 
   const project = useStore(useAppStore, (state) => state.selectedProject);
   const {
@@ -52,6 +47,27 @@ export const SideBar = () => {
   } = useAppStore((state) => state);
 
   const LOGO = project?.LOGO;
+
+  // Click outside handler to close mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        isModuleMenuOpen
+      ) {
+        setIsModuleMenuOpen(false);
+      }
+    };
+
+    if (isMobile && isModuleMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, isModuleMenuOpen]);
 
   useEffect(() => {
     setIsComponentLoading(false);
@@ -108,8 +124,28 @@ export const SideBar = () => {
   }, [isHy]);
 
   return (
-    <div className={isSideBarLarge ? "mainLarge" : "main"}>
-      <Flex vertical className="topNavBar">
+    <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`} ref={mobileMenuRef}>
+      {isMobile && (
+        <Button
+          type="text"
+          icon={<List size={iconSize} />}
+          className="buttonMenu"
+          onClick={() => setIsModuleMenuOpen(!isModuleMenuOpen)}
+        />
+      )}
+
+      {/* Mobile: Show ModulesButtons only when menu is open */}
+      {isMobile && isModuleMenuOpen && (
+        <div className="mobileMenuWrapper">
+          <ModulesButtons
+            isSideBarLarge={isSideBarLarge}
+            path={path}
+            project={project}
+            isMobileMenu={true}
+          />
+        </div>
+      )}
+      <Flex vertical align="center">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
           {LOGO ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -123,176 +159,27 @@ export const SideBar = () => {
           )}
         </button>
 
-        <Flex vertical className="containerButtons">
-          <Link href="/dashboard" passHref legacyBehavior>
-            <Button
-              type="primary"
-              size="large"
-              icon={<SquaresFour size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-              className={path.startsWith("/dashboard") ? "buttonIcon" : "buttonIconActive"}
-            >
-              {isSideBarLarge && "Dashboard"}
-            </Button>
-          </Link>
-
-          {checkUserViewPermissions(project, "Clientes") && (
-            <Link href="/clientes/all">
-              <Button
-                type="primary"
-                size="large"
-                icon={<User size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path.startsWith("/clientes") ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Clientes"}
-              </Button>
-            </Link>
-          )}
-          {checkUserViewPermissions(project, "Descuentos") && (
-            <Link href="/descuentos" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<SealPercent size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path.startsWith("/descuentos") ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Descuentos"}
-              </Button>
-            </Link>
-          )}
-          {checkUserViewPermissions(project, "Notificaciones") && (
-            <Link href="/notificaciones" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={
-                  <BellSimpleRinging size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />
-                }
-                className={path.startsWith("/notificaciones") ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Notificaciones"}
-              </Button>
-            </Link>
-          )}
-
-          {checkUserViewPermissions(project, "Marketplace") && (
-            <Link href="/comercio" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<Storefront size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path.startsWith("/comercio") ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Descuentos"}
-              </Button>
-            </Link>
-          )}
-
-          {checkUserViewPermissions(project, "Bancos") && (
-            <Link href="/banco" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<Bank size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path === "/banco" ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Bancos"}
-              </Button>
-            </Link>
-          )}
-
-          {checkUserViewPermissions(project, "Configuracion") && (
-            <Link href="/settings" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<Gear size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={
-                  path === "/settings" || path.startsWith("/proyectos/review")
-                    ? "buttonIcon"
-                    : "buttonIconActive"
-                }
-              >
-                {isSideBarLarge && "Ajustes"}
-              </Button>
-            </Link>
-          )}
-          {checkUserViewPermissions(project, "Proveedores") && (
-            <Link href="/proveedores" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<UsersFour size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={
-                  path === "/proveedores" || path.startsWith("/proveedores")
-                    ? "buttonIcon"
-                    : "buttonIconActive"
-                }
-              >
-                {isSideBarLarge && "Ajustes"}
-              </Button>
-            </Link>
-          )}
-          {checkUserViewPermissions(project, "GestorTareas") && (
-            <Link href="/gestor-tareas" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<ClipboardText size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path === "/gestor-tareas" ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Gestor de tareas"}
-              </Button>
-            </Link>
-          )}
-          {path === "/applyModule" && (
-            <Link href="/applyModule" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<HandTap size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path === "/applyModule" ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Apply Module"}
-              </Button>
-            </Link>
-          )}
-          {checkUserViewPermissions(project, "AdministracionClientes") && (
-            <Link href="/client-management" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<Stack size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path === "/client-management" ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Ajustes"}
-              </Button>
-            </Link>
-          )}
-          {true && (
-            <Link href="/chat" passHref legacyBehavior>
-              <Button
-                type="primary"
-                size="large"
-                icon={<ChatCircleDots size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
-                className={path === "/chat" ? "buttonIcon" : "buttonIconActive"}
-              >
-                {isSideBarLarge && "Ajustes"}
-              </Button>
-            </Link>
-          )}
-        </Flex>
+        {!isMobile && (
+          <ModulesButtons
+            isSideBarLarge={isSideBarLarge}
+            path={path}
+            project={project}
+            isMobileMenu={false}
+          />
+        )}
       </Flex>
+
       <Flex className="exit">
         <Button
           type="text"
-          size="large"
           onClick={() => logOut(router)}
-          icon={<ArrowLineRight size={height < 600 ? SMALL_LOGO_SIZE : STANDARD_LOGO_SIZE} />}
+          icon={<ArrowLineRight size={iconSize} />}
           className="buttonExit"
         >
           {isSideBarLarge && "Salir"}
         </Button>
       </Flex>
+
       <ModalProjectSelector
         isOpen={modalProjectSelectorOpen}
         onClose={() => setModalProjectSelectorOpen(false)}

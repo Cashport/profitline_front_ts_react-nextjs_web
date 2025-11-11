@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import Header from "@/components/organisms/header";
+import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 
 export const metadata: Metadata = {
   title: "Bancos",
@@ -8,13 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="page">
-      <SideBar />
-      <div className="mainContent">
-        <Header title="Bancos" />
-        {children}
-      </div>
-    </div>
-  );
+  return <ViewWrapper headerTitle="Bancos">{children}</ViewWrapper>;
 }
