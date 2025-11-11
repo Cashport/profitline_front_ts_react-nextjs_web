@@ -1,6 +1,6 @@
 import { FC, Key, useState, useMemo } from "react";
 import Link from "next/link";
-import { Button, Flex, Spin } from "antd";
+import { Button, Flex, message, Spin } from "antd";
 import { DotsThree } from "@phosphor-icons/react";
 
 import { deleteOrders } from "@/services/commerce/commerce";
@@ -87,11 +87,7 @@ export const OrdersView: FC = () => {
   };
 
   const handleIsGenerateActionOpen = () => {
-    if (selectedRows && selectedRows?.length > 0) {
-      setIsGenerateActionModalOpen(!isGenerateActionModalOpen);
-      return;
-    }
-    showMessage("error", "Selecciona al menos un pedido");
+    setIsGenerateActionModalOpen(!isGenerateActionModalOpen);
   };
 
   return (
@@ -162,6 +158,7 @@ export const OrdersView: FC = () => {
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}
         handleDeleteRows={() => {
+          if (selectedRows?.length === 0) return message.error("No hay órdenes seleccionadas");
           setIsGenerateActionModalOpen(false);
           setIsOpenModalRemove(true);
         }}

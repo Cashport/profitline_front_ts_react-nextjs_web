@@ -1,7 +1,7 @@
 "use client";
 import { Dispatch, Key, SetStateAction, useState } from "react";
-import { Flex, Modal, Typography } from "antd";
-import { DownloadSimple, NewspaperClipping, Trash } from "@phosphor-icons/react";
+import { Flex, message, Modal, Typography } from "antd";
+import { DownloadSimple, EnvelopeSimple, NewspaperClipping, Trash } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
@@ -43,7 +43,16 @@ export const OrdersGenerateActionModal = ({
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const validateOrdersSelected = (): boolean => {
+    if (ordersId.length === 0) {
+      message.error("No hay órdenes seleccionadas");
+      return false;
+    }
+    return true;
+  };
+
   const handleChangeOrderState = async () => {
+    if (!validateOrdersSelected()) return;
     try {
       await changeOrderState(ordersId, showMessage);
       setFetchMutate();
@@ -56,6 +65,7 @@ export const OrdersGenerateActionModal = ({
   };
 
   const handleDownloadCSV = async () => {
+    if (!validateOrdersSelected()) return;
     try {
       const res = await dowloadOrderCSV(ordersId, projectId);
       if (!res || !res.data) {
@@ -80,6 +90,7 @@ export const OrdersGenerateActionModal = ({
   };
 
   const handleDownloadCsvPartial = async (createBackorder: boolean) => {
+    if (!validateOrdersSelected()) return;
     try {
       const res = await downloadPartialOrderCSV(ordersId[0], createBackorder);
       createAndDownloadTxt(res.txtContent);
@@ -116,6 +127,8 @@ export const OrdersGenerateActionModal = ({
       }
     });
   };
+
+  const handleSendInvite = () => {};
 
   return (
     <>
@@ -155,6 +168,11 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDeleteRows}
             icon={<Trash size={16} />}
             title="Eliminar"
+          />
+          <ButtonGenerateAction
+            onClick={handleSendInvite}
+            icon={<EnvelopeSimple size={16} />}
+            title="Enviar invitación"
           />
         </Flex>
       </Modal>
