@@ -204,7 +204,7 @@ export const ModulesButtons = ({
       )}
 
       {/* Chat */}
-      {true && (
+      {checkUserViewPermissions(project, "Whatsapp") && (
         <Link href="/chat" passHref legacyBehavior>
           <Button
             type="primary"
