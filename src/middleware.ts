@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST?.slice(0, -4) ?? "";
   const apin8nHost = env.API_APPLY_TAB_AI?.slice(0, -45) ?? "";
   const apin8nHost2 = env.API_APPLY_TAB_AI_DEMO?.slice(0, -45) ?? "";
+  const apiChatHost = env.API_CHAT?.slice(0, -4) ?? "";
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const cspHeader = `
     default-src 'self';
@@ -13,7 +14,7 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} https://checkout.wompi.co;
+    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apiChatHost} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
     object-src 'none';
     frame-ancestors 'self';
