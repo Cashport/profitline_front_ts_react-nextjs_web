@@ -14,7 +14,7 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { sendMessage } from "@/services/chat/chat";
+import { getWhatsAppTemplates, sendMessage } from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
-import { IMessage, IMessageSocket } from "@/types/chat/IChat";
+import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
@@ -82,6 +82,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
   const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom, isConnected } =
     useSocket();
@@ -158,6 +159,17 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (channel === "whatsapp") {
+      getWhatsAppTemplates()
+        .then((res) => {
+          console.log("Templates cargadas:", res);
+          setWaTemplates(res);
+        })
+        .catch((err) => console.error("Error cargando plantillas:", err));
+    }
+  }, [channel]);
 
   async function sendWhatsapp() {
     const text = message.trim();
@@ -314,6 +326,19 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     });
   }
 
+  function formatWhatsAppText(text: string): string {
+    if (!text) return "";
+
+    return text
+      .replace(/_\*(.*?)\*_/g, "<b><i>$1</i></b>")
+      .replace(/\*(.*?)\*/g, "<b>$1</b>")
+      .replace(/_(.*?)_/g, "<i>$1</i>")
+      .replace(/~(.*?)~/g, "<s>$1</s>")
+      .replace(/```(.*?)```/g, "<code>$1</code>")
+      .replace(/`(.*?)`/g, "<code>$1</code>")
+      .replace(/\n/g, "<br/>");
+  }
+
   function renderBubble(m: IMessage) {
     const mine = m.direction === "OUTBOUND";
     const status = m.status;
@@ -347,6 +372,64 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (m.type === "TEMPLATE") {
+      let parsedData: any = null;
+      try {
+        parsedData =
+          typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
+      } catch {
+        parsedData = null;
+      }
+
+      const template = waTemplates.find((t) => t.name === m.templateName);
+      if (!template) {
+        return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
+      }
+
+      const templateComponents = JSON.parse(template.components || "[]");
+      const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
+      const buttonComponent = templateComponents.find(
+        (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
+      );
+
+      // Renderizamos los parámetros reales del mensaje
+      const bodyParams =
+        parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
+      let bodyText = bodyComponent?.text || "";
+
+      bodyParams.forEach((p: any, i: number) => {
+        bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
+      });
+
+      const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
+        ?.parameters?.[0]?.text;
+      const buttonText = buttonParam || null;
+
+      return (
+        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+            <div
+              className="text-sm text-[#141414] whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+            />
+
+            {buttonText && (
+              <a
+                href={`http://cashport.ai/mobile?token=https://develop-cartera.vercel.app/mobile?token=${encodeURIComponent(
+                  buttonText
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+              >
+                Ver detalle
+              </a>
+            )}
           </div>
         </div>
       );
@@ -665,6 +748,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         open={templateOpen}
         onOpenChange={setTemplateOpen}
         channel={channel}
+        ticketId={conversation.id}
         onUse={(payload) => {
           if (payload.channel === "email") {
             setSubject((prev) => (prev ? prev : payload.subject));

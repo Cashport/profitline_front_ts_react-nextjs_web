@@ -310,3 +310,17 @@ export const getClientWallet = async (token: string): Promise<IClientWalletData>
     throw error;
   }
 };
+
+export const getPayloadByTicket = async (ticketId: string): Promise<any> => {
+  try {
+    const response = await API.get(`${config.API_HOST}/client/get-payload-by-ticket`, {
+      params: { ticketId }
+    });
+    const data = response?.data?.data || response?.data || response;
+
+    return data;
+  } catch (error) {
+    console.warn("error getting payload by ticket: ", error);
+    return null;
+  }
+};
