@@ -7,6 +7,9 @@ import { useMessageApi } from "@/context/MessageContext";
 
 export function useLoginCetaphil(urlToken: string | null) {
   const [isLoading, setIsLoading] = useState(true);
+  const [registerMode, setRegisterMode] = useState<"complete-invitation" | "autoinvite">(
+    "autoinvite"
+  );
   const { showMessage } = useMessageApi();
   const localStorageToken =
     typeof window !== "undefined" ? localStorage.getItem(STORAGE_TOKEN) : null;
@@ -14,6 +17,11 @@ export function useLoginCetaphil(urlToken: string | null) {
   const pathname = usePathname();
   const decoder = useDecodeToken();
   useEffect(() => {
+    if (!urlToken) {
+      setRegisterMode("autoinvite");
+    } else {
+      setRegisterMode("complete-invitation");
+    }
     if (!urlToken && !localStorageToken && pathname !== "/cetaphil") {
       router.push("/cetaphil");
     }
@@ -70,5 +78,5 @@ export function useLoginCetaphil(urlToken: string | null) {
     }
   }, []);
 
-  return { isLoading };
+  return { isLoading, registerMode };
 }

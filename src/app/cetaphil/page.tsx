@@ -23,7 +23,12 @@ import {
 } from "@/modules/cetaphil/components/registration-dialog";
 
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
-import { acceptInvitation, AcceptInvitationRequest } from "@/services/cetaphil/acceptInvitation";
+import {
+  acceptInvitation,
+  AcceptInvitationRequest,
+  autoinviteGuest,
+  AutoinviteRequest
+} from "@/services/cetaphil/acceptInvitation";
 import { getDocumentTypeId } from "@/constants/documentTypes";
 
 // Static image imports for Next optimization
@@ -44,7 +49,7 @@ import { useLoginCetaphil } from "@/hooks/useLoginCetaphil";
 export default function CetaphilLanding() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const { isLoading: isLoadingLogin } = useLoginCetaphil(token);
+  const { isLoading: isLoadingLogin, registerMode } = useLoginCetaphil(token);
   const decoder = useDecodeToken();
   const [decodedToken, setDecodedToken] = useState<any>(null);
   const { showMessage } = useMessageApi();
@@ -165,6 +170,54 @@ export default function CetaphilLanding() {
     [token, showMessage, decodedToken]
   );
 
+  const onSubmitRegisterAutoinvite = useCallback(
+    async (data: RegistrationFormData) => {
+      try {
+        if (data.referralEmail === data.email) {
+          showMessage("error", "El email de referencia no puede ser igual al email de registro");
+          return;
+        }
+        if (!data.referralEmail) {
+          showMessage("error", "El email de referencia es obligatorio");
+          return;
+        }
+        setIsSubmitting(true);
+        const documentTypeId = getDocumentTypeId(data.documentType);
+
+        if (!documentTypeId) {
+          showMessage("error", "Tipo de documento inválido");
+          return;
+        }
+
+        const payload: AutoinviteRequest = {
+          guestData: {
+            document: data.documentNumber,
+            documentType: documentTypeId,
+            email: data.email,
+            name: data.fullName,
+            phoneNumber: data.phone,
+            projectId: decodedToken?.claims?.projectId || 0,
+            uuid: decodedToken?.claims?.uuid || "",
+            referralEmail: data.referralEmail
+          }
+        };
+
+        await autoinviteGuest(payload);
+        setShowLogin(false);
+        setShowRegisterSuccess(true);
+
+        setShowRegister(false);
+        setShowLogin(true);
+      } catch (error: any) {
+        console.error("Error:", error);
+        showMessage("error", error.message || "Error al aceptar la invitación");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [token, showMessage, decodedToken]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -245,31 +298,35 @@ export default function CetaphilLanding() {
                     Revisa tu correo
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
-                    Hemos enviado a tu correo un link para acceder al marketplace
+                    {registerMode === "autoinvite"
+                      ? "Muchas gracias por enviar tu solicitud. Pronto nos pondremos en contacto contigo."
+                      : `Hemos enviado a tu correo un link para acceder al marketplace`}
                   </DialogDescription>
                 </DialogHeader>
 
-                <form
-                  onSubmit={(e: any) => {
-                    e.preventDefault();
-                  }}
-                  className="space-y-4 py-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
-                      Email
-                    </Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="tu@email.com"
-                      value={loginEmail}
-                      required
-                      disabled={true}
-                      className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
-                    />
-                  </div>
-                </form>
+                {registerMode === "complete-invitation" && (
+                  <form
+                    onSubmit={(e: any) => {
+                      e.preventDefault();
+                    }}
+                    className="space-y-4 py-4"
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                        Email
+                      </Label>
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="tu@email.com"
+                        value={loginEmail}
+                        required
+                        disabled={true}
+                        className="bg-white border-[#DDDDDD] focus:border-[#141414] focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors"
+                      />
+                    </div>
+                  </form>
+                )}
               </DialogContent>
             </Dialog>
             <Button
@@ -282,7 +339,9 @@ export default function CetaphilLanding() {
             <RegistrationDialog
               open={showRegister}
               onOpenChange={setShowRegister}
-              onSubmit={onSubmitRegister}
+              onSubmit={
+                registerMode === "autoinvite" ? onSubmitRegisterAutoinvite : onSubmitRegister
+              }
               title="Solicitud de Registro"
               description="Complete el formulario para acceder al marketplace de distribuidores"
               submitButtonText="Crear mi cuenta"
