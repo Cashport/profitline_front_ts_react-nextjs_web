@@ -53,7 +53,7 @@ function ticketToConversation(ticket: ITicket): Conversation {
     id: ticket.id,
     customer: ticket.customer.name,
     customerId: ticket.customer.id,
-    client_name: ticket.clientName,
+    client_name: ticket.customer.name,
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",

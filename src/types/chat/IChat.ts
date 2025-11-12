@@ -1,6 +1,7 @@
 export interface ITicketCustomer {
   id: string;
   name: string;
+  clientName: string;
   phoneNumber: string;
 }
 
