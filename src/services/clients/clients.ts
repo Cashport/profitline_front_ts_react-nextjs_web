@@ -314,7 +314,10 @@ export const getClientWallet = async (token: string): Promise<IClientWalletData>
 export const getPayloadByTicket = async (ticketId: string): Promise<any> => {
   try {
     const response = await API.get(`${config.API_HOST}/client/get-payload-by-ticket`, {
-      params: { ticketId }
+      params: { 
+        ticketId,
+        templateId: 'estado_de_cuenta',
+      },
     });
     const data = response?.data?.data || response?.data || response;
 
