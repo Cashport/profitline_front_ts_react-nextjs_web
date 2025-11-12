@@ -18,7 +18,7 @@ export interface ITicket {
   id: string;
   projectId: number;
   customerId: string;
-  client_name: string;
+  clientName: string;
   assignedTo: string | null;
   status: string;
   priority: string;
