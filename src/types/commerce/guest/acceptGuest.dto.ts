@@ -7,3 +7,8 @@ export interface AcceptGuestDataDto {
   phoneNumber: string;
   uuid: string;
 }
+
+
+export interface AutoinviteGuestDataDto extends AcceptGuestDataDto {
+  referralEmail: string;
+}

@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import {
+  CAPTCHA_SITE_KEY,
   FIREBASE_API_KEY,
   FIREBASE_APP_ID,
   FIREBASE_AUTH_DOMAIN,
@@ -14,6 +15,7 @@ import "firebase/functions";
 import "firebase/firestore";
 import { IUserPermissions } from "@/types/userPermissions/IUserPermissions";
 import zlib from "react-zlib-js";
+import { initializeAppCheck, ReCaptchaV3Provider, getToken, AppCheck } from "firebase/app-check";
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 // Your web app's Firebase configuration
@@ -38,6 +40,11 @@ export async function customGetAuth(token: string) {
   customToken.user.getIdTokenResult();
   return customToken;
 }
+
+export const getTokenAppCheck = async (appCheck: AppCheck) => {
+  const appCheckToken = await getToken(appCheck, false);
+  return appCheckToken.token;
+};
 
 interface Claims extends ParsedToken {
   permissions: IUserPermissions["data"];
