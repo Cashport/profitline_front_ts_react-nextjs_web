@@ -167,6 +167,7 @@ export interface ICommerceAddressesData {
 
 export interface ISingleOrder {
   id: number;
+  operation_number: number;
   client_id: string;
   project_id: number;
   city: string;
@@ -216,6 +217,7 @@ export interface IOrder {
   order_status: string;
   rgb: string;
   id: number;
+  operation_number: number;
   order_date: string;
   city: string;
   contacto: string;

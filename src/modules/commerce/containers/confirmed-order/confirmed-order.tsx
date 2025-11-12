@@ -61,7 +61,7 @@ export const ConfirmedOrderView: FC = () => {
           <div className={styles.confirmedOrderView}>
             <div className={styles.confirmedOrderView__content}>
               <div className={styles.confirmedOrderView__content__header}>
-                <p>Pedido #{order?.id}</p>
+                <p>Pedido #{order?.operation_number}</p>
                 <div className={styles.title}>
                   <h2>Tu pedido ha sido solicitado</h2>
                   <CheckCircle className={styles.check} size={90} weight="fill" />

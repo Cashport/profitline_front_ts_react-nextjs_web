@@ -113,10 +113,10 @@ const OrdersViewTable = ({
       key: "id",
       render: (invoiceId, row) => (
         <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
-          {invoiceId}
+          {row.operation_number}
         </Text>
       ),
-      sorter: (a, b) => a.id - b.id,
+      sorter: (a, b) => a.operation_number - b.operation_number,
       showSorterTooltip: false
     },
     {
