@@ -1,7 +1,7 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IChatData, ITicket } from "@/types/chat/IChat";
+import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 
 export const getTickets = async (): Promise<ITicket[]> => {
   try {
@@ -47,6 +47,30 @@ export const sendMessage = async (customerId: string, message: string): Promise<
     });
   } catch (error) {
     console.error("Error sending message:", error);
+    throw error;
+  }
+};
+
+export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
+  try {
+    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get(
+      "/whatsapp-templates",
+      { baseURL: config.API_CHAT
+      });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching WhatsApp templates:", error);
+    throw error;
+  }
+};
+
+export const sendWhatsAppTemplate = async (payload: any): Promise<void> => {
+  try {
+    await API.post("/whatsapp-templates/send", payload, {
+      baseURL: config.API_CHAT
+    });
+  } catch (error) {
+    console.error("Error sending WhatsApp template:", error);
     throw error;
   }
 };

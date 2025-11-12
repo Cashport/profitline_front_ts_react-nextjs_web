@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/modules/chat/ui/tabs";
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
+import { getWhatsAppTemplates, sendWhatsAppTemplate } from "@/services/chat/chat";
+import { IWhatsAppTemplate } from "@/types/chat/IChat";
+import { getPayloadByTicket } from "@/services/clients/clients";
 
-type WhatsAppTemplate = { id: string; name: string; content: string };
 type EmailTemplate = { id: string; name: string; subject: string; body: string };
 
 type Payload =
@@ -20,22 +22,8 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   channel: "whatsapp" | "email";
   onUse: (p: Payload) => void;
+  ticketId: string;
 };
-
-const waTemplates: WhatsAppTemplate[] = [
-  {
-    id: "t1",
-    name: "Recordatorio suave",
-    content:
-      "Hola {nombre}, notamos {dias_atraso} días de atraso. Tu saldo es {monto}. Puedes ponerte al día aquí: {link_pago}"
-  },
-  {
-    id: "t2",
-    name: "Compromiso de pago",
-    content:
-      "Hola {nombre}, confirmamos tu compromiso de pago para {fecha_pago}. Responde SI para confirmar."
-  }
-];
 
 const emailTemplates: EmailTemplate[] = [
   {
@@ -52,7 +40,8 @@ const emailTemplates: EmailTemplate[] = [
   }
 ];
 
-export default function TemplateDialog({ open, onOpenChange, channel, onUse }: Props) {
+export default function TemplateDialog({ open, onOpenChange, channel, onUse, ticketId }: Props) {
+  const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
@@ -61,12 +50,22 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse }: P
   const canCreateEmail =
     name.trim().length > 2 && subject.trim().length > 0 && body.trim().length > 0;
 
+  // Cargar plantillas dinámicas de WhatsApp
+  useEffect(() => {
+    if (channel === "whatsapp") {
+      getWhatsAppTemplates()
+        .then(setWaTemplates)
+        .catch((err) => console.error("Error cargando plantillas:", err));
+    }
+  }, [channel]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Plantillas de {channel === "whatsapp" ? "WhatsApp" : "Correo"}</DialogTitle>
         </DialogHeader>
+
         <Tabs defaultValue="usar" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
             <TabsTrigger value="usar">Usar</TabsTrigger>
@@ -76,33 +75,52 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse }: P
           <TabsContent value="usar" className="space-y-4 pt-4">
             {channel === "whatsapp" ? (
               <div className="space-y-3">
-                {waTemplates.map((tpl) => (
-                  <div
-                    key={tpl.id}
-                    className="w-full rounded-lg border p-4"
-                    style={{ borderColor: "#DDDDDD" }}
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="font-medium">{tpl.name}</div>
-                      <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
-                        Texto
-                      </Badge>
+                {waTemplates.map((tpl) => {
+                  // Tomamos solo el componente BODY para mostrar en preview
+                  const components = JSON.parse(tpl.components);
+                  const bodyComponent = components.find((c: any) => c.type === "BODY");
+                  return (
+                    <div
+                      key={tpl.id}
+                      className="w-full rounded-lg border p-4"
+                      style={{ borderColor: "#DDDDDD" }}
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="font-medium">{tpl.name}</div>
+                        <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
+                          Texto
+                        </Badge>
+                      </div>
+                      <pre className="whitespace-pre-wrap text-sm text-[#606060]">
+                        {bodyComponent?.text}
+                      </pre>
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          className="text-[#141414]"
+                          style={{ backgroundColor: "#CBE71E" }}
+                          onClick={async () => {
+                            try {
+                              console.log("ticketid", ticketId);
+                              const payload = await getPayloadByTicket(ticketId);
+                              console.log("Payload generado:", payload);
+
+                              if (!payload) {
+                                return;
+                              }
+
+                              await sendWhatsAppTemplate(payload);
+                              onOpenChange(false);
+                            } catch (error) {
+                              console.error("Error al enviar la plantilla:", error);
+                            }
+                          }}
+                        >
+                          Enviar
+                        </Button>
+                      </div>
                     </div>
-                    <pre className="whitespace-pre-wrap text-sm text-[#606060]">{tpl.content}</pre>
-                    <div className="mt-3 flex justify-end">
-                      <Button
-                        className="text-[#141414]"
-                        style={{ backgroundColor: "#CBE71E" }}
-                        onClick={() => {
-                          onUse({ channel: "whatsapp", content: tpl.content });
-                          onOpenChange(false);
-                        }}
-                      >
-                        Insertar
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="space-y-3">
@@ -140,10 +158,6 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse }: P
                 ))}
               </div>
             )}
-            <div className="text-xs text-muted-foreground">
-              Variables soportadas: {"{nombre}"}, {"{dias_atraso}"}, {"{monto}"}, {"{link_pago}"},{" "}
-              {"{fecha_pago}"}, {"{fecha_vencimiento}"}, {"{periodo}"}
-            </div>
           </TabsContent>
 
           <TabsContent value="crear" className="space-y-3 pt-4">

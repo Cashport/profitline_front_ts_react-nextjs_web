@@ -35,11 +35,13 @@ export interface ITicket {
 export interface IMessage {
   id: string;
   content: string;
-  type: "TEXT" | "MEDIA" | string;
+  type: "TEXT" | "MEDIA" | "TEMPLATE" | string;
   direction: "INBOUND" | "OUTBOUND";
   status: "DELIVERED" | "SENT" | "FAILED" | "READ";
   timestamp: string;
   mediaUrl: string | null;
+  templateName?: string;
+  templateData?: any;
 }
 
 interface IPagination {
@@ -107,4 +109,17 @@ export interface IMessageSocket {
 export interface IChatData {
   messages: IMessage[];
   pagination: IPagination;
+}
+
+export interface IWhatsAppTemplate {
+  id: string;
+  projectId: number;
+  name: string;
+  category: string;
+  language: string;
+  status: string;
+  components: string;
+  metadata: any;
+  createdAt: string;
+  updatedAt: string;
 }
