@@ -53,6 +53,7 @@ function ticketToConversation(ticket: ITicket): Conversation {
     id: ticket.id,
     customer: ticket.customer.name,
     customerId: ticket.customer.id,
+    client_name: ticket.client_name,
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",
@@ -243,12 +244,13 @@ export default function ChatInbox() {
                       <div className="min-w-0 flex-1">
                         <div className="flex w-full items-baseline gap-2">
                           <p className="min-w-0 flex-1 truncate text-sm font-semibold">
-                            {c.customer}
+                            {c.client_name}
                           </p>
                           <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                             {formatRelativeTime(c.updatedAt)}
                           </span>
                         </div>
+                        <p className="text-[11px] font-normal">{c.customer}</p>
                         <p className="truncate text-sm text-muted-foreground">{c.lastMessage}</p>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <Badge
