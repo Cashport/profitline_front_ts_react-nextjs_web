@@ -447,7 +447,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
             {buttonText && (
               <a
-                href={`http://cashport.ai/mobile?token=https://develop-cartera.vercel.app/mobile?token=${encodeURIComponent(
+                href={`http://cashport.ai/mobile?token=${encodeURIComponent(
                   buttonText
                 )}`}
                 target="_blank"
