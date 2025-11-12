@@ -349,7 +349,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
-    if (m.type === "MEDIA" && m.mediaUrl) {
+    if (m.type === "IMAGE" && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
@@ -366,6 +366,33 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                 />
                 <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
                   <ArrowsOut className="h-4 w-4" />
+                </div>
+              </button>
+            </div>
+            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+              {formatRelativeTime(m.timestamp)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (m.type === "DOCUMENT" && m.mediaUrl) {
+      return (
+        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+          <div className={wrapper}>
+            <div className={bubble + " p-3"}>
+              <button
+                onClick={() => window.open(m.mediaUrl!, "_blank")}
+                className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
+                aria-label="Abrir documento"
+              >
+                <div className="rounded-lg bg-[#F7F7F7] p-3">
+                  <FileArrowDown className="h-6 w-6 text-[#141414]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
+                  <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
                 </div>
               </button>
             </div>
