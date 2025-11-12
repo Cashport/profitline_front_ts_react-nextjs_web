@@ -1,6 +1,6 @@
 import { FC, Key, useState, useMemo } from "react";
 import Link from "next/link";
-import { Button, Flex, Spin } from "antd";
+import { Button, Flex, message, Spin } from "antd";
 import { DotsThree } from "@phosphor-icons/react";
 
 import { deleteOrders } from "@/services/commerce/commerce";
@@ -8,6 +8,7 @@ import { useMessageApi } from "@/context/MessageContext";
 
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { useDebounce } from "@/hooks/useSearch";
+import { useOrders } from "../../hooks/orders-view/useOrders";
 
 import UiSearchInput from "@/components/ui/search-input";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -20,17 +21,18 @@ import {
   FilterMarketplaceOrders,
   IMarketplaceOrderFilters
 } from "@/components/atoms/Filters/FilterMarketplaceOrders/FilterMarketplaceOrders";
+import { SendInviteModal } from "../../components/send-invite-modal/send-invite-modal";
 
 import { IOrder } from "@/types/commerce/ICommerce";
 
 import styles from "./orders-view.module.scss";
-import { useOrders } from "../../hooks/orders-view/useOrders";
 
 export const OrdersView: FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isOpenModalRemove, setIsOpenModalRemove] = useState<boolean>(false);
   const [isGenerateActionModalOpen, setIsGenerateActionModalOpen] = useState<boolean>(false);
+  const [isSendInviteModalOpen, setIsSendInviteModalOpen] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<IOrder[] | undefined>([]);
   const [selectedFilters, setSelectedFilters] = useState<IMarketplaceOrderFilters>({
@@ -87,11 +89,7 @@ export const OrdersView: FC = () => {
   };
 
   const handleIsGenerateActionOpen = () => {
-    if (selectedRows && selectedRows?.length > 0) {
-      setIsGenerateActionModalOpen(!isGenerateActionModalOpen);
-      return;
-    }
-    showMessage("error", "Selecciona al menos un pedido");
+    setIsGenerateActionModalOpen(!isGenerateActionModalOpen);
   };
 
   return (
@@ -162,9 +160,18 @@ export const OrdersView: FC = () => {
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}
         handleDeleteRows={() => {
+          if (selectedRows?.length === 0) return message.error("No hay órdenes seleccionadas");
           setIsGenerateActionModalOpen(false);
           setIsOpenModalRemove(true);
         }}
+        handleSendInvite={() => {
+          setIsGenerateActionModalOpen(false);
+          setIsSendInviteModalOpen(true);
+        }}
+      />
+      <SendInviteModal
+        isOpen={isSendInviteModalOpen}
+        onClose={() => setIsSendInviteModalOpen(false)}
       />
     </div>
   );
