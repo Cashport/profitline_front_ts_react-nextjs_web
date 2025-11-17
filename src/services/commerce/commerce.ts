@@ -363,3 +363,15 @@ export const sendInvitationMarketplace = async (email: string) => {
     throw new Error("Error al enviar invitación");
   }
 };
+
+export const getMarketplaceConfig = async () => {
+  try {
+    const response: GenericResponse<{ id: number; name: string; value: string }[]> = await API.get(
+      `/marketplace/marketplace-config`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener la configuración del marketplace:", error);
+    throw new Error("Error al obtener la configuración del marketplace");
+  }
+};
