@@ -15,6 +15,7 @@ import { registerNewClient } from "@/services/commerce/commerce";
 import { getDocumentTypeId } from "@/constants/documentTypes";
 
 import styles from "./create-order-search-client.module.scss";
+import { useAppStore } from "@/lib/store/store";
 
 export interface selectClientForm {
   client: {
@@ -29,6 +30,7 @@ const CreateOrderSearchClient: FC = ({}) => {
   const { setClient } = useContext(OrderViewContext);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const { config } = useAppStore((state) => ({ config: state.config }));
 
   const {
     control,
@@ -37,7 +39,12 @@ const CreateOrderSearchClient: FC = ({}) => {
   } = useForm<selectClientForm>({});
 
   const handleCreateOrder = (data: selectClientForm) => {
-    setClient({ name: data.client.label, id: data.client.value, email: data.client.email, payment_type: data.client.payment_type });
+    setClient({
+      name: data.client.label,
+      id: data.client.value,
+      email: data.client.email,
+      payment_type: data.client.payment_type
+    });
   };
 
   const handleClickNewClient = () => {
@@ -85,7 +92,9 @@ const CreateOrderSearchClient: FC = ({}) => {
       <Flex className={styles.FlexContainer} vertical gap={"1.5rem"}>
         <Flex justify="space-between" align="center" className={styles.FlexContainer__header}>
           <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
-          <PrincipalButton onClick={handleClickNewClient}>Nuevo cliente</PrincipalButton>
+          {config.create_client_btn && (
+            <PrincipalButton onClick={handleClickNewClient}>Nuevo cliente</PrincipalButton>
+          )}
         </Flex>
         <Controller
           name="client"

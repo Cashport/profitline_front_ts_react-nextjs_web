@@ -11,6 +11,7 @@ import SimpleTag from "@/components/atoms/SimpleTag/SimpleTag";
 import { ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-cart-item.module.scss";
+import { useAppStore } from "@/lib/store/store";
 interface IproductDiscount {
   discountPercentage: number;
   subtotal: number;
@@ -28,6 +29,10 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
     handleIncrementQuantity,
     handleChangeQuantity
   } = useHandleProductsItems(product, categoryName);
+  const { config } = useAppStore((state) => ({ config: state.config }));
+
+  // Determinar el precio a mostrar según la configuración de IVA
+  const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
   return (
     <div className={styles.cartItemCard}>
@@ -61,7 +66,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       <div className={styles.price}>
         {productDiscount ? (
           <Flex vertical gap={4}>
-            <h5 className={styles.oldPrice}>${formatNumber(product.price_taxes ?? 0)}</h5>
+            <h5 className={styles.oldPrice}>${formatNumber(price ?? 0)}</h5>
             <Flex gap={8} align="baseline">
               <h5 className={styles.price__amount}>
                 ${formatNumber(productDiscount.subtotal ?? 0)}
@@ -70,7 +75,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
             </Flex>
           </Flex>
         ) : (
-          <h5 className={styles.price}>${formatNumber(product.price_taxes ?? 0)}</h5>
+          <h5 className={styles.price}>${formatNumber(price ?? 0)}</h5>
         )}
       </div>
 

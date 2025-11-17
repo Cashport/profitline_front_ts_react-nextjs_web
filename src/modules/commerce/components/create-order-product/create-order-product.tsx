@@ -21,7 +21,10 @@ export interface CreateOrderProductProps {
 }
 
 const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName }) => {
-  const formatMoney = useAppStore((state) => state.formatMoney);
+  const { formatMoney, config } = useAppStore((state) => ({
+    formatMoney: state.formatMoney,
+    config: state.config
+  }));
   const {
     alreadySelectedProduct,
     handleAddToCart,
@@ -29,6 +32,8 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
     handleIncrementQuantity,
     handleChangeQuantity
   } = useHandleProductsItems(product, categoryName);
+
+  const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
   return (
     <div className={styles.productCard}>
@@ -56,7 +61,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
       <div className={styles.price}>
         {product.discount ? (
           <>
-            <h5 className={styles.oldPrice}>{formatMoney(product.price_taxes)}</h5>
+            <h5 className={styles.oldPrice}>{formatMoney(price)}</h5>
             <Flex gap={4}>
               <h5 className={styles.price__amount}>{formatMoney(product.discount)}</h5>
               <p className={styles.discountPercentage}>-%{product.discount_percentage}</p>
@@ -64,7 +69,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           </>
         ) : (
           <Flex gap={"0.5rem"} align="baseline">
-            <h5 className={styles.price__amount}>{formatMoney(product.price_taxes)}</h5>
+            <h5 className={styles.price__amount}>{formatMoney(price)}</h5>
             {product.shipment_unit > 1 && (alreadySelectedProduct?.quantity ?? 0) > 0 && (
               <span className={styles.units}>
                 {product.shipment_unit * (alreadySelectedProduct?.quantity ?? 0)} und

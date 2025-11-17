@@ -16,6 +16,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { ISelectType } from "@/types/clients/IClients";
 
 import styles from "./create-order-cart.module.scss";
+import { config } from "process";
 export interface selectClientForm {
   client: ISelectType;
 }
@@ -23,8 +24,11 @@ export interface selectClientForm {
 const { Text } = Typography;
 
 const CreateOrderCart: FC = ({}) => {
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const formatMoney = useAppStore((state) => state.formatMoney);
+  const { formatMoney, config, projectId } = useAppStore((state) => ({
+    formatMoney: state.formatMoney,
+    config: state.config,
+    projectId: state.selectedProject.ID
+  }));
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
@@ -193,11 +197,14 @@ const CreateOrderCart: FC = ({}) => {
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
+                const subtotal = config?.include_iva
+                  ? productDiscount?.primary?.new_price_taxes || productDiscount?.primary?.new_price
+                  : productDiscount?.primary?.new_price;
                 const productDiscountData =
                   productDiscount && productDiscount.subtotalDiscount > 0
                     ? {
                         discountPercentage: productDiscount.primary?.discount_applied?.discount,
-                        subtotal: (productDiscount.primary?.new_price_taxes || productDiscount.primary?.new_price)
+                        subtotal
                       }
                     : undefined;
                 return (
