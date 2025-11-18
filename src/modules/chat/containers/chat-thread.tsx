@@ -92,7 +92,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     if (!conversation.id || !isConnected) return;
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg: IMessageSocket) => {
-      console.info("New socket message received in ChatThread:", msg);
       // Transform socket message to IMessage format
       const newMessage: IMessage = {
         id: msg.id,

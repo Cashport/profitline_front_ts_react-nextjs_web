@@ -15,7 +15,7 @@ import { IMessageSocket } from "@/types/chat/IChat";
 
 // Types
 interface SocketConfig {
-  customerId: string;
+  userId: string;
 }
 
 interface SocketContextType {
@@ -36,6 +36,8 @@ interface SocketContextType {
   subscribeToMessages: (callback: (message: IMessageSocket) => void) => () => void;
   // eslint-disable-next-line no-unused-vars
   subscribeToTickets: (callback: (ticket: any) => void) => () => void;
+  // eslint-disable-next-line no-unused-vars
+  subscribeToTicketUpdates: (callback: (ticket: any) => void) => () => void;
   // eslint-disable-next-line no-unused-vars
   desubscribeTicketRoom: (ticketRoomId: string) => void;
 }
@@ -73,6 +75,8 @@ class SocketManager {
   private messageCallbacks = new Set<(message: IMessageSocket) => void>();
   // eslint-disable-next-line no-unused-vars
   private ticketCallbacks = new Set<(ticket: any) => void>();
+  // eslint-disable-next-line no-unused-vars
+  private ticketUpdateCallbacks = new Set<(ticket: any) => void>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
@@ -112,16 +116,22 @@ class SocketManager {
       console.info("Connected to chat socket server");
       this.reconnectAttempts = 0; // Reset counter on successful connection
 
-      this.socket?.emit("join-user-room", config.customerId);
+      this.socket?.emit("join-user-room", config.userId);
     });
 
     // Eventos de mensajes - usar callbacks optimizados
     this.socket.on("new-message", (data: IMessageSocket) => {
+      console.info("new-message event received:", data);
       this.messageCallbacks.forEach((callback) => callback(data));
     });
 
     this.socket.on("new-ticket", (data: any) => {
       this.ticketCallbacks.forEach((callback) => callback(data));
+    });
+
+    this.socket.on("ticket-updated", (data: any) => {
+      console.log("ticket-updated event received:", data);
+      this.ticketUpdateCallbacks.forEach((callback) => callback(data));
     });
 
     // Manejar errores de reconexión
@@ -140,6 +150,12 @@ class SocketManager {
   subscribeToTickets(callback: (ticket: any) => void): () => void {
     this.ticketCallbacks.add(callback);
     return () => this.ticketCallbacks.delete(callback);
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  subscribeToTicketUpdates(callback: (ticket: any) => void): () => void {
+    this.ticketUpdateCallbacks.add(callback);
+    return () => this.ticketUpdateCallbacks.delete(callback);
   }
 
   desubscribeToTicketRoom(ticketRoomId: string) {
@@ -166,6 +182,7 @@ class SocketManager {
     // Limpiar callbacks
     this.messageCallbacks.clear();
     this.ticketCallbacks.clear();
+    this.ticketUpdateCallbacks.clear();
   }
 
   getSocket(): Socket | null {
@@ -255,6 +272,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return socketManager.current?.subscribeToTickets(callback) ?? (() => {});
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
+  const subscribeToTicketUpdates = useCallback((callback: (ticket: any) => void) => {
+    return socketManager.current?.subscribeToTicketUpdates(callback) ?? (() => {});
+  }, []);
+
   const desubscribeTicketRoom = useCallback((ticketRoomId: string) => {
     return socketManager.current?.desubscribeToTicketRoom(ticketRoomId);
   }, []);
@@ -278,6 +300,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       connectTicketRoom,
       subscribeToMessages,
       subscribeToTickets,
+      subscribeToTicketUpdates,
       desubscribeTicketRoom
     }),
     [
@@ -289,6 +312,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       connectTicketRoom,
       subscribeToMessages,
       subscribeToTickets,
+      subscribeToTicketUpdates,
       desubscribeTicketRoom
     ]
   );

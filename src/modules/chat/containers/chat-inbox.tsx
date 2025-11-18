@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
+
+import { getTickets } from "@/services/chat/chat";
+import { auth } from "../../../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useSocket } from "@/context/ChatContext";
+import { cn } from "@/utils/utils";
+
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
@@ -9,17 +17,13 @@ import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { cn } from "@/utils/utils";
 import { type Conversation, formatRelativeTime } from "@/modules/chat/lib/mock-data";
-import { ITicket } from "@/types/chat/IChat";
 import ChatThread from "./chat-thread";
 import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
-import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
-import { getTickets } from "@/services/chat/chat";
 
+import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
-import { useSocket } from "@/context/ChatContext";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -80,15 +84,27 @@ export default function ChatInbox() {
   const [ticketsData, setTicketsData] = useState<ITicket[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { connect } = useSocket();
+  const { connect, subscribeToTicketUpdates, isConnected } = useSocket();
 
   useEffect(() => {
-    if (activeId) {
-      connect({
-        customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
-      });
-    }
-  }, [activeId]);
+    // Esperamos a que Firebase Auth termine de inicializar
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed, user:", user);
+      if (activeId && user?.uid) {
+        connect({
+          userId: user.uid
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [activeId, connect]);
+
+  useEffect(() => {
+    if (!isConnected) return;
+    return subscribeToTicketUpdates((data) => {
+      console.log("Ticket update received in ChatInbox:", data);
+    });
+  }, [isConnected, subscribeToTicketUpdates]);
 
   useEffect(() => {
     const fetchTickets = async () => {
