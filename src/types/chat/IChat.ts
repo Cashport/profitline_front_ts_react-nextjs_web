@@ -27,11 +27,13 @@ export interface ITicket {
   tags: string | null;
   metadata: any | null;
   closedAt: string | null;
+  lastMessageAt: string | null;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
   agent: ITicketAgent | null;
   _count: ITicketCount;
+  lastMessage: IMessage | null;
 }
 
 export interface IMessage {

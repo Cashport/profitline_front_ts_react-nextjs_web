@@ -61,8 +61,7 @@ function ticketToConversation(ticket: ITicket): Conversation {
     segment: "",
     status: ticket.status === "OPEN" ? "Abierto" : "Cerrado",
     overdueDays: calculateOverdueDays(ticket.createdAt),
-    // TODO: Replace with actual last message content when available
-    lastMessage: ticket.subject,
+    lastMessage: ticket.lastMessage?.content || "",
     updatedAt: ticket.updatedAt,
     tags: ticket.tags ? [ticket.tags] : [],
     metrics: { totalVencido: 0, ultimoPago: "" },
