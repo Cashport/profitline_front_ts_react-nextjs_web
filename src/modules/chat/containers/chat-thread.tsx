@@ -92,6 +92,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     if (!conversation.id || !isConnected) return;
     connectTicketRoom(conversation.id);
     subscribeToMessages((msg: IMessageSocket) => {
+      console.info("New socket message received in ChatThread:", msg);
       // Transform socket message to IMessage format
       const newMessage: IMessage = {
         id: msg.id,
@@ -451,9 +452,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
             {buttonText && (
               <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(
-                  buttonText
-                )}`}
+                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
@@ -532,7 +531,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       </div>
 
       {/* History */}
-      <ScrollArea className="flex-1 min-h-0" ref={viewportRef}>
+      <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
         <div className="space-y-6 px-4 py-6">
           {ticketMessages.map((m) => (
             <div key={m.id}>{renderBubble(m)}</div>
