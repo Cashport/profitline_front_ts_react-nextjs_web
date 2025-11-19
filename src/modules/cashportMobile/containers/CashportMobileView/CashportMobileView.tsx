@@ -7,7 +7,7 @@ import type { TabsProps } from "antd";
 import { signInWithCustomToken } from "@firebase/auth";
 import { auth } from "../../../../../firebase";
 
-import { getClientWallet, getMobileToken } from "@/services/clients/clients";
+import { getClientWallet } from "@/services/clients/clients";
 
 import TotalDebtCard from "../../components/TotalDebtCard/TotalDebtCard";
 import PendingInvoicesTab from "../tabs/PendingInvoicesTab/PendingInvoicesTab";
@@ -107,70 +107,27 @@ const CashportMobileView: React.FC = () => {
     }
   };
 
-  const pendingInvoices: Invoice[] = [
-    {
-      id: "1",
-      code: "VT-22214",
-      date: "Jun 3, 2025",
-      amount: 288000,
-      formattedAmount: "288.000",
-      isPastDue: true
-    },
-    {
-      id: "2",
-      code: "VT-222766",
-      date: "Jun 3, 2025",
-      amount: 14900690,
-      formattedAmount: "14.900.690",
-      originalAmount: 16556323,
-      formattedOriginalAmount: "16.556.323"
-    },
-    {
-      id: "3",
-      code: "VT-223045",
-      date: "Jun 3, 2025",
-      amount: 14078700,
-      formattedAmount: "14.078.700",
-      originalAmount: 15643000,
-      formattedOriginalAmount: "15.643.000"
-    }
-  ];
-
-  const creditBalances = [
-    {
-      id: "1",
-      description: "Devolución de producto",
-      date: "Jun 3, 2025",
-      formattedAmount: "1.000.000"
-    },
-    {
-      id: "2",
-      description: "Producto dañado",
-      date: "Jun 1, 2025",
-      formattedAmount: "500.000"
-    }
-  ];
-
   const tabItems: TabsProps["items"] = [
     {
       key: "pending",
       label: "Facturas pendientes",
       children: (
         <PendingInvoicesTab
-          pendingInvoices={data ? mapPendingInvoices(data.listado_facturas) : pendingInvoices}
-          creditBalances={data ? mapCreditBalances(data.saldos_a_favor) : creditBalances}
+          pendingInvoices={data ? mapPendingInvoices(data.listado_facturas) : []}
+          creditBalances={data ? mapCreditBalances(data.saldos_a_favor) : []}
         />
       )
     },
     {
       key: "my-payments",
       label: "Mis pagos",
-      children: <MyPaymentsTab availablePayments={creditBalances} />
+      children: (
+        <MyPaymentsTab availablePayments={data ? mapCreditBalances(data.saldos_a_favor) : []} />
+      )
     }
   ];
 
   const handlePay = () => {
-    console.log("Initiating payment...");
     // a push to host/mobile/confirmPayment
     router.push("/mobile/confirmPayment");
   };

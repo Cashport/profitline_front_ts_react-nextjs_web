@@ -46,7 +46,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
 
       <Flex align="center" justify="space-between">
         <Text className="TotalDebtCard__label-400">
-          Pronto pago <span className="TotalDebtCard__label-note">(Faltan 2 días)</span>
+          Pronto pago <span className="TotalDebtCard__label-note">(Faltan - días)</span>
         </Text>
 
         <Title level={5} className="TotalDebtCard__ready-amount">
