@@ -10,7 +10,9 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SocketProvider>
-      <ViewWrapper headerTitle="">{children}</ViewWrapper>
+      <ViewWrapper headerTitle="" gapTitle="0">
+        {children}
+      </ViewWrapper>
     </SocketProvider>
   );
 }

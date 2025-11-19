@@ -89,7 +89,6 @@ export default function ChatInbox() {
   useEffect(() => {
     // Esperamos a que Firebase Auth termine de inicializar
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("Auth state changed, user:", user);
       if (activeId && user?.uid) {
         connect({
           userId: user.uid
