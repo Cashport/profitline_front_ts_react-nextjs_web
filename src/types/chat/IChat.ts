@@ -127,3 +127,23 @@ export interface IWhatsAppTemplate {
   createdAt: string;
   updatedAt: string;
 }
+
+// Extended interfaces for socket events with additional fields
+interface ICustomerSocketExtended extends ICustomerSocket {
+  customerCashportUUID: string | null;
+}
+
+interface ITicketSocketExtended extends ITicketSocket {
+  lastMessageAt: string | null;
+}
+
+interface IMessageSocketExtended extends Omit<IMessageSocket, "customer" | "ticket"> {
+  customer: ICustomerSocketExtended;
+  ticket: ITicketSocketExtended;
+}
+
+export interface ITicketUpdate {
+  ticketId: string;
+  message: IMessageSocketExtended;
+  customer: ICustomerSocketExtended;
+}
