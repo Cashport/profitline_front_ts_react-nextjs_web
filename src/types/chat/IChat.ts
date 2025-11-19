@@ -27,7 +27,7 @@ export interface ITicket {
   tags: string | null;
   metadata: any | null;
   closedAt: string | null;
-  lastMessageAt: string | null;
+  lastMessageAt: string;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
