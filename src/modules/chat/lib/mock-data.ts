@@ -40,6 +40,8 @@ export type Conversation = {
   metrics: { totalVencido: number; ultimoPago: string }; // totalVencido in COP
   timeline: TimelineItem[];
   messages: Message[];
+  hasUnreadUpdate?: boolean;
+  lastMessageAt: string;
 };
 
 export function formatRelativeTime(iso: string) {

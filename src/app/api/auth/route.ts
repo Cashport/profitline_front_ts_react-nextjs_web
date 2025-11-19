@@ -18,7 +18,6 @@ export async function POST() {
     const idToken = authorization.split("Bearer ")[1];
     const decodedToken = await auth().verifyIdToken(idToken);
     const permissions = await getPermissions(idToken);
-    console.log(permissions);
     let extraPermissions: {
       guestName?: string;
       guestId?: string;

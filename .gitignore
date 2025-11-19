@@ -40,3 +40,4 @@ next-env.d.ts
 CLAUDE.md
 .claude
 .env.staging
+.env.production

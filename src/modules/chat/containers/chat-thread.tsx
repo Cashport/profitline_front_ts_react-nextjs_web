@@ -359,11 +359,15 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                 className="group relative block overflow-hidden rounded-lg"
                 aria-label="Ver imagen"
               >
-                <Image
-                  src={m.mediaUrl || "/placeholder.svg"}
-                  alt="Imagen enviada"
-                  className="max-h-72 rounded-lg object-cover"
-                />
+                <div className="relative w-full max-h-72 aspect-video">
+                  <Image
+                    src={m.mediaUrl || "/placeholder.svg"}
+                    alt="Imagen enviada"
+                    fill
+                    unoptimized
+                    className="rounded-lg object-cover"
+                  />
+                </div>
                 <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
                   <ArrowsOut className="h-4 w-4" />
                 </div>
@@ -447,9 +451,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
             {buttonText && (
               <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(
-                  buttonText
-                )}`}
+                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
@@ -528,7 +530,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       </div>
 
       {/* History */}
-      <ScrollArea className="flex-1 min-h-0" ref={viewportRef}>
+      <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
         <div className="space-y-6 px-4 py-6">
           {ticketMessages.map((m) => (
             <div key={m.id}>{renderBubble(m)}</div>
@@ -662,17 +664,19 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                     {emailImages.map((img, idx) => (
                       <div
                         key={idx}
-                        className="relative overflow-hidden rounded-md border"
+                        className="relative overflow-hidden rounded-md border h-20"
                         style={{ borderColor: "#DDDDDD" }}
                       >
                         <Image
                           src={img.url || "/placeholder.svg"}
                           alt={"Adjunto " + img.name}
-                          className="h-20 w-full object-cover"
+                          fill
+                          unoptimized
+                          className="object-cover"
                         />
                         <button
                           onClick={() => removeEmailImage(idx)}
-                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white z-10"
                           aria-label={"Quitar imagen " + img.name}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -790,11 +794,15 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       <Dialog open={!!previewImage} onOpenChange={(o) => !o && setPreviewImage(null)}>
         <DialogContent className="max-w-3xl">
           {previewImage && (
-            <Image
-              src={previewImage || "/placeholder.svg"}
-              alt="Vista previa"
-              className="max-h-[70dvh] w-auto rounded-xl object-contain"
-            />
+            <div className="relative w-full h-[70dvh]">
+              <Image
+                src={previewImage || "/placeholder.svg"}
+                alt="Vista previa"
+                fill
+                unoptimized
+                className="rounded-xl object-contain"
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
