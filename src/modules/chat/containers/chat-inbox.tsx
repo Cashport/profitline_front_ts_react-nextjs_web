@@ -101,14 +101,15 @@ export default function ChatInbox() {
     return () => unsubscribe();
   }, [activeId, connect]);
 
+  // Use effect to subscribe to ticket updates and update ticketsData accordingly
   useEffect(() => {
     if (!isConnected) return;
     return subscribeToTicketUpdates((data) => {
       console.log("Ticket update received in ChatInbox:", data);
 
-      // Actualizar el ticket correspondiente
       setTicketsData((prevTickets) => {
-        return prevTickets.map((ticket) => {
+        // Actualizar el ticket correspondiente
+        const updatedTickets = prevTickets.map((ticket) => {
           if (ticket.id === data.ticketId) {
             return {
               ...ticket,
@@ -123,6 +124,11 @@ export default function ChatInbox() {
           }
           return ticket;
         });
+
+        // Ordenar por lastMessageAt descendente (más reciente primero)
+        return updatedTickets.sort(
+          (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+        );
       });
 
       // Si el ticket actualizado NO es el activo, marcarlo como no leído
