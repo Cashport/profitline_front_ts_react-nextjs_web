@@ -113,11 +113,11 @@ export default function useCreateDiscountView({ params }: Props) {
   const handleUpdateDiscount = async (e: DiscountSchema) => {
     setLoading(true);
     try {
-      const { data } = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
+      const res = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
       messageApi.success("Descuento actualizado exitosamente");
-      setDefaultDiscount(mapDiscountGetOneToDiscountSchema(data));
+      setDefaultDiscount(mapDiscountGetOneToDiscountSchema(res));
       setStatusForm("review");
-      form.reset(mapDiscountGetOneToDiscountSchema(data));
+      form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
       messageApi.error(e.response.data.message);
       console.error(e);

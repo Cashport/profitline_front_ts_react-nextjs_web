@@ -112,18 +112,14 @@ export const createDiscount = async (
   body = form;
 
   const token = await getIdToken();
-  const response = await API.post(
-    `/discount`,
-    body,
-    {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-        "projectid": idProject
-      }
+  const response = (await API.post(`/discount`, body, {
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+      projectid: idProject
     }
-  ) as GenericResponse<DiscountCreateResponse>;
+  })) as GenericResponse<DiscountCreateResponse>;
   return response.data;
 };
 
@@ -151,18 +147,14 @@ export const updateDiscount = async (
   body = form;
 
   const token = await getIdToken();
-  const response = await API.put<GenericResponse<DiscountGetOne>>(
-    `/discount/${discountId}`,
-    body,
-    {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-        "projectid": idProject
-      }
+  const response: GenericResponse<DiscountGetOne> = await API.put(`/discount/${discountId}`, body, {
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+      projectid: idProject
     }
-  );
+  });
   return response.data;
 };
 
