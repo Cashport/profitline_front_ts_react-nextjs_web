@@ -37,7 +37,7 @@ export const ModalConfirmAction = ({
       okText={okText}
       cancelButtonProps={{
         className: "cancelButton",
-        onClick: onCancel,
+        onClick: onCancel ? onCancel : onClose,
         loading: cancelLoading
       }}
       cancelText={cancelText}
