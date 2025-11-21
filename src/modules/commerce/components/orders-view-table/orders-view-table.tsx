@@ -224,7 +224,9 @@ const OrdersViewTable = ({
       title: "Total pronto pago",
       key: "total_pronto_pago",
       dataIndex: "total_pronto_pago",
-      render: (amount) => <Text className="cell">{formatMoney(amount)}</Text>,
+      render: (amount) => (
+        <p className="cell fontMonoSpace">{formatMoney(amount, { hideDecimals: true })}</p>
+      ),
       sorter: (a, b) => a.total_pronto_pago - b.total_pronto_pago,
       showSorterTooltip: false,
       align: "right"
@@ -233,9 +235,12 @@ const OrdersViewTable = ({
       title: "Total",
       key: "total",
       dataIndex: "total",
-      render: (amount) => <Text className="cell">{formatMoney(amount)}</Text>,
+      render: (amount) => (
+        <p className="cell fontMonoSpace bold">{formatMoney(amount, { hideDecimals: true })}</p>
+      ),
       sorter: (a, b) => a.total - b.total,
-      showSorterTooltip: false
+      showSorterTooltip: false,
+      align: "right"
     },
     {
       title: "",

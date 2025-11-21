@@ -1,16 +1,33 @@
 "use client";
-import { ConfigProvider } from "antd";
-import theme from "@/theme/themeConfig";
-import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { Poppins } from "next/font/google";
-import localFont from "next/font/local"; // Import localFont from next/font/local
-import { ModalProvider } from "@/context/ModalContext";
-import "../styles/globals.scss";
 import { useEffect, useState } from "react";
-import Loader from "@/components/atoms/loaders/loader";
-
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ConfigProvider } from "antd";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { MessageProvider } from "@/context/MessageContext";
+import { Poppins } from "next/font/google";
+import { ModalProvider } from "@/context/ModalContext";
+import localFont from "next/font/local"; // Import localFont from next/font/local
+
+import Loader from "@/components/atoms/loaders/loader";
+import theme from "@/theme/themeConfig";
+
+// Dayjs global configuration
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import localeData from "dayjs/plugin/localeData";
+import weekday from "dayjs/plugin/weekday";
+import weekOfYear from "dayjs/plugin/weekOfYear";
+import weekYear from "dayjs/plugin/weekYear";
+
+dayjs.extend(customParseFormat);
+dayjs.extend(advancedFormat);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
+dayjs.extend(weekYear);
+
+import "../styles/globals.scss";
 
 const queryClient = new QueryClient();
 

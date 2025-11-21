@@ -104,25 +104,30 @@ export default function useCreateDiscountView({ params }: Props) {
       messageApi.success("Descuento creado exitosamente");
       router.push(`/descuentos/regla/${res.idDiscount}`);
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      const errorMessage = e.response?.data?.message || e.message || "Error al crear el descuento";
+      messageApi.error(errorMessage);
       console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleUpdateDiscount = async (e: DiscountSchema) => {
     setLoading(true);
     try {
-      const { data } = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
+      const res = await updateDiscount({ ...e, project_id: ID }, discountId as number, files);
       messageApi.success("Descuento actualizado exitosamente");
-      setDefaultDiscount(mapDiscountGetOneToDiscountSchema(data));
+      setDefaultDiscount(mapDiscountGetOneToDiscountSchema(res));
       setStatusForm("review");
-      form.reset(mapDiscountGetOneToDiscountSchema(data));
+      form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      const errorMessage =
+        e.response?.data?.message || e.message || "Error al actualizar el descuento";
+      messageApi.error(errorMessage);
       console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleExecCallback = form.handleSubmit(
