@@ -30,7 +30,6 @@ export const ModalConfirmAction = ({
   return (
     <Modal
       className="ModalConfirmAction"
-      // width={"50%"}
       open={isOpen}
       onCancel={onClose}
       okButtonProps={{ className: "acceptButton", loading: okLoading }}

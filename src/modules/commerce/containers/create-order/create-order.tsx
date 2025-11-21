@@ -173,13 +173,15 @@ export const CreateOrderView: FC = () => {
       <div className={styles.ordersView}>
         <Flex align="center" justify="space-between">
           <h2 className={styles.title}>Crear orden</h2>
-          <Button className={styles.cartButton} onClick={toggleCart}>
-            <Flex vertical align="center" className={styles.cartButton__cart}>
-              <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
-              <ShoppingCartSimple size={32} />
-            </Flex>
-            Carrito
-          </Button>
+          {!client?.name ? null : (
+            <Button className={styles.cartButton} onClick={toggleCart}>
+              <Flex vertical align="center" className={styles.cartButton__cart}>
+                <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
+                <ShoppingCartSimple size={32} />
+              </Flex>
+              Carrito
+            </Button>
+          )}
         </Flex>
         {!client?.name ? (
           <SearchClient />
