@@ -16,4 +16,32 @@
         gap: 1.5rem;
         height: 100%;
     }
+
+    .cartButton {
+        background-color: $black;
+        color: $white;
+        height: 55px !important;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+
+        &:hover {
+            background-color: $black !important;
+            color: $white !important;
+            opacity: 0.9;
+        }
+
+        &__cart {
+            position: relative;
+            margin-top: 0.375rem;
+        }
+
+        &__itemsNum {
+            position: absolute;
+            top: -13px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: $secondary;
+        }
+    }
 }

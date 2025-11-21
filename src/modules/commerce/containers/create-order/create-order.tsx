@@ -1,7 +1,11 @@
 import { Dispatch, FC, useEffect, useState } from "react";
+import { Button, Flex } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+import { ShoppingCartSimple } from "@phosphor-icons/react";
+
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
@@ -17,7 +21,7 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
-import { OrderViewContext } from "../../contexts/orderViewContext";
+import { number } from "yup";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -135,6 +139,10 @@ export const CreateOrderView: FC = () => {
     };
   }, []);
 
+  const numberOfItems = selectedCategories.reduce((total, category) => {
+    return total + category.products.reduce((catTotal, product) => catTotal + product.quantity, 0);
+  }, 0);
+
   return (
     <OrderViewContext.Provider
       value={{
@@ -158,7 +166,16 @@ export const CreateOrderView: FC = () => {
       }}
     >
       <div className={styles.ordersView}>
-        <h2 className={styles.title}>Crear orden</h2>
+        <Flex align="center" justify="space-between">
+          <h2 className={styles.title}>Crear orden</h2>
+          <Button className={styles.cartButton}>
+            <Flex vertical align="center" className={styles.cartButton__cart}>
+              <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
+              <ShoppingCartSimple size={32} />
+            </Flex>
+            Carrito
+          </Button>
+        </Flex>
         {!client?.name ? (
           <SearchClient />
         ) : (
