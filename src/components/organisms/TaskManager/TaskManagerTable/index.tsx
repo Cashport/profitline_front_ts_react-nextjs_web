@@ -11,7 +11,8 @@ import {
   CalendarOutlined,
   CreditCardOutlined,
   FileTextOutlined,
-  FileDoneOutlined
+  FileDoneOutlined,
+  UnlockOutlined
 } from "@ant-design/icons";
 
 import { useAppStore } from "@/lib/store/store";
@@ -102,6 +103,17 @@ const TaskTable: React.FC<{
           onClick: handleOpenBalanceLegalization
         }
       ];
+    }
+
+    if (row.task_type === "Desbloqueo") {
+      baseItems.push({
+        key: "Desbloquear pedido",
+        icon: <UnlockOutlined  size={12} />,
+        label: "Desbloquear pedido",
+        onClick: () => {
+          openModal("novelty", { noveltyId: row.incident_id });
+        }
+      });
     }
 
     return baseItems;
