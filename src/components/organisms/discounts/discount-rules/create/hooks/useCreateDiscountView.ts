@@ -119,10 +119,12 @@ export default function useCreateDiscountView({ params }: Props) {
       setStatusForm("review");
       form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      const errorMessage = e.response?.data?.message || e.message || "Error al actualizar el descuento";
+      messageApi.error(errorMessage);
       console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleExecCallback = form.handleSubmit(
