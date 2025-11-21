@@ -63,7 +63,6 @@ export default function AnnualDiscountDefinition({
     watch
   } = form;
   const formNow = watch();
-  console.log("form", formNow);
 
   const { fields, append, remove } = useFieldArray({
     control,

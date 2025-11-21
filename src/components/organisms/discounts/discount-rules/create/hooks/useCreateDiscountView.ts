@@ -104,10 +104,12 @@ export default function useCreateDiscountView({ params }: Props) {
       messageApi.success("Descuento creado exitosamente");
       router.push(`/descuentos/regla/${res.idDiscount}`);
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      const errorMessage = e.response?.data?.message || e.message || "Error al crear el descuento";
+      messageApi.error(errorMessage);
       console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleUpdateDiscount = async (e: DiscountSchema) => {
@@ -119,7 +121,8 @@ export default function useCreateDiscountView({ params }: Props) {
       setStatusForm("review");
       form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
-      const errorMessage = e.response?.data?.message || e.message || "Error al actualizar el descuento";
+      const errorMessage =
+        e.response?.data?.message || e.message || "Error al actualizar el descuento";
       messageApi.error(errorMessage);
       console.error(e);
     } finally {
