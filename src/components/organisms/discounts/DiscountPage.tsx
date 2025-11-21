@@ -39,6 +39,11 @@ function DiscountPage() {
     loading
   } = useDiscount({ messageApi, tabActive });
 
+  const handleChangeTab = (newTab: string) => {
+    setTabActive(newTab);
+    handleChangePage(1);
+  };
+
   const items: TabsProps["items"] = [
     {
       key: "1",
@@ -103,7 +108,7 @@ function DiscountPage() {
             items={items}
             size="large"
             activeKey={tabActive}
-            onChange={(newTab) => setTabActive(newTab)}
+            onChange={handleChangeTab}
           />
         </Flex>
       </Flex>
