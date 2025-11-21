@@ -3,10 +3,13 @@
 import { Table } from "antd";
 import { discountsColumns } from "../../constants/column";
 import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
+import { DiscountBasicsState } from "../../hooks/useDiscount";
+import { GenericResponsePage } from "@/types/global/IGlobal";
+import { DiscountBasics } from "@/types/discount/DiscountBasics";
 
 export interface IDiscountTable {
-  data: any;
-  res: any;
+  data: DiscountBasicsState[] | undefined;
+  res: GenericResponsePage<DiscountBasics[]> | undefined;
   page: number;
   handleSelectToDelete: (id: number, addToDelete: boolean) => void;
   handleChangeStatus: (id: number, mewStatus: boolean) => void;

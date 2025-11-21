@@ -1,12 +1,12 @@
 import React from "react";
 import { Modal } from "antd";
-
 import "./modalConfirmAction.scss";
 
 interface Props {
   isOpen: boolean;
-  onClose: (cancelClicked?: boolean) => void;
+  onClose: () => void;
   onOk?: () => void;
+  onCancel?: () => void;
   title: string;
   content?: React.ReactNode;
   okText?: string;
@@ -14,10 +14,12 @@ interface Props {
   okLoading?: boolean;
   cancelLoading?: boolean;
 }
+
 export const ModalConfirmAction = ({
   isOpen,
   onClose,
   onOk,
+  onCancel,
   title,
   content,
   okText = "Aceptar",
@@ -25,27 +27,16 @@ export const ModalConfirmAction = ({
   okLoading,
   cancelLoading
 }: Props) => {
-  // Handler para cerrar con X o clic fuera (cancelClicked = false)
-  const handleClose = () => {
-    onClose(false);
-  };
-
-  // Handler para cerrar con botón Cancelar (cancelClicked = true)
-  const handleCancel = () => {
-    onClose(true);
-  };
-
   return (
     <Modal
       className="ModalConfirmAction"
-      width={"50%"}
       open={isOpen}
-      onCancel={handleClose}
+      onCancel={onClose}
       okButtonProps={{ className: "acceptButton", loading: okLoading }}
       okText={okText}
       cancelButtonProps={{
         className: "cancelButton",
-        onClick: handleCancel,
+        onClick: onCancel ? onCancel : onClose,
         loading: cancelLoading
       }}
       cancelText={cancelText}

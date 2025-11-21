@@ -31,6 +31,7 @@ import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 
 interface IShippingInfoForm {
+  isElectronicInvoicing: number;
   addresses: {
     value: string;
     label: string;
@@ -208,7 +209,8 @@ const CreateOrderCheckout: FC = ({}) => {
           id: data.addresses.value
         })
       },
-      order_summary: confirmOrderData
+      order_summary: confirmOrderData,
+      is_electronic_invoicing: data.isElectronicInvoicing ?? 0
     };
 
     if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
@@ -260,16 +262,18 @@ const CreateOrderCheckout: FC = ({}) => {
     await processOrderCreation(data);
   };
 
-  const handleElectronicBillingClose = async (cancelClicked?: boolean) => {
-    if (pendingFormData && cancelClicked !== false) {
-      // Usuario hizo click en "Sí" o "No" - proceder con la creación de orden
-      await processOrderCreation(pendingFormData);
-      setIsElectronicBillingModalOpen(false);
-      setPendingFormData(null);
-    } else {
-      // Usuario cerró el modal con X o click fuera - solo cerrar
-      setIsElectronicBillingModalOpen(false);
-    }
+  const handleElectronicBillingClose = async (isElectronic?: boolean) => {
+    if (!pendingFormData) return;
+
+    // Agregamos el campo para saber si el usuario eligió Sí o No
+    const formDataWithElectronic = {
+      ...pendingFormData,
+      isElectronicInvoicing: isElectronic ? 1 : 0
+    };
+
+    await processOrderCreation(formDataWithElectronic);
+    setIsElectronicBillingModalOpen(false);
+    setPendingFormData(null);
   };
 
   // Preparar opciones del select con "Nueva dirección" al principio
@@ -453,13 +457,14 @@ const CreateOrderCheckout: FC = ({}) => {
 
       <ModalConfirmAction
         isOpen={isElectronicBillingModalOpen}
-        onClose={handleElectronicBillingClose}
-        onOk={handleElectronicBillingClose}
+        onClose={() => handleElectronicBillingClose(undefined)} // Cierra sin acción
+        onOk={() => handleElectronicBillingClose(true)} // “Sí, necesito”
+        onCancel={() => handleElectronicBillingClose(false)} // “No”
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
-        cancelLoading={loading}
       />
+
       {showWompiModal && pendingFormData && (
         <>
           <WompiModal

@@ -7,6 +7,7 @@ import { formatMoneySlice, IFormatMoneyStore } from "@/lib/slices/formatMoneySli
 import { createHidrationSlice, Hidration } from "../slices/hidratationSlice";
 import { setProjectInApi } from "@/utils/api/api";
 import { IProvidersViewStore, providersViewSlice } from "../slices/providersViewSlice";
+import { createMarketplaceConfigSlice, IMarketplaceConfigSlice } from "../slices/marketplaceConfigSlice";
 
 interface AppStore
   extends ProjectSlice,
@@ -14,6 +15,7 @@ interface AppStore
     ICommerceSlice,
     IFormatMoneyStore,
     Hidration,
+    IMarketplaceConfigSlice,
     IProvidersViewStore {
   resetStore: () => void;
 }
@@ -27,6 +29,7 @@ export const useAppStore = create<AppStore>()(
       ...formatMoneySlice(set, get),
       ...createHidrationSlice(set),
       ...providersViewSlice(set),
+      ...createMarketplaceConfigSlice(set),
       resetStore: () => {
         // Clear the session storage
         localStorage.removeItem("project");
@@ -37,7 +40,8 @@ export const useAppStore = create<AppStore>()(
           ...createCommerceSlice(set),
           ...formatMoneySlice(set, get),
           ...createHidrationSlice(set),
-          ...providersViewSlice(set)
+          ...providersViewSlice(set),
+          ...createMarketplaceConfigSlice(set)
         });
       }
     }),

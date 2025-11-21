@@ -1,10 +1,12 @@
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
-import { BagSimple } from "phosphor-react";
+import { BagSimple, X } from "phosphor-react";
+
 import { formatNumber } from "@/utils/utils";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
@@ -20,11 +22,19 @@ export interface selectClientForm {
   client: ISelectType;
 }
 
+interface CreateOrderCartProps {
+  onClose?: () => void;
+}
+
 const { Text } = Typography;
 
-const CreateOrderCart: FC = ({}) => {
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const formatMoney = useAppStore((state) => state.formatMoney);
+const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
+  const { formatMoney, config, projectId } = useAppStore((state) => ({
+    formatMoney: state.formatMoney,
+    config: state.config,
+    projectId: state.selectedProject.ID
+  }));
+  const width = useScreenWidth();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
@@ -77,6 +87,7 @@ const CreateOrderCart: FC = ({}) => {
       } else {
         setCheckingOut(true);
       }
+      return;
     }
 
     setCheckingOut(true);
@@ -170,6 +181,11 @@ const CreateOrderCart: FC = ({}) => {
           <h3>Resumen de la orden</h3>
           <p>SKUs: {numberOfSelectedProducts}</p>
         </Flex>
+        {width <= 768 && onClose && (
+          <button onClick={onClose} className={styles.closeButton} aria-label="Cerrar carrito">
+            <X size={16} weight="bold" />
+          </button>
+        )}
 
         {selectedCategories.length === 0 && (
           <div className={styles.emptyCart}>
@@ -193,11 +209,14 @@ const CreateOrderCart: FC = ({}) => {
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
+                const subtotal = config?.include_iva
+                  ? productDiscount?.primary?.new_price_taxes || productDiscount?.primary?.new_price
+                  : productDiscount?.primary?.new_price;
                 const productDiscountData =
                   productDiscount && productDiscount.subtotalDiscount > 0
                     ? {
                         discountPercentage: productDiscount.primary?.discount_applied?.discount,
-                        subtotal: (productDiscount.primary?.new_price_taxes || productDiscount.primary?.new_price)
+                        subtotal
                       }
                     : undefined;
                 return (

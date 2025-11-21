@@ -43,7 +43,8 @@ export const SideBar = () => {
     setCurrency,
     setLocale,
     isHy,
-    projectsBasicInfo
+    projectsBasicInfo,
+    setConfig
   } = useAppStore((state) => state);
 
   const LOGO = project?.LOGO;
@@ -101,6 +102,7 @@ export const SideBar = () => {
         setUserId(response?.data.id_user);
         setCurrency(response?.data.preferences.currency);
         setLocale(response?.data.preferences.id);
+        setConfig({ include_iva: false, create_client_btn: false, projectId: 0 }); // Reset config before setting new values
 
         if (response?.data?.permissions?.length === 1) {
           const project = {
