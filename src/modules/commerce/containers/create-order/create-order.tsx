@@ -70,7 +70,12 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+
+  const toggleCart = () => {
+    setIsCartVisible(!isCartVisible);
+  };
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
@@ -168,7 +173,7 @@ export const CreateOrderView: FC = () => {
       <div className={styles.ordersView}>
         <Flex align="center" justify="space-between">
           <h2 className={styles.title}>Crear orden</h2>
-          <Button className={styles.cartButton}>
+          <Button className={styles.cartButton} onClick={toggleCart}>
             <Flex vertical align="center" className={styles.cartButton__cart}>
               <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
               <ShoppingCartSimple size={32} />
@@ -179,9 +184,9 @@ export const CreateOrderView: FC = () => {
         {!client?.name ? (
           <SearchClient />
         ) : (
-          <div className={styles.marketView}>
+          <div className={`${styles.marketView} ${isCartVisible ? styles.marketViewWithCart : ""}`}>
             {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
-            <CreateOrderCart />
+            {isCartVisible && <CreateOrderCart onClose={toggleCart} />}
           </div>
         )}
       </div>
