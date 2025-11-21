@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Chat, Funnel, MagnifyingGlass, Users, ChatCircleDots } from "@phosphor-icons/react";
+
+import { getTickets } from "@/services/chat/chat";
+import { auth } from "../../../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useSocket } from "@/context/ChatContext";
+import { cn } from "@/utils/utils";
+
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
@@ -9,17 +17,13 @@ import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { cn } from "@/utils/utils";
 import { type Conversation, formatRelativeTime } from "@/modules/chat/lib/mock-data";
-import { ITicket } from "@/types/chat/IChat";
 import ChatThread from "./chat-thread";
 import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
-import { Chat, Funnel, MagnifyingGlass, Users } from "@phosphor-icons/react";
-import { getTickets } from "@/services/chat/chat";
 
+import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
-import { useSocket } from "@/context/ChatContext";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -31,7 +35,7 @@ function riskColors(days: number) {
 }
 
 // Function to transform ITicket to Conversation format
-function ticketToConversation(ticket: ITicket): Conversation {
+function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): Conversation {
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -61,13 +65,14 @@ function ticketToConversation(ticket: ITicket): Conversation {
     segment: "",
     status: ticket.status === "OPEN" ? "Abierto" : "Cerrado",
     overdueDays: calculateOverdueDays(ticket.createdAt),
-    // TODO: Replace with actual last message content when available
-    lastMessage: ticket.subject,
+    lastMessage: ticket.lastMessage?.content || "",
     updatedAt: ticket.updatedAt,
     tags: ticket.tags ? [ticket.tags] : [],
     metrics: { totalVencido: 0, ultimoPago: "" },
     timeline: [],
-    messages: []
+    messages: [],
+    hasUnreadUpdate: unreadTicketsSet.has(ticket.id),
+    lastMessageAt: ticket.lastMessageAt
   };
 }
 
@@ -80,16 +85,58 @@ export default function ChatInbox() {
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [ticketsData, setTicketsData] = useState<ITicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
 
-  const { connect } = useSocket();
+  const { connect, subscribeToTicketUpdates, isConnected } = useSocket();
 
   useEffect(() => {
-    if (activeId) {
-      connect({
-        customerId: filtered.find((c) => c.id === activeId)?.customerId || ""
+    // Esperamos a que Firebase Auth termine de inicializar
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (activeId && user?.uid) {
+        connect({
+          userId: user.uid
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, [activeId, connect]);
+
+  // Use effect to subscribe to ticket updates and update ticketsData accordingly
+  useEffect(() => {
+    if (!isConnected) return;
+    return subscribeToTicketUpdates((data) => {
+      console.log("Ticket update received in ChatInbox:", data);
+
+      setTicketsData((prevTickets) => {
+        // Actualizar el ticket correspondiente
+        const updatedTickets = prevTickets.map((ticket) => {
+          if (ticket.id === data.ticketId) {
+            return {
+              ...ticket,
+              lastMessage: {
+                ...ticket.lastMessage,
+                content: data.message.content,
+                timestamp: data.message.timestamp
+              } as ITicket["lastMessage"],
+              lastMessageAt: data.message.timestamp,
+              updatedAt: data.message.timestamp
+            };
+          }
+          return ticket;
+        });
+
+        // Ordenar por lastMessageAt descendente (más reciente primero)
+        return updatedTickets.sort(
+          (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+        );
       });
-    }
-  }, [activeId]);
+
+      // Si el ticket actualizado NO es el activo, marcarlo como no leído
+      if (activeId !== data.ticketId) {
+        setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
+      }
+    });
+  }, [isConnected, subscribeToTicketUpdates, activeId]);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -111,8 +158,8 @@ export default function ChatInbox() {
 
   // Convert tickets to conversations format for display
   const conversations = useMemo(() => {
-    return ticketsData.map(ticketToConversation);
-  }, [ticketsData]);
+    return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
+  }, [ticketsData, unreadTickets]);
 
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
@@ -208,7 +255,10 @@ export default function ChatInbox() {
             </TabsList>
           </Tabs>
           <Separator className="my-2" />
-          <ScrollArea className="min-h-0 h-[calc(100dvh-154px)] md:h-[calc(100dvh-124px)] pr-2">
+          <ScrollArea
+            className="min-h-0 h-[calc(100dvh-154px)] md:h-[calc(100dvh-124px)] pr-2"
+            style={{ display: "flex" }}
+          >
             <ul className="px-1">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -230,7 +280,15 @@ export default function ChatInbox() {
                         "group relative flex w-full min-w-0 cursor-pointer items-start gap-3 rounded-md px-3 py-3",
                         isActive ? "bg-[#F7F7F7]" : "hover:bg-[#F7F7F7]"
                       )}
-                      onClick={() => setActiveId(c.id)}
+                      onClick={() => {
+                        setActiveId(c.id);
+                        // Marcar como leído al abrir la conversación
+                        setUnreadTickets((prev) => {
+                          const newSet = new Set(prev);
+                          newSet.delete(c.id);
+                          return newSet;
+                        });
+                      }}
                     >
                       <Checkbox
                         className="absolute left-2 top-1/2 -translate-y-1/2"
@@ -247,11 +305,28 @@ export default function ChatInbox() {
                             {c.client_name}
                           </p>
                           <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                            {formatRelativeTime(c.updatedAt)}
+                            {formatRelativeTime(c.lastMessageAt)}
                           </span>
                         </div>
-                        <p className="text-[11px] font-normal">{c.customer}</p>
-                        <p className="truncate text-sm text-muted-foreground">{c.lastMessage}</p>
+                        <p className="text-[11px] font-normal w-fit">{c.customer}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p
+                            className={cn(
+                              "truncate text-sm text-muted-foreground",
+                              c.hasUnreadUpdate && "font-semibold text-[#141414]"
+                            )}
+                          >
+                            {c.lastMessage}
+                          </p>
+
+                          {c.hasUnreadUpdate ? (
+                            <ChatCircleDots
+                              className="w-5 h-5 min-w-[20px] shrink-0"
+                              color="#CBE71E"
+                              weight="duotone"
+                            />
+                          ) : null}
+                        </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <Badge
                             className={cn(

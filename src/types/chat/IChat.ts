@@ -27,11 +27,13 @@ export interface ITicket {
   tags: string | null;
   metadata: any | null;
   closedAt: string | null;
+  lastMessageAt: string;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
   agent: ITicketAgent | null;
   _count: ITicketCount;
+  lastMessage: IMessage | null;
 }
 
 export interface IMessage {
@@ -124,4 +126,24 @@ export interface IWhatsAppTemplate {
   metadata: any;
   createdAt: string;
   updatedAt: string;
+}
+
+// Extended interfaces for socket events with additional fields
+interface ICustomerSocketExtended extends ICustomerSocket {
+  customerCashportUUID: string | null;
+}
+
+interface ITicketSocketExtended extends ITicketSocket {
+  lastMessageAt: string | null;
+}
+
+interface IMessageSocketExtended extends Omit<IMessageSocket, "customer" | "ticket"> {
+  customer: ICustomerSocketExtended;
+  ticket: ITicketSocketExtended;
+}
+
+export interface ITicketUpdate {
+  ticketId: string;
+  message: IMessageSocketExtended;
+  customer: ICustomerSocketExtended;
 }
