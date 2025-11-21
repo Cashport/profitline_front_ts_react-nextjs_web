@@ -112,14 +112,14 @@ export const createDiscount = async (
   body = form;
 
   const token = await getIdToken();
-  const response = (await API.post(`/discount`, body, {
+  const response: GenericResponse<DiscountCreateResponse> = await API.post(`/discount`, body, {
     headers: {
       Accept: "application/json, text/plain, */*",
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${token}`,
       projectid: idProject
     }
-  })) as GenericResponse<DiscountCreateResponse>;
+  });
   return response.data;
 };
 
