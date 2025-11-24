@@ -86,6 +86,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         setShowCanulasModal(true);
       } else {
         setCheckingOut(true);
+        onClose && onClose();
       }
       return;
     }
@@ -105,6 +106,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const handleConfirmCanulas = () => {
     setShowCanulasModal(false);
     setCheckingOut(true);
+    onClose && onClose();
   };
 
   const handleCloseModal = () => {

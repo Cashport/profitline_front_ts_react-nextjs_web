@@ -98,6 +98,11 @@
                 }
             }
         }
+
+        .actionButtons {
+            display: flex;
+            gap: 1rem;
+        }
     }
 
     .selectIndicative {
@@ -111,5 +116,34 @@
         font-weight: 600;
         line-height: normal;
         margin-bottom: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .checkoutContainer {
+        &__content {
+            .shippingInfo {
+                grid-template-columns: 1fr !important;
+
+                // Forzar todos los elementos a 1 columna
+                > * {
+                    grid-column: 1 / span 1 !important;
+                }
+
+                // .textArea {
+                //     grid-column: 1 / span 1 !important;
+                // }
+            }
+
+            .discounts {
+                .radioGroup {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .actionButtons {
+                flex-direction: column;
+            }
+        }
     }
 }

@@ -435,7 +435,7 @@ const CreateOrderCheckout: FC = ({}) => {
           </div>
         </div>
 
-        <Flex gap={"1rem"}>
+        <div className={styles.actionButtons}>
           <AlternativeBlackButton
             onClick={handleSubmit(onSubmitSaveDraft)}
             fullWidth
@@ -452,7 +452,7 @@ const CreateOrderCheckout: FC = ({}) => {
           >
             Finalizar pedido
           </PrincipalButton>
-        </Flex>
+        </div>
       </div>
 
       <ModalConfirmAction
