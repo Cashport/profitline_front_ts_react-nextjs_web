@@ -171,7 +171,7 @@ export const CreateOrderView: FC = () => {
       }}
     >
       <div className={styles.ordersView}>
-        <Flex align="center" justify="space-between">
+        <div className={styles.header}>
           <h2 className={styles.title}>Crear orden</h2>
           {!client?.name ? null : (
             <Button className={styles.cartButton} onClick={toggleCart}>
@@ -182,7 +182,7 @@ export const CreateOrderView: FC = () => {
               Carrito
             </Button>
           )}
-        </Flex>
+        </div>
         {!client?.name ? (
           <SearchClient />
         ) : (
