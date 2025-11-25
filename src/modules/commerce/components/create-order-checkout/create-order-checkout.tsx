@@ -247,6 +247,11 @@ const CreateOrderCheckout: FC = ({}) => {
   };
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+    if (confirmOrderData.total <= 0) {
+      showMessage("error", "El total no es valido");
+      return;
+    }
+
     if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
       setPendingFormData(data);
       setShowWompiModal(true);
@@ -263,7 +268,12 @@ const CreateOrderCheckout: FC = ({}) => {
   };
 
   const handleElectronicBillingClose = async (isElectronic?: boolean) => {
+    if (isElectronic === undefined) {
+      setIsElectronicBillingModalOpen(false);
+      return;
+    }
     if (!pendingFormData) return;
+    setLoading(true);
 
     // Agregamos el campo para saber si el usuario eligió Sí o No
     const formDataWithElectronic = {
@@ -274,6 +284,7 @@ const CreateOrderCheckout: FC = ({}) => {
     await processOrderCreation(formDataWithElectronic);
     setIsElectronicBillingModalOpen(false);
     setPendingFormData(null);
+    setLoading(false);
   };
 
   // Preparar opciones del select con "Nueva dirección" al principio
@@ -463,6 +474,8 @@ const CreateOrderCheckout: FC = ({}) => {
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
+        cancelLoading={loading}
+        okLoading={loading}
       />
 
       {showWompiModal && pendingFormData && (
