@@ -6,12 +6,18 @@ import styles from "./DiscountPage.module.scss";
 import Link from "next/link";
 import ButtonHeader from "@/components/atoms/buttons/buttonHeader/ButtonHeader";
 import DiscountPackages from "@/components/organisms/discounts/discount-package/table/DiscountPackageList";
-import useDiscount from "@/components/organisms/discounts/hooks/useDiscount";
+import useDiscount, {
+  DiscountBasicsState,
+  DiscountPackageState
+} from "@/components/organisms/discounts/hooks/useDiscount";
 import UiSearchInput from "@/components/ui/search-input";
 import FilterDiscounts from "@/components/atoms/Filters/FilterDiscounts/FilterDiscounts";
 import DropdownDiscount from "@/components/molecules/dropdown/discount/DropdownDiscount";
 import { ModalDeleteDiscount } from "@/components/molecules/modals/modalDeleteDiscount/ModalDeleteDiscount";
 import { useState } from "react";
+import { GenericResponsePage } from "@/types/global/IGlobal";
+import { DiscountPackage } from "@/types/discount/DiscountPackage";
+import { DiscountBasics } from "@/types/discount/DiscountBasics";
 
 export type DiscountTabs = "1" | "2";
 
@@ -33,16 +39,21 @@ function DiscountPage() {
     loading
   } = useDiscount({ messageApi, tabActive });
 
+  const handleChangeTab = (newTab: string) => {
+    setTabActive(newTab);
+    handleChangePage(1);
+  };
+
   const items: TabsProps["items"] = [
     {
       key: "1",
       label: "Paquete de descuentos",
       children: (
         <DiscountPackages
-          data={data}
+          data={data as DiscountPackageState[]}
           loading={loading}
           page={page}
-          res={res}
+          res={res as GenericResponsePage<DiscountPackage[]> | undefined}
           handleChangePage={handleChangePage}
           handleChangeStatus={handleChangeStatus}
           handleSelectToDelete={handleSelectToDelete}
@@ -54,10 +65,10 @@ function DiscountPage() {
       label: "Reglas de descuentos",
       children: (
         <Discounts
-          data={data}
+          data={data as DiscountBasicsState[]}
           loading={loading}
           page={page}
-          res={res}
+          res={res as GenericResponsePage<DiscountBasics[]> | undefined}
           handleChangePage={handleChangePage}
           handleChangeStatus={handleChangeStatus}
           handleSelectToDelete={handleSelectToDelete}
@@ -97,7 +108,7 @@ function DiscountPage() {
             items={items}
             size="large"
             activeKey={tabActive}
-            onChange={(newTab) => setTabActive(newTab)}
+            onChange={handleChangeTab}
           />
         </Flex>
       </Flex>

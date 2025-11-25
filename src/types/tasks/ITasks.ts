@@ -21,5 +21,6 @@ export interface ITask {
   client_name: string;
   user_name: string;
   total_portfolio: number;
+  incident_id: number;
   task_type: string;
 }

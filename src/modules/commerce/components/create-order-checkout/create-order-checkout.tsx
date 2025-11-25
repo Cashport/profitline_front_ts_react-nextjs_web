@@ -247,6 +247,11 @@ const CreateOrderCheckout: FC = ({}) => {
   };
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
+    if (confirmOrderData.total <= 0) {
+      showMessage("error", "El total no es valido");
+      return;
+    }
+
     if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
       setPendingFormData(data);
       setShowWompiModal(true);

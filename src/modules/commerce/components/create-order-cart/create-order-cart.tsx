@@ -81,6 +81,7 @@ const CreateOrderCart: FC = ({}) => {
       } else {
         setCheckingOut(true);
       }
+      return;
     }
 
     setCheckingOut(true);

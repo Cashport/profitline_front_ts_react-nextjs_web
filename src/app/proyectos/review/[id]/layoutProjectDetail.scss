@@ -1,48 +1,40 @@
 @import "@styles/variables.scss";
 
-.layoutProjectDetail {
+.containerTabsAndContent {
     width: 100%;
-    display: flex;
-    flex-direction: row;
     height: 100%;
+    background-color: $white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    background-color: $white;
 
-    .containerTabsAndContent {
+    .titleName {
+        margin: auto;
+        font-weight: 600;
+        width: 398px;
+        height: 32px;
+        color: #141414;
+        line-height: 124%;
+        font-style: normal;
+        font-size: 24px;
+    }
+
+    .tabContent {
         width: 100%;
-        height: 100%;
-        padding: 3rem;
-        padding-top: 2rem;
-        overflow-y: scroll;
-        scrollbar-width: none;
-
-        .titleName {
-            margin: auto;
-            font-weight: 600;
-            width: 398px;
-            height: 32px;
-            color: #141414;
-            line-height: 124%;
-            font-style: normal;
-            font-size: 24px;
-        }
-
-        .tabContent {
-            padding-left: 1.5rem;
-            width: 100%;
-            min-height: 150px;
-        }
+        min-height: 150px;
     }
+}
 
-    .infoHeaderProject {
-        gap: 2rem;
-        padding-left: 1.5rem;
-        margin-top: 0rem;
-    }
+.infoHeaderProject {
+    gap: 2rem;
+    margin-top: 0rem;
+}
 
-    .tabsContainer {
-        width: 100%;
-        padding-left: 1.5rem;
-        border-radius: 0.5rem;
-        background-color: $white;
-        scrollbar-width: none;
-    }
+.tabsContainer {
+    width: 100%;
+    border-radius: 0.5rem;
+    background-color: $white;
+    scrollbar-width: none;
 }

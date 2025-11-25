@@ -21,15 +21,15 @@ type Props = {
   tabActive: string;
 };
 
-type DiscountBasicsState = DiscountBasics & { checked: boolean };
-type DiscountPackageState = DiscountPackage & { checked: boolean };
+export type DiscountBasicsState = DiscountBasics & { checked: boolean };
+export type DiscountPackageState = DiscountPackage & { checked: boolean };
 
 export default function useDiscount({ messageApi, tabActive }: Props) {
   const [page, setPage] = useState(1);
   const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
   const [active, setActive] = useState<number | undefined>(undefined);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Array<DiscountBasicsState | DiscountPackageState>>([]);
   const { searchQuery, handleChangeSearch } = useSearch();
   const { ID } = useAppStore((project) => project.selectedProject);
   const fetcher = tabActive === "1" ? getAllDiscountPackages : getAllDiscounts;
