@@ -23,4 +23,7 @@ export interface ITask {
   total_portfolio: number;
   incident_id: number;
   task_type: string;
+  created_at: string;
+  order_amount: number;
+  client_uuid: string;
 }
