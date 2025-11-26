@@ -77,7 +77,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
               <div className="space-y-3">
                 {waTemplates.map((tpl) => {
                   // Tomamos solo el componente BODY para mostrar en preview
-                  const components = JSON.parse(tpl.components);
+                  const components = tpl.components;
                   const bodyComponent = components.find((c: any) => c.type === "BODY");
                   return (
                     <div

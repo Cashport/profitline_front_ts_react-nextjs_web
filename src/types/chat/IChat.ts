@@ -122,7 +122,7 @@ export interface IWhatsAppTemplate {
   category: string;
   language: string;
   status: string;
-  components: string;
+  components: { [key: string]: string }[];
   metadata: any;
   createdAt: string;
   updatedAt: string;
