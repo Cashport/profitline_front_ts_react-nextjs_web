@@ -124,7 +124,37 @@ const TaskTable: React.FC<{
   );
 
   const columns: ColumnsType<ITask> = [
-    { title: "Cliente", dataIndex: "client_name", key: "client_name" },
+    {
+      title: "Cliente",
+      dataIndex: "client_name",
+      key: "client_name",
+      render: (_value, row) => {
+        const url = `/clientes/detail/${row.client_uuid}/project/${row.id_project}`;
+        return (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#1677ff", textDecoration: "underline", cursor: "pointer" }}
+          >
+            {row.client_name}
+          </a>
+        );
+      },
+    },
+    {
+      title: "Fecha",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value) => {
+        if (!value) return "-";
+        return new Date(value).toLocaleDateString("es-CO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      },
+    },
     { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 130 },
     {
       title: "Descripción",
@@ -162,16 +192,16 @@ const TaskTable: React.FC<{
       showSorterTooltip: false
     },
     {
-      title: "Impacto",
-      dataIndex: "amount",
-      key: "amount",
+      title: "Pedido",
+      dataIndex: "order_amount",
+      key: "order_amount",
       align: "right",
       render: (value) => (
         <p className="fontMonoSpace" style={{ whiteSpace: "nowrap" }}>
           {formatMoney(value)}
         </p>
       ),
-      sorter: (a, b) => a.total_portfolio - b.total_portfolio,
+      sorter: (a, b) => a.order_amount - b.order_amount,
       showSorterTooltip: false
     },
     {
