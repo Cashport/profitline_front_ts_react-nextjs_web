@@ -422,7 +422,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
       }
 
-      const templateComponents = JSON.parse(template.components || "[]");
+      const templateComponents = template.components;
       const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
       const buttonComponent = templateComponents.find(
         (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
