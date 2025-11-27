@@ -1,5 +1,4 @@
 import { Dispatch, Key, SetStateAction, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button, Flex, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
 import { WarningDiamond } from "@phosphor-icons/react";
@@ -36,7 +35,6 @@ const OrdersViewTable = ({
   setFetchMutate,
   onlyKeyInfo = false
 }: PropsOrdersViewTable) => {
-  const router = useRouter();
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -49,18 +47,16 @@ const OrdersViewTable = ({
   const handleSeeDetail = (order: IOrder) => {
     const { id: orderId, order_status } = order;
 
-    console.log(order);
     if (order_status === "Borrador") {
       const draftInfo = {
         id: orderId,
         client_name: order.client_name
       };
       setDraftInfo(draftInfo);
-      router.push("/comercio/pedido");
+      window.open("/comercio/pedido", "_blank");
     } else {
       const url = `/comercio/pedidoConfirmado/${orderId}`;
-      router.prefetch(url);
-      router.push(url);
+      window.open(url, "_blank");
     }
   };
 
