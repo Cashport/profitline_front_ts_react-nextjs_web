@@ -185,6 +185,7 @@ export interface ISingleOrder {
   is_draft: number;
   client_name: string;
   block_flag: boolean;
+  vendor_name: string;
 }
 
 interface IDetailOrder {
