@@ -1,13 +1,20 @@
 "use client";
 import { Dispatch, Key, SetStateAction, useState } from "react";
 import { Flex, message, Modal, Typography } from "antd";
-import { DownloadSimple, EnvelopeSimple, NewspaperClipping, Trash } from "@phosphor-icons/react";
+import {
+  ArrowULeftDown,
+  DownloadSimple,
+  EnvelopeSimple,
+  NewspaperClipping,
+  Trash
+} from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { createAndDownloadTxt } from "@/utils/utils";
 import {
   changeOrderState,
+  changeStatusOrder,
   dowloadOrderCSV,
   downloadPartialOrderCSV
 } from "@/services/commerce/commerce";
@@ -130,6 +137,21 @@ export const OrdersGenerateActionModal = ({
     });
   };
 
+  const handleReturnToSeller = async () => {
+    if (!validateOrdersSelected()) return;
+    try {
+      await changeStatusOrder(ordersId[0]);
+      showMessage("success", "Estado cambiado correctamente");
+      setFetchMutate();
+      setSelectedRows([]);
+      setSelectedRowKeys([]);
+      onClose();
+    } catch (error: any) {
+      showMessage("error", error?.message || "Error al cambiar el estado de la orden");
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -173,6 +195,12 @@ export const OrdersGenerateActionModal = ({
             onClick={handleSendInvite}
             icon={<EnvelopeSimple size={16} />}
             title="Enviar invitación"
+          />
+          <ButtonGenerateAction
+            onClick={handleReturnToSeller}
+            icon={<ArrowULeftDown size={16} />}
+            title="Retornar al vendedor"
+            disabled={ordersId.length !== 1}
           />
         </Flex>
       </Modal>

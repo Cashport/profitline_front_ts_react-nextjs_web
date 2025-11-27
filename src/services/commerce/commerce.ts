@@ -375,3 +375,17 @@ export const getMarketplaceConfig = async () => {
     throw new Error("Error al obtener la configuración del marketplace");
   }
 };
+
+export const changeStatusOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/mark-created`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado de la orden:", error);
+    throw new Error(
+      error instanceof Error ? error.message : "Error al cambiar el estado de la orden"
+    );
+  }
+};
