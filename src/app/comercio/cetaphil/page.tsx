@@ -55,6 +55,9 @@ export interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  toggleCart?: () => void;
+  isCartVisible?: boolean;
+  numberOfItems?: number;
 }
 
 const CreateOrderView: FC = () => {

@@ -5,6 +5,7 @@ import { CaretLeft } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
 import UiTab from "@/components/ui/ui-tab";
+import CartButton from "../button-cart";
 import CreateOrderProduct from "../create-order-product";
 import { getProductsByClient } from "@/services/commerce/commerce";
 
@@ -31,8 +32,15 @@ interface CategoryMap {
 
 const CreateOrderMarket: FC = () => {
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { client, setClient, categories, setCategories, setSelectedCategories } =
-    useContext(OrderViewContext);
+  const {
+    client,
+    setClient,
+    categories,
+    setCategories,
+    setSelectedCategories,
+    toggleCart,
+    numberOfItems
+  } = useContext(OrderViewContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 800);
@@ -151,18 +159,21 @@ const CreateOrderMarket: FC = () => {
 
   return (
     <div className={styles.marketContainer}>
-      <Button
-        type="text"
-        size="large"
-        className={styles.buttonGoBack}
-        icon={<CaretLeft size={"1.3rem"} />}
-        onClick={() => {
-          setSelectedCategories([]);
-          setClient(undefined as any);
-        }}
-      >
-        {client?.name}
-      </Button>
+      <Flex justify="space-between" align="center">
+        <Button
+          type="text"
+          size="large"
+          className={styles.buttonGoBack}
+          icon={<CaretLeft size={"1.3rem"} />}
+          onClick={() => {
+            setSelectedCategories([]);
+            setClient(undefined as any);
+          }}
+        >
+          {client?.name}
+        </Button>
+        <CartButton onClick={toggleCart} numberOfItems={numberOfItems} />
+      </Flex>
       <Flex gap={"0.5rem"}>
         <UiSearchInput
           placeholder="Buscar"
