@@ -112,7 +112,7 @@ export const OrdersView: FC = () => {
           </Button>
           <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} />
           <Link href="/comercio/pedido" className={styles.ctaButton}>
-            <PrincipalButton>Crear orden</PrincipalButton>
+            <PrincipalButton className={styles.ctaButton}>Crear orden</PrincipalButton>
           </Link>
         </Flex>
         {isLoading ? (
