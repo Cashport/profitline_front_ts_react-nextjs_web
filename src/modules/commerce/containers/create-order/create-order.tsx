@@ -1,9 +1,7 @@
 import { Dispatch, FC, useEffect, useState } from "react";
-import { Button, Flex } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
-import { ShoppingCartSimple } from "@phosphor-icons/react";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 
@@ -56,6 +54,9 @@ interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  toggleCart?: () => void;
+  isCartVisible?: boolean;
+  numberOfItems?: number;
 }
 
 export const CreateOrderView: FC = () => {
@@ -167,22 +168,13 @@ export const CreateOrderView: FC = () => {
         setCategories,
         discounts,
         setDiscounts,
-        discountsLoading
+        discountsLoading,
+        toggleCart,
+        isCartVisible,
+        numberOfItems
       }}
     >
       <div className={styles.ordersView}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Crear orden</h2>
-          {!client?.name ? null : (
-            <Button className={styles.cartButton} onClick={toggleCart}>
-              <Flex vertical align="center" className={styles.cartButton__cart}>
-                <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
-                <ShoppingCartSimple size={32} />
-              </Flex>
-              Carrito
-            </Button>
-          )}
-        </div>
         {!client?.name ? (
           <SearchClient />
         ) : (

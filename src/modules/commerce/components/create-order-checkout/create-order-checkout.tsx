@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import CartButton from "../button-cart";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./create-order-checkout.module.scss";
@@ -64,7 +65,9 @@ const CreateOrderCheckout: FC = ({}) => {
     shippingInfo,
     selectedDiscount,
     setSelectedDiscount,
-    discounts
+    discounts,
+    toggleCart,
+    numberOfItems
   } = useContext(OrderViewContext);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { draftInfo } = useAppStore((state) => state);
@@ -298,15 +301,18 @@ const CreateOrderCheckout: FC = ({}) => {
 
   return (
     <div className={styles.checkoutContainer}>
-      <Button
-        type="text"
-        size="large"
-        className={styles.buttonGoBack}
-        icon={<CaretLeft size={"1.3rem"} />}
-        onClick={handleGoBack}
-      >
-        Volver
-      </Button>
+      <Flex justify="space-between" align="center">
+        <Button
+          type="text"
+          size="large"
+          className={styles.buttonGoBack}
+          icon={<CaretLeft size={"1.3rem"} />}
+          onClick={handleGoBack}
+        >
+          Volver
+        </Button>
+        <CartButton onClick={toggleCart} numberOfItems={numberOfItems} />
+      </Flex>
       <h3 className={styles.title}>Confirma datos de envío</h3>
 
       <div className={styles.checkoutContainer__content}>
