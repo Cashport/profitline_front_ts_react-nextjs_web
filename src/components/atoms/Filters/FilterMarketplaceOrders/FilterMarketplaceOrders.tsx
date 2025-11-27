@@ -59,6 +59,9 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
         // Transformar directamente a opciones del Cascader
         const sellersOptions = transformSellersToOptions(sellerGroups);
         setOptionsList(sellersOptions);
+        // Establecer las selecciones iniciales basadas en los vendedores marcados
+        const initialSelected = transformFirstFetchToSelected(sellerGroups);
+        setSelectOptions(initialSelected);
       } catch (error) {
         console.error("Error al cargar los filtros:", error);
       }
@@ -97,6 +100,18 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
         isLeaf: true
       }))
     }));
+  };
+
+  const transformFirstFetchToSelected = (sellerGroups: ISellerGroup[]): (string | number)[][] => {
+    const selected: (string | number)[][] = [];
+    sellerGroups.forEach((group) => {
+      group.sellers.forEach((seller) => {
+        if (seller.checked) {
+          selected.push([group.id, seller.id]);
+        }
+      });
+    });
+    return selected;
   };
 
   // Función para manejar cambios en la selección
