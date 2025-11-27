@@ -224,6 +224,7 @@ export interface IOrder {
   total: number;
   total_pronto_pago: number;
   client_name: string;
+  vendor_name: string;
   warehousename: string;
   warehouseid: number;
   last_datestamp: string | null;
