@@ -131,6 +131,8 @@ export const ConfirmedOrderView: FC = () => {
                       title="Teléfono contacto"
                       data={order?.shipping_info?.phone_number}
                     />
+                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
+                    <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
                     <ConfirmedOrderShippingInfo
                       title="Observaciones"
                       data={order?.shipping_info?.comments}

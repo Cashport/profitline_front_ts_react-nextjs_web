@@ -171,6 +171,12 @@ const OrdersViewTable = ({
       },
       showSorterTooltip: false
     },
+    {
+      title: "Vendedor",
+      key: "vendor_name",
+      dataIndex: "vendor_name",
+      render: (text) => <Text className="cell">{text}</Text>
+    },
     // TO DO: Uncomment when the status column is needed
     // {
     //   title: "Estado",
