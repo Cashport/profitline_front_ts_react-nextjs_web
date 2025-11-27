@@ -22,5 +22,9 @@
 @media (max-width: 768px) {
     .mainWrapper {
         flex-direction: column;
+
+        .rightContent {
+            padding: 1rem 0;
+        }
     }
 }

@@ -1,7 +1,11 @@
 import { Dispatch, FC, useEffect, useState } from "react";
+import { Button, Flex } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+import { ShoppingCartSimple } from "@phosphor-icons/react";
+
+import { OrderViewContext } from "../../contexts/orderViewContext";
 
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
@@ -17,7 +21,7 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
-import { OrderViewContext } from "../../contexts/orderViewContext";
+import { number } from "yup";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -66,7 +70,12 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+
+  const toggleCart = () => {
+    setIsCartVisible(!isCartVisible);
+  };
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
@@ -135,6 +144,10 @@ export const CreateOrderView: FC = () => {
     };
   }, []);
 
+  const numberOfItems = selectedCategories.reduce((total, category) => {
+    return total + category.products.reduce((catTotal, product) => catTotal + product.quantity, 0);
+  }, 0);
+
   return (
     <OrderViewContext.Provider
       value={{
@@ -158,13 +171,24 @@ export const CreateOrderView: FC = () => {
       }}
     >
       <div className={styles.ordersView}>
-        <h2 className={styles.title}>Crear orden</h2>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Crear orden</h2>
+          {!client?.name ? null : (
+            <Button className={styles.cartButton} onClick={toggleCart}>
+              <Flex vertical align="center" className={styles.cartButton__cart}>
+                <p className={styles.cartButton__itemsNum}>{numberOfItems}</p>
+                <ShoppingCartSimple size={32} />
+              </Flex>
+              Carrito
+            </Button>
+          )}
+        </div>
         {!client?.name ? (
           <SearchClient />
         ) : (
-          <div className={styles.marketView}>
+          <div className={`${styles.marketView} ${isCartVisible ? styles.marketViewWithCart : ""}`}>
             {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
-            <CreateOrderCart />
+            {isCartVisible && <CreateOrderCart onClose={toggleCart} />}
           </div>
         )}
       </div>

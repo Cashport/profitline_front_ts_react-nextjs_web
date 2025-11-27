@@ -52,3 +52,13 @@
         }
     }
 }
+
+@media screen and (max-width: 768px) {
+    .marketContainer {
+        padding: 1rem;
+
+        .productsGrid {
+            gap: 1rem;
+        }
+    }
+}
