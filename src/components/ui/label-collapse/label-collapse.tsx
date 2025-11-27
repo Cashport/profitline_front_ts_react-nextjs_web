@@ -44,7 +44,7 @@ const LabelCollapse = ({
         {capitalize(status)}
       </h5>
       {!!total && (
-        <Flex className={styles.labelCollapse__total}>
+        <Flex className={styles.labelCollapse__total} style={{ marginRight: !quantity ? '1rem' : undefined }}>
           {removeIcons ? null : <Money size={16} className={styles.labelCollapse__total__icon} />}
           <h5 className={styles.labelCollapse__total__title}>{formatMoney(total)}</h5>
         </Flex>
