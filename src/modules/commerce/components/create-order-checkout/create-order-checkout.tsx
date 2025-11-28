@@ -249,8 +249,8 @@ const CreateOrderCheckout: FC = ({}) => {
       );
       if (response.status === 200) {
         const queryParams = [];
-        if (!response.data?.notificationId) {
-          queryParams.push(`notification=${response.data.id_order}`);
+        if (response.data?.notificationId) {
+          queryParams.push(`notification=${response.data.notificationId}`);
         }
         const queryParamsString = queryParams.join("&");
         const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
