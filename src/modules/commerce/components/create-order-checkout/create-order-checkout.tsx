@@ -31,6 +31,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+import { ApiError } from "@/utils/api/api";
 
 interface IShippingInfoForm {
   isElectronicInvoicing: number;
@@ -193,73 +194,84 @@ const CreateOrderCheckout: FC = ({}) => {
 
   // Función helper para procesar la creación de la orden
   const processOrderCreation = async (data: IShippingInfoForm) => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    if (!client) {
-      showMessage("error", "Cliente no encontrado");
-      setLoading(false);
-      return;
-    }
+      if (!client) {
+        showMessage("error", "Cliente no encontrado");
+        setLoading(false);
+        return;
+      }
 
-    const indicative = data.indicative.label.split(" ")[0];
-    const createOrderModelData = {
-      shipping_information: {
-        address: data.address,
-        city: data.city.label,
-        dispatch_address: data.address,
-        email: data.email,
-        phone_number: `${indicative}${data.phone}`,
-        comments: data.comment,
-        // Solo incluir id_address si NO es una nueva dirección
-        ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
-          id: data.addresses.value
-        })
-      },
-      order_summary: confirmOrderData,
-      is_electronic_invoicing: data.isElectronicInvoicing ?? 0
-    };
+      const indicative = data.indicative.label.split(" ")[0];
+      const createOrderModelData = {
+        shipping_information: {
+          address: data.address,
+          city: data.city.label,
+          dispatch_address: data.address,
+          email: data.email,
+          phone_number: `${indicative}${data.phone}`,
+          comments: data.comment,
+          // Solo incluir id_address si NO es una nueva dirección
+          ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
+            id: data.addresses.value
+          })
+        },
+        order_summary: confirmOrderData,
+        is_electronic_invoicing: data.isElectronicInvoicing ?? 0
+      };
 
-    const paymentSupportFile =
-      selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
+      const paymentSupportFile =
+        selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
 
-    if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
-      const response = (await createOrderFromDraft(
+      if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
+        const response = (await createOrderFromDraft(
+          projectId,
+          client.id,
+          draftInfo.id,
+          createOrderModelData,
+          showMessage,
+          paymentSupportFile
+        )) as GenericResponse<{ id_order: number }>;
+
+        if (response.status === 200) {
+          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+          router.prefetch(url);
+          router.push(url);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const response = await createOrder(
         projectId,
         client.id,
-        draftInfo.id,
         createOrderModelData,
         showMessage,
         paymentSupportFile
-      )) as GenericResponse<{ id_order: number }>;
-
+      );
       if (response.status === 200) {
-        const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+        const queryParams = [];
+        if (!response.data?.notificationId) {
+          queryParams.push(`notification=${response.data.id_order}`);
+        }
+        const queryParamsString = queryParams.join("&");
+        const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
         router.prefetch(url);
         router.push(url);
       }
+
       setLoading(false);
-      return;
-    }
-
-    const response = await createOrder(
-      projectId,
-      client.id,
-      createOrderModelData,
-      showMessage,
-      paymentSupportFile
-    );
-    if (response.status === 200) {
-      const queryParams = [];
-      if (!response.data?.notificationId) {
-        queryParams.push(`notification=${response.data.id_order}`);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message || "Error al crear la orden");
+      } else {
+        showMessage("error", "Error al crear la orden");
       }
-      const queryParamsString = queryParams.join("&");
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
-      router.prefetch(url);
-      router.push(url);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
