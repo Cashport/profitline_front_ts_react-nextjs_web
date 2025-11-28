@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex } from "antd";
+import { Button, Flex, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -29,6 +29,7 @@ import { OrderViewContext } from "../../contexts/orderViewContext";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 
 interface IShippingInfoForm {
   isElectronicInvoicing: number;
@@ -73,6 +74,8 @@ const CreateOrderCheckout: FC = ({}) => {
   const [isNewAddress, setIsNewAddress] = useState(false);
   const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
+  const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
+  const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -213,13 +216,17 @@ const CreateOrderCheckout: FC = ({}) => {
       is_electronic_invoicing: data.isElectronicInvoicing ?? 0
     };
 
+    const paymentSupportFile =
+      selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
+
     if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
       const response = (await createOrderFromDraft(
         projectId,
         client.id,
         draftInfo.id,
         createOrderModelData,
-        showMessage
+        showMessage,
+        paymentSupportFile
       )) as GenericResponse<{ id_order: number }>;
 
       if (response.status === 200) {
@@ -231,7 +238,13 @@ const CreateOrderCheckout: FC = ({}) => {
       return;
     }
 
-    const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
+    const response = await createOrder(
+      projectId,
+      client.id,
+      createOrderModelData,
+      showMessage,
+      paymentSupportFile
+    );
     if (response.status === 200) {
       const queryParams = [];
       if (!response.data?.notificationId) {
@@ -249,6 +262,13 @@ const CreateOrderCheckout: FC = ({}) => {
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
     if (confirmOrderData.total <= 0) {
       showMessage("error", "El total no es valido");
+      return;
+    }
+
+    // Si es cliente de contado (payment_type === 2), mostrar vista de soporte de pago
+    if (client.payment_type === 2) {
+      setPendingFormData(data);
+      setShowPaymentSupportView(true);
       return;
     }
 
@@ -285,6 +305,33 @@ const CreateOrderCheckout: FC = ({}) => {
     setIsElectronicBillingModalOpen(false);
     setPendingFormData(null);
     setLoading(false);
+  };
+
+  const handlePaymentSupportSubmit = async () => {
+    if (selectedPaymentSupport.length === 0) {
+      showMessage("error", "Por favor, adjunta el soporte de pago");
+      return;
+    }
+
+    if (!pendingFormData) return;
+
+    // Si es proyecto Cetaphil, continuar con flujo de facturación electrónica
+    if (CETAPHIL_PROJECT_ID === projectId) {
+      setShowPaymentSupportView(false);
+      setIsElectronicBillingModalOpen(true);
+      return;
+    }
+
+    // Si no es Cetaphil, procesar la orden directamente
+    await processOrderCreation(pendingFormData);
+    setShowPaymentSupportView(false);
+    setPendingFormData(null);
+  };
+
+  const handlePaymentSupportCancel = () => {
+    setShowPaymentSupportView(false);
+    setSelectedPaymentSupport([]);
+    setPendingFormData(null);
   };
 
   // Preparar opciones del select con "Nueva dirección" al principio
@@ -496,6 +543,25 @@ const CreateOrderCheckout: FC = ({}) => {
           />
         </>
       )}
+
+      <ModalAttachEvidence
+        selectedEvidence={selectedPaymentSupport}
+        setSelectedEvidence={setSelectedPaymentSupport}
+        handleAttachEvidence={handlePaymentSupportSubmit}
+        isOpen={showPaymentSupportView}
+        handleCancel={handlePaymentSupportCancel}
+        customTexts={{
+          title: "Cargar soporte de pago",
+          description: "Cliente de contado, adjunta la evidencia del pago",
+          acceptButtonText: "Enviar soporte",
+          cancelButtonText: "Cancelar"
+        }}
+        multipleFiles={false}
+        noComment={true}
+        noDescription={true}
+        isMandatory={{ evidence: true }}
+        loading={loading}
+      />
     </div>
   );
 };
