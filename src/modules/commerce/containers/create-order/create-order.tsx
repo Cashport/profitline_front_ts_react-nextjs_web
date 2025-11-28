@@ -3,6 +3,8 @@ import { Dispatch, FC, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
 
+import { OrderViewContext } from "../../contexts/orderViewContext";
+
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
 import CreateOrderCart from "../../components/create-order-cart";
@@ -17,7 +19,7 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
-import { OrderViewContext } from "../../contexts/orderViewContext";
+import { number } from "yup";
 
 export interface ISelectedCategories {
   category_id: number;
@@ -52,6 +54,9 @@ interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  toggleCart?: () => void;
+  isCartVisible?: boolean;
+  numberOfItems?: number;
 }
 
 export const CreateOrderView: FC = () => {
@@ -66,7 +71,12 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [isCartVisible, setIsCartVisible] = useState(false);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+
+  const toggleCart = () => {
+    setIsCartVisible(!isCartVisible);
+  };
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
@@ -135,6 +145,10 @@ export const CreateOrderView: FC = () => {
     };
   }, []);
 
+  const numberOfItems = selectedCategories.reduce((total, category) => {
+    return total + category.products.reduce((catTotal, product) => catTotal + product.quantity, 0);
+  }, 0);
+
   return (
     <OrderViewContext.Provider
       value={{
@@ -154,17 +168,19 @@ export const CreateOrderView: FC = () => {
         setCategories,
         discounts,
         setDiscounts,
-        discountsLoading
+        discountsLoading,
+        toggleCart,
+        isCartVisible,
+        numberOfItems
       }}
     >
       <div className={styles.ordersView}>
-        <h2 className={styles.title}>Crear orden</h2>
         {!client?.name ? (
           <SearchClient />
         ) : (
-          <div className={styles.marketView}>
+          <div className={`${styles.marketView} ${isCartVisible ? styles.marketViewWithCart : ""}`}>
             {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
-            <CreateOrderCart />
+            {isCartVisible && <CreateOrderCart onClose={toggleCart} />}
           </div>
         )}
       </div>

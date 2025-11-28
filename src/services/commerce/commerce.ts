@@ -95,13 +95,26 @@ export const createOrder = async (
   clientId: string,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
+  showMessage: (type: MessageType, content: string) => void,
+  paymentSupport?: File
 ): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
   try {
-    const response: GenericResponse<{ id_order: number; notificationId: number }> = await API.post(
-      `/marketplace/projects/${projectId}/clients/${clientId}/create-order`,
-      data
-    );
+    let response: GenericResponse<{ id_order: number; notificationId: number }>;
+    const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
+    if (paymentSupport) {
+      const formData = new FormData();
+      formData.append("request", JSON.stringify(data));
+      formData.append("file", paymentSupport);
+
+      response = await API.post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+    } else {
+      response = await API.post(url, data);
+    }
+
     if (response.status !== 200) {
       throw response;
     }
@@ -165,13 +178,28 @@ export const createOrderFromDraft = async (
   orderId: number,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
+  showMessage: (type: MessageType, content: string) => void,
+  paymentSupport?: File
 ) => {
   try {
-    const response: GenericResponse<{ id_order: number }> = await API.put(
-      `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`,
-      data
-    );
+    let response: GenericResponse<{ id_order: number }>;
+
+    // si el cliente adjunta soporte de pago al crear la orden desde el borrador
+    const url = `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`;
+    if (paymentSupport) {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      formData.append("file", paymentSupport);
+
+      response = await API.put(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+    } else {
+      response = await API.put(url, data);
+    }
+
     if (response.status !== 200) {
       throw response;
     }
@@ -373,5 +401,19 @@ export const getMarketplaceConfig = async () => {
   } catch (error) {
     console.error("Error al obtener la configuración del marketplace:", error);
     throw new Error("Error al obtener la configuración del marketplace");
+  }
+};
+
+export const changeStatusOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/mark-created`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado de la orden:", error);
+    throw new Error(
+      error instanceof Error ? error.message : "Error al cambiar el estado de la orden"
+    );
   }
 };

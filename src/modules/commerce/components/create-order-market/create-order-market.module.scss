@@ -52,3 +52,25 @@
         }
     }
 }
+
+@media screen and (max-width: 768px) {
+    .marketContainer {
+        padding: 1rem;
+
+        .buttonGoBack {
+            max-width: 65vw;
+            justify-content: flex-start;
+
+            > span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: block;
+            }
+        }
+
+        .productsGrid {
+            gap: 1rem;
+        }
+    }
+}

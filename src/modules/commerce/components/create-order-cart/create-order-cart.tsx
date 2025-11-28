@@ -1,10 +1,12 @@
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
-import { BagSimple } from "phosphor-react";
+import { BagSimple, X } from "phosphor-react";
+
 import { formatNumber } from "@/utils/utils";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
@@ -16,19 +18,23 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { ISelectType } from "@/types/clients/IClients";
 
 import styles from "./create-order-cart.module.scss";
-import { config } from "process";
 export interface selectClientForm {
   client: ISelectType;
 }
 
+interface CreateOrderCartProps {
+  onClose?: () => void;
+}
+
 const { Text } = Typography;
 
-const CreateOrderCart: FC = ({}) => {
+const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const { formatMoney, config, projectId } = useAppStore((state) => ({
     formatMoney: state.formatMoney,
     config: state.config,
     projectId: state.selectedProject.ID
   }));
+  const width = useScreenWidth();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
@@ -80,6 +86,7 @@ const CreateOrderCart: FC = ({}) => {
         setShowCanulasModal(true);
       } else {
         setCheckingOut(true);
+        onClose && onClose();
       }
       return;
     }
@@ -99,6 +106,7 @@ const CreateOrderCart: FC = ({}) => {
   const handleConfirmCanulas = () => {
     setShowCanulasModal(false);
     setCheckingOut(true);
+    onClose && onClose();
   };
 
   const handleCloseModal = () => {
@@ -175,6 +183,11 @@ const CreateOrderCart: FC = ({}) => {
           <h3>Resumen de la orden</h3>
           <p>SKUs: {numberOfSelectedProducts}</p>
         </Flex>
+        {width <= 768 && onClose && (
+          <button onClick={onClose} className={styles.closeButton} aria-label="Cerrar carrito">
+            <X size={16} weight="bold" />
+          </button>
+        )}
 
         {selectedCategories.length === 0 && (
           <div className={styles.emptyCart}>

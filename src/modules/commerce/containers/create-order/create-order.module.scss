@@ -5,6 +5,12 @@
     flex-direction: column;
     gap: 1rem;
 
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
     .title {
         font-size: 2rem;
         font-weight: 700;
@@ -12,8 +18,122 @@
 
     .marketView {
         display: grid;
-        grid-template-columns: 5fr 3fr;
+        grid-template-columns: 1fr;
         gap: 1.5rem;
         height: 100%;
+        transition: grid-template-columns 0.3s ease;
+
+        &.marketViewWithCart {
+            grid-template-columns: 5fr 3fr;
+
+            // Animación slide-in para el carrito en desktop
+            > *:last-child {
+                animation: slideInRight 0.3s ease;
+            }
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .cartButton {
+        background-color: $black;
+        color: $white;
+        height: 55px !important;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+
+        &:hover {
+            background-color: $black !important;
+            color: $white !important;
+            opacity: 0.9;
+        }
+
+        &__cart {
+            position: relative;
+            margin-top: 0.375rem;
+        }
+
+        &__itemsNum {
+            position: absolute;
+            top: -13px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: $secondary;
+        }
+    }
+
+    // Comportamiento mobile: carrito como modal overlay
+    @media (max-width: 768px) {
+        .header {
+            padding: 0 1rem;
+        }
+
+        .marketView {
+            position: relative;
+            grid-template-columns: 1fr;
+
+            &.marketViewWithCart {
+                grid-template-columns: 1fr;
+
+                // Overlay backdrop
+                &::before {
+                    content: "";
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0, 0, 0, 0.5);
+                    z-index: 999;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                // Carrito como modal centrado
+                > *:last-child {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 1000;
+                    max-width: 95vw;
+                    max-height: 95vh;
+                    overflow-y: auto;
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                    animation: modalFadeIn 0.3s ease;
+                }
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
     }
 }

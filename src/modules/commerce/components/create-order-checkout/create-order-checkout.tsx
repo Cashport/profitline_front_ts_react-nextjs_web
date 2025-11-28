@@ -1,8 +1,9 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex } from "antd";
+import { Button, Flex, Modal } from "antd";
 import { CaretLeft } from "phosphor-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import CartButton from "../button-cart";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./create-order-checkout.module.scss";
@@ -29,6 +30,8 @@ import { OrderViewContext } from "../../contexts/orderViewContext";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+import { ApiError } from "@/utils/api/api";
 
 interface IShippingInfoForm {
   isElectronicInvoicing: number;
@@ -64,7 +67,9 @@ const CreateOrderCheckout: FC = ({}) => {
     shippingInfo,
     selectedDiscount,
     setSelectedDiscount,
-    discounts
+    discounts,
+    toggleCart,
+    numberOfItems
   } = useContext(OrderViewContext);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { draftInfo } = useAppStore((state) => state);
@@ -73,6 +78,8 @@ const CreateOrderCheckout: FC = ({}) => {
   const [isNewAddress, setIsNewAddress] = useState(false);
   const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
+  const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
+  const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
 
@@ -187,68 +194,96 @@ const CreateOrderCheckout: FC = ({}) => {
 
   // Función helper para procesar la creación de la orden
   const processOrderCreation = async (data: IShippingInfoForm) => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    if (!client) {
-      showMessage("error", "Cliente no encontrado");
-      setLoading(false);
-      return;
-    }
+      if (!client) {
+        showMessage("error", "Cliente no encontrado");
+        setLoading(false);
+        return;
+      }
 
-    const indicative = data.indicative.label.split(" ")[0];
-    const createOrderModelData = {
-      shipping_information: {
-        address: data.address,
-        city: data.city.label,
-        dispatch_address: data.address,
-        email: data.email,
-        phone_number: `${indicative}${data.phone}`,
-        comments: data.comment,
-        // Solo incluir id_address si NO es una nueva dirección
-        ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
-          id: data.addresses.value
-        })
-      },
-      order_summary: confirmOrderData,
-      is_electronic_invoicing: data.isElectronicInvoicing ?? 0
-    };
+      const indicative = data.indicative.label.split(" ")[0];
+      const createOrderModelData = {
+        shipping_information: {
+          address: data.address,
+          city: data.city.label,
+          dispatch_address: data.address,
+          email: data.email,
+          phone_number: `${indicative}${data.phone}`,
+          comments: data.comment,
+          // Solo incluir id_address si NO es una nueva dirección
+          ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
+            id: data.addresses.value
+          })
+        },
+        order_summary: confirmOrderData,
+        is_electronic_invoicing: data.isElectronicInvoicing ?? 0
+      };
 
-    if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
-      const response = (await createOrderFromDraft(
+      const paymentSupportFile =
+        selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
+
+      if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
+        const response = (await createOrderFromDraft(
+          projectId,
+          client.id,
+          draftInfo.id,
+          createOrderModelData,
+          showMessage,
+          paymentSupportFile
+        )) as GenericResponse<{ id_order: number }>;
+
+        if (response.status === 200) {
+          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+          router.prefetch(url);
+          router.push(url);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const response = await createOrder(
         projectId,
         client.id,
-        draftInfo.id,
         createOrderModelData,
-        showMessage
-      )) as GenericResponse<{ id_order: number }>;
-
+        showMessage,
+        paymentSupportFile
+      );
       if (response.status === 200) {
-        const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+        const queryParams = [];
+        if (response.data?.notificationId) {
+          queryParams.push(`notification=${response.data.notificationId}`);
+        }
+        const queryParamsString = queryParams.join("&");
+        const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
         router.prefetch(url);
         router.push(url);
       }
+
       setLoading(false);
-      return;
-    }
-
-    const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
-    if (response.status === 200) {
-      const queryParams = [];
-      if (!response.data?.notificationId) {
-        queryParams.push(`notification=${response.data.id_order}`);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message || "Error al crear la orden");
+      } else {
+        showMessage("error", "Error al crear la orden");
       }
-      const queryParamsString = queryParams.join("&");
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
-      router.prefetch(url);
-      router.push(url);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
     if (confirmOrderData.total <= 0) {
       showMessage("error", "El total no es valido");
+      return;
+    }
+
+    // Si es cliente de contado (payment_type === 2), mostrar vista de soporte de pago
+    if (client.payment_type === 2) {
+      setPendingFormData(data);
+      setShowPaymentSupportView(true);
       return;
     }
 
@@ -287,6 +322,33 @@ const CreateOrderCheckout: FC = ({}) => {
     setLoading(false);
   };
 
+  const handlePaymentSupportSubmit = async () => {
+    if (selectedPaymentSupport.length === 0) {
+      showMessage("error", "Por favor, adjunta el soporte de pago");
+      return;
+    }
+
+    if (!pendingFormData) return;
+
+    // Si es proyecto Cetaphil, continuar con flujo de facturación electrónica
+    if (CETAPHIL_PROJECT_ID === projectId) {
+      setShowPaymentSupportView(false);
+      setIsElectronicBillingModalOpen(true);
+      return;
+    }
+
+    // Si no es Cetaphil, procesar la orden directamente
+    await processOrderCreation(pendingFormData);
+    setShowPaymentSupportView(false);
+    setPendingFormData(null);
+  };
+
+  const handlePaymentSupportCancel = () => {
+    setShowPaymentSupportView(false);
+    setSelectedPaymentSupport([]);
+    setPendingFormData(null);
+  };
+
   // Preparar opciones del select con "Nueva dirección" al principio
   const addressOptions = [
     NEW_ADDRESS_OPTION,
@@ -298,15 +360,18 @@ const CreateOrderCheckout: FC = ({}) => {
 
   return (
     <div className={styles.checkoutContainer}>
-      <Button
-        type="text"
-        size="large"
-        className={styles.buttonGoBack}
-        icon={<CaretLeft size={"1.3rem"} />}
-        onClick={handleGoBack}
-      >
-        Volver
-      </Button>
+      <Flex justify="space-between" align="center">
+        <Button
+          type="text"
+          size="large"
+          className={styles.buttonGoBack}
+          icon={<CaretLeft size={"1.3rem"} />}
+          onClick={handleGoBack}
+        >
+          Volver
+        </Button>
+        <CartButton onClick={toggleCart} numberOfItems={numberOfItems} />
+      </Flex>
       <h3 className={styles.title}>Confirma datos de envío</h3>
 
       <div className={styles.checkoutContainer__content}>
@@ -446,7 +511,7 @@ const CreateOrderCheckout: FC = ({}) => {
           </div>
         </div>
 
-        <Flex gap={"1rem"}>
+        <div className={styles.actionButtons}>
           <AlternativeBlackButton
             onClick={handleSubmit(onSubmitSaveDraft)}
             fullWidth
@@ -463,7 +528,7 @@ const CreateOrderCheckout: FC = ({}) => {
           >
             Finalizar pedido
           </PrincipalButton>
-        </Flex>
+        </div>
       </div>
 
       <ModalConfirmAction
@@ -496,6 +561,25 @@ const CreateOrderCheckout: FC = ({}) => {
           />
         </>
       )}
+
+      <ModalAttachEvidence
+        selectedEvidence={selectedPaymentSupport}
+        setSelectedEvidence={setSelectedPaymentSupport}
+        handleAttachEvidence={handlePaymentSupportSubmit}
+        isOpen={showPaymentSupportView}
+        handleCancel={handlePaymentSupportCancel}
+        customTexts={{
+          title: "Cargar soporte de pago",
+          description: "Cliente de contado, adjunta la evidencia del pago",
+          acceptButtonText: "Enviar soporte",
+          cancelButtonText: "Cancelar"
+        }}
+        multipleFiles={false}
+        noComment={true}
+        noDescription={true}
+        isMandatory={{ evidence: true }}
+        loading={loading}
+      />
     </div>
   );
 };

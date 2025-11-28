@@ -60,8 +60,8 @@ export const OrdersView: FC = () => {
       const filteredOrders = category.orders.filter((order) => {
         // Add more fields to search through as needed
         return (
-          order.id?.toString().toLowerCase().includes(searchTermLower) ||
-          order.client_name?.toLowerCase().includes(searchTermLower)
+          order.client_name?.toLowerCase().includes(searchTermLower) ||
+          order.operation_number?.toString().toLowerCase().includes(searchTermLower)
         );
       });
 
@@ -112,7 +112,7 @@ export const OrdersView: FC = () => {
           </Button>
           <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} />
           <Link href="/comercio/pedido" className={styles.ctaButton}>
-            <PrincipalButton>Crear orden</PrincipalButton>
+            <PrincipalButton className={styles.ctaButton}>Crear orden</PrincipalButton>
           </Link>
         </Flex>
         {isLoading ? (
