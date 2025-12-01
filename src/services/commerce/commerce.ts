@@ -10,6 +10,7 @@ import {
   IOrderConfirmedResponse,
   IOrderData,
   IProductData,
+  ISalesDashboard,
   ISingleOrder
 } from "@/types/commerce/ICommerce";
 import { MessageType } from "@/context/MessageContext";
@@ -415,5 +416,17 @@ export const changeStatusOrder = async (orderId: number) => {
     throw new Error(
       error instanceof Error ? error.message : "Error al cambiar el estado de la orden"
     );
+  }
+};
+
+// For dashboard sales data
+
+export const getSalesDashboard = async () => {
+  try {
+    const response: GenericResponse<ISalesDashboard> = await API.get(`/galderma-dashboard/sellers`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales dashboard data:", error);
+    throw error;
   }
 };

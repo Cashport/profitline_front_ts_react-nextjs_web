@@ -9,6 +9,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        "cashport-green": "rgb(var(--cashport-green) / <alpha-value>)",
+        "cashport-black": "rgb(var(--cashport-black) / <alpha-value>)",
+        "cashport-gray-light": "rgb(var(--cashport-gray-light) / <alpha-value>)",
+        "cashport-gray-lighter": "rgb(var(--cashport-gray-lighter) / <alpha-value>)",
+        "cashport-white": "rgb(var(--cashport-white) / <alpha-value>)",
         background: "rgb(var(--background) / <alpha-value>)",
         foreground: "rgb(var(--foreground) / <alpha-value>)",
         card: {
