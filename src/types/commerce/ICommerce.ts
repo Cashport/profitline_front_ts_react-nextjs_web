@@ -273,7 +273,8 @@ export interface IUnitsByCategory {
   monto: number;
 }
 
-export interface ISalesDashboardTotal {
+// Base interface with common metrics for sales dashboard
+interface ISalesDashboardMetrics {
   total_sales: number;
   total_sales_pp: number;
   total_sales_invoiced: number;
@@ -289,7 +290,18 @@ export interface ISalesDashboardTotal {
   units_by_category: IUnitsByCategory[];
 }
 
+export interface ISalesDashboardTotal extends ISalesDashboardMetrics {}
+
+export interface ISalesDashboardSeller extends ISalesDashboardMetrics {
+  seller: string;
+}
+
+export interface ISalesDashboardSellerLeader extends ISalesDashboardMetrics {
+  seller_leader: string;
+  sellers: ISalesDashboardSeller[];
+}
+
 export interface ISalesDashboard {
   total: ISalesDashboardTotal;
-  seller_leaders: any[];
+  seller_leaders: ISalesDashboardSellerLeader[];
 }

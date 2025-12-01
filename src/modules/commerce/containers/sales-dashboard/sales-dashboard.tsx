@@ -12,13 +12,7 @@ import {
   ResponsiveContainer,
   Treemap
 } from "recharts";
-import {
-  DollarSign,
-  Package,
-  Users,
-  Clock,
-  TrendingUp
-} from "lucide-react";
+import { DollarSign, Package, Users, Clock, TrendingUp } from "lucide-react";
 
 import { getSalesDashboard } from "@/services/commerce/commerce";
 
@@ -257,7 +251,6 @@ const mockData = {
     }
   ]
 };
-
 
 export default function SalesDashboard() {
   const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
