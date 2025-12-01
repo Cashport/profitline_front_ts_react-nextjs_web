@@ -46,7 +46,7 @@ const OrdersViewTable = ({
 
   const handleSeeDetail = (order: IOrder) => {
     const { id: orderId, order_status } = order;
-
+    const notificationQuery = order.notification_id ? `?notification=${order.notification_id}` : "";
     if (order_status === "Borrador") {
       const draftInfo = {
         id: orderId,
@@ -55,7 +55,7 @@ const OrdersViewTable = ({
       setDraftInfo(draftInfo);
       window.open("/comercio/pedido", "_blank");
     } else {
-      const url = `/comercio/pedidoConfirmado/${orderId}`;
+      const url = `/comercio/pedidoConfirmado/${orderId}${notificationQuery}`;
       window.open(url, "_blank");
     }
   };
