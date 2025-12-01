@@ -2,76 +2,50 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/modules/chat/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from "@/modules/chat/ui/tooltip";
-
-type SalesData = {
-  total: number;
-  facturado: number;
-  enProceso: number;
-  cartera: number;
-  borrador: number;
-  cuota: number;
-  avance: number;
-  faltante: number;
-  topProducts: { name: string; sales: number }[];
-};
-
-type Vendedor = {
-  nombre: string;
-  data: SalesData;
-};
-
-type Regional = {
-  nombre: string;
-  data: SalesData;
-  vendedores: Vendedor[];
-};
+import {
+  ISalesDashboardSellerLeader,
+  ISalesDashboardSeller,
+  ISalesDashboardTotal
+} from "@/types/commerce/ICommerce";
 
 type SortColumn =
-  | "borrador"
-  | "cartera"
-  | "enProceso"
-  | "facturado"
-  | "total"
-  | "cuota"
-  | "faltante"
-  | "avance"
+  | "total_sales_in_process"
+  | "total_sales_invoiced"
+  | "total_sales"
+  | "total_cuota"
+  | "pending_cuota"
+  | "percentage_cuota"
   | null;
 
 type SortDirection = "asc" | "desc";
 
 interface SalesTableProps {
-  regionales: Regional[];
-  iaTotal: SalesData;
+  seller_leaders: ISalesDashboardSellerLeader[];
+  iaTotal: ISalesDashboardTotal;
   formatCurrency: (amount: number) => string;
 }
 
-export default function SalesTable({ regionales, iaTotal, formatCurrency }: SalesTableProps) {
-  const [expandedRegions, setExpandedRegions] = useState<Set<string>>(
+export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: SalesTableProps) {
+  const [expandedSellerLeaders, setExpandedSellerLeaders] = useState<Set<string>>(
     new Set(["regional 1", "regional 2", "regional 3"])
   );
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  const toggleRegion = (regionName: string) => {
-    setExpandedRegions((prev) => {
+  const toggleSellerLeader = (sellerLeaderName: string) => {
+    setExpandedSellerLeaders((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(regionName)) {
-        newSet.delete(regionName);
+      if (newSet.has(sellerLeaderName)) {
+        newSet.delete(sellerLeaderName);
       } else {
-        newSet.add(regionName);
+        newSet.add(sellerLeaderName);
       }
       return newSet;
     });
@@ -104,44 +78,36 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
     return "bg-red-50";
   };
 
-  const sortedRegionales = [...regionales].sort((a, b) => {
+  const sortedSellerLeaders = [...seller_leaders].sort((a, b) => {
     if (!sortColumn) return 0;
 
     let aValue: number;
     let bValue: number;
 
     switch (sortColumn) {
-      case "borrador":
-        aValue = a.data.borrador;
-        bValue = b.data.borrador;
+      case "total_sales_in_process":
+        aValue = a.total_sales_in_process;
+        bValue = b.total_sales_in_process;
         break;
-      case "cartera":
-        aValue = a.data.cartera;
-        bValue = b.data.cartera;
+      case "total_sales_invoiced":
+        aValue = a.total_sales_invoiced;
+        bValue = b.total_sales_invoiced;
         break;
-      case "enProceso":
-        aValue = a.data.enProceso;
-        bValue = b.data.enProceso;
+      case "total_sales":
+        aValue = a.total_sales;
+        bValue = b.total_sales;
         break;
-      case "facturado":
-        aValue = a.data.facturado;
-        bValue = b.data.facturado;
+      case "total_cuota":
+        aValue = a.total_cuota;
+        bValue = b.total_cuota;
         break;
-      case "total":
-        aValue = a.data.total;
-        bValue = b.data.total;
+      case "pending_cuota":
+        aValue = a.pending_cuota;
+        bValue = b.pending_cuota;
         break;
-      case "cuota":
-        aValue = a.data.cuota;
-        bValue = b.data.cuota;
-        break;
-      case "faltante":
-        aValue = a.data.faltante;
-        bValue = b.data.faltante;
-        break;
-      case "avance":
-        aValue = a.data.avance;
-        bValue = b.data.avance;
+      case "percentage_cuota":
+        aValue = a.percentage_cuota;
+        bValue = b.percentage_cuota;
         break;
       default:
         return 0;
@@ -154,44 +120,36 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
     }
   });
 
-  sortedRegionales.forEach((regional) => {
+  sortedSellerLeaders.forEach((sellerLeader) => {
     if (sortColumn) {
-      regional.vendedores.sort((a, b) => {
+      sellerLeader.sellers.sort((a, b) => {
         let aValue: number;
         let bValue: number;
 
         switch (sortColumn) {
-          case "borrador":
-            aValue = a.data.borrador;
-            bValue = b.data.borrador;
+          case "total_sales_in_process":
+            aValue = a.total_sales_in_process;
+            bValue = b.total_sales_in_process;
             break;
-          case "cartera":
-            aValue = a.data.cartera;
-            bValue = b.data.cartera;
+          case "total_sales_invoiced":
+            aValue = a.total_sales_invoiced;
+            bValue = b.total_sales_invoiced;
             break;
-          case "enProceso":
-            aValue = a.data.enProceso;
-            bValue = b.data.enProceso;
+          case "total_sales":
+            aValue = a.total_sales;
+            bValue = b.total_sales;
             break;
-          case "facturado":
-            aValue = a.data.facturado;
-            bValue = b.data.facturado;
+          case "total_cuota":
+            aValue = a.total_cuota;
+            bValue = b.total_cuota;
             break;
-          case "total":
-            aValue = a.data.total;
-            bValue = b.data.total;
+          case "pending_cuota":
+            aValue = a.pending_cuota;
+            bValue = b.pending_cuota;
             break;
-          case "cuota":
-            aValue = a.data.cuota;
-            bValue = b.data.cuota;
-            break;
-          case "faltante":
-            aValue = a.data.faltante;
-            bValue = b.data.faltante;
-            break;
-          case "avance":
-            aValue = a.data.avance;
-            bValue = b.data.avance;
+          case "percentage_cuota":
+            aValue = a.percentage_cuota;
+            bValue = b.percentage_cuota;
             break;
           default:
             return 0;
@@ -207,8 +165,8 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
   });
 
   return (
-    <Card className="bg-background border-0 shadow-sm">
-      <CardHeader className="p-4 sm:p-6">
+    <Card className="bg-background border-0 shadow-sm py-0">
+      <CardHeader className=" sm:p-6">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor
         </CardTitle>
@@ -225,100 +183,94 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
                   <th className="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
                     Regional / Vendedor
                   </th>
-                  <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("borrador")}
-                  >
-                    Borrador {renderSortIcon("borrador")}
+                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
+                    Borrador
+                  </th>
+                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
+                    Cartera
                   </th>
                   <th
                     className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("cartera")}
+                    onClick={() => handleSort("total_sales_in_process")}
                   >
-                    Cartera {renderSortIcon("cartera")}
+                    En proceso {renderSortIcon("total_sales_in_process")}
                   </th>
                   <th
                     className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("enProceso")}
+                    onClick={() => handleSort("total_sales_invoiced")}
                   >
-                    En proceso {renderSortIcon("enProceso")}
-                  </th>
-                  <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("facturado")}
-                  >
-                    Facturado {renderSortIcon("facturado")}
+                    Facturado {renderSortIcon("total_sales_invoiced")}
                   </th>
                   <th
                     className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("total")}
+                    onClick={() => handleSort("total_sales")}
                   >
-                    Total {renderSortIcon("total")}
+                    Total {renderSortIcon("total_sales")}
                   </th>
                   <th
                     className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("cuota")}
+                    onClick={() => handleSort("total_cuota")}
                   >
-                    Meta {renderSortIcon("cuota")}
+                    Meta {renderSortIcon("total_cuota")}
                   </th>
                   <th
                     className="hidden lg:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort("faltante")}
+                    onClick={() => handleSort("pending_cuota")}
                   >
-                    Monto faltante {renderSortIcon("faltante")}
+                    Monto faltante {renderSortIcon("pending_cuota")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {sortedRegionales.map((regional) => (
-                  <React.Fragment key={regional.nombre}>
+                {sortedSellerLeaders.map((sellerLeader) => (
+                  <React.Fragment key={sellerLeader.seller_leader}>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <tr
                             className="bg-blue-50 border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors"
-                            onClick={() => toggleRegion(regional.nombre)}
+                            onClick={() => toggleSellerLeader(sellerLeader.seller_leader)}
                           >
                             <td className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm flex items-center">
-                              {expandedRegions.has(regional.nombre) ? (
+                              {expandedSellerLeaders.has(sellerLeader.seller_leader) ? (
                                 <ChevronDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                               ) : (
                                 <ChevronRight className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                               )}
-                              <span className="truncate">{regional.nombre}</span>
+                              <span className="truncate">{sellerLeader.seller_leader}</span>
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.borrador)}
+                              -
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.cartera)}
+                              -
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.enProceso)}
+                              {formatCurrency(sellerLeader.total_sales_in_process)}
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.facturado)}
+                              {formatCurrency(sellerLeader.total_sales_invoiced)}
                             </td>
                             <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.total)}
+                              {formatCurrency(sellerLeader.total_sales)}
                             </td>
                             <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                               <div className="flex items-center justify-end gap-1 sm:gap-2">
                                 <span className="hidden sm:inline">
-                                  {formatCurrency(regional.data.cuota)}
+                                  {formatCurrency(sellerLeader.total_cuota)}
                                 </span>
                                 <span className="sm:hidden text-xs">
-                                  {formatCurrency(regional.data.cuota).replace(/\s/g, "")}
+                                  {formatCurrency(sellerLeader.total_cuota).replace(/\s/g, "")}
                                 </span>
                                 <span
-                                  className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(regional.data.avance)}`}
+                                  className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(sellerLeader.percentage_cuota)}`}
                                 >
-                                  {regional.data.avance.toFixed(0)}%
+                                  {sellerLeader.percentage_cuota.toFixed(0)}%
                                 </span>
                               </div>
                             </td>
                             <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(regional.data.faltante)}
+                              {formatCurrency(sellerLeader.pending_cuota)}
                             </td>
                           </tr>
                         </TooltipTrigger>
@@ -328,13 +280,13 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
                           className="max-w-xs hidden sm:block"
                         >
                           <div className="space-y-2">
-                            <p className="font-semibold">Top 5 Productos - {regional.nombre}</p>
-                            {regional.data.topProducts.map((product, idx) => (
+                            <p className="font-semibold">
+                              Top 5 Productos - {sellerLeader.seller_leader}
+                            </p>
+                            {sellerLeader.units_by_category.slice(0, 5).map((product, idx) => (
                               <div key={idx} className="flex justify-between text-sm">
-                                <span>{product.name}</span>
-                                <span className="font-medium">
-                                  {formatCurrency(product.sales)}
-                                </span>
+                                <span>{product.producto}</span>
+                                <span className="font-medium">{formatCurrency(product.monto)}</span>
                               </div>
                             ))}
                           </div>
@@ -342,47 +294,47 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
                       </Tooltip>
                     </TooltipProvider>
 
-                    {expandedRegions.has(regional.nombre) &&
-                      regional.vendedores.map((vendedor) => (
-                        <TooltipProvider key={vendedor.nombre}>
+                    {expandedSellerLeaders.has(sellerLeader.seller_leader) &&
+                      sellerLeader.sellers.map((seller) => (
+                        <TooltipProvider key={seller.seller}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer">
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 pl-6 sm:pl-12 text-xs sm:text-sm text-gray-700 truncate">
-                                  {vendedor.nombre}
+                                  {seller.seller}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.borrador)}
+                                  -
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.cartera)}
+                                  -
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.enProceso)}
+                                  {formatCurrency(seller.total_sales_in_process)}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.facturado)}
+                                  {formatCurrency(seller.total_sales_invoiced)}
                                 </td>
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.total)}
+                                  {formatCurrency(seller.total_sales)}
                                 </td>
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                                   <div className="flex items-center justify-end gap-1 sm:gap-2">
                                     <span className="hidden sm:inline">
-                                      {formatCurrency(vendedor.data.cuota)}
+                                      {formatCurrency(seller.total_cuota)}
                                     </span>
                                     <span className="sm:hidden text-xs">
-                                      {formatCurrency(vendedor.data.cuota).replace(/\s/g, "")}
+                                      {formatCurrency(seller.total_cuota).replace(/\s/g, "")}
                                     </span>
                                     <span
-                                      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(vendedor.data.avance)}`}
+                                      className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(seller.percentage_cuota)}`}
                                     >
-                                      {vendedor.data.avance.toFixed(0)}%
+                                      {seller.percentage_cuota.toFixed(0)}%
                                     </span>
                                   </div>
                                 </td>
                                 <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(vendedor.data.faltante)}
+                                  {formatCurrency(seller.pending_cuota)}
                                 </td>
                               </tr>
                             </TooltipTrigger>
@@ -392,14 +344,12 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
                               className="max-w-xs hidden sm:block"
                             >
                               <div className="space-y-2">
-                                <p className="font-semibold">
-                                  Top 5 Productos - {vendedor.nombre}
-                                </p>
-                                {vendedor.data.topProducts.map((product, idx) => (
+                                <p className="font-semibold">Top 5 Productos - {seller.seller}</p>
+                                {seller.units_by_category.slice(0, 5).map((product, idx) => (
                                   <div key={idx} className="flex justify-between text-sm">
-                                    <span>{product.name}</span>
+                                    <span>{product.producto}</span>
                                     <span className="font-medium">
-                                      {formatCurrency(product.sales)}
+                                      {formatCurrency(product.monto)}
                                     </span>
                                   </div>
                                 ))}
@@ -416,51 +366,47 @@ export default function SalesTable({ regionales, iaTotal, formatCurrency }: Sale
                       <tr className="border-t-2 border-cashport-black bg-gray-100 font-bold cursor-pointer">
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Total</td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.borrador)}
+                          -
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.cartera)}
+                          -
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.enProceso)}
+                          {formatCurrency(iaTotal.total_sales_in_process)}
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.facturado)}
+                          {formatCurrency(iaTotal.total_sales_invoiced)}
                         </td>
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total)}
+                          {formatCurrency(iaTotal.total_sales)}
                         </td>
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                           <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <span className="hidden sm:inline">
-                              {formatCurrency(iaTotal.cuota)}
+                              {formatCurrency(iaTotal.total_cuota)}
                             </span>
                             <span className="sm:hidden text-xs">
-                              {formatCurrency(iaTotal.cuota).replace(/\s/g, "")}
+                              {formatCurrency(iaTotal.total_cuota).replace(/\s/g, "")}
                             </span>
                             <span
-                              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(iaTotal.avance)}`}
+                              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(iaTotal.percentage_cuota)}`}
                             >
-                              {iaTotal.avance.toFixed(0)}%
+                              {iaTotal.percentage_cuota.toFixed(0)}%
                             </span>
                           </div>
                         </td>
                         <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.faltante)}
+                          {formatCurrency(iaTotal.pending_cuota)}
                         </td>
                       </tr>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      align="start"
-                      className="max-w-xs hidden sm:block"
-                    >
+                    <TooltipContent side="right" align="start" className="max-w-xs hidden sm:block">
                       <div className="space-y-2">
                         <p className="font-semibold">Top 5 Productos - Total General</p>
-                        {iaTotal.topProducts.map((product, idx) => (
+                        {iaTotal.units_by_category.slice(0, 5).map((product, idx) => (
                           <div key={idx} className="flex justify-between text-sm">
-                            <span>{product.name}</span>
-                            <span className="font-medium">{formatCurrency(product.sales)}</span>
+                            <span>{product.producto}</span>
+                            <span className="font-medium">{formatCurrency(product.monto)}</span>
                           </div>
                         ))}
                       </div>

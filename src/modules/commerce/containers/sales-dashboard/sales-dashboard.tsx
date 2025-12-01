@@ -15,35 +15,17 @@ import {
 import { DollarSign, Package, Users, Clock, TrendingUp } from "lucide-react";
 
 import { getSalesDashboard } from "@/services/commerce/commerce";
+import {
+  ISalesDashboardSellerLeader,
+  ISalesDashboardSeller,
+  ISalesDashboardTotal
+} from "@/types/commerce/ICommerce";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/modules/chat/ui/chart";
 
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
-
-type SalesData = {
-  total: number;
-  facturado: number;
-  enProceso: number;
-  cartera: number;
-  borrador: number;
-  cuota: number;
-  avance: number;
-  faltante: number;
-  topProducts: { name: string; sales: number }[];
-};
-
-type Vendedor = {
-  nombre: string;
-  data: SalesData;
-};
-
-type Regional = {
-  nombre: string;
-  data: SalesData;
-  vendedores: Vendedor[];
-};
 
 const mockData = {
   invoices: [
@@ -317,124 +299,25 @@ export default function SalesDashboard() {
     });
   }
 
-  const generateHierarchicalData = (): { iaTotal: SalesData; regionales: Regional[] } => {
-    const regionales: Regional[] = [
-      {
-        nombre: "regional 1",
-        data: {
-          total: 0,
-          facturado: 0,
-          enProceso: 0,
-          cartera: 0,
-          borrador: 0,
-          cuota: 150000000,
-          avance: 0,
-          faltante: 0,
-          topProducts: []
-        },
-        vendedores: []
-      },
-      {
-        nombre: "regional 2",
-        data: {
-          total: 0,
-          facturado: 0,
-          enProceso: 0,
-          cartera: 0,
-          borrador: 0,
-          cuota: 200000000,
-          avance: 0,
-          faltante: 0,
-          topProducts: []
-        },
-        vendedores: []
-      },
-      {
-        nombre: "regional 3",
-        data: {
-          total: 0,
-          facturado: 0,
-          enProceso: 0,
-          cartera: 0,
-          borrador: 0,
-          cuota: 180000000,
-          avance: 0,
-          faltante: 0,
-          topProducts: []
-        },
-        vendedores: []
-      }
-    ];
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p>Cargando datos...</p>
+      </main>
+    );
+  }
 
-    regionales.forEach((regional, idx) => {
-      const vendedoresCount = 5;
-      for (let i = 0; i < vendedoresCount; i++) {
-        const facturado = Math.random() * 15000000;
-        const enProceso = Math.random() * 8000000;
-        const cartera = Math.random() * 5000000;
-        const borrador = Math.random() * 3000000;
-        const total = facturado + enProceso + cartera + borrador;
-        const cuota = regional.data.cuota / vendedoresCount;
-        const avance = (total / cuota) * 100;
-        const faltante = Math.max(0, cuota - total);
+  // Handle error or no data state
+  if (!salesData) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <p>No hay datos disponibles</p>
+      </main>
+    );
+  }
 
-        regional.vendedores.push({
-          nombre: `Vendedor ${idx + 1}.${i + 1}`,
-          data: {
-            total,
-            facturado,
-            enProceso,
-            cartera,
-            borrador,
-            cuota,
-            avance,
-            faltante,
-            topProducts: []
-          }
-        });
-
-        regional.data.facturado += facturado;
-        regional.data.enProceso += enProceso;
-        regional.data.cartera += cartera;
-        regional.data.borrador += borrador;
-      }
-
-      regional.data.total =
-        regional.data.facturado +
-        regional.data.enProceso +
-        regional.data.cartera +
-        regional.data.borrador;
-      regional.data.avance = (regional.data.total / regional.data.cuota) * 100;
-      regional.data.faltante = Math.max(0, regional.data.cuota - regional.data.total);
-    });
-
-    const iaTotal: SalesData = {
-      total: 0,
-      facturado: 0,
-      enProceso: 0,
-      cartera: 0,
-      borrador: 0,
-      cuota: 0,
-      avance: 0,
-      faltante: 0,
-      topProducts: []
-    };
-
-    regionales.forEach((regional) => {
-      iaTotal.facturado += regional.data.facturado;
-      iaTotal.enProceso += regional.data.enProceso;
-      iaTotal.cartera += regional.data.cartera;
-      iaTotal.borrador += regional.data.borrador;
-    });
-
-    iaTotal.total = iaTotal.facturado + iaTotal.enProceso + iaTotal.cartera + iaTotal.borrador;
-    iaTotal.avance = (iaTotal.total / iaTotal.cuota) * 100;
-    iaTotal.faltante = Math.max(0, iaTotal.cuota - iaTotal.total);
-
-    return { iaTotal, regionales };
-  };
-
-  const { iaTotal, regionales } = generateHierarchicalData();
+  const { total: iaTotal, seller_leaders } = salesData;
 
   const productSales = mockData.invoices.reduce(
     (acc, invoice) => {
@@ -708,7 +591,7 @@ export default function SalesDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
         <Card className="bg-background border-0 shadow-sm">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-base sm:text-lg font-semibold">
@@ -786,9 +669,13 @@ export default function SalesDashboard() {
             </ChartContainer>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
-      <SalesTable regionales={regionales} iaTotal={iaTotal} formatCurrency={formatCurrency} />
+      <SalesTable
+        seller_leaders={seller_leaders}
+        iaTotal={iaTotal}
+        formatCurrency={formatCurrency}
+      />
     </main>
   );
 }
