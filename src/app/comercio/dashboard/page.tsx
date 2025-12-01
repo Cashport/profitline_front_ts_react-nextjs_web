@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import { DollarSign, Package, Users, Clock, TrendingUp } from "lucide-react";
-
 import { useState } from "react";
+import useSWR from "swr";
 import {
   LineChart,
   Line,
@@ -14,7 +13,18 @@ import {
   ResponsiveContainer,
   Treemap
 } from "recharts";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  DollarSign,
+  Package,
+  Users,
+  Clock,
+  TrendingUp,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react";
+
+import { getSalesDashboard } from "@/services/commerce/commerce";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/modules/chat/ui/chart";
 import {
@@ -274,6 +284,8 @@ export default function SalesDashboard() {
   );
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
 
   const toggleRegion = (regionName: string) => {
     setExpandedRegions((prev) => {

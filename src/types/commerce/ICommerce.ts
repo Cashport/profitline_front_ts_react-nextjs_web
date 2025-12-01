@@ -264,3 +264,32 @@ interface ISellerGroup {
 export interface IMarketplaceOrdersFilters {
   sellerFilter: ISellerGroup[];
 }
+
+// Sales Dashboard Interfaces
+export interface IUnitsByCategory {
+  categoria: number;
+  producto: string;
+  cantidad: number;
+  monto: number;
+}
+
+export interface ISalesDashboardTotal {
+  total_sales: number;
+  total_sales_pp: number;
+  total_sales_invoiced: number;
+  total_sales_pp_invoiced: number;
+  total_sales_in_process: number;
+  total_sales_pp_in_process: number;
+  total_sales_pending: number;
+  total_sales_pp_pending: number;
+  cuantity_orders: number;
+  total_cuota: number;
+  percentage_cuota: number;
+  pending_cuota: number;
+  units_by_category: IUnitsByCategory[];
+}
+
+export interface ISalesDashboard {
+  total: ISalesDashboardTotal;
+  seller_leaders: any[];
+}
