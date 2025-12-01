@@ -103,7 +103,7 @@ export const ConfirmedOrderView: FC = () => {
                     justify="space-between"
                   >
                     <h2 className={styles.mainTitle}>Resumen</h2>
-                    <Flex align="center" gap="0.5rem" vertical>
+                    <Flex align="end" gap="0.5rem" vertical>
                       <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
                       <p className={styles.quantity}>
                         Total Productos:{" "}
@@ -192,9 +192,9 @@ export const ConfirmedOrderView: FC = () => {
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
-                  <Flex justify="space-between">
+                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
                     <p>Total sin iva</p>
-                    <p>${formatNumber(order?.detail?.total ?? 0)}</p>
+                    <p>${formatNumber(order?.detail?.total_without_taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
                     <p>IVA 19%</p>
