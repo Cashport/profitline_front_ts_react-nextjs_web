@@ -229,6 +229,8 @@ export interface IOrder {
   warehousename: string;
   warehouseid: number;
   last_datestamp: string | null;
+  files: string | null;
+  notification_id: number | null;
 }
 
 export interface IDiscount {
