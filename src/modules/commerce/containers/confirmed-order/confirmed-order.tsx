@@ -187,6 +187,7 @@ export const ConfirmedOrderView: FC = () => {
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
+                  <div className={styles.footer__separator} />
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
                     <p>Total sin iva</p>
                     <p>${formatNumber(order?.detail?.total_without_taxes ?? 0)}</p>
