@@ -111,6 +111,9 @@ export const OrdersView: FC = () => {
             Generar acción
           </Button>
           <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} />
+          <Link href="/comercio/dashboard" className={styles.dashboardButton}>
+            <PrincipalButton className={styles.dashboardButton}>Dashboard</PrincipalButton>
+          </Link>
           <Link href="/comercio/pedido" className={styles.ctaButton}>
             <PrincipalButton className={styles.ctaButton}>Crear orden</PrincipalButton>
           </Link>

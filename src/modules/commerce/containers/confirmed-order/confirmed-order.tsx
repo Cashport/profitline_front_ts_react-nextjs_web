@@ -70,13 +70,51 @@ export const ConfirmedOrderView: FC = () => {
 
               <div className={styles.summaryContainer}>
                 <div className={styles.summaryContainer__top}>
+                  <div className={styles.shippingData}>
+                    <h2>Datos de envío</h2>
+                    <ConfirmedOrderShippingInfo
+                      title="Direcciones"
+                      data={order?.shipping_info.address}
+                      customStyles={{ gridColumn: "1 / span 2" }}
+                    />
+                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo
+                      title="Dirección de despacho"
+                      data={order?.shipping_info?.dispatch_address}
+                    />
+                    <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
+                    <ConfirmedOrderShippingInfo
+                      title="Teléfono contacto"
+                      data={order?.shipping_info?.phone_number}
+                    />
+                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
+                    <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
+                    <ConfirmedOrderShippingInfo
+                      title="Observaciones"
+                      data={order?.shipping_info?.comments}
+                    />
+                    <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
+                  </div>
+
                   <Flex
                     className={styles.summaryContainer__top__header}
                     align="center"
                     justify="space-between"
                   >
                     <h2 className={styles.mainTitle}>Resumen</h2>
-                    <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
+                    <Flex align="end" gap="0.5rem" vertical>
+                      <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
+                      <p className={styles.quantity}>
+                        Total Productos:{" "}
+                        {order?.detail?.products?.length &&
+                          order?.detail?.products.reduce(
+                            (acc, category) =>
+                              acc +
+                              category.products.reduce((acc, product) => acc + product.quantity, 0),
+                            0
+                          )}
+                      </p>
+                    </Flex>
                   </Flex>
 
                   <div className={styles.categories}>
@@ -112,32 +150,6 @@ export const ConfirmedOrderView: FC = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
-
-                  <div className={styles.shippingData}>
-                    <h2>Datos de envío</h2>
-                    <ConfirmedOrderShippingInfo
-                      title="Direcciones"
-                      data={order?.shipping_info.address}
-                      customStyles={{ gridColumn: "1 / span 2" }}
-                    />
-                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
-                    <ConfirmedOrderShippingInfo
-                      title="Dirección de despacho"
-                      data={order?.shipping_info?.dispatch_address}
-                    />
-                    <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
-                    <ConfirmedOrderShippingInfo
-                      title="Teléfono contacto"
-                      data={order?.shipping_info?.phone_number}
-                    />
-                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
-                    <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
-                    <ConfirmedOrderShippingInfo
-                      title="Observaciones"
-                      data={order?.shipping_info?.comments}
-                      customStyles={{ gridColumn: "1 / span 2" }}
-                    />
                   </div>
 
                   {order?.detail.discount_package_id ? (
@@ -179,13 +191,17 @@ export const ConfirmedOrderView: FC = () => {
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
-                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-                    <strong>Total</strong>
-                    <strong>${formatNumber(order?.total ?? 0)}</strong>
+                  <Flex justify="space-between" style={{ marginTop: "1rem" }}>
+                    <p>Total sin IVA</p>
+                    <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
                     <p>IVA 19%</p>
                     <p>${formatNumber(order?.detail?.taxes ?? 0)}</p>
+                  </Flex>
+                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
+                    <strong>Total</strong>
+                    <strong>${formatNumber(order?.total ?? 0)}</strong>
                   </Flex>
                   <Flex className={styles.footer__earlyPaymentTotal} justify="space-between">
                     <p>Total con pronto pago</p>

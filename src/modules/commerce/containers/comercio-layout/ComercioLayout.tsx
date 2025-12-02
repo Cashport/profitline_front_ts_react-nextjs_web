@@ -10,7 +10,12 @@ interface ComercioLayoutClientProps {
 export default function ComercioLayout({ children }: ComercioLayoutClientProps) {
   const pathname = usePathname();
 
-  const headerTitle = pathname.startsWith("/comercio/pedido") ? "Crear orden" : "Mis pedidos";
+  let headerTitle = "Mis pedidos";
+  if (pathname.startsWith("/comercio/pedido")) {
+    headerTitle = "Crear orden";
+  } else if (pathname.startsWith("/comercio/dashboard")) {
+    headerTitle = "Dashboard";
+  }
 
   return <ViewWrapper headerTitle={headerTitle}>{children}</ViewWrapper>;
 }
