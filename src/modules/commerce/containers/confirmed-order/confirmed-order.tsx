@@ -88,7 +88,6 @@ export const ConfirmedOrderView: FC = () => {
                     <ConfirmedOrderShippingInfo
                       title="Observaciones"
                       data={order?.shipping_info?.comments}
-                      customStyles={{ gridColumn: "1 / span 2" }}
                     />
                   </div>
 
@@ -188,9 +187,9 @@ export const ConfirmedOrderView: FC = () => {
                     </Text>
                   </Flex>
                   <div className={styles.footer__separator} />
-                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-                    <p>Total sin iva</p>
-                    <p>${formatNumber(order?.detail?.total_without_taxes ?? 0)}</p>
+                  <Flex justify="space-between" style={{ marginTop: "1rem" }}>
+                    <p>Total sin IVA</p>
+                    <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
                     <p>IVA 19%</p>
