@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { Button } from "antd";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
+import { CaretLeft } from "@phosphor-icons/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import {
   Tooltip,
@@ -14,8 +17,6 @@ import {
   ISalesDashboardSeller,
   ISalesDashboardTotal
 } from "@/types/commerce/ICommerce";
-import { Button } from "antd";
-import { CaretLeft } from "@phosphor-icons/react";
 
 type SortColumn =
   | "total_sales_in_process"
@@ -168,12 +169,15 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
 
   return (
     <Card className="bg-background border-0 shadow-sm py-0 gap-0">
-      <Button
-        type="text"
-        className="!text-base !font-semibold !w-fit m-[24px] mb-0 !h-fit !p-[4px_6px] "
-      >
-        <CaretLeft size={20} /> Volver a mis ordenes
-      </Button>
+      <Link href="/comercio" className="...">
+        <Button
+          type="text"
+          className="!text-base !font-semibold !w-fit m-[24px] mb-0 !h-fit !p-[4px_6px] "
+        >
+          <CaretLeft size={20} /> Volver a mis ordenes
+        </Button>
+      </Link>
+
       <CardHeader className="sm:p-6 !pb-0">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor
