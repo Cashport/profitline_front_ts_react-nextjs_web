@@ -196,7 +196,6 @@ interface IDetailOrder {
   discount_package_id: number;
   taxes: number;
   total_pronto_pago: number;
-  total_without_taxes: number;
   total: number;
   insufficientStockProducts: any[];
   discount_name?: string;
