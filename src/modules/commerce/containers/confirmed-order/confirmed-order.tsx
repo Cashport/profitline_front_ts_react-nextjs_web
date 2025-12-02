@@ -70,30 +70,25 @@ export const ConfirmedOrderView: FC = () => {
 
               <div className={styles.summaryContainer}>
                 <div className={styles.summaryContainer__top}>
+                  <h2>Datos de envío</h2>
                   <div className={styles.shippingData}>
-                    <h2>Datos de envío</h2>
-                    <ConfirmedOrderShippingInfo
-                      title="Direcciones"
-                      data={order?.shipping_info.address}
-                      customStyles={{ gridColumn: "1 / span 2" }}
-                    />
-                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
+                    <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
                     <ConfirmedOrderShippingInfo
                       title="Dirección de despacho"
                       data={order?.shipping_info?.dispatch_address}
                     />
+                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
                     <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
                     <ConfirmedOrderShippingInfo
-                      title="Teléfono contacto"
+                      title="Contacto"
                       data={order?.shipping_info?.phone_number}
                     />
-                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
                     <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
                     <ConfirmedOrderShippingInfo
                       title="Observaciones"
                       data={order?.shipping_info?.comments}
                     />
-                    <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
                   </div>
 
                   <Flex
@@ -101,7 +96,7 @@ export const ConfirmedOrderView: FC = () => {
                     align="center"
                     justify="space-between"
                   >
-                    <h2 className={styles.mainTitle}>Resumen</h2>
+                    <h2>Resumen</h2>
                     <Flex align="end" gap="0.5rem" vertical>
                       <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
                       <p className={styles.quantity}>
@@ -191,7 +186,8 @@ export const ConfirmedOrderView: FC = () => {
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
-                  <Flex justify="space-between" style={{ marginTop: "1rem" }}>
+                  <div className={styles.footer__separator} />
+                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
                     <p>Total sin IVA</p>
                     <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
