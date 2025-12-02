@@ -287,6 +287,8 @@ interface ISalesDashboardMetrics {
   total_sales_pp_in_process: number;
   total_sales_pending: number;
   total_sales_pp_pending: number;
+  total_sales_wallet: number;
+  total_sales_pp_wallet: number;
   cuantity_orders: number;
   total_cuota: number;
   percentage_cuota: number;
