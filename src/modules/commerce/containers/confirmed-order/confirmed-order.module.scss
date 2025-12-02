@@ -162,6 +162,13 @@
                 font-weight: 500;
                 color: $gray;
             }
+
+            &__separator {
+                width: 100%;
+                height: 1px;
+                margin: 0.25rem 0;
+                background-color: $light-gray;
+            }
         }
     }
 }
