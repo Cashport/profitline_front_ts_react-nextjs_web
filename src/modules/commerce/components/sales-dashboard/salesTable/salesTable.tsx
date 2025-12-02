@@ -165,8 +165,8 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
   });
 
   return (
-    <Card className="bg-background border-0 shadow-sm py-0">
-      <CardHeader className=" sm:p-6">
+    <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+      <CardHeader className="sm:p-6 !pb-0">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor
         </CardTitle>
@@ -274,11 +274,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                             </td>
                           </tr>
                         </TooltipTrigger>
-                        <TooltipContent
-                          // side="right"
-                          // align="start"
-                          className="max-w-xs hidden sm:block"
-                        >
+                        {/* <TooltipContent className="max-w-xs hidden sm:block">
                           <div className="space-y-2">
                             <p className="font-semibold">
                               Top 5 Productos - {sellerLeader.seller_leader}
@@ -290,7 +286,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                               </div>
                             ))}
                           </div>
-                        </TooltipContent>
+                        </TooltipContent> */}
                       </Tooltip>
                     </TooltipProvider>
 
@@ -338,7 +334,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                                 </td>
                               </tr>
                             </TooltipTrigger>
-                            <TooltipContent className="max-w-xs hidden sm:block">
+                            {/* <TooltipContent className="max-w-xs hidden sm:block">
                               <div className="space-y-2">
                                 <p className="font-semibold">Top 5 Productos - {seller.seller}</p>
                                 {seller.units_by_category.slice(0, 5).map((product, idx) => (
@@ -350,7 +346,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                                   </div>
                                 ))}
                               </div>
-                            </TooltipContent>
+                            </TooltipContent> */}
                           </Tooltip>
                         </TooltipProvider>
                       ))}
@@ -366,9 +362,6 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                           {formatCurrency(iaTotal.total_sales_wallet)}
-                        </td>
-                        <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales_in_process)}
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                           {formatCurrency(iaTotal.total_sales_in_process)}
@@ -399,7 +392,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                         </td>
                       </tr>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-xs hidden sm:block">
+                    {/* <TooltipContent className="max-w-xs hidden sm:block">
                       <div className="space-y-2">
                         <p className="font-semibold">Top 5 Productos - Total General</p>
                         {iaTotal.units_by_category.slice(0, 5).map((product, idx) => (
@@ -409,7 +402,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                           </div>
                         ))}
                       </div>
-                    </TooltipContent>
+                    </TooltipContent> */}
                   </Tooltip>
                 </TooltipProvider>
               </tbody>
