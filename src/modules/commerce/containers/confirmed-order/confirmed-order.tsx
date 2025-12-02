@@ -187,7 +187,7 @@ export const ConfirmedOrderView: FC = () => {
                     </Text>
                   </Flex>
                   <div className={styles.footer__separator} />
-                  <Flex justify="space-between" style={{ marginTop: "1rem" }}>
+                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
                     <p>Total sin IVA</p>
                     <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
