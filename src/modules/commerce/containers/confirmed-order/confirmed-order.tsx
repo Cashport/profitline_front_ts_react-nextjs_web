@@ -92,7 +92,6 @@ export const ConfirmedOrderView: FC = () => {
                     <ConfirmedOrderShippingInfo
                       title="Observaciones"
                       data={order?.shipping_info?.comments}
-                      customStyles={{ gridColumn: "1 / span 2" }}
                     />
                     <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
                   </div>
