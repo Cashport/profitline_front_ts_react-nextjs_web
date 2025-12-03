@@ -11,7 +11,7 @@ import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useModalDetail } from "@/context/ModalContext";
-import { ClientDetailsContext } from "@/modules/clients/containers/client-details/client-details";
+import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-context";
 
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
