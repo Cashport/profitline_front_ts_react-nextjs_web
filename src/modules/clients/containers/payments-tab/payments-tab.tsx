@@ -31,7 +31,7 @@ import "./payments-tab.scss";
 
 interface PaymentProd {
   // eslint-disable-next-line no-unused-vars
-  onChangeTab: (activeKey: string) => void;
+  onChangeTab?: (activeKey: string) => void;
 }
 
 const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
