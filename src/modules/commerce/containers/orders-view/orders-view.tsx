@@ -1,7 +1,7 @@
 import { FC, Key, useState, useMemo } from "react";
 import Link from "next/link";
 import { Button, Flex, message, Spin } from "antd";
-import { DotsThree } from "@phosphor-icons/react";
+import { DotsThree, Plus, PresentationChart } from "@phosphor-icons/react";
 
 import { deleteOrders } from "@/services/commerce/commerce";
 import { useMessageApi } from "@/context/MessageContext";
@@ -46,6 +46,7 @@ export const OrdersView: FC = () => {
 
   const { showMessage } = useMessageApi();
   const width = useScreenWidth();
+  const isMobile = width < 768;
 
   // Filtrar las órdenes basándose en el término de búsqueda
   const filteredOrdersByCategory = useMemo(() => {
@@ -108,14 +109,21 @@ export const OrdersView: FC = () => {
             disabled={false}
             onClick={handleIsGenerateActionOpen}
           >
-            Generar acción
+            {isMobile ? null : "Generar acción"}
           </Button>
-          <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} />
-          <Link href="/comercio/dashboard" className={styles.dashboardButton}>
-            <PrincipalButton className={styles.dashboardButton}>Dashboard</PrincipalButton>
+          <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} isMobile={isMobile} />
+          <Link href="/comercio/dashboard">
+            <Button className={styles.generateActionButton} size="large">
+              {isMobile ? <PresentationChart size={24} /> : "Dashboard"}
+            </Button>
           </Link>
           <Link href="/comercio/pedido" className={styles.ctaButton}>
-            <PrincipalButton className={styles.ctaButton}>Crear orden</PrincipalButton>
+            <PrincipalButton
+              className={styles.ctaButton}
+              customStyles={{ padding: isMobile ? "7px 12px" : undefined }}
+            >
+              {isMobile ? <Plus size={24} /> : "Crear orden"}
+            </PrincipalButton>
           </Link>
         </Flex>
         {isLoading ? (
