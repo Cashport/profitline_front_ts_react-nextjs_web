@@ -47,6 +47,7 @@ export const OrdersView: FC = () => {
   const { showMessage } = useMessageApi();
   const width = useScreenWidth();
   const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 900;
 
   // Filtrar las órdenes basándose en el término de búsqueda
   const filteredOrdersByCategory = useMemo(() => {
@@ -109,12 +110,12 @@ export const OrdersView: FC = () => {
             disabled={false}
             onClick={handleIsGenerateActionOpen}
           >
-            {isMobile ? null : "Generar acción"}
+            {isMobile || isTablet ? null : "Generar acción"}
           </Button>
           <FilterMarketplaceOrders setSelectedFilters={setSelectedFilters} isMobile={isMobile} />
           <Link href="/comercio/dashboard">
             <Button className={styles.generateActionButton} size="large">
-              {isMobile ? <PresentationChart size={24} /> : "Dashboard"}
+              {isMobile || isTablet ? <PresentationChart size={24} /> : "Dashboard"}
             </Button>
           </Link>
           <Link href="/comercio/pedido" className={styles.ctaButton}>

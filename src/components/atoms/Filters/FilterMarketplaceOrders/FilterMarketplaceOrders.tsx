@@ -1,8 +1,10 @@
+"use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Cascader } from "antd";
-import { Funnel } from "@phosphor-icons/react";
+import { Button, Cascader } from "antd";
+import { CaretDown, Funnel } from "@phosphor-icons/react";
 import { getOrdersFilter } from "@/services/commerce/commerce";
-import "../filterCascader.scss";
+
+import "./filterMarketplaceOrders.scss";
 
 // Interfaces para los tipos de datos
 interface ISeller {
@@ -43,6 +45,20 @@ interface Props {
 const initValueFiltersData = {
   sellers: []
 };
+
+// Sub-component for Mobile Button
+const MobileButton = (props: any) => (
+  <Button type="text" className="mobile-filter-button" {...props}>
+    <Funnel size={24} />
+  </Button>
+);
+
+// Sub-component for Default (Desktop) Button
+const DefaultButton = (props: any) => (
+  <Button {...props} type="text" className="default-filter-button">
+    Filtrar <CaretDown size={16} />
+  </Button>
+);
 
 export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>([]);
@@ -178,13 +194,10 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props)
 
   return (
     <Cascader
-      className="filterCascader"
-      style={{ maxWidth: isMobile ? "4rem" : "15rem", height: "48px" }}
       multiple
       size="large"
       removeIcon
       maxTagCount="responsive"
-      placeholder={isMobile ? <Funnel size={24} /> : "Filtrar"}
       placement="bottomLeft"
       onClear={() => {
         setSelectOptions([]);
@@ -196,6 +209,8 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props)
       onChange={onChange}
       displayRender={displayRender}
       showCheckedStrategy="SHOW_PARENT"
-    />
+    >
+      {isMobile ? <MobileButton /> : <DefaultButton />}
+    </Cascader>
   );
 };
