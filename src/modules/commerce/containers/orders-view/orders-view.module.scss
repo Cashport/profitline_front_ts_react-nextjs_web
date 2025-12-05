@@ -87,30 +87,21 @@
     .ordersView {
         .FlexContainer {
             padding: 1rem !important;
-        }
 
-        .header {
-            height: fit-content !important;
-            flex-wrap: wrap;
-
-            // Búsqueda y Generar acción en primera fila
-            > :nth-child(1), // searchInput
-            > :nth-child(2) {
-                // generateActionButton
-                flex: 1 1 calc(50% - 0.25rem);
-            }
-
-            // Filtrar y Crear orden en segunda fila
-            > :nth-child(3) {
-                // FilterMarketplaceOrders
-                // flex: 0 0 auto;
-                flex: 0 0 calc(50% - 0.25rem);
-            }
-
-            > :nth-child(4) {
-                // ctaButton (Crear orden)
-                flex: 1 1 auto;
+            .header {
+                height: fit-content !important;
+                gap: 0.125rem;
             }
         }
+    }
+
+    .dashboardButton {
+        background-color: $background !important;
+        padding: 7px 12px !important;
+    }
+
+    .generateActionButton {
+        width: fit-content !important;
+        padding: 7px 12px !important;
     }
 }

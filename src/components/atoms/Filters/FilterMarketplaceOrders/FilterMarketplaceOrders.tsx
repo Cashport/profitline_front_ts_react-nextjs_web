@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Cascader } from "antd";
+import { Funnel } from "@phosphor-icons/react";
 import { getOrdersFilter } from "@/services/commerce/commerce";
 import "../filterCascader.scss";
 
@@ -36,13 +37,14 @@ export interface IMarketplaceOrderFilters {
 
 interface Props {
   setSelectedFilters: Dispatch<SetStateAction<IMarketplaceOrderFilters>>;
+  isMobile?: boolean;
 }
 
 const initValueFiltersData = {
   sellers: []
 };
 
-export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
+export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>([]);
   const [selectOptions, setSelectOptions] = useState<(string | number)[][]>([]);
   const [sellersData, setSellersData] = useState<ISellerGroup[]>([]);
@@ -177,12 +179,12 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
   return (
     <Cascader
       className="filterCascader"
-      style={{ width: "15rem", height: "46px" }}
+      style={{ maxWidth: isMobile ? "4rem" : "15rem", height: "48px" }}
       multiple
       size="large"
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
+      placeholder={isMobile ? <Funnel size={24} /> : "Filtrar"}
       placement="bottomLeft"
       onClear={() => {
         setSelectOptions([]);
