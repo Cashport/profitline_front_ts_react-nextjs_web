@@ -1,7 +1,10 @@
+"use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Cascader } from "antd";
+import { Button, Cascader } from "antd";
+import { CaretDown, Funnel } from "@phosphor-icons/react";
 import { getOrdersFilter } from "@/services/commerce/commerce";
-import "../filterCascader.scss";
+
+import "./filterMarketplaceOrders.scss";
 
 // Interfaces para los tipos de datos
 interface ISeller {
@@ -36,13 +39,28 @@ export interface IMarketplaceOrderFilters {
 
 interface Props {
   setSelectedFilters: Dispatch<SetStateAction<IMarketplaceOrderFilters>>;
+  isMobile?: boolean;
 }
 
 const initValueFiltersData = {
   sellers: []
 };
 
-export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
+// Sub-component for Mobile Button
+const MobileButton = (props: any) => (
+  <Button type="text" className="mobile-filter-button" {...props}>
+    <Funnel size={24} />
+  </Button>
+);
+
+// Sub-component for Default (Desktop) Button
+const DefaultButton = (props: any) => (
+  <Button {...props} type="text" className="default-filter-button">
+    Filtrar <CaretDown size={16} />
+  </Button>
+);
+
+export const FilterMarketplaceOrders = ({ setSelectedFilters, isMobile }: Props) => {
   const [optionsList, setOptionsList] = useState<Option[]>([]);
   const [selectOptions, setSelectOptions] = useState<(string | number)[][]>([]);
   const [sellersData, setSellersData] = useState<ISellerGroup[]>([]);
@@ -176,13 +194,10 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
 
   return (
     <Cascader
-      className="filterCascader"
-      style={{ width: "15rem", height: "46px" }}
       multiple
       size="large"
       removeIcon
       maxTagCount="responsive"
-      placeholder="Filtrar"
       placement="bottomLeft"
       onClear={() => {
         setSelectOptions([]);
@@ -194,6 +209,8 @@ export const FilterMarketplaceOrders = ({ setSelectedFilters }: Props) => {
       onChange={onChange}
       displayRender={displayRender}
       showCheckedStrategy="SHOW_PARENT"
-    />
+    >
+      {isMobile ? <MobileButton /> : <DefaultButton />}
+    </Cascader>
   );
 };

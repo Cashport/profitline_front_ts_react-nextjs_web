@@ -8,22 +8,26 @@ import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
+import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 // import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
 // import { Tag } from "@/components/atoms/Tag/Tag";
 
-import { IOrder } from "@/types/commerce/ICommerce";
+import { IOrder, IOrderData } from "@/types/commerce/ICommerce";
 
 import "./orders-view-table.scss";
 const { Text } = Typography;
 
 interface PropsOrdersViewTable {
-  dataSingleOrder: any[];
+  dataSingleOrder: IOrderData | undefined;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   selectedRowKeys: Key[];
   orderStatus: string;
   setFetchMutate: () => void;
   onlyKeyInfo?: boolean;
+  onChangePage: (statusId: number, page: number) => void;
+  currentPage?: number;
+  isLoadingPagination?: boolean;
 }
 
 const OrdersViewTable = ({
@@ -33,7 +37,10 @@ const OrdersViewTable = ({
   selectedRowKeys,
   orderStatus,
   setFetchMutate,
-  onlyKeyInfo = false
+  onlyKeyInfo = false,
+  onChangePage,
+  currentPage,
+  isLoadingPagination = false
 }: PropsOrdersViewTable) => {
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -279,9 +286,18 @@ const OrdersViewTable = ({
       <Table
         className="ordersViewTable"
         columns={columns}
-        dataSource={data.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data?.orders?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
-        pagination={false}
+        pagination={{
+          current: currentPage || data?.pagination?.page || 1,
+          pageSize: data?.pagination?.limit || 25,
+          total: data?.pagination?.total_count || 0,
+          showSizeChanger: false,
+          position: ["none", "bottomRight"],
+          onChange: (page) => onChangePage(data?.status_id || 0, page),
+          itemRender: TablePaginator
+        }}
+        loading={isLoadingPagination}
       />
       <ChangeWarehouseModal
         selectedOrder={selectedOrder ?? 0}

@@ -11,7 +11,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 import { useDebounce } from "@/hooks/useDeabouce";
-import { ClientDetailsContext } from "../client-details/client-details";
+import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-context";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";

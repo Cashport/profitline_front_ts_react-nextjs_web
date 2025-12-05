@@ -172,6 +172,15 @@ export const InvoicesTable = ({
       width: 140
     },
     {
+      title: "Detalle",
+      dataIndex: "comments",
+      key: "comments",
+      render: (text) => <p className="cell -alignRight">{text ? text : "-"}</p>,
+      sorter: (a, b) => a.comments.localeCompare(b.comments),
+      showSorterTooltip: false,
+      align: "right"
+    },
+    {
       title: "Monto inicial",
       key: "initial_value",
       dataIndex: "initial_value",

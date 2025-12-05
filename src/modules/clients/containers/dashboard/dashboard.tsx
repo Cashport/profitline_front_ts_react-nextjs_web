@@ -9,7 +9,7 @@ import DashboardAlerts from "../../components/dashboard-alerts";
 import DashboardGenericItem from "../../components/dashboard-generic-item";
 import DashboardSellsVsPayments from "../../components/dashboard-sells-vs-payments";
 import DashboardHistoricDso from "../../components/dashboard-historic-dso";
-import { ClientDetailsContext } from "../client-details/client-details";
+import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-context";
 import { useDashboardInfo } from "@/components/hooks/useDashboardInfo";
 import DashboardCollectApply from "../../components/dashboard-collect-apply";
 
