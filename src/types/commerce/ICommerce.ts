@@ -210,9 +210,18 @@ export interface ICategories {
 export interface IOrderData {
   color: string;
   status: string;
+  status_id: number;
   count: number;
   orders: IOrder[];
   total: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total_count: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
 }
 
 export interface IOrder {
