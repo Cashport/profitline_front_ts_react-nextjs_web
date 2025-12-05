@@ -1,4 +1,3 @@
-"use client";
 import { Dispatch, Key, SetStateAction, useState } from "react";
 import { Flex, message, Modal, Typography } from "antd";
 import {
@@ -156,7 +155,6 @@ export const OrdersGenerateActionModal = ({
     <>
       <Modal
         className="ordersGenerateActionModal"
-        width={"45%"}
         open={isOpen}
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
