@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Button } from "antd";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
 import { CaretLeft } from "@phosphor-icons/react";
+
+import { useAppStore } from "@/lib/store/store";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import {
   Tooltip,
@@ -32,10 +35,11 @@ type SortDirection = "asc" | "desc";
 interface SalesTableProps {
   seller_leaders: ISalesDashboardSellerLeader[];
   iaTotal: ISalesDashboardTotal;
-  formatCurrency: (amount: number) => string;
 }
 
-export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: SalesTableProps) {
+export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps) {
+  const formatMoney = useAppStore((state) => state.formatMoney);
+
   const [expandedSellerLeaders, setExpandedSellerLeaders] = useState<Set<string>>(
     new Set(["regional 1", "regional 2", "regional 3"])
   );
@@ -252,27 +256,41 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                               <span className="truncate">{sellerLeader.seller_leader}</span>
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.total_sales_pending)}
+                              {formatMoney(sellerLeader.total_sales_pending, {
+                                hideDecimals: true
+                              })}
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.total_sales_wallet)}
+                              {formatMoney(sellerLeader.total_sales_wallet, {
+                                hideDecimals: true
+                              })}
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.total_sales_in_process)}
+                              {formatMoney(sellerLeader.total_sales_in_process, {
+                                hideDecimals: true
+                              })}
                             </td>
                             <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.total_sales_invoiced)}
+                              {formatMoney(sellerLeader.total_sales_invoiced, {
+                                hideDecimals: true
+                              })}
                             </td>
                             <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.total_sales)}
+                              {formatMoney(sellerLeader.total_sales, {
+                                hideDecimals: true
+                              })}
                             </td>
                             <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                               <div className="flex items-center justify-end gap-1 sm:gap-2">
                                 <span className="hidden sm:inline">
-                                  {formatCurrency(sellerLeader.total_cuota)}
+                                  {formatMoney(sellerLeader.total_cuota, {
+                                    hideDecimals: true
+                                  })}
                                 </span>
                                 <span className="sm:hidden text-xs">
-                                  {formatCurrency(sellerLeader.total_cuota).replace(/\s/g, "")}
+                                  {formatMoney(sellerLeader.total_cuota, {
+                                    hideDecimals: true
+                                  }).replace(/\s/g, "")}
                                 </span>
                                 <span
                                   className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(sellerLeader.percentage_cuota)}`}
@@ -282,7 +300,9 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                               </div>
                             </td>
                             <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                              {formatCurrency(sellerLeader.pending_cuota)}
+                              {formatMoney(sellerLeader.pending_cuota, {
+                                hideDecimals: true
+                              })}
                             </td>
                           </tr>
                         </TooltipTrigger>
@@ -294,7 +314,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                             {sellerLeader.units_by_category.slice(0, 5).map((product, idx) => (
                               <div key={idx} className="flex justify-between text-sm">
                                 <span>{product.producto}</span>
-                                <span className="font-medium">{formatCurrency(product.monto)}</span>
+                                <span className="font-medium">{formatMoney(product.monto)}</span>
                               </div>
                             ))}
                           </div>
@@ -312,27 +332,41 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                                   {seller.seller}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.total_sales_pending)}
+                                  {formatMoney(seller.total_sales_pending, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.total_sales_wallet)}
+                                  {formatMoney(seller.total_sales_wallet, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.total_sales_in_process)}
+                                  {formatMoney(seller.total_sales_in_process, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.total_sales_invoiced)}
+                                  {formatMoney(seller.total_sales_invoiced, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.total_sales)}
+                                  {formatMoney(seller.total_sales, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                                   <div className="flex items-center justify-end gap-1 sm:gap-2">
                                     <span className="hidden sm:inline">
-                                      {formatCurrency(seller.total_cuota)}
+                                      {formatMoney(seller.total_cuota, {
+                                        hideDecimals: true
+                                      })}
                                     </span>
                                     <span className="sm:hidden text-xs">
-                                      {formatCurrency(seller.total_cuota).replace(/\s/g, "")}
+                                      {formatMoney(seller.total_cuota, {
+                                        hideDecimals: true
+                                      }).replace(/\s/g, "")}
                                     </span>
                                     <span
                                       className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(seller.percentage_cuota)}`}
@@ -342,7 +376,9 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                                   </div>
                                 </td>
                                 <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                                  {formatCurrency(seller.pending_cuota)}
+                                  {formatMoney(seller.pending_cuota, {
+                                    hideDecimals: true
+                                  })}
                                 </td>
                               </tr>
                             </TooltipTrigger>
@@ -353,7 +389,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                                   <div key={idx} className="flex justify-between text-sm">
                                     <span>{product.producto}</span>
                                     <span className="font-medium">
-                                      {formatCurrency(product.monto)}
+                                      {formatMoney(product.monto)}
                                     </span>
                                   </div>
                                 ))}
@@ -370,27 +406,41 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                       <tr className="border-t-2 border-cashport-black bg-gray-100 font-bold cursor-pointer">
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Total</td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales_pending)}
+                          {formatMoney(iaTotal.total_sales_pending, {
+                            hideDecimals: true
+                          })}
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales_wallet)}
+                          {formatMoney(iaTotal.total_sales_wallet, {
+                            hideDecimals: true
+                          })}
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales_in_process)}
+                          {formatMoney(iaTotal.total_sales_in_process, {
+                            hideDecimals: true
+                          })}
                         </td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales_invoiced)}
+                          {formatMoney(iaTotal.total_sales_invoiced, {
+                            hideDecimals: true
+                          })}
                         </td>
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.total_sales)}
+                          {formatMoney(iaTotal.total_sales, {
+                            hideDecimals: true
+                          })}
                         </td>
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                           <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <span className="hidden sm:inline">
-                              {formatCurrency(iaTotal.total_cuota)}
+                              {formatMoney(iaTotal.total_cuota, {
+                                hideDecimals: true
+                              })}
                             </span>
                             <span className="sm:hidden text-xs">
-                              {formatCurrency(iaTotal.total_cuota).replace(/\s/g, "")}
+                              {formatMoney(iaTotal.total_cuota, {
+                                hideDecimals: true
+                              }).replace(/\s/g, "")}
                             </span>
                             <span
                               className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getAvanceBgColor(iaTotal.percentage_cuota)}`}
@@ -400,7 +450,9 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                           </div>
                         </td>
                         <td className="hidden lg:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
-                          {formatCurrency(iaTotal.pending_cuota)}
+                          {formatMoney(iaTotal.pending_cuota, {
+                            hideDecimals: true
+                          })}
                         </td>
                       </tr>
                     </TooltipTrigger>
@@ -410,7 +462,7 @@ export default function SalesTable({ seller_leaders, iaTotal, formatCurrency }: 
                         {iaTotal.units_by_category.slice(0, 5).map((product, idx) => (
                           <div key={idx} className="flex justify-between text-sm">
                             <span>{product.producto}</span>
-                            <span className="font-medium">{formatCurrency(product.monto)}</span>
+                            <span className="font-medium">{formatMoney(product.monto)}</span>
                           </div>
                         ))}
                       </div>
