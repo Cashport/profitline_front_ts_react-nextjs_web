@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal";
-import ApprovalsTable from "@/modules/aprobaciones/components/approvals-table/Approvals-table";
+import ApprovalsTable from "../approvals-table/approvals-table";
 
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
@@ -272,10 +272,6 @@ export default function ApprovalsView() {
   const [selectedStatuses, setSelectedStatuses] = useState<ApprovalStatus[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<ApprovalType[]>([]);
   const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<string | null>("daysWaiting");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filteredApprovals = mockApprovals.filter((approval) => {
@@ -289,65 +285,6 @@ export default function ApprovalsView() {
 
     return matchesSearch && matchesStatus && matchesType;
   });
-
-  const sortedApprovals = [...filteredApprovals].sort((a, b) => {
-    if (!sortColumn) return 0;
-
-    let aValue: any;
-    let bValue: any;
-
-    switch (sortColumn) {
-      case "id":
-        aValue = a.id;
-        bValue = b.id;
-        break;
-      case "type":
-        aValue = approvalTypeLabels[a.type];
-        bValue = approvalTypeLabels[b.type];
-        break;
-      case "client":
-        aValue = a.client.toLowerCase();
-        bValue = b.client.toLowerCase();
-        break;
-      case "date":
-        aValue = new Date(a.date);
-        bValue = new Date(b.date);
-        break;
-      case "daysWaiting":
-        aValue = a.daysWaiting;
-        bValue = b.daysWaiting;
-        break;
-      case "status":
-        aValue = a.status;
-        bValue = b.status;
-        break;
-      default:
-        return 0;
-    }
-
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedApprovals = sortedApprovals.slice(startIndex, endIndex);
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
-  const isAllSelected =
-    paginatedApprovals.length > 0 &&
-    paginatedApprovals.every((approval) => selectedIds.includes(approval.id));
-  const isIndeterminate =
-    paginatedApprovals.some((approval) => selectedIds.includes(approval.id)) && !isAllSelected;
 
   return (
     <div className="bg-background rounded-lg">
@@ -429,13 +366,10 @@ export default function ApprovalsView() {
             </div>
 
             <ApprovalsTable
-              approvals={paginatedApprovals}
+              approvals={filteredApprovals}
               selectedIds={selectedIds}
               onSelectIds={setSelectedIds}
               onSelectApproval={setSelectedApproval}
-              onSort={handleSort}
-              isAllSelected={isAllSelected}
-              isIndeterminate={isIndeterminate}
             />
           </div>
         </div>

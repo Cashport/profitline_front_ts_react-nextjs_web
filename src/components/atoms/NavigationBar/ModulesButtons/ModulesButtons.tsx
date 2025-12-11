@@ -219,7 +219,7 @@ export const ModulesButtons = ({
       )}
 
       {true && (
-        <Link href="/chat" passHref legacyBehavior>
+        <Link href="/aprobaciones" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"

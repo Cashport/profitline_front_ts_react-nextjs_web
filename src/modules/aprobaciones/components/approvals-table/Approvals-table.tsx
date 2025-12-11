@@ -1,9 +1,14 @@
 "use client";
 
-import { Eye, ArrowUpDown } from "lucide-react";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
+import { useEffect, useState } from "react";
+import { Button, Table, TableProps, Typography } from "antd";
+import { Eye } from "phosphor-react";
+
 import { Badge } from "@/modules/chat/ui/badge";
-import { Button } from "@/modules/chat/ui/button";
+
+import "./approvals-table.scss";
+
+const { Text } = Typography;
 
 type ApprovalStatus = "pendiente" | "aprobado" | "rechazado" | "en-espera";
 type ApprovalType = "creacion-nota" | "cupo-credito" | "creacion-cliente" | "orden-compra";
@@ -43,9 +48,6 @@ interface ApprovalsTableProps {
   selectedIds: string[];
   onSelectIds: (ids: string[]) => void;
   onSelectApproval: (approval: Approval) => void;
-  onSort: (column: string) => void;
-  isAllSelected: boolean;
-  isIndeterminate: boolean;
 }
 
 const approvalTypeLabels: Record<ApprovalType, string> = {
@@ -96,164 +98,116 @@ export default function ApprovalsTable({
   approvals,
   selectedIds,
   onSelectIds,
-  onSelectApproval,
-  onSort,
-  isAllSelected,
-  isIndeterminate
+  onSelectApproval
 }: ApprovalsTableProps) {
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectIds(approvals.map((approval) => approval.id));
-    } else {
-      onSelectIds([]);
-    }
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  useEffect(() => {
+    setSelectedRowKeys(selectedIds);
+  }, [selectedIds]);
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+    onSelectIds(newSelectedRowKeys as string[]);
   };
 
-  const handleToggleSelect = (approvalId: string) => {
-    onSelectIds(
-      selectedIds.includes(approvalId)
-        ? selectedIds.filter((id) => id !== approvalId)
-        : [...selectedIds, approvalId]
-    );
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange
   };
+
+  const columns: TableProps<Approval>["columns"] = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      render: (id, record) => (
+        <Text className="idText" onClick={() => onSelectApproval(record)}>
+          {id}
+        </Text>
+      ),
+      sorter: (a, b) => a.id.localeCompare(b.id),
+      showSorterTooltip: false
+    },
+    {
+      title: "Tipo de Aprobación",
+      dataIndex: "type",
+      key: "type",
+      render: (type: ApprovalType) => <Text>{approvalTypeLabels[type]}</Text>,
+      sorter: (a, b) => approvalTypeLabels[a.type].localeCompare(approvalTypeLabels[b.type]),
+      showSorterTooltip: false
+    },
+    {
+      title: "Cliente",
+      dataIndex: "client",
+      key: "client",
+      render: (text) => <Text className="clientText">{text}</Text>,
+      sorter: (a, b) => a.client.localeCompare(b.client),
+      showSorterTooltip: false
+    },
+    {
+      title: "Fecha",
+      dataIndex: "date",
+      key: "date",
+      render: (text) => <Text>{formatDate(text)}</Text>,
+      sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
+      showSorterTooltip: false,
+      width: 115
+    },
+    {
+      title: "Días Pendientes",
+      dataIndex: "daysWaiting",
+      key: "daysWaiting",
+      align: "center",
+      render: (days: number) => (
+        <Text className={`daysText ${calculateDaysColor(days)}`}>{days}</Text>
+      ),
+      sorter: (a, b) => a.daysWaiting - b.daysWaiting,
+      showSorterTooltip: false,
+      width: 130
+    },
+    {
+      title: "Estado",
+      dataIndex: "status",
+      key: "status",
+      render: (status: ApprovalStatus) => {
+        const config = statusConfig[status];
+        return (
+          <Badge className={config.textColor} style={{ backgroundColor: config.color }}>
+            {config.label}
+          </Badge>
+        );
+      },
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      showSorterTooltip: false,
+      width: 120
+    },
+    {
+      title: "",
+      key: "actions",
+      width: 60,
+      render: (_, record) => (
+        <Button
+          className="buttonSeeDetail"
+          onClick={() => onSelectApproval(record)}
+          icon={<Eye size={"1.3rem"} />}
+        />
+      )
+    }
+  ];
 
   return (
     <>
       {/* Desktop Table */}
-      <div className="hidden md:block rounded-lg border bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-white border-b border-gray-200">
-              <tr>
-                <th className="text-left p-4 font-bold text-black w-12">
-                  <Checkbox
-                    checked={isIndeterminate ? "indeterminate" : isAllSelected}
-                    onCheckedChange={handleSelectAll}
-                  />
-                </th>
-                <th className="text-left p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("id")}
-                    className="flex items-center gap-1 hover:text-gray-600 transition-colors"
-                  >
-                    ID
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="text-left p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("type")}
-                    className="flex items-center gap-1 hover:text-gray-600 transition-colors"
-                  >
-                    Tipo de Aprobacion
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="text-left p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("client")}
-                    className="flex items-center gap-1 hover:text-gray-600 transition-colors"
-                  >
-                    Cliente
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="text-left p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("date")}
-                    className="flex items-center gap-1 hover:text-gray-600 transition-colors"
-                  >
-                    Fecha
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="text-center p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("daysWaiting")}
-                    className="flex items-center justify-center gap-1 hover:text-gray-600 transition-colors w-full"
-                  >
-                    Dias Pendiente
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="text-left p-4 font-bold text-black">
-                  <button
-                    onClick={() => onSort("status")}
-                    className="flex items-center gap-1 hover:text-gray-600 transition-colors"
-                  >
-                    Estado
-                    <ArrowUpDown className="h-3 w-3" />
-                  </button>
-                </th>
-                <th className="p-4 w-16"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {approvals.map((approval) => {
-                const statusData = statusConfig[approval.status];
-
-                return (
-                  <tr
-                    key={approval.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selectedIds.includes(approval.id)}
-                        onCheckedChange={() => handleToggleSelect(approval.id)}
-                      />
-                    </td>
-                    <td className="p-4">
-                      <button
-                        onClick={() => onSelectApproval(approval)}
-                        className="text-blue-500 hover:text-blue-700 hover:underline cursor-pointer transition-colors"
-                      >
-                        {approval.id}
-                      </button>
-                    </td>
-                    <td className="p-4 text-gray-700">{approvalTypeLabels[approval.type]}</td>
-                    <td className="p-4 text-gray-700 max-w-64">
-                      <span className="truncate" title={approval.client}>
-                        {approval.client}
-                      </span>
-                    </td>
-                    <td className="p-4 text-gray-700">
-                      <span className="text-sm">{formatDate(approval.date)}</span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <span
-                        className={`font-semibold ${calculateDaysColor(approval.daysWaiting)}`}
-                      >
-                        {approval.daysWaiting}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <Badge
-                        className={`${statusData.textColor}`}
-                        style={{ backgroundColor: statusData.color }}
-                      >
-                        {statusData.label}
-                      </Badge>
-                    </td>
-                    <td className="p-4 text-right">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectApproval(approval);
-                        }}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className="hidden md:block">
+        <Table
+          className="approvalsTable"
+          columns={columns}
+          rowSelection={rowSelection}
+          dataSource={approvals.map((data) => ({ ...data, key: data.id }))}
+          pagination={{ pageSize: 15, showSizeChanger: false }}
+          scroll={{ x: "max-content" }}
+        />
       </div>
 
       {/* Mobile Cards */}
@@ -280,13 +234,10 @@ export default function ApprovalsTable({
                   <p className="text-sm text-gray-600 truncate">{approval.client}</p>
                 </div>
                 <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent flex-shrink-0"
+                  className="buttonSeeDetail"
                   onClick={() => onSelectApproval(approval)}
-                >
-                  <Eye className="h-4 w-4 text-gray-600" />
-                </Button>
+                  icon={<Eye size={"1.3rem"} />}
+                />
               </div>
             </div>
           );
