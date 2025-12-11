@@ -350,7 +350,7 @@ export default function ApprovalsView() {
     paginatedApprovals.some((approval) => selectedIds.includes(approval.id)) && !isAllSelected;
 
   return (
-    <div className="min-h-screen bg-background rounded-lg">
+    <div className="bg-background rounded-lg">
       <main className="p-6">
         <div className="mx-auto">
           <div className="space-y-4">

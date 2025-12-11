@@ -3,6 +3,9 @@
  * Solo define los colores de marca Cashport en formato RGB
  * Las otras variables (--background, --foreground, etc.) ya están en chatStyles.css
  */
+/* TO DO: Centralizar estilos y componentes creados por V0 en un solo lugar en vez 
+    de estar yendo a veces a chatStyles.css y componentes chat/ui 
+ */
 
 :root {
   /* Cashport Brand Colors - RGB format for Tailwind compatibility */
