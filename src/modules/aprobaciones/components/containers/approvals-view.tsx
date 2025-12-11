@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Search, MoreHorizontal, SlidersHorizontal, ListFilter } from "lucide-react";
-import { Input } from "@/modules/chat/ui/input";
+import { SlidersHorizontal, ListFilter } from "lucide-react";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import { Button } from "@/modules/chat/ui/button";
 import {
   DropdownMenu,
@@ -293,29 +294,21 @@ export default function ApprovalsView() {
           <div className="space-y-4">
             {/* Responsive flex-col on mobile, flex-row on md+ */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="relative w-full md:w-96">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Buscar"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
+              <OptimizedSearchComponent onSearch={setSearchQuery} title="Buscar" />
 
               <div className="hidden md:flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="gap-2 bg-transparent"
-                  onClick={() => console.log("Generate action")}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                  Generar acción
-                </Button>
+                <GenerateActionButton
+                  onClick={() => {}}
+                  disabled={selectedIds.length === 0}
+                />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="gap-2 bg-transparent !font-semibold"
+                      style={{ height: "3rem" }}
+                    >
                       <SlidersHorizontal className="h-4 w-4" />
                       Estados
                     </Button>
@@ -340,7 +333,11 @@ export default function ApprovalsView() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="gap-2 bg-transparent !font-semibold"
+                      style={{ height: "3rem" }}
+                    >
                       <ListFilter className="h-4 w-4" />
                       Tipos
                     </Button>
