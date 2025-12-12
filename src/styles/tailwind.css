@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TO DO: CENTRALIZE tailwind styles created by v0 here */
+
+/* Animación fadeIn para componentes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* MapLibre popup styles */
+.cashport-popup .maplibregl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
+}
+
+.cashport-popup .maplibregl-popup-tip {
+  border-top-color: #fff;
+}
