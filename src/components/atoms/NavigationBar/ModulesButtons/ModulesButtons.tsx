@@ -12,7 +12,7 @@ import {
   Stack,
   ClipboardText
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
+import { ChatCircleDots, SealPercent, HandTap, ChartBar } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -213,6 +213,20 @@ export const ModulesButtons = ({
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Chat"}
+          </Button>
+        </Link>
+      )}
+
+      {/* New Dashboard */}
+      {true && (
+        <Link href="/newDashboard" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ChartBar  size={iconSize} />}
+            className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "New Dashboard"}
           </Button>
         </Link>
       )}
