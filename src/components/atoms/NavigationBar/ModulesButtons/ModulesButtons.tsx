@@ -10,7 +10,8 @@ import {
   Storefront,
   UsersFour,
   Stack,
-  ClipboardText
+  ClipboardText,
+  ListChecks
 } from "phosphor-react";
 import { ChatCircleDots, SealPercent, HandTap, ChartBar } from "@phosphor-icons/react";
 
@@ -213,6 +214,20 @@ export const ModulesButtons = ({
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Chat"}
+          </Button>
+        </Link>
+      )}
+
+      {/* Aprobaciones */}
+      {true && (
+        <Link href="/aprobaciones" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ListChecks size={iconSize} />}
+            className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Aprobaciones"}
           </Button>
         </Link>
       )}
