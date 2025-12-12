@@ -12,10 +12,10 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal";
-import ApprovalsTable from "../approvals-table/approvals-table";
 
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
+import ApprovalsTable from "../approvals-table/Approvals-table";
 
 type ApprovalStatus = "pendiente" | "aprobado" | "rechazado" | "en-espera";
 type ApprovalType = "creacion-nota" | "cupo-credito" | "creacion-cliente" | "orden-compra";
