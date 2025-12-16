@@ -361,6 +361,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
               >
                 <div className="relative w-full max-h-72 aspect-video">
                   <Image
+                    style={{ position: "relative" }}
                     src={m.mediaUrl || "/placeholder.svg"}
                     alt="Imagen enviada"
                     fill
