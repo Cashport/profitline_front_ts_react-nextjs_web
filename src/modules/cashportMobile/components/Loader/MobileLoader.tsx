@@ -1,5 +1,5 @@
 import Loader from "@/components/atoms/loaders/loader";
-import "./mobileLoader.scss";
+import "./MobileLoader.scss";
 
 export default function MobileLoader() {
   return (
