@@ -67,7 +67,7 @@ const BaseCard: React.FC<BaseCardProps> = ({
           {rightColumnNode}
           {amount && (
             <p className="base-card__amount" style={{ color: amountColor }}>
-              <span className="base-card__currency">$</span> {amount}
+              <span className="base-card__currency"></span> {amount}
             </p>
           )}
           {originalAmount && (

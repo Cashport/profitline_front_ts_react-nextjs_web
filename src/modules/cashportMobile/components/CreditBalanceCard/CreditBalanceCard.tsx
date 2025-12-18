@@ -2,14 +2,10 @@
 import React from "react";
 import { ArrowUUpLeft } from "@phosphor-icons/react";
 import BaseCard from "../atoms/BaseCard/BaseCard";
+import { CreditBalance, CreditBalanceFormated } from "@/types/clients/IClients";
 
 export interface CreditBalanceCardProps {
-  credit: {
-    id: string | number;
-    description: string;
-    date: string;
-    formattedAmount: string;
-  };
+  credit: CreditBalanceFormated;
 }
 
 const CreditBalanceCard: React.FC<CreditBalanceCardProps> = ({ credit }) => {

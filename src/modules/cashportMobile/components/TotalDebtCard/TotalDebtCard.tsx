@@ -10,10 +10,11 @@ const { Text, Title } = Typography;
 interface TotalDebtProps {
   totalDebt: number | string;
   readyToPay: number | string;
+  ppToPay?: number | string;
   onPay?: () => void;
 }
 
-const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay }) => {
+const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, ppToPay, onPay }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   return (
@@ -25,6 +26,15 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
             <Title level={3} className="TotalDebtCard__total-amount">
               <span className="TotalDebtCard__currency">$</span>{" "}
               {formatMoney(totalDebt, {
+                hideCurrencySymbol: true
+              })}
+            </Title>
+          </div>
+          <Text className="TotalDebtCard__label">Total a pagar</Text>
+          <div className="TotalDebtCard__total-row">
+            <Title level={3} className="TotalDebtCard__total-amount">
+              <span className="TotalDebtCard__currency">$</span>{" "}
+              {formatMoney(readyToPay, {
                 hideCurrencySymbol: true
               })}
             </Title>
@@ -51,7 +61,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
 
         <Title level={5} className="TotalDebtCard__ready-amount">
           <span className="TotalDebtCard__currency">$</span>
-          {formatMoney(readyToPay, {
+          {formatMoney(ppToPay, {
             hideCurrencySymbol: true
           })}
         </Title>
@@ -61,6 +71,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
         type="primary"
         size="large"
         block
+        disabled={!onPay}
         className="TotalDebtCard__pay-button"
         onClick={onPay}
       >
