@@ -11,67 +11,86 @@ import { getClientWallet } from "@/services/clients/clients";
 
 import TotalDebtCard from "../../components/TotalDebtCard/TotalDebtCard";
 import PendingInvoicesTab from "../tabs/PendingInvoicesTab/PendingInvoicesTab";
+import CreditBalancesTab from "../tabs/CreditBalancesTab/CreditBalancesTab";
 import MyPaymentsTab from "../tabs/MyPaymentsTab/MyPaymentsTab";
 
-import { IClientWalletData } from "@/types/clients/IClients";
+import { CreditBalance, CreditBalanceFormated, IClientWalletData, InvoiceFormated } from "@/types/clients/IClients";
 
 import "./cashportMobileView.scss";
 import MobileLoader from "../../components/Loader/MobileLoader";
 import ErrorMobile from "../../components/ErrorView/ErrorMobile";
-
-interface Invoice {
-  id: string;
-  code: string;
-  date: string;
-  amount: number;
-  formattedAmount: string;
-  originalAmount?: number;
-  formattedOriginalAmount?: string;
-  isPastDue?: boolean;
-}
-
-interface CreditBalance {
-  id: string;
-  description: string;
-  date: string;
-  formattedAmount: string;
-}
-
-// Helper function to format currency
-const formatCurrency = (value?: number): string => {
-  if (value === undefined || value === null) return "0";
-  return value.toLocaleString("es-CO");
-};
+import { formatCurrencyMoney } from "@/utils/utils";
 
 // Helper function to format date
-const formatDate = (dateString?: string): string => {
+export const formatDate = (dateString?: string): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
   return date.toLocaleDateString("en-US", options);
 };
 
+const getInvoiceStatus = (
+  expirationDate: string,
+  estado: string
+): "overdue" | "dueToday" | "dueTomorrow" | "normal" => {
+  if (estado === "Vencida") return "overdue";
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const expDate = new Date(expirationDate);
+  // Adjust for timezone if necessary, but assuming local date or UTC consistent
+  // If expirationDate is ISO string with time, we strip time.
+  // If it's YYYY-MM-DD, new Date() might treat as UTC.
+  // To be safe with "today", we should probably use UTC or local consistently.
+  // Assuming simple comparison for now.
+  // However, new Date("2025-06-03") is UTC, new Date() is local.
+  // Let's try to be consistent.
+  // If expirationDate is "2025-06-03T00:00:00", it works.
+  
+  // A safer way for "today" check without timezone issues if we only care about date part:
+  const exp = new Date(expirationDate);
+  const t = new Date();
+  
+  const isSameDay = (d1: Date, d2: Date) => 
+    d1.getDate() === d2.getDate() && 
+    d1.getMonth() === d2.getMonth() && 
+    d1.getFullYear() === d2.getFullYear();
+
+  if (isSameDay(exp, t)) return "dueToday";
+  
+  const tmr = new Date();
+  tmr.setDate(tmr.getDate() + 1);
+  if (isSameDay(exp, tmr)) return "dueTomorrow";
+
+  return "normal";
+};
+
 // Helper function to map API invoice data to component format
-const mapPendingInvoices = (listadoFacturas?: IClientWalletData["listado_facturas"]): Invoice[] => {
+const mapPendingInvoices = (listadoFacturas?: IClientWalletData["invoices_list"]): InvoiceFormated[] => {
   if (!listadoFacturas) return [];
   return listadoFacturas?.map((factura, index) => ({
     id: (index + 1).toString(),
-    code: factura.factura,
+    code: factura.invoice,
     date: formatDate(factura.expiration_date),
-    amount: factura.valor,
-    formattedAmount: formatCurrency(factura.valor),
-    isPastDue: factura.estado === "Vencida"
+    amount: factura.value,
+    status: factura.status as any,
+    formattedAmount: formatCurrencyMoney(factura.value),
+    isPastDue: factura.status === "Vencida",
   }));
 };
 
 // Helper function to map API credit balance data to component format
-const mapCreditBalances = (saldosAFavor?: any[]): CreditBalance[] => {
+const mapCreditBalances = (saldosAFavor?: CreditBalance[]): CreditBalanceFormated[] => {
   if (!saldosAFavor) return [];
   return saldosAFavor.map((saldo, index) => ({
     id: (index + 1).toString(),
-    description: saldo.description || "Saldo a favor",
-    date: saldo.date ? formatDate(saldo.date) : "",
-    formattedAmount: formatCurrency(saldo.amount || 0)
+    description: saldo.reason || "Saldo a favor",
+    date: saldo.creation_date ? formatDate(saldo.creation_date) : "",
+    formattedAmount: formatCurrencyMoney(saldo.value || 0)
   }));
 };
 
@@ -125,16 +144,23 @@ const CashportMobileView: React.FC = () => {
       label: "Facturas pendientes",
       children: (
         <PendingInvoicesTab
-          pendingInvoices={data ? mapPendingInvoices(data.listado_facturas) : []}
-          creditBalances={data ? mapCreditBalances(data.saldos_a_favor) : []}
+          pendingInvoices={data ? mapPendingInvoices(data.invoices_list) : []}
+        />
+      )
+    },
+    {
+      key: "credit-balances",
+      label: "Saldos a favor",
+      children: (
+        <CreditBalancesTab
+          creditBalances={data ? mapCreditBalances(data.credit_balances) : []}
         />
       )
     },
     {
       key: "my-payments",
       label: "Mis pagos",
-      disabled: true,
-      children: <MyPaymentsTab availablePayments={[]} />
+      children: <MyPaymentsTab availablePayments={data?.payments.length ? data.payments : []} />
     }
   ];
 
@@ -155,9 +181,10 @@ const CashportMobileView: React.FC = () => {
   return (
     <div className="cashportMobileView">
       <TotalDebtCard
-        totalDebt={data?.deuda_total || 0}
-        readyToPay={data?.descuento_pronto_pago || 0}
-        onPay={handlePay}
+        totalDebt={data?.total_debt || 0}
+        readyToPay={data?.total_to_pay || 0}
+        ppToPay={data?.early_payment_discount || 0}
+        onPay={data?.total_to_pay ? handlePay : undefined}
       />
 
       <div className="cashportMobileView__tabs-section">

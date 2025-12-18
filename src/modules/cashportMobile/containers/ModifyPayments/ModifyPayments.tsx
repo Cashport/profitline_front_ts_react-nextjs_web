@@ -16,6 +16,7 @@ type IInvoiceFormItem = {
   id: string;
   code: string;
   date: string;
+  status: string;
   modifiedValue: string;
   isPastDue?: boolean;
   formattedOriginalAmount?: string;
@@ -79,6 +80,7 @@ const ModifyPayments: React.FC = () => {
                   invoice={{
                     id: field.id,
                     code: field.code,
+                    status: field.status as any,
                     date: field.date,
                     isPastDue: field.isPastDue || false,
                     formattedOriginalAmount: field.formattedOriginalAmount
