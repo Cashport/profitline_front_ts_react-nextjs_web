@@ -420,7 +420,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
       const template = waTemplates.find((t) => t.name === m.templateName);
       if (!template) {
-        return <div className="text-red-500">Plantilla "{m.templateName}" no encontrada</div>;
+        return <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>;
       }
 
       const templateComponents = template.components;

@@ -127,15 +127,53 @@ export interface ISelectType {
 }
 
 export interface IClientInvoice {
-  factura: string;
-  valor: number;
+  invoice: string;
+  emission_date: string;
+  value: number;
   expiration_date: string;
-  estado: string;
+  status: string;
 }
 
 export interface IClientWalletData {
-  deuda_total: number;
-  descuento_pronto_pago: number;
-  listado_facturas: IClientInvoice[];
-  saldos_a_favor: any[];
+  total_debt: number;
+  total_to_pay: number;
+  early_payment_discount: number;
+  invoices_list: IClientInvoice[];
+  credit_balances: CreditBalance[];
+  payments: CreditBalancePayments[];
+}
+
+export interface CreditBalance {
+  reason: string;
+  value: number;
+  creation_date: string;
+}
+
+export interface CreditBalancePayments {
+  id: number;
+  current_value: number;
+  id_status: number;
+  description: string;
+  color: string;
+  status_description: string;
+  payment_date: string;
+}
+
+export interface InvoiceFormated {
+  id: string;
+  code: string;
+  date: string;
+  amount: number;
+  formattedAmount: string;
+  originalAmount?: number;
+  formattedOriginalAmount?: string;
+  isPastDue?: boolean;
+  status?: "overdue" | "dueToday" | "dueTomorrow" | "normal";
+}
+
+export interface CreditBalanceFormated {
+  id: string;
+  description: string;
+  date: string;
+  formattedAmount: string;
 }
