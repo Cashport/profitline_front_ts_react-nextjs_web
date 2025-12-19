@@ -98,22 +98,9 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                         <Button
                           className="text-[#141414]"
                           style={{ backgroundColor: "#CBE71E" }}
-                          onClick={async () => {
-                            try {
-                              console.log("ticketid", ticketId);
-                              const payload = await getPayloadByTicket(ticketId);
-                              console.log("Payload generado:", payload);
-
-                              if (!payload) {
-                                return;
-                              }
-
-                              await sendWhatsAppTemplate(payload);
-                              onOpenChange(false);
-                            } catch (error) {
-                              console.error("Error al enviar la plantilla:", error);
-                            }
-                          }}
+                          onClick={() =>
+                            onUse({ channel: "whatsapp", content: bodyComponent?.text || "" })
+                          }
                         >
                           Enviar
                         </Button>
