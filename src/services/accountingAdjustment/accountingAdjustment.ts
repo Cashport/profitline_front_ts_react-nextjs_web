@@ -357,15 +357,35 @@ export const balanceLegalization = async (balances: IBalances[]): Promise<Generi
 export const addCommentHistoricAction = async (
   clientId: string,
   project_id: number,
-  comment: string
+  comment: string,
+  management_type_id: number,
+  management_status_id: number,
+  contact_id?: number,
+  file?: File
 ): Promise<GenericResponse> => {
-  const body = {
-    comment: comment
-  };
+  const formData = new FormData();
+
+  formData.append("comment", comment);
+  formData.append("management_type_id", String(management_type_id));
+  formData.append("management_status_id", String(management_status_id));
+
+  if (contact_id) {
+    formData.append("contact_id", String(contact_id));
+  }
+
+  if (file) {
+    formData.append("file", file);
+  }
+
   try {
     const response: GenericResponse = await API.post(
       `${config.API_HOST}/portfolio/add-comment-history/client/${clientId}/project/${project_id}`,
-      body
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
     );
     return response;
   } catch (error) {
@@ -392,3 +412,43 @@ export const markInvoiceAsBalance = async (
     throw error;
   }
 };
+
+export const getManagementTypes = async (): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/management/types`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting management types", error);
+    throw error;
+  }
+};
+
+export const getManagementStatus = async (): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/management/status`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting management status", error);
+    throw error;
+  }
+};
+
+export const getContactsByClient = async (
+  clientId: string,
+  project_id: number
+): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/clients/${clientId}/project/${project_id}/contacts`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting contacts by client", error);
+    throw error;
+  }
+};
+
