@@ -460,7 +460,7 @@ export default function ChatInbox() {
           if (!contact) return;
           const result = await getTemplateMessages(sendConversation?.clientUUID || "", "template");
           const data = {
-            ...result.data,
+            ...result,
             phoneNumber: "",
             templateId: "",
             senderId: "",
