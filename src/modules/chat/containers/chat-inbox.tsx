@@ -24,6 +24,15 @@ import MassMessageSheet from "./mass-message-sheet";
 
 import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
+import TemplateDialog from "./template-dialog";
+import SelectClientDialog from "./select-client-dialog";
+import { getClients } from "@/services/commerce/commerce";
+import {
+  getTemplateMessages,
+  getWhatsappClientContacts,
+  getWhatsappClients,
+  sendWhatsAppTemplateNew
+} from "@/services/whatsapp/clients";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -76,6 +85,13 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
   };
 }
 
+type NewConversation = {
+  stage: "selectClient" | "selectContact" | "confirm" | "completed";
+  clientUUID: string;
+  contactId: string;
+  contactNumber: string;
+};
+
 export default function ChatInbox() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
@@ -86,8 +102,47 @@ export default function ChatInbox() {
   const [ticketsData, setTicketsData] = useState<ITicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
+  const [sendNewMessage, setSendNewMessage] = useState(false);
+  const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
+
+  const [contacts, setContacts] = useState<
+    { id: number; contact_name: string; contact_phone: string }[]
+  >([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
 
   const { connect, subscribeToTicketUpdates, isConnected } = useSocket();
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const res = await getWhatsappClients();
+        const formatted = res.map((c) => ({ id: c.uuid, name: c.client_name }));
+        setClients(formatted);
+      } catch (error) {
+        console.error("Error fetching WhatsApp clients:", error);
+      }
+    };
+    fetchClients();
+  }, []);
+
+  useEffect(() => {
+    setContacts([]);
+    if (sendConversation?.clientUUID) {
+      const fetchContacts = async () => {
+        setLoadingContacts(true);
+        try {
+          const res = await getWhatsappClientContacts(sendConversation.clientUUID);
+          setContacts(res);
+        } catch (error) {
+          console.error("Error fetching WhatsApp contacts:", error);
+        } finally {
+          setLoadingContacts(false);
+        }
+      };
+      fetchContacts();
+    }
+  }, [sendConversation?.clientUUID]);
 
   useEffect(() => {
     // Esperamos a que Firebase Auth termine de inicializar
@@ -215,10 +270,9 @@ export default function ChatInbox() {
           <Button
             className="gap-2 text-[#141414]"
             style={{ backgroundColor: "#CBE71E" }}
-            onClick={() => setMassOpen(true)}
+            onClick={() => setSendNewMessage(true)}
           >
-            <Users className="h-4 w-4" />
-            Envío masivo
+            Nuevo chat
           </Button>
         </div>
       </header>
@@ -395,6 +449,75 @@ export default function ChatInbox() {
         onSend={(payload) => {
           console.log("Envío masivo simulado:", payload, "destinatarios:", selectedIds);
           setMassOpen(false);
+        }}
+      />
+      <SelectClientDialog
+        onConfirm={async () => {
+          console.log(sendConversation);
+          const contact = contacts.find(
+            (c) => c.id.toString() === (sendConversation?.contactId || "")
+          );
+          if (!contact) return;
+          const result = await getTemplateMessages(sendConversation?.clientUUID || "", "template");
+          const data = {
+            ...result.data,
+            phoneNumber: "",
+            templateId: "",
+            senderId: "",
+            name: ""
+          } as any;
+          console.log("Template payload:", data);
+          data.phoneNumber = contact.contact_phone;
+          data.templateId = "estado_de_cuenta";
+          data.senderId = "cmhv6mnla0003no0huiao1u63";
+          data.name = contact.contact_name;
+          await sendWhatsAppTemplateNew(data);
+          setSendConversation((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              stage: "completed"
+            };
+          });
+        }}
+        onOpenChange={() => setSendConversation(null)}
+        open={!!sendConversation}
+        clients={clients}
+        onSelectClient={(clientUUID) => {
+          setSendConversation({
+            stage: "confirm",
+            clientUUID,
+            contactId: "",
+            contactNumber: ""
+          });
+        }}
+        onSelectContact={(contactId: string) => {
+          console.log(contactId);
+          setSendConversation((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              contactId
+            };
+          });
+        }}
+        isContactLoading={loadingContacts}
+        contacts={contacts.map((c) => ({ id: c.id.toString(), name: c.contact_name }))}
+      />
+      <TemplateDialog
+        open={sendNewMessage}
+        onOpenChange={setSendNewMessage}
+        channel={"whatsapp"}
+        ticketId={activeConversation ? activeConversation.id : ""}
+        onUse={(payload) => {
+          console.log("Nuevo mensaje simulado:", payload);
+          setSendNewMessage(false);
+          setSendConversation({
+            stage: "selectClient",
+            clientUUID: "",
+            contactId: "",
+            contactNumber: ""
+          });
         }}
       />
     </div>
