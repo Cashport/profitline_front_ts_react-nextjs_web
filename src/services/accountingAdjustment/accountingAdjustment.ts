@@ -256,6 +256,18 @@ export const createDigitalRecord = async (
   }
 };
 
+export const sendDigitalRecord = async (clientUUID: string) => {
+  try {
+    const response = await API.post(`${config.API_HOST}/client/digital-record-background`, {
+      clientUUID
+    });
+    return response;
+  } catch (error) {
+    console.error("Error sending digital record", error);
+    throw error;
+  }
+};
+
 export const editAccountingAdjustments = async (adjustmentData: IFinancialDiscountForm[]) => {
   try {
     const body = {
@@ -451,4 +463,3 @@ export const getContactsByClient = async (
     throw error;
   }
 };
-

@@ -6,7 +6,10 @@ import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
-import { markInvoiceAsBalance } from "@/services/accountingAdjustment/accountingAdjustment";
+import {
+  markInvoiceAsBalance,
+  sendDigitalRecord
+} from "@/services/accountingAdjustment/accountingAdjustment";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -194,6 +197,20 @@ export const WalletTab = () => {
     closeAllModal();
   };
 
+  const handleSendDigitalRecord = async () => {
+    setisGenerateActionOpen(false);
+    try {
+      const response = await sendDigitalRecord(clientId);
+      if (response.status !== 200) {
+        messageShow.error(response.data?.message || "Error al enviar el registro digital");
+        return;
+      }
+      messageShow.success("El registro digital se ha enviado correctamente");
+    } catch (error) {
+      messageShow.error("Error al enviar el registro digital");
+    }
+  };
+
   return (
     <>
       {contextHolder}
@@ -266,6 +283,7 @@ export const WalletTab = () => {
           setisGenerateActionOpen(!isGenerateActionOpen);
           setShowActionDetailModal(e);
         }}
+        handleSendDigitalRecord={handleSendDigitalRecord}
         validateInvoiceIsSelected={validateInvoiceIsSelected}
         addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
         balanceLegalization={handleOpenBalanceLegalization}
