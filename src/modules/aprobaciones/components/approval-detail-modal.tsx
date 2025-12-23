@@ -351,7 +351,7 @@ export default function ApprovalDetailModal({
                                       {/* Comment */}
                                       {typeof approver !== "string" && approver.comment && (
                                         <p className="text-sm italic text-muted-foreground mt-2">
-                                          "{approver.comment}"
+                                          &quot;{approver.comment}&quot;
                                         </p>
                                       )}
                                     </div>
@@ -479,7 +479,7 @@ export default function ApprovalDetailModal({
                                     {/* Comment */}
                                     {typeof approver !== "string" && approver.comment && (
                                       <p className="text-sm italic text-muted-foreground mt-2">
-                                        "{approver.comment}"
+                                        &quot;{approver.comment}&quot;
                                       </p>
                                     )}
                                   </div>
