@@ -150,9 +150,9 @@ export const ModalGenerateAction = ({
           icon={<PaperPlaneTilt size={16} />}
           title="Acta digital"
           onClick={() => {
-            setSelectOpen({
+            /* setSelectOpen({
               selected: 7
-            });
+            }); */
             handleSendDigitalRecord();
           }}
         />
