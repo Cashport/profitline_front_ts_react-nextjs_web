@@ -14,7 +14,7 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getWhatsAppTemplates, sendMessage } from "@/services/chat/chat";
+import { getWhatsAppTemplates, sendMessage, sendWhatsAppTemplate } from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -34,6 +34,7 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
+import { getPayloadByTicket } from "@/services/clients/clients";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -420,7 +421,9 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
       const template = waTemplates.find((t) => t.name === m.templateName);
       if (!template) {
-        return <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>;
+        return (
+          <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
+        );
       }
 
       const templateComponents = template.components;
@@ -781,12 +784,20 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         onOpenChange={setTemplateOpen}
         channel={channel}
         ticketId={conversation.id}
-        onUse={(payload) => {
-          if (payload.channel === "email") {
-            setSubject((prev) => (prev ? prev : payload.subject));
-            setBody((prev) => (prev ? prev + "\n" + payload.body : payload.body));
-          } else {
-            setMessage((prev) => (prev ? prev + "\n" + payload.content : payload.content));
+        onUse={async (payload) => {
+          try {
+            console.log("ticketid", conversation.id);
+            const payload = await getPayloadByTicket(conversation.id);
+            console.log("Payload generado:", payload);
+
+            if (!payload) {
+              return;
+            }
+
+            await sendWhatsAppTemplate(payload);
+            setTemplateOpen(false);
+          } catch (error) {
+            console.error("Error al enviar la plantilla:", error);
           }
         }}
       />

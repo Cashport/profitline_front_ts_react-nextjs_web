@@ -40,6 +40,7 @@ interface Props {
   addInvoicesToApplicationTable: () => void;
   balanceLegalization?: () => void;
   markAsBalance: () => void;
+  handleSendDigitalRecord: () => Promise<void>;
 }
 
 export const ModalGenerateAction = ({
@@ -51,7 +52,8 @@ export const ModalGenerateAction = ({
   setSelectOpen,
   addInvoicesToApplicationTable,
   balanceLegalization,
-  markAsBalance
+  markAsBalance,
+  handleSendDigitalRecord
 }: Props) => {
   const router = useRouter();
   const handleActionDetail = (type: number) => {
@@ -61,7 +63,7 @@ export const ModalGenerateAction = ({
   };
 
   const handleOpenModal = (type: number) => {
-    const noNeedForValidation = [8, 9];
+    const noNeedForValidation = [7, 8, 9];
     if (noNeedForValidation.includes(type)) {
       setSelectOpen({
         selected: type
@@ -148,9 +150,10 @@ export const ModalGenerateAction = ({
           icon={<PaperPlaneTilt size={16} />}
           title="Acta digital"
           onClick={() => {
-            setSelectOpen({
+            /* setSelectOpen({
               selected: 7
-            });
+            }); */
+            handleSendDigitalRecord();
           }}
         />
         <ButtonGenerateAction
