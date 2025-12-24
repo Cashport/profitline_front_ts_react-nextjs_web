@@ -54,7 +54,7 @@ const OrdersViewTable = ({
   const handleSeeDetail = (order: IOrder) => {
     const { id: orderId, order_status } = order;
     const notificationQuery = order.notification_id ? `?notification=${order.notification_id}` : "";
-    if (order_status === "Borrador") {
+    if (order_status === "Pedidos en borrador") {
       const draftInfo = {
         id: orderId,
         client_name: order.client_name
@@ -259,6 +259,7 @@ const OrdersViewTable = ({
       render: (_, row) => (
         <Flex gap={8}>
           <Button
+            disabled={row.order_status === "Pedidos en proceso"}
             onClick={() => {
               setSelectedOrder(row.id);
               setCurrentWarehouseId(row.warehouseid);
