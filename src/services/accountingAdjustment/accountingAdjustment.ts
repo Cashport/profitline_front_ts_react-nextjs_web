@@ -221,45 +221,14 @@ export const getDigitalRecordFormInfo = async (
   }
 };
 
-export const createDigitalRecord = async (
-  data: IFormDigitalRecordModal,
-  project_id: number,
-  user_id: number,
-  clientId: string
-) => {
-  const forward_to = data.forward_to.map((user) => user.value);
-  const copy_to = data?.copy_to?.map((user) => user.value);
-
-  const formData = new FormData();
-
-  formData.append("forward_to", JSON.stringify(forward_to));
-  if (copy_to) formData.append("copy_to", JSON.stringify(copy_to));
-  formData.append("subject", data.subject);
-  formData.append("commentary", data.comment);
-  formData.append("user_id", user_id.toString());
-  formData.append("project_id", project_id.toString());
-  formData.append("clientUUID", clientId.toString());
-  data.attachments.forEach((file) => {
-    formData.append("attachments", file);
-  });
-
-  try {
-    const response = await API.post(
-      `${config.API_HOST}/client/digital-record?projectId=${project_id}`,
-      formData
-    );
-
-    return response;
-  } catch (error) {
-    console.error("Error creating digital record", error);
-    throw error;
-  }
-};
-
-export const sendDigitalRecord = async (clientUUID: string) => {
+export const sendDigitalRecord = async (clientUUID: string, data: IFormDigitalRecordModal) => {
   try {
     const response = await API.post(`${config.API_HOST}/client/digital-record-background`, {
-      clientUUID
+      clientUUID,
+      to: [
+        ...data.forward_to.map((user) => user.value),
+        ...(data.copy_to ? data.copy_to.map((user) => user.value) : [])
+      ]
     });
     return response;
   } catch (error) {
