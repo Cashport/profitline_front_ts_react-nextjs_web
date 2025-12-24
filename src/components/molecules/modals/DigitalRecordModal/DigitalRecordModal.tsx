@@ -34,7 +34,6 @@ interface ISelect {
 }
 export interface IFormDigitalRecordModal {
   forward_to: ISelect[];
-  copy_to?: ISelect[];
   subject: string;
 }
 
@@ -120,23 +119,6 @@ const DigitalRecordModal = ({
               errors={errors.forward_to}
               field={field}
               title="Para"
-              placeholder=""
-              options={recipients}
-              suffixIcon={null}
-              showLabelAndValue
-            />
-          )}
-        />
-
-        <Controller
-          name="copy_to"
-          control={control}
-          rules={{ required: false }}
-          render={({ field }) => (
-            <GeneralSearchSelect
-              errors={errors.copy_to}
-              field={field}
-              title="CC"
               placeholder=""
               options={recipients}
               suffixIcon={null}

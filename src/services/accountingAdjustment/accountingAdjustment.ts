@@ -225,10 +225,7 @@ export const sendDigitalRecord = async (clientUUID: string, data: IFormDigitalRe
   try {
     const response = await API.post(`${config.API_HOST}/client/digital-record-background`, {
       clientUUID,
-      to: [
-        ...data.forward_to.map((user) => user.value),
-        ...(data.copy_to ? data.copy_to.map((user) => user.value) : [])
-      ]
+      to: data.forward_to.map((user) => user.value)
     });
     return response;
   } catch (error) {
