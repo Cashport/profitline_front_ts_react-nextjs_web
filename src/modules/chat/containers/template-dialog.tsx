@@ -74,7 +74,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
 
           <TabsContent value="usar" className="space-y-4 pt-4">
             {channel === "whatsapp" ? (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
                 {waTemplates.map((tpl) => {
                   // Tomamos solo el componente BODY para mostrar en preview
                   const components = tpl.components;
@@ -110,7 +110,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                 })}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
                 {emailTemplates.map((tpl) => (
                   <div
                     key={tpl.id}
