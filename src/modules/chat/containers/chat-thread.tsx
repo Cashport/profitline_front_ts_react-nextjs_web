@@ -152,7 +152,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     if (!isLoading && ticketMessages.length > 0) {
       scrollToBottom();
     }
-  }, [conversation.id, isLoading, ticketMessages.length]);
+  }, [conversation.id, isLoading, ticketMessages.length, waTemplates.length]);
 
   useEffect(() => {
     // Cleanup ObjectURLs en unmount
