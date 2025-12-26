@@ -22,7 +22,6 @@ import {
   getContactsByClient
 } from "@/services/accountingAdjustment/accountingAdjustment";
 
-import styles from "../SendEmailModal/EmailModal.module.scss";
 import "./modalEnterProcess.scss";
 
 interface Props {
@@ -81,10 +80,17 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
         setManagementTypes(typesRes.data || []);
         setManagementStatuses(statusRes.data || []);
         // concatenamos nombre, apellido, teléfono y correo
-        const mappedContacts = (contactsRes.data || []).map((c: { CONTACT_NAME: any; CONTACT_LASTNAME: any; CONTACT_PHONE: any; CONTACT_EMAIL: any; }) => ({
-          ...c,
-          label: `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE} - ${c.CONTACT_EMAIL}`
-        }));
+        const mappedContacts = (contactsRes.data || []).map(
+          (c: {
+            CONTACT_NAME: any;
+            CONTACT_LASTNAME: any;
+            CONTACT_PHONE: any;
+            CONTACT_EMAIL: any;
+          }) => ({
+            ...c,
+            label: `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE} - ${c.CONTACT_EMAIL}`
+          })
+        );
         setContacts(mappedContacts);
       } catch (error) {
         message.error("Error cargando datos de gestión");
@@ -95,8 +101,7 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
   }, [isOpen, clientId, projectId]);
 
   /* -------------------- Helpers -------------------- */
-  const hasContent = () =>
-    editorState.getCurrentContent().getPlainText().trim().length > 0;
+  const hasContent = () => editorState.getCurrentContent().getPlainText().trim().length > 0;
 
   const onUpload = (file: File) => {
     setAttachments((prev) => [...prev, file]);
@@ -151,129 +156,132 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
       centered
       maskClosable={false}
       mask={mask}
-      modalRender={(node) => (
-        <div
-          style={{
-            width: modalSize.width,
-            height: modalSize.height,
-            borderRadius: 8
-          }}
-        >
-          <Header
-            title="Ingresar gestión"
-            onClose={onClose}
-            showMinimize={false}
-            showMaximize={false}
-            showRestore={false}
-            setViewMode={setViewMode}
-            setModalSize={setModalSize}
-            setMask={setMask}
-          />
-          {node}
-        </div>
-      )}
+      className="modalEnterProcess"
     >
-      <Flex vertical gap={20} className={styles.container}>
-        {/* ----------- Selects ----------- */}
-        <Flex gap={12}>
-          <Select
-            placeholder="Tipo de gestión"
-            value={managementType}
-            onChange={setManagementType}
-            style={{ width: "100%" }}
-            options={managementTypes.map((t) => ({
-              value: t.id,   // <- usar id en minúscula
-              label: t.name  // <- usar name en minúscula
-            }))}
+      <Flex vertical gap={20}>
+        <Header
+          title="Ingresar gestión"
+          onClose={onClose}
+          showMinimize={false}
+          showMaximize={false}
+          showRestore={false}
+          setViewMode={setViewMode}
+          setModalSize={setModalSize}
+          setMask={setMask}
+        />
+
+        <div className="modalEnterProcess__modalBody">
+          {/* ----------- Selects ----------- */}
+          <Flex gap={12}>
+            <Select
+              placeholder="Tipo de gestión"
+              value={managementType}
+              onChange={setManagementType}
+              style={{ width: "100%" }}
+              options={managementTypes.map((t) => ({
+                value: t.id, // <- usar id en minúscula
+                label: t.name // <- usar name en minúscula
+              }))}
+            />
+
+            <Select
+              placeholder="Estado de gestión"
+              value={managementStatus}
+              onChange={setManagementStatus}
+              style={{ width: "100%" }}
+              options={managementStatuses.map((s) => ({
+                value: s.id, // <- usar id en minúscula
+                label: s.name // <- usar name en minúscula
+              }))}
+            />
+
+            <Select
+              placeholder="Contacto (opcional)"
+              value={contactId}
+              onChange={setContactId}
+              allowClear
+              style={{ width: "100%" }}
+              optionLabelProp="value" // <--- usamos el valor como label visible
+              popupMatchSelectWidth={false}
+              options={contacts.map((c) => {
+                const mainText = `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE}`;
+                const subText = c.CONTACT_EMAIL;
+
+                return {
+                  value: mainText, // <- se mostrará truncado en el selector
+                  label: (
+                    <div className="contact-dropdown">
+                      <div className="contact-main">{mainText}</div>
+                      <div className="contact-sub">{subText}</div>
+                    </div>
+                  ),
+                  key: c.ID
+                };
+              })}
+            />
+          </Flex>
+
+          {/* ----------- Editor ----------- */}
+          <div style={{ minHeight: 120 }} className="modalEnterProcess__textArea">
+            <Editor
+              editorState={editorState}
+              onChange={setEditorState}
+              plugins={plugins}
+              ref={editorRef}
+              placeholder="Escribe la gestión..."
+            />
+          </div>
+
+          {/* ----------- Attachments ----------- */}
+          <AttachmentList
+            attachments={attachments}
+            handleRemoveFile={handleRemoveFile}
+            shortenFileName={(n) => n}
           />
 
-          <Select
-            placeholder="Estado de gestión"
-            value={managementStatus}
-            onChange={setManagementStatus}
-            style={{ width: "100%" }}
-            options={managementStatuses.map((s) => ({
-              value: s.id,   // <- usar id en minúscula
-              label: s.name  // <- usar name en minúscula
-            }))}
-          />
+          {/* ----------- Toolbar ----------- */}
+          <Toolbar>
+            {() => (
+              <Flex gap={16} align="center">
+                <CustomButton
+                  editorState={editorState}
+                  onChange={setEditorState}
+                  style="BOLD"
+                  icon={TextB as any}
+                />
+                <CustomButton
+                  editorState={editorState}
+                  onChange={setEditorState}
+                  style="ITALIC"
+                  icon={TextItalic as any}
+                />
+                <CustomButton
+                  editorState={editorState}
+                  onChange={setEditorState}
+                  style="UNDERLINE"
+                  icon={TextUnderline as any}
+                />
 
-          <Select
-            placeholder="Contacto (opcional)"
-            value={contactId}
-            onChange={setContactId}
-            allowClear
-            style={{ width: "100%" }}
-            optionLabelProp="value"           // <--- usamos el valor como label visible
-            popupMatchSelectWidth={false}
-            options={contacts.map((c) => {
-              const mainText = `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE}`;
-              const subText = c.CONTACT_EMAIL;
+                <LineVertical size={22} color="#DDD" />
 
-              return {
-                value: mainText,             // <- se mostrará truncado en el selector
-                label: (
-                  <div className="contact-dropdown">
-                    <div className="contact-main">{mainText}</div>
-                    <div className="contact-sub">{subText}</div>
-                  </div>
-                ),
-                key: c.ID
-              };
-            })}
-          />
+                <Upload beforeUpload={onUpload} showUploadList={false}>
+                  <Paperclip size={20} />
+                </Upload>
+              </Flex>
+            )}
+          </Toolbar>
 
-        </Flex>
+          <hr />
 
-        {/* ----------- Editor ----------- */}
-        <div className={styles.textArea} style={{ minHeight: 120 }}>
-          <Editor
-            editorState={editorState}
-            onChange={setEditorState}
-            plugins={plugins}
-            ref={editorRef}
-            placeholder="Escribe la gestión..."
+          {/* ----------- Footer ----------- */}
+          <FooterButtons
+            handleOk={handleSubmit}
+            onClose={onClose}
+            titleConfirm="Ingresar gestión"
+            isConfirmLoading={loading}
+            isConfirmDisabled={!managementType || !managementStatus || !hasContent()}
           />
         </div>
-
-        {/* ----------- Attachments ----------- */}
-        <AttachmentList
-          attachments={attachments}
-          handleRemoveFile={handleRemoveFile}
-          shortenFileName={(n) => n}
-        />
-
-        {/* ----------- Toolbar ----------- */}
-        <Toolbar>
-          {() => (
-            <Flex gap={16} align="center">
-              <CustomButton editorState={editorState} onChange={setEditorState} style="BOLD" icon={TextB as any} />
-              <CustomButton editorState={editorState} onChange={setEditorState} style="ITALIC" icon={TextItalic as any} />
-              <CustomButton editorState={editorState} onChange={setEditorState} style="UNDERLINE" icon={TextUnderline as any} />
-
-              <LineVertical size={22} color="#DDD" />
-
-              <Upload beforeUpload={onUpload} showUploadList={false}>
-                <Paperclip size={20} />
-              </Upload>
-            </Flex>
-          )}
-        </Toolbar>
-
-        <hr />
-
-        {/* ----------- Footer ----------- */}
-        <FooterButtons
-          handleOk={handleSubmit}
-          onClose={onClose}
-          titleConfirm="Ingresar gestión"
-          isConfirmLoading={loading}
-          isConfirmDisabled={
-            !managementType ||
-            !managementStatus ||
-            !hasContent()
-          }
-        />
       </Flex>
     </Modal>
   );

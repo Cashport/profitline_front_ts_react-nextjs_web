@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import discountCategories from "../../../constants/discountTypes";
+import discountCategories, { getOptionsByType } from "../../../constants/discountTypes";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { DiscountSchema, generalResolver } from "../resolvers/generalResolver";
@@ -89,9 +89,17 @@ export default function useCreateDiscountView({ params }: Props) {
 
   const handleClick = (type: number) => {
     setSelectedType(type);
+    // Limpiar discount_type al cambiar de categoría
+    form.resetField("discount_type");
+
+    // Si es Plan anual (categoría 3), asignar automáticamente el primer valor
+    if (type === discountCategories.annual.id) {
+      const options = getOptionsByType(type);
+      form.setValue("discount_type", options[0].value);
+    }
   };
 
-  const form = useForm({
+  const form = useForm<DiscountSchema>({
     resolver: yupResolver(generalResolver),
     defaultValues: Number(params?.id) ? fetchDiscount : defaultDiscount,
     disabled: statusForm === "review"

@@ -302,6 +302,14 @@ interface ISalesDashboardMetrics {
   percentage_cuota: number;
   pending_cuota: number;
   units_by_category: IUnitsByCategory[];
+  total_sales_month: number;
+  total_sales_previous_month: number;
+  percentage_sales_comparison: number;
+  total_products_month: number;
+  total_products_previous_month: number;
+  percentage_products_comparison: number;
+  unique_clients_month: number;
+  orders_pending_month: number;
 }
 
 export interface ISalesDashboardTotal extends ISalesDashboardMetrics {}

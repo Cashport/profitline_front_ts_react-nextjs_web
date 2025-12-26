@@ -1,0 +1,49 @@
+/*
+ * Approvals Module Styles
+ * Solo define los colores de marca Cashport en formato RGB
+ * Las otras variables (--background, --foreground, etc.) ya están en chatStyles.css
+ */
+/* TO DO: Centralizar estilos y componentes creados por V0 en un solo lugar en vez 
+    de estar yendo a veces a chatStyles.css y componentes chat/ui 
+ */
+
+:root {
+  /* Cashport Brand Colors - RGB format for Tailwind compatibility */
+  --cashport-black: 20 20 20;
+  --cashport-green: 203 231 30;
+  --cashport-gray-light: 221 221 221;
+  --cashport-gray-lighter: 247 247 247;
+  --cashport-white: 255 255 255;
+}
+
+/* Custom utility classes for Cashport colors */
+.text-cashport-black {
+  color: rgb(var(--cashport-black));
+}
+.text-cashport-green {
+  color: rgb(var(--cashport-green));
+}
+.text-cashport-gray-light {
+  color: rgb(var(--cashport-gray-light));
+}
+.bg-cashport-black {
+  background-color: rgb(var(--cashport-black));
+}
+.bg-cashport-green {
+  background-color: rgb(var(--cashport-green));
+}
+.bg-cashport-gray-light {
+  background-color: rgb(var(--cashport-gray-light));
+}
+.bg-cashport-gray-lighter {
+  background-color: rgb(var(--cashport-gray-lighter));
+}
+.bg-cashport-white {
+  background-color: rgb(var(--cashport-white));
+}
+.border-cashport-gray-light {
+  border-color: rgb(var(--cashport-gray-light));
+}
+.border-cashport-green {
+  border-color: rgb(var(--cashport-green));
+}
