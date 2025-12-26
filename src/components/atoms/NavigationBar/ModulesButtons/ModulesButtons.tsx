@@ -219,7 +219,7 @@ export const ModulesButtons = ({
       )}
 
       {/* Aprobaciones */}
-      {true && (
+      {false && (
         <Link href="/aprobaciones" passHref legacyBehavior>
           <Button
             type="primary"
@@ -233,12 +233,12 @@ export const ModulesButtons = ({
       )}
 
       {/* New Dashboard */}
-      {true && (
+      {false && (
         <Link href="/newDashboard" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
-            icon={<ChartBar  size={iconSize} />}
+            icon={<ChartBar size={iconSize} />}
             className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "New Dashboard"}
