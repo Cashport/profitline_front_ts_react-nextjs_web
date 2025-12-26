@@ -7,9 +7,8 @@ import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
-import { getWhatsAppTemplates, sendWhatsAppTemplate } from "@/services/chat/chat";
+import { getWhatsAppTemplates } from "@/services/chat/chat";
 import { IWhatsAppTemplate } from "@/types/chat/IChat";
-import { getPayloadByTicket } from "@/services/clients/clients";
 
 type EmailTemplate = { id: string; name: string; subject: string; body: string };
 
@@ -74,7 +73,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
 
           <TabsContent value="usar" className="space-y-4 pt-4">
             {channel === "whatsapp" ? (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
                 {waTemplates.map((tpl) => {
                   // Tomamos solo el componente BODY para mostrar en preview
                   const components = tpl.components;
@@ -110,7 +109,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                 })}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
                 {emailTemplates.map((tpl) => (
                   <div
                     key={tpl.id}
