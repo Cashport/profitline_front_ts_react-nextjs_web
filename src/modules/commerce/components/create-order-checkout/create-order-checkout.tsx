@@ -266,6 +266,11 @@ const CreateOrderCheckout: FC = ({}) => {
       console.error(error);
       if (error instanceof ApiError) {
         showMessage("error", error.message || "Error al crear la orden");
+        if (error.status === 400 && error.data?.length) {
+          error.data.forEach((err: { msg?: string }) => {
+            if (err.msg) showMessage("error", err.msg);
+          });
+        }
       } else {
         showMessage("error", "Error al crear la orden");
       }

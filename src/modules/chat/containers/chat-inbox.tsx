@@ -221,6 +221,7 @@ export default function ChatInbox() {
       const q = query.toLowerCase();
       const matchesQuery =
         c.customer.toLowerCase().includes(q) ||
+        c.client_name.toLowerCase().includes(q) ||
         c.phone.includes(query) ||
         c.lastMessage.toLowerCase().includes(q);
       const matchesTab =

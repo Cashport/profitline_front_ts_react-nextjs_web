@@ -99,32 +99,27 @@ export const createOrder = async (
   showMessage: (type: MessageType, content: string) => void,
   paymentSupport?: File
 ): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
-  try {
-    let response: GenericResponse<{ id_order: number; notificationId: number }>;
-    const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-    if (paymentSupport) {
-      const formData = new FormData();
-      formData.append("request", JSON.stringify(data));
-      formData.append("file", paymentSupport);
+  let response: GenericResponse<{ id_order: number; notificationId: number }>;
+  const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
+  if (paymentSupport) {
+    const formData = new FormData();
+    formData.append("request", JSON.stringify(data));
+    formData.append("file", paymentSupport);
 
-      response = await API.post(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
-    } else {
-      response = await API.post(url, data);
-    }
-
-    if (response.status !== 200) {
-      throw response;
-    }
-    showMessage("success", "Orden creada correctamente");
-    return response;
-  } catch (error) {
-    showMessage("error", "Error al crear orden");
-    throw error;
+    response = await API.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+  } else {
+    response = await API.post(url, data);
   }
+
+  if (response.status !== 200) {
+    throw response;
+  }
+  showMessage("success", "Orden creada correctamente");
+  return response;
 };
 
 export const createDraft = async (

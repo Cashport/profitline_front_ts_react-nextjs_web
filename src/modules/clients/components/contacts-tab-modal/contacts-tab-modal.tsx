@@ -24,7 +24,7 @@ interface PropsInvoicesTable {
     contactInfo: IContactForm,
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   updateContact: (
     // eslint-disable-next-line no-unused-vars
     contactInfo: IContactForm,
@@ -32,8 +32,9 @@ interface PropsInvoicesTable {
     contactId: number,
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   clientId: string;
+  isActionLoading: boolean;
 }
 
 const ContactsTabModal = ({
@@ -41,7 +42,8 @@ const ContactsTabModal = ({
   setShowContactModal,
   createContact,
   updateContact,
-  clientId
+  clientId,
+  isActionLoading
 }: PropsInvoicesTable) => {
   const { showMessage } = useMessageApi();
   const [ableToEdit, setAbleToEdit] = useState(false);
@@ -69,11 +71,13 @@ const ContactsTabModal = ({
     fetchData();
   }, [showContactModal.contactId]);
 
-  const onSubmitForm = (data: IContactForm) => {
+  const onSubmitForm = async (data: IContactForm) => {
     if (showContactModal.contactId) {
-      updateContact(data, showContactModal.contactId, showMessage);
+      const success = await updateContact(data, showContactModal.contactId, showMessage);
+      if (!success) return;
     } else {
-      createContact(data, showMessage);
+      const success = await createContact(data, showMessage);
+      if (!success) return;
     }
 
     setShowContactModal({ isOpen: false, contactId: 0 });
@@ -195,13 +199,20 @@ const ContactsTabModal = ({
               >
                 Cancelar
               </SecondaryButton>
-              <PrincipalButton disabled={!isValid} onClick={handleSubmit(onSubmitForm)}>
+              <PrincipalButton
+                disabled={!isValid}
+                onClick={handleSubmit(onSubmitForm)}
+                loading={isActionLoading}
+              >
                 {showContactModal.contactId ? "Guardar cambios" : "Crear contacto"}
               </PrincipalButton>
             </>
           ) : (
             <>
-              <SecondaryButton onClick={() => setShowContactModal({ isOpen: false, contactId: 0 })}>
+              <SecondaryButton
+                onClick={() => setShowContactModal({ isOpen: false, contactId: 0 })}
+                disabled={isActionLoading}
+              >
                 Cancelar
               </SecondaryButton>
               <PrincipalButton onClick={() => setAbleToEdit(true)}>Editar</PrincipalButton>

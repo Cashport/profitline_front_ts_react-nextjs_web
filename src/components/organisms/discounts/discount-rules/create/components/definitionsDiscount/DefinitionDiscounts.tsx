@@ -38,17 +38,10 @@ export default function DefinitionDiscounts({
     getValues,
     trigger,
     control,
-    resetField,
     formState: { errors }
   } = form;
 
   const options = useMemo(() => getOptionsByType(selectedType), [selectedType]);
-
-  useEffect(() => {
-    if (typeof selectedType === "undefined") {
-      resetField("discount_type");
-    }
-  }, [selectedType]);
 
   const [oldValue, setOldValue] = useState<Date | undefined>(undefined);
   useEffect(() => {

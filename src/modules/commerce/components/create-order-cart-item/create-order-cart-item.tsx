@@ -96,6 +96,11 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
           className={styles.quantityInput}
           defaultValue={alreadySelectedProduct ? alreadySelectedProduct.quantity : undefined}
           onBlur={(e) => handleChangeQuantity(e, product.id, product.category_id)}
+          onKeyDown={(e) => {
+            if (["e", "E", "+", "-", "."].includes(e.key)) {
+              return e.preventDefault();
+            }
+          }}
         />
         <Button
           className={styles.buttonChangeQuantity}

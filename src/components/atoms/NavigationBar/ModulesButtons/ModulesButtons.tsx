@@ -10,9 +10,10 @@ import {
   Storefront,
   UsersFour,
   Stack,
-  ClipboardText
+  ClipboardText,
+  ListChecks
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
+import { ChatCircleDots, SealPercent, HandTap, ChartBar } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -213,6 +214,34 @@ export const ModulesButtons = ({
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Chat"}
+          </Button>
+        </Link>
+      )}
+
+      {/* Aprobaciones */}
+      {false && (
+        <Link href="/aprobaciones" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ListChecks size={iconSize} />}
+            className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Aprobaciones"}
+          </Button>
+        </Link>
+      )}
+
+      {/* New Dashboard */}
+      {false && (
+        <Link href="/newDashboard" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ChartBar size={iconSize} />}
+            className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "New Dashboard"}
           </Button>
         </Link>
       )}

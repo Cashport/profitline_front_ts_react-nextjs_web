@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import discountCategories from "../../../constants/discountTypes";
+import discountCategories, { getOptionsByType } from "../../../constants/discountTypes";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { DiscountSchema, generalResolver } from "../resolvers/generalResolver";
@@ -9,6 +9,7 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 import { useRouter } from "next/navigation";
 import { mapDiscountGetOneToDiscountSchema } from "../logic/createDiscountLogic";
 import { message } from "antd";
+import { ApiError } from "@/utils/api/api";
 
 type Props = {
   params?: { id: string };
@@ -89,9 +90,17 @@ export default function useCreateDiscountView({ params }: Props) {
 
   const handleClick = (type: number) => {
     setSelectedType(type);
+    // Limpiar discount_type al cambiar de categoría
+    form.resetField("discount_type");
+
+    // Si es Plan anual (categoría 3), asignar automáticamente el primer valor
+    if (type === discountCategories.annual.id) {
+      const options = getOptionsByType(type);
+      form.setValue("discount_type", options[0].value);
+    }
   };
 
-  const form = useForm({
+  const form = useForm<DiscountSchema>({
     resolver: yupResolver(generalResolver),
     defaultValues: Number(params?.id) ? fetchDiscount : defaultDiscount,
     disabled: statusForm === "review"
@@ -104,9 +113,15 @@ export default function useCreateDiscountView({ params }: Props) {
       messageApi.success("Descuento creado exitosamente");
       router.push(`/descuentos/regla/${res.idDiscount}`);
     } catch (e: any) {
-      const errorMessage = e.response?.data?.message || e.message || "Error al crear el descuento";
-      messageApi.error(errorMessage);
-      console.error(e);
+      if (e instanceof ApiError) {
+        console.error(e);
+        messageApi.error(e.message);
+      } else {
+        console.error(e);
+        const errorMessage =
+          e.response?.data?.message || e.message || "Error al crear el descuento";
+        messageApi.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -121,10 +136,14 @@ export default function useCreateDiscountView({ params }: Props) {
       setStatusForm("review");
       form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
-      const errorMessage =
-        e.response?.data?.message || e.message || "Error al actualizar el descuento";
-      messageApi.error(errorMessage);
       console.error(e);
+      if (e instanceof ApiError) {
+        messageApi.error(e.message);
+      } else {
+        const errorMessage =
+          e.response?.data?.message || e.message || "Error al actualizar el descuento";
+        messageApi.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

@@ -2,11 +2,13 @@ import { MessageType } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { deleteContact, postContact, putContact } from "@/services/contacts/contacts";
 import { IContactForm, IGetContacts } from "@/types/contacts/IContacts";
-import { fetcher } from "@/utils/api/api";
+import { ApiError, fetcher } from "@/utils/api/api";
+import { useState } from "react";
 import useSWR from "swr";
 
 export const useClientContacts = (clientId: string) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   const { data, isLoading, mutate } = useSWR<IGetContacts>(
     `client/${clientId}/contact`,
@@ -19,6 +21,7 @@ export const useClientContacts = (clientId: string) => {
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
   ) => {
+    setIsActionLoading(true);
     const contact = {
       clientUUID: clientId,
       contact_name: contactInfo.name,
@@ -36,11 +39,18 @@ export const useClientContacts = (clientId: string) => {
         showMessage("success", "Contacto creado exitosamente");
       }
     } catch (error) {
-      showMessage("error", "Error al crear contacto");
-      console.warn("Error al crear contacto", error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message);
+      } else {
+        showMessage("error", "Error al crear contacto");
+        console.warn("Error al crear contacto", error);
+      }
+      return false;
     } finally {
       mutate();
+      setIsActionLoading(false);
     }
+    return true;
   };
 
   const updateContact = async (
@@ -49,6 +59,7 @@ export const useClientContacts = (clientId: string) => {
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
   ) => {
+    setIsActionLoading(true);
     const contact = {
       clientUUID: clientId,
       contact_name: contactInfo.name,
@@ -66,11 +77,18 @@ export const useClientContacts = (clientId: string) => {
         showMessage("success", "Contacto actualizado exitosamente");
       }
     } catch (error) {
-      showMessage("error", "Error al actualizar contacto");
-      console.warn("Error al actualizar contacto", error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message);
+      } else {
+        showMessage("error", "Error al actualizar contacto");
+        console.warn("Error al actualizar contacto", error);
+      }
+      return false;
     } finally {
+      setIsActionLoading(false);
       mutate();
     }
+    return true;
   };
 
   const deleteSelectedContacts = async (
@@ -95,6 +113,7 @@ export const useClientContacts = (clientId: string) => {
 
   return {
     data,
+    isActionLoading,
     isLoading,
     createContact,
     updateContact,
