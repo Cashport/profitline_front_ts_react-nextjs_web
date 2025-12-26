@@ -2,7 +2,7 @@ import { MessageType } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { deleteContact, postContact, putContact } from "@/services/contacts/contacts";
 import { IContactForm, IGetContacts } from "@/types/contacts/IContacts";
-import { fetcher } from "@/utils/api/api";
+import { ApiError, fetcher } from "@/utils/api/api";
 import useSWR from "swr";
 
 export const useClientContacts = (clientId: string) => {
@@ -36,8 +36,12 @@ export const useClientContacts = (clientId: string) => {
         showMessage("success", "Contacto creado exitosamente");
       }
     } catch (error) {
-      showMessage("error", "Error al crear contacto");
-      console.warn("Error al crear contacto", error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message);
+      } else {
+        showMessage("error", "Error al crear contacto");
+        console.warn("Error al crear contacto", error);
+      }
     } finally {
       mutate();
     }
@@ -66,8 +70,12 @@ export const useClientContacts = (clientId: string) => {
         showMessage("success", "Contacto actualizado exitosamente");
       }
     } catch (error) {
-      showMessage("error", "Error al actualizar contacto");
-      console.warn("Error al actualizar contacto", error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message);
+      } else {
+        showMessage("error", "Error al actualizar contacto");
+        console.warn("Error al actualizar contacto", error);
+      }
     } finally {
       mutate();
     }
