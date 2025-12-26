@@ -7,9 +7,8 @@ import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
-import { getWhatsAppTemplates, sendWhatsAppTemplate } from "@/services/chat/chat";
+import { getWhatsAppTemplates } from "@/services/chat/chat";
 import { IWhatsAppTemplate } from "@/types/chat/IChat";
-import { getPayloadByTicket } from "@/services/clients/clients";
 
 type EmailTemplate = { id: string; name: string; subject: string; body: string };
 
