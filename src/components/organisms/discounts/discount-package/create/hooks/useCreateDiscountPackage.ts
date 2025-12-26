@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { message } from "antd";
 import { DiscountPackageSchema, generalResolver } from "../resolvers/generaResolver";
 import useSWR from "swr";
-import { fetcher } from "@/utils/api/api";
+import { ApiError, fetcher } from "@/utils/api/api";
 import { createDiscountPackage, getOneDiscountPackage } from "@/services/discount/discount.service";
 import { Discount } from "@/types/discount/DiscountPackage";
 import { mapGetOneToDiscountPackageSchema } from "../logic/createPackageLogic";
@@ -95,9 +95,9 @@ export default function useCreateDiscountPackage({ params }: Props) {
     name: "secondaryDiscounts"
   });
 
-    const { clients, loading: isLoadingClients } = useClientsGroups({
-      noLimit: true
-    });
+  const { clients, loading: isLoadingClients } = useClientsGroups({
+    noLimit: true
+  });
 
   const { data: dataDiscountList, isLoading: isLoadingSelect } = useSWR<DiscountListData>(
     `/discount/discounts-to-apply/project/${projectId}`,
@@ -146,7 +146,11 @@ export default function useCreateDiscountPackage({ params }: Props) {
       messageApi.success("Descuento creado exitosamente");
       router.push(`/descuentos/paquete/${res.id}`);
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      if (e instanceof ApiError) {
+        messageApi.error(e.message);
+      } else {
+        messageApi.error(e.response.data.message);
+      }
       console.error(e);
     } finally {
       setLoading(false);
