@@ -28,7 +28,7 @@ const ContactsTab = () => {
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
   const clientId = clientIdParam || "";
-  const { data, isLoading, createContact, updateContact, deleteSelectedContacts } =
+  const { data, isLoading, createContact, updateContact, deleteSelectedContacts, isActionLoading } =
     useClientContacts(clientId);
 
   const handleDeleteClients = () => {
@@ -94,6 +94,7 @@ const ContactsTab = () => {
               createContact={createContact}
               updateContact={updateContact}
               clientId={clientId}
+              isActionLoading={isActionLoading}
             />
           )}
         </div>
