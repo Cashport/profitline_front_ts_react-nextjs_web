@@ -2,8 +2,17 @@ import config from "@/config";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
+
+// Toggle para usar mock data mientras el backend no está disponible
+const USE_MOCK = true;
 
 export const getTickets = async (): Promise<ITicket[]> => {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return mockTickets;
+  }
+
   try {
     const response: GenericResponse<ITicket[]> = await API.get("/whatsapp-tickets?limit=20", {
       baseURL: config.API_CHAT
@@ -52,11 +61,15 @@ export const sendMessage = async (customerId: string, message: string): Promise<
 };
 
 export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return mockWhatsAppTemplates;
+  }
+
   try {
-    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get(
-      "/whatsapp-templates",
-      { baseURL: config.API_CHAT
-      });
+    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get("/whatsapp-templates", {
+      baseURL: config.API_CHAT
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching WhatsApp templates:", error);
