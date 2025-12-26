@@ -71,7 +71,11 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const { data: ticketData, mutate } = useTicketMessages({ ticketId: conversation.id, page: 1 });
+  const {
+    data: ticketData,
+    mutate,
+    isLoading
+  } = useTicketMessages({ ticketId: conversation.id, page: 1 });
   const ticketMessages = useMemo(
     () => ticketData?.messages?.slice().reverse() || [],
     [ticketData?.messages]
@@ -145,12 +149,10 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [conversation.id]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [ticketMessages.length]);
+    if (!isLoading && ticketMessages.length > 0) {
+      scrollToBottom();
+    }
+  }, [conversation.id, isLoading, ticketMessages.length]);
 
   useEffect(() => {
     // Cleanup ObjectURLs en unmount
