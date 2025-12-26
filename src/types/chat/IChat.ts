@@ -41,7 +41,7 @@ export interface IMessage {
   content: string;
   type: "TEXT" | "MEDIA" | "TEMPLATE" | string;
   direction: "INBOUND" | "OUTBOUND";
-  status: "DELIVERED" | "SENT" | "FAILED" | "READ";
+  status: "DELIVERED" | "SENT" | "FAILED" | "READ" | "PENDING";
   timestamp: string;
   mediaUrl: string | null;
   templateName?: string;

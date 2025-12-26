@@ -350,7 +350,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
-    if (m.type === "IMAGE" && m.mediaUrl) {
+    if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
@@ -477,8 +477,11 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
             {mine && status === "DELIVERED" && (
               <div className="text-[10px] text-muted-foreground self-end">✓</div>
             )}
+            {mine && status === "PENDING" && (
+              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+            )}
             {mine && status === "READ" && (
-              <div className="text-[10px] text-muted-foreground self-end">✓✓</div>
+              <div className="text-[10px] self-end text-green-500">✓✓</div>
             )}
             {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
           </div>
