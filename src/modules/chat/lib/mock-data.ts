@@ -27,6 +27,7 @@ export type Conversation = {
   customer: string;
   customerId: string;
   client_name: string;
+  phoneNumber: string;
   initials: string;
   phone: string;
   email?: string;

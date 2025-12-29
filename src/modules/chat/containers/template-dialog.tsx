@@ -12,9 +12,7 @@ import { IWhatsAppTemplate } from "@/types/chat/IChat";
 
 type EmailTemplate = { id: string; name: string; subject: string; body: string };
 
-type Payload =
-  | { channel: "whatsapp"; content: string }
-  | { channel: "email"; subject: string; body: string };
+type Payload = { channel: "whatsapp"; content: string; templateId: string };
 
 type Props = {
   open: boolean;
@@ -68,7 +66,9 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
         <Tabs defaultValue="usar" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
             <TabsTrigger value="usar">Usar</TabsTrigger>
-            <TabsTrigger value="crear">Crear</TabsTrigger>
+            <TabsTrigger disabled value="crear">
+              Crear
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="usar" className="space-y-4 pt-4">
@@ -98,7 +98,11 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                           className="text-[#141414]"
                           style={{ backgroundColor: "#CBE71E" }}
                           onClick={() =>
-                            onUse({ channel: "whatsapp", content: bodyComponent?.text || "" })
+                            onUse({
+                              channel: "whatsapp",
+                              content: bodyComponent?.text || "",
+                              templateId: tpl.id
+                            })
                           }
                         >
                           Enviar
@@ -133,7 +137,6 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                         className="text-[#141414]"
                         style={{ backgroundColor: "#CBE71E" }}
                         onClick={() => {
-                          onUse({ channel: "email", subject: tpl.subject, body: tpl.body });
                           onOpenChange(false);
                         }}
                       >
@@ -172,7 +175,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                     className="text-[#141414]"
                     style={{ backgroundColor: "#CBE71E" }}
                     onClick={() => {
-                      onUse({ channel: "whatsapp", content });
+                      onUse({ channel: "whatsapp", content, templateId: "" });
                       onOpenChange(false);
                     }}
                   >
@@ -205,7 +208,6 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                     className="text-[#141414]"
                     style={{ backgroundColor: "#CBE71E" }}
                     onClick={() => {
-                      onUse({ channel: "email", subject, body });
                       onOpenChange(false);
                     }}
                   >

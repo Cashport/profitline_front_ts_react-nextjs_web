@@ -67,6 +67,7 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     customer: ticket.customer.name,
     customerId: ticket.customer.id,
     client_name: ticket.customer.clientName,
+    phoneNumber: ticket.customer.phoneNumber,
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",
@@ -467,7 +468,6 @@ export default function ChatInbox() {
             senderId: "",
             name: ""
           } as any;
-          console.log("Template payload:", data);
           data.phoneNumber = contact.contact_phone;
           data.templateId = "estado_de_cuenta";
           data.senderId = "cmhv6mnla0003no0huiao1u63";
