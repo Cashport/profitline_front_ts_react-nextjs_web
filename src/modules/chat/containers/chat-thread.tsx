@@ -421,6 +421,12 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         customerCashportUUID: conversation.customerCashportUUID || ""
       };
       await sendWhatsAppTemplateNew(payload);
+      setTemplateOpen(false);
+      toast({
+        title: "Plantilla enviada",
+        description: "La plantilla de WhatsApp fue enviada exitosamente."
+      });
+      scrollToBottom();
     } catch (error) {
       console.error("Error al enviar la plantilla:", error);
       toast({
