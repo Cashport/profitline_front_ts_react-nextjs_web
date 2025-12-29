@@ -1,0 +1,47 @@
+import useSWR from "swr";
+
+import { fetcher } from "@/utils/api/api";
+
+import { GenericResponsePage } from "@/types/global/IGlobal";
+import { IApprovalsResponse } from "@/types/approvals/IApprovals";
+
+interface UseApprovalsParams {
+  page?: number;
+  limit?: number;
+  typeActionCode?: string[];
+  status?: string[];
+}
+
+export const useApprovals = ({
+  page = 1,
+  limit = 20,
+  typeActionCode,
+  status
+}: UseApprovalsParams = {}) => {
+  const queryParams: string[] = [];
+  queryParams.push(`page=${page}`);
+  queryParams.push(`limit=${limit}`);
+
+  if (typeActionCode && typeActionCode.length > 0) {
+    queryParams.push(`typeActionCode=${typeActionCode.join(",")}`);
+  }
+  if (status && status.length > 0) {
+    queryParams.push(`status=${status.join(",")}`);
+  }
+
+  const pathKey = `/approval?${queryParams.join("&")}`;
+
+  const { data, error, isLoading, mutate } = useSWR<IApprovalsResponse>(pathKey, fetcher);
+
+  return {
+    data: data?.items || [],
+    pagination: {
+      page: data?.page,
+      limit: data?.limit,
+      total: data?.total
+    },
+    isLoading,
+    error,
+    mutate
+  };
+};

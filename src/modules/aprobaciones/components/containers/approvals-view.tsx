@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { SlidersHorizontal, ListFilter } from "lucide-react";
+
+import { useApprovals } from "@/hooks/useApprovals";
+
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import { Button } from "@/modules/chat/ui/button";
@@ -12,10 +15,10 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal";
-
-import "@/modules/chat/styles/chatStyles.css";
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import ApprovalsTable from "../approvals-table/Approvals-table";
+
+import "@/modules/aprobaciones/styles/approvalsStyles.css";
+import "@/modules/chat/styles/chatStyles.css";
 
 type ApprovalStatus = "pendiente" | "aprobado" | "rechazado" | "en-espera";
 type ApprovalType = "creacion-nota" | "cupo-credito" | "creacion-cliente" | "orden-compra";
@@ -275,6 +278,9 @@ export default function ApprovalsView() {
   const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  const { data: approvalsData } = useApprovals();
+  console.log("Datos de aprobaciones:", approvalsData);
+
   const filteredApprovals = mockApprovals.filter((approval) => {
     const matchesSearch =
       approval.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -297,10 +303,7 @@ export default function ApprovalsView() {
               <OptimizedSearchComponent onSearch={setSearchQuery} title="Buscar" />
 
               <div className="hidden md:flex items-center gap-2">
-                <GenerateActionButton
-                  onClick={() => {}}
-                  disabled={selectedIds.length === 0}
-                />
+                <GenerateActionButton onClick={() => {}} disabled={selectedIds.length === 0} />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
