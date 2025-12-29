@@ -417,7 +417,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         phoneNumber: conversation.phoneNumber,
         templateId: "presentacion",
         senderId: "cmhv6mnla0003no0huiao1u63",
-        name: conversation.client_name
+        name: conversation.client_name,
+        customerCashportUUID: conversation.customerCashportUUID || ""
       };
       await sendWhatsAppTemplateNew(payload);
     } catch (error) {

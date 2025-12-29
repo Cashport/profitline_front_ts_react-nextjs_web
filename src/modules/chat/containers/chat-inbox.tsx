@@ -68,6 +68,7 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     customerId: ticket.customer.id,
     client_name: ticket.customer.clientName,
     phoneNumber: ticket.customer.phoneNumber,
+    customerCashportUUID: ticket.customer.customerCashportUUID,
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",
