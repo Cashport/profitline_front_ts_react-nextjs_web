@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import useSWR from "swr";
 
+import { getApprovalById } from "@/services/approvals/approvals";
 import {
   CheckCircle2,
   XCircle,
@@ -18,12 +20,13 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
+import { IApprovalItem } from "@/types/approvals/IApprovals";
 
 interface ApprovalDetailModalProps {
-  approval: any | null;
+  approval?: IApprovalItem;
   onClose: () => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string, reason: string) => void;
+  onApprove: (id: number) => void;
+  onReject: (id: number, reason: string) => void;
 }
 
 const approvalTypeLabels: Record<string, string> = {
@@ -49,6 +52,12 @@ export default function ApprovalDetailModal({
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
 
+  const { data: approvalDetail } = useSWR(approval?.id ? `approval-${approval.id}` : null, () =>
+    getApprovalById(approval!.id)
+  );
+
+  console.log("Approval detail response:", approvalDetail);
+
   if (!approval) return null;
 
   const handleApprove = () => {
@@ -65,9 +74,10 @@ export default function ApprovalDetailModal({
     }
   };
 
-  const canTakeAction = approval.status === "pendiente" || approval.status === "en-espera";
+  const canTakeAction = approval.status === "PENDING";
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("es-ES", {
       weekday: "long",
       day: "numeric",
@@ -91,13 +101,12 @@ export default function ApprovalDetailModal({
           <div className="flex items-center justify-between gap-4">
             {/* Left side: ID + Status */}
             <div className="flex items-center gap-2 md:gap-3">
-              <DialogTitle className="text-lg md:text-xl font-bold">{approval.id}</DialogTitle>
-              <Badge
-                variant="outline"
-                className={`hidden md:flex text-xs font-medium ${statusConfig[approval.status]?.className || ""}`}
-              >
+              <DialogTitle className="text-lg md:text-xl font-bold">
+                {approvalDetail?.referenceId}
+              </DialogTitle>
+              <Badge variant="outline" className={`hidden md:flex text-xs font-medium`}>
                 <Clock className="h-3 w-3 mr-1" />
-                {statusConfig[approval.status]?.label || approval.status}
+                {approvalDetail?.status || approval.status}
               </Badge>
             </div>
 
@@ -138,7 +147,7 @@ export default function ApprovalDetailModal({
                   <User className="h-3.5 w-3.5" />
                   <span>Solicitado por</span>
                 </div>
-                <p className="text-sm">{approval.requestedBy}</p>
+                <p className="text-sm">XXXXXXXX</p>
               </div>
 
               {/* Fecha de solicitud */}
@@ -148,34 +157,32 @@ export default function ApprovalDetailModal({
                   <span>Fecha de solicitud</span>
                 </div>
                 <p className="text-sm">
-                  {formatDate(approval.date)}{" "}
-                  <span className="text-amber-600 font-medium">
-                    ({approval.daysWaiting} días pendiente)
-                  </span>
+                  {formatDate(approvalDetail?.createdAt)}{" "}
+                  <span className="text-amber-600 font-medium">(XXXXXX días pendiente)</span>
                 </p>
               </div>
             </div>
 
             {/* Comment */}
-            {approval.comment && (
+            {approvalDetail?.observation && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                   <MessageSquare className="h-4 w-4" />
                   <span>Comentario</span>
                 </div>
-                <p className="text-sm text-foreground">{approval.comment}</p>
+                <p className="text-sm text-foreground">{approvalDetail?.observation}</p>
               </div>
             )}
 
             {/* Attachments */}
-            {approval.attachments && approval.attachments.length > 0 && (
+            {approvalDetail?.attachments && approvalDetail.attachments.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                   <Paperclip className="h-4 w-4" />
-                  <span>Adjuntos ({approval.attachments.length})</span>
+                  <span>Adjuntos ({approvalDetail.attachments.length})</span>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {approval.attachments.map((attachment: string, index: number) => (
+                  {approvalDetail.attachments.map((attachment: string, index: number) => (
                     <a
                       key={index}
                       href="#"
@@ -203,14 +210,14 @@ export default function ApprovalDetailModal({
                   </h3>
                   <div className="mt-3 space-y-2 text-sm">
                     <p>
-                      <span className="font-medium">Cliente:</span> {approval.client}
+                      <span className="font-medium">Cliente:</span> CLIENTEXXXX
                     </p>
-                    {approval.details.amount && (
+                    {true && (
                       <p>
-                        <span className="font-medium">Monto:</span> ${approval.details.amount}
+                        <span className="font-medium">Monto:</span> $XXXXXXX
                       </p>
                     )}
-                    {approval.details.items && approval.details.items.length > 0 && (
+                    {false && (
                       <div>
                         <p className="font-medium">Ítems:</p>
                         <ul className="ml-4 mt-1 list-disc space-y-0.5">
@@ -279,7 +286,7 @@ export default function ApprovalDetailModal({
               </div>
 
               <div className="space-y-6">
-                {approval.otherApprovers && approval.otherApprovers.length > 0 ? (
+                {false && approval.otherApprovers.length > 0 ? (
                   (() => {
                     // Group approvers by step
                     const approversByStep: Record<number, any[]> = {};

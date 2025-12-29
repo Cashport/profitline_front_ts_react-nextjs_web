@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SlidersHorizontal, ListFilter } from "lucide-react";
 
 import { useApprovals } from "@/hooks/useApprovals";
+import { IApprovalItem } from "@/types/approvals/IApprovals";
 
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
@@ -20,277 +21,18 @@ import ApprovalsTable from "../approvals-table/Approvals-table";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import "@/modules/chat/styles/chatStyles.css";
 
-type ApprovalStatus = "pendiente" | "aprobado" | "rechazado" | "en-espera";
-type ApprovalType = "creacion-nota" | "cupo-credito" | "creacion-cliente" | "orden-compra";
-
-interface ApprovalApprover {
-  name: string;
-  step: number;
-  status: ApprovalStatus;
-  date?: string;
-  time?: string;
-  comment?: string;
-}
-
-interface Approval {
-  id: string;
-  type: ApprovalType;
-  client: string;
-  date: string;
-  daysWaiting: number;
-  status: ApprovalStatus;
-  requestedBy: string;
-  otherApprovers: ApprovalApprover[];
-  comment: string;
-  attachments: string[];
-  detailLink: string;
-  details: {
-    amount?: string;
-    items?: string[];
-    currentLimit?: string;
-    requestedLimit?: string;
-    clientInfo?: string;
-  };
-}
-
-// Mock data
-const mockApprovals: Approval[] = [
-  {
-    id: "APR-001",
-    type: "orden-compra",
-    client: "Acme Corporation",
-    date: "2025-01-15",
-    daysWaiting: 5,
-    status: "pendiente",
-    requestedBy: "Juan Pérez",
-    otherApprovers: [
-      {
-        name: "María González",
-        step: 1,
-        status: "aprobado",
-        date: "2025-01-16",
-        time: "10:30 a.m.",
-        comment: "Aprobado, presupuesto disponible"
-      },
-      {
-        name: "Carlos López",
-        step: 2,
-        status: "pendiente"
-      },
-      {
-        name: "Ana Martínez",
-        step: 2,
-        status: "pendiente"
-      }
-    ],
-    comment: "Orden urgente para proyecto Q1",
-    attachments: ["cotizacion.pdf", "especificaciones.docx"],
-    detailLink: "/documentos/OC-12345",
-    details: {
-      amount: "$25,000.00",
-      items: ["Equipos de oficina", "Software licencias", "Mobiliario"]
-    }
-  },
-  {
-    id: "APR-002",
-    type: "cupo-credito",
-    client: "Tech Solutions SA",
-    date: "2025-01-17",
-    daysWaiting: 3,
-    status: "pendiente",
-    requestedBy: "Ana Martínez",
-    otherApprovers: [
-      {
-        name: "Roberto Díaz",
-        step: 1,
-        status: "aprobado",
-        date: "2025-01-18",
-        time: "2:15 p.m.",
-        comment: "Cliente confiable, aprobado"
-      },
-      {
-        name: "Patricia Silva",
-        step: 2,
-        status: "pendiente"
-      }
-    ],
-    comment: "Cliente con historial positivo solicita aumento",
-    attachments: ["estados-financieros.pdf"],
-    detailLink: "/clientes/CLI-789/credito",
-    details: {
-      currentLimit: "$50,000.00",
-      requestedLimit: "$100,000.00"
-    }
-  },
-  {
-    id: "APR-003",
-    type: "creacion-cliente",
-    client: "Innovate Industries",
-    date: "2025-01-18",
-    daysWaiting: 2,
-    status: "pendiente",
-    requestedBy: "Luis Ramírez",
-    otherApprovers: [
-      {
-        name: "Sandra Torres",
-        step: 1,
-        status: "pendiente"
-      }
-    ],
-    comment: "Nuevo cliente referido por partner estratégico",
-    attachments: ["rut.pdf", "camara-comercio.pdf"],
-    detailLink: "/clientes/nuevo/CLI-NEW-456",
-    details: {
-      clientInfo: "Empresa de tecnología con 5 años en el mercado"
-    }
-  },
-  {
-    id: "APR-004",
-    type: "creacion-nota",
-    client: "Global Traders Ltd",
-    date: "2025-01-19",
-    daysWaiting: 1,
-    status: "en-espera",
-    requestedBy: "Patricia Silva",
-    otherApprovers: [
-      {
-        name: "Miguel Ángel Ruiz",
-        step: 1,
-        status: "aprobado",
-        date: "2025-01-19",
-        time: "11:45 a.m.",
-        comment: "Conforme con la devolución"
-      },
-      {
-        name: "Laura Fernández",
-        step: 2,
-        status: "pendiente"
-      },
-      {
-        name: "Jorge Medina",
-        step: 3,
-        status: "pendiente"
-      }
-    ],
-    comment: "Nota de crédito por devolución parcial",
-    attachments: ["factura-original.pdf", "acta-devolucion.pdf"],
-    detailLink: "/notas-credito/NC-9876",
-    details: {
-      amount: "$5,400.00"
-    }
-  },
-  {
-    id: "APR-005",
-    type: "orden-compra",
-    client: "Manufacturing Pro",
-    date: "2025-01-10",
-    daysWaiting: 10,
-    status: "aprobado",
-    requestedBy: "Fernando Castro",
-    otherApprovers: [
-      {
-        name: "Diana Morales",
-        step: 1,
-        status: "aprobado",
-        date: "2025-01-11",
-        time: "9:20 a.m.",
-        comment: "Aprobado por urgencia"
-      },
-      {
-        name: "Ricardo Vargas",
-        step: 2,
-        status: "aprobado",
-        date: "2025-01-12",
-        time: "3:45 p.m.",
-        comment: "Confirmado"
-      }
-    ],
-    comment: "Aprobado por urgencia de producción",
-    attachments: ["oc-detalle.pdf"],
-    detailLink: "/documentos/OC-11234",
-    details: {
-      amount: "$15,800.00",
-      items: ["Materia prima", "Insumos"]
-    }
-  },
-  {
-    id: "APR-006",
-    type: "cupo-credito",
-    client: "Small Business Inc",
-    date: "2025-01-14",
-    daysWaiting: 6,
-    status: "rechazado",
-    requestedBy: "Gabriela Sánchez",
-    otherApprovers: [
-      {
-        name: "Jorge Medina",
-        step: 1,
-        status: "rechazado",
-        date: "2025-01-15",
-        time: "4:30 p.m.",
-        comment: "Historial de pagos irregular, no se recomienda"
-      }
-    ],
-    comment: "Rechazado por historial de pagos irregular",
-    attachments: ["analisis-credito.pdf"],
-    detailLink: "/clientes/CLI-456/credito",
-    details: {
-      currentLimit: "$10,000.00",
-      requestedLimit: "$30,000.00"
-    }
-  }
-];
-
-const approvalTypeLabels: Record<ApprovalType, string> = {
-  "creacion-nota": "Creación de Nota",
-  "cupo-credito": "Cupo de Crédito",
-  "creacion-cliente": "Creación Cliente",
-  "orden-compra": "Orden de Compra"
-};
-
-const statusConfig: Record<ApprovalStatus, { label: string; color: string; textColor: string }> = {
-  pendiente: {
-    label: "Pendiente",
-    color: "#FFC107",
-    textColor: "text-black"
-  },
-  aprobado: {
-    label: "Aprobado",
-    color: "#4CAF50",
-    textColor: "text-white"
-  },
-  rechazado: {
-    label: "Rechazado",
-    color: "#E53935",
-    textColor: "text-white"
-  },
-  "en-espera": {
-    label: "En Espera",
-    color: "#2196F3",
-    textColor: "text-white"
-  }
-};
-
 export default function ApprovalsView() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<ApprovalStatus[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<ApprovalType[]>([]);
-  const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedApproval, setSelectedApproval] = useState<IApprovalItem>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
 
-  const { data: approvalsData } = useApprovals();
-  console.log("Datos de aprobaciones:", approvalsData);
-
-  const filteredApprovals = mockApprovals.filter((approval) => {
-    const matchesSearch =
-      approval.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      approval.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      approval.requestedBy.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      selectedStatuses.length === 0 || selectedStatuses.includes(approval.status);
-    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(approval.type);
-
-    return matchesSearch && matchesStatus && matchesType;
+  const { data, pagination, isLoading } = useApprovals({
+    page,
+    typeActionCode: selectedTypes.length > 0 ? selectedTypes : undefined,
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined
   });
 
   return (
@@ -317,18 +59,19 @@ export default function ApprovalsView() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    {Object.keys(statusConfig).map((status) => (
+                    {["PENDING", "APPROVED", "REJECTED"].map((status) => (
                       <DropdownMenuItem
                         key={status}
                         onClick={() => {
                           setSelectedStatuses((prev) =>
-                            prev.includes(status as ApprovalStatus)
+                            prev.includes(status)
                               ? prev.filter((s) => s !== status)
-                              : [...prev, status as ApprovalStatus]
+                              : [...prev, status]
                           );
+                          setPage(1);
                         }}
                       >
-                        {statusConfig[status as ApprovalStatus].label}
+                        {status}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -346,18 +89,17 @@ export default function ApprovalsView() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    {Object.keys(approvalTypeLabels).map((type) => (
+                    {["NEW_CLIENT", "CREDIT_LIMIT", "CREATE_NOTE", "PURCHASE_ORDER"].map((type) => (
                       <DropdownMenuItem
                         key={type}
                         onClick={() => {
                           setSelectedTypes((prev) =>
-                            prev.includes(type as ApprovalType)
-                              ? prev.filter((t) => t !== type)
-                              : [...prev, type as ApprovalType]
+                            prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
                           );
+                          setPage(1);
                         }}
                       >
-                        {approvalTypeLabels[type as ApprovalType]}
+                        {type}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -366,10 +108,16 @@ export default function ApprovalsView() {
             </div>
 
             <ApprovalsTable
-              approvals={filteredApprovals}
+              approvals={data}
               selectedIds={selectedIds}
               onSelectIds={setSelectedIds}
               onSelectApproval={setSelectedApproval}
+              isLoading={isLoading}
+              pagination={{
+                current: page,
+                total: pagination?.total || 0,
+                onChange: setPage
+              }}
             />
           </div>
         </div>
@@ -377,14 +125,14 @@ export default function ApprovalsView() {
 
       <ApprovalDetailModal
         approval={selectedApproval}
-        onClose={() => setSelectedApproval(null)}
+        onClose={() => setSelectedApproval(undefined)}
         onApprove={(id) => {
           console.log("Aprobar:", id);
-          setSelectedApproval(null);
+          setSelectedApproval(undefined);
         }}
         onReject={(id) => {
           console.log("Rechazar:", id);
-          setSelectedApproval(null);
+          setSelectedApproval(undefined);
         }}
       />
     </div>
