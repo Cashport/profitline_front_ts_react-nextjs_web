@@ -35,6 +35,7 @@ import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
+import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -341,6 +342,94 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       .replace(/`(.*?)`/g, "<code>$1</code>")
       .replace(/\n/g, "<br/>");
   }
+
+  const sendAccountStatementTemplate = async () => {
+    try {
+      const templatePayload = await getPayloadByTicket(conversation.id);
+
+      if (!templatePayload) {
+        toast({
+          title: "Error",
+          description: "No se pudo generar el payload para la plantilla.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await sendWhatsAppTemplate(templatePayload);
+
+      // Crear un mensaje temporal para feedback visual inmediato
+      const tempMessage: IMessage = {
+        id: `temp_template_${Date.now()}_${Math.random()}`,
+        content: "",
+        type: "TEMPLATE",
+        direction: "OUTBOUND",
+        status: "SENT",
+        timestamp: new Date().toISOString(),
+        mediaUrl: null,
+        templateName: templatePayload.template || "estado_de_cuenta",
+        templateData: templatePayload.components
+          ? JSON.stringify({ components: templatePayload.components })
+          : undefined
+      };
+
+      // Añadir el mensaje al cache de SWR
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+        return {
+          ...currentData,
+          messages: [tempMessage, ...currentData.messages]
+        };
+      }, false);
+
+      setTemplateOpen(false);
+      toast({
+        title: "Plantilla enviada",
+        description: "La plantilla de WhatsApp fue enviada exitosamente."
+      });
+      scrollToBottom();
+    } catch (error) {
+      console.error("Error al enviar la plantilla:", error);
+      toast({
+        title: "Error al enviar",
+        description: "No se pudo enviar la plantilla de WhatsApp.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const sendPresentationTemplate = async () => {
+    try {
+      const payload = {
+        templateData: {
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: conversation.client_name
+                }
+              ]
+            }
+          ]
+        },
+        phoneNumber: conversation.phoneNumber,
+        templateId: "presentacion",
+        senderId: "cmhv6mnla0003no0huiao1u63",
+        name: conversation.client_name,
+        customerCashportUUID: conversation.customerCashportUUID || ""
+      };
+      await sendWhatsAppTemplateNew(payload);
+    } catch (error) {
+      console.error("Error al enviar la plantilla:", error);
+      toast({
+        title: "Error al enviar",
+        description: "No se pudo enviar la plantilla de WhatsApp.",
+        variant: "destructive"
+      });
+    }
+  };
 
   function renderBubble(m: IMessage) {
     const mine = m.direction === "OUTBOUND";
@@ -790,61 +879,10 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         onOpenChange={setTemplateOpen}
         channel={channel}
         ticketId={conversation.id}
-        onUse={async () => {
-          try {
-            console.log("ticketid", conversation.id);
-            const templatePayload = await getPayloadByTicket(conversation.id);
-            console.log("Payload generado:", templatePayload);
-
-            if (!templatePayload) {
-              toast({
-                title: "Error",
-                description: "No se pudo generar el payload para la plantilla.",
-                variant: "destructive"
-              });
-              return;
-            }
-
-            await sendWhatsAppTemplate(templatePayload);
-
-            // Crear un mensaje temporal para feedback visual inmediato
-            const tempMessage: IMessage = {
-              id: `temp_template_${Date.now()}_${Math.random()}`,
-              content: "",
-              type: "TEMPLATE",
-              direction: "OUTBOUND",
-              status: "SENT",
-              timestamp: new Date().toISOString(),
-              mediaUrl: null,
-              templateName: templatePayload.template || "estado_de_cuenta",
-              templateData: templatePayload.components
-                ? JSON.stringify({ components: templatePayload.components })
-                : undefined
-            };
-
-            // Añadir el mensaje al cache de SWR
-            mutate((currentData) => {
-              if (!currentData) return currentData;
-              return {
-                ...currentData,
-                messages: [tempMessage, ...currentData.messages]
-              };
-            }, false);
-
-            setTemplateOpen(false);
-            toast({
-              title: "Plantilla enviada",
-              description: "La plantilla de WhatsApp fue enviada exitosamente."
-            });
-            scrollToBottom();
-          } catch (error) {
-            console.error("Error al enviar la plantilla:", error);
-            toast({
-              title: "Error al enviar",
-              description: "No se pudo enviar la plantilla de WhatsApp.",
-              variant: "destructive"
-            });
-          }
+        onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
+          if (payload.templateId === "estado_de_cuenta")
+            return await sendAccountStatementTemplate();
+          if (payload.templateId === "presentacion") return await sendPresentationTemplate();
         }}
       />
 

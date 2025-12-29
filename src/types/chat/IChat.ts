@@ -3,6 +3,7 @@ export interface ITicketCustomer {
   name: string;
   clientName: string;
   phoneNumber: string;
+  customerCashportUUID: string | null;
 }
 
 export interface ITicketAgent {
