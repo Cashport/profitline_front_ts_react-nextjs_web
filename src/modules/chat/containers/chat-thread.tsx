@@ -370,6 +370,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                     fill
                     unoptimized
                     className="rounded-lg object-cover"
+                    onLoad={scrollToBottom}
                   />
                 </div>
                 <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
