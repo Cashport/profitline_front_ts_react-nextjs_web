@@ -123,21 +123,16 @@ export default function ApprovalDetailModal({
                       : "border-amber-300 bg-amber-50 text-amber-700"
                 }`}
                 style={
-                  approvalDetail?.status.color
+                  approval?.status.color
                     ? {
-                        color: approvalDetail.status.color,
-                        backgroundColor: approvalDetail.status.backgroundColor,
-                        borderColor: approvalDetail.status.color
+                        color: approval.status.color,
+                        backgroundColor: approval.status.backgroundColor,
+                        borderColor: approval.status.color
                       }
                     : undefined
                 }
               >
-                {approvalDetail?.status.name ||
-                  (status === "aprobado"
-                    ? "Aprobado"
-                    : status === "rechazado"
-                      ? "Rechazado"
-                      : "Pendiente")}
+                {approval?.status.name}
               </Badge>
             </div>
 
