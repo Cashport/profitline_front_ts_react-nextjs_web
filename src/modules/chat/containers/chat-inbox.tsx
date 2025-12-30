@@ -90,8 +90,10 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
 type NewConversation = {
   stage: "selectClient" | "selectContact" | "confirm" | "completed";
   clientUUID: string;
+  clientName: string;
   contactId: string;
   contactNumber: string;
+  templateId: string;
 };
 
 export default function ChatInbox() {
@@ -456,24 +458,52 @@ export default function ChatInbox() {
       />
       <SelectClientDialog
         onConfirm={async () => {
-          console.log(sendConversation);
           const contact = contacts.find(
             (c) => c.id.toString() === (sendConversation?.contactId || "")
           );
           if (!contact) return;
-          const result = await getTemplateMessages(sendConversation?.clientUUID || "", "template");
-          const data = {
-            ...result,
-            phoneNumber: "",
-            templateId: "",
-            senderId: "",
-            name: ""
-          } as any;
-          data.phoneNumber = contact.contact_phone;
-          data.templateId = "estado_de_cuenta";
-          data.senderId = "cmhv6mnla0003no0huiao1u63";
-          data.name = contact.contact_name;
-          await sendWhatsAppTemplateNew(data);
+
+          const templateId = sendConversation?.templateId || "";
+          let payload: any;
+
+          if (templateId === "presentacion") {
+            // Payload para "presentacion" - usa clientName y clientUUID como customerCashportUUID
+            payload = {
+              templateData: {
+                components: [
+                  {
+                    type: "body",
+                    parameters: [
+                      {
+                        type: "text",
+                        text: sendConversation?.clientName || ""
+                      }
+                    ]
+                  }
+                ]
+              },
+              phoneNumber: contact.contact_phone,
+              templateId: "presentacion",
+              senderId: "cmhv6mnla0003no0huiao1u63",
+              name: sendConversation?.clientName || "",
+              customerCashportUUID: sendConversation?.clientUUID || ""
+            };
+          } else {
+            // Default: "estado_de_cuenta" (lógica existente)
+            const result = await getTemplateMessages(
+              sendConversation?.clientUUID || "",
+              "template"
+            );
+            payload = {
+              ...result,
+              phoneNumber: contact.contact_phone,
+              templateId: "estado_de_cuenta",
+              senderId: "cmhv6mnla0003no0huiao1u63",
+              name: contact.contact_name
+            };
+          }
+
+          await sendWhatsAppTemplateNew(payload);
           setSendConversation((prev) => {
             if (!prev) return null;
             return {
@@ -486,11 +516,17 @@ export default function ChatInbox() {
         open={!!sendConversation}
         clients={clients}
         onSelectClient={(clientUUID) => {
-          setSendConversation({
-            stage: "confirm",
-            clientUUID,
-            contactId: "",
-            contactNumber: ""
+          const selectedClient = clients.find((c) => c.id === clientUUID);
+          setSendConversation((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              stage: "confirm",
+              clientUUID,
+              clientName: selectedClient?.name || "",
+              contactId: "",
+              contactNumber: ""
+            };
           });
         }}
         onSelectContact={(contactId: string) => {
@@ -512,13 +548,14 @@ export default function ChatInbox() {
         channel={"whatsapp"}
         ticketId={activeConversation ? activeConversation.id : ""}
         onUse={(payload) => {
-          console.log("Nuevo mensaje simulado:", payload);
           setSendNewMessage(false);
           setSendConversation({
             stage: "selectClient",
             clientUUID: "",
+            clientName: "",
             contactId: "",
-            contactNumber: ""
+            contactNumber: "",
+            templateId: payload.templateId
           });
         }}
       />
