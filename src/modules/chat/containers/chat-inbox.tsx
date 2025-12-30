@@ -26,6 +26,7 @@ import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
+import { useToast } from "@/modules/chat/hooks/use-toast";
 import { getClients } from "@/services/commerce/commerce";
 import {
   getTemplateMessages,
@@ -97,6 +98,7 @@ type NewConversation = {
 };
 
 export default function ChatInbox() {
+  const { toast } = useToast();
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -108,6 +110,7 @@ export default function ChatInbox() {
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
@@ -197,21 +200,22 @@ export default function ChatInbox() {
     });
   }, [isConnected, subscribeToTicketUpdates, activeId]);
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setLoading(true);
-        const res = await getTickets();
-        setTicketsData(res);
-        if (res.length > 0) {
-          setActiveId(res[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
-      } finally {
-        setLoading(false);
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await getTickets();
+      setTicketsData(res);
+      if (res.length > 0) {
+        setActiveId(res[0].id);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTickets();
   }, []);
 
@@ -503,14 +507,20 @@ export default function ChatInbox() {
             };
           }
 
-          await sendWhatsAppTemplateNew(payload);
-          setSendConversation((prev) => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              stage: "completed"
-            };
-          });
+          setIsSending(true);
+          try {
+            await sendWhatsAppTemplateNew(payload);
+            setSendConversation(null);
+            await fetchTickets();
+          } catch (error) {
+            toast({
+              title: "Error enviando",
+              description: "No se pudo enviar el mensaje de WhatsApp.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsSending(false);
+          }
         }}
         onOpenChange={() => setSendConversation(null)}
         open={!!sendConversation}
@@ -540,6 +550,7 @@ export default function ChatInbox() {
           });
         }}
         isContactLoading={loadingContacts}
+        isLoading={isSending}
         contacts={contacts.map((c) => ({ id: c.id.toString(), name: c.contact_name }))}
       />
       <TemplateDialog
