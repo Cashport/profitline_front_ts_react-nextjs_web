@@ -7,17 +7,19 @@ interface IViewWrapper {
   headerTitle: string;
   children: React.ReactNode;
   gapTitle?: string;
+  hideHeader?: boolean;
 }
 export default function ViewWrapper({
   headerTitle,
   children,
-  gapTitle = "1rem"
+  gapTitle = "1rem",
+  hideHeader = false
 }: Readonly<IViewWrapper>) {
   return (
     <main className={styles.mainWrapper}>
       <SideBar />
       <Flex vertical className={styles.rightContent} gap={gapTitle}>
-        <Header title={headerTitle} />
+        {!hideHeader ? <Header title={headerTitle} /> : null}
         {children}
       </Flex>
     </main>
