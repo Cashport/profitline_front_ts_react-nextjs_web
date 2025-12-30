@@ -223,14 +223,7 @@ export default function ApprovalDetailModal({
                     {approvalDetail?.typeActionCode}
                   </h3>
                   <div className="mt-3 space-y-2 text-sm">
-                    <p>
-                      <span className="font-medium">Cliente:</span> CLIENTEXXXX
-                    </p>
-                    {true && (
-                      <p>
-                        <span className="font-medium">Monto:</span> $XXXXXXX
-                      </p>
-                    )}
+                    <p>{approvalDetail?.description}</p>
                   </div>
                 </div>
                 <Button

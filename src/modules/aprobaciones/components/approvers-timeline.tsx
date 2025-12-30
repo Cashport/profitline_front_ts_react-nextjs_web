@@ -65,7 +65,7 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
                     {/* Left side: Icon and details */}
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       {/* Status icon */}
-                      <div className="flex-shrink-0 pt-1">
+                      <div className="flex-shrink-0">
                         {status === "aprobado" ? (
                           <CheckCircle2 className="h-5 w-5 text-green-600" />
                         ) : status === "rechazado" ? (
@@ -115,7 +115,12 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
                           : undefined
                       }
                     >
-                      {step.status.name || (status === "aprobado" ? "Aprobado" : status === "rechazado" ? "Rechazado" : "Pendiente")}
+                      {step.status.name ||
+                        (status === "aprobado"
+                          ? "Aprobado"
+                          : status === "rechazado"
+                            ? "Rechazado"
+                            : "Pendiente")}
                     </Badge>
                   </div>
                 </div>
