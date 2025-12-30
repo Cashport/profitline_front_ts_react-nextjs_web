@@ -429,6 +429,7 @@ export default function ChatInbox() {
                 showSizeChanger={false}
                 size="small"
                 className="py-2 flex justify-center"
+                simple
               />
             )}
           </ScrollArea>

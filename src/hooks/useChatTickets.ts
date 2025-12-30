@@ -6,7 +6,7 @@ interface UseChatTicketsParams {
   page?: number;
 }
 
-const useChatTickets = ({ limit = 20, page = 1 }: UseChatTicketsParams = {}) => {
+const useChatTickets = ({ limit = 200, page = 1 }: UseChatTicketsParams = {}) => {
   const { data, isLoading, error, mutate } = useSWR<GetTicketsResponse>(
     `/whatsapp-tickets?limit=${limit}&page=${page}`,
     () => getTickets(limit, page),
