@@ -11,7 +11,7 @@ const useChatTickets = ({ limit = 20, page = 1 }: UseChatTicketsParams = {}) => 
     `/whatsapp-tickets?limit=${limit}&page=${page}`,
     () => getTickets(limit, page),
     {
-      refreshInterval: 10000,
+      refreshInterval: 30000,
       revalidateOnFocus: true
     }
   );
