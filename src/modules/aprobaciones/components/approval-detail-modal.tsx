@@ -75,7 +75,7 @@ export default function ApprovalDetailModal({
     }
   };
 
-  const canTakeAction = approval.status === "PENDING";
+  const canTakeAction = approval.status.name === "Pendiente";
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
@@ -113,9 +113,31 @@ export default function ApprovalDetailModal({
               <DialogTitle className="text-lg md:text-xl font-bold">
                 {approvalDetail?.referenceId}
               </DialogTitle>
-              <Badge variant="outline" className={`hidden md:flex text-xs font-medium`}>
-                <Clock className="h-3 w-3 mr-1" />
-                {approvalDetail?.status || approval.status}
+              <Badge
+                variant="outline"
+                className={`flex-shrink-0 ${
+                  status === "aprobado"
+                    ? "border-green-300 bg-green-50 text-green-700"
+                    : status === "rechazado"
+                      ? "border-red-300 bg-red-50 text-red-700"
+                      : "border-amber-300 bg-amber-50 text-amber-700"
+                }`}
+                style={
+                  approvalDetail?.status.color
+                    ? {
+                        color: approvalDetail.status.color,
+                        backgroundColor: approvalDetail.status.backgroundColor,
+                        borderColor: approvalDetail.status.color
+                      }
+                    : undefined
+                }
+              >
+                {approvalDetail?.status.name ||
+                  (status === "aprobado"
+                    ? "Aprobado"
+                    : status === "rechazado"
+                      ? "Rechazado"
+                      : "Pendiente")}
               </Badge>
             </div>
 

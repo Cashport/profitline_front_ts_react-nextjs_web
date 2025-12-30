@@ -2,7 +2,7 @@ import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
 
-import { GenericResponsePage } from "@/types/global/IGlobal";
+import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
 import { IApprovalsResponse } from "@/types/approvals/IApprovals";
 
 interface UseApprovalsParams {
@@ -31,14 +31,17 @@ export const useApprovals = ({
 
   const pathKey = `/approval?${queryParams.join("&")}`;
 
-  const { data, error, isLoading, mutate } = useSWR<IApprovalsResponse>(pathKey, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IApprovalsResponse>>(
+    pathKey,
+    fetcher
+  );
 
   return {
-    data: data?.items || [],
+    data: data?.data.items || [],
     pagination: {
-      page: data?.page,
-      limit: data?.limit,
-      total: data?.total
+      page: data?.data.page,
+      limit: data?.data.limit,
+      total: data?.data.total
     },
     isLoading,
     error,

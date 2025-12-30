@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
 
-import { IApprovalItem } from "@/types/approvals/IApprovals";
+import { IApprovalItem, IApprovalStepStatus } from "@/types/approvals/IApprovals";
+import { Badge } from "@/modules/chat/ui/badge";
 
 import "./approvals-table.scss";
 
@@ -103,10 +104,25 @@ export default function ApprovalsTable({
       title: "Estado",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => <Text>{status}</Text>,
-      sorter: (a, b) => a.status.localeCompare(b.status),
-      showSorterTooltip: false,
-      width: 120
+      render: (status: IApprovalStepStatus) => (
+        <Badge
+          variant="outline"
+          className="flex-shrink-0 border-gray-300 bg-gray-50 text-gray-700"
+          style={
+            status?.color && status?.backgroundColor
+              ? {
+                  color: status.color,
+                  backgroundColor: status.backgroundColor,
+                  borderColor: status.color
+                }
+              : undefined
+          }
+        >
+          {status?.name || "Desconocido"}
+        </Badge>
+      ),
+      sorter: (a, b) => a.status.name.localeCompare(b.status.name),
+      showSorterTooltip: false
     },
     {
       title: "",
@@ -150,10 +166,7 @@ export default function ApprovalsTable({
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
         {approvals.map((approval) => (
-          <div
-            key={approval.id}
-            className="rounded-lg border bg-white shadow-sm overflow-hidden"
-          >
+          <div key={approval.id} className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <div className="p-4 flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2">

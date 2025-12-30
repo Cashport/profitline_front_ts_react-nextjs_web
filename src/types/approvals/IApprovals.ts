@@ -6,7 +6,7 @@ export interface IApprovalItem {
   approvalName: string;
   approvalLink: string;
   observation: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: IApprovalStepStatus;
   requesterUserId: number;
   createdAt: string;
   updatedAt: string;
@@ -62,7 +62,7 @@ export interface IApprovalDetail {
   approvalLink: string;
   observation: string;
   description: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: IApprovalStepStatus;
   requesterUserId: number;
   createdAt: string;
   updatedAt: string;
