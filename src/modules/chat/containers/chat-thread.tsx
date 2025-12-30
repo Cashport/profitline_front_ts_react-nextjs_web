@@ -604,13 +604,17 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           </Avatar>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-semibold">{conversation.customer}</p>
+              <p className="truncate text-sm font-semibold">
+                {conversation.client_name ? conversation.client_name : conversation.customer}
+              </p>
               <Badge className="rounded-full bg-[#141414] px-2 py-0.5 text-xs text-white">
                 {conversation.status}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              {channel === "whatsapp" ? conversation.phone : conversation.email ?? "sin correo"}
+              {channel === "whatsapp"
+                ? `${conversation.phone} - ${conversation.customer}`
+                : conversation.email ?? "sin correo"}
             </p>
           </div>
         </div>

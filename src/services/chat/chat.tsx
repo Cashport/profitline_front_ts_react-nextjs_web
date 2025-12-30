@@ -1,28 +1,56 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { GenericResponse } from "@/types/global/IGlobal";
+import {
+  GenericResponse,
+  GenericResponsePaginated,
+  PaginationSimple
+} from "@/types/global/IGlobal";
 import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 
-export const getTickets = async (): Promise<ITicket[]> => {
+export interface GetTicketsResponse {
+  data: ITicket[];
+  pagination: PaginationSimple;
+}
+
+export const getTickets = async (
+  limit: number = 20,
+  page?: number
+): Promise<GetTicketsResponse> => {
   try {
-    const response: GenericResponse<ITicket[]> = await API.get("/whatsapp-tickets?limit=20", {
-      baseURL: config.API_CHAT
-    });
-    return response.data;
+    const params = new URLSearchParams();
+    params.append("limit", limit.toString());
+    if (page !== undefined) {
+      params.append("page", page.toString());
+    }
+
+    const response: GenericResponsePaginated<ITicket[]> = await API.get(
+      `/whatsapp-tickets?${params.toString()}`,
+      {
+        baseURL: config.API_CHAT
+      }
+    );
+    return {
+      data: response.data,
+      pagination: response.pagination
+    };
   } catch (error) {
     console.error("Error fetching tickets:", error);
     throw error;
   }
 };
 
-export const getOneTicket = async (ticketId: string, limit: number = 20, page?: number): Promise<IChatData> => {
+export const getOneTicket = async (
+  ticketId: string,
+  limit: number = 20,
+  page?: number
+): Promise<IChatData> => {
   try {
     const params = new URLSearchParams();
-    params.append('limit', limit.toString());
+    params.append("limit", limit.toString());
     if (page !== undefined) {
-      params.append('page', page.toString());
+      params.append("page", page.toString());
     }
-    
+
     const response: GenericResponse<IChatData> = await API.get(
       `/whatsapp-messages/ticket/${ticketId}?${params.toString()}`,
       {
@@ -53,10 +81,9 @@ export const sendMessage = async (customerId: string, message: string): Promise<
 
 export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
   try {
-    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get(
-      "/whatsapp-templates",
-      { baseURL: config.API_CHAT
-      });
+    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get("/whatsapp-templates", {
+      baseURL: config.API_CHAT
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching WhatsApp templates:", error);
