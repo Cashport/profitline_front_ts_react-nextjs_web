@@ -19,6 +19,7 @@ type Props = {
   onSelectClient: (clientUUID: string) => void;
   onSelectContact: (contactId: string) => void;
   isContactLoading: boolean;
+  isLoading?: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 };
@@ -28,6 +29,7 @@ export default function SelectClientDialog({
   clients,
   contacts,
   isContactLoading,
+  isLoading,
   onOpenChange,
   onConfirm,
   onSelectClient,
@@ -120,9 +122,9 @@ export default function SelectClientDialog({
               className="flex-1 h-12 text-[#141414] font-medium hover:opacity-90"
               style={{ backgroundColor: "#CBE71E" }}
               onClick={handleConfirm}
-              disabled={!selectedClient || !selectedContact}
+              disabled={!selectedClient || !selectedContact || isLoading}
             >
-              Enviar Whatsapp
+              {isLoading ? "Enviando..." : "Enviar Whatsapp"}
             </Button>
           </div>
         </div>
