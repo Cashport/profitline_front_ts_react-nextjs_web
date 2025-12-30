@@ -21,6 +21,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { IApprovalItem } from "@/types/approvals/IApprovals";
+import { ApproversTimeline } from "./approvers-timeline";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
@@ -182,14 +183,15 @@ export default function ApprovalDetailModal({
                   <span>Adjuntos ({approvalDetail.attachments.length})</span>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {approvalDetail.attachments.map((attachment: string, index: number) => (
+                  {approvalDetail.attachments.map((attachment, index) => (
                     <a
                       key={index}
-                      href="#"
+                      href={attachment.fileUrl}
+                      target="_blank"
                       className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       <Paperclip className="h-3.5 w-3.5" />
-                      {attachment}
+                      {attachment.fileName}
                     </a>
                   ))}
                 </div>
@@ -206,7 +208,7 @@ export default function ApprovalDetailModal({
               <div className="flex flex-col md:flex-row items-start justify-between gap-3 md:gap-4">
                 <div className="flex-1 w-full">
                   <h3 className="text-base md:text-lg font-semibold">
-                    {approvalTypeLabels[approval.type]}
+                    {approvalDetail?.typeActionCode}
                   </h3>
                   <div className="mt-3 space-y-2 text-sm">
                     <p>
@@ -217,16 +219,16 @@ export default function ApprovalDetailModal({
                         <span className="font-medium">Monto:</span> $XXXXXXX
                       </p>
                     )}
-                    {false && (
+                    {/* {false && (
                       <div>
                         <p className="font-medium">Ítems:</p>
                         <ul className="ml-4 mt-1 list-disc space-y-0.5">
-                          {approval.details.items.map((item: string, index: number) => (
+                          {approvalDetail?.items.map((item: string, index: number) => (
                             <li key={index}>{item}</li>
                           ))}
                         </ul>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
                 <Button
@@ -235,7 +237,7 @@ export default function ApprovalDetailModal({
                   asChild
                   className="gap-2 bg-background w-full md:w-auto"
                 >
-                  <a href={approval.detailLink} target="_blank" rel="noopener noreferrer">
+                  <a href={approvalDetail?.approvalLink} target="_blank" rel="noopener noreferrer">
                     Ver detalle
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -278,257 +280,15 @@ export default function ApprovalDetailModal({
                 </div>
               </div>
             )}
-
-            <div className="md:hidden space-y-4 pt-4 border-t">
-              <div className="flex items-center gap-2 pb-3">
-                <Users className="h-5 w-5" />
-                <h3 className="text-base font-semibold">Aprobadores</h3>
-              </div>
-
-              <div className="space-y-6">
-                {false && approval.otherApprovers.length > 0 ? (
-                  (() => {
-                    // Group approvers by step
-                    const approversByStep: Record<number, any[]> = {};
-                    approval.otherApprovers.forEach((approver: any) => {
-                      const step = typeof approver === "string" ? 1 : approver.step || 1;
-                      if (!approversByStep[step]) {
-                        approversByStep[step] = [];
-                      }
-                      approversByStep[step].push(approver);
-                    });
-
-                    const steps = Object.keys(approversByStep)
-                      .map(Number)
-                      .sort((a, b) => a - b);
-
-                    return steps.map((step, stepIndex) => (
-                      <div key={step} className="relative">
-                        {/* Step indicator */}
-                        <div className="mb-3 flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs font-semibold">
-                            Paso {step}
-                          </Badge>
-                          {approversByStep[step].length > 1 && (
-                            <span className="text-xs text-muted-foreground">
-                              ({approversByStep[step].length} aprobadores)
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Approvers in this step */}
-                        <div className="space-y-3">
-                          {approversByStep[step].map((approver: any, approverIndex: number) => {
-                            const status =
-                              typeof approver === "string"
-                                ? "pendiente"
-                                : approver.status || "pendiente";
-                            const name = typeof approver === "string" ? approver : approver.name;
-
-                            return (
-                              <div
-                                key={`${step}-${approverIndex}`}
-                                className="rounded-lg border bg-background p-4 shadow-sm"
-                              >
-                                <div className="flex items-start justify-between gap-3">
-                                  {/* Left side: Icon and details */}
-                                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                                    {/* Status icon */}
-                                    <div className="flex-shrink-0 pt-1">
-                                      {status === "aprobado" ? (
-                                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                                      ) : status === "rechazado" ? (
-                                        <XCircle className="h-5 w-5 text-red-600" />
-                                      ) : (
-                                        <Clock className="h-5 w-5 text-amber-500" />
-                                      )}
-                                    </div>
-
-                                    <div className="min-w-0 flex-1 space-y-1">
-                                      <p className="font-semibold text-base">{name}</p>
-
-                                      {/* Date and time */}
-                                      {typeof approver !== "string" && approver.date && (
-                                        <p className="text-xs text-muted-foreground">
-                                          {formatDate(approver.date)}
-                                          {approver.time && ` - ${approver.time}`}
-                                        </p>
-                                      )}
-
-                                      {/* Comment */}
-                                      {typeof approver !== "string" && approver.comment && (
-                                        <p className="text-sm italic text-muted-foreground mt-2">
-                                          &quot;{approver.comment}&quot;
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Right side: Status badge */}
-                                  <Badge
-                                    variant="outline"
-                                    className={`flex-shrink-0 ${
-                                      status === "aprobado"
-                                        ? "border-green-300 bg-green-50 text-green-700"
-                                        : status === "rechazado"
-                                          ? "border-red-300 bg-red-50 text-red-700"
-                                          : "border-amber-300 bg-amber-50 text-amber-700"
-                                    }`}
-                                  >
-                                    {status === "aprobado"
-                                      ? "Aprobado"
-                                      : status === "rechazado"
-                                        ? "Rechazado"
-                                        : "Pendiente"}
-                                  </Badge>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Connecting line to next step */}
-                        {stepIndex < steps.length - 1 && (
-                          <div className="my-4 flex items-center gap-2 pl-2">
-                            <div className="h-8 w-0.5 bg-border"></div>
-                            <div className="text-xs text-muted-foreground">↓</div>
-                          </div>
-                        )}
-                      </div>
-                    ));
-                  })()
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No hay otros aprobadores asignados
-                  </p>
-                )}
-              </div>
-            </div>
           </div>
 
-          {/* RIGHT COLUMN - Approvers Timeline (Desktop only) */}
-          <div className="hidden md:block md:w-[500px] flex-shrink-0 space-y-4 overflow-y-auto bg-muted/10 px-8 py-6">
-            <div className="flex items-center gap-2 border-b pb-3">
+          {/* Approvers Section - Responsive */}
+          <div className="pt-4 border-t px-4 md:border-t-0 md:w-[500px] md:flex-shrink-0 md:bg-muted/10 md:px-8 md:py-6 space-y-4 overflow-y-auto">
+            <div className="flex items-center gap-2 pb-3 md:border-b">
               <Users className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Aprobadores</h3>
+              <h3 className="text-base md:text-lg font-semibold">Aprobadores</h3>
             </div>
-
-            <div className="space-y-6">
-              {approval.otherApprovers && approval.otherApprovers.length > 0 ? (
-                (() => {
-                  // Group approvers by step
-                  const approversByStep: Record<number, any[]> = {};
-                  approval.otherApprovers.forEach((approver: any) => {
-                    const step = typeof approver === "string" ? 1 : approver.step || 1;
-                    if (!approversByStep[step]) {
-                      approversByStep[step] = [];
-                    }
-                    approversByStep[step].push(approver);
-                  });
-
-                  const steps = Object.keys(approversByStep)
-                    .map(Number)
-                    .sort((a, b) => a - b);
-
-                  return steps.map((step, stepIndex) => (
-                    <div key={step} className="relative">
-                      {/* Step indicator */}
-                      <div className="mb-3 flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs font-semibold">
-                          Paso {step}
-                        </Badge>
-                        {approversByStep[step].length > 1 && (
-                          <span className="text-xs text-muted-foreground">
-                            ({approversByStep[step].length} aprobadores)
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Approvers in this step */}
-                      <div className="space-y-3">
-                        {approversByStep[step].map((approver: any, approverIndex: number) => {
-                          const status =
-                            typeof approver === "string"
-                              ? "pendiente"
-                              : approver.status || "pendiente";
-                          const name = typeof approver === "string" ? approver : approver.name;
-
-                          return (
-                            <div
-                              key={`${step}-${approverIndex}`}
-                              className="rounded-lg border bg-background p-4 shadow-sm transition-all hover:shadow-md"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                {/* Left side: Icon and details */}
-                                <div className="flex items-start gap-3 flex-1 min-w-0">
-                                  {/* Status icon */}
-                                  <div className="flex-shrink-0 pt-1">
-                                    {status === "aprobado" ? (
-                                      <CheckCircle2 className="h-5 w-5 text-green-600" />
-                                    ) : status === "rechazado" ? (
-                                      <XCircle className="h-5 w-5 text-red-600" />
-                                    ) : (
-                                      <Clock className="h-5 w-5 text-amber-500" />
-                                    )}
-                                  </div>
-
-                                  <div className="min-w-0 flex-1 space-y-1">
-                                    <p className="font-semibold text-base">{name}</p>
-
-                                    {/* Date and time */}
-                                    {typeof approver !== "string" && approver.date && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {formatDate(approver.date)}
-                                        {approver.time && ` - ${approver.time}`}
-                                      </p>
-                                    )}
-
-                                    {/* Comment */}
-                                    {typeof approver !== "string" && approver.comment && (
-                                      <p className="text-sm italic text-muted-foreground mt-2">
-                                        &quot;{approver.comment}&quot;
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Right side: Status badge */}
-                                <Badge
-                                  variant="outline"
-                                  className={`flex-shrink-0 ${
-                                    status === "aprobado"
-                                      ? "border-green-300 bg-green-50 text-green-700"
-                                      : status === "rechazado"
-                                        ? "border-red-300 bg-red-50 text-red-700"
-                                        : "border-amber-300 bg-amber-50 text-amber-700"
-                                  }`}
-                                >
-                                  {status === "aprobado"
-                                    ? "Aprobado"
-                                    : status === "rechazado"
-                                      ? "Rechazado"
-                                      : "Pendiente"}
-                                </Badge>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Connecting line to next step */}
-                      {stepIndex < steps.length - 1 && (
-                        <div className="my-4 flex items-center gap-2 pl-2">
-                          <div className="h-8 w-0.5 bg-border"></div>
-                          <div className="text-xs text-muted-foreground">↓</div>
-                        </div>
-                      )}
-                    </div>
-                  ));
-                })()
-              ) : (
-                <p className="text-sm text-muted-foreground">No hay otros aprobadores asignados</p>
-              )}
-            </div>
+            <ApproversTimeline steps={approvalDetail?.steps || []} formatDate={formatDate} />
           </div>
         </div>
       </DialogContent>
