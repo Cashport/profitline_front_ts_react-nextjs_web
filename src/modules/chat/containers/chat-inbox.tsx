@@ -320,10 +320,7 @@ export default function ChatInbox() {
             </TabsList>
           </Tabs>
           <Separator className="my-2" />
-          <ScrollArea
-            className="min-h-0 h-[calc(100dvh-154px)] md:h-[calc(100dvh-124px)] pr-2"
-            style={{ display: "flex" }}
-          >
+          <ScrollArea className="min-h-0 flex-1 pr-2">
             <ul className="px-1">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -420,19 +417,19 @@ export default function ChatInbox() {
                 })
               )}
             </ul>
-            {ticketsData.length > 0 && pagination && (
-              <Pagination
-                current={page}
-                pageSize={pagination.limit}
-                total={pagination.total}
-                onChange={(newPage) => setPage(newPage)}
-                showSizeChanger={false}
-                size="small"
-                className="py-2 flex justify-center"
-                simple
-              />
-            )}
           </ScrollArea>
+          {ticketsData.length > 0 && pagination && (
+            <Pagination
+              current={page}
+              pageSize={pagination.limit}
+              total={pagination.total}
+              onChange={(newPage) => setPage(newPage)}
+              showSizeChanger={false}
+              size="small"
+              className="py-2 flex justify-center border-t"
+              style={{ borderColor: "#DDDDDD" }}
+            />
+          )}
         </aside>
 
         <section
