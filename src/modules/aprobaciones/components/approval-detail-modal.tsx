@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 import { getApprovalById } from "@/services/approvals/approvals";
 import {
@@ -57,8 +59,6 @@ export default function ApprovalDetailModal({
     getApprovalById(approval!.id)
   );
 
-  console.log("Approval detail response:", approvalDetail);
-
   if (!approval) return null;
 
   const handleApprove = () => {
@@ -93,6 +93,14 @@ export default function ApprovalDetailModal({
       month: "short",
       year: "numeric"
     });
+  };
+
+  const getDaysUntil = (dateStr?: string): number | null => {
+    if (!dateStr) return null;
+    dayjs.extend(utc);
+    const targetDate = dayjs.utc(dateStr).startOf("day");
+    const today = dayjs.utc().startOf("day");
+    return targetDate.diff(today, "day");
   };
 
   return (
@@ -159,7 +167,11 @@ export default function ApprovalDetailModal({
                 </div>
                 <p className="text-sm">
                   {formatDate(approvalDetail?.createdAt)}{" "}
-                  <span className="text-amber-600 font-medium">(XXXXXX días pendiente)</span>
+                  {getDaysUntil(approvalDetail?.createdAt) !== null && (
+                    <span className="text-amber-600 font-medium">
+                      ({getDaysUntil(approvalDetail?.createdAt)} días)
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -219,16 +231,6 @@ export default function ApprovalDetailModal({
                         <span className="font-medium">Monto:</span> $XXXXXXX
                       </p>
                     )}
-                    {/* {false && (
-                      <div>
-                        <p className="font-medium">Ítems:</p>
-                        <ul className="ml-4 mt-1 list-disc space-y-0.5">
-                          {approvalDetail?.items.map((item: string, index: number) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )} */}
                   </div>
                 </div>
                 <Button
@@ -270,7 +272,7 @@ export default function ApprovalDetailModal({
                     Cancelar
                   </Button>
                   <Button
-                    variant="destructive"
+                    variant="default"
                     size="sm"
                     onClick={handleReject}
                     disabled={!rejectReason.trim()}
