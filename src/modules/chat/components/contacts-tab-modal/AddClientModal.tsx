@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { SelectContactRole } from "@/components/molecules/selects/contacts/SelectContactRole";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 
 import { IAddClientForm } from "@/types/chat/IChat";
 
@@ -27,7 +28,6 @@ const AddClientModal = ({
   initialName,
   initialPhone
 }: PropsInvoicesTable) => {
-  console.log("initialPhone", initialPhone);
   const {
     control,
     handleSubmit,
@@ -36,7 +36,7 @@ const AddClientModal = ({
     mode: "onChange",
     defaultValues: {
       name: initialName || "",
-      phone: initialPhone || "",
+      phone: extractNationalNumber(initialPhone),
       indicative: { value: 57, label: "+57" }
     }
   });
@@ -152,3 +152,28 @@ const AddClientModal = ({
 };
 
 export default AddClientModal;
+
+/**
+ * Parsea un número telefónico internacional y extrae el número nacional
+ * @param internationalPhone - Teléfono en formato internacional (ej: "+573001234567")
+ * @returns El número nacional o vacío si falla el parseo
+ */
+function extractNationalNumber(internationalPhone: string | undefined): string {
+  if (!internationalPhone || internationalPhone.trim() === "") {
+    return "";
+  }
+
+  try {
+    const phoneNumber = parsePhoneNumberWithError(internationalPhone);
+
+    if (!phoneNumber || !phoneNumber.isValid()) {
+      return "";
+    }
+
+    // Usar phoneNumber.nationalNumber directamente
+    return phoneNumber.nationalNumber;
+  } catch (error) {
+    console.error("Error parseando número de teléfono:", error);
+    return "";
+  }
+}
