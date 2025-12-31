@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -46,6 +46,32 @@ export default function ApprovalDetailModal({
     getApprovalById(approval!.id)
   );
 
+  useEffect(() => {
+    // Reset state when modal is closed
+    setShowRejectForm(false);
+    setRejectReason("");
+  }, [approval]);
+
+  const canTakeAction = approvalDetail?.status === "PENDING";
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  };
+
+  const getDaysUntil = (dateStr?: string): number | null => {
+    if (!dateStr) return null;
+    dayjs.extend(utc);
+    const targetDate = dayjs.utc(dateStr).startOf("day");
+    const today = dayjs.utc().startOf("day");
+    return targetDate.diff(today, "day");
+  };
+
   if (!approval) return null;
 
   const handleApprove = () => {
@@ -60,34 +86,6 @@ export default function ApprovalDetailModal({
       setShowRejectForm(false);
       setRejectReason("");
     }
-  };
-
-  const canTakeAction = approval.status.name === "Pendiente";
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
-  };
-
-  const formatShortDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    });
-  };
-
-  const getDaysUntil = (dateStr?: string): number | null => {
-    if (!dateStr) return null;
-    dayjs.extend(utc);
-    const targetDate = dayjs.utc(dateStr).startOf("day");
-    const today = dayjs.utc().startOf("day");
-    return targetDate.diff(today, "day");
   };
 
   return (
@@ -160,7 +158,7 @@ export default function ApprovalDetailModal({
                   <User className="h-3.5 w-3.5" />
                   <span>Solicitado por</span>
                 </div>
-                <p className="text-sm">XXXXXXXX</p>
+                <p className="text-sm">{approvalDetail?.requester.userName}</p>
               </div>
 
               {/* Fecha de solicitud */}

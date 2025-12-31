@@ -54,6 +54,11 @@ export interface IApprovalHistoryItem {
   createdAt: string;
 }
 
+interface IRequester {
+  id: number;
+  userName: string;
+}
+
 export interface IApprovalDetail {
   id: number;
   typeActionCode: string;
@@ -62,8 +67,8 @@ export interface IApprovalDetail {
   approvalLink: string;
   observation: string;
   description: string;
-  status: IApprovalStepStatus;
-  requesterUserId: number;
+  status: string;
+  requester: IRequester;
   createdAt: string;
   updatedAt: string;
   steps: IApprovalStep[];
