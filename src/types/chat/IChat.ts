@@ -156,7 +156,7 @@ interface ISelectType {
 
 export interface IAddClientForm {
   name: string;
-  lastname: string;
+  lastname?: string;
   position: string;
   role: ISelectType;
   indicative: ISelectType;

@@ -80,6 +80,7 @@ const AddClientModal = ({
             control={control}
             nameInput="lastname"
             error={errors.lastname}
+            validationRules={{ required: false }}
           />
           <InputForm
             titleInput="Cargo"
