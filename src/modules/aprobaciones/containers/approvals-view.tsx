@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SlidersHorizontal, ListFilter } from "lucide-react";
 
 import { useApprovals } from "@/hooks/useApprovals";
 import {
@@ -12,15 +11,10 @@ import {
 
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
-import { Button } from "@/modules/chat/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
-import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal";
-import ApprovalsTable from "../approvals-table/Approvals-table";
+import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal/approval-detail-modal";
+import ApprovalsStateDropdown from "../components/approvals-state-dropdown/approvalsStateDorpdown";
+import ApprovalsTypeDropdown from "../components/approvals-type-dropdown/approvalsTypeDropdown";
+import ApprovalsTable from "../components/approvals-table/Approvals-table";
 
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import "@/modules/chat/styles/chatStyles.css";
@@ -65,67 +59,23 @@ export default function ApprovalsView() {
               <div className="hidden md:flex items-center gap-2">
                 <GenerateActionButton onClick={() => {}} disabled={selectedIds.length === 0} />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="gap-2 bg-transparent !font-semibold"
-                      style={{ height: "3rem" }}
-                    >
-                      <SlidersHorizontal className="h-4 w-4" />
-                      Estados
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {statusOptions.map((status) => (
-                      <DropdownMenuCheckboxItem
-                        key={status.code}
-                        checked={selectedStatuses.includes(status.code)}
-                        onCheckedChange={() => {
-                          setSelectedStatuses((prev) =>
-                            prev.includes(status.code)
-                              ? prev.filter((s) => s !== status.code)
-                              : [...prev, status.code]
-                          );
-                          setPage(1);
-                        }}
-                      >
-                        {status.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <ApprovalsStateDropdown
+                  statusOptions={statusOptions}
+                  selectedStatuses={selectedStatuses}
+                  onStatusChange={(statuses) => {
+                    setSelectedStatuses(statuses);
+                    setPage(1);
+                  }}
+                />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="gap-2 bg-transparent !font-semibold"
-                      style={{ height: "3rem" }}
-                    >
-                      <ListFilter className="h-4 w-4" />
-                      Tipos
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {typeOptions.map((type) => (
-                      <DropdownMenuCheckboxItem
-                        key={type.code}
-                        checked={selectedTypes.includes(type.code)}
-                        onCheckedChange={() => {
-                          setSelectedTypes((prev) =>
-                            prev.includes(type.code)
-                              ? prev.filter((t) => t !== type.code)
-                              : [...prev, type.code]
-                          );
-                          setPage(1);
-                        }}
-                      >
-                        {type.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <ApprovalsTypeDropdown
+                  typeOptions={typeOptions}
+                  selectedTypes={selectedTypes}
+                  onTypeChange={(types) => {
+                    setSelectedTypes(types);
+                    setPage(1);
+                  }}
+                />
               </div>
             </div>
 

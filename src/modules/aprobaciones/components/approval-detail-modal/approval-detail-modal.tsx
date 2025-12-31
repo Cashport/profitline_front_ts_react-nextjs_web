@@ -4,8 +4,6 @@ import { useState } from "react";
 import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-
-import { getApprovalById } from "@/services/approvals/approvals";
 import {
   CheckCircle2,
   XCircle,
@@ -14,16 +12,19 @@ import {
   Calendar,
   Users,
   MessageSquare,
-  Paperclip,
-  Clock
+  Paperclip
 } from "lucide-react";
+
+import { getApprovalById } from "@/services/approvals/approvals";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
+import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
+
 import { IApprovalItem } from "@/types/approvals/IApprovals";
-import { ApproversTimeline } from "./approvers-timeline";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
@@ -31,20 +32,6 @@ interface ApprovalDetailModalProps {
   onApprove: (id: number) => void;
   onReject: (id: number, reason: string) => void;
 }
-
-const approvalTypeLabels: Record<string, string> = {
-  "creacion-nota": "Creación de Nota",
-  "cupo-credito": "Cupo de Crédito",
-  "creacion-cliente": "Creación Cliente",
-  "orden-compra": "Orden de Compra"
-};
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pendiente: { label: "Pendiente", className: "border-amber-300 bg-amber-50 text-amber-700" },
-  aprobado: { label: "Aprobado", className: "border-green-300 bg-green-50 text-green-700" },
-  rechazado: { label: "Rechazado", className: "border-red-300 bg-red-50 text-red-700" },
-  "en-espera": { label: "En Espera", className: "border-blue-300 bg-blue-50 text-blue-700" }
-};
 
 export default function ApprovalDetailModal({
   approval,
