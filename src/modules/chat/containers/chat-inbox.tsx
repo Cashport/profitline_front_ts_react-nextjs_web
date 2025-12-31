@@ -5,6 +5,7 @@ import { Pagination } from "antd";
 import { Chat, Funnel, MagnifyingGlass, Users, ChatCircleDots } from "@phosphor-icons/react";
 
 import useChatTickets from "@/hooks/useChatTickets";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { auth } from "../../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSocket } from "@/context/ChatContext";
@@ -100,6 +101,7 @@ type NewConversation = {
 export default function ChatInbox() {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string>("");
@@ -111,7 +113,7 @@ export default function ChatInbox() {
     pagination,
     isLoading: loading,
     mutate: mutateTickets
-  } = useChatTickets({ page });
+  } = useChatTickets({ page, search: debouncedQuery });
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
@@ -228,21 +230,11 @@ export default function ChatInbox() {
 
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
-      const q = query.toLowerCase();
-      const matchesQuery =
-        c.customer.toLowerCase().includes(q) ||
-        c.client_name.toLowerCase().includes(q) ||
-        c.phone.includes(query) ||
-        c.lastMessage.toLowerCase().includes(q);
-      const matchesTab =
-        activeTab === "todos"
-          ? true
-          : activeTab === "abiertos"
-            ? c.status === "Abierto"
-            : c.status === "Cerrado";
-      return matchesQuery && matchesTab;
+      if (activeTab === "todos") return true;
+      if (activeTab === "abiertos") return c.status === "Abierto";
+      return c.status === "Cerrado";
     });
-  }, [conversations, query, activeTab]);
+  }, [conversations, activeTab]);
 
   const activeConversation = useMemo<Conversation | undefined>(
     () => filtered.find((c) => c.id === activeId) ?? filtered[0],
