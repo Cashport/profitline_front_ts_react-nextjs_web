@@ -14,13 +14,17 @@ export interface GetTicketsResponse {
 
 export const getTickets = async (
   limit: number = 20,
-  page?: number
+  page?: number,
+  search?: string
 ): Promise<GetTicketsResponse> => {
   try {
     const params = new URLSearchParams();
     params.append("limit", limit.toString());
     if (page !== undefined) {
       params.append("page", page.toString());
+    }
+    if (search) {
+      params.append("searchQuery", search);
     }
 
     const response: GenericResponsePaginated<ITicket[]> = await API.get(
