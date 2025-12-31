@@ -15,7 +15,7 @@ import {
   Paperclip
 } from "lucide-react";
 
-import { getApprovalById } from "@/services/approvals/approvals";
+import { getApprovalById, resolveApproval } from "@/services/approvals/approvals";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -24,21 +24,14 @@ import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
-import { IApprovalItem } from "@/types/approvals/IApprovals";
+import { IApprovalItem, ApprovalDecision } from "@/types/approvals/IApprovals";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
   onClose: () => void;
-  onApprove: (id: number) => void;
-  onReject: (id: number, reason: string) => void;
 }
 
-export default function ApprovalDetailModal({
-  approval,
-  onClose,
-  onApprove,
-  onReject
-}: ApprovalDetailModalProps) {
+export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetailModalProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
 
@@ -74,17 +67,21 @@ export default function ApprovalDetailModal({
 
   if (!approval) return null;
 
-  const handleApprove = () => {
-    onApprove(approval.id);
-    setShowRejectForm(false);
-    setRejectReason("");
-  };
+  const handleResolveApproval = async (decision: ApprovalDecision) => {
+    if (!approval?.id) return;
 
-  const handleReject = () => {
-    if (rejectReason.trim()) {
-      onReject(approval.id, rejectReason);
+    try {
+      await resolveApproval(approval.id, {
+        stepId: 1,
+        decision,
+        comment: decision === "REJECT" ? rejectReason : undefined
+      });
+
       setShowRejectForm(false);
       setRejectReason("");
+      onClose();
+    } catch (error) {
+      console.error("Error al resolver la aprobación:", error);
     }
   };
 
@@ -136,7 +133,7 @@ export default function ApprovalDetailModal({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleApprove}
+                  onClick={() => handleResolveApproval("APPROVE")}
                   className="gap-1 md:gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 bg-transparent text-xs md:text-sm px-2 md:px-3"
                 >
                   <CheckCircle2 className="h-3 md:h-4 w-3 md:w-4" />
@@ -269,7 +266,7 @@ export default function ApprovalDetailModal({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={handleReject}
+                    onClick={() => handleResolveApproval("REJECT")}
                     disabled={!rejectReason.trim()}
                   >
                     Confirmar Rechazo

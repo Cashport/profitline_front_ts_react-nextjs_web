@@ -3,7 +3,8 @@ import { API } from "@/utils/api/api";
 import {
   IApprovalDetail,
   IGetApprovalStatus,
-  IGetApprovalTypeActions
+  IGetApprovalTypeActions,
+  IResolveApprovalRequest
 } from "@/types/approvals/IApprovals";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -33,6 +34,17 @@ export const getApprovalTypes = async (): Promise<IGetApprovalTypeActions[]> => 
       `${config.API_HOST}/approval/type-actions`
     );
     return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resolveApproval = async (
+  id: number,
+  data: IResolveApprovalRequest
+): Promise<void> => {
+  try {
+    await API.post(`${config.API_HOST}/approval/resolve/${id}`, data);
   } catch (error) {
     throw error;
   }

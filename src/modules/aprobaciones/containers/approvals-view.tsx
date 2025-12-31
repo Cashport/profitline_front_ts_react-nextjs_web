@@ -98,14 +98,6 @@ export default function ApprovalsView() {
       <ApprovalDetailModal
         approval={selectedApproval}
         onClose={() => setSelectedApproval(undefined)}
-        onApprove={(id) => {
-          console.log("Aprobar:", id);
-          setSelectedApproval(undefined);
-        }}
-        onReject={(id) => {
-          console.log("Rechazar:", id);
-          setSelectedApproval(undefined);
-        }}
       />
     </div>
   );

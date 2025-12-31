@@ -97,3 +97,11 @@ export interface IGetApprovalTypeActions {
   description: string;
   hasTemplate: boolean;
 }
+
+export type ApprovalDecision = "APPROVE" | "REJECT";
+
+export interface IResolveApprovalRequest {
+  stepId: number;
+  decision: ApprovalDecision;
+  comment?: string;
+}
