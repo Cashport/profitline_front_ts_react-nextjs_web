@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
-import { Chat, Funnel, MagnifyingGlass, Users, ChatCircleDots } from "@phosphor-icons/react";
+import { Chat, Funnel, MagnifyingGlass, ChatCircleDots } from "@phosphor-icons/react";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
