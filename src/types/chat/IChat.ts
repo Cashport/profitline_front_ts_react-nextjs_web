@@ -162,4 +162,5 @@ export interface IAddClientForm {
   indicative: ISelectType;
   phone: string;
   email: string;
+  client: ISelectType;
 }

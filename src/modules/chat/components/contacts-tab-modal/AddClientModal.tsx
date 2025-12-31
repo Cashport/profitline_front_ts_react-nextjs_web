@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { Flex, Modal } from "antd";
+import { Flex, Modal, Select, Typography } from "antd";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -37,7 +37,8 @@ const AddClientModal = ({
     defaultValues: {
       name: initialName || "",
       phone: extractNationalNumber(initialPhone),
-      indicative: { value: 57, label: "+57" }
+      indicative: { value: 57, label: "+57" },
+      client: undefined
     }
   });
 
@@ -46,6 +47,12 @@ const AddClientModal = ({
 
     // setShowAddClientModal({ isOpen: false, contactId: 0 });
   };
+
+  const clientOptions = mockClients.map((client) => ({
+    value: client.id,
+    label: client.name,
+    className: "selectOptions"
+  }));
 
   return (
     <Modal
@@ -126,8 +133,35 @@ const AddClientModal = ({
               }
             }}
           />
+          <div className="inputContainer">
+            <h5 className="inputContainer__title">Cliente</h5>
+            <Controller
+              name="client"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <>
+                  <Select
+                    placeholder="Seleccione cliente"
+                    className={errors.client ? "selectInputError" : "selectInputCustom"}
+                    variant="borderless"
+                    optionLabelProp="label"
+                    {...field}
+                    popupClassName="selectDrop"
+                    options={clientOptions}
+                    labelInValue
+                    allowClear
+                  />
+                  {errors.client && (
+                    <Typography.Text className="textError">
+                      El cliente es obligatorio *
+                    </Typography.Text>
+                  )}
+                </>
+              )}
+            />
+          </div>
         </div>
-
         <div className="AddClientModalContainer__footer">
           <>
             <SecondaryButton
@@ -177,3 +211,9 @@ function extractNationalNumber(internationalPhone: string | undefined): string {
     return "";
   }
 }
+
+const mockClients = [
+  { id: 1, name: "Cliente A" },
+  { id: 2, name: "Cliente B" },
+  { id: 3, name: "Cliente C" }
+];
