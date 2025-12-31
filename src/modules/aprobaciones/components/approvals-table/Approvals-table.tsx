@@ -4,81 +4,25 @@ import { useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
 
+import { IApprovalItem, IApprovalStepStatus } from "@/types/approvals/IApprovals";
 import { Badge } from "@/modules/chat/ui/badge";
 
 import "./approvals-table.scss";
 
 const { Text } = Typography;
 
-type ApprovalStatus = "pendiente" | "aprobado" | "rechazado" | "en-espera";
-type ApprovalType = "creacion-nota" | "cupo-credito" | "creacion-cliente" | "orden-compra";
-
-interface ApprovalApprover {
-  name: string;
-  step: number;
-  status: ApprovalStatus;
-  date?: string;
-  time?: string;
-  comment?: string;
-}
-
-interface Approval {
-  id: string;
-  type: ApprovalType;
-  client: string;
-  date: string;
-  daysWaiting: number;
-  status: ApprovalStatus;
-  requestedBy: string;
-  otherApprovers: ApprovalApprover[];
-  comment: string;
-  attachments: string[];
-  detailLink: string;
-  details: {
-    amount?: string;
-    items?: string[];
-    currentLimit?: string;
-    requestedLimit?: string;
-    clientInfo?: string;
-  };
-}
-
 interface ApprovalsTableProps {
-  approvals: Approval[];
+  approvals: IApprovalItem[];
   selectedIds: string[];
   onSelectIds: (ids: string[]) => void;
-  onSelectApproval: (approval: Approval) => void;
+  onSelectApproval: (approval: IApprovalItem) => void;
+  pagination?: {
+    current: number;
+    total: number;
+    onChange: (page: number) => void;
+  };
+  isLoading?: boolean;
 }
-
-const approvalTypeLabels: Record<ApprovalType, string> = {
-  "creacion-nota": "Creacion de Nota",
-  "cupo-credito": "Cupo de Credito",
-  "creacion-cliente": "Creacion Cliente",
-  "orden-compra": "Orden de Compra"
-};
-
-const statusConfig: Record<ApprovalStatus, { label: string; color: string; textColor: string }> = {
-  pendiente: {
-    label: "Pendiente",
-    color: "#FFC107",
-    textColor: "text-black"
-  },
-  aprobado: {
-    label: "Aprobado",
-    color: "#4CAF50",
-    textColor: "text-white"
-  },
-  rechazado: {
-    label: "Rechazado",
-    color: "#E53935",
-    textColor: "text-white"
-  },
-  "en-espera": {
-    label: "En Espera",
-    color: "#2196F3",
-    textColor: "text-white"
-  }
-};
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -88,17 +32,13 @@ const formatDate = (dateString: string) => {
   return `${day}/${month}/${year}`;
 };
 
-const calculateDaysColor = (days: number) => {
-  if (days <= 2) return "text-cashport-black";
-  if (days <= 5) return "text-orange-600";
-  return "text-red-600";
-};
-
 export default function ApprovalsTable({
   approvals,
   selectedIds,
   onSelectIds,
-  onSelectApproval
+  onSelectApproval,
+  pagination,
+  isLoading
 }: ApprovalsTableProps) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -116,53 +56,47 @@ export default function ApprovalsTable({
     onChange: onSelectChange
   };
 
-  const columns: TableProps<Approval>["columns"] = [
+  const columns: TableProps<IApprovalItem>["columns"] = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
-      render: (id, record) => (
+      dataIndex: "referenceId",
+      key: "referenceId",
+      render: (referenceId, record) => (
         <Text className="idText" onClick={() => onSelectApproval(record)}>
-          {id}
+          {referenceId}
         </Text>
       ),
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      sorter: (a, b) => a.referenceId.localeCompare(b.referenceId),
       showSorterTooltip: false
     },
     {
       title: "Tipo de Aprobación",
-      dataIndex: "type",
-      key: "type",
-      render: (type: ApprovalType) => <Text>{approvalTypeLabels[type]}</Text>,
-      sorter: (a, b) => approvalTypeLabels[a.type].localeCompare(approvalTypeLabels[b.type]),
+      dataIndex: "typeActionCode",
+      key: "typeActionCode",
+      render: (typeActionCode: string) => <Text>{typeActionCode}</Text>,
+      sorter: (a, b) => a.typeActionCode.localeCompare(b.typeActionCode),
       showSorterTooltip: false
     },
     {
       title: "Cliente",
-      dataIndex: "client",
       key: "client",
-      render: (text) => <Text className="clientText">{text}</Text>,
-      sorter: (a, b) => a.client.localeCompare(b.client),
+      render: () => <Text className="clientText">-</Text>,
       showSorterTooltip: false
     },
     {
       title: "Fecha",
-      dataIndex: "date",
-      key: "date",
+      dataIndex: "createdAt",
+      key: "createdAt",
       render: (text) => <Text>{formatDate(text)}</Text>,
-      sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
+      sorter: (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
       showSorterTooltip: false,
       width: 115
     },
     {
       title: "Días Pendientes",
-      dataIndex: "daysWaiting",
       key: "daysWaiting",
       align: "center",
-      render: (days: number) => (
-        <Text className={`daysText ${calculateDaysColor(days)}`}>{days}</Text>
-      ),
-      sorter: (a, b) => a.daysWaiting - b.daysWaiting,
+      render: () => <Text className="daysText">-</Text>,
       showSorterTooltip: false,
       width: 130
     },
@@ -170,17 +104,25 @@ export default function ApprovalsTable({
       title: "Estado",
       dataIndex: "status",
       key: "status",
-      render: (status: ApprovalStatus) => {
-        const config = statusConfig[status];
-        return (
-          <Badge className={config.textColor} style={{ backgroundColor: config.color }}>
-            {config.label}
-          </Badge>
-        );
-      },
-      sorter: (a, b) => a.status.localeCompare(b.status),
-      showSorterTooltip: false,
-      width: 120
+      render: (status: IApprovalStepStatus) => (
+        <Badge
+          variant="outline"
+          className="flex-shrink-0 border-gray-300 bg-gray-50 text-gray-700"
+          style={
+            status?.color && status?.backgroundColor
+              ? {
+                  color: status.color,
+                  backgroundColor: status.backgroundColor,
+                  borderColor: status.color
+                }
+              : undefined
+          }
+        >
+          {status?.name || "Desconocido"}
+        </Badge>
+      ),
+      sorter: (a, b) => a.status.name.localeCompare(b.status.name),
+      showSorterTooltip: false
     },
     {
       title: "",
@@ -205,43 +147,41 @@ export default function ApprovalsTable({
           columns={columns}
           rowSelection={rowSelection}
           dataSource={approvals.map((data) => ({ ...data, key: data.id }))}
-          pagination={{ pageSize: 15, showSizeChanger: false }}
+          loading={isLoading}
+          pagination={
+            pagination
+              ? {
+                  current: pagination.current,
+                  pageSize: 20,
+                  total: pagination.total,
+                  onChange: pagination.onChange,
+                  showSizeChanger: false
+                }
+              : { pageSize: 20, showSizeChanger: false }
+          }
           scroll={{ x: "max-content" }}
         />
       </div>
 
       {/* Mobile Cards */}
       <div className="md:hidden space-y-3">
-        {approvals.map((approval) => {
-          const statusData = statusConfig[approval.status];
-
-          return (
-            <div
-              key={approval.id}
-              className="rounded-lg border bg-white shadow-sm overflow-hidden"
-              style={{ borderLeftWidth: "4px", borderLeftColor: statusData.color }}
-            >
-              <div className="p-4 flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm truncate">
-                      {approvalTypeLabels[approval.type]}
-                    </p>
-                    <span className="text-xs text-amber-600 font-medium whitespace-nowrap">
-                      {approval.daysWaiting}d
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 truncate">{approval.client}</p>
+        {approvals.map((approval) => (
+          <div key={approval.id} className="rounded-lg border bg-white shadow-sm overflow-hidden">
+            <div className="p-4 flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm truncate">{approval.typeActionCode}</p>
                 </div>
-                <Button
-                  className="buttonSeeDetail"
-                  onClick={() => onSelectApproval(approval)}
-                  icon={<Eye size={"1.3rem"} />}
-                />
+                <p className="text-sm text-gray-600 truncate">{approval.referenceId}</p>
               </div>
+              <Button
+                className="buttonSeeDetail"
+                onClick={() => onSelectApproval(approval)}
+                icon={<Eye size={"1.3rem"} />}
+              />
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </>
   );
