@@ -1,12 +1,39 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { IApprovalDetail } from "@/types/approvals/IApprovals";
+import {
+  IApprovalDetail,
+  IGetApprovalStatus,
+  IGetApprovalTypeActions
+} from "@/types/approvals/IApprovals";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getApprovalById = async (id: number): Promise<IApprovalDetail> => {
   try {
     const response: IApprovalDetail = await API.get(`${config.API_HOST}/approval/${id}`);
     return response;
   } catch (error) {
-    return error as any;
+    throw error;
+  }
+};
+
+export const getApprovalStatuses = async (): Promise<IGetApprovalStatus> => {
+  try {
+    const response: GenericResponse<IGetApprovalStatus> = await API.get(
+      `${config.API_HOST}/approval/step-status`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getApprovalTypes = async (): Promise<IGetApprovalTypeActions[]> => {
+  try {
+    const response: GenericResponse<IGetApprovalTypeActions[]> = await API.get(
+      `${config.API_HOST}/approval/type-actions`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 };

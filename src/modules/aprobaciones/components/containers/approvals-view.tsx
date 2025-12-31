@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SlidersHorizontal, ListFilter } from "lucide-react";
 
 import { useApprovals } from "@/hooks/useApprovals";
-import { IApprovalItem } from "@/types/approvals/IApprovals";
+import {
+  IApprovalItem,
+  IApprovalStatusItem,
+  IGetApprovalTypeActions
+} from "@/types/approvals/IApprovals";
 
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import { Button } from "@/modules/chat/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal";
@@ -20,6 +24,7 @@ import ApprovalsTable from "../approvals-table/Approvals-table";
 
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import "@/modules/chat/styles/chatStyles.css";
+import { getApprovalStatuses, getApprovalTypes } from "@/services/approvals/approvals";
 
 export default function ApprovalsView() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,12 +33,25 @@ export default function ApprovalsView() {
   const [selectedApproval, setSelectedApproval] = useState<IApprovalItem>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [statusOptions, setStatusOptions] = useState<IApprovalStatusItem[]>([]);
+  const [typeOptions, setTypeOptions] = useState<IGetApprovalTypeActions[]>([]);
 
   const { data, pagination, isLoading } = useApprovals({
     page,
     typeActionCode: selectedTypes.length > 0 ? selectedTypes : undefined,
     status: selectedStatuses.length > 0 ? selectedStatuses : undefined
   });
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const statusResponse = await getApprovalStatuses();
+      setStatusOptions(statusResponse.items);
+
+      const typesResponse = await getApprovalTypes();
+      setTypeOptions(typesResponse);
+    };
+    fetchOptions();
+  }, []);
 
   return (
     <div className="bg-background rounded-lg">
@@ -59,20 +77,21 @@ export default function ApprovalsView() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    {["PENDING", "APPROVED", "REJECTED"].map((status) => (
-                      <DropdownMenuItem
-                        key={status}
-                        onClick={() => {
+                    {statusOptions.map((status) => (
+                      <DropdownMenuCheckboxItem
+                        key={status.code}
+                        checked={selectedStatuses.includes(status.code)}
+                        onCheckedChange={() => {
                           setSelectedStatuses((prev) =>
-                            prev.includes(status)
-                              ? prev.filter((s) => s !== status)
-                              : [...prev, status]
+                            prev.includes(status.code)
+                              ? prev.filter((s) => s !== status.code)
+                              : [...prev, status.code]
                           );
                           setPage(1);
                         }}
                       >
-                        {status}
-                      </DropdownMenuItem>
+                        {status.name}
+                      </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -89,18 +108,21 @@ export default function ApprovalsView() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    {["NEW_CLIENT", "CREDIT_LIMIT", "CREATE_NOTE", "PURCHASE_ORDER"].map((type) => (
-                      <DropdownMenuItem
-                        key={type}
-                        onClick={() => {
+                    {typeOptions.map((type) => (
+                      <DropdownMenuCheckboxItem
+                        key={type.code}
+                        checked={selectedTypes.includes(type.code)}
+                        onCheckedChange={() => {
                           setSelectedTypes((prev) =>
-                            prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+                            prev.includes(type.code)
+                              ? prev.filter((t) => t !== type.code)
+                              : [...prev, type.code]
                           );
                           setPage(1);
                         }}
                       >
-                        {type}
-                      </DropdownMenuItem>
+                        {type.name}
+                      </DropdownMenuCheckboxItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>

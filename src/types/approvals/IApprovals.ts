@@ -70,3 +70,25 @@ export interface IApprovalDetail {
   attachments: IApprovalAttachment[];
   history: IApprovalHistoryItem[];
 }
+
+export interface IApprovalStatusItem {
+  id: number;
+  code: string;
+  name: string;
+  color: string;
+  backgroundColor: string;
+  isFinal: boolean;
+}
+
+export interface IGetApprovalStatus {
+  total: number;
+  items: IApprovalStatusItem[];
+}
+
+export interface IGetApprovalTypeActions {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  hasTemplate: boolean;
+}
