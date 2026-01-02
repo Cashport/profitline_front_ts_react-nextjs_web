@@ -51,7 +51,6 @@ const AddClientModal = ({
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        console.log("Fetching WhatsApp clients...");
         const res = await getWhatsappClients();
         const formatted = res.map((c) => ({ id: c.uuid, name: c.client_name }));
         setClients(formatted);
@@ -67,6 +66,17 @@ const AddClientModal = ({
       reset();
     }
   }, [showAddClientModal, reset]);
+
+  useEffect(() => {
+    if (showAddClientModal && (initialName || initialPhone)) {
+      reset({
+        name: initialName || "",
+        phone: extractNationalNumber(initialPhone),
+        indicative: { value: "1", label: "+57" },
+        client: undefined
+      });
+    }
+  }, [showAddClientModal, initialName, initialPhone, reset]);
 
   const onSubmitForm = async (data: IAddClientForm) => {
     try {
@@ -244,8 +254,12 @@ function extractNationalNumber(internationalPhone: string | undefined): string {
     return "";
   }
 
+  const formattedNumber = internationalPhone.startsWith("+")
+    ? internationalPhone
+    : `+${internationalPhone}`;
+
   try {
-    const phoneNumber = parsePhoneNumberWithError(internationalPhone);
+    const phoneNumber = parsePhoneNumberWithError(formattedNumber);
 
     if (!phoneNumber || !phoneNumber.isValid()) {
       return "";
