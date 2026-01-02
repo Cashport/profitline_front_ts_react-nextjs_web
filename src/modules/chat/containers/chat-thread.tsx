@@ -42,6 +42,7 @@ import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
+import { TypeContactMessage } from "@/types/chat/messages";
 import AddClientModal from "../components/contacts-tab-modal";
 
 type FileItem = { url: string; name: string; size: number };
@@ -114,7 +115,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         direction: msg.direction,
         status: msg.status as "DELIVERED" | "SENT" | "FAILED" | "READ",
         timestamp: msg.timestamp,
-        mediaUrl: msg.mediaUrl
+        mediaUrl: msg.mediaUrl,
+        metadata: msg.metadata
       };
 
       // Update the SWR cache by adding the new message only if it doesn't exist
@@ -208,7 +210,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         direction: "OUTBOUND",
         status: "SENT",
         timestamp: new Date().toISOString(),
-        mediaUrl: null
+        mediaUrl: null,
+        metadata: {}
       };
 
       // Add the sent message immediately to ticketMessages (at beginning of array since we reverse it)
@@ -376,6 +379,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         timestamp: new Date().toISOString(),
         mediaUrl: null,
         templateName: templatePayload.template || "estado_de_cuenta",
+        metadata: {},
         templateData: templatePayload.components
           ? JSON.stringify({ components: templatePayload.components })
           : undefined
@@ -454,6 +458,42 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       (mine
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
+
+    if (m.type === "CONTACTS") {
+      const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
+      if (contacts?.length === 0) {
+        return (
+          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+            <div className={wrapper}>
+              <div className={bubble + " p-2"}>Contacto sin datos</div>
+              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+                {formatRelativeTime(m.timestamp)}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+          <div className={wrapper}>
+            <div className={bubble + " p-2 space-y-2"}>
+              {contacts.map((contact, index) => (
+                <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
+                  <div className="font-semibold">{contact.name.formatted_name || "Sin nombre"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
+                      "Sin teléfono"}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+              {formatRelativeTime(m.timestamp)}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
       return (

@@ -47,6 +47,7 @@ export interface IMessage {
   mediaUrl: string | null;
   templateName?: string;
   templateData?: any;
+  metadata: any;
 }
 
 interface IPagination {
