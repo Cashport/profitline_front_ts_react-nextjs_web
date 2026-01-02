@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Button, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 import { IApprovalItem, IApprovalStepStatus } from "@/types/approvals/IApprovals";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -30,6 +32,14 @@ const formatDate = (dateString: string) => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
+};
+
+const getDaysUntil = (dateStr?: string): number | null => {
+  if (!dateStr) return null;
+  dayjs.extend(utc);
+  const targetDate = dayjs.utc(dateStr).startOf("day");
+  const today = dayjs.utc().startOf("day");
+  return targetDate.diff(today, "day");
 };
 
 export default function ApprovalsTable({
@@ -96,7 +106,19 @@ export default function ApprovalsTable({
       title: "Días Pendientes",
       key: "daysWaiting",
       align: "center",
-      render: () => <Text className="daysText">-</Text>,
+      render: (_, record) => {
+        const days = getDaysUntil(record.createdAt);
+        return (
+          <Text className="daysText">
+            {days !== null ? `${days} días` : "-"}
+          </Text>
+        );
+      },
+      sorter: (a, b) => {
+        const daysA = getDaysUntil(a.createdAt) ?? 0;
+        const daysB = getDaysUntil(b.createdAt) ?? 0;
+        return daysA - daysB;
+      },
       showSorterTooltip: false,
       width: 130
     },
