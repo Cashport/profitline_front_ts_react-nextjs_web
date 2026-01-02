@@ -149,3 +149,19 @@ export interface ITicketUpdate {
   message: IMessageSocketExtended;
   customer: ICustomerSocketExtended;
 }
+
+interface ISelectType {
+  value: string | number;
+  label: string;
+}
+
+export interface IAddClientForm {
+  name: string;
+  lastname?: string;
+  position: string;
+  role: ISelectType;
+  indicative: ISelectType;
+  phone: string;
+  email: string;
+  client: ISelectType;
+}

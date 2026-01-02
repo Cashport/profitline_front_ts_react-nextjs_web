@@ -3,8 +3,8 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import {
   ArrowsOut,
-  CaretDown,
   CodesandboxLogo,
+  DotsThreeVertical,
   FileArrowDown,
   Microphone,
   Paperclip,
@@ -24,6 +24,12 @@ import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/modules/chat/ui/dropdown-menu";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
@@ -37,6 +43,7 @@ import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
+import AddClientModal from "../components/contacts-tab-modal";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -70,6 +77,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -566,9 +574,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
       const templateComponents = template.components;
       const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
-      const buttonComponent = templateComponents.find(
-        (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
-      );
 
       // Renderizamos los parámetros reales del mensaje
       const bodyParams =
@@ -665,16 +670,34 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
               <TabsTrigger value="email">Correo</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            style={{ borderColor: "#DDDDDD" }}
-            onClick={() => onShowDetails?.()}
-          >
-            {detailsOpen ? "Ver más" : "Mostrar info"}
-            <CaretDown className="h-4 w-4" />
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <DotsThreeVertical size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setShowAddClientModal(true)}
+                className="cursor-pointer"
+              >
+                Agregar cliente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {!detailsOpen ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              style={{ borderColor: "#DDDDDD" }}
+              onClick={() => onShowDetails?.()}
+            >
+              Ver más
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -952,6 +975,14 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           )}
         </DialogContent>
       </Dialog>
+
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={conversation.customer}
+        initialPhone={conversation.phone}
+      />
     </div>
   );
 }
