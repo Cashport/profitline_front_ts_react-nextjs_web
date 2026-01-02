@@ -43,7 +43,6 @@ import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
-import AddClientModal from "../components/contacts-tab-modal";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -51,6 +50,7 @@ type Props = {
   conversation: Conversation;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
+  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -66,7 +66,7 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({ conversation, onShowDetails, detailsOpen }: Props) {
+export default function ChatThread({ conversation, onShowDetails, detailsOpen, onOpenAddClientModal }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -77,7 +77,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -679,7 +678,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => setShowAddClientModal(true)}
+                onClick={() => onOpenAddClientModal?.()}
                 className="cursor-pointer"
               >
                 Agregar cliente
@@ -975,14 +974,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           )}
         </DialogContent>
       </Dialog>
-
-      <AddClientModal
-        showAddClientModal={showAddClientModal}
-        setShowAddClientModal={setShowAddClientModal}
-        isActionLoading={false}
-        initialName={conversation.customer}
-        initialPhone={conversation.phone}
-      />
     </div>
   );
 }
