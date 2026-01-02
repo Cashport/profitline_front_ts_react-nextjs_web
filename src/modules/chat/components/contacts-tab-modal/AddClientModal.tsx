@@ -1,15 +1,19 @@
-import { Dispatch, SetStateAction } from "react";
-import { Flex, Modal, Select, Typography } from "antd";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { Controller, useForm } from "react-hook-form";
+import { Flex, Modal, Select, Typography, message } from "antd";
+
+import { getWhatsappClients } from "@/services/whatsapp/clients";
+import { postContact } from "@/services/contacts/contacts";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { Controller, useForm } from "react-hook-form";
 import { SelectContactRole } from "@/components/molecules/selects/contacts/SelectContactRole";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
-import { parsePhoneNumberWithError } from "libphonenumber-js";
 
 import { IAddClientForm } from "@/types/chat/IChat";
+import { ICreateEditContact } from "@/types/contacts/IContacts";
 
 import "./addClientModal.scss";
 
@@ -28,35 +32,71 @@ const AddClientModal = ({
   initialName,
   initialPhone
 }: PropsInvoicesTable) => {
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors, isValid }
   } = useForm<IAddClientForm>({
     mode: "onChange",
     defaultValues: {
       name: initialName || "",
       phone: extractNationalNumber(initialPhone),
-      indicative: { value: 57, label: "+57" },
+      indicative: { value: "1", label: "+57" },
       client: undefined
     }
   });
 
-  const onSubmitForm = async (data: IAddClientForm) => {
-    console.log("Form data submitted:", data);
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        console.log("Fetching WhatsApp clients...");
+        const res = await getWhatsappClients();
+        const formatted = res.map((c) => ({ id: c.uuid, name: c.client_name }));
+        setClients(formatted);
+      } catch (error) {
+        console.error("Error fetching WhatsApp clients:", error);
+      }
+    };
+    fetchClients();
+  }, []);
 
-    // setShowAddClientModal({ isOpen: false, contactId: 0 });
+  useEffect(() => {
+    if (!showAddClientModal) {
+      reset();
+    }
+  }, [showAddClientModal, reset]);
+
+  const onSubmitForm = async (data: IAddClientForm) => {
+    try {
+      const body: ICreateEditContact = {
+        clientUUID: String(data.client.value),
+        contact_name: data.name,
+        contact_lastname: data.lastname ?? "",
+        contact_email: data.email,
+        contact_phone: data.phone,
+        position: Number(data.role.value),
+        name_position: data.position,
+        country_calling_code_id: Number(data.indicative.value)
+      };
+
+      await postContact(body);
+
+      message.success("Cliente agregado exitosamente");
+      setShowAddClientModal(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      message.error("Error al agregar el cliente");
+    }
   };
 
-  const clientOptions = mockClients.map((client) => ({
-    value: client.id,
-    label: client.name,
-    className: "selectOptions"
-  }));
+  const filterOption = (input: string, option?: { label: string; value: string }) => {
+    return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
+  };
 
   return (
     <Modal
-      width={"50%"}
       destroyOnClose
       open={showAddClientModal}
       className="AddClientModalContainer"
@@ -143,15 +183,21 @@ const AddClientModal = ({
               render={({ field }) => (
                 <>
                   <Select
+                    showSearch
                     placeholder="Seleccione cliente"
                     className={errors.client ? "selectInputError" : "selectInputCustom"}
                     variant="borderless"
                     optionLabelProp="label"
                     {...field}
                     popupClassName="selectDrop"
-                    options={clientOptions}
+                    options={clients.map((client) => ({
+                      label: client.name,
+                      value: client.id,
+                      className: "selectOptions"
+                    }))}
                     labelInValue
                     allowClear
+                    filterOption={filterOption}
                   />
                   {errors.client && (
                     <Typography.Text className="textError">
@@ -212,9 +258,3 @@ function extractNationalNumber(internationalPhone: string | undefined): string {
     return "";
   }
 }
-
-const mockClients = [
-  { id: 1, name: "Cliente A" },
-  { id: 2, name: "Cliente B" },
-  { id: 3, name: "Cliente C" }
-];

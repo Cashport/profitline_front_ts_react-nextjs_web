@@ -150,7 +150,7 @@ export interface ITicketUpdate {
 }
 
 interface ISelectType {
-  value: number;
+  value: string | number;
   label: string;
 }
 

@@ -1,6 +1,9 @@
 @import "@styles/variables.scss";
 
 .AddClientModalContainer {
+    width: 60% !important;
+    min-width: 400px !important;
+    max-width: 575px !important;
     &__header {
         display: flex;
         flex-direction: column;
