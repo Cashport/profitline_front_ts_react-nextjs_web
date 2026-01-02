@@ -98,7 +98,8 @@ export const mockTickets: ITicket[] = [
       direction: "INBOUND",
       status: "DELIVERED",
       timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-      mediaUrl: null
+      mediaUrl: null,
+      metadata: {}
     }
   },
   {
@@ -136,7 +137,8 @@ export const mockTickets: ITicket[] = [
       direction: "INBOUND",
       status: "READ",
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      mediaUrl: null
+      mediaUrl: null,
+      metadata: {}
     }
   },
   {
@@ -170,7 +172,8 @@ export const mockTickets: ITicket[] = [
       direction: "INBOUND",
       status: "DELIVERED",
       timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      mediaUrl: null
+      mediaUrl: null,
+      metadata: {}
     }
   },
   {
@@ -208,7 +211,8 @@ export const mockTickets: ITicket[] = [
       direction: "OUTBOUND",
       status: "READ",
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      mediaUrl: null
+      mediaUrl: null,
+      metadata: {}
     }
   },
   {
@@ -246,7 +250,8 @@ export const mockTickets: ITicket[] = [
       direction: "OUTBOUND",
       status: "READ",
       timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      mediaUrl: null
+      mediaUrl: null,
+      metadata: {}
     }
   }
 ];
