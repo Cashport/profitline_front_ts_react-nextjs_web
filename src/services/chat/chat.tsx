@@ -9,7 +9,7 @@ import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
 
 // Toggle para usar mock data mientras el backend no está disponible
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export interface GetTicketsResponse {
   data: ITicket[];
