@@ -7,6 +7,7 @@ export interface IApprovalItem {
   approvalLink: string;
   observation: string;
   status: IApprovalStepStatus;
+  clientName: string;
   requesterUserId: number;
   createdAt: string;
   updatedAt: string;
