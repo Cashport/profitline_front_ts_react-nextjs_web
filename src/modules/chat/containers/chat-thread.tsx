@@ -14,7 +14,12 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getWhatsAppTemplates, sendMessage, sendWhatsAppTemplate } from "@/services/chat/chat";
+import {
+  getWhatsAppTemplates,
+  markTicketAsRead,
+  sendMessage,
+  sendWhatsAppTemplate
+} from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -66,7 +71,12 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({ conversation, onShowDetails, detailsOpen, onOpenAddClientModal }: Props) {
+export default function ChatThread({
+  conversation,
+  onShowDetails,
+  detailsOpen,
+  onOpenAddClientModal
+}: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -148,6 +158,11 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
       desubscribeTicketRoom(conversation.id);
     };
   }, [conversation.id, mutate, isConnected]);
+
+  useEffect(() => {
+    if (!conversation.id) return;
+    markTicketAsRead(conversation.id).catch(() => {});
+  }, [conversation.id]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -677,10 +692,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => onOpenAddClientModal?.()}
-                className="cursor-pointer"
-              >
+              <DropdownMenuItem onClick={() => onOpenAddClientModal?.()} className="cursor-pointer">
                 Agregar cliente
               </DropdownMenuItem>
             </DropdownMenuContent>

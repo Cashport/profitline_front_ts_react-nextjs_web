@@ -97,7 +97,7 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     metrics: { totalVencido: 0, ultimoPago: "" },
     timeline: [],
     messages: [],
-    hasUnreadUpdate: unreadTicketsSet.has(ticket.id),
+    hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt
   };
 }
