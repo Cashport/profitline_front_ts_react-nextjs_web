@@ -463,6 +463,7 @@ export default function ChatInbox() {
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
               onOpenAddClientModal={() => setShowAddClientModal(true)}
+              mutateTickets={mutateTickets}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">

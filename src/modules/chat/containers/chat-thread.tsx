@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 
 import {
+  GetTicketsResponse,
   getWhatsAppTemplates,
   markTicketAsRead,
   sendMessage,
@@ -48,11 +49,13 @@ import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
+import { KeyedMutator } from "swr";
 
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
+  mutateTickets: KeyedMutator<GetTicketsResponse>;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
   onOpenAddClientModal?: () => void;
@@ -75,7 +78,8 @@ export default function ChatThread({
   conversation,
   onShowDetails,
   detailsOpen,
-  onOpenAddClientModal
+  onOpenAddClientModal,
+  mutateTickets
 }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
@@ -159,9 +163,19 @@ export default function ChatThread({
     };
   }, [conversation.id, mutate, isConnected]);
 
+  // Mark ticket as read on mount
   useEffect(() => {
     if (!conversation.id) return;
-    markTicketAsRead(conversation.id).catch(() => {});
+    const markAsRead = async () => {
+      try {
+        await markTicketAsRead(conversation.id);
+        mutateTickets();
+      } catch {
+        console.error("Error marking ticket as read");
+      }
+    };
+
+    markAsRead();
   }, [conversation.id]);
 
   const scrollToBottom = () => {
