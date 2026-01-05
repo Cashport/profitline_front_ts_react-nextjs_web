@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
-import { Chat, Funnel, MagnifyingGlass, ChatCircleDots } from "@phosphor-icons/react";
+import {
+  Chat,
+  Funnel,
+  MagnifyingGlass,
+  ChatCircleDots,
+  DotsThreeVertical
+} from "@phosphor-icons/react";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -28,6 +34,7 @@ import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
+import AddClientModal from "../components/contacts-tab-modal";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
   getTemplateMessages,
@@ -35,6 +42,12 @@ import {
   getWhatsappClients,
   sendWhatsAppTemplateNew
 } from "@/services/whatsapp/clients";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/modules/chat/ui/dropdown-menu";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -118,6 +131,7 @@ export default function ChatInbox() {
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
 
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
@@ -266,6 +280,21 @@ export default function ChatInbox() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <DotsThreeVertical size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setShowAddClientModal(true)}
+                className="cursor-pointer"
+              >
+                Agregar cliente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" className="gap-2" style={{ borderColor: "#DDDDDD" }}>
             <Funnel className="h-4 w-4" />
             Filtrar
@@ -433,6 +462,7 @@ export default function ChatInbox() {
               conversation={activeConversation}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
+              onOpenAddClientModal={() => setShowAddClientModal(true)}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -572,6 +602,13 @@ export default function ChatInbox() {
             templateId: payload.templateId
           });
         }}
+      />
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={activeConversation?.customer}
+        initialPhone={activeConversation?.phone}
       />
     </div>
   );

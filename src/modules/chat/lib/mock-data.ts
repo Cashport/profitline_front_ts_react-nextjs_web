@@ -82,7 +82,7 @@ export const mockTickets: ITicket[] = [
       id: "cust-001",
       name: "Maria Garcia",
       clientName: "Farmacia Cruz Verde",
-      phoneNumber: "+573001234567",
+      phoneNumber: "573122800443",
       customerCashportUUID: "uuid-001"
     },
     agent: {
