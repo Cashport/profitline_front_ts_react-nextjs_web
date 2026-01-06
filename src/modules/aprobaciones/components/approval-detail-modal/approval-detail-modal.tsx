@@ -87,7 +87,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
 
   return (
     <Dialog open={!!approval} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="!max-w-none !w-[95vw] md:!w-[90vw] max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="!max-w-[1000px] !w-[95vw] md:!w-[90vw] max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="border-b px-4 md:px-8 py-4 pr-8">
           <div className="flex items-center justify-between gap-4">
             {/* Left side: ID + Status */}
@@ -120,7 +120,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
 
             {/* Right side: Action buttons (only shown if can take action) */}
             {canTakeAction && !showRejectForm && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mr-4">
                 <Button
                   variant="outline"
                   size="sm"
@@ -277,7 +277,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
           </div>
 
           {/* Approvers Section - Responsive */}
-          <div className="pt-4 border-t px-4 md:border-t-0 md:w-[500px] md:flex-shrink-0 md:bg-muted/10 md:px-8 md:py-6 space-y-4 overflow-y-auto">
+          <div className="pt-4 border-t px-4 md:border-t-0  md:max-w-[500px] md:min-w-[430px] md:bg-muted/10 md:px-8 md:py-6 space-y-4 overflow-y-auto">
             <div className="flex items-center gap-2 pb-3 md:border-b">
               <Users className="h-5 w-5" />
               <h3 className="text-base md:text-lg font-semibold">Aprobadores</h3>

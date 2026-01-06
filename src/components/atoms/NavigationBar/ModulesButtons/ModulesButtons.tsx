@@ -219,7 +219,7 @@ export const ModulesButtons = ({
       )}
 
       {/* Aprobaciones */}
-      {false && (
+      {checkUserViewPermissions(project, "Aprobaciones") && (
         <Link href="/aprobaciones" passHref legacyBehavior>
           <Button
             type="primary"
