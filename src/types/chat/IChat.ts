@@ -47,6 +47,7 @@ export interface IMessage {
   mediaUrl: string | null;
   templateName?: string;
   templateData?: any;
+  metadata: any;
 }
 
 interface IPagination {
@@ -147,4 +148,20 @@ export interface ITicketUpdate {
   ticketId: string;
   message: IMessageSocketExtended;
   customer: ICustomerSocketExtended;
+}
+
+interface ISelectType {
+  value: string | number;
+  label: string;
+}
+
+export interface IAddClientForm {
+  name: string;
+  lastname?: string;
+  position: string;
+  role: ISelectType;
+  indicative: ISelectType;
+  phone: string;
+  email: string;
+  client: ISelectType;
 }

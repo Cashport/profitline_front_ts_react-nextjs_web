@@ -1,28 +1,98 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { GenericResponse } from "@/types/global/IGlobal";
+import {
+  GenericResponse,
+  GenericResponsePaginated,
+  PaginationSimple
+} from "@/types/global/IGlobal";
 import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
 
-export const getTickets = async (): Promise<ITicket[]> => {
+// Toggle para usar mock data mientras el backend no está disponible
+const USE_MOCK = false;
+
+export interface GetTicketsResponse {
+  data: ITicket[];
+  pagination: PaginationSimple;
+}
+
+export const getTickets = async (
+  limit: number = 20,
+  page?: number,
+  search?: string
+): Promise<GetTicketsResponse> => {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Filter by search if provided
+    let filteredTickets = mockTickets;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredTickets = mockTickets.filter(
+        (ticket) =>
+          ticket.clientName?.toLowerCase().includes(searchLower) ||
+          ticket.customer?.name?.toLowerCase().includes(searchLower) ||
+          ticket.customer?.phoneNumber?.includes(search) ||
+          ticket.subject?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Calculate pagination
+    const currentPage = page ?? 1;
+    const total = filteredTickets.length;
+    const pages = Math.ceil(total / limit);
+    const startIndex = (currentPage - 1) * limit;
+    const paginatedData = filteredTickets.slice(startIndex, startIndex + limit);
+
+    return {
+      data: paginatedData,
+      pagination: {
+        page: currentPage,
+        limit,
+        total,
+        pages
+      }
+    };
+  }
+
   try {
-    const response: GenericResponse<ITicket[]> = await API.get("/whatsapp-tickets?limit=20", {
-      baseURL: config.API_CHAT
-    });
-    return response.data;
+    const params = new URLSearchParams();
+    params.append("limit", limit.toString());
+    if (page !== undefined) {
+      params.append("page", page.toString());
+    }
+    if (search) {
+      params.append("searchQuery", search);
+    }
+
+    const response: GenericResponsePaginated<ITicket[]> = await API.get(
+      `/whatsapp-tickets?${params.toString()}`,
+      {
+        baseURL: config.API_CHAT
+      }
+    );
+    return {
+      data: response.data,
+      pagination: response.pagination
+    };
   } catch (error) {
     console.error("Error fetching tickets:", error);
     throw error;
   }
 };
 
-export const getOneTicket = async (ticketId: string, limit: number = 20, page?: number): Promise<IChatData> => {
+export const getOneTicket = async (
+  ticketId: string,
+  limit: number = 20,
+  page?: number
+): Promise<IChatData> => {
   try {
     const params = new URLSearchParams();
-    params.append('limit', limit.toString());
+    params.append("limit", limit.toString());
     if (page !== undefined) {
-      params.append('page', page.toString());
+      params.append("page", page.toString());
     }
-    
+
     const response: GenericResponse<IChatData> = await API.get(
       `/whatsapp-messages/ticket/${ticketId}?${params.toString()}`,
       {
@@ -52,11 +122,15 @@ export const sendMessage = async (customerId: string, message: string): Promise<
 };
 
 export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return mockWhatsAppTemplates;
+  }
+
   try {
-    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get(
-      "/whatsapp-templates",
-      { baseURL: config.API_CHAT
-      });
+    const response: GenericResponse<IWhatsAppTemplate[]> = await API.get("/whatsapp-templates", {
+      baseURL: config.API_CHAT
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching WhatsApp templates:", error);

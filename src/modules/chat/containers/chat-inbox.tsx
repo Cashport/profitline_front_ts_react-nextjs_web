@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Chat, Funnel, MagnifyingGlass, Users, ChatCircleDots } from "@phosphor-icons/react";
+import { Pagination } from "antd";
+import {
+  Chat,
+  Funnel,
+  MagnifyingGlass,
+  ChatCircleDots,
+  DotsThreeVertical
+} from "@phosphor-icons/react";
 
-import { getTickets } from "@/services/chat/chat";
+import useChatTickets from "@/hooks/useChatTickets";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { auth } from "../../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSocket } from "@/context/ChatContext";
@@ -26,14 +34,20 @@ import { ITicket } from "@/types/chat/IChat";
 import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
+import AddClientModal from "../components/contacts-tab-modal";
 import { useToast } from "@/modules/chat/hooks/use-toast";
-import { getClients } from "@/services/commerce/commerce";
 import {
   getTemplateMessages,
   getWhatsappClientContacts,
   getWhatsappClients,
   sendWhatsAppTemplateNew
 } from "@/services/whatsapp/clients";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/modules/chat/ui/dropdown-menu";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -100,17 +114,24 @@ type NewConversation = {
 export default function ChatInbox() {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   const [massOpen, setMassOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
-  const [ticketsData, setTicketsData] = useState<ITicket[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const {
+    data: ticketsData = [],
+    pagination,
+    isLoading: loading,
+    mutate: mutateTickets
+  } = useChatTickets({ page, search: debouncedQuery });
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
 
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
@@ -169,55 +190,52 @@ export default function ChatInbox() {
     return subscribeToTicketUpdates((data) => {
       console.log("Ticket update received in ChatInbox:", data);
 
-      setTicketsData((prevTickets) => {
-        // Actualizar el ticket correspondiente
-        const updatedTickets = prevTickets.map((ticket) => {
-          if (ticket.id === data.ticketId) {
-            return {
-              ...ticket,
-              lastMessage: {
-                ...ticket.lastMessage,
-                content: data.message.content,
-                timestamp: data.message.timestamp
-              } as ITicket["lastMessage"],
-              lastMessageAt: data.message.timestamp,
-              updatedAt: data.message.timestamp
-            };
-          }
-          return ticket;
-        });
+      mutateTickets(
+        (currentData) => {
+          if (!currentData) return currentData;
+          // Actualizar el ticket correspondiente
+          const updatedTickets = currentData.data.map((ticket) => {
+            if (ticket.id === data.ticketId) {
+              return {
+                ...ticket,
+                lastMessage: {
+                  ...ticket.lastMessage,
+                  content: data.message.content,
+                  timestamp: data.message.timestamp
+                } as ITicket["lastMessage"],
+                lastMessageAt: data.message.timestamp,
+                updatedAt: data.message.timestamp
+              };
+            }
+            return ticket;
+          });
 
-        // Ordenar por lastMessageAt descendente (más reciente primero)
-        return updatedTickets.sort(
-          (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
-        );
-      });
+          // Ordenar por lastMessageAt descendente (más reciente primero)
+          const sortedTickets = updatedTickets.sort(
+            (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+          );
+
+          return {
+            ...currentData,
+            data: sortedTickets
+          };
+        },
+        { revalidate: false }
+      );
 
       // Si el ticket actualizado NO es el activo, marcarlo como no leído
       if (activeId !== data.ticketId) {
         setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
       }
     });
-  }, [isConnected, subscribeToTicketUpdates, activeId]);
+  }, [isConnected, subscribeToTicketUpdates, activeId, mutateTickets]);
 
-  const fetchTickets = async () => {
-    try {
-      setLoading(true);
-      const res = await getTickets();
-      setTicketsData(res);
-      if (res.length > 0) {
-        setActiveId(res[0].id);
-      }
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Set activeId to first ticket on initial load
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    if (ticketsData && ticketsData.length > 0 && !activeId) {
+      setActiveId(ticketsData[0].id);
+    }
+  }, [ticketsData, activeId]);
 
   // Convert tickets to conversations format for display
   const conversations = useMemo(() => {
@@ -226,21 +244,11 @@ export default function ChatInbox() {
 
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
-      const q = query.toLowerCase();
-      const matchesQuery =
-        c.customer.toLowerCase().includes(q) ||
-        c.client_name.toLowerCase().includes(q) ||
-        c.phone.includes(query) ||
-        c.lastMessage.toLowerCase().includes(q);
-      const matchesTab =
-        activeTab === "todos"
-          ? true
-          : activeTab === "abiertos"
-            ? c.status === "Abierto"
-            : c.status === "Cerrado";
-      return matchesQuery && matchesTab;
+      if (activeTab === "todos") return true;
+      if (activeTab === "abiertos") return c.status === "Abierto";
+      return c.status === "Cerrado";
     });
-  }, [conversations, query, activeTab]);
+  }, [conversations, activeTab]);
 
   const activeConversation = useMemo<Conversation | undefined>(
     () => filtered.find((c) => c.id === activeId) ?? filtered[0],
@@ -272,6 +280,21 @@ export default function ChatInbox() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <DotsThreeVertical size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setShowAddClientModal(true)}
+                className="cursor-pointer"
+              >
+                Agregar cliente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" className="gap-2" style={{ borderColor: "#DDDDDD" }}>
             <Funnel className="h-4 w-4" />
             Filtrar
@@ -318,10 +341,7 @@ export default function ChatInbox() {
             </TabsList>
           </Tabs>
           <Separator className="my-2" />
-          <ScrollArea
-            className="min-h-0 h-[calc(100dvh-154px)] md:h-[calc(100dvh-124px)] pr-2"
-            style={{ display: "flex" }}
-          >
+          <ScrollArea className="min-h-0 flex-1 pr-2">
             <ul className="px-1">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -419,6 +439,18 @@ export default function ChatInbox() {
               )}
             </ul>
           </ScrollArea>
+          {ticketsData.length > 0 && pagination && (
+            <Pagination
+              current={page}
+              pageSize={pagination.limit}
+              total={pagination.total}
+              onChange={(newPage) => setPage(newPage)}
+              showSizeChanger={false}
+              size="small"
+              className="py-2 flex justify-center border-t"
+              style={{ borderColor: "#DDDDDD" }}
+            />
+          )}
         </aside>
 
         <section
@@ -430,6 +462,7 @@ export default function ChatInbox() {
               conversation={activeConversation}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
+              onOpenAddClientModal={() => setShowAddClientModal(true)}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -511,7 +544,7 @@ export default function ChatInbox() {
           try {
             await sendWhatsAppTemplateNew(payload);
             setSendConversation(null);
-            await fetchTickets();
+            await mutateTickets();
           } catch (error) {
             toast({
               title: "Error enviando",
@@ -569,6 +602,13 @@ export default function ChatInbox() {
             templateId: payload.templateId
           });
         }}
+      />
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={activeConversation?.customer}
+        initialPhone={activeConversation?.phone}
       />
     </div>
   );

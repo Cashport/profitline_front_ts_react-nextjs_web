@@ -89,8 +89,9 @@ export default function ApprovalsTable({
     },
     {
       title: "Cliente",
-      key: "client",
-      render: () => <Text className="clientText">-</Text>,
+      dataIndex: "clientName",
+      key: "clientName",
+      render: (clientName: string) => <Text className="clientText">{clientName}</Text>,
       showSorterTooltip: false
     },
     {
@@ -108,11 +109,7 @@ export default function ApprovalsTable({
       align: "center",
       render: (_, record) => {
         const days = getDaysUntil(record.createdAt);
-        return (
-          <Text className="daysText">
-            {days !== null ? `${days} días` : "-"}
-          </Text>
-        );
+        return <Text className="daysText">{days !== null ? `${days} días` : "-"}</Text>;
       },
       sorter: (a, b) => {
         const daysA = getDaysUntil(a.createdAt) ?? 0;

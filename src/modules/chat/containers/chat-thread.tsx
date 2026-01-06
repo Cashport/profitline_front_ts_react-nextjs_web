@@ -3,8 +3,8 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import {
   ArrowsOut,
-  CaretDown,
   CodesandboxLogo,
+  DotsThreeVertical,
   FileArrowDown,
   Microphone,
   Paperclip,
@@ -24,6 +24,12 @@ import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/modules/chat/ui/dropdown-menu";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
@@ -36,6 +42,7 @@ import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
+import { TypeContactMessage } from "@/types/chat/messages";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -43,6 +50,7 @@ type Props = {
   conversation: Conversation;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
+  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -58,7 +66,7 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({ conversation, onShowDetails, detailsOpen }: Props) {
+export default function ChatThread({ conversation, onShowDetails, detailsOpen, onOpenAddClientModal }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -106,7 +114,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         direction: msg.direction,
         status: msg.status as "DELIVERED" | "SENT" | "FAILED" | "READ",
         timestamp: msg.timestamp,
-        mediaUrl: msg.mediaUrl
+        mediaUrl: msg.mediaUrl,
+        metadata: msg.metadata
       };
 
       // Update the SWR cache by adding the new message only if it doesn't exist
@@ -200,7 +209,8 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         direction: "OUTBOUND",
         status: "SENT",
         timestamp: new Date().toISOString(),
-        mediaUrl: null
+        mediaUrl: null,
+        metadata: {}
       };
 
       // Add the sent message immediately to ticketMessages (at beginning of array since we reverse it)
@@ -368,6 +378,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         timestamp: new Date().toISOString(),
         mediaUrl: null,
         templateName: templatePayload.template || "estado_de_cuenta",
+        metadata: {},
         templateData: templatePayload.components
           ? JSON.stringify({ components: templatePayload.components })
           : undefined
@@ -446,6 +457,42 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       (mine
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
+
+    if (m.type === "CONTACTS") {
+      const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
+      if (contacts?.length === 0) {
+        return (
+          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+            <div className={wrapper}>
+              <div className={bubble + " p-2"}>Contacto sin datos</div>
+              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+                {formatRelativeTime(m.timestamp)}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+          <div className={wrapper}>
+            <div className={bubble + " p-2 space-y-2"}>
+              {contacts.map((contact, index) => (
+                <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
+                  <div className="font-semibold">{contact.name.formatted_name || "Sin nombre"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
+                      "Sin teléfono"}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+              {formatRelativeTime(m.timestamp)}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
       return (
@@ -526,9 +573,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
       const templateComponents = template.components;
       const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
-      const buttonComponent = templateComponents.find(
-        (c: any) => c.type === "BUTTON" && c.sub_type === "URL"
-      );
 
       // Renderizamos los parámetros reales del mensaje
       const bodyParams =
@@ -604,13 +648,17 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           </Avatar>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-semibold">{conversation.customer}</p>
+              <p className="truncate text-sm font-semibold">
+                {conversation.client_name ? conversation.client_name : conversation.customer}
+              </p>
               <Badge className="rounded-full bg-[#141414] px-2 py-0.5 text-xs text-white">
                 {conversation.status}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              {channel === "whatsapp" ? conversation.phone : conversation.email ?? "sin correo"}
+              {channel === "whatsapp"
+                ? `${conversation.phone} - ${conversation.customer}`
+                : conversation.email ?? "sin correo"}
             </p>
           </div>
         </div>
@@ -621,16 +669,34 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
               <TabsTrigger value="email">Correo</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            style={{ borderColor: "#DDDDDD" }}
-            onClick={() => onShowDetails?.()}
-          >
-            {detailsOpen ? "Ver más" : "Mostrar info"}
-            <CaretDown className="h-4 w-4" />
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <DotsThreeVertical size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => onOpenAddClientModal?.()}
+                className="cursor-pointer"
+              >
+                Agregar cliente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {!detailsOpen ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              style={{ borderColor: "#DDDDDD" }}
+              onClick={() => onShowDetails?.()}
+            >
+              Ver más
+            </Button>
+          ) : null}
         </div>
       </div>
 

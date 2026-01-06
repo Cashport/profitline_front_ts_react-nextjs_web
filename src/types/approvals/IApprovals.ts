@@ -7,6 +7,7 @@ export interface IApprovalItem {
   approvalLink: string;
   observation: string;
   status: IApprovalStepStatus;
+  clientName: string;
   requesterUserId: number;
   createdAt: string;
   updatedAt: string;
@@ -101,7 +102,6 @@ export interface IGetApprovalTypeActions {
 export type ApprovalDecision = "APPROVE" | "REJECT";
 
 export interface IResolveApprovalRequest {
-  stepId: number;
   decision: ApprovalDecision;
   comment?: string;
 }
