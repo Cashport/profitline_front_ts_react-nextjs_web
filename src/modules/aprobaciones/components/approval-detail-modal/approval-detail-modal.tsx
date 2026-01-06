@@ -72,7 +72,6 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
 
     try {
       await resolveApproval(approval.id, {
-        stepId: 1,
         decision,
         comment: decision === "REJECT" ? rejectReason : undefined
       });

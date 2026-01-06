@@ -10,17 +10,24 @@ interface UseApprovalsParams {
   limit?: number;
   typeActionCode?: string[];
   status?: string[];
+  search?: string;
 }
 
 export const useApprovals = ({
   page = 1,
   limit = 20,
   typeActionCode,
-  status
+  status,
+  search
 }: UseApprovalsParams = {}) => {
   const queryParams: string[] = [];
+  queryParams.push("only_actionable=true");
   queryParams.push(`page=${page}`);
   queryParams.push(`limit=${limit}`);
+
+  if (search?.trim()) {
+    queryParams.push(`search=${search.trim()}`);
+  }
 
   if (typeActionCode && typeActionCode.length > 0) {
     queryParams.push(`typeActionCode=${typeActionCode.join(",")}`);

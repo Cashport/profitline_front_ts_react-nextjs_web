@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { useApprovals } from "@/hooks/useApprovals";
+import { useDebounce } from "@/hooks/useDeabouce";
 import {
   IApprovalItem,
   IApprovalStatusItem,
@@ -22,6 +23,7 @@ import { getApprovalStatuses, getApprovalTypes } from "@/services/approvals/appr
 
 export default function ApprovalsView() {
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 500);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedApproval, setSelectedApproval] = useState<IApprovalItem>();
@@ -33,7 +35,8 @@ export default function ApprovalsView() {
   const { data, pagination, isLoading } = useApprovals({
     page,
     typeActionCode: selectedTypes.length > 0 ? selectedTypes : undefined,
-    status: selectedStatuses.length > 0 ? selectedStatuses : undefined
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+    search: debouncedSearch
   });
 
   useEffect(() => {
