@@ -504,8 +504,8 @@ export default function ChatInbox() {
           const templateId = sendConversation?.templateId || "";
           let payload: any;
 
-          if (templateId === "presentacion") {
-            // Payload para "presentacion" - usa clientName y clientUUID como customerCashportUUID
+          if (templateId === "presentacion" || templateId === "saludo") {
+            // Payload para "presentacion" y "saludo" - usa clientName y clientUUID como customerCashportUUID
             payload = {
               templateData: {
                 components: [
@@ -521,7 +521,7 @@ export default function ChatInbox() {
                 ]
               },
               phoneNumber: contact.contact_phone,
-              templateId: "presentacion",
+              templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: sendConversation?.clientName || "",
               customerCashportUUID: sendConversation?.clientUUID || ""

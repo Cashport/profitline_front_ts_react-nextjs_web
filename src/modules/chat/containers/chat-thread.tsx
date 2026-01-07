@@ -438,7 +438,7 @@ export default function ChatThread({
     }
   };
 
-  const sendPresentationTemplate = async () => {
+  const sendBasicTemplate = async (templateId: "presentacion" | "saludo") => {
     try {
       const payload = {
         templateData: {
@@ -455,7 +455,7 @@ export default function ChatThread({
           ]
         },
         phoneNumber: conversation.phoneNumber,
-        templateId: "presentacion",
+        templateId,
         senderId: "cmhv6mnla0003no0huiao1u63",
         name: conversation.client_name,
         customerCashportUUID: conversation.customerCashportUUID || ""
@@ -980,7 +980,9 @@ export default function ChatThread({
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
           if (payload.templateId === "estado_de_cuenta")
             return await sendAccountStatementTemplate();
-          if (payload.templateId === "presentacion") return await sendPresentationTemplate();
+          else if (payload.templateId === "presentacion")
+            return await sendBasicTemplate("presentacion");
+          else if (payload.templateId === "saludo") return await sendBasicTemplate("saludo");
         }}
       />
 
