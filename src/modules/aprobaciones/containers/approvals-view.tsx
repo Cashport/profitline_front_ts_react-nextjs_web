@@ -32,7 +32,12 @@ export default function ApprovalsView() {
   const [statusOptions, setStatusOptions] = useState<IApprovalStatusItem[]>([]);
   const [typeOptions, setTypeOptions] = useState<IGetApprovalTypeActions[]>([]);
 
-  const { data, pagination, isLoading } = useApprovals({
+  const {
+    data,
+    pagination,
+    isLoading,
+    mutate: mutateApprovals
+  } = useApprovals({
     page,
     typeActionCode: selectedTypes.length > 0 ? selectedTypes : undefined,
     status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
@@ -101,6 +106,7 @@ export default function ApprovalsView() {
       <ApprovalDetailModal
         approval={selectedApproval}
         onClose={() => setSelectedApproval(undefined)}
+        mutateApprovals={mutateApprovals}
       />
     </div>
   );
