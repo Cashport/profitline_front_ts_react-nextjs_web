@@ -24,8 +24,8 @@ import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
-import { IApprovalItem, ApprovalDecision, IApprovalsResponse } from "@/types/approvals/IApprovals";
 import { GenericResponse } from "@/types/global/IGlobal";
+import { IApprovalItem, ApprovalDecision, IApprovalsResponse } from "@/types/approvals/IApprovals";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
