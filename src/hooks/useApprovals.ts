@@ -26,7 +26,7 @@ export const useApprovals = ({
   queryParams.push(`limit=${limit}`);
 
   if (search?.trim()) {
-    queryParams.push(`search=${search.trim()}`);
+    queryParams.push(`q=${search.trim()}`);
   }
 
   if (typeActionCode && typeActionCode.length > 0) {

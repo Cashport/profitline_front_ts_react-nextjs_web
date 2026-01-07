@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useSWR from "swr";
+import useSWR, { KeyedMutator } from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {
@@ -24,16 +24,23 @@ import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
-import { IApprovalItem, ApprovalDecision } from "@/types/approvals/IApprovals";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { IApprovalItem, ApprovalDecision, IApprovalsResponse } from "@/types/approvals/IApprovals";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
   onClose: () => void;
+  mutateApprovals: KeyedMutator<GenericResponse<IApprovalsResponse>>;
 }
 
-export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetailModalProps) {
+export default function ApprovalDetailModal({
+  approval,
+  onClose,
+  mutateApprovals
+}: ApprovalDetailModalProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
 
   const { data: approvalDetail } = useSWR(approval?.id ? `approval-${approval.id}` : null, () =>
     getApprovalById(approval!.id)
@@ -70,6 +77,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
   const handleResolveApproval = async (decision: ApprovalDecision) => {
     if (!approval?.id) return;
 
+    setIsResolving(true);
     try {
       await resolveApproval(approval.id, {
         decision,
@@ -78,9 +86,12 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
 
       setShowRejectForm(false);
       setRejectReason("");
+      mutateApprovals();
       onClose();
     } catch (error) {
       console.error("Error al resolver la aprobación:", error);
+    } finally {
+      setIsResolving(false);
     }
   };
 
@@ -133,6 +144,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
                   variant="outline"
                   size="sm"
                   onClick={() => handleResolveApproval("APPROVE")}
+                  disabled={isResolving}
                   className="gap-1 md:gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 bg-transparent text-xs md:text-sm px-2 md:px-3"
                 >
                   <CheckCircle2 className="h-3 md:h-4 w-3 md:w-4" />
@@ -266,7 +278,7 @@ export default function ApprovalDetailModal({ approval, onClose }: ApprovalDetai
                     variant="default"
                     size="sm"
                     onClick={() => handleResolveApproval("REJECT")}
-                    disabled={!rejectReason.trim()}
+                    disabled={!rejectReason.trim() || isResolving}
                   >
                     Confirmar Rechazo
                   </Button>
