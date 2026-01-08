@@ -14,7 +14,13 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getWhatsAppTemplates, sendMessage, sendWhatsAppTemplate } from "@/services/chat/chat";
+import {
+  GetTicketsResponse,
+  getWhatsAppTemplates,
+  markTicketAsRead,
+  sendMessage,
+  sendWhatsAppTemplate
+} from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -43,11 +49,13 @@ import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
 import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
+import { KeyedMutator } from "swr";
 
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
+  mutateTickets: KeyedMutator<GetTicketsResponse>;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
   onOpenAddClientModal?: () => void;
@@ -66,7 +74,13 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({ conversation, onShowDetails, detailsOpen, onOpenAddClientModal }: Props) {
+export default function ChatThread({
+  conversation,
+  onShowDetails,
+  detailsOpen,
+  onOpenAddClientModal,
+  mutateTickets
+}: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -148,6 +162,21 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
       desubscribeTicketRoom(conversation.id);
     };
   }, [conversation.id, mutate, isConnected]);
+
+  // Mark ticket as read on mount
+  useEffect(() => {
+    if (!conversation.id) return;
+    const markAsRead = async () => {
+      try {
+        await markTicketAsRead(conversation.id);
+        mutateTickets();
+      } catch {
+        console.error("Error marking ticket as read");
+      }
+    };
+
+    markAsRead();
+  }, [conversation.id]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -409,7 +438,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
     }
   };
 
-  const sendPresentationTemplate = async () => {
+  const sendBasicTemplate = async (templateId: "presentacion" | "saludo") => {
     try {
       const payload = {
         templateData: {
@@ -426,7 +455,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
           ]
         },
         phoneNumber: conversation.phoneNumber,
-        templateId: "presentacion",
+        templateId,
         senderId: "cmhv6mnla0003no0huiao1u63",
         name: conversation.client_name,
         customerCashportUUID: conversation.customerCashportUUID || ""
@@ -677,10 +706,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => onOpenAddClientModal?.()}
-                className="cursor-pointer"
-              >
+              <DropdownMenuItem onClick={() => onOpenAddClientModal?.()} className="cursor-pointer">
                 Agregar cliente
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -954,7 +980,9 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen, o
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
           if (payload.templateId === "estado_de_cuenta")
             return await sendAccountStatementTemplate();
-          if (payload.templateId === "presentacion") return await sendPresentationTemplate();
+          else if (payload.templateId === "presentacion")
+            return await sendBasicTemplate("presentacion");
+          else if (payload.templateId === "saludo") return await sendBasicTemplate("saludo");
         }}
       />
 

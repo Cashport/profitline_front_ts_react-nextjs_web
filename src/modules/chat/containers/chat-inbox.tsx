@@ -97,7 +97,7 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     metrics: { totalVencido: 0, ultimoPago: "" },
     timeline: [],
     messages: [],
-    hasUnreadUpdate: unreadTicketsSet.has(ticket.id),
+    hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt
   };
 }
@@ -463,6 +463,7 @@ export default function ChatInbox() {
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
               onOpenAddClientModal={() => setShowAddClientModal(true)}
+              mutateTickets={mutateTickets}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -503,8 +504,8 @@ export default function ChatInbox() {
           const templateId = sendConversation?.templateId || "";
           let payload: any;
 
-          if (templateId === "presentacion") {
-            // Payload para "presentacion" - usa clientName y clientUUID como customerCashportUUID
+          if (templateId === "presentacion" || templateId === "saludo") {
+            // Payload para "presentacion" y "saludo" - usa clientName y clientUUID como customerCashportUUID
             payload = {
               templateData: {
                 components: [
@@ -520,7 +521,7 @@ export default function ChatInbox() {
                 ]
               },
               phoneNumber: contact.contact_phone,
-              templateId: "presentacion",
+              templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: sendConversation?.clientName || "",
               customerCashportUUID: sendConversation?.clientUUID || ""

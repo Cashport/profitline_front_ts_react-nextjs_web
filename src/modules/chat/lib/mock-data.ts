@@ -76,6 +76,8 @@ export const mockTickets: ITicket[] = [
     metadata: null,
     closedAt: null,
     lastMessageAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    lastViewedAt: null,
+    lastViewedBy: null,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
     customer: {
@@ -115,6 +117,8 @@ export const mockTickets: ITicket[] = [
     metadata: null,
     closedAt: null,
     lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    lastViewedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    lastViewedBy: "agent-002",
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     customer: {
@@ -154,6 +158,8 @@ export const mockTickets: ITicket[] = [
     metadata: null,
     closedAt: null,
     lastMessageAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    lastViewedAt: null,
+    lastViewedBy: null,
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     customer: {
@@ -189,6 +195,8 @@ export const mockTickets: ITicket[] = [
     metadata: null,
     closedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
     lastMessageAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    lastViewedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    lastViewedBy: "agent-001",
     createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
     customer: {
@@ -228,6 +236,8 @@ export const mockTickets: ITicket[] = [
     metadata: null,
     closedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     lastMessageAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    lastViewedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    lastViewedBy: "agent-002",
     createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     customer: {
