@@ -19,7 +19,8 @@ import {
   getWhatsAppTemplates,
   markTicketAsRead,
   sendMessage,
-  sendWhatsAppTemplate
+  sendWhatsAppTemplate,
+  sendWhatsAppTemplateNew
 } from "@/services/chat/chat";
 
 import { Button } from "@/modules/chat/ui/button";
@@ -47,7 +48,6 @@ import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 import { getPayloadByTicket } from "@/services/clients/clients";
-import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
 import { KeyedMutator } from "swr";
 
@@ -382,9 +382,9 @@ export default function ChatThread({
       .replace(/\n/g, "<br/>");
   }
 
-  const sendAccountStatementTemplate = async () => {
+  const sendTemplateNeedingPayload = async (templateId: string) => {
     try {
-      const templatePayload = await getPayloadByTicket(conversation.id);
+      const templatePayload = await getPayloadByTicket(conversation.id, templateId);
 
       if (!templatePayload) {
         toast({
@@ -406,10 +406,10 @@ export default function ChatThread({
         status: "SENT",
         timestamp: new Date().toISOString(),
         mediaUrl: null,
-        templateName: templatePayload.template || "estado_de_cuenta",
+        templateName: templatePayload.templateId,
         metadata: {},
-        templateData: templatePayload.components
-          ? JSON.stringify({ components: templatePayload.components })
+        templateData: templatePayload.templateData.components
+          ? JSON.stringify({ components: templatePayload.templateData.components })
           : undefined
       };
 
@@ -423,6 +423,7 @@ export default function ChatThread({
       }, false);
 
       setTemplateOpen(false);
+      mutate();
       toast({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
@@ -466,6 +467,7 @@ export default function ChatThread({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
       });
+      mutate();
       scrollToBottom();
     } catch (error) {
       console.error("Error al enviar la plantilla:", error);
@@ -979,10 +981,12 @@ export default function ChatThread({
         ticketId={conversation.id}
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
           if (payload.templateId === "estado_de_cuenta")
-            return await sendAccountStatementTemplate();
+            return await sendTemplateNeedingPayload("estado_de_cuenta");
           else if (payload.templateId === "presentacion")
             return await sendBasicTemplate("presentacion");
           else if (payload.templateId === "saludo") return await sendBasicTemplate("saludo");
+          else if (payload.templateId === "soportes")
+            return await sendTemplateNeedingPayload("soportes");
         }}
       />
 

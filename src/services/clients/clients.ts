@@ -15,6 +15,7 @@ import { IAddAddressData } from "@/types/locations/ILocations";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { MessageType } from "@/context/MessageContext";
 import { stringToBoolean } from "@/utils/utils";
+import { PayloadByTicket } from "@/types/chat/IChat";
 
 // create
 
@@ -311,11 +312,17 @@ export const getClientWallet = async (token: string): Promise<IClientWalletData>
   }
 };
 
-export const getPayloadByTicket = async (ticketId: string): Promise<any> => {
+export const getPayloadByTicket = async (
+  ticketId: string,
+  templateId: string
+): Promise<PayloadByTicket | null> => {
   try {
-    const response = await API.get(`${config.API_HOST}/client/get-payload-by-ticket`, {
-      params: { ticketId, templateId: "estado_de_cuenta" }
-    });
+    const response: GenericResponse<any> = await API.get(
+      `${config.API_HOST}/client/get-payload-by-ticket`,
+      {
+        params: { ticketId, templateId }
+      }
+    );
     const data = response?.data?.data || response?.data || response;
 
     return data;

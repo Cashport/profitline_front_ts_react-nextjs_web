@@ -167,3 +167,26 @@ export interface IAddClientForm {
   email: string;
   client: ISelectType;
 }
+
+interface TemplateParameter {
+  type: string;
+  text: string;
+}
+
+interface TemplateComponent {
+  type: "body" | "button";
+  parameters: TemplateParameter[];
+  sub_type?: string;
+  index?: string;
+}
+
+interface TemplateData {
+  components: TemplateComponent[];
+}
+
+export interface PayloadByTicket {
+  ticketId: string;
+  templateId: string;
+  senderId: string;
+  templateData: TemplateData;
+}

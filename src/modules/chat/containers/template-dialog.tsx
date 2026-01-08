@@ -85,7 +85,7 @@ export default function TemplateDialog({ open, onOpenChange, channel, onUse, tic
                       style={{ borderColor: "#DDDDDD" }}
                     >
                       <div className="mb-2 flex items-center justify-between">
-                        <div className="font-medium">{tpl.name}</div>
+                        <div className="font-medium">{tpl.id}</div>
                         <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
                           Texto
                         </Badge>

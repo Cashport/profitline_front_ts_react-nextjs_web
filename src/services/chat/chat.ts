@@ -161,3 +161,14 @@ export const markTicketAsRead = async (ticketId: string): Promise<void> => {
     throw error;
   }
 };
+
+export const sendWhatsAppTemplateNew = async (payload: any): Promise<void> => {
+  try {
+    await API.post("/whatsapp-templates/send-new", payload, {
+      baseURL: config.API_CHAT
+    });
+  } catch (error) {
+    console.error("Error sending WhatsApp template:", error);
+    throw error;
+  }
+};
