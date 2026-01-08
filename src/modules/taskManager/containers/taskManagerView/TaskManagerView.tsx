@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/modules/chat/ui/button";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 
 import StatusTab from "@/modules/taskManager/components/statusTab/StatusTab";
@@ -18,7 +18,6 @@ import FiltersTasks, {
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import { FilterState, mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import {
@@ -26,6 +25,8 @@ import {
   InvoiceData,
   mockTaskDetail
 } from "../../components/modalTaskDetail/ModalTaskDetail";
+
+import "@/modules/aprobaciones/styles/approvalsStyles.css";
 
 export const TaskManagerView: React.FC = () => {
   // States
@@ -186,11 +187,10 @@ export const TaskManagerView: React.FC = () => {
               />
             </div>
 
-            <Button className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold text-base px-6 py-5 whitespace-nowrap w-full sm:w-auto">
+            <PrincipalButton customStyles={{ height: "100%" }}>
               <Plus className="h-5 w-5 mr-2" />
-              <span className="hidden sm:inline">Nueva tarea</span>
-              <span className="sm:hidden">Nueva</span>
-            </Button>
+              Nueva tarea
+            </PrincipalButton>
           </div>
 
           <StatusTab tabs={tabItems} activeKey={activeTabKey} onChange={setActiveTabKey} />
