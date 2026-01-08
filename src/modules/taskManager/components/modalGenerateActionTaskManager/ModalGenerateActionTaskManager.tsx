@@ -3,10 +3,10 @@ import { message, Modal } from "antd";
 import { MailOutlined, PhoneOutlined } from "@ant-design/icons";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { FinancialDiscount } from "@/types/financialDiscounts/IFinancialDiscounts";
+
+import { ITask } from "../tasksTable/TasksTable";
 
 import "./modalGenerateActionTaskManager.scss";
-import { ITask } from "../tasksTable/TasksTable";
 
 type ModalActionPaymentProps = {
   isOpen: boolean;

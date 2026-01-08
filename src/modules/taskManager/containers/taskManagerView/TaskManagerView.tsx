@@ -21,11 +21,15 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import { FilterState, mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
+import {
+  ModalTaskDetail,
+  InvoiceData,
+  mockTaskDetail
+} from "../../components/modalTaskDetail/ModalTaskDetail";
 
 export const TaskManagerView: React.FC = () => {
   // States
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [showNewApprovalForm, setShowNewApprovalForm] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
@@ -45,6 +49,8 @@ export const TaskManagerView: React.FC = () => {
     statuses: [],
     taskTypes: []
   });
+
+  const [selectedTask, setSelectedTask] = useState<InvoiceData | null>(null);
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
@@ -68,9 +74,11 @@ export const TaskManagerView: React.FC = () => {
     }));
   };
 
-  // View task handler
+  // View task handler - opens detail modal with mock data
   const handleViewTask = (task: ITask) => {
-    console.log("View task:", task);
+    // For now, use mockTaskDetail but preserve the task id
+    setSelectedTask({ ...mockTaskDetail, id: task.id });
+    setIsModalOpen({ selected: 2 });
   };
 
   // Handle select all for current tab
@@ -178,10 +186,7 @@ export const TaskManagerView: React.FC = () => {
               />
             </div>
 
-            <Button
-              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold text-base px-6 py-5 whitespace-nowrap w-full sm:w-auto"
-              onClick={() => setShowNewApprovalForm(true)}
-            >
+            <Button className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold text-base px-6 py-5 whitespace-nowrap w-full sm:w-auto">
               <Plus className="h-5 w-5 mr-2" />
               <span className="hidden sm:inline">Nueva tarea</span>
               <span className="sm:hidden">Nueva</span>
@@ -200,6 +205,19 @@ export const TaskManagerView: React.FC = () => {
         selectedRows={mockTasks
           .flatMap((group) => group.tasks)
           .filter((task) => state.selectedTaskIds.includes(task.id))}
+      />
+
+      <ModalTaskDetail
+        task={selectedTask}
+        isOpen={isModalOpen.selected === 2}
+        onClose={() => {
+          setIsModalOpen({ selected: 0 });
+          setSelectedTask(null);
+        }}
+        onUpdate={(updatedTask) => {
+          console.log("Task updated:", updatedTask);
+          // TODO: Implement actual update logic when API is ready
+        }}
       />
     </main>
   );
