@@ -20,11 +20,15 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 import { FilterState, mockTasks } from "../../lib/mockData";
+import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 
 export const TaskManagerView: React.FC = () => {
   // States
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showNewApprovalForm, setShowNewApprovalForm] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState({
+    selected: 0
+  });
   const [activeTabKey, setActiveTabKey] = useState<string>("1");
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(
     null
@@ -41,6 +45,10 @@ export const TaskManagerView: React.FC = () => {
     statuses: [],
     taskTypes: []
   });
+
+  const handleOpenModal = (selected: number) => {
+    setIsModalOpen({ selected });
+  };
 
   // Selection handlers
   const toggleTaskSelection = (taskId: string) => {
@@ -164,8 +172,9 @@ export const TaskManagerView: React.FC = () => {
               />
               <FiltersTasks setSelectedFilters={setSelectedFilters} />
               <GenerateActionButton
-                onClick={() => {}}
-                disabled={state.selectedTaskIds.length === 0}
+                onClick={() => {
+                  setIsModalOpen({ selected: 1 });
+                }}
               />
             </div>
 
@@ -182,6 +191,16 @@ export const TaskManagerView: React.FC = () => {
           <StatusTab tabs={tabItems} activeKey={activeTabKey} onChange={setActiveTabKey} />
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <ModalGenerateActionTaskManager
+        isOpen={isModalOpen.selected === 1}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        handleOpenModal={handleOpenModal}
+        selectedRows={mockTasks
+          .flatMap((group) => group.tasks)
+          .filter((task) => state.selectedTaskIds.includes(task.id))}
+      />
     </main>
   );
 };
