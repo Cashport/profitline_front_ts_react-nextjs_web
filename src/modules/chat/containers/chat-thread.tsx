@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
+import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
   CodesandboxLogo,
@@ -22,6 +23,11 @@ import {
   sendWhatsAppTemplate,
   sendWhatsAppTemplateNew
 } from "@/services/chat/chat";
+import { getPayloadByTicket } from "@/services/chat/clients";
+
+import { cn } from "@/utils/utils";
+import { useSocket } from "@/context/ChatContext";
+import useTicketMessages from "@/hooks/useTicketMessages";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -44,12 +50,7 @@ import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
-import { cn } from "@/utils/utils";
-import { useSocket } from "@/context/ChatContext";
-import useTicketMessages from "@/hooks/useTicketMessages";
-import { getPayloadByTicket } from "@/services/clients/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
-import { KeyedMutator } from "swr";
 
 type FileItem = { url: string; name: string; size: number };
 

@@ -272,7 +272,6 @@ export const getMobileToken = async (clientUUID: string): Promise<string> => {
     clientUUID
   };
   try {
-    console.log("entrando uuid", clientUUID);
     const response: { status: number; message: string; token: string } = await API.post(
       `${config.API_HOST}/client/create-mobile-token`,
       body,
@@ -282,7 +281,6 @@ export const getMobileToken = async (clientUUID: string): Promise<string> => {
         }
       }
     );
-    console.log("saliendo", response);
 
     if (response.status !== 200) {
       throw new Error(`Failed to get mobile token: ${response.message}`);
@@ -309,25 +307,5 @@ export const getClientWallet = async (token: string): Promise<IClientWalletData>
   } catch (error) {
     console.error("error getting client wallet: ", error);
     throw error;
-  }
-};
-
-export const getPayloadByTicket = async (
-  ticketId: string,
-  templateId: string
-): Promise<PayloadByTicket | null> => {
-  try {
-    const response: GenericResponse<any> = await API.get(
-      `${config.API_HOST}/client/get-payload-by-ticket`,
-      {
-        params: { ticketId, templateId }
-      }
-    );
-    const data = response?.data?.data || response?.data || response;
-
-    return data;
-  } catch (error) {
-    console.warn("error getting payload by ticket: ", error);
-    return null;
   }
 };
