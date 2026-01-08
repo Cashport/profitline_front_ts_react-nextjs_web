@@ -44,11 +44,11 @@ export const useApprovals = ({
   );
 
   return {
-    data: data?.data.items || [],
+    data: data?.data?.items || [],
     pagination: {
-      page: data?.data.page,
-      limit: data?.data.limit,
-      total: data?.data.total
+      page: data?.data?.page,
+      limit: data?.data?.limit,
+      total: data?.data?.total
     },
     isLoading,
     error,
