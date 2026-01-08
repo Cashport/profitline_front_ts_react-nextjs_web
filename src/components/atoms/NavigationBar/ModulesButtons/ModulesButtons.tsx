@@ -253,7 +253,7 @@ export const ModulesButtons = ({
       )}
 
       {/* New Task Manager */}
-      {true && (
+      {checkUserViewPermissions(project, "TaskManager") && (
         <Link href="/task-manager" passHref legacyBehavior>
           <Button
             type="primary"
