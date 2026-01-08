@@ -1,4 +1,6 @@
 import config from "@/config";
+import { PayloadByTicket } from "@/types/chat/IChat";
+import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
 export async function getWhatsappClients() {
@@ -27,7 +29,7 @@ export async function getWhatsappClientContacts(clientUUID: string) {
 export async function getTemplateMessages(clientUUID: string, templateId: string) {
   try {
     const res = await API.get<any>(
-      `/client/get-payload-by-client/client-uuid/${clientUUID}/ticket/${templateId}`
+      `/client/get-payload-by-client/client-uuid/${clientUUID}/template/${templateId}`
     );
     return res.data;
   } catch (error) {
@@ -36,13 +38,22 @@ export async function getTemplateMessages(clientUUID: string, templateId: string
   }
 }
 
-export const sendWhatsAppTemplateNew = async (payload: any): Promise<void> => {
+export const getPayloadByTicket = async (
+  ticketId: string,
+  templateId: string
+): Promise<PayloadByTicket | null> => {
   try {
-    await API.post("/whatsapp-templates/send-new", payload, {
-      baseURL: config.API_CHAT
-    });
+    const response: GenericResponse<any> = await API.get(
+      `${config.API_HOST}/client/get-payload-by-ticket`,
+      {
+        params: { ticketId, templateId }
+      }
+    );
+    const data = response?.data?.data || response?.data || response;
+
+    return data;
   } catch (error) {
-    console.error("Error sending WhatsApp template:", error);
-    throw error;
+    console.warn("error getting payload by ticket: ", error);
+    return null;
   }
 };

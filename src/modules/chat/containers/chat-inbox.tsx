@@ -39,15 +39,15 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
   getTemplateMessages,
   getWhatsappClientContacts,
-  getWhatsappClients,
-  sendWhatsAppTemplateNew
-} from "@/services/whatsapp/clients";
+  getWhatsappClients
+} from "@/services/chat/clients";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
+import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -530,12 +530,12 @@ export default function ChatInbox() {
             // Default: "estado_de_cuenta" (lógica existente)
             const result = await getTemplateMessages(
               sendConversation?.clientUUID || "",
-              "template"
+              templateId
             );
             payload = {
               ...result,
               phoneNumber: contact.contact_phone,
-              templateId: "estado_de_cuenta",
+              templateId: templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: contact.contact_name
             };

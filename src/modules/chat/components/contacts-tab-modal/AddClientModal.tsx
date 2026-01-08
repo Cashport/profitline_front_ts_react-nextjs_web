@@ -3,7 +3,7 @@ import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Modal, Select, Typography, message } from "antd";
 
-import { getWhatsappClients } from "@/services/whatsapp/clients";
+import { getWhatsappClients } from "@/services/chat/clients";
 import { postContact } from "@/services/contacts/contacts";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
