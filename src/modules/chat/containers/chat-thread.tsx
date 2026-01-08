@@ -92,6 +92,7 @@ export default function ChatThread({
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -253,6 +254,7 @@ export default function ChatThread({
       }, false);
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
+      mutate();
       scrollToBottom();
     } catch (err: any) {
       toast({
@@ -980,14 +982,19 @@ export default function ChatThread({
         onOpenChange={setTemplateOpen}
         channel={channel}
         ticketId={conversation.id}
+        loading={templateLoading}
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
-          if (payload.templateId === "estado_de_cuenta")
-            return await sendTemplateNeedingPayload("estado_de_cuenta");
-          else if (payload.templateId === "presentacion")
-            return await sendBasicTemplate("presentacion");
-          else if (payload.templateId === "saludo") return await sendBasicTemplate("saludo");
-          else if (payload.templateId === "soportes")
-            return await sendTemplateNeedingPayload("soportes");
+          setTemplateLoading(true);
+          try {
+            if (payload.templateId === "estado_de_cuenta")
+              await sendTemplateNeedingPayload("estado_de_cuenta");
+            else if (payload.templateId === "presentacion") await sendBasicTemplate("presentacion");
+            else if (payload.templateId === "saludo") await sendBasicTemplate("saludo");
+            else if (payload.templateId === "soportes")
+              await sendTemplateNeedingPayload("soportes");
+          } finally {
+            setTemplateLoading(false);
+          }
         }}
       />
 
