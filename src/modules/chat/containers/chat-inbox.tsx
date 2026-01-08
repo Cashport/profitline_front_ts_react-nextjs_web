@@ -31,7 +31,6 @@ import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
 
 import { ITicket } from "@/types/chat/IChat";
-import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
 import AddClientModal from "../components/contacts-tab-modal";
@@ -48,6 +47,8 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
+
+import "@/modules/chat/styles/chatStyles.css";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
