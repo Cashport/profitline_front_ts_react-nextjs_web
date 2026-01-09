@@ -489,6 +489,26 @@ export default function ChatThread({
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
+    const calcReadStatus = (mine: boolean, status: string) => {
+      return (
+        <>
+          {mine && status === "DELIVERED" && (
+            <div className="text-[10px] text-muted-foreground self-end">✓</div>
+          )}
+          {mine && status === "PENDING" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "SENT" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "READ" && (
+            <div className="text-[10px] self-end text-green-500">✓✓</div>
+          )}
+          {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+        </>
+      );
+    };
+
     if (m.type === "CONTACTS") {
       const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
       if (contacts?.length === 0) {
@@ -516,6 +536,7 @@ export default function ChatThread({
                   </div>
                 </div>
               ))}
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -550,6 +571,7 @@ export default function ChatThread({
                   <ArrowsOut className="h-4 w-4" />
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -577,6 +599,7 @@ export default function ChatThread({
                   <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -640,6 +663,7 @@ export default function ChatThread({
               </a>
             )}
           </div>
+          <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
         </div>
       );
     }
@@ -650,16 +674,7 @@ export default function ChatThread({
         <div className={wrapper}>
           <div className="flex items-center gap-1">
             <div className={bubble}>{m.content}</div>
-            {mine && status === "DELIVERED" && (
-              <div className="text-[10px] text-muted-foreground self-end">✓</div>
-            )}
-            {mine && status === "PENDING" && (
-              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-            )}
-            {mine && status === "READ" && (
-              <div className="text-[10px] self-end text-green-500">✓✓</div>
-            )}
-            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+            {calcReadStatus(mine, status)}
           </div>
           <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
