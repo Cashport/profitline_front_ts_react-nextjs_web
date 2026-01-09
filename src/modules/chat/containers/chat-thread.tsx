@@ -132,8 +132,13 @@ export default function ChatThread({
       };
 
       // Update the SWR cache by adding the new message only if it doesn't exist
+      let isNew = true;
       mutate((currentData) => {
         if (!currentData) return currentData;
+        if (currentData.messages.some((m) => m.id === newMessage.id)) {
+          isNew = false;
+          return currentData; // Message already exists, do not add
+        }
 
         // Check if message with same ID already exists
         const messageExists = currentData.messages.some(
@@ -151,8 +156,8 @@ export default function ChatThread({
         };
       }, false);
 
-      // Auto-scroll when new messages arrive via socket
-      setTimeout(scrollToBottom, 100);
+      // Auto-scroll when new messages arrive via socket just if they are new
+      if (isNew) setTimeout(scrollToBottom, 100);
     });
 
     // Cleanup function: runs when conversation.id changes or component unmounts

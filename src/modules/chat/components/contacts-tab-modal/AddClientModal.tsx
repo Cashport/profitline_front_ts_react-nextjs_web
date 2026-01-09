@@ -16,6 +16,7 @@ import { IAddClientForm } from "@/types/chat/IChat";
 import { ICreateEditContact } from "@/types/contacts/IContacts";
 
 import "./addClientModal.scss";
+import { ApiError } from "@/utils/api/api";
 
 interface PropsInvoicesTable {
   showAddClientModal: boolean;
@@ -96,8 +97,12 @@ const AddClientModal = ({
       message.success("Cliente agregado exitosamente");
       setShowAddClientModal(false);
     } catch (error) {
+      if (error instanceof ApiError) {
+        message.error(error.message);
+      } else {
+        message.error("Error al agregar el cliente");
+      }
       console.error("Error submitting form:", error);
-      message.error("Error al agregar el cliente");
     }
   };
 
