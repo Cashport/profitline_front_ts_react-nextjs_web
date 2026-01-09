@@ -151,6 +151,8 @@ export default function ChatThread({
         status: msg.status as "DELIVERED" | "SENT" | "FAILED" | "READ",
         timestamp: msg.timestamp,
         mediaUrl: msg.mediaUrl,
+        templateName: msg.templateName ?? undefined,
+        templateData: msg.templateData ?? undefined,
         metadata: msg.metadata
       };
 
