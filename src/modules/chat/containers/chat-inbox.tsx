@@ -31,7 +31,6 @@ import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
 
 import { ITicket } from "@/types/chat/IChat";
-import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
 import AddClientModal from "../components/contacts-tab-modal";
@@ -39,15 +38,17 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
   getTemplateMessages,
   getWhatsappClientContacts,
-  getWhatsappClients,
-  sendWhatsAppTemplateNew
-} from "@/services/whatsapp/clients";
+  getWhatsappClients
+} from "@/services/chat/clients";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
+import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
+
+import "@/modules/chat/styles/chatStyles.css";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -260,7 +261,7 @@ export default function ChatInbox() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
       <header className="flex items-center gap-2 border-b" style={{ borderColor: "#DDDDDD" }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <Chat className="h-5 w-5" />
@@ -447,7 +448,7 @@ export default function ChatInbox() {
               onChange={(newPage) => setPage(newPage)}
               showSizeChanger={false}
               size="small"
-              className="py-2 flex justify-center border-t"
+              className="!py-2 flex justify-center border-t"
               style={{ borderColor: "#DDDDDD" }}
             />
           )}
@@ -530,12 +531,12 @@ export default function ChatInbox() {
             // Default: "estado_de_cuenta" (lógica existente)
             const result = await getTemplateMessages(
               sendConversation?.clientUUID || "",
-              "template"
+              templateId
             );
             payload = {
               ...result,
               phoneNumber: contact.contact_phone,
-              templateId: "estado_de_cuenta",
+              templateId: templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: contact.contact_name
             };

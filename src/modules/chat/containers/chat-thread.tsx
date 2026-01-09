@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
+import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
   CodesandboxLogo,
@@ -19,8 +20,14 @@ import {
   getWhatsAppTemplates,
   markTicketAsRead,
   sendMessage,
-  sendWhatsAppTemplate
+  sendWhatsAppTemplate,
+  sendWhatsAppTemplateNew
 } from "@/services/chat/chat";
+import { getPayloadByTicket } from "@/services/chat/clients";
+
+import { cn } from "@/utils/utils";
+import { useSocket } from "@/context/ChatContext";
+import useTicketMessages from "@/hooks/useTicketMessages";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -43,13 +50,7 @@ import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
-import { cn } from "@/utils/utils";
-import { useSocket } from "@/context/ChatContext";
-import useTicketMessages from "@/hooks/useTicketMessages";
-import { getPayloadByTicket } from "@/services/clients/clients";
-import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
-import { KeyedMutator } from "swr";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -91,6 +92,7 @@ export default function ChatThread({
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -99,10 +101,7 @@ export default function ChatThread({
     mutate,
     isLoading
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
-  const ticketMessages = useMemo(
-    () => ticketData?.messages?.slice().reverse() || [],
-    [ticketData?.messages]
-  );
+  const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -252,6 +251,7 @@ export default function ChatThread({
       }, false);
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
+      mutate();
       scrollToBottom();
     } catch (err: any) {
       toast({
@@ -382,9 +382,9 @@ export default function ChatThread({
       .replace(/\n/g, "<br/>");
   }
 
-  const sendAccountStatementTemplate = async () => {
+  const sendTemplateNeedingPayload = async (templateId: string) => {
     try {
-      const templatePayload = await getPayloadByTicket(conversation.id);
+      const templatePayload = await getPayloadByTicket(conversation.id, templateId);
 
       if (!templatePayload) {
         toast({
@@ -406,10 +406,10 @@ export default function ChatThread({
         status: "SENT",
         timestamp: new Date().toISOString(),
         mediaUrl: null,
-        templateName: templatePayload.template || "estado_de_cuenta",
+        templateName: templatePayload.templateId,
         metadata: {},
-        templateData: templatePayload.components
-          ? JSON.stringify({ components: templatePayload.components })
+        templateData: templatePayload.templateData.components
+          ? JSON.stringify({ components: templatePayload.templateData.components })
           : undefined
       };
 
@@ -423,6 +423,7 @@ export default function ChatThread({
       }, false);
 
       setTemplateOpen(false);
+      mutate();
       toast({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
@@ -466,6 +467,7 @@ export default function ChatThread({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
       });
+      mutate();
       scrollToBottom();
     } catch (error) {
       console.error("Error al enviar la plantilla:", error);
@@ -486,6 +488,26 @@ export default function ChatThread({
       (mine
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
+
+    const calcReadStatus = (mine: boolean, status: string) => {
+      return (
+        <>
+          {mine && status === "DELIVERED" && (
+            <div className="text-[10px] text-muted-foreground self-end">✓</div>
+          )}
+          {mine && status === "PENDING" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "SENT" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "READ" && (
+            <div className="text-[10px] self-end text-green-500">✓✓</div>
+          )}
+          {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+        </>
+      );
+    };
 
     if (m.type === "CONTACTS") {
       const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
@@ -514,6 +536,7 @@ export default function ChatThread({
                   </div>
                 </div>
               ))}
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -548,6 +571,7 @@ export default function ChatThread({
                   <ArrowsOut className="h-4 w-4" />
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -575,6 +599,7 @@ export default function ChatThread({
                   <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -593,7 +618,10 @@ export default function ChatThread({
         parsedData = null;
       }
 
-      const template = waTemplates.find((t) => t.name === m.templateName);
+      const template = waTemplates.find(
+        (t) => t.id === m.templateName || t.name === m.templateName
+      );
+
       if (!template) {
         return (
           <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
@@ -618,22 +646,25 @@ export default function ChatThread({
 
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-            <div
-              className="text-sm text-[#141414] whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-            />
+          <div className="flex items-center gap-1">
+            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+              <div
+                className="text-sm text-[#141414] whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+              />
 
-            {buttonText && (
-              <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-              >
-                Ver detalle
-              </a>
-            )}
+              {buttonText && (
+                <a
+                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+                >
+                  Ver detalle
+                </a>
+              )}
+            </div>
+            {calcReadStatus(mine, status)}
           </div>
         </div>
       );
@@ -645,16 +676,7 @@ export default function ChatThread({
         <div className={wrapper}>
           <div className="flex items-center gap-1">
             <div className={bubble}>{m.content}</div>
-            {mine && status === "DELIVERED" && (
-              <div className="text-[10px] text-muted-foreground self-end">✓</div>
-            )}
-            {mine && status === "PENDING" && (
-              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-            )}
-            {mine && status === "READ" && (
-              <div className="text-[10px] self-end text-green-500">✓✓</div>
-            )}
-            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+            {calcReadStatus(mine, status)}
           </div>
           <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
@@ -977,12 +999,19 @@ export default function ChatThread({
         onOpenChange={setTemplateOpen}
         channel={channel}
         ticketId={conversation.id}
+        loading={templateLoading}
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
-          if (payload.templateId === "estado_de_cuenta")
-            return await sendAccountStatementTemplate();
-          else if (payload.templateId === "presentacion")
-            return await sendBasicTemplate("presentacion");
-          else if (payload.templateId === "saludo") return await sendBasicTemplate("saludo");
+          setTemplateLoading(true);
+          try {
+            if (payload.templateId === "estado_de_cuenta")
+              await sendTemplateNeedingPayload("estado_de_cuenta");
+            else if (payload.templateId === "presentacion") await sendBasicTemplate("presentacion");
+            else if (payload.templateId === "saludo") await sendBasicTemplate("saludo");
+            else if (payload.templateId === "soportes")
+              await sendTemplateNeedingPayload("soportes");
+          } finally {
+            setTemplateLoading(false);
+          }
         }}
       />
 

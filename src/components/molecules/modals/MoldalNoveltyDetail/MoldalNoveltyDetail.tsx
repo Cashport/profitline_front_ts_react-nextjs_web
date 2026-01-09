@@ -95,7 +95,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
 
         <div className="header">
           <Title level={4}>{incidentData.incident_name}</Title>
-          {incidentData.status_name === "pendiente" && (
+          {incidentData.status_name.toLowerCase() === "pendiente" && (
             <div className="header-buttons">
               <Button onClick={() => handleOpenResolveModal(false)}>
                 <X />
