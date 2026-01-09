@@ -646,26 +646,24 @@ export default function ChatThread({
 
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className="flex items-center gap-1">
-            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-              <div
-                className="text-sm text-[#141414] whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-              />
+          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+            <div
+              className="text-sm text-[#141414] whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+            />
 
-              {buttonText && (
-                <a
-                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-                >
-                  Ver detalle
-                </a>
-              )}
-            </div>
-            {calcReadStatus(mine, status)}
+            {buttonText && (
+              <a
+                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+              >
+                Ver detalle
+              </a>
+            )}
           </div>
+          <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
         </div>
       );
     }
