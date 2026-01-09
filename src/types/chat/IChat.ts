@@ -29,6 +29,8 @@ export interface ITicket {
   metadata: any | null;
   closedAt: string | null;
   lastMessageAt: string;
+  lastViewedAt: string | null;
+  lastViewedBy: string | null;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
@@ -164,4 +166,27 @@ export interface IAddClientForm {
   phone: string;
   email: string;
   client: ISelectType;
+}
+
+interface TemplateParameter {
+  type: string;
+  text: string;
+}
+
+interface TemplateComponent {
+  type: "body" | "button";
+  parameters: TemplateParameter[];
+  sub_type?: string;
+  index?: string;
+}
+
+interface TemplateData {
+  components: TemplateComponent[];
+}
+
+export interface PayloadByTicket {
+  ticketId: string;
+  templateId: string;
+  senderId: string;
+  templateData: TemplateData;
 }

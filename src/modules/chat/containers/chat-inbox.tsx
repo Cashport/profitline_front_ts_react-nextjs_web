@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
-import { Chat, Funnel, MagnifyingGlass, ChatCircleDots } from "@phosphor-icons/react";
+import {
+  Chat,
+  Funnel,
+  MagnifyingGlass,
+  ChatCircleDots,
+  DotsThreeVertical
+} from "@phosphor-icons/react";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -25,16 +31,24 @@ import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
 
 import { ITicket } from "@/types/chat/IChat";
-import "@/modules/chat/styles/chatStyles.css";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
+import AddClientModal from "../components/contacts-tab-modal";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
   getTemplateMessages,
   getWhatsappClientContacts,
-  getWhatsappClients,
-  sendWhatsAppTemplateNew
-} from "@/services/whatsapp/clients";
+  getWhatsappClients
+} from "@/services/chat/clients";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/modules/chat/ui/dropdown-menu";
+import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
+
+import "@/modules/chat/styles/chatStyles.css";
 
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
@@ -84,7 +98,7 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     metrics: { totalVencido: 0, ultimoPago: "" },
     timeline: [],
     messages: [],
-    hasUnreadUpdate: unreadTicketsSet.has(ticket.id),
+    hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt
   };
 }
@@ -118,6 +132,7 @@ export default function ChatInbox() {
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
 
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
@@ -246,7 +261,7 @@ export default function ChatInbox() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
       <header className="flex items-center gap-2 border-b" style={{ borderColor: "#DDDDDD" }}>
         <div className="flex items-center gap-3 px-4 py-3">
           <Chat className="h-5 w-5" />
@@ -266,6 +281,21 @@ export default function ChatInbox() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <DotsThreeVertical size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setShowAddClientModal(true)}
+                className="cursor-pointer"
+              >
+                Agregar cliente
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" className="gap-2" style={{ borderColor: "#DDDDDD" }}>
             <Funnel className="h-4 w-4" />
             Filtrar
@@ -418,7 +448,7 @@ export default function ChatInbox() {
               onChange={(newPage) => setPage(newPage)}
               showSizeChanger={false}
               size="small"
-              className="py-2 flex justify-center border-t"
+              className="!py-2 flex justify-center border-t"
               style={{ borderColor: "#DDDDDD" }}
             />
           )}
@@ -433,6 +463,8 @@ export default function ChatInbox() {
               conversation={activeConversation}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
+              onOpenAddClientModal={() => setShowAddClientModal(true)}
+              mutateTickets={mutateTickets}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -473,8 +505,8 @@ export default function ChatInbox() {
           const templateId = sendConversation?.templateId || "";
           let payload: any;
 
-          if (templateId === "presentacion") {
-            // Payload para "presentacion" - usa clientName y clientUUID como customerCashportUUID
+          if (templateId === "presentacion" || templateId === "saludo") {
+            // Payload para "presentacion" y "saludo" - usa clientName y clientUUID como customerCashportUUID
             payload = {
               templateData: {
                 components: [
@@ -490,7 +522,7 @@ export default function ChatInbox() {
                 ]
               },
               phoneNumber: contact.contact_phone,
-              templateId: "presentacion",
+              templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: sendConversation?.clientName || "",
               customerCashportUUID: sendConversation?.clientUUID || ""
@@ -499,12 +531,12 @@ export default function ChatInbox() {
             // Default: "estado_de_cuenta" (lógica existente)
             const result = await getTemplateMessages(
               sendConversation?.clientUUID || "",
-              "template"
+              templateId
             );
             payload = {
               ...result,
               phoneNumber: contact.contact_phone,
-              templateId: "estado_de_cuenta",
+              templateId: templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
               name: contact.contact_name
             };
@@ -572,6 +604,13 @@ export default function ChatInbox() {
             templateId: payload.templateId
           });
         }}
+      />
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={activeConversation?.customer}
+        initialPhone={activeConversation?.phone}
       />
     </div>
   );

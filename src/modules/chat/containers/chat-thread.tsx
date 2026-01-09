@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
+import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
   CodesandboxLogo,
@@ -14,7 +15,19 @@ import {
   X
 } from "@phosphor-icons/react";
 
-import { getWhatsAppTemplates, sendMessage, sendWhatsAppTemplate } from "@/services/chat/chat";
+import {
+  GetTicketsResponse,
+  getWhatsAppTemplates,
+  markTicketAsRead,
+  sendMessage,
+  sendWhatsAppTemplate,
+  sendWhatsAppTemplateNew
+} from "@/services/chat/chat";
+import { getPayloadByTicket } from "@/services/chat/clients";
+
+import { cn } from "@/utils/utils";
+import { useSocket } from "@/context/ChatContext";
+import useTicketMessages from "@/hooks/useTicketMessages";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
@@ -37,20 +50,16 @@ import TemplateDialog from "./template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
-import { cn } from "@/utils/utils";
-import { useSocket } from "@/context/ChatContext";
-import useTicketMessages from "@/hooks/useTicketMessages";
-import { getPayloadByTicket } from "@/services/clients/clients";
-import { sendWhatsAppTemplateNew } from "@/services/whatsapp/clients";
 import { TypeContactMessage } from "@/types/chat/messages";
-import AddClientModal from "../components/contacts-tab-modal";
 
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
+  mutateTickets: KeyedMutator<GetTicketsResponse>;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
+  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -66,7 +75,13 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
-export default function ChatThread({ conversation, onShowDetails, detailsOpen }: Props) {
+export default function ChatThread({
+  conversation,
+  onShowDetails,
+  detailsOpen,
+  onOpenAddClientModal,
+  mutateTickets
+}: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -77,7 +92,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isSendingWA, setIsSendingWA] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -86,10 +101,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     mutate,
     isLoading
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
-  const ticketMessages = useMemo(
-    () => ticketData?.messages?.slice().reverse() || [],
-    [ticketData?.messages]
-  );
+  const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -149,6 +161,21 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       desubscribeTicketRoom(conversation.id);
     };
   }, [conversation.id, mutate, isConnected]);
+
+  // Mark ticket as read on mount
+  useEffect(() => {
+    if (!conversation.id) return;
+    const markAsRead = async () => {
+      try {
+        await markTicketAsRead(conversation.id);
+        mutateTickets();
+      } catch {
+        console.error("Error marking ticket as read");
+      }
+    };
+
+    markAsRead();
+  }, [conversation.id]);
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -224,6 +251,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       }, false);
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
+      mutate();
       scrollToBottom();
     } catch (err: any) {
       toast({
@@ -354,9 +382,9 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       .replace(/\n/g, "<br/>");
   }
 
-  const sendAccountStatementTemplate = async () => {
+  const sendTemplateNeedingPayload = async (templateId: string) => {
     try {
-      const templatePayload = await getPayloadByTicket(conversation.id);
+      const templatePayload = await getPayloadByTicket(conversation.id, templateId);
 
       if (!templatePayload) {
         toast({
@@ -378,10 +406,10 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         status: "SENT",
         timestamp: new Date().toISOString(),
         mediaUrl: null,
-        templateName: templatePayload.template || "estado_de_cuenta",
+        templateName: templatePayload.templateId,
         metadata: {},
-        templateData: templatePayload.components
-          ? JSON.stringify({ components: templatePayload.components })
+        templateData: templatePayload.templateData.components
+          ? JSON.stringify({ components: templatePayload.templateData.components })
           : undefined
       };
 
@@ -395,6 +423,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
       }, false);
 
       setTemplateOpen(false);
+      mutate();
       toast({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
@@ -410,7 +439,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
     }
   };
 
-  const sendPresentationTemplate = async () => {
+  const sendBasicTemplate = async (templateId: "presentacion" | "saludo") => {
     try {
       const payload = {
         templateData: {
@@ -427,7 +456,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           ]
         },
         phoneNumber: conversation.phoneNumber,
-        templateId: "presentacion",
+        templateId,
         senderId: "cmhv6mnla0003no0huiao1u63",
         name: conversation.client_name,
         customerCashportUUID: conversation.customerCashportUUID || ""
@@ -438,6 +467,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
       });
+      mutate();
       scrollToBottom();
     } catch (error) {
       console.error("Error al enviar la plantilla:", error);
@@ -588,7 +618,10 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         parsedData = null;
       }
 
-      const template = waTemplates.find((t) => t.name === m.templateName);
+      const template = waTemplates.find(
+        (t) => t.id === m.templateName || t.name === m.templateName
+      );
+
       if (!template) {
         return (
           <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
@@ -695,10 +728,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setShowAddClientModal(true)}
-                className="cursor-pointer"
-              >
+              <DropdownMenuItem onClick={() => onOpenAddClientModal?.()} className="cursor-pointer">
                 Agregar cliente
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -969,10 +999,19 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         onOpenChange={setTemplateOpen}
         channel={channel}
         ticketId={conversation.id}
+        loading={templateLoading}
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
-          if (payload.templateId === "estado_de_cuenta")
-            return await sendAccountStatementTemplate();
-          if (payload.templateId === "presentacion") return await sendPresentationTemplate();
+          setTemplateLoading(true);
+          try {
+            if (payload.templateId === "estado_de_cuenta")
+              await sendTemplateNeedingPayload("estado_de_cuenta");
+            else if (payload.templateId === "presentacion") await sendBasicTemplate("presentacion");
+            else if (payload.templateId === "saludo") await sendBasicTemplate("saludo");
+            else if (payload.templateId === "soportes")
+              await sendTemplateNeedingPayload("soportes");
+          } finally {
+            setTemplateLoading(false);
+          }
         }}
       />
 
@@ -992,14 +1031,6 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
           )}
         </DialogContent>
       </Dialog>
-
-      <AddClientModal
-        showAddClientModal={showAddClientModal}
-        setShowAddClientModal={setShowAddClientModal}
-        isActionLoading={false}
-        initialName={conversation.customer}
-        initialPhone={conversation.phone}
-      />
     </div>
   );
 }

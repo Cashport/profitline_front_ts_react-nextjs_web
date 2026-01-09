@@ -148,3 +148,27 @@ export const sendWhatsAppTemplate = async (payload: any): Promise<void> => {
     throw error;
   }
 };
+
+export const markTicketAsRead = async (ticketId: string): Promise<void> => {
+  try {
+    await API.put(
+      `/whatsapp-messages/ticket/${ticketId}/mark-read`,
+      {},
+      { baseURL: config.API_CHAT }
+    );
+  } catch (error) {
+    console.error("Error marking ticket as read:", error);
+    throw error;
+  }
+};
+
+export const sendWhatsAppTemplateNew = async (payload: any): Promise<void> => {
+  try {
+    await API.post("/whatsapp-templates/send-new", payload, {
+      baseURL: config.API_CHAT
+    });
+  } catch (error) {
+    console.error("Error sending WhatsApp template:", error);
+    throw error;
+  }
+};

@@ -3,7 +3,7 @@ import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { Controller, useForm } from "react-hook-form";
 import { Flex, Modal, Select, Typography, message } from "antd";
 
-import { getWhatsappClients } from "@/services/whatsapp/clients";
+import { getWhatsappClients } from "@/services/chat/clients";
 import { postContact } from "@/services/contacts/contacts";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
@@ -51,7 +51,6 @@ const AddClientModal = ({
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        console.log("Fetching WhatsApp clients...");
         const res = await getWhatsappClients();
         const formatted = res.map((c) => ({ id: c.uuid, name: c.client_name }));
         setClients(formatted);
@@ -67,6 +66,17 @@ const AddClientModal = ({
       reset();
     }
   }, [showAddClientModal, reset]);
+
+  useEffect(() => {
+    if (showAddClientModal && (initialName || initialPhone)) {
+      reset({
+        name: initialName || "",
+        phone: extractNationalNumber(initialPhone),
+        indicative: { value: "1", label: "+57" },
+        client: undefined
+      });
+    }
+  }, [showAddClientModal, initialName, initialPhone, reset]);
 
   const onSubmitForm = async (data: IAddClientForm) => {
     try {
@@ -244,8 +254,12 @@ function extractNationalNumber(internationalPhone: string | undefined): string {
     return "";
   }
 
+  const formattedNumber = internationalPhone.startsWith("+")
+    ? internationalPhone
+    : `+${internationalPhone}`;
+
   try {
-    const phoneNumber = parsePhoneNumberWithError(internationalPhone);
+    const phoneNumber = parsePhoneNumberWithError(formattedNumber);
 
     if (!phoneNumber || !phoneNumber.isValid()) {
       return "";
