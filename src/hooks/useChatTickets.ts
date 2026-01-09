@@ -12,7 +12,7 @@ const useChatTickets = ({ limit = 200, page = 1, search = "" }: UseChatTicketsPa
     `/whatsapp-tickets?limit=${limit}&page=${page}&search=${search}`,
     () => getTickets(limit, page, search),
     {
-      refreshInterval: 30000,
+      refreshInterval: 7000,
       revalidateOnFocus: true
     }
   );
