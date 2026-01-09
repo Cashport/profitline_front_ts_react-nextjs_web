@@ -598,7 +598,10 @@ export default function ChatThread({
         parsedData = null;
       }
 
-      const template = waTemplates.find((t) => t.name === m.templateName);
+      const template = waTemplates.find(
+        (t) => t.id === m.templateName || t.name === m.templateName
+      );
+
       if (!template) {
         return (
           <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
