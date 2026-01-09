@@ -396,32 +396,6 @@ export default function ChatThread({
       }
 
       await sendWhatsAppTemplate(templatePayload);
-
-      // Crear un mensaje temporal para feedback visual inmediato
-      const tempMessage: IMessage = {
-        id: `temp_template_${Date.now()}_${Math.random()}`,
-        content: "",
-        type: "TEMPLATE",
-        direction: "OUTBOUND",
-        status: "SENT",
-        timestamp: new Date().toISOString(),
-        mediaUrl: null,
-        templateName: templatePayload.templateId,
-        metadata: {},
-        templateData: templatePayload.templateData.components
-          ? JSON.stringify({ components: templatePayload.templateData.components })
-          : undefined
-      };
-
-      // Añadir el mensaje al cache de SWR
-      mutate((currentData) => {
-        if (!currentData) return currentData;
-        return {
-          ...currentData,
-          messages: [tempMessage, ...currentData.messages]
-        };
-      }, false);
-
       setTemplateOpen(false);
       mutate();
       toast({
