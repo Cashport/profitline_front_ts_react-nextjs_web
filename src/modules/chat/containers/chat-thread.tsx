@@ -459,6 +459,26 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         ? "bg-[#141414] text-white border-[#141414]"
         : "bg-white text-[#141414] border-[#DDDDDD]");
 
+    const calcReadStatus = (mine: boolean, status: string) => {
+      return (
+        <>
+          {mine && status === "DELIVERED" && (
+            <div className="text-[10px] text-muted-foreground self-end">✓</div>
+          )}
+          {mine && status === "PENDING" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "SENT" && (
+            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+          )}
+          {mine && status === "READ" && (
+            <div className="text-[10px] self-end text-green-500">✓✓</div>
+          )}
+          {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+        </>
+      );
+    };
+
     if (m.type === "CONTACTS") {
       const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
       if (contacts?.length === 0) {
@@ -486,6 +506,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                   </div>
                 </div>
               ))}
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -520,6 +541,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                   <ArrowsOut className="h-4 w-4" />
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -547,6 +569,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
                   <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
                 </div>
               </button>
+              {calcReadStatus(mine, status)}
             </div>
             <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
               {formatRelativeTime(m.timestamp)}
@@ -590,22 +613,25 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
 
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-            <div
-              className="text-sm text-[#141414] whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-            />
+          <div className="flex items-center gap-1">
+            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+              <div
+                className="text-sm text-[#141414] whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+              />
 
-            {buttonText && (
-              <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-              >
-                Ver detalle
-              </a>
-            )}
+              {buttonText && (
+                <a
+                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+                >
+                  Ver detalle
+                </a>
+              )}
+            </div>
+            {calcReadStatus(mine, status)}
           </div>
         </div>
       );
@@ -617,16 +643,7 @@ export default function ChatThread({ conversation, onShowDetails, detailsOpen }:
         <div className={wrapper}>
           <div className="flex items-center gap-1">
             <div className={bubble}>{m.content}</div>
-            {mine && status === "DELIVERED" && (
-              <div className="text-[10px] text-muted-foreground self-end">✓</div>
-            )}
-            {mine && status === "PENDING" && (
-              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-            )}
-            {mine && status === "READ" && (
-              <div className="text-[10px] self-end text-green-500">✓✓</div>
-            )}
-            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+            {calcReadStatus(mine, status)}
           </div>
           <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
             {formatRelativeTime(m.timestamp)}
