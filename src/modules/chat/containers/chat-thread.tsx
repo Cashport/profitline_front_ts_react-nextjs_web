@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { KeyedMutator } from "swr";
 import {
@@ -75,6 +75,19 @@ function normalizePhoneForWA(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
+function formatWhatsAppText(text: string): string {
+  if (!text) return "";
+
+  return text
+    .replace(/_\*(.*?)\*_/g, "<b><i>$1</i></b>")
+    .replace(/\*(.*?)\*/g, "<b>$1</b>")
+    .replace(/_(.*?)_/g, "<i>$1</i>")
+    .replace(/~(.*?)~/g, "<s>$1</s>")
+    .replace(/```(.*?)```/g, "<code>$1</code>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br/>");
+}
+
 export default function ChatThread({
   conversation,
   onShowDetails,
@@ -110,6 +123,16 @@ export default function ChatThread({
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
+
+  // Memoized template lookup map for O(1) access
+  const templateMap = useMemo(() => {
+    const map = new Map<string, IWhatsAppTemplate>();
+    waTemplates.forEach((t) => {
+      map.set(t.id, t);
+      map.set(t.name, t);
+    });
+    return map;
+  }, [waTemplates]);
 
   const { connectTicketRoom, subscribeToMessages, desubscribeTicketRoom, isConnected } =
     useSocket();
@@ -177,14 +200,14 @@ export default function ChatThread({
     markAsRead();
   }, [conversation.id]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
       const el = viewportRef.current;
       if (el) {
         el.scrollTop = el.scrollHeight;
       }
     });
-  };
+  }, []);
 
   useEffect(() => {
     if (!isLoading && ticketMessages.length > 0) {
@@ -369,19 +392,6 @@ export default function ChatThread({
     });
   }
 
-  function formatWhatsAppText(text: string): string {
-    if (!text) return "";
-
-    return text
-      .replace(/_\*(.*?)\*_/g, "<b><i>$1</i></b>")
-      .replace(/\*(.*?)\*/g, "<b>$1</b>")
-      .replace(/_(.*?)_/g, "<i>$1</i>")
-      .replace(/~(.*?)~/g, "<s>$1</s>")
-      .replace(/```(.*?)```/g, "<code>$1</code>")
-      .replace(/`(.*?)`/g, "<code>$1</code>")
-      .replace(/\n/g, "<br/>");
-  }
-
   const sendTemplateNeedingPayload = async (templateId: string) => {
     try {
       const templatePayload = await getPayloadByTicket(conversation.id, templateId);
@@ -453,7 +463,7 @@ export default function ChatThread({
     }
   };
 
-  function renderBubble(m: IMessage) {
+  const renderBubble = useCallback((m: IMessage) => {
     const mine = m.direction === "OUTBOUND";
     const status = m.status;
     const wrapper = "max-w-[80%] md:max-w-[70%]";
@@ -592,9 +602,14 @@ export default function ChatThread({
         parsedData = null;
       }
 
-      const template = waTemplates.find(
-        (t) => t.id === m.templateName || t.name === m.templateName
-      );
+      // If templates haven't loaded yet, show loading state
+      if (templateMap.size === 0) {
+        return (
+          <div className="text-gray-500">Cargando plantilla...</div>
+        );
+      }
+
+      const template = templateMap.get(m.templateName!);
 
       if (!template) {
         return (
@@ -656,7 +671,7 @@ export default function ChatThread({
         </div>
       </div>
     );
-  }
+  }, [templateMap, setPreviewImage, scrollToBottom]);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
