@@ -101,10 +101,7 @@ export default function ChatThread({
     mutate,
     isLoading
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
-  const ticketMessages = useMemo(
-    () => ticketData?.messages?.slice().reverse() || [],
-    [ticketData?.messages]
-  );
+  const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
