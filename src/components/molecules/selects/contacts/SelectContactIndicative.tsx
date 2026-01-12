@@ -24,6 +24,15 @@ interface Props<T extends FieldValues> {
   readOnly?: boolean;
   className?: string;
   isColombia?: boolean;
+  options: {
+    value: number;
+    label: string;
+  }[];
+  isLoading: boolean;
+  defaultValue?: {
+    value: number;
+    label: string;
+  };
 }
 
 export const SelectContactIndicative = <T extends FieldValues>({
@@ -31,27 +40,11 @@ export const SelectContactIndicative = <T extends FieldValues>({
   field,
   readOnly,
   className,
-  isColombia = false
+  isColombia = false,
+  options,
+  defaultValue,
+  isLoading
 }: Props<T>) => {
-  const { data, isLoading } = useSWR<IResponseContactOptions>(
-    "/client/contact/options",
-    fetcher,
-    {}
-  );
-
-  const options =
-    data?.data && typeof data.data === "object"
-      ? "country_calling_code" in data.data
-        ? data?.data?.country_calling_code?.map((option) => {
-            return {
-              value: option.id,
-              label: `${option.code} ${option.country_name}`,
-              className: "selectOptions"
-            };
-          })
-        : []
-      : [];
-
   useEffect(() => {
     if (isColombia && options.length > 0 && !field.value) {
       const colombiaOption = options.find((option) => option.value === 1);
@@ -77,6 +70,7 @@ export const SelectContactIndicative = <T extends FieldValues>({
         labelInValue
         open={readOnly ? false : undefined}
         popupMatchSelectWidth={false}
+        defaultValue={defaultValue}
       />
       {errors && <Typography.Text className="textError">Obligatorio *</Typography.Text>}
     </>
