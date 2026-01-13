@@ -165,9 +165,10 @@ const CashportMobileView: React.FC = () => {
   ];
 
   const handlePay = () => {
-    console.log("Initiating payment...");
-    // a push to host/mobile/confirmPayment
-    router.push("/mobile/confirmPayment");
+    const token = paramsToken ? encodeURIComponent(paramsToken as string) : "";
+    const paymentLink = data?.payment_link ? encodeURIComponent(data.payment_link) : "";
+
+    router.push(`/mobile/confirmPayment?token=${token}&payment_link=${paymentLink}`);
   };
 
   if (loading) {
