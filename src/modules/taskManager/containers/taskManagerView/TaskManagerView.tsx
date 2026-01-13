@@ -1,23 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import { getTasks } from "@/services/tasks/tasks";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-
 import StatusTab from "@/modules/taskManager/components/statusTab/StatusTab";
 import TasksTable, {
   ITask,
   SortKey,
   SortDirection
 } from "@/modules/taskManager/components/tasksTable/TasksTable";
-
 import UiSearchInput from "@/components/ui/search-input";
 import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-
 import { FilterState, mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import {
@@ -52,6 +51,15 @@ export const TaskManagerView: React.FC = () => {
   });
 
   const [selectedTask, setSelectedTask] = useState<InvoiceData | null>(null);
+
+  useEffect(() => {
+    const fetchTasksData = async () => {
+      const res = await getTasks();
+      console.log("Fetched tasks data:", res);
+    };
+
+    fetchTasksData();
+  }, []);
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
