@@ -165,8 +165,8 @@ const CashportMobileView: React.FC = () => {
   ];
 
   const handlePay = () => {
-    let token = paramsToken ? encodeURIComponent(paramsToken as string) : "";
-    let paymentLink = data?.payment_link ? encodeURIComponent(data.payment_link) : "";
+    const token = paramsToken ? encodeURIComponent(paramsToken as string) : "";
+    const paymentLink = data?.payment_link ? encodeURIComponent(data.payment_link) : "";
 
     router.push(`/mobile/confirmPayment?token=${token}&payment_link=${paymentLink}`);
   };
