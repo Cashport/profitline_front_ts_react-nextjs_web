@@ -138,6 +138,7 @@ export interface IClientWalletData {
   total_debt: number;
   total_to_pay: number;
   early_payment_discount: number;
+  payment_link?: string | null;
   invoices_list: IClientInvoice[];
   credit_balances: CreditBalance[];
   payments: CreditBalancePayments[];
