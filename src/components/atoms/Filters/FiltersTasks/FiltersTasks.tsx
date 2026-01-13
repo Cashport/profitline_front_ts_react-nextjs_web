@@ -90,7 +90,7 @@ export default function FiltersTasks({ setSelectedFilters }: Props) {
   return (
     <Cascader
       className="filterCascader"
-      style={{ width: "180px", height: "100%" }}
+      style={{ width: "180px", height: "48px" }}
       size="large"
       multiple
       maxTagCount="responsive"

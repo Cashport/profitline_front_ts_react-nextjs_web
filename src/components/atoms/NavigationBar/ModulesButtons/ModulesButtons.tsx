@@ -13,7 +13,13 @@ import {
   ClipboardText,
   ListChecks
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap, ChartBar } from "@phosphor-icons/react";
+import {
+  ChatCircleDots,
+  SealPercent,
+  HandTap,
+  ChartBar,
+  CheckSquareOffset
+} from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -219,7 +225,7 @@ export const ModulesButtons = ({
       )}
 
       {/* Aprobaciones */}
-      {false && (
+      {checkUserViewPermissions(project, "Aprobaciones") && (
         <Link href="/aprobaciones" passHref legacyBehavior>
           <Button
             type="primary"
@@ -242,6 +248,20 @@ export const ModulesButtons = ({
             className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "New Dashboard"}
+          </Button>
+        </Link>
+      )}
+
+      {/* New Task Manager */}
+      {checkUserViewPermissions(project, "TaskManager") && (
+        <Link href="/task-manager" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<CheckSquareOffset size={iconSize} />}
+            className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Task Manager"}
           </Button>
         </Link>
       )}
