@@ -165,10 +165,12 @@ const CashportMobileView: React.FC = () => {
   ];
 
   const handlePay = () => {
-    const token = paramsToken ? encodeURIComponent(paramsToken as string) : "";
-    const paymentLink = data?.payment_link ? encodeURIComponent(data.payment_link) : "";
+    if (!data?.payment_link) {
+      message.error("No se pudo iniciar el pago.");
+      return;
+    }
 
-    router.push(`/mobile/confirmPayment?token=${token}&payment_link=${paymentLink}`);
+    window.location.href = data.payment_link;
   };
 
   if (loading) {
