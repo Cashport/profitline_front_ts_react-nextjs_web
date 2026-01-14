@@ -538,7 +538,8 @@ export default function ChatInbox() {
               phoneNumber: contact.contact_phone,
               templateId: templateId,
               senderId: "cmhv6mnla0003no0huiao1u63",
-              name: contact.contact_name
+              name: contact.contact_name,
+              customerCashportUUID: sendConversation?.clientUUID || ""
             };
           }
 
