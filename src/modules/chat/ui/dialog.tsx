@@ -70,6 +70,36 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+// SafeDialog wrapper to fix Radix UI pointer-events cleanup bug
+// Radix UI's DismissableLayer fails to restore body.style.pointerEvents
+// when modal dialogs close, leaving the app unresponsive. This wrapper
+// explicitly restores pointer-events to ensure UI remains interactive.
+const SafeDialog = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>
+>(({ open, onOpenChange, children, ...props }, ref) => {
+  const handleOpenChange = React.useCallback(
+    (newOpen: boolean) => {
+      onOpenChange?.(newOpen);
+      if (!newOpen) {
+        // Restore pointer events when closing
+        // setTimeout ensures this runs after Radix's cleanup attempt
+        setTimeout(() => {
+          document.body.style.pointerEvents = "";
+        }, 0);
+      }
+    },
+    [onOpenChange]
+  );
+
+  return (
+    <Dialog ref={ref} open={open} onOpenChange={handleOpenChange} {...props}>
+      {children}
+    </Dialog>
+  );
+});
+SafeDialog.displayName = "SafeDialog";
+
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -123,5 +153,6 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
+  SafeDialog
 };

@@ -57,41 +57,13 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
+import { SafeDialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
 import { useApp } from "../../context/app-context";
 
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
-
-// SafeDialog wrapper to fix Radix UI pointer-events cleanup bug
-interface SafeDialogProps extends React.ComponentProps<typeof Dialog> {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-function SafeDialog({ open, onOpenChange, children, ...props }: SafeDialogProps) {
-  const handleOpenChange = React.useCallback(
-    (newOpen: boolean) => {
-      onOpenChange(newOpen);
-      if (!newOpen) {
-        // Restore pointer events when closing
-        // setTimeout ensures this runs after Radix's cleanup attempt
-        setTimeout(() => {
-          document.body.style.pointerEvents = "";
-        }, 0);
-      }
-    },
-    [onOpenChange]
-  );
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange} {...props}>
-      {children}
-    </Dialog>
-  );
-}
 
 export function DetailPurchaseOrder() {
   const params = useParams();
