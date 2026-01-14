@@ -52,10 +52,7 @@ const defaultConfig: ModuleConfig = {
   fechaLabel: "Fecha Factura"
 };
 
-export function PurchaseOrdersView({
-  moduleTitle = "TEST",
-  config = defaultConfig
-}: MainDashboardProps) {
+export function PurchaseOrdersView({ config = defaultConfig }: MainDashboardProps) {
   const {
     state,
     getInvoiceCounts,
@@ -301,9 +298,6 @@ export function PurchaseOrdersView({
                 <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 {state.invoices.length === 0 ? (
                   <>
-                    <h3 className="text-lg font-semibold text-cashport-black mb-2">
-                      No hay {moduleTitle.toLowerCase()} procesadas
-                    </h3>
                     <p className="mb-4">
                       Carga tu primera orden de compra para comenzar el análisis
                     </p>
