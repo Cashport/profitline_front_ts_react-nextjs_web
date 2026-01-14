@@ -8,7 +8,6 @@ import { extractSingleParam } from "@/utils/utils";
 import {
   ArrowLeft,
   FileText,
-  Download,
   Edit,
   GripVertical,
   MoreHorizontal,
@@ -53,6 +52,7 @@ import { useApp } from "../../context/app-context";
 import { PurchaseOrderInfo } from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
+import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
 
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
@@ -586,91 +586,14 @@ export function DetailPurchaseOrder() {
             )}
 
             {!isPdfCollapsed && (
-              <div
-                className="transition-all duration-300 ease-in-out min-w-0"
-                style={{ flex: `0 0 calc(${pdfWidth}% - 1.5rem)` }}
-              >
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="flex items-center text-lg font-semibold text-cashport-black">
-                      <FileText className="h-5 w-5 mr-2 text-cashport-green" />
-                      Documento Original
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleDownloadPdf}
-                        disabled={!invoiceData.pdfUrl}
-                        className="border-cashport-gray-light text-cashport-black hover:bg-cashport-white bg-transparent"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Descargar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsPdfCollapsed(true)}
-                        className="text-cashport-black hover:bg-cashport-white"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex-1 min-h-0">
-                    {invoiceData.pdfUrl ? (
-                      <div className="w-full h-full min-h-[400px] rounded-lg bg-cashport-gray-lighter flex flex-col">
-                        <object
-                          data={invoiceData.pdfUrl}
-                          type="application/pdf"
-                          className="w-full flex-1 min-h-[400px] rounded-lg"
-                          title={`PDF: ${invoiceData.archivoOriginal || `factura-${invoiceData.numeroFactura}.pdf`}`}
-                        >
-                          <div className="p-8 text-center h-full flex items-center justify-center">
-                            <div className="space-y-4">
-                              <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
-                              <div>
-                                <p className="text-lg font-medium text-cashport-black mb-2">
-                                  Vista previa no disponible
-                                </p>
-                                <p className="text-sm text-muted-foreground mb-4">
-                                  {invoiceData.archivoOriginal ||
-                                    `factura-${invoiceData.numeroFactura}.pdf`}
-                                </p>
-                                <Button
-                                  onClick={handleDownloadPdf}
-                                  className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
-                                >
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Descargar PDF
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </object>
-                      </div>
-                    ) : (
-                      <div className="bg-cashport-gray-lighter rounded-lg p-8 text-center h-full min-h-[400px] flex items-center justify-center">
-                        <div className="space-y-4">
-                          <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
-                          <div>
-                            <p className="text-lg font-medium text-cashport-black mb-2">
-                              Documento no disponible
-                            </p>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              {invoiceData.archivoOriginal ||
-                                `factura-${invoiceData.numeroFactura}.pdf`}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              El PDF original no está disponible para visualización
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <PurchaseOrderDocument
+                pdfUrl={invoiceData.pdfUrl}
+                archivoOriginal={invoiceData.archivoOriginal}
+                numeroFactura={invoiceData.numeroFactura}
+                pdfWidth={pdfWidth}
+                onCollapse={() => setIsPdfCollapsed(true)}
+                onDownload={handleDownloadPdf}
+              />
             )}
           </div>
         </CardContent>
