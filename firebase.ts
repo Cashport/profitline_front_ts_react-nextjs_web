@@ -8,8 +8,8 @@ import {
   FIREBASE_PROJECT_ID,
   FIREBASE_STORAGE_BUCKET
 } from "@/utils/constants/globalConstants";
-import { initializeApp } from "firebase/app";
-import { getAuth, ParsedToken, signInWithCustomToken } from "firebase/auth";
+import { initializeApp } from "@firebase/app";
+import { getAuth, ParsedToken, signInWithCustomToken } from "@firebase/auth";
 import "firebase/auth";
 import "firebase/functions";
 import "firebase/firestore";
