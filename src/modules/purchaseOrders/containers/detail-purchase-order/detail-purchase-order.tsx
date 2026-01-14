@@ -65,126 +65,33 @@ import { useApp } from "../../context/app-context";
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
 
-const orderStages = [
-  {
-    id: 1,
-    name: "Orden de compra",
-    icon: ClipboardList,
-    completedBy: "Sistema",
-    completedAt: "2024-01-14 10:00"
-  },
-  {
-    id: 2,
-    name: "Validaciones",
-    icon: CheckCircle,
-    completedBy: null,
-    completedAt: null,
-    subValidations: [
-      {
-        name: "Aprobado Cartera",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: true
-      },
-      {
-        name: "Aprobado Financiera",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: true
-      },
-      {
-        name: "Aprobado KAM",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: false
+// SafeDialog wrapper to fix Radix UI pointer-events cleanup bug
+interface SafeDialogProps extends React.ComponentProps<typeof Dialog> {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+function SafeDialog({ open, onOpenChange, children, ...props }: SafeDialogProps) {
+  const handleOpenChange = React.useCallback(
+    (newOpen: boolean) => {
+      onOpenChange(newOpen);
+      if (!newOpen) {
+        // Restore pointer events when closing
+        // setTimeout ensures this runs after Radix's cleanup attempt
+        setTimeout(() => {
+          document.body.style.pointerEvents = "";
+        }, 0);
       }
-    ]
-  },
-  {
-    id: 3,
-    name: "Facturado",
-    icon: Receipt,
-    completedBy: null,
-    completedAt: null
-  },
-  {
-    id: 4,
-    name: "En despacho",
-    icon: Truck,
-    completedBy: null,
-    completedAt: null
-  },
-  {
-    id: 5,
-    name: "Entregado",
-    icon: Package,
-    completedBy: null,
-    completedAt: null
-  }
-];
+    },
+    [onOpenChange]
+  );
 
-const stateColorConfig: Record<string, { color: string; textColor: string }> = {
-  "En validación": { color: "#2196F3", textColor: "text-white" },
-  "En aprobaciones": { color: "#9C27B0", textColor: "text-white" },
-  "En facturación": { color: "#FFC107", textColor: "text-black" },
-  Facturado: { color: "#4CAF50", textColor: "text-white" },
-  "En despacho": { color: "#009688", textColor: "text-white" },
-  Entregado: { color: "#2E7D32", textColor: "text-white" },
-  Novedad: { color: "#E53935", textColor: "text-white" },
-  "Back order": { color: "#000000", textColor: "text-white" }
-};
-
-const novedadConfig = {
-  "No tiene cupo": {
-    icon: ShoppingCart,
-    color: "#FF6B6B",
-    bgColor: "#FFF5F5",
-    borderColor: "#FFEBEB",
-    description: "El cliente ha excedido su límite de crédito disponible"
-  },
-  "No tiene stock": {
-    icon: PackageX,
-    color: "#FF8C42",
-    bgColor: "#FFF8F3",
-    borderColor: "#FFEDD5",
-    description: "No hay inventario suficiente para completar el pedido"
-  },
-  "No cumple especificaciones de entrega": {
-    icon: AlertTriangle,
-    color: "#FFA726",
-    bgColor: "#FFF3E0",
-    borderColor: "#FFE0B2",
-    description: "La entrega no cumple con los requisitos establecidos"
-  },
-  "Cantidad fuera de promedio": {
-    icon: TrendingDown,
-    color: "#AB47BC",
-    bgColor: "#F3E5F5",
-    borderColor: "#E1BEE7",
-    description: "La cantidad solicitada difiere significativamente del promedio histórico"
-  },
-  "Nuevo punto de entrega": {
-    icon: MapPin,
-    color: "#42A5F5",
-    bgColor: "#E3F2FD",
-    borderColor: "#BBDEFB",
-    description: "Primera entrega en esta ubicación, requiere validación"
-  },
-  "No es posible cumplir con la entrega": {
-    icon: XOctagon,
-    color: "#EF5350",
-    bgColor: "#FFEBEE",
-    borderColor: "#FFCDD2",
-    description: "Restricciones logísticas impiden completar la entrega"
-  },
-  "No coincide la lista de precios y/o productos": {
-    icon: DollarSign,
-    color: "#FF7043",
-    bgColor: "#FBE9E7",
-    borderColor: "#FFCCBC",
-    description: "Discrepancia entre precios/productos solicitados y catálogo actual"
-  }
-};
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange} {...props}>
+      {children}
+    </Dialog>
+  );
+}
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -439,19 +346,6 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const getEstadoBadge = (estado: string) => {
-    const colors = {
-      Procesado: { bg: "bg-cashport-green", text: "text-black" }
-    };
-
-    const colorConfig = colors[estado as keyof typeof colors] || {
-      bg: "bg-gray-500",
-      text: "text-white"
-    };
-
-    return <Badge className={`${colorConfig.bg} ${colorConfig.text}`}>{estado}</Badge>;
-  };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -471,13 +365,6 @@ export function DetailPurchaseOrder() {
       });
     }
   };
-
-  const availableApprovers = [
-    { id: "1", name: "Miguel Martínez", role: "KAM" },
-    { id: "2", name: "Ana García", role: "Cartera" },
-    { id: "3", name: "Carlos López", role: "Financiera" },
-    { id: "4", name: "Laura Rodríguez", role: "Gerente" }
-  ];
 
   const handleApprove = () => {
     setShowApproveModal(true);
@@ -1234,7 +1121,7 @@ export function DetailPurchaseOrder() {
         </div>
       )}
 
-      <Dialog open={showApproveModal} onOpenChange={setShowApproveModal}>
+      <SafeDialog open={showApproveModal} onOpenChange={setShowApproveModal}>
         <DialogContent className="sm:max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">¿Está seguro?</DialogTitle>
@@ -1259,9 +1146,9 @@ export function DetailPurchaseOrder() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </SafeDialog>
 
-      <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+      <SafeDialog open={showRejectModal} onOpenChange={setShowRejectModal}>
         <DialogContent className="sm:max-w-lg mx-auto">
           <DialogHeader>
             <div className="flex items-center gap-2">
@@ -1329,9 +1216,9 @@ export function DetailPurchaseOrder() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </SafeDialog>
 
-      <Dialog open={showApprovalModal} onOpenChange={setShowApprovalModal}>
+      <SafeDialog open={showApprovalModal} onOpenChange={setShowApprovalModal}>
         <DialogContent className="sm:max-w-lg mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">Enviar a aprobación</DialogTitle>
@@ -1391,9 +1278,9 @@ export function DetailPurchaseOrder() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </SafeDialog>
 
-      <Dialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
+      <SafeDialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
         <DialogContent className="sm:max-w-lg mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">Facturar orden de compra</DialogTitle>
@@ -1437,9 +1324,9 @@ export function DetailPurchaseOrder() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </SafeDialog>
 
-      <Dialog open={showDispatchModal} onOpenChange={setShowDispatchModal}>
+      <SafeDialog open={showDispatchModal} onOpenChange={setShowDispatchModal}>
         <DialogContent className="sm:max-w-lg mx-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">Confirmar despacho</DialogTitle>
@@ -1493,7 +1380,7 @@ export function DetailPurchaseOrder() {
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </SafeDialog>
 
       <TimelineHistoryModal
         isOpen={showTimelineHistory}
@@ -1504,3 +1391,131 @@ export function DetailPurchaseOrder() {
     </div>
   );
 }
+
+const orderStages = [
+  {
+    id: 1,
+    name: "Orden de compra",
+    icon: ClipboardList,
+    completedBy: "Sistema",
+    completedAt: "2024-01-14 10:00"
+  },
+  {
+    id: 2,
+    name: "Validaciones",
+    icon: CheckCircle,
+    completedBy: null,
+    completedAt: null,
+    subValidations: [
+      {
+        name: "Aprobado Cartera",
+        completedBy: "Miguel Martinez",
+        completedAt: "02/02/2025 12:00",
+        isCompleted: true
+      },
+      {
+        name: "Aprobado Financiera",
+        completedBy: "Miguel Martinez",
+        completedAt: "02/02/2025 12:00",
+        isCompleted: true
+      },
+      {
+        name: "Aprobado KAM",
+        completedBy: "Miguel Martinez",
+        completedAt: "02/02/2025 12:00",
+        isCompleted: false
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Facturado",
+    icon: Receipt,
+    completedBy: null,
+    completedAt: null
+  },
+  {
+    id: 4,
+    name: "En despacho",
+    icon: Truck,
+    completedBy: null,
+    completedAt: null
+  },
+  {
+    id: 5,
+    name: "Entregado",
+    icon: Package,
+    completedBy: null,
+    completedAt: null
+  }
+];
+
+const stateColorConfig: Record<string, { color: string; textColor: string }> = {
+  "En validación": { color: "#2196F3", textColor: "text-white" },
+  "En aprobaciones": { color: "#9C27B0", textColor: "text-white" },
+  "En facturación": { color: "#FFC107", textColor: "text-black" },
+  Facturado: { color: "#4CAF50", textColor: "text-white" },
+  "En despacho": { color: "#009688", textColor: "text-white" },
+  Entregado: { color: "#2E7D32", textColor: "text-white" },
+  Novedad: { color: "#E53935", textColor: "text-white" },
+  "Back order": { color: "#000000", textColor: "text-white" }
+};
+
+const novedadConfig = {
+  "No tiene cupo": {
+    icon: ShoppingCart,
+    color: "#FF6B6B",
+    bgColor: "#FFF5F5",
+    borderColor: "#FFEBEB",
+    description: "El cliente ha excedido su límite de crédito disponible"
+  },
+  "No tiene stock": {
+    icon: PackageX,
+    color: "#FF8C42",
+    bgColor: "#FFF8F3",
+    borderColor: "#FFEDD5",
+    description: "No hay inventario suficiente para completar el pedido"
+  },
+  "No cumple especificaciones de entrega": {
+    icon: AlertTriangle,
+    color: "#FFA726",
+    bgColor: "#FFF3E0",
+    borderColor: "#FFE0B2",
+    description: "La entrega no cumple con los requisitos establecidos"
+  },
+  "Cantidad fuera de promedio": {
+    icon: TrendingDown,
+    color: "#AB47BC",
+    bgColor: "#F3E5F5",
+    borderColor: "#E1BEE7",
+    description: "La cantidad solicitada difiere significativamente del promedio histórico"
+  },
+  "Nuevo punto de entrega": {
+    icon: MapPin,
+    color: "#42A5F5",
+    bgColor: "#E3F2FD",
+    borderColor: "#BBDEFB",
+    description: "Primera entrega en esta ubicación, requiere validación"
+  },
+  "No es posible cumplir con la entrega": {
+    icon: XOctagon,
+    color: "#EF5350",
+    bgColor: "#FFEBEE",
+    borderColor: "#FFCDD2",
+    description: "Restricciones logísticas impiden completar la entrega"
+  },
+  "No coincide la lista de precios y/o productos": {
+    icon: DollarSign,
+    color: "#FF7043",
+    bgColor: "#FBE9E7",
+    borderColor: "#FFCCBC",
+    description: "Discrepancia entre precios/productos solicitados y catálogo actual"
+  }
+};
+
+const availableApprovers = [
+  { id: "1", name: "Miguel Martínez", role: "KAM" },
+  { id: "2", name: "Ana García", role: "Cartera" },
+  { id: "3", name: "Carlos López", role: "Financiera" },
+  { id: "4", name: "Laura Rodríguez", role: "Gerente" }
+];
