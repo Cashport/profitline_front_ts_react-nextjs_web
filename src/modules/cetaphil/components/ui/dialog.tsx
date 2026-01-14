@@ -73,10 +73,7 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 // Radix UI's DismissableLayer fails to restore body.style.pointerEvents
 // when modal dialogs close, leaving the app unresponsive. This wrapper
 // explicitly restores pointer-events to ensure UI remains interactive.
-const SafeDialog = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>
->(({ open, onOpenChange, children, ...props }, ref) => {
+function SafeDialog({ open, onOpenChange, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   const handleOpenChange = React.useCallback(
     (newOpen: boolean) => {
       onOpenChange?.(newOpen);
@@ -92,12 +89,11 @@ const SafeDialog = React.forwardRef<
   );
 
   return (
-    <Dialog ref={ref} open={open} onOpenChange={handleOpenChange} {...props}>
+    <Dialog open={open} onOpenChange={handleOpenChange} {...props}>
       {children}
     </Dialog>
   );
-});
-SafeDialog.displayName = "SafeDialog";
+}
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (

@@ -57,9 +57,13 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { SafeDialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
-import { Textarea } from "@/modules/chat/ui/textarea";
 import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
+import { ApproveOrderModal } from "../../components/dialogs/approve-order-modal/approve-order-modal";
+import { RejectOrderModal } from "../../components/dialogs/reject-order-modal/reject-order-modal";
+import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-modal/send-to-approval-modal";
+import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
+import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
+import { availableApprovers } from "../../constants/approvers";
 import { useApp } from "../../context/app-context";
 
 import "@/modules/chat/styles/chatStyles.css";
@@ -119,13 +123,8 @@ export function DetailPurchaseOrder() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showDispatchModal, setShowDispatchModal] = useState(false);
-  const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
-  const [invoiceIds, setInvoiceIds] = useState("");
-  const [dispatchNotes, setDispatchNotes] = useState("");
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [rejectObservation, setRejectObservation] = useState("");
 
   // Dragging handlers - must be before conditional returns
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -352,12 +351,10 @@ export function DetailPurchaseOrder() {
     setShowApproveModal(false);
   };
 
-  const confirmReject = () => {
-    console.log("Order rejected:", { reason: rejectReason, observation: rejectObservation });
+  const confirmReject = (reason: string, observation: string) => {
+    console.log("Order rejected:", { reason, observation });
     // TODO: Implement rejection logic
     setShowRejectModal(false);
-    setRejectReason("");
-    setRejectObservation("");
   };
 
   const estadoConfig = stateColorConfig[invoiceData.estado] || {
@@ -401,31 +398,22 @@ export function DetailPurchaseOrder() {
     document.body.removeChild(link);
   };
 
-  const handleSendToApproval = () => {
-    console.log("Send to approval:", selectedApprovers);
+  const handleSendToApproval = (selectedApproverIds: string[]) => {
+    console.log("Send to approval:", selectedApproverIds);
     // TODO: Implement send to approval logic
     setShowApprovalModal(false);
-    setSelectedApprovers([]);
   };
 
-  const handleAddInvoices = () => {
+  const handleAddInvoices = (invoiceIds: string) => {
     console.log("Invoice IDs:", invoiceIds);
     // TODO: Implement invoice addition logic
     setShowInvoiceModal(false);
-    setInvoiceIds("");
   };
 
-  const handleConfirmDispatch = () => {
+  const handleConfirmDispatch = (dispatchNotes: string) => {
     console.log("Dispatch confirmed with notes:", dispatchNotes);
     // TODO: Implement dispatch confirmation logic
     setShowDispatchModal(false);
-    setDispatchNotes("");
-  };
-
-  const toggleApprover = (approverId: string) => {
-    setSelectedApprovers((prev) =>
-      prev.includes(approverId) ? prev.filter((id) => id !== approverId) : [...prev, approverId]
-    );
   };
 
   return (
@@ -1093,266 +1081,37 @@ export function DetailPurchaseOrder() {
         </div>
       )}
 
-      <SafeDialog open={showApproveModal} onOpenChange={setShowApproveModal}>
-        <DialogContent className="sm:max-w-md mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">¿Está seguro?</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-gray-600">¿Desea aprobar esta orden de compra?</p>
-          </div>
-          <div className="flex gap-3 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setShowApproveModal(false)}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={confirmApprove}
-              className="flex-1 text-black font-semibold"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Confirmar
-            </Button>
-          </div>
-        </DialogContent>
-      </SafeDialog>
+      <ApproveOrderModal
+        open={showApproveModal}
+        onOpenChange={setShowApproveModal}
+        onConfirm={confirmApprove}
+      />
 
-      <SafeDialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-        <DialogContent className="sm:max-w-lg mx-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowRejectModal(false)}
-                className="h-8 w-8 p-0"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <DialogTitle className="text-xl font-semibold">Rechazar orden</DialogTitle>
-            </div>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-gray-600">Selecciona el motivo y agrega una observación</p>
+      <RejectOrderModal
+        open={showRejectModal}
+        onOpenChange={setShowRejectModal}
+        onConfirm={confirmReject}
+      />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Motivo de rechazo</label>
-              <Select value={rejectReason} onValueChange={setRejectReason}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar motivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="precio-incorrecto">Precio incorrecto</SelectItem>
-                  <SelectItem value="producto-no-disponible">Producto no disponible</SelectItem>
-                  <SelectItem value="informacion-incompleta">Información incompleta</SelectItem>
-                  <SelectItem value="error-cliente">Error del cliente</SelectItem>
-                  <SelectItem value="otro">Otro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <SendToApprovalModal
+        open={showApprovalModal}
+        onOpenChange={setShowApprovalModal}
+        onConfirm={handleSendToApproval}
+        availableApprovers={availableApprovers}
+      />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Observación <span className="text-red-500">*</span>
-              </label>
-              <Textarea
-                value={rejectObservation}
-                onChange={(e) => setRejectObservation(e.target.value)}
-                placeholder="Escribe una observación..."
-                className="min-h-[100px] resize-none"
-              />
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowRejectModal(false);
-                setRejectReason("");
-                setRejectObservation("");
-              }}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={confirmReject}
-              disabled={!rejectReason || !rejectObservation.trim()}
-              className="flex-1 text-black font-semibold disabled:opacity-50"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Guardar
-            </Button>
-          </div>
-        </DialogContent>
-      </SafeDialog>
+      <InvoiceModal
+        open={showInvoiceModal}
+        onOpenChange={setShowInvoiceModal}
+        onConfirm={handleAddInvoices}
+      />
 
-      <SafeDialog open={showApprovalModal} onOpenChange={setShowApprovalModal}>
-        <DialogContent className="sm:max-w-lg mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Enviar a aprobación</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-gray-600">Selecciona quién debe aprobar esta novedad</p>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Aprobadores</label>
-              <div className="border rounded-lg divide-y">
-                {availableApprovers.map((approver) => (
-                  <div
-                    key={approver.id}
-                    className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => toggleApprover(approver.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                          selectedApprovers.includes(approver.id)
-                            ? "bg-[#CBE71E] border-[#CBE71E]"
-                            : "border-gray-300"
-                        }`}
-                      >
-                        {selectedApprovers.includes(approver.id) && (
-                          <Check className="h-3 w-3 text-black" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{approver.name}</p>
-                        <p className="text-xs text-gray-500">{approver.role}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowApprovalModal(false);
-                setSelectedApprovers([]);
-              }}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSendToApproval}
-              disabled={selectedApprovers.length === 0}
-              className="flex-1 text-black font-semibold disabled:opacity-50"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Enviar
-            </Button>
-          </div>
-        </DialogContent>
-      </SafeDialog>
-
-      <SafeDialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
-        <DialogContent className="sm:max-w-lg mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Facturar orden de compra</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-gray-600">
-              Ingresa el ID o IDs de las facturas generadas para esta orden de compra
-            </p>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                ID de Factura(s) <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={invoiceIds}
-                onChange={(e) => setInvoiceIds(e.target.value)}
-                placeholder="Ej: FV-2024-001, FV-2024-002"
-                className="w-full"
-              />
-              <p className="text-xs text-gray-500">Separa múltiples IDs con comas</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowInvoiceModal(false);
-                setInvoiceIds("");
-              }}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleAddInvoices}
-              disabled={!invoiceIds.trim()}
-              className="flex-1 text-black font-semibold disabled:opacity-50"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Guardar
-            </Button>
-          </div>
-        </DialogContent>
-      </SafeDialog>
-
-      <SafeDialog open={showDispatchModal} onOpenChange={setShowDispatchModal}>
-        <DialogContent className="sm:max-w-lg mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">Confirmar despacho</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-gray-600">
-              Confirma que el pedido ha sido despachado por logística
-            </p>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Observaciones</label>
-              <Textarea
-                value={dispatchNotes}
-                onChange={(e) => setDispatchNotes(e.target.value)}
-                placeholder="Agrega notas sobre el despacho (opcional)"
-                className="min-h-[100px] resize-none"
-              />
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div className="flex gap-2">
-                <AlertTriangle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900">
-                    Orden de compra: {invoiceData.numeroFactura}
-                  </p>
-                  <p className="text-xs text-blue-700 mt-1">
-                    El estado cambiará a &quot;En despacho&quot; una vez confirmado
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowDispatchModal(false);
-                setDispatchNotes("");
-              }}
-              className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleConfirmDispatch}
-              className="flex-1 text-black font-semibold"
-              style={{ backgroundColor: "#CBE71E" }}
-            >
-              Confirmar despacho
-            </Button>
-          </div>
-        </DialogContent>
-      </SafeDialog>
+      <DispatchModal
+        open={showDispatchModal}
+        onOpenChange={setShowDispatchModal}
+        onConfirm={handleConfirmDispatch}
+        orderNumber={invoiceData.numeroFactura}
+      />
 
       <TimelineHistoryModal
         isOpen={showTimelineHistory}
@@ -1484,10 +1243,3 @@ const novedadConfig = {
     description: "Discrepancia entre precios/productos solicitados y catálogo actual"
   }
 };
-
-const availableApprovers = [
-  { id: "1", name: "Miguel Martínez", role: "KAM" },
-  { id: "2", name: "Ana García", role: "Cartera" },
-  { id: "3", name: "Carlos López", role: "Financiera" },
-  { id: "4", name: "Laura Rodríguez", role: "Gerente" }
-];
