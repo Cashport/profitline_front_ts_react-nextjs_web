@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { getTasks } from "@/services/tasks/tasks";
+import { getTaskTabs, getTasks } from "@/services/tasks/tasks";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
@@ -58,6 +58,12 @@ export const TaskManagerView: React.FC = () => {
       console.log("Fetched tasks data:", res);
     };
 
+    const fetchTabsData = async () => {
+      const res = await getTaskTabs();
+      console.log("Fetched tabs data:", res);
+    };
+
+    fetchTabsData();
     fetchTasksData();
   }, []);
 

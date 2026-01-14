@@ -25,6 +25,17 @@ export const getTaskTypes = async (): Promise<ITaskTypes[]> => {
   }
 };
 
+export const getTaskTabs = async (): Promise<any[]> => {
+  try {
+    const response: GenericResponse<any[]> = await API.get(
+      `${config.API_HOST}/task/counts-by-status`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getTasks = async (
   statusId: string = "6d5e2aa5-8e77-11f0-b08c-0635ef5156a1"
 ): Promise<ITaskTypes[]> => {
