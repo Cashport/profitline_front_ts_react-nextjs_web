@@ -65,6 +65,7 @@ import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-mod
 import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
 import { availableApprovers } from "../../constants/approvers";
 import { useApp } from "../../context/app-context";
+import { PurchaseOrderInfo } from "../../components/purchase-order-info/purchase-order-info";
 
 import "@/modules/chat/styles/chatStyles.css";
 import "@/modules/aprobaciones/styles/approvalsStyles.css";
@@ -563,130 +564,13 @@ export function DetailPurchaseOrder() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-8 mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-cashport-black mb-4">
-                Información General
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Orden de compra
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={editableGeneralInfo.numeroFactura}
-                      onChange={(e) => handleGeneralInfoChange("numeroFactura", e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableGeneralInfo.numeroFactura}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Cliente
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={editableGeneralInfo.comprador}
-                      onChange={(e) => handleGeneralInfoChange("comprador", e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableGeneralInfo.comprador}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Fecha
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={editableGeneralInfo.fechaFactura}
-                      onChange={(e) => handleGeneralInfoChange("fechaFactura", e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableGeneralInfo.fechaFactura}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-cashport-black mb-4">
-                Información de Entrega
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Fecha/Hora entrega
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={editableDeliveryInfo.fechaEntrega}
-                      onChange={(e) => handleDeliveryInfoChange("fechaEntrega", e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableDeliveryInfo.fechaEntrega || "-"}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Dirección completa
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={
-                        editableDeliveryInfo.direccion && editableDeliveryInfo.ciudad
-                          ? `${editableDeliveryInfo.direccion}, ${editableDeliveryInfo.ciudad}`
-                          : editableDeliveryInfo.direccion || editableDeliveryInfo.ciudad || ""
-                      }
-                      onChange={(e) => {
-                        const parts = e.target.value.split(",");
-                        handleDeliveryInfoChange("direccion", parts[0]?.trim() || "");
-                        handleDeliveryInfoChange("ciudad", parts[1]?.trim() || "");
-                      }}
-                      className="mt-1 h-8 text-sm font-semibold"
-                      placeholder="Dirección, Ciudad"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableDeliveryInfo.direccion && editableDeliveryInfo.ciudad
-                        ? `${editableDeliveryInfo.direccion}, ${editableDeliveryInfo.ciudad}`
-                        : editableDeliveryInfo.direccion || editableDeliveryInfo.ciudad || "-"}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                    Observación
-                  </label>
-                  {isEditMode ? (
-                    <Input
-                      value={editableDeliveryInfo.observacion}
-                      onChange={(e) => handleDeliveryInfoChange("observacion", e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {editableDeliveryInfo.observacion || "-"}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <PurchaseOrderInfo
+            isEditMode={isEditMode}
+            generalInfo={editableGeneralInfo}
+            deliveryInfo={editableDeliveryInfo}
+            onGeneralInfoChange={handleGeneralInfoChange}
+            onDeliveryInfoChange={handleDeliveryInfoChange}
+          />
 
           <TooltipProvider>
             <div className="mb-8 pt-4">
