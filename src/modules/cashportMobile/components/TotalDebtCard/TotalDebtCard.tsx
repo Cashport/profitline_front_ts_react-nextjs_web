@@ -52,7 +52,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, ppToPa
         />
       </Flex>
 
-      <span className="TotalDebtCard__divider" />
+      {/* <span className="TotalDebtCard__divider" />
 
       <Flex align="center" justify="space-between">
         <Text className="TotalDebtCard__label-400">
@@ -65,7 +65,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, ppToPa
             hideCurrencySymbol: true
           })}
         </Title>
-      </Flex>
+      </Flex> */}
 
       <Button
         type="primary"
