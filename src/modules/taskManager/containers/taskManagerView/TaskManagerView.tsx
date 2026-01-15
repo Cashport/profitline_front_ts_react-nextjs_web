@@ -86,6 +86,12 @@ export const TaskManagerView: React.FC = () => {
   }, [tabsData, isLoadingTabs]);
 
   useEffect(() => {
+    // Clear selected rows when switching tabs
+    setState((prev) => ({
+      ...prev,
+      selectedTaskIds: []
+    }));
+
     // Fetch tasks for the active tab only if not already loaded
     const fetchTasksForActiveTab = async () => {
       if (activeTabKey && !tasksByStatus[activeTabKey]) {
