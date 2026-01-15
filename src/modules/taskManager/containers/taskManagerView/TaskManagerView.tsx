@@ -36,7 +36,7 @@ export const TaskManagerView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
-  const [activeTabKey, setActiveTabKey] = useState<string>("1");
+  const [activeTabKey, setActiveTabKey] = useState<string>();
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(
     null
   );
@@ -81,8 +81,10 @@ export const TaskManagerView: React.FC = () => {
         setActiveTabKey(tabsData[0].id);
       }
     }
-    console.log("Tabs data (SWR):", tabsData, "Loading:", isLoadingTabs);
   }, [tabsData, isLoadingTabs]);
+
+  // Safely access pagination page for the active tab (handles undefined activeTabKey)
+  const currentPaginationPage = activeTabKey ? paginationByStatus[activeTabKey]?.page : undefined;
 
   useEffect(() => {
     // Fetch tasks for the active tab and store them in state
@@ -110,7 +112,7 @@ export const TaskManagerView: React.FC = () => {
       }
     };
     fetchTasksForActiveTab();
-  }, [activeTabKey, paginationByStatus[activeTabKey]?.page]);
+  }, [activeTabKey, currentPaginationPage]);
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });

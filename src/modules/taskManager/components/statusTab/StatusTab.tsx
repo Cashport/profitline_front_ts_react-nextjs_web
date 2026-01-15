@@ -12,7 +12,7 @@ export interface ItemTab {
 
 interface IStatusTabProps {
   tabs?: ItemTab[];
-  activeKey: string;
+  activeKey?: string;
   onChange: (key: string) => void;
 }
 
