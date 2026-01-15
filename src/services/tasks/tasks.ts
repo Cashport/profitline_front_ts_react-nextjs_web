@@ -1,6 +1,6 @@
 import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { ITaskStatus, ITaskTypes } from "@/types/tasks/ITasks";
+import { ITask, ITaskByStatus, ITaskStatus, ITaskTabState, ITaskTypes } from "@/types/tasks/ITasks";
 import { API } from "@/utils/api/api";
 
 export const getTasksStatus = async (): Promise<ITaskStatus[]> => {
@@ -25,9 +25,9 @@ export const getTaskTypes = async (): Promise<ITaskTypes[]> => {
   }
 };
 
-export const getTaskTabs = async (): Promise<any[]> => {
+export const getTaskTabs = async (): Promise<ITaskTabState[]> => {
   try {
-    const response: GenericResponse<any[]> = await API.get(
+    const response: GenericResponse<ITaskTabState[]> = await API.get(
       `${config.API_HOST}/task/counts-by-status`
     );
     return response.data;
@@ -36,12 +36,16 @@ export const getTaskTabs = async (): Promise<any[]> => {
   }
 };
 
-export const getTasks = async (
-  statusId: string = "6d5e2aa5-8e77-11f0-b08c-0635ef5156a1"
-): Promise<ITaskTypes[]> => {
+export const getTasksByStatus = async (
+  statusId: string,
+  page: number = 1
+): Promise<ITaskByStatus> => {
+  const queryParams: string[] = [];
+  queryParams.push(`page=${page}`);
+
   try {
-    const response: GenericResponse<any[]> = await API.post(
-      `${config.API_HOST}/task/status-group${statusId ? `/${statusId}` : ""}`
+    const response: GenericResponse<ITaskByStatus> = await API.post(
+      `${config.API_HOST}/task/status-group/${statusId}?${queryParams.join("&")}`
     );
     return response.data;
   } catch (error) {
