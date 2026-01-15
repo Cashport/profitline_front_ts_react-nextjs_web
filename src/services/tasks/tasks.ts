@@ -40,12 +40,12 @@ export const getTasksByStatus = async (
   statusId: string,
   page: number = 1
 ): Promise<ITaskByStatus> => {
-  const queryParams: string[] = [];
-  queryParams.push(`page=${page}`);
+  const body = { page };
 
   try {
     const response: GenericResponse<ITaskByStatus> = await API.post(
-      `${config.API_HOST}/task/status-group/${statusId}?${queryParams.join("&")}`
+      `${config.API_HOST}/task/status-group/${statusId}`,
+      body
     );
     return response.data;
   } catch (error) {

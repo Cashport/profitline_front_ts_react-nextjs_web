@@ -16,9 +16,6 @@ import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-deta
 import ApprovalsStateDropdown from "../components/approvals-state-dropdown/approvalsStateDorpdown";
 import ApprovalsTypeDropdown from "../components/approvals-type-dropdown/approvalsTypeDropdown";
 import ApprovalsTable from "../components/approvals-table/Approvals-table";
-
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
-import "@/modules/chat/styles/chatStyles.css";
 import { getApprovalStatuses, getApprovalTypes } from "@/services/approvals/approvals";
 
 export default function ApprovalsView() {

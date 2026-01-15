@@ -28,8 +28,6 @@ import {
   mockTaskDetail
 } from "../../components/modalTaskDetail/ModalTaskDetail";
 
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
-
 export const TaskManagerView: React.FC = () => {
   // States
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -72,7 +70,11 @@ export const TaskManagerView: React.FC = () => {
     data: tabsData,
     isLoading: isLoadingTabs,
     mutate: mutateTabs
-  } = useSWR("taskTabs", getTaskTabs);
+  } = useSWR("taskTabs", getTaskTabs, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000
+  });
 
   useEffect(() => {
     if (tabsData && !isLoadingTabs) {
@@ -83,16 +85,18 @@ export const TaskManagerView: React.FC = () => {
     }
   }, [tabsData, isLoadingTabs]);
 
-  // Safely access pagination page for the active tab (handles undefined activeTabKey)
-  const currentPaginationPage = activeTabKey ? paginationByStatus[activeTabKey]?.page : undefined;
-
   useEffect(() => {
-    // Fetch tasks for the active tab and store them in state
+    // Clear selected rows when switching tabs
+    setState((prev) => ({
+      ...prev,
+      selectedTaskIds: []
+    }));
+
+    // Fetch tasks for the active tab only if not already loaded
     const fetchTasksForActiveTab = async () => {
-      if (activeTabKey) {
+      if (activeTabKey && !tasksByStatus[activeTabKey]) {
         try {
-          const currentPage = paginationByStatus[activeTabKey]?.page || 1;
-          const response = await getTasksByStatus(activeTabKey, currentPage);
+          const response = await getTasksByStatus(activeTabKey, 1);
           const tasksArray = response?.tasks ?? [];
           setTasksByStatus((prev) => ({
             ...prev,
@@ -112,7 +116,7 @@ export const TaskManagerView: React.FC = () => {
       }
     };
     fetchTasksForActiveTab();
-  }, [activeTabKey, currentPaginationPage]);
+  }, [activeTabKey]);
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
