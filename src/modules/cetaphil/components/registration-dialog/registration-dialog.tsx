@@ -14,7 +14,6 @@ import { Input } from "@cetaphilUI/input";
 import { Label } from "@cetaphilUI/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@cetaphilUI/select";
 import { DOCUMENT_TYPES } from "@/constants/documentTypes";
-
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 
 export interface RegistrationFormData {

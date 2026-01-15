@@ -9,7 +9,6 @@ import { getSalesDashboard } from "@/services/commerce/commerce";
 
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
-import "@/modules/cetaphil/styles/cetaphilStyles.css";
 
 const mockData = {
   invoices: [

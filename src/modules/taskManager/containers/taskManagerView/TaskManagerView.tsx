@@ -28,8 +28,6 @@ import {
   mockTaskDetail
 } from "../../components/modalTaskDetail/ModalTaskDetail";
 
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
-
 export const TaskManagerView: React.FC = () => {
   // States
   const [searchTerm, setSearchTerm] = useState<string>("");
