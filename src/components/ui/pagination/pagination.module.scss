@@ -1,0 +1,92 @@
+@import "@styles/variables";
+
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-top: 1px solid $dark-gray;
+  margin-top: 1rem;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+  }
+}
+
+.resultsText {
+  font-size: 14px;
+  color: $gray;
+  text-align: center;
+
+  @media (min-width: 640px) {
+    text-align: left;
+  }
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: $black;
+  background-color: $white;
+  border: 1px solid $dark-gray;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled) {
+    background-color: $background;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pageButton {
+  min-width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: $black;
+  background-color: $white;
+  border: 1px solid $dark-gray;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(.active) {
+    background-color: $background;
+  }
+
+  &.active {
+    background-color: $secondary;
+    border-color: $secondary;
+    color: $black;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}

@@ -1,8 +1,8 @@
 "use client";
-import { Dispatch, FC, createContext, useEffect, useState } from "react";
+import { Dispatch, FC, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
-import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+import { getDiscounts } from "@/services/commerce/commerce";
 
 import CreateOrderMarket from "@/modules/commerce/components/create-order-market";
 import CreateOrderCart from "@/modules/commerce/components/create-order-cart";
@@ -75,7 +75,7 @@ const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
-  const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+  const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
   const token = localStorage.getItem(STORAGE_TOKEN);
 

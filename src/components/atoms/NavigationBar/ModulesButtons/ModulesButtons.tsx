@@ -13,7 +13,13 @@ import {
   ClipboardText,
   ListChecks
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap, ChartBar } from "@phosphor-icons/react";
+import {
+  ChatCircleDots,
+  SealPercent,
+  HandTap,
+  ChartBar,
+  CheckSquareOffset
+} from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -162,20 +168,6 @@ export const ModulesButtons = ({
         </Link>
       )}
 
-      {/* Gestor de Tareas */}
-      {checkUserViewPermissions(project, "GestorTareas") && (
-        <Link href="/gestor-tareas" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ClipboardText size={iconSize} />}
-            className={path === "/gestor-tareas" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Tareas"}
-          </Button>
-        </Link>
-      )}
-
       {/* Apply Module */}
       {path === "/applyModule" && (
         <Link href="/applyModule" passHref legacyBehavior>
@@ -219,7 +211,7 @@ export const ModulesButtons = ({
       )}
 
       {/* Aprobaciones */}
-      {false && (
+      {checkUserViewPermissions(project, "Aprobaciones") && (
         <Link href="/aprobaciones" passHref legacyBehavior>
           <Button
             type="primary"
@@ -242,6 +234,20 @@ export const ModulesButtons = ({
             className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "New Dashboard"}
+          </Button>
+        </Link>
+      )}
+
+      {/* New Task Manager */}
+      {checkUserViewPermissions(project, "GestorTareas") && (
+        <Link href="/task-manager" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ClipboardText size={iconSize} />}
+            className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Gestor Tareas"}
           </Button>
         </Link>
       )}

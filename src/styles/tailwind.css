@@ -2,12 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TO DO: CENTRALIZE tailwind styles created by v0 here */
+:root {
+  /* Cashport Brand Colors - RGB format for Tailwind compatibility */
+  --cashport-black: 20 20 20;
+  --cashport-green: 203 231 30;
+  --cashport-gray-light: 221 221 221;
+  --cashport-gray-lighter: 247 247 247;
+  --cashport-white: 255 255 255;
+  --accent: 244 244 245;
+  --accent-foreground: 24 24 27;
+
+  /* Theme tokens using Cashport colors */
+  --background: var(--cashport-white);
+  --foreground: var(--cashport-black);
+  --card: var(--cashport-white);
+  --card-foreground: var(--cashport-black);
+  --popover: var(--cashport-white);
+  --popover-foreground: var(--cashport-black);
+  --primary: var(--cashport-green);
+  --primary-foreground: var(--cashport-black);
+  --secondary: var(--cashport-gray-lighter);
+  --secondary-foreground: var(--cashport-black);
+  --muted: var(--cashport-gray-lighter);
+  --muted-foreground: 102 102 102;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: var(--cashport-gray-light);
+  --input: var(--cashport-gray-light);
+  --ring: var(--cashport-gray-light);
+  --radius: 0.5rem;
+
+  /* Chart colors */
+  --chart-1: 251 146 60;
+  --chart-2: 56 189 248;
+  --chart-3: 129 140 248;
+  --chart-4: 132 204 22;
+  --chart-5: 245 158 11;
+
+  /* Sidebar */
+  --sidebar: var(--cashport-white);
+  --sidebar-foreground: var(--cashport-black);
+  --sidebar-primary: var(--cashport-black);
+  --sidebar-primary-foreground: var(--cashport-white);
+  --sidebar-accent: var(--cashport-gray-lighter);
+  --sidebar-accent-foreground: var(--cashport-black);
+  --sidebar-border: var(--cashport-gray-light);
+  --sidebar-ring: var(--cashport-gray-light);
+}
+
+/* Cashport utility classes */
+.text-cashport-black {
+  color: rgb(var(--cashport-black));
+}
+.text-cashport-green {
+  color: rgb(var(--cashport-green));
+}
+.text-cashport-gray-light {
+  color: rgb(var(--cashport-gray-light));
+}
+.bg-accent {
+  background-color: rgb(var(--accent));
+}
+.bg-accent-foreground {
+  background-color: rgb(var(--accent-foreground));
+}
+.bg-cashport-black {
+  background-color: rgb(var(--cashport-black));
+}
+.bg-cashport-green {
+  background-color: rgb(var(--cashport-green));
+}
+.bg-cashport-gray-light {
+  background-color: rgb(var(--cashport-gray-light));
+}
+.bg-cashport-gray-lighter {
+  background-color: rgb(var(--cashport-gray-lighter));
+}
+.bg-cashport-white {
+  background-color: rgb(var(--cashport-white));
+}
+.border-cashport-gray-light {
+  border-color: rgb(var(--cashport-gray-light));
+}
+.border-cashport-green {
+  border-color: rgb(var(--cashport-green));
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
 
 /* Animación fadeIn para componentes */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -18,7 +117,9 @@
 .cashport-popup .maplibregl-popup-content {
   padding: 0;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border: 1px solid #f3f4f6;
 }
 

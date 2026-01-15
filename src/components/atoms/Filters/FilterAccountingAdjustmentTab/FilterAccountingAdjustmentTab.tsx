@@ -32,7 +32,6 @@ export const AccountingAdjustmentsFilter: React.FC<AccountingAdjustmentsFilterPr
 }) => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const [cascaderOptions, setCascaderOptions] = useState<FilterOption[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<(string | number)[][]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,7 +91,6 @@ export const AccountingAdjustmentsFilter: React.FC<AccountingAdjustmentsFilterPr
   }, [ID]);
 
   const handleCascaderChange = (value: (string | number)[][]) => {
-    setSelectedOptions(value);
     updateFilters(value);
   };
 
