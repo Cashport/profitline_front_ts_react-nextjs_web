@@ -13,9 +13,12 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 
 import { IAddClientForm } from "@/types/chat/IChat";
-import { ICreateEditContact } from "@/types/contacts/IContacts";
+import { ICreateEditContact, IResponseContactOptions } from "@/types/contacts/IContacts";
 
 import "./addClientModal.scss";
+import { ApiError, fetcher } from "@/utils/api/api";
+import useSWR from "swr";
+import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
 interface PropsInvoicesTable {
   showAddClientModal: boolean;
@@ -33,6 +36,10 @@ const AddClientModal = ({
   initialPhone
 }: PropsInvoicesTable) => {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
+
+  const initialPhoneData = extractNationalNumber(initialPhone, callingCodeOptions);
+
   const {
     control,
     handleSubmit,
@@ -42,8 +49,8 @@ const AddClientModal = ({
     mode: "onChange",
     defaultValues: {
       name: initialName || "",
-      phone: extractNationalNumber(initialPhone),
-      indicative: { value: "1", label: "+57" },
+      phone: initialPhoneData.phone,
+      indicative: initialPhoneData.indicative,
       client: undefined
     }
   });
@@ -69,10 +76,11 @@ const AddClientModal = ({
 
   useEffect(() => {
     if (showAddClientModal && (initialName || initialPhone)) {
+      const phoneData = extractNationalNumber(initialPhone, callingCodeOptions);
       reset({
         name: initialName || "",
-        phone: extractNationalNumber(initialPhone),
-        indicative: { value: "1", label: "+57" },
+        phone: phoneData.phone,
+        indicative: phoneData.indicative,
         client: undefined
       });
     }
@@ -96,8 +104,12 @@ const AddClientModal = ({
       message.success("Cliente agregado exitosamente");
       setShowAddClientModal(false);
     } catch (error) {
+      if (error instanceof ApiError) {
+        message.error(error.message);
+      } else {
+        message.error("Error al agregar el cliente");
+      }
       console.error("Error submitting form:", error);
-      message.error("Error al agregar el cliente");
     }
   };
 
@@ -144,7 +156,14 @@ const AddClientModal = ({
               name="role"
               control={control}
               rules={{ required: true }}
-              render={({ field }) => <SelectContactRole errors={errors.role} field={field} />}
+              render={({ field }) => (
+                <SelectContactRole
+                  errors={errors.role}
+                  field={field}
+                  options={roleOptions}
+                  isLoading={isLoading}
+                />
+              )}
             />
           </div>
           <div className="inputContainer">
@@ -154,7 +173,12 @@ const AddClientModal = ({
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
-                <SelectContactIndicative errors={errors.indicative} field={field} />
+                <SelectContactIndicative
+                  errors={errors.indicative}
+                  field={field}
+                  options={callingCodeOptions}
+                  isLoading={isLoading}
+                />
               )}
             />
           </div>
@@ -165,9 +189,13 @@ const AddClientModal = ({
             error={errors.phone}
             typeInput="number"
             validationRules={{
-              pattern: {
-                value: /^\d{10}$/,
-                message: "El teléfono debe tener 10 dígitos"
+              validate: (value, formValues) => {
+                const isColombia = formValues.indicative?.value === 1;
+
+                if (isColombia) {
+                  return /^\d{10}$/.test(value) || "El teléfono debe tener 10 dígitos";
+                }
+                return /^\d{7,12}$/.test(value) || "El teléfono debe tener entre 7 y 12 dígitos";
               }
             }}
           />
@@ -249,9 +277,14 @@ export default AddClientModal;
  * @param internationalPhone - Teléfono en formato internacional (ej: "+573001234567")
  * @returns El número nacional o vacío si falla el parseo
  */
-function extractNationalNumber(internationalPhone: string | undefined): string {
+function extractNationalNumber(
+  internationalPhone: string | undefined,
+  indicativeOptions: { value: string | number; label: string }[] = []
+): { phone: string; indicative: { value: string | number; label: string } } {
+  const defaultIndicative = { value: "1", label: "+57" };
+
   if (!internationalPhone || internationalPhone.trim() === "") {
-    return "";
+    return { phone: "", indicative: defaultIndicative };
   }
 
   const formattedNumber = internationalPhone.startsWith("+")
@@ -262,13 +295,20 @@ function extractNationalNumber(internationalPhone: string | undefined): string {
     const phoneNumber = parsePhoneNumberWithError(formattedNumber);
 
     if (!phoneNumber || !phoneNumber.isValid()) {
-      return "";
+      return { phone: "", indicative: defaultIndicative };
     }
 
-    // Usar phoneNumber.nationalNumber directamente
-    return phoneNumber.nationalNumber;
+    const countryCallingCode = phoneNumber.countryCallingCode;
+    const matchingOption = indicativeOptions.find((option) =>
+      option.label.includes(`+${countryCallingCode}`)
+    );
+
+    return {
+      phone: phoneNumber.nationalNumber,
+      indicative: matchingOption || defaultIndicative
+    };
   } catch (error) {
     console.error("Error parseando número de teléfono:", error);
-    return "";
+    return { phone: "", indicative: defaultIndicative };
   }
 }

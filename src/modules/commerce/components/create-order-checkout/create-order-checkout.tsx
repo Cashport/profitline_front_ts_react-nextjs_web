@@ -32,6 +32,7 @@ import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 import { ApiError } from "@/utils/api/api";
+import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
 interface IShippingInfoForm {
   isElectronicInvoicing: number;
@@ -82,6 +83,7 @@ const CreateOrderCheckout: FC = ({}) => {
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
   const router = useRouter();
   const { showMessage } = useMessageApi();
+  const { callingCodeOptions, isLoading } = useContactModalOptions();
 
   const {
     control,
@@ -448,6 +450,8 @@ const CreateOrderCheckout: FC = ({}) => {
                     field={field}
                     readOnly={false}
                     className={styles.selectIndicative}
+                    options={callingCodeOptions}
+                    isLoading={isLoading}
                     isColombia
                   />
                 )}

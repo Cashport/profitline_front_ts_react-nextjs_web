@@ -10,6 +10,7 @@ import { SelectContactIndicative } from "@/components/molecules/selects/contacts
 import { MessageType, useMessageApi } from "@/context/MessageContext";
 import { getContact } from "@/services/contacts/contacts";
 import "./contacts-tab-modal.scss";
+import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
 type showContactModalType = {
   isOpen: boolean;
@@ -48,6 +49,8 @@ const ContactsTabModal = ({
   const { showMessage } = useMessageApi();
   const [ableToEdit, setAbleToEdit] = useState(false);
   const [contactDetails, setContactDetails] = useState<IContact>();
+  console.log("contactDetails", contactDetails);
+  const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
   const {
     control,
     handleSubmit,
@@ -136,7 +139,13 @@ const ContactsTabModal = ({
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
-                <SelectContactRole errors={errors.role} field={field} readOnly={!ableToEdit} />
+                <SelectContactRole
+                  errors={errors.role}
+                  field={field}
+                  readOnly={!ableToEdit}
+                  options={roleOptions}
+                  isLoading={isLoading}
+                />
               )}
             />
           </div>
@@ -151,6 +160,8 @@ const ContactsTabModal = ({
                   errors={errors.indicative}
                   field={field}
                   readOnly={!ableToEdit}
+                  options={callingCodeOptions}
+                  isLoading={isLoading}
                 />
               )}
             />
@@ -163,9 +174,13 @@ const ContactsTabModal = ({
             readOnly={!ableToEdit}
             typeInput="number"
             validationRules={{
-              pattern: {
-                value: /^\d{10}$/,
-                message: "El teléfono debe tener 10 dígitos"
+              validate: (value, formValues) => {
+                const isColombia = formValues.indicative?.value === 1;
+
+                if (isColombia) {
+                  return /^\d{10}$/.test(value) || "El teléfono debe tener 10 dígitos";
+                }
+                return /^\d{7,12}$/.test(value) || "El teléfono debe tener entre 7 y 12 dígitos";
               }
             }}
           />

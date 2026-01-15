@@ -11,18 +11,18 @@ export interface ItemTab {
 }
 
 interface IStatusTabProps {
-  tabs: ItemTab[];
-  activeKey: string;
+  tabs?: ItemTab[];
+  activeKey?: string;
   onChange: (key: string) => void;
 }
 
 const StatusTab: FC<IStatusTabProps> = ({ tabs, activeKey, onChange }) => {
-  const activeTab = tabs.find((tab) => tab.key === activeKey);
+  const activeTab = tabs?.find((tab) => tab.key === activeKey);
 
   return (
     <>
       <div className="flex items-center gap-1 mb-6 border-b border-gray-200">
-        {tabs.map((tab) => (
+        {tabs?.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onChange(tab.key)}

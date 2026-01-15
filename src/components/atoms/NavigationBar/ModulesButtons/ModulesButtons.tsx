@@ -168,20 +168,6 @@ export const ModulesButtons = ({
         </Link>
       )}
 
-      {/* Gestor de Tareas */}
-      {checkUserViewPermissions(project, "GestorTareas") && (
-        <Link href="/gestor-tareas" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ClipboardText size={iconSize} />}
-            className={path === "/gestor-tareas" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Tareas"}
-          </Button>
-        </Link>
-      )}
-
       {/* Apply Module */}
       {path === "/applyModule" && (
         <Link href="/applyModule" passHref legacyBehavior>
@@ -253,15 +239,15 @@ export const ModulesButtons = ({
       )}
 
       {/* New Task Manager */}
-      {checkUserViewPermissions(project, "TaskManager") && (
+      {checkUserViewPermissions(project, "GestorTareas") && (
         <Link href="/task-manager" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
-            icon={<CheckSquareOffset size={iconSize} />}
+            icon={<ClipboardText size={iconSize} />}
             className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
           >
-            {isSideBarLarge && "Task Manager"}
+            {isSideBarLarge && "Gestor Tareas"}
           </Button>
         </Link>
       )}

@@ -6,8 +6,6 @@ import { FileDownloadModal } from "@/components/molecules/modals/FileDownloadMod
 import { editClientDocument } from "@/services/clients/clients";
 import { useMessageApi } from "@/context/MessageContext";
 
-const { Text } = Typography;
-
 interface Props {
   className?: any;
   renderedDocument: { ID: number; URL: string };

@@ -1,23 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import useSWR from "swr";
+import { getTasksByStatus, getTaskTabs } from "@/services/tasks/tasks";
+import { ITask as ITaskApi } from "@/types/tasks/ITasks";
+
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-
 import StatusTab from "@/modules/taskManager/components/statusTab/StatusTab";
 import TasksTable, {
   ITask,
   SortKey,
   SortDirection
 } from "@/modules/taskManager/components/tasksTable/TasksTable";
-
 import UiSearchInput from "@/components/ui/search-input";
+import Pagination from "@/components/ui/pagination";
 import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-
 import { FilterState, mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import {
@@ -34,7 +36,7 @@ export const TaskManagerView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState({
     selected: 0
   });
-  const [activeTabKey, setActiveTabKey] = useState<string>("1");
+  const [activeTabKey, setActiveTabKey] = useState<string>();
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(
     null
   );
@@ -52,6 +54,65 @@ export const TaskManagerView: React.FC = () => {
   });
 
   const [selectedTask, setSelectedTask] = useState<InvoiceData | null>(null);
+
+  // Tasks by status - stores fetched tasks indexed by status ID
+  const [tasksByStatus, setTasksByStatus] = useState<Record<string, ITaskApi[]>>({});
+
+  // Pagination state per tab
+  interface PaginationInfo {
+    page: number;
+    total: number;
+    limit: number;
+  }
+  const [paginationByStatus, setPaginationByStatus] = useState<Record<string, PaginationInfo>>({});
+  const [isLoadingPagination, setIsLoadingPagination] = useState(false);
+
+  // SWR for tabs data
+  const {
+    data: tabsData,
+    isLoading: isLoadingTabs,
+    mutate: mutateTabs
+  } = useSWR("taskTabs", getTaskTabs);
+
+  useEffect(() => {
+    if (tabsData && !isLoadingTabs) {
+      // aca entonces setear el activeTabKey al primero si no esta seteado
+      if (!activeTabKey && tabsData.length > 0) {
+        setActiveTabKey(tabsData[0].id);
+      }
+    }
+  }, [tabsData, isLoadingTabs]);
+
+  // Safely access pagination page for the active tab (handles undefined activeTabKey)
+  const currentPaginationPage = activeTabKey ? paginationByStatus[activeTabKey]?.page : undefined;
+
+  useEffect(() => {
+    // Fetch tasks for the active tab and store them in state
+    const fetchTasksForActiveTab = async () => {
+      if (activeTabKey) {
+        try {
+          const currentPage = paginationByStatus[activeTabKey]?.page || 1;
+          const response = await getTasksByStatus(activeTabKey, currentPage);
+          const tasksArray = response?.tasks ?? [];
+          setTasksByStatus((prev) => ({
+            ...prev,
+            [activeTabKey]: tasksArray
+          }));
+          setPaginationByStatus((prev) => ({
+            ...prev,
+            [activeTabKey]: {
+              page: response?.page ?? 1,
+              total: response?.total ?? 0,
+              limit: response?.limit ?? 25
+            }
+          }));
+        } catch (error) {
+          console.error("Error fetching tasks for active tab:", error);
+        }
+      }
+    };
+    fetchTasksForActiveTab();
+  }, [activeTabKey, currentPaginationPage]);
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
@@ -98,6 +159,51 @@ export const TaskManagerView: React.FC = () => {
       }));
     }
   };
+
+  // Handle page change for pagination
+  const handlePageChange = async (statusId: string, page: number) => {
+    setIsLoadingPagination(true);
+    try {
+      const response = await getTasksByStatus(statusId, page);
+      setTasksByStatus((prev) => ({
+        ...prev,
+        [statusId]: response?.tasks ?? []
+      }));
+      setPaginationByStatus((prev) => ({
+        ...prev,
+        [statusId]: {
+          page: response?.page ?? page,
+          total: response?.total ?? 0,
+          limit: response?.limit ?? 25
+        }
+      }));
+    } catch (error) {
+      console.error("Error fetching page:", error);
+    } finally {
+      setIsLoadingPagination(false);
+    }
+  };
+
+  // Reset pagination when filters/search change
+  useEffect(() => {
+    setPaginationByStatus({});
+  }, [searchTerm, selectedFilters, sortConfig]);
+
+  // Map API task to frontend task structure
+  const mapApiTaskToFrontend = (apiTask: ITaskApi): ITask => ({
+    id: String(apiTask.id),
+    cliente: apiTask.client_name || "",
+    comprador: apiTask.user_name || "",
+    tipoTarea: apiTask.task_type || "",
+    descripcion: apiTask.description || "",
+    estado: apiTask.status?.name || "",
+    responsable: apiTask.user_name || "",
+    vendedor: "",
+    monto: apiTask.amount || 0,
+    origen: "",
+    isAI: apiTask.is_ai || false,
+    tab: String(apiTask.status?.id || "")
+  });
 
   // Filter and sort tasks for a group
   const getFilteredAndSortedTasks = (tasks: ITask[]): ITask[] => {
@@ -146,24 +252,38 @@ export const TaskManagerView: React.FC = () => {
     return filtered;
   };
 
-  // Build tabs from mockTasks
-  const tabItems = mockTasks.map((group) => {
-    const filteredTasks = getFilteredAndSortedTasks(group.tasks);
+  // Build tabs from API data
+  const tabItems = tabsData?.map((tab) => {
+    const apiTasks = tasksByStatus[tab.id] || [];
+    const mappedTasks = apiTasks.map(mapApiTaskToFrontend);
+    const filteredTasks = getFilteredAndSortedTasks(mappedTasks);
+    const pagination = paginationByStatus[tab.id];
 
     return {
-      key: group.status_id.toString(),
-      label: group.status,
-      count: group.count,
+      key: tab.id,
+      label: tab.status_name,
+      count: tab.count,
       children: (
-        <TasksTable
-          tasks={filteredTasks}
-          selectedIds={state.selectedTaskIds}
-          onToggleSelection={toggleTaskSelection}
-          onSelectAll={(checked) => handleSelectAll(filteredTasks, checked)}
-          onViewTask={handleViewTask}
-          sortConfig={sortConfig}
-          onSort={handleSort}
-        />
+        <>
+          <TasksTable
+            tasks={filteredTasks}
+            selectedIds={state.selectedTaskIds}
+            onToggleSelection={toggleTaskSelection}
+            onSelectAll={(checked) => handleSelectAll(filteredTasks, checked)}
+            onViewTask={handleViewTask}
+            sortConfig={sortConfig}
+            onSort={handleSort}
+          />
+          {pagination && pagination.total > pagination.limit && (
+            <Pagination
+              currentPage={pagination.page}
+              totalItems={pagination.total}
+              pageSize={pagination.limit}
+              onPageChange={(page) => handlePageChange(tab.id, page)}
+              isLoading={isLoadingPagination}
+            />
+          )}
+        </>
       )
     };
   });
