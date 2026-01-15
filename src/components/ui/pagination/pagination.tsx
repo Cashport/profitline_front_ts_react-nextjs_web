@@ -41,21 +41,15 @@ const Pagination: FC<PaginationProps> = ({
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const getVisiblePages = (): number[] => {
-    const pages: number[] = [];
     const half = Math.floor(maxVisiblePages / 2);
+    const initialStart = Math.max(1, currentPage - half);
+    const end = Math.min(totalPages, initialStart + maxVisiblePages - 1);
+    const start =
+      end - initialStart + 1 < maxVisiblePages
+        ? Math.max(1, end - maxVisiblePages + 1)
+        : initialStart;
 
-    let start = Math.max(1, currentPage - half);
-    let end = Math.min(totalPages, start + maxVisiblePages - 1);
-
-    if (end - start + 1 < maxVisiblePages) {
-      start = Math.max(1, end - maxVisiblePages + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   const visiblePages = getVisiblePages();
