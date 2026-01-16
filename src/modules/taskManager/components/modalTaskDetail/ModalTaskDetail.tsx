@@ -66,8 +66,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
         } finally {
           setIsLoadingDetail(false);
         }
-      } else {
-        message.error("No se proporcionó ID de tarea o queue_id válido.");
       }
     };
     fetchTaskDetail();
