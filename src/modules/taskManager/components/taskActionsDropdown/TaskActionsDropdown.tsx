@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import { Button } from "@/modules/chat/ui/button";
-import { ITask } from "../tasksTable/TasksTable";
+import { ITask } from "@/types/tasks/ITasks";
 
 interface TaskActionsDropdownProps {
   task: ITask;
@@ -43,11 +43,11 @@ export const TaskActionsDropdown: FC<TaskActionsDropdownProps> = ({
       { key: "report", icon: CheckCircle, label: "Reportar pago" }
     ];
 
-    if (task.tipoTarea === "Saldo") {
+    if (task.task_type === "Saldo") {
       baseItems.push({ key: "legalize", icon: CheckCircle, label: "Legalizar saldo" });
     }
 
-    if (task.tipoTarea === "Desbloqueo") {
+    if (task.task_type === "Desbloqueo") {
       baseItems.push({ key: "unlock", icon: XCircle, label: "Desbloquear pedido" });
     }
 

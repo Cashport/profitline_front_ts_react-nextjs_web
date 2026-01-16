@@ -44,3 +44,55 @@ export interface ITaskByStatus {
   status: string;
   limit: number;
 }
+
+export interface ITaskClient {
+  id: string;
+  name: string;
+  uuid: string;
+}
+
+export interface IEmailAttachment {
+  id: number;
+  email_id: number;
+  file_name: string;
+  inline: number;
+  content_type: string;
+  size: number;
+  s3_key: string;
+  s3_url: string;
+  created_at: string;
+}
+
+export interface IEmailDetails {
+  details: {
+    id: number;
+    email_account_id: number;
+    message_id: string;
+    subject: string;
+    from_address: string;
+    to_address: string;
+    received_date: string;
+    has_attachments: number;
+    details: string;
+    created_at: string;
+  };
+  attachments: IEmailAttachment[];
+}
+
+export interface ITaskDetail {
+  id: number;
+  description: string;
+  status: ITaskStatus;
+  task_type: string;
+  client: ITaskClient;
+  assigned_user: string;
+  amount: number;
+  id_email_api_emails: number | null;
+  created_at: string;
+  updated_at: string;
+  source_metadata: unknown | null;
+  actions_log: unknown[];
+  days_in_status: number;
+  is_overdue: boolean;
+  emailDetails?: IEmailDetails;
+}

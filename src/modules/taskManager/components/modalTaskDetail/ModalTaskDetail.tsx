@@ -5,9 +5,6 @@ import { useState, useEffect } from "react";
 import {
   X,
   Mail,
-  MessageCircle,
-  ShoppingBag,
-  UserPlus,
   Sparkles,
   User,
   Building,
@@ -16,7 +13,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  Download
+  Download,
+  AlertCircle
 } from "lucide-react";
 import {
   Select,
@@ -30,66 +28,61 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
-import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
-import { ITask } from "@/modules/taskManager/components/tasksTable/TasksTable";
+import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
+import { ITask, ITaskDetail } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
-
-// Extend ITask with additional fields for the detail modal
-export interface InvoiceData extends ITask {
-  fechaCreacion: string;
-  mensajeOriginal?: string;
-  emailSubject?: string;
-  emailFrom?: string;
-  emailTo?: string;
-  emailDate?: string;
-  adjuntos?: string[];
-}
+import { getTaskDetails } from "@/services/tasks/tasks";
 
 interface IModalTaskDetail {
-  task: InvoiceData | null;
+  task: ITask | null;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate?: (task: InvoiceData) => void;
+  onUpdate?: (task: ITask) => void;
 }
 
 export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskDetail) {
-  const [editedTask, setEditedTask] = useState<InvoiceData | null>(task);
+  const [editedTask, setEditedTask] = useState<ITask | null>(task);
+  const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
+  // Fetch task details when modal opens with a task
+  useEffect(() => {
+    const fetchTaskDetail = async () => {
+      if (task?.id && isOpen) {
+        setIsLoadingDetail(true);
+        setDetailError(null);
+        try {
+          const res = await getTaskDetails({ taskId: String(task.id) });
+          setTaskDetail(res);
+          console.log("Fetched task details:", res);
+        } catch (error) {
+          console.error("Error fetching task details:", error);
+          setDetailError("Failed to load task details");
+        } finally {
+          setIsLoadingDetail(false);
+        }
+      }
+    };
+    fetchTaskDetail();
+  }, [task?.id, isOpen]);
+
+  // Sync editedTask with incoming task prop
   useEffect(() => {
     if (task) {
       setEditedTask(task);
     }
   }, [task]);
 
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setTaskDetail(null);
+      setDetailError(null);
+    }
+  }, [isOpen]);
+
   if (!task || !editedTask) return null;
-
-  const getOrigenIcon = (origen: string) => {
-    switch (origen) {
-      case "Correo":
-        return <Mail className="h-4 w-4" />;
-      case "WhatsApp":
-        return <MessageCircle className="h-4 w-4" />;
-      case "Marketplace":
-        return <ShoppingBag className="h-4 w-4" />;
-      case "Cliente nuevo":
-        return <UserPlus className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
-
-  const getEstadoIcon = (estado: string) => {
-    switch (estado) {
-      case "Completado":
-        return <CheckCircle className="h-4 w-4" />;
-      case "En progreso":
-        return <Clock className="h-4 w-4" />;
-      case "Cancelado":
-        return <XCircle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,91 +95,79 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     });
   };
 
-  const EmailMessage = () => (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-2">
-          <Mail className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">{task.emailSubject || "Sin asunto"}</h3>
-        </div>
-      </div>
-      <div className="p-4 space-y-3">
-        <div className="grid grid-cols-[80px_1fr] gap-2 text-sm">
-          <span className="text-gray-600 font-medium">De:</span>
-          <span className="text-gray-900">{task.emailFrom || "Desconocido"}</span>
-          <span className="text-gray-600 font-medium">Para:</span>
-          <span className="text-gray-900">{task.emailTo || "soporte@cashport.com"}</span>
-          <span className="text-gray-600 font-medium">Fecha:</span>
-          <span className="text-gray-900">
-            {task.emailDate ? formatDateTime(task.emailDate) : "N/A"}
-          </span>
-        </div>
-        <div className="pt-3 border-t border-gray-200">
-          <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-            {task.mensajeOriginal}
-          </p>
-        </div>
-        {task.adjuntos && task.adjuntos.length > 0 && (
-          <div className="pt-3 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-2">
-              <Paperclip className="h-4 w-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Adjuntos ({task.adjuntos.length})
-              </span>
-            </div>
-            <div className="space-y-2">
-              {task.adjuntos.map((adjunto, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-900">{adjunto}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-7 px-2">
-                    <Download className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  const EmailMessage = () => {
+    const emailDetails = taskDetail?.emailDetails;
 
-  const WhatsAppMessage = () => (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg rounded-tl-none shadow-sm border border-green-200">
-        <MessageCircle className="h-5 w-5 text-green-600" />
-        <span className="font-semibold text-green-900">Mensaje de WhatsApp</span>
-      </div>
-      <div className="flex justify-start">
-        <div className="max-w-[85%] bg-white rounded-lg rounded-tl-none shadow-sm border border-gray-200 p-4">
-          <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap mb-2">
-            {task.mensajeOriginal}
-          </p>
-          <div className="flex items-center justify-end gap-1 text-xs text-gray-500">
-            <span>
-              {task.emailDate
-                ? new Date(task.emailDate).toLocaleTimeString("es-CO", {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })
-                : ""}
+    if (!emailDetails) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          <Mail className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p>No hay detalles de correo disponibles</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Mail className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold text-gray-900">
+              {emailDetails.details.subject || "Sin asunto"}
+            </h3>
+          </div>
+        </div>
+        <div className="p-4 space-y-3">
+          <div className="grid grid-cols-[80px_1fr] gap-2 text-sm">
+            <span className="text-gray-600 font-medium">De:</span>
+            <span className="text-gray-900">{emailDetails.details.from_address}</span>
+            <span className="text-gray-600 font-medium">Para:</span>
+            <span className="text-gray-900">{emailDetails.details.to_address}</span>
+            <span className="text-gray-600 font-medium">Fecha:</span>
+            <span className="text-gray-900">
+              {formatDateTime(emailDetails.details.received_date)}
             </span>
           </div>
+          <div className="pt-3 border-t border-gray-200">
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+              {taskDetail.description}
+            </p>
+          </div>
+          {emailDetails.attachments && emailDetails.attachments.length > 0 && (
+            <div className="pt-3 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Paperclip className="h-4 w-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  Adjuntos ({emailDetails.attachments.length})
+                </span>
+              </div>
+              <div className="space-y-2">
+                {emailDetails.attachments.map((attachment) => (
+                  <div
+                    key={attachment.id}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-600" />
+                      <span className="text-sm text-gray-900">{attachment.file_name}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2"
+                      onClick={() => window.open(attachment.s3_url, '_blank')}
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      {task.cliente && (
-        <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="text-xs text-gray-600 mb-1">Contacto</div>
-          <div className="font-medium text-gray-900">{task.cliente}</div>
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   const getEstadoBadge = (estado: string) => {
     const configs = {
@@ -222,9 +203,12 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     if (onUpdate && editedTask) {
       const updatedTask = {
         ...editedTask,
-        responsable: "Cashport AI",
-        isAI: true,
-        estado: "En progreso" as const
+        user_name: "Cashport AI",
+        is_ai: true,
+        status: {
+          ...editedTask.status,
+          name: "En progreso"
+        }
       };
       onUpdate(updatedTask);
     }
@@ -237,15 +221,17 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
         showCloseButton={false}
         className="!w-[80vw] !max-w-[80vw] max-h-[90vh] p-0 bg-white text-cashport-black border-gray-200"
       >
+        <DialogTitle className="sr-only">{task.id} details</DialogTitle>
+
         <div className="flex flex-col h-[90vh]">
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-semibold text-cashport-black">{task.id}</h2>
-              {getTipoTareaBadge(task.tipoTarea)}
+              <h2 className="text-2xl font-semibold text-cashport-black">TASK-{task.id}</h2>
+              {getTipoTareaBadge(task.task_type)}
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
-                {getOrigenIcon(task.origen)}
+                <Mail className="h-4 w-4 text-gray-500" />
                 <span className="text-sm text-gray-600">
-                  {new Date(task.fechaCreacion).toLocaleDateString("es-CO", {
+                  {new Date(task.created_at).toLocaleDateString("es-CO", {
                     day: "numeric",
                     month: "short",
                     year: "numeric"
@@ -256,7 +242,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
 
             <div className="flex items-center gap-3">
               <TaskActionsDropdown task={task} />
-              {getEstadoBadge(editedTask.estado)}
+              {getEstadoBadge(editedTask.status?.name || "")}
               <Button
                 variant="ghost"
                 size="icon"
@@ -282,43 +268,43 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                     <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
                       {/* Cliente */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.cliente ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.client_name ? "bg-rose-50" : ""}`}
                       >
                         <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Cliente
-                          {!editedTask.cliente && <span className="text-rose-600 ml-1">*</span>}
+                          {!editedTask.client_name && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Input
-                          value={editedTask.cliente || ""}
+                          value={editedTask.client_name || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, cliente: e.target.value })
+                            setEditedTask({ ...editedTask, client_name: e.target.value || null })
                           }
                           placeholder="Asignar cliente..."
                           className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                            !editedTask.cliente ? "placeholder:text-rose-400" : ""
+                            !editedTask.client_name ? "placeholder:text-rose-400" : ""
                           }`}
                         />
                       </div>
 
                       {/* Tipo de tarea */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.tipoTarea ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.task_type ? "bg-rose-50" : ""}`}
                       >
                         <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Tipo de tarea
-                          {!editedTask.tipoTarea && <span className="text-rose-600 ml-1">*</span>}
+                          {!editedTask.task_type && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Select
-                          value={editedTask.tipoTarea || ""}
+                          value={editedTask.task_type || ""}
                           onValueChange={(value) =>
-                            setEditedTask({ ...editedTask, tipoTarea: value })
+                            setEditedTask({ ...editedTask, task_type: value })
                           }
                         >
                           <SelectTrigger
                             className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                              !editedTask.tipoTarea ? "text-rose-600" : ""
+                              !editedTask.task_type ? "text-rose-600" : ""
                             }`}
                           >
                             <SelectValue placeholder="Seleccionar tipo..." />
@@ -335,27 +321,26 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
 
                       {/* Responsable */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.responsable ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.user_name ? "bg-rose-50" : ""}`}
                       >
                         <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Responsable
-                          {!editedTask.responsable && <span className="text-rose-600 ml-1">*</span>}
+                          {!editedTask.user_name && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Select
-                          value={editedTask.responsable || ""}
+                          value={editedTask.user_name || ""}
                           onValueChange={(value) => {
                             if (value === "Cashport AI") {
                               handleAssignToAI();
                             } else {
-                              const isAI = false;
-                              setEditedTask({ ...editedTask, responsable: value, isAI });
+                              setEditedTask({ ...editedTask, user_name: value, is_ai: false });
                             }
                           }}
                         >
                           <SelectTrigger
                             className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                              !editedTask.responsable ? "text-rose-600" : ""
+                              !editedTask.user_name ? "text-rose-600" : ""
                             }`}
                           >
                             <SelectValue placeholder="Asignar responsable..." />
@@ -385,9 +370,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                         </Label>
                         <Input
                           type="number"
-                          value={editedTask.monto || ""}
+                          value={editedTask.amount || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, monto: Number(e.target.value) })
+                            setEditedTask({ ...editedTask, amount: Number(e.target.value) })
                           }
                           placeholder="0"
                           className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -401,9 +386,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                           Descripción
                         </Label>
                         <Textarea
-                          value={editedTask.descripcion || ""}
+                          value={editedTask.description || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, descripcion: e.target.value })
+                            setEditedTask({ ...editedTask, description: e.target.value })
                           }
                           placeholder="Agregar descripción..."
                           rows={2}
@@ -413,7 +398,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                     </div>
                   </div>
 
-                  {task.isAI && (
+                  {task.is_ai && (
                     <div className="pt-4">
                       <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
                         <Sparkles className="h-3 w-3 mr-1" />
@@ -430,22 +415,27 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                   <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
                     Mensaje Original
                   </h3>
-                  {task.mensajeOriginal ? (
-                    task.origen === "Correo" ? (
-                      <EmailMessage />
-                    ) : task.origen === "WhatsApp" ? (
-                      <WhatsAppMessage />
-                    ) : (
-                      <div className="p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
-                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                          {task.mensajeOriginal}
-                        </p>
-                      </div>
-                    )
+                  {isLoadingDetail ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
+                      <p className="text-gray-500">Cargando detalles...</p>
+                    </div>
+                  ) : detailError ? (
+                    <div className="text-center py-12 text-red-500">
+                      <AlertCircle className="h-12 w-12 mx-auto mb-3" />
+                      <p>{detailError}</p>
+                    </div>
+                  ) : taskDetail?.emailDetails ? (
+                    <EmailMessage />
                   ) : (
                     <div className="text-center py-12 text-gray-500">
                       <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
                       <p>No hay mensaje original disponible</p>
+                      {taskDetail?.description && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
+                          <p className="text-gray-700 text-sm">{taskDetail.description}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -479,27 +469,3 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     </Dialog>
   );
 }
-
-// Mock data for testing
-export const mockTaskDetail: InvoiceData = {
-  id: "TASK-001",
-  cliente: "Comercializadora ABC S.A.S",
-  comprador: "Juan Perez",
-  tipoTarea: "Aplicacion pago",
-  descripcion: "Revisar aplicacion de pago pendiente para factura FV-2024-001",
-  estado: "Pendiente",
-  responsable: "Maria Rodriguez",
-  vendedor: "Carlos Mendez",
-  monto: 15500000,
-  origen: "Correo",
-  isAI: false,
-  tab: "1",
-  fechaCreacion: "2024-01-15T10:30:00",
-  mensajeOriginal:
-    "Buenos dias,\n\nPor favor revisar la aplicacion del pago realizado el dia de ayer por transferencia bancaria.\n\nEl monto transferido fue de $15.500.000 COP correspondiente a la factura FV-2024-001.\n\nAdjunto comprobante de pago y copia de la factura para su verificacion.\n\nQuedo atenta a su confirmacion.\n\nSaludos cordiales,\nAna Maria Gonzalez\nComercializadora ABC S.A.S",
-  emailSubject: "Solicitud aplicacion de pago - Factura FV-2024-001",
-  emailFrom: "ana.gonzalez@comercializadora-abc.com",
-  emailTo: "soporte@cashport.com",
-  emailDate: "2024-01-15T10:30:00",
-  adjuntos: ["comprobante_pago_15012024.pdf", "factura_FV-2024-001.pdf"]
-};

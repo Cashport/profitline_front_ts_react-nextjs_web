@@ -18,6 +18,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
+import { ITask } from "@/types/tasks/ITasks";
 
 // Types
 export interface DocumentStateConfig {
@@ -28,22 +29,7 @@ export interface DocumentStateConfig {
   iconColor: string;
 }
 
-export interface ITask {
-  id: string;
-  cliente: string;
-  comprador: string;
-  tipoTarea: string;
-  descripcion: string;
-  estado: string;
-  responsable: string;
-  vendedor: string;
-  monto: number;
-  origen: string;
-  isAI: boolean;
-  tab: string;
-}
-
-export type SortKey = "cliente" | "tipoTarea" | "descripcion" | "estado" | "responsable" | "monto";
+export type SortKey = "client_name" | "task_type" | "description" | "status" | "user_name" | "amount";
 export type SortDirection = "asc" | "desc";
 
 // Config
@@ -86,19 +72,6 @@ export const documentStateConfig: DocumentStateConfig[] = [
 ];
 
 // Helpers
-const getOrigenIcon = (origen: string) => {
-  switch (origen) {
-    case "email":
-      return <Mail className="h-4 w-4 text-gray-500" />;
-    case "chat":
-      return <MessageSquare className="h-4 w-4 text-gray-500" />;
-    case "phone":
-      return <Phone className="h-4 w-4 text-gray-500" />;
-    default:
-      return <Mail className="h-4 w-4 text-gray-500" />;
-  }
-};
-
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -110,8 +83,8 @@ const formatCurrency = (amount: number) => {
 
 interface ITasksTableProps {
   tasks: ITask[];
-  selectedIds: string[];
-  onToggleSelection: (id: string) => void;
+  selectedIds: number[];
+  onToggleSelection: (id: number | null) => void;
   onSelectAll: (checked: boolean) => void;
   onViewTask: (task: ITask) => void;
   sortConfig: { key: SortKey; direction: SortDirection } | null;
@@ -127,8 +100,8 @@ const TasksTable: FC<ITasksTableProps> = ({
   sortConfig,
   onSort
 }) => {
-  const isAllSelected = tasks.length > 0 && tasks.every((task) => selectedIds.includes(task.id));
-  const isIndeterminate = tasks.some((task) => selectedIds.includes(task.id)) && !isAllSelected;
+  const isAllSelected = tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
+  const isIndeterminate = tasks.some((task) => task.id !== null && selectedIds.includes(task.id)) && !isAllSelected;
 
   return (
     <div className="overflow-x-auto -mx-6 px-6">
@@ -150,11 +123,9 @@ const TasksTable: FC<ITasksTableProps> = ({
                 }}
               />
             </th>
-            {/* Origen icon - hidden on mobile */}
-            <th className="hidden md:table-cell text-center p-4 font-bold text-black w-20"></th>
             <th className="text-left p-2 md:p-4 font-bold text-black w-[60%] md:w-auto">
               <button
-                onClick={() => onSort("cliente")}
+                onClick={() => onSort("client_name")}
                 className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
               >
                 Cliente
@@ -163,7 +134,7 @@ const TasksTable: FC<ITasksTableProps> = ({
             </th>
             <th className="text-left p-2 md:p-4 font-bold text-black w-[30%] md:w-auto">
               <button
-                onClick={() => onSort("tipoTarea")}
+                onClick={() => onSort("task_type")}
                 className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
               >
                 Tipo de tarea
@@ -173,7 +144,7 @@ const TasksTable: FC<ITasksTableProps> = ({
             {/* Descripción - hidden on mobile */}
             <th className="hidden lg:table-cell text-left p-4 font-bold text-black">
               <button
-                onClick={() => onSort("descripcion")}
+                onClick={() => onSort("description")}
                 className="flex items-center gap-1 hover:text-gray-600 transition-colors"
               >
                 Descripción
@@ -182,7 +153,7 @@ const TasksTable: FC<ITasksTableProps> = ({
             </th>
             <th className="hidden md:table-cell p-4 font-bold text-black">
               <button
-                onClick={() => onSort("estado")}
+                onClick={() => onSort("status")}
                 className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
               >
                 Estado
@@ -192,7 +163,7 @@ const TasksTable: FC<ITasksTableProps> = ({
             {/* Usuario - hidden on mobile */}
             <td className="hidden md:table-cell text-left p-4 font-bold text-black">
               <button
-                onClick={() => onSort("responsable")}
+                onClick={() => onSort("user_name")}
                 className="flex items-center gap-1 hover:text-gray-600 transition-colors"
               >
                 Usuario
@@ -202,7 +173,7 @@ const TasksTable: FC<ITasksTableProps> = ({
             {/* Monto - hidden on mobile */}
             <th className="hidden lg:table-cell text-right p-4 font-bold text-black">
               <button
-                onClick={() => onSort("monto")}
+                onClick={() => onSort("amount")}
                 className="flex items-center justify-end gap-1 hover:text-gray-600 transition-colors w-full"
               >
                 Monto
@@ -214,8 +185,8 @@ const TasksTable: FC<ITasksTableProps> = ({
         </thead>
         <tbody>
           {tasks.map((task) => {
-            const estadoConfig = documentStateConfig.find((s) => s.name === task.estado);
-            const hasIncompleteInfo = !task.cliente || !task.tipoTarea || !task.responsable;
+            const estadoConfig = documentStateConfig.find((s) => s.name === task.status?.name);
+            const hasIncompleteInfo = !task.client_name || !task.task_type || !task.user_name;
 
             return (
               <tr
@@ -227,24 +198,18 @@ const TasksTable: FC<ITasksTableProps> = ({
                 {/* Checkbox - hidden on mobile */}
                 <td className="hidden md:table-cell p-4" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
-                    checked={selectedIds.includes(task.id)}
+                    checked={task.id !== null && selectedIds.includes(task.id)}
                     onCheckedChange={() => onToggleSelection(task.id)}
                   />
                 </td>
-                {/* Origen icon - hidden on mobile */}
-                <td className="hidden md:table-cell p-4 text-center">
-                  <div className="flex items-center justify-center" title={task.origen}>
-                    {getOrigenIcon(task.origen)}
-                  </div>
-                </td>
                 {/* Cliente - always visible */}
                 <td className="p-2 md:p-4 text-gray-900 font-medium">
-                  {task.cliente || task.comprador ? (
+                  {task.client_name ? (
                     <div
                       className="truncate text-xs md:text-sm max-w-[150px] md:max-w-xs"
-                      title={task.cliente || task.comprador}
+                      title={task.client_name}
                     >
-                      {task.cliente || task.comprador}
+                      {task.client_name}
                     </div>
                   ) : (
                     <Badge
@@ -257,13 +222,13 @@ const TasksTable: FC<ITasksTableProps> = ({
                 </td>
                 {/* Tipo de tarea - always visible */}
                 <td className="p-2 md:p-4">
-                  {task.tipoTarea ? (
+                  {task.task_type ? (
                     <Badge
                       variant="outline"
                       className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-xs"
-                      title={task.tipoTarea}
+                      title={task.task_type}
                     >
-                      {task.tipoTarea}
+                      {task.task_type}
                     </Badge>
                   ) : (
                     <Badge
@@ -276,9 +241,9 @@ const TasksTable: FC<ITasksTableProps> = ({
                 </td>
                 {/* Descripción - hidden on mobile */}
                 <td className="hidden lg:table-cell p-4 text-gray-700 max-w-md">
-                  {task.descripcion ? (
-                    <div className="truncate" title={task.descripcion}>
-                      {task.descripcion}
+                  {task.description ? (
+                    <div className="truncate" title={task.description}>
+                      {task.description}
                     </div>
                   ) : (
                     <span className="text-gray-400 italic">Sin descripción</span>
@@ -287,18 +252,18 @@ const TasksTable: FC<ITasksTableProps> = ({
                 <td className="hidden md:table-cell p-4">
                   <Badge
                     className={`${estadoConfig?.textColor || "text-gray-700"} font-medium px-2 md:px-3 py-1 flex items-center gap-1.5 w-fit whitespace-nowrap text-xs`}
-                    style={{ backgroundColor: estadoConfig?.color || "#F3F4F6" }}
-                    title={task.estado}
+                    style={{ backgroundColor: task.status?.backgroundColor || estadoConfig?.color || "#F3F4F6" }}
+                    title={task.status?.name}
                   >
                     {estadoConfig?.icon && (
                       <estadoConfig.icon className={`h-3.5 w-3.5 ${estadoConfig.iconColor}`} />
                     )}
-                    {task.estado}
+                    {task.status?.name}
                   </Badge>
                 </td>
                 {/* Usuario - hidden on mobile */}
                 <td className="hidden md:table-cell p-4 max-w-xs">
-                  {task.isAI ? (
+                  {task.is_ai ? (
                     <Badge
                       className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 font-medium px-3 py-1 flex items-center gap-1.5 whitespace-nowrap w-fit"
                       title="Cashport AI"
@@ -306,10 +271,10 @@ const TasksTable: FC<ITasksTableProps> = ({
                       <Sparkles className="h-3.5 w-3.5" />
                       Cashport AI
                     </Badge>
-                  ) : task.responsable || task.vendedor ? (
-                    <div className="truncate" title={task.responsable || task.vendedor}>
+                  ) : task.user_name ? (
+                    <div className="truncate" title={task.user_name}>
                       <span className="text-gray-900 font-medium">
-                        {task.responsable || task.vendedor}
+                        {task.user_name}
                       </span>
                     </div>
                   ) : (
@@ -323,7 +288,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                 </td>
                 {/* Monto - hidden on mobile */}
                 <td className="hidden lg:table-cell p-4 text-right text-cashport-black font-medium whitespace-nowrap">
-                  {task.monto ? formatCurrency(task.monto) : "-"}
+                  {task.amount ? formatCurrency(task.amount) : "-"}
                 </td>
                 <td className="p-2 md:p-4 text-center">
                   <div className="flex items-center justify-center gap-1">

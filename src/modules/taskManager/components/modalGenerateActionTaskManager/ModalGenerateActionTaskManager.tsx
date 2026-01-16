@@ -4,7 +4,7 @@ import { MailOutlined, PhoneOutlined } from "@ant-design/icons";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
-import { ITask } from "../tasksTable/TasksTable";
+import { ITask } from "@/types/tasks/ITasks";
 
 import "./modalGenerateActionTaskManager.scss";
 
