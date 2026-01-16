@@ -18,7 +18,7 @@ import {
   SealPercent,
   HandTap,
   ChartBar,
-  CheckSquareOffset
+  ShoppingCartSimple
 } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
@@ -248,6 +248,20 @@ export const ModulesButtons = ({
             className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Gestor Tareas"}
+          </Button>
+        </Link>
+      )}
+
+      {/* Purchase Orders */}
+      {checkUserViewPermissions(project, "PurchaseOrders") && (
+        <Link href="/purchase-orders" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ShoppingCartSimple size={iconSize} />}
+            className={path === "/purchase-orders" ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Purchase Orders"}
           </Button>
         </Link>
       )}
