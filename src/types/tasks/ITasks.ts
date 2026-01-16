@@ -28,6 +28,7 @@ export interface ITask {
   incident_id: number | null;
   total_portfolio: number;
   order_amount: number;
+  queue_id: string | null;
 }
 
 export interface ITaskTabState {
