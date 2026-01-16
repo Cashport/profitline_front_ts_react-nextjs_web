@@ -11,19 +11,36 @@ export interface ITaskTypes {
 }
 
 export interface ITask {
-  id: number;
+  id: number | null;
   id_project: number;
-  id_client: string;
+  id_client: string | null;
   description: string;
-  related_user_id: number;
+  related_user_id: number | null;
   amount: number;
-  status: ITaskStatus;
-  client_name: string;
-  user_name: string;
-  total_portfolio: number;
-  incident_id: number;
-  task_type: string;
   created_at: string;
+  is_ai: boolean;
+  status: ITaskStatus;
+  task_type: string;
+  taskTypeId: number;
+  client_name: string | null;
+  client_uuid: string | null;
+  user_name: string | null;
+  incident_id: number | null;
+  total_portfolio: number;
   order_amount: number;
-  client_uuid: string;
+}
+
+export interface ITaskTabState {
+  id: string;
+  status_name: string;
+  count: number;
+}
+
+export interface ITaskByStatus {
+  tasks: ITask[];
+  total: number;
+  count: number;
+  page: number;
+  status: string;
+  limit: number;
 }

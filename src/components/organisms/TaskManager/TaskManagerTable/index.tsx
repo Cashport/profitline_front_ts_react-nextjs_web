@@ -108,10 +108,10 @@ const TaskTable: React.FC<{
     if (row.task_type === "Desbloqueo") {
       baseItems.push({
         key: "Desbloquear pedido",
-        icon: <UnlockOutlined  size={12} />,
+        icon: <UnlockOutlined size={12} />,
         label: "Desbloquear pedido",
         onClick: () => {
-          openModal("novelty", { noveltyId: row.incident_id });
+          // openModal("novelty", { noveltyId: row.incident_id });
         }
       });
     }
@@ -140,7 +140,7 @@ const TaskTable: React.FC<{
             {row.client_name}
           </a>
         );
-      },
+      }
     },
     {
       title: "Fecha",
@@ -151,9 +151,9 @@ const TaskTable: React.FC<{
         return new Date(value).toLocaleDateString("es-CO", {
           day: "2-digit",
           month: "2-digit",
-          year: "numeric",
+          year: "numeric"
         });
-      },
+      }
     },
     { title: "Tipo de tarea", dataIndex: "task_type", key: "task_type", width: 130 },
     {

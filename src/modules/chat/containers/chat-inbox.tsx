@@ -48,8 +48,6 @@ import {
 } from "@/modules/chat/ui/dropdown-menu";
 import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
 
-import "@/modules/chat/styles/chatStyles.css";
-
 function riskColors(days: number) {
   if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
   if (days <= 7)
