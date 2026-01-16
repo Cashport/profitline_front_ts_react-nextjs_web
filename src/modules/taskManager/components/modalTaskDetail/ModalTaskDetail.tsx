@@ -10,9 +10,6 @@ import {
   Building,
   FileText,
   Paperclip,
-  CheckCircle,
-  Clock,
-  XCircle,
   Download,
   AlertCircle
 } from "lucide-react";
@@ -29,7 +26,7 @@ import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
-import { ITask, ITaskDetail, ITaskTypes } from "@/types/tasks/ITasks";
+import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { getTaskDetails, getTaskTypes } from "@/services/tasks/tasks";
 
@@ -183,23 +180,16 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     );
   };
 
-  const getEstadoBadge = (estado: string) => {
-    const configs = {
-      Completado: { icon: CheckCircle, color: "bg-green-100 text-green-700 border-green-200" },
-      "En progreso": { icon: Clock, color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-      Novedad: { icon: Clock, color: "bg-blue-100 text-blue-700 border-blue-200" },
-      "Pend. Revisión": { icon: Clock, color: "bg-orange-100 text-orange-700 border-orange-200" },
-      "En aprobaciones": { icon: Clock, color: "bg-purple-100 text-purple-700 border-purple-200" },
-      "Sin empezar": { icon: Clock, color: "bg-gray-100 text-gray-700 border-gray-200" },
-      Cancelado: { icon: XCircle, color: "bg-red-100 text-red-700 border-red-200" },
-      Spam: { icon: XCircle, color: "bg-gray-100 text-gray-600 border-gray-200" }
-    };
-    const config = configs[estado as keyof typeof configs] || configs["Sin empezar"];
-    const Icon = config.icon;
+  const getEstadoBadge = (status: ITaskStatus) => {
     return (
-      <Badge className={`${config.color} border flex items-center gap-1.5 px-3 py-1.5`}>
-        <Icon className="h-3.5 w-3.5" />
-        {estado}
+      <Badge
+        className="border flex items-center px-3 py-1.5"
+        style={{
+          backgroundColor: status.backgroundColor || '#F3F4F6',
+          color: status.color || '#374151'
+        }}
+      >
+        {status.name}
       </Badge>
     );
   };
@@ -303,7 +293,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
 
             <div className="flex items-center gap-3">
               <TaskActionsDropdown task={task} />
-              {taskDetail && getEstadoBadge(taskDetail.status.name)}
+              {taskDetail && getEstadoBadge(taskDetail.status)}
               <Button
                 variant="ghost"
                 size="icon"

@@ -4,15 +4,7 @@ import { FC } from "react";
 import {
   ArrowUpDown,
   Eye,
-  Sparkles,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  Mail,
-  MessageSquare,
-  Phone,
-  LucideIcon
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -21,55 +13,14 @@ import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown"
 import { ITask } from "@/types/tasks/ITasks";
 
 // Types
-export interface DocumentStateConfig {
-  name: string;
-  color: string;
-  textColor: string;
-  icon: LucideIcon;
-  iconColor: string;
-}
-
-export type SortKey = "client_name" | "task_type" | "description" | "status" | "user_name" | "amount";
+export type SortKey =
+  | "client_name"
+  | "task_type"
+  | "description"
+  | "status"
+  | "user_name"
+  | "amount";
 export type SortDirection = "asc" | "desc";
-
-// Config
-export const documentStateConfig: DocumentStateConfig[] = [
-  {
-    name: "Pendiente",
-    color: "#FEF3C7",
-    textColor: "text-amber-800",
-    icon: Clock,
-    iconColor: "text-amber-600"
-  },
-  {
-    name: "En proceso",
-    color: "#DBEAFE",
-    textColor: "text-blue-800",
-    icon: Clock,
-    iconColor: "text-blue-600"
-  },
-  {
-    name: "Completado",
-    color: "#D1FAE5",
-    textColor: "text-green-800",
-    icon: CheckCircle,
-    iconColor: "text-green-600"
-  },
-  {
-    name: "Rechazado",
-    color: "#FEE2E2",
-    textColor: "text-red-800",
-    icon: XCircle,
-    iconColor: "text-red-600"
-  },
-  {
-    name: "En revisión",
-    color: "#E0E7FF",
-    textColor: "text-indigo-800",
-    icon: AlertCircle,
-    iconColor: "text-indigo-600"
-  }
-];
 
 // Helpers
 const formatCurrency = (amount: number) => {
@@ -100,8 +51,10 @@ const TasksTable: FC<ITasksTableProps> = ({
   sortConfig,
   onSort
 }) => {
-  const isAllSelected = tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
-  const isIndeterminate = tasks.some((task) => task.id !== null && selectedIds.includes(task.id)) && !isAllSelected;
+  const isAllSelected =
+    tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
+  const isIndeterminate =
+    tasks.some((task) => task.id !== null && selectedIds.includes(task.id)) && !isAllSelected;
 
   return (
     <div className="overflow-x-auto -mx-6 px-6">
@@ -185,7 +138,6 @@ const TasksTable: FC<ITasksTableProps> = ({
         </thead>
         <tbody>
           {tasks.map((task) => {
-            const estadoConfig = documentStateConfig.find((s) => s.name === task.status?.name);
             const hasIncompleteInfo = !task.client_name || !task.task_type || !task.user_name;
 
             return (
@@ -249,15 +201,16 @@ const TasksTable: FC<ITasksTableProps> = ({
                     <span className="text-gray-400 italic">Sin descripción</span>
                   )}
                 </td>
+                {/* Estado */}
                 <td className="hidden md:table-cell p-4">
                   <Badge
-                    className={`${estadoConfig?.textColor || "text-gray-700"} font-medium px-2 md:px-3 py-1 flex items-center gap-1.5 w-fit whitespace-nowrap text-xs`}
-                    style={{ backgroundColor: task.status?.backgroundColor || estadoConfig?.color || "#F3F4F6" }}
+                    className="font-medium px-2 md:px-3 py-1 flex items-center w-fit whitespace-nowrap text-xs"
+                    style={{
+                      backgroundColor: task.status?.backgroundColor || '#F3F4F6',
+                      color: task.status?.color || '#374151'
+                    }}
                     title={task.status?.name}
                   >
-                    {estadoConfig?.icon && (
-                      <estadoConfig.icon className={`h-3.5 w-3.5 ${estadoConfig.iconColor}`} />
-                    )}
                     {task.status?.name}
                   </Badge>
                 </td>
@@ -273,9 +226,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                     </Badge>
                   ) : task.user_name ? (
                     <div className="truncate" title={task.user_name}>
-                      <span className="text-gray-900 font-medium">
-                        {task.user_name}
-                      </span>
+                      <span className="text-gray-900 font-medium">{task.user_name}</span>
                     </div>
                   ) : (
                     <Badge
