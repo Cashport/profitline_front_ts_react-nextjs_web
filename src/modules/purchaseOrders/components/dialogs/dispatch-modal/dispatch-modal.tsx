@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeDialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { AlertTriangle } from "lucide-react";
@@ -31,7 +31,7 @@ export function DispatchModal({ open, onOpenChange, onConfirm, orderNumber }: Di
   };
 
   return (
-    <SafeDialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Confirmar despacho</DialogTitle>
@@ -82,6 +82,6 @@ export function DispatchModal({ open, onOpenChange, onConfirm, orderNumber }: Di
           </Button>
         </div>
       </DialogContent>
-    </SafeDialog>
+    </Dialog>
   );
 }

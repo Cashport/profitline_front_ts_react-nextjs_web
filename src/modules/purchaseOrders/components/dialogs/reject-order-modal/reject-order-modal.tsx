@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeDialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import {
   Select,
@@ -39,7 +39,7 @@ export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderM
   };
 
   return (
-    <SafeDialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
@@ -103,6 +103,6 @@ export function RejectOrderModal({ open, onOpenChange, onConfirm }: RejectOrderM
           </Button>
         </div>
       </DialogContent>
-    </SafeDialog>
+    </Dialog>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SafeDialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 
@@ -29,7 +29,7 @@ export function InvoiceModal({ open, onOpenChange, onConfirm }: InvoiceModalProp
   };
 
   return (
-    <SafeDialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg mx-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Facturar orden de compra</DialogTitle>
@@ -70,6 +70,6 @@ export function InvoiceModal({ open, onOpenChange, onConfirm }: InvoiceModalProp
           </Button>
         </div>
       </DialogContent>
-    </SafeDialog>
+    </Dialog>
   );
 }

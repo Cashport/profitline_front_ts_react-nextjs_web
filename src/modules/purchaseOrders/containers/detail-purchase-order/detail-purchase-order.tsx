@@ -54,9 +54,6 @@ import { PurchaseOrderProcess } from "../../components/purchase-order-process/pu
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
 
-import "@/modules/chat/styles/chatStyles.css";
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
-
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
@@ -332,13 +329,13 @@ export function DetailPurchaseOrder() {
   const confirmApprove = () => {
     console.log("Order approved");
     // TODO: Implement approval logic
-    setShowApproveModal(false);
+    // Note: Modal handles its own closing via onOpenChange
   };
 
   const confirmReject = (reason: string, observation: string) => {
     console.log("Order rejected:", { reason, observation });
     // TODO: Implement rejection logic
-    setShowRejectModal(false);
+    // Note: Modal handles its own closing via onOpenChange
   };
 
   const estadoConfig = stateColorConfig[invoiceData.estado] || {
@@ -385,19 +382,19 @@ export function DetailPurchaseOrder() {
   const handleSendToApproval = (selectedApproverIds: string[]) => {
     console.log("Send to approval:", selectedApproverIds);
     // TODO: Implement send to approval logic
-    setShowApprovalModal(false);
+    // Note: Modal handles its own closing via onOpenChange
   };
 
   const handleAddInvoices = (invoiceIds: string) => {
     console.log("Invoice IDs:", invoiceIds);
     // TODO: Implement invoice addition logic
-    setShowInvoiceModal(false);
+    // Note: Modal handles its own closing via onOpenChange
   };
 
   const handleConfirmDispatch = (dispatchNotes: string) => {
     console.log("Dispatch confirmed with notes:", dispatchNotes);
     // TODO: Implement dispatch confirmation logic
-    setShowDispatchModal(false);
+    // Note: Modal handles its own closing via onOpenChange
   };
 
   return (

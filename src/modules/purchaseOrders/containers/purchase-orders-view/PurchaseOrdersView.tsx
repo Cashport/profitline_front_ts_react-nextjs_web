@@ -19,9 +19,6 @@ import { GeneralFilter } from "../../components/filters/general-filter";
 import { SellersFilter } from "../../components/filters/sellers-filter";
 import { useApp } from "../../context/app-context";
 
-import "@/modules/chat/styles/chatStyles.css";
-import "@/modules/aprobaciones/styles/approvalsStyles.css";
-
 interface ModuleConfig {
   showVendedor: boolean;
   showProductosPromocion: boolean;
