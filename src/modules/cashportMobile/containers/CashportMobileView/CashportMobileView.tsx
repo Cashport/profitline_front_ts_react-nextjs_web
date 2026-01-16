@@ -165,9 +165,12 @@ const CashportMobileView: React.FC = () => {
   ];
 
   const handlePay = () => {
-    console.log("Initiating payment...");
-    // a push to host/mobile/confirmPayment
-    router.push("/mobile/confirmPayment");
+    if (!data?.payment_link) {
+      message.error("No se pudo iniciar el pago.");
+      return;
+    }
+
+    window.location.href = data.payment_link;
   };
 
   if (loading) {
