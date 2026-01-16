@@ -32,6 +32,7 @@ import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { ITask } from "@/modules/taskManager/components/tasksTable/TasksTable";
+import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 
 // Extend ITask with additional fields for the detail modal
 export interface InvoiceData extends ITask {
@@ -252,7 +253,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                 </span>
               </div>
             </div>
+
             <div className="flex items-center gap-3">
+              <TaskActionsDropdown task={task} />
               {getEstadoBadge(editedTask.estado)}
               <Button
                 variant="ghost"

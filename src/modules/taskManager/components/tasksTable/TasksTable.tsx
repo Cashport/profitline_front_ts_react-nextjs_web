@@ -17,6 +17,7 @@ import {
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
+import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 
 // Types
 export interface DocumentStateConfig {
@@ -42,13 +43,7 @@ export interface ITask {
   tab: string;
 }
 
-export type SortKey =
-  | "cliente"
-  | "tipoTarea"
-  | "descripcion"
-  | "estado"
-  | "responsable"
-  | "monto";
+export type SortKey = "cliente" | "tipoTarea" | "descripcion" | "estado" | "responsable" | "monto";
 export type SortDirection = "asc" | "desc";
 
 // Config
@@ -133,8 +128,7 @@ const TasksTable: FC<ITasksTableProps> = ({
   onSort
 }) => {
   const isAllSelected = tasks.length > 0 && tasks.every((task) => selectedIds.includes(task.id));
-  const isIndeterminate =
-    tasks.some((task) => selectedIds.includes(task.id)) && !isAllSelected;
+  const isIndeterminate = tasks.some((task) => selectedIds.includes(task.id)) && !isAllSelected;
 
   return (
     <div className="overflow-x-auto -mx-6 px-6">
@@ -332,18 +326,21 @@ const TasksTable: FC<ITasksTableProps> = ({
                   {task.monto ? formatCurrency(task.monto) : "-"}
                 </td>
                 <td className="p-2 md:p-4 text-center">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewTask(task);
-                    }}
-                    title="Ver detalles"
-                  >
-                    <Eye className="h-4 w-4 text-gray-600" />
-                  </Button>
+                  <div className="flex items-center justify-center gap-1">
+                    <TaskActionsDropdown task={task} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewTask(task);
+                      }}
+                      title="Ver detalles"
+                    >
+                      <Eye className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             );
