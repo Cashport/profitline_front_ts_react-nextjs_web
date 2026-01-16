@@ -68,14 +68,9 @@ export const TaskManagerView: React.FC = () => {
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
 
   // SWR for tabs data
-  const {
-    data: tabsData,
-    isLoading: isLoadingTabs,
-    mutate: mutateTabs
-  } = useSWR("taskTabs", getTaskTabs, {
+  const { data: tabsData, isLoading: isLoadingTabs } = useSWR("taskTabs", getTaskTabs, {
     revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000
+    revalidateOnReconnect: true
   });
 
   useEffect(() => {
