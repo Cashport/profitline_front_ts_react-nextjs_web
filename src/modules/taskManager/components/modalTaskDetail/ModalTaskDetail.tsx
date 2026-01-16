@@ -281,7 +281,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
         <div className="flex flex-col h-[90vh]">
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-semibold text-cashport-black">TASK-{task.id}</h2>
+              <h2 className="text-2xl font-semibold text-cashport-black">
+                TASK-{task.id ? task.id : task.queue_id ? task.queue_id : "N/A"}
+              </h2>
               {taskDetail && getTipoTareaBadge(taskDetail.task_type)}
               {taskDetail && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
