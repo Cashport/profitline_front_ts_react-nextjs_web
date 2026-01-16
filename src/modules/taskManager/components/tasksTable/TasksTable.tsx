@@ -6,6 +6,7 @@ import {
   Eye,
   Sparkles
 } from "lucide-react";
+import { Spin } from "antd";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
@@ -40,6 +41,7 @@ interface ITasksTableProps {
   onViewTask: (task: ITask) => void;
   sortConfig: { key: SortKey; direction: SortDirection } | null;
   onSort: (key: SortKey) => void;
+  isLoading?: boolean;
 }
 
 const TasksTable: FC<ITasksTableProps> = ({
@@ -49,7 +51,8 @@ const TasksTable: FC<ITasksTableProps> = ({
   onSelectAll,
   onViewTask,
   sortConfig,
-  onSort
+  onSort,
+  isLoading = false
 }) => {
   const isAllSelected =
     tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
@@ -57,8 +60,14 @@ const TasksTable: FC<ITasksTableProps> = ({
     tasks.some((task) => task.id !== null && selectedIds.includes(task.id)) && !isAllSelected;
 
   return (
-    <div className="overflow-x-auto -mx-6 px-6">
-      <table className="w-full min-w-full">
+    <div className="relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
+          <Spin size="large" />
+        </div>
+      )}
+      <div className="overflow-x-auto -mx-6 px-6">
+        <table className="w-full min-w-full">
         <thead className="bg-white border-b border-gray-200">
           <tr>
             {/* Checkbox - hidden on mobile */}
@@ -263,6 +272,7 @@ const TasksTable: FC<ITasksTableProps> = ({
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

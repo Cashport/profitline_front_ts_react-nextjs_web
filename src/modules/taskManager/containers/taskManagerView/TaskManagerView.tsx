@@ -97,6 +97,7 @@ export const TaskManagerView: React.FC = () => {
     // Fetch tasks for the active tab only if not already loaded
     const fetchTasksForActiveTab = async () => {
       if (activeTabKey && !tasksByStatus[activeTabKey]) {
+        setIsLoadingPagination(true);
         try {
           const response = await getTasksByStatus(activeTabKey, 1);
           const tasksArray = response?.tasks ?? [];
@@ -114,6 +115,8 @@ export const TaskManagerView: React.FC = () => {
           }));
         } catch (error) {
           console.error("Error fetching tasks for active tab:", error);
+        } finally {
+          setIsLoadingPagination(false);
         }
       }
     };
@@ -273,6 +276,7 @@ export const TaskManagerView: React.FC = () => {
             onViewTask={handleViewTask}
             sortConfig={sortConfig}
             onSort={handleSort}
+            isLoading={isLoadingPagination}
           />
           {pagination && pagination.total > pagination.limit && (
             <Pagination
