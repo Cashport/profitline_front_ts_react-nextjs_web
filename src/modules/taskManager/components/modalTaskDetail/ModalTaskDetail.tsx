@@ -29,9 +29,9 @@ import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
-import { ITask, ITaskDetail } from "@/types/tasks/ITasks";
+import { ITask, ITaskDetail, ITaskTypes } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
-import { getTaskDetails } from "@/services/tasks/tasks";
+import { getTaskDetails, getTaskTypes } from "@/services/tasks/tasks";
 
 interface IModalTaskDetail {
   task: ITask | null;
@@ -41,10 +41,12 @@ interface IModalTaskDetail {
 }
 
 export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskDetail) {
-  const [editedTask, setEditedTask] = useState<ITask | null>(task);
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
+  const [isLoadingTaskTypes, setIsLoadingTaskTypes] = useState(false);
+  const [taskTypesError, setTaskTypesError] = useState<string | null>(null);
 
   // Fetch task details when modal opens with a task
   useEffect(() => {
@@ -55,7 +57,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
         try {
           const res = await getTaskDetails({ taskId: String(task.id) });
           setTaskDetail(res);
-          console.log("Fetched task details:", res);
         } catch (error) {
           console.error("Error fetching task details:", error);
           setDetailError("Failed to load task details");
@@ -67,13 +68,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     fetchTaskDetail();
   }, [task?.id, isOpen]);
 
-  // Sync editedTask with incoming task prop
-  useEffect(() => {
-    if (task) {
-      setEditedTask(task);
-    }
-  }, [task]);
-
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -82,7 +76,27 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     }
   }, [isOpen]);
 
-  if (!task || !editedTask) return null;
+  // Fetch task types when modal opens
+  useEffect(() => {
+    const fetchTaskTypes = async () => {
+      if (isOpen && taskTypes.length === 0) {
+        setIsLoadingTaskTypes(true);
+        setTaskTypesError(null);
+        try {
+          const types = await getTaskTypes();
+          setTaskTypes(types);
+        } catch (error) {
+          console.error("Error fetching task types:", error);
+          setTaskTypesError("Failed to load task types");
+        } finally {
+          setIsLoadingTaskTypes(false);
+        }
+      }
+    };
+    fetchTaskTypes();
+  }, [isOpen, taskTypes.length]);
+
+  if (!task) return null;
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -155,7 +169,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                       variant="ghost"
                       size="sm"
                       className="h-7 px-2"
-                      onClick={() => window.open(attachment.s3_url, '_blank')}
+                      onClick={() => window.open(attachment.s3_url, "_blank")}
                     >
                       <Download className="h-3 w-3" />
                     </Button>
@@ -200,19 +214,64 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
   };
 
   const handleAssignToAI = () => {
-    if (onUpdate && editedTask) {
-      const updatedTask = {
-        ...editedTask,
-        user_name: "Cashport AI",
-        is_ai: true,
+    if (taskDetail) {
+      setTaskDetail({
+        ...taskDetail,
+        assigned_user: "Cashport AI",
         status: {
-          ...editedTask.status,
+          ...taskDetail.status,
           name: "En progreso"
         }
-      };
-      onUpdate(updatedTask);
+      });
     }
-    onClose();
+  };
+
+  const getTaskTypeOptions = (): { value: string; label: string }[] => {
+    const options: { value: string; label: string }[] = [];
+    const seenValues = new Set<string>();
+
+    // Add current value first if it exists
+    if (taskDetail?.task_type && taskDetail.task_type.trim()) {
+      options.push({ value: taskDetail.task_type, label: taskDetail.task_type });
+      seenValues.add(taskDetail.task_type);
+    }
+
+    // Add API options
+    taskTypes.forEach((type) => {
+      if (!seenValues.has(type.NAME)) {
+        options.push({ value: type.NAME, label: type.NAME });
+        seenValues.add(type.NAME);
+      }
+    });
+
+    return options;
+  };
+
+  const getAssignedUserOptions = (): { value: string; label: string; isAI?: boolean }[] => {
+    const STATIC_USERS = [
+      { value: "Yanin Perez", label: "Yanin Perez" },
+      { value: "Maria Rodriguez", label: "Maria Rodriguez" },
+      { value: "Carlos Mendez", label: "Carlos Mendez" },
+      { value: "Ana Gutierrez", label: "Ana Gutierrez" },
+      { value: "Cashport AI", label: "Cashport AI", isAI: true }
+    ];
+
+    const options = [...STATIC_USERS];
+    const existingValues = new Set(STATIC_USERS.map((u) => u.value));
+
+    // Add current user if not in static list (insert before "Cashport AI")
+    if (
+      taskDetail?.assigned_user &&
+      taskDetail.assigned_user.trim() &&
+      !existingValues.has(taskDetail.assigned_user)
+    ) {
+      options.splice(options.length - 1, 0, {
+        value: taskDetail.assigned_user,
+        label: taskDetail.assigned_user
+      });
+    }
+
+    return options;
   };
 
   return (
@@ -227,22 +286,24 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-semibold text-cashport-black">TASK-{task.id}</h2>
-              {getTipoTareaBadge(task.task_type)}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
-                <Mail className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">
-                  {new Date(task.created_at).toLocaleDateString("es-CO", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric"
-                  })}
-                </span>
-              </div>
+              {taskDetail && getTipoTareaBadge(taskDetail.task_type)}
+              {taskDetail && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    {new Date(taskDetail.created_at).toLocaleDateString("es-CO", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric"
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
               <TaskActionsDropdown task={task} />
-              {getEstadoBadge(editedTask.status?.name || "")}
+              {taskDetail && getEstadoBadge(taskDetail.status.name)}
               <Button
                 variant="ghost"
                 size="icon"
@@ -255,107 +316,143 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
           </div>
 
           <div className="flex-1 overflow-hidden bg-gray-50">
-            <div className="h-full grid grid-cols-2 gap-12">
-              {/* Left Column - Task Details */}
-              <div className="overflow-y-auto px-10 py-8">
-                <div className="space-y-8 max-w-[700px]">
-                  {/* Custom Fields */}
-                  <div className="space-y-0">
-                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
-                      Campos personalizados
-                    </h3>
+            {isLoadingDetail ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center py-12">
+                  <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
+                  <p className="text-gray-500">Cargando detalles...</p>
+                </div>
+              </div>
+            ) : detailError ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center py-12 text-red-500">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-3" />
+                  <p>{detailError}</p>
+                </div>
+              </div>
+            ) : taskDetail ? (
+              <div className="h-full grid grid-cols-2 gap-12">
+                {/* Left Column - Task Details */}
+                <div className="overflow-y-auto px-10 py-8">
+                  <div className="space-y-8 max-w-[700px]">
+                    {/* Custom Fields */}
+                    <div className="space-y-0">
+                      <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
+                        Campos personalizados
+                      </h3>
 
-                    <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+                      <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
                       {/* Cliente */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.client_name ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.client?.name ? "bg-rose-50" : ""}`}
                       >
                         <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Cliente
-                          {!editedTask.client_name && <span className="text-rose-600 ml-1">*</span>}
+                          {!taskDetail?.client?.name && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Input
-                          value={editedTask.client_name || ""}
+                          value={taskDetail?.client?.name || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, client_name: e.target.value || null })
+                            taskDetail &&
+                            setTaskDetail({
+                              ...taskDetail,
+                              client: { ...taskDetail.client, name: e.target.value }
+                            })
                           }
                           placeholder="Asignar cliente..."
                           className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                            !editedTask.client_name ? "placeholder:text-rose-400" : ""
+                            !taskDetail?.client?.name ? "placeholder:text-rose-400" : ""
                           }`}
                         />
                       </div>
 
                       {/* Tipo de tarea */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.task_type ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.task_type ? "bg-rose-50" : ""}`}
                       >
                         <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Tipo de tarea
-                          {!editedTask.task_type && <span className="text-rose-600 ml-1">*</span>}
+                          {!taskDetail?.task_type && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Select
-                          value={editedTask.task_type || ""}
+                          value={taskDetail?.task_type || ""}
                           onValueChange={(value) =>
-                            setEditedTask({ ...editedTask, task_type: value })
+                            taskDetail && setTaskDetail({ ...taskDetail, task_type: value })
                           }
+                          disabled={isLoadingTaskTypes}
                         >
                           <SelectTrigger
                             className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                              !editedTask.task_type ? "text-rose-600" : ""
-                            }`}
+                              !taskDetail?.task_type ? "text-rose-600" : ""
+                            } ${isLoadingTaskTypes ? "opacity-50 cursor-wait" : ""}`}
                           >
-                            <SelectValue placeholder="Seleccionar tipo..." />
+                            <SelectValue
+                              placeholder={
+                                isLoadingTaskTypes
+                                  ? "Cargando tipos..."
+                                  : taskTypesError
+                                  ? "Error al cargar tipos"
+                                  : "Seleccionar tipo..."
+                              }
+                            />
                           </SelectTrigger>
                           <SelectContent className="bg-white border-gray-200">
-                            <SelectItem value="Desbloqueo">Desbloqueo</SelectItem>
-                            <SelectItem value="Aprobación">Aprobación</SelectItem>
-                            <SelectItem value="Aplicación pago">Aplicación pago</SelectItem>
-                            <SelectItem value="Conciliación">Conciliación</SelectItem>
-                            <SelectItem value="Novedad">Novedad</SelectItem>
+                            {taskTypesError ? (
+                              <div className="px-2 py-1.5 text-xs text-red-600">
+                                {taskTypesError}
+                              </div>
+                            ) : (
+                              getTaskTypeOptions().map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
 
                       {/* Responsable */}
                       <div
-                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!editedTask.user_name ? "bg-rose-50" : ""}`}
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.assigned_user ? "bg-rose-50" : ""}`}
                       >
                         <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                           Responsable
-                          {!editedTask.user_name && <span className="text-rose-600 ml-1">*</span>}
+                          {!taskDetail?.assigned_user && <span className="text-rose-600 ml-1">*</span>}
                         </Label>
                         <Select
-                          value={editedTask.user_name || ""}
+                          value={taskDetail?.assigned_user || ""}
                           onValueChange={(value) => {
                             if (value === "Cashport AI") {
                               handleAssignToAI();
-                            } else {
-                              setEditedTask({ ...editedTask, user_name: value, is_ai: false });
+                            } else if (taskDetail) {
+                              setTaskDetail({ ...taskDetail, assigned_user: value });
                             }
                           }}
                         >
                           <SelectTrigger
                             className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                              !editedTask.user_name ? "text-rose-600" : ""
+                              !taskDetail?.assigned_user ? "text-rose-600" : ""
                             }`}
                           >
                             <SelectValue placeholder="Asignar responsable..." />
                           </SelectTrigger>
                           <SelectContent className="bg-white border-gray-200">
-                            <SelectItem value="Yanin Perez">Yanin Perez</SelectItem>
-                            <SelectItem value="Maria Rodriguez">Maria Rodriguez</SelectItem>
-                            <SelectItem value="Carlos Mendez">Carlos Mendez</SelectItem>
-                            <SelectItem value="Ana Gutierrez">Ana Gutierrez</SelectItem>
-                            <SelectItem value="Cashport AI">
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" />
-                                Cashport AI
-                              </div>
-                            </SelectItem>
+                            {getAssignedUserOptions().map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.isAI ? (
+                                  <div className="flex items-center gap-2">
+                                    <Sparkles className="h-4 w-4" />
+                                    {option.label}
+                                  </div>
+                                ) : (
+                                  option.label
+                                )}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -370,9 +467,10 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                         </Label>
                         <Input
                           type="number"
-                          value={editedTask.amount || ""}
+                          value={taskDetail?.amount || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, amount: Number(e.target.value) })
+                            taskDetail &&
+                            setTaskDetail({ ...taskDetail, amount: Number(e.target.value) })
                           }
                           placeholder="0"
                           className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -386,9 +484,10 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                           Descripción
                         </Label>
                         <Textarea
-                          value={editedTask.description || ""}
+                          value={taskDetail?.description || ""}
                           onChange={(e) =>
-                            setEditedTask({ ...editedTask, description: e.target.value })
+                            taskDetail &&
+                            setTaskDetail({ ...taskDetail, description: e.target.value })
                           }
                           placeholder="Agregar descripción..."
                           rows={2}
@@ -409,38 +508,29 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                 </div>
               </div>
 
-              {/* Right Column - Original Message */}
-              <div className="overflow-y-auto px-10 py-8 border-l border-gray-200 bg-white">
-                <div className="space-y-6">
-                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
-                    Mensaje Original
-                  </h3>
-                  {isLoadingDetail ? (
-                    <div className="text-center py-12">
-                      <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
-                      <p className="text-gray-500">Cargando detalles...</p>
-                    </div>
-                  ) : detailError ? (
-                    <div className="text-center py-12 text-red-500">
-                      <AlertCircle className="h-12 w-12 mx-auto mb-3" />
-                      <p>{detailError}</p>
-                    </div>
-                  ) : taskDetail?.emailDetails ? (
-                    <EmailMessage />
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                      <p>No hay mensaje original disponible</p>
-                      {taskDetail?.description && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
-                          <p className="text-gray-700 text-sm">{taskDetail.description}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                {/* Right Column - Original Message */}
+                <div className="overflow-y-auto px-10 py-8 border-l border-gray-200 bg-white">
+                  <div className="space-y-6">
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
+                      Mensaje Original
+                    </h3>
+                    {taskDetail.emailDetails ? (
+                      <EmailMessage />
+                    ) : (
+                      <div className="text-center py-12 text-gray-500">
+                        <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                        <p>No hay mensaje original disponible</p>
+                        {taskDetail.description && (
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
+                            <p className="text-gray-700 text-sm">{taskDetail.description}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : null}
           </div>
 
           {/* Footer */}
@@ -454,8 +544,22 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
             </Button>
             <Button
               onClick={() => {
-                if (onUpdate && editedTask) {
-                  onUpdate(editedTask);
+                if (onUpdate && taskDetail) {
+                  // Transform taskDetail (ITaskDetail) to ITask format
+                  const updatedTask: ITask = {
+                    ...task,
+                    description: taskDetail.description,
+                    status: taskDetail.status,
+                    task_type: taskDetail.task_type,
+                    client_name: taskDetail.client.name,
+                    client_uuid: taskDetail.client.uuid,
+                    id_client: taskDetail.client.id,
+                    user_name: taskDetail.assigned_user,
+                    amount: taskDetail.amount,
+                    is_ai: taskDetail.assigned_user === "Cashport AI",
+                    created_at: taskDetail.created_at
+                  };
+                  onUpdate(updatedTask);
                 }
                 onClose();
               }}
