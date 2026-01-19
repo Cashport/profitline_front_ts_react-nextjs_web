@@ -5,6 +5,7 @@ import { Eye } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
 import { useAppStore } from "@/lib/store/store";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 const { Text } = Typography;
 
@@ -44,6 +45,7 @@ export function OrdersTable({
   onRowClick
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const height = useScreenHeight();
 
   const columns: TableProps<IPurchaseOrder>["columns"] = [
     {
@@ -190,7 +192,7 @@ export function OrdersTable({
         position: ["bottomRight"],
         showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
       }}
-      scroll={{ x: 1200 }}
+      scroll={{ y: height - 420, x: 100 }}
     />
   );
 }

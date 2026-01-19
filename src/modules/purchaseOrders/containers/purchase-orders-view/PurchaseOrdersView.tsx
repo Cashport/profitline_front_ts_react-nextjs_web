@@ -120,11 +120,11 @@ export function PurchaseOrdersView() {
   };
 
   return (
-    <div className="min-h-screen bg-white rounded-lg">
+    <div className="bg-white rounded-lg">
       {/* Main white card containing all content */}
       <main>
-        <Card className="bg-cashport-white border-0 shadow-sm">
-          <CardContent className="px-6 pt-2 pb-4">
+        <Card className="bg-cashport-white border-0 shadow-sm p-6">
+          <CardContent className="p-0 ">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="relative">
