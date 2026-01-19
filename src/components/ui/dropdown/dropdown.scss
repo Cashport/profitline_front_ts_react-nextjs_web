@@ -1,0 +1,11 @@
+@import "@styles/variables.scss";
+
+// Dropdown menu (rendered in portal)
+.generalDropdownMenu {
+    // Divider
+    li.ant-dropdown-menu-item-divider {
+        background-color: rgb(221, 221, 221) !important;
+        margin: 0.25rem 0 !important;
+        height: 1px;
+    }
+}

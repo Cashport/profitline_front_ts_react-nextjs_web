@@ -53,6 +53,7 @@ import { PurchaseOrderInfo } from "../../components/purchase-order-info/purchase
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
+import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -397,6 +398,37 @@ export function DetailPurchaseOrder() {
     // Note: Modal handles its own closing via onOpenChange
   };
 
+  const actionItems: DropdownItem[] = [
+    {
+      key: "approval",
+      label: "Enviar a aprobación",
+      icon: <Send className="h-4 w-4" />,
+      onClick: () => setShowApprovalModal(true)
+    },
+    {
+      key: "invoice",
+      label: "Facturar",
+      icon: <Receipt className="h-4 w-4" />,
+      onClick: () => setShowInvoiceModal(true)
+    },
+    {
+      key: "dispatch",
+      label: "Confirmar despacho",
+      icon: <PackageCheck className="h-4 w-4" />,
+      onClick: () => setShowDispatchModal(true)
+    },
+    {
+      key: "divider-1",
+      type: "divider"
+    },
+    {
+      key: "download",
+      label: "Descargar plano",
+      icon: <FileOutput className="h-4 w-4" />,
+      onClick: handleDownloadCSV
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-cashport-gray-lighter">
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
@@ -416,37 +448,16 @@ export function DetailPurchaseOrder() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-cashport-gray-light text-cashport-black hover:bg-gray-50 bg-white"
-                  >
-                    <MoreHorizontal className="h-4 w-4 mr-2" />
-                    Generar acción
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuItem onClick={() => setShowApprovalModal(true)}>
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar a aprobación
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowInvoiceModal(true)}>
-                    <Receipt className="h-4 w-4 mr-2" />
-                    Facturar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowDispatchModal(true)}>
-                    <PackageCheck className="h-4 w-4 mr-2" />
-                    Confirmar despacho
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleDownloadCSV}>
-                    <FileOutput className="h-4 w-4 mr-2" />
-                    Descargar plano
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <GeneralDropdown items={actionItems} align="start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-cashport-gray-light text-cashport-black hover:bg-gray-50 bg-white"
+                >
+                  <MoreHorizontal className="h-4 w-4 mr-2" />
+                  Generar acción
+                </Button>
+              </GeneralDropdown>
               <Button
                 variant="outline"
                 size="sm"
