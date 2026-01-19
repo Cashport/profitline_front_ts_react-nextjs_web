@@ -20,7 +20,6 @@ import { useAppStore } from "@/lib/store/store";
 import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
-import { SellersFilter } from "../../components/filters/sellers-filter";
 import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
 
 export function PurchaseOrdersView() {
@@ -176,16 +175,13 @@ export function PurchaseOrdersView() {
                   selectedClientId={selectedFilters.clientId ?? null}
                   clients={filterOptions.clients || []}
                   onCompradorChange={handleClientChange}
-                  filterDateRange={selectedFilters.dateRange}
-                  onDateRangeChange={handleDateRangeChange}
-                  onClearDateRange={handleClearDateRange}
-                />
-
-                {/* Vendedor Filter */}
-                <SellersFilter
+                  showVendedorFilter={true}
                   selectedSellerId={selectedFilters.sellerId ?? null}
                   sellers={filterOptions.sellers || []}
                   onVendedorChange={handleSellerChange}
+                  filterDateRange={selectedFilters.dateRange}
+                  onDateRangeChange={handleDateRangeChange}
+                  onClearDateRange={handleClearDateRange}
                 />
               </div>
 
