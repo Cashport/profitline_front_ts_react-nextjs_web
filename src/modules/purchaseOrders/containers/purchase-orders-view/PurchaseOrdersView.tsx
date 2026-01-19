@@ -17,10 +17,11 @@ import { UploadInterface } from "../../components/upload-interface/upload-interf
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
+import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { SellersFilter } from "../../components/filters/sellers-filter";
+import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
 
 export function PurchaseOrdersView() {
   const { ID } = useAppStore((projects) => projects.selectedProject);
@@ -28,14 +29,46 @@ export function PurchaseOrdersView() {
   const [showUploadInterface, setShowUploadInterface] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const { data, isLoading, pagination } = usePurchaseOrders({
-    projectId: ID,
-    page: currentPage,
-    limit: itemsPerPage
+  // Filter options from API
+  const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
+    statuses: [],
+    clients: [],
+    sellers: []
   });
+
+  // Single state for selected filter IDs
+  const [selectedFilters, setSelectedFilters] = useState({
+    statusId: undefined as number | undefined,
+    clientId: undefined as string | undefined,
+    sellerId: undefined as string | undefined,
+    createdFrom: undefined as string | undefined,
+    createdTo: undefined as string | undefined,
+    dateRange: { start: null as string | null, end: null as string | null }
+  });
+
+  const { data, isLoading, pagination } = usePurchaseOrders({
+    page: currentPage,
+    search: searchTerm,
+    statusId: selectedFilters.statusId,
+    clientId: selectedFilters.clientId,
+    sellerId: selectedFilters.sellerId,
+    createdFrom: selectedFilters.createdFrom,
+    createdTo: selectedFilters.createdTo
+  });
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const filters = await getFilters(ID);
+        setFilterOptions(filters);
+      } catch (error) {
+        console.error("Failed to fetch filters:", error);
+      }
+    };
+    fetchFilters();
+  }, [ID]);
 
   const handleFileUpload = (files: File[]) => {
     console.log("Files uploaded:", files);
@@ -50,6 +83,41 @@ export function PurchaseOrdersView() {
   const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
     setSelectedRowKeys(selectedKeys);
     console.log("Selected rows:", selectedRows);
+  };
+
+  // Filter handler functions
+  const handleStatusChange = (statusId: number | null) => {
+    setSelectedFilters((prev) => ({ ...prev, statusId: statusId ?? undefined }));
+    setCurrentPage(1);
+  };
+
+  const handleClientChange = (clientId: string | null) => {
+    setSelectedFilters((prev) => ({ ...prev, clientId: clientId ?? undefined }));
+    setCurrentPage(1);
+  };
+
+  const handleSellerChange = (sellerId: string | null) => {
+    setSelectedFilters((prev) => ({ ...prev, sellerId: sellerId ?? undefined }));
+    setCurrentPage(1);
+  };
+
+  const handleDateRangeChange = (start: string, end: string) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dateRange: { start, end },
+      createdFrom: start || undefined,
+      createdTo: end || undefined
+    }));
+    setCurrentPage(1);
+  };
+
+  const handleClearDateRange = () => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dateRange: { start: null, end: null },
+      createdFrom: undefined,
+      createdTo: undefined
+    }));
   };
 
   return (
@@ -94,35 +162,31 @@ export function PurchaseOrdersView() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Filters hide for now */}
                 {/* Estado Filter Dropdown */}
-                {/* <StatesFilter
-                  filterState={state.filterState}
-                  invoiceCounts={invoiceCounts}
-                  totalCount={state.invoices.length}
-                  onFilterChange={handleStateFilter}
-                /> */}
+                <StatesFilter
+                  selectedStatusId={selectedFilters.statusId ?? null}
+                  statuses={filterOptions.statuses || []}
+                  onFilterChange={handleStatusChange}
+                />
 
                 {/* General Filters Dropdown */}
-                {/* <GeneralFilter
-                  showCompradorFilter={config.showCompradorFilter}
-                  clienteFilterLabel={config.clienteFilterLabel}
-                  filterComprador={state.filterComprador}
-                  uniqueCompradores={uniqueCompradores}
-                  onCompradorChange={handleCompradorFilter}
-                  filterDateRange={state.filterDateRange}
+                <GeneralFilter
+                  showCompradorFilter={true}
+                  clienteFilterLabel="Cliente"
+                  selectedClientId={selectedFilters.clientId ?? null}
+                  clients={filterOptions.clients || []}
+                  onCompradorChange={handleClientChange}
+                  filterDateRange={selectedFilters.dateRange}
                   onDateRangeChange={handleDateRangeChange}
-                  onClearDateRange={() => setDateRangeFilter({ start: null, end: null })}
-                /> */}
+                  onClearDateRange={handleClearDateRange}
+                />
 
                 {/* Vendedor Filter */}
-                {/* {false && (
-                  <SellersFilter
-                    filterVendedor={state.filterVendedor}
-                    uniqueVendedores={uniqueVendedores}
-                    onVendedorChange={handleVendedorFilter}
-                  />
-                )} */}
+                <SellersFilter
+                  selectedSellerId={selectedFilters.sellerId ?? null}
+                  sellers={filterOptions.sellers || []}
+                  onVendedorChange={handleSellerChange}
+                />
               </div>
 
               <Button

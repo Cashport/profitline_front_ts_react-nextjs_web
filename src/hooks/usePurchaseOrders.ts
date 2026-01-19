@@ -2,28 +2,52 @@ import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
 import { GenericResponsePage } from "@/types/global/IGlobal";
-import { getAllOrdersUrl } from "@/services/purchaseOrders/purchaseOrders";
-import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
-
-interface IUsePurchaseOrdersParams {
-  projectId: number;
-  page?: number;
-  limit?: number;
-}
+import { IPurchaseOrder, IUsePurchaseOrdersParams } from "@/types/purchaseOrders/purchaseOrders";
 
 export const usePurchaseOrders = ({
-  projectId
-  //   page = 1,
-  //   limit = 20
+  page = 1,
+  pageSize = 10,
+  search,
+  clientId,
+  sellerId,
+  statusId,
+  createdFrom,
+  createdTo
 }: IUsePurchaseOrdersParams) => {
   const queryParams: string[] = [];
-  //   queryParams.push(`page=${page}`);
-  //   queryParams.push(`limit=${limit}`);
+
+  // Pagination (always included)
+  queryParams.push(`page=${page}`);
+  queryParams.push(`pageSize=${pageSize}`);
+
+  // Search (encoded)
+  if (search) {
+    queryParams.push(`search=${encodeURIComponent(search.trim())}`);
+  }
+
+  // Filters (check !== undefined to allow empty values)
+  if (clientId !== undefined) {
+    queryParams.push(`clientId=${encodeURIComponent(clientId)}`);
+  }
+  if (sellerId !== undefined) {
+    queryParams.push(`sellerId=${encodeURIComponent(sellerId)}`);
+  }
+  if (statusId !== undefined) {
+    queryParams.push(`statusId=${statusId}`);
+  }
+
+  // Date ranges (truthy check)
+  if (createdFrom) {
+    queryParams.push(`createdFrom=${createdFrom}`);
+  }
+  if (createdTo) {
+    queryParams.push(`createdTo=${createdTo}`);
+  }
 
   const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponsePage<IPurchaseOrder[]>>(
-    `${getAllOrdersUrl(projectId)}${queryString}`,
+    `/purchaseOrder/all${queryString}`,
     fetcher
   );
 

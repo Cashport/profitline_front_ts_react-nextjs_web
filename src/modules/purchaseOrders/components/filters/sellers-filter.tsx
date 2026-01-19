@@ -3,16 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { User, ChevronDown } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
+import { IPurchaseOrderSeller } from "@/types/purchaseOrders/purchaseOrders";
 
 interface SellersFilterProps {
-  filterVendedor: string | null;
-  uniqueVendedores: string[];
-  onVendedorChange: (vendedor: string | null) => void;
+  selectedSellerId: string | null;
+  sellers: IPurchaseOrderSeller[];
+  onVendedorChange: (sellerId: string | null) => void;
 }
 
 export function SellersFilter({
-  filterVendedor,
-  uniqueVendedores,
+  selectedSellerId,
+  sellers,
   onVendedorChange
 }: SellersFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,10 +30,15 @@ export function SellersFilter({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleVendedorSelect = (vendedor: string | null) => {
-    onVendedorChange(vendedor);
+  const handleVendedorSelect = (sellerId: string | null) => {
+    onVendedorChange(sellerId);
     setIsOpen(false);
   };
+
+  // Find the selected seller name for display
+  const selectedSellerName = selectedSellerId
+    ? sellers.find(s => s.id === selectedSellerId)?.name
+    : null;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -43,7 +49,7 @@ export function SellersFilter({
         onClick={() => setIsOpen(!isOpen)}
       >
         <User className="h-4 w-4 mr-2" />
-        {filterVendedor || "Todos los vendedores"}
+        {selectedSellerName || "Todos los vendedores"}
         <ChevronDown className="h-4 w-4 ml-2" />
       </Button>
 
@@ -52,7 +58,7 @@ export function SellersFilter({
           <div className="p-1">
             <button
               className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                filterVendedor === null
+                selectedSellerId === null
                   ? "bg-cashport-green text-cashport-black"
                   : "text-cashport-black"
               }`}
@@ -61,17 +67,17 @@ export function SellersFilter({
               Todos los vendedores
             </button>
 
-            {uniqueVendedores.map((vendedor) => (
+            {sellers.map((seller) => (
               <button
-                key={vendedor}
+                key={seller.id}
                 className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                  filterVendedor === vendedor
+                  selectedSellerId === seller.id
                     ? "bg-cashport-green text-cashport-black"
                     : "text-cashport-black"
                 }`}
-                onClick={() => handleVendedorSelect(vendedor)}
+                onClick={() => handleVendedorSelect(seller.id)}
               >
-                {vendedor}
+                {seller.name}
               </button>
             ))}
           </div>

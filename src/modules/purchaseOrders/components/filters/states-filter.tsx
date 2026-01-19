@@ -1,32 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Filter, ChevronDown, FileText, CheckCircle, XCircle } from "lucide-react";
-import { Badge } from "@/modules/chat/ui/badge";
+import { Filter, ChevronDown } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
-
-export const documentStateConfig = [
-  { name: "Novedad", color: "#E53935", icon: XCircle, textColor: "text-white" },
-  { name: "En validación", color: "#2196F3", icon: CheckCircle, textColor: "text-white" },
-  { name: "En aprobaciones", color: "#9C27B0", icon: CheckCircle, textColor: "text-white" },
-  { name: "En facturación", color: "#FFC107", icon: FileText, textColor: "text-black" },
-  { name: "Facturado", color: "#4CAF50", icon: CheckCircle, textColor: "text-white" },
-  { name: "En despacho", color: "#009688", icon: CheckCircle, textColor: "text-white" },
-  { name: "Entregado", color: "#2E7D32", icon: CheckCircle, textColor: "text-white" },
-  { name: "Back order", color: "#000000", icon: XCircle, textColor: "text-white" }
-];
+import { IPurchaseOrderStatus } from "@/types/purchaseOrders/purchaseOrders";
 
 interface StatesFilterProps {
-  filterState: string | null;
-  invoiceCounts: Record<string, number>;
-  totalCount: number;
-  onFilterChange: (state: string | null) => void;
+  selectedStatusId: number | null;
+  statuses: IPurchaseOrderStatus[];
+  onFilterChange: (statusId: number | null) => void;
 }
 
 export function StatesFilter({
-  filterState,
-  invoiceCounts,
-  totalCount,
+  selectedStatusId,
+  statuses,
   onFilterChange
 }: StatesFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,8 +30,8 @@ export function StatesFilter({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleStateSelect = (stateName: string | null) => {
-    onFilterChange(stateName);
+  const handleStateSelect = (statusId: number | null) => {
+    onFilterChange(statusId);
     setIsOpen(false);
   };
 
@@ -66,51 +53,34 @@ export function StatesFilter({
           <div className="p-1">
             <button
               className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                filterState === null
+                selectedStatusId === null
                   ? "bg-cashport-green text-cashport-black"
                   : "text-cashport-black"
               }`}
               onClick={() => handleStateSelect(null)}
             >
-              <div className="flex items-center justify-between">
-                <span>Todos los estados</span>
-                <Badge
-                  variant="secondary"
-                  className="bg-cashport-gray-lighter text-cashport-black"
-                >
-                  {totalCount}
-                </Badge>
-              </div>
+              <span>Todos los estados</span>
             </button>
 
-            {documentStateConfig.map((stateConfig) => {
-              const count = invoiceCounts[stateConfig.name] || 0;
-              const isActive = filterState === stateConfig.name;
+            {statuses.map((status) => {
+              const isActive = selectedStatusId === status.id;
 
               return (
                 <button
-                  key={stateConfig.name}
+                  key={status.id}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-cashport-gray-lighter transition-colors ${
                     isActive
                       ? "bg-cashport-green text-cashport-black"
                       : "text-cashport-black"
                   }`}
-                  onClick={() => handleStateSelect(stateConfig.name)}
+                  onClick={() => handleStateSelect(status.id)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: stateConfig.color }}
-                      ></div>
-                      <span>{stateConfig.name}</span>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-cashport-gray-lighter text-cashport-black"
-                    >
-                      {count}
-                    </Badge>
+                  <div className="flex items-center">
+                    <div
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: status.color }}
+                    ></div>
+                    <span>{status.name}</span>
                   </div>
                 </button>
               );

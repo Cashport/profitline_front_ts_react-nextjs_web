@@ -4,13 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { Filter, ChevronDown, Calendar, Building } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
+import { IPurchaseOrderClient } from "@/types/purchaseOrders/purchaseOrders";
 
 interface GeneralFilterProps {
   showCompradorFilter: boolean;
   clienteFilterLabel?: string;
-  filterComprador: string | null;
-  uniqueCompradores: string[];
-  onCompradorChange: (comprador: string | null) => void;
+  selectedClientId: string | null;
+  clients: IPurchaseOrderClient[];
+  onCompradorChange: (clientId: string | null) => void;
   filterDateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
@@ -19,8 +20,8 @@ interface GeneralFilterProps {
 export function GeneralFilter({
   showCompradorFilter,
   clienteFilterLabel,
-  filterComprador,
-  uniqueCompradores,
+  selectedClientId,
+  clients,
   onCompradorChange,
   filterDateRange,
   onDateRangeChange,
@@ -66,7 +67,7 @@ export function GeneralFilter({
                 <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
                   <button
                     className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                      filterComprador === null
+                      selectedClientId === null
                         ? "bg-cashport-green text-cashport-black font-medium"
                         : "text-cashport-black"
                     }`}
@@ -75,18 +76,18 @@ export function GeneralFilter({
                     Todos los {clienteFilterLabel || "clientes"}
                   </button>
 
-                  {uniqueCompradores.map((comprador) => (
+                  {clients.map((client) => (
                     <button
-                      key={comprador}
+                      key={client.id}
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors border-t border-gray-100 ${
-                        filterComprador === comprador
+                        selectedClientId === client.id
                           ? "bg-cashport-green text-cashport-black font-medium"
                           : "text-cashport-black"
                       }`}
-                      onClick={() => onCompradorChange(comprador)}
+                      onClick={() => onCompradorChange(client.id)}
                     >
-                      <div className="truncate" title={comprador}>
-                        {comprador}
+                      <div className="truncate" title={client.name}>
+                        {client.name}
                       </div>
                     </button>
                   ))}
