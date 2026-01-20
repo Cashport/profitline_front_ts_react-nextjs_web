@@ -94,8 +94,6 @@ export function DetailPurchaseOrder() {
     observacion: ""
   });
 
-  const [standardizedProducts, setStandardizedProducts] = useState<Record<string, string>>({});
-
   const [editableProducts, setEditableProducts] = useState<
     Array<{
       idProducto: string;
@@ -210,24 +208,6 @@ export function DetailPurchaseOrder() {
   }
 
   const onBack = goToDashboard;
-
-  const internalProducts = [
-    { id: "laptop-dell-inspiron-15", name: "Laptop Dell Inspiron 15" },
-    { id: "laptop-hp-pavilion", name: "Laptop HP Pavilion" },
-    { id: "mouse-logitech-mx", name: "Mouse Logitech MX Master" },
-    { id: "mouse-logitech-basic", name: "Mouse Logitech Básico" },
-    { id: "teclado-logitech", name: "Teclado Logitech" },
-    { id: "mousepad-corporativo", name: "Mousepad Corporativo" },
-    { id: "monitor-samsung-24", name: 'Monitor Samsung 24"' },
-    { id: "webcam-logitech", name: "Webcam Logitech HD" }
-  ];
-
-  const handleStandardizedProductChange = (productId: string, value: string) => {
-    setStandardizedProducts((prev) => ({
-      ...prev,
-      [productId]: value
-    }));
-  };
 
   const handleProductFieldChange = (
     index: number,
@@ -490,14 +470,11 @@ export function DetailPurchaseOrder() {
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
               editableProducts={editableProducts}
-              standardizedProducts={standardizedProducts}
               isEditMode={isEditMode}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
               onProductFieldChange={handleProductFieldChange}
-              onStandardizedProductChange={handleStandardizedProductChange}
               formatCurrency={formatCurrency}
-              internalProducts={internalProducts}
             />
 
             {!isPdfCollapsed && (

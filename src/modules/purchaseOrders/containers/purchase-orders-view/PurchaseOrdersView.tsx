@@ -75,7 +75,6 @@ export function PurchaseOrdersView() {
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
-    console.log("Row clicked:", record);
     // TODO: Navigate to detail page or open modal
     router.push(`/purchase-orders/${record.id}`);
   };

@@ -1,5 +1,6 @@
 import React from "react";
 import { Input } from "@/modules/chat/ui/input";
+import { formatDateBars } from "@/utils/utils";
 
 // Interfaces de datos
 interface GeneralInfo {
@@ -13,7 +14,6 @@ interface GeneralInfo {
 interface DeliveryInfo {
   fechaEntrega: string;
   direccion: string;
-  ciudad: string;
   observacion: string;
 }
 
@@ -36,9 +36,7 @@ export function PurchaseOrderInfo({
   return (
     <div className="grid grid-cols-2 gap-8 mb-6">
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">
-          Información General
-        </h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información General</h3>
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
@@ -73,18 +71,17 @@ export function PurchaseOrderInfo({
             )}
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
-              Fecha
-            </label>
+            <label className="text-xs font-medium text-muted-foreground tracking-wide">Fecha</label>
             {isEditMode ? (
               <Input
-                value={generalInfo.fechaFactura}
+                type="date"
+                value={formatDateBars(generalInfo.fechaFactura)}
                 onChange={(e) => onGeneralInfoChange("fechaFactura", e.target.value)}
                 className="mt-1 h-8 text-sm font-semibold"
               />
             ) : (
               <p className="text-sm font-semibold text-cashport-black mt-1">
-                {generalInfo.fechaFactura}
+                {formatDateBars(generalInfo.fechaFactura)}
               </p>
             )}
           </div>
@@ -92,9 +89,7 @@ export function PurchaseOrderInfo({
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">
-          Información de Entrega
-        </h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
@@ -102,13 +97,14 @@ export function PurchaseOrderInfo({
             </label>
             {isEditMode ? (
               <Input
-                value={deliveryInfo.fechaEntrega}
+                type="date"
+                value={deliveryInfo.fechaEntrega ? formatDateBars(deliveryInfo.fechaEntrega) : ""}
                 onChange={(e) => onDeliveryInfoChange("fechaEntrega", e.target.value)}
                 className="mt-1 h-8 text-sm font-semibold"
               />
             ) : (
               <p className="text-sm font-semibold text-cashport-black mt-1">
-                {deliveryInfo.fechaEntrega || "-"}
+                {deliveryInfo.fechaEntrega ? formatDateBars(deliveryInfo.fechaEntrega) : "-"}
               </p>
             )}
           </div>
@@ -118,24 +114,17 @@ export function PurchaseOrderInfo({
             </label>
             {isEditMode ? (
               <Input
-                value={
-                  deliveryInfo.direccion && deliveryInfo.ciudad
-                    ? `${deliveryInfo.direccion}, ${deliveryInfo.ciudad}`
-                    : deliveryInfo.direccion || deliveryInfo.ciudad || ""
-                }
+                value={deliveryInfo.direccion ? `${deliveryInfo.direccion}` : ""}
                 onChange={(e) => {
                   const parts = e.target.value.split(",");
                   onDeliveryInfoChange("direccion", parts[0]?.trim() || "");
-                  onDeliveryInfoChange("ciudad", parts[1]?.trim() || "");
                 }}
                 className="mt-1 h-8 text-sm font-semibold"
                 placeholder="Dirección, Ciudad"
               />
             ) : (
               <p className="text-sm font-semibold text-cashport-black mt-1">
-                {deliveryInfo.direccion && deliveryInfo.ciudad
-                  ? `${deliveryInfo.direccion}, ${deliveryInfo.ciudad}`
-                  : deliveryInfo.direccion || deliveryInfo.ciudad || "-"}
+                {deliveryInfo.direccion ? `${deliveryInfo.direccion}` : "-"}
               </p>
             )}
           </div>

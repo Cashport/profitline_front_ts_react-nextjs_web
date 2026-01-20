@@ -259,7 +259,9 @@ export const ModulesButtons = ({
             type="primary"
             size="large"
             icon={<ShoppingCartSimple size={iconSize} />}
-            className={path === "/purchase-orders" ? styles.buttonIcon : styles.buttonIconActive}
+            className={
+              path.startsWith("/purchase-orders") ? styles.buttonIcon : styles.buttonIconActive
+            }
           >
             {isSideBarLarge && "Purchase Orders"}
           </Button>
