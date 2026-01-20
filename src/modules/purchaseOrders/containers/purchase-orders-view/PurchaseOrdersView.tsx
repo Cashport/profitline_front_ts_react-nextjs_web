@@ -3,16 +3,13 @@
 import { useEffect, useState } from "react";
 import { Flex, Spin } from "antd";
 
-import { Upload, FileText, Search, MoreHorizontal } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
-import { Button } from "@/modules/chat/ui/button";
+import UiSearchInput from "@/components/ui/search-input";
+import { useDebounce } from "@/hooks/useSearch";
+import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { UploadInterface } from "../../components/upload-interface/upload-interface";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
@@ -27,6 +24,7 @@ export function PurchaseOrdersView() {
 
   const [showUploadInterface, setShowUploadInterface] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -49,7 +47,7 @@ export function PurchaseOrdersView() {
 
   const { data, isLoading, pagination } = usePurchaseOrders({
     page: currentPage,
-    search: searchTerm,
+    search: debouncedSearchTerm,
     statusId: selectedFilters.statusId,
     clientId: selectedFilters.clientId,
     sellerId: selectedFilters.sellerId,
@@ -119,6 +117,19 @@ export function PurchaseOrdersView() {
     }));
   };
 
+  const actionItems: DropdownItem[] = [
+    {
+      key: "download",
+      label: "Descargar plano",
+      onClick: () => console.log("Descargar plano")
+    },
+    {
+      key: "mark-invoiced",
+      label: "Marcar como facturado",
+      onClick: () => console.log("Marcar como facturado")
+    }
+  ];
+
   return (
     <div className="bg-white rounded-lg">
       {/* Main white card containing all content */}
@@ -127,39 +138,17 @@ export function PurchaseOrdersView() {
           <CardContent className="p-0 ">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Buscar"
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="pl-10 w-80 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-gray-300 focus:ring-0"
-                  />
-                </div>
+                <UiSearchInput
+                  placeholder="Buscar"
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-gray-200 text-gray-700 hover:bg-gray-100 bg-gray-50"
-                    >
-                      <MoreHorizontal className="h-4 w-4 mr-2" />
-                      Generar acción
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem onClick={() => console.log("Descargar plano")}>
-                      Descargar plano
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => console.log("Marcar como facturado")}>
-                      Marcar como facturado
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <GeneralDropdown items={actionItems} align="start">
+                  <GenerateActionButton label="Generar acción" />
+                </GeneralDropdown>
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
@@ -185,13 +174,10 @@ export function PurchaseOrdersView() {
                 />
               </div>
 
-              <Button
-                className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold text-base px-6 py-5"
-                onClick={() => setShowUploadInterface(true)}
-              >
-                <Upload className="h-5 w-5 mr-2" />
+              <PrincipalButton onClick={() => setShowUploadInterface(true)}>
+                <Upload className="h-4 w-4 mr-2" />
                 Cargar Orden de compra
-              </Button>
+              </PrincipalButton>
             </div>
 
             {/* Table content */}
@@ -203,13 +189,10 @@ export function PurchaseOrdersView() {
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="mb-4">Carga tu primera orden de compra para comenzar el análisis</p>
-                <Button
-                  className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold"
-                  onClick={() => setShowUploadInterface(true)}
-                >
+                <PrincipalButton onClick={() => setShowUploadInterface(true)}>
                   <Upload className="h-4 w-4 mr-2" />
                   Cargar Orden de compra
-                </Button>
+                </PrincipalButton>
               </div>
             ) : (
               <div className="overflow-x-auto">

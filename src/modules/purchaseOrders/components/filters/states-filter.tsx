@@ -40,7 +40,7 @@ export function StatesFilter({
       <Button
         variant="outline"
         size="sm"
-        className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white"
+        className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-base"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Filter className="h-4 w-4 mr-2" />
