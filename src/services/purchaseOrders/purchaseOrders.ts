@@ -43,6 +43,36 @@ export const getOrderById = async (orderId: string): Promise<IPurchaseOrderDetai
   }
 };
 
+export const editPurchaseOrder = async (
+  orderId: string,
+  updatedData: Partial<IPurchaseOrderDetail>
+): Promise<IPurchaseOrderDetail> => {
+  try {
+    const response: GenericResponse<IPurchaseOrderDetail> = await API.put(
+      `${config.API_HOST}/purchaseorder/${orderId}`,
+      updatedData
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const editPurchaseOrderProducts = async (
+  orderId: string,
+  productsData: any[]
+): Promise<IPurchaseOrderDetail> => {
+  try {
+    const response: GenericResponse<IPurchaseOrderDetail> = await API.put(
+      `${config.API_HOST}/purchaseorder/${orderId}/products`,
+      { products: productsData }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const uploadPurchaseOrder = async (file: File): Promise<any> => {
   try {
     const formData = new FormData();
