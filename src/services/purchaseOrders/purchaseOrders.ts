@@ -36,3 +36,16 @@ export const getOrderById = async (orderId: number): Promise<any> => {
     throw error;
   }
 };
+
+export const uploadPurchaseOrder = async (file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("interno", "true");
+
+    const response: any = await API.post(`${config.API_PURCHASE_ORDERS_AI}`, formData);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};

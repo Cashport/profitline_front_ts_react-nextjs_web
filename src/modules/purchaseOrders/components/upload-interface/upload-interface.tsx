@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState, useCallback, useRef } from "react";
+import { message } from "antd";
 
 import { Upload, FileText, X, Scan, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
@@ -10,6 +11,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 import { Progress } from "@/modules/chat/ui/progress";
 import { AIProcessingInterface } from "../ai-processing-interface/ai-processing-interface";
+import { uploadPurchaseOrder } from "@/services/purchaseOrders/purchaseOrders";
 
 interface UploadedFile {
   file: File;
@@ -44,7 +46,7 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
   };
 
   const handleFiles = useCallback(
-    (files: FileList | File[]) => {
+    async (files: FileList | File[]) => {
       setError(null);
       const fileArray = Array.from(files);
 
@@ -65,29 +67,33 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
 
         setUploadedFiles((prev) => [...prev, uploadedFile]);
 
-        // Simulate upload progress
-        const interval = setInterval(() => {
-          setUploadedFiles((prev) =>
-            prev.map((f) => {
-              if (f.id === fileId) {
-                const newProgress = Math.min(f.progress + Math.random() * 30, 100);
-                const newStatus = newProgress === 100 ? "completed" : "uploading";
-                return { ...f, progress: newProgress, status: newStatus };
-              }
-              return f;
-            })
-          );
-        }, 500);
+        try {
+          // Call the real API to upload the file
+          await uploadPurchaseOrder(file);
 
-        setTimeout(() => {
-          clearInterval(interval);
+          // On success, update file status
           setUploadedFiles((prev) =>
             prev.map((f) => (f.id === fileId ? { ...f, progress: 100, status: "completed" } : f))
           );
+
+          message.success("Orden cargada con éxito");
+
+          // Transition to AI processing interface after successful upload
           setTimeout(() => {
             setShowAIProcessing(true);
           }, 500);
-        }, 3000);
+        } catch (error: any) {
+          // On error, update file status to error
+          setUploadedFiles((prev) =>
+            prev.map((f) => (f.id === fileId ? { ...f, status: "error" } : f))
+          );
+
+          // Extract error message
+          const errorMessage =
+            error?.response?.data?.message || error?.message || "Error al cargar la orden de compra";
+
+          message.error(errorMessage);
+        }
       }
 
       if (onFileUpload) {
