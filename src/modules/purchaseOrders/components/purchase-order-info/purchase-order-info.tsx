@@ -1,153 +1,265 @@
-import React from "react";
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { formatDateBars } from "@/utils/utils";
+import { PurchaseOrderInfoFormData } from "../../types/forms";
+import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
 
-// Interfaces de datos
-interface GeneralInfo {
-  numeroFactura: string;
-  comprador: string;
-  fechaFactura: string;
-  vendedor: string;
-  fechaVencimiento: string;
-}
-
-interface DeliveryInfo {
-  fechaEntrega: string;
-  direccion: string;
-  observacion: string;
+// Ref type for exposing methods to parent
+export interface PurchaseOrderInfoRef {
+  submitForm: () => void;
 }
 
 // Props del componente
 interface PurchaseOrderInfoProps {
   isEditMode: boolean;
-  generalInfo: GeneralInfo;
-  deliveryInfo: DeliveryInfo;
-  onGeneralInfoChange: (field: keyof GeneralInfo, value: string) => void;
-  onDeliveryInfoChange: (field: keyof DeliveryInfo, value: string) => void;
+  initialData: PurchaseOrderInfoFormData;
+  onSave: (data: PurchaseOrderInfoFormData, dirtyFields: string[]) => void;
+  onCancel: () => void;
 }
 
-export function PurchaseOrderInfo({
-  isEditMode,
-  generalInfo,
-  deliveryInfo,
-  onGeneralInfoChange,
-  onDeliveryInfoChange
-}: PurchaseOrderInfoProps) {
+export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderInfoProps>(
+  ({ isEditMode, initialData, onSave, onCancel }, ref) => {
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, dirtyFields },
+    reset,
+    getValues,
+  } = useForm<PurchaseOrderInfoFormData>({
+    resolver: yupResolver(purchaseOrderInfoSchema),
+    defaultValues: initialData,
+    mode: "onChange",
+  });
+
+  // Reset form when initialData changes (API refetch)
+  useEffect(() => {
+    reset(initialData);
+  }, [initialData, reset]);
+
+  // Submit handler that will be called by handleSubmit
+  const handleSaveInfo = (formData: PurchaseOrderInfoFormData) => {
+    const changedFields = Object.keys(dirtyFields);
+    if (changedFields.length > 0) {
+      console.log("handleSaveInfo - changed fields:", changedFields);
+      console.log("handleSaveInfo - form data:", formData);
+      onSave(formData, changedFields);
+    }
+  };
+
+  // Expose submitForm method to parent via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      submitForm: () => {
+        const changedFields = Object.keys(dirtyFields);
+        if (changedFields.length > 0) {
+          handleSubmit(handleSaveInfo)();
+        }
+      },
+    }),
+    [dirtyFields, handleSubmit]
+  );
+
   return (
     <div className="grid grid-cols-2 gap-8 mb-6">
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información General</h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">
+          Información General
+        </h3>
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Orden de compra
             </label>
-            {isEditMode ? (
-              <Input
-                value={generalInfo.numeroFactura}
-                onChange={(e) => onGeneralInfoChange("numeroFactura", e.target.value)}
-                className="mt-1 h-8 text-sm font-semibold"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {generalInfo.numeroFactura}
-              </p>
-            )}
+            <Controller
+              name="purchase_order_number"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      {...field}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      disabled
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {field.value}
+                    </p>
+                  )}
+                  {errors.purchase_order_number && (
+                    <span className="text-xs text-red-500">
+                      {errors.purchase_order_number.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Cliente
             </label>
-            {isEditMode ? (
-              <Input
-                value={generalInfo.comprador}
-                onChange={(e) => onGeneralInfoChange("comprador", e.target.value)}
-                className="mt-1 h-8 text-sm font-semibold"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {generalInfo.comprador}
-              </p>
-            )}
+            <Controller
+              name="client_name"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      {...field}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      disabled
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {field.value}
+                    </p>
+                  )}
+                  {errors.client_name && (
+                    <span className="text-xs text-red-500">
+                      {errors.client_name.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">Fecha</label>
-            {isEditMode ? (
-              <Input
-                type="date"
-                value={formatDateBars(generalInfo.fechaFactura)}
-                onChange={(e) => onGeneralInfoChange("fechaFactura", e.target.value)}
-                className="mt-1 h-8 text-sm font-semibold"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {formatDateBars(generalInfo.fechaFactura)}
-              </p>
-            )}
+            <label className="text-xs font-medium text-muted-foreground tracking-wide">
+              Fecha
+            </label>
+            <Controller
+              name="created_at"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      type="date"
+                      value={formatDateBars(field.value)}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      disabled
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {formatDateBars(field.value)}
+                    </p>
+                  )}
+                  {errors.created_at && (
+                    <span className="text-xs text-red-500">
+                      {errors.created_at.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
+        <h3 className="text-lg font-semibold text-cashport-black mb-4">
+          Información de Entrega
+        </h3>
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Fecha/Hora entrega
             </label>
-            {isEditMode ? (
-              <Input
-                type="date"
-                value={deliveryInfo.fechaEntrega ? formatDateBars(deliveryInfo.fechaEntrega) : ""}
-                onChange={(e) => onDeliveryInfoChange("fechaEntrega", e.target.value)}
-                className="mt-1 h-8 text-sm font-semibold"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {deliveryInfo.fechaEntrega ? formatDateBars(deliveryInfo.fechaEntrega) : "-"}
-              </p>
-            )}
+            <Controller
+              name="delivery_date"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      type="date"
+                      value={field.value ? formatDateBars(field.value) : ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className="mt-1 h-8 text-sm font-semibold"
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {field.value ? formatDateBars(field.value) : "-"}
+                    </p>
+                  )}
+                  {errors.delivery_date && (
+                    <span className="text-xs text-red-500">
+                      {errors.delivery_date.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Dirección completa
             </label>
-            {isEditMode ? (
-              <Input
-                value={deliveryInfo.direccion ? `${deliveryInfo.direccion}` : ""}
-                onChange={(e) => {
-                  const parts = e.target.value.split(",");
-                  onDeliveryInfoChange("direccion", parts[0]?.trim() || "");
-                }}
-                className="mt-1 h-8 text-sm font-semibold"
-                placeholder="Dirección, Ciudad"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {deliveryInfo.direccion ? `${deliveryInfo.direccion}` : "-"}
-              </p>
-            )}
+            <Controller
+              name="delivery_address"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      {...field}
+                      value={field.value || ""}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      placeholder="Dirección completa"
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {field.value || "-"}
+                    </p>
+                  )}
+                  {errors.delivery_address && (
+                    <span className="text-xs text-red-500">
+                      {errors.delivery_address.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Observación
             </label>
-            {isEditMode ? (
-              <Input
-                value={deliveryInfo.observacion}
-                onChange={(e) => onDeliveryInfoChange("observacion", e.target.value)}
-                className="mt-1 h-8 text-sm font-semibold"
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black mt-1">
-                {deliveryInfo.observacion || "-"}
-              </p>
-            )}
+            <Controller
+              name="observations"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {isEditMode ? (
+                    <Input
+                      {...field}
+                      value={field.value || ""}
+                      className="mt-1 h-8 text-sm font-semibold"
+                    />
+                  ) : (
+                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                      {field.value || "-"}
+                    </p>
+                  )}
+                  {errors.observations && (
+                    <span className="text-xs text-red-500">
+                      {errors.observations.message}
+                    </span>
+                  )}
+                </>
+              )}
+            />
           </div>
         </div>
       </div>
     </div>
   );
-}
+});
 
-export type { GeneralInfo, DeliveryInfo };
+PurchaseOrderInfo.displayName = "PurchaseOrderInfo";

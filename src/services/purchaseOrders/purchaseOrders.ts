@@ -48,7 +48,7 @@ export const editPurchaseOrder = async (
   updatedData: Partial<IPurchaseOrderDetail>
 ): Promise<IPurchaseOrderDetail> => {
   try {
-    const response: GenericResponse<IPurchaseOrderDetail> = await API.put(
+    const response: GenericResponse<IPurchaseOrderDetail> = await API.patch(
       `${config.API_HOST}/purchaseorder/${orderId}`,
       updatedData
     );

@@ -1,0 +1,108 @@
+import {
+  IPurchaseOrderDetail,
+  IPurchaseOrderProduct,
+} from "@/types/purchaseOrders/purchaseOrders";
+
+/**
+ * Unified form data type for purchase order information
+ * Combines general info and delivery info into a single form
+ */
+export interface PurchaseOrderInfoFormData {
+  // General Information (read-only in form, but included for display)
+  purchase_order_number: string;
+  client_name: string;
+  created_at: string;
+
+  // Delivery Information (editable, optional)
+  delivery_date?: string;
+  delivery_address?: string;
+  observations?: string;
+}
+
+/**
+ * Form data type for individual product
+ */
+export interface ProductFormData {
+  marketplace_order_product_id: number; // For API identification
+  product_sku: string; // Read-only display
+  product_description: string; // Read-only display
+  quantity: number; // Editable
+  unit_price: number; // Editable
+  tax_amount: number; // Editable
+  subtotal: number; // Calculated: quantity * unit_price
+  total_price: number; // Calculated: subtotal + tax_amount
+}
+
+/**
+ * Form data type for products array
+ */
+export interface PurchaseOrderProductsFormData {
+  products: ProductFormData[];
+}
+
+/**
+ * Transform API purchase order detail to form data
+ * @param data - API response data
+ * @returns Form data for PurchaseOrderInfo component
+ */
+export const mapApiToFormData = (
+  data: IPurchaseOrderDetail
+): PurchaseOrderInfoFormData => ({
+  purchase_order_number: data.purchase_order_number || "",
+  client_name: data.client_name || "",
+  created_at: data.created_at || "",
+  delivery_date: data.delivery_date || "",
+  delivery_address: data.delivery_address || "",
+  observations: data.observations || "",
+});
+
+/**
+ * Transform form data to API payload for update
+ * Only includes editable fields
+ * @param formData - Form data from PurchaseOrderInfo
+ * @returns Payload for API update request
+ */
+export const mapFormDataToApi = (
+  formData: PurchaseOrderInfoFormData
+): Partial<IPurchaseOrderDetail> => ({
+  delivery_date: formData.delivery_date,
+  delivery_address: formData.delivery_address,
+  observations: formData.observations,
+});
+
+/**
+ * Transform API products to form data
+ * @param products - API products array
+ * @returns Form data for PurchaseOrderProducts component
+ */
+export const mapApiProductsToForm = (
+  products: IPurchaseOrderProduct[]
+): PurchaseOrderProductsFormData => ({
+  products: products.map((p) => ({
+    marketplace_order_product_id: p.marketplace_order_product_id,
+    product_sku: p.product_sku || "",
+    product_description: p.product_description || "",
+    quantity: p.quantity || 0,
+    unit_price: p.unit_price || 0,
+    tax_amount: p.tax_amount || 0,
+    subtotal: p.subtotal || 0,
+    total_price: p.total_price || 0,
+  })),
+});
+
+/**
+ * Transform form products to API payload
+ * Only includes editable fields
+ * @param formData - Form data from PurchaseOrderProducts
+ * @returns Payload for API update request
+ */
+export const mapFormProductsToApi = (
+  formData: PurchaseOrderProductsFormData
+) => ({
+  products: formData.products.map((p) => ({
+    marketplace_order_product_id: p.marketplace_order_product_id,
+    quantity: p.quantity,
+    unit_price: p.unit_price,
+    tax_amount: p.tax_amount,
+  })),
+});
