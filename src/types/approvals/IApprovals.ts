@@ -30,6 +30,7 @@ export interface IApprovalStepStatus {
 export interface IApprovalStep {
   id: number;
   approverUserId: number;
+  approverName: string;
   order: number;
   isSequential: boolean;
   approvedAt: string | null;
