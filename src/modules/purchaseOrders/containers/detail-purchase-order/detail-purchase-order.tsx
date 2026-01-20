@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
+import useSWR from "swr";
 import { extractSingleParam } from "@/utils/utils";
 
 import {
@@ -12,33 +13,15 @@ import {
   GripVertical,
   MoreHorizontal,
   Save,
-  CheckCircle,
-  ClipboardList,
   Receipt,
-  Truck,
-  Package,
   Check,
   X,
-  AlertTriangle,
-  ShoppingCart,
-  PackageX,
-  TrendingDown,
-  MapPin,
-  XOctagon,
-  DollarSign,
   Send,
   FileOutput,
   PackageCheck
 } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Separator } from "@/modules/chat/ui/separator";
 import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
@@ -54,14 +37,18 @@ import { PurchaseOrderProcess } from "../../components/purchase-order-process/pu
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
 import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
+import { fetcher } from "@/utils/api/api";
+import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
+import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
-  const { state, goToDashboard, selectInvoice } = useApp();
+  const { goToDashboard } = useApp();
 
   const orderId = extractSingleParam(params.orderId);
-  const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   // All hooks must be called before any conditional returns
@@ -70,7 +57,27 @@ export function DetailPurchaseOrder() {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [currentStage, setCurrentStage] = useState(2);
+
+  const {
+    data: orderData,
+    isLoading,
+    mutate
+  } = useSWR<GenericResponse<IPurchaseOrderDetail>>(
+    orderId ? `/purchaseorder/${orderId}` : null,
+    fetcher
+  );
+  const data = orderData?.data;
+
+  // Process tracking data to populate stage completion info
+  const processedStages = useMemo(() => {
+    if (!data?.tracking) return ORDER_STAGES_CONFIG;
+    return mergeTrackingWithStages(ORDER_STAGES_CONFIG, data.tracking);
+  }, [data?.tracking]);
+
+  // Determine current stage from tracking data
+  const currentStage = useMemo(() => {
+    return getCurrentStage(processedStages);
+  }, [processedStages]);
 
   const [editableGeneralInfo, setEditableGeneralInfo] = useState({
     numeroFactura: "",
@@ -87,11 +94,7 @@ export function DetailPurchaseOrder() {
     observacion: ""
   });
 
-  const [standardizedProducts, setStandardizedProducts] = useState<Record<string, string>>({
-    "PROD-001": "laptop-dell-inspiron-15",
-    "PROD-002": "",
-    "PROMO-001": "mousepad-corporativo"
-  });
+  const [standardizedProducts, setStandardizedProducts] = useState<Record<string, string>>({});
 
   const [editableProducts, setEditableProducts] = useState<
     Array<{
@@ -153,61 +156,34 @@ export function DetailPurchaseOrder() {
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  // Sync URL param with context state
+  // Sync editable state when data from API changes
   useEffect(() => {
-    if (!orderId) {
-      setNotFound(true);
-      setIsLoading(false);
-      return;
-    }
-
-    // If we already have the correct invoice selected, use it
-    if (state.selectedInvoice?.id === orderId) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Find invoice by ID from context invoices array directly
-    const invoice = state.invoices.find((inv) => inv.id === orderId);
-
-    if (invoice) {
-      selectInvoice(invoice);
-      setIsLoading(false);
-    } else {
-      setNotFound(true);
-      setIsLoading(false);
-    }
-  }, [orderId, state.selectedInvoice?.id, state.invoices, selectInvoice]);
-
-  // Sync editable state when invoiceData changes
-  useEffect(() => {
-    if (state.selectedInvoice) {
-      const invoiceData = state.selectedInvoice;
+    if (data) {
       setEditableGeneralInfo({
-        numeroFactura: invoiceData.numeroFactura,
-        comprador: invoiceData.comprador,
-        fechaFactura: invoiceData.fechaFactura,
-        vendedor: invoiceData.vendedor || "",
-        fechaVencimiento: invoiceData.fechaVencimiento || ""
+        numeroFactura: data.purchase_order_number,
+        comprador: data.client_name,
+        fechaFactura: data.created_at,
+        vendedor: "XXXXX", // No disponible en API
+        fechaVencimiento: "XXXXX" // No disponible en API
       });
       setEditableDeliveryInfo({
-        fechaEntrega: invoiceData.fechaEntrega || "",
-        direccion: invoiceData.direccion || "",
-        ciudad: invoiceData.ciudad || "",
-        observacion: invoiceData.observacion || ""
+        fechaEntrega: data.delivery_date || "",
+        direccion: data.delivery_address || "",
+        ciudad: "XXXXX", // No disponible en API
+        observacion: data.observations || ""
       });
       setEditableProducts(
-        invoiceData.productos.map((p) => ({
-          idProducto: p.idProducto,
-          nombreProducto: p.nombreProducto,
-          cantidad: p.cantidad,
-          precioUnitario: p.precioUnitario,
-          iva: p.iva,
-          precioTotal: p.precioTotal
+        data.products.map((p) => ({
+          idProducto: p.product_sku,
+          nombreProducto: p.product_description,
+          cantidad: p.quantity,
+          precioUnitario: p.unit_price,
+          iva: p.tax_amount,
+          precioTotal: p.total_price
         }))
       );
     }
-  }, [state.selectedInvoice]);
+  }, [data]);
 
   // Loading state
   if (isLoading) {
@@ -219,7 +195,7 @@ export function DetailPurchaseOrder() {
   }
 
   // Not found state
-  if (notFound || !state.selectedInvoice) {
+  if (notFound || (!isLoading && !data)) {
     return (
       <div className="min-h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
         <p>Orden de compra no encontrada</p>
@@ -228,7 +204,11 @@ export function DetailPurchaseOrder() {
     );
   }
 
-  const invoiceData = state.selectedInvoice;
+  // Early return if still loading or no data
+  if (!data) {
+    return null; // Loading state is already handled above
+  }
+
   const onBack = goToDashboard;
 
   const internalProducts = [
@@ -288,17 +268,6 @@ export function DetailPurchaseOrder() {
     setPdfWidth(40); // Default width when expanding
   };
 
-  const handleDownloadPdf = () => {
-    if (invoiceData.pdfUrl) {
-      const link = document.createElement("a");
-      link.href = invoiceData.pdfUrl;
-      link.download = invoiceData.archivoOriginal || `factura-${invoiceData.numeroFactura}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -339,16 +308,6 @@ export function DetailPurchaseOrder() {
     // Note: Modal handles its own closing via onOpenChange
   };
 
-  const estadoConfig = stateColorConfig[invoiceData.estado] || {
-    color: "#B0BEC5",
-    textColor: "text-white"
-  };
-
-  const novedadInfo =
-    invoiceData.tipoNovedad && invoiceData.estado === "Novedad"
-      ? novedadConfig[invoiceData.tipoNovedad]
-      : null;
-
   const handleDownloadCSV = () => {
     const headers = [
       "ID Producto",
@@ -373,7 +332,6 @@ export function DetailPurchaseOrder() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `productos-${invoiceData.numeroFactura}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -383,19 +341,16 @@ export function DetailPurchaseOrder() {
   const handleSendToApproval = (selectedApproverIds: string[]) => {
     console.log("Send to approval:", selectedApproverIds);
     // TODO: Implement send to approval logic
-    // Note: Modal handles its own closing via onOpenChange
   };
 
   const handleAddInvoices = (invoiceIds: string) => {
     console.log("Invoice IDs:", invoiceIds);
     // TODO: Implement invoice addition logic
-    // Note: Modal handles its own closing via onOpenChange
   };
 
   const handleConfirmDispatch = (dispatchNotes: string) => {
     console.log("Dispatch confirmed with notes:", dispatchNotes);
     // TODO: Implement dispatch confirmation logic
-    // Note: Modal handles its own closing via onOpenChange
   };
 
   const actionItems: DropdownItem[] = [
@@ -478,7 +433,7 @@ export function DetailPurchaseOrder() {
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              {invoiceData.estado === "En aprobaciones" && (
+              {data.status_name === "En aprobaciones" && (
                 <div className="flex items-center gap-2 mr-2">
                   <Button
                     variant="outline"
@@ -499,61 +454,22 @@ export function DetailPurchaseOrder() {
                 </div>
               )}
               <Badge
-                className={`${estadoConfig.textColor} px-3 py-1 text-sm font-medium`}
-                style={{ backgroundColor: estadoConfig.color }}
+                className="text-white px-3 py-1 text-sm font-medium"
+                style={{ backgroundColor: data.status_color || "#B0BEC5" }}
               >
-                {invoiceData.estado}
+                {data.status_name ? data.status_name : "Desconocido"}
               </Badge>
             </div>
           </div>
 
+          {/* Novedades no disponibles en API
           {novedadInfo && (
-            <div
-              className="mb-6 rounded-lg border-2 p-4"
-              style={{
-                backgroundColor: novedadInfo.bgColor,
-                borderColor: novedadInfo.borderColor
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${novedadInfo.color}20` }}
-                >
-                  <novedadInfo.icon className="h-5 w-5" style={{ color: novedadInfo.color }} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-base" style={{ color: novedadInfo.color }}>
-                      {invoiceData.tipoNovedad}
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                      style={{
-                        borderColor: novedadInfo.color,
-                        color: novedadInfo.color,
-                        backgroundColor: "white"
-                      }}
-                    >
-                      Requiere atención
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{novedadInfo.description}</p>
-                  {invoiceData.alertas.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {invoiceData.alertas.map((alerta, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-xs text-gray-600">
-                          <span className="text-orange-500 mt-0.5">•</span>
-                          <span>{alerta}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="mb-6 rounded-lg border-2 p-4">
+              Sección de novedades temporalmente deshabilitada
+              Campos necesarios del backend: tipoNovedad, alertas
             </div>
           )}
+          */}
 
           <PurchaseOrderInfo
             isEditMode={isEditMode}
@@ -565,7 +481,7 @@ export function DetailPurchaseOrder() {
 
           <PurchaseOrderProcess
             currentStage={currentStage}
-            orderStages={orderStages}
+            orderStages={processedStages}
             onShowHistory={() => setShowTimelineHistory(true)}
           />
 
@@ -595,12 +511,11 @@ export function DetailPurchaseOrder() {
 
             {!isPdfCollapsed && (
               <PurchaseOrderDocument
-                pdfUrl={invoiceData.pdfUrl}
-                archivoOriginal={invoiceData.archivoOriginal}
-                numeroFactura={invoiceData.numeroFactura}
+                pdfUrl={data.document_url}
+                archivoOriginal={data.document_name}
+                numeroFactura={data.purchase_order_number}
                 pdfWidth={pdfWidth}
                 onCollapse={() => setIsPdfCollapsed(true)}
-                onDownload={handleDownloadPdf}
               />
             )}
           </div>
@@ -648,136 +563,22 @@ export function DetailPurchaseOrder() {
         open={showDispatchModal}
         onOpenChange={setShowDispatchModal}
         onConfirm={handleConfirmDispatch}
-        orderNumber={invoiceData.numeroFactura}
+        orderNumber={data.purchase_order_number}
       />
 
       <TimelineHistoryModal
         isOpen={showTimelineHistory}
         onClose={() => setShowTimelineHistory(false)}
-        invoiceId={invoiceData.id}
-        timeline={invoiceData.timeline || []}
+        invoiceId={data.purchase_order_number}
+        timeline={data.tracking.map((t) => ({
+          id: t.id.toString(),
+          title: t.step_name,
+          description: t.event_description,
+          actor: t.created_by_name,
+          timestamp: t.created_at,
+          type: "system" as const
+        }))}
       />
     </div>
   );
 }
-
-const orderStages = [
-  {
-    id: 1,
-    name: "Orden de compra",
-    icon: ClipboardList,
-    completedBy: "Sistema",
-    completedAt: "2024-01-14 10:00"
-  },
-  {
-    id: 2,
-    name: "Validaciones",
-    icon: CheckCircle,
-    completedBy: null,
-    completedAt: null,
-    subValidations: [
-      {
-        name: "Aprobado Cartera",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: true
-      },
-      {
-        name: "Aprobado Financiera",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: true
-      },
-      {
-        name: "Aprobado KAM",
-        completedBy: "Miguel Martinez",
-        completedAt: "02/02/2025 12:00",
-        isCompleted: false
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Facturado",
-    icon: Receipt,
-    completedBy: null,
-    completedAt: null
-  },
-  {
-    id: 4,
-    name: "En despacho",
-    icon: Truck,
-    completedBy: null,
-    completedAt: null
-  },
-  {
-    id: 5,
-    name: "Entregado",
-    icon: Package,
-    completedBy: null,
-    completedAt: null
-  }
-];
-
-const stateColorConfig: Record<string, { color: string; textColor: string }> = {
-  "En validación": { color: "#2196F3", textColor: "text-white" },
-  "En aprobaciones": { color: "#9C27B0", textColor: "text-white" },
-  "En facturación": { color: "#FFC107", textColor: "text-black" },
-  Facturado: { color: "#4CAF50", textColor: "text-white" },
-  "En despacho": { color: "#009688", textColor: "text-white" },
-  Entregado: { color: "#2E7D32", textColor: "text-white" },
-  Novedad: { color: "#E53935", textColor: "text-white" },
-  "Back order": { color: "#000000", textColor: "text-white" }
-};
-
-const novedadConfig = {
-  "No tiene cupo": {
-    icon: ShoppingCart,
-    color: "#FF6B6B",
-    bgColor: "#FFF5F5",
-    borderColor: "#FFEBEB",
-    description: "El cliente ha excedido su límite de crédito disponible"
-  },
-  "No tiene stock": {
-    icon: PackageX,
-    color: "#FF8C42",
-    bgColor: "#FFF8F3",
-    borderColor: "#FFEDD5",
-    description: "No hay inventario suficiente para completar el pedido"
-  },
-  "No cumple especificaciones de entrega": {
-    icon: AlertTriangle,
-    color: "#FFA726",
-    bgColor: "#FFF3E0",
-    borderColor: "#FFE0B2",
-    description: "La entrega no cumple con los requisitos establecidos"
-  },
-  "Cantidad fuera de promedio": {
-    icon: TrendingDown,
-    color: "#AB47BC",
-    bgColor: "#F3E5F5",
-    borderColor: "#E1BEE7",
-    description: "La cantidad solicitada difiere significativamente del promedio histórico"
-  },
-  "Nuevo punto de entrega": {
-    icon: MapPin,
-    color: "#42A5F5",
-    bgColor: "#E3F2FD",
-    borderColor: "#BBDEFB",
-    description: "Primera entrega en esta ubicación, requiere validación"
-  },
-  "No es posible cumplir con la entrega": {
-    icon: XOctagon,
-    color: "#EF5350",
-    bgColor: "#FFEBEE",
-    borderColor: "#FFCDD2",
-    description: "Restricciones logísticas impiden completar la entrega"
-  },
-  "No coincide la lista de precios y/o productos": {
-    icon: DollarSign,
-    color: "#FF7043",
-    bgColor: "#FBE9E7",
-    borderColor: "#FFCCBC",
-    description: "Discrepancia entre precios/productos solicitados y catálogo actual"
-  }
-};

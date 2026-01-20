@@ -1,7 +1,11 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
 import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
-import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import {
+  IPurchaseOrder,
+  IPurchaseOrderDetail,
+  IPurchaseOrderFilters
+} from "@/types/purchaseOrders/purchaseOrders";
 
 export const getAllOrders = async (
   projectId: number
@@ -28,10 +32,12 @@ export const getFilters = async (projectId: number): Promise<IPurchaseOrderFilte
   }
 };
 
-export const getOrderById = async (orderId: number): Promise<any> => {
+export const getOrderById = async (orderId: string): Promise<IPurchaseOrderDetail> => {
   try {
-    const response: IPurchaseOrder = await API.get(`${config.API_HOST}/purchaseorder/${orderId}`);
-    return response;
+    const response: GenericResponse<IPurchaseOrderDetail> = await API.get(
+      `${config.API_HOST}/purchaseorder/${orderId}`
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }

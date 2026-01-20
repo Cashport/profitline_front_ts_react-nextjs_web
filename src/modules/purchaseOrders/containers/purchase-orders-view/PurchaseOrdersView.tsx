@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Flex, Spin } from "antd";
+import { useRouter } from "next/navigation";
 
 import { Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
@@ -20,6 +21,7 @@ import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
 
 export function PurchaseOrdersView() {
+  const router = useRouter();
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
   const [showUploadInterface, setShowUploadInterface] = useState(false);
@@ -75,6 +77,7 @@ export function PurchaseOrdersView() {
   const handleRowClick = (record: IPurchaseOrder) => {
     console.log("Row clicked:", record);
     // TODO: Navigate to detail page or open modal
+    router.push(`/purchase-orders/${record.id}`);
   };
 
   const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
