@@ -1,398 +1,214 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Flex, Spin } from "antd";
+import { useRouter } from "next/navigation";
 
-import { Upload, FileText, Search, MoreHorizontal } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
-import { Button } from "@/modules/chat/ui/button";
+import UiSearchInput from "@/components/ui/search-input";
+import { useDebounce } from "@/hooks/useSearch";
+import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { UploadInterface } from "../../components/upload-interface/upload-interface";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
-import { StatesFilter, documentStateConfig } from "../../components/filters/states-filter";
+import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
+import { useAppStore } from "@/lib/store/store";
+import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
-import { SellersFilter } from "../../components/filters/sellers-filter";
-import { useApp } from "../../context/app-context";
+import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
 
-interface ModuleConfig {
-  showVendedor: boolean;
-  showProductosPromocion: boolean;
-  compradorLabel: string;
-  idLabel: string;
-  showCompradorFilter: boolean;
-  showVendedorFilter: boolean;
-  clienteFilterLabel?: string;
-  showEntregaColumn?: boolean;
-  showAlertas?: boolean;
-  fechaLabel?: string;
-}
+export function PurchaseOrdersView() {
+  const router = useRouter();
+  const { ID } = useAppStore((projects) => projects.selectedProject);
 
-interface MainDashboardProps {
-  moduleTitle?: string;
-  config?: ModuleConfig;
-}
-
-const defaultConfig: ModuleConfig = {
-  showVendedor: true,
-  showProductosPromocion: true,
-  compradorLabel: "Comprador",
-  idLabel: "Id factura",
-  showCompradorFilter: true,
-  showVendedorFilter: true,
-  showEntregaColumn: false,
-  showAlertas: true,
-  fechaLabel: "Fecha Factura"
-};
-
-export function PurchaseOrdersView({ config = defaultConfig }: MainDashboardProps) {
-  const {
-    state,
-    getInvoiceCounts,
-    getFilteredInvoices,
-    setFilter,
-    setCompradorFilter,
-    setVendedorFilter,
-    setDateRangeFilter,
-    getUniqueCompradores,
-    getUniqueVendedores,
-    goToDetail,
-    toggleInvoiceSelection,
-    selectAllInvoices,
-    clearSelection
-  } = useApp();
   const [showUploadInterface, setShowUploadInterface] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<string | null>("estado");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const invoiceCounts = getInvoiceCounts();
-  const filteredInvoices = getFilteredInvoices();
-  const uniqueCompradores = getUniqueCompradores();
-  const uniqueVendedores = getUniqueVendedores();
+  // Filter options from API
+  const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
+    statuses: [],
+    clients: [],
+    sellers: []
+  });
+
+  // Single state for selected filter IDs
+  const [selectedFilters, setSelectedFilters] = useState({
+    statusId: undefined as number | undefined,
+    clientId: undefined as string | undefined,
+    sellerId: undefined as string | undefined,
+    createdFrom: undefined as string | undefined,
+    createdTo: undefined as string | undefined,
+    dateRange: { start: null as string | null, end: null as string | null }
+  });
+
+  const { data, isLoading, pagination } = usePurchaseOrders({
+    page: currentPage,
+    search: debouncedSearchTerm,
+    statusId: selectedFilters.statusId,
+    clientId: selectedFilters.clientId,
+    sellerId: selectedFilters.sellerId,
+    createdFrom: selectedFilters.createdFrom,
+    createdTo: selectedFilters.createdTo
+  });
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const filters = await getFilters(ID);
+        setFilterOptions(filters);
+      } catch (error) {
+        console.error("Failed to fetch filters:", error);
+      }
+    };
+    fetchFilters();
+  }, [ID]);
 
   const handleFileUpload = (files: File[]) => {
     console.log("Files uploaded:", files);
     // The upload interface will handle the AI processing and add the invoice to state
   };
 
-  const handleStateFilter = (stateName: string | null) => {
-    if (stateName === null || state.filterState === stateName) {
-      setFilter(null);
-    } else {
-      setFilter(stateName);
-    }
+  const handleRowClick = (record: IPurchaseOrder) => {
+    console.log("Row clicked:", record);
+    // TODO: Navigate to detail page or open modal
+    router.push(`/purchase-orders/${record.id}`);
+  };
+
+  const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
+    setSelectedRowKeys(selectedKeys);
+    console.log("Selected rows:", selectedRows);
+  };
+
+  // Filter handler functions
+  const handleStatusChange = (statusId: number | null) => {
+    setSelectedFilters((prev) => ({ ...prev, statusId: statusId ?? undefined }));
     setCurrentPage(1);
   };
 
-  const handleCompradorFilter = (comprador: string | null) => {
-    if (comprador === null || state.filterComprador === comprador) {
-      setCompradorFilter(null);
-    } else {
-      setCompradorFilter(comprador);
-    }
+  const handleClientChange = (clientId: string | null) => {
+    setSelectedFilters((prev) => ({ ...prev, clientId: clientId ?? undefined }));
     setCurrentPage(1);
   };
 
-  const handleVendedorFilter = (vendedor: string | null) => {
-    if (vendedor === null || state.filterVendedor === vendedor) {
-      setVendedorFilter(null);
-    } else {
-      setVendedorFilter(vendedor);
-    }
+  const handleSellerChange = (sellerId: string | null) => {
+    setSelectedFilters((prev) => ({ ...prev, sellerId: sellerId ?? undefined }));
     setCurrentPage(1);
   };
 
   const handleDateRangeChange = (start: string, end: string) => {
-    setDateRangeFilter({ start: start || null, end: end || null });
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dateRange: { start, end },
+      createdFrom: start || undefined,
+      createdTo: end || undefined
+    }));
     setCurrentPage(1);
   };
 
-  const searchFilteredInvoices = filteredInvoices.filter(
-    (invoice) =>
-      invoice.numeroFactura.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.comprador.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.vendedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getEstadoOrder = (estado: string) => {
-    const index = documentStateConfig.findIndex((s) => s.name === estado);
-    return index === -1 ? 999 : index;
+  const handleClearDateRange = () => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      dateRange: { start: null, end: null },
+      createdFrom: undefined,
+      createdTo: undefined
+    }));
   };
 
-  const sortedInvoices = [...searchFilteredInvoices].sort((a, b) => {
-    if (!sortColumn) return 0;
-
-    let aValue: any;
-    let bValue: any;
-
-    switch (sortColumn) {
-      case "autoId":
-        aValue = a.autoId;
-        bValue = b.autoId;
-        break;
-      case "id":
-        aValue = a.id;
-        bValue = b.id;
-        break;
-      case "fecha":
-        aValue = new Date(a.fechaFactura);
-        bValue = new Date(b.fechaFactura);
-        break;
-      case "entrega":
-        aValue = a.fechaEntrega ? new Date(a.fechaEntrega) : new Date(0);
-        bValue = b.fechaEntrega ? new Date(b.fechaEntrega) : new Date(0);
-        break;
-      case "comprador":
-        aValue = a.comprador.toLowerCase();
-        bValue = b.comprador.toLowerCase();
-        break;
-      case "vendedor":
-        aValue = a.vendedor.toLowerCase();
-        bValue = b.vendedor.toLowerCase();
-        break;
-      case "estado":
-        aValue = getEstadoOrder(a.estado);
-        bValue = getEstadoOrder(b.estado);
-        break;
-      case "productos":
-        aValue = a.cantidad;
-        bValue = b.cantidad;
-        break;
-      case "monto":
-        aValue = a.monto;
-        bValue = b.monto;
-        break;
-      default:
-        return 0;
+  const actionItems: DropdownItem[] = [
+    {
+      key: "download",
+      label: "Descargar plano",
+      onClick: () => console.log("Descargar plano")
+    },
+    {
+      key: "mark-invoiced",
+      label: "Marcar como facturado",
+      onClick: () => console.log("Marcar como facturado")
     }
-
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const totalPages = Math.ceil(sortedInvoices.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedInvoices = sortedInvoices.slice(startIndex, endIndex);
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      selectAllInvoices(paginatedInvoices.map((invoice) => invoice.id));
-    } else {
-      clearSelection();
-    }
-  };
-
-  const isAllSelected =
-    paginatedInvoices.length > 0 &&
-    paginatedInvoices.every((invoice) => state.selectedInvoiceIds.includes(invoice.id));
-  const isIndeterminate =
-    paginatedInvoices.some((invoice) => state.selectedInvoiceIds.includes(invoice.id)) &&
-    !isAllSelected;
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
+  ];
 
   return (
-    <div className="min-h-screen bg-white rounded-lg">
+    <div className="bg-white rounded-lg">
       {/* Main white card containing all content */}
       <main>
-        <Card className="bg-cashport-white border-0 shadow-sm">
-          <CardContent className="px-6 pt-2 pb-4">
+        <Card className="bg-cashport-white border-0 shadow-sm p-6">
+          <CardContent className="p-0 ">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Buscar"
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="pl-10 w-80 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-gray-300 focus:ring-0"
-                  />
-                </div>
+                <UiSearchInput
+                  placeholder="Buscar"
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-gray-200 text-gray-700 hover:bg-gray-100 bg-gray-50"
-                    >
-                      <MoreHorizontal className="h-4 w-4 mr-2" />
-                      Generar acción
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem onClick={() => console.log("Descargar plano")}>
-                      Descargar plano
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => console.log("Marcar como facturado")}>
-                      Marcar como facturado
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <GeneralDropdown items={actionItems} align="start">
+                  <GenerateActionButton label="Generar acción" />
+                </GeneralDropdown>
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
-                  filterState={state.filterState}
-                  invoiceCounts={invoiceCounts}
-                  totalCount={state.invoices.length}
-                  onFilterChange={handleStateFilter}
+                  selectedStatusId={selectedFilters.statusId ?? null}
+                  statuses={filterOptions.statuses || []}
+                  onFilterChange={handleStatusChange}
                 />
 
                 {/* General Filters Dropdown */}
                 <GeneralFilter
-                  showCompradorFilter={config.showCompradorFilter}
-                  clienteFilterLabel={config.clienteFilterLabel}
-                  filterComprador={state.filterComprador}
-                  uniqueCompradores={uniqueCompradores}
-                  onCompradorChange={handleCompradorFilter}
-                  filterDateRange={state.filterDateRange}
+                  showCompradorFilter={true}
+                  clienteFilterLabel="Cliente"
+                  selectedClientId={selectedFilters.clientId ?? null}
+                  clients={filterOptions.clients || []}
+                  onCompradorChange={handleClientChange}
+                  showVendedorFilter={true}
+                  selectedSellerId={selectedFilters.sellerId ?? null}
+                  sellers={filterOptions.sellers || []}
+                  onVendedorChange={handleSellerChange}
+                  filterDateRange={selectedFilters.dateRange}
                   onDateRangeChange={handleDateRangeChange}
-                  onClearDateRange={() => setDateRangeFilter({ start: null, end: null })}
+                  onClearDateRange={handleClearDateRange}
                 />
-
-                {/* Vendedor Filter */}
-                {config.showVendedorFilter && (
-                  <SellersFilter
-                    filterVendedor={state.filterVendedor}
-                    uniqueVendedores={uniqueVendedores}
-                    onVendedorChange={handleVendedorFilter}
-                  />
-                )}
               </div>
 
-              <Button
-                className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold text-base px-6 py-5"
-                onClick={() => setShowUploadInterface(true)}
-              >
-                <Upload className="h-5 w-5 mr-2" />
+              <PrincipalButton onClick={() => setShowUploadInterface(true)}>
+                <Upload className="h-4 w-4 mr-2" />
                 Cargar Orden de compra
-              </Button>
+              </PrincipalButton>
             </div>
 
             {/* Table content */}
-            {sortedInvoices.length === 0 ? (
+            {isLoading ? (
+              <Flex justify="center" align="center" style={{ height: "20rem" }}>
+                <Spin size="large" />
+              </Flex>
+            ) : data.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                {state.invoices.length === 0 ? (
-                  <>
-                    <p className="mb-4">
-                      Carga tu primera orden de compra para comenzar el análisis
-                    </p>
-                    <Button
-                      className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold"
-                      onClick={() => setShowUploadInterface(true)}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Cargar Orden de compra
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-lg font-semibold text-cashport-black mb-2">
-                      No se encontraron resultados
-                    </h3>
-                    <p>Intenta ajustar los filtros de búsqueda</p>
-                  </>
-                )}
+                <p className="mb-4">Carga tu primera orden de compra para comenzar el análisis</p>
+                <PrincipalButton onClick={() => setShowUploadInterface(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Cargar Orden de compra
+                </PrincipalButton>
               </div>
             ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <OrdersTable
-                    invoices={paginatedInvoices}
-                    selectedInvoiceIds={state.selectedInvoiceIds}
-                    sortColumn={sortColumn}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    onRowClick={goToDetail}
-                    onToggleSelection={toggleInvoiceSelection}
-                    onSelectAll={handleSelectAll}
-                    isAllSelected={isAllSelected}
-                    isIndeterminate={isIndeterminate}
-                  />
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-4 py-3 border-t border-cashport-gray-light mt-4">
-                    <div className="text-sm text-muted-foreground">
-                      Mostrando {startIndex + 1} a {Math.min(endIndex, sortedInvoices.length)} de{" "}
-                      {sortedInvoices.length} resultados
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                        className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter disabled:opacity-50"
-                      >
-                        Anterior
-                      </Button>
-
-                      <div className="flex items-center space-x-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNumber: number;
-                          if (totalPages <= 5) {
-                            pageNumber = i + 1;
-                          } else if (currentPage <= 3) {
-                            pageNumber = i + 1;
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNumber = totalPages - 4 + i;
-                          } else {
-                            pageNumber = currentPage - 2 + i;
-                          }
-
-                          return (
-                            <Button
-                              key={pageNumber}
-                              variant={currentPage === pageNumber ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setCurrentPage(pageNumber)}
-                              className={
-                                currentPage === pageNumber
-                                  ? "bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
-                                  : "border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter"
-                              }
-                            >
-                              {pageNumber}
-                            </Button>
-                          );
-                        })}
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
-                        className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter disabled:opacity-50"
-                      >
-                        Siguiente
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </>
+              <div className="overflow-x-auto">
+                <OrdersTable
+                  data={data}
+                  pagination={pagination}
+                  loading={isLoading}
+                  onPageChange={setCurrentPage}
+                  selectedRowKeys={selectedRowKeys}
+                  onRowSelect={handleRowSelect}
+                  onRowClick={handleRowClick}
+                />
+              </div>
             )}
           </CardContent>
         </Card>
@@ -407,3 +223,4 @@ export function PurchaseOrdersView({ config = defaultConfig }: MainDashboardProp
     </div>
   );
 }
+//

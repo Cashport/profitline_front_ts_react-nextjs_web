@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Filter, ChevronDown, Calendar, Building } from "lucide-react";
+import { Filter, ChevronDown, Calendar, Building, User } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
+import { IPurchaseOrderClient, IPurchaseOrderSeller } from "@/types/purchaseOrders/purchaseOrders";
 
 interface GeneralFilterProps {
   showCompradorFilter: boolean;
   clienteFilterLabel?: string;
-  filterComprador: string | null;
-  uniqueCompradores: string[];
-  onCompradorChange: (comprador: string | null) => void;
+  selectedClientId: string | null;
+  clients: IPurchaseOrderClient[];
+  onCompradorChange: (clientId: string | null) => void;
+  showVendedorFilter?: boolean;
+  selectedSellerId: string | null;
+  sellers: IPurchaseOrderSeller[];
+  onVendedorChange: (sellerId: string | null) => void;
   filterDateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
@@ -19,9 +24,13 @@ interface GeneralFilterProps {
 export function GeneralFilter({
   showCompradorFilter,
   clienteFilterLabel,
-  filterComprador,
-  uniqueCompradores,
+  selectedClientId,
+  clients,
   onCompradorChange,
+  showVendedorFilter = false,
+  selectedSellerId,
+  sellers,
+  onVendedorChange,
   filterDateRange,
   onDateRangeChange,
   onClearDateRange
@@ -45,7 +54,7 @@ export function GeneralFilter({
       <Button
         variant="outline"
         size="sm"
-        className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white"
+        className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-base"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Filter className="h-4 w-4 mr-2" />
@@ -66,7 +75,7 @@ export function GeneralFilter({
                 <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
                   <button
                     className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                      filterComprador === null
+                      selectedClientId === null
                         ? "bg-cashport-green text-cashport-black font-medium"
                         : "text-cashport-black"
                     }`}
@@ -75,18 +84,56 @@ export function GeneralFilter({
                     Todos los {clienteFilterLabel || "clientes"}
                   </button>
 
-                  {uniqueCompradores.map((comprador) => (
+                  {clients.map((client) => (
                     <button
-                      key={comprador}
+                      key={client.id}
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors border-t border-gray-100 ${
-                        filterComprador === comprador
+                        selectedClientId === client.id
                           ? "bg-cashport-green text-cashport-black font-medium"
                           : "text-cashport-black"
                       }`}
-                      onClick={() => onCompradorChange(comprador)}
+                      onClick={() => onCompradorChange(client.id)}
                     >
-                      <div className="truncate" title={comprador}>
-                        {comprador}
+                      <div className="truncate" title={client.name}>
+                        {client.name}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Vendedor Filter Section */}
+            {showVendedorFilter && (
+              <div>
+                <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                  <User className="h-3 w-3 inline mr-1" />
+                  Vendedor
+                </label>
+                <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                  <button
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors ${
+                      selectedSellerId === null
+                        ? "bg-cashport-green text-cashport-black font-medium"
+                        : "text-cashport-black"
+                    }`}
+                    onClick={() => onVendedorChange(null)}
+                  >
+                    Todos los vendedores
+                  </button>
+
+                  {sellers.map((seller) => (
+                    <button
+                      key={seller.id}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors border-t border-gray-100 ${
+                        selectedSellerId === seller.id
+                          ? "bg-cashport-green text-cashport-black font-medium"
+                          : "text-cashport-black"
+                      }`}
+                      onClick={() => onVendedorChange(seller.id)}
+                    >
+                      <div className="truncate" title={seller.name}>
+                        {seller.name}
                       </div>
                     </button>
                   ))}

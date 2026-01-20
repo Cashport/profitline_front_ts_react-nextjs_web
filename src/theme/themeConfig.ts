@@ -7,7 +7,6 @@ const theme: ThemeConfig = {
     colorTextSecondary: "#FFFFFF",
     colorTextPlaceholder: "#000000",
     colorSplit: "#FFFFFF",
-    colorBgElevated: "#575a6b",
     fontFamily: "inherit",
     green: "#CBE71E"
   },

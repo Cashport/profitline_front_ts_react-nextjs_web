@@ -7,7 +7,6 @@ interface PurchaseOrderDocumentProps {
   numeroFactura: string;
   pdfWidth: number;
   onCollapse: () => void;
-  onDownload: () => void;
 }
 
 export function PurchaseOrderDocument({
@@ -15,9 +14,13 @@ export function PurchaseOrderDocument({
   archivoOriginal,
   numeroFactura,
   pdfWidth,
-  onCollapse,
-  onDownload
+  onCollapse
 }: PurchaseOrderDocumentProps) {
+  const handleDownloadPdf = () => {
+    if (pdfUrl) {
+      window.open(pdfUrl, "_blank");
+    }
+  };
   return (
     <div
       className="transition-all duration-300 ease-in-out min-w-0"
@@ -33,7 +36,7 @@ export function PurchaseOrderDocument({
             <Button
               variant="outline"
               size="sm"
-              onClick={onDownload}
+              onClick={handleDownloadPdf}
               disabled={!pdfUrl}
               className="border-cashport-gray-light text-cashport-black hover:bg-cashport-white bg-transparent"
             >
@@ -70,7 +73,7 @@ export function PurchaseOrderDocument({
                         {archivoOriginal || `factura-${numeroFactura}.pdf`}
                       </p>
                       <Button
-                        onClick={onDownload}
+                        onClick={handleDownloadPdf}
                         className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
                       >
                         <Download className="h-4 w-4 mr-2" />
