@@ -19,6 +19,7 @@ import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/pu
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
+import { mutate } from "swr";
 
 export function PurchaseOrdersView() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export function PurchaseOrdersView() {
     dateRange: { start: null as string | null, end: null as string | null }
   });
 
-  const { data, isLoading, pagination } = usePurchaseOrders({
+  const { data, isLoading, pagination, mutate } = usePurchaseOrders({
     page: currentPage,
     search: debouncedSearchTerm,
     statusId: selectedFilters.statusId,
@@ -71,6 +72,7 @@ export function PurchaseOrdersView() {
 
   const handleFileUpload = (files: File[]) => {
     console.log("Files uploaded:", files);
+    mutate();
     // The upload interface will handle the AI processing and add the invoice to state
   };
 
