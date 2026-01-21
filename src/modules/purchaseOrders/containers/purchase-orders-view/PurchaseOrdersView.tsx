@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flex, Spin } from "antd";
+import { Flex, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 
 import { Upload, FileText } from "lucide-react";
@@ -18,7 +18,7 @@ import { useAppStore } from "@/lib/store/store";
 import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
-import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
+import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
 
 export function PurchaseOrdersView() {
   const router = useRouter();
@@ -29,6 +29,7 @@ export function PurchaseOrdersView() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
@@ -118,11 +119,38 @@ export function PurchaseOrdersView() {
     }));
   };
 
+  const handleDownloadCSV = async () => {
+    // Validation: Check if any orders are selected
+    if (selectedRowKeys.length === 0) {
+      message.warning("Por favor selecciona al menos una orden de compra para descargar");
+      return;
+    }
+
+    setIsDownloadingCSV(true);
+
+    try {
+      const orderIds = selectedRowKeys.map((key) => String(key));
+      const response = await downloadPurchaseOrdersCSV(orderIds);
+      // Open CSV link in new tab (per user requirement)
+      window.open(response.url, "_blank");
+
+      // Success feedback
+      message.success(
+        `Plano CSV generado exitosamente para ${selectedRowKeys.length} orden${selectedRowKeys.length > 1 ? "es" : ""}`
+      );
+    } catch (error: any) {
+      console.log("CSV downlasdasdoad error:", error);
+      message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
+    } finally {
+      setIsDownloadingCSV(false);
+    }
+  };
+
   const actionItems: DropdownItem[] = [
     {
       key: "download",
       label: "Descargar plano",
-      onClick: () => console.log("Descargar plano")
+      onClick: handleDownloadCSV
     },
     {
       key: "mark-invoiced",
@@ -147,8 +175,8 @@ export function PurchaseOrdersView() {
                   }}
                 />
 
-                <GeneralDropdown items={actionItems} align="start">
-                  <GenerateActionButton label="Generar acción" />
+                <GeneralDropdown items={actionItems} align="start" disabled={isDownloadingCSV}>
+                  <GenerateActionButton label="Generar acción" disabled={isDownloadingCSV} />
                 </GeneralDropdown>
 
                 {/* Estado Filter Dropdown */}

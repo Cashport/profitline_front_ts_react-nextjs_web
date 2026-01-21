@@ -30,38 +30,50 @@ import ProfitLoader from "@/components/ui/profit-loader";
 
 // Dynamic imports for modals to reduce initial bundle size
 const TimelineHistoryModal = dynamic(
-  () => import("../../components/timeline-history-modal/timeline-history-modal")
-    .then(mod => ({ default: mod.TimelineHistoryModal })),
+  () =>
+    import("../../components/timeline-history-modal/timeline-history-modal").then((mod) => ({
+      default: mod.TimelineHistoryModal
+    })),
   { ssr: false }
 );
 
 const ApproveOrderModal = dynamic(
-  () => import("../../components/dialogs/approve-order-modal/approve-order-modal")
-    .then(mod => ({ default: mod.ApproveOrderModal })),
+  () =>
+    import("../../components/dialogs/approve-order-modal/approve-order-modal").then((mod) => ({
+      default: mod.ApproveOrderModal
+    })),
   { ssr: false }
 );
 
 const RejectOrderModal = dynamic(
-  () => import("../../components/dialogs/reject-order-modal/reject-order-modal")
-    .then(mod => ({ default: mod.RejectOrderModal })),
+  () =>
+    import("../../components/dialogs/reject-order-modal/reject-order-modal").then((mod) => ({
+      default: mod.RejectOrderModal
+    })),
   { ssr: false }
 );
 
 const SendToApprovalModal = dynamic(
-  () => import("../../components/dialogs/send-to-approval-modal/send-to-approval-modal")
-    .then(mod => ({ default: mod.SendToApprovalModal })),
+  () =>
+    import("../../components/dialogs/send-to-approval-modal/send-to-approval-modal").then(
+      (mod) => ({ default: mod.SendToApprovalModal })
+    ),
   { ssr: false }
 );
 
 const InvoiceModal = dynamic(
-  () => import("../../components/dialogs/invoice-modal/invoice-modal")
-    .then(mod => ({ default: mod.InvoiceModal })),
+  () =>
+    import("../../components/dialogs/invoice-modal/invoice-modal").then((mod) => ({
+      default: mod.InvoiceModal
+    })),
   { ssr: false }
 );
 
 const DispatchModal = dynamic(
-  () => import("../../components/dialogs/dispatch-modal/dispatch-modal")
-    .then(mod => ({ default: mod.DispatchModal })),
+  () =>
+    import("../../components/dialogs/dispatch-modal/dispatch-modal").then((mod) => ({
+      default: mod.DispatchModal
+    })),
   { ssr: false }
 );
 import { availableApprovers } from "../../constants/approvers";
@@ -87,6 +99,7 @@ import {
   PurchaseOrderProductsFormData
 } from "../../types/forms";
 import {
+  downloadPurchaseOrdersCSV,
   editPurchaseOrder,
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
@@ -275,35 +288,20 @@ export function DetailPurchaseOrder() {
     // Note: Modal handles its own closing via onOpenChange
   };
 
-  const handleDownloadCSV = () => {
-    const headers = [
-      "ID Producto",
-      "Nombre Producto",
-      "Cantidad",
-      "Precio Unitario",
-      "IVA",
-      "Precio Total"
-    ];
-    const rows = data.products.map((p) => [
-      p.product_sku,
-      p.product_description,
-      p.quantity,
-      p.unit_price,
-      p.tax_amount,
-      p.total_price
-    ]);
-
-    const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `orden-${data.purchase_order_number}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadCSV = async () => {
+    try {
+      const response = await downloadPurchaseOrdersCSV([orderId!]);
+      // Crea un link temporal en memoria (no visible ni navegable)
+      const link = document.createElement("a");
+      link.href = response.url;
+      link.setAttribute("download", `orden-${data.purchase_order_number}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error: any) {
+      message.error(error ? error : "Error al descargar el plano de la orden de compra");
+    }
   };
 
   const handleSendToApproval = (selectedApproverIds: string[]) => {
