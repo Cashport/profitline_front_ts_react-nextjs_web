@@ -47,7 +47,7 @@ export function PurchaseOrdersView() {
     dateRange: { start: null as string | null, end: null as string | null }
   });
 
-  const { data, isLoading, pagination } = usePurchaseOrders({
+  const { data, isLoading, pagination, mutate } = usePurchaseOrders({
     page: currentPage,
     search: debouncedSearchTerm,
     statusId: selectedFilters.statusId,
@@ -70,8 +70,7 @@ export function PurchaseOrdersView() {
   }, [ID]);
 
   const handleFileUpload = (files: File[]) => {
-    console.log("Files uploaded:", files);
-    // The upload interface will handle the AI processing and add the invoice to state
+    mutate();
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
