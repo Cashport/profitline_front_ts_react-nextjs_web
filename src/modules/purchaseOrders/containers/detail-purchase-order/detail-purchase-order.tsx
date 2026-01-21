@@ -5,6 +5,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { extractSingleParam } from "@/utils/utils";
+import { message } from "antd";
 
 import {
   ArrowLeft,
@@ -31,8 +32,10 @@ import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-m
 import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
 import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
 import { availableApprovers } from "../../constants/approvers";
-import { useApp } from "../../context/app-context";
-import { PurchaseOrderInfo } from "../../components/purchase-order-info/purchase-order-info";
+import {
+  PurchaseOrderInfo,
+  PurchaseOrderInfoRef
+} from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
@@ -42,11 +45,22 @@ import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
 import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
+import {
+  mapApiToFormData,
+  mapFormDataToApi,
+  mapApiProductsToForm,
+  mapFormProductsToApi,
+  PurchaseOrderInfoFormData,
+  PurchaseOrderProductsFormData
+} from "../../types/forms";
+import {
+  editPurchaseOrder,
+  editPurchaseOrderProducts
+} from "@/services/purchaseOrders/purchaseOrders";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
-  const { goToDashboard } = useApp();
 
   const orderId = extractSingleParam(params.orderId);
   const [notFound, setNotFound] = useState(false);
@@ -56,6 +70,7 @@ export function DetailPurchaseOrder() {
   const [isPdfCollapsed, setIsPdfCollapsed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const infoFormRef = useRef<PurchaseOrderInfoRef>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const {
@@ -78,32 +93,6 @@ export function DetailPurchaseOrder() {
   const currentStage = useMemo(() => {
     return getCurrentStage(processedStages);
   }, [processedStages]);
-
-  const [editableGeneralInfo, setEditableGeneralInfo] = useState({
-    numeroFactura: "",
-    comprador: "",
-    fechaFactura: "",
-    vendedor: "",
-    fechaVencimiento: ""
-  });
-
-  const [editableDeliveryInfo, setEditableDeliveryInfo] = useState({
-    fechaEntrega: "",
-    direccion: "",
-    ciudad: "",
-    observacion: ""
-  });
-
-  const [editableProducts, setEditableProducts] = useState<
-    Array<{
-      idProducto: string;
-      nombreProducto: string;
-      cantidad: number;
-      precioUnitario: number;
-      iva: number;
-      precioTotal: number;
-    }>
-  >([]);
 
   // Modal states - must be before conditional returns
   const [showTimelineHistory, setShowTimelineHistory] = useState(false);
@@ -154,35 +143,6 @@ export function DetailPurchaseOrder() {
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  // Sync editable state when data from API changes
-  useEffect(() => {
-    if (data) {
-      setEditableGeneralInfo({
-        numeroFactura: data.purchase_order_number,
-        comprador: data.client_name,
-        fechaFactura: data.created_at,
-        vendedor: "XXXXX", // No disponible en API
-        fechaVencimiento: "XXXXX" // No disponible en API
-      });
-      setEditableDeliveryInfo({
-        fechaEntrega: data.delivery_date || "",
-        direccion: data.delivery_address || "",
-        ciudad: "XXXXX", // No disponible en API
-        observacion: data.observations || ""
-      });
-      setEditableProducts(
-        data.products.map((p) => ({
-          idProducto: p.product_sku,
-          nombreProducto: p.product_description,
-          cantidad: p.quantity,
-          precioUnitario: p.unit_price,
-          iva: p.tax_amount,
-          precioTotal: p.total_price
-        }))
-      );
-    }
-  }, [data]);
-
   // Loading state
   if (isLoading) {
     return (
@@ -207,41 +167,7 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
-  const onBack = goToDashboard;
-
-  const handleProductFieldChange = (
-    index: number,
-    field: "cantidad" | "precioUnitario" | "iva",
-    value: string
-  ) => {
-    const numValue = Number.parseFloat(value) || 0;
-    setEditableProducts((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]: numValue
-      };
-      const cantidad = field === "cantidad" ? numValue : updated[index].cantidad;
-      const precioUnitario = field === "precioUnitario" ? numValue : updated[index].precioUnitario;
-      const iva = field === "iva" ? numValue : updated[index].iva;
-      updated[index].precioTotal = cantidad * precioUnitario + iva;
-      return updated;
-    });
-  };
-
-  const handleGeneralInfoChange = (field: keyof typeof editableGeneralInfo, value: string) => {
-    setEditableGeneralInfo((prev) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleDeliveryInfoChange = (field: keyof typeof editableDeliveryInfo, value: string) => {
-    setEditableDeliveryInfo((prev) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const onBack = () => router.push("/purchase-orders");
 
   const expandPdf = () => {
     setIsPdfCollapsed(false);
@@ -257,14 +183,40 @@ export function DetailPurchaseOrder() {
   };
 
   const handleEditToggle = () => {
-    setIsEditMode(!isEditMode);
     if (isEditMode) {
-      // Log changes when exiting edit mode (mock data)
-      console.log("Saving changes:", {
-        generalInfo: editableGeneralInfo,
-        deliveryInfo: editableDeliveryInfo,
-        products: editableProducts
-      });
+      // Trigger save before exiting edit mode
+      infoFormRef.current?.submitForm();
+    }
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleInfoSave = async (formData: PurchaseOrderInfoFormData) => {
+    try {
+      // Only send changed fields to API
+      const payload = mapFormDataToApi(formData);
+      await editPurchaseOrder(orderId!, payload);
+
+      // Refetch data
+      mutate();
+
+      // Show success message
+      message.success("Información actualizada correctamente");
+    } catch (error) {
+      console.error("Error saving:", error);
+      message.error("Error al actualizar la información");
+    }
+  };
+
+  const handleProductsSave = async (formData: PurchaseOrderProductsFormData) => {
+    try {
+      const payload = mapFormProductsToApi(formData);
+      await editPurchaseOrderProducts(orderId!, payload.products);
+
+      mutate();
+      message.success("Productos actualizados correctamente");
+    } catch (error) {
+      console.error("Error saving products:", error);
+      message.error("Error al actualizar los productos");
     }
   };
 
@@ -277,13 +229,11 @@ export function DetailPurchaseOrder() {
   };
 
   const confirmApprove = () => {
-    console.log("Order approved");
     // TODO: Implement approval logic
     // Note: Modal handles its own closing via onOpenChange
   };
 
   const confirmReject = (reason: string, observation: string) => {
-    console.log("Order rejected:", { reason, observation });
     // TODO: Implement rejection logic
     // Note: Modal handles its own closing via onOpenChange
   };
@@ -297,13 +247,13 @@ export function DetailPurchaseOrder() {
       "IVA",
       "Precio Total"
     ];
-    const rows = editableProducts.map((p) => [
-      p.idProducto,
-      p.nombreProducto,
-      p.cantidad,
-      p.precioUnitario,
-      p.iva,
-      p.precioTotal
+    const rows = data.products.map((p) => [
+      p.product_sku,
+      p.product_description,
+      p.quantity,
+      p.unit_price,
+      p.tax_amount,
+      p.total_price
     ]);
 
     const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -312,6 +262,7 @@ export function DetailPurchaseOrder() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
+    link.setAttribute("download", `orden-${data.purchase_order_number}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -319,17 +270,14 @@ export function DetailPurchaseOrder() {
   };
 
   const handleSendToApproval = (selectedApproverIds: string[]) => {
-    console.log("Send to approval:", selectedApproverIds);
     // TODO: Implement send to approval logic
   };
 
   const handleAddInvoices = (invoiceIds: string) => {
-    console.log("Invoice IDs:", invoiceIds);
     // TODO: Implement invoice addition logic
   };
 
   const handleConfirmDispatch = (dispatchNotes: string) => {
-    console.log("Dispatch confirmed with notes:", dispatchNotes);
     // TODO: Implement dispatch confirmation logic
   };
 
@@ -369,7 +317,7 @@ export function DetailPurchaseOrder() {
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
         <CardContent className="px-6 pb-6 pt-6">
           <h1 className="text-2xl font-bold text-cashport-black mb-6">
-            Orden de compra {editableGeneralInfo.numeroFactura}
+            Orden de compra {data.purchase_order_number}
           </h1>
 
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
@@ -452,11 +400,11 @@ export function DetailPurchaseOrder() {
           */}
 
           <PurchaseOrderInfo
+            ref={infoFormRef}
             isEditMode={isEditMode}
-            generalInfo={editableGeneralInfo}
-            deliveryInfo={editableDeliveryInfo}
-            onGeneralInfoChange={handleGeneralInfoChange}
-            onDeliveryInfoChange={handleDeliveryInfoChange}
+            initialData={mapApiToFormData(data)}
+            onSave={handleInfoSave}
+            onCancel={() => setIsEditMode(false)}
           />
 
           <PurchaseOrderProcess
@@ -469,12 +417,11 @@ export function DetailPurchaseOrder() {
 
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
-              editableProducts={editableProducts}
-              isEditMode={isEditMode}
+              initialProducts={mapApiProductsToForm(data.products)}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
-              onProductFieldChange={handleProductFieldChange}
               formatCurrency={formatCurrency}
+              onSave={handleProductsSave}
             />
 
             {!isPdfCollapsed && (

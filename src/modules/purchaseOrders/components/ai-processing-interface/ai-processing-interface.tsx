@@ -19,11 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card
 import { Button } from "@/modules/chat/ui/button";
 import { Progress } from "@/modules/chat/ui/progress";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
-import { InvoiceData, useApp } from "../../context/app-context";
 
 interface AIProcessingInterfaceProps {
   files: File[];
-  onProcessingComplete?: (data: InvoiceData) => void;
+  onProcessingComplete?: () => void;
   onClose?: () => void;
 }
 
@@ -41,11 +40,9 @@ export function AIProcessingInterface({
   onProcessingComplete,
   onClose
 }: AIProcessingInterfaceProps) {
-  const { addInvoice } = useApp();
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(true);
-  const [extractedData, setExtractedData] = useState<InvoiceData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,6 +50,8 @@ export function AIProcessingInterface({
       try {
         setIsProcessing(true);
 
+        // Simulate processing steps for demo purposes
+        // TODO: Replace with actual API call to process documents
         for (let step = 0; step < processingSteps.length; step++) {
           setCurrentStep(step);
 
@@ -75,60 +74,20 @@ export function AIProcessingInterface({
           await new Promise((resolve) => setTimeout(resolve, stepDuration));
         }
 
-        const mockData: InvoiceData = {
-          id: "invoice-" + Date.now(),
-          autoId: Date.now(),
-          numeroFactura: "FAC-2024-001234",
-          fechaFactura: "2024-10-15",
-          fechaVencimiento: "2024-11-15",
-          comprador: "EMPRESA COMPRADORA S.A.S",
-          vendedor: "PROVEEDOR COLOMBIA LTDA",
-          cantidad: 3,
-          monto: 2850000,
-          productos: [
-            {
-              idProducto: "PROD-001",
-              nombreProducto: "Laptop Dell Inspiron 15",
-              cantidad: 2,
-              precioUnitario: 1200000,
-              iva: 456000,
-              precioTotal: 2400000
-            },
-            {
-              idProducto: "PROD-002",
-              nombreProducto: "Mouse Inalámbrico Logitech",
-              cantidad: 5,
-              precioUnitario: 45000,
-              iva: 42750,
-              precioTotal: 225000
-            },
-            {
-              idProducto: "PROD-003",
-              nombreProducto: "Teclado Mecánico RGB",
-              cantidad: 1,
-              precioUnitario: 225000,
-              iva: 42750,
-              precioTotal: 225000
-            }
-          ],
-          alertas: ["Fecha de vencimiento próxima (30 días)", "Monto superior al promedio mensual"],
-          estado: "Back order",
-          fechaProcesamiento: new Date().toLocaleDateString("es-CO"),
-          archivoOriginal: files[0]?.name || "factura.pdf",
-          pdfUrl: files[0] ? URL.createObjectURL(files[0]) : undefined
-        };
-
-        setExtractedData(mockData);
+        // Processing complete
         setIsProcessing(false);
 
-        addInvoice(mockData);
-        if (onClose) {
-          onClose();
+        // Notify completion
+        if (onProcessingComplete) {
+          onProcessingComplete();
         }
 
-        if (onProcessingComplete) {
-          onProcessingComplete(mockData);
-        }
+        // Auto-close after a short delay
+        setTimeout(() => {
+          if (onClose) {
+            onClose();
+          }
+        }, 1500);
       } catch (err) {
         setError("Error al procesar el documento con IA");
         setIsProcessing(false);
@@ -136,7 +95,7 @@ export function AIProcessingInterface({
     };
 
     processDocument();
-  }, [files, onProcessingComplete, addInvoice, onClose]);
+  }, [files, onProcessingComplete, onClose]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -243,7 +202,7 @@ export function AIProcessingInterface({
             </Alert>
           )}
 
-          {extractedData && !isProcessing && (
+          {!isProcessing && !error && (
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-5 w-5 text-green-600" />
@@ -254,162 +213,8 @@ export function AIProcessingInterface({
 
               <div className="flex items-center space-x-2 p-4 bg-cashport-green/10 rounded-lg">
                 <Loader2 className="h-4 w-4 text-cashport-green animate-spin" />
-                <p className="text-sm text-cashport-black">
-                  Redirigiendo al detalle de la factura...
-                </p>
+                <p className="text-sm text-cashport-black">Cerrando modal...</p>
               </div>
-
-              {extractedData.alertas.length > 0 && (
-                <Alert className="border-orange-200 bg-orange-50">
-                  <AlertTriangle className="h-4 w-4 text-orange-600" />
-                  <AlertDescription className="text-orange-800">
-                    <div className="font-medium mb-2">Se encontraron las siguientes alertas:</div>
-                    <ul className="list-disc list-inside space-y-1">
-                      {extractedData.alertas.map((alerta, index) => (
-                        <li key={index} className="text-sm">
-                          {alerta}
-                        </li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="border-cashport-gray-light">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-cashport-black">
-                      Información de la Factura
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Número de Factura
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {extractedData.numeroFactura}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Fecha de Factura
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {extractedData.fechaFactura}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Tipo de Factura
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">XXXXXXXXXX</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Monto Total
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {new Intl.NumberFormat("es-CO", {
-                          style: "currency",
-                          currency: "COP",
-                          minimumFractionDigits: 0
-                        }).format(extractedData.monto)}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Archivo Original
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {extractedData.archivoOriginal}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-cashport-gray-light">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm text-cashport-black">
-                      Comprador y Vendedor
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Comprador</label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {extractedData.comprador}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Vendedor</label>
-                      <p className="text-sm font-medium text-cashport-black">
-                        {extractedData.vendedor}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">
-                        Método de Pago
-                      </label>
-                      <p className="text-sm font-medium text-cashport-black">XXXXXXXXXX</p>
-                    </div>
-                    {extractedData.fechaVencimiento && (
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground">
-                          Fecha de Vencimiento
-                        </label>
-                        <p className="text-sm font-medium text-cashport-black">
-                          {extractedData.fechaVencimiento}
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="border-cashport-gray-light">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-cashport-black">
-                    Productos ({extractedData.productos.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {extractedData.productos.slice(0, 3).map((producto, index) => (
-                      <div key={index} className="p-3 bg-cashport-gray-lighter rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="text-sm font-medium text-cashport-black">
-                              {producto.nombreProducto}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              ID: {producto.idProducto}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium text-cashport-black">
-                              {new Intl.NumberFormat("es-CO", {
-                                style: "currency",
-                                currency: "COP",
-                                minimumFractionDigits: 0
-                              }).format(producto.precioTotal)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Cant: {producto.cantidad}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {extractedData.productos.length > 3 && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        Y {extractedData.productos.length - 3} producto
-                        {extractedData.productos.length - 3 !== 1 ? "s" : ""} más...
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           )}
         </CardContent>

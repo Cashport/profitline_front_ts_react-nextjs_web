@@ -4,7 +4,7 @@ import { X, Clock, CheckCircle, XCircle, MessageSquare, Settings } from "lucide-
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { TimelineEvent } from "../../context/app-context";
+import { TimelineEvent } from "../../types/timeline";
 
 interface TimelineHistoryModalProps {
   isOpen: boolean;
