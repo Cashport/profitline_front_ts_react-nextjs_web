@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
 import { extractSingleParam } from "@/utils/utils";
 import { message } from "antd";
+import dynamic from "next/dynamic";
 
 import {
   ArrowLeft,
@@ -25,13 +26,44 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Separator } from "@/modules/chat/ui/separator";
-import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
-import { ApproveOrderModal } from "../../components/dialogs/approve-order-modal/approve-order-modal";
-import { RejectOrderModal } from "../../components/dialogs/reject-order-modal/reject-order-modal";
 import ProfitLoader from "@/components/ui/profit-loader";
-import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-modal/send-to-approval-modal";
-import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
-import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
+
+// Dynamic imports for modals to reduce initial bundle size
+const TimelineHistoryModal = dynamic(
+  () => import("../../components/timeline-history-modal/timeline-history-modal")
+    .then(mod => ({ default: mod.TimelineHistoryModal })),
+  { ssr: false }
+);
+
+const ApproveOrderModal = dynamic(
+  () => import("../../components/dialogs/approve-order-modal/approve-order-modal")
+    .then(mod => ({ default: mod.ApproveOrderModal })),
+  { ssr: false }
+);
+
+const RejectOrderModal = dynamic(
+  () => import("../../components/dialogs/reject-order-modal/reject-order-modal")
+    .then(mod => ({ default: mod.RejectOrderModal })),
+  { ssr: false }
+);
+
+const SendToApprovalModal = dynamic(
+  () => import("../../components/dialogs/send-to-approval-modal/send-to-approval-modal")
+    .then(mod => ({ default: mod.SendToApprovalModal })),
+  { ssr: false }
+);
+
+const InvoiceModal = dynamic(
+  () => import("../../components/dialogs/invoice-modal/invoice-modal")
+    .then(mod => ({ default: mod.InvoiceModal })),
+  { ssr: false }
+);
+
+const DispatchModal = dynamic(
+  () => import("../../components/dialogs/dispatch-modal/dispatch-modal")
+    .then(mod => ({ default: mod.DispatchModal })),
+  { ssr: false }
+);
 import { availableApprovers } from "../../constants/approvers";
 import {
   PurchaseOrderInfo,
