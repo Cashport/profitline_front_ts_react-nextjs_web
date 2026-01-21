@@ -19,7 +19,6 @@ import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/pu
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters } from "@/services/purchaseOrders/purchaseOrders";
-import { mutate } from "swr";
 
 export function PurchaseOrdersView() {
   const router = useRouter();
@@ -71,9 +70,7 @@ export function PurchaseOrdersView() {
   }, [ID]);
 
   const handleFileUpload = (files: File[]) => {
-    console.log("Files uploaded:", files);
     mutate();
-    // The upload interface will handle the AI processing and add the invoice to state
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
