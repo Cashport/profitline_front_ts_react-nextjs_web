@@ -129,3 +129,26 @@ export interface IPurchaseOrderSummary {
   totalTaxes: number;
   grandTotal: number;
 }
+
+export interface IHistoryTimelineEvent {
+  id: number;
+  marketplace_order_id: number;
+  step_id: number;
+  step_name: string;
+  step_order: number;
+  step_icon: string;
+  step_description: string;
+  is_step_complete: number;
+  event_description: string;
+  is_ia: number;
+  is_novelty: number;
+  is_resolved: number;
+  novelty_type_id: number | null;
+  novelty_type_name: string | null;
+  resolution_date: string | null;
+  created_by: number;
+  created_by_name: string;
+  created_by_email: string;
+  created_at: string;
+  updated_at: string;
+}
