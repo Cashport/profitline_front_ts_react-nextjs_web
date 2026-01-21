@@ -32,7 +32,6 @@ import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-m
 import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
 import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
 import { availableApprovers } from "../../constants/approvers";
-import { useApp } from "../../context/app-context";
 import { PurchaseOrderInfo, PurchaseOrderInfoRef } from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
@@ -59,7 +58,6 @@ import {
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
-  const { goToDashboard } = useApp();
 
   const orderId = extractSingleParam(params.orderId);
   const [notFound, setNotFound] = useState(false);
@@ -166,7 +164,7 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
-  const onBack = goToDashboard;
+  const onBack = () => router.push("/purchase-orders");
 
   const expandPdf = () => {
     setIsPdfCollapsed(false);
