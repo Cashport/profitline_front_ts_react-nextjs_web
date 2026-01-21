@@ -6,6 +6,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { Edit, Save } from "lucide-react";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
+import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
 
 interface PurchaseOrderProductsProps {
   initialProducts: PurchaseOrderProductsFormData;
@@ -13,6 +14,7 @@ interface PurchaseOrderProductsProps {
   pdfWidth: number;
   formatCurrency: (amount: number) => string;
   onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
+  summary: IPurchaseOrderSummary;
 }
 
 export function PurchaseOrderProducts({
@@ -20,7 +22,8 @@ export function PurchaseOrderProducts({
   isPdfCollapsed,
   pdfWidth,
   formatCurrency,
-  onSave
+  onSave,
+  summary
 }: PurchaseOrderProductsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -29,8 +32,7 @@ export function PurchaseOrderProducts({
     handleSubmit,
     formState: { errors, dirtyFields },
     reset,
-    watch,
-    setValue
+    watch
   } = useForm<PurchaseOrderProductsFormData>({
     resolver: yupResolver<PurchaseOrderProductsFormData>(purchaseOrderProductsSchema),
     defaultValues: initialProducts,
@@ -44,25 +46,6 @@ export function PurchaseOrderProducts({
 
   // Watch for changes to recalculate totals
   const watchedProducts = watch("products");
-
-  // Auto-calculate subtotal and total_price when quantity, unit_price, or tax_amount changes
-  useEffect(() => {
-    watchedProducts.forEach((product, index) => {
-      const subtotal = product.quantity * product.unit_price;
-      const totalPrice = subtotal + product.tax_amount;
-
-      if (product.subtotal !== subtotal) {
-        setValue(`products.${index}.subtotal`, subtotal, {
-          shouldDirty: false
-        });
-      }
-      if (product.total_price !== totalPrice) {
-        setValue(`products.${index}.total_price`, totalPrice, {
-          shouldDirty: false
-        });
-      }
-    });
-  }, [watchedProducts, setValue]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
@@ -85,21 +68,24 @@ export function PurchaseOrderProducts({
       .map((_, index) => (dirtyFields.products?.[index] ? index : -1))
       .filter((index) => index !== -1);
 
-    console.log("Modified products indices:", changedIndices);
-    console.log("Modified products data:", {
-      changedProducts: changedIndices.map((i) => data.products[i]),
-      allProducts: data.products
-    });
     if (changedIndices.length > 0) {
       onSave(data, changedIndices);
     }
     setIsEditMode(false);
   };
 
-  // Calculate totals
-  const totalUnits = watchedProducts.reduce((sum, producto) => sum + producto.quantity, 0);
-  const totalIVA = watchedProducts.reduce((sum, producto) => sum + producto.tax_amount, 0);
-  const totalAmount = watchedProducts.reduce((sum, producto) => sum + producto.total_price, 0);
+  // Calculate totals - use local calculations in edit mode, API summary otherwise
+  const totalUnits = isEditMode
+    ? watchedProducts.reduce((sum, producto) => sum + producto.quantity, 0)
+    : summary.totalQuantity;
+
+  const totalIVA = isEditMode
+    ? watchedProducts.reduce((sum, producto) => sum + producto.tax_amount * producto.quantity, 0)
+    : summary.totalTaxes;
+
+  const totalAmount = isEditMode
+    ? watchedProducts.reduce((sum, producto) => sum + producto.total_price, 0)
+    : summary.grandTotal;
 
   return (
     <div

@@ -5,7 +5,8 @@ import {
   IPurchaseOrder,
   IPurchaseOrderDetail,
   IPurchaseOrderFilters,
-  IEditPurchaseOrderProduct
+  IEditPurchaseOrderProduct,
+  IHistoryTimelineEvent
 } from "@/types/purchaseOrders/purchaseOrders";
 
 export const getAllOrders = async (
@@ -82,6 +83,19 @@ export const uploadPurchaseOrder = async (file: File): Promise<any> => {
 
     const response: any = await API.post(`${config.API_PURCHASE_ORDERS_AI}`, formData);
     return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getHistoryTimelineEvents = async (
+  orderId: string
+): Promise<IHistoryTimelineEvent[]> => {
+  try {
+    const response: GenericResponse<IHistoryTimelineEvent[]> = await API.get(
+      `${config.API_HOST}/purchaseorder/${orderId}/events`
+    );
+    return response.data;
   } catch (error) {
     throw error;
   }

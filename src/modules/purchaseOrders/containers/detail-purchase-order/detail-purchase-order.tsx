@@ -422,6 +422,7 @@ export function DetailPurchaseOrder() {
               pdfWidth={pdfWidth}
               formatCurrency={formatCurrency}
               onSave={handleProductsSave}
+              summary={data.summary}
             />
 
             {!isPdfCollapsed && (
@@ -493,15 +494,7 @@ export function DetailPurchaseOrder() {
       <TimelineHistoryModal
         isOpen={showTimelineHistory}
         onClose={() => setShowTimelineHistory(false)}
-        invoiceId={data.purchase_order_number}
-        timeline={data.tracking.map((t) => ({
-          id: t.id.toString(),
-          title: t.step_name,
-          description: t.event_description,
-          actor: t.created_by_name,
-          timestamp: t.created_at,
-          type: "system" as const
-        }))}
+        purchaseOrderId={orderId}
       />
     </div>
   );
