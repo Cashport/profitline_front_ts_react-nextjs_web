@@ -10,13 +10,15 @@ export async function middleware(request: NextRequest) {
   const apiChatHost = env.API_CHAT?.slice(0, -4) ?? "";
   const apiChatWsHost = apiChatHost.replace("https://", "wss://").replace("http://", "ws://");
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const unpkgForPDF = "https://unpkg.com";
+  const amazonFiles = "https://*.amazonaws.com";
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co ${unpkgForPDF};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https://*.amazonaws.com data: blob: https://www.gstatic.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} https://checkout.wompi.co;
+    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
     object-src 'none';
     frame-ancestors 'self';

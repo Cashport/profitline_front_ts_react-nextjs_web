@@ -1,5 +1,7 @@
 import { Button } from "@/modules/chat/ui/button";
 import { FileText, Download } from "lucide-react";
+import { Viewer, Worker } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 interface PurchaseOrderDocumentProps {
   pdfUrl?: string;
@@ -16,6 +18,8 @@ export function PurchaseOrderDocument({
   pdfWidth,
   onCollapse
 }: PurchaseOrderDocumentProps) {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
   const handleDownloadPdf = () => {
     if (pdfUrl) {
       window.open(pdfUrl, "_blank");
@@ -83,6 +87,15 @@ export function PurchaseOrderDocument({
                   </div>
                 </div>
               </object>
+
+              <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.js">
+                <div style={{ height: "750px" }}>
+                  <Viewer
+                    fileUrl={pdfUrl || "/testPDF.pdf"}
+                    plugins={[defaultLayoutPluginInstance]}
+                  />
+                </div>
+              </Worker>
             </div>
           ) : (
             <div className="bg-cashport-gray-lighter rounded-lg p-8 text-center h-full min-h-[400px] flex items-center justify-center">
