@@ -89,7 +89,9 @@ export function PurchaseOrderProducts({
   const handleEditToggle = () => {
     if (isEditMode) {
       // Exiting edit mode - save changes
-      handleSubmit(onSubmitProducts)();
+      handleSubmit(onSubmitProducts, (errors) => {
+        console.error("Errores de validación:", errors);
+      })();
     } else {
       // Entering edit mode
       setIsEditMode(true);

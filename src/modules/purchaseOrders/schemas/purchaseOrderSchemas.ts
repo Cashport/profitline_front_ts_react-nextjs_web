@@ -24,8 +24,8 @@ export const purchaseOrderInfoSchema = yup.object({
  */
 export const productFormSchema = yup.object({
   marketplace_order_product_id: yup.number().required("ID de producto requerido"),
-  product_sku: yup.string().required(),
-  product_description: yup.string().required(),
+  product_sku: yup.string().optional(),
+  product_description: yup.string().optional(),
   quantity: yup
     .number()
     .required("Cantidad requerida")
