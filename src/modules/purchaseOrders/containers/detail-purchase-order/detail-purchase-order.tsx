@@ -3,9 +3,10 @@
 import React from "react";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import useSWR from "swr";
+import useSWR, { preload } from "swr";
 import { extractSingleParam } from "@/utils/utils";
 import { message } from "antd";
+import dynamic from "next/dynamic";
 
 import {
   ArrowLeft,
@@ -25,12 +26,44 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Separator } from "@/modules/chat/ui/separator";
-import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
-import { ApproveOrderModal } from "../../components/dialogs/approve-order-modal/approve-order-modal";
-import { RejectOrderModal } from "../../components/dialogs/reject-order-modal/reject-order-modal";
-import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-modal/send-to-approval-modal";
-import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
-import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
+import ProfitLoader from "@/components/ui/profit-loader";
+
+// Dynamic imports for modals to reduce initial bundle size
+const TimelineHistoryModal = dynamic(
+  () => import("../../components/timeline-history-modal/timeline-history-modal")
+    .then(mod => ({ default: mod.TimelineHistoryModal })),
+  { ssr: false }
+);
+
+const ApproveOrderModal = dynamic(
+  () => import("../../components/dialogs/approve-order-modal/approve-order-modal")
+    .then(mod => ({ default: mod.ApproveOrderModal })),
+  { ssr: false }
+);
+
+const RejectOrderModal = dynamic(
+  () => import("../../components/dialogs/reject-order-modal/reject-order-modal")
+    .then(mod => ({ default: mod.RejectOrderModal })),
+  { ssr: false }
+);
+
+const SendToApprovalModal = dynamic(
+  () => import("../../components/dialogs/send-to-approval-modal/send-to-approval-modal")
+    .then(mod => ({ default: mod.SendToApprovalModal })),
+  { ssr: false }
+);
+
+const InvoiceModal = dynamic(
+  () => import("../../components/dialogs/invoice-modal/invoice-modal")
+    .then(mod => ({ default: mod.InvoiceModal })),
+  { ssr: false }
+);
+
+const DispatchModal = dynamic(
+  () => import("../../components/dialogs/dispatch-modal/dispatch-modal")
+    .then(mod => ({ default: mod.DispatchModal })),
+  { ssr: false }
+);
 import { availableApprovers } from "../../constants/approvers";
 import {
   PurchaseOrderInfo,
@@ -61,9 +94,7 @@ import {
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
-
   const orderId = extractSingleParam(params.orderId);
-  const [notFound, setNotFound] = useState(false);
 
   // All hooks must be called before any conditional returns
   const [pdfWidth, setPdfWidth] = useState(50);
@@ -146,16 +177,16 @@ export function DetailPurchaseOrder() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cashport-gray-lighter flex items-center justify-center">
-        <p>Cargando orden de compra...</p>
+      <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center">
+        <ProfitLoader size="large" message="Cargando orden de compra..." />
       </div>
     );
   }
 
   // Not found state
-  if (notFound || (!isLoading && !data)) {
+  if (!isLoading && !data) {
     return (
-      <div className="min-h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
+      <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
         <p>Orden de compra no encontrada</p>
         <Button onClick={() => router.push("/purchase-orders")}>Volver al listado</Button>
       </div>
@@ -226,6 +257,12 @@ export function DetailPurchaseOrder() {
 
   const handleReject = () => {
     setShowRejectModal(true);
+  };
+
+  const handlePrefetchHistory = () => {
+    if (orderId) {
+      preload(`/purchaseorder/${orderId}/events`, fetcher);
+    }
   };
 
   const confirmApprove = () => {
@@ -411,12 +448,14 @@ export function DetailPurchaseOrder() {
             currentStage={currentStage}
             orderStages={processedStages}
             onShowHistory={() => setShowTimelineHistory(true)}
+            onPrefetchHistory={handlePrefetchHistory}
           />
 
           <Separator className="mb-6" />
 
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
+              clientId={data.client_nit}
               initialProducts={mapApiProductsToForm(data.products)}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}

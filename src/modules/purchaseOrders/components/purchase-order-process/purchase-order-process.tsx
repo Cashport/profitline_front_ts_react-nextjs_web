@@ -12,7 +12,7 @@ import {
 interface SubValidation {
   name: string;
   completedBy: string;
-  completedAt: string;
+  createdAt: string;
   isCompleted: boolean;
 }
 
@@ -29,12 +29,14 @@ interface PurchaseOrderProcessProps {
   currentStage: number;
   orderStages: OrderStage[];
   onShowHistory: () => void;
+  onPrefetchHistory?: () => void;
 }
 
 export function PurchaseOrderProcess({
   currentStage,
   orderStages,
-  onShowHistory
+  onShowHistory,
+  onPrefetchHistory
 }: PurchaseOrderProcessProps) {
   return (
     <TooltipProvider>
@@ -45,6 +47,7 @@ export function PurchaseOrderProcess({
             variant="outline"
             size="sm"
             onClick={onShowHistory}
+            onMouseEnter={onPrefetchHistory}
             className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
           >
             <History className="h-4 w-4 mr-2" />
@@ -93,7 +96,7 @@ export function PurchaseOrderProcess({
                             {subVal.isCompleted ? (
                               <>
                                 <p className="text-gray-300">{subVal.completedBy}</p>
-                                <p className="text-gray-400">{subVal.completedAt}</p>
+                                <p className="text-gray-400">{subVal.createdAt}</p>
                               </>
                             ) : (
                               <p className="text-gray-400">Pendiente</p>
@@ -104,14 +107,7 @@ export function PurchaseOrderProcess({
                     ) : (
                       <div className="text-xs">
                         <p className="font-semibold mb-1">{stage.name}</p>
-                        {stage.completedBy ? (
-                          <>
-                            <p>Completado por: {stage.completedBy}</p>
-                            <p>{stage.completedAt}</p>
-                          </>
-                        ) : (
-                          <p className="text-gray-400">Pendiente</p>
-                        )}
+                        <p className="text-gray-400">Pendiente</p>
                       </div>
                     )}
                   </TooltipContent>

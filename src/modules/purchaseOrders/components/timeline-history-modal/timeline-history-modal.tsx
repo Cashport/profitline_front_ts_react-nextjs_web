@@ -4,9 +4,8 @@ import { X, MessageSquare, Settings, FileText } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { useEffect, useState } from "react";
-import { getHistoryTimelineEvents } from "@/services/purchaseOrders/purchaseOrders";
 import { IHistoryTimelineEvent } from "@/types/purchaseOrders/purchaseOrders";
+import { usePurchaseOrderHistory } from "../../hooks/usePurchaseOrderHistory";
 
 interface TimelineHistoryModalProps {
   isOpen: boolean;
@@ -19,34 +18,10 @@ export function TimelineHistoryModal({
   onClose,
   purchaseOrderId
 }: TimelineHistoryModalProps) {
-  const [events, setEvents] = useState<IHistoryTimelineEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (!purchaseOrderId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await getHistoryTimelineEvents(purchaseOrderId);
-        setEvents(res);
-      } catch (err) {
-        console.error("Error fetching timeline events:", err);
-        setError("Error al cargar el historial");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (isOpen) {
-      fetchEvents();
-    }
-  }, [purchaseOrderId, isOpen]);
+  const { events, isLoading, error } = usePurchaseOrderHistory({
+    purchaseOrderId,
+    enabled: isOpen
+  });
 
   if (!isOpen) return null;
 
