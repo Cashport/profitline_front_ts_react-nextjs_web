@@ -32,7 +32,10 @@ import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-m
 import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
 import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
 import { availableApprovers } from "../../constants/approvers";
-import { PurchaseOrderInfo, PurchaseOrderInfoRef } from "../../components/purchase-order-info/purchase-order-info";
+import {
+  PurchaseOrderInfo,
+  PurchaseOrderInfoRef
+} from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
@@ -48,11 +51,11 @@ import {
   mapApiProductsToForm,
   mapFormProductsToApi,
   PurchaseOrderInfoFormData,
-  PurchaseOrderProductsFormData,
+  PurchaseOrderProductsFormData
 } from "../../types/forms";
 import {
   editPurchaseOrder,
-  editPurchaseOrderProducts,
+  editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
 
 export function DetailPurchaseOrder() {
@@ -187,10 +190,7 @@ export function DetailPurchaseOrder() {
     setIsEditMode(!isEditMode);
   };
 
-  const handleInfoSave = async (
-    formData: PurchaseOrderInfoFormData,
-    dirtyFields: string[]
-  ) => {
+  const handleInfoSave = async (formData: PurchaseOrderInfoFormData) => {
     try {
       // Only send changed fields to API
       const payload = mapFormDataToApi(formData);
@@ -207,10 +207,7 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const handleProductsSave = async (
-    formData: PurchaseOrderProductsFormData,
-    changedIndices: number[]
-  ) => {
+  const handleProductsSave = async (formData: PurchaseOrderProductsFormData) => {
     try {
       const payload = mapFormProductsToApi(formData);
       await editPurchaseOrderProducts(orderId!, payload.products);

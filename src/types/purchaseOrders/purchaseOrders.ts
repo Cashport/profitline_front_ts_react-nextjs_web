@@ -96,6 +96,13 @@ export interface IPurchaseOrderProduct {
   total_price: number;
 }
 
+export interface IEditPurchaseOrderProduct {
+  marketplace_order_product_id: number;
+  quantity?: number;
+  price?: number;
+  taxes?: number;
+}
+
 export interface IPurchaseOrderStatusHistory {
   status_name: string;
   status_color: string;

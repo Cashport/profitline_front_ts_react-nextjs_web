@@ -213,9 +213,7 @@ export function AIProcessingInterface({
 
               <div className="flex items-center space-x-2 p-4 bg-cashport-green/10 rounded-lg">
                 <Loader2 className="h-4 w-4 text-cashport-green animate-spin" />
-                <p className="text-sm text-cashport-black">
-                  Cerrando modal...
-                </p>
+                <p className="text-sm text-cashport-black">Cerrando modal...</p>
               </div>
             </div>
           )}

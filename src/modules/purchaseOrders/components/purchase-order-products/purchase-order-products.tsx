@@ -4,10 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Edit, Save } from "lucide-react";
-import {
-  PurchaseOrderProductsFormData,
-  ProductFormData,
-} from "../../types/forms";
+import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 
 interface PurchaseOrderProductsProps {
@@ -15,10 +12,7 @@ interface PurchaseOrderProductsProps {
   isPdfCollapsed: boolean;
   pdfWidth: number;
   formatCurrency: (amount: number) => string;
-  onSave: (
-    data: PurchaseOrderProductsFormData,
-    changedIndices: number[]
-  ) => void;
+  onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
 }
 
 export function PurchaseOrderProducts({
@@ -26,7 +20,7 @@ export function PurchaseOrderProducts({
   isPdfCollapsed,
   pdfWidth,
   formatCurrency,
-  onSave,
+  onSave
 }: PurchaseOrderProductsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -36,16 +30,16 @@ export function PurchaseOrderProducts({
     formState: { errors, dirtyFields },
     reset,
     watch,
-    setValue,
+    setValue
   } = useForm<PurchaseOrderProductsFormData>({
-    resolver: yupResolver(purchaseOrderProductsSchema),
+    resolver: yupResolver<PurchaseOrderProductsFormData>(purchaseOrderProductsSchema),
     defaultValues: initialProducts,
-    mode: "onChange",
+    mode: "onChange"
   });
 
   const { fields } = useFieldArray({
     control,
-    name: "products",
+    name: "products"
   });
 
   // Watch for changes to recalculate totals
@@ -59,12 +53,12 @@ export function PurchaseOrderProducts({
 
       if (product.subtotal !== subtotal) {
         setValue(`products.${index}.subtotal`, subtotal, {
-          shouldDirty: false,
+          shouldDirty: false
         });
       }
       if (product.total_price !== totalPrice) {
         setValue(`products.${index}.total_price`, totalPrice, {
-          shouldDirty: false,
+          shouldDirty: false
         });
       }
     });
@@ -94,45 +88,30 @@ export function PurchaseOrderProducts({
     console.log("Modified products indices:", changedIndices);
     console.log("Modified products data:", {
       changedProducts: changedIndices.map((i) => data.products[i]),
-      allProducts: data.products,
+      allProducts: data.products
     });
-
-    onSave(data, changedIndices);
+    if (changedIndices.length > 0) {
+      onSave(data, changedIndices);
+    }
     setIsEditMode(false);
   };
 
   // Calculate totals
-  const totalUnits = watchedProducts.reduce(
-    (sum, producto) => sum + producto.quantity,
-    0
-  );
-  const totalIVA = watchedProducts.reduce(
-    (sum, producto) => sum + producto.tax_amount,
-    0
-  );
-  const totalAmount = watchedProducts.reduce(
-    (sum, producto) => sum + producto.total_price,
-    0
-  );
+  const totalUnits = watchedProducts.reduce((sum, producto) => sum + producto.quantity, 0);
+  const totalIVA = watchedProducts.reduce((sum, producto) => sum + producto.tax_amount, 0);
+  const totalAmount = watchedProducts.reduce((sum, producto) => sum + producto.total_price, 0);
 
   return (
     <div
       className="space-y-6 transition-all duration-300 ease-in-out min-w-0"
       style={{
-        flex: isPdfCollapsed ? "1" : `0 0 calc(${100 - pdfWidth}% - 1.5rem)`,
+        flex: isPdfCollapsed ? "1" : `0 0 calc(${100 - pdfWidth}% - 1.5rem)`
       }}
     >
       <div>
         <div className="mb-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-cashport-black">
-            Detalle de Productos
-          </h3>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleEditToggle}
-          >
+          <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
+          <Button type="button" variant="outline" size="sm" onClick={handleEditToggle}>
             {isEditMode ? (
               <>
                 <Save className="h-4 w-4 mr-2" />
@@ -159,9 +138,7 @@ export function PurchaseOrderProducts({
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Precio unitario
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
-                  IVA
-                </th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">IVA</th>
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Precio total
                 </th>
@@ -169,8 +146,7 @@ export function PurchaseOrderProducts({
             </thead>
             <tbody>
               {fields.map((field, index) => {
-                const baseRowClass =
-                  index % 2 === 0 ? "bg-white" : "bg-cashport-gray-lighter/30";
+                const baseRowClass = index % 2 === 0 ? "bg-white" : "bg-cashport-gray-lighter/30";
 
                 const rowClass = `border-b border-cashport-gray-light ${baseRowClass}`;
 
@@ -196,11 +172,7 @@ export function PurchaseOrderProducts({
                               <Input
                                 type="number"
                                 {...controllerField}
-                                onChange={(e) =>
-                                  controllerField.onChange(
-                                    Number(e.target.value)
-                                  )
-                                }
+                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
                                 className="w-20 h-8 text-sm"
                               />
                             ) : (
@@ -227,11 +199,7 @@ export function PurchaseOrderProducts({
                               <Input
                                 type="number"
                                 {...controllerField}
-                                onChange={(e) =>
-                                  controllerField.onChange(
-                                    Number(e.target.value)
-                                  )
-                                }
+                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
                                 className="w-28 h-8 text-sm"
                               />
                             ) : (
@@ -258,11 +226,7 @@ export function PurchaseOrderProducts({
                               <Input
                                 type="number"
                                 {...controllerField}
-                                onChange={(e) =>
-                                  controllerField.onChange(
-                                    Number(e.target.value)
-                                  )
-                                }
+                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
                                 className="w-24 h-8 text-sm"
                               />
                             ) : (
@@ -288,9 +252,7 @@ export function PurchaseOrderProducts({
             </tbody>
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
-                <td className="p-3 text-sm font-semibold text-cashport-black text-right">
-                  Total
-                </td>
+                <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
                 <td className="p-3 text-sm font-bold text-cashport-black">
                   {totalUnits.toLocaleString()}
                 </td>

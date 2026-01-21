@@ -4,7 +4,8 @@ import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
 import {
   IPurchaseOrder,
   IPurchaseOrderDetail,
-  IPurchaseOrderFilters
+  IPurchaseOrderFilters,
+  IEditPurchaseOrderProduct
 } from "@/types/purchaseOrders/purchaseOrders";
 
 export const getAllOrders = async (
@@ -60,10 +61,10 @@ export const editPurchaseOrder = async (
 
 export const editPurchaseOrderProducts = async (
   orderId: string,
-  productsData: any[]
+  productsData: IEditPurchaseOrderProduct[]
 ): Promise<IPurchaseOrderDetail> => {
   try {
-    const response: GenericResponse<IPurchaseOrderDetail> = await API.put(
+    const response: GenericResponse<IPurchaseOrderDetail> = await API.patch(
       `${config.API_HOST}/purchaseorder/${orderId}/products`,
       { products: productsData }
     );

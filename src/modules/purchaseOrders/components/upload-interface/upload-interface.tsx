@@ -178,8 +178,7 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
   }, [uploadedFiles]);
 
   const handleProcessingComplete = useCallback(
-    (data: any) => {
-      console.log("Processing completed with data:", data);
+    () => {
       // Close the upload interface when processing is complete
       setShowAIProcessing(false);
       if (onClose) {

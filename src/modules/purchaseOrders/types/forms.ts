@@ -1,6 +1,7 @@
 import {
   IPurchaseOrderDetail,
   IPurchaseOrderProduct,
+  IEditPurchaseOrderProduct
 } from "@/types/purchaseOrders/purchaseOrders";
 
 /**
@@ -8,12 +9,9 @@ import {
  * Combines general info and delivery info into a single form
  */
 export interface PurchaseOrderInfoFormData {
-  // General Information (read-only in form, but included for display)
   purchase_order_number: string;
   client_name: string;
   created_at: string;
-
-  // Delivery Information (editable, optional)
   delivery_date?: string;
   delivery_address?: string;
   observations?: string;
@@ -45,15 +43,13 @@ export interface PurchaseOrderProductsFormData {
  * @param data - API response data
  * @returns Form data for PurchaseOrderInfo component
  */
-export const mapApiToFormData = (
-  data: IPurchaseOrderDetail
-): PurchaseOrderInfoFormData => ({
+export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoFormData => ({
   purchase_order_number: data.purchase_order_number || "",
   client_name: data.client_name || "",
   created_at: data.created_at || "",
   delivery_date: data.delivery_date || "",
   delivery_address: data.delivery_address || "",
-  observations: data.observations || "",
+  observations: data.observations || ""
 });
 
 /**
@@ -66,8 +62,7 @@ export const mapFormDataToApi = (
   formData: PurchaseOrderInfoFormData
 ): Partial<IPurchaseOrderDetail> => ({
   delivery_date: formData.delivery_date,
-  delivery_address: formData.delivery_address,
-  observations: formData.observations,
+  observations: formData.observations
 });
 
 /**
@@ -86,8 +81,8 @@ export const mapApiProductsToForm = (
     unit_price: p.unit_price || 0,
     tax_amount: p.tax_amount || 0,
     subtotal: p.subtotal || 0,
-    total_price: p.total_price || 0,
-  })),
+    total_price: p.total_price || 0
+  }))
 });
 
 /**
@@ -98,11 +93,11 @@ export const mapApiProductsToForm = (
  */
 export const mapFormProductsToApi = (
   formData: PurchaseOrderProductsFormData
-) => ({
+): { products: IEditPurchaseOrderProduct[] } => ({
   products: formData.products.map((p) => ({
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
-    unit_price: p.unit_price,
-    tax_amount: p.tax_amount,
-  })),
+    price: p.unit_price,
+    taxes: p.tax_amount
+  }))
 });
