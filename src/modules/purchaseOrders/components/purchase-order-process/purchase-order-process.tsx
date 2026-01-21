@@ -12,7 +12,7 @@ import {
 interface SubValidation {
   name: string;
   completedBy: string;
-  completedAt: string;
+  createdAt: string;
   isCompleted: boolean;
 }
 
@@ -96,7 +96,7 @@ export function PurchaseOrderProcess({
                             {subVal.isCompleted ? (
                               <>
                                 <p className="text-gray-300">{subVal.completedBy}</p>
-                                <p className="text-gray-400">{subVal.completedAt}</p>
+                                <p className="text-gray-400">{subVal.createdAt}</p>
                               </>
                             ) : (
                               <p className="text-gray-400">Pendiente</p>
@@ -107,14 +107,7 @@ export function PurchaseOrderProcess({
                     ) : (
                       <div className="text-xs">
                         <p className="font-semibold mb-1">{stage.name}</p>
-                        {stage.completedBy ? (
-                          <>
-                            <p>Completado por: {stage.completedBy}</p>
-                            <p>{stage.completedAt}</p>
-                          </>
-                        ) : (
-                          <p className="text-gray-400">Pendiente</p>
-                        )}
+                        <p className="text-gray-400">Pendiente</p>
                       </div>
                     )}
                   </TooltipContent>

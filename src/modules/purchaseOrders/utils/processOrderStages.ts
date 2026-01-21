@@ -1,5 +1,5 @@
 import type { IPurchaseOrderTracking } from "@/types/purchaseOrders/purchaseOrders";
-import type { OrderStage } from "../components/purchase-order-process/purchase-order-process";
+import type { OrderStage, SubValidation } from "../components/purchase-order-process/purchase-order-process";
 import { formatDateAndTime } from "@/utils/utils";
 
 /**
@@ -26,7 +26,7 @@ export function getLatestTrackingEvent(
  * Merge API tracking data with static order stages
  * @param staticStages - Array of static order stage configurations
  * @param tracking - Array of tracking events from the API
- * @returns Array of order stages with completion data populated
+ * @returns Array of order stages with completion data and subValidations populated
  */
 export function mergeTrackingWithStages(
   staticStages: OrderStage[],
@@ -36,64 +36,78 @@ export function mergeTrackingWithStages(
     return staticStages;
   }
 
-  // Create a map of step_id to the latest completed tracking event
-  const trackingMap = new Map<number, IPurchaseOrderTracking>();
+  // Agrupar todos los eventos por step_id
+  const trackingByStepId = new Map<number, IPurchaseOrderTracking[]>();
 
-  // Filter for completed steps and group by step_id
-  const completedTracking = tracking.filter((t) => t.is_step_complete === 1);
-
-  completedTracking.forEach((event) => {
-    const existingEvent = trackingMap.get(event.step_id);
-
-    if (!existingEvent) {
-      trackingMap.set(event.step_id, event);
-    } else {
-      // If multiple events for same step_id, keep the latest
-      const existingDate = new Date(existingEvent.created_at).getTime();
-      const currentDate = new Date(event.created_at).getTime();
-
-      if (currentDate > existingDate) {
-        trackingMap.set(event.step_id, event);
-      }
-    }
+  tracking.forEach((event) => {
+    const events = trackingByStepId.get(event.step_id) || [];
+    events.push(event);
+    trackingByStepId.set(event.step_id, events);
   });
 
   // Merge tracking data into static stages
   return staticStages.map((stage) => {
-    const trackingEvent = trackingMap.get(stage.id);
+    const trackingEvents = trackingByStepId.get(stage.id);
 
-    if (!trackingEvent) {
+    if (!trackingEvents || trackingEvents.length === 0) {
       // No tracking data for this stage, return as-is
       return stage;
     }
 
-    // Populate completion data from tracking
+    // Convertir todos los eventos a SubValidations
+    const subValidations: SubValidation[] = trackingEvents
+      .map((event) => ({
+        name: event.event_description,
+        completedBy: event.created_by_name,
+        createdAt: formatDateAndTime(event.created_at),
+        isCompleted: event.is_step_complete === 1
+      }))
+      .sort((a, b) => {
+        // Ordenar por fecha descendente (más reciente primero)
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
+    // Encontrar el evento completado más reciente para el stage
+    const completedEvents = trackingEvents
+      .filter((e) => e.is_step_complete === 1)
+      .sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateB - dateA;
+      });
+
+    const latestCompleted = completedEvents[0];
+
     return {
       ...stage,
-      completedBy: trackingEvent.created_by_name || "Sistema",
-      completedAt: formatDateAndTime(trackingEvent.created_at)
+      completedBy: latestCompleted ? latestCompleted.created_by_name : null,
+      completedAt: latestCompleted ? formatDateAndTime(latestCompleted.created_at) : null,
+      subValidations
     };
   });
 }
 
 /**
- * Determine the current stage based on completion data
+ * Determine the current stage based on tracking data
+ * Returns the highest step_id reached in the tracking array
  * @param stages - Array of order stages with completion data
  * @returns The ID of the current stage (1-5)
  */
 export function getCurrentStage(stages: OrderStage[]): number {
-  // Find the first stage that is not completed (completedBy is null)
-  const firstIncomplete = stages.find((stage) => stage.completedBy === null);
+  // Find the maximum step_id that has been reached
+  // All stages up to and including this one should be highlighted
+  let maxStepId = 1;
 
-  if (firstIncomplete) {
-    return firstIncomplete.id;
-  }
+  stages.forEach((stage) => {
+    // If the stage has any subvalidations, it has been reached
+    if (stage.subValidations && stage.subValidations.length > 0) {
+      if (stage.id > maxStepId) {
+        maxStepId = stage.id;
+      }
+    }
+  });
 
-  // If all stages are complete, return the last stage id
-  if (stages.length > 0) {
-    return stages[stages.length - 1].id;
-  }
-
-  // Fallback to first stage
-  return 1;
+  return maxStepId;
 }
