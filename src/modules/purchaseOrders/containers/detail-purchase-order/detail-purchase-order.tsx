@@ -3,7 +3,7 @@
 import React from "react";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import useSWR from "swr";
+import useSWR, { preload } from "swr";
 import { extractSingleParam } from "@/utils/utils";
 import { message } from "antd";
 
@@ -62,9 +62,7 @@ import {
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
-
   const orderId = extractSingleParam(params.orderId);
-  const [notFound, setNotFound] = useState(false);
 
   // All hooks must be called before any conditional returns
   const [pdfWidth, setPdfWidth] = useState(50);
@@ -154,7 +152,7 @@ export function DetailPurchaseOrder() {
   }
 
   // Not found state
-  if (notFound || (!isLoading && !data)) {
+  if (!isLoading && !data) {
     return (
       <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
         <p>Orden de compra no encontrada</p>
@@ -227,6 +225,12 @@ export function DetailPurchaseOrder() {
 
   const handleReject = () => {
     setShowRejectModal(true);
+  };
+
+  const handlePrefetchHistory = () => {
+    if (orderId) {
+      preload(`/purchaseorder/${orderId}/events`, fetcher);
+    }
   };
 
   const confirmApprove = () => {
@@ -412,6 +416,7 @@ export function DetailPurchaseOrder() {
             currentStage={currentStage}
             orderStages={processedStages}
             onShowHistory={() => setShowTimelineHistory(true)}
+            onPrefetchHistory={handlePrefetchHistory}
           />
 
           <Separator className="mb-6" />

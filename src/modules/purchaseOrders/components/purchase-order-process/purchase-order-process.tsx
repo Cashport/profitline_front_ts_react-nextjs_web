@@ -29,12 +29,14 @@ interface PurchaseOrderProcessProps {
   currentStage: number;
   orderStages: OrderStage[];
   onShowHistory: () => void;
+  onPrefetchHistory?: () => void;
 }
 
 export function PurchaseOrderProcess({
   currentStage,
   orderStages,
-  onShowHistory
+  onShowHistory,
+  onPrefetchHistory
 }: PurchaseOrderProcessProps) {
   return (
     <TooltipProvider>
@@ -45,6 +47,7 @@ export function PurchaseOrderProcess({
             variant="outline"
             size="sm"
             onClick={onShowHistory}
+            onMouseEnter={onPrefetchHistory}
             className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
           >
             <History className="h-4 w-4 mr-2" />
