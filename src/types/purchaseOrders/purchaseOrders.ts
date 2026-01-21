@@ -101,6 +101,7 @@ export interface IEditPurchaseOrderProduct {
   quantity?: number;
   price?: number;
   taxes?: number;
+  product_id?: number;
 }
 
 export interface IPurchaseOrderStatusHistory {

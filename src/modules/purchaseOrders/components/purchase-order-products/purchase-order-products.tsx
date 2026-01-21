@@ -3,10 +3,20 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/modules/chat/ui/select";
 import { Edit, Save } from "lucide-react";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
+import { useAppStore } from "@/lib/store/store";
+import { getProductsByClient } from "@/services/commerce/commerce";
+import { IProduct } from "@/types/commerce/ICommerce";
 
 interface PurchaseOrderProductsProps {
   initialProducts: PurchaseOrderProductsFormData;
@@ -15,6 +25,7 @@ interface PurchaseOrderProductsProps {
   formatCurrency: (amount: number) => string;
   onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
   summary: IPurchaseOrderSummary;
+  clientId: string;
 }
 
 export function PurchaseOrderProducts({
@@ -23,9 +34,12 @@ export function PurchaseOrderProducts({
   pdfWidth,
   formatCurrency,
   onSave,
-  summary
+  summary,
+  clientId
 }: PurchaseOrderProductsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const {
     control,
@@ -46,6 +60,26 @@ export function PurchaseOrderProducts({
 
   // Watch for changes to recalculate totals
   const watchedProducts = watch("products");
+
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!projectId || !clientId) return;
+
+      try {
+        const response = await getProductsByClient(projectId, clientId);
+        if (response.success && response.data) {
+          // Flatten products from all categories
+          const allProducts = response.data.flatMap((category) => category.products);
+          setInternalProducts(allProducts);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, [projectId, clientId]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
@@ -119,6 +153,9 @@ export function PurchaseOrderProducts({
                   Producto cliente
                 </th>
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                  Producto
+                </th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
@@ -147,6 +184,44 @@ export function PurchaseOrderProducts({
                           SKU: {field.product_sku}
                         </span>
                       </div>
+                    </td>
+                    <td className="p-3">
+                      <Controller
+                        name={`products.${index}.product_id`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <div>
+                            {isEditMode ? (
+                              <Select
+                                value={controllerField.value?.toString() || ""}
+                                onValueChange={(value) => controllerField.onChange(Number(value))}
+                              >
+                                <SelectTrigger className="w-full h-8">
+                                  <SelectValue placeholder="Seleccionar producto" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {internalProducts.map((product) => (
+                                    <SelectItem key={product.id} value={product.id.toString()}>
+                                      {product.description}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <div className="flex flex-col">
+                                {controllerField.value ? (
+                                  <span className="text-sm text-cashport-black">
+                                    {internalProducts.find((p) => p.id === controllerField.value)
+                                      ?.description || "-"}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-gray-400">-</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      />
                     </td>
                     <td className="p-3">
                       <Controller
@@ -239,6 +314,7 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black">
                   {totalUnits.toLocaleString()}
                 </td>

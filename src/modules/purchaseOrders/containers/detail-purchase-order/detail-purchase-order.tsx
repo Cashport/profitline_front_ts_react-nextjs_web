@@ -417,6 +417,7 @@ export function DetailPurchaseOrder() {
 
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
+              clientId={data.client_nit}
               initialProducts={mapApiProductsToForm(data.products)}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}

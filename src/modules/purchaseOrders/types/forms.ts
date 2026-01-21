@@ -29,6 +29,7 @@ export interface ProductFormData {
   tax_amount: number; // Editable
   subtotal: number; // Calculated: quantity * unit_price
   total_price: number; // Calculated: subtotal + tax_amount
+  product_id?: number; // Optional internal product ID
 }
 
 /**
@@ -81,7 +82,8 @@ export const mapApiProductsToForm = (
     unit_price: p.unit_price || 0,
     tax_amount: p.tax_amount || 0,
     subtotal: p.subtotal || 0,
-    total_price: p.total_price || 0
+    total_price: p.total_price || 0,
+    product_id: p.product_id ?? undefined
   }))
 });
 
@@ -98,6 +100,7 @@ export const mapFormProductsToApi = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
     price: p.unit_price,
-    taxes: p.tax_amount
+    taxes: p.tax_amount,
+    product_id: p.product_id
   }))
 });
