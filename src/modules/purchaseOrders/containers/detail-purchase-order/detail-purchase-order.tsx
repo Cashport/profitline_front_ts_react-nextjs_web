@@ -28,6 +28,7 @@ import { Separator } from "@/modules/chat/ui/separator";
 import { TimelineHistoryModal } from "../../components/timeline-history-modal/timeline-history-modal";
 import { ApproveOrderModal } from "../../components/dialogs/approve-order-modal/approve-order-modal";
 import { RejectOrderModal } from "../../components/dialogs/reject-order-modal/reject-order-modal";
+import ProfitLoader from "@/components/ui/profit-loader";
 import { SendToApprovalModal } from "../../components/dialogs/send-to-approval-modal/send-to-approval-modal";
 import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
 import { DispatchModal } from "../../components/dialogs/dispatch-modal/dispatch-modal";
@@ -146,8 +147,8 @@ export function DetailPurchaseOrder() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cashport-gray-lighter flex items-center justify-center">
-        <p>Cargando orden de compra...</p>
+      <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center">
+        <ProfitLoader size="large" message="Cargando orden de compra..." />
       </div>
     );
   }
@@ -155,7 +156,7 @@ export function DetailPurchaseOrder() {
   // Not found state
   if (notFound || (!isLoading && !data)) {
     return (
-      <div className="min-h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
+      <div className="h-screen bg-cashport-gray-lighter flex items-center justify-center flex-col gap-4">
         <p>Orden de compra no encontrada</p>
         <Button onClick={() => router.push("/purchase-orders")}>Volver al listado</Button>
       </div>
