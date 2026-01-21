@@ -19,6 +19,7 @@ export const getAllOrders = async (
 
     return response;
   } catch (error) {
+    console.error("Error fetching all purchase orders:", error);
     throw error;
   }
 };
@@ -30,6 +31,7 @@ export const getFilters = async (projectId: number): Promise<IPurchaseOrderFilte
     );
     return response.data;
   } catch (error) {
+    console.error("Error fetching purchase order filters:", error);
     throw error;
   }
 };
@@ -41,6 +43,7 @@ export const getOrderById = async (orderId: string): Promise<IPurchaseOrderDetai
     );
     return response.data;
   } catch (error) {
+    console.error("Error fetching purchase order by ID:", error);
     throw error;
   }
 };
@@ -56,6 +59,7 @@ export const editPurchaseOrder = async (
     );
     return response.data;
   } catch (error) {
+    console.error("Error editing purchase order:", error);
     throw error;
   }
 };
@@ -71,6 +75,7 @@ export const editPurchaseOrderProducts = async (
     );
     return response.data;
   } catch (error) {
+    console.error("Error editing purchase order products:", error);
     throw error;
   }
 };
@@ -84,6 +89,7 @@ export const uploadPurchaseOrder = async (file: File): Promise<any> => {
     const response: any = await API.post(`${config.API_PURCHASE_ORDERS_AI}`, formData);
     return response;
   } catch (error) {
+    console.error("File upload error:", error);
     throw error;
   }
 };
@@ -97,6 +103,27 @@ export const getHistoryTimelineEvents = async (
     );
     return response.data;
   } catch (error) {
+    console.error("Error fetching timeline events:", error);
+    throw error;
+  }
+};
+
+export const downloadPurchaseOrdersCSV = async (
+  orderIds: string[]
+): Promise<{
+  url: string;
+  filename: string;
+}> => {
+  try {
+    const response: {
+      url: string;
+      filename: string;
+    } = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
+      order_ids: orderIds
+    });
+    return response;
+  } catch (error) {
+    console.error("CSV download error:", error);
     throw error;
   }
 };
