@@ -105,7 +105,7 @@ export function PurchaseOrderDocument({
               <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.js">
                 <div style={{ height: "750px" }}>
                   <Viewer
-                    fileUrl={pdfUrl || "/testPDF.pdf"}
+                    fileUrl={pdfUrl}
                     plugins={[defaultLayoutPluginInstance]}
                     renderError={renderError}
                   />
