@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import {
   Brain,
@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 
 interface AIProcessingInterfaceProps {
   files: File[];
+  uploadPromise?: Promise<any> | null;
   onProcessingComplete?: () => void;
   onClose?: () => void;
 }
@@ -37,6 +38,7 @@ const processingSteps = [
 
 export function AIProcessingInterface({
   files,
+  uploadPromise,
   onProcessingComplete,
   onClose
 }: AIProcessingInterfaceProps) {
@@ -44,34 +46,66 @@ export function AIProcessingInterface({
   const [progress, setProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
+    // Guard: Only run processing once
+    if (hasProcessedRef.current) {
+      return;
+    }
+    hasProcessedRef.current = true;
+
     const processDocument = async () => {
       try {
         setIsProcessing(true);
 
-        // Simulate processing steps for demo purposes
-        // TODO: Replace with actual API call to process documents
-        for (let step = 0; step < processingSteps.length; step++) {
-          setCurrentStep(step);
-
-          const stepDuration = 1500 + Math.random() * 1000;
-          const stepProgress = ((step + 1) / processingSteps.length) * 100;
-
-          await new Promise((resolve) => {
+        // Helper function to animate progress
+        const animateProgress = (targetProgress: number) => {
+          return new Promise<void>((resolve) => {
             const interval = setInterval(() => {
               setProgress((prev) => {
-                const newProgress = Math.min(prev + 2, stepProgress);
-                if (newProgress >= stepProgress) {
+                const newProgress = Math.min(prev + 2, targetProgress);
+                if (newProgress >= targetProgress) {
                   clearInterval(interval);
-                  resolve(undefined);
+                  resolve();
                 }
                 return newProgress;
               });
             }, 50);
           });
+        };
 
-          await new Promise((resolve) => setTimeout(resolve, stepDuration));
+        // Process steps 1-5 quickly, step 6 waits for upload
+        for (let step = 0; step < processingSteps.length; step++) {
+          setCurrentStep(step);
+
+          if (step < processingSteps.length - 1) {
+            // Steps 1-5: Fast simulation
+            const stepDuration = 800 + Math.random() * 400;
+            const stepProgress = ((step + 1) / processingSteps.length) * 80; // Progress up to 80%
+
+            await animateProgress(stepProgress);
+            await new Promise((resolve) => setTimeout(resolve, stepDuration));
+          } else {
+            // Step 6 (last): Stay at 80% while waiting for uploadPromise
+            await animateProgress(80);
+
+            if (uploadPromise) {
+              try {
+                await uploadPromise;
+                // Once upload completes, progress to 100%
+                await animateProgress(100);
+              } catch (error) {
+                setError("Error al validar la información extraída");
+                setIsProcessing(false);
+                return;
+              }
+            } else {
+              // Fallback if no promise
+              await new Promise((resolve) => setTimeout(resolve, 1500));
+              await animateProgress(100);
+            }
+          }
         }
 
         // Processing complete
@@ -95,7 +129,14 @@ export function AIProcessingInterface({
     };
 
     processDocument();
-  }, [files, onProcessingComplete, onClose]);
+  }, [files, uploadPromise, onProcessingComplete, onClose]);
+
+  // Cleanup: Reset ref when component unmounts
+  useEffect(() => {
+    return () => {
+      hasProcessedRef.current = false;
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">

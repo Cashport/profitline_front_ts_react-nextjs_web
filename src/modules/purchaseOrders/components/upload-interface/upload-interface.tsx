@@ -32,6 +32,8 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAIProcessing, setShowAIProcessing] = useState(false);
+  const [uploadPromise, setUploadPromise] = useState<Promise<any> | null>(null);
+  const [processingFiles, setProcessingFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -67,33 +69,40 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
 
         setUploadedFiles((prev) => [...prev, uploadedFile]);
 
-        try {
-          // Call the real API to upload the file
-          await uploadPurchaseOrder(file);
+        // Set processing files before activating AI modal
+        setProcessingFiles([file]);
 
-          // On success, update file status
-          setUploadedFiles((prev) =>
-            prev.map((f) => (f.id === fileId ? { ...f, progress: 100, status: "completed" } : f))
-          );
+        // Activate AI processing interface immediately
+        setShowAIProcessing(true);
 
-          message.success("Orden cargada con éxito");
+        // Create upload promise
+        const uploadTask = uploadPurchaseOrder(file)
+          .then((response) => {
+            // On success, update file status
+            setUploadedFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, progress: 100, status: "completed" } : f))
+            );
+            message.success("Orden cargada con éxito");
+            return response;
+          })
+          .catch((error: any) => {
+            // On error, update file status to error
+            setUploadedFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, status: "error" } : f))
+            );
 
-          // Transition to AI processing interface after successful upload
-          setTimeout(() => {
-            setShowAIProcessing(true);
-          }, 500);
-        } catch (error: any) {
-          // On error, update file status to error
-          setUploadedFiles((prev) =>
-            prev.map((f) => (f.id === fileId ? { ...f, status: "error" } : f))
-          );
+            // Extract error message
+            const errorMessage =
+              error?.response?.data?.message ||
+              error?.message ||
+              "Error al cargar la orden de compra";
 
-          // Extract error message
-          const errorMessage =
-            error?.response?.data?.message || error?.message || "Error al cargar la orden de compra";
+            message.error(errorMessage);
+            throw error;
+          });
 
-          message.error(errorMessage);
-        }
+        setUploadPromise(uploadTask);
+        await uploadTask;
       }
 
       if (onFileUpload) {
@@ -170,31 +179,25 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
     setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
   }, []);
 
-  const handleProcessWithAI = useCallback(() => {
-    const completedFiles = uploadedFiles.filter((f) => f.status === "completed").map((f) => f.file);
-    if (completedFiles.length > 0) {
-      setShowAIProcessing(true);
+  const handleProcessingComplete = useCallback(() => {
+    // Close the upload interface when processing is complete
+    setShowAIProcessing(false);
+    if (onClose) {
+      onClose();
     }
-  }, [uploadedFiles]);
+  }, [onClose]);
 
-  const handleProcessingComplete = useCallback(
-    () => {
-      // Close the upload interface when processing is complete
-      setShowAIProcessing(false);
-      if (onClose) {
-        onClose();
-      }
-    },
-    [onClose]
-  );
+  const handleAIProcessingClose = useCallback(() => {
+    setShowAIProcessing(false);
+  }, []);
 
   if (showAIProcessing) {
-    const completedFiles = uploadedFiles.filter((f) => f.status === "completed").map((f) => f.file);
     return (
       <AIProcessingInterface
-        files={completedFiles}
+        files={processingFiles}
+        uploadPromise={uploadPromise}
         onProcessingComplete={handleProcessingComplete}
-        onClose={() => setShowAIProcessing(false)}
+        onClose={handleAIProcessingClose}
       />
     );
   }
