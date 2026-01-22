@@ -76,7 +76,6 @@ const DispatchModal = dynamic(
     })),
   { ssr: false }
 );
-import { availableApprovers } from "../../constants/approvers";
 import {
   PurchaseOrderInfo,
   PurchaseOrderInfoRef
@@ -283,7 +282,7 @@ export function DetailPurchaseOrder() {
     // Note: Modal handles its own closing via onOpenChange
   };
 
-  const confirmReject = (reason: string, observation: string) => {
+  const confirmReject = (_reason: string, _observation: string) => {
     // TODO: Implement rejection logic
     // Note: Modal handles its own closing via onOpenChange
   };
@@ -302,18 +301,6 @@ export function DetailPurchaseOrder() {
     } catch (error: any) {
       message.error(error ? error : "Error al descargar el plano de la orden de compra");
     }
-  };
-
-  const handleSendToApproval = (selectedApproverIds: string[]) => {
-    // TODO: Implement send to approval logic
-  };
-
-  const handleAddInvoices = (invoiceIds: string) => {
-    // TODO: Implement invoice addition logic
-  };
-
-  const handleConfirmDispatch = (dispatchNotes: string) => {
-    // TODO: Implement dispatch confirmation logic
   };
 
   const actionItems: DropdownItem[] = [
@@ -511,21 +498,23 @@ export function DetailPurchaseOrder() {
       <SendToApprovalModal
         open={showApprovalModal}
         onOpenChange={setShowApprovalModal}
-        onConfirm={handleSendToApproval}
-        availableApprovers={availableApprovers}
+        purchaseOrderId={orderId}
+        mutateOrderDetail={mutate}
       />
 
       <InvoiceModal
         open={showInvoiceModal}
         onOpenChange={setShowInvoiceModal}
-        onConfirm={handleAddInvoices}
+        purchaseOrderId={orderId!}
+        onSuccess={() => mutate()}
       />
 
       <DispatchModal
         open={showDispatchModal}
         onOpenChange={setShowDispatchModal}
-        onConfirm={handleConfirmDispatch}
         orderNumber={data.purchase_order_number}
+        purchaseOrderId={orderId}
+        mutateOrderDetail={mutate}
       />
 
       <TimelineHistoryModal

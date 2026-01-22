@@ -153,3 +153,43 @@ export interface IHistoryTimelineEvent {
   created_at: string;
   updated_at: string;
 }
+
+// Purchase Order Actions - Discriminated Union Types
+export interface IDispatchActionPayload {
+  action: "dispatch";
+  data: Record<string, never>;
+  observation: string;
+}
+
+export interface IInvoiceActionPayload {
+  action: "invoice";
+  data: {
+    invoice_ids: number[];
+  };
+  observation: string;
+}
+
+export interface IApproveActionPayload {
+  action: "approve";
+  data: {
+    approvers: Array<{ userId: number; order: number }>;
+  };
+  observation: string;
+}
+
+export type IPurchaseOrderActionPayload =
+  | IDispatchActionPayload
+  | IInvoiceActionPayload
+  | IApproveActionPayload;
+
+// Approver type from API
+export interface IApprover {
+  user_id: number;
+  user_name: string;
+  user_rol: string;
+}
+
+export interface IApproversResponse {
+  templateId: number;
+  approvers: IApprover[];
+}
