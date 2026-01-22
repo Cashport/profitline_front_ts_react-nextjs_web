@@ -1,28 +1,13 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
-import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
+import { GenericResponse } from "@/types/global/IGlobal";
 import {
-  IPurchaseOrder,
   IPurchaseOrderDetail,
   IPurchaseOrderFilters,
   IEditPurchaseOrderProduct,
-  IHistoryTimelineEvent
+  IHistoryTimelineEvent,
+  IPurchaseOrderActionPayload
 } from "@/types/purchaseOrders/purchaseOrders";
-
-export const getAllOrders = async (
-  projectId: number
-): Promise<GenericResponsePage<IPurchaseOrder[]>> => {
-  try {
-    const response: GenericResponsePage<IPurchaseOrder[]> = await API.get(
-      `${config.API_HOST}/purchaseOrder/all`
-    );
-
-    return response;
-  } catch (error) {
-    console.error("Error fetching all purchase orders:", error);
-    throw error;
-  }
-};
 
 export const getFilters = async (projectId: number): Promise<IPurchaseOrderFilters> => {
   try {
@@ -124,6 +109,48 @@ export const downloadPurchaseOrdersCSV = async (
     return response;
   } catch (error) {
     console.error("CSV download error:", error);
+    throw error;
+  }
+};
+
+export const getApprovers = async (): Promise<string[]> => {
+  const templateId = 3;
+  try {
+    const response: GenericResponse<string[]> = await API.get(
+      `${config.API_HOST}/approval/templates/${templateId}/approvers`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching approvers:", error);
+    throw error;
+  }
+};
+
+export const purchaseOrderActions = async (
+  purchase_order_id: string,
+  payload: IPurchaseOrderActionPayload,
+  files?: File | File[]
+): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append("request", JSON.stringify(payload));
+
+    if (payload.action === "invoice" && files) {
+      if (Array.isArray(files)) {
+        files.forEach((file) => formData.append("file", file));
+      } else {
+        formData.append("file", files);
+      }
+    }
+
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${purchase_order_id}/action`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error executing purchase order action:", error);
     throw error;
   }
 };
