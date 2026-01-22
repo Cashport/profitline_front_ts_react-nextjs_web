@@ -111,7 +111,7 @@ export default function HomePage() {
               </div>
 
               <div className="pt-2">
-                <Link href="blank" target="_blank">
+                <Link href="/data-quality/clients">
                   <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
                     Ver Clientes
                   </Button>
