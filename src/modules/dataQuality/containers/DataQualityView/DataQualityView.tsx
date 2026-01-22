@@ -1,6 +1,8 @@
-import { Badge } from "@/modules/chat/ui/badge";
+import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { Users, Calendar, TrendingUp } from "lucide-react";
+import { Badge } from "antd";
+import { BellSimpleRinging } from "phosphor-react";
 import Link from "next/link";
 
 // Mock data for countries and their alerts
@@ -29,15 +31,25 @@ const countries = [
 
 export default function HomePage() {
   const totalAlerts = countries.reduce((sum, country) => sum + country.alerts, 0);
-  const totalClients = countries.reduce((sum, country) => sum + country.clients, 0);
 
   return (
     <div className="bg-[#F7F7F7]">
-      <div className="flex items-center space-x-4 mb-6">
-        <h2 className="text-xl font-semibold text-[#141414]">Países y Distribuidores</h2>
-        <Badge variant="secondary" className="text-sm">
-          {countries.length} países activos
-        </Badge>
+      <div className="flex items-center justify-between ">
+        <div className="flex items-center space-x-4 mb-6">
+          <h2 className="text-xl font-semibold text-[#141414]">Países y Distribuidores</h2>
+          <BadgeUI variant="secondary" className="text-sm">
+            {countries.length} países activos
+          </BadgeUI>
+        </div>
+
+        <Link href="/data-quality/alerts">
+          <Badge count={totalAlerts} color="#E53935">
+            <Button variant="outline">
+              <BellSimpleRinging size={18} />
+              Alertas
+            </Button>
+          </Badge>
+        </Link>
       </div>
 
       {/* Main Content */}
@@ -56,12 +68,12 @@ export default function HomePage() {
                   <h3 className="text-lg text-[#141414]">{country.name}</h3>
                 </div>
                 {country.alerts > 0 && (
-                  <Badge
+                  <BadgeUI
                     variant={country.alerts > 10 ? "destructive" : "secondary"}
                     className="text-xs"
                   >
                     {country.alerts} alertas
-                  </Badge>
+                  </BadgeUI>
                 )}
               </div>
             </div>
