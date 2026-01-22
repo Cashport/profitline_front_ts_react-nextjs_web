@@ -1,24 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
-import { Check } from "lucide-react";
-import { getApprovers } from "@/services/purchaseOrders/purchaseOrders";
-import { IApprover } from "@/types/purchaseOrders/purchaseOrders";
+import { Check, Loader2, AlertTriangle } from "lucide-react";
+import { message } from "antd";
+import { getApprovers, purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  IApprover,
+  IPurchaseOrderDetail,
+  IApproveActionPayload
+} from "@/types/purchaseOrders/purchaseOrders";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { KeyedMutator } from "swr";
 
 interface SendToApprovalModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (selectedApproverIds: number[]) => void;
+  purchaseOrderId?: string;
+  mutateOrderDetail: KeyedMutator<GenericResponse<IPurchaseOrderDetail>>;
 }
 
-export function SendToApprovalModal({ open, onOpenChange, onConfirm }: SendToApprovalModalProps) {
+export function SendToApprovalModal({
+  open,
+  onOpenChange,
+  purchaseOrderId,
+  mutateOrderDetail
+}: SendToApprovalModalProps) {
   const [availableApprovers, setAvailableApprovers] = useState<IApprover[]>();
   const [selectedApprovers, setSelectedApprovers] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Reset state when modal closes
   useEffect(() => {
     if (!open) {
       setSelectedApprovers([]);
+      setError(null);
     }
   }, [open]);
 
@@ -28,10 +44,36 @@ export function SendToApprovalModal({ open, onOpenChange, onConfirm }: SendToApp
     );
   };
 
-  const handleConfirm = () => {
-    onConfirm(selectedApprovers);
-    console.log("Selected Approvers:", selectedApprovers);
-    onOpenChange(false);
+  const handleConfirm = async () => {
+    if (!purchaseOrderId) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const approvers = selectedApprovers.map((userId, index) => ({
+        userId,
+        order: index + 1
+      }));
+
+      const payload: IApproveActionPayload = {
+        action: "approve",
+        data: { approvers },
+        observation: ""
+      };
+
+      await purchaseOrderActions(purchaseOrderId, payload);
+
+      message.success("Orden enviada a aprobación correctamente");
+      mutateOrderDetail();
+      onOpenChange(false);
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message || err?.message || "Error al enviar a aprobación";
+      setError(errorMessage);
+      message.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -85,22 +127,39 @@ export function SendToApprovalModal({ open, onOpenChange, onConfirm }: SendToApp
               ))}
             </div>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={handleCancel}
+            disabled={isLoading}
             className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             Cancelar
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={selectedApprovers.length === 0}
+            disabled={selectedApprovers.length === 0 || isLoading}
             className="flex-1 text-black font-semibold disabled:opacity-50"
             style={{ backgroundColor: "#CBE71E" }}
           >
-            Enviar
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              "Enviar"
+            )}
           </Button>
         </div>
       </DialogContent>

@@ -502,7 +502,8 @@ export function DetailPurchaseOrder() {
       <SendToApprovalModal
         open={showApprovalModal}
         onOpenChange={setShowApprovalModal}
-        onConfirm={handleSendToApproval}
+        purchaseOrderId={orderId}
+        mutateOrderDetail={mutate}
       />
 
       <InvoiceModal
