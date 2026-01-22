@@ -205,8 +205,10 @@ export default function NoveltyAlertsView() {
               {/* Country Filter */}
               <Select value={countryFilter} onValueChange={setCountryFilter}>
                 <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Todos los países" />
+                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <Filter className="w-4 h-4 shrink-0" />
+                    <SelectValue placeholder="Todos los países" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
@@ -247,7 +249,9 @@ export default function NoveltyAlertsView() {
               {/* Client Filter */}
               <Select value={clientFilter} onValueChange={setClientFilter}>
                 <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
-                  <SelectValue placeholder="Todos los clientes" />
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <SelectValue placeholder="Todos los clientes" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
@@ -274,7 +278,9 @@ export default function NoveltyAlertsView() {
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
-                  <SelectValue placeholder="Todos los estados" />
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <SelectValue placeholder="Todos los estados" />
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">

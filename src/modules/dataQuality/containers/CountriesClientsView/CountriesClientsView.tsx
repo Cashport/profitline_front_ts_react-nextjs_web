@@ -464,8 +464,10 @@ export default function CountriesClientsView() {
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[200px] border-[#DDDDDD]">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Estados" />
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <Filter className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Estados" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
@@ -514,8 +516,10 @@ export default function CountriesClientsView() {
             {/* Periodicity Filter */}
             <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
               <SelectTrigger className="w-[180px] border-[#DDDDDD]">
-                <Calendar className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Periodicidad" />
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Periodicidad" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas las periodicidades</SelectItem>
@@ -528,8 +532,10 @@ export default function CountriesClientsView() {
             {/* File Type Filter */}
             <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
               <SelectTrigger className="w-[180px] border-[#DDDDDD]">
-                <FileText className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Tipo de archivo" />
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <FileText className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Tipo de archivo" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los archivos</SelectItem>
