@@ -1,7 +1,7 @@
-import CountriesClientsView from "@/modules/dataQuality/containers/CountriesClientsView/CountriesClientsView";
+import DataClientDetail from "@/modules/dataQuality/containers/DataQualityClientDetail/DataQualityClientDetail";
 
 function Page() {
-  return <CountriesClientsView />;
+  return <DataClientDetail />;
 }
 
 export default Page;

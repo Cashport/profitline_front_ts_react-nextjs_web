@@ -348,7 +348,7 @@ const getStatusBadge = (status: string, alerts?: number) => {
   }
 };
 
-export default function CountryClientsPage() {
+export default function CountriesClientsView() {
   const countryId = "colombia";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -840,7 +840,7 @@ export default function CountryClientsPage() {
                 >
                   <TableCell>
                     <Link
-                      href={`/explorer/${countryId}/${client.id}`}
+                      href={`/data-quality/clients/${client.id}`}
                       className="font-medium hover:underline text-[#141414]"
                     >
                       {client.name}
@@ -882,7 +882,7 @@ export default function CountryClientsPage() {
                   </TableCell>
                   <TableCell>{getStatusBadge(client.status, client.alerts)}</TableCell>
                   <TableCell>
-                    <Link href={`/explorer/${countryId}/${client.id}`}>
+                    <Link href={`/data-quality/clients/${client.id}`}>
                       <Button variant="ghost" size="sm" title="Ver detalles del cliente">
                         <Eye className="w-4 h-4" />
                       </Button>

@@ -29,7 +29,7 @@ const countries = [
   }
 ];
 
-export default function HomePage() {
+export default function DataQualityView() {
   const totalAlerts = countries.reduce((sum, country) => sum + country.alerts, 0);
 
   return (

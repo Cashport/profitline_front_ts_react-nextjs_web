@@ -149,7 +149,7 @@ const getAlertTypeLabel = (alertType: string) => {
   }
 };
 
-export default function AlertsPage() {
+export default function NoveltyAlertsView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
