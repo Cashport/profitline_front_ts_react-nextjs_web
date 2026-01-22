@@ -181,3 +181,15 @@ export type IPurchaseOrderActionPayload =
   | IDispatchActionPayload
   | IInvoiceActionPayload
   | IApproveActionPayload;
+
+// Approver type from API
+export interface IApprover {
+  user_id: number;
+  user_name: string;
+  user_rol: string;
+}
+
+export interface IApproversResponse {
+  templateId: number;
+  approvers: IApprover[];
+}

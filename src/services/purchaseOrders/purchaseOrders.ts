@@ -6,7 +6,9 @@ import {
   IPurchaseOrderFilters,
   IEditPurchaseOrderProduct,
   IHistoryTimelineEvent,
-  IPurchaseOrderActionPayload
+  IPurchaseOrderActionPayload,
+  IApprover,
+  IApproversResponse
 } from "@/types/purchaseOrders/purchaseOrders";
 
 export const getFilters = async (projectId: number): Promise<IPurchaseOrderFilters> => {
@@ -113,13 +115,13 @@ export const downloadPurchaseOrdersCSV = async (
   }
 };
 
-export const getApprovers = async (): Promise<string[]> => {
+export const getApprovers = async (): Promise<IApprover[]> => {
   const templateId = 3;
   try {
-    const response: GenericResponse<string[]> = await API.get(
+    const response: IApproversResponse = await API.get(
       `${config.API_HOST}/approval/templates/${templateId}/approvers`
     );
-    return response.data;
+    return response.approvers;
   } catch (error) {
     console.error("Error fetching approvers:", error);
     throw error;

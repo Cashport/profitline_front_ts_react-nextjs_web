@@ -2,27 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Check } from "lucide-react";
-
-interface Approver {
-  id: string;
-  name: string;
-  role: string;
-}
+import { getApprovers } from "@/services/purchaseOrders/purchaseOrders";
+import { IApprover } from "@/types/purchaseOrders/purchaseOrders";
 
 interface SendToApprovalModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (selectedApproverIds: string[]) => void;
-  availableApprovers: Approver[];
+  onConfirm: (selectedApproverIds: number[]) => void;
 }
 
-export function SendToApprovalModal({
-  open,
-  onOpenChange,
-  onConfirm,
-  availableApprovers
-}: SendToApprovalModalProps) {
-  const [selectedApprovers, setSelectedApprovers] = useState<string[]>([]);
+export function SendToApprovalModal({ open, onOpenChange, onConfirm }: SendToApprovalModalProps) {
+  const [availableApprovers, setAvailableApprovers] = useState<IApprover[]>();
+  const [selectedApprovers, setSelectedApprovers] = useState<number[]>([]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -31,7 +22,7 @@ export function SendToApprovalModal({
     }
   }, [open]);
 
-  const toggleApprover = (approverId: string) => {
+  const toggleApprover = (approverId: number) => {
     setSelectedApprovers((prev) =>
       prev.includes(approverId) ? prev.filter((id) => id !== approverId) : [...prev, approverId]
     );
@@ -39,12 +30,21 @@ export function SendToApprovalModal({
 
   const handleConfirm = () => {
     onConfirm(selectedApprovers);
+    console.log("Selected Approvers:", selectedApprovers);
     onOpenChange(false);
   };
 
   const handleCancel = () => {
     onOpenChange(false);
   };
+
+  useEffect(() => {
+    const fetchApprovers = async () => {
+      const res = await getApprovers();
+      setAvailableApprovers(res);
+    };
+    fetchApprovers();
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,27 +58,27 @@ export function SendToApprovalModal({
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Aprobadores</label>
             <div className="border rounded-lg divide-y">
-              {availableApprovers.map((approver) => (
+              {availableApprovers?.map((approver) => (
                 <div
-                  key={approver.id}
+                  key={approver.user_id}
                   className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => toggleApprover(approver.id)}
+                  onClick={() => toggleApprover(approver.user_id)}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                        selectedApprovers.includes(approver.id)
+                        selectedApprovers.includes(approver.user_id)
                           ? "bg-[#CBE71E] border-[#CBE71E]"
                           : "border-gray-300"
                       }`}
                     >
-                      {selectedApprovers.includes(approver.id) && (
+                      {selectedApprovers.includes(approver.user_id) && (
                         <Check className="h-3 w-3 text-black" />
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{approver.name}</p>
-                      <p className="text-xs text-gray-500">{approver.role}</p>
+                      <p className="text-sm font-medium text-gray-900">{approver.user_name}</p>
+                      <p className="text-xs text-gray-500">{approver.user_rol}</p>
                     </div>
                   </div>
                 </div>
