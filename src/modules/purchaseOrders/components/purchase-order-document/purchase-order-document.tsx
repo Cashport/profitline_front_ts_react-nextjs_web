@@ -1,6 +1,6 @@
 import { Button } from "@/modules/chat/ui/button";
 import { FileText, Download } from "lucide-react";
-import { Viewer, Worker } from "@react-pdf-viewer/core";
+import { LoadError, Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 interface PurchaseOrderDocumentProps {
@@ -24,6 +24,48 @@ export function PurchaseOrderDocument({
     if (pdfUrl) {
       window.open(pdfUrl, "_blank");
     }
+  };
+
+  const renderError = (error: LoadError) => {
+    let message = "";
+    switch (error.name) {
+      case "InvalidPDFException":
+        message = "The document is invalid or corrupted";
+        break;
+      case "MissingPDFException":
+        message = "The document is missing";
+        break;
+      case "UnexpectedResponseException":
+        message = "Unexpected server response";
+        break;
+      default:
+        message = "Cannot load the document";
+        break;
+    }
+
+    return (
+      <div className="p-8 text-center h-full flex items-center justify-center">
+        <div className="space-y-4">
+          <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
+          <div>
+            <p className="text-lg font-medium text-cashport-black mb-2">
+              Vista previa no disponible
+            </p>
+            <p className="text-sm text-muted-foreground mb-2">{message}</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {archivoOriginal || `factura-${numeroFactura}.pdf`}
+            </p>
+            <Button
+              onClick={handleDownloadPdf}
+              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Descargar PDF
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   };
   return (
     <div
@@ -60,39 +102,12 @@ export function PurchaseOrderDocument({
         <div className="flex-1 min-h-0">
           {pdfUrl ? (
             <div className="w-full h-full min-h-[400px] rounded-lg bg-cashport-gray-lighter flex flex-col">
-              <object
-                data={pdfUrl}
-                type="application/pdf"
-                className="w-full flex-1 min-h-[400px] rounded-lg"
-                title={`PDF: ${archivoOriginal || `factura-${numeroFactura}.pdf`}`}
-              >
-                <div className="p-8 text-center h-full flex items-center justify-center">
-                  <div className="space-y-4">
-                    <FileText className="h-16 w-16 mx-auto text-cashport-green opacity-50" />
-                    <div>
-                      <p className="text-lg font-medium text-cashport-black mb-2">
-                        Vista previa no disponible
-                      </p>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {archivoOriginal || `factura-${numeroFactura}.pdf`}
-                      </p>
-                      <Button
-                        onClick={handleDownloadPdf}
-                        className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Descargar PDF
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </object>
-
               <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.js">
                 <div style={{ height: "750px" }}>
                   <Viewer
                     fileUrl={pdfUrl || "/testPDF.pdf"}
                     plugins={[defaultLayoutPluginInstance]}
+                    renderError={renderError}
                   />
                 </div>
               </Worker>
