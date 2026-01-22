@@ -26,7 +26,12 @@ const createEmptyInvoice = (): InvoiceEntry => ({
   file: null
 });
 
-export function InvoiceModal({ open, onOpenChange, purchaseOrderId, onSuccess }: InvoiceModalProps) {
+export function InvoiceModal({
+  open,
+  onOpenChange,
+  purchaseOrderId,
+  onSuccess
+}: InvoiceModalProps) {
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([createEmptyInvoice()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +57,7 @@ export function InvoiceModal({ open, onOpenChange, purchaseOrderId, onSuccess }:
     }
 
     setError(null);
-    setInvoices((prev) =>
-      prev.map((inv) => (inv.id === invoiceEntryId ? { ...inv, file } : inv))
-    );
+    setInvoices((prev) => prev.map((inv) => (inv.id === invoiceEntryId ? { ...inv, file } : inv)));
   };
 
   const handleInvoiceIdChange = (invoiceEntryId: string, value: string) => {
@@ -131,7 +134,7 @@ export function InvoiceModal({ open, onOpenChange, purchaseOrderId, onSuccess }:
           </p>
 
           <div className="space-y-3">
-            {invoices.map((invoice, index) => (
+            {invoices.map((invoice) => (
               <div key={invoice.id} className="flex items-center gap-3">
                 <div className="flex-shrink-0">
                   <input

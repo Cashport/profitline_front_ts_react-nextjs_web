@@ -282,7 +282,7 @@ export function DetailPurchaseOrder() {
     // Note: Modal handles its own closing via onOpenChange
   };
 
-  const confirmReject = (reason: string, observation: string) => {
+  const confirmReject = (_reason: string, _observation: string) => {
     // TODO: Implement rejection logic
     // Note: Modal handles its own closing via onOpenChange
   };
@@ -301,10 +301,6 @@ export function DetailPurchaseOrder() {
     } catch (error: any) {
       message.error(error ? error : "Error al descargar el plano de la orden de compra");
     }
-  };
-
-  const handleSendToApproval = (selectedApproverIds: number[]) => {
-    // TODO: Implement send to approval logic
   };
 
   const actionItems: DropdownItem[] = [
