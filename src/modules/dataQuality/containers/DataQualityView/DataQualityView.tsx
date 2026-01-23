@@ -1,9 +1,12 @@
-import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
-import { Button } from "@/modules/chat/ui/button";
-import { Users, Calendar, TrendingUp } from "lucide-react";
+import { useEffect } from "react";
+import Link from "next/link";
 import { Badge } from "antd";
 import { BellSimpleRinging } from "phosphor-react";
-import Link from "next/link";
+import { Users, Calendar, TrendingUp } from "lucide-react";
+import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
+import { Button } from "@/modules/chat/ui/button";
+import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
 
 // Mock data for countries and their alerts
 const countries = [
@@ -30,7 +33,17 @@ const countries = [
 ];
 
 export default function DataQualityView() {
+  const { ID } = useAppStore((projects) => projects.selectedProject);
+
   const totalAlerts = countries.reduce((sum, country) => sum + country.alerts, 0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getSummaryCountries(ID);
+      console.log("Data fetched:", res);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="bg-[#F7F7F7]">

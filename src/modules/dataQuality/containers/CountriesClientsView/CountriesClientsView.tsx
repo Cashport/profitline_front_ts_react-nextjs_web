@@ -23,19 +23,7 @@ import {
   SelectValue
 } from "@/modules/chat/ui/select";
 import UiSearchInput from "@/components/ui/search-input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
-import { Label } from "@/modules/chat/ui/label";
-import { Input } from "@/modules/chat/ui/input";
-import { Switch } from "@/modules/chat/ui/switch";
 import {
   Table,
   TableBody,
