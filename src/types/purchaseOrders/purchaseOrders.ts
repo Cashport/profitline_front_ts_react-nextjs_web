@@ -1,6 +1,7 @@
 export interface IPurchaseOrder {
   id: number;
   orderNumber: string;
+  purchaseOrderId: number;
   customerName: string;
   deliveryAddress: string;
   deliveryDate: string;

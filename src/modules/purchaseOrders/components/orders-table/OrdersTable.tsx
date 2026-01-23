@@ -50,8 +50,8 @@ export function OrdersTable({
   const columns: TableProps<IPurchaseOrder>["columns"] = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "purchaseOrderId",
+      key: "purchaseOrderId",
       render: (id, record) => (
         <button
           onClick={() => onRowClick?.(record)}
@@ -60,7 +60,7 @@ export function OrdersTable({
           {id}
         </button>
       ),
-      sorter: (a, b) => a.id - b.id,
+      sorter: (a, b) => a.purchaseOrderId - b.purchaseOrderId,
       showSorterTooltip: false,
       width: 80
     },
