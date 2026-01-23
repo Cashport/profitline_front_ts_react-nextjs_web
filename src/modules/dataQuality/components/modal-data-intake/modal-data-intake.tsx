@@ -180,7 +180,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar tipo de archivo" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockTipoArchivo.map((tipo) => (
                         <SelectItem key={tipo.id} value={tipo.value}>
                           {tipo.label}
@@ -305,7 +305,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar fuente de ingesta" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockIngesta.map((ingesta) => (
                         <SelectItem key={ingesta.id} value={ingesta.value}>
                           {ingesta.label}
@@ -331,7 +331,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar responsable" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockStakeholders.map((stakeholder) => (
                         <SelectItem key={stakeholder.id} value={stakeholder.name}>
                           {stakeholder.name}
