@@ -18,7 +18,8 @@ import {
   SealPercent,
   HandTap,
   ChartBar,
-  ShoppingCartSimple
+  ShoppingCartSimple,
+  Database
 } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
@@ -264,6 +265,22 @@ export const ModulesButtons = ({
             }
           >
             {isSideBarLarge && "Purchase Orders"}
+          </Button>
+        </Link>
+      )}
+
+      {/* Data Quality */}
+      {checkUserViewPermissions(project, "DataQuality") && (
+        <Link href="/data-quality" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Database size={iconSize} />}
+            className={
+              path.startsWith("/data-quality") ? styles.buttonIcon : styles.buttonIconActive
+            }
+          >
+            {isSideBarLarge && "Data Quality"}
           </Button>
         </Link>
       )}
