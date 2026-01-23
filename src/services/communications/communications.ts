@@ -220,13 +220,22 @@ export const sendEmailNotification = async (data: IFormEmailNotification) => {
 
   const formData = new FormData();
 
-  // for each of the keys in the data object, append the key and value to the formData object
-  Object.entries(modelData).forEach(([key, value]) => {
-    if (key === "files" && Array.isArray(value)) {
-      value.forEach((file) => formData.append("files", file));
-    } else if (value !== undefined && value !== null && value !== "") {
-      formData.append(key, typeof value === "string" ? value : JSON.stringify(value));
-    }
+  formData.append("subject", data.subject);
+  formData.append("body", data.body);
+
+  // PARA
+  data.forward_to.forEach((email) => {
+    formData.append("to[]", email.value);
+  });
+
+  // CC
+  data.copy_to?.forEach((email) => {
+    formData.append("copy[]", email.value);
+  });
+
+  // ARCHIVOS
+  data.attachments.forEach((file) => {
+    formData.append("files", file);
   });
 
   try {
