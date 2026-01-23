@@ -14,8 +14,7 @@ import {
   Edit,
   ArrowLeft
 } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Badge } from "@/modules/chat/ui/badge";
 import {
   Select,
@@ -202,6 +201,8 @@ const getCategoryBadge = (category: string) => {
 
 export default function DataQualityClientDetails() {
   const params = useParams();
+  const router = useRouter();
+
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
@@ -288,6 +289,14 @@ export default function DataQualityClientDetails() {
     setIsEditDialogOpen(false);
   };
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/data-quality");
+    }
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F7F7F7" }}>
       <main className="px-6 py-8">
@@ -301,12 +310,16 @@ export default function DataQualityClientDetails() {
           <CardContent>
             <div className="flex items-center justify-between mb-6 ">
               <div className="mb-6 flex items-center gap-4">
-                <Link href="/data-quality/clients">
-                  <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Atrás
-                  </Button>
-                </Link>
+                <Button
+                  onClick={handleGoBack}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" />
+                  Atrás
+                </Button>
+
                 <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
                   Información general
                 </h2>

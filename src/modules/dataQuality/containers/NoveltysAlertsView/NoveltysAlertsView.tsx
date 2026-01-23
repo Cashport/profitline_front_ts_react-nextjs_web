@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
-  Search,
   Filter,
   ExternalLink,
   AlertTriangle,
@@ -15,7 +15,6 @@ import {
 import Link from "next/link";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
+import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import {
   Table,
@@ -150,6 +150,16 @@ const getAlertTypeLabel = (alertType: string) => {
 };
 
 export default function NoveltyAlertsView() {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/data-quality');
+    }
+  };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -171,12 +181,15 @@ export default function NoveltyAlertsView() {
   return (
     <main>
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/data-quality">
-          <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Atrás
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-gray-700 hover:text-gray-900"
+          onClick={handleGoBack}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Atrás
+        </Button>
         <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
           Alertas y Novedades
         </h1>
@@ -188,23 +201,16 @@ export default function NoveltyAlertsView() {
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-4">
               {/* Search Input */}
-              <div className="relative flex-1 min-w-64">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-                  style={{ color: "#141414" }}
-                />
-                <Input
+              <div className="flex-1 min-w-64">
+                <UiSearchInput
                   placeholder="Buscar alertas..."
-                  value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  style={{ borderColor: "#DDDDDD" }}
                 />
               </div>
 
               {/* Country Filter */}
               <Select value={countryFilter} onValueChange={setCountryFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                     <Filter className="w-4 h-4 shrink-0" />
                     <SelectValue placeholder="Todos los países" />
@@ -248,7 +254,7 @@ export default function NoveltyAlertsView() {
 
               {/* Client Filter */}
               <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <SelectValue placeholder="Todos los clientes" />
                   </div>
@@ -277,7 +283,7 @@ export default function NoveltyAlertsView() {
 
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD" }}>
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <SelectValue placeholder="Todos los estados" />
                   </div>
@@ -326,7 +332,7 @@ export default function NoveltyAlertsView() {
                   setClientFilter("all");
                   setSearchTerm("");
                 }}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap h-12"
               >
                 Limpiar filtros
               </Button>
@@ -391,7 +397,7 @@ export default function NoveltyAlertsView() {
                     <TableCell>{getStatusBadge(alert.status)}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
-                        <Link href={`/catalog/${alert.countryId}/${alert.clientId}`}>
+                        <Link href={`/data-quality/clients/${alert.clientId}`}>
                           <Button
                             variant="outline"
                             size="sm"

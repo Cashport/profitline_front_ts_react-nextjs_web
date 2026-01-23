@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
-  Search,
   Calendar,
   FileText,
   Filter,
@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
+import UiSearchInput from "@/components/ui/search-input";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { Card, CardContent } from "@/modules/chat/ui/card";
+import { ModalDataIntake } from "../../components/modal-data-intake";
 
 const mockClients = {
   colombia: [
@@ -349,6 +351,12 @@ const getStatusBadge = (status: string, alerts?: number) => {
 };
 
 export default function CountriesClientsView() {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.push("/data-quality");
+  };
+
   const countryId = "colombia";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -356,30 +364,7 @@ export default function CountriesClientsView() {
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [clientName, setClientName] = useState("");
-  const [selectedPeriodicity, setSelectedPeriodicity] = useState<
-    "Daily" | "Weekly" | "Monthly" | ""
-  >("");
-  const [selectedFileType, setSelectedFileType] = useState("");
-  const [dailyDetails, setDailyDetails] = useState({
-    diasHabiles: false,
-    festivos: false
-  });
-  const [weeklyDetails, setWeeklyDetails] = useState({
-    acumulado: false,
-    porRango: false
-  });
-  const [ingestaSource, setIngestaSource] = useState("");
-  const [ingestaDetail, setIngestaDetail] = useState(""); // Declared ingestaDetail variable
-  const [stakeholder, setStakeholder] = useState("");
-  const [attachedFile, setAttachedFile] = useState<File | null>(null);
-  const [ingestaVariables, setIngestaVariables] = useState<{ key: string; value: string }[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState({
-    sales: false,
-    stock: false,
-    inTransit: false
-  });
+  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
 
   const clients = mockClients[countryId as keyof typeof mockClients] || [];
   const countryName = countryNames[countryId as keyof typeof countryNames] || countryId;
@@ -409,40 +394,24 @@ export default function CountriesClientsView() {
     partial: clients.filter((c) => c.status === "partial").length
   };
 
-  const handleCreateIngestion = () => {
-    console.log("[v0] Creating ingestion:", {
-      clientName,
-      periodicity: selectedPeriodicity,
-      fileType: selectedFileType,
-      dailyDetails: selectedPeriodicity === "Daily" ? dailyDetails : undefined,
-      weeklyDetails: selectedPeriodicity === "Weekly" ? weeklyDetails : undefined,
-      ingestaSource,
-      ingestaVariables: ingestaVariables.filter((v) => v.key && v.value),
-      stakeholder,
-      attachedFile: attachedFile?.name
-    });
-    setIsModalOpen(false);
-    setClientName("");
-    setSelectedPeriodicity("");
-    setSelectedFileType("");
-    setDailyDetails({ diasHabiles: false, festivos: false });
-    setWeeklyDetails({ acumulado: false, porRango: false });
-    setIngestaSource("");
-    setIngestaVariables([{ key: "", value: "" }]); // Declared setIngestaDetail variable
-    setStakeholder("");
-    setAttachedFile(null);
-    setIngestaVariables([]);
+  const handleCreateIngestionSuccess = () => {
+    console.log("[v0] Ingestion created successfully");
+    // Aquí podrías agregar lógica adicional después de crear la ingesta
+    // Por ejemplo: refrescar la lista de clientes, mostrar notificación, etc.
   };
 
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link href="/data-quality">
-          <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Inicio
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-gray-700 hover:text-gray-900"
+          onClick={handleGoBack}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Inicio
+        </Button>
         <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
       </div>
 
@@ -452,18 +421,15 @@ export default function CountriesClientsView() {
           {/* Filter Bar */}
           <div className="flex items-center gap-4 mb-6">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#141414]" />
-              <Input
+            <div className="flex-1 max-w-sm">
+              <UiSearchInput
                 placeholder="Buscar cliente..."
-                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-[#DDDDDD]"
               />
             </div>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px] border-[#DDDDDD]">
+              <SelectTrigger className="w-[200px] border-[#DDDDDD]" style={{ height: "48px" }}>
                 <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                   <Filter className="w-4 h-4 shrink-0" />
                   <SelectValue placeholder="Estados" />
@@ -515,7 +481,7 @@ export default function CountriesClientsView() {
 
             {/* Periodicity Filter */}
             <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
-              <SelectTrigger className="w-[180px] border-[#DDDDDD]">
+              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
                 <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                   <Calendar className="w-4 h-4 shrink-0" />
                   <SelectValue placeholder="Periodicidad" />
@@ -531,7 +497,7 @@ export default function CountriesClientsView() {
 
             {/* File Type Filter */}
             <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-              <SelectTrigger className="w-[180px] border-[#DDDDDD]">
+              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
                 <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                   <FileText className="w-4 h-4 shrink-0" />
                   <SelectValue placeholder="Tipo de archivo" />
@@ -546,284 +512,13 @@ export default function CountriesClientsView() {
             </Select>
 
             {/* Create Ingestion Button */}
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="ml-auto bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Crear nueva ingesta
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                {/* Dialog Header */}
-                <DialogHeader>
-                  <DialogTitle>Crear Nueva Ingesta</DialogTitle>
-                  <DialogDescription>
-                    Configure los detalles de la nueva ingesta de datos para {countryName}
-                  </DialogDescription>
-                </DialogHeader>
-
-                {/* Dialog Content */}
-                <div className="grid gap-6 py-4">
-                  {/* Cliente Input */}
-                  <div className="grid gap-2">
-                    <Label htmlFor="client-name">Cliente</Label>
-                    <Input
-                      id="client-name"
-                      placeholder="Nombre del cliente"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="border-[#DDDDDD]"
-                    />
-                  </div>
-
-                  {/* Tipo de Archivo Dropdown */}
-                  <div className="grid gap-2">
-                    <Label>Tipo de Archivo</Label>
-                    <Select value={selectedFileType} onValueChange={setSelectedFileType}>
-                      <SelectTrigger className="w-full border-[#DDDDDD]">
-                        <SelectValue placeholder="Seleccionar tipo de archivo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sales">Sales</SelectItem>
-                        <SelectItem value="Stock">Stock</SelectItem>
-                        <SelectItem value="In transit">In transit</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Periodicidad Toggles */}
-                  <div className="grid gap-2">
-                    <Label>Periodicidad</Label>
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={selectedPeriodicity === "Daily"}
-                          onCheckedChange={(checked) => {
-                            setSelectedPeriodicity(checked ? "Daily" : "");
-                            if (!checked) {
-                              setDailyDetails({ diasHabiles: false, festivos: false });
-                            }
-                          }}
-                        />
-                        <span className="text-sm">Daily</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={selectedPeriodicity === "Weekly"}
-                          onCheckedChange={(checked) => {
-                            setSelectedPeriodicity(checked ? "Weekly" : "");
-                            if (!checked) {
-                              setWeeklyDetails({ acumulado: false, porRango: false });
-                            }
-                          }}
-                        />
-                        <span className="text-sm">Weekly</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={selectedPeriodicity === "Monthly"}
-                          onCheckedChange={(checked) =>
-                            setSelectedPeriodicity(checked ? "Monthly" : "")
-                          }
-                        />
-                        <span className="text-sm">Monthly</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedPeriodicity === "Daily" && (
-                    <div className="grid gap-2">
-                      <Label>Detalle</Label>
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={dailyDetails.diasHabiles}
-                            onCheckedChange={(checked) =>
-                              setDailyDetails((prev) => ({ ...prev, diasHabiles: checked }))
-                            }
-                          />
-                          <span className="text-sm">Días hábiles</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={dailyDetails.festivos}
-                            onCheckedChange={(checked) =>
-                              setDailyDetails((prev) => ({ ...prev, festivos: checked }))
-                            }
-                          />
-                          <span className="text-sm">Festivos</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedPeriodicity === "Weekly" && (
-                    <div className="grid gap-2">
-                      <Label>Detalle</Label>
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={weeklyDetails.acumulado}
-                            onCheckedChange={(checked) =>
-                              setWeeklyDetails((prev) => ({ ...prev, acumulado: checked }))
-                            }
-                          />
-                          <span className="text-sm">Acumulado</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={weeklyDetails.porRango}
-                            onCheckedChange={(checked) =>
-                              setWeeklyDetails((prev) => ({ ...prev, porRango: checked }))
-                            }
-                          />
-                          <span className="text-sm">Por rango</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="ingesta">Ingesta</Label>
-                    <Select value={ingestaSource} onValueChange={setIngestaSource}>
-                      <SelectTrigger className="w-full border-[#DDDDDD]">
-                        <SelectValue placeholder="Seleccionar fuente de ingesta" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="b2b-web">B2B Web</SelectItem>
-                        <SelectItem value="api">API</SelectItem>
-                        <SelectItem value="app">App</SelectItem>
-                        <SelectItem value="teamcorp">Teamcorp</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="stakeholder">Stakeholder</Label>
-                    <Select value={stakeholder} onValueChange={setStakeholder}>
-                      <SelectTrigger className="w-full border-[#DDDDDD]">
-                        <SelectValue placeholder="Seleccionar responsable" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="juan-perez">Juan Pérez</SelectItem>
-                        <SelectItem value="maria-garcia">María García</SelectItem>
-                        <SelectItem value="carlos-rodriguez">Carlos Rodríguez</SelectItem>
-                        <SelectItem value="ana-martinez">Ana Martínez</SelectItem>
-                        <SelectItem value="luis-fernandez">Luis Fernández</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* File Attachment Field */}
-                  <div className="grid gap-2">
-                    <Label htmlFor="file-attachment">Adjunto (opcional)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="file-attachment"
-                        type="file"
-                        onChange={(e) => setAttachedFile(e.target.files?.[0] || null)}
-                        className="border-[#DDDDDD]"
-                      />
-                      {attachedFile && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setAttachedFile(null)}
-                          className="text-red-600"
-                        >
-                          Eliminar
-                        </Button>
-                      )}
-                    </div>
-                    {attachedFile && (
-                      <p className="text-xs text-gray-600">
-                        Archivo seleccionado: {attachedFile.name}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Variables de configuración - Al final */}
-                  <div className="grid gap-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Variables de configuración</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setIngestaVariables([...ingestaVariables, { key: "", value: "" }])
-                        }
-                        className="text-xs bg-transparent"
-                      >
-                        + Agregar variable
-                      </Button>
-                    </div>
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                      {ingestaVariables.map((variable, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <Input
-                            placeholder="Nombre (ej: EMAIL, API_URL)"
-                            value={variable.key}
-                            onChange={(e) => {
-                              const newVariables = [...ingestaVariables];
-                              newVariables[index].key = e.target.value;
-                              setIngestaVariables(newVariables);
-                            }}
-                            className="border-[#DDDDDD] flex-1 font-mono text-sm"
-                          />
-                          <Input
-                            placeholder="Valor"
-                            value={variable.value}
-                            onChange={(e) => {
-                              const newVariables = [...ingestaVariables];
-                              newVariables[index].value = e.target.value;
-                              setIngestaVariables(newVariables);
-                            }}
-                            className="border-[#DDDDDD] flex-1"
-                          />
-                          {ingestaVariables.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const newVariables = ingestaVariables.filter((_, i) => i !== index);
-                                setIngestaVariables(newVariables);
-                              }}
-                              className="text-red-600 hover:text-red-700 px-2"
-                            >
-                              ✕
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Agregue variables como EMAIL, API_URL, PASSWORD, etc.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Dialog Footer */}
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleCreateIngestion}
-                    disabled={
-                      !clientName ||
-                      !selectedPeriodicity ||
-                      (!selectedFiles.sales && !selectedFiles.stock && !selectedFiles.inTransit)
-                    }
-                    className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-                  >
-                    Crear Ingesta
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button
+              className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+              onClick={() => setIsModalDataIntakeOpen(true)}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Crear nueva ingesta
+            </Button>
           </div>
 
           {/* Clients Table */}
@@ -946,6 +641,12 @@ export default function CountriesClientsView() {
           </div>
         </CardContent>
       </Card>
+
+      <ModalDataIntake
+        open={isModalDataIntakeOpen}
+        onOpenChange={setIsModalDataIntakeOpen}
+        onSuccess={handleCreateIngestionSuccess}
+      />
     </div>
   );
 }
