@@ -76,8 +76,7 @@ export const ApproversTimeline = ({ steps, formatDate }: ApproversTimelineProps)
                       </div>
 
                       <div className="min-w-0 flex-1 space-y-1">
-                        {/* TODO: Replace with actual user name when available */}
-                        <p className="font-semibold text-base">Usuario #{step.approverUserId}</p>
+                        <p className="font-semibold text-base">{step.approverName}</p>
 
                         {/* Date */}
                         {step.approvedAt && (

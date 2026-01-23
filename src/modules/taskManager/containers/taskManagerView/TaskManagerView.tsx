@@ -4,13 +4,12 @@ import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import useSWR from "swr";
 import { getTasksByStatus, getTaskTabs } from "@/services/tasks/tasks";
-import { ITask as ITaskApi } from "@/types/tasks/ITasks";
+import { ITask } from "@/types/tasks/ITasks";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import StatusTab from "@/modules/taskManager/components/statusTab/StatusTab";
 import TasksTable, {
-  ITask,
   SortKey,
   SortDirection
 } from "@/modules/taskManager/components/tasksTable/TasksTable";
@@ -20,13 +19,16 @@ import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import { FilterState, mockTasks } from "../../lib/mockData";
+import { mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
-import {
-  ModalTaskDetail,
-  InvoiceData,
-  mockTaskDetail
-} from "../../components/modalTaskDetail/ModalTaskDetail";
+import { ModalTaskDetail } from "../../components/modalTaskDetail/ModalTaskDetail";
+
+interface FilterState {
+  filterState: string | null;
+  filterComprador: string | null;
+  filterVendedor: string | null;
+  selectedTaskIds: number[];
+}
 
 export const TaskManagerView: React.FC = () => {
   // States
@@ -51,10 +53,10 @@ export const TaskManagerView: React.FC = () => {
     taskTypes: []
   });
 
-  const [selectedTask, setSelectedTask] = useState<InvoiceData | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
   // Tasks by status - stores fetched tasks indexed by status ID
-  const [tasksByStatus, setTasksByStatus] = useState<Record<string, ITaskApi[]>>({});
+  const [tasksByStatus, setTasksByStatus] = useState<Record<string, ITask[]>>({});
 
   // Pagination state per tab
   interface PaginationInfo {
@@ -66,14 +68,9 @@ export const TaskManagerView: React.FC = () => {
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
 
   // SWR for tabs data
-  const {
-    data: tabsData,
-    isLoading: isLoadingTabs,
-    mutate: mutateTabs
-  } = useSWR("taskTabs", getTaskTabs, {
+  const { data: tabsData, isLoading: isLoadingTabs } = useSWR("taskTabs", getTaskTabs, {
     revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000
+    revalidateOnReconnect: true
   });
 
   useEffect(() => {
@@ -95,6 +92,7 @@ export const TaskManagerView: React.FC = () => {
     // Fetch tasks for the active tab only if not already loaded
     const fetchTasksForActiveTab = async () => {
       if (activeTabKey && !tasksByStatus[activeTabKey]) {
+        setIsLoadingPagination(true);
         try {
           const response = await getTasksByStatus(activeTabKey, 1);
           const tasksArray = response?.tasks ?? [];
@@ -112,6 +110,8 @@ export const TaskManagerView: React.FC = () => {
           }));
         } catch (error) {
           console.error("Error fetching tasks for active tab:", error);
+        } finally {
+          setIsLoadingPagination(false);
         }
       }
     };
@@ -123,7 +123,8 @@ export const TaskManagerView: React.FC = () => {
   };
 
   // Selection handlers
-  const toggleTaskSelection = (taskId: string) => {
+  const toggleTaskSelection = (taskId: number | null) => {
+    if (taskId === null) return; // Guard against null IDs
     setState((prev) => ({
       ...prev,
       selectedTaskIds: prev.selectedTaskIds.includes(taskId)
@@ -140,23 +141,22 @@ export const TaskManagerView: React.FC = () => {
     }));
   };
 
-  // View task handler - opens detail modal with mock data
+  // View task handler - opens detail modal
   const handleViewTask = (task: ITask) => {
-    // For now, use mockTaskDetail but preserve the task id
-    setSelectedTask({ ...mockTaskDetail, id: task.id });
+    setSelectedTask(task);
     setIsModalOpen({ selected: 2 });
   };
 
   // Handle select all for current tab
   const handleSelectAll = (tasks: ITask[], checked: boolean) => {
     if (checked) {
-      const allIds = tasks.map((task) => task.id);
+      const allIds = tasks.map((task) => task.id).filter((id): id is number => id !== null);
       setState((prev) => ({
         ...prev,
         selectedTaskIds: Array.from(new Set([...prev.selectedTaskIds, ...allIds]))
       }));
     } else {
-      const taskIds = tasks.map((task) => task.id);
+      const taskIds = tasks.map((task) => task.id).filter((id): id is number => id !== null);
       setState((prev) => ({
         ...prev,
         selectedTaskIds: prev.selectedTaskIds.filter((id) => !taskIds.includes(id))
@@ -193,22 +193,6 @@ export const TaskManagerView: React.FC = () => {
     setPaginationByStatus({});
   }, [searchTerm, selectedFilters, sortConfig]);
 
-  // Map API task to frontend task structure
-  const mapApiTaskToFrontend = (apiTask: ITaskApi): ITask => ({
-    id: String(apiTask.id),
-    cliente: apiTask.client_name || "",
-    comprador: apiTask.user_name || "",
-    tipoTarea: apiTask.task_type || "",
-    descripcion: apiTask.description || "",
-    estado: apiTask.status?.name || "",
-    responsable: apiTask.user_name || "",
-    vendedor: "",
-    monto: apiTask.amount || 0,
-    origen: "",
-    isAI: apiTask.is_ai || false,
-    tab: String(apiTask.status?.id || "")
-  });
-
   // Filter and sort tasks for a group
   const getFilteredAndSortedTasks = (tasks: ITask[]): ITask[] => {
     let filtered = tasks.filter((task) => {
@@ -216,21 +200,21 @@ export const TaskManagerView: React.FC = () => {
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         const matchesSearch =
-          task.cliente?.toLowerCase().includes(searchLower) ||
-          task.tipoTarea?.toLowerCase().includes(searchLower) ||
-          task.descripcion?.toLowerCase().includes(searchLower) ||
-          task.responsable?.toLowerCase().includes(searchLower);
+          task.client_name?.toLowerCase().includes(searchLower) ||
+          task.task_type?.toLowerCase().includes(searchLower) ||
+          task.description?.toLowerCase().includes(searchLower) ||
+          task.user_name?.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
       }
 
       // State filter
-      if (state.filterState && task.estado !== state.filterState) return false;
+      if (state.filterState && task.status?.name !== state.filterState) return false;
 
-      // Comprador filter
-      if (state.filterComprador && task.comprador !== state.filterComprador) return false;
+      // Comprador filter - use client_name
+      if (state.filterComprador && task.client_name !== state.filterComprador) return false;
 
-      // Vendedor filter
-      if (state.filterVendedor && task.vendedor !== state.filterVendedor) return false;
+      // Vendedor filter - skip or use user_name
+      // if (state.filterVendedor && task.user_name !== state.filterVendedor) return false;
 
       return true;
     });
@@ -238,14 +222,25 @@ export const TaskManagerView: React.FC = () => {
     // Sort
     if (sortConfig) {
       filtered = [...filtered].sort((a, b) => {
-        const aValue = a[sortConfig.key] ?? "";
-        const bValue = b[sortConfig.key] ?? "";
-
-        if (sortConfig.key === "monto") {
+        // Handle amount sorting
+        if (sortConfig.key === "amount") {
           return sortConfig.direction === "asc"
-            ? (a.monto || 0) - (b.monto || 0)
-            : (b.monto || 0) - (a.monto || 0);
+            ? (a.amount || 0) - (b.amount || 0)
+            : (b.amount || 0) - (a.amount || 0);
         }
+
+        // Handle status sorting (nested property)
+        if (sortConfig.key === "status") {
+          const aValue = a.status?.name ?? "";
+          const bValue = b.status?.name ?? "";
+          if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+          if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+          return 0;
+        }
+
+        // Handle other fields with optional chaining
+        const aValue = (a[sortConfig.key as keyof ITask] as any)?.toString() ?? "";
+        const bValue = (b[sortConfig.key as keyof ITask] as any)?.toString() ?? "";
 
         if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
         if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
@@ -259,8 +254,7 @@ export const TaskManagerView: React.FC = () => {
   // Build tabs from API data
   const tabItems = tabsData?.map((tab) => {
     const apiTasks = tasksByStatus[tab.id] || [];
-    const mappedTasks = apiTasks.map(mapApiTaskToFrontend);
-    const filteredTasks = getFilteredAndSortedTasks(mappedTasks);
+    const filteredTasks = getFilteredAndSortedTasks(apiTasks);
     const pagination = paginationByStatus[tab.id];
 
     return {
@@ -277,6 +271,7 @@ export const TaskManagerView: React.FC = () => {
             onViewTask={handleViewTask}
             sortConfig={sortConfig}
             onSort={handleSort}
+            isLoading={isLoadingPagination}
           />
           {pagination && pagination.total > pagination.limit && (
             <Pagination
@@ -328,7 +323,7 @@ export const TaskManagerView: React.FC = () => {
         handleOpenModal={handleOpenModal}
         selectedRows={mockTasks
           .flatMap((group) => group.tasks)
-          .filter((task) => state.selectedTaskIds.includes(task.id))}
+          .filter((task) => task.id !== null && state.selectedTaskIds.includes(task.id))}
       />
 
       <ModalTaskDetail
@@ -338,7 +333,7 @@ export const TaskManagerView: React.FC = () => {
           setIsModalOpen({ selected: 0 });
           setSelectedTask(null);
         }}
-        onUpdate={(updatedTask) => {
+        onUpdate={(updatedTask: ITask) => {
           console.log("Task updated:", updatedTask);
           // TODO: Implement actual update logic when API is ready
         }}
