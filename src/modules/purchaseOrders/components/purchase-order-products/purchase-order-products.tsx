@@ -172,7 +172,7 @@ export function PurchaseOrderProducts({
                   <tr key={field.id} className={rowClass}>
                     <td className="p-3">
                       <span className="text-sm text-cashport-black">
-                        {field.product_description}
+                        {field.po_product_description || "-"}
                       </span>
                     </td>
                     <td className="p-3">
@@ -191,7 +191,7 @@ export function PurchaseOrderProducts({
                             ) : (
                               <div className="flex flex-col">
                                 <span className="text-sm text-cashport-black">
-                                  {field.po_product_description || "-"}
+                                  {field.product_description || "-"}
                                 </span>
                                 {field.product_sku && (
                                   <span className="text-xs text-blue-600 mt-0.5">
