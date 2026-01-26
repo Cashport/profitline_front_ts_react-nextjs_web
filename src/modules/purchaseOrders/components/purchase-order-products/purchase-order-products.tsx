@@ -22,7 +22,6 @@ interface PurchaseOrderProductsProps {
   initialProducts: PurchaseOrderProductsFormData;
   isPdfCollapsed: boolean;
   pdfWidth: number;
-  formatCurrency: (amount: number) => string;
   onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
   summary: IPurchaseOrderSummary;
   clientId: string;
@@ -32,7 +31,6 @@ export function PurchaseOrderProducts({
   initialProducts,
   isPdfCollapsed,
   pdfWidth,
-  formatCurrency,
   onSave,
   summary,
   clientId
@@ -40,6 +38,7 @@ export function PurchaseOrderProducts({
   const [isEditMode, setIsEditMode] = useState(false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
+  const formatMoney = useAppStore((state) => state.formatMoney);
 
   const {
     control,
@@ -157,14 +156,14 @@ export function PurchaseOrderProducts({
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Producto
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Precio unitario
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">IVA</th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">IVA</th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Precio total
                 </th>
               </tr>
@@ -178,14 +177,9 @@ export function PurchaseOrderProducts({
                 return (
                   <tr key={field.id} className={rowClass}>
                     <td className="p-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-cashport-black">
-                          {field.product_description}
-                        </span>
-                        <span className="text-xs text-blue-600 mt-0.5">
-                          SKU: {field.product_sku}
-                        </span>
-                      </div>
+                      <span className="text-sm text-cashport-black">
+                        {field.product_description}
+                      </span>
                     </td>
                     <td className="p-3">
                       <Controller
@@ -211,13 +205,13 @@ export function PurchaseOrderProducts({
                               </Select>
                             ) : (
                               <div className="flex flex-col">
-                                {controllerField.value ? (
-                                  <span className="text-sm text-cashport-black">
-                                    {internalProducts.find((p) => p.id === controllerField.value)
-                                      ?.description || "-"}
+                                <span className="text-sm text-cashport-black">
+                                  {field.po_product_description || "-"}
+                                </span>
+                                {field.product_sku && (
+                                  <span className="text-xs text-blue-600 mt-0.5">
+                                    SKU: {field.product_sku}
                                   </span>
-                                ) : (
-                                  <span className="text-sm text-gray-400">-</span>
                                 )}
                               </div>
                             )}
@@ -225,7 +219,7 @@ export function PurchaseOrderProducts({
                         )}
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 text-right">
                       <Controller
                         name={`products.${index}.quantity`}
                         control={control}
@@ -236,10 +230,10 @@ export function PurchaseOrderProducts({
                                 type="number"
                                 {...controllerField}
                                 onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-20 h-8 text-sm"
+                                className="w-20 h-8 text-sm text-right"
                               />
                             ) : (
-                              <span className="text-sm text-cashport-black">
+                              <span className="text-sm text-cashport-black fontMonoSpace">
                                 {controllerField.value}
                               </span>
                             )}
@@ -252,7 +246,7 @@ export function PurchaseOrderProducts({
                         )}
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 text-right">
                       <Controller
                         name={`products.${index}.unit_price`}
                         control={control}
@@ -263,11 +257,11 @@ export function PurchaseOrderProducts({
                                 type="number"
                                 {...controllerField}
                                 onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-28 h-8 text-sm"
+                                className="w-28 h-8 text-sm text-right"
                               />
                             ) : (
-                              <span className="text-sm text-cashport-black">
-                                {formatCurrency(controllerField.value)}
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {formatMoney(controllerField.value)}
                               </span>
                             )}
                             {errors.products?.[index]?.unit_price && (
@@ -279,7 +273,7 @@ export function PurchaseOrderProducts({
                         )}
                       />
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 text-right">
                       <Controller
                         name={`products.${index}.tax_amount`}
                         control={control}
@@ -290,11 +284,11 @@ export function PurchaseOrderProducts({
                                 type="number"
                                 {...controllerField}
                                 onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-24 h-8 text-sm"
+                                className="w-24 h-8 text-sm text-right"
                               />
                             ) : (
-                              <span className="text-sm text-cashport-black">
-                                {formatCurrency(controllerField.value)}
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {formatMoney(controllerField.value)}
                               </span>
                             )}
                             {errors.products?.[index]?.tax_amount && (
@@ -306,8 +300,8 @@ export function PurchaseOrderProducts({
                         )}
                       />
                     </td>
-                    <td className="p-3 text-sm text-cashport-black">
-                      {formatCurrency(watchedProducts[index].total_price)}
+                    <td className="p-3 text-sm text-cashport-black text-right fontMonoSpace">
+                      {formatMoney(watchedProducts[index].total_price)}
                     </td>
                   </tr>
                 );
@@ -317,15 +311,15 @@ export function PurchaseOrderProducts({
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
                 <td className="p-3"></td>
-                <td className="p-3 text-sm font-bold text-cashport-black">
+                <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
                 </td>
                 <td className="p-3"></td>
-                <td className="p-3 text-sm font-bold text-cashport-black">
-                  {formatCurrency(totalIVA)}
+                <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
+                  {formatMoney(totalIVA)}
                 </td>
-                <td className="p-3 text-sm font-bold text-cashport-black">
-                  {formatCurrency(totalAmount)}
+                <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
+                  {formatMoney(totalAmount)}
                 </td>
               </tr>
             </tfoot>

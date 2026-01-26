@@ -9,6 +9,10 @@ export interface IPurchaseOrder {
   statusColor: string;
   totalProducts: number;
   totalAmount: number;
+  openNovelties: number;
+  noveltyTypes: string;
+  invoiceCount: number;
+  invoiceIds: string[];
 }
 
 export interface IPurchaseOrderStatus {
@@ -79,6 +83,19 @@ export interface IPurchaseOrderDetail {
   status_history: IPurchaseOrderStatusHistory[];
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
+  novelties: IPurchaseOrderNovelty[];
+}
+
+export interface IPurchaseOrderNovelty {
+  id: number;
+  novelty_type_id: number;
+  novelty_type_name: string;
+  description: string;
+  is_ia: number;
+  created_by: number;
+  created_by_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface IPurchaseOrderProduct {
@@ -87,6 +104,7 @@ export interface IPurchaseOrderProduct {
   image: string | null;
   category_id: number | null;
   product_description: string;
+  po_product_description: string;
   product_sku: string;
   line_id: number | null;
   unit_price: number;
