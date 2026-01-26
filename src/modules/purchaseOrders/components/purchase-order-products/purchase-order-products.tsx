@@ -178,14 +178,9 @@ export function PurchaseOrderProducts({
                 return (
                   <tr key={field.id} className={rowClass}>
                     <td className="p-3">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-cashport-black">
-                          {field.product_description}
-                        </span>
-                        <span className="text-xs text-blue-600 mt-0.5">
-                          SKU: {field.product_sku}
-                        </span>
-                      </div>
+                      <span className="text-sm text-cashport-black">
+                        {field.product_description}
+                      </span>
                     </td>
                     <td className="p-3">
                       <Controller
@@ -212,10 +207,17 @@ export function PurchaseOrderProducts({
                             ) : (
                               <div className="flex flex-col">
                                 {controllerField.value ? (
-                                  <span className="text-sm text-cashport-black">
-                                    {internalProducts.find((p) => p.id === controllerField.value)
-                                      ?.description || "-"}
-                                  </span>
+                                  <>
+                                    <span className="text-sm text-cashport-black">
+                                      {internalProducts.find((p) => p.id === controllerField.value)
+                                        ?.description || "-"}
+                                    </span>
+                                    <span className="text-xs text-blue-600 mt-0.5">
+                                      SKU:{" "}
+                                      {internalProducts.find((p) => p.id === controllerField.value)
+                                        ?.SKU}
+                                    </span>
+                                  </>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
                                 )}
