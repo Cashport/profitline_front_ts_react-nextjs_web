@@ -74,8 +74,7 @@ export interface IPurchaseOrderDetail {
   document_name: string;
   client_name: string;
   client_nit: string;
-  delivery_address: string;
-  delivery_address_id?: number;
+  delivery_address: IPurchaseOrderDeliveryAddress;
   created_at: string;
   updated_at: string;
   created_by_name: string;
@@ -85,6 +84,17 @@ export interface IPurchaseOrderDetail {
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
   novelties: IPurchaseOrderNovelty[];
+}
+
+export interface IPurchaseOrderDeliveryAddress {
+  id: number;
+  city: string;
+  email: string;
+  address: string;
+  comments: string;
+  location_id: number | null;
+  phone_number: string;
+  dispatch_address: string;
 }
 
 export interface IPurchaseOrderNovelty {

@@ -51,8 +51,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   client_name: data.client_name || "",
   created_at: data.created_at || "",
   delivery_date: data.delivery_date || "",
-  delivery_address: data.delivery_address || "",
-  delivery_address_id: data.delivery_address_id,
+  delivery_address: data.delivery_address?.address || "",
+  delivery_address_id: data.delivery_address?.id,
   observations: data.observations || ""
 });
 
