@@ -10,6 +10,7 @@ import {
   IApprover,
   IApproversResponse
 } from "@/types/purchaseOrders/purchaseOrders";
+import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
 export const getFilters = async (projectId: number): Promise<IPurchaseOrderFilters> => {
   try {
@@ -37,7 +38,7 @@ export const getOrderById = async (orderId: string): Promise<IPurchaseOrderDetai
 
 export const editPurchaseOrder = async (
   orderId: string,
-  updatedData: Partial<IPurchaseOrderDetail>
+  updatedData: PurchaseOrderUpdatePayload
 ): Promise<IPurchaseOrderDetail> => {
   try {
     const response: GenericResponse<IPurchaseOrderDetail> = await API.patch(
