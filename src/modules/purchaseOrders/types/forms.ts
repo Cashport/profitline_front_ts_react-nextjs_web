@@ -24,6 +24,7 @@ export interface ProductFormData {
   marketplace_order_product_id: number; // For API identification
   product_sku: string; // Read-only display
   product_description: string; // Read-only display
+  po_product_description: string; // Read-only display
   quantity: number; // Editable
   unit_price: number; // Editable
   tax_amount: number; // Editable
@@ -78,6 +79,7 @@ export const mapApiProductsToForm = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     product_sku: p.product_sku || "",
     product_description: p.product_description || "",
+    po_product_description: p.po_product_description || "",
     quantity: p.quantity || 0,
     unit_price: p.unit_price || 0,
     tax_amount: p.tax_amount || 0,

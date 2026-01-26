@@ -87,6 +87,7 @@ export interface IPurchaseOrderProduct {
   image: string | null;
   category_id: number | null;
   product_description: string;
+  po_product_description: string;
   product_sku: string;
   line_id: number | null;
   unit_price: number;

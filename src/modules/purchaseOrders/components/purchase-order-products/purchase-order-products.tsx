@@ -206,20 +206,13 @@ export function PurchaseOrderProducts({
                               </Select>
                             ) : (
                               <div className="flex flex-col">
-                                {controllerField.value ? (
-                                  <>
-                                    <span className="text-sm text-cashport-black">
-                                      {internalProducts.find((p) => p.id === controllerField.value)
-                                        ?.description || "-"}
-                                    </span>
-                                    <span className="text-xs text-blue-600 mt-0.5">
-                                      SKU:{" "}
-                                      {internalProducts.find((p) => p.id === controllerField.value)
-                                        ?.SKU}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <span className="text-sm text-gray-400">-</span>
+                                <span className="text-sm text-cashport-black">
+                                  {field.po_product_description || "-"}
+                                </span>
+                                {field.product_sku && (
+                                  <span className="text-xs text-blue-600 mt-0.5">
+                                    SKU: {field.product_sku}
+                                  </span>
                                 )}
                               </div>
                             )}
