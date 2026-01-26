@@ -79,6 +79,19 @@ export interface IPurchaseOrderDetail {
   status_history: IPurchaseOrderStatusHistory[];
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
+  novelties: IPurchaseOrderNovelty[];
+}
+
+export interface IPurchaseOrderNovelty {
+  id: number;
+  novelty_type_id: number;
+  novelty_type_name: string;
+  description: string;
+  is_ia: number;
+  created_by: number;
+  created_by_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface IPurchaseOrderProduct {
