@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, TableProps, Button, Typography } from "antd";
+import { Table, TableProps, Button, Typography, Tooltip } from "antd";
 import { Eye } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
@@ -123,22 +123,41 @@ export function OrdersTable({
       dataIndex: "status",
       key: "status",
       render: (status: string, record) => (
-        <span
-          style={{
-            backgroundColor: record.statusColor || "#B0BEC5",
-            color: "#FFFFFF",
-            padding: "4px 12px",
-            borderRadius: "8px",
-            fontSize: "12px",
-            display: "inline-block",
-            fontWeight: 500
-          }}
+        <Tooltip
+          title={
+            record.noveltyTypes ? (
+              <div style={{ whiteSpace: "pre-wrap" }}>{record.noveltyTypes}</div>
+            ) : null
+          }
         >
-          {status || "-"}
-        </span>
+          <span
+            style={{
+              backgroundColor: record.statusColor || "#B0BEC5",
+              color: "#FFFFFF",
+              padding: "4px 12px",
+              borderRadius: "8px",
+              fontSize: "12px",
+              display: "inline-block",
+              fontWeight: 500
+            }}
+          >
+            {status || "-"}
+          </span>
+        </Tooltip>
       ),
       sorter: (a, b) => a.status.localeCompare(b.status),
       showSorterTooltip: false
+    },
+    {
+      title: "Factura",
+      dataIndex: "invoiceIds",
+      key: "invoiceIds",
+      render: (invoiceIds: string[]) => (
+        <Text className="!text-xs truncate">
+          {invoiceIds && invoiceIds.length > 0 ? invoiceIds.join(", ") : "-"}
+        </Text>
+      ),
+      width: 100
     },
     {
       title: "Productos",
@@ -147,8 +166,7 @@ export function OrdersTable({
       align: "right",
       render: (totalProducts) => <Text className="text-cashport-black">{totalProducts || 0}</Text>,
       sorter: (a, b) => a.totalProducts - b.totalProducts,
-      showSorterTooltip: false,
-      width: 100
+      showSorterTooltip: false
     },
     {
       title: "Monto",

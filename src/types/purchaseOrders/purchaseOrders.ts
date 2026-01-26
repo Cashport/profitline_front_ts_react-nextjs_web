@@ -9,6 +9,10 @@ export interface IPurchaseOrder {
   statusColor: string;
   totalProducts: number;
   totalAmount: number;
+  openNovelties: number;
+  noveltyTypes: string;
+  invoiceCount: number;
+  invoiceIds: string[];
 }
 
 export interface IPurchaseOrderStatus {
