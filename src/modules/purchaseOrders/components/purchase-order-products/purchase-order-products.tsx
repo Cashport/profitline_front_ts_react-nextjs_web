@@ -3,14 +3,8 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import { Edit, Save } from "lucide-react";
+import { ProductCombobox } from "@/modules/purchaseOrders/components/product-combobox/product-combobox";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
@@ -178,7 +172,7 @@ export function PurchaseOrderProducts({
                   <tr key={field.id} className={rowClass}>
                     <td className="p-3">
                       <span className="text-sm text-cashport-black">
-                        {field.product_description}
+                        {field.po_product_description || "-"}
                       </span>
                     </td>
                     <td className="p-3">
@@ -188,25 +182,16 @@ export function PurchaseOrderProducts({
                         render={({ field: controllerField }) => (
                           <div>
                             {isEditMode ? (
-                              <Select
-                                value={controllerField.value?.toString() || ""}
-                                onValueChange={(value) => controllerField.onChange(Number(value))}
-                              >
-                                <SelectTrigger className="w-full h-8">
-                                  <SelectValue placeholder="Seleccionar producto" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {internalProducts.map((product) => (
-                                    <SelectItem key={product.id} value={product.id.toString()}>
-                                      {product.description}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <ProductCombobox
+                                products={internalProducts}
+                                value={controllerField.value}
+                                onValueChange={controllerField.onChange}
+                                placeholder="Seleccionar producto"
+                              />
                             ) : (
                               <div className="flex flex-col">
                                 <span className="text-sm text-cashport-black">
-                                  {field.po_product_description || "-"}
+                                  {field.product_description || "-"}
                                 </span>
                                 {field.product_sku && (
                                   <span className="text-xs text-blue-600 mt-0.5">
