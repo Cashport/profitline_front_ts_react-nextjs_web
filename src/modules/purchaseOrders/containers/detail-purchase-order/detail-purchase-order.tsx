@@ -217,14 +217,6 @@ export function DetailPurchaseOrder() {
     setPdfWidth(40); // Default width when expanding
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
   const handleEditToggle = () => {
     if (isEditMode) {
       // Trigger save before exiting edit mode
@@ -444,7 +436,6 @@ export function DetailPurchaseOrder() {
               initialProducts={mapApiProductsToForm(data.products)}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
-              formatCurrency={formatCurrency}
               onSave={handleProductsSave}
               summary={data.summary}
             />
