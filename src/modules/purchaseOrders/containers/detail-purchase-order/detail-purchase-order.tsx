@@ -331,10 +331,6 @@ export function DetailPurchaseOrder() {
     <div className="min-h-screen bg-cashport-gray-lighter">
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
         <CardContent className="px-6 pb-6 pt-6">
-          <h1 className="text-2xl font-bold text-cashport-black mb-6">
-            Orden de compra {data.purchase_order_number}
-          </h1>
-
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
               <Button
@@ -410,7 +406,7 @@ export function DetailPurchaseOrder() {
               className="mb-6 rounded-lg border-2 p-4"
               style={{
                 backgroundColor: "#FFF3E0",
-                borderColor: "#FFE0B2",
+                borderColor: "#FFE0B2"
               }}
             >
               <div className="flex items-start gap-3">
@@ -431,7 +427,7 @@ export function DetailPurchaseOrder() {
                       style={{
                         borderColor: "#FFA726",
                         color: "#FFA726",
-                        backgroundColor: "white",
+                        backgroundColor: "white"
                       }}
                     >
                       Requiere atención
@@ -458,6 +454,7 @@ export function DetailPurchaseOrder() {
             initialData={mapApiToFormData(data)}
             onSave={handleInfoSave}
             onCancel={() => setIsEditMode(false)}
+            clientId={data.client_nit}
           />
 
           <PurchaseOrderProcess

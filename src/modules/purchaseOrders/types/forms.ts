@@ -14,6 +14,17 @@ export interface PurchaseOrderInfoFormData {
   created_at: string;
   delivery_date?: string;
   delivery_address?: string;
+  delivery_address_id?: number;
+  observations?: string;
+}
+
+/**
+ * Payload type for updating purchase order info
+ * Unlike IPurchaseOrderDetail, delivery_address only needs the ID
+ */
+export interface PurchaseOrderUpdatePayload {
+  delivery_date?: string;
+  delivery_address?: { id: number };
   observations?: string;
 }
 
@@ -50,7 +61,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   client_name: data.client_name || "",
   created_at: data.created_at || "",
   delivery_date: data.delivery_date || "",
-  delivery_address: data.delivery_address || "",
+  delivery_address: data.delivery_address?.address || "",
+  delivery_address_id: data.delivery_address?.id,
   observations: data.observations || ""
 });
 
@@ -62,8 +74,9 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
  */
 export const mapFormDataToApi = (
   formData: PurchaseOrderInfoFormData
-): Partial<IPurchaseOrderDetail> => ({
+): PurchaseOrderUpdatePayload => ({
   delivery_date: formData.delivery_date,
+  delivery_address: formData.delivery_address_id ? { id: formData.delivery_address_id } : undefined,
   observations: formData.observations
 });
 
