@@ -75,6 +75,7 @@ export interface IPurchaseOrderDetail {
   client_name: string;
   client_nit: string;
   delivery_address: string;
+  delivery_address_id?: number;
   created_at: string;
   updated_at: string;
   created_by_name: string;

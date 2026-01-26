@@ -16,6 +16,7 @@ export const purchaseOrderInfoSchema = yup.object({
     return !isNaN(Date.parse(value));
   }),
   delivery_address: yup.string().max(500, "La dirección no puede exceder 500 caracteres"),
+  delivery_address_id: yup.number().optional(),
   observations: yup.string().max(1000, "Las observaciones no pueden exceder 1000 caracteres")
 });
 

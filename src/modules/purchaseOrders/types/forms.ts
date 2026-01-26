@@ -14,6 +14,7 @@ export interface PurchaseOrderInfoFormData {
   created_at: string;
   delivery_date?: string;
   delivery_address?: string;
+  delivery_address_id?: number;
   observations?: string;
 }
 
@@ -51,6 +52,7 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   created_at: data.created_at || "",
   delivery_date: data.delivery_date || "",
   delivery_address: data.delivery_address || "",
+  delivery_address_id: data.delivery_address_id,
   observations: data.observations || ""
 });
 
@@ -64,6 +66,7 @@ export const mapFormDataToApi = (
   formData: PurchaseOrderInfoFormData
 ): Partial<IPurchaseOrderDetail> => ({
   delivery_date: formData.delivery_date,
+  delivery_address_id: formData.delivery_address_id,
   observations: formData.observations
 });
 
