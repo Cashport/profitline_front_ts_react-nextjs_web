@@ -1,6 +1,6 @@
 "use client";
 
-import { Table, TableProps, Badge, Button, Typography } from "antd";
+import { Table, TableProps, Button, Typography } from "antd";
 import { Eye } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
@@ -123,7 +123,19 @@ export function OrdersTable({
       dataIndex: "status",
       key: "status",
       render: (status: string, record) => (
-        <Badge color={record.statusColor || "#B0BEC5"} text={status || "-"} status="default" />
+        <span
+          style={{
+            backgroundColor: record.statusColor || "#B0BEC5",
+            color: "#FFFFFF",
+            padding: "4px 12px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            display: "inline-block",
+            fontWeight: 500
+          }}
+        >
+          {status || "-"}
+        </span>
       ),
       sorter: (a, b) => a.status.localeCompare(b.status),
       showSorterTooltip: false
