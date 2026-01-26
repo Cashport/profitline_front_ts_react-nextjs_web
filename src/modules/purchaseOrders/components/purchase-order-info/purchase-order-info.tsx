@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import React, { useEffect, forwardRef, useImperativeHandle } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
-import { formatDateBars } from "@/utils/utils";
+import { formatDateBars, formatDateDMY } from "@/utils/utils";
 import { PurchaseOrderInfoFormData } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
 
@@ -20,13 +20,12 @@ interface PurchaseOrderInfoProps {
 }
 
 export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderInfoProps>(
-  ({ isEditMode, initialData, onSave, onCancel }, ref) => {
+  ({ isEditMode, initialData, onSave }, ref) => {
     const {
       control,
       handleSubmit,
       formState: { errors, dirtyFields },
-      reset,
-      getValues
+      reset
     } = useForm<PurchaseOrderInfoFormData>({
       resolver: yupResolver(purchaseOrderInfoSchema),
       defaultValues: initialData,
@@ -117,7 +116,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                Fecha
+                Fecha orden de compra
               </label>
               <Controller
                 name="created_at"
@@ -134,7 +133,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {formatDateBars(field.value)}
+                        {formatDateDMY(field.value)}
                       </p>
                     )}
                     {errors.created_at && (
@@ -168,7 +167,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {field.value ? formatDateBars(field.value) : "-"}
+                        {field.value ? formatDateDMY(field.value) : "-"}
                       </p>
                     )}
                     {errors.delivery_date && (
