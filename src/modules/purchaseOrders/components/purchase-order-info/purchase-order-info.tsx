@@ -1,10 +1,19 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import React, { useEffect, forwardRef, useImperativeHandle, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
-import { formatDateBars } from "@/utils/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/modules/chat/ui/select";
+import { formatDateAndTime, formatDateBars, formatDateDMY } from "@/utils/utils";
 import { PurchaseOrderInfoFormData } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
+import { getAdresses } from "@/services/commerce/commerce";
+import { ICommerceAdresses } from "@/types/commerce/ICommerce";
 
 // Ref type for exposing methods to parent
 export interface PurchaseOrderInfoRef {
@@ -17,33 +26,54 @@ interface PurchaseOrderInfoProps {
   initialData: PurchaseOrderInfoFormData;
   onSave: (data: PurchaseOrderInfoFormData, dirtyFields: string[]) => void;
   onCancel: () => void;
+  clientId: string;
 }
 
 export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderInfoProps>(
-  ({ isEditMode, initialData, onSave, onCancel }, ref) => {
+  ({ isEditMode, initialData, onSave, clientId }, ref) => {
     const {
       control,
       handleSubmit,
       formState: { errors, dirtyFields },
-      reset,
-      getValues
+      reset
     } = useForm<PurchaseOrderInfoFormData>({
       resolver: yupResolver(purchaseOrderInfoSchema),
       defaultValues: initialData,
       mode: "onChange"
     });
 
+    // State for managing addresses
+    const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
+    const [addressesLoading, setAddressesLoading] = useState(false);
+    const [addressesError, setAddressesError] = useState<string | null>(null);
+
     // Reset form when initialData changes (API refetch)
     useEffect(() => {
       reset(initialData);
     }, [initialData, reset]);
 
+    useEffect(() => {
+      const fetchAdresses = async () => {
+        if (!clientId) return;
+        setAddressesLoading(true);
+        setAddressesError(null);
+        try {
+          const res = await getAdresses(clientId);
+          setAddresses(res.otherAddresses || []);
+        } catch (error) {
+          console.error("Error fetching addresses:", error);
+          setAddressesError("Error al cargar las direcciones");
+        } finally {
+          setAddressesLoading(false);
+        }
+      };
+      fetchAdresses();
+    }, [clientId]);
+
     // Submit handler that will be called by handleSubmit
     const handleSaveInfo = (formData: PurchaseOrderInfoFormData) => {
       const changedFields = Object.keys(dirtyFields);
       if (changedFields.length > 0) {
-        console.log("handleSaveInfo - changed fields:", changedFields);
-        console.log("handleSaveInfo - form data:", formData);
         onSave(formData, changedFields);
       }
     };
@@ -117,7 +147,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                Fecha
+                Fecha orden de compra
               </label>
               <Controller
                 name="created_at"
@@ -134,7 +164,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {formatDateBars(field.value)}
+                        {formatDateDMY(field.value)}
                       </p>
                     )}
                     {errors.created_at && (
@@ -168,7 +198,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {field.value ? formatDateBars(field.value) : "-"}
+                        {field.value ? formatDateAndTime(field.value) : "-"}
                       </p>
                     )}
                     {errors.delivery_date && (
@@ -188,13 +218,61 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                 render={({ field }) => (
                   <>
                     {isEditMode ? (
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        className="mt-1 h-8 text-sm font-semibold"
-                        placeholder="Dirección completa"
-                        disabled
-                      />
+                      <>
+                        <Controller
+                          name="delivery_address_id"
+                          control={control}
+                          render={({ field: selectField }) => (
+                            <Select
+                              value={selectField.value?.toString() || ""}
+                              onValueChange={(value) => {
+                                const selectedId = parseInt(value);
+                                selectField.onChange(selectedId);
+
+                                // Update the display address field for consistency
+                                const selectedAddress = addresses.find(a => a.id === selectedId);
+                                if (selectedAddress) {
+                                  field.onChange(selectedAddress.address);
+                                }
+                              }}
+                              disabled={addressesLoading}
+                            >
+                              <SelectTrigger className="mt-1 h-8 w-full">
+                                <SelectValue
+                                  placeholder={
+                                    addressesLoading
+                                      ? "Cargando direcciones..."
+                                      : addresses.length === 0
+                                      ? "No hay direcciones disponibles"
+                                      : "Seleccionar dirección"
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {addresses.length > 0 ? (
+                                  addresses.map((address) => (
+                                    <SelectItem
+                                      key={address.id}
+                                      value={address.id.toString()}
+                                    >
+                                      {address.address}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                    No hay direcciones disponibles
+                                  </div>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        {addressesError && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {addressesError}
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
                         {field.value || "-"}

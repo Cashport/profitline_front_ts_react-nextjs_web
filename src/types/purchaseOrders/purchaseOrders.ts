@@ -1,6 +1,7 @@
 export interface IPurchaseOrder {
   id: number;
   orderNumber: string;
+  purchaseOrderId: number;
   customerName: string;
   deliveryAddress: string;
   deliveryDate: string;
@@ -8,6 +9,10 @@ export interface IPurchaseOrder {
   statusColor: string;
   totalProducts: number;
   totalAmount: number;
+  openNovelties: number;
+  noveltyTypes: string;
+  invoiceCount: number;
+  invoiceIds: string[];
 }
 
 export interface IPurchaseOrderStatus {
@@ -69,7 +74,7 @@ export interface IPurchaseOrderDetail {
   document_name: string;
   client_name: string;
   client_nit: string;
-  delivery_address: string;
+  delivery_address: IPurchaseOrderDeliveryAddress;
   created_at: string;
   updated_at: string;
   created_by_name: string;
@@ -78,6 +83,30 @@ export interface IPurchaseOrderDetail {
   status_history: IPurchaseOrderStatusHistory[];
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
+  novelties: IPurchaseOrderNovelty[];
+}
+
+export interface IPurchaseOrderDeliveryAddress {
+  id: number;
+  city: string;
+  email: string;
+  address: string;
+  comments: string;
+  location_id: number | null;
+  phone_number: string;
+  dispatch_address: string;
+}
+
+export interface IPurchaseOrderNovelty {
+  id: number;
+  novelty_type_id: number;
+  novelty_type_name: string;
+  description: string;
+  is_ia: number;
+  created_by: number;
+  created_by_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface IPurchaseOrderProduct {
@@ -86,6 +115,7 @@ export interface IPurchaseOrderProduct {
   image: string | null;
   category_id: number | null;
   product_description: string;
+  po_product_description: string;
   product_sku: string;
   line_id: number | null;
   unit_price: number;

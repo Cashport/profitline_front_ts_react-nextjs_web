@@ -20,7 +20,8 @@ import {
   X,
   Send,
   FileOutput,
-  PackageCheck
+  PackageCheck,
+  AlertTriangle
 } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
@@ -217,14 +218,6 @@ export function DetailPurchaseOrder() {
     setPdfWidth(40); // Default width when expanding
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
   const handleEditToggle = () => {
     if (isEditMode) {
       // Trigger save before exiting edit mode
@@ -338,10 +331,6 @@ export function DetailPurchaseOrder() {
     <div className="min-h-screen bg-cashport-gray-lighter">
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
         <CardContent className="px-6 pb-6 pt-6">
-          <h1 className="text-2xl font-bold text-cashport-black mb-6">
-            Orden de compra {data.purchase_order_number}
-          </h1>
-
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
               <Button
@@ -412,14 +401,52 @@ export function DetailPurchaseOrder() {
             </div>
           </div>
 
-          {/* Novedades no disponibles en API
-          {novedadInfo && (
-            <div className="mb-6 rounded-lg border-2 p-4">
-              Sección de novedades temporalmente deshabilitada
-              Campos necesarios del backend: tipoNovedad, alertas
+          {data.novelties.length > 0 && (
+            <div
+              className="mb-6 rounded-lg border-2 p-4"
+              style={{
+                backgroundColor: "#FFF3E0",
+                borderColor: "#FFE0B2"
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "#FFA72620" }}
+                >
+                  <AlertTriangle className="h-5 w-5" style={{ color: "#FFA726" }} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-base" style={{ color: "#FFA726" }}>
+                      Novedades
+                    </h3>
+                    <Badge
+                      variant="outline"
+                      className="text-xs"
+                      style={{
+                        borderColor: "#FFA726",
+                        color: "#FFA726",
+                        backgroundColor: "white"
+                      }}
+                    >
+                      Requiere atención
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {data.novelties.map((novelty) => (
+                      <div key={novelty.id} className="flex items-start gap-2 text-sm">
+                        <span className="text-orange-500 mt-0.5">•</span>
+                        <p className="text-gray-700">
+                          <strong>{novelty.novelty_type_name}:</strong> {novelty.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
-          */}
 
           <PurchaseOrderInfo
             ref={infoFormRef}
@@ -427,6 +454,7 @@ export function DetailPurchaseOrder() {
             initialData={mapApiToFormData(data)}
             onSave={handleInfoSave}
             onCancel={() => setIsEditMode(false)}
+            clientId={data.client_nit}
           />
 
           <PurchaseOrderProcess
@@ -444,7 +472,6 @@ export function DetailPurchaseOrder() {
               initialProducts={mapApiProductsToForm(data.products)}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
-              formatCurrency={formatCurrency}
               onSave={handleProductsSave}
               summary={data.summary}
             />

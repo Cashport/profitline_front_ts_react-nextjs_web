@@ -14,6 +14,17 @@ export interface PurchaseOrderInfoFormData {
   created_at: string;
   delivery_date?: string;
   delivery_address?: string;
+  delivery_address_id?: number;
+  observations?: string;
+}
+
+/**
+ * Payload type for updating purchase order info
+ * Unlike IPurchaseOrderDetail, delivery_address only needs the ID
+ */
+export interface PurchaseOrderUpdatePayload {
+  delivery_date?: string;
+  delivery_address?: { id: number };
   observations?: string;
 }
 
@@ -24,6 +35,7 @@ export interface ProductFormData {
   marketplace_order_product_id: number; // For API identification
   product_sku: string; // Read-only display
   product_description: string; // Read-only display
+  po_product_description: string; // Read-only display
   quantity: number; // Editable
   unit_price: number; // Editable
   tax_amount: number; // Editable
@@ -49,7 +61,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   client_name: data.client_name || "",
   created_at: data.created_at || "",
   delivery_date: data.delivery_date || "",
-  delivery_address: data.delivery_address || "",
+  delivery_address: data.delivery_address?.address || "",
+  delivery_address_id: data.delivery_address?.id,
   observations: data.observations || ""
 });
 
@@ -61,8 +74,9 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
  */
 export const mapFormDataToApi = (
   formData: PurchaseOrderInfoFormData
-): Partial<IPurchaseOrderDetail> => ({
+): PurchaseOrderUpdatePayload => ({
   delivery_date: formData.delivery_date,
+  delivery_address: formData.delivery_address_id ? { id: formData.delivery_address_id } : undefined,
   observations: formData.observations
 });
 
@@ -78,6 +92,7 @@ export const mapApiProductsToForm = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     product_sku: p.product_sku || "",
     product_description: p.product_description || "",
+    po_product_description: p.po_product_description || "",
     quantity: p.quantity || 0,
     unit_price: p.unit_price || 0,
     tax_amount: p.tax_amount || 0,

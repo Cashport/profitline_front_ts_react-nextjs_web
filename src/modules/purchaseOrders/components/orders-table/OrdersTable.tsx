@@ -1,11 +1,13 @@
 "use client";
 
-import { Table, TableProps, Badge, Button, Typography } from "antd";
-import { Eye } from "lucide-react";
+import { Table, TableProps, Button, Typography } from "antd";
+import { Eye, AlertCircle } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
+import { Badge } from "@/modules/chat/ui/badge";
 
 const { Text } = Typography;
 
@@ -50,8 +52,8 @@ export function OrdersTable({
   const columns: TableProps<IPurchaseOrder>["columns"] = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "purchaseOrderId",
+      key: "purchaseOrderId",
       render: (id, record) => (
         <button
           onClick={() => onRowClick?.(record)}
@@ -60,7 +62,7 @@ export function OrdersTable({
           {id}
         </button>
       ),
-      sorter: (a, b) => a.id - b.id,
+      sorter: (a, b) => a.purchaseOrderId - b.purchaseOrderId,
       showSorterTooltip: false,
       width: 80
     },
@@ -123,10 +125,66 @@ export function OrdersTable({
       dataIndex: "status",
       key: "status",
       render: (status: string, record) => (
-        <Badge color={record.statusColor || "#B0BEC5"} text={status || "-"} status="default" />
+        <>
+          {record.noveltyTypes ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 cursor-help">
+                  <Badge
+                    variant="outline"
+                    className="text-white font-medium border-transparent"
+                    style={{
+                      backgroundColor: record.statusColor || "#B0BEC5",
+                      fontSize: "12px",
+                      padding: "4px 12px",
+                      borderRadius: "8px"
+                    }}
+                  >
+                    {status || "-"}
+                  </Badge>
+                  <AlertCircle className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-gray-900 text-white p-3 max-w-xs">
+                <div className="space-y-1">
+                  <div className="font-semibold text-sm">Tipo de novedad:</div>
+                  <div className="text-sm whitespace-pre-wrap">{record.noveltyTypes}</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Badge
+              variant="outline"
+              className="text-white font-medium border-transparent"
+              style={{
+                backgroundColor: record.statusColor || "#B0BEC5",
+                fontSize: "12px",
+                padding: "4px 12px",
+                borderRadius: "8px"
+              }}
+            >
+              {status || "-"}
+            </Badge>
+          )}
+        </>
       ),
       sorter: (a, b) => a.status.localeCompare(b.status),
       showSorterTooltip: false
+    },
+    {
+      title: "Factura",
+      dataIndex: "invoiceIds",
+      key: "invoiceIds",
+      render: (invoiceIds: string[]) => (
+        <Text
+          className="!text-xs line-clamp-2 break-words"
+          title={invoiceIds && invoiceIds.length > 0 ? invoiceIds.join(", ") : ""}
+        >
+          {invoiceIds && invoiceIds.length > 0 ? invoiceIds.join(", ") : "-"}
+        </Text>
+      ),
+      width: 100,
+      align: "right"
     },
     {
       title: "Productos",
@@ -135,8 +193,7 @@ export function OrdersTable({
       align: "right",
       render: (totalProducts) => <Text className="text-cashport-black">{totalProducts || 0}</Text>,
       sorter: (a, b) => a.totalProducts - b.totalProducts,
-      showSorterTooltip: false,
-      width: 100
+      showSorterTooltip: false
     },
     {
       title: "Monto",
