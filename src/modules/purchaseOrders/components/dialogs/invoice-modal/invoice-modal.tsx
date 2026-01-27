@@ -86,18 +86,12 @@ export function InvoiceModal({
     setError(null);
 
     try {
-      const invoiceIds = invoices.map((inv) => {
-        const parsed = parseInt(inv.invoiceId.trim(), 10);
-        if (isNaN(parsed)) {
-          return inv.invoiceId.trim();
-        }
-        return parsed;
-      });
+      const invoiceIds = invoices.map((inv) => inv.invoiceId.trim());
 
       const payload: IInvoiceActionPayload = {
         action: "invoice",
         data: {
-          invoice_ids: invoiceIds as number[]
+          invoice_ids: invoiceIds
         },
         observation: ""
       };
