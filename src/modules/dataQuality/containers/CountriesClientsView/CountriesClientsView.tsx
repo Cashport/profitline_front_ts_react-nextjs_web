@@ -89,6 +89,7 @@ export default function CountriesClientsView() {
       updated_at: record.updated_at,
       full_record: record
     });
+    router.push(`/data-quality/clients/${record.id_client}`);
   };
 
   return (
@@ -196,6 +197,7 @@ export default function CountriesClientsView() {
       </Card>
 
       <ModalDataIntake
+        mode="create"
         open={isModalDataIntakeOpen}
         onOpenChange={setIsModalDataIntakeOpen}
         onSuccess={handleCreateIngestionSuccess}

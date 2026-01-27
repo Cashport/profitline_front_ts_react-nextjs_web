@@ -16,25 +16,7 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Badge } from "@/modules/chat/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
-import { Label } from "@/modules/chat/ui/label";
-import { Input } from "@/modules/chat/ui/input";
-import { Switch } from "@/modules/chat/ui/switch";
 import {
   Table,
   TableBody,
@@ -44,6 +26,8 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { Card, CardContent } from "@/modules/chat/ui/card";
+import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
+import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 
 const mockFiles = {
   "farmacia-cruz-verde": [
@@ -206,28 +190,10 @@ export default function DataQualityClientDetails() {
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editClientName, setEditClientName] = useState("");
-  const [editPeriodicity, setEditPeriodicity] = useState<"Daily" | "Weekly" | "Monthly" | "">("");
-  const [editFileTypes, setEditFileTypes] = useState({
-    sales: false,
-    stock: false,
-    inTransit: false
-  });
-  const [editFileType, setEditFileType] = useState(""); // Declared editFileType
-  const [editDailyDetails, setEditDailyDetails] = useState({
-    diasHabiles: false,
-    festivos: false
-  });
-  const [editWeeklyDetails, setEditWeeklyDetails] = useState({
-    acumulado: false,
-    porRango: false
-  });
-  const [editIngestaSource, setEditIngestaSource] = useState("");
-  const [editIngestaDetail, setEditIngestaDetail] = useState(""); // Declared editIngestaDetail
-  const [editStakeholder, setEditStakeholder] = useState("");
-  const [editAttachedFile, setEditAttachedFile] = useState<File | null>(null);
-  const [editIngestaVariables, setEditIngestaVariables] = useState([{ key: "", value: "" }]); // Declared editIngestaVariables
+  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState<Partial<DataIntakeFormData> | undefined>(
+    undefined
+  );
 
   const files = mockFiles[clientId as keyof typeof mockFiles] || [];
   const countryName = countryNames[countryId as keyof typeof countryNames] || countryId;
@@ -253,40 +219,26 @@ export default function DataQualityClientDetails() {
   );
 
   const handleEditConfig = () => {
-    setEditClientName(clientName);
-    setEditPeriodicity(clientConfig.periodicity as "Daily" | "Weekly" | "Monthly");
-    setEditFileTypes((prev) => ({ ...prev, sales: clientConfig.fileTypes.includes("Sales") }));
-    setEditFileTypes((prev) => ({ ...prev, stock: clientConfig.fileTypes.includes("Stock") }));
-    setEditFileTypes((prev) => ({
-      ...prev,
-      inTransit: clientConfig.fileTypes.includes("In transit")
-    }));
-    setEditDailyDetails(clientInfo.dailyDetails);
-    setEditWeeklyDetails(clientInfo.weeklyDetails);
-    setEditIngestaSource(clientInfo.ingestaSource);
-    setEditIngestaVariables(
-      clientInfo.ingestaVariables.length > 0
-        ? [...clientInfo.ingestaVariables]
-        : [{ key: "", value: "" }]
-    );
-    setEditStakeholder(clientInfo.stakeholder);
-    setEditAttachedFile(null);
-    setIsEditDialogOpen(true);
-  };
+    // Determine fileType from clientConfig.fileTypes array (take first one or default)
+    const primaryFileType = clientConfig.fileTypes[0] || "";
 
-  const handleSaveConfig = () => {
-    console.log("[v0] Saving configuration:", {
-      clientName: editClientName,
-      periodicity: editPeriodicity,
-      fileType: editFileType,
-      dailyDetails: editPeriodicity === "Daily" ? editDailyDetails : undefined,
-      weeklyDetails: editPeriodicity === "Weekly" ? editWeeklyDetails : undefined,
-      ingestaSource: editIngestaSource,
-      ingestaVariables: editIngestaVariables.filter((v) => v.key && v.value), // Used editIngestaDetail
-      stakeholder: editStakeholder,
-      attachedFile: editAttachedFile?.name
-    });
-    setIsEditDialogOpen(false);
+    const initialData: Partial<DataIntakeFormData> = {
+      clientName: clientName,
+      fileType: primaryFileType,
+      periodicity: clientConfig.periodicity as "Daily" | "Weekly" | "Monthly",
+      dailyDetails: clientInfo.dailyDetails,
+      weeklyDetails: clientInfo.weeklyDetails,
+      ingestaSource: clientInfo.ingestaSource,
+      stakeholder: clientInfo.stakeholder,
+      attachedFile: null,
+      ingestaVariables:
+        clientInfo.ingestaVariables.length > 0
+          ? [...clientInfo.ingestaVariables]
+          : [{ key: "", value: "" }]
+    };
+
+    setModalInitialData(initialData);
+    setIsModalDataIntakeOpen(true);
   };
 
   const handleGoBack = () => {
@@ -299,7 +251,7 @@ export default function DataQualityClientDetails() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F7F7F7" }}>
-      <main className="px-6 py-8">
+      <main>
         <div className="mb-6">
           <h1 className="text-3xl font-bold" style={{ color: "#141414" }}>
             {clientName}
@@ -357,125 +309,7 @@ export default function DataQualityClientDetails() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6 mb-8">
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                  Periodicidad
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="text-sm font-medium"
-                  style={{ backgroundColor: "#CBE71E", color: "#141414" }}
-                >
-                  {clientConfig.periodicity}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                  Tipos de Archivo
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {clientConfig.fileTypes.map((fileType) => (
-                    <Badge
-                      key={fileType}
-                      variant="secondary"
-                      className="text-sm font-medium bg-gray-200 text-gray-800"
-                    >
-                      {fileType}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {clientConfig.periodicity === "Daily" && (
-                <div>
-                  <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                    Detalle de Periodicidad
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {clientInfo.dailyDetails.diasHabiles && (
-                      <Badge
-                        variant="secondary"
-                        className="text-sm font-medium bg-gray-200 text-gray-800"
-                      >
-                        Días hábiles
-                      </Badge>
-                    )}
-                    {clientInfo.dailyDetails.festivos && (
-                      <Badge
-                        variant="secondary"
-                        className="text-sm font-medium bg-gray-200 text-gray-800"
-                      >
-                        Festivos
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {clientConfig.periodicity === "Weekly" && (
-                <div>
-                  <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                    Detalle de Periodicidad
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {clientInfo.weeklyDetails.acumulado && (
-                      <Badge
-                        variant="secondary"
-                        className="text-sm font-medium bg-gray-200 text-gray-800"
-                      >
-                        Acumulado
-                      </Badge>
-                    )}
-                    {clientInfo.weeklyDetails.porRango && (
-                      <Badge
-                        variant="secondary"
-                        className="text-sm font-medium bg-gray-200 text-gray-800"
-                      >
-                        Por rango
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                  Fuente de Ingesta
-                </p>
-                <p className="text-sm" style={{ color: "#141414" }}>
-                  {clientInfo.ingestaSource}
-                </p>
-              </div>
-
-              <div className="col-span-2">
-                <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                  Variables de Configuración
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {clientInfo.ingestaVariables.map((variable, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1"
-                    >
-                      <span className="text-xs font-mono font-semibold text-gray-700">
-                        {variable.key}:
-                      </span>
-                      <span className="text-xs text-gray-600">{variable.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium mb-2" style={{ color: "#141414" }}>
-                  Stakeholder
-                </p>
-                <p className="text-sm" style={{ color: "#141414" }}>
-                  {clientInfo.stakeholder}
-                </p>
-              </div>
-            </div>
+            <ClientDetailInfo clientConfig={clientConfig} clientInfo={clientInfo} />
 
             <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
               Archivos
@@ -544,260 +378,16 @@ export default function DataQualityClientDetails() {
         </div>
       </main>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Editar Parametrización</DialogTitle>
-            <DialogDescription>
-              Modifica la configuración de ingesta para {clientName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-client-name">Cliente</Label>
-              <Input
-                id="edit-client-name"
-                value={editClientName}
-                onChange={(e) => setEditClientName(e.target.value)}
-                className="border-[#DDDDDD]"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Tipo de Archivo</Label>
-              <Select value={editFileType} onValueChange={setEditFileType}>
-                <SelectTrigger className="border-[#DDDDDD]">
-                  <SelectValue placeholder="Seleccionar tipo de archivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sales">Sales</SelectItem>
-                  <SelectItem value="Stock">Stock</SelectItem>
-                  <SelectItem value="In transit">In transit</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Periodicidad</Label>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={editPeriodicity === "Daily"}
-                    onCheckedChange={(checked) => {
-                      setEditPeriodicity(checked ? "Daily" : "");
-                      if (!checked) {
-                        setEditDailyDetails({ diasHabiles: false, festivos: false });
-                      }
-                    }}
-                  />
-                  <span className="text-sm">Daily</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={editPeriodicity === "Weekly"}
-                    onCheckedChange={(checked) => {
-                      setEditPeriodicity(checked ? "Weekly" : "");
-                      if (!checked) {
-                        setEditWeeklyDetails({ acumulado: false, porRango: false });
-                      }
-                    }}
-                  />
-                  <span className="text-sm">Weekly</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={editPeriodicity === "Monthly"}
-                    onCheckedChange={(checked) => setEditPeriodicity(checked ? "Monthly" : "")}
-                  />
-                  <span className="text-sm">Monthly</span>
-                </div>
-              </div>
-            </div>
-
-            {editPeriodicity === "Daily" && (
-              <div className="grid gap-2">
-                <Label>Detalle</Label>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={editDailyDetails.diasHabiles}
-                      onCheckedChange={(checked) =>
-                        setEditDailyDetails((prev) => ({ ...prev, diasHabiles: checked }))
-                      }
-                    />
-                    <span className="text-sm">Días hábiles</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={editDailyDetails.festivos}
-                      onCheckedChange={(checked) =>
-                        setEditDailyDetails((prev) => ({ ...prev, festivos: checked }))
-                      }
-                    />
-                    <span className="text-sm">Festivos</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {editPeriodicity === "Weekly" && (
-              <div className="grid gap-2">
-                <Label>Detalle</Label>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={editWeeklyDetails.acumulado}
-                      onCheckedChange={(checked) =>
-                        setEditWeeklyDetails((prev) => ({ ...prev, acumulado: checked }))
-                      }
-                    />
-                    <span className="text-sm">Acumulado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={editWeeklyDetails.porRango}
-                      onCheckedChange={(checked) =>
-                        setEditWeeklyDetails((prev) => ({ ...prev, porRango: checked }))
-                      }
-                    />
-                    <span className="text-sm">Por rango</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-ingesta">Ingesta</Label>
-              <Select value={editIngestaSource} onValueChange={setEditIngestaSource}>
-                <SelectTrigger className="w-full border-[#DDDDDD]">
-                  <SelectValue placeholder="Seleccionar fuente de ingesta" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Email">Email</SelectItem>
-                  <SelectItem value="B2B Web">B2B Web</SelectItem>
-                  <SelectItem value="API">API</SelectItem>
-                  <SelectItem value="App">App</SelectItem>
-                  <SelectItem value="Teamcorp">Teamcorp</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label>Variables de configuración</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setEditIngestaVariables([...editIngestaVariables, { key: "", value: "" }])
-                  }
-                  className="text-xs bg-transparent"
-                >
-                  + Agregar variable
-                </Button>
-              </div>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                {editIngestaVariables.map((variable, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      placeholder="Nombre (ej: EMAIL, API_URL)"
-                      value={variable.key}
-                      onChange={(e) => {
-                        const newVariables = [...editIngestaVariables];
-                        newVariables[index].key = e.target.value;
-                        setEditIngestaVariables(newVariables);
-                      }}
-                      className="border-[#DDDDDD] flex-1 font-mono text-sm"
-                    />
-                    <Input
-                      placeholder="Valor"
-                      value={variable.value}
-                      onChange={(e) => {
-                        const newVariables = [...editIngestaVariables];
-                        newVariables[index].value = e.target.value;
-                        setEditIngestaVariables(newVariables);
-                      }}
-                      className="border-[#DDDDDD] flex-1"
-                    />
-                    {editIngestaVariables.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const newVariables = editIngestaVariables.filter((_, i) => i !== index);
-                          setEditIngestaVariables(newVariables);
-                        }}
-                        className="text-red-600 hover:text-red-700 px-2"
-                      >
-                        ✕
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500">
-                Agregue variables como EMAIL, API_URL, PASSWORD, etc.
-              </p>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-stakeholder">Stakeholder</Label>
-              <Select value={editStakeholder} onValueChange={setEditStakeholder}>
-                <SelectTrigger className="w-full border-[#DDDDDD]">
-                  <SelectValue placeholder="Seleccionar responsable" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Juan Pérez">Juan Pérez</SelectItem>
-                  <SelectItem value="María García">María García</SelectItem>
-                  <SelectItem value="Carlos Rodríguez">Carlos Rodríguez</SelectItem>
-                  <SelectItem value="Ana Martínez">Ana Martínez</SelectItem>
-                  <SelectItem value="Luis Fernández">Luis Fernández</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="edit-file-attachment">Adjunto (opcional)</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="edit-file-attachment"
-                  type="file"
-                  onChange={(e) => setEditAttachedFile(e.target.files?.[0] || null)}
-                  className="border-[#DDDDDD]"
-                />
-                {editAttachedFile && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditAttachedFile(null)}
-                    className="text-red-600"
-                  >
-                    Eliminar
-                  </Button>
-                )}
-              </div>
-              {editAttachedFile && (
-                <p className="text-xs text-gray-600">
-                  Archivo seleccionado: {editAttachedFile.name}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveConfig}
-              style={{ backgroundColor: "#CBE71E", color: "#141414" }}
-            >
-              Guardar Cambios
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ModalDataIntake
+        mode="edit"
+        open={isModalDataIntakeOpen}
+        onOpenChange={setIsModalDataIntakeOpen}
+        initialData={modalInitialData}
+        onSuccess={() => {
+          console.log("[v0] Configuration saved successfully");
+          // TODO: Refresh client data or show success notification
+        }}
+      />
     </div>
   );
 }

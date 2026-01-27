@@ -9,7 +9,7 @@ import {
   IUpdateClientRequest,
   IUpdateClientResponse,
   IDeleteClientResponse,
-  IClientDetail,
+  IClientDetail
 } from "@/types/dataQuality/IDataQuality";
 import { useAppStore } from "@/lib/store/store";
 
