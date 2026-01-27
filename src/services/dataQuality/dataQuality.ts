@@ -86,7 +86,7 @@ export const deleteClient = async (clientId: number): Promise<IDeleteClientRespo
 };
 
 export const getClientDetail = async (
-  idClient: number,
+  idClient: string,
   idProject: number
 ): Promise<IClientDetail> => {
   try {

@@ -89,7 +89,7 @@ export default function CountriesClientsView() {
       updated_at: record.updated_at,
       full_record: record
     });
-    router.push(`/data-quality/clients/${record.id_client}`);
+    router.push(`/data-quality/clients/${record.id}`);
   };
 
   return (

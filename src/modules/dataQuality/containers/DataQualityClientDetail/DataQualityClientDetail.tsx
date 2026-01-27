@@ -1,33 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import {
-  MoreHorizontal,
-  Calendar,
-  Download,
-  Eye,
-  CheckCircle,
-  Clock,
-  XCircle,
-  AlertTriangle,
-  Edit,
-  ArrowLeft
-} from "lucide-react";
+import { Edit, ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/modules/chat/ui/table";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
+import { ClientDetailTable } from "../../components/ClientDetailTable";
+import { getClientDetail } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
 
 const mockFiles = {
   "farmacia-cruz-verde": [
@@ -116,76 +99,10 @@ const clientNames = {
   "locatel-colombia": "Locatel Colombia"
 };
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "processed":
-      return <CheckCircle className="w-4 h-4 text-green-600" />;
-    case "pending":
-      return <Clock className="w-4 h-4 text-yellow-600" />;
-    case "error":
-      return <XCircle className="w-4 h-4 text-red-600" />;
-    case "pending-catalog":
-      return <AlertTriangle className="w-4 h-4 text-orange-600" />;
-    default:
-      return <Eye className="w-4 h-4" style={{ color: "#141414" }} />;
-  }
-};
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "processed":
-      return (
-        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-          Procesado
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-          Pendiente
-        </Badge>
-      );
-    case "error":
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Data con error
-        </Badge>
-      );
-    case "pending-catalog":
-      return (
-        <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
-          Pendiente catálogo
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-xs">
-          Desconocido
-        </Badge>
-      );
-  }
-};
-
-const getCategoryBadge = (category: string) => {
-  const colors = {
-    Stock: "bg-blue-100 text-blue-800",
-    Sales: "bg-purple-100 text-purple-800",
-    "In transit": "bg-orange-100 text-orange-800"
-  };
-
-  return (
-    <Badge
-      variant="secondary"
-      className={`text-xs ${colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"}`}
-    >
-      {category}
-    </Badge>
-  );
-};
-
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
@@ -194,6 +111,16 @@ export default function DataQualityClientDetails() {
   const [modalInitialData, setModalInitialData] = useState<Partial<DataIntakeFormData> | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    const fetchClientDetail = async () => {
+      // TO DO - use real countryId and clientId
+      const res = await getClientDetail("2", 100);
+      console.log("Client detail data:", res);
+    };
+
+    fetchClientDetail();
+  }, [clientId, countryId]);
 
   const files = mockFiles[clientId as keyof typeof mockFiles] || [];
   const countryName = countryNames[countryId as keyof typeof countryNames] || countryId;
@@ -311,65 +238,7 @@ export default function DataQualityClientDetails() {
 
             <ClientDetailInfo clientConfig={clientConfig} clientInfo={clientInfo} />
 
-            <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
-              Archivos
-            </h2>
-            <Table>
-              <TableHeader>
-                <TableRow style={{ borderColor: "#DDDDDD" }}>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>
-                    Tipo de archivo
-                  </TableHead>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha y hora</TableHead>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
-                  <TableHead style={{ color: "#141414", fontWeight: 600 }}>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFiles.map((file) => (
-                  <TableRow
-                    key={file.id}
-                    className="hover:bg-gray-50"
-                    style={{ borderColor: "#DDDDDD" }}
-                  >
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        {getStatusIcon(file.status)}
-                        <span className="font-normal" style={{ color: "#141414" }}>
-                          {file.name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getCategoryBadge(file.category)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                        <span style={{ color: "#141414" }}>{file.lastUpdate}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>{file.size}</span>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(file.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" title="Ver archivo">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" title="Descargar">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ClientDetailTable files={filteredFiles} />
           </CardContent>
         </Card>
 
