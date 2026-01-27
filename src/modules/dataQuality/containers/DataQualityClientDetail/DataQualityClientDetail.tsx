@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Edit, ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -9,100 +9,45 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
-import { getClientDetail } from "@/services/dataQuality/dataQuality";
-import { useAppStore } from "@/lib/store/store";
+import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 
-const mockFiles = {
-  "farmacia-cruz-verde": [
-    {
-      id: "stock-2024-04-29.xlsx",
-      name: "stock-2024-04-29.xlsx",
-      type: "file",
-      size: "2.4 MB",
-      lastUpdate: "2024-04-29 14:30",
-      status: "processed",
-      category: "Stock"
-    },
-    {
-      id: "sales-2024-04-29.csv",
-      name: "sales-2024-04-29.csv",
-      type: "file",
-      size: "1.8 MB",
-      lastUpdate: "2024-04-29 12:15",
-      status: "processed",
-      category: "Sales"
-    },
-    {
-      id: "in-transit-2024-04-28.xlsx",
-      name: "in-transit-2024-04-28.xlsx",
-      type: "file",
-      size: "3.1 MB",
-      lastUpdate: "2024-04-28 16:45",
-      status: "pending",
-      category: "In transit"
-    }
-  ],
-  "drogueria-colsubsidio": [
-    {
-      id: "sales-2024-04-28.xlsx",
-      name: "sales-2024-04-28.xlsx",
-      type: "file",
-      size: "4.2 MB",
-      lastUpdate: "2024-04-28 10:20",
-      status: "processed",
-      category: "Sales"
-    },
-    {
-      id: "stock-2024-04-27.csv",
-      name: "stock-2024-04-27.csv",
-      type: "file",
-      size: "1.5 MB",
-      lastUpdate: "2024-04-27 18:30",
-      status: "pending",
-      category: "Stock"
-    }
-  ]
+// Helper functions for data transformation
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
 
-const clientConfigurations = {
-  "farmacia-cruz-verde": {
-    periodicity: "Daily",
-    fileTypes: ["Stock", "Sales", "In transit"]
-  },
-  "drogueria-colsubsidio": {
-    periodicity: "Weekly",
-    fileTypes: ["Stock", "Sales"]
-  },
-  "farmatodo-colombia": {
-    periodicity: "Daily",
-    fileTypes: ["Stock", "Sales", "In transit"]
-  },
-  "locatel-colombia": {
-    periodicity: "Monthly",
-    fileTypes: ["Sales"]
+const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date
+    .toLocaleString("es-ES", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+    .replace(",", "");
+};
+
+const parseDetailFuente = (detalle: string): Array<{ key: string; value: string }> => {
+  try {
+    const parsed = JSON.parse(detalle);
+    return Object.entries(parsed).map(([key, value]) => ({
+      key,
+      value: String(value)
+    }));
+  } catch {
+    return [{ key: "", value: detalle }];
   }
-};
-
-const countryNames = {
-  colombia: "Colombia",
-  mexico: "México",
-  peru: "Perú",
-  chile: "Chile",
-  argentina: "Argentina",
-  ecuador: "Ecuador"
-};
-
-const clientNames = {
-  "farmacia-cruz-verde": "Farmacia Cruz Verde",
-  "drogueria-colsubsidio": "Droguería Colsubsidio",
-  "farmatodo-colombia": "Farmatodo Colombia",
-  "locatel-colombia": "Locatel Colombia"
 };
 
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
-  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
@@ -112,36 +57,84 @@ export default function DataQualityClientDetails() {
     undefined
   );
 
-  useEffect(() => {
-    const fetchClientDetail = async () => {
-      // TO DO - use real countryId and clientId
-      const res = await getClientDetail("2", 100);
-      console.log("Client detail data:", res);
-    };
+  // Fetch client detail data using SWR hook
+  const { clientDetail, isLoading, error } = useDataQualityClientDetail();
 
-    fetchClientDetail();
-  }, [clientId, countryId]);
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#F7F7F7" }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="text-gray-600">Cargando información del cliente...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const files = mockFiles[clientId as keyof typeof mockFiles] || [];
-  const countryName = countryNames[countryId as keyof typeof countryNames] || countryId;
-  const clientName = clientNames[clientId as keyof typeof clientNames] || clientId;
-  const clientConfig = clientConfigurations[clientId as keyof typeof clientConfigurations] || {
-    periodicity: "Daily",
-    fileTypes: ["Stock", "Sales"]
+  // Handle error state
+  if (error) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#F7F7F7" }}
+      >
+        <div className="text-center">
+          <div className="text-red-600 mb-4">
+            <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+          </div>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <Button onClick={() => window.location.reload()}>Reintentar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle empty state
+  if (!clientDetail) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#F7F7F7" }}
+      >
+        <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+      </div>
+    );
+  }
+
+  // Map API data to component props
+  const files = clientDetail.archivos || [];
+  const countryName = clientDetail.country_name;
+  const clientName = clientDetail.client_name;
+
+  const clientConfig = {
+    periodicity: clientDetail.periodicidad[0] || "Daily",
+    fileTypes: clientDetail.tipos_archivo_esperados
   };
 
   const clientInfo = {
-    ingestaSource: "Email",
-    ingestaVariables: [
-      { key: "EMAIL", value: "ventas@farmaciacruz.com" },
-      { key: "CC", value: "reportes@farmaciacruz.com" }
-    ],
-    stakeholder: "Juan Pérez",
+    ingestaSource: clientDetail.fuente_ingesta[0] || "Email",
+    ingestaVariables: parseDetailFuente(clientDetail.detalle_fuente),
+    stakeholder: clientDetail.stakeholder.toString(),
     dailyDetails: { diasHabiles: true, festivos: false },
     weeklyDetails: { acumulado: false, porRango: false }
   };
 
-  const filteredFiles = files.filter((file) =>
+  // Transform files for display
+  const displayFiles = files.map((archivo) => ({
+    id: archivo.id.toString(),
+    name: archivo.nombre_archivo,
+    type: "file",
+    size: formatBytes(archivo.tamano),
+    lastUpdate: formatDateTime(archivo.fecha_hora),
+    status: archivo.estado.toLowerCase(),
+    category: archivo.tipo_archivo
+  }));
+
+  const filteredFiles = displayFiles.filter((file) =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
