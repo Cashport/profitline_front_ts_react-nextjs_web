@@ -6,7 +6,7 @@ import { IPurchaseOrder, IUsePurchaseOrdersParams } from "@/types/purchaseOrders
 
 export const usePurchaseOrders = ({
   page = 1,
-  pageSize = 10,
+  pageSize = 25,
   search,
   clientId,
   sellerId,
