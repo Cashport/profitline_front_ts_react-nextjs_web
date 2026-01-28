@@ -5,7 +5,6 @@ import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
   CodesandboxLogo,
-  DotsThreeVertical,
   FileArrowDown,
   Microphone,
   Paperclip,
@@ -37,12 +36,7 @@ import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
+import ChatActions from "@/modules/chat/components/chat-actions";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
@@ -715,18 +709,11 @@ export default function ChatThread({
             </TabsList>
           </Tabs>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <DotsThreeVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpenAddClientModal?.()} className="cursor-pointer">
-                Agregar cliente
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ChatActions
+            items={[
+              { key: 'add-client', label: 'Agregar cliente', onClick: () => onOpenAddClientModal?.() }
+            ]}
+          />
 
           {!detailsOpen ? (
             <Button

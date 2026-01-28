@@ -1,13 +1,8 @@
-import { Chat, Funnel, MagnifyingGlass, DotsThreeVertical } from "@phosphor-icons/react";
+import { Chat, Funnel, MagnifyingGlass } from "@phosphor-icons/react";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
+import ChatActions from "@/modules/chat/components/chat-actions";
 
 interface ChatInboxHeaderProps {
   query: string;
@@ -46,18 +41,11 @@ export default function ChatInboxHeader({
             onChange={(e) => onQueryChange(e.target.value)}
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-              <DotsThreeVertical size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onAddClient} className="cursor-pointer">
-              Agregar cliente
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ChatActions
+          items={[
+            { key: 'add-client', label: 'Agregar cliente', onClick: onAddClient }
+          ]}
+        />
         <Button
           variant="outline"
           className="gap-2"
