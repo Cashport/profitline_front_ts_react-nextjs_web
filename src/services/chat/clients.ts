@@ -58,7 +58,7 @@ export const getPayloadByTicket = async (
   }
 };
 
-export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: string[]) => {
+export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: number[]) => {
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/client/digital-record-whatsapp`,

@@ -151,14 +151,16 @@ const AccountStatementModal = ({
 
           // For each recipient, get phone number
           const recipientPhoneNumbers =
-            data.recipients?.map((recipient) => {
-              // If recipient exists in map (selected from dropdown), use their phone
-              if (emailToPhoneMap.has(recipient.value)) {
-                return emailToPhoneMap.get(recipient.value)!;
-              }
-              // Otherwise, it's a typed phone number, use value directly
-              return recipient.value;
-            }) || [];
+            data.recipients
+              ?.map((recipient) => {
+                // If recipient exists in map (selected from dropdown), use their phone
+                if (emailToPhoneMap.has(recipient.value)) {
+                  return emailToPhoneMap.get(recipient.value)!;
+                }
+                // Otherwise, it's a typed phone number, use value directly
+                return recipient.value.trim();
+              })
+              .map(Number) || [];
 
           await sendDigitalRecordWhatsapp(clientId, recipientPhoneNumbers);
           message.success("Estado de cuenta enviado por WhatsApp correctamente");
