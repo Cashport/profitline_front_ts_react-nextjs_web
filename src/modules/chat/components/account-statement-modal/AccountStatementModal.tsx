@@ -16,6 +16,7 @@ import {
 } from "@/services/accountingAdjustment/accountingAdjustment";
 import { sendDigitalRecordWhatsapp, downloadDigitalRecordFiles } from "@/services/chat/clients";
 import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
+import { ApiError } from "@/utils/api/api";
 
 interface ISelectOption {
   value: string;
@@ -190,14 +191,22 @@ const AccountStatementModal = ({
     } catch (error) {
       console.error("Error processing account statement:", error);
 
-      // Mensajes de error específicos por método
-      const errorMessages = {
-        correo: "Error al enviar el estado de cuenta por correo",
-        whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
-        descargar: "Error al descargar los archivos del estado de cuenta"
-      };
+      let errorMessage: string;
 
-      message.error(errorMessages[data.method] || "Error al procesar el estado de cuenta");
+      // Check if it's an API error with a specific message
+      if (error instanceof ApiError && error.message) {
+        errorMessage = error.message;
+      } else {
+        // Fall back to generic messages
+        const errorMessages = {
+          correo: "Error al enviar el estado de cuenta por correo",
+          whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
+          descargar: "Error al descargar los archivos del estado de cuenta"
+        };
+        errorMessage = errorMessages[data.method] || "Error al procesar el estado de cuenta";
+      }
+
+      message.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
