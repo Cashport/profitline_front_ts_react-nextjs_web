@@ -200,14 +200,14 @@ interface IAttachments {
   name: string;
 }
 
-interface User {
+export interface IUser {
   label: string;
   value: string;
   full_phone: string;
 }
 
 interface DigitalRecordResponse {
-  usuarios: User[];
+  usuarios: IUser[];
   asunto: string;
   attachments: IAttachments[];
 }
