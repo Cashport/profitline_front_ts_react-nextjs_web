@@ -1,5 +1,5 @@
 import config from "@/config";
-import { PayloadByTicket } from "@/types/chat/IChat";
+import { PayloadByTicket, IDigitalRecordFile } from "@/types/chat/IChat";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
@@ -58,11 +58,11 @@ export const getPayloadByTicket = async (
   }
 };
 
-export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: string[]) => {
+export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: number[]) => {
   try {
     const response: GenericResponse<any> = await API.post(
-      `${config.API_HOST}/client/send-digital-record-whatsapp`,
-      { clientUUID: clientId, to: recipients }
+      `${config.API_HOST}/client/digital-record-whatsapp`,
+      { clientUUID: clientId, destination: recipients }
     );
     return response.data;
   } catch (error) {
@@ -71,11 +71,16 @@ export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: st
   }
 };
 
-export const downloadDigitalRecordFiles = async (clientId: string): Promise<any> => {
+export const downloadDigitalRecordFiles = async (
+  clientId: string
+): Promise<IDigitalRecordFile[] | null> => {
   try {
-    const response = await API.post(`${config.API_HOST}/client/download-digital-record-files`, {
-      clientUUID: clientId
-    });
+    const response: GenericResponse<IDigitalRecordFile[]> = await API.post(
+      `${config.API_HOST}/client/download-digital-record`,
+      {
+        clientUUID: clientId
+      }
+    );
     return response.data;
   } catch (error) {
     console.warn("error downloading digital record files: ", error);

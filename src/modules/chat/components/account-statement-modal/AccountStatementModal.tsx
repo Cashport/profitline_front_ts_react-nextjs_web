@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, Resolver, FieldErrors } from "react-hook-form";
 import { Flex, Modal, Typography, message } from "antd";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
@@ -11,10 +11,12 @@ import "./accountStatementModal.scss";
 import { useAppStore } from "@/lib/store/store";
 import {
   getDigitalRecordFormInfo,
+  IUser,
   sendDigitalRecord
 } from "@/services/accountingAdjustment/accountingAdjustment";
 import { sendDigitalRecordWhatsapp, downloadDigitalRecordFiles } from "@/services/chat/clients";
 import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
+import { ApiError } from "@/utils/api/api";
 
 interface ISelectOption {
   value: string;
@@ -40,19 +42,42 @@ const AccountStatementModal = ({
 }: AccountStatementModalProps) => {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const [activeTab, setActiveTab] = useState<"correo" | "whatsapp" | "descargar">("correo");
-  const [recipients, setRecipients] = useState<{ value: string; label: string }[]>([]);
+  const [recipients, setRecipients] = useState<IUser[]>([]);
   const [attachments, setAttachments] = useState<{ value: string; label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Custom validation that checks activeTab state
+  const validateForm: Resolver<IAccountStatementForm> = async (data) => {
+    const errors: FieldErrors<IAccountStatementForm> = {};
+
+    // Validate recipients for correo and whatsapp tabs
+    if (
+      (activeTab === "correo" || activeTab === "whatsapp") &&
+      (!data.recipients || data.recipients.length === 0)
+    ) {
+      errors.recipients = {
+        type: "required",
+        message: "Se requiere seleccionar destinatarios"
+      };
+    }
+
+    return {
+      values: data,
+      errors: Object.keys(errors).length > 0 ? errors : {}
+    };
+  };
 
   const {
     control,
     handleSubmit,
     reset,
     setValue,
+    trigger,
     formState: { errors, isValid }
   } = useForm<IAccountStatementForm>({
     mode: "onChange",
+    resolver: validateForm,
     defaultValues: {
       method: "correo",
       recipients: [],
@@ -68,7 +93,6 @@ const AccountStatementModal = ({
       setIsLoading(true);
       try {
         const response = await getDigitalRecordFormInfo(projectId, clientId);
-        console.log("Digital Record Form Info:", response);
         setRecipients(response.usuarios);
 
         // Mapear attachments y establecerlos como seleccionados por defecto
@@ -100,7 +124,8 @@ const AccountStatementModal = ({
   // Update method field when tab changes
   useEffect(() => {
     setValue("method", activeTab);
-  }, [activeTab, setValue]);
+    trigger(); // Force re-validation with new activeTab value
+  }, [activeTab, setValue, trigger]);
 
   const onSubmit = async (data: IAccountStatementForm) => {
     if (!clientId) {
@@ -112,7 +137,6 @@ const AccountStatementModal = ({
     try {
       switch (data.method) {
         case "correo": {
-          // Preparar datos para email
           const emailData: IFormDigitalRecordModal = {
             forward_to: data.recipients || [],
             subject: ""
@@ -123,17 +147,33 @@ const AccountStatementModal = ({
         }
 
         case "whatsapp": {
-          // Extraer valores de recipients para WhatsApp
-          const recipientValues = data.recipients?.map((r) => r.value) || [];
-          await sendDigitalRecordWhatsapp(clientId, recipientValues);
+          const emailToPhoneMap = new Map(recipients.map((user) => [user.value, user.full_phone]));
+
+          // For each recipient, get phone number
+          const recipientPhoneNumbers =
+            data.recipients
+              ?.map((recipient) => {
+                // If recipient exists in map (selected from dropdown), use their phone
+                if (emailToPhoneMap.has(recipient.value)) {
+                  return emailToPhoneMap.get(recipient.value)!;
+                }
+                // Otherwise, it's a typed phone number, use value directly
+                return recipient.value.trim();
+              })
+              .map(Number) || [];
+
+          await sendDigitalRecordWhatsapp(clientId, recipientPhoneNumbers);
           message.success("Estado de cuenta enviado por WhatsApp correctamente");
           break;
         }
 
         case "descargar": {
-          // Llamar servicio de descarga
           const response = await downloadDigitalRecordFiles(clientId);
           if (response) {
+            response.forEach((file) => {
+              window.open(file.url, "_blank");
+            });
+
             message.success("Archivos del estado de cuenta descargados correctamente");
           } else {
             message.warning("No se pudieron descargar los archivos");
@@ -153,14 +193,22 @@ const AccountStatementModal = ({
     } catch (error) {
       console.error("Error processing account statement:", error);
 
-      // Mensajes de error específicos por método
-      const errorMessages = {
-        correo: "Error al enviar el estado de cuenta por correo",
-        whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
-        descargar: "Error al descargar los archivos del estado de cuenta"
-      };
+      let errorMessage: string;
 
-      message.error(errorMessages[data.method] || "Error al procesar el estado de cuenta");
+      // Check if it's an API error with a specific message
+      if (error instanceof ApiError && error.message) {
+        errorMessage = error.message;
+      } else {
+        // Fall back to generic messages
+        const errorMessages = {
+          correo: "Error al enviar el estado de cuenta por correo",
+          whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
+          descargar: "Error al descargar los archivos del estado de cuenta"
+        };
+        errorMessage = errorMessages[data.method] || "Error al procesar el estado de cuenta";
+      }
+
+      message.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -227,7 +275,6 @@ const AccountStatementModal = ({
               <Controller
                 name="recipients"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <GeneralSearchSelect
                     errors={errors.recipients}
@@ -247,7 +294,6 @@ const AccountStatementModal = ({
               <Controller
                 name="recipients"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <GeneralSearchSelect
                     errors={errors.recipients}
@@ -267,7 +313,6 @@ const AccountStatementModal = ({
               <Controller
                 name="files"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <GeneralSearchSelect
                     errors={errors.files}

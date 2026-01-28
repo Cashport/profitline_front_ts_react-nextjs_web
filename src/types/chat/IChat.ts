@@ -190,3 +190,8 @@ export interface PayloadByTicket {
   senderId: string;
   templateData: TemplateData;
 }
+
+export interface IDigitalRecordFile {
+  fileName: string;
+  url: string;
+}
