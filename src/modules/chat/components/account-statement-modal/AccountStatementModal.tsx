@@ -9,7 +9,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/modules/chat/ui/tabs
 
 import "./accountStatementModal.scss";
 import { useAppStore } from "@/lib/store/store";
-import { getDigitalRecordFormInfo } from "@/services/accountingAdjustment/accountingAdjustment";
+import {
+  getDigitalRecordFormInfo,
+  sendDigitalRecord
+} from "@/services/accountingAdjustment/accountingAdjustment";
+import { sendDigitalRecordWhatsapp, downloadDigitalRecordFiles } from "@/services/chat/clients";
+import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
 
 interface ISelectOption {
   value: string;
@@ -65,12 +70,14 @@ const AccountStatementModal = ({
         const response = await getDigitalRecordFormInfo(projectId, clientId);
         console.log("Digital Record Form Info:", response);
         setRecipients(response.usuarios);
-        setAttachments(
-          response.attachments.map((att) => ({
-            value: att.id.toString(),
-            label: att.name
-          }))
-        );
+
+        // Mapear attachments y establecerlos como seleccionados por defecto
+        const mappedAttachments = response.attachments.map((att) => ({
+          value: att.id.toString(),
+          label: att.name
+        }));
+        setAttachments(mappedAttachments);
+        setValue("files", mappedAttachments);
       } catch (error) {
         console.error("Error getting digital record form info:", error);
         message.error("Error al cargar la información");
@@ -96,21 +103,64 @@ const AccountStatementModal = ({
   }, [activeTab, setValue]);
 
   const onSubmit = async (data: IAccountStatementForm) => {
+    if (!clientId) {
+      message.error("No se ha seleccionado un cliente");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      console.log("Account Statement Form Data:", {
-        method: data.method,
-        recipients: data.recipients,
-        files: data.files,
-        clientId,
-        projectId
-      });
+      switch (data.method) {
+        case "correo": {
+          // Preparar datos para email
+          const emailData: IFormDigitalRecordModal = {
+            forward_to: data.recipients || [],
+            subject: ""
+          };
+          await sendDigitalRecord(clientId, emailData);
+          message.success("Estado de cuenta enviado por correo correctamente");
+          break;
+        }
 
-      message.success("Estado de cuenta procesado correctamente");
+        case "whatsapp": {
+          // Extraer valores de recipients para WhatsApp
+          const recipientValues = data.recipients?.map((r) => r.value) || [];
+          await sendDigitalRecordWhatsapp(clientId, recipientValues);
+          message.success("Estado de cuenta enviado por WhatsApp correctamente");
+          break;
+        }
+
+        case "descargar": {
+          // Llamar servicio de descarga
+          const response = await downloadDigitalRecordFiles(clientId);
+          if (response) {
+            message.success("Archivos del estado de cuenta descargados correctamente");
+          } else {
+            message.warning("No se pudieron descargar los archivos");
+            return; // No cerrar modal si falla
+          }
+          break;
+        }
+
+        default:
+          message.error("Método de envío no válido");
+          return;
+      }
+
+      // Cerrar modal y resetear form después de éxito
       setShowModal(false);
+      reset();
     } catch (error) {
       console.error("Error processing account statement:", error);
-      message.error("Error al procesar el estado de cuenta");
+
+      // Mensajes de error específicos por método
+      const errorMessages = {
+        correo: "Error al enviar el estado de cuenta por correo",
+        whatsapp: "Error al enviar el estado de cuenta por WhatsApp",
+        descargar: "Error al descargar los archivos del estado de cuenta"
+      };
+
+      message.error(errorMessages[data.method] || "Error al procesar el estado de cuenta");
     } finally {
       setIsSubmitting(false);
     }
@@ -227,6 +277,7 @@ const AccountStatementModal = ({
                     options={attachments}
                     loading={isLoading}
                     suffixIcon={null}
+                    disabled={true}
                   />
                 )}
               />

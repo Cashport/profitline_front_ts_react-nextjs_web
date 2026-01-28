@@ -434,7 +434,7 @@ export default function ChatInbox() {
       <AccountStatementModal
         showModal={showAccountStatementModal}
         setShowModal={setShowAccountStatementModal}
-        clientId={activeConversation?.customerCashportUUID || "5a94a3289d4b4309a0237b1ec5479c54"}
+        clientId={activeConversation?.customerCashportUUID}
       />
     </div>
   );

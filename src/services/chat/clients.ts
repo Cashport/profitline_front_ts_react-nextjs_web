@@ -57,3 +57,28 @@ export const getPayloadByTicket = async (
     return null;
   }
 };
+
+export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: string[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/client/send-digital-record-whatsapp`,
+      { clientUUID: clientId, to: recipients }
+    );
+    return response.data;
+  } catch (error) {
+    console.warn("error sending digital record via whatsapp: ", error);
+    throw error;
+  }
+};
+
+export const downloadDigitalRecordFiles = async (clientId: string): Promise<any> => {
+  try {
+    const response = await API.post(`${config.API_HOST}/client/download-digital-record-files`, {
+      clientUUID: clientId
+    });
+    return response.data;
+  } catch (error) {
+    console.warn("error downloading digital record files: ", error);
+    return null;
+  }
+};
