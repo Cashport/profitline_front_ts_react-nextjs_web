@@ -229,6 +229,10 @@ export default function ChatInbox() {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
+  const handleOpenAccountStatement = () => {
+    console.log("Estado de cuenta clicked");
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
       <ChatInboxHeader
@@ -236,6 +240,7 @@ export default function ChatInbox() {
         onQueryChange={setQuery}
         onNewChat={() => setSendNewMessage(true)}
         onAddClient={() => setShowAddClientModal(true)}
+        onAccountStatement={handleOpenAccountStatement}
         onFilter={() => {}}
       />
 

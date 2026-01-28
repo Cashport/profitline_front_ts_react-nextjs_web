@@ -9,6 +9,7 @@ interface ChatInboxHeaderProps {
   onQueryChange: (query: string) => void;
   onNewChat: () => void;
   onAddClient: () => void;
+  onAccountStatement?: () => void;
   onFilter?: () => void;
   searchPlaceholder?: string;
 }
@@ -18,6 +19,7 @@ export default function ChatInboxHeader({
   onQueryChange,
   onNewChat,
   onAddClient,
+  onAccountStatement,
   onFilter,
   searchPlaceholder = "Buscar cliente, teléfono o mensaje..."
 }: ChatInboxHeaderProps) {
@@ -43,7 +45,8 @@ export default function ChatInboxHeader({
         </div>
         <ChatActions
           items={[
-            { key: 'add-client', label: 'Agregar cliente', onClick: onAddClient }
+            { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
+            { key: "account-statement", label: "Estado de cuenta", onClick: onAccountStatement }
           ]}
         />
         <Button

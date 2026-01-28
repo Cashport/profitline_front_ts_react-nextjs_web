@@ -10,7 +10,7 @@ import {
 interface ChatActionItem {
   key: string;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
   icon?: React.ComponentType<any>;
   variant?: "default" | "destructive";
 }
@@ -37,11 +37,7 @@ export default function ChatActions({
         {items.map((item) => {
           const IconComponent = item.icon;
           return (
-            <DropdownMenuItem
-              key={item.key}
-              onClick={item.onClick}
-              className="cursor-pointer"
-            >
+            <DropdownMenuItem key={item.key} onClick={item.onClick} className="cursor-pointer">
               {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
               {item.label}
             </DropdownMenuItem>
