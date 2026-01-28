@@ -20,6 +20,7 @@ import { ITicket } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
 import SelectClientDialog from "./select-client-dialog";
 import AddClientModal from "../components/contacts-tab-modal";
+import AccountStatementModal from "../components/account-statement-modal/AccountStatementModal";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
   getTemplateMessages,
@@ -102,6 +103,7 @@ export default function ChatInbox() {
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [showAccountStatementModal, setShowAccountStatementModal] = useState(false);
 
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
@@ -230,7 +232,7 @@ export default function ChatInbox() {
   }
 
   const handleOpenAccountStatement = () => {
-    console.log("Estado de cuenta clicked");
+    setShowAccountStatementModal(true);
   };
 
   return (
@@ -428,6 +430,11 @@ export default function ChatInbox() {
         isActionLoading={false}
         initialName={activeConversation?.customer}
         initialPhone={activeConversation?.phone}
+      />
+      <AccountStatementModal
+        showModal={showAccountStatementModal}
+        setShowModal={setShowAccountStatementModal}
+        clientId={activeConversation?.customerCashportUUID || "5a94a3289d4b4309a0237b1ec5479c54"}
       />
     </div>
   );
