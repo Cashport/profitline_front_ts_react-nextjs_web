@@ -17,10 +17,14 @@ import {
   SelectValue
 } from "@/modules/chat/ui/select";
 import { Switch } from "@/modules/chat/ui/switch";
-import { Input } from "antd";
+import { Input, message } from "antd";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useEffect } from "react";
+
+// Mode type definition
+type ModalMode = "create" | "edit";
 
 // Interface para el formulario
 export interface DataIntakeFormData {
@@ -42,6 +46,7 @@ export interface DataIntakeFormData {
     key: string;
     value: string;
   }>;
+  existingFileName?: string; // For displaying current file in edit mode
 }
 
 // Schema de validación Yup
@@ -82,12 +87,35 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
 });
 
 interface IModalDataIntakeProps {
+  mode: ModalMode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: (data: DataIntakeFormData) => Promise<void>;
+  initialData?: Partial<DataIntakeFormData>;
+  isLoading?: boolean;
 }
 
-export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataIntakeProps) {
+// Default form values
+const defaultFormValues: DataIntakeFormData = {
+  clientName: "",
+  fileType: "",
+  periodicity: "",
+  dailyDetails: { diasHabiles: false, festivos: false },
+  weeklyDetails: { acumulado: false, porRango: false },
+  ingestaSource: "",
+  stakeholder: "",
+  attachedFile: null,
+  ingestaVariables: [{ key: "", value: "" }]
+};
+
+export function ModalDataIntake({
+  mode,
+  open,
+  onOpenChange,
+  onSuccess,
+  initialData,
+  isLoading
+}: IModalDataIntakeProps) {
   // Setup react-hook-form
   const {
     control,
@@ -98,17 +126,8 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
   } = useForm<DataIntakeFormData>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
-    defaultValues: {
-      clientName: "",
-      fileType: "",
-      periodicity: "",
-      dailyDetails: { diasHabiles: false, festivos: false },
-      weeklyDetails: { acumulado: false, porRango: false },
-      ingestaSource: "",
-      stakeholder: "",
-      attachedFile: null,
-      ingestaVariables: [{ key: "", value: "" }]
-    }
+    defaultValues:
+      mode === "edit" && initialData ? { ...defaultFormValues, ...initialData } : defaultFormValues
   });
 
   // useFieldArray for dynamic variables
@@ -121,19 +140,40 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
   const periodicityValue = watch("periodicity");
   const attachedFileValue = watch("attachedFile");
 
+  // Form reset logic when modal opens or data changes
+  useEffect(() => {
+    if (open && mode === "edit" && initialData) {
+      // Handle ingestaVariables specially to ensure at least one row
+      const resetData = {
+        ...defaultFormValues,
+        ...initialData,
+        ingestaVariables: initialData.ingestaVariables?.length
+          ? initialData.ingestaVariables
+          : [{ key: "", value: "" }]
+      };
+      reset(resetData);
+    } else if (open && mode === "create") {
+      reset(defaultFormValues);
+    }
+  }, [open, mode, initialData, reset]);
+
   // Submit handler
   const onSubmit = async (data: DataIntakeFormData) => {
-    try {
-      console.log("Data ingesta creada:", data);
-      // TODO: Aquí iría la llamada a la API
-      // await createIngesta(data);
+    if (mode === "create") {
+      try {
+        console.log("Creating ingesta:", data);
+        // Pass data to parent through onSuccess callback
+        await onSuccess?.(data);
 
-      reset(); // Resetear formulario
-      onOpenChange(false); // Cerrar modal
-      onSuccess?.(); // Notificar éxito al padre
-    } catch (error) {
-      console.error("Error al crear ingesta:", error);
-      // TODO: Manejar error (mostrar toast, etc.)
+        message.success("Ingesta creada exitosamente");
+        reset(defaultFormValues); // Resetear formulario
+        onOpenChange(false); // Cerrar modal
+      } catch (error) {
+        message.error("Error al crear la ingesta");
+      }
+    } else if (mode === "edit") {
+      console.log("Updating ingesta:", data);
+      // TODO: await updateIngesta(data);
     }
   };
 
@@ -143,8 +183,14 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Dialog Header */}
           <DialogHeader>
-            <DialogTitle>Crear Nueva Ingesta</DialogTitle>
-            <DialogDescription>Configure los detalles de la nueva ingesta</DialogDescription>
+            <DialogTitle>
+              {mode === "create" ? "Crear Nueva Ingesta" : "Editar Parametrización"}
+            </DialogTitle>
+            <DialogDescription>
+              {mode === "create"
+                ? "Configure los detalles de la nueva ingesta"
+                : `Modifica la configuración de ingesta${initialData?.clientName ? ` para ${initialData.clientName}` : ""}`}
+            </DialogDescription>
           </DialogHeader>
 
           {/* Dialog Content */}
@@ -180,7 +226,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar tipo de archivo" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockTipoArchivo.map((tipo) => (
                         <SelectItem key={tipo.id} value={tipo.value}>
                           {tipo.label}
@@ -305,7 +351,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar fuente de ingesta" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockIngesta.map((ingesta) => (
                         <SelectItem key={ingesta.id} value={ingesta.value}>
                           {ingesta.label}
@@ -331,7 +377,7 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
                     <SelectTrigger className="w-full border-[#DDDDDD]">
                       <SelectValue placeholder="Seleccionar responsable" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="!z-[10000]">
                       {mockStakeholders.map((stakeholder) => (
                         <SelectItem key={stakeholder.id} value={stakeholder.name}>
                           {stakeholder.name}
@@ -381,6 +427,11 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
               {attachedFileValue && (
                 <p className="text-xs text-gray-600">
                   Archivo seleccionado: {attachedFileValue.name}
+                </p>
+              )}
+              {mode === "edit" && initialData?.existingFileName && !attachedFileValue && (
+                <p className="text-xs text-gray-600">
+                  Archivo actual: {initialData.existingFileName}
                 </p>
               )}
             </div>
@@ -442,15 +493,26 @@ export function ModalDataIntake({ open, onOpenChange, onSuccess }: IModalDataInt
 
           {/* Dialog Footer */}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting || isLoading}
+            >
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSubmitting || isLoading}
               className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
             >
-              {isSubmitting ? "Creando..." : "Crear Ingesta"}
+              {isSubmitting || isLoading
+                ? mode === "create"
+                  ? "Creando..."
+                  : "Guardando..."
+                : mode === "create"
+                  ? "Crear Ingesta"
+                  : "Guardar Cambios"}
             </Button>
           </DialogFooter>
         </form>

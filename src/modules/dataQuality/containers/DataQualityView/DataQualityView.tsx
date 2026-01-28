@@ -1,36 +1,80 @@
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Badge, Spin } from "antd";
+import { BellSimpleRinging } from "phosphor-react";
+import { Users, Calendar, TrendingUp } from "lucide-react";
 import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { Users, Calendar, TrendingUp } from "lucide-react";
-import { Badge } from "antd";
-import { BellSimpleRinging } from "phosphor-react";
-import Link from "next/link";
-
-// Mock data for countries and their alerts
-const countries = [
-  {
-    id: "colombia",
-    name: "Colombia",
-    code: "CO",
-    alerts: 12,
-    clients: 45,
-    lastUpdate: "2024-04-29",
-    status: "active",
-    ingestionProgress: 87
-  },
-  {
-    id: "mexico",
-    name: "México",
-    code: "MX",
-    alerts: 8,
-    clients: 32,
-    lastUpdate: "2024-04-28",
-    status: "active",
-    ingestionProgress: 92
-  }
-];
+import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
+import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
+import { formatDateBars } from "@/utils/utils";
 
 export default function DataQualityView() {
-  const totalAlerts = countries.reduce((sum, country) => sum + country.alerts, 0);
+  const { ID } = useAppStore((projects) => projects.selectedProject);
+
+  const [summaryData, setSummaryData] = useState<ISummaryCountries | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const countries = summaryData?.countries || [];
+  const totalAlerts = summaryData?.countries.reduce((sum, c) => sum + c.active_alerts, 0) || 0;
+  const totalCountries = summaryData?.total_countries || 0;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await getSummaryCountries(ID);
+        setSummaryData(response);
+      } catch (err) {
+        console.error("Error fetching countries:", err);
+        setError("No se pudieron cargar los países. Por favor, intenta de nuevo.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (ID) {
+      fetchData();
+    }
+  }, [ID]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-[#F7F7F7] flex justify-center items-center min-h-[400px]">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[#F7F7F7]">
+        <div className="bg-white border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119]"
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (countries.length === 0) {
+    return (
+      <div className="bg-[#F7F7F7]">
+        <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
+        <div className="bg-white border border-[#DDDDDD] rounded-lg p-12 text-center">
+          <p className="text-gray-500 text-lg">No hay países configurados</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#F7F7F7]">
@@ -38,7 +82,7 @@ export default function DataQualityView() {
         <div className="flex items-center space-x-4 mb-6">
           <h2 className="text-xl font-semibold text-[#141414]">Países y Distribuidores</h2>
           <BadgeUI variant="secondary" className="text-sm">
-            {countries.length} países activos
+            {totalCountries} países activos
           </BadgeUI>
         </div>
 
@@ -56,23 +100,23 @@ export default function DataQualityView() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {countries.map((country) => (
           <div
-            key={country.id}
+            key={country.id_country}
             className="hover:shadow-md transition-shadow cursor-pointer bg-white border border-[#DDDDDD] rounded-lg p-6"
           >
             <div className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white bg-[#141414]">
-                    {country.code}
+                    {country.country_name.slice(0, 2).toUpperCase()}
                   </div>
-                  <h3 className="text-lg text-[#141414]">{country.name}</h3>
+                  <h3 className="text-lg text-[#141414]">{country.country_name}</h3>
                 </div>
-                {country.alerts > 0 && (
+                {country.active_alerts > 0 && (
                   <BadgeUI
-                    variant={country.alerts > 10 ? "destructive" : "secondary"}
+                    variant={country.active_alerts > 10 ? "destructive" : "secondary"}
                     className="text-xs"
                   >
-                    {country.alerts} alertas
+                    {country.active_alerts} alertas
                   </BadgeUI>
                 )}
               </div>
@@ -83,7 +127,7 @@ export default function DataQualityView() {
                   <Users className="w-4 h-4 text-[#141414]" />
                   <span className="text-[#141414]">Clientes</span>
                 </div>
-                <span className="font-medium text-[#141414]">{country.clients}</span>
+                <span className="font-medium text-[#141414]">{country.total_clients}</span>
               </div>
 
               <div className="space-y-2">
@@ -92,12 +136,14 @@ export default function DataQualityView() {
                     <TrendingUp className="w-4 h-4 text-[#141414]" />
                     <span className="text-[#141414]">Ingesta del mes</span>
                   </div>
-                  <span className="font-medium text-[#141414]">{country.ingestionProgress}%</span>
+                  <span className="font-medium text-[#141414]">
+                    {country.monthly_ingestion_percentage}%
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="h-2 rounded-full transition-all bg-[#141414]"
-                    style={{ width: `${country.ingestionProgress}%` }}
+                    style={{ width: `${country.monthly_ingestion_percentage}%` }}
                   />
                 </div>
               </div>
@@ -107,11 +153,13 @@ export default function DataQualityView() {
                   <Calendar className="w-4 h-4 text-[#141414]" />
                   <span className="text-[#141414]">Última actualización</span>
                 </div>
-                <span className="font-medium text-[#141414]">{country.lastUpdate}</span>
+                <span className="font-medium text-[#141414]">
+                  {formatDateBars(country.last_update_date)}
+                </span>
               </div>
 
               <div className="pt-2">
-                <Link href="/data-quality/clients">
+                <Link href={`/data-quality/country/${country.id_country}`}>
                   <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
                     Ver Clientes
                   </Button>
