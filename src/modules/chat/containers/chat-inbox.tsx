@@ -2,13 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "antd";
-import {
-  Chat,
-  Funnel,
-  MagnifyingGlass,
-  ChatCircleDots,
-  DotsThreeVertical
-} from "@phosphor-icons/react";
+import { ChatCircleDots, MagnifyingGlass, Funnel } from "@phosphor-icons/react";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -29,6 +23,7 @@ import { type Conversation, formatRelativeTime } from "@/modules/chat/lib/mock-d
 import ChatThread from "./chat-thread";
 import ChatDetails from "./chat-details";
 import MassMessageSheet from "./mass-message-sheet";
+import ChatInboxHeader from "../components/chat-inbox-header";
 
 import { ITicket } from "@/types/chat/IChat";
 import TemplateDialog from "./template-dialog";
@@ -40,12 +35,6 @@ import {
   getWhatsappClientContacts,
   getWhatsappClients
 } from "@/services/chat/clients";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
 import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
 
 function riskColors(days: number) {
@@ -260,53 +249,13 @@ export default function ChatInbox() {
 
   return (
     <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
-      <header className="flex items-center gap-2 border-b" style={{ borderColor: "#DDDDDD" }}>
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Chat className="h-5 w-5" />
-          <h1 className="text-lg font-semibold">Conversaciones</h1>
-          <Badge className="rounded-full bg-[#F7F7F7] text-xs text-[#141414]" variant="secondary">
-            WhatsApp
-          </Badge>
-        </div>
-        <div className="ml-auto flex items-center gap-2 px-4">
-          <div className="relative hidden md:block">
-            <MagnifyingGlass className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar cliente, teléfono o mensaje..."
-              className="w-[340px] bg-[#F7F7F7] pl-8"
-              style={{ borderColor: "#DDDDDD" }}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <DotsThreeVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setShowAddClientModal(true)}
-                className="cursor-pointer"
-              >
-                Agregar cliente
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="outline" className="gap-2" style={{ borderColor: "#DDDDDD" }}>
-            <Funnel className="h-4 w-4" />
-            Filtrar
-          </Button>
-          <Button
-            className="gap-2 text-[#141414]"
-            style={{ backgroundColor: "#CBE71E" }}
-            onClick={() => setSendNewMessage(true)}
-          >
-            Nuevo chat
-          </Button>
-        </div>
-      </header>
+      <ChatInboxHeader
+        query={query}
+        onQueryChange={setQuery}
+        onNewChat={() => setSendNewMessage(true)}
+        onAddClient={() => setShowAddClientModal(true)}
+        onFilter={() => {}}
+      />
 
       <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-12">
         <aside
