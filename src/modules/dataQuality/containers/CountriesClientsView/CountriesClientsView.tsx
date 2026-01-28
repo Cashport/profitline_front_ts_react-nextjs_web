@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import { Calendar, FileText, Filter, Upload, ArrowLeft } from "lucide-react";
+import { Calendar, FileText, Filter, Upload, ArrowLeft, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -37,7 +37,6 @@ export default function CountriesClientsView() {
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const height = useScreenHeight();
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
 
   const handleGoBack = () => {
     router.push("/data-quality");
@@ -90,95 +89,6 @@ export default function CountriesClientsView() {
   const filteredData = clientsData.filter((client) =>
     client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleCreateIngestionSuccess = async (formData: DataIntakeFormData) => {
-    setIsLoadingCreate(true);
-    try {
-      // Build ICreateClientRequest from form data
-
-      // TODO: Verify id_client generation strategy with backend
-      // Currently using crypto.randomUUID() for unique identifier
-      const generatedClientId = crypto.randomUUID();
-
-      // Map stakeholder name to ID using mockStakeholders
-      const stakeholderId = mockStakeholders.find((s) => s.name === formData.stakeholder)?.id || 0;
-
-      // TODO: Verify with backend - Current mapping: Sales=1, Stock=2, In transit=3
-      const archiveTypeId =
-        formData.fileType === "Sales"
-          ? 1
-          : formData.fileType === "Stock"
-            ? 2
-            : formData.fileType === "In transit"
-              ? 3
-              : 0;
-
-      // TODO: Implement proper periodicity_json construction based on form details
-      // Current implementation is simplified and should be enhanced with:
-      // - dailyDetails (diasHabiles, festivos)
-      // - weeklyDetails (acumulado, porRango)
-      // - start_date and end_date handling
-      const periodicityJson = {
-        repeat: {
-          day:
-            formData.periodicity === "Daily"
-              ? [1, 2, 3, 4, 5]
-              : formData.periodicity === "Weekly"
-                ? [1]
-                : formData.periodicity === "Monthly"
-                  ? [1]
-                  : [],
-          interval: formData.periodicity?.toLowerCase() || "daily",
-          frequency: formData.periodicity?.toLowerCase() || "daily"
-        }
-      };
-
-      const modelData: ICreateClientRequest = {
-        id_client: generatedClientId,
-        id_project: projectId,
-        client_name: formData.clientName,
-        id_country: 1, // Hardcoded based on current component logic (line 54)
-        stakeholder: stakeholderId,
-        archive_rules: [
-          {
-            id_type_archive: archiveTypeId,
-            periodicity_json: periodicityJson
-          }
-        ]
-        // TODO: Handle unused form data in future iterations:
-        // - ingestaSource (email, api, b2b-web, etc.)
-        // - ingestaVariables (configuration key-value pairs)
-        // - attachedFile (File upload)
-        // These may require separate API endpoints or additional fields
-      };
-
-      // Call the createClient service
-      const response = await createClient(modelData);
-      console.log("Client created successfully:", response);
-
-      // Refresh the client list to show newly created client
-      const res = await getClientData(
-        countryId,
-        projectId,
-        pagination.pageSize,
-        pagination.current
-      );
-      setClientsData(res.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total
-      }));
-
-      // TODO: Add success notification (e.g., Ant Design message component)
-      // message.success("Cliente creado exitosamente");
-    } catch (error) {
-      console.error("Error creating client:", error);
-      // TODO: Add error notification with user-friendly message
-      // message.error("Error al crear el cliente. Por favor intente nuevamente.");
-    } finally {
-      setIsLoadingCreate(false);
-    }
-  };
 
   const handleRowClick = (record: IClientData) => {
     console.log("Row clicked:", {
@@ -269,12 +179,9 @@ export default function CountriesClientsView() {
             </Select>
 
             {/* Create Ingestion Button */}
-            <Button
-              className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-              onClick={() => setIsModalDataIntakeOpen(true)}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Crear nueva ingesta
+            <Button className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
+              <Plus className="w-4 h-4 mr-2" />
+              Crear cliente
             </Button>
           </div>
 
@@ -295,14 +202,6 @@ export default function CountriesClientsView() {
           />
         </CardContent>
       </Card>
-
-      <ModalDataIntake
-        mode="create"
-        open={isModalDataIntakeOpen}
-        onOpenChange={setIsModalDataIntakeOpen}
-        onSuccess={handleCreateIngestionSuccess}
-        isLoading={isLoadingCreate}
-      />
     </div>
   );
 }

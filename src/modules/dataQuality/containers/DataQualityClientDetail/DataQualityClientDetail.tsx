@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import { Edit, ArrowLeft } from "lucide-react";
+import { Edit, ArrowLeft, Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
+import { ModalDataIntake } from "../../components/modal-data-intake";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
@@ -46,6 +46,8 @@ const parseDetailFuente = (detalle: string): Array<{ key: string; value: string 
   }
 };
 
+type IModalState = { isOpen: boolean; mode: "create" | "edit" };
+
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
@@ -53,10 +55,9 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState<Partial<DataIntakeFormData> | undefined>(
-    undefined
-  );
+
+  // Modal state with discriminated union for type safety
+  const [modalState, setModalState] = useState<IModalState>({ isOpen: false, mode: "create" });
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error } = useDataQualityClientDetail(clientId, projectId);
@@ -139,29 +140,6 @@ export default function DataQualityClientDetails() {
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleEditConfig = () => {
-    // Determine fileType from clientConfig.fileTypes array (take first one or default)
-    const primaryFileType = clientConfig.fileTypes?.[0] || "";
-
-    const initialData: Partial<DataIntakeFormData> = {
-      clientName: clientName || "",
-      fileType: primaryFileType,
-      periodicity: clientConfig.periodicity as "Daily" | "Weekly" | "Monthly",
-      dailyDetails: clientInfo.dailyDetails,
-      weeklyDetails: clientInfo.weeklyDetails,
-      ingestaSource: clientInfo.ingestaSource,
-      stakeholder: clientInfo.stakeholder,
-      attachedFile: null,
-      ingestaVariables:
-        clientInfo.ingestaVariables.length > 0
-          ? [...clientInfo.ingestaVariables]
-          : [{ key: "", value: "" }]
-    };
-
-    setModalInitialData(initialData);
-    setIsModalDataIntakeOpen(true);
-  };
-
   const handleGoBack = () => {
     if (window.history.length > 1) {
       router.back();
@@ -218,10 +196,19 @@ export default function DataQualityClientDetails() {
                 >
                   Catálogos
                 </Button>
+                {/* Create Ingestion Button */}
+                <Button
+                  className="ml-auto bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                  onClick={() => setModalState({ isOpen: true, mode: "create" })}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Crear nueva ingesta
+                </Button>
+
                 <Button
                   variant="outline"
                   className="text-sm font-medium bg-transparent"
-                  onClick={handleEditConfig}
+                  onClick={() => setModalState({ isOpen: true, mode: "edit" })}
                   style={{ borderColor: "#DDDDDD", color: "#141414" }}
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -241,16 +228,20 @@ export default function DataQualityClientDetails() {
         </div>
       </main>
 
-      <ModalDataIntake
-        mode="edit"
-        open={isModalDataIntakeOpen}
-        onOpenChange={setIsModalDataIntakeOpen}
-        initialData={modalInitialData}
-        onSuccess={async (data) => {
-          console.log("[v0] Configuration saved successfully", data);
-          // TODO: Refresh client data or show success notification
-        }}
-      />
+      {modalState.isOpen && clientId && clientDetail && clientName && (
+        <ModalDataIntake
+          open={modalState.isOpen}
+          onOpenChange={() => setModalState({ isOpen: false, mode: "create" })}
+          mode={modalState.mode}
+          clientId={clientId as string}
+          clientName={clientName}
+          idCountry={clientDetail.id_country || 1}
+          onSuccess={() => {
+            // Refresh client data
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

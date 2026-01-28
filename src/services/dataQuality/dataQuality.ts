@@ -9,7 +9,8 @@ import {
   IUpdateClientRequest,
   IUpdateClientResponse,
   IDeleteClientResponse,
-  IClientDetail
+  IClientDetail,
+  IParameterData
 } from "@/types/dataQuality/IDataQuality";
 import { useAppStore } from "@/lib/store/store";
 
@@ -96,6 +97,21 @@ export const getClientDetail = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching client detail:", error);
+    throw error;
+  }
+};
+
+export const getParametersData = async (
+  projectId: number,
+  clientId: string
+): Promise<IParameterData> => {
+  try {
+    const response: GenericResponse<IParameterData> = await API.get(
+      `${config.API_HOST}/data/clients/${clientId}/parametrization/${projectId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching parameters data:", error);
     throw error;
   }
 };

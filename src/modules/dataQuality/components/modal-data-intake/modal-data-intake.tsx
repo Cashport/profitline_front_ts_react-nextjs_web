@@ -21,7 +21,20 @@ import { Input, message } from "antd";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAppStore } from "@/lib/store/store";
+import useSWR from "swr";
+import { fetcher } from "@/utils/api/api";
+import { updateClient } from "@/services/dataQuality/dataQuality";
+import {
+  IUpdateClientRequest,
+  IArchiveRule,
+  IPeriodicity,
+  IParameterData,
+  IParameterCatalogs
+} from "@/types/dataQuality/IDataQuality";
+import { transformParameterDataToFormData } from "../../utils/transformParameterData";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 // Mode type definition
 type ModalMode = "create" | "edit";
@@ -87,12 +100,13 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
 });
 
 interface IModalDataIntakeProps {
-  mode: ModalMode;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess?: (data: DataIntakeFormData) => Promise<void>;
-  initialData?: Partial<DataIntakeFormData>;
-  isLoading?: boolean;
+  onOpenChange: () => void;
+  mode: ModalMode;
+  clientId: string; // Always required (we're in client detail view)
+  clientName: string; // To display in the modal
+  idCountry: number; // For API calls
+  onSuccess?: () => void; // Simple callback for parent refresh
 }
 
 // Default form values
@@ -109,13 +123,50 @@ const defaultFormValues: DataIntakeFormData = {
 };
 
 export function ModalDataIntake({
-  mode,
   open,
   onOpenChange,
-  onSuccess,
-  initialData,
-  isLoading
+  mode,
+  clientId,
+  clientName,
+  idCountry,
+  onSuccess
 }: IModalDataIntakeProps) {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
+  // Fetch parameter data when in edit mode with clientId using SWR
+  const {
+    data: parameterDataResponse,
+    error: fetchError,
+    mutate
+  } = useSWR<GenericResponse<IParameterData>>(
+    open && mode === "edit" && clientId
+      ? `/data/clients/${clientId}/parametrization/${projectId}`
+      : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+
+  const parameterData = parameterDataResponse?.data;
+  const isFetchingParameters =
+    !fetchError && !parameterDataResponse && open && mode === "edit" && !!clientId;
+
+  // Compute form initial data based on available sources
+  const formInitialData = useMemo(() => {
+    if (mode === "edit" && clientId && parameterData) {
+      // Use API data transformed to form data
+      return transformParameterDataToFormData(parameterData);
+    } else {
+      // Create mode - use default values
+      return defaultFormValues;
+    }
+  }, [mode, clientId, parameterData]);
+
+  // Combined loading state
+  const isLoading = isFetchingParameters;
+
   // Setup react-hook-form
   const {
     control,
@@ -126,8 +177,7 @@ export function ModalDataIntake({
   } = useForm<DataIntakeFormData>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
-    defaultValues:
-      mode === "edit" && initialData ? { ...defaultFormValues, ...initialData } : defaultFormValues
+    defaultValues: formInitialData
   });
 
   // useFieldArray for dynamic variables
@@ -142,40 +192,150 @@ export function ModalDataIntake({
 
   // Form reset logic when modal opens or data changes
   useEffect(() => {
-    if (open && mode === "edit" && initialData) {
-      // Handle ingestaVariables specially to ensure at least one row
+    if (open) {
+      // Ensure ingestaVariables always has at least one row
       const resetData = {
-        ...defaultFormValues,
-        ...initialData,
-        ingestaVariables: initialData.ingestaVariables?.length
-          ? initialData.ingestaVariables
+        ...formInitialData,
+        ingestaVariables: formInitialData.ingestaVariables?.length
+          ? formInitialData.ingestaVariables
           : [{ key: "", value: "" }]
       };
       reset(resetData);
-    } else if (open && mode === "create") {
-      reset(defaultFormValues);
     }
-  }, [open, mode, initialData, reset]);
+  }, [open, formInitialData, reset]);
+
+  // Handle fetch errors
+  useEffect(() => {
+    if (fetchError) {
+      message.error("Error al cargar los datos del cliente");
+    }
+  }, [fetchError]);
+
+  // Utility functions for data transformation
+  const getArchiveTypeId = (fileType: string, catalogs?: IParameterCatalogs): number => {
+    if (!catalogs?.archive_types) {
+      // Fallback to mock mapping
+      return fileType === "Sales" ? 1 : fileType === "Stock" ? 2 : 3;
+    }
+    return catalogs.archive_types.find((t) => t.description === fileType)?.id || 0;
+  };
+
+  const getStakeholderId = (stakeholderName: string, catalogs?: IParameterCatalogs): number => {
+    if (!catalogs?.stakeholders) {
+      return mockStakeholders.find((s) => s.name === stakeholderName)?.id || 0;
+    }
+    return catalogs.stakeholders.find((s) => s.name === stakeholderName)?.id || 0;
+  };
+
+  const buildPeriodicityJson = (formData: DataIntakeFormData): IPeriodicity => {
+    const frequency = formData.periodicity.toLowerCase();
+
+    // Determine days array based on periodicity and details
+    let days: number[] = [];
+    if (formData.periodicity === "Daily") {
+      // If diasHabiles is true, use weekdays [1,2,3,4,5], else all days
+      days = formData.dailyDetails?.diasHabiles ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7];
+    } else if (formData.periodicity === "Weekly") {
+      days = [1]; // Default to Monday
+    } else if (formData.periodicity === "Monthly") {
+      days = [1]; // Default to first day of month
+    }
+
+    return {
+      repeat: {
+        frequency,
+        interval: "1",
+        day: days
+      },
+      start_date: new Date().toISOString()
+    };
+  };
+
+  // Handler for creating ingestion
+  const handleCreateIngestion = async (formData: DataIntakeFormData) => {
+    try {
+      // Transform form data to archive rules
+      const archiveRules: IArchiveRule[] = [
+        {
+          id_type_archive: getArchiveTypeId(formData.fileType, parameterData?.catalogs),
+          periodicity_json: buildPeriodicityJson(formData)
+        }
+      ];
+
+      // Call updateClient API to add/update archive rules
+      const requestData: IUpdateClientRequest = {
+        client_name: clientName, // Keep current name
+        id_country: idCountry, // From props
+        archive_rules: archiveRules
+      };
+
+      await updateClient(parseInt(clientId), requestData);
+
+      message.success("Ingesta creada exitosamente");
+
+      // Revalidate parameter data
+      mutate?.();
+
+      // Notify parent for refresh
+      onSuccess?.();
+
+      // Close modal and reset form
+      onOpenChange();
+      reset(defaultFormValues);
+    } catch (error) {
+      console.error("Error creating ingestion:", error);
+      message.error("Error al crear la ingesta");
+    }
+  };
 
   // Submit handler
   const onSubmit = async (data: DataIntakeFormData) => {
     if (mode === "create") {
-      try {
-        console.log("Creating ingesta:", data);
-        // Pass data to parent through onSuccess callback
-        await onSuccess?.(data);
-
-        message.success("Ingesta creada exitosamente");
-        reset(defaultFormValues); // Resetear formulario
-        onOpenChange(false); // Cerrar modal
-      } catch (error) {
-        message.error("Error al crear la ingesta");
-      }
+      await handleCreateIngestion(data);
     } else if (mode === "edit") {
-      console.log("Updating ingesta:", data);
-      // TODO: await updateIngesta(data);
+      // TODO: Por ahora no hace nada según el usuario
+      console.log("Edit mode - not implemented yet");
+      message.info("La edición será implementada próximamente");
     }
   };
+
+  // Compute dropdown options from catalogs or fallback to mocks
+  const stakeholderOptions = useMemo(() => {
+    if (parameterData?.catalogs?.stakeholders) {
+      return parameterData.catalogs.stakeholders.map((s) => ({
+        id: s.id,
+        name: s.name
+      }));
+    }
+    return mockStakeholders;
+  }, [parameterData]);
+
+  const fileTypeOptions = useMemo(() => {
+    if (parameterData?.catalogs?.archive_types) {
+      return parameterData.catalogs.archive_types.map((t) => ({
+        id: t.id,
+        value: t.description,
+        label: t.description
+      }));
+    }
+    return mockTipoArchivo;
+  }, [parameterData]);
+
+  // Show loading state inside modal
+  if (isLoading && open) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[600px]">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando datos...</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -189,30 +349,18 @@ export function ModalDataIntake({
             <DialogDescription>
               {mode === "create"
                 ? "Configure los detalles de la nueva ingesta"
-                : `Modifica la configuración de ingesta${initialData?.clientName ? ` para ${initialData.clientName}` : ""}`}
+                : `Modifica la configuración de ingesta ${clientName ? ` para ${clientName}` : ""}`}
             </DialogDescription>
           </DialogHeader>
 
           {/* Dialog Content */}
           <div className="grid gap-6 py-4">
-            {/* Cliente Input */}
+            {/* Cliente - Read-only display */}
             <div className="grid gap-2">
-              <Label htmlFor="client-name">Cliente</Label>
-              <Controller
-                name="clientName"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="client-name"
-                    placeholder="Nombre del cliente"
-                    className="border-[#DDDDDD]"
-                  />
-                )}
-              />
-              {errors.clientName && (
-                <p className="text-xs text-red-600">{errors.clientName.message}</p>
-              )}
+              <Label>Cliente</Label>
+              <div className="px-3 py-2 border border-[#DDDDDD] rounded-md bg-gray-50 text-gray-700">
+                {clientName}
+              </div>
             </div>
 
             {/* Tipo de Archivo Dropdown */}
@@ -227,7 +375,7 @@ export function ModalDataIntake({
                       <SelectValue placeholder="Seleccionar tipo de archivo" />
                     </SelectTrigger>
                     <SelectContent className="!z-[10000]">
-                      {mockTipoArchivo.map((tipo) => (
+                      {fileTypeOptions.map((tipo) => (
                         <SelectItem key={tipo.id} value={tipo.value}>
                           {tipo.label}
                         </SelectItem>
@@ -378,7 +526,7 @@ export function ModalDataIntake({
                       <SelectValue placeholder="Seleccionar responsable" />
                     </SelectTrigger>
                     <SelectContent className="!z-[10000]">
-                      {mockStakeholders.map((stakeholder) => (
+                      {stakeholderOptions.map((stakeholder) => (
                         <SelectItem key={stakeholder.id} value={stakeholder.name}>
                           {stakeholder.name}
                         </SelectItem>
@@ -429,9 +577,9 @@ export function ModalDataIntake({
                   Archivo seleccionado: {attachedFileValue.name}
                 </p>
               )}
-              {mode === "edit" && initialData?.existingFileName && !attachedFileValue && (
+              {mode === "edit" && formInitialData?.existingFileName && !attachedFileValue && (
                 <p className="text-xs text-gray-600">
-                  Archivo actual: {initialData.existingFileName}
+                  Archivo actual: {formInitialData.existingFileName}
                 </p>
               )}
             </div>
@@ -496,7 +644,7 @@ export function ModalDataIntake({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={onOpenChange}
               disabled={isSubmitting || isLoading}
             >
               Cancelar

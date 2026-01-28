@@ -144,3 +144,39 @@ export interface IClientDetail {
   updated_at: string | null;
   last_activity: string | null;
 }
+
+// Catalog interfaces for parameter data
+export interface ICatalogItem {
+  id: number;
+  description: string;
+}
+
+export interface IStakeholder {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface IParameterCatalogs {
+  countries: ICatalogItem[];
+  archive_types: ICatalogItem[];
+  archive_status: ICatalogItem[];
+  stakeholders: IStakeholder[];
+}
+
+export interface IParameterClientData {
+  id: number;
+  id_client: string;
+  client_name: string;
+  id_country: number;
+  country_name: string;
+  stakeholder: number | null;
+}
+
+// Main parameter data interface
+export interface IParameterData {
+  client_data: IParameterClientData;
+  archive_rules: IArchiveRuleResponse[];
+  variables: any[]; // Define more specifically when structure is known
+  catalogs: IParameterCatalogs;
+}
