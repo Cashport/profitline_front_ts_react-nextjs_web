@@ -10,6 +10,7 @@ import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
+import { useAppStore } from "@/lib/store/store";
 
 // Helper functions for data transformation
 const formatBytes = (bytes: number): string => {
@@ -48,8 +49,8 @@ const parseDetailFuente = (detalle: string): Array<{ key: string; value: string 
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
-  const countryId = params.countryId as string;
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
@@ -58,7 +59,7 @@ export default function DataQualityClientDetails() {
   );
 
   // Fetch client detail data using SWR hook
-  const { clientDetail, isLoading, error } = useDataQualityClientDetail();
+  const { clientDetail, isLoading, error } = useDataQualityClientDetail(clientId, projectId);
 
   // Handle loading state
   if (isLoading) {
@@ -111,14 +112,14 @@ export default function DataQualityClientDetails() {
   const clientName = clientDetail.client_name;
 
   const clientConfig = {
-    periodicity: clientDetail.periodicidad[0] || "Daily",
+    periodicity: clientDetail.periodicidad?.[0] || "Daily",
     fileTypes: clientDetail.tipos_archivo_esperados
   };
 
   const clientInfo = {
-    ingestaSource: clientDetail.fuente_ingesta[0] || "Email",
-    ingestaVariables: parseDetailFuente(clientDetail.detalle_fuente),
-    stakeholder: clientDetail.stakeholder.toString(),
+    ingestaSource: clientDetail.fuente_ingesta?.[0] || "Email",
+    ingestaVariables: parseDetailFuente(clientDetail.detalle_fuente || ""),
+    stakeholder: clientDetail.stakeholder?.toString(),
     dailyDetails: { diasHabiles: true, festivos: false },
     weeklyDetails: { acumulado: false, porRango: false }
   };
@@ -140,10 +141,10 @@ export default function DataQualityClientDetails() {
 
   const handleEditConfig = () => {
     // Determine fileType from clientConfig.fileTypes array (take first one or default)
-    const primaryFileType = clientConfig.fileTypes[0] || "";
+    const primaryFileType = clientConfig.fileTypes?.[0] || "";
 
     const initialData: Partial<DataIntakeFormData> = {
-      clientName: clientName,
+      clientName: clientName || "",
       fileType: primaryFileType,
       periodicity: clientConfig.periodicity as "Daily" | "Weekly" | "Monthly",
       dailyDetails: clientInfo.dailyDetails,
@@ -245,8 +246,8 @@ export default function DataQualityClientDetails() {
         open={isModalDataIntakeOpen}
         onOpenChange={setIsModalDataIntakeOpen}
         initialData={modalInitialData}
-        onSuccess={() => {
-          console.log("[v0] Configuration saved successfully");
+        onSuccess={async (data) => {
+          console.log("[v0] Configuration saved successfully", data);
           // TODO: Refresh client data or show success notification
         }}
       />

@@ -26,7 +26,7 @@ export const getSummaryCountries = async (projectId: number): Promise<ISummaryCo
 };
 
 export const getClientData = async (
-  idCountry: number,
+  idCountry: string,
   idProject: number,
   limit: number = 10,
   page: number = 1

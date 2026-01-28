@@ -31,7 +31,8 @@ const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
 
   archives.forEach((archive) => {
-    const desc = archive.description.toLowerCase();
+    const desc = archive?.description?.toLowerCase();
+    if (!desc) return;
     if (desc.includes("stock") || desc.includes("inventario")) {
       if (!fileTypes.some((f) => f.type === "stock")) {
         fileTypes.push({ type: "stock", label: "ST", color: "bg-blue-500" });
@@ -80,12 +81,7 @@ export default function CountriesClientsTable({
       dataIndex: "client_name",
       key: "client_name",
       render: (name: string, record: IClientData) => (
-        <Link
-          href={`/data-quality/clients/${record.id_client}`}
-          className="font-medium hover:underline text-[#141414]"
-        >
-          {name}
-        </Link>
+        <p className="font-medium hover:underline text-[#141414]">{name}</p>
       ),
       sorter: (a, b) => a.client_name.localeCompare(b.client_name),
       showSorterTooltip: false
@@ -157,22 +153,20 @@ export default function CountriesClientsTable({
       width: 60,
       align: "right",
       render: (_, record: IClientData) => (
-        <Link href={`/data-quality/clients/${record.id_client}`}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0"
-            title="Ver detalles del cliente"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onRowClick) {
-                onRowClick(record);
-              }
-            }}
-          >
-            <Eye className="w-4 h-4 text-gray-600" />
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          title="Ver detalles del cliente"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onRowClick) {
+              onRowClick(record);
+            }
+          }}
+        >
+          <Eye className="w-4 h-4 text-gray-600" />
+        </Button>
       )
     }
   ];

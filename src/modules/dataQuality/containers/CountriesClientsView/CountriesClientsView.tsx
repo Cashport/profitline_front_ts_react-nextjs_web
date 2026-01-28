@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { Calendar, FileText, Filter, Upload, ArrowLeft } from "lucide-react";
 import {
@@ -14,23 +14,35 @@ import {
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake } from "../../components/modal-data-intake";
-import { getClientData } from "@/services/dataQuality/dataQuality";
+import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
+import { getClientData, createClient } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import { IClientData } from "@/types/dataQuality/IDataQuality";
+import { IClientData, ICreateClientRequest } from "@/types/dataQuality/IDataQuality";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
 
+// Mock stakeholders for mapping name to ID
+const mockStakeholders = [
+  { id: 1, name: "Juan Pérez" },
+  { id: 2, name: "María García" },
+  { id: 3, name: "Carlos Rodríguez" },
+  { id: 4, name: "Ana Martínez" }
+];
+
 export default function CountriesClientsView() {
+  const params = useParams();
+  const countryId = params.countryId as string;
+  console.log("Country ID from params:", countryId);
+
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const height = useScreenHeight();
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
 
   const handleGoBack = () => {
     router.push("/data-quality");
   };
 
-  const countryId = "colombia";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [periodicityFilter, setPeriodicityFilter] = useState("all");
@@ -51,7 +63,12 @@ export default function CountriesClientsView() {
       setLoading(true);
       try {
         // Use projectId from store, hardcode countryId=1 for now
-        const res = await getClientData(1, 100, pagination.pageSize, pagination.current);
+        const res = await getClientData(
+          countryId,
+          projectId,
+          pagination.pageSize,
+          pagination.current
+        );
         setClientsData(res.data);
         setPagination((prev) => ({
           ...prev,
@@ -74,10 +91,93 @@ export default function CountriesClientsView() {
     client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreateIngestionSuccess = () => {
-    console.log("[v0] Ingestion created successfully");
-    // Aquí podrías agregar lógica adicional después de crear la ingesta
-    // Por ejemplo: refrescar la lista de clientes, mostrar notificación, etc.
+  const handleCreateIngestionSuccess = async (formData: DataIntakeFormData) => {
+    setIsLoadingCreate(true);
+    try {
+      // Build ICreateClientRequest from form data
+
+      // TODO: Verify id_client generation strategy with backend
+      // Currently using crypto.randomUUID() for unique identifier
+      const generatedClientId = crypto.randomUUID();
+
+      // Map stakeholder name to ID using mockStakeholders
+      const stakeholderId = mockStakeholders.find((s) => s.name === formData.stakeholder)?.id || 0;
+
+      // TODO: Verify with backend - Current mapping: Sales=1, Stock=2, In transit=3
+      const archiveTypeId =
+        formData.fileType === "Sales"
+          ? 1
+          : formData.fileType === "Stock"
+            ? 2
+            : formData.fileType === "In transit"
+              ? 3
+              : 0;
+
+      // TODO: Implement proper periodicity_json construction based on form details
+      // Current implementation is simplified and should be enhanced with:
+      // - dailyDetails (diasHabiles, festivos)
+      // - weeklyDetails (acumulado, porRango)
+      // - start_date and end_date handling
+      const periodicityJson = {
+        repeat: {
+          day:
+            formData.periodicity === "Daily"
+              ? [1, 2, 3, 4, 5]
+              : formData.periodicity === "Weekly"
+                ? [1]
+                : formData.periodicity === "Monthly"
+                  ? [1]
+                  : [],
+          interval: formData.periodicity?.toLowerCase() || "daily",
+          frequency: formData.periodicity?.toLowerCase() || "daily"
+        }
+      };
+
+      const modelData: ICreateClientRequest = {
+        id_client: generatedClientId,
+        id_project: projectId,
+        client_name: formData.clientName,
+        id_country: 1, // Hardcoded based on current component logic (line 54)
+        stakeholder: stakeholderId,
+        archive_rules: [
+          {
+            id_type_archive: archiveTypeId,
+            periodicity_json: periodicityJson
+          }
+        ]
+        // TODO: Handle unused form data in future iterations:
+        // - ingestaSource (email, api, b2b-web, etc.)
+        // - ingestaVariables (configuration key-value pairs)
+        // - attachedFile (File upload)
+        // These may require separate API endpoints or additional fields
+      };
+
+      // Call the createClient service
+      const response = await createClient(modelData);
+      console.log("Client created successfully:", response);
+
+      // Refresh the client list to show newly created client
+      const res = await getClientData(
+        countryId,
+        projectId,
+        pagination.pageSize,
+        pagination.current
+      );
+      setClientsData(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }));
+
+      // TODO: Add success notification (e.g., Ant Design message component)
+      // message.success("Cliente creado exitosamente");
+    } catch (error) {
+      console.error("Error creating client:", error);
+      // TODO: Add error notification with user-friendly message
+      // message.error("Error al crear el cliente. Por favor intente nuevamente.");
+    } finally {
+      setIsLoadingCreate(false);
+    }
   };
 
   const handleRowClick = (record: IClientData) => {
@@ -89,7 +189,7 @@ export default function CountriesClientsView() {
       updated_at: record.updated_at,
       full_record: record
     });
-    router.push(`/data-quality/clients/${record.id}`);
+    router.push(`/data-quality/client/${record.id}`);
   };
 
   return (
@@ -201,6 +301,7 @@ export default function CountriesClientsView() {
         open={isModalDataIntakeOpen}
         onOpenChange={setIsModalDataIntakeOpen}
         onSuccess={handleCreateIngestionSuccess}
+        isLoading={isLoadingCreate}
       />
     </div>
   );

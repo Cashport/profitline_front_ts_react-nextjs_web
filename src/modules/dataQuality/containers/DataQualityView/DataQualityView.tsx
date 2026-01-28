@@ -159,7 +159,7 @@ export default function DataQualityView() {
               </div>
 
               <div className="pt-2">
-                <Link href="/data-quality/clients">
+                <Link href={`/data-quality/country/${country.id_country}`}>
                   <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
                     Ver Clientes
                   </Button>

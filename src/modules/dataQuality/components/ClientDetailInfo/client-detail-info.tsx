@@ -2,13 +2,13 @@ import { Badge } from "@/modules/chat/ui/badge";
 
 interface ClientDetailInfoProps {
   clientConfig: {
-    periodicity: string;
-    fileTypes: string[];
+    periodicity: string | null;
+    fileTypes: string[] | null;
   };
   clientInfo: {
-    ingestaSource: string;
+    ingestaSource: string | null;
     ingestaVariables: Array<{ key: string; value: string }>;
-    stakeholder: string;
+    stakeholder: string | null | undefined;
     dailyDetails: { diasHabiles: boolean; festivos: boolean };
     weeklyDetails: { acumulado: boolean; porRango: boolean };
   };
@@ -26,7 +26,7 @@ export function ClientDetailInfo({ clientConfig, clientInfo }: ClientDetailInfoP
           className="text-sm font-medium"
           style={{ backgroundColor: "#CBE71E", color: "#141414" }}
         >
-          {clientConfig.periodicity}
+          {clientConfig.periodicity || ""}
         </Badge>
       </div>
       <div>
@@ -34,7 +34,7 @@ export function ClientDetailInfo({ clientConfig, clientInfo }: ClientDetailInfoP
           Tipos de Archivo
         </p>
         <div className="flex flex-wrap gap-2">
-          {clientConfig.fileTypes.map((fileType) => (
+          {clientConfig.fileTypes?.map((fileType) => (
             <Badge
               key={fileType}
               variant="secondary"
@@ -91,7 +91,7 @@ export function ClientDetailInfo({ clientConfig, clientInfo }: ClientDetailInfoP
           Fuente de Ingesta
         </p>
         <p className="text-sm" style={{ color: "#141414" }}>
-          {clientInfo.ingestaSource}
+          {clientInfo.ingestaSource || ""}
         </p>
       </div>
 

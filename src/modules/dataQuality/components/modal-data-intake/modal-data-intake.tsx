@@ -17,7 +17,7 @@ import {
   SelectValue
 } from "@/modules/chat/ui/select";
 import { Switch } from "@/modules/chat/ui/switch";
-import { Input } from "antd";
+import { Input, message } from "antd";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -90,8 +90,9 @@ interface IModalDataIntakeProps {
   mode: ModalMode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: (data: DataIntakeFormData) => Promise<void>;
   initialData?: Partial<DataIntakeFormData>;
+  isLoading?: boolean;
 }
 
 // Default form values
@@ -107,7 +108,14 @@ const defaultFormValues: DataIntakeFormData = {
   ingestaVariables: [{ key: "", value: "" }]
 };
 
-export function ModalDataIntake({ mode, open, onOpenChange, onSuccess, initialData }: IModalDataIntakeProps) {
+export function ModalDataIntake({
+  mode,
+  open,
+  onOpenChange,
+  onSuccess,
+  initialData,
+  isLoading
+}: IModalDataIntakeProps) {
   // Setup react-hook-form
   const {
     control,
@@ -118,9 +126,8 @@ export function ModalDataIntake({ mode, open, onOpenChange, onSuccess, initialDa
   } = useForm<DataIntakeFormData>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
-    defaultValues: mode === "edit" && initialData
-      ? { ...defaultFormValues, ...initialData }
-      : defaultFormValues
+    defaultValues:
+      mode === "edit" && initialData ? { ...defaultFormValues, ...initialData } : defaultFormValues
   });
 
   // useFieldArray for dynamic variables
@@ -152,21 +159,21 @@ export function ModalDataIntake({ mode, open, onOpenChange, onSuccess, initialDa
 
   // Submit handler
   const onSubmit = async (data: DataIntakeFormData) => {
-    try {
-      if (mode === "create") {
+    if (mode === "create") {
+      try {
         console.log("Creating ingesta:", data);
-        // TODO: await createIngesta(data);
-      } else {
-        console.log("Updating ingesta:", data);
-        // TODO: await updateIngesta(data);
-      }
+        // Pass data to parent through onSuccess callback
+        await onSuccess?.(data);
 
-      reset(defaultFormValues); // Resetear formulario
-      onOpenChange(false); // Cerrar modal
-      onSuccess?.(); // Notificar éxito al padre
-    } catch (error) {
-      console.error(`Error ${mode === "create" ? "creating" : "updating"} ingesta:`, error);
-      // TODO: Manejar error (mostrar toast, etc.)
+        message.success("Ingesta creada exitosamente");
+        reset(defaultFormValues); // Resetear formulario
+        onOpenChange(false); // Cerrar modal
+      } catch (error) {
+        message.error("Error al crear la ingesta");
+      }
+    } else if (mode === "edit") {
+      console.log("Updating ingesta:", data);
+      // TODO: await updateIngesta(data);
     }
   };
 
@@ -182,8 +189,7 @@ export function ModalDataIntake({ mode, open, onOpenChange, onSuccess, initialDa
             <DialogDescription>
               {mode === "create"
                 ? "Configure los detalles de la nueva ingesta"
-                : `Modifica la configuración de ingesta${initialData?.clientName ? ` para ${initialData.clientName}` : ""}`
-              }
+                : `Modifica la configuración de ingesta${initialData?.clientName ? ` para ${initialData.clientName}` : ""}`}
             </DialogDescription>
           </DialogHeader>
 
@@ -487,18 +493,26 @@ export function ModalDataIntake({ mode, open, onOpenChange, onSuccess, initialDa
 
           {/* Dialog Footer */}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting || isLoading}
+            >
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || isSubmitting}
+              disabled={!isValid || isSubmitting || isLoading}
               className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
             >
-              {isSubmitting
-                ? (mode === "create" ? "Creando..." : "Guardando...")
-                : (mode === "create" ? "Crear Ingesta" : "Guardar Cambios")
-              }
+              {isSubmitting || isLoading
+                ? mode === "create"
+                  ? "Creando..."
+                  : "Guardando..."
+                : mode === "create"
+                  ? "Crear Ingesta"
+                  : "Guardar Cambios"}
             </Button>
           </DialogFooter>
         </form>
