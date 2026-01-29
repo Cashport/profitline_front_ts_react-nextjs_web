@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { downloadDigitalRecordFilesFromToken } from "@/services/chat/clients";
-import type { IDigitalRecordFile } from "@/types/chat/IChat";
 
 interface IDecodedPayload {
   data: {
@@ -16,29 +15,24 @@ interface IDecodedPayload {
 export default function PortalArchivosPage() {
   const searchParams = useSearchParams();
   const fileToken = searchParams.get("fileToken");
-  const [responses, setResponses] = useState<Record<string, IDigitalRecordFile[] | null>>({});
 
-  // Mueve el parseo del payload aquí, para que siempre se ejecute
   let payload: IDecodedPayload | undefined = undefined;
   if (fileToken) {
     try {
       payload = JSON.parse(atob(fileToken.split(".")[1]));
     } catch (e) {
-      // Opcional: manejar error de parseo
+      console.error("Error decoding file token payload:", e);
     }
   }
 
   useEffect(() => {
-    if (!fileToken || !payload?.data) return;
+    if (!fileToken || !payload?.data || !payload) return;
 
     const fetchFiles = async () => {
+      if (!payload?.data) return;
+
       for (const file of payload.data) {
         const response = await downloadDigitalRecordFilesFromToken(file.url, fileToken);
-
-        setResponses((prev) => ({
-          ...prev,
-          [file.fileName]: response
-        }));
       }
     };
 
