@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
+import { Scroll } from "@/components/ui/scroll";
 
 interface AllChatsProps {
   query: string;
@@ -107,8 +108,8 @@ export default function AllChats({
 
       <Separator className="my-2" />
 
-      <div className="min-h-0 flex-1 overflow-y-auto pr-2">
-        <ul className="px-1">
+      <Scroll className="min-h-0 flex-1">
+        <ul className="pl-2">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">Cargando tickets...</div>
@@ -199,7 +200,7 @@ export default function AllChats({
             })
           )}
         </ul>
-      </div>
+      </Scroll>
 
       {conversations.length > 0 && pagination && (
         <Pagination
