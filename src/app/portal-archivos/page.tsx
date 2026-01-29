@@ -29,9 +29,7 @@ export default function PortalArchivosPage() {
 
     const fetchFiles = async () => {
       for (const file of payload.data) {
-        console.log(`Calling downloadDigitalRecordFilesFromToken for: ${file.fileName}`);
         const response = await downloadDigitalRecordFilesFromToken(file.url, fileToken);
-        console.log(`Response for ${file.fileName}:`, response);
 
         setResponses((prev) => ({
           ...prev,
@@ -41,22 +39,23 @@ export default function PortalArchivosPage() {
     };
 
     fetchFiles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileToken]);
 
   return (
-    <>
-      <h1>Archivos a descargar</h1>
-      <ul>
-        {payload?.data.map((file) => (
-          <li key={file.fileName}>
-            <strong>{file.fileName}</strong>
-            {responses[file.fileName] && (
-              <pre>{JSON.stringify(responses[file.fileName], null, 2)}</pre>
-            )}
-          </li>
-        ))}
-      </ul>
-    </>
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 flex flex-col items-center">
+        <h1 className="text-2xl font-bold mb-6">Archivos a descargar</h1>
+        <ul className="w-full space-y-4">
+          {payload?.data.map((file) => (
+            <li key={file.fileName} className="w-full flex flex-col items-center">
+              <p>{file.fileName}</p>
+            </li>
+          ))}
+        </ul>
+        <h2 className="mt-3 text-xl font-bold text-center">
+          ¡Recuerda darle a <span className="underline text-black">aceptar descarga</span>!
+        </h2>
+      </div>
+    </div>
   );
 }

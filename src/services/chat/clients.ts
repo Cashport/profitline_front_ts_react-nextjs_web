@@ -92,9 +92,9 @@ export const downloadDigitalRecordFiles = async (
 export const downloadDigitalRecordFilesFromToken = async (
   fileKey: string,
   token: string
-): Promise<IDigitalRecordFile[] | null> => {
+): Promise<any> => {
   try {
-    const response: GenericResponse<IDigitalRecordFile[]> = await axios.post(
+    const response: GenericResponse<any> = await axios.post(
       `${config.API_HOST}/client/download-from-token`,
       {
         fileKey
@@ -102,9 +102,20 @@ export const downloadDigitalRecordFilesFromToken = async (
       {
         headers: {
           Authorization: `Bearer ${token}`
-        }
+        },
+        responseType: "blob"
       }
     );
+    const url = window.URL.createObjectURL(response.data);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", "archivo.pdf");
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
     return response.data;
   } catch (error) {
     console.error("error downloading digital record files from token: ", error);
