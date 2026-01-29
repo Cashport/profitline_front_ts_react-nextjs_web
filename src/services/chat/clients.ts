@@ -2,6 +2,7 @@ import config from "@/config";
 import { PayloadByTicket, IDigitalRecordFile } from "@/types/chat/IChat";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
+import axios from "axios";
 
 export async function getWhatsappClients() {
   try {
@@ -53,7 +54,7 @@ export const getPayloadByTicket = async (
 
     return data;
   } catch (error) {
-    console.warn("error getting payload by ticket: ", error);
+    console.error("error getting payload by ticket: ", error);
     return null;
   }
 };
@@ -66,7 +67,7 @@ export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: nu
     );
     return response.data;
   } catch (error) {
-    console.warn("error sending digital record via whatsapp: ", error);
+    console.error("error sending digital record via whatsapp: ", error);
     throw error;
   }
 };
@@ -83,7 +84,30 @@ export const downloadDigitalRecordFiles = async (
     );
     return response.data;
   } catch (error) {
-    console.warn("error downloading digital record files: ", error);
+    console.error("error downloading digital record files: ", error);
+    return null;
+  }
+};
+
+export const downloadDigitalRecordFilesFromToken = async (
+  fileKey: string,
+  token: string
+): Promise<IDigitalRecordFile[] | null> => {
+  try {
+    const response: GenericResponse<IDigitalRecordFile[]> = await axios.post(
+      `${config.API_HOST}/client/download-from-token`,
+      {
+        fileKey
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error downloading digital record files from token: ", error);
     return null;
   }
 };
