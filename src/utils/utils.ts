@@ -433,6 +433,27 @@ export function formatTimeAgo(utcDateString: string): string {
   return `${years} años`;
 }
 
+export function formatChatDate(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+
+  now.setHours(0, 0, 0, 0);
+  const dateOnly = new Date(date);
+  dateOnly.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.floor((now.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays >= 0 && diffDays < 7) {
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    return days[date.getDay()];
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}/${month}/${year}`;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

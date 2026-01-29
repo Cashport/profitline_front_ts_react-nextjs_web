@@ -1,14 +1,14 @@
 import { ChatCircleDots, MagnifyingGlass } from "@phosphor-icons/react";
 import { Pagination } from "antd";
-import { cn } from "@/utils/utils";
+import { cn, formatChatDate } from "@/utils/utils";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
-import { ScrollArea } from "@/modules/chat/ui/scroll-area";
+
 import { Badge } from "@/modules/chat/ui/badge";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { type Conversation, formatRelativeTime } from "@/modules/chat/lib/mock-data";
+import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
 
 interface AllChatsProps {
@@ -107,7 +107,7 @@ export default function AllChats({
 
       <Separator className="my-2" />
 
-      <ScrollArea className="min-h-0 flex-1 pr-2">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-2">
         <ul className="px-1">
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -149,7 +149,7 @@ export default function AllChats({
                         {c.client_name}
                       </p>
                       <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                        {formatRelativeTime(c.lastMessageAt)}
+                        {formatChatDate(c.lastMessageAt)}
                       </span>
                     </div>
                     <p className="text-[11px] font-normal w-fit">{c.customer}</p>
@@ -199,7 +199,7 @@ export default function AllChats({
             })
           )}
         </ul>
-      </ScrollArea>
+      </div>
 
       {conversations.length > 0 && pagination && (
         <Pagination

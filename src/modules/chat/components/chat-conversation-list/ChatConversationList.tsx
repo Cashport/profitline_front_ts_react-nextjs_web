@@ -1,6 +1,6 @@
 import { ChatCircleDots, MagnifyingGlass, Funnel } from "@phosphor-icons/react";
 import { Pagination } from "antd";
-import { cn } from "@/utils/utils";
+import { cn, formatChatDate } from "@/utils/utils";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
@@ -9,7 +9,7 @@ import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { type Conversation, formatRelativeTime } from "@/modules/chat/lib/mock-data";
+import { type Conversation } from "@/modules/chat/lib/mock-data";
 
 interface ChatConversationListProps {
   // Search & Filter State
@@ -155,7 +155,7 @@ export default function ChatConversationList({
                         {c.client_name}
                       </p>
                       <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                        {formatRelativeTime(c.lastMessageAt)}
+                        {formatChatDate(c.lastMessageAt)}
                       </span>
                     </div>
                     <p className="text-[11px] font-normal w-fit">{c.customer}</p>
