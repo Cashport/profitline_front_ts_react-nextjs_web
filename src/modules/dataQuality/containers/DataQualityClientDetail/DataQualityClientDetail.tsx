@@ -236,10 +236,6 @@ export default function DataQualityClientDetails() {
           clientId={clientId as string}
           clientName={clientName}
           idCountry={clientDetail.id_country || 1}
-          onSuccess={() => {
-            // Refresh client data
-            window.location.reload();
-          }}
         />
       )}
     </div>

@@ -106,7 +106,6 @@ interface IModalDataIntakeProps {
   clientId: string; // Always required (we're in client detail view)
   clientName: string; // To display in the modal
   idCountry: number; // For API calls
-  onSuccess?: () => void; // Simple callback for parent refresh
 }
 
 // Default form values
@@ -128,8 +127,7 @@ export function ModalDataIntake({
   mode,
   clientId,
   clientName,
-  idCountry,
-  onSuccess
+  idCountry
 }: IModalDataIntakeProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
@@ -137,11 +135,10 @@ export function ModalDataIntake({
   const {
     data: parameterDataResponse,
     error: fetchError,
+    isLoading,
     mutate
   } = useSWR<GenericResponse<IParameterData>>(
-    open && mode === "edit" && clientId
-      ? `/data/clients/${clientId}/parametrization/${projectId}`
-      : null,
+    open && clientId ? `/data/clients/${clientId}/parametrization/${projectId}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -150,8 +147,6 @@ export function ModalDataIntake({
   );
 
   const parameterData = parameterDataResponse?.data;
-  const isFetchingParameters =
-    !fetchError && !parameterDataResponse && open && mode === "edit" && !!clientId;
 
   // Compute form initial data based on available sources
   const formInitialData = useMemo(() => {
@@ -163,9 +158,6 @@ export function ModalDataIntake({
       return defaultFormValues;
     }
   }, [mode, clientId, parameterData]);
-
-  // Combined loading state
-  const isLoading = isFetchingParameters;
 
   // Setup react-hook-form
   const {
@@ -220,13 +212,6 @@ export function ModalDataIntake({
     return catalogs.archive_types.find((t) => t.description === fileType)?.id || 0;
   };
 
-  const getStakeholderId = (stakeholderName: string, catalogs?: IParameterCatalogs): number => {
-    if (!catalogs?.stakeholders) {
-      return mockStakeholders.find((s) => s.name === stakeholderName)?.id || 0;
-    }
-    return catalogs.stakeholders.find((s) => s.name === stakeholderName)?.id || 0;
-  };
-
   const buildPeriodicityJson = (formData: DataIntakeFormData): IPeriodicity => {
     const frequency = formData.periodicity.toLowerCase();
 
@@ -254,7 +239,6 @@ export function ModalDataIntake({
   // Handler for creating ingestion
   const handleCreateIngestion = async (formData: DataIntakeFormData) => {
     try {
-      // Transform form data to archive rules
       const archiveRules: IArchiveRule[] = [
         {
           id_type_archive: getArchiveTypeId(formData.fileType, parameterData?.catalogs),
@@ -272,14 +256,6 @@ export function ModalDataIntake({
       await updateClient(parseInt(clientId), requestData);
 
       message.success("Ingesta creada exitosamente");
-
-      // Revalidate parameter data
-      mutate?.();
-
-      // Notify parent for refresh
-      onSuccess?.();
-
-      // Close modal and reset form
       onOpenChange();
       reset(defaultFormValues);
     } catch (error) {
@@ -288,14 +264,11 @@ export function ModalDataIntake({
     }
   };
 
-  // Submit handler
   const onSubmit = async (data: DataIntakeFormData) => {
     if (mode === "create") {
       await handleCreateIngestion(data);
     } else if (mode === "edit") {
-      // TODO: Por ahora no hace nada según el usuario
       console.log("Edit mode - not implemented yet");
-      message.info("La edición será implementada próximamente");
     }
   };
 
@@ -307,7 +280,6 @@ export function ModalDataIntake({
         name: s.name
       }));
     }
-    return mockStakeholders;
   }, [parameterData]);
 
   const fileTypeOptions = useMemo(() => {
@@ -318,7 +290,6 @@ export function ModalDataIntake({
         label: t.description
       }));
     }
-    return mockTipoArchivo;
   }, [parameterData]);
 
   // Show loading state inside modal
@@ -375,7 +346,7 @@ export function ModalDataIntake({
                       <SelectValue placeholder="Seleccionar tipo de archivo" />
                     </SelectTrigger>
                     <SelectContent className="!z-[10000]">
-                      {fileTypeOptions.map((tipo) => (
+                      {fileTypeOptions?.map((tipo) => (
                         <SelectItem key={tipo.id} value={tipo.value}>
                           {tipo.label}
                         </SelectItem>
@@ -526,7 +497,7 @@ export function ModalDataIntake({
                       <SelectValue placeholder="Seleccionar responsable" />
                     </SelectTrigger>
                     <SelectContent className="!z-[10000]">
-                      {stakeholderOptions.map((stakeholder) => (
+                      {stakeholderOptions?.map((stakeholder) => (
                         <SelectItem key={stakeholder.id} value={stakeholder.name}>
                           {stakeholder.name}
                         </SelectItem>
@@ -641,17 +612,12 @@ export function ModalDataIntake({
 
           {/* Dialog Footer */}
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onOpenChange}
-              disabled={isSubmitting || isLoading}
-            >
+            <Button type="button" variant="outline" onClick={onOpenChange} disabled={isSubmitting}>
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || isSubmitting || isLoading}
+              disabled={!isValid || isSubmitting}
               className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
             >
               {isSubmitting || isLoading
@@ -669,23 +635,10 @@ export function ModalDataIntake({
   );
 }
 
-const mockStakeholders = [
-  { id: 1, name: "Juan Pérez" },
-  { id: 2, name: "María García" },
-  { id: 3, name: "Carlos Rodríguez" },
-  { id: 4, name: "Ana Martínez" }
-];
-
 const mockIngesta = [
   { id: 1, value: "email", label: "Email" },
   { id: 2, value: "b2b-web", label: "B2B Web" },
   { id: 3, value: "api", label: "API" },
   { id: 4, value: "app", label: "App" },
   { id: 5, value: "teamcorp", label: "Teamcorp" }
-];
-
-const mockTipoArchivo = [
-  { id: 1, value: "Sales", label: "Sales" },
-  { id: 2, value: "Stock", label: "Stock" },
-  { id: 3, value: "In transit", label: "In transit" }
 ];
