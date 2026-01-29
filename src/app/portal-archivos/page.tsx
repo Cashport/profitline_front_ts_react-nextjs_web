@@ -18,11 +18,15 @@ export default function PortalArchivosPage() {
   const fileToken = searchParams.get("fileToken");
   const [responses, setResponses] = useState<Record<string, IDigitalRecordFile[] | null>>({});
 
-  if (!fileToken) {
-    return <p>No file token provided</p>;
+  // Mueve el parseo del payload aquí, para que siempre se ejecute
+  let payload: IDecodedPayload | undefined = undefined;
+  if (fileToken) {
+    try {
+      payload = JSON.parse(atob(fileToken.split(".")[1]));
+    } catch (e) {
+      // Opcional: manejar error de parseo
+    }
   }
-
-  const payload: IDecodedPayload | undefined = JSON.parse(atob(fileToken?.split(".")[1]));
 
   useEffect(() => {
     if (!fileToken || !payload?.data) return;
@@ -41,12 +45,16 @@ export default function PortalArchivosPage() {
     fetchFiles();
   }, [fileToken]);
 
+  if (!fileToken) {
+    return <p>No file token provided</p>;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-xl bg-white rounded-lg shadow p-8 flex flex-col items-center">
         <h1 className="text-2xl font-bold mb-6">Archivos a descargar</h1>
         <ul className="w-full space-y-4">
-          {payload?.data.map((file) => (
+          {payload?.data?.map((file) => (
             <li key={file.fileName} className="w-full flex flex-col items-center">
               <p>{file.fileName}</p>
             </li>
