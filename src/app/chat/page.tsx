@@ -1,5 +1,5 @@
-import ChatInbox from "@/modules/chat/containers/chat-inbox";
+import ChatView from "@/modules/chat/containers/chat-view/ChatView";
 
 export default function Page() {
-  return <ChatInbox />;
+  return <ChatView />;
 }
