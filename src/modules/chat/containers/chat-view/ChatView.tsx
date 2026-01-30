@@ -40,14 +40,6 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
       .slice(0, 2);
   };
 
-  const calculateOverdueDays = (createdAt: string) => {
-    const created = new Date(createdAt);
-    const now = new Date();
-    const diffTime = now.getTime() - created.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
-
   return {
     id: ticket.id,
     customer: ticket.customer.name,
@@ -58,16 +50,11 @@ function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): C
     initials: getInitials(ticket.customer.name),
     phone: ticket.customer.phoneNumber,
     email: ticket.agent?.email || "",
-    document: "",
-    segment: "",
-    status: ticket.status === "OPEN" ? "Abierto" : "Cerrado",
-    overdueDays: calculateOverdueDays(ticket.createdAt),
     lastMessage: ticket.lastMessage?.content || "",
     updatedAt: ticket.updatedAt,
     tags: ticket.tags ? [ticket.tags] : [],
-    metrics: { totalVencido: 0, ultimoPago: "" },
     timeline: [],
-    messages: [],
+    metrics: { totalVencido: 0, ultimoPago: "" },
     hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt
   };
@@ -217,8 +204,6 @@ export default function ChatInbox() {
   const filtered = useMemo(() => {
     return conversations.filter((c) => {
       if (activeTab === "todos") return true;
-      if (activeTab === "abiertos") return c.status === "Abierto";
-      return c.status === "Cerrado";
     });
   }, [conversations, activeTab]);
 
@@ -249,7 +234,6 @@ export default function ChatInbox() {
           onToggleSelect={toggleSelect}
           activeConversationId={activeConversation?.id}
           onConversationClick={setActiveId}
-          unreadTicketIds={unreadTickets}
           onMarkAsRead={(id) => {
             setUnreadTickets((prev) => {
               const newSet = new Set(prev);

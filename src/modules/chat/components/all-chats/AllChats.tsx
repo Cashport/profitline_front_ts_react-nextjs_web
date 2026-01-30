@@ -5,8 +5,6 @@ import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 
-import { Badge } from "@/modules/chat/ui/badge";
-import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
@@ -23,7 +21,6 @@ interface AllChatsProps {
   onToggleSelect: (id: string) => void;
   activeConversationId?: string;
   onConversationClick: (id: string) => void;
-  unreadTicketIds: Set<string>;
   onMarkAsRead: (id: string) => void;
   page: number;
   onPageChange: (page: number) => void;
@@ -31,15 +28,6 @@ interface AllChatsProps {
   onNewChat: () => void;
   onAddClient: () => void;
   onAccountStatement?: () => void;
-}
-
-function getRiskColors(days: number) {
-  if (days <= 0) return { bg: "#F7F7F7", text: "#141414", border: "#DDDDDD", label: "Al día" };
-  if (days <= 7)
-    return { bg: "#EAF6B1", text: "#141414", border: "#DDE78F", label: `${days} días` };
-  if (days <= 30)
-    return { bg: "#FDE68A", text: "#141414", border: "#FACC15", label: `${days} días` };
-  return { bg: "#FCA5A5", text: "#141414", border: "#F87171", label: `${days} días` };
 }
 
 export default function AllChats({
@@ -53,7 +41,6 @@ export default function AllChats({
   onToggleSelect,
   activeConversationId,
   onConversationClick,
-  unreadTicketIds,
   onMarkAsRead,
   page,
   onPageChange,
@@ -131,7 +118,6 @@ export default function AllChats({
             conversations.map((c) => {
               const isActive = c.id === activeConversationId;
               const isSelected = selectedIds.includes(c.id);
-              const risk = getRiskColors(c.overdueDays);
               return (
                 <li
                   key={c.id}

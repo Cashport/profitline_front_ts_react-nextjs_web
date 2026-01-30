@@ -80,9 +80,9 @@ export default function ChatDetails({ conversation, onClose }: Props) {
                 ) : null}
               </div>
               <div className="text-muted-foreground">Documento</div>
-              <div className="font-medium">{conversation.document ?? "—"}</div>
+              <div className="font-medium">{"—"}</div>
               <div className="text-muted-foreground">Segmento</div>
-              <div className="font-medium">{conversation.segment ?? "—"}</div>
+              <div className="font-medium">{"—"}</div>
             </div>
             <Separator />
             <div className="flex flex-wrap gap-2">
@@ -106,7 +106,7 @@ export default function ChatDetails({ conversation, onClose }: Props) {
                 <div className="text-muted-foreground">Total vencido</div>
                 <div className="font-medium">{formatCOP(conversation.metrics.totalVencido)}</div>
                 <div className="text-muted-foreground">Días de atraso</div>
-                <div className="font-medium">{conversation.overdueDays}</div>
+                <div className="font-medium">-</div>
                 <div className="text-muted-foreground">Último pago</div>
                 <div className="font-medium">{conversation.metrics.ultimoPago}</div>
               </div>
