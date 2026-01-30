@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
+  CaretDoubleLeft,
   CodesandboxLogo,
   FileArrowDown,
   Microphone,
@@ -15,7 +15,6 @@ import {
 } from "@phosphor-icons/react";
 
 import {
-  GetTicketsResponse,
   getWhatsAppTemplates,
   markTicketAsRead,
   sendMessage,
@@ -33,10 +32,9 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
-import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
-import ChatActions from "@/modules/chat/components/chat-actions";
+
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
@@ -51,10 +49,9 @@ type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
-  mutateTickets: KeyedMutator<GetTicketsResponse>;
+  mutateTickets: () => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
-  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -87,7 +84,6 @@ export default function ChatThread({
   conversation,
   onShowDetails,
   detailsOpen,
-  onOpenAddClientModal,
   mutateTickets
 }: Props) {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
@@ -694,9 +690,6 @@ export default function ChatThread({
               <p className="truncate text-sm font-semibold">
                 {conversation.client_name ? conversation.client_name : conversation.customer}
               </p>
-              <Badge className="rounded-full bg-[#141414] px-2 py-0.5 text-xs text-white">
-                {conversation.status}
-              </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
               {channel === "whatsapp"
@@ -713,26 +706,10 @@ export default function ChatThread({
             </TabsList>
           </Tabs>
 
-          <ChatActions
-            items={[
-              {
-                key: "add-client",
-                label: "Agregar cliente",
-                onClick: () => onOpenAddClientModal?.()
-              }
-            ]}
-          />
-
           {!detailsOpen ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              style={{ borderColor: "#DDDDDD" }}
-              onClick={() => onShowDetails?.()}
-            >
-              Ver más
-            </Button>
+            <button onClick={() => onShowDetails?.()} aria-label="Ocultar información del cliente">
+              <CaretDoubleLeft size={20} />
+            </button>
           ) : null}
         </div>
       </div>

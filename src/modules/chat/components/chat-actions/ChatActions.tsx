@@ -1,4 +1,4 @@
-import { DotsThreeVertical } from "@phosphor-icons/react";
+import { ArrowUpRight } from "@phosphor-icons/react";
 import { Button } from "@/modules/chat/ui/button";
 import {
   DropdownMenu,
@@ -23,14 +23,15 @@ interface ChatActionsProps {
 
 export default function ChatActions({
   items,
-  triggerClassName = "h-8 w-8 p-0",
+  triggerClassName = "h-8 p-0 font-semibold italic",
   align = "end"
 }: ChatActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className={triggerClassName}>
-          <DotsThreeVertical size={16} />
+        <Button variant="ghost" className={triggerClassName}>
+          Acciones
+          <ArrowUpRight size={16} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
@@ -39,7 +40,7 @@ export default function ChatActions({
           return (
             <DropdownMenuItem key={item.key} onClick={item.onClick} className="cursor-pointer">
               {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
-              {item.label}
+              <p className="text-base font-light">{item.label}</p>
             </DropdownMenuItem>
           );
         })}
