@@ -33,7 +33,7 @@ export default function AllChats({
 }: AllChatsProps) {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
-  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
+  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos">("todos");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
@@ -43,7 +43,11 @@ export default function AllChats({
     pagination,
     isLoading: loading,
     mutate: mutateTickets
-  } = useChatTickets({ page, search: debouncedQuery });
+  } = useChatTickets({
+    page,
+    search: debouncedQuery,
+    isRead: activeTab === "abiertos" ? true : activeTab === "no-leidos" ? false : undefined
+  });
 
   const { isConnected, subscribeToTicketUpdates } = useSocket();
 
@@ -51,8 +55,6 @@ export default function AllChats({
   useEffect(() => {
     if (!isConnected) return;
     return subscribeToTicketUpdates((data) => {
-      console.log("Ticket update received in AllChats:", data);
-
       mutateTickets(
         (currentData) => {
           if (!currentData) return currentData;
@@ -94,18 +96,12 @@ export default function AllChats({
     return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
   }, [ticketsData, unreadTickets]);
 
-  const filtered = useMemo(() => {
-    return conversations.filter((c) => {
-      if (activeTab === "todos") return true;
-    });
-  }, [conversations, activeTab]);
-
   // Auto-select first conversation when data loads and none is selected
   useEffect(() => {
-    if (!activeConversation && filtered.length > 0 && !loading) {
-      onConversationSelect(filtered[0]);
+    if (!activeConversation && conversations.length > 0 && !loading) {
+      onConversationSelect(conversations[0]);
     }
-  }, [filtered, activeConversation, loading, onConversationSelect]);
+  }, [conversations, activeConversation, loading, onConversationSelect]);
 
   // Reset page when search or tab changes
   useEffect(() => {
@@ -113,9 +109,7 @@ export default function AllChats({
   }, [debouncedQuery, activeTab]);
 
   function toggleSelect(id: string) {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   function handleConversationClick(conversation: Conversation) {
@@ -177,7 +171,7 @@ export default function AllChats({
         <TabsList className="grid w-full grid-cols-3 bg-[#F7F7F7]">
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="abiertos">Abiertos</TabsTrigger>
-          <TabsTrigger value="cerrados">Cerrados</TabsTrigger>
+          <TabsTrigger value="no-leidos">No leídos</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -189,12 +183,12 @@ export default function AllChats({
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">Cargando tickets...</div>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : conversations.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">No se encontraron tickets</div>
             </div>
           ) : (
-            filtered.map((c) => {
+            conversations.map((c) => {
               const isActive = c.id === activeConversation?.id;
               const isSelected = selectedIds.includes(c.id);
               return (
@@ -257,7 +251,7 @@ export default function AllChats({
         </ul>
       </Scroll>
 
-      {filtered.length > 0 && pagination && (
+      {conversations.length > 0 && pagination && (
         <Pagination
           current={page}
           pageSize={pagination.limit}

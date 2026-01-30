@@ -6,7 +6,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useSocket } from "@/context/ChatContext";
 import { cn } from "@/utils/utils";
 
-import useChatTickets from "@/hooks/useChatTickets";
+import { useSWRConfig } from "swr";
+import config from "@/config";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 
 import { useToast } from "@/modules/chat/hooks/use-toast";
@@ -37,7 +38,13 @@ type NewConversation = {
 
 export default function ChatInbox() {
   const { toast } = useToast();
-  const { mutate: mutateTickets } = useChatTickets();
+  const { mutate } = useSWRConfig();
+
+  const revalidateTickets = useCallback(() => {
+    return mutate(
+      (key) => typeof key === "string" && key.includes(`${config.API_CHAT}/whatsapp-tickets`)
+    );
+  }, [mutate]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [massOpen, setMassOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
@@ -122,7 +129,7 @@ export default function ChatInbox() {
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
               onOpenAddClientModal={() => setShowAddClientModal(true)}
-              mutateTickets={() => mutateTickets()}
+              mutateTickets={revalidateTickets}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -203,7 +210,7 @@ export default function ChatInbox() {
           try {
             await sendWhatsAppTemplateNew(payload);
             setSendConversation(null);
-            await mutateTickets();
+            await revalidateTickets();
           } catch (error) {
             toast({
               title: "Error enviando",
