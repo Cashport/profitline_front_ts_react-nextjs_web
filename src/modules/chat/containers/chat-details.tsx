@@ -12,11 +12,13 @@ import {
 } from "@/modules/chat/ui/accordion";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { useToast } from "@/modules/chat/hooks/use-toast";
-import { CaretRight, ChatCircle, Copy, EnvelopeSimple } from "@phosphor-icons/react";
+import { CaretDoubleRight, ChatCircle, Copy, EnvelopeSimple } from "@phosphor-icons/react";
+import ChatActions from "@/modules/chat/components/chat-actions";
 
 type Props = {
   conversation: Conversation;
   onClose?: () => void;
+  onOpenAddClientModal?: () => void;
 };
 
 function formatCOP(value: number) {
@@ -31,24 +33,45 @@ function formatCOP(value: number) {
   }
 }
 
-export default function ChatDetails({ conversation, onClose }: Props) {
+export default function ChatDetails({ conversation, onClose, onOpenAddClientModal }: Props) {
   const { toast } = useToast();
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={onClose} aria-label="Ocultar información del cliente">
+            <CaretDoubleRight size={20} />
+          </button>
+          <ChatActions
+            items={[
+              {
+                key: "add-client",
+                label: "Agregar cliente",
+                onClick: () => onOpenAddClientModal?.()
+              },
+              {
+                key: "register-payment-agreement",
+                label: "Registrar acuerdo de pago"
+              },
+              {
+                key: "generate-payment-link",
+                label: "Generar link de pago"
+              },
+              {
+                key: "apply-payment",
+                label: "Aplicar pago"
+              },
+              {
+                key: "edit-contact",
+                label: "Editar contacto"
+              }
+            ]}
+          />
+        </div>
         <Card className="border-[#DDDDDD]">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Información del cliente</CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-muted-foreground hover:text-[#141414]"
-              aria-label="Ocultar información del cliente"
-            >
-              <CaretRight className="h-4 w-4" />
-            </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-2">

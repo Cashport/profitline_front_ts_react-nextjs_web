@@ -128,7 +128,6 @@ export default function ChatInbox() {
               conversation={activeConversation}
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
-              onOpenAddClientModal={() => setShowAddClientModal(true)}
               mutateTickets={revalidateTickets}
             />
           ) : (
@@ -146,7 +145,11 @@ export default function ChatInbox() {
           style={{ borderColor: "#DDDDDD" }}
         >
           {activeConversation && (
-            <ChatDetails conversation={activeConversation} onClose={() => setDetailsOpen(false)} />
+            <ChatDetails
+              conversation={activeConversation}
+              onClose={() => setDetailsOpen(false)}
+              onOpenAddClientModal={() => setShowAddClientModal(true)}
+            />
           )}
         </aside>
       </div>

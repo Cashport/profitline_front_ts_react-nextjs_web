@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import {
   ArrowsOut,
+  CaretDoubleLeft,
   CodesandboxLogo,
   FileArrowDown,
   Microphone,
@@ -33,7 +34,7 @@ import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
-import ChatActions from "@/modules/chat/components/chat-actions";
+
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
@@ -51,7 +52,6 @@ type Props = {
   mutateTickets: () => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
-  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -84,7 +84,6 @@ export default function ChatThread({
   conversation,
   onShowDetails,
   detailsOpen,
-  onOpenAddClientModal,
   mutateTickets
 }: Props) {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
@@ -707,26 +706,10 @@ export default function ChatThread({
             </TabsList>
           </Tabs>
 
-          <ChatActions
-            items={[
-              {
-                key: "add-client",
-                label: "Agregar cliente",
-                onClick: () => onOpenAddClientModal?.()
-              }
-            ]}
-          />
-
           {!detailsOpen ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              style={{ borderColor: "#DDDDDD" }}
-              onClick={() => onShowDetails?.()}
-            >
-              Ver más
-            </Button>
+            <button onClick={() => onShowDetails?.()} aria-label="Ocultar información del cliente">
+              <CaretDoubleLeft size={20} />
+            </button>
           ) : null}
         </div>
       </div>
