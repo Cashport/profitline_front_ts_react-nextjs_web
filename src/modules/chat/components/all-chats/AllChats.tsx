@@ -1,5 +1,5 @@
-import { ChatCircleDots, MagnifyingGlass } from "@phosphor-icons/react";
-import { Pagination } from "antd";
+import { CaretDown, ChatCircleDots, MagnifyingGlass } from "@phosphor-icons/react";
+import { Dropdown, MenuProps, Pagination } from "antd";
 import { cn, formatChatDate } from "@/utils/utils";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
@@ -62,6 +62,12 @@ export default function AllChats({
   onAddClient,
   onAccountStatement
 }: AllChatsProps) {
+  const items: MenuProps["items"] = [
+    {
+      label: <p>Marcar como no leído</p>,
+      key: "0"
+    }
+  ];
   return (
     <aside
       className="border-r md:col-span-3 overflow-hidden min-h-0 flex flex-col"
@@ -72,13 +78,16 @@ export default function AllChats({
         style={{ borderColor: "#DDDDDD" }}
       >
         <h2 style={{ fontSize: 30, fontWeight: 600 }}>Chats</h2>
-        <ChatActions
-          items={[
-            { key: "new-chat", label: "Nuevo chat", onClick: onNewChat },
-            { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
-            { key: "account-statement", label: "Estado de cuenta", onClick: onAccountStatement }
-          ]}
-        />
+        <div className="self-end">
+          <ChatActions
+            items={[
+              { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
+              { key: "account-statement", label: "Estado de cuenta", onClick: onAccountStatement },
+              { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
+              { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
+            ]}
+          />
+        </div>
       </div>
 
       <div className="px-3 py-2">
@@ -127,7 +136,7 @@ export default function AllChats({
                 <li
                   key={c.id}
                   className={cn(
-                    "group relative flex w-full min-w-0 cursor-pointer items-start gap-3 rounded-md px-3 py-3",
+                    "group relative flex w-full min-w-0 cursor-pointer items-start gap-3 rounded-md px-3 py-3 min-h-[80px]",
                     isActive ? "bg-[#F7F7F7]" : "hover:bg-[#F7F7F7]"
                   )}
                   onClick={() => {
@@ -141,10 +150,7 @@ export default function AllChats({
                     onCheckedChange={() => onToggleSelect(c.id)}
                     aria-label={"Seleccionar chat de " + c.customer}
                   />
-                  <Avatar className="ml-6 h-9 w-9 border" style={{ borderColor: "#DDDDDD" }}>
-                    <AvatarFallback>{c.initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
+                  <div className="ml-6 min-w-0 flex-1">
                     <div className="flex w-full items-baseline gap-2">
                       <p className="min-w-0 flex-1 truncate text-sm font-semibold">
                         {c.client_name}
@@ -153,47 +159,34 @@ export default function AllChats({
                         {formatChatDate(c.lastMessageAt)}
                       </span>
                     </div>
-                    <p className="text-[11px] font-normal w-fit">{c.customer}</p>
-                    <div className="flex items-center justify-between gap-2">
-                      <p
-                        className={cn(
-                          "truncate text-sm text-muted-foreground",
-                          c.hasUnreadUpdate && "font-semibold text-[#141414]"
-                        )}
-                      >
-                        {c.lastMessage}
-                      </p>
 
-                      {c.hasUnreadUpdate ? (
-                        <ChatCircleDots
-                          className="w-5 h-5 min-w-[20px] shrink-0"
-                          color="#CBE71E"
-                          weight="duotone"
-                        />
-                      ) : null}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-normal w-fit">{c.customer}</p>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        {c.hasUnreadUpdate ? (
+                          <ChatCircleDots
+                            className="w-5 h-5 min-w-[20px] shrink-0"
+                            color="#CBE71E"
+                            weight="duotone"
+                          />
+                        ) : null}
+                        <Dropdown menu={{ items }} trigger={["click"]}>
+                          <CaretDown
+                            size={14}
+                            className="hidden group-hover:inline transition-all"
+                          />
+                        </Dropdown>
+                      </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <Badge
-                        className={cn(
-                          "h-5 rounded-full px-2 text-xs",
-                          c.status === "Abierto"
-                            ? "bg-[#141414] text-white"
-                            : "bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]"
-                        )}
-                      >
-                        {c.status}
-                      </Badge>
-                      <Badge
-                        className="h-5 rounded-full px-2 text-xs"
-                        style={{
-                          backgroundColor: risk.bg,
-                          color: risk.text,
-                          border: `1px solid ${risk.border}`
-                        }}
-                      >
-                        {c.overdueDays > 0 ? `Atraso: ${risk.label}` : "Sin atraso"}
-                      </Badge>
-                    </div>
+                    <p
+                      className={cn(
+                        "truncate text-sm text-muted-foreground",
+                        c.hasUnreadUpdate && "font-semibold text-[#141414]"
+                      )}
+                    >
+                      {c.lastMessage}
+                    </p>
                   </div>
                 </li>
               );
