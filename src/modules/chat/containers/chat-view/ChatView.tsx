@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import useChatTickets from "@/hooks/useChatTickets";
-import { useDebounce } from "@/hooks/useDeabouce";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSocket } from "@/context/ChatContext";
 import { cn } from "@/utils/utils";
 
+import useChatTickets from "@/hooks/useChatTickets";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
-
-import { ITicket } from "@/types/chat/IChat";
 
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import {
@@ -29,37 +26,6 @@ import SelectClientDialog from "../select-client-dialog";
 import TemplateDialog from "../template-dialog";
 import { auth } from "../../../../../firebase";
 
-// Function to transform ITicket to Conversation format
-function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): Conversation {
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  return {
-    id: ticket.id,
-    customer: ticket.customer.name,
-    customerId: ticket.customer.id,
-    client_name: ticket.customer.clientName,
-    phoneNumber: ticket.customer.phoneNumber,
-    customerCashportUUID: ticket.customer.customerCashportUUID,
-    initials: getInitials(ticket.customer.name),
-    phone: ticket.customer.phoneNumber,
-    email: ticket.agent?.email || "",
-    lastMessage: ticket.lastMessage?.content || "",
-    updatedAt: ticket.updatedAt,
-    tags: ticket.tags ? [ticket.tags] : [],
-    timeline: [],
-    metrics: { totalVencido: 0, ultimoPago: "" },
-    hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
-    lastMessageAt: ticket.lastMessageAt
-  };
-}
-
 type NewConversation = {
   stage: "selectClient" | "selectContact" | "confirm" | "completed";
   clientUUID: string;
@@ -71,21 +37,10 @@ type NewConversation = {
 
 export default function ChatInbox() {
   const { toast } = useToast();
-  const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
-  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [activeId, setActiveId] = useState<string>("");
+  const { mutate: mutateTickets } = useChatTickets();
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [massOpen, setMassOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
-  const [page, setPage] = useState(1);
-  const {
-    data: ticketsData = [],
-    pagination,
-    isLoading: loading,
-    mutate: mutateTickets
-  } = useChatTickets({ page, search: debouncedQuery });
-  const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -98,7 +53,7 @@ export default function ChatInbox() {
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
 
-  const { connect, subscribeToTicketUpdates, isConnected } = useSocket();
+  const { connect } = useSocket();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -132,121 +87,29 @@ export default function ChatInbox() {
   }, [sendConversation?.clientUUID]);
 
   useEffect(() => {
-    // Esperamos a que Firebase Auth termine de inicializar
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (activeId && user?.uid) {
+      if (activeConversation?.id && user?.uid) {
         connect({
           userId: user.uid
         });
       }
     });
     return () => unsubscribe();
-  }, [activeId, connect]);
+  }, [activeConversation?.id, connect]);
 
-  // Use effect to subscribe to ticket updates and update ticketsData accordingly
-  useEffect(() => {
-    if (!isConnected) return;
-    return subscribeToTicketUpdates((data) => {
-      console.log("Ticket update received in ChatInbox:", data);
-
-      mutateTickets(
-        (currentData) => {
-          if (!currentData) return currentData;
-          // Actualizar el ticket correspondiente
-          const updatedTickets = currentData.data.map((ticket) => {
-            if (ticket.id === data.ticketId) {
-              return {
-                ...ticket,
-                lastMessage: {
-                  ...ticket.lastMessage,
-                  content: data.message.content,
-                  timestamp: data.message.timestamp
-                } as ITicket["lastMessage"],
-                lastMessageAt: data.message.timestamp,
-                updatedAt: data.message.timestamp
-              };
-            }
-            return ticket;
-          });
-
-          // Ordenar por lastMessageAt descendente (más reciente primero)
-          const sortedTickets = updatedTickets.sort(
-            (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
-          );
-
-          return {
-            ...currentData,
-            data: sortedTickets
-          };
-        },
-        { revalidate: false }
-      );
-
-      // Si el ticket actualizado NO es el activo, marcarlo como no leído
-      if (activeId !== data.ticketId) {
-        setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
-      }
-    });
-  }, [isConnected, subscribeToTicketUpdates, activeId, mutateTickets]);
-
-  // Set activeId to first ticket on initial load
-  useEffect(() => {
-    if (ticketsData && ticketsData.length > 0 && !activeId) {
-      setActiveId(ticketsData[0].id);
-    }
-  }, [ticketsData, activeId]);
-
-  // Convert tickets to conversations format for display
-  const conversations = useMemo(() => {
-    return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
-  }, [ticketsData, unreadTickets]);
-
-  const filtered = useMemo(() => {
-    return conversations.filter((c) => {
-      if (activeTab === "todos") return true;
-    });
-  }, [conversations, activeTab]);
-
-  const activeConversation = useMemo<Conversation | undefined>(
-    () => filtered.find((c) => c.id === activeId) ?? filtered[0],
-    [filtered, activeId]
-  );
-
-  function toggleSelect(id: string) {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  }
-
-  const handleOpenAccountStatement = () => {
-    setShowAccountStatementModal(true);
-  };
+  const handleConversationSelect = useCallback((conversation: Conversation) => {
+    setActiveConversation(conversation);
+  }, []);
 
   return (
     <div className="flex flex-col h-full w-full bg-white text-[#141414] rounded-lg">
       <div className="grid h-full min-h-0 grid-cols-1 md:grid-cols-12">
         <AllChats
-          query={query}
-          onQueryChange={setQuery}
-          activeTab={activeTab}
-          onActiveTabChange={setActiveTab}
-          conversations={filtered}
-          loading={loading}
-          selectedIds={selectedIds}
-          onToggleSelect={toggleSelect}
-          activeConversationId={activeConversation?.id}
-          onConversationClick={setActiveId}
-          onMarkAsRead={(id) => {
-            setUnreadTickets((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(id);
-              return newSet;
-            });
-          }}
-          page={page}
-          onPageChange={setPage}
-          pagination={pagination}
+          activeConversation={activeConversation}
+          onConversationSelect={handleConversationSelect}
           onNewChat={() => setSendNewMessage(true)}
           onAddClient={() => setShowAddClientModal(true)}
-          onAccountStatement={handleOpenAccountStatement}
+          onAccountStatement={() => setShowAccountStatementModal(true)}
         />
 
         <section
@@ -259,11 +122,11 @@ export default function ChatInbox() {
               onShowDetails={() => setDetailsOpen(true)}
               detailsOpen={detailsOpen}
               onOpenAddClientModal={() => setShowAddClientModal(true)}
-              mutateTickets={mutateTickets}
+              mutateTickets={() => mutateTickets()}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Selecciona un chat para ver la conversación
+              Selecciona un chat para ver la conversacion
             </div>
           )}
         </section>
@@ -284,9 +147,9 @@ export default function ChatInbox() {
       <MassMessageSheet
         open={massOpen}
         onOpenChange={setMassOpen}
-        selectedCount={selectedIds.length}
+        selectedCount={0}
         onSend={(payload) => {
-          console.log("Envío masivo simulado:", payload, "destinatarios:", selectedIds);
+          console.log("Envio masivo simulado:", payload);
           setMassOpen(false);
         }}
       />
@@ -301,7 +164,6 @@ export default function ChatInbox() {
           let payload: any;
 
           if (templateId === "presentacion" || templateId === "saludo") {
-            // Payload para "presentacion" y "saludo" - usa clientName y clientUUID como customerCashportUUID
             payload = {
               templateData: {
                 components: [
@@ -323,7 +185,6 @@ export default function ChatInbox() {
               customerCashportUUID: sendConversation?.clientUUID || ""
             };
           } else {
-            // Default: "estado_de_cuenta" (lógica existente)
             const result = await getTemplateMessages(
               sendConversation?.clientUUID || "",
               templateId

@@ -1,60 +1,139 @@
+import { useEffect, useMemo, useState } from "react";
 import { CaretDown, ChatCircleDots, MagnifyingGlass } from "@phosphor-icons/react";
 import { Dropdown, MenuProps, Pagination } from "antd";
 import { cn, formatChatDate } from "@/utils/utils";
 import { Input } from "@/modules/chat/ui/input";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
-
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import { Scroll } from "@/components/ui/scroll";
 
+import useChatTickets from "@/hooks/useChatTickets";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useSocket } from "@/context/ChatContext";
+import { ITicket } from "@/types/chat/IChat";
+import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
+
 interface AllChatsProps {
-  query: string;
-  onQueryChange: (query: string) => void;
-  activeTab: "todos" | "abiertos" | "cerrados";
-  onActiveTabChange: (tab: "todos" | "abiertos" | "cerrados") => void;
-  conversations: Conversation[];
-  loading: boolean;
-  selectedIds: string[];
-  onToggleSelect: (id: string) => void;
-  activeConversationId?: string;
-  onConversationClick: (id: string) => void;
-  onMarkAsRead: (id: string) => void;
-  page: number;
-  onPageChange: (page: number) => void;
-  pagination?: { limit: number; total: number };
+  activeConversation: Conversation | null;
+  onConversationSelect: (conversation: Conversation) => void;
   onNewChat: () => void;
   onAddClient: () => void;
-  onAccountStatement?: () => void;
+  onAccountStatement: () => void;
 }
 
 export default function AllChats({
-  query,
-  onQueryChange,
-  activeTab,
-  onActiveTabChange,
-  conversations,
-  loading,
-  selectedIds,
-  onToggleSelect,
-  activeConversationId,
-  onConversationClick,
-  onMarkAsRead,
-  page,
-  onPageChange,
-  pagination,
+  activeConversation,
+  onConversationSelect,
   onNewChat,
   onAddClient,
   onAccountStatement
 }: AllChatsProps) {
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "cerrados">("todos");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
+
+  const {
+    data: ticketsData = [],
+    pagination,
+    isLoading: loading,
+    mutate: mutateTickets
+  } = useChatTickets({ page, search: debouncedQuery });
+
+  const { isConnected, subscribeToTicketUpdates } = useSocket();
+
+  // Subscribe to ticket updates via socket
+  useEffect(() => {
+    if (!isConnected) return;
+    return subscribeToTicketUpdates((data) => {
+      console.log("Ticket update received in AllChats:", data);
+
+      mutateTickets(
+        (currentData) => {
+          if (!currentData) return currentData;
+          const updatedTickets = currentData.data.map((ticket) => {
+            if (ticket.id === data.ticketId) {
+              return {
+                ...ticket,
+                lastMessage: {
+                  ...ticket.lastMessage,
+                  content: data.message.content,
+                  timestamp: data.message.timestamp
+                } as ITicket["lastMessage"],
+                lastMessageAt: data.message.timestamp,
+                updatedAt: data.message.timestamp
+              };
+            }
+            return ticket;
+          });
+
+          const sortedTickets = updatedTickets.sort(
+            (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+          );
+
+          return {
+            ...currentData,
+            data: sortedTickets
+          };
+        },
+        { revalidate: false }
+      );
+
+      if (activeConversation?.id !== data.ticketId) {
+        setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
+      }
+    });
+  }, [isConnected, subscribeToTicketUpdates, activeConversation?.id, mutateTickets]);
+
+  const conversations = useMemo(() => {
+    return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
+  }, [ticketsData, unreadTickets]);
+
+  const filtered = useMemo(() => {
+    return conversations.filter((c) => {
+      if (activeTab === "todos") return true;
+    });
+  }, [conversations, activeTab]);
+
+  // Auto-select first conversation when data loads and none is selected
+  useEffect(() => {
+    if (!activeConversation && filtered.length > 0 && !loading) {
+      onConversationSelect(filtered[0]);
+    }
+  }, [filtered, activeConversation, loading, onConversationSelect]);
+
+  // Reset page when search or tab changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, activeTab]);
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function handleConversationClick(conversation: Conversation) {
+    setUnreadTickets((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(conversation.id);
+      return newSet;
+    });
+    onConversationSelect(conversation);
+  }
+
   const items: MenuProps["items"] = [
     {
-      label: <p>Marcar como no leído</p>,
+      label: <p>Marcar como no leido</p>,
       key: "0"
     }
   ];
+
   return (
     <aside
       className="border-r md:col-span-3 overflow-hidden min-h-0 flex flex-col"
@@ -81,18 +160,18 @@ export default function AllChats({
         <div className="relative">
           <MagnifyingGlass className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar cliente, teléfono o mensaje..."
+            placeholder="Buscar cliente, telefono o mensaje..."
             className="w-full bg-[#F7F7F7] pl-8"
             style={{ borderColor: "#DDDDDD" }}
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
       </div>
 
       <Tabs
         value={activeTab}
-        onValueChange={(v) => onActiveTabChange(v as typeof activeTab)}
+        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
         className="w-full px-3 pt-2"
       >
         <TabsList className="grid w-full grid-cols-3 bg-[#F7F7F7]">
@@ -110,13 +189,13 @@ export default function AllChats({
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">Cargando tickets...</div>
             </div>
-          ) : conversations.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-sm text-muted-foreground">No se encontraron tickets</div>
             </div>
           ) : (
-            conversations.map((c) => {
-              const isActive = c.id === activeConversationId;
+            filtered.map((c) => {
+              const isActive = c.id === activeConversation?.id;
               const isSelected = selectedIds.includes(c.id);
               return (
                 <li
@@ -125,15 +204,12 @@ export default function AllChats({
                     "group relative flex w-full min-w-0 cursor-pointer items-start gap-3 rounded-md px-3 py-3 min-h-[80px]",
                     isActive ? "bg-[#F7F7F7]" : "hover:bg-[#F7F7F7]"
                   )}
-                  onClick={() => {
-                    onConversationClick(c.id);
-                    onMarkAsRead(c.id);
-                  }}
+                  onClick={() => handleConversationClick(c)}
                 >
                   <Checkbox
                     className="absolute left-2 top-1/2 -translate-y-1/2"
                     checked={isSelected}
-                    onCheckedChange={() => onToggleSelect(c.id)}
+                    onCheckedChange={() => toggleSelect(c.id)}
                     aria-label={"Seleccionar chat de " + c.customer}
                   />
                   <div className="ml-6 min-w-0 flex-1">
@@ -181,12 +257,12 @@ export default function AllChats({
         </ul>
       </Scroll>
 
-      {conversations.length > 0 && pagination && (
+      {filtered.length > 0 && pagination && (
         <Pagination
           current={page}
           pageSize={pagination.limit}
           total={pagination.total}
-          onChange={(newPage) => onPageChange(newPage)}
+          onChange={(newPage) => setPage(newPage)}
           showSizeChanger={false}
           size="small"
           className="!py-2 flex justify-center border-t"

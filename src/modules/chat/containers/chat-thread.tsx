@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
   CodesandboxLogo,
@@ -15,7 +14,6 @@ import {
 } from "@phosphor-icons/react";
 
 import {
-  GetTicketsResponse,
   getWhatsAppTemplates,
   markTicketAsRead,
   sendMessage,
@@ -33,7 +31,6 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
-import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
 import ChatActions from "@/modules/chat/components/chat-actions";
@@ -51,7 +48,7 @@ type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
-  mutateTickets: KeyedMutator<GetTicketsResponse>;
+  mutateTickets: () => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
   onOpenAddClientModal?: () => void;
