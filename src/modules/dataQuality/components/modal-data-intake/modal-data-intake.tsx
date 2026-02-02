@@ -136,8 +136,7 @@ export function ModalDataIntake({
   const {
     data: parameterDataResponse,
     error: fetchError,
-    isLoading,
-    mutate
+    isLoading
   } = useSWR<GenericResponse<IParameterData>>(
     open && clientId ? `/data/clients/${clientId}/parametrization/${projectId}` : null,
     fetcher,
@@ -292,6 +291,17 @@ export function ModalDataIntake({
     }
   }, [parameterData]);
 
+  const ingestaOptions = useMemo(() => {
+    if (parameterData?.intake_types && parameterData.intake_types.length > 0) {
+      return parameterData.intake_types.map((type) => ({
+        id: type.id,
+        value: type.description,
+        label: type.description
+      }));
+    }
+    return [];
+  }, [parameterData?.intake_types]);
+
   // Show loading state inside modal
   if (isLoading && open) {
     return (
@@ -373,7 +383,7 @@ export function ModalDataIntake({
                       <SelectValue placeholder="Seleccionar fuente de ingesta" />
                     </SelectTrigger>
                     <SelectContent className="!z-[10000]">
-                      {mockIngesta.map((ingesta) => (
+                      {ingestaOptions.map((ingesta) => (
                         <SelectItem key={ingesta.id} value={ingesta.value}>
                           {ingesta.label}
                         </SelectItem>
@@ -537,10 +547,3 @@ export function ModalDataIntake({
   );
 }
 
-const mockIngesta = [
-  { id: 1, value: "email", label: "Email" },
-  { id: 2, value: "b2b-web", label: "B2B Web" },
-  { id: 3, value: "api", label: "API" },
-  { id: 4, value: "app", label: "App" },
-  { id: 5, value: "teamcorp", label: "Teamcorp" }
-];

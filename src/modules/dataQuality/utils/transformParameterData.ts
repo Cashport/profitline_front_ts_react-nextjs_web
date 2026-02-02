@@ -1,4 +1,4 @@
-import { IParameterData } from "@/types/dataQuality/IDataQuality";
+import { IParameterData, IParameterVariable } from "@/types/dataQuality/IDataQuality";
 import { DataIntakeFormData } from "../components/modal-data-intake/modal-data-intake";
 
 export const transformParameterDataToFormData = (
@@ -27,18 +27,20 @@ export const transformParameterDataToFormData = (
     "";
 
   // Transform variables array to key-value pairs
-  // The variables structure might be { key: string, value: string }[] or need transformation
   const ingestaVariables =
     variables && variables.length > 0
-      ? variables.map((v: any) => ({
-          key: v.key || v.name || "",
-          value: v.value || ""
+      ? variables.map((v: IParameterVariable) => ({
+          key: v.variable_key || "",
+          value: v.variable_value || ""
         }))
       : [{ key: "", value: "" }];
 
-  // Extract ingestaSource from variables if available
-  // This is a placeholder - adjust based on actual API structure
-  const ingestaSource = "email"; // Default value
+  // Extract ingestaSource from first intake type as default
+  // Note: Edit mode is not yet implemented, so this is only used for initial form state
+  const ingestaSource =
+    parameterData.intake_types && parameterData.intake_types.length > 0
+      ? parameterData.intake_types[0].description
+      : "";
 
   // Extract daily/weekly details from periodicity_json if structure allows
   // For now, use defaults - can be refined later based on actual structure

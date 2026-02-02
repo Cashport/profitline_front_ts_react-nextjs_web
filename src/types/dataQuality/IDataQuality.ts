@@ -176,7 +176,17 @@ export interface IParameterClientData {
 // Main parameter data interface
 export interface IParameterData {
   client_data: IParameterClientData;
+  intake_types: {
+    id: number;
+    description: string;
+  }[];
   archive_rules: IArchiveRuleResponse[];
-  variables: any[]; // Define more specifically when structure is known
+  variables: IParameterVariable[];
   catalogs: IParameterCatalogs;
+}
+
+export interface IParameterVariable {
+  id: number;
+  variable_key: string;
+  variable_value: string;
 }

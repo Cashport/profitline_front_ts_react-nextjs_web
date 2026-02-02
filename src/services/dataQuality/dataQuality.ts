@@ -115,3 +115,25 @@ export const getParametersData = async (
     throw error;
   }
 };
+
+export const createIntake = async (modelData: {
+  file: File;
+  id_client_data: number;
+  id_type_archive: number;
+  id_status: number;
+}): Promise<void> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    formData.append(key, (modelData as any)[key]);
+  }
+  try {
+    const response: GenericResponse<void> = await API.post(
+      `${config.API_HOST}/data/client-archive-monthly`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating intake:", error);
+    throw error;
+  }
+};
