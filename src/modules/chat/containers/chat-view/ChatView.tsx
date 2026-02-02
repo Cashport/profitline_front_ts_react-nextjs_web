@@ -26,6 +26,7 @@ import MassMessageSheet from "../mass-message-sheet";
 import SelectClientDialog from "../select-client-dialog";
 import TemplateDialog from "../template-dialog";
 import { auth } from "../../../../../firebase";
+import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 
 type NewConversation = {
   stage: "selectClient" | "selectContact" | "confirm" | "completed";
@@ -61,6 +62,9 @@ export default function ChatInbox() {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
 
   const { connect } = useSocket();
+
+  // Prefetch client segmentation detail as soon as a conversation is active
+  useClientSegmentationDetail(activeConversation?.customerCashportUUID);
 
   useEffect(() => {
     const fetchClients = async () => {

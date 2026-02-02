@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import dayjs from "dayjs";
-import { Flex, message, Spin } from "antd";
+import { Flex, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { Button } from "@/modules/chat/ui/button";
 
-import { getClientSegmentationDetail } from "@/services/chat/clients";
+import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 
 import {
   Accordion,
@@ -20,7 +20,6 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 import { cn } from "@/utils/utils";
-import { IClientSegmentationDetail } from "@/types/clients/IClients";
 import { useAppStore } from "@/lib/store/store";
 
 type Props = {
@@ -37,38 +36,15 @@ export default function ChatDetails({
   onOpenAddClientModal
 }: Props) {
   const { toast } = useToast();
-  const [clientDetails, setClientDetails] = useState<IClientSegmentationDetail>();
+  const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
+    conversation.customerCashportUUID
+  );
   const [isModalOpen, setIsModalOpen] = useState({
     isOpen: false,
     selected: 0
   });
-  const [loading, setLoading] = useState(false);
 
   const formatMoney = useAppStore((state) => state.formatMoney);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!conversation.customerCashportUUID) return;
-
-      setLoading(true);
-      try {
-        const res = await getClientSegmentationDetail(conversation.customerCashportUUID);
-        setClientDetails(res);
-      } catch (error) {
-        message.error("Error al traer los detalles del cliente");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDetails();
-  }, [conversation, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setClientDetails(undefined);
-      setLoading(false);
-    }
-  }, [isOpen]);
 
   const handleCloseModals = () => {
     setIsModalOpen({ isOpen: false, selected: 0 });
