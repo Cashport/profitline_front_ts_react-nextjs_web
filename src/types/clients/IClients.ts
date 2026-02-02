@@ -178,3 +178,20 @@ export interface CreditBalanceFormated {
   date: string;
   formattedAmount: string;
 }
+
+export interface IClientSegmentationDetail {
+  client: {
+    uuid: string;
+    business_name: string;
+    phone: string;
+    email: string;
+    segment: string;
+  };
+  portfolio: {
+    total_portfolio: number;
+    past_due_amount: number;
+    unapplied_payments: number;
+    last_payment_date: string;
+    dso: number | null;
+  };
+}
