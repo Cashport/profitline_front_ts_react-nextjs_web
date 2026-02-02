@@ -180,7 +180,8 @@ export default function ChatDetails({
           ticketInfo={{
             clientId: clientDetails?.client.uuid || "",
             clientName: clientDetails?.client.business_name || "",
-            ticketId: conversation.id
+            ticketId: conversation.id,
+            email: clientDetails?.client.email || ""
           }}
         />
       </div>
