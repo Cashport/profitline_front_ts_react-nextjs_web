@@ -17,7 +17,7 @@ import { IPaymentLinkData } from "@/types/commerce/ICommerce";
 interface ModalGeneratePaymentLinkProps {
   isOpen: boolean;
   onClose: () => void;
-  ticketInfo: { clientId: string; clientName: string; ticketId: string };
+  ticketInfo: { clientId: string; clientName: string; ticketId: string; email: string };
 }
 
 interface IFormGenerateLink {
@@ -82,7 +82,7 @@ const ModalGeneratePaymentLink = ({
         amount: data.amount,
         descripcion: data.description,
         ticket_id: ticketInfo.ticketId,
-        email: "mock"
+        email: ticketInfo.email
       };
 
       console.log("Generating link with data:", modelData);

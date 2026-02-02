@@ -41,6 +41,7 @@ export type Conversation = {
   hasUnreadUpdate?: boolean;
   lastMessageAt: string;
   timeline: TimelineItem[];
+  countMessages: number;
 };
 
 export function formatRelativeTime(iso: string) {
