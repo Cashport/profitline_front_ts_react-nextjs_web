@@ -64,7 +64,10 @@ export default function ChatInbox() {
   const { connect } = useSocket();
 
   // Prefetch client segmentation detail as soon as a conversation is active
-  useClientSegmentationDetail(activeConversation?.customerCashportUUID);
+  useClientSegmentationDetail(
+    activeConversation?.customerCashportUUID,
+    activeConversation?.id || ""
+  );
 
   useEffect(() => {
     const fetchClients = async () => {

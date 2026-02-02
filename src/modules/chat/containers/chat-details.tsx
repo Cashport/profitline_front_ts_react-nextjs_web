@@ -39,7 +39,8 @@ export default function ChatDetails({
 }: Props) {
   const { toast } = useToast();
   const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
-    conversation.customerCashportUUID
+    conversation.customerCashportUUID,
+    conversation.id
   );
   const [isModalOpen, setIsModalOpen] = useState({
     isOpen: false,
@@ -65,8 +66,10 @@ export default function ChatDetails({
     setIsActionLoading(true);
     try {
       // TO DO: replace with real contact id when backend is ready
-      const mockContactId = { contacts_ids: [123] };
-      await deleteContact(mockContactId, clientDetails?.client.uuid || "", projectId);
+      const contactIdValue = clientDetails?.client.contact_id;
+      if (!contactIdValue) return;
+      const contactId = { contacts_ids: [contactIdValue] };
+      await deleteContact(contactId, clientDetails?.client.uuid || "", projectId);
       message.success("Contacto inactivado exitosamente");
       handleCloseModals();
     } catch (error) {
