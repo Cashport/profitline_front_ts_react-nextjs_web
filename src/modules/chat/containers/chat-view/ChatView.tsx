@@ -137,21 +137,14 @@ export default function ChatInbox() {
           )}
         </section>
 
-        <aside
-          className={cn(
-            "hidden border-l md:col-span-3 md:block min-h-0 flex flex-col",
-            detailsOpen ? "md:block" : "md:hidden"
-          )}
-          style={{ borderColor: "#DDDDDD" }}
-        >
-          {activeConversation && (
-            <ChatDetails
-              conversation={activeConversation}
-              onClose={() => setDetailsOpen(false)}
-              onOpenAddClientModal={() => setShowAddClientModal(true)}
-            />
-          )}
-        </aside>
+        {activeConversation && (
+          <ChatDetails
+            isOpen={detailsOpen}
+            conversation={activeConversation}
+            onClose={() => setDetailsOpen(false)}
+            onOpenAddClientModal={() => setShowAddClientModal(true)}
+          />
+        )}
       </div>
 
       <MassMessageSheet
