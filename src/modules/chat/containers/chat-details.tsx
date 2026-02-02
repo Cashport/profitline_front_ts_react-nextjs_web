@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
+import { CaretDoubleRight, ChatCircle, Copy, EnvelopeSimple } from "@phosphor-icons/react";
+
 import { Button } from "@/modules/chat/ui/button";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -12,8 +15,8 @@ import {
 } from "@/modules/chat/ui/accordion";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { useToast } from "@/modules/chat/hooks/use-toast";
-import { CaretDoubleRight, ChatCircle, Copy, EnvelopeSimple } from "@phosphor-icons/react";
 import ChatActions from "@/modules/chat/components/chat-actions";
+import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 
 type Props = {
   conversation: Conversation;
@@ -35,6 +38,18 @@ function formatCOP(value: number) {
 
 export default function ChatDetails({ conversation, onClose, onOpenAddClientModal }: Props) {
   const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState({
+    isOpen: false,
+    selected: 0
+  });
+
+  const handleCloseModals = () => {
+    setIsModalOpen({ isOpen: false, selected: 0 });
+  };
+
+  const handleOpenGeneratePaymentLink = () => {
+    setIsModalOpen({ isOpen: true, selected: 1 });
+  };
 
   return (
     <div className="h-full overflow-y-auto">
@@ -56,7 +71,8 @@ export default function ChatDetails({ conversation, onClose, onOpenAddClientModa
               },
               {
                 key: "generate-payment-link",
-                label: "Generar link de pago"
+                label: "Generar link de pago",
+                onClick: handleOpenGeneratePaymentLink
               },
               {
                 key: "apply-payment",
@@ -156,6 +172,16 @@ export default function ChatDetails({ conversation, onClose, onOpenAddClientModa
           </AccordionItem>
         </Accordion>
       </div>
+
+      <ModalGeneratePaymentLink
+        isOpen={isModalOpen.selected === 1}
+        onClose={handleCloseModals}
+        ticketInfo={{
+          clientId: conversation.customerCashportUUID || "",
+          clientName: conversation.client_name,
+          ticketId: conversation.id
+        }}
+      />
     </div>
   );
 }
