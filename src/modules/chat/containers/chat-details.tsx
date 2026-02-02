@@ -176,9 +176,10 @@ export default function ChatDetails({ conversation, onClose, onOpenAddClientModa
       <ModalGeneratePaymentLink
         isOpen={isModalOpen.selected === 1}
         onClose={handleCloseModals}
-        clientInfo={{
+        ticketInfo={{
           clientId: conversation.customerCashportUUID || "",
-          clientName: conversation.client_name
+          clientName: conversation.client_name,
+          ticketId: conversation.id
         }}
       />
     </div>

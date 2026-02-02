@@ -2,23 +2,25 @@ import React, { useEffect, useState } from "react";
 import { Flex, message, Modal } from "antd";
 import { CaretLeft } from "@phosphor-icons/react";
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import { InputTimeForm } from "@/components/atoms/inputs/InputTime/InputTimeForm";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import dayjs from "dayjs";
 import "./modalGeneratePaymentLink.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { generatePaymentLink } from "@/services/commerce/commerce";
 import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
+import { IPaymentLinkData } from "@/types/commerce/ICommerce";
 
 interface ModalGeneratePaymentLinkProps {
   isOpen: boolean;
   onClose: () => void;
-  clientInfo: { clientId: string; clientName: string };
+  ticketInfo: { clientId: string; clientName: string; ticketId: string };
 }
 
 interface IFormGenerateLink {
-  client: string;
   expirationDate: Date;
   expirationTime: Date;
   amount: number;
@@ -34,14 +36,18 @@ const schema = yup.object().shape({
     .date()
     .typeError("Debe ser una hora válida")
     .required("La hora de expiración es requerida"),
-  amount: yup.number().typeError("Debe ser un número válido"),
+  amount: yup
+    .number()
+    .typeError("Debe ser un número válido")
+    .moreThan(0, "El monto debe ser mayor a 0")
+    .required("El monto es requerido"),
   description: yup.string().required("La descripción es requerida")
 });
 
 const ModalGeneratePaymentLink = ({
   isOpen,
   onClose,
-  clientInfo
+  ticketInfo
 }: ModalGeneratePaymentLinkProps) => {
   const {
     control,
@@ -53,7 +59,7 @@ const ModalGeneratePaymentLink = ({
     defaultValues: {
       expirationDate: undefined,
       expirationTime: undefined,
-      amount: 0,
+      amount: undefined,
       description: ""
     }
   });
@@ -70,12 +76,20 @@ const ModalGeneratePaymentLink = ({
   const onSubmit = async (data: IFormGenerateLink) => {
     setIsSubmitting(true);
     try {
-      // await generatePaymentLink(clientInfo.clientId);
-      reset();
+      const modelData: IPaymentLinkData = {
+        fecha_vencimiento: dayjs(data.expirationDate).format("YYYY/MM/DD"),
+        hora_vencimiento: dayjs(data.expirationTime).format("HH:mm"),
+        amount: data.amount,
+        descripcion: data.description,
+        ticket_id: ticketInfo.ticketId,
+        email: "mock"
+      };
 
+      console.log("Generating link with data:", modelData);
+      await generatePaymentLink(ticketInfo.clientId, modelData);
+      reset();
       onClose();
     } catch (error) {
-      console.error("Error al generar el link:", error);
       message.error("Error al generar el link");
     } finally {
       setIsSubmitting(false);
@@ -107,7 +121,7 @@ const ModalGeneratePaymentLink = ({
           <InputForm
             disabled
             nameInput="client"
-            defaultValue={clientInfo.clientName}
+            defaultValue={ticketInfo.clientName}
             control={control}
             error={undefined}
             titleInput="Cliente"
@@ -118,12 +132,14 @@ const ModalGeneratePaymentLink = ({
           nameInput="expirationDate"
           control={control}
           error={errors.expirationDate}
+          placeholder="MM/DD/AAAA"
         />
-        <InputDateForm
+        <InputTimeForm
           titleInput="Hora de vencimiento"
           nameInput="expirationTime"
           control={control}
           error={errors.expirationTime}
+          placeholder="HH:MM"
         />
         <InputFormMoney
           titleInput="Monto a pagar"
