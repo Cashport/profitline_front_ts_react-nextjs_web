@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Flex, Spin } from "antd";
+import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { Button } from "@/modules/chat/ui/button";
@@ -21,6 +21,8 @@ import ChatActions from "@/modules/chat/components/chat-actions";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 import { cn } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { deleteContact } from "@/services/contacts/contacts";
 
 type Props = {
   conversation: Conversation;
@@ -37,13 +39,15 @@ export default function ChatDetails({
 }: Props) {
   const { toast } = useToast();
   const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
-    conversation.customerCashportUUID
+    conversation.customerCashportUUID,
+    conversation.id
   );
   const [isModalOpen, setIsModalOpen] = useState({
     isOpen: false,
     selected: 0
   });
-
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const handleCloseModals = () => {
@@ -52,6 +56,27 @@ export default function ChatDetails({
 
   const handleOpenGeneratePaymentLink = () => {
     setIsModalOpen({ isOpen: true, selected: 1 });
+  };
+
+  const handleOpenDeactivateContact = () => {
+    setIsModalOpen({ isOpen: true, selected: 2 });
+  };
+
+  const handleDeactivateContact = async () => {
+    setIsActionLoading(true);
+    try {
+      // TO DO: replace with real contact id when backend is ready
+      const contactIdValue = clientDetails?.client.contact_id;
+      if (!contactIdValue) return;
+      const contactId = { contacts_ids: [contactIdValue] };
+      await deleteContact(contactId, clientDetails?.client.uuid || "", projectId);
+      message.success("Contacto inactivado exitosamente");
+      handleCloseModals();
+    } catch (error) {
+      message.error("Error al inactivar el contacto");
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
   return (
@@ -96,6 +121,11 @@ export default function ChatDetails({
                   {
                     key: "edit-contact",
                     label: "Editar contacto"
+                  },
+                  {
+                    key: "deactivate-contact",
+                    label: "Inactivar contacto",
+                    onClick: handleOpenDeactivateContact
                   }
                 ]}
               />
@@ -183,6 +213,15 @@ export default function ChatDetails({
             ticketId: conversation.id,
             email: clientDetails?.client.email || ""
           }}
+        />
+
+        <ModalConfirmAction
+          isOpen={isModalOpen.selected === 2}
+          onClose={() => handleCloseModals()}
+          onOk={handleDeactivateContact}
+          title="¿Está seguro de inactivar este contacto?"
+          okText="Inactivar"
+          okLoading={isActionLoading}
         />
       </div>
     </aside>

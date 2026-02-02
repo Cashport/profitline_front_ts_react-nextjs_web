@@ -186,6 +186,7 @@ export interface IClientSegmentationDetail {
     phone: string;
     email: string;
     segment: string;
+    contact_id: number;
   };
   portfolio: {
     total_portfolio: number;
