@@ -150,6 +150,7 @@ export default function ChatInbox() {
             conversation={activeConversation}
             onClose={() => setDetailsOpen(false)}
             onOpenAddClientModal={() => setShowAddClientModal(true)}
+            mutateTickets={revalidateTickets}
           />
         )}
       </div>
