@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
-import { CaretDoubleRight, ChatCircle, Copy, EnvelopeSimple } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { Flex, message, Spin } from "antd";
+import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { Button } from "@/modules/chat/ui/button";
-import { Separator } from "@/modules/chat/ui/separator";
-import { Badge } from "@/modules/chat/ui/badge";
+
+import { getClientSegmentationDetail } from "@/services/chat/clients";
+
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +20,8 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 import { cn } from "@/utils/utils";
+import { IClientSegmentationDetail } from "@/types/clients/IClients";
+import { useAppStore } from "@/lib/store/store";
 
 type Props = {
   conversation: Conversation;
@@ -26,18 +30,6 @@ type Props = {
   onOpenAddClientModal?: () => void;
 };
 
-function formatCOP(value: number) {
-  try {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      maximumFractionDigits: 0
-    }).format(value);
-  } catch {
-    return "$" + value.toLocaleString("es-CO");
-  }
-}
-
 export default function ChatDetails({
   conversation,
   isOpen,
@@ -45,10 +37,38 @@ export default function ChatDetails({
   onOpenAddClientModal
 }: Props) {
   const { toast } = useToast();
+  const [clientDetails, setClientDetails] = useState<IClientSegmentationDetail>();
   const [isModalOpen, setIsModalOpen] = useState({
     isOpen: false,
     selected: 0
   });
+  const [loading, setLoading] = useState(false);
+
+  const formatMoney = useAppStore((state) => state.formatMoney);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!conversation.customerCashportUUID) return;
+
+      setLoading(true);
+      try {
+        const res = await getClientSegmentationDetail(conversation.customerCashportUUID);
+        setClientDetails(res);
+      } catch (error) {
+        message.error("Error al traer los detalles del cliente");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [conversation, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setClientDetails(undefined);
+      setLoading(false);
+    }
+  }, [isOpen]);
 
   const handleCloseModals = () => {
     setIsModalOpen({ isOpen: false, selected: 0 });
@@ -67,132 +87,123 @@ export default function ChatDetails({
       style={{ borderColor: "#DDDDDD" }}
     >
       <div className="h-full overflow-y-auto">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={onClose} aria-label="Ocultar información del cliente">
-              <CaretDoubleRight size={20} />
-            </button>
-            <ChatActions
-              items={[
-                {
-                  key: "add-client",
-                  label: "Agregar cliente",
-                  onClick: () => onOpenAddClientModal?.()
-                },
-                {
-                  key: "register-payment-agreement",
-                  label: "Registrar acuerdo de pago"
-                },
-                {
-                  key: "generate-payment-link",
-                  label: "Generar link de pago",
-                  onClick: handleOpenGeneratePaymentLink
-                },
-                {
-                  key: "apply-payment",
-                  label: "Aplicar pago"
-                },
-                {
-                  key: "edit-contact",
-                  label: "Editar contacto"
-                }
-              ]}
-            />
-          </div>
-          <Card className="border-[#DDDDDD]">
-            <CardHeader>
-              <CardTitle className="text-base">Información del cliente</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="text-muted-foreground">Nombre</div>
-                <div className="font-medium">{conversation.customer}</div>
-                <div className="text-muted-foreground">Teléfono</div>
-                <div className="font-medium">{conversation.phone}</div>
-                <div className="text-muted-foreground">Correo</div>
-                <div className="font-medium min-w-0 overflow-hidden flex items-center gap-2">
-                  <span className="truncate">{conversation.email ?? "—"}</span>
-                  {conversation.email ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 shrink-0 text-muted-foreground"
-                      aria-label="Copiar correo"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(conversation.email!);
-                          toast({ title: "Correo copiado", description: conversation.email });
-                        } catch {
-                          toast({ title: "No se pudo copiar", variant: "destructive" });
-                        }
-                      }}
-                    >
-                      <Copy className="h-4 w-4" />
-                      <span className="sr-only">Copiar correo</span>
-                    </Button>
-                  ) : null}
-                </div>
-                <div className="text-muted-foreground">Documento</div>
-                <div className="font-medium">{"—"}</div>
-                <div className="text-muted-foreground">Segmento</div>
-                <div className="font-medium">{"—"}</div>
-              </div>
-              <Separator />
-              <div className="flex flex-wrap gap-2">
-                {conversation.tags.map((t) => (
-                  <Badge
-                    key={t}
-                    className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]"
-                  >
-                    {t}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Accordion type="single" collapsible className="mt-4">
-            <AccordionItem value="deuda" className="border-[#DDDDDD]">
-              <AccordionTrigger>Resumen de cartera</AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-muted-foreground">Total vencido</div>
-                  <div className="font-medium">{formatCOP(conversation.metrics.totalVencido)}</div>
-                  <div className="text-muted-foreground">Días de atraso</div>
-                  <div className="font-medium">-</div>
-                  <div className="text-muted-foreground">Último pago</div>
-                  <div className="font-medium">{conversation.metrics.ultimoPago}</div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="historial" className="border-[#DDDDDD]">
-              <AccordionTrigger>Historial de acciones</AccordionTrigger>
-              <AccordionContent className="space-y-2 text-sm">
-                {conversation.timeline.map((t) => (
-                  <div key={t.id} className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      {t.channel === "email" ? (
-                        <EnvelopeSimple className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChatCircle className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <div>{t.title}</div>
+        {loading ? (
+          <Flex align="center" justify="center" style={{ minHeight: "300px" }}>
+            <Spin size="large" />
+          </Flex>
+        ) : (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <button onClick={onClose} aria-label="Ocultar información del cliente">
+                <CaretDoubleRight size={20} />
+              </button>
+              <ChatActions
+                items={[
+                  {
+                    key: "add-client",
+                    label: "Agregar cliente",
+                    onClick: () => onOpenAddClientModal?.()
+                  },
+                  {
+                    key: "register-payment-agreement",
+                    label: "Registrar acuerdo de pago"
+                  },
+                  {
+                    key: "generate-payment-link",
+                    label: "Generar link de pago",
+                    onClick: handleOpenGeneratePaymentLink
+                  },
+                  {
+                    key: "apply-payment",
+                    label: "Aplicar pago"
+                  },
+                  {
+                    key: "edit-contact",
+                    label: "Editar contacto"
+                  }
+                ]}
+              />
+            </div>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="info-cliente" className="border-[#DDDDDD]">
+                <AccordionTrigger>Información del cliente</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
+                    <div className="text-muted-foreground">Nombre</div>
+                    <div className="font-medium">{clientDetails?.client.business_name}</div>
+                    <div className="text-muted-foreground">Teléfono</div>
+                    <div className="font-medium">{clientDetails?.client.phone}</div>
+                    <div className="text-muted-foreground">Correo</div>
+                    <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
+                      <span className="truncate">{clientDetails?.client.email}</span>
+                      {clientDetails?.client.email ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground"
+                          aria-label="Copiar correo"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(clientDetails.client.email);
+                              toast({
+                                title: "Correo copiado",
+                                description: clientDetails.client.email
+                              });
+                            } catch {
+                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                          <span className="sr-only">Copiar correo</span>
+                        </Button>
+                      ) : null}
                     </div>
-                    <div className="text-xs text-muted-foreground">{t.when}</div>
+                    <div className="text-muted-foreground">Segmento</div>
+                    <div className="font-medium">{clientDetails?.client.segment}</div>
                   </div>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem value="deuda" className="border-[#DDDDDD]">
+                <AccordionTrigger>Resumen de cartera</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
+                    <div className="text-muted-foreground">Cartera total</div>
+                    <p className="font-medium text-right">
+                      {formatMoney(clientDetails?.portfolio.total_portfolio || 0)}
+                    </p>
+                    <div className="text-muted-foreground">Cartera vencida</div>
+                    <p className="font-medium text-right">
+                      {formatMoney(clientDetails?.portfolio.past_due_amount || 0)}
+                    </p>
+                    <div className="text-muted-foreground">Pagos no aplicados</div>
+                    <p className="font-medium text-right">
+                      {formatMoney(clientDetails?.portfolio.unapplied_payments || 0)}
+                    </p>
+                    <div className="text-muted-foreground">Último pago</div>
+                    <p className="font-medium text-right">
+                      {clientDetails?.portfolio.last_payment_date
+                        ? dayjs(clientDetails.portfolio.last_payment_date).format("DD/MM/YY")
+                        : "-"}
+                    </p>
+                    <div className="text-muted-foreground">DSO</div>
+                    <p className="font-medium text-right">{clientDetails?.portfolio.dso ?? "-"}</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        )}
 
         <ModalGeneratePaymentLink
           isOpen={isModalOpen.selected === 1}
           onClose={handleCloseModals}
           ticketInfo={{
-            clientId: conversation.customerCashportUUID || "",
-            clientName: conversation.client_name,
+            clientId: clientDetails?.client.uuid || "",
+            clientName: clientDetails?.client.business_name || "",
             ticketId: conversation.id
           }}
         />
