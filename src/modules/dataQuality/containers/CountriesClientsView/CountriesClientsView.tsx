@@ -1,0 +1,308 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+
+import { Calendar, FileText, Filter, Upload, ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/modules/chat/ui/select";
+import UiSearchInput from "@/components/ui/search-input";
+import { Button } from "@/modules/chat/ui/button";
+import { Card, CardContent } from "@/modules/chat/ui/card";
+import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
+import { getClientData, createClient } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
+import { IClientData, ICreateClientRequest } from "@/types/dataQuality/IDataQuality";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
+
+// Mock stakeholders for mapping name to ID
+const mockStakeholders = [
+  { id: 1, name: "Juan Pérez" },
+  { id: 2, name: "María García" },
+  { id: 3, name: "Carlos Rodríguez" },
+  { id: 4, name: "Ana Martínez" }
+];
+
+export default function CountriesClientsView() {
+  const params = useParams();
+  const countryId = params.countryId as string;
+  console.log("Country ID from params:", countryId);
+
+  const router = useRouter();
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
+  const height = useScreenHeight();
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
+
+  const handleGoBack = () => {
+    router.push("/data-quality");
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [periodicityFilter, setPeriodicityFilter] = useState("all");
+  const [fileTypeFilter, setFileTypeFilter] = useState("all");
+  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
+
+  // API data state
+  const [clientsData, setClientsData] = useState<IClientData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Use projectId from store, hardcode countryId=1 for now
+        const res = await getClientData(
+          countryId,
+          projectId,
+          pagination.pageSize,
+          pagination.current
+        );
+        setClientsData(res.data);
+        setPagination((prev) => ({
+          ...prev,
+          total: res.total
+        }));
+      } catch (err) {
+        console.error("Error fetching client data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (projectId) {
+      fetchData();
+    }
+  }, [projectId, pagination.current, pagination.pageSize]);
+
+  // Filter by client_name only (other filters remain mock)
+  const filteredData = clientsData.filter((client) =>
+    client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleCreateIngestionSuccess = async (formData: DataIntakeFormData) => {
+    setIsLoadingCreate(true);
+    try {
+      // Build ICreateClientRequest from form data
+
+      // TODO: Verify id_client generation strategy with backend
+      // Currently using crypto.randomUUID() for unique identifier
+      const generatedClientId = crypto.randomUUID();
+
+      // Map stakeholder name to ID using mockStakeholders
+      const stakeholderId = mockStakeholders.find((s) => s.name === formData.stakeholder)?.id || 0;
+
+      // TODO: Verify with backend - Current mapping: Sales=1, Stock=2, In transit=3
+      const archiveTypeId =
+        formData.fileType === "Sales"
+          ? 1
+          : formData.fileType === "Stock"
+            ? 2
+            : formData.fileType === "In transit"
+              ? 3
+              : 0;
+
+      // TODO: Implement proper periodicity_json construction based on form details
+      // Current implementation is simplified and should be enhanced with:
+      // - dailyDetails (diasHabiles, festivos)
+      // - weeklyDetails (acumulado, porRango)
+      // - start_date and end_date handling
+      const periodicityJson = {
+        repeat: {
+          day:
+            formData.periodicity === "Daily"
+              ? [1, 2, 3, 4, 5]
+              : formData.periodicity === "Weekly"
+                ? [1]
+                : formData.periodicity === "Monthly"
+                  ? [1]
+                  : [],
+          interval: formData.periodicity?.toLowerCase() || "daily",
+          frequency: formData.periodicity?.toLowerCase() || "daily"
+        }
+      };
+
+      const modelData: ICreateClientRequest = {
+        id_client: generatedClientId,
+        id_project: projectId,
+        client_name: formData.clientName,
+        id_country: 1, // Hardcoded based on current component logic (line 54)
+        stakeholder: stakeholderId,
+        archive_rules: [
+          {
+            id_type_archive: archiveTypeId,
+            periodicity_json: periodicityJson
+          }
+        ]
+        // TODO: Handle unused form data in future iterations:
+        // - ingestaSource (email, api, b2b-web, etc.)
+        // - ingestaVariables (configuration key-value pairs)
+        // - attachedFile (File upload)
+        // These may require separate API endpoints or additional fields
+      };
+
+      // Call the createClient service
+      const response = await createClient(modelData);
+      console.log("Client created successfully:", response);
+
+      // Refresh the client list to show newly created client
+      const res = await getClientData(
+        countryId,
+        projectId,
+        pagination.pageSize,
+        pagination.current
+      );
+      setClientsData(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }));
+
+      // TODO: Add success notification (e.g., Ant Design message component)
+      // message.success("Cliente creado exitosamente");
+    } catch (error) {
+      console.error("Error creating client:", error);
+      // TODO: Add error notification with user-friendly message
+      // message.error("Error al crear el cliente. Por favor intente nuevamente.");
+    } finally {
+      setIsLoadingCreate(false);
+    }
+  };
+
+  const handleRowClick = (record: IClientData) => {
+    console.log("Row clicked:", {
+      id: record.id,
+      id_client: record.id_client,
+      client_name: record.client_name,
+      archives_count: record.client_data_archives?.length || 0,
+      updated_at: record.updated_at,
+      full_record: record
+    });
+    router.push(`/data-quality/client/${record.id}`);
+  };
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-gray-700 hover:text-gray-900"
+          onClick={handleGoBack}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Inicio
+        </Button>
+        <h1 className="text-2xl font-bold text-[#141414]">-</h1>
+      </div>
+
+      {/* Main Content */}
+      <Card className="bg-white border-[#DDDDDD] p-0">
+        <CardContent className="p-6">
+          {/* Filter Bar */}
+          <div className="flex items-center gap-4 mb-6">
+            {/* Search Input */}
+            <div className="flex-1 max-w-sm">
+              <UiSearchInput
+                placeholder="Buscar cliente..."
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[200px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <Filter className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Estados" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="processed">Procesado</SelectItem>
+                <SelectItem value="pending">Pendiente</SelectItem>
+                <SelectItem value="with-alert">Con novedad</SelectItem>
+                <SelectItem value="partial">Procesado parcial</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Periodicity Filter */}
+            <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
+              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Periodicidad" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las periodicidades</SelectItem>
+                <SelectItem value="Daily">Daily</SelectItem>
+                <SelectItem value="Weekly">Weekly</SelectItem>
+                <SelectItem value="Monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* File Type Filter */}
+            <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                  <FileText className="w-4 h-4 shrink-0" />
+                  <SelectValue placeholder="Tipo de archivo" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los archivos</SelectItem>
+                <SelectItem value="stock">Stock</SelectItem>
+                <SelectItem value="sales">Sales</SelectItem>
+                <SelectItem value="in transit">In transit</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Create Ingestion Button */}
+            <Button
+              className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+              onClick={() => setIsModalDataIntakeOpen(true)}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Crear nueva ingesta
+            </Button>
+          </div>
+
+          {/* Clients Table */}
+          <CountriesClientsTable
+            data={filteredData}
+            loading={loading}
+            pagination={pagination}
+            onPaginationChange={(page, pageSize) => {
+              setPagination((prev) => ({
+                ...prev,
+                current: page,
+                pageSize: pageSize || prev.pageSize
+              }));
+            }}
+            scrollHeight={height - 420}
+            onRowClick={handleRowClick}
+          />
+        </CardContent>
+      </Card>
+
+      <ModalDataIntake
+        mode="create"
+        open={isModalDataIntakeOpen}
+        onOpenChange={setIsModalDataIntakeOpen}
+        onSuccess={handleCreateIngestionSuccess}
+        isLoading={isLoadingCreate}
+      />
+    </div>
+  );
+}

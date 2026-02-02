@@ -11,6 +11,10 @@ import localFont from "next/font/local"; // Import localFont from next/font/loca
 import Loader from "@/components/atoms/loaders/loader";
 import theme from "@/theme/themeConfig";
 
+// Import the styles provided by the react-pdf-viewer packages
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+
 // Dayjs global configuration
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
