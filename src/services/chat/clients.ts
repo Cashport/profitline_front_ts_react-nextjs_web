@@ -1,5 +1,6 @@
 import config from "@/config";
 import { PayloadByTicket, IDigitalRecordFile } from "@/types/chat/IChat";
+import { IClientSegmentationDetail } from "@/types/clients/IClients";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 import axios from "axios";
@@ -120,5 +121,19 @@ export const downloadDigitalRecordFilesFromToken = async (
   } catch (error) {
     console.error("error downloading digital record files from token: ", error);
     return null;
+  }
+};
+
+export const getClientSegmentationDetail = async (
+  clientId: string
+): Promise<IClientSegmentationDetail> => {
+  try {
+    const response: GenericResponse<IClientSegmentationDetail> = await API.get(
+      `${config.API_HOST}/client/segmentation-detail?client_uuid=${clientId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error fetching client segmentation detail: ", error);
+    throw error;
   }
 };

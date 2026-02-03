@@ -220,12 +220,13 @@ export default function AllChats({
                       <p className="text-[11px] font-normal w-fit">{c.customer}</p>
 
                       <div className="flex items-center gap-1 shrink-0">
-                        {c.hasUnreadUpdate ? (
-                          <ChatCircleDots
-                            className="w-5 h-5 min-w-[20px] shrink-0"
-                            color="#CBE71E"
-                            weight="duotone"
-                          />
+                        {c.hasUnreadUpdate && c.countMessages > 0 ? (
+                          <p
+                            className="bg-primary text-black text-[12px] font-medium rounded-full w-[23px] h-[23px] flex items-center justify-center"
+                            style={{ minWidth: 24, textAlign: "center" }}
+                          >
+                            {c.countMessages}
+                          </p>
                         ) : null}
                         <Dropdown menu={{ items }} trigger={["click"]}>
                           <CaretDown
