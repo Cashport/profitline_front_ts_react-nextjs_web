@@ -10,10 +10,7 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function ticketToConversation(
-  ticket: ITicket,
-  unreadTicketsSet: Set<string>
-): Conversation {
+export function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<string>): Conversation {
   return {
     id: ticket.id,
     customer: ticket.customer.name,
@@ -30,6 +27,7 @@ export function ticketToConversation(
     timeline: [],
     metrics: { totalVencido: 0, ultimoPago: "" },
     hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
-    lastMessageAt: ticket.lastMessageAt
+    lastMessageAt: ticket.lastMessageAt,
+    countMessages: ticket._count?.messages || 0
   };
 }
