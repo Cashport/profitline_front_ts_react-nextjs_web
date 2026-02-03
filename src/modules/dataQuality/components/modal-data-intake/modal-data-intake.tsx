@@ -546,4 +546,3 @@ export function ModalDataIntake({
     </Dialog>
   );
 }
-

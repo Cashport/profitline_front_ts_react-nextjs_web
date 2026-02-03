@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/modules/chat/ui/tabs";
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
-import { Spin } from "antd";
+import { Modal, Spin } from "antd";
 import { getWhatsAppTemplates } from "@/services/chat/chat";
 import { IWhatsAppTemplate } from "@/types/chat/IChat";
 
@@ -66,19 +65,19 @@ export default function TemplateDialog({
   }, [channel]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <div className="relative">
-          {loading && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 rounded-lg">
-              <Spin size="large" />
-            </div>
-          )}
-          <DialogHeader>
-            <DialogTitle>
-              Plantillas de {channel === "whatsapp" ? "WhatsApp" : "Correo"}
-            </DialogTitle>
-          </DialogHeader>
+    <Modal
+      open={open}
+      onCancel={() => onOpenChange(false)}
+      footer={null}
+      width="60%"
+      title={`Plantillas de ${channel === "whatsapp" ? "WhatsApp" : "Correo"}`}
+    >
+      <div className="relative">
+        {loading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 rounded-lg">
+            <Spin size="large" />
+          </div>
+        )}
 
           <Tabs defaultValue="usar" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
@@ -236,7 +235,6 @@ export default function TemplateDialog({
             </TabsContent>
           </Tabs>
         </div>
-      </DialogContent>
-    </Dialog>
+    </Modal>
   );
 }

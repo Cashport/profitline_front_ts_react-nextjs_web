@@ -6,9 +6,11 @@ import {
   ICreateOrderData,
   IDiscountPackageAvailable,
   IEcommerceClient,
+  IGeneratePaymentLinkResponse,
   IMarketplaceOrdersFilters,
   IOrderConfirmedResponse,
   IOrderData,
+  IPaymentLinkData,
   IProductData,
   ISalesDashboard,
   ISingleOrder
@@ -422,6 +424,19 @@ export const getSalesDashboard = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching sales dashboard data:", error);
+    throw error;
+  }
+};
+
+export const generatePaymentLink = async (clientId: string, modelData: IPaymentLinkData) => {
+  try {
+    const response: GenericResponse<IGeneratePaymentLinkResponse> = await API.post(
+      `/marketplace/clients/${clientId}/payment-links`,
+      modelData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al generar el link de pago:", error);
     throw error;
   }
 };

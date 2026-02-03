@@ -172,3 +172,27 @@ export const sendWhatsAppTemplateNew = async (payload: any): Promise<void> => {
     throw error;
   }
 };
+
+export const sendAttahcment: (modelData: {
+  customerId: string;
+  caption: string;
+  file: File;
+}) => Promise<any> = async (modelData) => {
+  const { customerId, caption, file } = modelData;
+  try {
+    const formData = new FormData();
+    formData.append("customerId", customerId);
+    formData.append("caption", caption);
+    formData.append("file", file);
+    const res = await API.post("/whatsapp-messages/send-attachment", formData, {
+      baseURL: config.API_CHAT,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error sending attachment:", error);
+    throw error;
+  }
+};

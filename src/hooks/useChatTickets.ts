@@ -1,21 +1,34 @@
-import { getTickets, GetTicketsResponse } from "@/services/chat/chat";
+import config from "@/config";
+import { GetTicketsResponse } from "@/services/chat/chat";
+import { fetcher } from "@/utils/api/api";
 import useSWR from "swr";
 
 interface UseChatTicketsParams {
   limit?: number;
   page?: number;
   search?: string;
+  isRead?: boolean;
 }
 
-const useChatTickets = ({ limit = 200, page = 1, search = "" }: UseChatTicketsParams = {}) => {
-  const { data, isLoading, error, mutate } = useSWR<GetTicketsResponse>(
-    `/whatsapp-tickets?limit=${limit}&page=${page}&search=${search}`,
-    () => getTickets(limit, page, search),
-    {
-      refreshInterval: 7000,
-      revalidateOnFocus: true
+const useChatTickets = ({ limit = 200, page = 1, search, isRead }: UseChatTicketsParams = {}) => {
+  const params = [`limit=${limit}`, `page=${page}`];
+
+  if (search) {
+    params.push(`searchQuery=${search}`);
+  }
+  if (typeof isRead === "boolean") {
+    if (isRead) {
+      params.push(`is_read=1`);
+    } else {
+      params.push(`is_read=0`);
     }
-  );
+  }
+
+  const patKey = `${config.API_CHAT}/whatsapp-tickets?${params.join("&")}`;
+  const { data, isLoading, error, mutate } = useSWR<GetTicketsResponse>(patKey, fetcher, {
+    refreshInterval: 7000,
+    revalidateOnFocus: true
+  });
 
   return {
     data: data?.data,

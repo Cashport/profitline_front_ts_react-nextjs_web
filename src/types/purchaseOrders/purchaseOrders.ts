@@ -194,7 +194,7 @@ export interface IDispatchActionPayload {
 export interface IInvoiceActionPayload {
   action: "invoice";
   data: {
-    invoice_ids: number[];
+    invoice_ids: string[];
   };
   observation: string;
 }

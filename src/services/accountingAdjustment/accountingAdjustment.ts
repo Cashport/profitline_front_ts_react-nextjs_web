@@ -195,14 +195,21 @@ export const legalizeFinancialDiscount = async (
   return response;
 };
 
-interface User {
+interface IAttachments {
+  id: number;
+  name: string;
+}
+
+export interface IUser {
   label: string;
   value: string;
+  full_phone: string;
 }
 
 interface DigitalRecordResponse {
-  usuarios: User[];
+  usuarios: IUser[];
   asunto: string;
+  attachments: IAttachments[];
 }
 
 export const getDigitalRecordFormInfo = async (

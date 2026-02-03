@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import { KeyedMutator } from "swr";
 import {
   ArrowsOut,
+  CaretDoubleLeft,
   CodesandboxLogo,
-  DotsThreeVertical,
   FileArrowDown,
   Microphone,
   Paperclip,
@@ -16,9 +15,9 @@ import {
 } from "@phosphor-icons/react";
 
 import {
-  GetTicketsResponse,
   getWhatsAppTemplates,
   markTicketAsRead,
+  sendAttahcment,
   sendMessage,
   sendWhatsAppTemplate,
   sendWhatsAppTemplateNew
@@ -34,32 +33,27 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
-import { Badge } from "@/modules/chat/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
+
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
-import TemplateDialog from "./template-dialog";
+import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
 import { TypeContactMessage } from "@/types/chat/messages";
+import { useAppStore } from "@/lib/store/store";
+import { message as messageApi } from "antd";
 
 type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
-  mutateTickets: KeyedMutator<GetTicketsResponse>;
+  mutateTickets: () => void;
   onShowDetails?: () => void;
   detailsOpen?: boolean;
-  onOpenAddClientModal?: () => void;
 };
 
 function formatBytes(bytes?: number) {
@@ -92,9 +86,9 @@ export default function ChatThread({
   conversation,
   onShowDetails,
   detailsOpen,
-  onOpenAddClientModal,
   mutateTickets
 }: Props) {
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -122,6 +116,7 @@ export default function ChatThread({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const waFileInputRef = useRef<HTMLInputElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
   // Memoized template lookup map for O(1) access
@@ -235,7 +230,6 @@ export default function ChatThread({
     if (channel === "whatsapp") {
       getWhatsAppTemplates()
         .then((res) => {
-          console.log("Templates cargadas:", res);
           setWaTemplates(res);
         })
         .catch((err) => console.error("Error cargando plantillas:", err));
@@ -282,6 +276,10 @@ export default function ChatThread({
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       mutate();
+      // double mutate ensures correct lastMessage status, so it displays READ for example
+      setTimeout(() => {
+        mutate();
+      }, 2000);
       scrollToBottom();
     } catch (err: any) {
       toast({
@@ -470,43 +468,92 @@ export default function ChatThread({
     }
   };
 
-  const renderBubble = useCallback((m: IMessage) => {
-    const mine = m.direction === "OUTBOUND";
-    const status = m.status;
-    const wrapper = "max-w-[80%] md:max-w-[70%]";
-    const bubble =
-      "rounded-2xl border px-3 py-2 text-sm " +
-      (mine
-        ? "bg-[#141414] text-white border-[#141414]"
-        : "bg-white text-[#141414] border-[#DDDDDD]");
+  const handleAttachFile = () => {
+    waFileInputRef.current?.click();
+  };
 
-    const calcReadStatus = (mine: boolean, status: string) => {
-      return (
-        <>
-          {mine && status === "DELIVERED" && (
-            <div className="text-[10px] text-muted-foreground self-end">✓</div>
-          )}
-          {mine && status === "PENDING" && (
-            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-          )}
-          {mine && status === "SENT" && (
-            <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-          )}
-          {mine && status === "READ" && (
-            <div className="text-[10px] self-end text-green-500">✓✓</div>
-          )}
-          {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
-        </>
-      );
-    };
+  async function onPickWAFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    try {
+      await sendAttahcment({
+        customerId: conversation.customerId,
+        caption: file.name,
+        file
+      });
+      messageApi.success("Archivo enviado correctamente");
+      mutate();
+      setTimeout(() => {
+        scrollToBottom();
+      }, 2000);
+    } catch (error) {
+      messageApi.error("Error al enviar el archivo");
+    }
+  }
 
-    if (m.type === "CONTACTS") {
-      const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
-      if (contacts?.length === 0) {
+  const renderBubble = useCallback(
+    (m: IMessage) => {
+      const mine = m.direction === "OUTBOUND";
+      const status = m.status;
+      const wrapper = "max-w-[80%] md:max-w-[70%]";
+      const bubble =
+        "rounded-2xl border px-3 py-2 text-sm " +
+        (mine
+          ? "bg-[#141414] text-white border-[#141414]"
+          : "bg-white text-[#141414] border-[#DDDDDD]");
+
+      const calcReadStatus = (mine: boolean, status: string) => {
+        return (
+          <>
+            {mine && status === "DELIVERED" && (
+              <div className="text-[10px] text-muted-foreground self-end">✓</div>
+            )}
+            {mine && status === "PENDING" && (
+              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+            )}
+            {mine && status === "SENT" && (
+              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
+            )}
+            {mine && status === "READ" && (
+              <div className="text-[10px] self-end text-green-500">✓✓</div>
+            )}
+            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
+          </>
+        );
+      };
+
+      if (m.type === "CONTACTS") {
+        const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
+        if (contacts?.length === 0) {
+          return (
+            <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+              <div className={wrapper}>
+                <div className={bubble + " p-2"}>Contacto sin datos</div>
+                <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+                  {formatRelativeTime(m.timestamp)}
+                </div>
+              </div>
+            </div>
+          );
+        }
         return (
           <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
             <div className={wrapper}>
-              <div className={bubble + " p-2"}>Contacto sin datos</div>
+              <div className={bubble + " p-2 space-y-2"}>
+                {contacts.map((contact, index) => (
+                  <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
+                    <div className="font-semibold">
+                      {contact.name.formatted_name || "Sin nombre"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
+                        "Sin teléfono"}
+                    </div>
+                  </div>
+                ))}
+                {calcReadStatus(mine, status)}
+              </div>
               <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
                 {formatRelativeTime(m.timestamp)}
               </div>
@@ -514,171 +561,149 @@ export default function ChatThread({
           </div>
         );
       }
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-2 space-y-2"}>
-              {contacts.map((contact, index) => (
-                <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
-                  <div className="font-semibold">{contact.name.formatted_name || "Sin nombre"}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
-                      "Sin teléfono"}
+
+      if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
+        return (
+          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+            <div className={wrapper}>
+              <div className={bubble + " p-2"}>
+                <button
+                  onClick={() => setPreviewImage(m.mediaUrl!)}
+                  className="group relative block overflow-hidden rounded-lg"
+                  aria-label="Ver imagen"
+                >
+                  <div className="relative w-full max-h-72 aspect-video">
+                    <Image
+                      style={{ position: "relative" }}
+                      src={m.mediaUrl || "/placeholder.svg"}
+                      alt="Imagen enviada"
+                      fill
+                      unoptimized
+                      className="rounded-lg object-cover"
+                      onLoad={scrollToBottom}
+                    />
                   </div>
-                </div>
-              ))}
-              {calcReadStatus(mine, status)}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-2"}>
-              <button
-                onClick={() => setPreviewImage(m.mediaUrl!)}
-                className="group relative block overflow-hidden rounded-lg"
-                aria-label="Ver imagen"
-              >
-                <div className="relative w-full max-h-72 aspect-video">
-                  <Image
-                    style={{ position: "relative" }}
-                    src={m.mediaUrl || "/placeholder.svg"}
-                    alt="Imagen enviada"
-                    fill
-                    unoptimized
-                    className="rounded-lg object-cover"
-                    onLoad={scrollToBottom}
-                  />
-                </div>
-                <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
-                  <ArrowsOut className="h-4 w-4" />
-                </div>
-              </button>
-              {calcReadStatus(mine, status)}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
+                  <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
+                    <ArrowsOut className="h-4 w-4" />
+                  </div>
+                </button>
+                {calcReadStatus(mine, status)}
+              </div>
+              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+                {formatRelativeTime(m.timestamp)}
+              </div>
             </div>
           </div>
-        </div>
-      );
-    }
-
-    if (m.type === "DOCUMENT" && m.mediaUrl) {
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className={bubble + " p-3"}>
-              <button
-                onClick={() => window.open(m.mediaUrl!, "_blank")}
-                className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
-                aria-label="Abrir documento"
-              >
-                <div className="rounded-lg bg-[#F7F7F7] p-3">
-                  <FileArrowDown className="h-6 w-6 text-[#141414]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
-                  <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
-                </div>
-              </button>
-              {calcReadStatus(mine, status)}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (m.type === "TEMPLATE") {
-      let parsedData: any = null;
-      try {
-        parsedData =
-          typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
-      } catch {
-        parsedData = null;
-      }
-
-      // If templates haven't loaded yet, show loading state
-      if (templateMap.size === 0) {
-        return (
-          <div className="text-gray-500">Cargando plantilla...</div>
         );
       }
 
-      const template = templateMap.get(m.templateName!);
-
-      if (!template) {
+      if (m.type === "DOCUMENT" && m.mediaUrl) {
         return (
-          <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
+          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+            <div className={wrapper}>
+              <div className={bubble + " p-3"}>
+                <button
+                  onClick={() => window.open(m.mediaUrl!, "_blank")}
+                  className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
+                  aria-label="Abrir documento"
+                >
+                  <div className="rounded-lg bg-[#F7F7F7] p-3">
+                    <FileArrowDown className="h-6 w-6 text-[#141414]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
+                    <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
+                  </div>
+                </button>
+                {calcReadStatus(mine, status)}
+              </div>
+              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+                {formatRelativeTime(m.timestamp)}
+              </div>
+            </div>
+          </div>
         );
       }
 
-      const templateComponents = template.components;
-      const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
+      if (m.type === "TEMPLATE") {
+        let parsedData: any = null;
+        try {
+          parsedData =
+            typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
+        } catch {
+          parsedData = null;
+        }
 
-      // Renderizamos los parámetros reales del mensaje
-      const bodyParams =
-        parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
-      let bodyText = bodyComponent?.text || "";
+        // If templates haven't loaded yet, show loading state
+        if (templateMap.size === 0) {
+          return <div className="text-gray-500">Cargando plantilla...</div>;
+        }
 
-      bodyParams.forEach((p: any, i: number) => {
-        bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
-      });
+        const template = templateMap.get(m.templateName!);
 
-      const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
-        ?.parameters?.[0]?.text;
-      const buttonText = buttonParam || null;
+        if (!template) {
+          return (
+            <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
+          );
+        }
 
+        const templateComponents = template.components;
+        const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
+
+        // Renderizamos los parámetros reales del mensaje
+        const bodyParams =
+          parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
+        let bodyText = bodyComponent?.text || "";
+
+        bodyParams.forEach((p: any, i: number) => {
+          bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
+        });
+
+        const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
+          ?.parameters?.[0]?.text;
+        const buttonText = buttonParam || null;
+
+        return (
+          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
+            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
+              <div
+                className="text-sm text-[#141414] whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+              />
+
+              {buttonText && (
+                <a
+                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+                >
+                  Ver detalle
+                </a>
+              )}
+            </div>
+            <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
+          </div>
+        );
+      }
+
+      // Texto por defecto
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-            <div
-              className="text-sm text-[#141414] whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-            />
-
-            {buttonText && (
-              <a
-                href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-              >
-                Ver detalle
-              </a>
-            )}
+          <div className={wrapper}>
+            <div className="flex items-center gap-1">
+              <div className={bubble}>{m.content}</div>
+              {calcReadStatus(mine, status)}
+            </div>
+            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
+              {formatRelativeTime(m.timestamp)}
+            </div>
           </div>
-          <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
         </div>
       );
-    }
-
-    // Texto por defecto
-    return (
-      <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-        <div className={wrapper}>
-          <div className="flex items-center gap-1">
-            <div className={bubble}>{m.content}</div>
-            {calcReadStatus(mine, status)}
-          </div>
-          <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-            {formatRelativeTime(m.timestamp)}
-          </div>
-        </div>
-      </div>
-    );
-  }, [templateMap, setPreviewImage, scrollToBottom]);
+    },
+    [templateMap, setPreviewImage, scrollToBottom]
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -696,9 +721,6 @@ export default function ChatThread({
               <p className="truncate text-sm font-semibold">
                 {conversation.client_name ? conversation.client_name : conversation.customer}
               </p>
-              <Badge className="rounded-full bg-[#141414] px-2 py-0.5 text-xs text-white">
-                {conversation.status}
-              </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
               {channel === "whatsapp"
@@ -715,29 +737,10 @@ export default function ChatThread({
             </TabsList>
           </Tabs>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <DotsThreeVertical size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpenAddClientModal?.()} className="cursor-pointer">
-                Agregar cliente
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {!detailsOpen ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              style={{ borderColor: "#DDDDDD" }}
-              onClick={() => onShowDetails?.()}
-            >
-              Ver más
-            </Button>
+            <button onClick={() => onShowDetails?.()} aria-label="Ocultar información del cliente">
+              <CaretDoubleLeft size={20} />
+            </button>
           ) : null}
         </div>
       </div>
@@ -757,6 +760,7 @@ export default function ChatThread({
       <div className="flex flex-col gap-2 p-3">
         {channel === "whatsapp" ? (
           <div className="flex items-end gap-2">
+            <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
             <div className="flex-1">
               <Textarea
                 value={message}
@@ -771,6 +775,7 @@ export default function ChatThread({
                     size="icon"
                     className="h-8 w-8 text-muted-foreground"
                     aria-label="Adjuntar archivo"
+                    onClick={handleAttachFile}
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>

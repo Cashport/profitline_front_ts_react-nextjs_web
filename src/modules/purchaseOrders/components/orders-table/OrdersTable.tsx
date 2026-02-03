@@ -249,7 +249,7 @@ export function OrdersTable({
         position: ["bottomRight"],
         showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
       }}
-      scroll={{ y: height - 420, x: 100 }}
+      scroll={{ y: height - 360, x: 100 }}
     />
   );
 }
