@@ -6,6 +6,7 @@ import {
   ICreateOrderData,
   IDiscountPackageAvailable,
   IEcommerceClient,
+  IGeneratePaymentLinkResponse,
   IMarketplaceOrdersFilters,
   IOrderConfirmedResponse,
   IOrderData,
@@ -429,7 +430,7 @@ export const getSalesDashboard = async () => {
 
 export const generatePaymentLink = async (clientId: string, modelData: IPaymentLinkData) => {
   try {
-    const response: GenericResponse<any> = await API.post(
+    const response: GenericResponse<IGeneratePaymentLinkResponse> = await API.post(
       `/marketplace/clients/${clientId}/payment-links`,
       modelData
     );

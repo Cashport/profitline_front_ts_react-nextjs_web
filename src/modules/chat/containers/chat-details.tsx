@@ -29,13 +29,15 @@ type Props = {
   isOpen?: boolean;
   onClose?: () => void;
   onOpenAddClientModal?: () => void;
+  mutateTickets: () => void;
 };
 
 export default function ChatDetails({
   conversation,
   isOpen,
   onClose,
-  onOpenAddClientModal
+  onOpenAddClientModal,
+  mutateTickets
 }: Props) {
   const { toast } = useToast();
   const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
@@ -65,13 +67,13 @@ export default function ChatDetails({
   const handleDeactivateContact = async () => {
     setIsActionLoading(true);
     try {
-      // TO DO: replace with real contact id when backend is ready
       const contactIdValue = clientDetails?.client.contact_id;
       if (!contactIdValue) return;
       const contactId = { contacts_ids: [contactIdValue] };
       await deleteContact(contactId, clientDetails?.client.uuid || "", projectId);
       message.success("Contacto inactivado exitosamente");
       handleCloseModals();
+      mutateTickets();
     } catch (error) {
       message.error("Error al inactivar el contacto");
     } finally {
