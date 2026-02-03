@@ -336,3 +336,12 @@ export interface IPaymentLinkData {
   descripcion: string;
   email: string;
 }
+
+export interface IGeneratePaymentLinkResponse {
+  id: number;
+  client: string;
+  amount: number;
+  status: string;
+  expiration: string;
+  link: string;
+}

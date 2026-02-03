@@ -62,8 +62,6 @@ export default function ApprovalsView() {
               <OptimizedSearchComponent onSearch={setSearchQuery} title="Buscar" />
 
               <div className="hidden md:flex items-center gap-2">
-                <GenerateActionButton onClick={() => {}} disabled={selectedIds.length === 0} />
-
                 <ApprovalsStateDropdown
                   statusOptions={statusOptions}
                   selectedStatuses={selectedStatuses}
