@@ -14,20 +14,13 @@ import {
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
-import { getClientData, createClient } from "@/services/dataQuality/dataQuality";
+import { ModalDataIntake } from "../../components/modal-data-intake";
+import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
+import { getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import { IClientData, ICreateClientRequest } from "@/types/dataQuality/IDataQuality";
+import { IClientData } from "@/types/dataQuality/IDataQuality";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
-
-// Mock stakeholders for mapping name to ID
-const mockStakeholders = [
-  { id: 1, name: "Juan Pérez" },
-  { id: 2, name: "María García" },
-  { id: 3, name: "Carlos Rodríguez" },
-  { id: 4, name: "Ana Martínez" }
-];
 
 export default function CountriesClientsView() {
   const params = useParams();
@@ -47,6 +40,7 @@ export default function CountriesClientsView() {
   const [periodicityFilter, setPeriodicityFilter] = useState("all");
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
   const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
+  const [isModalClientOpen, setIsModalClientOpen] = useState(false);
 
   // API data state
   const [clientsData, setClientsData] = useState<IClientData[]>([]);
@@ -57,29 +51,28 @@ export default function CountriesClientsView() {
     total: 0
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Use projectId from store, hardcode countryId=1 for now
-        const res = await getClientData(
-          countryId,
-          projectId,
-          pagination.pageSize,
-          pagination.current
-        );
-        setClientsData(res.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: res.total
-        }));
-      } catch (err) {
-        console.error("Error fetching client data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await getClientData(
+        countryId,
+        projectId,
+        pagination.pageSize,
+        pagination.current
+      );
+      setClientsData(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }));
+    } catch (err) {
+      console.error("Error fetching client data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (projectId) {
       fetchData();
     }
@@ -178,8 +171,11 @@ export default function CountriesClientsView() {
               </SelectContent>
             </Select>
 
-            {/* Create Ingestion Button */}
-            <Button className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
+            {/* Create Client Button */}
+            <Button
+              className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+              onClick={() => setIsModalClientOpen(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Crear cliente
             </Button>
@@ -202,6 +198,14 @@ export default function CountriesClientsView() {
           />
         </CardContent>
       </Card>
+      <ModalCreateEditClient
+        isOpen={isModalClientOpen}
+        onClose={() => setIsModalClientOpen(false)}
+        onSuccess={fetchData}
+        countryName=""
+        countryId={countryId}
+        mode="create"
+      />
     </div>
   );
 }

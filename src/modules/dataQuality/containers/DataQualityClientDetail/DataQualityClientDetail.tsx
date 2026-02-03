@@ -7,7 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalDataIntake } from "../../components/modal-data-intake";
+import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
+import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import { useAppStore } from "@/lib/store/store";
@@ -46,7 +48,7 @@ const parseDetailFuente = (detalle: string): Array<{ key: string; value: string 
   }
 };
 
-type IModalState = { isOpen: boolean; mode: "create" | "edit" };
+type IModalState = { isOpen: boolean; mode: "create" | "view" };
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -58,9 +60,13 @@ export default function DataQualityClientDetails() {
 
   // Modal state with discriminated union for type safety
   const [modalState, setModalState] = useState<IModalState>({ isOpen: false, mode: "create" });
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
 
   // Fetch client detail data using SWR hook
-  const { clientDetail, isLoading, error } = useDataQualityClientDetail(clientId, projectId);
+  const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
+    clientId,
+    projectId
+  );
 
   // Handle loading state
   if (isLoading) {
@@ -196,19 +202,10 @@ export default function DataQualityClientDetails() {
                 >
                   Catálogos
                 </Button>
-                {/* Create Ingestion Button */}
-                <Button
-                  className="ml-auto bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-                  onClick={() => setModalState({ isOpen: true, mode: "create" })}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Crear nueva ingesta
-                </Button>
-
                 <Button
                   variant="outline"
                   className="text-sm font-medium bg-transparent"
-                  onClick={() => setModalState({ isOpen: true, mode: "edit" })}
+                  onClick={() => setIsEditClientOpen(true)}
                   style={{ borderColor: "#DDDDDD", color: "#141414" }}
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -218,6 +215,7 @@ export default function DataQualityClientDetails() {
             </div>
 
             <ClientDetailInfo clientConfig={clientConfig} clientInfo={clientInfo} />
+            <ClientDetailIntakesTable />
 
             <ClientDetailTable files={filteredFiles} />
           </CardContent>
@@ -238,6 +236,20 @@ export default function DataQualityClientDetails() {
           idCountry={clientDetail.id_country || 1}
         />
       )}
+
+      <ModalCreateEditClient
+        isOpen={isEditClientOpen}
+        onClose={() => setIsEditClientOpen(false)}
+        onSuccess={() => mutate()}
+        countryName={countryName || ""}
+        countryId={String(clientDetail.id_country || "")}
+        mode="edit"
+        clientData={{
+          id: clientDetail.id!,
+          client_name: clientDetail.client_name || "",
+          stakeholder: String(clientDetail.stakeholder || "")
+        }}
+      />
     </div>
   );
 }
