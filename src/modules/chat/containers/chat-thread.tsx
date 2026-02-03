@@ -17,6 +17,7 @@ import {
 import {
   getWhatsAppTemplates,
   markTicketAsRead,
+  sendAttahcment,
   sendMessage,
   sendWhatsAppTemplate,
   sendWhatsAppTemplateNew
@@ -44,6 +45,7 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 
 import { TypeContactMessage } from "@/types/chat/messages";
 import { useAppStore } from "@/lib/store/store";
+import { message as messageApi } from "antd";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -114,6 +116,7 @@ export default function ChatThread({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const waFileInputRef = useRef<HTMLInputElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
   // Memoized template lookup map for O(1) access
@@ -465,6 +468,30 @@ export default function ChatThread({
     }
   };
 
+  const handleAttachFile = () => {
+    waFileInputRef.current?.click();
+  };
+
+  async function onPickWAFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    try {
+      await sendAttahcment({
+        customerId: conversation.customerId,
+        caption: file.name,
+        file
+      });
+      messageApi.success("Archivo enviado correctamente");
+      mutate();
+      setTimeout(() => {
+        scrollToBottom();
+      }, 2000);
+    } catch (error) {
+      messageApi.error("Error al enviar el archivo");
+    }
+  }
+
   const renderBubble = useCallback(
     (m: IMessage) => {
       const mine = m.direction === "OUTBOUND";
@@ -733,6 +760,7 @@ export default function ChatThread({
       <div className="flex flex-col gap-2 p-3">
         {channel === "whatsapp" ? (
           <div className="flex items-end gap-2">
+            <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
             <div className="flex-1">
               <Textarea
                 value={message}
@@ -747,6 +775,7 @@ export default function ChatThread({
                     size="icon"
                     className="h-8 w-8 text-muted-foreground"
                     aria-label="Adjuntar archivo"
+                    onClick={handleAttachFile}
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
