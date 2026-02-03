@@ -213,7 +213,8 @@ export default function ChatDetails({
             clientId: clientDetails?.client.uuid || "",
             clientName: clientDetails?.client.business_name || "",
             ticketId: conversation.id,
-            email: clientDetails?.client.email || ""
+            email: clientDetails?.client.email || "",
+            phone: clientDetails?.client.phone || ""
           }}
         />
 
