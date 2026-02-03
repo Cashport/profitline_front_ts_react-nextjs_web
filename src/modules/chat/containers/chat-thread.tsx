@@ -38,7 +38,7 @@ import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
-import TemplateDialog from "./template-dialog";
+import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
