@@ -22,9 +22,9 @@ import AllChats from "../../components/all-chats";
 import AddClientModal from "../../components/contacts-tab-modal";
 import ChatDetails from "../chat-details";
 import ChatThread from "../chat-thread";
-import MassMessageSheet from "../mass-message-sheet";
-import SelectClientDialog from "../select-client-dialog";
-import TemplateDialog from "../template-dialog";
+import MassMessageSheet from "../../components/mass-message-sheet/mass-message-sheet";
+import SelectClientDialog from "../../components/select-client-dialog/select-client-dialog";
+import TemplateDialog from "../../components/template-dialog/template-dialog";
 import { auth } from "../../../../../firebase";
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 

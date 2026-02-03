@@ -38,7 +38,7 @@ import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
-import TemplateDialog from "./template-dialog";
+import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
@@ -273,6 +273,10 @@ export default function ChatThread({
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       mutate();
+      // double mutate ensures correct lastMessage status, so it displays READ for example
+      setTimeout(() => {
+        mutate();
+      }, 2000);
       scrollToBottom();
     } catch (err: any) {
       toast({
