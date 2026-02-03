@@ -273,6 +273,10 @@ export default function ChatThread({
 
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       mutate();
+      // double mutate ensures correct lastMessage status, so it displays READ for example
+      setTimeout(() => {
+        mutate();
+      }, 2000);
       scrollToBottom();
     } catch (err: any) {
       toast({
