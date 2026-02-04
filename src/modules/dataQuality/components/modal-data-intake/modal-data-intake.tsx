@@ -20,7 +20,7 @@ import { IParameterData } from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit } from "lucide-react";
-import InputClickable from "@/components/ui/input-clickable";
+import { InputClickableStyled } from "../input-clickable-styled/input-clickable-styled";
 import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
 import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
 import { createIntake } from "@/services/dataQuality/dataQuality";
@@ -46,7 +46,10 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
   clientName: yup.string().required("El nombre del cliente es requerido"),
   fileType: yup.string().required("El tipo de archivo es requerido"),
   ingestaSource: yup.string().required("La fuente de ingesta es requerida"),
-  attachedFile: yup.mixed().nullable(),
+  attachedFile: yup
+    .mixed<File>()
+    .required("El archivo adjunto es requerido")
+    .test("is-file", "El archivo adjunto es requerido", (value) => value instanceof File),
   ingestaVariables: yup
     .array()
     .of(
@@ -206,7 +209,7 @@ export function ModalDataIntake({
 
       try {
         const modelData = {
-          file: data.attachedFile!,
+          file: data.attachedFile as File,
           id_client_data: Number(clientId),
           id_type_archive: Number(data.fileType),
           id_status: 1, // Assuming '1' is the default status for new intake
@@ -314,9 +317,8 @@ export function ModalDataIntake({
       {/* Periodicidad */}
       <div className="grid gap-2">
         <Label>Periodicidad *</Label>
-        <InputClickable
-          title=""
-          callBackFunction={() => setIsPeriodicityModalOpen(true)}
+        <InputClickableStyled
+          onClick={() => setIsPeriodicityModalOpen(true)}
           value={
             selectedPeriodicity
               ? selectedPeriodicity.frequency.value === "Mensual"
@@ -325,7 +327,7 @@ export function ModalDataIntake({
               : ""
           }
           error={periodicityError}
-          customStyles={periodicityError ? { border: "1px dashed red" } : undefined}
+          placeholder="Seleccionar frecuencia"
         />
         {periodicityError && (
           <p className="text-xs text-red-600">La periodicidad es obligatoria *</p>
@@ -360,7 +362,7 @@ export function ModalDataIntake({
 
       {/* Adjunto */}
       <div className="grid gap-2">
-        <Label>Adjunto (opcional)</Label>
+        <Label>Adjunto *</Label>
         <Controller
           name="attachedFile"
           control={control}
@@ -409,10 +411,13 @@ export function ModalDataIntake({
             </div>
           )}
         />
+        {errors.attachedFile && (
+          <p className="text-xs text-red-600">{errors.attachedFile.message}</p>
+        )}
       </div>
 
       {/* Variables de configuración */}
-      <div className="grid gap-2">
+      {/* <div className="grid gap-2">
         <div className="flex items-center justify-between">
           <Label>Variables de configuración</Label>
           <Button
@@ -463,7 +468,7 @@ export function ModalDataIntake({
         <p className="text-xs text-gray-500">
           Agregue variables como EMAIL, API_URL, PASSWORD, etc.
         </p>
-      </div>
+      </div> */}
     </div>
   );
 
