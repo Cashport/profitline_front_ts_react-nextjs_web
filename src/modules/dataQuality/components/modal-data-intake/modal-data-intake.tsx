@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
-import { IParameterData } from "@/types/dataQuality/IDataQuality";
+import { IParameterData, IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit } from "lucide-react";
@@ -68,7 +68,8 @@ interface IModalDataIntakeProps {
   clientId: string;
   clientName: string;
   idCountry: number;
-  onSuccess?: () => void;
+  intakeData?: IClientDetailDataArchive | null;
+  onSuccess: () => void;
 }
 
 // Default form values
@@ -87,6 +88,7 @@ export function ModalDataIntake({
   clientId,
   clientName,
   idCountry,
+  intakeData,
   onSuccess
 }: IModalDataIntakeProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -115,12 +117,21 @@ export function ModalDataIntake({
 
   // Compute form initial data based on available sources
   const formInitialData = useMemo(() => {
+    if (mode === "view" && intakeData) {
+      return {
+        clientName,
+        fileType: intakeData.tipo_archivo || "",
+        ingestaSource: intakeData.strategy || "",
+        attachedFile: null,
+        existingFileName: intakeData.url || "",
+        ingestaVariables: [{ key: "", value: "" }]
+      } as DataIntakeFormData;
+    }
     if (mode === "view" && clientId && parameterData) {
       return transformParameterDataToFormData(parameterData);
-    } else {
-      return defaultFormValues;
     }
-  }, [mode, clientId, parameterData]);
+    return defaultFormValues;
+  }, [mode, clientId, parameterData, intakeData, clientName]);
 
   // Setup react-hook-form
   const {
@@ -218,7 +229,7 @@ export function ModalDataIntake({
         };
         await createIntake(modelData);
         message.success("Ingesta creada correctamente");
-        onSuccess && onSuccess();
+        onSuccess();
         onOpenChange();
       } catch (error) {
         message.error("Error al crear la ingesta");
@@ -370,7 +381,18 @@ export function ModalDataIntake({
             <div className="space-y-2">
               {mode === "view" && formInitialData?.existingFileName && !attachedFileValue && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span>Archivo actual: {formInitialData.existingFileName}</span>
+                  <span>
+                    Archivo actual:{" "}
+                    <a
+                      href={formInitialData.existingFileName}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {formInitialData.existingFileName.split("/").pop() ||
+                        formInitialData.existingFileName}
+                    </a>
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"
@@ -494,9 +516,20 @@ export function ModalDataIntake({
       {/* Adjunto */}
       <div className="grid gap-2">
         <Label>Adjunto</Label>
-        <p className="text-sm" style={{ color: "#141414" }}>
-          {formInitialData.existingFileName || "Sin archivo adjunto"}
-        </p>
+        {formInitialData.existingFileName ? (
+          <a
+            href={formInitialData.existingFileName}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            {formInitialData.existingFileName.split("/").pop() || formInitialData.existingFileName}
+          </a>
+        ) : (
+          <p className="text-sm" style={{ color: "#141414" }}>
+            Sin archivo adjunto
+          </p>
+        )}
       </div>
 
       {/* Variables de configuración */}

@@ -6,7 +6,6 @@ import { Edit, ArrowLeft, Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake } from "../../components/modal-data-intake";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
@@ -36,20 +35,6 @@ const formatDateTime = (dateString: string): string => {
     .replace(",", "");
 };
 
-const parseDetailFuente = (detalle: string): Array<{ key: string; value: string }> => {
-  try {
-    const parsed = JSON.parse(detalle);
-    return Object.entries(parsed).map(([key, value]) => ({
-      key,
-      value: String(value)
-    }));
-  } catch {
-    return [{ key: "", value: detalle }];
-  }
-};
-
-type IModalState = { isOpen: boolean; mode: "create" | "view" };
-
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
@@ -57,9 +42,6 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Modal state with discriminated union for type safety
-  const [modalState, setModalState] = useState<IModalState>({ isOpen: false, mode: "create" });
   const [isEditClientOpen, setIsEditClientOpen] = useState(false);
 
   // Fetch client detail data using SWR hook
@@ -194,6 +176,7 @@ export default function DataQualityClientDetails() {
               clientName={clientDetail.client_name}
               idCountry={clientDetail.id_country}
               intakes={clientDetail.client_data_archives}
+              onSuccess={() => mutate()}
             />
 
             <ClientDetailTable files={clientDetail.archives_client_data} />
@@ -205,18 +188,6 @@ export default function DataQualityClientDetails() {
           {clientDetail.archives_client_data.length} archivos
         </div>
       </main>
-
-      {modalState.isOpen && clientId && clientDetail && clientName && (
-        <ModalDataIntake
-          open={modalState.isOpen}
-          onOpenChange={() => setModalState({ isOpen: false, mode: "create" })}
-          mode={modalState.mode}
-          clientId={clientId as string}
-          clientName={clientName}
-          idCountry={clientDetail.id_country || 1}
-          onSuccess={() => mutate()}
-        />
-      )}
 
       <ModalCreateEditClient
         isOpen={isEditClientOpen}

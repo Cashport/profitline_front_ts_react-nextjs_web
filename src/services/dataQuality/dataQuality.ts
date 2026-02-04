@@ -118,7 +118,6 @@ export const getParametersData = async (
 };
 
 export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any> => {
-  console.log("Creating intake with data:", modelData);
   const formData = new FormData();
   for (const key in modelData) {
     const value = (modelData as any)[key];

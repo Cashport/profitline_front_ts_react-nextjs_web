@@ -19,21 +19,26 @@ interface ClientDetailIntakesTableProps {
   clientName?: string | null;
   clientId?: string | null;
   idCountry?: number | null;
+  onDetailClicked?: (intake: IClientDetailDataArchive) => void;
+  onSuccess?: () => void;
 }
 
 export function ClientDetailIntakesTable({
   intakes = [],
   clientName,
   clientId,
-  idCountry
+  idCountry,
+  onDetailClicked,
+  onSuccess
 }: ClientDetailIntakesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState({
     isOpen: false,
     mode: "create" as IModalMode
   });
+  const [selectedIntake, setSelectedIntake] = useState<IClientDetailDataArchive | null>(null);
 
-  const handleOpenIntakeModal = (mode: IModalMode) => {
-    // Open the modal to create a new intake
+  const handleOpenIntakeModal = (mode: IModalMode, intake?: IClientDetailDataArchive) => {
+    setSelectedIntake(intake ?? null);
     setIsModalOpen({ isOpen: true, mode });
   };
   return (
@@ -77,7 +82,11 @@ export function ClientDetailIntakesTable({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <p className="text-xs">"Se produce Semanal 4 veces iniciando el 04/02/2026"</p>
+                  <p className="text-xs">
+                    Se produce {intake.periodicity_json.repeat.frequency}{" "}
+                    {intake.periodicity_json.repeat.interval} veces iniciando el{" "}
+                    {intake.periodicity_json.start_date}
+                  </p>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm" style={{ color: "#141414" }}>
@@ -89,7 +98,10 @@ export function ClientDetailIntakesTable({
                     variant="ghost"
                     size="sm"
                     title="Ver detalles"
-                    onClick={() => console.log(intake)}
+                    onClick={() => {
+                      handleOpenIntakeModal("view", intake);
+                      onDetailClicked?.(intake);
+                    }}
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -121,7 +133,12 @@ export function ClientDetailIntakesTable({
         idCountry={idCountry || 0}
         open={isModalOpen.isOpen}
         mode={isModalOpen.mode}
-        onOpenChange={() => setIsModalOpen({ isOpen: false, mode: "create" })}
+        intakeData={selectedIntake}
+        onOpenChange={() => {
+          setIsModalOpen({ isOpen: false, mode: "create" });
+          setSelectedIntake(null);
+        }}
+        onSuccess={() => onSuccess?.()}
       />
     </>
   );
