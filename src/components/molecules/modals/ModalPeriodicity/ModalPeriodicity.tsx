@@ -8,7 +8,7 @@ import GeneralSelect from "@/components/ui/general-select";
 import { SelectDay } from "@/components/atoms/SelectDay/SelectDay";
 import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
 import dayjs from "dayjs";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 interface Props {
   isOpen: boolean;
@@ -20,6 +20,7 @@ interface Props {
     communicationId: number;
     active: boolean;
   };
+  resetOnParentClose?: boolean;
 }
 export const ModalPeriodicity = ({
   isOpen,
@@ -27,13 +28,15 @@ export const ModalPeriodicity = ({
   selectedPeriodicity,
   setSelectedPeriodicity,
   isEditAvailable,
-  showCommunicationDetails
+  showCommunicationDetails,
+  resetOnParentClose = false
 }: Props) => {
   const {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isValid }
+    formState: { errors, isValid },
+    reset
   } = useForm<IPeriodicityModalForm>({
     defaultValues: { days: [] },
     values: selectedPeriodicity
@@ -46,6 +49,18 @@ export const ModalPeriodicity = ({
         }
       : ({} as IPeriodicityModalForm)
   });
+
+  useEffect(() => {
+    if (resetOnParentClose && !isOpen) {
+      reset({
+        init_date: undefined,
+        frequency_number: undefined,
+        frequency: undefined,
+        days: [],
+        end_date: undefined
+      });
+    }
+  }, [isOpen, reset, resetOnParentClose]);
 
   const watchInitDate = watch("init_date");
   const watchFrequency = watch("frequency");

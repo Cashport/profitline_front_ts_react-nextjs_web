@@ -159,6 +159,8 @@ export function ModalDataIntake({
   useEffect(() => {
     if (open) {
       setIsEditing(false);
+      setSelectedPeriodicity(undefined);
+      setPeriodicityError(false);
       const resetData = {
         ...formInitialData,
         clientName,
@@ -233,7 +235,7 @@ export function ModalDataIntake({
         await createIntake(modelData);
         message.success("Ingesta creada correctamente");
         onSuccess();
-        onOpenChange();
+        handleClose();
       } catch (error) {
         message.error("Error al crear la ingesta");
       }
@@ -263,6 +265,8 @@ export function ModalDataIntake({
     setIsEditing(false);
     setSelectedPeriodicity(undefined);
     setPeriodicityError(false);
+    setIsPeriodicityModalOpen(false);
+    reset(defaultFormValues);
     onOpenChange();
   };
 
@@ -511,6 +515,27 @@ export function ModalDataIntake({
         </Badge>
       </div>
 
+      {/* Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Periodicidad</Label>
+        <Badge variant="outline" className="w-fit">
+          {intakeData?.periodicity || "Sin periodicidad"}
+        </Badge>
+      </div>
+      {/* Detalle de Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Detalle de Periodicidad</Label>
+        <p className="text-sm" style={{ color: "#141414" }}>
+          {intakeData?.periodicity_json
+            ? `${intakeData.periodicity_json.repeat.frequency}${
+                intakeData.periodicity_json.repeat.frequency?.toLowerCase() === "semanal"
+                  ? `, ${intakeData.periodicity_json.repeat.day.join(", ")}`
+                  : ""
+              }, ${intakeData.periodicity_json.repeat.interval} veces, iniciando el ${intakeData.periodicity_json.start_date}`
+            : "Sin detalle"}
+        </p>
+      </div>
+
       {/* Fuente de Ingesta */}
       <div className="grid gap-2">
         <Label>Fuente de Ingesta</Label>
@@ -657,6 +682,7 @@ export function ModalDataIntake({
         setSelectedPeriodicity={setSelectedPeriodicity}
         isEditAvailable={true}
         showCommunicationDetails={{ communicationId: 0, active: false }}
+        resetOnParentClose={!open}
       />
     </>
   );
