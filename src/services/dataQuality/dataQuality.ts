@@ -10,7 +10,8 @@ import {
   IUpdateClientResponse,
   IDeleteClientResponse,
   IClientDetail,
-  IParameterData
+  IParameterData,
+  ICreateIntakeRequest
 } from "@/types/dataQuality/IDataQuality";
 import { useAppStore } from "@/lib/store/store";
 
@@ -116,18 +117,18 @@ export const getParametersData = async (
   }
 };
 
-export const createIntake = async (modelData: {
-  file: File;
-  id_client_data: number;
-  id_type_archive: number;
-  id_status: number;
-}): Promise<void> => {
+export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any> => {
+  console.log("Creating intake with data:", modelData);
   const formData = new FormData();
   for (const key in modelData) {
-    formData.append(key, (modelData as any)[key]);
+    const value = (modelData as any)[key];
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
   }
   try {
-    const response: GenericResponse<void> = await API.post(
+    const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/client-archive-monthly`,
       formData
     );

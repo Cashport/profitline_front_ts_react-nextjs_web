@@ -1,13 +1,5 @@
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/modules/chat/ui/dialog";
 import { Label } from "@/modules/chat/ui/label";
 import {
   Select,
@@ -16,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { Input, message } from "antd";
+import { Input, message, Modal } from "antd";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -28,6 +20,10 @@ import { IParameterData } from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit } from "lucide-react";
+import InputClickable from "@/components/ui/input-clickable";
+import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
+import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
+import { createIntake } from "@/services/dataQuality/dataQuality";
 
 // Mode type definition
 export type IModalMode = "create" | "view";
@@ -54,14 +50,12 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
   ingestaVariables: yup
     .array()
     .of(
-      yup
-        .object({
-          key: yup.string().required(),
-          value: yup.string().required()
-        })
-        .required()
+      yup.object({
+        key: yup.string().defined(),
+        value: yup.string().defined()
+      })
     )
-    .required()
+    .defined()
 });
 
 interface IModalDataIntakeProps {
@@ -71,6 +65,7 @@ interface IModalDataIntakeProps {
   clientId: string;
   clientName: string;
   idCountry: number;
+  onSuccess?: () => void;
 }
 
 // Default form values
@@ -88,10 +83,16 @@ export function ModalDataIntake({
   mode,
   clientId,
   clientName,
-  idCountry
+  idCountry,
+  onSuccess
 }: IModalDataIntakeProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [isEditing, setIsEditing] = useState(false);
+  const [isPeriodicityModalOpen, setIsPeriodicityModalOpen] = useState(false);
+  const [selectedPeriodicity, setSelectedPeriodicity] = useState<IPeriodicityModalForm | undefined>(
+    undefined
+  );
+  const [periodicityError, setPeriodicityError] = useState(false);
 
   // Fetch parameter data with clientId using SWR
   const {
@@ -146,13 +147,14 @@ export function ModalDataIntake({
       setIsEditing(false);
       const resetData = {
         ...formInitialData,
+        clientName,
         ingestaVariables: formInitialData.ingestaVariables?.length
           ? formInitialData.ingestaVariables
           : [{ key: "", value: "" }]
       };
       reset(resetData);
     }
-  }, [open, formInitialData, reset]);
+  }, [open, formInitialData, reset, clientName]);
 
   // Handle fetch errors
   useEffect(() => {
@@ -161,11 +163,68 @@ export function ModalDataIntake({
     }
   }, [fetchError]);
 
+  // useEffect to clear error when periodicity is selected
+  useEffect(() => {
+    if (selectedPeriodicity) {
+      setPeriodicityError(false);
+    }
+  }, [selectedPeriodicity]);
+
+  // Helper function to format days array
+  const formatDaysArray = (days: Array<{ value: string; label: string }>) => {
+    return days.map((day) => day.value).join(", ");
+  };
+
   const onSubmit = async (data: DataIntakeFormData) => {
+    // Validar periodicidad
+    if (!selectedPeriodicity) {
+      setPeriodicityError(true);
+      return;
+    }
+
+    // Limpiar error si existe
+    setPeriodicityError(false);
+
     if (mode === "create") {
-      console.log(data);
+      console.log({
+        ...data,
+        periodicity: selectedPeriodicity
+      });
+
+      const jsonFreq = {
+        start_date: selectedPeriodicity?.init_date?.format("YYYY-MM-DD") || "",
+        repeat: {
+          interval: String(selectedPeriodicity?.frequency_number || 0),
+          frequency: selectedPeriodicity?.frequency.value || "Mensual",
+          day:
+            selectedPeriodicity?.frequency.value.toLowerCase() === "semanal"
+              ? selectedPeriodicity?.days.map((day) => Number(day.value))
+              : [Number(selectedPeriodicity?.init_date?.format("YYYY-MM-DD").split("-")[2])]
+        },
+        end_date: selectedPeriodicity?.end_date?.format("YYYY-MM-DD") || ""
+      };
+
+      try {
+        const modelData = {
+          file: data.attachedFile!,
+          id_client_data: Number(clientId),
+          id_type_archive: Number(data.fileType),
+          id_status: 1, // Assuming '1' is the default status for new intake
+          intake_type_id: Number(data.ingestaSource),
+          periodicity_json: jsonFreq
+        };
+        await createIntake(modelData);
+        message.success("Ingesta creada correctamente");
+        onSuccess && onSuccess();
+        onOpenChange();
+      } catch (error) {
+        message.error("Error al crear la ingesta");
+      }
     } else if (mode === "view" && isEditing) {
-      console.log("Edit mode - not implemented yet");
+      console.log("Edit mode - not implemented yet", {
+        ...data,
+        periodicity: selectedPeriodicity
+      });
     }
   };
 
@@ -182,6 +241,8 @@ export function ModalDataIntake({
 
   const handleClose = () => {
     setIsEditing(false);
+    setSelectedPeriodicity(undefined);
+    setPeriodicityError(false);
     onOpenChange();
   };
 
@@ -189,7 +250,7 @@ export function ModalDataIntake({
     if (parameterData?.catalogs?.archive_types) {
       return parameterData.catalogs.archive_types.map((t) => ({
         id: t.id,
-        value: t.description,
+        value: String(t.id),
         label: t.description
       }));
     }
@@ -199,7 +260,7 @@ export function ModalDataIntake({
     if (parameterData?.intake_types && parameterData.intake_types.length > 0) {
       return parameterData.intake_types.map((type) => ({
         id: type.id,
-        value: type.description,
+        value: String(type.id),
         label: type.description
       }));
     }
@@ -212,30 +273,20 @@ export function ModalDataIntake({
   // Show loading state inside modal
   if (isLoading && open) {
     return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[600px]">
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-gray-600">Cargando datos...</p>
-            </div>
+      <Modal open={open} onCancel={handleClose} footer={null} width={600} destroyOnClose>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando datos...</p>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
     );
   }
 
   // --- Form fields (shared by create and edit modes) ---
   const renderFormFields = () => (
     <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
-      {/* Cliente - Read-only display */}
-      <div className="grid gap-2">
-        <Label>Cliente</Label>
-        <div className="px-3 py-2 border border-[#DDDDDD] rounded-md bg-gray-50 text-gray-700">
-          {clientName}
-        </div>
-      </div>
-
       {/* Tipo de Archivo Dropdown */}
       <div className="grid gap-2">
         <Label>Tipo de Archivo</Label>
@@ -258,6 +309,27 @@ export function ModalDataIntake({
           )}
         />
         {errors.fileType && <p className="text-xs text-red-600">{errors.fileType.message}</p>}
+      </div>
+
+      {/* Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Periodicidad *</Label>
+        <InputClickable
+          title=""
+          callBackFunction={() => setIsPeriodicityModalOpen(true)}
+          value={
+            selectedPeriodicity
+              ? selectedPeriodicity.frequency.value === "Mensual"
+                ? `${selectedPeriodicity.frequency.value}, ${selectedPeriodicity.frequency_number} veces`
+                : `Cada ${formatDaysArray(selectedPeriodicity.days)}, ${selectedPeriodicity.frequency.value}`
+              : ""
+          }
+          error={periodicityError}
+          customStyles={periodicityError ? { border: "1px dashed red" } : undefined}
+        />
+        {periodicityError && (
+          <p className="text-xs text-red-600">La periodicidad es obligatoria *</p>
+        )}
       </div>
 
       {/* Fuente de Ingesta */}
@@ -446,30 +518,34 @@ export function ModalDataIntake({
   );
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === "create"
-              ? "Crear Nueva Ingesta"
-              : isEditing
-                ? "Editar Ingesta"
-                : "Detalle de Ingesta"}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === "create"
-              ? "Configure los detalles de la nueva ingesta"
-              : isEditing
-                ? "Modifica los detalles de la ingesta"
-                : `Información de la ingesta de ${formInitialData.fileType || clientName}`}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Modal
+        open={open}
+        onCancel={handleClose}
+        footer={null}
+        width={600}
+        destroyOnClose
+        title={
+          mode === "create"
+            ? "Crear Nueva Ingesta"
+            : isEditing
+              ? "Editar Ingesta"
+              : "Detalle de Ingesta"
+        }
+      >
+        <p className="text-sm text-gray-500 mb-4">
+          {mode === "create"
+            ? "Configure los detalles de la nueva ingesta"
+            : isEditing
+              ? "Modifica los detalles de la ingesta"
+              : `Información de la ingesta de ${formInitialData.fileType || clientName}`}
+        </p>
 
         {showForm ? (
           <form onSubmit={handleSubmit(onSubmit)}>
             {renderFormFields()}
 
-            <DialogFooter>
+            <div className="flex justify-end gap-2 pt-4">
               {mode === "create" ? (
                 <>
                   <Button
@@ -483,7 +559,7 @@ export function ModalDataIntake({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!isValid || isSubmitting}
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity}
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
                     {isSubmitting ? "Creando..." : "Crear Ingesta"}
@@ -501,20 +577,20 @@ export function ModalDataIntake({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!isValid || isSubmitting}
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity}
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
                     {isSubmitting ? "Guardando..." : "Guardar"}
                   </Button>
                 </>
               )}
-            </DialogFooter>
+            </div>
           </form>
         ) : (
           <>
             {renderViewFields()}
 
-            <DialogFooter>
+            <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={handleClose} className="bg-transparent">
                 Cerrar
               </Button>
@@ -525,10 +601,19 @@ export function ModalDataIntake({
                 <Edit className="w-4 h-4 mr-2" />
                 Editar
               </Button>
-            </DialogFooter>
+            </div>
           </>
         )}
-      </DialogContent>
-    </Dialog>
+      </Modal>
+
+      <ModalPeriodicity
+        isOpen={isPeriodicityModalOpen}
+        onClose={() => setIsPeriodicityModalOpen(false)}
+        selectedPeriodicity={selectedPeriodicity}
+        setSelectedPeriodicity={setSelectedPeriodicity}
+        isEditAvailable={true}
+        showCommunicationDetails={{ communicationId: 0, active: false }}
+      />
+    </>
   );
 }

@@ -208,3 +208,23 @@ export interface IParameterVariable {
   variable_key: string;
   variable_value: string;
 }
+
+// Intake interfaces
+export interface IPeriodicityJSON {
+  repeat: {
+    day?: number[];
+    interval: string;
+    frequency: string;
+  };
+  end_date: string;
+  start_date: string;
+}
+
+export interface ICreateIntakeRequest {
+  file: File;
+  id_client_data: number;
+  id_type_archive: number;
+  id_status: number;
+  intake_type_id: number;
+  periodicity_json: IPeriodicityJSON;
+}
