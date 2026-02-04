@@ -30,7 +30,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit } from "lucide-react";
 
 // Mode type definition
-type ModalMode = "create" | "view";
+export type IModalMode = "create" | "view";
 
 // Interface para el formulario
 export interface DataIntakeFormData {
@@ -67,7 +67,7 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
 interface IModalDataIntakeProps {
   open: boolean;
   onOpenChange: () => void;
-  mode: ModalMode;
+  mode: IModalMode;
   clientId: string;
   clientName: string;
   idCountry: number;
@@ -332,9 +332,7 @@ export function ModalDataIntake({
                 )}
               </div>
               {attachedFileValue && (
-                <p className="text-xs text-gray-600">
-                  Nuevo archivo: {attachedFileValue.name}
-                </p>
+                <p className="text-xs text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
               )}
             </div>
           )}
@@ -403,7 +401,9 @@ export function ModalDataIntake({
       {/* Tipo de Archivo */}
       <div className="grid gap-2">
         <Label>Tipo de Archivo</Label>
-        <Badge variant="outline" className="w-fit">{formInitialData.fileType || "Sin tipo"}</Badge>
+        <Badge variant="outline" className="w-fit">
+          {formInitialData.fileType || "Sin tipo"}
+        </Badge>
       </div>
 
       {/* Fuente de Ingesta */}
@@ -515,11 +515,7 @@ export function ModalDataIntake({
             {renderViewFields()}
 
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                className="bg-transparent"
-              >
+              <Button variant="outline" onClick={handleClose} className="bg-transparent">
                 Cerrar
               </Button>
               <Button

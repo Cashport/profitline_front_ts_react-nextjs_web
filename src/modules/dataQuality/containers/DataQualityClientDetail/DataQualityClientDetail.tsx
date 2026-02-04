@@ -210,7 +210,11 @@ export default function DataQualityClientDetails() {
               clientName={clientDetail?.client_name}
               stakeholder={clientDetail?.stakeholder?.toString()}
             />
-            <ClientDetailIntakesTable />
+            <ClientDetailIntakesTable
+              clientId={clientId}
+              clientName={clientDetail.client_name}
+              idCountry={clientDetail.id_country}
+            />
 
             <ClientDetailTable files={filteredFiles} />
           </CardContent>

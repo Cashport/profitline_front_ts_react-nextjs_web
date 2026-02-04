@@ -1,4 +1,5 @@
-import { Eye, Plus, Upload } from "lucide-react";
+import { useState } from "react";
+import { Eye, Plus } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -9,6 +10,8 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
+import { ModalDataIntake } from "../modal-data-intake";
+import { IModalMode } from "../modal-data-intake/modal-data-intake";
 
 export interface Ingesta {
   id: string | number;
@@ -21,12 +24,27 @@ export interface Ingesta {
 interface ClientDetailIntakesTableProps {
   ingestas?: Ingesta[];
   onViewIngesta?: (ingesta: Ingesta) => void;
+  clientName?: string | null;
+  clientId?: string | null;
+  idCountry?: number | null;
 }
 
 export function ClientDetailIntakesTable({
   ingestas = [],
-  onViewIngesta
+  onViewIngesta,
+  clientName,
+  clientId,
+  idCountry
 }: ClientDetailIntakesTableProps) {
+  const [isModalOpen, setIsModalOpen] = useState({
+    isOpen: false,
+    mode: "create" as IModalMode
+  });
+
+  const handleOpenIntakeModal = (mode: IModalMode) => {
+    // Open the modal to create a new intake
+    setIsModalOpen({ isOpen: true, mode });
+  };
   return (
     <>
       <h2 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
@@ -99,7 +117,7 @@ export function ClientDetailIntakesTable({
         </TableBody>
       </Table>
       <Button
-        onClick={() => console.log(true)}
+        onClick={() => handleOpenIntakeModal("create")}
         variant="outline"
         className="mb-8 bg-transparent"
         style={{ borderColor: "#DDDDDD", color: "#141414" }}
@@ -107,6 +125,15 @@ export function ClientDetailIntakesTable({
         <Plus className="w-4 h-4 mr-2" />
         Crear nueva ingesta
       </Button>
+
+      <ModalDataIntake
+        clientId={clientId || ""}
+        clientName={clientName || ""}
+        idCountry={idCountry || 0}
+        open={isModalOpen.isOpen}
+        mode={isModalOpen.mode}
+        onOpenChange={() => setIsModalOpen({ isOpen: false, mode: "create" })}
+      />
     </>
   );
 }
