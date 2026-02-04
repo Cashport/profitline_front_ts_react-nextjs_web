@@ -52,6 +52,7 @@ export interface IClientData {
   deleted_by: number | null;
   is_deleted: number;
   client_data_archives: IClientDataArchive[];
+  country_name: string;
 }
 
 // Client List Response

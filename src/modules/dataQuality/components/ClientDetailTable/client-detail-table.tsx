@@ -20,6 +20,7 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
+import dayjs from "dayjs";
 
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
@@ -91,9 +92,12 @@ const getCategoryBadge = (category: string) => {
   );
 };
 
-// Convierte bytes a megabytes (MB) con dos decimales
 const bytesToMB = (bytes: number): number => {
   return +(bytes / (1024 * 1024)).toFixed(2);
+};
+
+const formatDateTime = (isoDateString: string): string => {
+  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
 };
 
 export function ClientDetailTable({ files }: IClientDetailTableProps) {
@@ -128,7 +132,9 @@ export function ClientDetailTable({ files }: IClientDetailTableProps) {
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                  <span style={{ color: "#141414" }}>{file.updated_at}</span>
+                  <span style={{ color: "#141414" }}>
+                    {formatDateTime(file.updated_at ?? file.created_at)}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>

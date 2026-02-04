@@ -93,6 +93,8 @@ export default function CountriesClientsView() {
     router.push(`/data-quality/client/${record.id}`);
   };
 
+  const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
@@ -105,7 +107,7 @@ export default function CountriesClientsView() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           Inicio
         </Button>
-        <h1 className="text-2xl font-bold text-[#141414]">-</h1>
+        <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
       </div>
 
       {/* Main Content */}
