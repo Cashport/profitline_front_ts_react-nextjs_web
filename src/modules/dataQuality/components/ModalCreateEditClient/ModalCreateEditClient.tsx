@@ -69,12 +69,10 @@ const ModalCreateEditClient = ({
     try {
       if (mode === "create") {
         await createClient({
-          id_client: "",
           id_project: projectId,
           client_name: data.client_name,
           id_country: Number(countryId),
-          stakeholder: Number(data.stakeholder) || 0,
-          archive_rules: []
+          stakeholder: data.stakeholder
         });
         message.success("Cliente creado exitosamente");
       } else if (clientData) {

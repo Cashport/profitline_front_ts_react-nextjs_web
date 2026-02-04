@@ -1,4 +1,4 @@
-import { Eye, Upload } from "lucide-react";
+import { Eye, Plus, Upload } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -99,10 +99,12 @@ export function ClientDetailIntakesTable({
         </TableBody>
       </Table>
       <Button
-        className="ml-auto bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-        onClick={() => console.log({ isOpen: true, mode: "create" })}
+        onClick={() => console.log(true)}
+        variant="outline"
+        className="mb-8 bg-transparent"
+        style={{ borderColor: "#DDDDDD", color: "#141414" }}
       >
-        <Upload className="w-4 h-4 mr-2" />
+        <Plus className="w-4 h-4 mr-2" />
         Crear nueva ingesta
       </Button>
     </>

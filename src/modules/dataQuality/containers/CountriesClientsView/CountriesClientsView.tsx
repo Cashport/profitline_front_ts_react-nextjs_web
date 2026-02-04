@@ -14,7 +14,6 @@ import {
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake } from "../../components/modal-data-intake";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
@@ -39,7 +38,6 @@ export default function CountriesClientsView() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [periodicityFilter, setPeriodicityFilter] = useState("all");
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
-  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
   const [isModalClientOpen, setIsModalClientOpen] = useState(false);
 
   // API data state

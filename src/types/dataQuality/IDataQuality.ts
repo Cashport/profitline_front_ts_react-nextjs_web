@@ -78,12 +78,10 @@ export interface IArchiveRuleResponse {
 
 // Create Client Request
 export interface ICreateClientRequest {
-  id_client: string;
-  id_project: number;
   client_name: string;
   id_country: number;
-  stakeholder: number;
-  archive_rules: IArchiveRule[];
+  id_project: number;
+  stakeholder: string;
 }
 
 // Create Client Response
@@ -114,16 +112,17 @@ export interface IDeleteClientResponse {
   deleted: boolean;
 }
 
-// Client Detail File
-export interface IClientDetailFile {
+export interface IClientDetailDataArchive {
   id: number;
-  nombre_archivo: string;
+  id_type_archive: number;
   tipo_archivo: string;
-  fecha_hora: string;
-  tamano: number;
-  estado: string;
-  acciones: string[];
-  periodicidad: string;
+  periodicity: string;
+  periodicity_json: IPeriodicity;
+  strategy: string;
+  input_file_skip_rows: number;
+  url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // Client Detail
@@ -138,7 +137,8 @@ export interface IClientDetail {
   tipos_archivo_esperados: string[] | null;
   fuente_ingesta: string[] | null;
   detalle_fuente: string | null;
-  archivos: IClientDetailFile[] | null;
+  client_data_archives: IClientDetailDataArchive[];
+  archives_client_data: any[];
   estados_archivo: string[] | null;
   created_at: string | null;
   updated_at: string | null;

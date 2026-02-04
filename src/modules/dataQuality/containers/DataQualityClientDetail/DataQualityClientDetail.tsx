@@ -114,7 +114,7 @@ export default function DataQualityClientDetails() {
   }
 
   // Map API data to component props
-  const files = clientDetail.archivos || [];
+  const files = clientDetail.archives_client_data || [];
   const countryName = clientDetail.country_name;
   const clientName = clientDetail.client_name;
 
