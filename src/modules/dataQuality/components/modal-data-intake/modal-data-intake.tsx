@@ -212,7 +212,7 @@ export function ModalDataIntake({
           frequency: selectedPeriodicity?.frequency.value || "Mensual",
           day:
             selectedPeriodicity?.frequency.value.toLowerCase() === "semanal"
-              ? selectedPeriodicity?.days.map((day) => Number(day.value))
+              ? selectedPeriodicity?.days.map((day) => day.value)
               : [Number(selectedPeriodicity?.init_date?.format("YYYY-MM-DD").split("-")[2])]
         },
         end_date: selectedPeriodicity?.end_date?.format("YYYY-MM-DD") || ""
@@ -225,7 +225,10 @@ export function ModalDataIntake({
           id_type_archive: Number(data.fileType),
           id_status: 1, // Assuming '1' is the default status for new intake
           intake_type_id: Number(data.ingestaSource),
-          periodicity_json: jsonFreq
+          periodicity_json: jsonFreq,
+          variables: data.ingestaVariables
+            .filter((v) => v.key && v.value)
+            .map((v) => ({ variable_key: v.key, variable_value: v.value }))
         };
         await createIntake(modelData);
         message.success("Ingesta creada correctamente");
@@ -237,7 +240,10 @@ export function ModalDataIntake({
     } else if (mode === "view" && isEditing) {
       console.log("Edit mode - not implemented yet", {
         ...data,
-        periodicity: selectedPeriodicity
+        periodicity: selectedPeriodicity,
+        variables: data.ingestaVariables
+          .filter((v) => v.key && v.value)
+          .map((v) => ({ variable_key: v.key, variable_value: v.value }))
       });
     }
   };
@@ -439,7 +445,7 @@ export function ModalDataIntake({
       </div>
 
       {/* Variables de configuración */}
-      {/* <div className="grid gap-2">
+      <div className="grid gap-2">
         <div className="flex items-center justify-between">
           <Label>Variables de configuración</Label>
           <Button
@@ -490,7 +496,7 @@ export function ModalDataIntake({
         <p className="text-xs text-gray-500">
           Agregue variables como EMAIL, API_URL, PASSWORD, etc.
         </p>
-      </div> */}
+      </div>
     </div>
   );
 

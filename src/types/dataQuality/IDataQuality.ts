@@ -212,7 +212,7 @@ export interface IParameterVariable {
 // Intake interfaces
 export interface IPeriodicityJSON {
   repeat: {
-    day?: number[];
+    day?: number[] | string[];
     interval: string;
     frequency: string;
   };
@@ -227,4 +227,5 @@ export interface ICreateIntakeRequest {
   id_status: number;
   intake_type_id: number;
   periodicity_json: IPeriodicityJSON;
+  variables: Array<{ variable_key: string; variable_value: string }>;
 }
