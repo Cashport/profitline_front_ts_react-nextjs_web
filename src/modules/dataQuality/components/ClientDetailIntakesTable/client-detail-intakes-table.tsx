@@ -12,26 +12,17 @@ import {
 } from "@/modules/chat/ui/table";
 import { ModalDataIntake } from "../modal-data-intake";
 import { IModalMode } from "../modal-data-intake/modal-data-intake";
-
-export interface Ingesta {
-  id: string | number;
-  fileType: string;
-  periodicity: string;
-  periodicityDetail: string;
-  source: string;
-}
+import { IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
 
 interface ClientDetailIntakesTableProps {
-  ingestas?: Ingesta[];
-  onViewIngesta?: (ingesta: Ingesta) => void;
+  intakes?: IClientDetailDataArchive[];
   clientName?: string | null;
   clientId?: string | null;
   idCountry?: number | null;
 }
 
 export function ClientDetailIntakesTable({
-  ingestas = [],
-  onViewIngesta,
+  intakes = [],
   clientName,
   clientId,
   idCountry
@@ -63,17 +54,17 @@ export function ClientDetailIntakesTable({
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Ver</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {ingestas.length > 0 ? (
-            ingestas.map((ingesta) => (
+        <TableBody className="max-h-[400px] overflow-y-auto">
+          {intakes.length > 0 ? (
+            intakes.map((intake) => (
               <TableRow
-                key={ingesta.id}
+                key={intake.id}
                 className="hover:bg-gray-50"
                 style={{ borderColor: "#DDDDDD" }}
               >
                 <TableCell>
                   <Badge variant="outline" className="text-xs">
-                    {ingesta.fileType}
+                    {intake.tipo_archivo}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -82,17 +73,15 @@ export function ClientDetailIntakesTable({
                     className="text-xs"
                     style={{ backgroundColor: "#CBE71E", color: "#141414" }}
                   >
-                    {ingesta.periodicity}
+                    {intake.periodicity}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="text-xs">
-                    {ingesta.periodicityDetail}
-                  </Badge>
+                  <p className="text-xs">"Se produce Semanal 4 veces iniciando el 04/02/2026"</p>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm" style={{ color: "#141414" }}>
-                    {ingesta.source}
+                    -
                   </span>
                 </TableCell>
                 <TableCell>
@@ -100,7 +89,7 @@ export function ClientDetailIntakesTable({
                     variant="ghost"
                     size="sm"
                     title="Ver detalles"
-                    onClick={() => onViewIngesta?.(ingesta)}
+                    onClick={() => console.log(intake)}
                   >
                     <Eye className="w-4 h-4" />
                   </Button>

@@ -114,29 +114,8 @@ export default function DataQualityClientDetails() {
   }
 
   // Map API data to component props
-  const files = clientDetail.archives_client_data || [];
   const countryName = clientDetail.country_name;
   const clientName = clientDetail.client_name;
-
-  const clientInfo = {
-    stakeholder: clientDetail.stakeholder?.toString(),
-    clientName: clientDetail.client_name
-  };
-
-  // Transform files for display
-  const displayFiles = files.map((archivo) => ({
-    id: archivo.id.toString(),
-    name: archivo.nombre_archivo,
-    type: "file",
-    size: formatBytes(archivo.tamano),
-    lastUpdate: formatDateTime(archivo.fecha_hora),
-    status: archivo.estado.toLowerCase(),
-    category: archivo.tipo_archivo
-  }));
-
-  const filteredFiles = displayFiles.filter((file) =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -214,14 +193,16 @@ export default function DataQualityClientDetails() {
               clientId={clientId}
               clientName={clientDetail.client_name}
               idCountry={clientDetail.id_country}
+              intakes={clientDetail.client_data_archives}
             />
 
-            <ClientDetailTable files={filteredFiles} />
+            <ClientDetailTable files={clientDetail.archives_client_data} />
           </CardContent>
         </Card>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
-          Mostrando {filteredFiles.length} de {files.length} archivos
+          Mostrando {clientDetail.archives_client_data.length} de{" "}
+          {clientDetail.archives_client_data.length} archivos
         </div>
       </main>
 

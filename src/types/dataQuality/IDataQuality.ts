@@ -125,6 +125,23 @@ export interface IClientDetailDataArchive {
   updated_at: string;
 }
 
+export interface IClientDetailArchiveClient {
+  id: number;
+  id_client_data_archives: any | null;
+  id_type_archive: number;
+  tipo_archivo: string;
+  description: string;
+  id_status: number;
+  status_description: string;
+  date_upload: string | null;
+  user_upload: string | null;
+  size: number;
+  intake_type_id: number | null;
+  acciones: string[];
+  created_at: string;
+  updated_at: string | null;
+}
+
 // Client Detail
 export interface IClientDetail {
   id: number | null;
@@ -138,7 +155,7 @@ export interface IClientDetail {
   fuente_ingesta: string[] | null;
   detalle_fuente: string | null;
   client_data_archives: IClientDetailDataArchive[];
-  archives_client_data: any[];
+  archives_client_data: IClientDetailArchiveClient[];
   estados_archivo: string[] | null;
   created_at: string | null;
   updated_at: string | null;

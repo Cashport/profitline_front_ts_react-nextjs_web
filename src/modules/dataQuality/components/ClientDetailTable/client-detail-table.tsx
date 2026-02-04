@@ -6,7 +6,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  BadgeQuestionMark
 } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -18,19 +19,10 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
+import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 
-export interface FileData {
-  id: string;
-  name: string;
-  type: string;
-  size: string;
-  lastUpdate: string;
-  status: string;
-  category: string;
-}
-
-interface ClientDetailTableProps {
-  files: FileData[];
+interface IClientDetailTableProps {
+  files?: IClientDetailArchiveClient[];
 }
 
 const getStatusIcon = (status: string) => {
@@ -44,10 +36,9 @@ const getStatusIcon = (status: string) => {
     case "pending-catalog":
       return <AlertTriangle className="w-4 h-4 text-orange-600" />;
     default:
-      return <Eye className="w-4 h-4" style={{ color: "#141414" }} />;
+      return <BadgeQuestionMark className="w-4 h-4" style={{ color: "#141414" }} />;
   }
 };
-
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "processed":
@@ -100,7 +91,12 @@ const getCategoryBadge = (category: string) => {
   );
 };
 
-export function ClientDetailTable({ files }: ClientDetailTableProps) {
+// Convierte bytes a megabytes (MB) con dos decimales
+const bytesToMB = (bytes: number): number => {
+  return +(bytes / (1024 * 1024)).toFixed(2);
+};
+
+export function ClientDetailTable({ files }: IClientDetailTableProps) {
   return (
     <div>
       <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
@@ -118,27 +114,27 @@ export function ClientDetailTable({ files }: ClientDetailTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {files.map((file) => (
+          {files?.map((file) => (
             <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
               <TableCell>
                 <div className="flex items-center space-x-3">
-                  {getStatusIcon(file.status)}
+                  {getStatusIcon(file.status_description)}
                   <span className="font-normal" style={{ color: "#141414" }}>
-                    {file.name}
+                    {file.description}
                   </span>
                 </div>
               </TableCell>
-              <TableCell>{getCategoryBadge(file.category)}</TableCell>
+              <TableCell>{getCategoryBadge(file.tipo_archivo)}</TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                  <span style={{ color: "#141414" }}>{file.lastUpdate}</span>
+                  <span style={{ color: "#141414" }}>{file.updated_at}</span>
                 </div>
               </TableCell>
               <TableCell>
-                <span style={{ color: "#141414" }}>{file.size}</span>
+                <span style={{ color: "#141414" }}>{bytesToMB(file.size)} MB</span>
               </TableCell>
-              <TableCell>{getStatusBadge(file.status)}</TableCell>
+              <TableCell>{getStatusBadge(file.status_description)}</TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="sm" title="Ver archivo">
