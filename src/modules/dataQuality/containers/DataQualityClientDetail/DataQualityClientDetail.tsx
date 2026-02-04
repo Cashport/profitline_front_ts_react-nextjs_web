@@ -118,17 +118,9 @@ export default function DataQualityClientDetails() {
   const countryName = clientDetail.country_name;
   const clientName = clientDetail.client_name;
 
-  const clientConfig = {
-    periodicity: clientDetail.periodicidad?.[0] || "Daily",
-    fileTypes: clientDetail.tipos_archivo_esperados
-  };
-
   const clientInfo = {
-    ingestaSource: clientDetail.fuente_ingesta?.[0] || "Email",
-    ingestaVariables: parseDetailFuente(clientDetail.detalle_fuente || ""),
     stakeholder: clientDetail.stakeholder?.toString(),
-    dailyDetails: { diasHabiles: true, festivos: false },
-    weeklyDetails: { acumulado: false, porRango: false }
+    clientName: clientDetail.client_name
   };
 
   // Transform files for display
@@ -214,7 +206,10 @@ export default function DataQualityClientDetails() {
               </div>
             </div>
 
-            <ClientDetailInfo clientConfig={clientConfig} clientInfo={clientInfo} />
+            <ClientDetailInfo
+              clientName={clientDetail?.client_name}
+              stakeholder={clientDetail?.stakeholder?.toString()}
+            />
             <ClientDetailIntakesTable />
 
             <ClientDetailTable files={filteredFiles} />
