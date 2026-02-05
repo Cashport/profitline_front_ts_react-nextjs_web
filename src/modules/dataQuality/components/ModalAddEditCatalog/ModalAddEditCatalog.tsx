@@ -64,7 +64,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
     reset,
     setValue
   } = useForm<CatalogFormData>({
@@ -94,18 +94,20 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
   // Inicializar form en modo edición
   useEffect(() => {
     if (isOpen && mode === "edit" && catalogData) {
-      setValue("customer_product_cod", catalogData.customer_product_cod);
-      setValue("customer_product_description", catalogData.customer_product_description);
-      setValue("material_code", catalogData.material_code);
-      setValue("material_name", catalogData.material_name);
-      setValue("product_type", catalogData.product_type);
-      setValue("type_vol", catalogData.type_vol);
-      setValue("factor", catalogData.factor);
+      reset({
+        customer_product_cod: catalogData.customer_product_cod,
+        customer_product_description: catalogData.customer_product_description,
+        material_code: String(catalogData.material_id),
+        material_name: catalogData.material_name,
+        product_type: String(catalogData.product_type_id),
+        type_vol: String(catalogData.type_vol_id),
+        factor: catalogData.factor
+      });
     }
     if (!isOpen) {
       reset();
     }
-  }, [isOpen, mode, catalogData, setValue, reset]);
+  }, [isOpen, mode, catalogData, reset]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,6 +129,12 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   const handleFormSubmit = (data: CatalogFormData) => {
     onSave(data);
@@ -250,31 +258,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             )}
           </div>
 
-          {/* Campo 4: Nombre del Producto */}
-          <div className="grid gap-2">
-            <Label htmlFor="productName" style={{ color: "#141414" }}>
-              Nombre del Producto
-            </Label>
-            <Controller
-              name="material_name"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  id="productName"
-                  placeholder="Ej: Dolex Max X6 Und"
-                  style={{ borderColor: errors.material_name ? "#ff4d4f" : "#DDDDDD" }}
-                />
-              )}
-            />
-            {errors.material_name && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
-                {errors.material_name.message}
-              </span>
-            )}
-          </div>
-
-          {/* Campo 5: Tipo Producto */}
+          {/* Campo 4: Tipo Producto */}
           <div className="grid gap-2">
             <Label htmlFor="productType" style={{ color: "#141414" }}>
               Tipo producto
@@ -309,7 +293,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             )}
           </div>
 
-          {/* Campo 6: Tipo Volumen */}
+          {/* Campo 5: Tipo Volumen */}
           <div className="grid gap-2">
             <Label htmlFor="typeVol" style={{ color: "#141414" }}>
               Tipo volumen
@@ -342,7 +326,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             )}
           </div>
 
-          {/* Campo 7: Factor */}
+          {/* Campo 6: Factor */}
           <div className="grid gap-2">
             <Label htmlFor="factor" style={{ color: "#141414" }}>
               Factor
@@ -380,12 +364,16 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
           </Button>
           <Button
             type="submit"
-            disabled={!isValid}
+            disabled={mode === "edit" ? !isValid || !isDirty : !isValid}
             style={{
-              backgroundColor: !isValid ? "#d9d9d9" : "#CBE71E",
+              backgroundColor: (mode === "edit" ? !isValid || !isDirty : !isValid)
+                ? "#d9d9d9"
+                : "#CBE71E",
               color: "#141414",
               border: "none",
-              cursor: !isValid ? "not-allowed" : "pointer"
+              cursor: (mode === "edit" ? !isValid || !isDirty : !isValid)
+                ? "not-allowed"
+                : "pointer"
             }}
           >
             <Save className="w-4 h-4 mr-2" />

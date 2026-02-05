@@ -213,3 +213,19 @@ export const createCatalog = async (catalogData: ICreateCatalogRequest): Promise
     throw error;
   }
 };
+
+export const editCatalog = async (
+  catalogId: number,
+  catalogData: ICreateCatalogRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/catalog/materials/${catalogId}`,
+      catalogData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing catalog:", error);
+    throw error;
+  }
+};

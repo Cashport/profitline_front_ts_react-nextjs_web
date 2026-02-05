@@ -233,8 +233,13 @@ export interface IGetCatalogs {
   id: number;
   customer_product_cod: string;
   customer_product_description: string;
-  product_type: string;
-  type_vol: string;
+  product_type_id: number;
+  product_type_code: string;
+  product_type_name: string;
+  type_vol_id: number;
+  type_vol_code: string;
+  type_vol_name: string;
+  material_id: number;
   material_code: string;
   material_name: string;
   factor: number;
