@@ -130,7 +130,6 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
 
   const handleFormSubmit = (data: CatalogFormData) => {
     onSave(data);
-    reset();
   };
 
   const handleClose = () => {

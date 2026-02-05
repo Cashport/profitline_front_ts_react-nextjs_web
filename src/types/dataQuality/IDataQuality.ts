@@ -251,3 +251,14 @@ export interface ICatalogSelectOption {
   code: string;
   name: string;
 }
+
+export interface ICreateCatalogRequest {
+  id_client: number;
+  id_country: number;
+  customer_product_cod: string;
+  customer_product_description: string;
+  product_type: number;
+  type_vol: number;
+  material_code: number;
+  factor: number;
+}

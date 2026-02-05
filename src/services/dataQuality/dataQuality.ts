@@ -13,7 +13,8 @@ import {
   IParameterData,
   ICreateIntakeRequest,
   ICatalogMaterial,
-  ICatalogSelectOption
+  ICatalogSelectOption,
+  ICreateCatalogRequest
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -171,6 +172,19 @@ export const getMaterialProductType = async (): Promise<ICatalogSelectOption[]> 
     return response.data;
   } catch (error) {
     console.error("Error fetching material product type:", error);
+    throw error;
+  }
+};
+
+export const createCatalog = async (catalogData: ICreateCatalogRequest): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials`,
+      catalogData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating catalog:", error);
     throw error;
   }
 };
