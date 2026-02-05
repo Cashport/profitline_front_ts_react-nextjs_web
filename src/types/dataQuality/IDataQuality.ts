@@ -229,3 +229,14 @@ export interface ICreateIntakeRequest {
   periodicity_json: IPeriodicityJSON;
   variables: Array<{ variable_key: string; variable_value: string }>;
 }
+
+export interface IGetCatalogs {
+  id: number;
+  customer_product_cod: string;
+  customer_product_description: string;
+  product_type: string;
+  type_vol: string;
+  material_code: string;
+  material_name: string;
+  factor: number;
+}
