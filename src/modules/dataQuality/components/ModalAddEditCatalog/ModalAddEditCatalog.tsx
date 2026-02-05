@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as yup from "yup";
 import { Modal } from "antd";
 import { useForm, Controller } from "react-hook-form";
@@ -8,8 +8,19 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/modules/chat/ui/select";
 
 import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
+import {
+  getCatalogMaterialsForSelect,
+  ICatalogMaterial
+} from "@/services/dataQuality/dataQuality";
 
 export const catalogFormSchema = yup.object().shape({
   customer_product_cod: yup
@@ -20,10 +31,18 @@ export const catalogFormSchema = yup.object().shape({
     .string()
     .required("El producto del cliente es requerido")
     .min(1, "La descripción debe tener al menos 1 caracter"),
+  material_code: yup.string().required("El material es requerido"),
   material_name: yup
     .string()
     .required("El nombre del producto es requerido")
-    .min(1, "El nombre debe tener al menos 1 caracter")
+    .min(1, "El nombre debe tener al menos 1 caracter"),
+  product_type: yup.string().required("El tipo de producto es requerido"),
+  type_vol: yup.string().required("El tipo de volumen es requerido"),
+  factor: yup
+    .number()
+    .typeError("El factor debe ser un número")
+    .required("El factor es requerido")
+    .positive("El factor debe ser positivo")
 });
 
 export type CatalogFormData = yup.InferType<typeof catalogFormSchema>;
@@ -48,22 +67,44 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     defaultValues: {
       customer_product_cod: "",
       customer_product_description: "",
-      material_name: ""
+      material_code: "",
+      material_name: "",
+      product_type: "",
+      type_vol: "",
+      factor: undefined as unknown as number
     },
     mode: "onChange"
   });
+
+  const [materials, setMaterials] = useState<ICatalogMaterial[]>([]);
 
   // Inicializar form en modo edición
   useEffect(() => {
     if (isOpen && mode === "edit" && catalogData) {
       setValue("customer_product_cod", catalogData.customer_product_cod);
       setValue("customer_product_description", catalogData.customer_product_description);
+      setValue("material_code", catalogData.material_code);
       setValue("material_name", catalogData.material_name);
+      setValue("product_type", catalogData.product_type);
+      setValue("type_vol", catalogData.type_vol);
+      setValue("factor", catalogData.factor);
     }
     if (!isOpen) {
       reset();
     }
   }, [isOpen, mode, catalogData, setValue, reset]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getCatalogMaterialsForSelect();
+        setMaterials(res);
+      } catch (error) {
+        console.error("Error fetching catalog materials:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleFormSubmit = (data: CatalogFormData) => {
     onSave(data);
@@ -142,7 +183,56 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             )}
           </div>
 
-          {/* Campo 3: Nombre del Producto */}
+          {/* Campo 3: Material */}
+          <div className="grid gap-2">
+            <Label htmlFor="materialCode" style={{ color: "#141414" }}>
+              Material
+            </Label>
+            <Controller
+              name="material_code"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    const selectedMaterial = materials.find(
+                      (m) => m.material_code === value
+                    );
+                    if (selectedMaterial) {
+                      setValue("material_name", selectedMaterial.material_name);
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full"
+                    style={{
+                      borderColor: errors.material_code ? "#ff4d4f" : "#DDDDDD"
+                    }}
+                  >
+                    <SelectValue placeholder="Seleccionar material" />
+                  </SelectTrigger>
+                  <SelectContent className="!z-[10000]">
+                    {materials.map((material) => (
+                      <SelectItem
+                        key={material.material_code}
+                        value={material.material_code}
+                      >
+                        {material.material_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.material_code && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.material_code.message}
+              </span>
+            )}
+          </div>
+
+          {/* Campo 4: Nombre del Producto */}
           <div className="grid gap-2">
             <Label htmlFor="productName" style={{ color: "#141414" }}>
               Nombre del Producto
@@ -162,6 +252,109 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             {errors.material_name && (
               <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
                 {errors.material_name.message}
+              </span>
+            )}
+          </div>
+
+          {/* Campo 5: Tipo Producto */}
+          <div className="grid gap-2">
+            <Label htmlFor="productType" style={{ color: "#141414" }}>
+              Tipo producto
+            </Label>
+            <Controller
+              name="product_type"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    className="w-full"
+                    style={{
+                      borderColor: errors.product_type ? "#ff4d4f" : "#DDDDDD"
+                    }}
+                  >
+                    <SelectValue placeholder="Seleccionar tipo de producto" />
+                  </SelectTrigger>
+                  <SelectContent className="!z-[10000]">
+                    {mockProductType.map((type) => (
+                      <SelectItem key={type.id} value={String(type.id)}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.product_type && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.product_type.message}
+              </span>
+            )}
+          </div>
+
+          {/* Campo 6: Tipo Volumen */}
+          <div className="grid gap-2">
+            <Label htmlFor="typeVol" style={{ color: "#141414" }}>
+              Tipo volumen
+            </Label>
+            <Controller
+              name="type_vol"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger
+                    className="w-full"
+                    style={{
+                      borderColor: errors.type_vol ? "#ff4d4f" : "#DDDDDD"
+                    }}
+                  >
+                    <SelectValue placeholder="Seleccionar tipo de volumen" />
+                  </SelectTrigger>
+                  <SelectContent className="!z-[10000]">
+                    {mockTypeVol.map((vol) => (
+                      <SelectItem key={vol.id} value={String(vol.id)}>
+                        {vol.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.type_vol && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.type_vol.message}
+              </span>
+            )}
+          </div>
+
+          {/* Campo 7: Factor */}
+          <div className="grid gap-2">
+            <Label htmlFor="factor" style={{ color: "#141414" }}>
+              Factor
+            </Label>
+            <Controller
+              name="factor"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="factor"
+                  type="number"
+                  step="any"
+                  placeholder="Ej: 1.5"
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    field.onChange(val === "" ? undefined : Number(val));
+                  }}
+                  style={{
+                    borderColor: errors.factor ? "#ff4d4f" : "#DDDDDD"
+                  }}
+                />
+              )}
+            />
+            {errors.factor && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.factor.message}
               </span>
             )}
           </div>
@@ -189,3 +382,15 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     </Modal>
   );
 }
+
+const mockProductType = [
+  { id: 1, name: "Tipo A" },
+  { id: 2, name: "Tipo B" },
+  { id: 3, name: "Tipo C" }
+];
+
+const mockTypeVol = [
+  { id: 1, name: "Volumen 1" },
+  { id: 2, name: "Volumen 2" },
+  { id: 3, name: "Volumen 3" }
+];

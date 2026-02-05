@@ -137,3 +137,22 @@ export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any
     throw error;
   }
 };
+
+export interface ICatalogMaterial {
+  material_code: string;
+  material_name: string;
+}
+
+export const getCatalogMaterialsForSelect = async (): Promise<
+  ICatalogMaterial[]
+> => {
+  try {
+    const response: GenericResponse<ICatalogMaterial[]> = await API.get(
+      `${config.API_HOST}/data/catalog/material`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching catalog material:", error);
+    throw error;
+  }
+};
