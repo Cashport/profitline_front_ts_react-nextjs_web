@@ -16,10 +16,15 @@ import {
   SelectItem
 } from "@/modules/chat/ui/select";
 
-import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
+import {
+  IGetCatalogs,
+  ICatalogSelectOption,
+  ICatalogMaterial
+} from "@/types/dataQuality/IDataQuality";
 import {
   getCatalogMaterialsForSelect,
-  ICatalogMaterial
+  getCatalogMaterialType,
+  getMaterialProductType
 } from "@/services/dataQuality/dataQuality";
 
 export const catalogFormSchema = yup.object().shape({
@@ -76,7 +81,15 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     mode: "onChange"
   });
 
-  const [materials, setMaterials] = useState<ICatalogMaterial[]>([]);
+  const [selectOptions, setSelectOptions] = useState<{
+    materials: ICatalogMaterial[];
+    productTypes: ICatalogSelectOption[];
+    typeVols: ICatalogSelectOption[];
+  }>({
+    materials: [],
+    productTypes: [],
+    typeVols: []
+  });
 
   // Inicializar form en modo edición
   useEffect(() => {
@@ -97,10 +110,19 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await getCatalogMaterialsForSelect();
-        setMaterials(res);
+        const [materials, typeVols, productTypes] = await Promise.all([
+          getCatalogMaterialsForSelect(),
+          getCatalogMaterialType(),
+          getMaterialProductType()
+        ]);
+
+        setSelectOptions({
+          materials,
+          productTypes,
+          typeVols
+        });
       } catch (error) {
-        console.error("Error fetching catalog materials:", error);
+        console.error("Error fetching catalog data:", error);
       }
     };
     fetchData();
@@ -196,7 +218,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                   value={field.value}
                   onValueChange={(value) => {
                     field.onChange(value);
-                    const selectedMaterial = materials.find(
+                    const selectedMaterial = selectOptions.materials.find(
                       (m) => m.material_code === value
                     );
                     if (selectedMaterial) {
@@ -213,11 +235,8 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                     <SelectValue placeholder="Seleccionar material" />
                   </SelectTrigger>
                   <SelectContent className="!z-[10000]">
-                    {materials.map((material) => (
-                      <SelectItem
-                        key={material.material_code}
-                        value={material.material_code}
-                      >
+                    {selectOptions.materials.map((material) => (
+                      <SelectItem key={material.material_code} value={material.material_code}>
                         {material.material_name}
                       </SelectItem>
                     ))}
@@ -275,7 +294,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                     <SelectValue placeholder="Seleccionar tipo de producto" />
                   </SelectTrigger>
                   <SelectContent className="!z-[10000]">
-                    {mockProductType.map((type) => (
+                    {selectOptions.productTypes.map((type) => (
                       <SelectItem key={type.id} value={String(type.id)}>
                         {type.name}
                       </SelectItem>
@@ -310,7 +329,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                     <SelectValue placeholder="Seleccionar tipo de volumen" />
                   </SelectTrigger>
                   <SelectContent className="!z-[10000]">
-                    {mockTypeVol.map((vol) => (
+                    {selectOptions.typeVols.map((vol) => (
                       <SelectItem key={vol.id} value={String(vol.id)}>
                         {vol.name}
                       </SelectItem>
@@ -320,9 +339,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
               )}
             />
             {errors.type_vol && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
-                {errors.type_vol.message}
-              </span>
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.type_vol.message}</span>
             )}
           </div>
 
@@ -353,9 +370,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
               )}
             />
             {errors.factor && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
-                {errors.factor.message}
-              </span>
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.factor.message}</span>
             )}
           </div>
         </div>
@@ -382,15 +397,3 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     </Modal>
   );
 }
-
-const mockProductType = [
-  { id: 1, name: "Tipo A" },
-  { id: 2, name: "Tipo B" },
-  { id: 3, name: "Tipo C" }
-];
-
-const mockTypeVol = [
-  { id: 1, name: "Volumen 1" },
-  { id: 2, name: "Volumen 2" },
-  { id: 3, name: "Volumen 3" }
-];

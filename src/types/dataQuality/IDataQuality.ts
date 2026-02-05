@@ -240,3 +240,14 @@ export interface IGetCatalogs {
   material_name: string;
   factor: number;
 }
+
+export interface ICatalogMaterial {
+  material_code: string;
+  material_name: string;
+}
+
+export interface ICatalogSelectOption {
+  id: number;
+  code: string;
+  name: string;
+}

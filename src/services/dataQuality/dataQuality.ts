@@ -11,9 +11,10 @@ import {
   IDeleteClientResponse,
   IClientDetail,
   IParameterData,
-  ICreateIntakeRequest
+  ICreateIntakeRequest,
+  ICatalogMaterial,
+  ICatalogSelectOption
 } from "@/types/dataQuality/IDataQuality";
-import { useAppStore } from "@/lib/store/store";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
   try {
@@ -138,14 +139,7 @@ export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any
   }
 };
 
-export interface ICatalogMaterial {
-  material_code: string;
-  material_name: string;
-}
-
-export const getCatalogMaterialsForSelect = async (): Promise<
-  ICatalogMaterial[]
-> => {
+export const getCatalogMaterialsForSelect = async (): Promise<ICatalogMaterial[]> => {
   try {
     const response: GenericResponse<ICatalogMaterial[]> = await API.get(
       `${config.API_HOST}/data/catalog/material`
@@ -153,6 +147,30 @@ export const getCatalogMaterialsForSelect = async (): Promise<
     return response.data;
   } catch (error) {
     console.error("Error fetching catalog material:", error);
+    throw error;
+  }
+};
+
+export const getCatalogMaterialType = async (): Promise<ICatalogSelectOption[]> => {
+  try {
+    const response: GenericResponse<ICatalogSelectOption[]> = await API.get(
+      "/data/catalog/material-type-vol"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching catalog material type:", error);
+    throw error;
+  }
+};
+
+export const getMaterialProductType = async (): Promise<ICatalogSelectOption[]> => {
+  try {
+    const response: GenericResponse<ICatalogSelectOption[]> = await API.get(
+      "/data/catalog/material-product-type"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching material product type:", error);
     throw error;
   }
 };
