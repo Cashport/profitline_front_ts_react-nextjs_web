@@ -7,7 +7,9 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/modules/chat/ui/button";
 import { CatalogsTable } from "../../components/CatalogsTable";
-import ModalAddEditCatalog from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
+import ModalAddEditCatalog, {
+  CatalogFormData
+} from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
 import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
@@ -18,24 +20,40 @@ export default function CatalogView() {
   const clientId = params.clientId as string;
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
-  const [editingItem, setEditingItem] = useState<IGetCatalogs | null>(null);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: catalogData, isLoading } = useCatalogsDataQuality(projectId, clientId, countryId);
 
   const handleEdit = (item: IGetCatalogs) => {
-    setEditingItem(item);
+    setMode("edit");
+    setSelectedCatalog(item);
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (data: CatalogFormData) => {
+    // TODO: Implementar lógica de guardar/actualizar
+    if (mode === "create") {
+      // Llamar API para crear
+      console.log("Crear nuevo catálogo:", data);
+    } else {
+      // Llamar API para actualizar
+      console.log("Actualizar catálogo:", selectedCatalog?.id, data);
+    }
     setIsDialogOpen(false);
-    setEditingItem(null);
+    setSelectedCatalog(null);
   };
 
   const handleAddNew = () => {
-    setEditingItem(null);
+    setMode("create");
+    setSelectedCatalog(null);
     setIsDialogOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsDialogOpen(false);
+    setSelectedCatalog(null);
   };
 
   return (
@@ -86,9 +104,9 @@ export default function CatalogView() {
 
       <ModalAddEditCatalog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        editingItem={editingItem}
-        setEditingItem={setEditingItem}
+        onClose={handleClose}
+        mode={mode}
+        catalogData={selectedCatalog}
         onSave={handleSave}
       />
     </>
