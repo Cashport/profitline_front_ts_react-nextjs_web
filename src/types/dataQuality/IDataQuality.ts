@@ -241,6 +241,7 @@ export interface IGetCatalogs {
 }
 
 export interface ICatalogMaterial {
+  id: number;
   material_code: string;
   material_name: string;
 }

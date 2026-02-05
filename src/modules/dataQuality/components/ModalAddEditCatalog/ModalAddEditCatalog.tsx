@@ -235,7 +235,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                   </SelectTrigger>
                   <SelectContent className="!z-[10000]">
                     {selectOptions.materials.map((material) => (
-                      <SelectItem key={material.material_code} value={material.material_code}>
+                      <SelectItem key={material.id} value={String(material.id)}>
                         {material.material_name}
                       </SelectItem>
                     ))}
