@@ -79,7 +79,7 @@ const ModalCreateEditClient = ({
         await updateClient(clientData.id, {
           client_name: data.client_name,
           id_country: Number(countryId),
-          archive_rules: []
+          stakeholder: data.stakeholder
         });
         message.success("Cliente actualizado exitosamente");
       }

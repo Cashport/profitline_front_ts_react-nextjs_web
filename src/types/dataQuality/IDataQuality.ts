@@ -64,12 +64,6 @@ export interface IClientDataList {
   total_pages: number;
 }
 
-// Archive Rule (for create/update)
-export interface IArchiveRule {
-  id_type_archive: number;
-  periodicity_json: IPeriodicity;
-}
-
 export interface IArchiveRuleResponse {
   id: number;
   id_type_archive: number;
@@ -102,7 +96,7 @@ export interface ICreateClientResponse {
 export interface IUpdateClientRequest {
   client_name: string;
   id_country: number;
-  archive_rules: IArchiveRule[];
+  stakeholder: string;
 }
 
 // Update Client Response (same as Create)
@@ -124,6 +118,11 @@ export interface IClientDetailDataArchive {
   url: string;
   created_at: string;
   updated_at: string;
+  variables: Record<string, string>;
+  intake_type: {
+    id: number;
+    description: string;
+  } | null;
 }
 
 export interface IClientDetailArchiveClient {
@@ -221,7 +220,7 @@ export interface IPeriodicityJSON {
 }
 
 export interface ICreateIntakeRequest {
-  file: File;
+  file?: File | null;
   id_client_data: number;
   id_type_archive: number;
   id_status: number;
