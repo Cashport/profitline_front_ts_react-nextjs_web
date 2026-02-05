@@ -192,6 +192,7 @@ export function ModalDataIntake({
     handleSubmit,
     watch,
     reset,
+    trigger,
     formState: { errors, isValid, isSubmitting, isDirty }
   } = useForm<DataIntakeFormData>({
     resolver: yupResolver(activeValidationSchema),
@@ -513,7 +514,10 @@ export function ModalDataIntake({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsExistingFileDeleted(true)}
+                    onClick={() => {
+                      setIsExistingFileDeleted(true);
+                      trigger();
+                    }}
                     className="text-red-600 h-6 px-2"
                   >
                     Eliminar
@@ -754,7 +758,7 @@ export function ModalDataIntake({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!isValid || isSubmitting || !selectedPeriodicity || !hasChanges}
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity || !hasChanges || (isExistingFileDeleted && !attachedFileValue)}
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
                     {isSubmitting ? "Guardando..." : "Guardar"}
@@ -779,6 +783,7 @@ export function ModalDataIntake({
                     setSelectedPeriodicity(converted);
                     setInitialPeriodicity(converted);
                   }
+                  trigger();
                 }}
                 className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
               >
