@@ -216,7 +216,7 @@ export interface IPeriodicityJSON {
 }
 
 export interface ICreateIntakeRequest {
-  file: File;
+  file?: File | null;
   id_client_data: number;
   id_type_archive: number;
   id_status: number;

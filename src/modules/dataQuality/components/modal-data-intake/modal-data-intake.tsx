@@ -13,17 +13,18 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import { useAppStore } from "@/lib/store/store";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
-import { IParameterData, IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
+import { IParameterData, IClientDetailDataArchive, IPeriodicity } from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { Edit } from "lucide-react";
 import { InputClickableStyled } from "../input-clickable-styled/input-clickable-styled";
 import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
 import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
-import { createIntake } from "@/services/dataQuality/dataQuality";
+import { createIntake, editIntake } from "@/services/dataQuality/dataQuality";
 
 // Mode type definition
 export type IModalMode = "create" | "view";
@@ -60,6 +61,44 @@ const validationSchema: yup.ObjectSchema<any> = yup.object({
     )
     .defined()
 });
+
+const editValidationSchema: yup.ObjectSchema<any> = yup.object({
+  clientName: yup.string().required("El nombre del cliente es requerido"),
+  fileType: yup.string().required("El tipo de archivo es requerido"),
+  ingestaSource: yup.string().defined(),
+  attachedFile: yup.mixed<File>().nullable().notRequired(),
+  ingestaVariables: yup
+    .array()
+    .of(
+      yup.object({
+        key: yup.string().defined(),
+        value: yup.string().defined()
+      })
+    )
+    .defined()
+});
+
+const convertPeriodicityToFormData = (
+  periodicity: IPeriodicity
+): IPeriodicityModalForm => {
+  const isWeekly = periodicity.repeat.frequency?.toLowerCase() === "semanal";
+
+  return {
+    init_date: periodicity.start_date ? dayjs(periodicity.start_date) : undefined,
+    frequency_number: Number(periodicity.repeat.interval) || undefined,
+    frequency: {
+      value: periodicity.repeat.frequency || "Mensual",
+      label: periodicity.repeat.frequency || "Mensual"
+    },
+    days: isWeekly
+      ? periodicity.repeat.day.map((d) => ({
+          value: String(d),
+          label: String(d)
+        }))
+      : [],
+    end_date: periodicity.end_date ? dayjs(periodicity.end_date) : undefined
+  };
+};
 
 interface IModalDataIntakeProps {
   open: boolean;
@@ -98,6 +137,10 @@ export function ModalDataIntake({
     undefined
   );
   const [periodicityError, setPeriodicityError] = useState(false);
+  const [isExistingFileDeleted, setIsExistingFileDeleted] = useState(false);
+  const [initialPeriodicity, setInitialPeriodicity] = useState<IPeriodicityModalForm | undefined>(
+    undefined
+  );
 
   // Fetch parameter data with clientId using SWR
   const {
@@ -118,10 +161,13 @@ export function ModalDataIntake({
   // Compute form initial data based on available sources
   const formInitialData = useMemo(() => {
     if (mode === "view" && intakeData) {
+      const matchedIntakeType = parameterData?.intake_types?.find(
+        (t) => t.description === intakeData.strategy
+      );
       return {
         clientName,
-        fileType: intakeData.tipo_archivo || "",
-        ingestaSource: intakeData.strategy || "",
+        fileType: String(intakeData.id_type_archive),
+        ingestaSource: matchedIntakeType ? String(matchedIntakeType.id) : "",
         attachedFile: null,
         existingFileName: intakeData.url || "",
         ingestaVariables: intakeData.variables
@@ -138,15 +184,20 @@ export function ModalDataIntake({
     return defaultFormValues;
   }, [mode, clientId, parameterData, intakeData, clientName]);
 
+  // Select validation schema based on mode
+  const activeValidationSchema = useMemo(() => {
+    return mode === "view" ? editValidationSchema : validationSchema;
+  }, [mode]);
+
   // Setup react-hook-form
   const {
     control,
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isValid, isSubmitting }
+    formState: { errors, isValid, isSubmitting, isDirty }
   } = useForm<DataIntakeFormData>({
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(activeValidationSchema),
     mode: "onChange",
     defaultValues: formInitialData
   });
@@ -165,7 +216,9 @@ export function ModalDataIntake({
     if (open) {
       setIsEditing(false);
       setSelectedPeriodicity(undefined);
+      setInitialPeriodicity(undefined);
       setPeriodicityError(false);
+      setIsExistingFileDeleted(false);
       const resetData = {
         ...formInitialData,
         clientName,
@@ -196,6 +249,24 @@ export function ModalDataIntake({
     return days.map((day) => day.value).join(", ");
   };
 
+  // Track if periodicity has changed from initial values
+  const periodicityChanged = useMemo(() => {
+    if (!initialPeriodicity && !selectedPeriodicity) return false;
+    if (!initialPeriodicity || !selectedPeriodicity) return true;
+    return (
+      initialPeriodicity.init_date?.format("YYYY-MM-DD") !==
+        selectedPeriodicity.init_date?.format("YYYY-MM-DD") ||
+      initialPeriodicity.frequency?.value !== selectedPeriodicity.frequency?.value ||
+      initialPeriodicity.frequency_number !== selectedPeriodicity.frequency_number ||
+      initialPeriodicity.end_date?.format("YYYY-MM-DD") !==
+        selectedPeriodicity.end_date?.format("YYYY-MM-DD") ||
+      initialPeriodicity.days?.map((d) => d.value).join(",") !==
+        selectedPeriodicity.days?.map((d) => d.value).join(",")
+    );
+  }, [initialPeriodicity, selectedPeriodicity]);
+
+  const hasChanges = isDirty || periodicityChanged || isExistingFileDeleted;
+
   const onSubmit = async (data: DataIntakeFormData) => {
     // Validar periodicidad
     if (!selectedPeriodicity) {
@@ -207,11 +278,6 @@ export function ModalDataIntake({
     setPeriodicityError(false);
 
     if (mode === "create") {
-      console.log({
-        ...data,
-        periodicity: selectedPeriodicity
-      });
-
       const jsonFreq = {
         start_date: selectedPeriodicity?.init_date?.format("YYYY-MM-DD") || "",
         repeat: {
@@ -245,18 +311,54 @@ export function ModalDataIntake({
         message.error("Error al crear la ingesta");
       }
     } else if (mode === "view" && isEditing) {
-      console.log("Edit mode - not implemented yet", {
-        ...data,
-        periodicity: selectedPeriodicity,
-        variables: data.ingestaVariables
-          .filter((v) => v.key && v.value)
-          .map((v) => ({ variable_key: v.key, variable_value: v.value }))
-      });
+      const jsonFreq = {
+        start_date: selectedPeriodicity?.init_date?.format("YYYY-MM-DD") || "",
+        repeat: {
+          interval: String(selectedPeriodicity?.frequency_number || 0),
+          frequency: selectedPeriodicity?.frequency.value || "Mensual",
+          day:
+            selectedPeriodicity?.frequency.value.toLowerCase() === "semanal"
+              ? selectedPeriodicity?.days.map((day) => day.value)
+              : [Number(selectedPeriodicity?.init_date?.format("YYYY-MM-DD").split("-")[2])]
+        },
+        end_date: selectedPeriodicity?.end_date?.format("YYYY-MM-DD") || ""
+      };
+
+      try {
+        const modelData = {
+          ...(data.attachedFile ? { file: data.attachedFile } : {}),
+          id_client_data: Number(clientId),
+          id_type_archive: Number(data.fileType),
+          id_status: 1,
+          intake_type_id: Number(data.ingestaSource),
+          periodicity_json: jsonFreq,
+          variables: data.ingestaVariables
+            .filter((v) => v.key && v.value)
+            .map((v) => ({ variable_key: v.key, variable_value: v.value }))
+        };
+
+        await editIntake(intakeData!.id, modelData as any);
+
+        message.success("Ingesta actualizada correctamente");
+        onSuccess();
+        handleClose();
+      } catch (error) {
+        message.error("Error al actualizar la ingesta");
+      }
     }
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
+    setIsExistingFileDeleted(false);
+    if (intakeData?.periodicity_json) {
+      const converted = convertPeriodicityToFormData(intakeData.periodicity_json);
+      setSelectedPeriodicity(converted);
+      setInitialPeriodicity(converted);
+    } else {
+      setSelectedPeriodicity(undefined);
+      setInitialPeriodicity(undefined);
+    }
     const resetData = {
       ...formInitialData,
       ingestaVariables: formInitialData.ingestaVariables?.length
@@ -269,8 +371,10 @@ export function ModalDataIntake({
   const handleClose = () => {
     setIsEditing(false);
     setSelectedPeriodicity(undefined);
+    setInitialPeriodicity(undefined);
     setPeriodicityError(false);
     setIsPeriodicityModalOpen(false);
+    setIsExistingFileDeleted(false);
     reset(defaultFormValues);
     onOpenChange();
   };
@@ -394,7 +498,7 @@ export function ModalDataIntake({
           control={control}
           render={({ field: { onChange, value, ...field } }) => (
             <div className="space-y-2">
-              {mode === "view" && formInitialData?.existingFileName && !attachedFileValue && (
+              {mode === "view" && formInitialData?.existingFileName && !isExistingFileDeleted && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <span>
                     Archivo actual:{" "}
@@ -412,36 +516,38 @@ export function ModalDataIntake({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => {}}
+                    onClick={() => setIsExistingFileDeleted(true)}
                     className="text-red-600 h-6 px-2"
                   >
                     Eliminar
                   </Button>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Input
-                  {...field}
-                  id="file-attachment"
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    onChange(file);
-                  }}
-                  className="border-[#DDDDDD]"
-                />
-                {attachedFileValue && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onChange(null)}
-                    className="text-red-600"
-                  >
-                    Eliminar
-                  </Button>
-                )}
-              </div>
+              {(mode === "create" || isExistingFileDeleted || !formInitialData?.existingFileName) && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    {...field}
+                    id="file-attachment"
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      onChange(file);
+                    }}
+                    className="border-[#DDDDDD]"
+                  />
+                  {attachedFileValue && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onChange(null)}
+                      className="text-red-600"
+                    >
+                      Eliminar
+                    </Button>
+                  )}
+                </div>
+              )}
               {attachedFileValue && (
                 <p className="text-xs text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
               )}
@@ -516,7 +622,7 @@ export function ModalDataIntake({
       <div className="grid gap-2">
         <Label>Tipo de Archivo</Label>
         <Badge variant="outline" className="w-fit">
-          {formInitialData.fileType || "Sin tipo"}
+          {intakeData?.tipo_archivo || "Sin tipo"}
         </Badge>
       </div>
 
@@ -545,7 +651,7 @@ export function ModalDataIntake({
       <div className="grid gap-2">
         <Label>Fuente de Ingesta</Label>
         <p className="text-sm" style={{ color: "#141414" }}>
-          {formInitialData.ingestaSource || "Sin fuente"}
+          {intakeData?.strategy || "Sin fuente"}
         </p>
       </div>
 
@@ -612,7 +718,7 @@ export function ModalDataIntake({
             ? "Configure los detalles de la nueva ingesta"
             : isEditing
               ? "Modifica los detalles de la ingesta"
-              : `Información de la ingesta de ${formInitialData.fileType || clientName}`}
+              : `Información de la ingesta de ${intakeData?.tipo_archivo || clientName}`}
         </p>
 
         {showForm ? (
@@ -651,7 +757,7 @@ export function ModalDataIntake({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!isValid || isSubmitting || !selectedPeriodicity}
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity || !hasChanges}
                     className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
                   >
                     {isSubmitting ? "Guardando..." : "Guardar"}
@@ -669,7 +775,14 @@ export function ModalDataIntake({
                 Cerrar
               </Button>
               <Button
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setIsEditing(true);
+                  if (intakeData?.periodicity_json) {
+                    const converted = convertPeriodicityToFormData(intakeData.periodicity_json);
+                    setSelectedPeriodicity(converted);
+                    setInitialPeriodicity(converted);
+                  }
+                }}
                 className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
               >
                 <Edit className="w-4 h-4 mr-2" />

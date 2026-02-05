@@ -145,6 +145,7 @@ export const editIntake = async (
   const formData = new FormData();
   for (const key in modelData) {
     const value = (modelData as any)[key];
+    if (value === null || value === undefined) continue;
     formData.append(
       key,
       typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
