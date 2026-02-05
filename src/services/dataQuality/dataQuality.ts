@@ -137,3 +137,27 @@ export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any
     throw error;
   }
 };
+
+export const editIntake = async (
+  intakeId: number,
+  modelData: ICreateIntakeRequest
+): Promise<any> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = (modelData as any)[key];
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
+  }
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/client-archive-monthly/${intakeId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing intake:", error);
+    throw error;
+  }
+};

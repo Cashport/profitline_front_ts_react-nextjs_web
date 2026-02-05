@@ -118,6 +118,7 @@ export interface IClientDetailDataArchive {
   url: string;
   created_at: string;
   updated_at: string;
+  variables: Record<string, string>;
 }
 
 export interface IClientDetailArchiveClient {

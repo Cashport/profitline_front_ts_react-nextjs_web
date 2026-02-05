@@ -124,7 +124,12 @@ export function ModalDataIntake({
         ingestaSource: intakeData.strategy || "",
         attachedFile: null,
         existingFileName: intakeData.url || "",
-        ingestaVariables: [{ key: "", value: "" }]
+        ingestaVariables: intakeData.variables
+          ? Object.entries(intakeData.variables).map(([key, value]) => ({
+              key,
+              value
+            }))
+          : []
       } as DataIntakeFormData;
     }
     if (mode === "view" && clientId && parameterData) {
@@ -570,7 +575,7 @@ export function ModalDataIntake({
           {formInitialData.ingestaVariables
             ?.filter((v) => v.key && v.value)
             .map((variable, index) => (
-              <div key={index} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1">
+              <div key={index} className="flex items-center gap-1 rounded px-2 py-1">
                 <span className="text-xs font-mono font-semibold text-gray-700">
                   {variable.key}:
                 </span>
