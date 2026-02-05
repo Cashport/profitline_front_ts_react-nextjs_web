@@ -161,13 +161,10 @@ export function ModalDataIntake({
   // Compute form initial data based on available sources
   const formInitialData = useMemo(() => {
     if (mode === "view" && intakeData) {
-      const matchedIntakeType = parameterData?.intake_types?.find(
-        (t) => t.description === intakeData.strategy
-      );
       return {
         clientName,
         fileType: String(intakeData.id_type_archive),
-        ingestaSource: matchedIntakeType ? String(matchedIntakeType.id) : "",
+        ingestaSource: intakeData.intake_type ? String(intakeData.intake_type.id) : "",
         attachedFile: null,
         existingFileName: intakeData.url || "",
         ingestaVariables: intakeData.variables
@@ -651,7 +648,7 @@ export function ModalDataIntake({
       <div className="grid gap-2">
         <Label>Fuente de Ingesta</Label>
         <p className="text-sm" style={{ color: "#141414" }}>
-          {intakeData?.strategy || "Sin fuente"}
+          {intakeData?.intake_type?.description || "Sin fuente"}
         </p>
       </div>
 

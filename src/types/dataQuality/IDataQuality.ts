@@ -119,6 +119,10 @@ export interface IClientDetailDataArchive {
   created_at: string;
   updated_at: string;
   variables: Record<string, string>;
+  intake_type: {
+    id: number;
+    description: string;
+  } | null;
 }
 
 export interface IClientDetailArchiveClient {
