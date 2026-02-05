@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import { Calendar, FileText, Filter, Upload, ArrowLeft } from "lucide-react";
+import { Calendar, FileText, Filter, Upload, ArrowLeft, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -14,20 +14,12 @@ import {
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
-import { getClientData, createClient } from "@/services/dataQuality/dataQuality";
+import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
+import { getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import { IClientData, ICreateClientRequest } from "@/types/dataQuality/IDataQuality";
+import { IClientData } from "@/types/dataQuality/IDataQuality";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
-
-// Mock stakeholders for mapping name to ID
-const mockStakeholders = [
-  { id: 1, name: "Juan Pérez" },
-  { id: 2, name: "María García" },
-  { id: 3, name: "Carlos Rodríguez" },
-  { id: 4, name: "Ana Martínez" }
-];
 
 export default function CountriesClientsView() {
   const params = useParams();
@@ -37,7 +29,6 @@ export default function CountriesClientsView() {
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const height = useScreenHeight();
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
 
   const handleGoBack = () => {
     router.push("/data-quality");
@@ -47,7 +38,7 @@ export default function CountriesClientsView() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [periodicityFilter, setPeriodicityFilter] = useState("all");
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
-  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
+  const [isModalClientOpen, setIsModalClientOpen] = useState(false);
 
   // API data state
   const [clientsData, setClientsData] = useState<IClientData[]>([]);
@@ -58,105 +49,9 @@ export default function CountriesClientsView() {
     total: 0
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Use projectId from store, hardcode countryId=1 for now
-        const res = await getClientData(
-          countryId,
-          projectId,
-          pagination.pageSize,
-          pagination.current
-        );
-        setClientsData(res.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: res.total
-        }));
-      } catch (err) {
-        console.error("Error fetching client data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (projectId) {
-      fetchData();
-    }
-  }, [projectId, pagination.current, pagination.pageSize]);
-
-  // Filter by client_name only (other filters remain mock)
-  const filteredData = clientsData.filter((client) =>
-    client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCreateIngestionSuccess = async (formData: DataIntakeFormData) => {
-    setIsLoadingCreate(true);
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      // Build ICreateClientRequest from form data
-
-      // TODO: Verify id_client generation strategy with backend
-      // Currently using crypto.randomUUID() for unique identifier
-      const generatedClientId = crypto.randomUUID();
-
-      // Map stakeholder name to ID using mockStakeholders
-      const stakeholderId = mockStakeholders.find((s) => s.name === formData.stakeholder)?.id || 0;
-
-      // TODO: Verify with backend - Current mapping: Sales=1, Stock=2, In transit=3
-      const archiveTypeId =
-        formData.fileType === "Sales"
-          ? 1
-          : formData.fileType === "Stock"
-            ? 2
-            : formData.fileType === "In transit"
-              ? 3
-              : 0;
-
-      // TODO: Implement proper periodicity_json construction based on form details
-      // Current implementation is simplified and should be enhanced with:
-      // - dailyDetails (diasHabiles, festivos)
-      // - weeklyDetails (acumulado, porRango)
-      // - start_date and end_date handling
-      const periodicityJson = {
-        repeat: {
-          day:
-            formData.periodicity === "Daily"
-              ? [1, 2, 3, 4, 5]
-              : formData.periodicity === "Weekly"
-                ? [1]
-                : formData.periodicity === "Monthly"
-                  ? [1]
-                  : [],
-          interval: formData.periodicity?.toLowerCase() || "daily",
-          frequency: formData.periodicity?.toLowerCase() || "daily"
-        }
-      };
-
-      const modelData: ICreateClientRequest = {
-        id_client: generatedClientId,
-        id_project: projectId,
-        client_name: formData.clientName,
-        id_country: 1, // Hardcoded based on current component logic (line 54)
-        stakeholder: stakeholderId,
-        archive_rules: [
-          {
-            id_type_archive: archiveTypeId,
-            periodicity_json: periodicityJson
-          }
-        ]
-        // TODO: Handle unused form data in future iterations:
-        // - ingestaSource (email, api, b2b-web, etc.)
-        // - ingestaVariables (configuration key-value pairs)
-        // - attachedFile (File upload)
-        // These may require separate API endpoints or additional fields
-      };
-
-      // Call the createClient service
-      const response = await createClient(modelData);
-      console.log("Client created successfully:", response);
-
-      // Refresh the client list to show newly created client
       const res = await getClientData(
         countryId,
         projectId,
@@ -168,17 +63,23 @@ export default function CountriesClientsView() {
         ...prev,
         total: res.total
       }));
-
-      // TODO: Add success notification (e.g., Ant Design message component)
-      // message.success("Cliente creado exitosamente");
-    } catch (error) {
-      console.error("Error creating client:", error);
-      // TODO: Add error notification with user-friendly message
-      // message.error("Error al crear el cliente. Por favor intente nuevamente.");
+    } catch (err) {
+      console.error("Error fetching client data:", err);
     } finally {
-      setIsLoadingCreate(false);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (projectId) {
+      fetchData();
+    }
+  }, [projectId, pagination.current, pagination.pageSize]);
+
+  // Filter by client_name only (other filters remain mock)
+  const filteredData = clientsData.filter((client) =>
+    client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleRowClick = (record: IClientData) => {
     console.log("Row clicked:", {
@@ -192,6 +93,8 @@ export default function CountriesClientsView() {
     router.push(`/data-quality/client/${record.id}`);
   };
 
+  const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
+
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
@@ -204,7 +107,7 @@ export default function CountriesClientsView() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           Inicio
         </Button>
-        <h1 className="text-2xl font-bold text-[#141414]">-</h1>
+        <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
       </div>
 
       {/* Main Content */}
@@ -268,13 +171,13 @@ export default function CountriesClientsView() {
               </SelectContent>
             </Select>
 
-            {/* Create Ingestion Button */}
+            {/* Create Client Button */}
             <Button
               className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-              onClick={() => setIsModalDataIntakeOpen(true)}
+              onClick={() => setIsModalClientOpen(true)}
             >
-              <Upload className="w-4 h-4 mr-2" />
-              Crear nueva ingesta
+              <Plus className="w-4 h-4 mr-2" />
+              Crear cliente
             </Button>
           </div>
 
@@ -295,13 +198,13 @@ export default function CountriesClientsView() {
           />
         </CardContent>
       </Card>
-
-      <ModalDataIntake
+      <ModalCreateEditClient
+        isOpen={isModalClientOpen}
+        onClose={() => setIsModalClientOpen(false)}
+        onSuccess={fetchData}
+        countryName=""
+        countryId={countryId}
         mode="create"
-        open={isModalDataIntakeOpen}
-        onOpenChange={setIsModalDataIntakeOpen}
-        onSuccess={handleCreateIngestionSuccess}
-        isLoading={isLoadingCreate}
       />
     </div>
   );

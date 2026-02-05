@@ -9,7 +9,9 @@ import {
   IUpdateClientRequest,
   IUpdateClientResponse,
   IDeleteClientResponse,
-  IClientDetail
+  IClientDetail,
+  IParameterData,
+  ICreateIntakeRequest
 } from "@/types/dataQuality/IDataQuality";
 import { useAppStore } from "@/lib/store/store";
 
@@ -96,6 +98,67 @@ export const getClientDetail = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching client detail:", error);
+    throw error;
+  }
+};
+
+export const getParametersData = async (
+  projectId: number,
+  clientId: string
+): Promise<IParameterData> => {
+  try {
+    const response: GenericResponse<IParameterData> = await API.get(
+      `${config.API_HOST}/data/clients/${clientId}/parametrization/${projectId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching parameters data:", error);
+    throw error;
+  }
+};
+
+export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = (modelData as any)[key];
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
+  }
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/client-archive-monthly`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating intake:", error);
+    throw error;
+  }
+};
+
+export const editIntake = async (
+  intakeId: number,
+  modelData: ICreateIntakeRequest
+): Promise<any> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = (modelData as any)[key];
+    if (value === null || value === undefined) continue;
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
+  }
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/client-archive-monthly/${intakeId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing intake:", error);
     throw error;
   }
 };
