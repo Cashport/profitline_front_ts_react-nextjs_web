@@ -23,7 +23,7 @@ import {
 } from "@/modules/chat/ui/table";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 import dayjs from "dayjs";
-import { uploadIntakeFile } from "@/services/dataQuality/dataQuality";
+import { downloadCSV, uploadIntakeFile } from "@/services/dataQuality/dataQuality";
 
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
@@ -52,8 +52,8 @@ const bytesToMB = (bytes: number): string => {
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 
-const formatDateTime = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
+const formatDate = (isoDateString: string): string => {
+  return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
 export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
@@ -76,6 +76,48 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     input.click();
   };
 
+  const handleProcessedFile = async (fileId: number) => {
+    try {
+      const res = await downloadCSV(fileId);
+      // Aquí puedes implementar la lógica para descargar el archivo, por ejemplo:
+      const url = window.URL.createObjectURL(new Blob([res]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `archivo_${fileId}.csv`); // Nombre del archivo a descargar
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      message.success("Archivo descargado exitosamente.");
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al descargar el archivo. Por favor, inténtalo de nuevo.";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleDownloadOriginal = async (file: IClientDetailArchiveClient) => {
+    if (file.procesed_url) {
+      try {
+        const response = await fetch(file.procesed_url);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", file.description || "archivo_original");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch {
+        message.error("Error al descargar el archivo. Por favor, inténtalo de nuevo.");
+      }
+    } else {
+      message.error("No hay URL disponible para descargar el archivo original.");
+    }
+  };
+
   return (
     <div>
       <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
@@ -86,7 +128,8 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
           <TableRow style={{ borderColor: "#DDDDDD" }}>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha y hora</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
             <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
@@ -109,7 +152,15 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
                   <span style={{ color: "#141414" }}>
-                    {formatDateTime(file.updated_at ?? file.created_at)}
+                    {file.date_archive ? formatDate(file.date_archive) : "-"}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                  <span style={{ color: "#141414" }}>
+                    {file.date_upload ? formatDate(file.date_upload) : "-"}
                   </span>
                 </div>
               </TableCell>
@@ -125,8 +176,23 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                 <div className="flex items-center justify-center">
                   <Dropdown
                     menu={{
-                      items: [{ key: "upload", label: "Subir ingesta" }] as MenuProps["items"],
-                      onClick: () => handleUploadIntake(file.id)
+                      items: [
+                        {
+                          key: "upload",
+                          label: "Subir ingesta",
+                          onClick: () => handleUploadIntake(file.id)
+                        },
+                        {
+                          key: "download-original",
+                          label: "Descarga original",
+                          onClick: () => handleDownloadOriginal(file)
+                        },
+                        {
+                          key: "download-universal",
+                          label: "Descarga universal",
+                          onClick: () => handleProcessedFile(file.id)
+                        }
+                      ]
                     }}
                     trigger={["click"]}
                   >
