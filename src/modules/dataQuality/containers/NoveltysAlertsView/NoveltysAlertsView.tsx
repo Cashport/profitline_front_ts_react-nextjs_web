@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { Filter, ExternalLink, ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { Badge } from "@/modules/chat/ui/badge";
+import { Filter, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import {
   Select,
@@ -16,17 +14,9 @@ import {
 } from "@/modules/chat/ui/select";
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/modules/chat/ui/table";
-import { Spin } from "antd";
 
 import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
+import { AlertsTable } from "../../components/AlertsTable";
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
 import {
   IAlertFilterCountry,
@@ -50,6 +40,7 @@ export default function NoveltyAlertsView() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
   const [clientFilter, setClientFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [filtersData, setFiltersData] = useState<{
     countries: IAlertFilterCountry[];
@@ -61,17 +52,21 @@ export default function NoveltyAlertsView() {
     getAlertsFilters().then((data) => setFiltersData(data));
   }, []);
 
-  const { data: alertsData, isLoading } = useDataQualityAlerts(
-    1,
-    50,
+  const { data: alertsResponse, isLoading } = useDataQualityAlerts(
+    currentPage,
+    10,
     searchTerm || undefined,
     countryFilter !== "all" ? Number(countryFilter) : undefined,
     clientFilter !== "all" ? Number(clientFilter) : undefined,
     statusFilter !== "all" ? Number(statusFilter) : undefined
   );
 
-  const alertsResponse = alertsData as unknown as IGetAlerts | undefined;
-  const alerts = alertsResponse?.data ?? [];
+  const alertsData = alertsResponse as unknown as IGetAlerts | undefined;
+  const alerts = alertsData?.data ?? [];
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, countryFilter, clientFilter]);
 
   return (
     <main>
@@ -191,101 +186,19 @@ export default function NoveltyAlertsView() {
             <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
               Lista de Alertas y Novedades
             </h3>
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <Spin size="large" />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow style={{ borderColor: "#DDDDDD" }}>
-                    <TableHead style={{ color: "#141414" }}>Cliente</TableHead>
-                    <TableHead style={{ color: "#141414" }}>País</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Novedad</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Tipo</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Fecha novedad</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Prioridad</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Estado</TableHead>
-                    <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {alerts.map((alert) => (
-                    <TableRow
-                      key={alert.id}
-                      className="hover:bg-gray-50"
-                      style={{ borderColor: "#DDDDDD" }}
-                    >
-                      <TableCell>
-                        <span className="font-medium" style={{ color: "#141414" }}>
-                          {alert.client_name}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {alert.country_name}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className="text-sm truncate max-w-xs block"
-                          style={{ color: "#141414" }}
-                        >
-                          {alert.error_message}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {alert.error_type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm" style={{ color: "#141414" }}>
-                          {alert.created_at}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {alert.error_level}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: alert.status_color }}
-                          />
-                          <span className="text-sm">{alert.status_description}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Link href={`/data-quality/clients/${alert.id_client}`}>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs bg-transparent"
-                              title="Ir al catálogo del cliente"
-                            >
-                              <ExternalLink className="w-3 h-3 mr-1" />
-                              Catálogo
-                            </Button>
-                          </Link>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+            <AlertsTable
+              alerts={alerts}
+              isLoading={isLoading}
+              pagination={{
+                current: currentPage,
+                total: alertsData?.total ?? 0,
+                pageSize: alertsData?.limit ?? 10
+              }}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </CardContent>
       </Card>
-
-      {/* Summary */}
-      <div className="mt-6 text-sm" style={{ color: "#141414" }}>
-        Mostrando {alerts.length} de {alertsResponse?.total ?? 0} alertas
-      </div>
     </main>
   );
 }

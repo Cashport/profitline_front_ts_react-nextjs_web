@@ -21,7 +21,7 @@ export const useDataQualityAlerts = (
 
   const pathKey = `/data/alerts${queryParams.length ? `?${queryParams.join("&")}` : ""}`;
 
-  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetAlerts[]>>(
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetAlerts>>(
     pathKey,
     fetcher,
     {
