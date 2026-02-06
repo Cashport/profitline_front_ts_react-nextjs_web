@@ -9,6 +9,8 @@ import {
   AlertTriangle,
   BadgeQuestionMark
 } from "lucide-react";
+import { Dropdown, message } from "antd";
+import type { MenuProps } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -21,9 +23,11 @@ import {
 } from "@/modules/chat/ui/table";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 import dayjs from "dayjs";
+import { uploadIntakeFile } from "@/services/dataQuality/dataQuality";
 
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
+  mutate: () => void;
 }
 
 const getStatusIcon = (status: string) => {
@@ -100,7 +104,26 @@ const formatDateTime = (isoDateString: string): string => {
   return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
 };
 
-export function ClientDetailTable({ files }: IClientDetailTableProps) {
+export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
+  const handleUploadIntake = async (id: number) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          await uploadIntakeFile(id, file);
+          message.success("Archivo de ingesta subido exitosamente.");
+          mutate();
+        } catch (error) {
+          message.error("Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo.");
+        }
+      }
+      input.remove();
+    };
+    input.click();
+  };
+
   return (
     <div>
       <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
@@ -149,9 +172,17 @@ export function ClientDetailTable({ files }: IClientDetailTableProps) {
                   <Button variant="ghost" size="sm" title="Descargar">
                     <Download className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
+                  <Dropdown
+                    menu={{
+                      items: [{ key: "upload", label: "Subir ingesta" }] as MenuProps["items"],
+                      onClick: () => handleUploadIntake(file.id)
+                    }}
+                    trigger={["click"]}
+                  >
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </Dropdown>
                 </div>
               </TableCell>
             </TableRow>
