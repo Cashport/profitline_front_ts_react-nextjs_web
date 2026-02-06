@@ -73,21 +73,13 @@ export function AlertsTable({ alerts, isLoading, pagination, onPageChange }: Ale
                   {alert.error_message}
                 </span>
               </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="text-xs">
-                  {alert.error_type}
-                </Badge>
-              </TableCell>
+              <TableCell>-</TableCell>
               <TableCell>
                 <div className="text-sm" style={{ color: "#141414" }}>
                   {alert.created_at}
                 </div>
               </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="text-xs">
-                  {alert.error_level}
-                </Badge>
-              </TableCell>
+              <TableCell>-</TableCell>
               <TableCell>
                 <div className="flex items-center gap-1">
                   <div
@@ -99,7 +91,7 @@ export function AlertsTable({ alerts, isLoading, pagination, onPageChange }: Ale
               </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
-                  <Link href={`/data-quality/clients/${alert.id_client}`}>
+                  <Link href={`/data-quality/client/${alert.id_client}`}>
                     <Button
                       variant="outline"
                       size="sm"
