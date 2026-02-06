@@ -31,6 +31,7 @@ const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
 
   archives.forEach((archive) => {
+    if (!archive?.description || !archive?.id || !archive?.periodicity) return;
     const desc = archive?.description?.toLowerCase();
     if (!desc) return;
     if (desc.includes("stock") || desc.includes("inventario")) {
