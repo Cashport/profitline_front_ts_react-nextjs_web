@@ -218,5 +218,11 @@
                 border-radius: 44px;
             }
         }
+
+        &-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
     }
 }

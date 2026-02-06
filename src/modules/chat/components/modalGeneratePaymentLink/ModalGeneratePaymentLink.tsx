@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import dayjs from "dayjs";
-import { Flex, message, Modal } from "antd";
+import { Flex, message, Modal, Spin } from "antd";
 import { CaretLeft, PiggyBank, X, Copy, ArrowUpRight } from "@phosphor-icons/react";
 
 import { generatePaymentLink } from "@/services/commerce/commerce";
+import { sendWhatsAppTemplate } from "@/services/chat/chat";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { formatCurrency } from "@/modules/new_dashboard/components/Formatters";
@@ -23,7 +24,13 @@ import "./modalGeneratePaymentLink.scss";
 interface ModalGeneratePaymentLinkProps {
   isOpen: boolean;
   onClose: () => void;
-  ticketInfo: { clientId: string; clientName: string; ticketId: string; email: string };
+  ticketInfo: {
+    clientId: string;
+    clientName: string;
+    ticketId: string;
+    email: string;
+    phone: string;
+  };
 }
 
 interface IFormGenerateLink {
@@ -74,6 +81,7 @@ const ModalGeneratePaymentLink = ({
   const [successData, setSuccessData] = useState<IGeneratePaymentLinkResponse | null>(null);
   const [formDescription, setFormDescription] = useState("Pago mensualidad enero 2026");
   const [createdAt, setCreatedAt] = useState(dayjs().format("YYYY-MM-DD HH:mm:ss"));
+  const [isSendingTemplate, setIsSendingTemplate] = useState(false);
 
   // Limpiar estados al cerrar modal
   useEffect(() => {
@@ -122,6 +130,26 @@ const ModalGeneratePaymentLink = ({
       message.success("Link copiado al portapapeles");
     } catch {
       message.error("Error al copiar el link");
+    }
+  };
+
+  const handleSendTemplate = async () => {
+    setIsSendingTemplate(true);
+    const payload = {
+      templateData: {
+        phoneNumber: ticketInfo.phone || "",
+        templateId: "link_de_pago",
+        senderId: "cmhv6mnla0003no0huiao1u63",
+        name: ticketInfo.clientName,
+        customerCashportUUID: ticketInfo.clientId || ""
+      }
+    };
+    try {
+      await sendWhatsAppTemplate(payload);
+    } catch (error) {
+      message.error("Error al enviar la plantilla por WhatsApp");
+    } finally {
+      setIsSendingTemplate(false);
     }
   };
 
@@ -226,9 +254,13 @@ const ModalGeneratePaymentLink = ({
                 <Copy size={20} />
               </button>
             </div>
-            <button className="modalGeneratePaymentLink__success-link-send">
+            <button
+              className="modalGeneratePaymentLink__success-link-send"
+              onClick={handleSendTemplate}
+              disabled={isSendingTemplate}
+            >
               Enviar plantilla
-              <ArrowUpRight size={16} />
+              {isSendingTemplate ? <Spin size="small" /> : <ArrowUpRight size={16} />}
             </button>
           </div>
 
@@ -279,9 +311,11 @@ const ModalGeneratePaymentLink = ({
             </div>
           </div>
 
-          <PrincipalButton fullWidth onClick={handleClose}>
-            Finalizar
-          </PrincipalButton>
+          <div className="modalGeneratePaymentLink__success-footer">
+            <PrincipalButton customStyles={{ gridColumn: "2 / 3" }} fullWidth onClick={handleClose}>
+              Finalizar
+            </PrincipalButton>
+          </div>
         </div>
       )}
     </Modal>

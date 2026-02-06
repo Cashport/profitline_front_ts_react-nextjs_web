@@ -9,9 +9,13 @@ import {
   IUpdateClientRequest,
   IUpdateClientResponse,
   IDeleteClientResponse,
-  IClientDetail
+  IClientDetail,
+  IParameterData,
+  ICreateIntakeRequest,
+  ICatalogMaterial,
+  ICatalogSelectOption,
+  ICreateCatalogRequest
 } from "@/types/dataQuality/IDataQuality";
-import { useAppStore } from "@/lib/store/store";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
   try {
@@ -96,6 +100,163 @@ export const getClientDetail = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching client detail:", error);
+    throw error;
+  }
+};
+
+export const getParametersData = async (
+  projectId: number,
+  clientId: string
+): Promise<IParameterData> => {
+  try {
+    const response: GenericResponse<IParameterData> = await API.get(
+      `${config.API_HOST}/data/clients/${clientId}/parametrization/${projectId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching parameters data:", error);
+    throw error;
+  }
+};
+
+export const createIntake = async (modelData: ICreateIntakeRequest): Promise<any> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = (modelData as any)[key];
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
+  }
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/client-archive-monthly`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating intake:", error);
+    throw error;
+  }
+};
+
+export const editIntake = async (
+  intakeId: number,
+  modelData: ICreateIntakeRequest
+): Promise<any> => {
+  const formData = new FormData();
+  for (const key in modelData) {
+    const value = (modelData as any)[key];
+    if (value === null || value === undefined) continue;
+    formData.append(
+      key,
+      typeof value === "object" && !(value instanceof File) ? JSON.stringify(value) : value
+    );
+  }
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/client-archive-monthly/${intakeId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing intake:", error);
+    throw error;
+  }
+};
+
+export const getCatalogMaterialsForSelect = async (): Promise<ICatalogMaterial[]> => {
+  try {
+    const response: GenericResponse<ICatalogMaterial[]> = await API.get(
+      `${config.API_HOST}/data/catalog/material`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching catalog material:", error);
+    throw error;
+  }
+};
+
+export const getCatalogMaterialType = async (): Promise<ICatalogSelectOption[]> => {
+  try {
+    const response: GenericResponse<ICatalogSelectOption[]> = await API.get(
+      "/data/catalog/material-type-vol"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching catalog material type:", error);
+    throw error;
+  }
+};
+
+export const getMaterialProductType = async (): Promise<ICatalogSelectOption[]> => {
+  try {
+    const response: GenericResponse<ICatalogSelectOption[]> = await API.get(
+      "/data/catalog/material-product-type"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching material product type:", error);
+    throw error;
+  }
+};
+
+export const createCatalog = async (catalogData: ICreateCatalogRequest): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials`,
+      catalogData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating catalog:", error);
+    throw error;
+  }
+};
+
+export const editCatalog = async (
+  catalogId: number,
+  catalogData: ICreateCatalogRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/catalog/materials/${catalogId}`,
+      catalogData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing catalog:", error);
+    throw error;
+  }
+};
+
+export const deleteCatalog = async (catalogId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/data/catalog/materials/${catalogId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting catalog:", error);
+    throw error;
+  }
+};
+
+export const uploadIntakeFile = async (
+  id_archives_client_data: number,
+  file: File
+): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("id_archives_client_data", id_archives_client_data.toString());
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/create-intake`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading intake file:", error);
     throw error;
   }
 };

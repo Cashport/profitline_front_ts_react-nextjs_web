@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 
-import { Edit, ArrowLeft } from "lucide-react";
+import { Edit, ArrowLeft, Upload } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import { ModalDataIntake, DataIntakeFormData } from "../../components/modal-data-intake";
+import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
+import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import { useAppStore } from "@/lib/store/store";
+import Link from "next/link";
 
 // Helper functions for data transformation
 const formatBytes = (bytes: number): string => {
@@ -34,18 +36,6 @@ const formatDateTime = (dateString: string): string => {
     .replace(",", "");
 };
 
-const parseDetailFuente = (detalle: string): Array<{ key: string; value: string }> => {
-  try {
-    const parsed = JSON.parse(detalle);
-    return Object.entries(parsed).map(([key, value]) => ({
-      key,
-      value: String(value)
-    }));
-  } catch {
-    return [{ key: "", value: detalle }];
-  }
-};
-
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
@@ -53,13 +43,13 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalDataIntakeOpen, setIsModalDataIntakeOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState<Partial<DataIntakeFormData> | undefined>(
-    undefined
-  );
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
 
   // Fetch client detail data using SWR hook
-  const { clientDetail, isLoading, error } = useDataQualityClientDetail(clientId, projectId);
+  const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
+    clientId,
+    projectId
+  );
 
   // Handle loading state
   if (isLoading) {
@@ -107,60 +97,8 @@ export default function DataQualityClientDetails() {
   }
 
   // Map API data to component props
-  const files = clientDetail.archivos || [];
   const countryName = clientDetail.country_name;
   const clientName = clientDetail.client_name;
-
-  const clientConfig = {
-    periodicity: clientDetail.periodicidad?.[0] || "Daily",
-    fileTypes: clientDetail.tipos_archivo_esperados
-  };
-
-  const clientInfo = {
-    ingestaSource: clientDetail.fuente_ingesta?.[0] || "Email",
-    ingestaVariables: parseDetailFuente(clientDetail.detalle_fuente || ""),
-    stakeholder: clientDetail.stakeholder?.toString(),
-    dailyDetails: { diasHabiles: true, festivos: false },
-    weeklyDetails: { acumulado: false, porRango: false }
-  };
-
-  // Transform files for display
-  const displayFiles = files.map((archivo) => ({
-    id: archivo.id.toString(),
-    name: archivo.nombre_archivo,
-    type: "file",
-    size: formatBytes(archivo.tamano),
-    lastUpdate: formatDateTime(archivo.fecha_hora),
-    status: archivo.estado.toLowerCase(),
-    category: archivo.tipo_archivo
-  }));
-
-  const filteredFiles = displayFiles.filter((file) =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleEditConfig = () => {
-    // Determine fileType from clientConfig.fileTypes array (take first one or default)
-    const primaryFileType = clientConfig.fileTypes?.[0] || "";
-
-    const initialData: Partial<DataIntakeFormData> = {
-      clientName: clientName || "",
-      fileType: primaryFileType,
-      periodicity: clientConfig.periodicity as "Daily" | "Weekly" | "Monthly",
-      dailyDetails: clientInfo.dailyDetails,
-      weeklyDetails: clientInfo.weeklyDetails,
-      ingestaSource: clientInfo.ingestaSource,
-      stakeholder: clientInfo.stakeholder,
-      attachedFile: null,
-      ingestaVariables:
-        clientInfo.ingestaVariables.length > 0
-          ? [...clientInfo.ingestaVariables]
-          : [{ key: "", value: "" }]
-    };
-
-    setModalInitialData(initialData);
-    setIsModalDataIntakeOpen(true);
-  };
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -208,20 +146,22 @@ export default function DataQualityClientDetails() {
                 >
                   Puntos de venta
                 </Button>
-                <Button
-                  className="text-sm font-medium"
-                  style={{
-                    backgroundColor: "#CBE71E",
-                    color: "#141414",
-                    border: "none"
-                  }}
-                >
-                  Catálogos
-                </Button>
+                <Link href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}`}>
+                  <Button
+                    className="text-sm font-medium"
+                    style={{
+                      backgroundColor: "#CBE71E",
+                      color: "#141414",
+                      border: "none"
+                    }}
+                  >
+                    Catálogos
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="text-sm font-medium bg-transparent"
-                  onClick={handleEditConfig}
+                  onClick={() => setIsEditClientOpen(true)}
                   style={{ borderColor: "#DDDDDD", color: "#141414" }}
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -230,25 +170,39 @@ export default function DataQualityClientDetails() {
               </div>
             </div>
 
-            <ClientDetailInfo clientConfig={clientConfig} clientInfo={clientInfo} />
+            <ClientDetailInfo
+              clientName={clientDetail?.client_name}
+              stakeholder={clientDetail?.stakeholder?.toString()}
+            />
+            <ClientDetailIntakesTable
+              clientId={clientId}
+              clientName={clientDetail.client_name}
+              idCountry={clientDetail.id_country}
+              intakes={clientDetail.client_data_archives}
+              onSuccess={() => mutate()}
+            />
 
-            <ClientDetailTable files={filteredFiles} />
+            <ClientDetailTable files={clientDetail.archives_client_data} mutate={() => mutate()} />
           </CardContent>
         </Card>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
-          Mostrando {filteredFiles.length} de {files.length} archivos
+          Mostrando {clientDetail.archives_client_data.length} de{" "}
+          {clientDetail.archives_client_data.length} archivos
         </div>
       </main>
 
-      <ModalDataIntake
+      <ModalCreateEditClient
+        isOpen={isEditClientOpen}
+        onClose={() => setIsEditClientOpen(false)}
+        onSuccess={() => mutate()}
+        countryName={countryName || ""}
+        countryId={String(clientDetail.id_country || "")}
         mode="edit"
-        open={isModalDataIntakeOpen}
-        onOpenChange={setIsModalDataIntakeOpen}
-        initialData={modalInitialData}
-        onSuccess={async (data) => {
-          console.log("[v0] Configuration saved successfully", data);
-          // TODO: Refresh client data or show success notification
+        clientData={{
+          id: clientDetail.id!,
+          client_name: clientDetail.client_name || "",
+          stakeholder: String(clientDetail.stakeholder || "")
         }}
       />
     </div>

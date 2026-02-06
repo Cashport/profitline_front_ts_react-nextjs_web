@@ -1,28 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import dayjs from "dayjs";
 import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
-import { Button } from "@/modules/chat/ui/button";
+import { deleteContact } from "@/services/contacts/contacts";
 
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
+import { cn } from "@/utils/utils";
+import { useAppStore } from "@/lib/store/store";
 
+import { Button } from "@/modules/chat/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
 } from "@/modules/chat/ui/accordion";
-import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
-import { cn } from "@/utils/utils";
-import { useAppStore } from "@/lib/store/store";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
-import { deleteContact } from "@/services/contacts/contacts";
+
+import type { Conversation } from "@/modules/chat/lib/mock-data";
 
 type Props = {
   conversation: Conversation;
@@ -132,13 +134,19 @@ export default function ChatDetails({
                 ]}
               />
             </div>
-            <Accordion type="single" collapsible>
+            <Accordion type="single" collapsible defaultValue="info-cliente">
               <AccordionItem value="info-cliente" className="border-[#DDDDDD]">
                 <AccordionTrigger>Información del cliente</AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-[auto_auto] gap-2 text-sm">
                     <div className="text-muted-foreground">Nombre</div>
-                    <div className="font-medium">{clientDetails?.client.business_name}</div>
+                    <Link
+                      href={`/clientes/detail/${clientDetails?.client.uuid}/project/${projectId}/dashboard`}
+                      target="_blank"
+                      className="font-medium underline"
+                    >
+                      <div className="font-medium">{clientDetails?.client.business_name}</div>
+                    </Link>
                     <div className="text-muted-foreground">Teléfono</div>
                     <div className="font-medium">{clientDetails?.client.phone}</div>
                     <div className="text-muted-foreground">Correo</div>
@@ -174,7 +182,7 @@ export default function ChatDetails({
               </AccordionItem>
             </Accordion>
 
-            <Accordion type="single" collapsible className="mt-4">
+            <Accordion type="single" collapsible defaultValue="deuda" className="mt-4">
               <AccordionItem value="deuda" className="border-[#DDDDDD]">
                 <AccordionTrigger>Resumen de cartera</AccordionTrigger>
                 <AccordionContent>
@@ -213,7 +221,8 @@ export default function ChatDetails({
             clientId: clientDetails?.client.uuid || "",
             clientName: clientDetails?.client.business_name || "",
             ticketId: conversation.id,
-            email: clientDetails?.client.email || ""
+            email: clientDetails?.client.email || "",
+            phone: clientDetails?.client.phone || ""
           }}
         />
 

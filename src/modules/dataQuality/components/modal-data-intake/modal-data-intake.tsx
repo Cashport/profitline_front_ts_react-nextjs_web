@@ -1,13 +1,5 @@
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/modules/chat/ui/dialog";
+import { Badge } from "@/modules/chat/ui/badge";
 import { Label } from "@/modules/chat/ui/label";
 import {
   Select,
@@ -16,118 +8,196 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { Switch } from "@/modules/chat/ui/switch";
-import { Input, message } from "antd";
+import { Input, message, Modal } from "antd";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
+import { useAppStore } from "@/lib/store/store";
+import useSWR from "swr";
+import { fetcher } from "@/utils/api/api";
+import { IParameterData, IClientDetailDataArchive, IPeriodicity } from "@/types/dataQuality/IDataQuality";
+import { transformParameterDataToFormData } from "../../utils/transformParameterData";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { Edit } from "lucide-react";
+import { InputClickableStyled } from "../input-clickable-styled/input-clickable-styled";
+import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
+import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
+import { createIntake, editIntake } from "@/services/dataQuality/dataQuality";
 
 // Mode type definition
-type ModalMode = "create" | "edit";
+export type IModalMode = "create" | "view";
 
 // Interface para el formulario
 export interface DataIntakeFormData {
   clientName: string;
   fileType: string;
-  periodicity: "Daily" | "Weekly" | "Monthly" | "";
-  dailyDetails?: {
-    diasHabiles: boolean;
-    festivos: boolean;
-  };
-  weeklyDetails?: {
-    acumulado: boolean;
-    porRango: boolean;
-  };
   ingestaSource: string;
-  stakeholder: string;
   attachedFile: File | null;
   ingestaVariables: Array<{
     key: string;
     value: string;
   }>;
-  existingFileName?: string; // For displaying current file in edit mode
+  existingFileName?: string;
 }
 
 // Schema de validación Yup
 const validationSchema: yup.ObjectSchema<any> = yup.object({
   clientName: yup.string().required("El nombre del cliente es requerido"),
   fileType: yup.string().required("El tipo de archivo es requerido"),
-  periodicity: yup
-    .mixed<"Daily" | "Weekly" | "Monthly" | "">()
-    .oneOf(["Daily", "Weekly", "Monthly", ""], "Debe seleccionar una periodicidad")
-    .test("is-not-empty", "La periodicidad es requerida", (value) => value !== "")
-    .required(),
-  dailyDetails: yup
-    .object({
-      diasHabiles: yup.boolean().required(),
-      festivos: yup.boolean().required()
-    })
-    .optional(),
-  weeklyDetails: yup
-    .object({
-      acumulado: yup.boolean().required(),
-      porRango: yup.boolean().required()
-    })
-    .optional(),
   ingestaSource: yup.string().required("La fuente de ingesta es requerida"),
-  stakeholder: yup.string().required("El stakeholder es requerido"),
-  attachedFile: yup.mixed().nullable(),
+  attachedFile: yup
+    .mixed<File>()
+    .required("El archivo adjunto es requerido")
+    .test("is-file", "El archivo adjunto es requerido", (value) => value instanceof File),
   ingestaVariables: yup
     .array()
     .of(
-      yup
-        .object({
-          key: yup.string().required(),
-          value: yup.string().required()
-        })
-        .required()
+      yup.object({
+        key: yup.string().defined(),
+        value: yup.string().defined()
+      })
     )
-    .required()
+    .defined()
 });
 
+const editValidationSchema: yup.ObjectSchema<any> = yup.object({
+  clientName: yup.string().required("El nombre del cliente es requerido"),
+  fileType: yup.string().required("El tipo de archivo es requerido"),
+  ingestaSource: yup.string().defined(),
+  attachedFile: yup.mixed<File>().nullable().notRequired(),
+  ingestaVariables: yup
+    .array()
+    .of(
+      yup.object({
+        key: yup.string().defined(),
+        value: yup.string().defined()
+      })
+    )
+    .defined()
+});
+
+const convertPeriodicityToFormData = (
+  periodicity: IPeriodicity
+): IPeriodicityModalForm => {
+  const isWeekly = periodicity.repeat.frequency?.toLowerCase() === "semanal";
+
+  return {
+    init_date: periodicity.start_date ? dayjs(periodicity.start_date) : undefined,
+    frequency_number: Number(periodicity.repeat.interval) || undefined,
+    frequency: {
+      value: periodicity.repeat.frequency || "Mensual",
+      label: periodicity.repeat.frequency || "Mensual"
+    },
+    days: isWeekly
+      ? periodicity.repeat.day.map((d) => ({
+          value: String(d),
+          label: String(d)
+        }))
+      : [],
+    end_date: periodicity.end_date ? dayjs(periodicity.end_date) : undefined
+  };
+};
+
 interface IModalDataIntakeProps {
-  mode: ModalMode;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess?: (data: DataIntakeFormData) => Promise<void>;
-  initialData?: Partial<DataIntakeFormData>;
-  isLoading?: boolean;
+  onOpenChange: () => void;
+  mode: IModalMode;
+  clientId: string;
+  clientName: string;
+  idCountry: number;
+  intakeData?: IClientDetailDataArchive | null;
+  onSuccess: () => void;
 }
 
 // Default form values
 const defaultFormValues: DataIntakeFormData = {
   clientName: "",
   fileType: "",
-  periodicity: "",
-  dailyDetails: { diasHabiles: false, festivos: false },
-  weeklyDetails: { acumulado: false, porRango: false },
   ingestaSource: "",
-  stakeholder: "",
   attachedFile: null,
   ingestaVariables: [{ key: "", value: "" }]
 };
 
 export function ModalDataIntake({
-  mode,
   open,
   onOpenChange,
-  onSuccess,
-  initialData,
-  isLoading
+  mode,
+  clientId,
+  clientName,
+  idCountry,
+  intakeData,
+  onSuccess
 }: IModalDataIntakeProps) {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isPeriodicityModalOpen, setIsPeriodicityModalOpen] = useState(false);
+  const [selectedPeriodicity, setSelectedPeriodicity] = useState<IPeriodicityModalForm | undefined>(
+    undefined
+  );
+  const [periodicityError, setPeriodicityError] = useState(false);
+  const [isExistingFileDeleted, setIsExistingFileDeleted] = useState(false);
+  const [initialPeriodicity, setInitialPeriodicity] = useState<IPeriodicityModalForm | undefined>(
+    undefined
+  );
+
+  // Fetch parameter data with clientId using SWR
+  const {
+    data: parameterDataResponse,
+    error: fetchError,
+    isLoading
+  } = useSWR<GenericResponse<IParameterData>>(
+    open && clientId ? `/data/clients/${clientId}/parametrization/${projectId}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
+  );
+
+  const parameterData = parameterDataResponse?.data;
+
+  // Compute form initial data based on available sources
+  const formInitialData = useMemo(() => {
+    if (mode === "view" && intakeData) {
+      return {
+        clientName,
+        fileType: String(intakeData.id_type_archive),
+        ingestaSource: intakeData.intake_type ? String(intakeData.intake_type.id) : "",
+        attachedFile: null,
+        existingFileName: intakeData.url || "",
+        ingestaVariables: intakeData.variables
+          ? Object.entries(intakeData.variables).map(([key, value]) => ({
+              key,
+              value
+            }))
+          : []
+      } as DataIntakeFormData;
+    }
+    if (mode === "view" && clientId && parameterData) {
+      return transformParameterDataToFormData(parameterData);
+    }
+    return defaultFormValues;
+  }, [mode, clientId, parameterData, intakeData, clientName]);
+
+  // Select validation schema based on mode
+  const activeValidationSchema = useMemo(() => {
+    return mode === "view" ? editValidationSchema : validationSchema;
+  }, [mode]);
+
   // Setup react-hook-form
   const {
     control,
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isValid, isSubmitting }
+    trigger,
+    formState: { errors, isValid, isSubmitting, isDirty }
   } = useForm<DataIntakeFormData>({
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(activeValidationSchema),
     mode: "onChange",
-    defaultValues:
-      mode === "edit" && initialData ? { ...defaultFormValues, ...initialData } : defaultFormValues
+    defaultValues: formInitialData
   });
 
   // useFieldArray for dynamic variables
@@ -136,408 +206,604 @@ export function ModalDataIntake({
     name: "ingestaVariables"
   });
 
-  // Watch periodicity for conditional rendering
-  const periodicityValue = watch("periodicity");
+  // Watch for attached file
   const attachedFileValue = watch("attachedFile");
 
   // Form reset logic when modal opens or data changes
   useEffect(() => {
-    if (open && mode === "edit" && initialData) {
-      // Handle ingestaVariables specially to ensure at least one row
+    if (open) {
+      setIsEditing(false);
+      setSelectedPeriodicity(undefined);
+      setInitialPeriodicity(undefined);
+      setPeriodicityError(false);
+      setIsExistingFileDeleted(false);
       const resetData = {
-        ...defaultFormValues,
-        ...initialData,
-        ingestaVariables: initialData.ingestaVariables?.length
-          ? initialData.ingestaVariables
+        ...formInitialData,
+        clientName,
+        ingestaVariables: formInitialData.ingestaVariables?.length
+          ? formInitialData.ingestaVariables
           : [{ key: "", value: "" }]
       };
       reset(resetData);
-    } else if (open && mode === "create") {
-      reset(defaultFormValues);
     }
-  }, [open, mode, initialData, reset]);
+  }, [open, formInitialData, reset, clientName]);
 
-  // Submit handler
+  // Handle fetch errors
+  useEffect(() => {
+    if (fetchError) {
+      message.error("Error al cargar los datos del cliente");
+    }
+  }, [fetchError]);
+
+  // useEffect to clear error when periodicity is selected
+  useEffect(() => {
+    if (selectedPeriodicity) {
+      setPeriodicityError(false);
+    }
+  }, [selectedPeriodicity]);
+
+  // Helper function to format days array
+  const formatDaysArray = (days: Array<{ value: string; label: string }>) => {
+    return days.map((day) => day.value).join(", ");
+  };
+
+  // Track if periodicity has changed from initial values
+  const periodicityChanged = useMemo(() => {
+    if (!initialPeriodicity && !selectedPeriodicity) return false;
+    if (!initialPeriodicity || !selectedPeriodicity) return true;
+    return (
+      initialPeriodicity.init_date?.format("YYYY-MM-DD") !==
+        selectedPeriodicity.init_date?.format("YYYY-MM-DD") ||
+      initialPeriodicity.frequency?.value !== selectedPeriodicity.frequency?.value ||
+      initialPeriodicity.frequency_number !== selectedPeriodicity.frequency_number ||
+      initialPeriodicity.end_date?.format("YYYY-MM-DD") !==
+        selectedPeriodicity.end_date?.format("YYYY-MM-DD") ||
+      initialPeriodicity.days?.map((d) => d.value).join(",") !==
+        selectedPeriodicity.days?.map((d) => d.value).join(",")
+    );
+  }, [initialPeriodicity, selectedPeriodicity]);
+
+  const hasChanges = isDirty || periodicityChanged || isExistingFileDeleted;
+
   const onSubmit = async (data: DataIntakeFormData) => {
-    if (mode === "create") {
-      try {
-        console.log("Creating ingesta:", data);
-        // Pass data to parent through onSuccess callback
-        await onSuccess?.(data);
+    // Validar periodicidad
+    if (!selectedPeriodicity) {
+      setPeriodicityError(true);
+      return;
+    }
 
-        message.success("Ingesta creada exitosamente");
-        reset(defaultFormValues); // Resetear formulario
-        onOpenChange(false); // Cerrar modal
+    // Limpiar error si existe
+    setPeriodicityError(false);
+
+    if (mode === "create") {
+      const jsonFreq = {
+        start_date: selectedPeriodicity?.init_date?.format("YYYY-MM-DD") || "",
+        repeat: {
+          interval: String(selectedPeriodicity?.frequency_number || 0),
+          frequency: selectedPeriodicity?.frequency.value || "Mensual",
+          day:
+            selectedPeriodicity?.frequency.value.toLowerCase() === "semanal"
+              ? selectedPeriodicity?.days.map((day) => day.value)
+              : [Number(selectedPeriodicity?.init_date?.format("YYYY-MM-DD").split("-")[2])]
+        },
+        end_date: selectedPeriodicity?.end_date?.format("YYYY-MM-DD") || ""
+      };
+
+      try {
+        const modelData = {
+          file: data.attachedFile as File,
+          id_client_data: Number(clientId),
+          id_type_archive: Number(data.fileType),
+          id_status: 1, // Assuming '1' is the default status for new intake
+          intake_type_id: Number(data.ingestaSource),
+          periodicity_json: jsonFreq,
+          variables: data.ingestaVariables
+            .filter((v) => v.key && v.value)
+            .map((v) => ({ variable_key: v.key, variable_value: v.value }))
+        };
+        await createIntake(modelData);
+        message.success("Ingesta creada correctamente");
+        onSuccess();
+        handleClose();
       } catch (error) {
         message.error("Error al crear la ingesta");
       }
-    } else if (mode === "edit") {
-      console.log("Updating ingesta:", data);
-      // TODO: await updateIngesta(data);
+    } else if (mode === "view" && isEditing) {
+      const jsonFreq = {
+        start_date: selectedPeriodicity?.init_date?.format("YYYY-MM-DD") || "",
+        repeat: {
+          interval: String(selectedPeriodicity?.frequency_number || 0),
+          frequency: selectedPeriodicity?.frequency.value || "Mensual",
+          day:
+            selectedPeriodicity?.frequency.value.toLowerCase() === "semanal"
+              ? selectedPeriodicity?.days.map((day) => day.value)
+              : [Number(selectedPeriodicity?.init_date?.format("YYYY-MM-DD").split("-")[2])]
+        },
+        end_date: selectedPeriodicity?.end_date?.format("YYYY-MM-DD") || ""
+      };
+
+      try {
+        const modelData = {
+          ...(data.attachedFile ? { file: data.attachedFile } : {}),
+          id_client_data: Number(clientId),
+          id_type_archive: Number(data.fileType),
+          id_status: 1,
+          intake_type_id: Number(data.ingestaSource),
+          periodicity_json: jsonFreq,
+          variables: data.ingestaVariables
+            .filter((v) => v.key && v.value)
+            .map((v) => ({ variable_key: v.key, variable_value: v.value }))
+        };
+
+        await editIntake(intakeData!.id, modelData as any);
+
+        message.success("Ingesta actualizada correctamente");
+        onSuccess();
+        handleClose();
+      } catch (error) {
+        message.error("Error al actualizar la ingesta");
+      }
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Dialog Header */}
-          <DialogHeader>
-            <DialogTitle>
-              {mode === "create" ? "Crear Nueva Ingesta" : "Editar Parametrización"}
-            </DialogTitle>
-            <DialogDescription>
-              {mode === "create"
-                ? "Configure los detalles de la nueva ingesta"
-                : `Modifica la configuración de ingesta${initialData?.clientName ? ` para ${initialData.clientName}` : ""}`}
-            </DialogDescription>
-          </DialogHeader>
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setIsExistingFileDeleted(false);
+    if (intakeData?.periodicity_json) {
+      const converted = convertPeriodicityToFormData(intakeData.periodicity_json);
+      setSelectedPeriodicity(converted);
+      setInitialPeriodicity(converted);
+    } else {
+      setSelectedPeriodicity(undefined);
+      setInitialPeriodicity(undefined);
+    }
+    const resetData = {
+      ...formInitialData,
+      ingestaVariables: formInitialData.ingestaVariables?.length
+        ? formInitialData.ingestaVariables
+        : [{ key: "", value: "" }]
+    };
+    reset(resetData);
+  };
 
-          {/* Dialog Content */}
-          <div className="grid gap-6 py-4">
-            {/* Cliente Input */}
-            <div className="grid gap-2">
-              <Label htmlFor="client-name">Cliente</Label>
+  const handleClose = () => {
+    setIsEditing(false);
+    setSelectedPeriodicity(undefined);
+    setInitialPeriodicity(undefined);
+    setPeriodicityError(false);
+    setIsPeriodicityModalOpen(false);
+    setIsExistingFileDeleted(false);
+    reset(defaultFormValues);
+    onOpenChange();
+  };
+
+  const fileTypeOptions = useMemo(() => {
+    if (parameterData?.catalogs?.archive_types) {
+      return parameterData.catalogs.archive_types.map((t) => ({
+        id: t.id,
+        value: String(t.id),
+        label: t.description
+      }));
+    }
+  }, [parameterData]);
+
+  const ingestaOptions = useMemo(() => {
+    if (parameterData?.intake_types && parameterData.intake_types.length > 0) {
+      return parameterData.intake_types.map((type) => ({
+        id: type.id,
+        value: String(type.id),
+        label: type.description
+      }));
+    }
+    return [];
+  }, [parameterData?.intake_types]);
+
+  // Determine if we should show form fields
+  const showForm = mode === "create" || (mode === "view" && isEditing);
+
+  // Show loading state inside modal
+  if (isLoading && open) {
+    return (
+      <Modal open={open} onCancel={handleClose} footer={null} width={600} destroyOnClose>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando datos...</p>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
+  // --- Form fields (shared by create and edit modes) ---
+  const renderFormFields = () => (
+    <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
+      {/* Tipo de Archivo Dropdown */}
+      <div className="grid gap-2">
+        <Label>Tipo de Archivo</Label>
+        <Controller
+          name="fileType"
+          control={control}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full border-[#DDDDDD]">
+                <SelectValue placeholder="Seleccionar tipo de archivo" />
+              </SelectTrigger>
+              <SelectContent className="!z-[10000]">
+                {fileTypeOptions?.map((tipo) => (
+                  <SelectItem key={tipo.id} value={tipo.value}>
+                    {tipo.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.fileType && <p className="text-xs text-red-600">{errors.fileType.message}</p>}
+      </div>
+
+      {/* Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Periodicidad *</Label>
+        <InputClickableStyled
+          onClick={() => setIsPeriodicityModalOpen(true)}
+          value={
+            selectedPeriodicity
+              ? selectedPeriodicity.frequency.value === "Mensual"
+                ? `${selectedPeriodicity.frequency.value}, ${selectedPeriodicity.frequency_number} veces`
+                : `Cada ${formatDaysArray(selectedPeriodicity.days)}, ${selectedPeriodicity.frequency.value}`
+              : ""
+          }
+          error={periodicityError}
+          placeholder="Seleccionar frecuencia"
+        />
+        {periodicityError && (
+          <p className="text-xs text-red-600">La periodicidad es obligatoria *</p>
+        )}
+      </div>
+
+      {/* Fuente de Ingesta */}
+      <div className="grid gap-2">
+        <Label>Fuente de Ingesta</Label>
+        <Controller
+          name="ingestaSource"
+          control={control}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full border-[#DDDDDD]">
+                <SelectValue placeholder="Seleccionar fuente de ingesta" />
+              </SelectTrigger>
+              <SelectContent className="!z-[10000]">
+                {ingestaOptions.map((ingesta) => (
+                  <SelectItem key={ingesta.id} value={ingesta.value}>
+                    {ingesta.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.ingestaSource && (
+          <p className="text-xs text-red-600">{errors.ingestaSource.message}</p>
+        )}
+      </div>
+
+      {/* Adjunto */}
+      <div className="grid gap-2">
+        <Label>Adjunto *</Label>
+        <Controller
+          name="attachedFile"
+          control={control}
+          render={({ field: { onChange, value, ...field } }) => (
+            <div className="space-y-2">
+              {mode === "view" && formInitialData?.existingFileName && !isExistingFileDeleted && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span>
+                    Archivo actual:{" "}
+                    <a
+                      href={formInitialData.existingFileName}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {formInitialData.existingFileName.split("/").pop() ||
+                        formInitialData.existingFileName}
+                    </a>
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIsExistingFileDeleted(true);
+                      trigger();
+                    }}
+                    className="text-red-600 h-6 px-2"
+                  >
+                    Eliminar
+                  </Button>
+                </div>
+              )}
+              {(mode === "create" || isExistingFileDeleted || !formInitialData?.existingFileName) && (
+                <div className="flex items-center gap-2">
+                  <Input
+                    {...field}
+                    id="file-attachment"
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      onChange(file);
+                    }}
+                    className="border-[#DDDDDD]"
+                  />
+                  {attachedFileValue && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onChange(null)}
+                      className="text-red-600"
+                    >
+                      Eliminar
+                    </Button>
+                  )}
+                </div>
+              )}
+              {attachedFileValue && (
+                <p className="text-xs text-gray-600">Nuevo archivo: {attachedFileValue.name}</p>
+              )}
+            </div>
+          )}
+        />
+        {errors.attachedFile && (
+          <p className="text-xs text-red-600">{errors.attachedFile.message}</p>
+        )}
+      </div>
+
+      {/* Variables de configuración */}
+      <div className="grid gap-2">
+        <div className="flex items-center justify-between">
+          <Label>Variables de configuración</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => append({ key: "", value: "" })}
+            className="text-xs bg-transparent"
+          >
+            + Agregar variable
+          </Button>
+        </div>
+        <div className="space-y-2 max-h-[200px] overflow-y-auto">
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex items-center gap-2">
               <Controller
-                name="clientName"
+                name={`ingestaVariables.${index}.key`}
                 control={control}
                 render={({ field }) => (
                   <Input
                     {...field}
-                    id="client-name"
-                    placeholder="Nombre del cliente"
-                    className="border-[#DDDDDD]"
+                    placeholder="Nombre (ej: EMAIL, API_URL)"
+                    className="border-[#DDDDDD] flex-1 font-mono text-sm"
                   />
                 )}
               />
-              {errors.clientName && (
-                <p className="text-xs text-red-600">{errors.clientName.message}</p>
-              )}
-            </div>
-
-            {/* Tipo de Archivo Dropdown */}
-            <div className="grid gap-2">
-              <Label>Tipo de Archivo</Label>
               <Controller
-                name="fileType"
+                name={`ingestaVariables.${index}.value`}
                 control={control}
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full border-[#DDDDDD]">
-                      <SelectValue placeholder="Seleccionar tipo de archivo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockTipoArchivo.map((tipo) => (
-                        <SelectItem key={tipo.id} value={tipo.value}>
-                          {tipo.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input {...field} placeholder="Valor" className="border-[#DDDDDD] flex-1" />
                 )}
               />
-              {errors.fileType && <p className="text-xs text-red-600">{errors.fileType.message}</p>}
-            </div>
-
-            {/* Periodicidad Toggles */}
-            <div className="grid gap-2">
-              <Label>Periodicidad</Label>
-              <Controller
-                name="periodicity"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={field.value === "Daily"}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked ? "Daily" : "");
-                        }}
-                      />
-                      <span className="text-sm">Daily</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={field.value === "Weekly"}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked ? "Weekly" : "");
-                        }}
-                      />
-                      <span className="text-sm">Weekly</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={field.value === "Monthly"}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked ? "Monthly" : "");
-                        }}
-                      />
-                      <span className="text-sm">Monthly</span>
-                    </div>
-                  </div>
-                )}
-              />
-              {errors.periodicity && (
-                <p className="text-xs text-red-600">{errors.periodicity.message}</p>
-              )}
-            </div>
-
-            {/* Daily Details - Conditional */}
-            {periodicityValue === "Daily" && (
-              <div className="grid gap-2">
-                <Label>Detalle</Label>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Controller
-                      name="dailyDetails.diasHabiles"
-                      control={control}
-                      render={({ field }) => (
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      )}
-                    />
-                    <span className="text-sm">Días hábiles</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Controller
-                      name="dailyDetails.festivos"
-                      control={control}
-                      render={({ field }) => (
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      )}
-                    />
-                    <span className="text-sm">Festivos</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Weekly Details - Conditional */}
-            {periodicityValue === "Weekly" && (
-              <div className="grid gap-2">
-                <Label>Detalle</Label>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <Controller
-                      name="weeklyDetails.acumulado"
-                      control={control}
-                      render={({ field }) => (
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      )}
-                    />
-                    <span className="text-sm">Acumulado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Controller
-                      name="weeklyDetails.porRango"
-                      control={control}
-                      render={({ field }) => (
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      )}
-                    />
-                    <span className="text-sm">Por rango</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Ingesta Source */}
-            <div className="grid gap-2">
-              <Label htmlFor="ingesta">Ingesta</Label>
-              <Controller
-                name="ingestaSource"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full border-[#DDDDDD]">
-                      <SelectValue placeholder="Seleccionar fuente de ingesta" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockIngesta.map((ingesta) => (
-                        <SelectItem key={ingesta.id} value={ingesta.value}>
-                          {ingesta.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.ingestaSource && (
-                <p className="text-xs text-red-600">{errors.ingestaSource.message}</p>
-              )}
-            </div>
-
-            {/* Stakeholder */}
-            <div className="grid gap-2">
-              <Label htmlFor="stakeholder">Stakeholder</Label>
-              <Controller
-                name="stakeholder"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full border-[#DDDDDD]">
-                      <SelectValue placeholder="Seleccionar responsable" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockStakeholders.map((stakeholder) => (
-                        <SelectItem key={stakeholder.id} value={stakeholder.name}>
-                          {stakeholder.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.stakeholder && (
-                <p className="text-xs text-red-600">{errors.stakeholder.message}</p>
-              )}
-            </div>
-
-            {/* File Attachment Field */}
-            <div className="grid gap-2">
-              <Label htmlFor="file-attachment">Adjunto (opcional)</Label>
-              <Controller
-                name="attachedFile"
-                control={control}
-                render={({ field: { onChange, value, ...field } }) => (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      {...field}
-                      id="file-attachment"
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        onChange(file);
-                      }}
-                      className="border-[#DDDDDD]"
-                    />
-                    {attachedFileValue && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onChange(null)}
-                        className="text-red-600"
-                      >
-                        Eliminar
-                      </Button>
-                    )}
-                  </div>
-                )}
-              />
-              {attachedFileValue && (
-                <p className="text-xs text-gray-600">
-                  Archivo seleccionado: {attachedFileValue.name}
-                </p>
-              )}
-              {mode === "edit" && initialData?.existingFileName && !attachedFileValue && (
-                <p className="text-xs text-gray-600">
-                  Archivo actual: {initialData.existingFileName}
-                </p>
-              )}
-            </div>
-
-            {/* Variables de configuración */}
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label>Variables de configuración</Label>
+              {fields.length > 1 && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => append({ key: "", value: "" })}
-                  className="text-xs bg-transparent"
+                  onClick={() => remove(index)}
+                  className="text-red-600 hover:text-red-700 px-2"
                 >
-                  + Agregar variable
+                  ✕
                 </Button>
-              </div>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2">
-                    <Controller
-                      name={`ingestaVariables.${index}.key`}
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          placeholder="Nombre (ej: EMAIL, API_URL)"
-                          className="border-[#DDDDDD] flex-1 font-mono text-sm"
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={`ingestaVariables.${index}.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <Input {...field} placeholder="Valor" className="border-[#DDDDDD] flex-1" />
-                      )}
-                    />
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                        className="text-red-600 hover:text-red-700 px-2"
-                      >
-                        ✕
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500">
-                Agregue variables como EMAIL, API_URL, PASSWORD, etc.
-              </p>
+              )}
             </div>
-          </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500">
+          Agregue variables como EMAIL, API_URL, PASSWORD, etc.
+        </p>
+      </div>
+    </div>
+  );
 
-          {/* Dialog Footer */}
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting || isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={!isValid || isSubmitting || isLoading}
-              className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-            >
-              {isSubmitting || isLoading
-                ? mode === "create"
-                  ? "Creando..."
-                  : "Guardando..."
-                : mode === "create"
-                  ? "Crear Ingesta"
-                  : "Guardar Cambios"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+  // --- View-only fields (for view mode without editing) ---
+  const renderViewFields = () => (
+    <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto">
+      {/* Tipo de Archivo */}
+      <div className="grid gap-2">
+        <Label>Tipo de Archivo</Label>
+        <Badge variant="outline" className="w-fit">
+          {intakeData?.tipo_archivo || "Sin tipo"}
+        </Badge>
+      </div>
+
+      {/* Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Periodicidad</Label>
+        <Badge variant="outline" className="w-fit">
+          {intakeData?.periodicity || "Sin periodicidad"}
+        </Badge>
+      </div>
+      {/* Detalle de Periodicidad */}
+      <div className="grid gap-2">
+        <Label>Detalle de Periodicidad</Label>
+        <p className="text-sm" style={{ color: "#141414" }}>
+          {intakeData?.periodicity_json
+            ? `${intakeData.periodicity_json.repeat.frequency}${
+                intakeData.periodicity_json.repeat.frequency?.toLowerCase() === "semanal"
+                  ? `, ${intakeData.periodicity_json.repeat.day.join(", ")}`
+                  : ""
+              }, ${intakeData.periodicity_json.repeat.interval} veces, iniciando el ${intakeData.periodicity_json.start_date}`
+            : "Sin detalle"}
+        </p>
+      </div>
+
+      {/* Fuente de Ingesta */}
+      <div className="grid gap-2">
+        <Label>Fuente de Ingesta</Label>
+        <p className="text-sm" style={{ color: "#141414" }}>
+          {intakeData?.intake_type?.description || "Sin fuente"}
+        </p>
+      </div>
+
+      {/* Adjunto */}
+      <div className="grid gap-2">
+        <Label>Adjunto</Label>
+        {formInitialData.existingFileName ? (
+          <a
+            href={formInitialData.existingFileName}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            {formInitialData.existingFileName.split("/").pop() || formInitialData.existingFileName}
+          </a>
+        ) : (
+          <p className="text-sm" style={{ color: "#141414" }}>
+            Sin archivo adjunto
+          </p>
+        )}
+      </div>
+
+      {/* Variables de configuración */}
+      <div className="grid gap-2">
+        <Label>Variables de configuración</Label>
+        <div className="space-y-1">
+          {formInitialData.ingestaVariables
+            ?.filter((v) => v.key && v.value)
+            .map((variable, index) => (
+              <div key={index} className="flex items-center gap-1 rounded px-2 py-1">
+                <span className="text-xs font-mono font-semibold text-gray-700">
+                  {variable.key}:
+                </span>
+                <span className="text-xs text-gray-600">{variable.value}</span>
+              </div>
+            ))}
+          {(!formInitialData.ingestaVariables ||
+            formInitialData.ingestaVariables.filter((v) => v.key && v.value).length === 0) && (
+            <p className="text-sm text-gray-500">Sin variables configuradas</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <Modal
+        open={open}
+        onCancel={handleClose}
+        footer={null}
+        width={600}
+        destroyOnClose
+        title={
+          mode === "create"
+            ? "Crear Nueva Ingesta"
+            : isEditing
+              ? "Editar Ingesta"
+              : "Detalle de Ingesta"
+        }
+      >
+        <p className="text-sm text-gray-500 mb-4">
+          {mode === "create"
+            ? "Configure los detalles de la nueva ingesta"
+            : isEditing
+              ? "Modifica los detalles de la ingesta"
+              : `Información de la ingesta de ${intakeData?.tipo_archivo || clientName}`}
+        </p>
+
+        {showForm ? (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {renderFormFields()}
+
+            <div className="flex justify-end gap-2 pt-4">
+              {mode === "create" ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClose}
+                    disabled={isSubmitting}
+                    className="bg-transparent"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity}
+                    className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                  >
+                    {isSubmitting ? "Creando..." : "Crear Ingesta"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="bg-transparent"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!isValid || isSubmitting || !selectedPeriodicity || !hasChanges || (isExistingFileDeleted && !attachedFileValue)}
+                    className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                  >
+                    {isSubmitting ? "Guardando..." : "Guardar"}
+                  </Button>
+                </>
+              )}
+            </div>
+          </form>
+        ) : (
+          <>
+            {renderViewFields()}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={handleClose} className="bg-transparent">
+                Cerrar
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsEditing(true);
+                  if (intakeData?.periodicity_json) {
+                    const converted = convertPeriodicityToFormData(intakeData.periodicity_json);
+                    setSelectedPeriodicity(converted);
+                    setInitialPeriodicity(converted);
+                  }
+                  trigger();
+                }}
+                className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      <ModalPeriodicity
+        isOpen={isPeriodicityModalOpen}
+        onClose={() => setIsPeriodicityModalOpen(false)}
+        selectedPeriodicity={selectedPeriodicity}
+        setSelectedPeriodicity={setSelectedPeriodicity}
+        isEditAvailable={true}
+        showCommunicationDetails={{ communicationId: 0, active: false }}
+        resetOnParentClose={!open}
+      />
+    </>
   );
 }
-
-const mockStakeholders = [
-  { id: 1, name: "Juan Pérez" },
-  { id: 2, name: "María García" },
-  { id: 3, name: "Carlos Rodríguez" },
-  { id: 4, name: "Ana Martínez" }
-];
-
-const mockIngesta = [
-  { id: 1, value: "email", label: "Email" },
-  { id: 2, value: "b2b-web", label: "B2B Web" },
-  { id: 3, value: "api", label: "API" },
-  { id: 4, value: "app", label: "App" },
-  { id: 5, value: "teamcorp", label: "Teamcorp" }
-];
-
-const mockTipoArchivo = [
-  { id: 1, value: "Sales", label: "Sales" },
-  { id: 2, value: "Stock", label: "Stock" },
-  { id: 3, value: "In transit", label: "In transit" }
-];
