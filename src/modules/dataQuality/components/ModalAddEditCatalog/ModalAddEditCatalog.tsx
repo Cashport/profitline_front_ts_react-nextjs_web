@@ -48,6 +48,15 @@ export const catalogFormSchema = yup.object().shape({
 
 export type CatalogFormData = yup.InferType<typeof catalogFormSchema>;
 
+const INITIAL_VALUES: CatalogFormData = {
+  customer_product_cod: "",
+  customer_product_description: "",
+  material_code: "",
+  product_type: "",
+  type_vol: "",
+  factor: undefined as unknown as number
+};
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -57,7 +66,14 @@ interface Props {
   isLoadingCreateEdit?: boolean;
 }
 
-export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData, onSave, isLoadingCreateEdit = false }: Props) {
+export default function ModalAddEditCatalog({
+  isOpen,
+  onClose,
+  mode,
+  catalogData,
+  onSave,
+  isLoadingCreateEdit = false
+}: Props) {
   const {
     control,
     handleSubmit,
@@ -65,14 +81,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     reset
   } = useForm<CatalogFormData>({
     resolver: yupResolver(catalogFormSchema),
-    defaultValues: {
-      customer_product_cod: "",
-      customer_product_description: "",
-      material_code: "",
-      product_type: "",
-      type_vol: "",
-      factor: undefined as unknown as number
-    },
+    defaultValues: INITIAL_VALUES,
     mode: "onChange"
   });
 
@@ -99,7 +108,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
       });
     }
     if (!isOpen) {
-      reset();
+      reset(INITIAL_VALUES);
     }
   }, [isOpen, mode, catalogData, reset]);
 
@@ -124,18 +133,12 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (!isOpen) {
-      reset();
-    }
-  }, [isOpen, reset]);
-
   const handleFormSubmit = (data: CatalogFormData) => {
     onSave(data);
   };
 
   const handleClose = () => {
-    reset();
+    reset(INITIAL_VALUES);
     onClose();
   };
 
@@ -215,10 +218,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
               name="material_code"
               control={control}
               render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger
                     className="w-full"
                     style={{
@@ -326,7 +326,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
                   id="factor"
                   type="number"
                   step="any"
-                  placeholder="Ej: 1.5"
+                  placeholder="Ej: 2"
                   value={field.value ?? ""}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -352,14 +352,16 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
             type="submit"
             disabled={isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid)}
             style={{
-              backgroundColor: (isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid))
-                ? "#d9d9d9"
-                : "#CBE71E",
+              backgroundColor:
+                isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid)
+                  ? "#d9d9d9"
+                  : "#CBE71E",
               color: "#141414",
               border: "none",
-              cursor: (isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid))
-                ? "not-allowed"
-                : "pointer"
+              cursor:
+                isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid)
+                  ? "not-allowed"
+                  : "pointer"
             }}
           >
             {isLoadingCreateEdit ? (

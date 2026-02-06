@@ -13,8 +13,9 @@ import ModalAddEditCatalog, {
 } from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
 import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
-import { createCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
+import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
 import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 export default function CatalogView() {
   const router = useRouter();
@@ -25,8 +26,8 @@ export default function CatalogView() {
 
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoadingCreateEdit, setIsLoadingCreateEdit] = useState(false);
+  const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   const {
     data: catalogData,
@@ -37,7 +38,7 @@ export default function CatalogView() {
   const handleEdit = (item: IGetCatalogs) => {
     setMode("edit");
     setSelectedCatalog(item);
-    setIsDialogOpen(true);
+    setWhichModalOpen({ selected: 1 });
   };
 
   const handleSave = async (data: CatalogFormData) => {
@@ -51,7 +52,7 @@ export default function CatalogView() {
       material_code: Number(data.material_code),
       factor: data.factor
     };
-    setIsLoadingCreateEdit(true);
+    setIsLoadingAction(true);
     try {
       if (mode === "create") {
         await createCatalog(modelData);
@@ -63,30 +64,45 @@ export default function CatalogView() {
         mutate();
         message.success("Catálogo actualizado exitosamente");
       }
-      setIsDialogOpen(false);
+      setWhichModalOpen({ selected: 0 });
       setSelectedCatalog(null);
     } catch (error) {
       message.error(
         mode === "create" ? "Error al crear el catálogo" : "Error al actualizar el catálogo"
       );
     } finally {
-      setIsLoadingCreateEdit(false);
+      setIsLoadingAction(false);
     }
   };
 
   const handleAddNew = () => {
     setMode("create");
     setSelectedCatalog(null);
-    setIsDialogOpen(true);
+    setWhichModalOpen({ selected: 1 });
   };
 
   const handleClose = () => {
-    setIsDialogOpen(false);
+    setWhichModalOpen({ selected: 0 });
     setSelectedCatalog(null);
   };
 
   const handleGoBack = () => {
     router.back();
+  };
+
+  const handleDeleteCatalog = async (catalog: IGetCatalogs) => {
+    setIsLoadingAction(true);
+    try {
+      await deleteCatalog(catalog.id);
+      mutate();
+      message.success("Catálogo eliminado exitosamente");
+      setWhichModalOpen({ selected: 0 });
+      setSelectedCatalog(null);
+    } catch (error) {
+      message.error("Error al eliminar el catálogo");
+    } finally {
+      setIsLoadingAction(false);
+    }
   };
 
   return (
@@ -131,16 +147,33 @@ export default function CatalogView() {
           clientName={clientId}
           onEdit={handleEdit}
           onAddNew={handleAddNew}
+          onDelete={(item) => {
+            setSelectedCatalog(item);
+            setWhichModalOpen({ selected: 2 });
+          }}
         />
       </main>
 
       <ModalAddEditCatalog
-        isOpen={isDialogOpen}
+        isOpen={whichModalOpen.selected === 1}
         onClose={handleClose}
         mode={mode}
         catalogData={selectedCatalog}
         onSave={handleSave}
-        isLoadingCreateEdit={isLoadingCreateEdit}
+        isLoadingCreateEdit={isLoadingAction}
+      />
+
+      <ModalConfirmAction
+        isOpen={whichModalOpen.selected === 2}
+        onClose={() => {
+          setWhichModalOpen({ selected: 0 });
+        }}
+        onOk={() => {
+          if (selectedCatalog) handleDeleteCatalog(selectedCatalog);
+        }}
+        title="¿Está seguro de eliminar?"
+        okText="Eliminar"
+        okLoading={isLoadingAction}
       />
     </>
   );

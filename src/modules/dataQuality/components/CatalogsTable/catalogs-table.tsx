@@ -22,7 +22,7 @@ interface CatalogsTableProps {
   clientName: string;
   onEdit: (item: IGetCatalogs) => void;
   onAddNew: () => void;
-  onDelete?: (itemId: number) => void;
+  onDelete: (item: IGetCatalogs) => void;
 }
 
 const getStatusBadge = (status: string) => {
@@ -181,7 +181,7 @@ export function CatalogsTable({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onDelete?.(item.id)}
+                        onClick={() => onDelete(item)}
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
