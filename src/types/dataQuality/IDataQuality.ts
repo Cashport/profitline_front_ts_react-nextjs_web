@@ -53,6 +53,8 @@ export interface IClientData {
   is_deleted: number;
   client_data_archives: IClientDataArchive[];
   country_name: string;
+  periodicity: string | null;
+  status: string;
 }
 
 // Client List Response
