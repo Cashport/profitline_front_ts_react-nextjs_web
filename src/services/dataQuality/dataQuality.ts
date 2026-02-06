@@ -14,7 +14,8 @@ import {
   ICreateIntakeRequest,
   ICatalogMaterial,
   ICatalogSelectOption,
-  ICreateCatalogRequest
+  ICreateCatalogRequest,
+  IGetFiltersAlerts
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -261,11 +262,26 @@ export const uploadIntakeFile = async (
   }
 };
 
+export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
+  try {
+    const response: GenericResponse<IGetFiltersAlerts> = await API.get(
+      `${config.API_HOST}/data/filters`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching alerts filters:", error);
+    throw error;
+  }
+};
+
 export const downloadCSV = async (id_archives_client_data: number): Promise<Blob> => {
   try {
-    const response = await instance.get(`${config.API_HOST}/data/sales-csv/${id_archives_client_data}`, {
-      responseType: "blob"
-    });
+    const response = await instance.get(
+      `${config.API_HOST}/data/sales-csv/${id_archives_client_data}`,
+      {
+        responseType: "blob"
+      }
+    );
     return response.data;
   } catch (error: any) {
     if (error?.response?.data instanceof Blob) {
