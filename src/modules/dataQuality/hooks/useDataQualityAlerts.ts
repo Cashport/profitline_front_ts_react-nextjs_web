@@ -9,7 +9,7 @@ export const useDataQualityAlerts = (
   search?: string,
   id_country?: number,
   id_client?: number,
-  id_alert_status?: number[]
+  id_alert_status?: number
 ) => {
   const queryParams = [];
   if (page) queryParams.push(`page=${page}`);
