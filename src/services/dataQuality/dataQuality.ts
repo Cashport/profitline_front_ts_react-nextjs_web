@@ -229,3 +229,15 @@ export const editCatalog = async (
     throw error;
   }
 };
+
+export const deleteCatalog = async (catalogId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/data/catalog/materials/${catalogId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting catalog:", error);
+    throw error;
+  }
+};

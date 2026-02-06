@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as yup from "yup";
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
 import { useForm, Controller } from "react-hook-form";
 import { Save } from "lucide-react";
 
@@ -37,10 +37,6 @@ export const catalogFormSchema = yup.object().shape({
     .required("El producto del cliente es requerido")
     .min(1, "La descripción debe tener al menos 1 caracter"),
   material_code: yup.string().required("El material es requerido"),
-  material_name: yup
-    .string()
-    .required("El nombre del producto es requerido")
-    .min(1, "El nombre debe tener al menos 1 caracter"),
   product_type: yup.string().required("El tipo de producto es requerido"),
   type_vol: yup.string().required("El tipo de volumen es requerido"),
   factor: yup
@@ -58,22 +54,21 @@ interface Props {
   mode: "create" | "edit";
   catalogData?: IGetCatalogs | null;
   onSave: (data: CatalogFormData) => void;
+  isLoadingCreateEdit?: boolean;
 }
 
-export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData, onSave }: Props) {
+export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData, onSave, isLoadingCreateEdit = false }: Props) {
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, isDirty },
-    reset,
-    setValue
+    reset
   } = useForm<CatalogFormData>({
     resolver: yupResolver(catalogFormSchema),
     defaultValues: {
       customer_product_cod: "",
       customer_product_description: "",
       material_code: "",
-      material_name: "",
       product_type: "",
       type_vol: "",
       factor: undefined as unknown as number
@@ -98,7 +93,6 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
         customer_product_cod: catalogData.customer_product_cod,
         customer_product_description: catalogData.customer_product_description,
         material_code: String(catalogData.material_id),
-        material_name: catalogData.material_name,
         product_type: String(catalogData.product_type_id),
         type_vol: String(catalogData.type_vol_id),
         factor: catalogData.factor
@@ -223,15 +217,7 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
               render={({ field }) => (
                 <Select
                   value={field.value}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    const selectedMaterial = selectOptions.materials.find(
-                      (m) => m.material_code === value
-                    );
-                    if (selectedMaterial) {
-                      setValue("material_name", selectedMaterial.material_name);
-                    }
-                  }}
+                  onValueChange={field.onChange}
                 >
                   <SelectTrigger
                     className="w-full"
@@ -364,20 +350,26 @@ export default function ModalAddEditCatalog({ isOpen, onClose, mode, catalogData
           </Button>
           <Button
             type="submit"
-            disabled={mode === "edit" ? !isValid || !isDirty : !isValid}
+            disabled={isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid)}
             style={{
-              backgroundColor: (mode === "edit" ? !isValid || !isDirty : !isValid)
+              backgroundColor: (isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid))
                 ? "#d9d9d9"
                 : "#CBE71E",
               color: "#141414",
               border: "none",
-              cursor: (mode === "edit" ? !isValid || !isDirty : !isValid)
+              cursor: (isLoadingCreateEdit || (mode === "edit" ? !isValid || !isDirty : !isValid))
                 ? "not-allowed"
                 : "pointer"
             }}
           >
-            <Save className="w-4 h-4 mr-2" />
-            Guardar
+            {isLoadingCreateEdit ? (
+              <Spin size="small" />
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Guardar
+              </>
+            )}
           </Button>
         </div>
       </form>

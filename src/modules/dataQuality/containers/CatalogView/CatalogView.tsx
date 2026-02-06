@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Plus, ArrowLeft } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { message } from "antd";
 import { Button } from "@/modules/chat/ui/button";
@@ -17,6 +17,7 @@ import { createCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
 import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
 
 export default function CatalogView() {
+  const router = useRouter();
   const params = useParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
@@ -25,6 +26,7 @@ export default function CatalogView() {
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoadingCreateEdit, setIsLoadingCreateEdit] = useState(false);
 
   const {
     data: catalogData,
@@ -49,30 +51,26 @@ export default function CatalogView() {
       material_code: Number(data.material_code),
       factor: data.factor
     };
-    if (mode === "create") {
-      try {
+    setIsLoadingCreateEdit(true);
+    try {
+      if (mode === "create") {
         await createCatalog(modelData);
         mutate();
-        setIsDialogOpen(false);
-        setSelectedCatalog(null);
         message.success("Catálogo creado exitosamente");
-        setIsDialogOpen(false);
-        setSelectedCatalog(null);
-      } catch (error) {
-        message.error("Error al crear el catálogo");
-      }
-    } else {
-      // Llamar API para actualizar
-      if (!selectedCatalog) return;
-      try {
+      } else {
+        if (!selectedCatalog) return;
         await editCatalog(selectedCatalog.id, modelData);
         mutate();
         message.success("Catálogo actualizado exitosamente");
-        setIsDialogOpen(false);
-        setSelectedCatalog(null);
-      } catch (error) {
-        message.error("Error al actualizar el catálogo");
       }
+      setIsDialogOpen(false);
+      setSelectedCatalog(null);
+    } catch (error) {
+      message.error(
+        mode === "create" ? "Error al crear el catálogo" : "Error al actualizar el catálogo"
+      );
+    } finally {
+      setIsLoadingCreateEdit(false);
     }
   };
 
@@ -87,6 +85,10 @@ export default function CatalogView() {
     setSelectedCatalog(null);
   };
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   return (
     <>
       {/* Main Content */}
@@ -95,17 +97,16 @@ export default function CatalogView() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href={`/explorer/${countryId}/${clientId}`}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white"
-                  style={{ borderColor: "#DDDDDD", color: "#141414" }}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver al cliente
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white"
+                style={{ borderColor: "#DDDDDD", color: "#141414" }}
+                onClick={handleGoBack}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver al cliente
+              </Button>
               <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
                 Catálogo de Equivalencias
               </h1>
@@ -139,6 +140,7 @@ export default function CatalogView() {
         mode={mode}
         catalogData={selectedCatalog}
         onSave={handleSave}
+        isLoadingCreateEdit={isLoadingCreateEdit}
       />
     </>
   );
