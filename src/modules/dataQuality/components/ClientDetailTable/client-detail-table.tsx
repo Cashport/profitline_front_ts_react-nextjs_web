@@ -52,8 +52,8 @@ const bytesToMB = (bytes: number): string => {
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 
-const formatDateTime = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
+const formatDate = (isoDateString: string): string => {
+  return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
 export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
@@ -128,7 +128,8 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
           <TableRow style={{ borderColor: "#DDDDDD" }}>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha y hora</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
             <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
@@ -151,7 +152,15 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
                   <span style={{ color: "#141414" }}>
-                    {formatDateTime(file.updated_at ?? file.created_at)}
+                    {file.date_archive ? formatDate(file.date_archive) : "-"}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                  <span style={{ color: "#141414" }}>
+                    {file.date_upload ? formatDate(file.date_upload) : "-"}
                   </span>
                 </div>
               </TableCell>
