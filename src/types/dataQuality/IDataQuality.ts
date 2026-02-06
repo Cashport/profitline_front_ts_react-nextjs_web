@@ -267,3 +267,53 @@ export interface ICreateCatalogRequest {
   material_code: number;
   factor: number;
 }
+
+export interface IAlertFilterCountry {
+  id: number;
+  country_name: string;
+  address_format: string;
+}
+
+export interface IAlertFilterClient {
+  client_id: number;
+  client_name: string;
+  id_country: number;
+  country_name: string;
+}
+
+export interface IAlertFilterStatus {
+  id: number;
+  description: string;
+  budget_color: string;
+}
+
+export interface IGetFiltersAlerts {
+  countries: IAlertFilterCountry[];
+  clients: IAlertFilterClient[];
+  alertStatus: IAlertFilterStatus[];
+}
+
+export interface IAlert {
+  id: number;
+  id_client: number;
+  client_name: string;
+  id_country: number;
+  country_name: string;
+  error_message: string;
+  error_type: string;
+  error_level: string;
+  created_at: string;
+  id_alert_status: number;
+  status_description: string;
+  status_color: string;
+  id_archives_client_data: number;
+  file_name: string | null;
+}
+
+export interface IGetAlerts {
+  data: IAlert[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}

@@ -14,7 +14,8 @@ import {
   ICreateIntakeRequest,
   ICatalogMaterial,
   ICatalogSelectOption,
-  ICreateCatalogRequest
+  ICreateCatalogRequest,
+  IGetFiltersAlerts
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -257,6 +258,18 @@ export const uploadIntakeFile = async (
     return response.data;
   } catch (error) {
     console.error("Error uploading intake file:", error);
+    throw error;
+  }
+};
+
+export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
+  try {
+    const response: GenericResponse<IGetFiltersAlerts> = await API.get(
+      `${config.API_HOST}/data/filters`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching alerts filters:", error);
     throw error;
   }
 };
