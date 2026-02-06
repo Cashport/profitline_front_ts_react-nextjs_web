@@ -241,3 +241,22 @@ export const deleteCatalog = async (catalogId: number): Promise<any> => {
     throw error;
   }
 };
+
+export const uploadIntakeFile = async (
+  id_archives_client_data: number,
+  file: File
+): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("id_archives_client_data", id_archives_client_data.toString());
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/create-intake`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading intake file:", error);
+    throw error;
+  }
+};
