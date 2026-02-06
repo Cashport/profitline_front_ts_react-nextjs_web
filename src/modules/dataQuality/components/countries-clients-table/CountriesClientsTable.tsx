@@ -18,15 +18,6 @@ interface CountriesClientsTableProps {
   onRowClick?: (record: IClientData) => void;
 }
 
-const getStatusBadge = (status: string) => {
-  // Since API doesn't provide status yet, show "desconocido" with outline variant
-  return (
-    <Badge variant="outline" className="text-xs">
-      desconocido
-    </Badge>
-  );
-};
-
 const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
 
@@ -90,7 +81,8 @@ export default function CountriesClientsTable({
     {
       title: "Periodicidad",
       key: "periodicity",
-      render: () => <span className="text-gray-500">-</span>
+      dataIndex: "periodicity",
+      render: (periodicity) => <span className="text-gray-500">{periodicity}</span>
     },
     {
       title: "Archivos",
@@ -146,7 +138,12 @@ export default function CountriesClientsTable({
     {
       title: "Estado",
       key: "status",
-      render: (_, record: IClientData) => getStatusBadge("unknown")
+      dataIndex: "status",
+      render: (status) => (
+        <Badge variant="outline" className="text-xs">
+          {status || "desconocido"}
+        </Badge>
+      )
     },
     {
       title: "Ver",
