@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Pagination, Spin } from "antd";
+import dayjs from "dayjs";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -76,7 +77,7 @@ export function AlertsTable({ alerts, isLoading, pagination, onPageChange }: Ale
               <TableCell>-</TableCell>
               <TableCell>
                 <div className="text-sm" style={{ color: "#141414" }}>
-                  {alert.created_at}
+                  {dayjs(alert.created_at).format("DD-MM-YY HH:mm")}
                 </div>
               </TableCell>
               <TableCell>-</TableCell>
@@ -99,7 +100,7 @@ export function AlertsTable({ alerts, isLoading, pagination, onPageChange }: Ale
                       title="Ir al catálogo del cliente"
                     >
                       <ExternalLink className="w-3 h-3 mr-1" />
-                      Catálogo
+                      Ir
                     </Button>
                   </Link>
                 </div>
