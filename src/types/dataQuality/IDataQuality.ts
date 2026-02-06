@@ -130,13 +130,14 @@ export interface IClientDetailArchiveClient {
   id_client_data_archives: any | null;
   id_type_archive: number;
   tipo_archivo: string;
+  date_archive: string | null;
   description: string;
   id_status: number;
   status_description: string;
   date_upload: string | null;
   user_upload: string | null;
   size: number;
-  intake_type_id: number | null;
+  procesed_url: string | null;
   acciones: string[];
   created_at: string;
   updated_at: string | null;

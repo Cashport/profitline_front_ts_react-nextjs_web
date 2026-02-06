@@ -23,61 +23,12 @@ import {
 } from "@/modules/chat/ui/table";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 import dayjs from "dayjs";
-import { uploadIntakeFile } from "@/services/dataQuality/dataQuality";
+import { downloadCSV, uploadIntakeFile } from "@/services/dataQuality/dataQuality";
 
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
   mutate: () => void;
 }
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "processed":
-      return <CheckCircle className="w-4 h-4 text-green-600" />;
-    case "pending":
-      return <Clock className="w-4 h-4 text-yellow-600" />;
-    case "error":
-      return <XCircle className="w-4 h-4 text-red-600" />;
-    case "pending-catalog":
-      return <AlertTriangle className="w-4 h-4 text-orange-600" />;
-    default:
-      return <BadgeQuestionMark className="w-4 h-4" style={{ color: "#141414" }} />;
-  }
-};
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "processed":
-      return (
-        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-          Procesado
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-          Pendiente
-        </Badge>
-      );
-    case "error":
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Data con error
-        </Badge>
-      );
-    case "pending-catalog":
-      return (
-        <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
-          Pendiente catálogo
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-xs">
-          Desconocido
-        </Badge>
-      );
-  }
-};
 
 const getCategoryBadge = (category: string) => {
   const colors = {
@@ -96,12 +47,13 @@ const getCategoryBadge = (category: string) => {
   );
 };
 
-const bytesToMB = (bytes: number): number => {
-  return +(bytes / (1024 * 1024)).toFixed(2);
+const bytesToMB = (bytes: number): string => {
+  if (!bytes) return "-";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 
-const formatDateTime = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
+const formatDate = (isoDateString: string): string => {
+  return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
 export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
@@ -124,6 +76,48 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     input.click();
   };
 
+  const handleProcessedFile = async (fileId: number) => {
+    try {
+      const res = await downloadCSV(fileId);
+      // Aquí puedes implementar la lógica para descargar el archivo, por ejemplo:
+      const url = window.URL.createObjectURL(new Blob([res]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `archivo_${fileId}.csv`); // Nombre del archivo a descargar
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      message.success("Archivo descargado exitosamente.");
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al descargar el archivo. Por favor, inténtalo de nuevo.";
+      message.error(errorMessage);
+    }
+  };
+
+  const handleDownloadOriginal = async (file: IClientDetailArchiveClient) => {
+    if (file.procesed_url) {
+      try {
+        const response = await fetch(file.procesed_url);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", file.description || "archivo_original");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch {
+        message.error("Error al descargar el archivo. Por favor, inténtalo de nuevo.");
+      }
+    } else {
+      message.error("No hay URL disponible para descargar el archivo original.");
+    }
+  };
+
   return (
     <div>
       <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
@@ -134,10 +128,13 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
           <TableRow style={{ borderColor: "#DDDDDD" }}>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha y hora</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Acciones</TableHead>
+            <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
+              Acciones
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -145,7 +142,6 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
             <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
               <TableCell>
                 <div className="flex items-center space-x-3">
-                  {getStatusIcon(file.status_description)}
                   <span className="font-normal" style={{ color: "#141414" }}>
                     {file.description}
                   </span>
@@ -156,26 +152,47 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
                   <span style={{ color: "#141414" }}>
-                    {formatDateTime(file.updated_at ?? file.created_at)}
+                    {file.date_archive ? formatDate(file.date_archive) : "-"}
                   </span>
                 </div>
               </TableCell>
               <TableCell>
-                <span style={{ color: "#141414" }}>{bytesToMB(file.size)} MB</span>
-              </TableCell>
-              <TableCell>{getStatusBadge(file.status_description)}</TableCell>
-              <TableCell>
                 <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm" title="Ver archivo">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" title="Descargar">
-                    <Download className="w-4 h-4" />
-                  </Button>
+                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                  <span style={{ color: "#141414" }}>
+                    {file.date_upload ? formatDate(file.date_upload) : "-"}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <span style={{ color: "#141414" }}>{bytesToMB(file.size)}</span>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="text-xs">
+                  {file.status_description}
+                </Badge>
+              </TableCell>
+              <TableCell className="w-0">
+                <div className="flex items-center justify-center">
                   <Dropdown
                     menu={{
-                      items: [{ key: "upload", label: "Subir ingesta" }] as MenuProps["items"],
-                      onClick: () => handleUploadIntake(file.id)
+                      items: [
+                        {
+                          key: "upload",
+                          label: "Subir ingesta",
+                          onClick: () => handleUploadIntake(file.id)
+                        },
+                        {
+                          key: "download-original",
+                          label: "Descarga original",
+                          onClick: () => handleDownloadOriginal(file)
+                        },
+                        {
+                          key: "download-universal",
+                          label: "Descarga universal",
+                          onClick: () => handleProcessedFile(file.id)
+                        }
+                      ]
                     }}
                     trigger={["click"]}
                   >

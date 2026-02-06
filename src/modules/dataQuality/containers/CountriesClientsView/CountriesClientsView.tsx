@@ -82,14 +82,6 @@ export default function CountriesClientsView() {
   );
 
   const handleRowClick = (record: IClientData) => {
-    console.log("Row clicked:", {
-      id: record.id,
-      id_client: record.id_client,
-      client_name: record.client_name,
-      archives_count: record.client_data_archives?.length || 0,
-      updated_at: record.updated_at,
-      full_record: record
-    });
     router.push(`/data-quality/client/${record.id}`);
   };
 

@@ -1,5 +1,5 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ISummaryCountries,
@@ -270,6 +270,25 @@ export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
     return response.data;
   } catch (error) {
     console.error("Error fetching alerts filters:", error);
+    throw error;
+  }
+};
+
+export const downloadCSV = async (id_archives_client_data: number): Promise<Blob> => {
+  try {
+    const response = await instance.get(
+      `${config.API_HOST}/data/sales-csv/${id_archives_client_data}`,
+      {
+        responseType: "blob"
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.data instanceof Blob) {
+      const text = await error.response.data.text();
+      const parsed = JSON.parse(text);
+      throw new Error(parsed.message || "Error al descargar el archivo");
+    }
     throw error;
   }
 };
