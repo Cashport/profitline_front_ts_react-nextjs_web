@@ -31,7 +31,6 @@ const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
 
   archives.forEach((archive) => {
-    if (!archive?.description || !archive?.id || !archive?.periodicity) return;
     const desc = archive?.description?.toLowerCase();
     if (!desc) return;
     if (desc.includes("stock") || desc.includes("inventario")) {
@@ -56,9 +55,10 @@ const getFileTypeBadges = (archives: IClientDataArchive[]) => {
     }
   });
 
-  // If no types detected, show generic badge for each archive
-  if (fileTypes.length === 0 && archives.length > 0) {
-    return archives.map((archive, idx) => ({
+  // If no types detected, show generic badge for each valid archive
+  const validArchives = archives.filter((a) => a?.id && a?.description && a?.periodicity);
+  if (fileTypes.length === 0 && validArchives.length > 0) {
+    return validArchives.map((archive, idx) => ({
       type: `archive-${idx}`,
       label: "AR",
       color: "bg-gray-500"
