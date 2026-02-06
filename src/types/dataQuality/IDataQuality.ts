@@ -228,3 +228,42 @@ export interface ICreateIntakeRequest {
   periodicity_json: IPeriodicityJSON;
   variables: Array<{ variable_key: string; variable_value: string }>;
 }
+
+export interface IGetCatalogs {
+  id: number;
+  customer_product_cod: string;
+  customer_product_description: string;
+  product_type_id: number;
+  product_type_code: string;
+  product_type_name: string;
+  type_vol_id: number;
+  type_vol_code: string;
+  type_vol_name: string;
+  material_id: number;
+  material_code: string;
+  material_name: string;
+  factor: number;
+}
+
+export interface ICatalogMaterial {
+  id: number;
+  material_code: string;
+  material_name: string;
+}
+
+export interface ICatalogSelectOption {
+  id: number;
+  code: string;
+  name: string;
+}
+
+export interface ICreateCatalogRequest {
+  id_client: number;
+  id_country: number;
+  customer_product_cod: string;
+  customer_product_description: string;
+  product_type: number;
+  type_vol: number;
+  material_code: number;
+  factor: number;
+}

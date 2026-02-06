@@ -12,6 +12,7 @@ import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTa
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import { useAppStore } from "@/lib/store/store";
+import Link from "next/link";
 
 // Helper functions for data transformation
 const formatBytes = (bytes: number): string => {
@@ -145,16 +146,18 @@ export default function DataQualityClientDetails() {
                 >
                   Puntos de venta
                 </Button>
-                <Button
-                  className="text-sm font-medium"
-                  style={{
-                    backgroundColor: "#CBE71E",
-                    color: "#141414",
-                    border: "none"
-                  }}
-                >
-                  Catálogos
-                </Button>
+                <Link href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}`}>
+                  <Button
+                    className="text-sm font-medium"
+                    style={{
+                      backgroundColor: "#CBE71E",
+                      color: "#141414",
+                      border: "none"
+                    }}
+                  >
+                    Catálogos
+                  </Button>
+                </Link>
                 <Button
                   variant="outline"
                   className="text-sm font-medium bg-transparent"
