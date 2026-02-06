@@ -1,16 +1,10 @@
-import {
-  Calendar,
-  Download,
-  Eye,
-  MoreHorizontal,
-  CheckCircle,
-  Clock,
-  XCircle,
-  AlertTriangle,
-  BadgeQuestionMark
-} from "lucide-react";
+import { useState } from "react";
+import dayjs from "dayjs";
+import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, message } from "antd";
-import type { MenuProps } from "antd";
+
+import { downloadCSV, uploadIntakeFile } from "@/services/dataQuality/dataQuality";
+
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import {
@@ -22,8 +16,6 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
-import dayjs from "dayjs";
-import { downloadCSV, uploadIntakeFile } from "@/services/dataQuality/dataQuality";
 
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
@@ -57,12 +49,14 @@ const formatDate = (isoDateString: string): string => {
 };
 
 export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
+  const [isUploadingLoading, setIsUploadingLoading] = useState(false);
   const handleUploadIntake = async (id: number) => {
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        setIsUploadingLoading(true);
         try {
           await uploadIntakeFile(id, file);
           message.success("Archivo de ingesta subido exitosamente.");
@@ -70,6 +64,7 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         } catch (error) {
           message.error("Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo.");
         }
+        setIsUploadingLoading(false);
       }
       input.remove();
     };
@@ -126,9 +121,9 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
       <Table>
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
@@ -140,19 +135,19 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         <TableBody>
           {files?.map((file) => (
             <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <span className="font-normal" style={{ color: "#141414" }}>
-                    {file.description}
-                  </span>
-                </div>
-              </TableCell>
               <TableCell>{getCategoryBadge(file.tipo_archivo)}</TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
                   <span style={{ color: "#141414" }}>
                     {file.date_archive ? formatDate(file.date_archive) : "-"}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center space-x-3">
+                  <span className="font-normal" style={{ color: "#141414" }}>
+                    {file.description}
                   </span>
                 </div>
               </TableCell>
@@ -180,7 +175,8 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                         {
                           key: "upload",
                           label: "Subir ingesta",
-                          onClick: () => handleUploadIntake(file.id)
+                          onClick: () => handleUploadIntake(file.id),
+                          disabled: isUploadingLoading
                         },
                         {
                           key: "download-original",
