@@ -49,6 +49,13 @@ a {
     background-color: rgba(255, 255, 255, 0.37) !important;
 }
 
+.ant-picker-ok .ant-btn-primary {
+    background-color: $secondary !important;
+    border-color: $secondary !important;
+    color: $black !important;
+    box-shadow: none !important;
+}
+
 .ant-cascader-menus,
 .ant-cascader-menu-item {
     background-color: white !important;
