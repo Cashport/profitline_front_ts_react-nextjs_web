@@ -195,17 +195,18 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                   <>
                     {isEditMode ? (
                       <DatePicker
-                        format="YYYY-MM-DD HH:mm:ss"
-                        showTime={{ defaultOpenValue: dayjs("00:00:00", "HH:mm:ss") }}
+                        format="YYYY-MM-DD HH:mm"
+                        showTime={{ defaultOpenValue: dayjs("00:00:00", "HH:mm") }}
+                        showNow={false}
                         value={field.value ? dayjs.utc(field.value) : null}
                         onChange={(date) =>
-                          field.onChange(date ? date.utc().format("YYYY-MM-DD HH:mm:ss") : "")
+                          field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
                         }
                         className="mt-1 h-8 text-sm font-semibold w-full"
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {field.value ? dayjs.utc(field.value).format("YYYY-MM-DD HH:mm:ss") : "-"}
+                        {field.value ? dayjs.utc(field.value).format("YYYY-MM-DD HH:mm") : "-"}
                       </p>
                     )}
                     {errors.delivery_date && (
