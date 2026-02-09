@@ -259,31 +259,9 @@ export function PurchaseOrderProducts({
                       />
                     </td>
                     <td className="p-3 text-right">
-                      <Controller
-                        name={`products.${index}.tax_amount`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <div>
-                            {isEditMode ? (
-                              <Input
-                                type="number"
-                                {...controllerField}
-                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-24 h-8 text-sm text-right"
-                              />
-                            ) : (
-                              <span className="text-sm text-cashport-black fontMonoSpace">
-                                {formatMoney(controllerField.value)}
-                              </span>
-                            )}
-                            {errors.products?.[index]?.tax_amount && (
-                              <span className="text-xs text-red-500 block mt-1">
-                                {errors.products[index]?.tax_amount?.message}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      />
+                      <span className="text-sm text-cashport-black fontMonoSpace">
+                        {formatMoney(watchedProducts[index].tax_amount)}
+                      </span>
                     </td>
                     <td className="p-3 text-sm text-cashport-black text-right fontMonoSpace">
                       {formatMoney(watchedProducts[index].total_price)}

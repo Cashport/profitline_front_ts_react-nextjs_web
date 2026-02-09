@@ -130,7 +130,6 @@ export interface IEditPurchaseOrderProduct {
   marketplace_order_product_id: number;
   quantity?: number;
   price?: number;
-  taxes?: number;
   product_id?: number;
 }
 

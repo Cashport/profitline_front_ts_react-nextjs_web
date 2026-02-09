@@ -36,10 +36,7 @@ export const productFormSchema = yup.object({
     .number()
     .required("Precio unitario requerido")
     .min(0, "El precio unitario no puede ser negativo"),
-  tax_amount: yup
-    .number()
-    .required("Monto de IVA requerido")
-    .min(0, "El monto de IVA no puede ser negativo"),
+  tax_amount: yup.number().optional(),
   subtotal: yup.number().required(),
   total_price: yup.number().required(),
   product_id: yup.number().optional()
