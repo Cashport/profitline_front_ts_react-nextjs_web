@@ -53,6 +53,8 @@ export interface IClientData {
   is_deleted: number;
   client_data_archives: IClientDataArchive[];
   country_name: string;
+  periodicity: string | null;
+  status: string;
 }
 
 // Client List Response
@@ -130,13 +132,14 @@ export interface IClientDetailArchiveClient {
   id_client_data_archives: any | null;
   id_type_archive: number;
   tipo_archivo: string;
+  date_archive: string | null;
   description: string;
   id_status: number;
   status_description: string;
   date_upload: string | null;
   user_upload: string | null;
   size: number;
-  intake_type_id: number | null;
+  procesed_url: string | null;
   acciones: string[];
   created_at: string;
   updated_at: string | null;
@@ -266,4 +269,54 @@ export interface ICreateCatalogRequest {
   type_vol: number;
   material_code: number;
   factor: number;
+}
+
+export interface IAlertFilterCountry {
+  id: number;
+  country_name: string;
+  address_format: string;
+}
+
+export interface IAlertFilterClient {
+  client_id: number;
+  client_name: string;
+  id_country: number;
+  country_name: string;
+}
+
+export interface IAlertFilterStatus {
+  id: number;
+  description: string;
+  budget_color: string;
+}
+
+export interface IGetFiltersAlerts {
+  countries: IAlertFilterCountry[];
+  clients: IAlertFilterClient[];
+  alertStatus: IAlertFilterStatus[];
+}
+
+export interface IAlert {
+  id: number;
+  id_client: number;
+  client_name: string;
+  id_country: number;
+  country_name: string;
+  error_message: string;
+  error_type: string;
+  error_level: string;
+  created_at: string;
+  id_alert_status: number;
+  status_description: string;
+  status_color: string;
+  id_archives_client_data: number;
+  file_name: string | null;
+}
+
+export interface IGetAlerts {
+  data: IAlert[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
 }

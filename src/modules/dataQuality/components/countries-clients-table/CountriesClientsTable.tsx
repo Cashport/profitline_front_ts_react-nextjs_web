@@ -18,14 +18,20 @@ interface CountriesClientsTableProps {
   onRowClick?: (record: IClientData) => void;
 }
 
-const getStatusBadge = (status: string) => {
-  // Since API doesn't provide status yet, show "desconocido" with outline variant
-  return (
-    <Badge variant="outline" className="text-xs">
-      desconocido
-    </Badge>
-  );
-};
+const FILE_TYPE_MAPPINGS = [
+  {
+    keyword: "stock cedi in-transit",
+    type: "stock-cedi-in-transit",
+    label: "CI",
+    color: "bg-teal-500"
+  },
+  { keyword: "stock in-transit", type: "stock-in-transit", label: "SI", color: "bg-purple-500" },
+  { keyword: "stock cedi", type: "stock-cedi", label: "SC", color: "bg-cyan-500" },
+  { keyword: "sellout", type: "sellout", label: "SO", color: "bg-orange-500" },
+  { keyword: "stock", type: "stock", label: "SK", color: "bg-blue-500" },
+  { keyword: "store", type: "store", label: "ST", color: "bg-yellow-500" },
+  { keyword: "sales", type: "sales", label: "SA", color: "bg-green-500" }
+];
 
 const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
@@ -33,31 +39,17 @@ const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   archives.forEach((archive) => {
     const desc = archive?.description?.toLowerCase();
     if (!desc) return;
-    if (desc.includes("stock") || desc.includes("inventario")) {
-      if (!fileTypes.some((f) => f.type === "stock")) {
-        fileTypes.push({ type: "stock", label: "ST", color: "bg-blue-500" });
-      }
-    }
-    if (desc.includes("sales") || desc.includes("ventas") || desc.includes("venta")) {
-      if (!fileTypes.some((f) => f.type === "sales")) {
-        fileTypes.push({ type: "sales", label: "SA", color: "bg-green-500" });
-      }
-    }
-    if (desc.includes("transit") || desc.includes("tránsito") || desc.includes("transito")) {
-      if (!fileTypes.some((f) => f.type === "transit")) {
-        fileTypes.push({ type: "transit", label: "IT", color: "bg-purple-500" });
-      }
-    }
-    if (desc.includes("store")) {
-      if (!fileTypes.some((f) => f.type === "store")) {
-        fileTypes.push({ type: "store", label: "ST", color: "bg-yellow-500" });
-      }
+
+    const match = FILE_TYPE_MAPPINGS.find((m) => desc.includes(m.keyword));
+    if (match && !fileTypes.some((f) => f.type === match.type)) {
+      fileTypes.push({ type: match.type, label: match.label, color: match.color });
     }
   });
 
-  // If no types detected, show generic badge for each archive
-  if (fileTypes.length === 0 && archives.length > 0) {
-    return archives.map((archive, idx) => ({
+  // If no types detected, show generic badge for each valid archive
+  const validArchives = archives.filter((a) => a?.id && a?.description);
+  if (fileTypes.length === 0 && validArchives.length > 0) {
+    return validArchives.map((archive, idx) => ({
       type: `archive-${idx}`,
       label: "AR",
       color: "bg-gray-500"
@@ -89,7 +81,8 @@ export default function CountriesClientsTable({
     {
       title: "Periodicidad",
       key: "periodicity",
-      render: () => <span className="text-gray-500">-</span>
+      dataIndex: "periodicity",
+      render: (periodicity) => <span className="text-gray-500">{periodicity}</span>
     },
     {
       title: "Archivos",
@@ -145,7 +138,12 @@ export default function CountriesClientsTable({
     {
       title: "Estado",
       key: "status",
-      render: (_, record: IClientData) => getStatusBadge("unknown")
+      dataIndex: "status",
+      render: (status) => (
+        <Badge variant="outline" className="text-xs">
+          {status || "desconocido"}
+        </Badge>
+      )
     },
     {
       title: "Ver",

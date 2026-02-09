@@ -90,7 +90,7 @@ export function ClientDetailIntakesTable({
                 </TableCell>
                 <TableCell>
                   <span className="text-sm" style={{ color: "#141414" }}>
-                    -
+                    {intake.intake_type?.description || "-"}
                   </span>
                 </TableCell>
                 <TableCell>

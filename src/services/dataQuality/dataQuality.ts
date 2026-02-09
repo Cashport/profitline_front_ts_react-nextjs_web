@@ -1,5 +1,5 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ISummaryCountries,
@@ -14,7 +14,8 @@ import {
   ICreateIntakeRequest,
   ICatalogMaterial,
   ICatalogSelectOption,
-  ICreateCatalogRequest
+  ICreateCatalogRequest,
+  IGetFiltersAlerts
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -257,6 +258,37 @@ export const uploadIntakeFile = async (
     return response.data;
   } catch (error) {
     console.error("Error uploading intake file:", error);
+    throw error;
+  }
+};
+
+export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
+  try {
+    const response: GenericResponse<IGetFiltersAlerts> = await API.get(
+      `${config.API_HOST}/data/filters`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching alerts filters:", error);
+    throw error;
+  }
+};
+
+export const downloadCSV = async (id_archives_client_data: number): Promise<Blob> => {
+  try {
+    const response = await instance.get(
+      `${config.API_HOST}/data/sales-csv/${id_archives_client_data}`,
+      {
+        responseType: "blob"
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.data instanceof Blob) {
+      const text = await error.response.data.text();
+      const parsed = JSON.parse(text);
+      throw new Error(parsed.message || "Error al descargar el archivo");
+    }
     throw error;
   }
 };

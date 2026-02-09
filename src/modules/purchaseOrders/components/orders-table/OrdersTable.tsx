@@ -241,6 +241,7 @@ export function OrdersTable({
       }
       loading={loading}
       pagination={{
+        style: { marginBottom: "0.125rem" },
         current: pagination?.actualPage || 1,
         pageSize: pagination?.rowsperpage || 10,
         total: pagination?.totalRows || 0,
@@ -249,7 +250,7 @@ export function OrdersTable({
         position: ["bottomRight"],
         showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
       }}
-      scroll={{ y: height - 360, x: 100 }}
+      scroll={{ y: height - 345, x: 100 }}
     />
   );
 }
