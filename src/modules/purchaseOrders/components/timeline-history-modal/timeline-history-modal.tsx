@@ -108,15 +108,24 @@ export function TimelineHistoryModal({
                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                 <span className="text-sm font-medium text-yellow-600">●</span>
                                 <h4 className="text-sm font-semibold text-gray-900 truncate">
-                                  {event.step_name}
+                                  {event.is_novelty
+                                    ? event.novelty_type_name
+                                    : event.step_name ?? event.event_description}
                                 </h4>
                               </div>
-                              {event.novelty_type_name && (
+                              {!event.is_resolved ? (
                                 <Badge
                                   variant="outline"
                                   className="text-xs shrink-0 bg-orange-50 text-orange-700 border-orange-200"
                                 >
                                   Abierta
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs shrink-0 bg-green-50 text-green-700 border-green-200"
+                                >
+                                  Cerrada
                                 </Badge>
                               )}
                             </div>
@@ -135,15 +144,6 @@ export function TimelineHistoryModal({
                               <div className="text-xs text-gray-600">
                                 <span className="font-medium">Comentario:</span>{" "}
                                 {event.event_description}
-                              </div>
-                            )}
-
-                            {event.novelty_type_name && (
-                              <div className="mt-2 pt-2 border-t border-gray-300">
-                                <div className="text-xs text-gray-600">
-                                  <span className="font-medium">Tipo novedad:</span>{" "}
-                                  {event.novelty_type_name}
-                                </div>
                               </div>
                             )}
                           </div>
