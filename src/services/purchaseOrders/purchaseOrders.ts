@@ -157,3 +157,15 @@ export const purchaseOrderActions = async (
     throw error;
   }
 };
+
+export const sendToBilling = async (purchase_order_id: string): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${purchase_order_id}/send-to-billing`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending purchase order to billing:", error);
+    throw error;
+  }
+};
