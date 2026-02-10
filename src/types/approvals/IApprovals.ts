@@ -1,6 +1,9 @@
+import { ApprovalStepStatus, ApprovalType } from "@/constants/approvalTypes";
+
 export interface IApprovalItem {
   id: number;
-  typeActionCode: string;
+  projectIncrement: number;
+  typeActionCode: ApprovalType;
   typeActionId: number;
   referenceId: string;
   approvalName: string;
@@ -63,13 +66,14 @@ interface IRequester {
 
 export interface IApprovalDetail {
   id: number;
-  typeActionCode: string;
+  projectIncrement: number;
+  typeActionCode: ApprovalType;
   referenceId: string;
   approvalName: string;
   approvalLink: string;
   observation: string;
   description: string;
-  status: string;
+  status: ApprovalStepStatus;
   requester: IRequester;
   createdAt: string;
   updatedAt: string;
