@@ -143,13 +143,14 @@ export function DetailPurchaseOrder() {
     return getCurrentStage(processedStages);
   }, [processedStages]);
 
-  // Modal states - must be before conditional returns
+  // Modal states
   const [whichModalIsOpen, setWhichModalIsOpen] = useState({
     selected: 0
   });
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const closeModals = () => setWhichModalIsOpen({ selected: 0 });
 
-  // Dragging handlers - must be before conditional returns
+  // Dragging handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -178,7 +179,7 @@ export function DetailPurchaseOrder() {
     setIsDragging(false);
   }, []);
 
-  // Dragging effect - must be before conditional returns
+  // Dragging effect
   useEffect(() => {
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -308,13 +309,16 @@ export function DetailPurchaseOrder() {
       message.error("ID de orden de compra no válido");
       return;
     }
+    setIsActionLoading(true);
     try {
       await sendToBilling(orderId!);
       message.success("Orden de compra enviada a facturación correctamente");
+      closeModals();
       mutate();
     } catch (error) {
       message.error("Error al enviar la orden de compra a facturación");
     }
+    setIsActionLoading(false);
   };
 
   const actionItems: DropdownItem[] = [
@@ -587,7 +591,7 @@ export function DetailPurchaseOrder() {
         onOk={() => sendOrderToBilling(orderId)}
         title="¿Está seguro que desea enviar esta orden a facturación?"
         okText="Enviar"
-        okLoading={false}
+        okLoading={isActionLoading}
       />
     </div>
   );
