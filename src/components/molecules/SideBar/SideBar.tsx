@@ -14,10 +14,13 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
 import { ModulesButtons } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
+import { usePermissionRedirect } from "@/hooks/usePermissionRedirect";
 
 import "./sidebar.scss";
 
 export const SideBar = () => {
+  usePermissionRedirect();
+
   const [isSideBarLarge, setIsSideBarLarge] = useState(false);
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
