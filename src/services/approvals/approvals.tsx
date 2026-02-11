@@ -2,6 +2,7 @@ import config from "@/config";
 import { API } from "@/utils/api/api";
 import {
   IApprovalDetail,
+  ICreateApprovalRequest,
   IGetApprovalStatus,
   IGetApprovalTypeActions,
   IResolveApprovalRequest
@@ -39,12 +40,17 @@ export const getApprovalTypes = async (): Promise<IGetApprovalTypeActions[]> => 
   }
 };
 
-export const resolveApproval = async (
-  id: number,
-  data: IResolveApprovalRequest
-): Promise<void> => {
+export const resolveApproval = async (id: number, data: IResolveApprovalRequest): Promise<void> => {
   try {
     await API.post(`${config.API_HOST}/approval/resolve/${id}`, data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createApproval = async (data: ICreateApprovalRequest): Promise<void> => {
+  try {
+    await API.post(`${config.API_HOST}/approval/create`, data);
   } catch (error) {
     throw error;
   }

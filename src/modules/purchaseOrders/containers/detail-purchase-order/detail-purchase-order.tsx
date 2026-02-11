@@ -108,6 +108,8 @@ const DispatchModal = dynamic(
     })),
   { ssr: false }
 );
+import { createApproval } from "@/services/approvals/approvals";
+import { ICreateApprovalRequest } from "@/types/approvals/IApprovals";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -274,9 +276,24 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const confirmApprove = () => {
-    // TODO: Implement approval logic
-    // Note: Modal handles its own closing via onOpenChange
+  const confirmApprove = async () => {
+    setIsActionLoading(true);
+    const modelData: ICreateApprovalRequest = {
+      typeActionCode: "PURCHASE_ORDER",
+      approvalName: `Aprobación para orden de compra ${data.purchase_order_number}`,
+      approvalLink: `/purchase-orders/${orderId}`,
+      referenceId: orderId!
+    };
+
+    try {
+      await createApproval(modelData);
+      message.success("Orden de compra enviada a aprobación");
+      setWhichModalIsOpen({ selected: 0 });
+      mutate();
+    } catch (error) {
+      message.error("Error al aprobar la orden de compra");
+    }
+    setIsActionLoading(false);
   };
 
   const confirmReject = (_reason: string, _observation: string) => {
@@ -549,6 +566,7 @@ export function DetailPurchaseOrder() {
         open={whichModalIsOpen.selected === 5}
         onOpenChange={closeModals}
         onConfirm={confirmApprove}
+        loading={isActionLoading}
       />
 
       <RejectOrderModal
