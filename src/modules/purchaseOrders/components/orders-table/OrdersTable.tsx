@@ -53,7 +53,10 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
-  const [selectedOrder, setSelectedOrder] = useState<number>(0);
+  const [selectedOrder, setSelectedOrder] = useState({
+    id: 0,
+    warehouse_id: 0
+  });
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
 
   const columns: TableProps<IPurchaseOrder>["columns"] = [
@@ -225,7 +228,10 @@ export function OrdersTable({
             size="small"
             className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
             onClick={() => {
-              setSelectedOrder(record.purchaseOrderId);
+              setSelectedOrder({
+                id: record.id,
+                warehouse_id: record.warehouse_id || 0
+              });
               setIsWarehouseModalOpen(true);
             }}
             icon={<WarningDiamond className="h-4 w-4 text-gray-600" />}
@@ -274,8 +280,8 @@ export function OrdersTable({
       />
       <ChangeWarehouseModal
         isOpen={isWarehouseModalOpen}
-        selectedOrder={selectedOrder}
-        currentWarehouseId={0}
+        selectedOrder={selectedOrder.id}
+        currentWarehouseId={selectedOrder.warehouse_id}
         onClose={() => setIsWarehouseModalOpen(false)}
         setFetchMutate={mutate}
       />
