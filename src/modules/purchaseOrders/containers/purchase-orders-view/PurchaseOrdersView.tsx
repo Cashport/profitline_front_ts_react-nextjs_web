@@ -81,7 +81,6 @@ export function PurchaseOrdersView() {
 
   const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
     setSelectedRowKeys(selectedKeys);
-    console.log("Selected rows:", selectedRows);
   };
 
   // Filter handler functions
@@ -233,6 +232,7 @@ export function PurchaseOrdersView() {
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
                   onRowClick={handleRowClick}
+                  mutate={() => mutate()}
                 />
               </div>
             )}
