@@ -6,9 +6,15 @@ interface ApproveOrderModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
-export function ApproveOrderModal({ open, onOpenChange, onConfirm }: ApproveOrderModalProps) {
+export function ApproveOrderModal({
+  open,
+  onOpenChange,
+  onConfirm,
+  loading
+}: ApproveOrderModalProps) {
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
@@ -33,6 +39,7 @@ export function ApproveOrderModal({ open, onOpenChange, onConfirm }: ApproveOrde
           </Button>
           <Button
             onClick={handleConfirm}
+            disabled={loading}
             className="flex-1 text-black font-semibold"
             style={{ backgroundColor: "#CBE71E" }}
           >
