@@ -38,7 +38,7 @@ export interface ProductFormData {
   po_product_description: string; // Read-only display
   quantity: number; // Editable
   unit_price: number; // Editable
-  tax_amount: number; // Editable
+  tax_amount: number; // Read-only
   subtotal: number; // Calculated: quantity * unit_price
   total_price: number; // Calculated: subtotal + tax_amount
   product_id?: number; // Optional internal product ID
@@ -115,7 +115,6 @@ export const mapFormProductsToApi = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
     price: p.unit_price,
-    taxes: p.tax_amount,
     product_id: p.product_id
   }))
 });
