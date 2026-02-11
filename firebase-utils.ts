@@ -75,7 +75,7 @@ const getAuth = async (
           const data = await response.json();
           if (response.status === 200) {
             localStorage.setItem(STORAGE_TOKEN, data.data.token);
-            router.push("/clientes/all");
+            router.push("/land");
           }
         });
       })

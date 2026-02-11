@@ -50,16 +50,18 @@ export const ModulesButtons = ({
   return (
     <div className={`${styles.containerButtons} ${isMobileMenu ? styles.mobile : ""}`}>
       {/* Dashboard */}
-      <Link href="/dashboard" passHref legacyBehavior>
-        <Button
-          type="primary"
-          size="large"
-          icon={<SquaresFour size={iconSize} />}
-          className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
-        >
-          {isSideBarLarge && "Dashboard"}
-        </Button>
-      </Link>
+      {checkUserViewPermissions(project, "Dashboard") && (
+        <Link href="/dashboard" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SquaresFour size={iconSize} />}
+            className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Dashboard"}
+          </Button>
+        </Link>
+      )}
 
       {/* Clientes */}
       {checkUserViewPermissions(project, "Clientes") && (
