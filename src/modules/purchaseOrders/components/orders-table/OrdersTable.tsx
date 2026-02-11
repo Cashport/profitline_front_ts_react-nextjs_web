@@ -1,6 +1,7 @@
 "use client";
 
-import { Table, TableProps, Button, Typography } from "antd";
+import { useState } from "react";
+import { Table, TableProps, Button, Typography, Flex } from "antd";
 import { Eye, AlertCircle } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
@@ -8,6 +9,8 @@ import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { Badge } from "@/modules/chat/ui/badge";
+import { WarningDiamond } from "@phosphor-icons/react";
+import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 
 const { Text } = Typography;
 
@@ -32,6 +35,7 @@ interface OrdersTableProps {
   pagination: Pagination;
   loading: boolean;
   onPageChange: (page: number) => void;
+  mutate: () => void;
   selectedRowKeys?: React.Key[];
   onRowSelect?: (selectedRowKeys: React.Key[], selectedRows: IPurchaseOrder[]) => void;
   onRowClick?: (record: IPurchaseOrder) => void;
@@ -41,6 +45,7 @@ export function OrdersTable({
   data,
   pagination,
   loading,
+  mutate,
   onPageChange,
   selectedRowKeys,
   onRowSelect,
@@ -48,6 +53,11 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
+  const [selectedOrder, setSelectedOrder] = useState({
+    id: 0,
+    warehouse_id: 0
+  });
+  const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
 
   const columns: TableProps<IPurchaseOrder>["columns"] = [
     {
@@ -212,45 +222,69 @@ export function OrdersTable({
       width: 60,
       align: "right",
       render: (_, record) => (
-        <Button
-          type="text"
-          size="small"
-          className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRowClick?.(record);
-          }}
-          icon={<Eye className="h-4 w-4 text-gray-600" />}
-        />
+        <Flex gap={8}>
+          <Button
+            type="text"
+            size="small"
+            className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
+            onClick={() => {
+              setSelectedOrder({
+                id: record.id,
+                warehouse_id: record.warehouse_id || 0
+              });
+              setIsWarehouseModalOpen(true);
+            }}
+            icon={<WarningDiamond className="h-4 w-4 text-gray-600" />}
+          />
+          <Button
+            type="text"
+            size="small"
+            className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRowClick?.(record);
+            }}
+            icon={<Eye className="h-4 w-4 text-gray-600" />}
+          />
+        </Flex>
       )
     }
   ];
 
   return (
-    <Table
-      className="w-full"
-      columns={columns}
-      dataSource={data?.map((item) => ({ ...item, key: item.id }))}
-      rowSelection={
-        onRowSelect
-          ? {
-              selectedRowKeys,
-              onChange: onRowSelect
-            }
-          : undefined
-      }
-      loading={loading}
-      pagination={{
-        style: { marginBottom: "0.125rem" },
-        current: pagination?.actualPage || 1,
-        pageSize: pagination?.rowsperpage || 10,
-        total: pagination?.totalRows || 0,
-        onChange: onPageChange,
-        showSizeChanger: false,
-        position: ["bottomRight"],
-        showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
-      }}
-      scroll={{ y: height - 345, x: 100 }}
-    />
+    <>
+      <Table
+        className="w-full"
+        columns={columns}
+        dataSource={data?.map((item) => ({ ...item, key: item.id }))}
+        rowSelection={
+          onRowSelect
+            ? {
+                selectedRowKeys,
+                onChange: onRowSelect
+              }
+            : undefined
+        }
+        loading={loading}
+        pagination={{
+          style: { marginBottom: "0.125rem" },
+          current: pagination?.actualPage || 1,
+          pageSize: pagination?.rowsperpage || 10,
+          total: pagination?.totalRows || 0,
+          onChange: onPageChange,
+          showSizeChanger: false,
+          position: ["bottomRight"],
+          showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
+        }}
+        scroll={{ y: height - 345, x: 100 }}
+      />
+      <ChangeWarehouseModal
+        isOpen={isWarehouseModalOpen}
+        selectedOrder={selectedOrder.id}
+        currentWarehouseId={selectedOrder.warehouse_id}
+        onClose={() => setIsWarehouseModalOpen(false)}
+        setFetchMutate={mutate}
+      />
+    </>
   );
 }
