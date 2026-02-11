@@ -13,7 +13,7 @@ export interface IPurchaseOrder {
   noveltyTypes: string;
   invoiceCount: number;
   invoiceIds: string[];
-  warehouse_id: number | null;
+  warehouseId: number | null;
 }
 
 export interface IPurchaseOrderStatus {
