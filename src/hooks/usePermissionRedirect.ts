@@ -19,9 +19,7 @@ export const usePermissionRedirect = () => {
   useEffect(() => {
     if (!isHy || !selectedProject?.ID) return;
 
-    const isIgnoredRoute = IGNORED_PREFIXES.some((prefix) =>
-      pathname.startsWith(prefix)
-    );
+    const isIgnoredRoute = IGNORED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
     if (isIgnoredRoute) return;
 
     if (isRedirecting.current) {

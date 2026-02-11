@@ -38,6 +38,7 @@ export const ProjectTable = () => {
   const projects = useAppStore((state) => state.projects);
   const setProjects = useAppStore((state) => state.setProjects);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
+  const projectsBasicInfo = useAppStore((state) => state.projectsBasicInfo);
   const router = useRouter();
 
   const onChangePage = (pagePagination: number) => {
@@ -64,10 +65,14 @@ export const ProjectTable = () => {
   }, [error]);
 
   const handleOpenProject = (row: IProject) => {
+    const projectPermissions = projectsBasicInfo?.find((p) => p.ID === row.ID);
     setSelectedProject({
       ID: row.ID,
       NAME: row.PROJECT_DESCRIPTION,
-      LOGO: row.LOGO ?? ""
+      LOGO: row.LOGO ?? "",
+      views_permissions: projectPermissions?.views_permissions,
+      action_permissions: projectPermissions?.action_permissions,
+      isSuperAdmin: projectPermissions?.isSuperAdmin
     });
 
     router.push(`/proyectos/review/${row.ID}/detail`);
