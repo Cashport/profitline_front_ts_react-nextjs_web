@@ -106,3 +106,10 @@ export interface IResolveApprovalRequest {
   decision: ApprovalDecision;
   comment?: string;
 }
+
+export interface ICreateApprovalRequest {
+  typeActionCode: string;
+  approvalName: string;
+  approvalLink: string;
+  referenceId: string;
+}

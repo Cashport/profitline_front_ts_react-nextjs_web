@@ -103,6 +103,8 @@ import {
   editPurchaseOrder,
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
+import { createApproval } from "@/services/approvals/approvals";
+import { ICreateApprovalRequest } from "@/types/approvals/IApprovals";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -270,9 +272,22 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const confirmApprove = () => {
-    // TODO: Implement approval logic
-    // Note: Modal handles its own closing via onOpenChange
+  const confirmApprove = async () => {
+    const modelData: ICreateApprovalRequest = {
+      typeActionCode: "PURCHASE_ORDER",
+      approvalName: `Aprobación para orden de compra ${data.purchase_order_number}`,
+      approvalLink: "",
+      referenceId: orderId!
+    };
+
+    try {
+      await createApproval(modelData);
+      message.success("Orden de compra enviada a aprobación");
+      setShowApproveModal(false);
+      mutate();
+    } catch (error) {
+      message.error("Error al aprobar la orden de compra");
+    }
   };
 
   const confirmReject = (_reason: string, _observation: string) => {
