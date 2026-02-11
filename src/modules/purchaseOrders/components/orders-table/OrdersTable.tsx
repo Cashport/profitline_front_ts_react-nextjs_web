@@ -230,7 +230,7 @@ export function OrdersTable({
             onClick={() => {
               setSelectedOrder({
                 id: record.id,
-                warehouse_id: record.warehouse_id || 0
+                warehouse_id: record.warehouseId || 0
               });
               setIsWarehouseModalOpen(true);
             }}
