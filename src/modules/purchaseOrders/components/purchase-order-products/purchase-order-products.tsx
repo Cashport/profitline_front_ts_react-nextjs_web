@@ -113,7 +113,10 @@ export function PurchaseOrderProducts({
     : summary.totalTaxes;
 
   const totalAmount = isEditMode
-    ? watchedProducts.reduce((sum, producto) => sum + producto.total_price, 0)
+    ? watchedProducts.reduce(
+        (sum, p) => sum + (p.unit_price + p.tax_amount) * p.quantity,
+        0
+      )
     : summary.grandTotal;
 
   return (
@@ -232,31 +235,9 @@ export function PurchaseOrderProducts({
                       />
                     </td>
                     <td className="p-3 text-right">
-                      <Controller
-                        name={`products.${index}.unit_price`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <div>
-                            {isEditMode ? (
-                              <Input
-                                type="number"
-                                {...controllerField}
-                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-28 h-8 text-sm text-right"
-                              />
-                            ) : (
-                              <span className="text-sm text-cashport-black fontMonoSpace">
-                                {formatMoney(controllerField.value)}
-                              </span>
-                            )}
-                            {errors.products?.[index]?.unit_price && (
-                              <span className="text-xs text-red-500 block mt-1">
-                                {errors.products[index]?.unit_price?.message}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      />
+                      <span className="text-sm text-cashport-black fontMonoSpace">
+                        {formatMoney(watchedProducts[index].unit_price)}
+                      </span>
                     </td>
                     <td className="p-3 text-right">
                       <span className="text-sm text-cashport-black fontMonoSpace">
@@ -264,7 +245,10 @@ export function PurchaseOrderProducts({
                       </span>
                     </td>
                     <td className="p-3 text-sm text-cashport-black text-right fontMonoSpace">
-                      {formatMoney(watchedProducts[index].total_price)}
+                      {formatMoney(
+                        (watchedProducts[index].unit_price + watchedProducts[index].tax_amount) *
+                          watchedProducts[index].quantity
+                      )}
                     </td>
                   </tr>
                 );
