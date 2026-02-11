@@ -16,6 +16,7 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
   const selectedProject = useAppStore((state) => state.selectedProject);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
   const projects = useAppStore((state) => state.projectsBasicInfo);
+  console.log("Projects in ModalProjectSelector:", projects);
 
   const handleSelectProject = (project: ISelectedProject) => {
     const projectInfo: ISelectedProject = {
