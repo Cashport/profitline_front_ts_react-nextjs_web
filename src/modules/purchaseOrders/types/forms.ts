@@ -37,7 +37,7 @@ export interface ProductFormData {
   product_description: string; // Read-only display
   po_product_description: string; // Read-only display
   quantity: number; // Editable
-  unit_price: number; // Editable
+  unit_price: number; // Read-only
   tax_amount: number; // Read-only
   subtotal: number; // Calculated: quantity * unit_price
   total_price: number; // Calculated: subtotal + tax_amount
@@ -114,7 +114,6 @@ export const mapFormProductsToApi = (
   products: formData.products.map((p) => ({
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
-    price: p.unit_price,
     product_id: p.product_id
   }))
 });
