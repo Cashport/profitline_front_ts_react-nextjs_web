@@ -4,10 +4,8 @@ import React from "react";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
-import { extractSingleParam } from "@/utils/utils";
 import { message } from "antd";
 import dynamic from "next/dynamic";
-
 import {
   ArrowLeft,
   FileText,
@@ -23,11 +21,44 @@ import {
   PackageCheck,
   AlertTriangle
 } from "lucide-react";
+import { Invoice } from "@phosphor-icons/react";
+
+import { extractSingleParam } from "@/utils/utils";
+import { fetcher } from "@/utils/api/api";
+import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
+import {
+  downloadPurchaseOrdersCSV,
+  editPurchaseOrder,
+  editPurchaseOrderProducts,
+  sendToBilling
+} from "@/services/purchaseOrders/purchaseOrders";
+
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Separator } from "@/modules/chat/ui/separator";
 import ProfitLoader from "@/components/ui/profit-loader";
+import {
+  PurchaseOrderInfo,
+  PurchaseOrderInfoRef
+} from "../../components/purchase-order-info/purchase-order-info";
+import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
+import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
+import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
+import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+
+import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
+import {
+  mapApiToFormData,
+  mapFormDataToApi,
+  mapApiProductsToForm,
+  mapFormProductsToApi,
+  PurchaseOrderInfoFormData,
+  PurchaseOrderProductsFormData
+} from "../../types/forms";
+import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 // Dynamic imports for modals to reduce initial bundle size
 const TimelineHistoryModal = dynamic(
@@ -77,32 +108,8 @@ const DispatchModal = dynamic(
     })),
   { ssr: false }
 );
-import {
-  PurchaseOrderInfo,
-  PurchaseOrderInfoRef
-} from "../../components/purchase-order-info/purchase-order-info";
-import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
-import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
-import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
-import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
-import { fetcher } from "@/utils/api/api";
-import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
-import { GenericResponse } from "@/types/global/IGlobal";
-import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
-import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
-import {
-  mapApiToFormData,
-  mapFormDataToApi,
-  mapApiProductsToForm,
-  mapFormProductsToApi,
-  PurchaseOrderInfoFormData,
-  PurchaseOrderProductsFormData
-} from "../../types/forms";
-import {
-  downloadPurchaseOrdersCSV,
-  editPurchaseOrder,
-  editPurchaseOrderProducts
-} from "@/services/purchaseOrders/purchaseOrders";
+import { createApproval } from "@/services/approvals/approvals";
+import { ICreateApprovalRequest } from "@/types/approvals/IApprovals";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -138,15 +145,14 @@ export function DetailPurchaseOrder() {
     return getCurrentStage(processedStages);
   }, [processedStages]);
 
-  // Modal states - must be before conditional returns
-  const [showTimelineHistory, setShowTimelineHistory] = useState(false);
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [showDispatchModal, setShowDispatchModal] = useState(false);
-  const [showApproveModal, setShowApproveModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
+  // Modal states
+  const [whichModalIsOpen, setWhichModalIsOpen] = useState({
+    selected: 0
+  });
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const closeModals = () => setWhichModalIsOpen({ selected: 0 });
 
-  // Dragging handlers - must be before conditional returns
+  // Dragging handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -175,7 +181,7 @@ export function DetailPurchaseOrder() {
     setIsDragging(false);
   }, []);
 
-  // Dragging effect - must be before conditional returns
+  // Dragging effect
   useEffect(() => {
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -257,11 +263,11 @@ export function DetailPurchaseOrder() {
   };
 
   const handleApprove = () => {
-    setShowApproveModal(true);
+    setWhichModalIsOpen({ selected: 5 });
   };
 
   const handleReject = () => {
-    setShowRejectModal(true);
+    setWhichModalIsOpen({ selected: 6 });
   };
 
   const handlePrefetchHistory = () => {
@@ -270,9 +276,24 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const confirmApprove = () => {
-    // TODO: Implement approval logic
-    // Note: Modal handles its own closing via onOpenChange
+  const confirmApprove = async () => {
+    setIsActionLoading(true);
+    const modelData: ICreateApprovalRequest = {
+      typeActionCode: "PURCHASE_ORDER",
+      approvalName: `Aprobación para orden de compra ${data.purchase_order_number}`,
+      approvalLink: `/purchase-orders/${orderId}`,
+      referenceId: orderId!
+    };
+
+    try {
+      await createApproval(modelData);
+      message.success("Orden de compra enviada a aprobación");
+      setWhichModalIsOpen({ selected: 0 });
+      mutate();
+    } catch (error) {
+      message.error("Error al aprobar la orden de compra");
+    }
+    setIsActionLoading(false);
   };
 
   const confirmReject = (_reason: string, _observation: string) => {
@@ -296,24 +317,45 @@ export function DetailPurchaseOrder() {
     }
   };
 
+  const handleSendToBilling = async () => {
+    setWhichModalIsOpen({ selected: 7 });
+  };
+
+  const sendOrderToBilling = async (orderId?: string): Promise<any> => {
+    if (!orderId) {
+      message.error("ID de orden de compra no válido");
+      return;
+    }
+    setIsActionLoading(true);
+    try {
+      await sendToBilling(orderId!);
+      message.success("Orden de compra enviada a facturación correctamente");
+      closeModals();
+      mutate();
+    } catch (error) {
+      message.error("Error al enviar la orden de compra a facturación");
+    }
+    setIsActionLoading(false);
+  };
+
   const actionItems: DropdownItem[] = [
     {
       key: "approval",
       label: "Enviar a aprobación",
       icon: <Send className="h-4 w-4" />,
-      onClick: () => setShowApprovalModal(true)
+      onClick: () => setWhichModalIsOpen({ selected: 2 })
     },
     {
       key: "invoice",
       label: "Facturar",
       icon: <Receipt className="h-4 w-4" />,
-      onClick: () => setShowInvoiceModal(true)
+      onClick: () => setWhichModalIsOpen({ selected: 3 })
     },
     {
       key: "dispatch",
       label: "Confirmar despacho",
       icon: <PackageCheck className="h-4 w-4" />,
-      onClick: () => setShowDispatchModal(true)
+      onClick: () => setWhichModalIsOpen({ selected: 4 })
     },
     {
       key: "divider-1",
@@ -372,6 +414,16 @@ export function DetailPurchaseOrder() {
               </Button>
             </div>
             <div className="flex items-center gap-2">
+              {data.status_name === "En aprobaciones" && (
+                <Button
+                  variant="outline"
+                  onClick={handleSendToBilling}
+                  className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
+                >
+                  <Invoice size={16} />
+                  <span className="text-sm font-medium text-black">Enviar a facturación</span>
+                </Button>
+              )}
               {data.status_name === "En aprobaciones" && (
                 <div className="flex items-center gap-2 mr-2">
                   <Button
@@ -437,7 +489,7 @@ export function DetailPurchaseOrder() {
                     {data.novelties.map((novelty) => (
                       <div key={novelty.id} className="flex items-start gap-2 text-sm">
                         <span className="text-orange-500 mt-0.5">•</span>
-                        <p className="text-gray-700">
+                        <p className="text-gray-700 text-xs">
                           <strong>{novelty.novelty_type_name}:</strong> {novelty.description}
                         </p>
                       </div>
@@ -460,7 +512,7 @@ export function DetailPurchaseOrder() {
           <PurchaseOrderProcess
             currentStage={currentStage}
             orderStages={processedStages}
-            onShowHistory={() => setShowTimelineHistory(true)}
+            onShowHistory={() => setWhichModalIsOpen({ selected: 1 })}
             onPrefetchHistory={handlePrefetchHistory}
           />
 
@@ -511,43 +563,53 @@ export function DetailPurchaseOrder() {
       )}
 
       <ApproveOrderModal
-        open={showApproveModal}
-        onOpenChange={setShowApproveModal}
+        open={whichModalIsOpen.selected === 5}
+        onOpenChange={closeModals}
         onConfirm={confirmApprove}
+        loading={isActionLoading}
       />
 
       <RejectOrderModal
-        open={showRejectModal}
-        onOpenChange={setShowRejectModal}
+        open={whichModalIsOpen.selected === 6}
+        onOpenChange={closeModals}
         onConfirm={confirmReject}
       />
 
       <SendToApprovalModal
-        open={showApprovalModal}
-        onOpenChange={setShowApprovalModal}
+        open={whichModalIsOpen.selected === 2}
+        onOpenChange={closeModals}
         purchaseOrderId={orderId}
         mutateOrderDetail={mutate}
       />
 
       <InvoiceModal
-        open={showInvoiceModal}
-        onOpenChange={setShowInvoiceModal}
+        open={whichModalIsOpen.selected === 3}
+        onOpenChange={closeModals}
         purchaseOrderId={orderId!}
         onSuccess={() => mutate()}
       />
 
       <DispatchModal
-        open={showDispatchModal}
-        onOpenChange={setShowDispatchModal}
+        open={whichModalIsOpen.selected === 4}
+        onOpenChange={closeModals}
         orderNumber={data.purchase_order_number}
         purchaseOrderId={orderId}
         mutateOrderDetail={mutate}
       />
 
       <TimelineHistoryModal
-        isOpen={showTimelineHistory}
-        onClose={() => setShowTimelineHistory(false)}
+        isOpen={whichModalIsOpen.selected === 1}
+        onClose={closeModals}
         purchaseOrderId={orderId}
+      />
+
+      <ModalConfirmAction
+        isOpen={whichModalIsOpen.selected === 7}
+        onClose={closeModals}
+        onOk={() => sendOrderToBilling(orderId)}
+        title="¿Está seguro que desea enviar esta orden a facturación?"
+        okText="Enviar"
+        okLoading={isActionLoading}
       />
     </div>
   );

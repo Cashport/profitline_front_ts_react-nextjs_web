@@ -32,16 +32,10 @@ export const productFormSchema = yup.object({
     .required("Cantidad requerida")
     .min(1, "La cantidad mínima es 1")
     .integer("La cantidad debe ser un número entero"),
-  unit_price: yup
-    .number()
-    .required("Precio unitario requerido")
-    .min(0, "El precio unitario no puede ser negativo"),
-  tax_amount: yup
-    .number()
-    .required("Monto de IVA requerido")
-    .min(0, "El monto de IVA no puede ser negativo"),
-  subtotal: yup.number().required(),
-  total_price: yup.number().required(),
+  unit_price: yup.number().optional(),
+  tax_amount: yup.number().optional(),
+  subtotal: yup.number().optional(),
+  total_price: yup.number().optional(),
   product_id: yup.number().optional()
 }) as yup.ObjectSchema<ProductFormData>;
 

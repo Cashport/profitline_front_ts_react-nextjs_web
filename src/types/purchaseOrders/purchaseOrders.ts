@@ -13,6 +13,7 @@ export interface IPurchaseOrder {
   noveltyTypes: string;
   invoiceCount: number;
   invoiceIds: string[];
+  warehouseId: number | null;
 }
 
 export interface IPurchaseOrderStatus {
@@ -84,6 +85,12 @@ export interface IPurchaseOrderDetail {
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
   novelties: IPurchaseOrderNovelty[];
+  invoices: IPurchaseOrderInvoice[];
+}
+
+export interface IPurchaseOrderInvoice {
+  invoice_id: string;
+  invoice_file_url: string;
 }
 
 export interface IPurchaseOrderDeliveryAddress {
@@ -130,7 +137,6 @@ export interface IEditPurchaseOrderProduct {
   marketplace_order_product_id: number;
   quantity?: number;
   price?: number;
-  taxes?: number;
   product_id?: number;
 }
 
@@ -222,4 +228,12 @@ export interface IApprover {
 export interface IApproversResponse {
   templateId: number;
   approvers: IApprover[];
+}
+
+export interface IUploadPurchaseOrderResponse {
+  marketplace_order_id: string;
+  purchase_order_detail_id: string;
+  status: string;
+  document_url: string;
+  products_count: number;
 }

@@ -73,18 +73,19 @@ export default function ApprovalsTable({
       key: "referenceId",
       render: (referenceId, record) => (
         <Text className="idText" onClick={() => onSelectApproval(record)}>
-          {referenceId}
+          {record.projectIncrement}
         </Text>
       ),
+      width: 80,
       sorter: (a, b) => a.referenceId.localeCompare(b.referenceId),
       showSorterTooltip: false
     },
     {
       title: "Tipo de Aprobación",
-      dataIndex: "typeActionCode",
-      key: "typeActionCode",
-      render: (typeActionCode: string) => <Text>{typeActionCode}</Text>,
-      sorter: (a, b) => a.typeActionCode.localeCompare(b.typeActionCode),
+      dataIndex: "approvalName",
+      key: "approvalName",
+      render: (approvalName: string) => <Text>{approvalName}</Text>,
+      sorter: (a, b) => a.approvalName.localeCompare(b.approvalName),
       showSorterTooltip: false
     },
     {

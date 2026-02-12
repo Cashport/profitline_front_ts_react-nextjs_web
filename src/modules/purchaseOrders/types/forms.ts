@@ -1,7 +1,8 @@
 import {
   IPurchaseOrderDetail,
   IPurchaseOrderProduct,
-  IEditPurchaseOrderProduct
+  IEditPurchaseOrderProduct,
+  IPurchaseOrderInvoice
 } from "@/types/purchaseOrders/purchaseOrders";
 
 /**
@@ -16,6 +17,7 @@ export interface PurchaseOrderInfoFormData {
   delivery_address?: string;
   delivery_address_id?: number;
   observations?: string;
+  invoices?: IPurchaseOrderInvoice[];
 }
 
 /**
@@ -37,8 +39,8 @@ export interface ProductFormData {
   product_description: string; // Read-only display
   po_product_description: string; // Read-only display
   quantity: number; // Editable
-  unit_price: number; // Editable
-  tax_amount: number; // Editable
+  unit_price: number; // Read-only
+  tax_amount: number; // Read-only
   subtotal: number; // Calculated: quantity * unit_price
   total_price: number; // Calculated: subtotal + tax_amount
   product_id?: number; // Optional internal product ID
@@ -63,7 +65,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   delivery_date: data.delivery_date || "",
   delivery_address: data.delivery_address?.address || "",
   delivery_address_id: data.delivery_address?.id,
-  observations: data.observations || ""
+  observations: data.observations || "",
+  invoices: data.invoices || []
 });
 
 /**
@@ -114,8 +117,6 @@ export const mapFormProductsToApi = (
   products: formData.products.map((p) => ({
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
-    price: p.unit_price,
-    taxes: p.tax_amount,
     product_id: p.product_id
   }))
 });

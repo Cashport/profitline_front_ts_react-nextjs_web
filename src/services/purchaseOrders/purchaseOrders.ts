@@ -8,7 +8,8 @@ import {
   IHistoryTimelineEvent,
   IPurchaseOrderActionPayload,
   IApprover,
-  IApproversResponse
+  IApproversResponse,
+  IUploadPurchaseOrderResponse
 } from "@/types/purchaseOrders/purchaseOrders";
 import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
@@ -68,14 +69,18 @@ export const editPurchaseOrderProducts = async (
   }
 };
 
-export const uploadPurchaseOrder = async (file: File): Promise<any> => {
+export const uploadPurchaseOrder = async (file: File): Promise<IUploadPurchaseOrderResponse> => {
   try {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("interno", "true");
 
-    const response: any = await API.post(`${config.API_PURCHASE_ORDERS_AI}`, formData);
-    return response;
+    const response: GenericResponse<IUploadPurchaseOrderResponse> = await API.post(
+      `${config.API_PURCHASE_ORDERS_AI}`,
+      formData
+    );
+    console.log("File upload response:", response);
+    return response.data;
   } catch (error) {
     console.error("File upload error:", error);
     throw error;
@@ -154,6 +159,18 @@ export const purchaseOrderActions = async (
     return response.data;
   } catch (error) {
     console.error("Error executing purchase order action:", error);
+    throw error;
+  }
+};
+
+export const sendToBilling = async (purchase_order_id: string): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${purchase_order_id}/send-to-billing`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending purchase order to billing:", error);
     throw error;
   }
 };

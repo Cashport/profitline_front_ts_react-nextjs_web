@@ -26,6 +26,12 @@ import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IApprovalItem, ApprovalDecision, IApprovalsResponse } from "@/types/approvals/IApprovals";
+import {
+  APPROVAL_STEP_STATUS_COLORS,
+  APPROVAL_TYPE_LABELS,
+  ApprovalStepStatus,
+  ApprovalType
+} from "@/constants/approvalTypes";
 
 interface ApprovalDetailModalProps {
   approval?: IApprovalItem;
@@ -95,6 +101,18 @@ export default function ApprovalDetailModal({
     }
   };
 
+  const getApprovalTypeLabel = (typeCode: ApprovalType) => {
+    return APPROVAL_TYPE_LABELS[typeCode] || typeCode;
+  };
+
+  const getStatusClassName = (approval: IApprovalItem) => {
+    const baseClasses = "flex-shrink-0 px-2 py-0.5 rounded-lg text-xs font-medium";
+    if (approval.status) {
+      return `${baseClasses} border ${approval.status.color} bg-${approval.status.backgroundColor}`;
+    }
+    return baseClasses;
+  };
+
   return (
     <Dialog open={!!approval} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="!max-w-[1000px] !w-[95vw] md:!w-[90vw] max-h-[90vh] overflow-hidden p-0">
@@ -103,17 +121,11 @@ export default function ApprovalDetailModal({
             {/* Left side: ID + Status */}
             <div className="flex items-center gap-2 md:gap-3">
               <DialogTitle className="text-lg md:text-xl font-bold">
-                {approvalDetail?.referenceId}
+                #{approvalDetail?.projectIncrement}
               </DialogTitle>
               <Badge
                 variant="outline"
-                className={`flex-shrink-0 ${
-                  status === "aprobado"
-                    ? "border-green-300 bg-green-50 text-green-700"
-                    : status === "rechazado"
-                      ? "border-red-300 bg-red-50 text-red-700"
-                      : "border-amber-300 bg-amber-50 text-amber-700"
-                }`}
+                className={getStatusClassName(approval)}
                 style={
                   approval?.status.color
                     ? {
@@ -230,7 +242,7 @@ export default function ApprovalDetailModal({
               <div className="flex flex-col md:flex-row items-start justify-between gap-3 md:gap-4">
                 <div className="flex-1 w-full">
                   <h3 className="text-base md:text-lg font-semibold">
-                    {approvalDetail?.typeActionCode}
+                    {getApprovalTypeLabel(approvalDetail?.typeActionCode as ApprovalType)}
                   </h3>
                   <div className="mt-3 space-y-2 text-sm">
                     <p>{approvalDetail?.description}</p>

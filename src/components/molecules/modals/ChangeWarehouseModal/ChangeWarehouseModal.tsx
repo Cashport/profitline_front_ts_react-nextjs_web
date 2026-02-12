@@ -16,7 +16,7 @@ interface Props {
   selectedOrder: number;
   currentWarehouseId: number;
   onClose: () => void;
-  setFetchMutate: Dispatch<SetStateAction<boolean>>;
+  setFetchMutate: () => void;
 }
 export interface InventoriesByWarehouse {
   id: number;
@@ -74,12 +74,19 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     const fetchWarehouseStock = async () => {
       setLoading(true);
       if (viewWarehouseDetails?.id) {
-        const response = await getWarehouseProducts(
-          projectId,
-          viewWarehouseDetails?.id,
-          selectedOrder
-        );
-        setWarehouseProductsStock(response);
+        try {
+          const response = await getWarehouseProducts(
+            projectId,
+            viewWarehouseDetails?.id,
+            selectedOrder
+          );
+          setWarehouseProductsStock(response);
+        } catch (error) {
+          message.error(
+            error instanceof Error ? error.message : "Error fetching warehouse stock details",
+            3
+          );
+        }
       }
       setLoading(false);
     };
@@ -160,14 +167,11 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     try {
       const orderIds = [selectedOrder];
       await updateWarehouse(orderIds, warehouseSelected as number);
-      message.success("Bodega actualizada", 2, onClose);
-      setFetchMutate((prev) => !prev);
+      onClose();
+      message.success("Bodega actualizada", 2);
+      setFetchMutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al actualizar la bodega",
-        3,
-        onClose
-      );
+      message.error(error instanceof Error ? error.message : "Error al actualizar la bodega", 3);
     } finally {
       setLoadingSubmit(false);
     }

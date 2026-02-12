@@ -21,7 +21,9 @@ export const useApprovals = ({
   search
 }: UseApprovalsParams = {}) => {
   const queryParams: string[] = [];
-  queryParams.push("only_actionable=true");
+  if (!typeActionCode?.length && !status?.length) {
+    queryParams.push("only_actionable=true");
+  }
   queryParams.push(`page=${page}`);
   queryParams.push(`limit=${limit}`);
 

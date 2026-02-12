@@ -8,7 +8,8 @@ const theme: ThemeConfig = {
     colorTextPlaceholder: "#000000",
     colorSplit: "#FFFFFF",
     fontFamily: "inherit",
-    green: "#CBE71E"
+    green: "#CBE71E",
+    colorBgElevated: "#FFFFFF"
   },
   components: {
     Message: {
@@ -43,7 +44,10 @@ const theme: ThemeConfig = {
     },
     DatePicker: {
       colorBgElevated: "#FFFFFF",
-      controlHeight: 47
+      controlHeight: 47,
+      controlItemBgActive: "#CBE71E",
+      colorPrimary: "#CBE71E",
+      colorTextLightSolid: "#000000"
     },
     Notification: {
       colorBgElevated: "#141414",
