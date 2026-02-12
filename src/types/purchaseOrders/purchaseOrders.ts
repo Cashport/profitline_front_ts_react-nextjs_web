@@ -84,6 +84,12 @@ export interface IPurchaseOrderDetail {
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
   novelties: IPurchaseOrderNovelty[];
+  invoices: IPurchaseOrderInvoice[];
+}
+
+export interface IPurchaseOrderInvoice {
+  invoice_id: string;
+  invoice_file_url: string;
 }
 
 export interface IPurchaseOrderDeliveryAddress {

@@ -174,6 +174,27 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                 )}
               />
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                Facturas
+              </label>
+
+              <p className="text-sm font-semibold text-cashport-black mt-1">
+                {initialData.invoices && initialData.invoices.length > 0
+                  ? initialData.invoices.map((inv) => (
+                      <a
+                        href={inv.invoice_file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={inv.invoice_id}
+                        className="text-blue-600 underline"
+                      >
+                        {inv.invoice_id}
+                      </a>
+                    ))
+                  : "-"}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -230,7 +251,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                                 selectField.onChange(selectedId);
 
                                 // Update the display address field for consistency
-                                const selectedAddress = addresses.find(a => a.id === selectedId);
+                                const selectedAddress = addresses.find((a) => a.id === selectedId);
                                 if (selectedAddress) {
                                   field.onChange(selectedAddress.address);
                                 }
@@ -243,18 +264,15 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                                     addressesLoading
                                       ? "Cargando direcciones..."
                                       : addresses.length === 0
-                                      ? "No hay direcciones disponibles"
-                                      : "Seleccionar dirección"
+                                        ? "No hay direcciones disponibles"
+                                        : "Seleccionar dirección"
                                   }
                                 />
                               </SelectTrigger>
                               <SelectContent>
                                 {addresses.length > 0 ? (
                                   addresses.map((address) => (
-                                    <SelectItem
-                                      key={address.id}
-                                      value={address.id.toString()}
-                                    >
+                                    <SelectItem key={address.id} value={address.id.toString()}>
                                       {address.address}
                                     </SelectItem>
                                   ))
@@ -268,9 +286,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                           )}
                         />
                         {addressesError && (
-                          <span className="text-xs text-red-500 mt-1">
-                            {addressesError}
-                          </span>
+                          <span className="text-xs text-red-500 mt-1">{addressesError}</span>
                         )}
                       </>
                     ) : (

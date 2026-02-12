@@ -1,7 +1,8 @@
 import {
   IPurchaseOrderDetail,
   IPurchaseOrderProduct,
-  IEditPurchaseOrderProduct
+  IEditPurchaseOrderProduct,
+  IPurchaseOrderInvoice
 } from "@/types/purchaseOrders/purchaseOrders";
 
 /**
@@ -16,6 +17,7 @@ export interface PurchaseOrderInfoFormData {
   delivery_address?: string;
   delivery_address_id?: number;
   observations?: string;
+  invoices?: IPurchaseOrderInvoice[];
 }
 
 /**
@@ -63,7 +65,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   delivery_date: data.delivery_date || "",
   delivery_address: data.delivery_address?.address || "",
   delivery_address_id: data.delivery_address?.id,
-  observations: data.observations || ""
+  observations: data.observations || "",
+  invoices: data.invoices || []
 });
 
 /**
