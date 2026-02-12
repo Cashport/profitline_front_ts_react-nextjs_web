@@ -489,7 +489,7 @@ export function DetailPurchaseOrder() {
                     {data.novelties.map((novelty) => (
                       <div key={novelty.id} className="flex items-start gap-2 text-sm">
                         <span className="text-orange-500 mt-0.5">•</span>
-                        <p className="text-gray-700">
+                        <p className="text-gray-700 text-xs">
                           <strong>{novelty.novelty_type_name}:</strong> {novelty.description}
                         </p>
                       </div>

@@ -223,3 +223,11 @@ export interface IApproversResponse {
   templateId: number;
   approvers: IApprover[];
 }
+
+export interface IUploadPurchaseOrderResponse {
+  marketplace_order_id: string;
+  purchase_order_detail_id: string;
+  status: string;
+  document_url: string;
+  products_count: number;
+}
