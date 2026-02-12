@@ -178,6 +178,27 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                 )}
               />
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                Facturas
+              </label>
+
+              <p className="text-sm font-semibold text-cashport-black mt-1">
+                {initialData.invoices && initialData.invoices.length > 0
+                  ? initialData.invoices.map((inv) => (
+                      <a
+                        href={inv.invoice_file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={inv.invoice_id}
+                        className="text-blue-600 underline"
+                      >
+                        {inv.invoice_id}
+                      </a>
+                    ))
+                  : "-"}
+              </p>
+            </div>
           </div>
         </div>
 
