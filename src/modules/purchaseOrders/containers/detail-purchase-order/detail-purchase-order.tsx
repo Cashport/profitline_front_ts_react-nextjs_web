@@ -117,6 +117,14 @@ const SendToBackorderModal = dynamic(
     ),
   { ssr: false }
 );
+
+const ChangeWarehouseModal = dynamic(
+  () =>
+    import("@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal").then(
+      (mod) => ({ default: mod.ChangeWarehouseModal })
+    ),
+  { ssr: false }
+);
 import { createApproval } from "@/services/approvals/approvals";
 import { ICreateApprovalRequest } from "@/types/approvals/IApprovals";
 
@@ -538,6 +546,7 @@ export function DetailPurchaseOrder() {
             currentStage={currentStage}
             orderStages={processedStages}
             onShowHistory={() => setWhichModalIsOpen({ selected: 1 })}
+            onShowStock={() => setWhichModalIsOpen({ selected: 9 })}
             onPrefetchHistory={handlePrefetchHistory}
           />
 
@@ -643,6 +652,14 @@ export function DetailPurchaseOrder() {
         warehouseId={data.warehouseId!}
         orderId={orderId!}
         mutate={mutate}
+      />
+
+      <ChangeWarehouseModal
+        isOpen={whichModalIsOpen.selected === 9}
+        onClose={closeModals}
+        selectedOrder={data.id}
+        currentWarehouseId={data.warehouseId!}
+        setFetchMutate={() => mutate()}
       />
     </div>
   );

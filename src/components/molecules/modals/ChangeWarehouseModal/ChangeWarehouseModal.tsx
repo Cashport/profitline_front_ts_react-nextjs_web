@@ -55,7 +55,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       setLoading(false);
     };
     isOpen && fetchWarehouses();
-  }, [selectedOrder]);
+  }, [selectedOrder, isOpen]);
 
   useEffect(() => {
     const fetchWarehouseStock = async () => {
