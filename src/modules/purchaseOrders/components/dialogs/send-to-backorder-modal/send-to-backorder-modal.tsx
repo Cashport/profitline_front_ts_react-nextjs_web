@@ -3,8 +3,10 @@ import { message, Modal, Spin } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { getWarehouseProducts } from "@/services/commerce/commerce";
-import { WarehouseProductsStock } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 import { useAppStore } from "@/lib/store/store";
+import { sendToBackorder } from "@/services/purchaseOrders/purchaseOrders";
+import { IWarehouseProductsStock } from "@/types/commerce/ICommerce";
+import { Description } from "@radix-ui/react-dialog";
 
 type IPhase = "loading" | "noData" | "allStock" | "noStock" | "partial" | "processAvailable";
 
@@ -23,7 +25,7 @@ export function SendToBackorderModal({
 }: SendToBackorderModalProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [phase, setPhase] = useState<IPhase>("loading");
-  const [products, setProducts] = useState<WarehouseProductsStock[]>([]);
+  const [products, setProducts] = useState<IWarehouseProductsStock[]>([]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,8 +68,36 @@ export function SendToBackorderModal({
     fetchProducts();
   }, [isOpen, projectId, warehouseId, orderId]);
 
-  const handleSendAllToBackOrder = () => {
-    console.log("Products:", products);
+  const handleSendAllToBackOrder = async () => {
+    try {
+      const modelData = products.map((p) => ({
+        marketplace_order_product_id: p.product_id,
+        description: p.description,
+        quantity: p.quantity
+      }));
+
+      await sendToBackorder(orderId, modelData);
+      message.success("Orden de compra enviada a Back Order exitosamente");
+      onClose();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al enviar la orden de compra a Back Order"
+      );
+    }
+  };
+
+  const handleDeleteUnavailableProducts = () => {
+    console.log(
+      "Eliminar productos no disponibles:",
+      products.filter((p) => p.inWarehouse < p.requested)
+    );
+  };
+
+  const handleSaveInNewPurchaseOrder = () => {
+    console.log(
+      "Guardar en nueva OC los productos no disponibles:",
+      products.filter((p) => p.inWarehouse < p.requested)
+    );
   };
 
   const renderContent = () => {
@@ -165,8 +195,8 @@ export function SendToBackorderModal({
           <FooterButtons
             titleCancel="Eliminar no disponibles"
             titleConfirm="Guardar en nueva OC"
-            onClose={handleSendAllToBackOrder}
-            handleOk={handleSendAllToBackOrder}
+            onClose={handleDeleteUnavailableProducts}
+            handleOk={handleSaveInNewPurchaseOrder}
           />
         </>
       );
