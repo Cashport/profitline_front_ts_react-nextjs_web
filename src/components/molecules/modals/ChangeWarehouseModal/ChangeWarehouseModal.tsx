@@ -168,6 +168,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     const viewMap = {
       "change-warehouse": (
         <Table
+          key="change-warehouse"
           dataSource={inventoriesByWarehouse}
           columns={columns}
           pagination={false}
@@ -176,6 +177,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       ),
       "warehouse-detail": (
         <Table
+          key="warehouse-detail"
           dataSource={warehouseProductsStock}
           columns={columnsDetails}
           pagination={false}
