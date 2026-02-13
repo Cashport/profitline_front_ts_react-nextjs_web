@@ -345,3 +345,20 @@ export interface IGeneratePaymentLinkResponse {
   expiration: string;
   link: string;
 }
+
+export interface IWarehouseProductsStock {
+  sku: string;
+  product_id: number;
+  quantity: number;
+  description: string;
+  requested: number;
+  inWarehouse: number;
+}
+
+export interface IInventoriesByWarehouse {
+  id: number;
+  warehouse: string;
+  warehouse_description?: string;
+  availability: boolean;
+  availability_msg: string;
+}

@@ -56,13 +56,11 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
 
         message.success("Orden cargada con éxito");
         router.push(`/purchase-orders/${response.marketplace_order_id}`);
-      } catch (error: any) {
+      } catch (error) {
         setShowAIProcessing(false);
 
         const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Error al cargar la orden de compra";
+          error instanceof Error ? error.message : "Error al cargar la orden de compra";
 
         setError(errorMessage);
         message.error(errorMessage);
@@ -131,8 +129,10 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
       } else {
         setError("La función de escaneo no está disponible en este navegador");
       }
-    } catch (err) {
-      setError("Error al acceder a la cámara para escanear");
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error al acceder a la cámara para escanear"
+      );
     } finally {
       setIsScanning(false);
     }

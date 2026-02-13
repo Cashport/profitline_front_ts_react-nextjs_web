@@ -174,3 +174,31 @@ export const sendToBilling = async (purchase_order_id: string): Promise<any> => 
     throw error;
   }
 };
+
+export const sendToBackorder = async (purchase_order_id: string): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${purchase_order_id}/send-to-backorder`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending purchase order to backorder:", error);
+    throw error;
+  }
+};
+
+export const sendToBackorderStock = async (
+  purchase_order_id: string,
+  saveRest: boolean
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${purchase_order_id}/process-partial`,
+      { saveRest }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending purchase order to backorder stock:", error);
+    throw error;
+  }
+};

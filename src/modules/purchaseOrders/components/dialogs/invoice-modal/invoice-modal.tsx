@@ -103,9 +103,9 @@ export function InvoiceModal({
       message.success("Facturas agregadas correctamente");
       onSuccess?.();
       onOpenChange(false);
-    } catch (err: any) {
+    } catch (error) {
       const errorMessage =
-        err?.response?.data?.message || err?.message || "Error al agregar las facturas";
+        error instanceof Error ? error.message : "Error al agregar las facturas";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {

@@ -19,7 +19,8 @@ import {
   Send,
   FileOutput,
   PackageCheck,
-  AlertTriangle
+  AlertTriangle,
+  Boxes
 } from "lucide-react";
 import { Invoice } from "@phosphor-icons/react";
 
@@ -106,6 +107,22 @@ const DispatchModal = dynamic(
     import("../../components/dialogs/dispatch-modal/dispatch-modal").then((mod) => ({
       default: mod.DispatchModal
     })),
+  { ssr: false }
+);
+
+const SendToBackorderModal = dynamic(
+  () =>
+    import("../../components/dialogs/send-to-backorder-modal/send-to-backorder-modal").then(
+      (mod) => ({ default: mod.SendToBackorderModal })
+    ),
+  { ssr: false }
+);
+
+const ChangeWarehouseModal = dynamic(
+  () =>
+    import("@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal").then(
+      (mod) => ({ default: mod.ChangeWarehouseModal })
+    ),
   { ssr: false }
 );
 import { createApproval } from "@/services/approvals/approvals";
@@ -244,8 +261,9 @@ export function DetailPurchaseOrder() {
       // Show success message
       message.success("Información actualizada correctamente");
     } catch (error) {
-      console.error("Error saving:", error);
-      message.error("Error al actualizar la información");
+      message.error(
+        error instanceof Error ? error.message : "Error al actualizar la información"
+      );
     }
   };
 
@@ -257,8 +275,9 @@ export function DetailPurchaseOrder() {
       mutate();
       message.success("Productos actualizados correctamente");
     } catch (error) {
-      console.error("Error saving products:", error);
-      message.error("Error al actualizar los productos");
+      message.error(
+        error instanceof Error ? error.message : "Error al actualizar los productos"
+      );
     }
   };
 
@@ -291,7 +310,9 @@ export function DetailPurchaseOrder() {
       setWhichModalIsOpen({ selected: 0 });
       mutate();
     } catch (error) {
-      message.error("Error al aprobar la orden de compra");
+      message.error(
+        error instanceof Error ? error.message : "Error al aprobar la orden de compra"
+      );
     }
     setIsActionLoading(false);
   };
@@ -312,8 +333,10 @@ export function DetailPurchaseOrder() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error: any) {
-      message.error(error ? error : "Error al descargar el plano de la orden de compra");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar el plano de la orden de compra"
+      );
     }
   };
 
@@ -333,7 +356,11 @@ export function DetailPurchaseOrder() {
       closeModals();
       mutate();
     } catch (error) {
-      message.error("Error al enviar la orden de compra a facturación");
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al enviar la orden de compra a facturación"
+      );
     }
     setIsActionLoading(false);
   };
@@ -356,6 +383,12 @@ export function DetailPurchaseOrder() {
       label: "Confirmar despacho",
       icon: <PackageCheck className="h-4 w-4" />,
       onClick: () => setWhichModalIsOpen({ selected: 4 })
+    },
+    {
+      key: "back-order",
+      label: "Marcar como Backorder",
+      icon: <Boxes className="h-4 w-4" />,
+      onClick: () => setWhichModalIsOpen({ selected: 8 })
     },
     {
       key: "divider-1",
@@ -513,6 +546,7 @@ export function DetailPurchaseOrder() {
             currentStage={currentStage}
             orderStages={processedStages}
             onShowHistory={() => setWhichModalIsOpen({ selected: 1 })}
+            onShowStock={() => setWhichModalIsOpen({ selected: 9 })}
             onPrefetchHistory={handlePrefetchHistory}
           />
 
@@ -610,6 +644,22 @@ export function DetailPurchaseOrder() {
         title="¿Está seguro que desea enviar esta orden a facturación?"
         okText="Enviar"
         okLoading={isActionLoading}
+      />
+
+      <SendToBackorderModal
+        isOpen={whichModalIsOpen.selected === 8}
+        onClose={closeModals}
+        warehouseId={data.warehouseId!}
+        orderId={orderId!}
+        mutate={mutate}
+      />
+
+      <ChangeWarehouseModal
+        isOpen={whichModalIsOpen.selected === 9}
+        onClose={closeModals}
+        selectedOrder={data.id}
+        currentWarehouseId={data.warehouseId!}
+        setFetchMutate={() => mutate()}
       />
     </div>
   );

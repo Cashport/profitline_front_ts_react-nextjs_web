@@ -1,5 +1,5 @@
 import React from "react";
-import { LucideIcon, History } from "lucide-react";
+import { LucideIcon, History, Edit } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import {
   Tooltip,
@@ -29,6 +29,7 @@ interface PurchaseOrderProcessProps {
   currentStage: number;
   orderStages: OrderStage[];
   onShowHistory: () => void;
+  onShowStock: () => void;
   onPrefetchHistory?: () => void;
 }
 
@@ -36,6 +37,7 @@ export function PurchaseOrderProcess({
   currentStage,
   orderStages,
   onShowHistory,
+  onShowStock,
   onPrefetchHistory
 }: PurchaseOrderProcessProps) {
   return (
@@ -43,16 +45,27 @@ export function PurchaseOrderProcess({
       <div className="mb-8 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-cashport-black">Proceso de la orden</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onShowHistory}
-            onMouseEnter={onPrefetchHistory}
-            className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
-          >
-            <History className="h-4 w-4 mr-2" />
-            Ver historial completo
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowStock}
+              className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Ver stock
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowHistory}
+              onMouseEnter={onPrefetchHistory}
+              className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-white"
+            >
+              <History className="h-4 w-4 mr-2" />
+              Ver historial completo
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between relative">
