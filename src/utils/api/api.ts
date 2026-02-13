@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { useNotificationStore } from "@/context/CountNotification";
+
 export async function getIdToken(forceRefresh?: boolean) {
   const user = auth.currentUser;
   if (user) {
@@ -28,22 +28,6 @@ const instance = axios.create({
   }
 });
 
-instance.interceptors.response.use(
-  async (response) => {
-    if (!response.config.url?.includes("/notification/count")) {
-      try {
-        await useNotificationStore.getState().updateNotificationCount();
-      } catch (error) {
-        console.error("Error updating notification count:", error);
-      }
-    }
-    return response;
-  },
-  (error) => {
-    console.error("Interceptor error:", error);
-    return Promise.reject(error);
-  }
-);
 
 interface IError {
   error: boolean;
