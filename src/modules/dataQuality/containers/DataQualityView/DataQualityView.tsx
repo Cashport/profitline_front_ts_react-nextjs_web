@@ -52,7 +52,7 @@ export default function DataQualityView() {
   if (error) {
     return (
       <div className="bg-[#F7F7F7]">
-        <div className="bg-white border border-red-200 rounded-lg p-6 text-center">
+        <div className="bg-white rounded-lg p-6 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button
             onClick={() => window.location.reload()}
@@ -69,7 +69,7 @@ export default function DataQualityView() {
     return (
       <div className="bg-[#F7F7F7]">
         <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
-        <div className="bg-white border border-[#DDDDDD] rounded-lg p-12 text-center">
+        <div className="bg-white rounded-lg p-12 text-center">
           <p className="text-gray-500 text-lg">No hay países configurados</p>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function DataQualityView() {
         {countries.map((country) => (
           <div
             key={country.id_country}
-            className="hover:shadow-md transition-shadow cursor-pointer bg-white border border-[#DDDDDD] rounded-lg p-6"
+            className="hover:shadow-md transition-shadow cursor-pointer bg-white rounded-lg p-6"
           >
             <div className="pb-3">
               <div className="flex items-center justify-between">
