@@ -1,7 +1,24 @@
 @import "@styles/variables.scss";
 
 .ModalConfirmAction {
-    .ant-modal-content,
+    .ant-modal-content {
+        background-color: $white !important;
+        text-align: center;
+        margin: 0px !important;
+
+        .ant-modal-close {
+            top: 10px;
+            right: 14px;
+            width: 20px;
+            height: 20px;
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+
     .ant-modal-header {
         background-color: $white !important;
         text-align: center;

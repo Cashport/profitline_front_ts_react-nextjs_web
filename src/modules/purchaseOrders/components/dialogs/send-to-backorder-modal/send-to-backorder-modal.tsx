@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { message, Modal, Spin } from "antd";
 
-import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { getWarehouseProducts } from "@/services/commerce/commerce";
-import { useAppStore } from "@/lib/store/store";
 import { sendToBackorder, sendToBackorderStock } from "@/services/purchaseOrders/purchaseOrders";
+
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { useAppStore } from "@/lib/store/store";
+
 import { IWarehouseProductsStock } from "@/types/commerce/ICommerce";
-import { Description } from "@radix-ui/react-dialog";
+
+import "./send-to-backorder-modal.scss";
 
 type IPhase = "loading" | "noData" | "allStock" | "noStock" | "partial" | "processAvailable";
 
@@ -210,7 +213,15 @@ export function SendToBackorderModal({
   };
 
   return (
-    <Modal open={isOpen} onCancel={onClose} footer={null} centered destroyOnClose width={600}>
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      centered
+      destroyOnClose
+      width={600}
+      className="sendToBackorderModal"
+    >
       {renderContent()}
     </Modal>
   );
