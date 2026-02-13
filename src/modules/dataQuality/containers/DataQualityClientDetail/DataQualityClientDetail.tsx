@@ -117,7 +117,7 @@ export default function DataQualityClientDetails() {
           </h1>
         </div>
 
-        <Card className="" style={{ backgroundColor: "#FFFFFF", borderColor: "#DDDDDD" }}>
+        <Card className="border-none">
           <CardContent>
             <div className="flex items-center justify-between mb-6 ">
               <div className="mb-6 flex items-center gap-4">

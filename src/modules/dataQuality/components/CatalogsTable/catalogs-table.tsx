@@ -86,7 +86,7 @@ export function CatalogsTable({
     <>
       {/* Filters Card */}
       <div className="mb-6">
-        <Card style={{ backgroundColor: "#FFFFFF", borderColor: "#DDDDDD" }}>
+        <Card className="border-none">
           <CardContent className="p-4">
             <div className="flex items-center space-x-4">
               {/* Search bar */}
@@ -120,7 +120,7 @@ export function CatalogsTable({
       </div>
 
       {/* Equivalencies Table */}
-      <Card style={{ backgroundColor: "#FFFFFF", borderColor: "#DDDDDD" }}>
+      <Card className="border-none">
         <CardHeader>
           <CardTitle className="text-lg" style={{ color: "#141414" }}>
             Equivalencias de Productos - {clientName}

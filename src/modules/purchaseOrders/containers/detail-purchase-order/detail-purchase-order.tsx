@@ -23,6 +23,7 @@ import {
   Boxes
 } from "lucide-react";
 import { Invoice } from "@phosphor-icons/react";
+import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
@@ -261,9 +262,7 @@ export function DetailPurchaseOrder() {
       // Show success message
       message.success("Información actualizada correctamente");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al actualizar la información"
-      );
+      message.error(error instanceof Error ? error.message : "Error al actualizar la información");
     }
   };
 
@@ -275,9 +274,7 @@ export function DetailPurchaseOrder() {
       mutate();
       message.success("Productos actualizados correctamente");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al actualizar los productos"
-      );
+      message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
     }
   };
 
@@ -310,9 +307,7 @@ export function DetailPurchaseOrder() {
       setWhichModalIsOpen({ selected: 0 });
       mutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al aprobar la orden de compra"
-      );
+      message.error(error instanceof Error ? error.message : "Error al aprobar la orden de compra");
     }
     setIsActionLoading(false);
   };
@@ -357,9 +352,7 @@ export function DetailPurchaseOrder() {
       mutate();
     } catch (error) {
       message.error(
-        error instanceof Error
-          ? error.message
-          : "Error al enviar la orden de compra a facturación"
+        error instanceof Error ? error.message : "Error al enviar la orden de compra a facturación"
       );
     }
     setIsActionLoading(false);
@@ -407,40 +400,37 @@ export function DetailPurchaseOrder() {
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
         <CardContent className="px-6 pb-6 pt-6">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
                 className="text-cashport-black hover:bg-gray-50"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 " />
                 Volver
               </Button>
-              <GeneralDropdown items={actionItems} align="start">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-cashport-gray-light text-cashport-black hover:bg-gray-50 bg-white"
-                >
-                  <MoreHorizontal className="h-4 w-4 mr-2" />
-                  Generar acción
-                </Button>
+              <GeneralDropdown items={actionItems} align="start" customDropdownClass="m-0">
+                <ButtonGenerateAction
+                  icon={<MoreHorizontal className="h-4 w-4" />}
+                  title="Generar acción"
+                  hideArrow
+                />
               </GeneralDropdown>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={handleEditToggle}
-                className="border-cashport-gray-light text-cashport-black hover:bg-gray-50 bg-white"
+                className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
               >
                 {isEditMode ? (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 " />
                     Guardar
                   </>
                 ) : (
                   <>
-                    <Edit className="h-4 w-4 mr-2" />
+                    <Edit className="h-4 w-4" />
                     Editar
                   </>
                 )}
