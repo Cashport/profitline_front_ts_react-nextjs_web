@@ -5,6 +5,7 @@ export interface IPurchaseOrder {
   customerName: string;
   deliveryAddress: string;
   deliveryDate: string;
+  orderDate: string;
   status: string;
   statusColor: string;
   totalProducts: number;

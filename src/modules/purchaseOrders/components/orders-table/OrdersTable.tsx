@@ -17,16 +17,17 @@ const { Text } = Typography;
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
 
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const [datePart, timePartRaw] = dateString.includes("T")
+    ? dateString.split("T")
+    : dateString.split(" ");
+
+  const [year, month, day] = datePart.split("-");
+
+  const timePart = timePartRaw ? timePartRaw.replace("Z", "").slice(0, 5) : "";
 
   return {
     date: `${day}/${month}/${year}`,
-    time: `${hours}:${minutes}`
+    time: timePart
   };
 };
 
@@ -81,7 +82,7 @@ export function OrdersTable({
       dataIndex: "orderNumber",
       key: "orderNumber",
       render: (orderNumber, record) => {
-        const formattedDate = formatDate(record.deliveryDate);
+        const formattedDate = formatDate(record.orderDate);
         return (
           <div className="flex flex-col">
             <Text className="text-cashport-black">{orderNumber || "-"}</Text>
@@ -127,7 +128,7 @@ export function OrdersTable({
           </div>
         );
       },
-      sorter: (a, b) => new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime(),
+      sorter: (a, b) => (a.deliveryDate || "").localeCompare(b.deliveryDate || ""),
       showSorterTooltip: false
     },
     {
