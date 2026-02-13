@@ -632,6 +632,7 @@ export function DetailPurchaseOrder() {
         onClose={closeModals}
         warehouseId={data.warehouseId!}
         orderId={orderId!}
+        mutate={mutate}
       />
     </div>
   );
