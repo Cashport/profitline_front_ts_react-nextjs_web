@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { Table, TableProps, Button, Typography, Flex } from "antd";
-import { Eye, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { Badge } from "@/modules/chat/ui/badge";
-import { WarningDiamond } from "@phosphor-icons/react";
+import { Eye, WarningDiamond } from "@phosphor-icons/react";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
+import "./OrdersTable.scss";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 const { Text } = Typography;
 
@@ -53,6 +55,7 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const height = useScreenHeight();
+  const width = useScreenWidth();
   const [selectedOrder, setSelectedOrder] = useState({
     id: 0,
     warehouse_id: 0
@@ -219,14 +222,11 @@ export function OrdersTable({
     },
     {
       key: "actions",
-      width: 60,
+      width: 90,
       align: "right",
       render: (_, record) => (
         <Flex gap={8}>
           <Button
-            type="text"
-            size="small"
-            className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
             onClick={() => {
               setSelectedOrder({
                 id: record.id,
@@ -234,17 +234,13 @@ export function OrdersTable({
               });
               setIsWarehouseModalOpen(true);
             }}
-            icon={<WarningDiamond className="h-4 w-4 text-gray-600" />}
+            className="buttonSeeProject"
+            icon={<WarningDiamond size={"1.3rem"} />}
           />
           <Button
-            type="text"
-            size="small"
-            className="h-8 w-8 rounded-md border-gray-300 hover:bg-gray-100 bg-transparent"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRowClick?.(record);
-            }}
-            icon={<Eye className="h-4 w-4 text-gray-600" />}
+            onClick={() => onRowClick?.(record)}
+            className="buttonSeeProject"
+            icon={<Eye size={"1.3rem"} />}
           />
         </Flex>
       )
@@ -254,7 +250,7 @@ export function OrdersTable({
   return (
     <>
       <Table
-        className="w-full"
+        className="w-full ordersTable"
         columns={columns}
         dataSource={data?.map((item) => ({ ...item, key: item.id }))}
         rowSelection={
@@ -276,7 +272,7 @@ export function OrdersTable({
           position: ["bottomRight"],
           showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
         }}
-        scroll={{ y: height - 345, x: 100 }}
+        scroll={{ y: width > 1280 ? height - 345 : height - 370, x: undefined }}
       />
       <ChangeWarehouseModal
         isOpen={isWarehouseModalOpen}
