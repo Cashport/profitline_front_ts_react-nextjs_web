@@ -9,6 +9,7 @@ import {
   updateWarehouse
 } from "@/services/commerce/commerce";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { IInventoriesByWarehouse, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
 const { Title, Text } = Typography;
 
 interface Props {
@@ -17,20 +18,6 @@ interface Props {
   currentWarehouseId: number;
   onClose: () => void;
   setFetchMutate: () => void;
-}
-export interface InventoriesByWarehouse {
-  id: number;
-  warehouse: string;
-  warehouse_description?: string;
-  availability: boolean;
-  availability_msg: string;
-}
-
-export interface WarehouseProductsStock {
-  sku: string;
-  quantity: number;
-  requested: number;
-  inWarehouse: number;
 }
 
 export const ChangeWarehouseModal: React.FC<Props> = ({
@@ -42,16 +29,16 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
 }) => {
   const [view, setView] = useState<"change-warehouse" | "warehouse-detail">("change-warehouse");
   const [warehouseSelected, setWarehouseSelected] = useState<number | null>(currentWarehouseId);
-  const [viewWarehouseDetails, setViewWarehouseDetails] = useState<InventoriesByWarehouse | null>(
+  const [viewWarehouseDetails, setViewWarehouseDetails] = useState<IInventoriesByWarehouse | null>(
     null
   );
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [inventoriesByWarehouse, setInventoriesByWarehouse] = useState<InventoriesByWarehouse[]>(
+  const [inventoriesByWarehouse, setInventoriesByWarehouse] = useState<IInventoriesByWarehouse[]>(
     []
   );
-  const [warehouseProductsStock, setWarehouseProductsStock] = useState<WarehouseProductsStock[]>(
+  const [warehouseProductsStock, setWarehouseProductsStock] = useState<IWarehouseProductsStock[]>(
     []
   );
   useEffect(() => {
@@ -93,7 +80,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     isOpen && fetchWarehouseStock();
   }, [viewWarehouseDetails?.id]);
 
-  const columns: ColumnsType<InventoriesByWarehouse> = [
+  const columns: ColumnsType<IInventoriesByWarehouse> = [
     {
       title: "Bodega",
       dataIndex: "warehouse",
@@ -141,7 +128,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       )
     }
   ];
-  const columnsDetails: ColumnsType<WarehouseProductsStock> = [
+  const columnsDetails: ColumnsType<IWarehouseProductsStock> = [
     {
       title: "Producto",
       dataIndex: "description",
@@ -156,7 +143,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       title: "Stock",
       dataIndex: "inWarehouse",
       key: "inWarehouse",
-      render: (inWarehouse: number, record: WarehouseProductsStock) => (
+      render: (inWarehouse: number, record: IWarehouseProductsStock) => (
         <Text {...(inWarehouse < record.requested && { type: "danger" })}>{inWarehouse}</Text>
       )
     }

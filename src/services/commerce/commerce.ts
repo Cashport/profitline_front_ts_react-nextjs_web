@@ -7,19 +7,17 @@ import {
   IDiscountPackageAvailable,
   IEcommerceClient,
   IGeneratePaymentLinkResponse,
+  IInventoriesByWarehouse,
   IMarketplaceOrdersFilters,
   IOrderConfirmedResponse,
   IOrderData,
   IPaymentLinkData,
   IProductData,
   ISalesDashboard,
-  ISingleOrder
+  ISingleOrder,
+  IWarehouseProductsStock
 } from "@/types/commerce/ICommerce";
 import { MessageType } from "@/context/MessageContext";
-import {
-  InventoriesByWarehouse,
-  WarehouseProductsStock
-} from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 
 export const getAllOrders = async (projectId: number) => {
   const response: GenericResponse<IOrderData[]> = await API.get(
@@ -284,7 +282,7 @@ export const getInventoriesWarehouse = async (projectId: number, orderIds: numbe
       projectId,
       orderIds
     };
-    const response: GenericResponse<InventoriesByWarehouse[]> = await API.post(
+    const response: GenericResponse<IInventoriesByWarehouse[]> = await API.post(
       `/warehouse/calculate-warehouses-availables`,
       form
     );
@@ -311,7 +309,7 @@ export const getWarehouseProducts = async (
       warehouseId,
       orderIds: [orderId]
     };
-    const response: GenericResponse<WarehouseProductsStock[]> = await API.post(
+    const response: GenericResponse<IWarehouseProductsStock[]> = await API.post(
       `/warehouse/get-warehouse-details-by-order`,
       form
     );
