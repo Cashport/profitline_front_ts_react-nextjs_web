@@ -253,8 +253,9 @@ export function DetailPurchaseOrder() {
       // Show success message
       message.success("Información actualizada correctamente");
     } catch (error) {
-      console.error("Error saving:", error);
-      message.error("Error al actualizar la información");
+      message.error(
+        error instanceof Error ? error.message : "Error al actualizar la información"
+      );
     }
   };
 
@@ -266,8 +267,9 @@ export function DetailPurchaseOrder() {
       mutate();
       message.success("Productos actualizados correctamente");
     } catch (error) {
-      console.error("Error saving products:", error);
-      message.error("Error al actualizar los productos");
+      message.error(
+        error instanceof Error ? error.message : "Error al actualizar los productos"
+      );
     }
   };
 
@@ -300,7 +302,9 @@ export function DetailPurchaseOrder() {
       setWhichModalIsOpen({ selected: 0 });
       mutate();
     } catch (error) {
-      message.error("Error al aprobar la orden de compra");
+      message.error(
+        error instanceof Error ? error.message : "Error al aprobar la orden de compra"
+      );
     }
     setIsActionLoading(false);
   };
@@ -321,8 +325,10 @@ export function DetailPurchaseOrder() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error: any) {
-      message.error(error ? error : "Error al descargar el plano de la orden de compra");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar el plano de la orden de compra"
+      );
     }
   };
 
@@ -342,7 +348,11 @@ export function DetailPurchaseOrder() {
       closeModals();
       mutate();
     } catch (error) {
-      message.error("Error al enviar la orden de compra a facturación");
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al enviar la orden de compra a facturación"
+      );
     }
     setIsActionLoading(false);
   };

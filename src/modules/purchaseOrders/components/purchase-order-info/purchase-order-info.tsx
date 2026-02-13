@@ -65,7 +65,6 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
           const res = await getAdresses(clientId);
           setAddresses(res.otherAddresses || []);
         } catch (error) {
-          console.error("Error fetching addresses:", error);
           setAddressesError("Error al cargar las direcciones");
         } finally {
           setAddressesLoading(false);

@@ -56,9 +56,9 @@ export function DispatchModal({
       message.success("Orden despachada correctamente");
       mutateOrderDetail();
       onOpenChange(false);
-    } catch (err: any) {
+    } catch (error) {
       const errorMessage =
-        err?.response?.data?.message || err?.message || "Error al despachar la orden";
+        error instanceof Error ? error.message : "Error al despachar la orden";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
