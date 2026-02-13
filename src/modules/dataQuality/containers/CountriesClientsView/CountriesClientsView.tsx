@@ -103,7 +103,7 @@ export default function CountriesClientsView() {
       </div>
 
       {/* Main Content */}
-      <Card className="bg-white border-[#DDDDDD] p-0">
+      <Card className="border-none p-0">
         <CardContent className="p-6">
           {/* Filter Bar */}
           <div className="flex items-center gap-4 mb-6">

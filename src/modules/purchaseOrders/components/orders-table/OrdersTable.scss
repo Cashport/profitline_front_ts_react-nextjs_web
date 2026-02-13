@@ -1,0 +1,19 @@
+@import "@styles/variables.scss";
+
+.ordersTable {
+    th {
+        font-size: 1rem;
+        line-height: 18px;
+    }
+}
+
+.buttonSeeProject {
+    background-color: $dark-gray !important;
+    width: 32px !important;
+    height: 32px !important;
+    aspect-ratio: 1/1 !important;
+
+    &:hover {
+        background-color: $white !important;
+    }
+}
