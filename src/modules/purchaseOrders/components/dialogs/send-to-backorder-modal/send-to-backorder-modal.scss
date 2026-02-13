@@ -1,0 +1,15 @@
+.sendToBackorderModal {
+    .ant-modal-content {
+        .ant-modal-close {
+            top: 10px;
+            right: 14px;
+            width: 20px;
+            height: 20px;
+
+            svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
+}

@@ -86,6 +86,7 @@ export interface IPurchaseOrderDetail {
   summary: IPurchaseOrderSummary;
   novelties: IPurchaseOrderNovelty[];
   invoices: IPurchaseOrderInvoice[];
+  warehouseId: number | null;
 }
 
 export interface IPurchaseOrderInvoice {

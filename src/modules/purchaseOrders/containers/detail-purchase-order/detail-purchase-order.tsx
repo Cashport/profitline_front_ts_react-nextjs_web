@@ -19,7 +19,8 @@ import {
   Send,
   FileOutput,
   PackageCheck,
-  AlertTriangle
+  AlertTriangle,
+  Boxes
 } from "lucide-react";
 import { Invoice } from "@phosphor-icons/react";
 
@@ -106,6 +107,14 @@ const DispatchModal = dynamic(
     import("../../components/dialogs/dispatch-modal/dispatch-modal").then((mod) => ({
       default: mod.DispatchModal
     })),
+  { ssr: false }
+);
+
+const SendToBackorderModal = dynamic(
+  () =>
+    import("../../components/dialogs/send-to-backorder-modal/send-to-backorder-modal").then(
+      (mod) => ({ default: mod.SendToBackorderModal })
+    ),
   { ssr: false }
 );
 import { createApproval } from "@/services/approvals/approvals";
@@ -356,6 +365,12 @@ export function DetailPurchaseOrder() {
       label: "Confirmar despacho",
       icon: <PackageCheck className="h-4 w-4" />,
       onClick: () => setWhichModalIsOpen({ selected: 4 })
+    },
+    {
+      key: "back-order",
+      label: "Marcar como Backorder",
+      icon: <Boxes className="h-4 w-4" />,
+      onClick: () => setWhichModalIsOpen({ selected: 8 })
     },
     {
       key: "divider-1",
@@ -610,6 +625,14 @@ export function DetailPurchaseOrder() {
         title="¿Está seguro que desea enviar esta orden a facturación?"
         okText="Enviar"
         okLoading={isActionLoading}
+      />
+
+      <SendToBackorderModal
+        isOpen={whichModalIsOpen.selected === 8}
+        onClose={closeModals}
+        warehouseId={data.warehouseId!}
+        orderId={orderId!}
+        mutate={mutate}
       />
     </div>
   );
