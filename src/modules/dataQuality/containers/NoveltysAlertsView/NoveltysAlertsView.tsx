@@ -85,7 +85,7 @@ export default function NoveltyAlertsView() {
         </h1>
       </div>
 
-      <Card className="p-0" style={{ backgroundColor: "#FFFFFF", borderColor: "#DDDDDD" }}>
+      <Card className="p-0 border-none">
         <CardContent className="pt-6">
           {/* Compact Filters */}
           <div className="mb-6">
@@ -100,10 +100,7 @@ export default function NoveltyAlertsView() {
 
               {/* Country Filter */}
               <Select value={countryFilter} onValueChange={setCountryFilter}>
-                <SelectTrigger
-                  className="w-48"
-                  style={{ borderColor: "#DDDDDD", height: "48px" }}
-                >
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                     <Filter className="w-4 h-4 shrink-0" />
                     <SelectValue placeholder="Todos los países" />
@@ -121,10 +118,7 @@ export default function NoveltyAlertsView() {
 
               {/* Client Filter */}
               <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger
-                  className="w-48"
-                  style={{ borderColor: "#DDDDDD", height: "48px" }}
-                >
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <SelectValue placeholder="Todos los clientes" />
                   </div>
@@ -141,10 +135,7 @@ export default function NoveltyAlertsView() {
 
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger
-                  className="w-48"
-                  style={{ borderColor: "#DDDDDD", height: "48px" }}
-                >
+                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <SelectValue placeholder="Todos los estados" />
                   </div>
