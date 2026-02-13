@@ -66,9 +66,9 @@ export function SendToApprovalModal({
       message.success("Orden enviada a aprobación correctamente");
       mutateOrderDetail();
       onOpenChange(false);
-    } catch (err: any) {
+    } catch (error) {
       const errorMessage =
-        err?.response?.data?.message || err?.message || "Error al enviar a aprobación";
+        error instanceof Error ? error.message : "Error al enviar a aprobación";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
