@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Filter, ArrowLeft } from "lucide-react";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
@@ -30,6 +30,9 @@ import {
 
 export default function NoveltyAlertsView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const countryIdParam = searchParams.get("countryId");
+  const clientIdParam = searchParams.get("clientId");
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -41,8 +44,8 @@ export default function NoveltyAlertsView() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [countryFilter, setCountryFilter] = useState("all");
-  const [clientFilter, setClientFilter] = useState("all");
+  const [countryFilter, setCountryFilter] = useState(countryIdParam ?? "all");
+  const [clientFilter, setClientFilter] = useState(clientIdParam ?? "all");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filtersData, setFiltersData] = useState<{
