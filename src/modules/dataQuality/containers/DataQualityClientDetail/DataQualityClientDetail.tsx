@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Edit, ArrowLeft, Upload } from "lucide-react";
+import { Edit, ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
@@ -14,35 +14,12 @@ import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDeta
 import { useAppStore } from "@/lib/store/store";
 import Link from "next/link";
 
-// Helper functions for data transformation
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
-
-const formatDateTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date
-    .toLocaleString("es-ES", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-    .replace(",", "");
-};
-
 export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const clientId = params.clientId as string;
-  const [searchTerm, setSearchTerm] = useState("");
   const [isEditClientOpen, setIsEditClientOpen] = useState(false);
 
   // Fetch client detail data using SWR hook
@@ -130,10 +107,6 @@ export default function DataQualityClientDetails() {
                   <ArrowLeft className="h-4 w-4 mr-1" />
                   Atrás
                 </Button>
-
-                <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-                  Información general
-                </h2>
               </div>
               <div className="flex items-center gap-3">
                 <Button
