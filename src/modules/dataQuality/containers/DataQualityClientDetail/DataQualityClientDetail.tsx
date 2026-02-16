@@ -15,6 +15,7 @@ import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
+import { BellSimpleRinging } from "@phosphor-icons/react";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -104,6 +105,15 @@ export default function DataQualityClientDetails() {
                 Atrás
               </Button>
               <div className="flex items-center gap-3">
+                <Link
+                  href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <Button variant="outline" className="">
+                    <BellSimpleRinging size={18} />
+                    Alertas
+                  </Button>
+                </Link>
                 <Button
                   className="text-sm font-medium"
                   style={{

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Calendar, FileText, Filter, ArrowLeft, Plus } from "lucide-react";
+import { BellSimpleRinging } from "phosphor-react";
 
 import { getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
@@ -100,80 +102,92 @@ export default function CountriesClientsView() {
       <Card className="border-none p-0">
         <CardContent className="p-6">
           {/* Filter Bar */}
-          <div className="flex items-center gap-4 mb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-700 hover:text-gray-900"
-              onClick={handleGoBack}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Inicio
-            </Button>
-            {/* Search Input */}
-            <div className="flex-1 max-w-sm">
-              <UiSearchInput
-                placeholder="Buscar cliente..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 hover:text-gray-900"
+                onClick={handleGoBack}
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Inicio
+              </Button>
+              {/* Search Input */}
+              <div className="flex-1 max-w-sm">
+                <UiSearchInput
+                  placeholder="Buscar cliente..."
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[200px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <Filter className="w-4 h-4 shrink-0" />
+                    <SelectValue placeholder="Estados" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="processed">Procesado</SelectItem>
+                  <SelectItem value="pending">Pendiente</SelectItem>
+                  <SelectItem value="with-alert">Con novedad</SelectItem>
+                  <SelectItem value="partial">Procesado parcial</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Periodicity Filter */}
+              <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
+                <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <Calendar className="w-4 h-4 shrink-0" />
+                    <SelectValue placeholder="Periodicidad" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las periodicidades</SelectItem>
+                  <SelectItem value="Daily">Daily</SelectItem>
+                  <SelectItem value="Weekly">Weekly</SelectItem>
+                  <SelectItem value="Monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* File Type Filter */}
+              <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
+                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <FileText className="w-4 h-4 shrink-0" />
+                    <SelectValue placeholder="Tipo de archivo" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los archivos</SelectItem>
+                  <SelectItem value="stock">Stock</SelectItem>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="in transit">In transit</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                  <Filter className="w-4 h-4 shrink-0" />
-                  <SelectValue placeholder="Estados" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="processed">Procesado</SelectItem>
-                <SelectItem value="pending">Pendiente</SelectItem>
-                <SelectItem value="with-alert">Con novedad</SelectItem>
-                <SelectItem value="partial">Procesado parcial</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Periodicity Filter */}
-            <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
-              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                  <Calendar className="w-4 h-4 shrink-0" />
-                  <SelectValue placeholder="Periodicidad" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las periodicidades</SelectItem>
-                <SelectItem value="Daily">Daily</SelectItem>
-                <SelectItem value="Weekly">Weekly</SelectItem>
-                <SelectItem value="Monthly">Monthly</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* File Type Filter */}
-            <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-              <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                  <FileText className="w-4 h-4 shrink-0" />
-                  <SelectValue placeholder="Tipo de archivo" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los archivos</SelectItem>
-                <SelectItem value="stock">Stock</SelectItem>
-                <SelectItem value="sales">Sales</SelectItem>
-                <SelectItem value="in transit">In transit</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Create Client Button */}
-            <Button
-              className="ml-auto h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-              onClick={() => setIsModalClientOpen(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Crear cliente
-            </Button>
+            <div className="flex items-center gap-4">
+              <Link
+                href={`/data-quality/alerts?countryId=${countryId}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Button variant="outline" className="h-12">
+                  <BellSimpleRinging size={18} />
+                  Alertas
+                </Button>
+              </Link>
+              <Button
+                className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                onClick={() => setIsModalClientOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Crear cliente
+              </Button>
+            </div>
           </div>
 
           {/* Clients Table */}
