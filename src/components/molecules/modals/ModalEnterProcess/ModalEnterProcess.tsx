@@ -201,23 +201,20 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
               onChange={setContactId}
               allowClear
               style={{ width: "100%" }}
-              optionLabelProp="value" // <--- usamos el valor como label visible
-              popupMatchSelectWidth={false}
               options={contacts.map((c) => {
                 const mainText = `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE}`;
-                const subText = c.CONTACT_EMAIL;
-
                 return {
-                  value: mainText, // <- se mostrará truncado en el selector
-                  label: (
-                    <div className="contact-dropdown">
-                      <div className="contact-main">{mainText}</div>
-                      <div className="contact-sub">{subText}</div>
-                    </div>
-                  ),
-                  key: c.ID
+                  value: c.ID,
+                  label: mainText,
+                  email: c.CONTACT_EMAIL
                 };
               })}
+              optionRender={(option) => (
+                <div className="contact-dropdown">
+                  <div className="contact-main">{option.label}</div>
+                  <div className="contact-sub">{option.data.email}</div>
+                </div>
+              )}
             />
           </Flex>
 
