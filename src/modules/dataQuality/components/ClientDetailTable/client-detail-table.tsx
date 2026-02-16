@@ -3,7 +3,11 @@ import dayjs from "dayjs";
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, message } from "antd";
 
-import { downloadCSV, uploadIntakeFile } from "@/services/dataQuality/dataQuality";
+import {
+  deleteIntakeFile,
+  downloadCSV,
+  uploadIntakeFile
+} from "@/services/dataQuality/dataQuality";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -50,6 +54,8 @@ const formatDate = (isoDateString: string): string => {
 
 export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
   const [isUploadingLoading, setIsUploadingLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
   const handleUploadIntake = async (id: number) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -62,7 +68,11 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
           message.success("Archivo de ingesta subido exitosamente.");
           mutate();
         } catch (error) {
-          message.error("Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo.");
+          message.error(
+            error instanceof Error
+              ? error.message
+              : "Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo."
+          );
         }
         setIsUploadingLoading(false);
       }
@@ -105,12 +115,33 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-      } catch {
-        message.error("Error al descargar el archivo. Por favor, inténtalo de nuevo.");
+      } catch (error) {
+        message.error(
+          error instanceof Error
+            ? error.message
+            : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
+        );
       }
     } else {
       message.error("No hay URL disponible para descargar el archivo original.");
     }
+  };
+
+  const handleDeleteFile = async (fileId: number) => {
+    console.log("Deleting file with ID:", fileId);
+    setIsDeleteLoading(true);
+    try {
+      await deleteIntakeFile(fileId);
+      message.success("Archivo eliminado exitosamente.");
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al eliminar el archivo. Por favor, inténtalo de nuevo."
+      );
+    }
+    setIsDeleteLoading(false);
   };
 
   return (
@@ -187,6 +218,12 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                           key: "download-universal",
                           label: "Descarga universal",
                           onClick: () => handleProcessedFile(file.id)
+                        },
+                        {
+                          key: "delete",
+                          label: "Eliminar archivo",
+                          onClick: () => handleDeleteFile(file.id),
+                          disabled: isDeleteLoading
                         }
                       ]
                     }}
