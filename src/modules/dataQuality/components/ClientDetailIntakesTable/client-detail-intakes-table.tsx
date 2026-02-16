@@ -13,6 +13,13 @@ import {
 import { ModalDataIntake } from "../modal-data-intake";
 import { IModalMode } from "../modal-data-intake/modal-data-intake";
 import { IClientDetailDataArchive } from "@/types/dataQuality/IDataQuality";
+import { FILE_TYPE_MAPPINGS } from "@/modules/dataQuality/lib/constants";
+
+const getFileTypeColor = (tipoArchivo: string): string => {
+  const lower = tipoArchivo?.toLowerCase() ?? "";
+  const match = FILE_TYPE_MAPPINGS.find((m) => lower.includes(m.keyword));
+  return match?.color ?? "bg-gray-500";
+};
 
 interface ClientDetailIntakesTableProps {
   intakes?: IClientDetailDataArchive[];
@@ -68,7 +75,10 @@ export function ClientDetailIntakesTable({
                 style={{ borderColor: "#DDDDDD" }}
               >
                 <TableCell>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge
+                    variant="secondary"
+                    className={`text-xs text-white ${getFileTypeColor(intake.tipo_archivo)}`}
+                  >
                     {intake.tipo_archivo}
                   </Badge>
                 </TableCell>

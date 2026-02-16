@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash2, Filter } from "lucide-react";
+import { Plus, Edit, Trash2, Filter, ArrowLeft } from "lucide-react";
 import { Pagination } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -16,6 +16,7 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
+import { useRouter } from "next/navigation";
 
 interface CatalogsTableProps {
   equivalencies: IGetCatalogs[];
@@ -63,6 +64,8 @@ export function CatalogsTable({
 }: CatalogsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
+
   const itemsPerPage = 10;
 
   const filteredEquivalencies = equivalencies.filter((item) => {
@@ -81,6 +84,9 @@ export function CatalogsTable({
     setSearchTerm(value);
     setCurrentPage(1);
   };
+  const handleGoBack = () => {
+    router.back();
+  };
 
   return (
     <>
@@ -88,32 +94,56 @@ export function CatalogsTable({
       <div className="mb-6">
         <Card className="border-none">
           <CardContent className="p-4">
-            <div className="flex items-center space-x-4">
-              {/* Search bar */}
-              <div className="relative flex-1 max-w-md">
-                <Plus
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-                  style={{ color: "#141414" }}
-                />
-                <Input
-                  placeholder="Buscar producto..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-10"
-                  style={{ borderColor: "#DDDDDD" }}
-                />
-              </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white"
+                  style={{ borderColor: "#DDDDDD", color: "#141414" }}
+                  onClick={handleGoBack}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Volver al cliente
+                </Button>
+                {/* Search bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Plus
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                    style={{ color: "#141414" }}
+                  />
+                  <Input
+                    placeholder="Buscar producto..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="pl-10"
+                    style={{ borderColor: "#DDDDDD" }}
+                  />
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4" style={{ color: "#141414" }} />
-                <span className="text-sm font-medium" style={{ color: "#141414" }}>
-                  Filtros:
-                </span>
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4" style={{ color: "#141414" }} />
+                  <span className="text-sm font-medium" style={{ color: "#141414" }}>
+                    Filtros:
+                  </span>
+                </div>
+                <div className="text-sm" style={{ color: "#141414" }}>
+                  Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length}{" "}
+                  productos
+                </div>
               </div>
-              <div className="text-sm" style={{ color: "#141414" }}>
-                Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length}{" "}
-                productos
-              </div>
+              <Button
+                onClick={onAddNew}
+                className="text-sm font-medium"
+                style={{
+                  backgroundColor: "#CBE71E",
+                  color: "#141414",
+                  border: "none"
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nueva Equivalencia
+              </Button>
             </div>
           </CardContent>
         </Card>
