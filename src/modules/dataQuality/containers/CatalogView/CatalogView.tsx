@@ -161,6 +161,7 @@ export default function CatalogView() {
         catalogData={selectedCatalog}
         onSave={handleSave}
         isLoadingCreateEdit={isLoadingAction}
+        countryId={Number(countryId) || 0}
       />
 
       <ModalConfirmAction

@@ -63,6 +63,7 @@ interface Props {
   mode: "create" | "edit";
   catalogData?: IGetCatalogs | null;
   onSave: (data: CatalogFormData) => void;
+  countryId: number;
   isLoadingCreateEdit?: boolean;
 }
 
@@ -72,6 +73,7 @@ export default function ModalAddEditCatalog({
   mode,
   catalogData,
   onSave,
+  countryId,
   isLoadingCreateEdit = false
 }: Props) {
   const {
@@ -116,7 +118,7 @@ export default function ModalAddEditCatalog({
     const fetchData = async () => {
       try {
         const [materials, typeVols, productTypes] = await Promise.all([
-          getCatalogMaterialsForSelect(),
+          getCatalogMaterialsForSelect(countryId),
           getCatalogMaterialType(),
           getMaterialProductType()
         ]);
