@@ -24,7 +24,6 @@ import CountriesClientsTable from "../../components/countries-clients-table/Coun
 export default function CountriesClientsView() {
   const params = useParams();
   const countryId = params.countryId as string;
-  console.log("Country ID from params:", countryId);
 
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
@@ -90,15 +89,6 @@ export default function CountriesClientsView() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-700 hover:text-gray-900"
-          onClick={handleGoBack}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Inicio
-        </Button>
         <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
       </div>
 
@@ -107,6 +97,15 @@ export default function CountriesClientsView() {
         <CardContent className="p-6">
           {/* Filter Bar */}
           <div className="flex items-center gap-4 mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-700 hover:text-gray-900"
+              onClick={handleGoBack}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Inicio
+            </Button>
             {/* Search Input */}
             <div className="flex-1 max-w-sm">
               <UiSearchInput

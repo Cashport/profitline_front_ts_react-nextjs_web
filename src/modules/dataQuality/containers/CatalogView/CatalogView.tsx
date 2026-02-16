@@ -1,24 +1,22 @@
 "use client";
 
 import { useState } from "react";
-
-import { Plus, ArrowLeft } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
 import { message } from "antd";
-import { Button } from "@/modules/chat/ui/button";
+
+import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
+import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
+
 import { CatalogsTable } from "../../components/CatalogsTable";
 import ModalAddEditCatalog, {
   CatalogFormData
 } from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
-import { useAppStore } from "@/lib/store/store";
-import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
-import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
-import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
+import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
+
 export default function CatalogView() {
-  const router = useRouter();
   const params = useParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
@@ -86,10 +84,6 @@ export default function CatalogView() {
     setSelectedCatalog(null);
   };
 
-  const handleGoBack = () => {
-    router.back();
-  };
-
   const handleDeleteCatalog = async (catalog: IGetCatalogs) => {
     setIsLoadingAction(true);
     try {
@@ -111,34 +105,10 @@ export default function CatalogView() {
       <main>
         {/* Page Title on Gray Background */}
         <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white"
-                style={{ borderColor: "#DDDDDD", color: "#141414" }}
-                onClick={handleGoBack}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al cliente
-              </Button>
-              <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
-                Catálogo de Equivalencias
-              </h1>
-            </div>
-            <Button
-              onClick={handleAddNew}
-              className="text-sm font-medium"
-              style={{
-                backgroundColor: "#CBE71E",
-                color: "#141414",
-                border: "none"
-              }}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Equivalencia
-            </Button>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
+              Catálogo de Equivalencias
+            </h1>
           </div>
         </div>
 
