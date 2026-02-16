@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import { Calendar, FileText, Filter, Upload, ArrowLeft, Plus } from "lucide-react";
+import { Calendar, FileText, Filter, ArrowLeft, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,

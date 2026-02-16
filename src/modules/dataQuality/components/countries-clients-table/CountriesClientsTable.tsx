@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { Calendar, Eye } from "lucide-react";
 import { Table, TableProps } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { IClientData, IClientDataArchive } from "@/types/dataQuality/IDataQuality";
+import { FILE_TYPE_MAPPINGS } from "@/modules/dataQuality/lib/constants";
 
 interface CountriesClientsTableProps {
   data: IClientData[];
@@ -17,21 +17,6 @@ interface CountriesClientsTableProps {
   scrollHeight: number;
   onRowClick?: (record: IClientData) => void;
 }
-
-const FILE_TYPE_MAPPINGS = [
-  {
-    keyword: "stock cedi in-transit",
-    type: "stock-cedi-in-transit",
-    label: "CI",
-    color: "bg-teal-500"
-  },
-  { keyword: "stock in-transit", type: "stock-in-transit", label: "SI", color: "bg-purple-500" },
-  { keyword: "stock cedi", type: "stock-cedi", label: "SC", color: "bg-cyan-500" },
-  { keyword: "sellout", type: "sellout", label: "SO", color: "bg-orange-500" },
-  { keyword: "stock", type: "stock", label: "SK", color: "bg-blue-500" },
-  { keyword: "store", type: "store", label: "ST", color: "bg-yellow-500" },
-  { keyword: "sales", type: "sales", label: "SA", color: "bg-green-500" }
-];
 
 const getFileTypeBadges = (archives: IClientDataArchive[]) => {
   const fileTypes: Array<{ type: string; label: string; color: string }> = [];
@@ -72,7 +57,7 @@ export default function CountriesClientsTable({
       title: "Nombre",
       dataIndex: "client_name",
       key: "client_name",
-      render: (name: string, record: IClientData) => (
+      render: (name: string) => (
         <p className="font-medium hover:underline text-[#141414]">{name}</p>
       ),
       sorter: (a, b) => a.client_name.localeCompare(b.client_name),

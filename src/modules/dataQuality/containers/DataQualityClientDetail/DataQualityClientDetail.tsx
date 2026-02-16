@@ -97,17 +97,15 @@ export default function DataQualityClientDetails() {
         <Card className="border-none">
           <CardContent>
             <div className="flex items-center justify-between mb-6 ">
-              <div className="mb-6 flex items-center gap-4">
-                <Button
-                  onClick={handleGoBack}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Atrás
-                </Button>
-              </div>
+              <Button
+                onClick={handleGoBack}
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Atrás
+              </Button>
               <div className="flex items-center gap-3">
                 <Button
                   className="text-sm font-medium"
