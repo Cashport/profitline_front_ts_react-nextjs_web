@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-
-import { Edit, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Edit, ArrowLeft } from "lucide-react";
+
+import { useAppStore } from "@/lib/store/store";
+import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
+
+import Header from "@/components/organisms/header";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
-import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
-import { useAppStore } from "@/lib/store/store";
-import Link from "next/link";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -31,13 +33,13 @@ export default function DataQualityClientDetails() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600">Cargando información del cliente...</p>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            <p className="text-gray-600">Cargando información del cliente...</p>
+          </div>
         </div>
       </div>
     );
@@ -46,16 +48,16 @@ export default function DataQualityClientDetails() {
   // Handle error state
   if (error) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <div className="text-center">
-          <div className="text-red-600 mb-4">
-            <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">
+              <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+            </div>
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <Button onClick={() => window.location.reload()}>Reintentar</Button>
           </div>
-          <p className="text-gray-600 mb-4">{error.message}</p>
-          <Button onClick={() => window.location.reload()}>Reintentar</Button>
         </div>
       </div>
     );
@@ -64,11 +66,11 @@ export default function DataQualityClientDetails() {
   // Handle empty state
   if (!clientDetail) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+        </div>
       </div>
     );
   }
@@ -86,14 +88,9 @@ export default function DataQualityClientDetails() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F7F7F7" }}>
+    <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+      <Header title={`${countryName} - ${clientName}` || ""} />
       <main>
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold" style={{ color: "#141414" }}>
-            {clientName}
-          </h1>
-        </div>
-
         <Card className="border-none">
           <CardContent>
             <div className="flex items-center justify-between mb-6 ">

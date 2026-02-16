@@ -8,6 +8,7 @@ import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQualit
 import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 
+import Header from "@/components/organisms/header";
 import { CatalogsTable } from "../../components/CatalogsTable";
 import ModalAddEditCatalog, {
   CatalogFormData
@@ -100,18 +101,10 @@ export default function CatalogView() {
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      <Header title="Catálogo de Equivalencias" />
       {/* Main Content */}
       <main>
-        {/* Page Title on Gray Background */}
-        <div className="mb-6">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
-              Catálogo de Equivalencias
-            </h1>
-          </div>
-        </div>
-
         <CatalogsTable
           equivalencies={catalogData ?? []}
           clientName={clientId}
@@ -145,6 +138,6 @@ export default function CatalogView() {
         okText="Eliminar"
         okLoading={isLoadingAction}
       />
-    </>
+    </div>
   );
 }

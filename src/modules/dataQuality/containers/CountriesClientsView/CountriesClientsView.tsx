@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import { Calendar, FileText, Filter, ArrowLeft, Plus } from "lucide-react";
+
+import { getClientData } from "@/services/dataQuality/dataQuality";
+import { useAppStore } from "@/lib/store/store";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+
 import {
   Select,
   SelectContent,
@@ -15,11 +19,10 @@ import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
-import { getClientData } from "@/services/dataQuality/dataQuality";
-import { useAppStore } from "@/lib/store/store";
-import { IClientData } from "@/types/dataQuality/IDataQuality";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
+import Header from "@/components/organisms/header";
+
+import { IClientData } from "@/types/dataQuality/IDataQuality";
 
 export default function CountriesClientsView() {
   const params = useParams();
@@ -87,10 +90,11 @@ export default function CountriesClientsView() {
   const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
 
   return (
-    <div>
-      <div className="mb-6 flex items-center gap-4">
+    <div className="flex flex-col gap-4">
+      <Header title={countryName} />
+      {/* <div className="mb-6 flex items-center gap-4">
         <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <Card className="border-none p-0">

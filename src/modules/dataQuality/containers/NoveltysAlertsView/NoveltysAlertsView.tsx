@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import { Filter, ArrowLeft } from "lucide-react";
+
+import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
+import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
+
+import Header from "@/components/organisms/header";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import {
   Select,
@@ -15,9 +19,8 @@ import {
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 
-import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
 import { AlertsTable } from "../../components/AlertsTable";
-import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
+
 import {
   IAlertFilterCountry,
   IAlertFilterClient,
@@ -69,27 +72,22 @@ export default function NoveltyAlertsView() {
   }, [searchTerm, statusFilter, countryFilter, clientFilter]);
 
   return (
-    <main>
-      <div className="mb-6 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-gray-700 hover:text-gray-900"
-          onClick={handleGoBack}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Atrás
-        </Button>
-        <h1 className="text-2xl font-bold" style={{ color: "#141414" }}>
-          Alertas y Novedades
-        </h1>
-      </div>
-
+    <div className="flex flex-col gap-4">
+      <Header title="Alertas y Novedades" />
       <Card className="p-0 border-none">
         <CardContent className="pt-6">
           {/* Compact Filters */}
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 hover:text-gray-900"
+                onClick={handleGoBack}
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Atrás
+              </Button>
               {/* Search Input */}
               <div className="flex-1 min-w-64">
                 <UiSearchInput
@@ -190,6 +188,6 @@ export default function NoveltyAlertsView() {
           </div>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
