@@ -166,10 +166,12 @@ export const editIntake = async (
   }
 };
 
-export const getCatalogMaterialsForSelect = async (): Promise<ICatalogMaterial[]> => {
+export const getCatalogMaterialsForSelect = async (
+  countryId: number
+): Promise<ICatalogMaterial[]> => {
   try {
     const response: GenericResponse<ICatalogMaterial[]> = await API.get(
-      `${config.API_HOST}/data/catalog/material`
+      `${config.API_HOST}/data/catalog/material?country_id=${countryId}`
     );
     return response.data;
   } catch (error) {
