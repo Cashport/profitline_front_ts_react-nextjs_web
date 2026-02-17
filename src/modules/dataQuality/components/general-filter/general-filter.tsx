@@ -1,47 +1,32 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Filter, ChevronDown, Calendar, FileText } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Filter, ChevronDown, Calendar, FileText, Package } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
+import { ICountryClientsFilters } from "@/types/dataQuality/IDataQuality";
 
 interface DataQualityGeneralFilterProps {
+  filterOptions?: ICountryClientsFilters;
   selectedStatus: string;
   onStatusChange: (value: string | null) => void;
   selectedPeriodicity: string;
   onPeriodicityChange: (value: string | null) => void;
   selectedFileType: string;
   onFileTypeChange: (value: string | null) => void;
+  selectedIntakeType: string;
+  onIntakeTypeChange: (value: string | null) => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: null, label: "Todos los estados" },
-  { value: "processed", label: "Procesado" },
-  { value: "pending", label: "Pendiente" },
-  { value: "with-alert", label: "Con novedad" },
-  { value: "partial", label: "Procesado parcial" }
-];
-
-const PERIODICITY_OPTIONS = [
-  { value: null, label: "Todas las periodicidades" },
-  { value: "Daily", label: "Daily" },
-  { value: "Weekly", label: "Weekly" },
-  { value: "Monthly", label: "Monthly" }
-];
-
-const FILE_TYPE_OPTIONS = [
-  { value: null, label: "Todos los archivos" },
-  { value: "stock", label: "Stock" },
-  { value: "sales", label: "Sales" },
-  { value: "in transit", label: "In transit" }
-];
-
 export function DataQualityGeneralFilter({
+  filterOptions,
   selectedStatus,
   onStatusChange,
   selectedPeriodicity,
   onPeriodicityChange,
   selectedFileType,
-  onFileTypeChange
+  onFileTypeChange,
+  selectedIntakeType,
+  onIntakeTypeChange
 }: DataQualityGeneralFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -56,6 +41,44 @@ export function DataQualityGeneralFilter({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const statusOptions = useMemo(
+    () => [
+      { value: null as string | null, label: "Todos los estados" },
+      ...(filterOptions?.status ?? []).map((s) => ({ value: s as string | null, label: s }))
+    ],
+    [filterOptions?.status]
+  );
+
+  const periodicityOptions = useMemo(
+    () => [
+      { value: null as string | null, label: "Todas las periodicidades" },
+      ...(filterOptions?.periodicity ?? []).map((p) => ({ value: p as string | null, label: p }))
+    ],
+    [filterOptions?.periodicity]
+  );
+
+  const fileTypeOptions = useMemo(
+    () => [
+      { value: null as string | null, label: "Todos los archivos" },
+      ...(filterOptions?.archive_types ?? []).map((a) => ({
+        value: String(a.id) as string | null,
+        label: a.description
+      }))
+    ],
+    [filterOptions?.archive_types]
+  );
+
+  const intakeTypeOptions = useMemo(
+    () => [
+      { value: null as string | null, label: "Todos los tipos de ingesta" },
+      ...(filterOptions?.intake_types ?? []).map((i) => ({
+        value: String(i.id) as string | null,
+        label: i.description
+      }))
+    ],
+    [filterOptions?.intake_types]
+  );
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -80,7 +103,7 @@ export function DataQualityGeneralFilter({
                 Estados
               </label>
               <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
-                {STATUS_OPTIONS.map((option) => {
+                {statusOptions.map((option) => {
                   const isSelected =
                     option.value === null
                       ? selectedStatus === "all"
@@ -112,7 +135,7 @@ export function DataQualityGeneralFilter({
                 Periodicidad
               </label>
               <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
-                {PERIODICITY_OPTIONS.map((option) => {
+                {periodicityOptions.map((option) => {
                   const isSelected =
                     option.value === null
                       ? selectedPeriodicity === "all"
@@ -144,7 +167,7 @@ export function DataQualityGeneralFilter({
                 Tipo de archivo
               </label>
               <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
-                {FILE_TYPE_OPTIONS.map((option) => {
+                {fileTypeOptions.map((option) => {
                   const isSelected =
                     option.value === null
                       ? selectedFileType === "all"
@@ -161,6 +184,38 @@ export function DataQualityGeneralFilter({
                           : "text-cashport-black"
                       }`}
                       onClick={() => onFileTypeChange(option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tipo de ingesta Section */}
+            <div>
+              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                <Package className="h-3 w-3 inline mr-1" />
+                Tipo de ingesta
+              </label>
+              <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                {intakeTypeOptions.map((option) => {
+                  const isSelected =
+                    option.value === null
+                      ? selectedIntakeType === "all"
+                      : selectedIntakeType === option.value;
+
+                  return (
+                    <button
+                      key={option.value ?? "all"}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors ${
+                        option.value !== null ? "border-t border-gray-100" : ""
+                      } ${
+                        isSelected
+                          ? "bg-cashport-green text-cashport-black font-medium"
+                          : "text-cashport-black"
+                      }`}
+                      onClick={() => onIntakeTypeChange(option.value)}
                     >
                       {option.label}
                     </button>
