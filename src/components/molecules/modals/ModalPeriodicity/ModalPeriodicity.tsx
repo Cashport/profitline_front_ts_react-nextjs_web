@@ -185,7 +185,7 @@ export const ModalPeriodicity = ({
       <p className="modalPeriodicity__inputs__name">
         Se produce {watchFrequency?.value}{" "}
         {watchDays.length > 0
-          ? `cada ${watchDays?.map((day) => `${day.value} `)}`
+          ? `cada ${watchDays?.map((day) => day.value).join(", ")} `
           : `${watchFrequencyNumber ? watchFrequencyNumber : "n"} veces `}
         iniciando el
         {watchInitDate ? ` ${dayjs(watchInitDate, "YYYY-MM-DD").format("DD/MM/YYYY")}` : "..."}
