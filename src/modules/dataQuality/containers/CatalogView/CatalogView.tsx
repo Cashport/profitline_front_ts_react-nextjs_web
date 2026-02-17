@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { message } from "antd";
 
 import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
@@ -19,8 +19,10 @@ import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQu
 
 export default function CatalogView() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
+  const clientName = searchParams.get("clientName");
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -107,7 +109,7 @@ export default function CatalogView() {
       <main>
         <CatalogsTable
           equivalencies={catalogData ?? []}
-          clientName={clientId}
+          clientName={clientName || ""}
           onEdit={handleEdit}
           onAddNew={handleAddNew}
           onDelete={(item) => {

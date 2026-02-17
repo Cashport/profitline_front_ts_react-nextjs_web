@@ -124,7 +124,10 @@ export default function DataQualityClientDetails() {
                 >
                   Puntos de venta
                 </Button>
-                <Link href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}`}>
+                <Link
+                  href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
                   <Button
                     className="text-sm font-medium"
                     style={{
