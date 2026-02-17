@@ -123,15 +123,6 @@ export function CatalogsTable({
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4" style={{ color: "#141414" }} />
-              <span className="text-sm font-medium" style={{ color: "#141414" }}>
-                Filtros:
-              </span>
-            </div>
-            <div className="text-sm" style={{ color: "#141414" }}>
-              Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length} productos
-            </div>
           </div>
           <Button
             onClick={onAddNew}
@@ -216,6 +207,9 @@ export function CatalogsTable({
           className="mt-4 pt-4 border-t flex items-center justify-between"
           style={{ borderColor: "#DDDDDD" }}
         >
+          <div className="text-sm" style={{ color: "#141414" }}>
+            Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length} productos
+          </div>
           <Pagination
             current={currentPage}
             onChange={(page) => setCurrentPage(page)}
@@ -223,16 +217,6 @@ export function CatalogsTable({
             pageSize={itemsPerPage}
             showSizeChanger={false}
           />
-
-          <Button
-            onClick={onAddNew}
-            variant="outline"
-            className="bg-transparent"
-            style={{ borderColor: "#DDDDDD", color: "#141414" }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar registro
-          </Button>
         </div>
       </CardContent>
     </Card>
