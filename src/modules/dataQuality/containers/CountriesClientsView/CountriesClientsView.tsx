@@ -35,10 +35,12 @@ export default function CountriesClientsView() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [periodicityFilter, setPeriodicityFilter] = useState("all");
-  const [fileTypeFilter, setFileTypeFilter] = useState("all");
-  const [intakeTypeFilter, setIntakeTypeFilter] = useState("all");
+  const [activeFilters, setActiveFilters] = useState({
+    status: "all",
+    periodicity: "all",
+    fileType: "all",
+    intakeType: "all"
+  });
   const [isModalClientOpen, setIsModalClientOpen] = useState(false);
 
   const [pagination, setPagination] = useState({
@@ -52,10 +54,10 @@ export default function CountriesClientsView() {
     pagination.current,
     pagination.pageSize,
     {
-      status: statusFilter !== "all" ? statusFilter : undefined,
-      periodicity: periodicityFilter !== "all" ? periodicityFilter : undefined,
-      id_type_archive: fileTypeFilter !== "all" ? Number(fileTypeFilter) : undefined,
-      id_intake_type: intakeTypeFilter !== "all" ? Number(intakeTypeFilter) : undefined,
+      status: activeFilters.status !== "all" ? activeFilters.status : undefined,
+      periodicity: activeFilters.periodicity !== "all" ? activeFilters.periodicity : undefined,
+      id_type_archive: activeFilters.fileType !== "all" ? Number(activeFilters.fileType) : undefined,
+      id_intake_type: activeFilters.intakeType !== "all" ? Number(activeFilters.intakeType) : undefined,
       search: debouncedSearchTerm || undefined
     }
   );
@@ -98,14 +100,8 @@ export default function CountriesClientsView() {
 
               <DataQualityGeneralFilter
                 filterOptions={filters}
-                selectedStatus={statusFilter}
-                onStatusChange={(val) => setStatusFilter(val ?? "all")}
-                selectedPeriodicity={periodicityFilter}
-                onPeriodicityChange={(val) => setPeriodicityFilter(val ?? "all")}
-                selectedFileType={fileTypeFilter}
-                onFileTypeChange={(val) => setFileTypeFilter(val ?? "all")}
-                selectedIntakeType={intakeTypeFilter}
-                onIntakeTypeChange={(val) => setIntakeTypeFilter(val ?? "all")}
+                activeFilters={activeFilters}
+                onChange={(key, val) => setActiveFilters((prev) => ({ ...prev, [key]: val ?? "all" }))}
               />
             </div>
 
