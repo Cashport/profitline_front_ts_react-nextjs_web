@@ -67,7 +67,8 @@ export default function CountriesClientsTable({
       title: "Periodicidad",
       key: "periodicity",
       dataIndex: "periodicity",
-      render: (periodicity) => <span className="text-gray-500">{periodicity}</span>
+      render: (periodicity) => <span className="text-gray-500">{periodicity}</span>,
+      ellipsis: true
     },
     {
       title: "Archivos",
@@ -133,8 +134,10 @@ export default function CountriesClientsTable({
     {
       title: "Ver",
       key: "actions",
-      width: 60,
+      width: 46,
       align: "right",
+      onHeaderCell: () => ({ style: { paddingLeft: 0 } }),
+      onCell: () => ({ style: { paddingLeft: 0 } }),
       render: (_, record: IClientData) => (
         <Button
           variant="ghost"
@@ -155,28 +158,31 @@ export default function CountriesClientsTable({
   ];
 
   return (
-    <Table<IClientData>
-      columns={columns}
-      dataSource={data.map((item) => ({ ...item, key: item.id }))}
-      loading={loading}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total: pagination.total,
-        onChange: onPaginationChange,
-        showSizeChanger: false,
-        position: ["bottomRight"],
-        showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} clientes`
-      }}
-      scroll={{ y: scrollHeight, x: 100 }}
-      onRow={(record) => ({
-        onClick: () => {
-          if (onRowClick) {
-            onRowClick(record);
-          }
-        },
-        className: "cursor-pointer hover:bg-gray-50"
-      })}
-    />
+    <div className="dq-clients-table">
+      <style>{`.dq-clients-table .ant-table-pagination.ant-pagination { margin-bottom: 0 !important; margin-block-end: 0 !important; }`}</style>
+      <Table<IClientData>
+        columns={columns}
+        dataSource={data.map((item) => ({ ...item, key: item.id }))}
+        loading={loading}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: onPaginationChange,
+          showSizeChanger: false,
+          position: ["bottomRight"],
+          showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} clientes`
+        }}
+        scroll={{ y: scrollHeight, x: 100 }}
+        onRow={(record) => ({
+          onClick: () => {
+            if (onRowClick) {
+              onRowClick(record);
+            }
+          },
+          className: "cursor-pointer hover:bg-gray-50"
+        })}
+      />
+    </div>
   );
 }

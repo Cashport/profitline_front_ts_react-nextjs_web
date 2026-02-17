@@ -157,7 +157,7 @@ export default function CountriesClientsView() {
                 pageSize: pageSize || prev.pageSize
               }));
             }}
-            scrollHeight={height - 420}
+            scrollHeight={height - 325}
             onRowClick={handleRowClick}
           />
         </CardContent>
