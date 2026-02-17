@@ -3,25 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Calendar, FileText, Filter, ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { BellSimpleRinging } from "phosphor-react";
 
 import { getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
+import { DataQualityGeneralFilter } from "../../components/general-filter";
 import Header from "@/components/organisms/header";
 
 import { IClientData } from "@/types/dataQuality/IDataQuality";
@@ -111,7 +105,7 @@ export default function CountriesClientsView() {
                 onClick={handleGoBack}
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                Inicio
+                <span className="hidden min-[900px]:inline">Inicio</span>
               </Button>
               {/* Search Input */}
               <div className="flex-1 max-w-sm">
@@ -121,53 +115,14 @@ export default function CountriesClientsView() {
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[200px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <Filter className="w-4 h-4 shrink-0" />
-                    <SelectValue placeholder="Estados" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="processed">Procesado</SelectItem>
-                  <SelectItem value="pending">Pendiente</SelectItem>
-                  <SelectItem value="with-alert">Con novedad</SelectItem>
-                  <SelectItem value="partial">Procesado parcial</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Periodicity Filter */}
-              <Select value={periodicityFilter} onValueChange={setPeriodicityFilter}>
-                <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <Calendar className="w-4 h-4 shrink-0" />
-                    <SelectValue placeholder="Periodicidad" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las periodicidades</SelectItem>
-                  <SelectItem value="Daily">Daily</SelectItem>
-                  <SelectItem value="Weekly">Weekly</SelectItem>
-                  <SelectItem value="Monthly">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* File Type Filter */}
-              <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-                <SelectTrigger className="w-[180px] border-[#DDDDDD]" style={{ height: "48px" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <FileText className="w-4 h-4 shrink-0" />
-                    <SelectValue placeholder="Tipo de archivo" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los archivos</SelectItem>
-                  <SelectItem value="stock">Stock</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="in transit">In transit</SelectItem>
-                </SelectContent>
-              </Select>
+              <DataQualityGeneralFilter
+                selectedStatus={statusFilter}
+                onStatusChange={(val) => setStatusFilter(val ?? "all")}
+                selectedPeriodicity={periodicityFilter}
+                onPeriodicityChange={(val) => setPeriodicityFilter(val ?? "all")}
+                selectedFileType={fileTypeFilter}
+                onFileTypeChange={(val) => setFileTypeFilter(val ?? "all")}
+              />
             </div>
 
             <div className="flex items-center gap-4">
@@ -177,7 +132,7 @@ export default function CountriesClientsView() {
               >
                 <Button variant="outline" className="h-12">
                   <BellSimpleRinging size={18} />
-                  Alertas
+                  <span className="hidden min-[1000px]:inline">Alertas</span>
                 </Button>
               </Link>
               <Button
