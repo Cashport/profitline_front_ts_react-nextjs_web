@@ -166,10 +166,12 @@ export const editIntake = async (
   }
 };
 
-export const getCatalogMaterialsForSelect = async (): Promise<ICatalogMaterial[]> => {
+export const getCatalogMaterialsForSelect = async (
+  countryId: number
+): Promise<ICatalogMaterial[]> => {
   try {
     const response: GenericResponse<ICatalogMaterial[]> = await API.get(
-      `${config.API_HOST}/data/catalog/material`
+      `${config.API_HOST}/data/catalog/material?country_id=${countryId}`
     );
     return response.data;
   } catch (error) {
@@ -289,6 +291,19 @@ export const downloadCSV = async (id_archives_client_data: number): Promise<Blob
       const parsed = JSON.parse(text);
       throw new Error(parsed.message || "Error al descargar el archivo");
     }
+    throw error;
+  }
+};
+
+export const deleteIntakeFile = async (fileId: number): Promise<any> => {
+  console.log("Attempting to delete intake file with ID:", fileId);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/archives-client-data/${fileId}/delete`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting intake file:", error);
     throw error;
   }
 };

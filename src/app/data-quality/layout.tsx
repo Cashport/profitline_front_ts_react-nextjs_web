@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ViewWrapper headerTitle="Data Quality" gapTitle="0">
+    <ViewWrapper headerTitle="Data Quality" hideHeader>
       {children}
     </ViewWrapper>
   );

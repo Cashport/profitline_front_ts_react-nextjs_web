@@ -8,13 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem
-} from "@/modules/chat/ui/select";
+import Select from "@/modules/dataQuality/components/atoms/select/Select";
 
 import {
   IGetCatalogs,
@@ -63,6 +57,7 @@ interface Props {
   mode: "create" | "edit";
   catalogData?: IGetCatalogs | null;
   onSave: (data: CatalogFormData) => void;
+  countryId: number;
   isLoadingCreateEdit?: boolean;
 }
 
@@ -72,6 +67,7 @@ export default function ModalAddEditCatalog({
   mode,
   catalogData,
   onSave,
+  countryId,
   isLoadingCreateEdit = false
 }: Props) {
   const {
@@ -116,7 +112,7 @@ export default function ModalAddEditCatalog({
     const fetchData = async () => {
       try {
         const [materials, typeVols, productTypes] = await Promise.all([
-          getCatalogMaterialsForSelect(),
+          getCatalogMaterialsForSelect(countryId),
           getCatalogMaterialType(),
           getMaterialProductType()
         ]);
@@ -218,23 +214,17 @@ export default function ModalAddEditCatalog({
               name="material_code"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger
-                    className="w-full"
-                    style={{
-                      borderColor: errors.material_code ? "#ff4d4f" : "#DDDDDD"
-                    }}
-                  >
-                    <SelectValue placeholder="Seleccionar material" />
-                  </SelectTrigger>
-                  <SelectContent className="!z-[10000]">
-                    {selectOptions.materials.map((material) => (
-                      <SelectItem key={material.id} value={String(material.id)}>
-                        {material.material_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Select
+                  showSearch
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar material"
+                  hasError={!!errors.material_code}
+                  options={selectOptions.materials.map((material) => ({
+                    value: String(material.id),
+                    label: material.material_name
+                  }))}
+                />
               )}
             />
             {errors.material_code && (
@@ -253,23 +243,16 @@ export default function ModalAddEditCatalog({
               name="product_type"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger
-                    className="w-full"
-                    style={{
-                      borderColor: errors.product_type ? "#ff4d4f" : "#DDDDDD"
-                    }}
-                  >
-                    <SelectValue placeholder="Seleccionar tipo de producto" />
-                  </SelectTrigger>
-                  <SelectContent className="!z-[10000]">
-                    {selectOptions.productTypes.map((type) => (
-                      <SelectItem key={type.id} value={String(type.id)}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Select
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar tipo de producto"
+                  hasError={!!errors.product_type}
+                  options={selectOptions.productTypes.map((type) => ({
+                    value: String(type.id),
+                    label: type.name
+                  }))}
+                />
               )}
             />
             {errors.product_type && (
@@ -288,23 +271,16 @@ export default function ModalAddEditCatalog({
               name="type_vol"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger
-                    className="w-full"
-                    style={{
-                      borderColor: errors.type_vol ? "#ff4d4f" : "#DDDDDD"
-                    }}
-                  >
-                    <SelectValue placeholder="Seleccionar tipo de volumen" />
-                  </SelectTrigger>
-                  <SelectContent className="!z-[10000]">
-                    {selectOptions.typeVols.map((vol) => (
-                      <SelectItem key={vol.id} value={String(vol.id)}>
-                        {vol.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Select
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar tipo de volumen"
+                  hasError={!!errors.type_vol}
+                  options={selectOptions.typeVols.map((vol) => ({
+                    value: String(vol.id),
+                    label: vol.name
+                  }))}
+                />
               )}
             />
             {errors.type_vol && (

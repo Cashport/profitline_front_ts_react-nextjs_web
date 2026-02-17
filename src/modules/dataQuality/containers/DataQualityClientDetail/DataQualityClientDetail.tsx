@@ -1,40 +1,21 @@
 "use client";
 
 import { useState } from "react";
-
-import { Edit, ArrowLeft, Upload } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { Edit, ArrowLeft } from "lucide-react";
+
+import { useAppStore } from "@/lib/store/store";
+import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
+
+import Header from "@/components/organisms/header";
 import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
-import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
-import { useAppStore } from "@/lib/store/store";
-import Link from "next/link";
-
-// Helper functions for data transformation
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
-
-const formatDateTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date
-    .toLocaleString("es-ES", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    })
-    .replace(",", "");
-};
+import { BellSimpleRinging } from "@phosphor-icons/react";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -42,7 +23,6 @@ export default function DataQualityClientDetails() {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const clientId = params.clientId as string;
-  const [searchTerm, setSearchTerm] = useState("");
   const [isEditClientOpen, setIsEditClientOpen] = useState(false);
 
   // Fetch client detail data using SWR hook
@@ -54,13 +34,13 @@ export default function DataQualityClientDetails() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600">Cargando información del cliente...</p>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            <p className="text-gray-600">Cargando información del cliente...</p>
+          </div>
         </div>
       </div>
     );
@@ -69,16 +49,16 @@ export default function DataQualityClientDetails() {
   // Handle error state
   if (error) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <div className="text-center">
-          <div className="text-red-600 mb-4">
-            <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">
+              <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+            </div>
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <Button onClick={() => window.location.reload()}>Reintentar</Button>
           </div>
-          <p className="text-gray-600 mb-4">{error.message}</p>
-          <Button onClick={() => window.location.reload()}>Reintentar</Button>
         </div>
       </div>
     );
@@ -87,11 +67,11 @@ export default function DataQualityClientDetails() {
   // Handle empty state
   if (!clientDetail) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#F7F7F7" }}
-      >
-        <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+        </div>
       </div>
     );
   }
@@ -109,33 +89,31 @@ export default function DataQualityClientDetails() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F7F7F7" }}>
+    <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+      <Header title={`${countryName} - ${clientName}` || ""} />
       <main>
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold" style={{ color: "#141414" }}>
-            {clientName}
-          </h1>
-        </div>
-
         <Card className="border-none">
           <CardContent>
             <div className="flex items-center justify-between mb-6 ">
-              <div className="mb-6 flex items-center gap-4">
-                <Button
-                  onClick={handleGoBack}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  Atrás
-                </Button>
-
-                <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-                  Información general
-                </h2>
-              </div>
+              <Button
+                onClick={handleGoBack}
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Atrás
+              </Button>
               <div className="flex items-center gap-3">
+                <Link
+                  href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <Button variant="outline" className="">
+                    <BellSimpleRinging size={18} />
+                    Alertas
+                  </Button>
+                </Link>
                 <Button
                   className="text-sm font-medium"
                   style={{

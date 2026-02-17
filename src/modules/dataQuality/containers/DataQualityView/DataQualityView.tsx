@@ -3,12 +3,16 @@ import Link from "next/link";
 import { Badge, Spin } from "antd";
 import { BellSimpleRinging } from "phosphor-react";
 import { Users, Calendar, TrendingUp } from "lucide-react";
-import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
-import { Button } from "@/modules/chat/ui/button";
+
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
 import { formatDateBars } from "@/utils/utils";
+
+import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
+import { Button } from "@/modules/chat/ui/button";
+import Header from "@/components/organisms/header";
+
+import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
 
 export default function DataQualityView() {
   const { ID } = useAppStore((projects) => projects.selectedProject);
@@ -43,15 +47,19 @@ export default function DataQualityView() {
 
   if (isLoading) {
     return (
-      <div className="bg-[#F7F7F7] flex justify-center items-center min-h-[400px]">
-        <Spin size="large" />
+      <div className="flex flex-col gap-4">
+        <Header title="Data Quality" />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Spin size="large" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-[#F7F7F7]">
+      <div className="flex flex-col gap-4">
+        <Header title="Data Quality" />
         <div className="bg-white rounded-lg p-6 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <Button
@@ -67,7 +75,8 @@ export default function DataQualityView() {
 
   if (countries.length === 0) {
     return (
-      <div className="bg-[#F7F7F7]">
+      <div className="flex flex-col gap-4">
+        <Header title="Data Quality" />
         <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
         <div className="bg-white rounded-lg p-12 text-center">
           <p className="text-gray-500 text-lg">No hay países configurados</p>
@@ -77,7 +86,8 @@ export default function DataQualityView() {
   }
 
   return (
-    <div className="bg-[#F7F7F7]">
+    <div className="flex flex-col gap-4">
+      <Header title="Data Quality" />
       <div className="flex items-center justify-between ">
         <div className="flex items-center space-x-4 mb-6">
           <h2 className="text-xl font-semibold text-[#141414]">Países y Distribuidores</h2>
