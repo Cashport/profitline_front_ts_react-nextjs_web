@@ -3,7 +3,6 @@ import { Table, TableProps } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { IClientData, IClientDataArchive } from "@/types/dataQuality/IDataQuality";
-import { FILE_TYPE_MAPPINGS } from "@/modules/dataQuality/lib/constants";
 
 interface CountriesClientsTableProps {
   data: IClientData[];
@@ -17,32 +16,6 @@ interface CountriesClientsTableProps {
   scrollHeight: number;
   onRowClick?: (record: IClientData) => void;
 }
-
-const getFileTypeBadges = (archives: IClientDataArchive[]) => {
-  const fileTypes: Array<{ type: string; label: string; color: string }> = [];
-
-  archives.forEach((archive) => {
-    const desc = archive?.description?.toLowerCase();
-    if (!desc) return;
-
-    const match = FILE_TYPE_MAPPINGS.find((m) => desc.includes(m.keyword));
-    if (match && !fileTypes.some((f) => f.type === match.type)) {
-      fileTypes.push({ type: match.type, label: match.label, color: match.color });
-    }
-  });
-
-  // If no types detected, show generic badge for each valid archive
-  const validArchives = archives.filter((a) => a?.id && a?.description);
-  if (fileTypes.length === 0 && validArchives.length > 0) {
-    return validArchives.map((archive, idx) => ({
-      type: `archive-${idx}`,
-      label: "AR",
-      color: "bg-gray-500"
-    }));
-  }
-
-  return fileTypes;
-};
 
 export default function CountriesClientsTable({
   data,
@@ -75,20 +48,21 @@ export default function CountriesClientsTable({
       dataIndex: "client_data_archives",
       key: "archives",
       render: (archives: IClientDataArchive[]) => {
-        const fileTypes = getFileTypeBadges(archives);
-
+        if (!archives || archives.length === 0) {
+          return <span className="text-xs text-gray-500">Sin archivos</span>;
+        }
         return (
           <div className="flex gap-1">
-            {fileTypes.map((fileType, idx) => (
+            {archives.map((archive) => (
               <div
-                key={`${fileType.type}-${idx}`}
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white ${fileType.color}`}
-                title={fileType.type}
+                key={archive.id}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+                style={{ backgroundColor: archive.color }}
+                title={archive.description}
               >
-                {fileType.label}
+                {archive.abreviation}
               </div>
             ))}
-            {fileTypes.length === 0 && <span className="text-xs text-gray-500">Sin archivos</span>}
           </div>
         );
       }
