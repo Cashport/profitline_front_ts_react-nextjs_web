@@ -222,7 +222,7 @@ export default function ModalAddEditCatalog({
                   hasError={!!errors.material_code}
                   options={selectOptions.materials.map((material) => ({
                     value: String(material.id),
-                    label: material.material_name
+                    label: `${material.material_code} - ${material.material_name}`
                   }))}
                 />
               )}
