@@ -307,3 +307,25 @@ export const deleteIntakeFile = async (fileId: number): Promise<any> => {
     throw error;
   }
 };
+
+export const downloadCatalogFile = async ({
+  clientId,
+  countryId
+}: {
+  clientId?: number | string;
+  countryId?: number | string;
+}) => {
+  const params = [];
+  if (clientId) params.push(`id_client=${clientId}`);
+  if (countryId) params.push(`id_country=${countryId}`);
+  const queryString = params.length > 0 ? `?${params.join("&")}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/catalog/materials/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

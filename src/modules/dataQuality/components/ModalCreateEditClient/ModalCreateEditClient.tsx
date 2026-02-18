@@ -105,7 +105,7 @@ const ModalCreateEditClient = ({
   return (
     <Modal
       className="modalCreateEditClient"
-      width={400}
+      width={460}
       footer={null}
       open={isOpen}
       closable={false}
