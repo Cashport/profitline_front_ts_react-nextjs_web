@@ -16,6 +16,10 @@ import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { BellSimpleRinging } from "@phosphor-icons/react";
+import { DotsThree } from "phosphor-react";
+import { downloadCatalogFile } from "@/services/dataQuality/dataQuality";
+import { message } from "antd";
+import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -24,12 +28,35 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [isEditClientOpen, setIsEditClientOpen] = useState(false);
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
     clientId,
     projectId
   );
+
+  const handleDownloadCatalog = async () => {
+    setIsDownloadCatalogLoading(true);
+    try {
+      const res = await downloadCatalogFile({
+        clientId
+      });
+      const url = window.URL.createObjectURL(new Blob([res.url]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${res.filename}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setIsActionsModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
+    }
+    setIsDownloadCatalogLoading(false);
+  };
 
   // Handle loading state
   if (isLoading) {
@@ -105,6 +132,10 @@ export default function DataQualityClientDetails() {
                 Atrás
               </Button>
               <div className="flex items-center gap-3">
+                <Button variant="outline" className="" onClick={() => setIsActionsModalOpen(true)}>
+                  <DotsThree size={"1.5rem"} />
+                  Generar acción
+                </Button>
                 <Link
                   href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
                   style={{ textDecoration: "none", color: "inherit" }}
@@ -114,16 +145,7 @@ export default function DataQualityClientDetails() {
                     Alertas
                   </Button>
                 </Link>
-                <Button
-                  className="text-sm font-medium"
-                  style={{
-                    backgroundColor: "#CBE71E",
-                    color: "#141414",
-                    border: "none"
-                  }}
-                >
-                  Puntos de venta
-                </Button>
+
                 <Link
                   href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}`}
                   style={{ textDecoration: "none", color: "inherit" }}
@@ -185,6 +207,13 @@ export default function DataQualityClientDetails() {
           client_name: clientDetail.client_name || "",
           stakeholder: String(clientDetail.stakeholder || "")
         }}
+      />
+
+      <CountryClientsActionsModal
+        isOpen={isActionsModalOpen}
+        onClose={() => setIsActionsModalOpen(false)}
+        onDownloadCatalog={handleDownloadCatalog}
+        isDownloadCatalogLoading={isDownloadCatalogLoading}
       />
     </div>
   );
