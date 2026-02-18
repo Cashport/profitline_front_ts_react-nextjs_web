@@ -32,6 +32,8 @@ export interface IPeriodicity {
 // Client Data Archive
 export interface IClientDataArchive {
   id: number;
+  color: string;
+  abreviation: string;
   description: string;
   periodicity: IPeriodicity;
 }
@@ -109,6 +111,13 @@ export interface IDeleteClientResponse {
   deleted: boolean;
 }
 
+export interface IDataType {
+  id: number;
+  color: string;
+  abreviation: string;
+  description: string;
+}
+
 export interface IClientDetailDataArchive {
   id: number;
   id_type_archive: number;
@@ -125,6 +134,7 @@ export interface IClientDetailDataArchive {
     id: number;
     description: string;
   } | null;
+  data_type: IDataType;
 }
 
 export interface IClientDetailArchiveClient {
@@ -143,6 +153,7 @@ export interface IClientDetailArchiveClient {
   acciones: string[];
   created_at: string;
   updated_at: string | null;
+  data_type: IDataType;
 }
 
 // Client Detail

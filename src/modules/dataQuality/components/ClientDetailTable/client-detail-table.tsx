@@ -26,23 +26,6 @@ interface IClientDetailTableProps {
   mutate: () => void;
 }
 
-const getCategoryBadge = (category: string) => {
-  const colors = {
-    Stock: "bg-blue-100 text-blue-800",
-    Sales: "bg-purple-100 text-purple-800",
-    "In transit": "bg-orange-100 text-orange-800"
-  };
-
-  return (
-    <Badge
-      variant="secondary"
-      className={`text-xs ${colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"}`}
-    >
-      {category}
-    </Badge>
-  );
-};
-
 const bytesToMB = (bytes: number): string => {
   if (!bytes) return "-";
   return (bytes / (1024 * 1024)).toFixed(2) + " MB";
@@ -166,7 +149,15 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         <TableBody>
           {files?.map((file) => (
             <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
-              <TableCell>{getCategoryBadge(file.tipo_archivo)}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="secondary"
+                  className="text-xs text-white"
+                  style={{ backgroundColor: file.data_type.color }}
+                >
+                  {file.data_type.description}
+                </Badge>
+              </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
