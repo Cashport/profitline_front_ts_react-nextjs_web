@@ -1,3 +1,19 @@
+import { GenericResponse } from "@/types/global/IGlobal";
+
+export interface GenericResponseWithFilters<T = any, F = any> extends GenericResponse<T> {
+  filters: F;
+}
+
+export interface ICountryClientsFilters {
+  status: string[];
+  periodicity: string[];
+  archive_types: IDataType[];
+  intake_types: {
+    id: number;
+    description: string;
+  }[];
+}
+
 export interface ICountry {
   id_country: number;
   country_name: string;

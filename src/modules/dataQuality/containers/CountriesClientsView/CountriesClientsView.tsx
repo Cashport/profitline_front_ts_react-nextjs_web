@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -8,9 +8,11 @@ import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
 
-import { downloadCatalogFile, getClientData } from "@/services/dataQuality/dataQuality";
+import { downloadCatalogFile } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useCountriesClients } from "../../hooks/useCountriesClients";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
@@ -38,53 +40,40 @@ export default function CountriesClientsView() {
   };
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [periodicityFilter, setPeriodicityFilter] = useState("all");
-  const [fileTypeFilter, setFileTypeFilter] = useState("all");
+  const debouncedSearchTerm = useDebounce(searchTerm, 400);
+  const [activeFilters, setActiveFilters] = useState({
+    status: "all",
+    periodicity: "all",
+    fileType: "all",
+    intakeType: "all"
+  });
   const [isModalClientOpen, setIsModalClientOpen] = useState(false);
   const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
 
-  // API data state
-  const [clientsData, setClientsData] = useState<IClientData[]>([]);
-  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
-    total: 0
+    pageSize: 10
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await getClientData(
-        countryId,
-        projectId,
-        pagination.pageSize,
-        pagination.current
-      );
-      setClientsData(res.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total
-      }));
-    } catch (err) {
-      console.error("Error fetching client data:", err);
-    } finally {
-      setLoading(false);
+  const { data, filters, isLoading, mutate } = useCountriesClients(
+    countryId,
+    projectId,
+    pagination.current,
+    pagination.pageSize,
+    {
+      status: activeFilters.status !== "all" ? activeFilters.status : undefined,
+      periodicity: activeFilters.periodicity !== "all" ? activeFilters.periodicity : undefined,
+      id_type_archive:
+        activeFilters.fileType !== "all" ? Number(activeFilters.fileType) : undefined,
+      id_intake_type:
+        activeFilters.intakeType !== "all" ? Number(activeFilters.intakeType) : undefined,
+      search: debouncedSearchTerm || undefined
     }
-  };
-
-  useEffect(() => {
-    if (projectId) {
-      fetchData();
-    }
-  }, [projectId, pagination.current, pagination.pageSize]);
-
-  // Filter by client_name only (other filters remain mock)
-  const filteredData = clientsData.filter((client) =>
-    client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const clientsData = data?.data ?? [];
+  const total = data?.total ?? 0;
 
   const handleRowClick = (record: IClientData) => {
     router.push(`/data-quality/client/${record.id}`);
@@ -116,9 +105,6 @@ export default function CountriesClientsView() {
   return (
     <div className="flex flex-col gap-4">
       <Header title={countryName} />
-      {/* <div className="mb-6 flex items-center gap-4">
-        <h1 className="text-2xl font-bold text-[#141414]">{countryName}</h1>
-      </div> */}
 
       {/* Main Content */}
       <Card className="border-none p-0">
@@ -152,12 +138,11 @@ export default function CountriesClientsView() {
               </AntButton>
 
               <DataQualityGeneralFilter
-                selectedStatus={statusFilter}
-                onStatusChange={(val) => setStatusFilter(val ?? "all")}
-                selectedPeriodicity={periodicityFilter}
-                onPeriodicityChange={(val) => setPeriodicityFilter(val ?? "all")}
-                selectedFileType={fileTypeFilter}
-                onFileTypeChange={(val) => setFileTypeFilter(val ?? "all")}
+                filterOptions={filters}
+                activeFilters={activeFilters}
+                onChange={(key, val) =>
+                  setActiveFilters((prev) => ({ ...prev, [key]: val ?? "all" }))
+                }
               />
             </div>
 
@@ -183,9 +168,9 @@ export default function CountriesClientsView() {
 
           {/* Clients Table */}
           <CountriesClientsTable
-            data={filteredData}
-            loading={loading}
-            pagination={pagination}
+            data={clientsData}
+            loading={isLoading}
+            pagination={{ ...pagination, total }}
             onPaginationChange={(page, pageSize) => {
               setPagination((prev) => ({
                 ...prev,
@@ -207,7 +192,7 @@ export default function CountriesClientsView() {
       <ModalCreateEditClient
         isOpen={isModalClientOpen}
         onClose={() => setIsModalClientOpen(false)}
-        onSuccess={fetchData}
+        onSuccess={mutate}
         countryName=""
         countryId={countryId}
         mode="create"
