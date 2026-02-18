@@ -312,8 +312,8 @@ export const downloadCatalogFile = async ({
   clientId,
   countryId
 }: {
-  clientId: number;
-  countryId: number;
+  clientId?: number | string;
+  countryId?: number | string;
 }) => {
   const params = [];
   if (clientId) params.push(`id_client=${clientId}`);
@@ -323,9 +323,9 @@ export const downloadCatalogFile = async ({
     const response: GenericResponse<{
       url: string;
       filename: string;
-    }> = await instance.get(`${config.API_HOST}/data/catalog/materials/download${queryString}`);
+    }> = await API.get(`${config.API_HOST}/data/catalog/materials/download${queryString}`);
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     throw error;
   }
 };

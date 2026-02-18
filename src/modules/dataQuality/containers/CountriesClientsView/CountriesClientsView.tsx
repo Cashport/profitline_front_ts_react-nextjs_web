@@ -6,9 +6,9 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
-import { Button as AntButton } from "antd";
+import { Button as AntButton, message } from "antd";
 
-import { getClientData } from "@/services/dataQuality/dataQuality";
+import { downloadCatalogFile, getClientData } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 
@@ -43,6 +43,7 @@ export default function CountriesClientsView() {
   const [fileTypeFilter, setFileTypeFilter] = useState("all");
   const [isModalClientOpen, setIsModalClientOpen] = useState(false);
   const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
 
   // API data state
   const [clientsData, setClientsData] = useState<IClientData[]>([]);
@@ -87,6 +88,27 @@ export default function CountriesClientsView() {
 
   const handleRowClick = (record: IClientData) => {
     router.push(`/data-quality/client/${record.id}`);
+  };
+
+  const handleDownloadCatalog = async () => {
+    setIsDownloadCatalogLoading(true);
+    try {
+      const res = await downloadCatalogFile({
+        countryId
+      });
+      const url = window.URL.createObjectURL(new Blob([res.url]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${res.filename}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setIsActionsModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
+    }
+    setIsDownloadCatalogLoading(false);
   };
 
   const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
@@ -179,6 +201,8 @@ export default function CountriesClientsView() {
       <CountryClientsActionsModal
         isOpen={isActionsModalOpen}
         onClose={() => setIsActionsModalOpen(false)}
+        onDownloadCatalog={handleDownloadCatalog}
+        isDownloadCatalogLoading={isDownloadCatalogLoading}
       />
       <ModalCreateEditClient
         isOpen={isModalClientOpen}

@@ -9,11 +9,15 @@ import "./countryClientsActionsModal.scss";
 type CountryClientsActionsModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onDownloadCatalog: () => void;
+  isDownloadCatalogLoading: boolean;
 };
 
 export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  onDownloadCatalog,
+  isDownloadCatalogLoading
 }) => {
   return (
     <Modal
@@ -29,7 +33,8 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         <ButtonGenerateAction
           icon={<DownloadSimple size={20} />}
           title="Descargar catalogo"
-          onClick={() => {}}
+          onClick={onDownloadCatalog}
+          disabled={isDownloadCatalogLoading}
         />
         <ButtonGenerateAction
           icon={<UploadSimple size={20} />}
