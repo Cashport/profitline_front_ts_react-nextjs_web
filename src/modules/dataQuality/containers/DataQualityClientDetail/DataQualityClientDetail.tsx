@@ -147,7 +147,7 @@ export default function DataQualityClientDetails() {
                 </Link>
 
                 <Link
-                  href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}`}
+                  href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <Button
