@@ -161,21 +161,13 @@ export default function DataQualityClientDetails() {
                     Catálogos
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  className="text-sm font-medium bg-transparent"
-                  onClick={() => setIsEditClientOpen(true)}
-                  style={{ borderColor: "#DDDDDD", color: "#141414" }}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar
-                </Button>
               </div>
             </div>
 
             <ClientDetailInfo
               clientName={clientDetail?.client_name}
               stakeholder={clientDetail?.stakeholder?.toString()}
+              setIsEditClientOpen={setIsEditClientOpen}
             />
             <ClientDetailIntakesTable
               clientId={clientId}
