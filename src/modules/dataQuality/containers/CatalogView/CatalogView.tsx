@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { message } from "antd";
 
 import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
@@ -16,13 +16,18 @@ import ModalAddEditCatalog, {
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
+import { Button } from "@/modules/chat/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { Card } from "@/modules/chat/ui/card";
 
 export default function CatalogView() {
+  const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
   const clientName = searchParams.get("clientName");
+  const countryName = searchParams.get("countryName");
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const [mode, setMode] = useState<"create" | "edit">("create");
@@ -102,11 +107,24 @@ export default function CatalogView() {
     }
   };
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <Header title="Catálogo de Equivalencias" />
+      <Header title={`${countryName} - ${clientName}`} />
       {/* Main Content */}
-      <main>
+      <Card className="border-none gap-2 p-6">
+        <Button
+          onClick={handleGoBack}
+          variant="ghost"
+          size="sm"
+          className="text-gray-700 hover:text-gray-900 w-fit"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Volver al cliente
+        </Button>
         <CatalogsTable
           equivalencies={catalogData ?? []}
           clientName={clientName || ""}
@@ -117,7 +135,7 @@ export default function CatalogView() {
             setWhichModalOpen({ selected: 2 });
           }}
         />
-      </main>
+      </Card>
 
       <ModalAddEditCatalog
         isOpen={whichModalOpen.selected === 1}
