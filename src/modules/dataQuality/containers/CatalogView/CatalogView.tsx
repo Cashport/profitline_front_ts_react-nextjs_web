@@ -9,6 +9,7 @@ import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 
 import Header from "@/components/organisms/header";
+import UiTab from "@/components/ui/ui-tab";
 import { CatalogsTable } from "../../components/CatalogsTable";
 import ModalAddEditCatalog, {
   CatalogFormData
@@ -125,15 +126,35 @@ export default function CatalogView() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           Volver al cliente
         </Button>
-        <CatalogsTable
-          equivalencies={catalogData ?? []}
-          clientName={clientName || ""}
-          onEdit={handleEdit}
-          onAddNew={handleAddNew}
-          onDelete={(item) => {
-            setSelectedCatalog(item);
-            setWhichModalOpen({ selected: 2 });
-          }}
+        <UiTab
+          tabs={[
+            {
+              key: "productos",
+              label: "Productos",
+              children: (
+                <CatalogsTable
+                  equivalencies={catalogData ?? []}
+                  clientName={clientName || ""}
+                  onEdit={handleEdit}
+                  onAddNew={handleAddNew}
+                  onDelete={(item) => {
+                    setSelectedCatalog(item);
+                    setWhichModalOpen({ selected: 2 });
+                  }}
+                />
+              )
+            },
+            {
+              key: "packs",
+              label: "Packs",
+              children: <div />
+            },
+            {
+              key: "puntos-de-venta",
+              label: "Puntos de venta",
+              children: <div />
+            }
+          ]}
         />
       </Card>
 

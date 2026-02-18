@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash2, Filter, ArrowLeft } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Pagination } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
-import { Input } from "@/modules/chat/ui/input";
+import UiSearchInput from "@/components/ui/search-input";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
   Table,
   TableBody,
@@ -16,7 +16,6 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
-import { useRouter } from "next/navigation";
 
 interface CatalogsTableProps {
   equivalencies: IGetCatalogs[];
@@ -88,21 +87,12 @@ export function CatalogsTable({
     <div>
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-4 pb-4 ">
-        <div className="flex items-center space-x-4">
-          {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Plus
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-              style={{ color: "#141414" }}
-            />
-            <Input
-              placeholder="Buscar producto..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10"
-              style={{ borderColor: "#DDDDDD" }}
-            />
-          </div>
+        <div className="flex items-center gap-3">
+          <UiSearchInput
+            placeholder="Buscar por ID"
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+          <GenerateActionButton />
         </div>
         <Button
           onClick={onAddNew}
