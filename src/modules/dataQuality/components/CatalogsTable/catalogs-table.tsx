@@ -58,7 +58,7 @@ export function CatalogsTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   const filteredEquivalencies = equivalencies.filter((item) => {
     const term = searchTerm.toLowerCase();
