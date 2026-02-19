@@ -20,11 +20,7 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from "@/modules/chat/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 
 interface IClientDetailTableProps {
@@ -81,10 +77,17 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
     try {
       const res = type === "excel" ? await downloadExcel(fileId) : await downloadCSV(fileId);
-      const url = window.URL.createObjectURL(res);
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `archivo_${fileId}`);
+
+      if (res instanceof Blob) {
+        const url = window.URL.createObjectURL(res);
+        link.href = url;
+        link.setAttribute("download", `archivo_${fileId}`);
+      } else {
+        link.href = res.url;
+        link.setAttribute("download", res.filename || `archivo_${fileId}`);
+      }
+
       document.body.appendChild(link);
       link.click();
       link.remove();

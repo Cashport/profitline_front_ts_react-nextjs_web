@@ -295,14 +295,12 @@ export const downloadCSV = async (id_archives_client_data: number): Promise<Blob
   }
 };
 
-export const downloadExcel = async (id_archives_client_data: number): Promise<Blob> => {
+export const downloadExcel = async (id_archives_client_data: number) => {
   try {
-    const response = await instance.get(
-      `${config.API_HOST}/data/sales-excel/${id_archives_client_data}`,
-      {
-        responseType: "blob"
-      }
-    );
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await instance.get(`${config.API_HOST}/data/sales-excel/${id_archives_client_data}`);
     return response.data;
   } catch (error: any) {
     if (error?.response?.data instanceof Blob) {
