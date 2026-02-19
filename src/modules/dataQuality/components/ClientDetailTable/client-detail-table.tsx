@@ -84,8 +84,9 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         link.href = url;
         link.setAttribute("download", `archivo_${fileId}`);
       } else {
-        link.href = res.url;
-        link.setAttribute("download", res.filename || `archivo_${fileId}`);
+        window.open(res.url, "_blank");
+        message.success("Archivo descargado exitosamente.");
+        return;
       }
 
       document.body.appendChild(link);
