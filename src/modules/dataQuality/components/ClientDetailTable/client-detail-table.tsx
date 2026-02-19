@@ -19,6 +19,11 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 
 interface IClientDetailTableProps {
@@ -185,9 +190,22 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                 <span style={{ color: "#141414" }}>{bytesToMB(file.size)}</span>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className="text-xs">
-                  {file.status_description}
-                </Badge>
+                {file.last_novelty ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="outline" className="text-xs cursor-help">
+                        {file.status_description}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">{file.last_novelty}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Badge variant="outline" className="text-xs">
+                    {file.status_description}
+                  </Badge>
+                )}
               </TableCell>
               <TableCell className="w-0">
                 <div className="flex items-center justify-center">
