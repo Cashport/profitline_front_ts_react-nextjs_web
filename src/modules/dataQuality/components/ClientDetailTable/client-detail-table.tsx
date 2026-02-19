@@ -84,17 +84,8 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         link.href = url;
         link.setAttribute("download", `archivo_${fileId}`);
       } else {
-        const fetchResponse = await fetch(res.url);
-        const blob = await fetchResponse.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        link.href = blobUrl;
+        link.href = res.url;
         link.setAttribute("download", res.filename || `archivo_${fileId}`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(blobUrl);
-        message.success("Archivo descargado exitosamente.");
-        return;
       }
 
       document.body.appendChild(link);
