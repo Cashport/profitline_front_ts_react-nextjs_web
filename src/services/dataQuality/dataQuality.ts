@@ -295,6 +295,25 @@ export const downloadCSV = async (id_archives_client_data: number): Promise<Blob
   }
 };
 
+export const downloadExcel = async (id_archives_client_data: number): Promise<Blob> => {
+  try {
+    const response = await instance.get(
+      `${config.API_HOST}/data/sales-excel/${id_archives_client_data}`,
+      {
+        responseType: "blob"
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.data instanceof Blob) {
+      const text = await error.response.data.text();
+      const parsed = JSON.parse(text);
+      throw new Error(parsed.message || "Error al descargar el archivo");
+    }
+    throw error;
+  }
+};
+
 export const deleteIntakeFile = async (fileId: number): Promise<any> => {
   console.log("Attempting to delete intake file with ID:", fileId);
   try {

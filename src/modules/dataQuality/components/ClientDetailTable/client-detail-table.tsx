@@ -6,6 +6,7 @@ import { Dropdown, message } from "antd";
 import {
   deleteIntakeFile,
   downloadCSV,
+  downloadExcel,
   uploadIntakeFile
 } from "@/services/dataQuality/dataQuality";
 
@@ -71,15 +72,15 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     input.click();
   };
 
-  const handleProcessedFile = async (fileId: number) => {
+  const handleProcessedFile = async (fileId: number, type: "excel" | "csv") => {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
     try {
-      const res = await downloadCSV(fileId);
-      // Aquí puedes implementar la lógica para descargar el archivo, por ejemplo:
+      const res = type === "excel" ? await downloadExcel(fileId) : await downloadCSV(fileId);
+      const extension = type === "excel" ? "xlsx" : "csv";
       const url = window.URL.createObjectURL(new Blob([res]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `archivo_${fileId}.csv`); // Nombre del archivo a descargar
+      link.setAttribute("download", `archivo_${fileId}.${extension}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -223,8 +224,13 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                         },
                         {
                           key: "download-universal",
+                          label: "Descarga universal",
+                          onClick: () => handleProcessedFile(file.id, "csv")
+                        },
+                        {
+                          key: "download-universal-excel",
                           label: "Descarga universal excel",
-                          onClick: () => handleProcessedFile(file.id)
+                          onClick: () => handleProcessedFile(file.id, "excel")
                         },
                         {
                           key: "delete",
