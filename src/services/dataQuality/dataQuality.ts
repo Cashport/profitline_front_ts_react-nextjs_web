@@ -300,7 +300,7 @@ export const downloadExcel = async (id_archives_client_data: number) => {
     const response: GenericResponse<{
       url: string;
       filename: string;
-    }> = await instance.get(`${config.API_HOST}/data/sales-excel/${id_archives_client_data}`);
+    }> = await API.get(`${config.API_HOST}/data/sales-excel/${id_archives_client_data}`);
     return response.data;
   } catch (error: any) {
     if (error?.response?.data instanceof Blob) {
