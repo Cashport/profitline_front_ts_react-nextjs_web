@@ -161,6 +161,7 @@ export interface IClientDetailArchiveClient {
   date_archive: string | null;
   description: string;
   id_status: number;
+  last_novelty: string | null;
   status_description: string;
   date_upload: string | null;
   user_upload: string | null;
