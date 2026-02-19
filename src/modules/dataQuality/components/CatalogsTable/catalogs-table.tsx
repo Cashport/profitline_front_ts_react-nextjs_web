@@ -58,7 +58,7 @@ export function CatalogsTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   const filteredEquivalencies = equivalencies.filter((item) => {
     const term = searchTerm.toLowerCase();
@@ -80,7 +80,7 @@ export function CatalogsTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 pb-4 gap-2 ">
+      <div className="flex items-center justify-between pb-4 gap-2 ">
         <div className="flex items-center gap-3">
           <UiSearchInput
             placeholder="Buscar por ID"
