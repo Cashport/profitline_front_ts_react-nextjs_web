@@ -25,35 +25,6 @@ interface CatalogsTableProps {
   onDelete: (item: IGetCatalogs) => void;
 }
 
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "active":
-      return (
-        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-          Activo
-        </Badge>
-      );
-    case "audit":
-      return (
-        <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-          Por auditar
-        </Badge>
-      );
-    case "unmapped":
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Sin mapear
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-xs">
-          Desconocido
-        </Badge>
-      );
-  }
-};
-
 export function CatalogsTable({
   equivalencies,
   clientName,
@@ -137,7 +108,11 @@ export function CatalogsTable({
               <TableCell>
                 <span style={{ color: "#141414" }}>{item.material_name}</span>
               </TableCell>
-              <TableCell>{getStatusBadge("-")}</TableCell>
+              <TableCell>
+                <Badge variant="outline" className="text-xs">
+                  {item.status}
+                </Badge>
+              </TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>-</span>
               </TableCell>
