@@ -75,7 +75,6 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
 
   const handleProcessedFile = async (fileId: number, type: "excel" | "csv") => {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
-    const newWindow = type === "excel" ? window.open("", "_blank") : null;
     try {
       const res = type === "excel" ? await downloadExcel(fileId) : await downloadCSV(fileId);
       const link = document.createElement("a");
@@ -85,7 +84,15 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         link.href = url;
         link.setAttribute("download", `archivo_${fileId}`);
       } else {
-        if (newWindow) newWindow.location.href = res.url;
+        const fetchResponse = await fetch(res.url);
+        const blob = await fetchResponse.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        link.href = blobUrl;
+        link.setAttribute("download", res.filename || `archivo_${fileId}`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
         message.success("Archivo descargado exitosamente.");
         return;
       }
