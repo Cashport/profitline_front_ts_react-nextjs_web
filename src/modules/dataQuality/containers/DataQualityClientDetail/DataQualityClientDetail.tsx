@@ -39,23 +39,38 @@ export default function DataQualityClientDetails() {
 
   const handleDownloadCatalog = async () => {
     setIsDownloadCatalogLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando catálogo...",
+      duration: 0,
+    });
+
     try {
-      const res = await downloadCatalogFile({
-        clientId
-      });
-      const url = window.URL.createObjectURL(new Blob([res.url]));
+      const res = await downloadCatalogFile({ clientId });
+
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${res.filename}`);
+      link.href = res.url;
+      link.setAttribute("download", res.filename || "catalogo.xlsx");
+
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
 
+      message.success("Catálogo descargado exitosamente.");
       setIsActionsModalOpen(false);
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
+
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al descargar el catálogo.";
+
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadCatalogLoading(false);
     }
-    setIsDownloadCatalogLoading(false);
   };
 
   // Handle loading state
