@@ -129,8 +129,8 @@ export default function CatalogView() {
         <UiTab
           tabs={[
             {
-              key: "productos",
-              label: "Productos",
+              key: "materiales",
+              label: "Materiales",
               children: (
                 <CatalogsTable
                   equivalencies={catalogData ?? []}

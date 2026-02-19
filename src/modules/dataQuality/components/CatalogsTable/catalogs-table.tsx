@@ -25,6 +25,29 @@ interface CatalogsTableProps {
   onDelete: (item: IGetCatalogs) => void;
 }
 
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "Activo":
+      return (
+        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+          {status}
+        </Badge>
+      );
+    case "Sin equivalencia":
+      return (
+        <Badge variant="secondary" className="text-xs bg-red-100 text-red-800">
+          {status}
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="text-xs">
+          {status}
+        </Badge>
+      );
+  }
+};
+
 export function CatalogsTable({
   equivalencies,
   clientName,
@@ -35,7 +58,7 @@ export function CatalogsTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   const filteredEquivalencies = equivalencies.filter((item) => {
     const term = searchTerm.toLowerCase();
@@ -57,7 +80,7 @@ export function CatalogsTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 pb-4 ">
+      <div className="flex items-center justify-between pb-4 gap-2 ">
         <div className="flex items-center gap-3">
           <UiSearchInput
             placeholder="Buscar por ID"
@@ -103,16 +126,12 @@ export function CatalogsTable({
                 <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
               </TableCell>
               <TableCell>
-                <span style={{ color: "#141414" }}>-</span>
+                <span style={{ color: "#141414" }}>{item.material_code}</span>
               </TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>{item.material_name}</span>
               </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="text-xs">
-                  {item.status}
-                </Badge>
-              </TableCell>
+              <TableCell>{getStatusBadge(item.status)}</TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>-</span>
               </TableCell>
