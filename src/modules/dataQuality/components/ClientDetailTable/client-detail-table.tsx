@@ -46,6 +46,11 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         setIsUploadingLoading(true);
+        const hide = message.open({
+          type: "loading",
+          content: "Subiendo archivo de ingesta...",
+          duration: 0
+        });
         try {
           await uploadIntakeFile(id, file);
           message.success("Archivo de ingesta subido exitosamente.");
@@ -56,8 +61,10 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
               ? error.message
               : "Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo."
           );
+        } finally {
+          hide();
+          setIsUploadingLoading(false);
         }
-        setIsUploadingLoading(false);
       }
       input.remove();
     };
@@ -65,6 +72,7 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
   };
 
   const handleProcessedFile = async (fileId: number) => {
+    const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
     try {
       const res = await downloadCSV(fileId);
       // Aquí puedes implementar la lógica para descargar el archivo, por ejemplo:
@@ -82,36 +90,44 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
         error?.message ||
         "Error al descargar el archivo. Por favor, inténtalo de nuevo.";
       message.error(errorMessage);
+    } finally {
+      hide();
     }
   };
 
   const handleDownloadOriginal = async (file: IClientDetailArchiveClient) => {
-    if (file.procesed_url) {
-      try {
-        const response = await fetch(file.procesed_url);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", file.description || "archivo_original");
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        message.error(
-          error instanceof Error
-            ? error.message
-            : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
-        );
-      }
-    } else {
+    if (!file.procesed_url) {
       message.error("No hay URL disponible para descargar el archivo original.");
+      return;
+    }
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando archivo original...",
+      duration: 0
+    });
+    try {
+      const response = await fetch(file.procesed_url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", file.description || "archivo_original");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al descargar el archivo. Por favor, inténtalo de nuevo."
+      );
+    } finally {
+      hide();
     }
   };
 
   const handleDeleteFile = async (fileId: number) => {
-    console.log("Deleting file with ID:", fileId);
     setIsDeleteLoading(true);
     try {
       await deleteIntakeFile(fileId);
@@ -207,7 +223,7 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                         },
                         {
                           key: "download-universal",
-                          label: "Descarga universal",
+                          label: "Descarga universal excel",
                           onClick: () => handleProcessedFile(file.id)
                         },
                         {
