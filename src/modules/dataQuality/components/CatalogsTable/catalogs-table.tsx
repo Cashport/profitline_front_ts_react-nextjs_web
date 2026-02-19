@@ -27,28 +27,22 @@ interface CatalogsTableProps {
 
 const getStatusBadge = (status: string) => {
   switch (status) {
-    case "active":
+    case "Activo":
       return (
         <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-          Activo
+          {status}
         </Badge>
       );
-    case "audit":
+    case "Sin equivalencia":
       return (
-        <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-          Por auditar
-        </Badge>
-      );
-    case "unmapped":
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Sin mapear
+        <Badge variant="secondary" className="text-xs bg-red-100 text-red-800">
+          {status}
         </Badge>
       );
     default:
       return (
         <Badge variant="outline" className="text-xs">
-          Desconocido
+          {status}
         </Badge>
       );
   }
@@ -86,7 +80,7 @@ export function CatalogsTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-4 pb-4 ">
+      <div className="flex items-center justify-between mb-4 pb-4 gap-2 ">
         <div className="flex items-center gap-3">
           <UiSearchInput
             placeholder="Buscar por ID"
@@ -132,12 +126,12 @@ export function CatalogsTable({
                 <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
               </TableCell>
               <TableCell>
-                <span style={{ color: "#141414" }}>-</span>
+                <span style={{ color: "#141414" }}>{item.material_code}</span>
               </TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>{item.material_name}</span>
               </TableCell>
-              <TableCell>{getStatusBadge("-")}</TableCell>
+              <TableCell>{getStatusBadge(item.status)}</TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>-</span>
               </TableCell>

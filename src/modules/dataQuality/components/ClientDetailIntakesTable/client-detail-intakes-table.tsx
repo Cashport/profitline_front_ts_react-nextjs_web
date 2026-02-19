@@ -77,11 +77,7 @@ export function ClientDetailIntakesTable({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs"
-                    style={{ backgroundColor: "#CBE71E", color: "#141414" }}
-                  >
+                  <Badge variant="outline" className="text-xs">
                     {intake.periodicity}
                   </Badge>
                 </TableCell>
