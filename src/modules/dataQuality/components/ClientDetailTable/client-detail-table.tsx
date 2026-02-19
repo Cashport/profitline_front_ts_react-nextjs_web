@@ -81,11 +81,10 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
     try {
       const res = type === "excel" ? await downloadExcel(fileId) : await downloadCSV(fileId);
-      const extension = type === "excel" ? "xlsx" : "csv";
-      const url = window.URL.createObjectURL(new Blob([res]));
+      const url = window.URL.createObjectURL(res);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `archivo_${fileId}.${extension}`);
+      link.setAttribute("download", `archivo_${fileId}`);
       document.body.appendChild(link);
       link.click();
       link.remove();
