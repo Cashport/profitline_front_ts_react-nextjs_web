@@ -214,7 +214,7 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                         {file.status_description}
                       </Badge>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="bg-cashport-black text-white">
                       <p className="text-xs">{file.last_novelty}</p>
                     </TooltipContent>
                   </Tooltip>
