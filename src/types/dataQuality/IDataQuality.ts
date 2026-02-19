@@ -263,6 +263,9 @@ export interface IGetCatalogs {
   id: number;
   customer_product_cod: string;
   customer_product_description: string;
+  status: string;
+  client_id: number;
+  client_name: string;
   product_type_id: number;
   product_type_code: string;
   product_type_name: string;
