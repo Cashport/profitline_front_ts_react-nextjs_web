@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal, Table, TableProps, DatePicker, Input } from "antd";
+import { Button, Modal, Table, TableProps, DatePicker, Input, Tooltip } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { CaretLeft, Warning, Trash } from "phosphor-react";
 import dayjs from "dayjs";
@@ -48,6 +48,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
   const [tableData, setTableData] = useState<ITableData[]>([]);
   const [globalDate, setGlobalDate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [invoicesWithError, setInvoicesWithError] = useState<string[]>([]);
 
   const handleAttachEvidence = async () => {
     if (!clientId || !projectId) {
@@ -74,8 +75,16 @@ const PaymentAgreementModal: React.FC<Props> = ({
       setGlobalDate(null);
       setIsSecondView(false);
       setSelectedEvidence([]);
-    } catch (error) {
-      messageShow.error("Error al crear el acuerdo de pago. Por favor, intente de nuevo.");
+      setInvoicesWithError([]);
+    } catch (error: any) {
+      const data = error?.response?.data;
+      if (data?.invoices_with_active_agreement?.length) {
+        setInvoicesWithError(data.invoices_with_active_agreement);
+        setIsSecondView(false);
+        messageShow.error(data.message || "Error al crear el acuerdo de pago.");
+      } else {
+        messageShow.error("Error al crear el acuerdo de pago. Por favor, intente de nuevo.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -196,7 +205,11 @@ const PaymentAgreementModal: React.FC<Props> = ({
       key: "actions",
       render: (_, record) => (
         <div className="actions__buttons">
-          {/* <Button type="text" className="iconBtn" icon={<Warning size="1.125rem" color="red" />} /> */}
+          {invoicesWithError.includes(record.id_erp) && (
+            <Tooltip title="Esta factura ya tiene un acuerdo de pago activo">
+              <Button type="text" className="iconBtn" icon={<Warning size="1.125rem" color="red" />} />
+            </Tooltip>
+          )}
           <Button
             type="text"
             className="iconBtn"
@@ -228,6 +241,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
     setGlobalDate(null);
     setIsSecondView(false);
     setSelectedEvidence([]);
+    setInvoicesWithError([]);
     onClose();
   };
 
