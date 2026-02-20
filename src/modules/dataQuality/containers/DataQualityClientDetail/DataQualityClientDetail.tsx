@@ -17,9 +17,13 @@ import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTa
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { BellSimpleRinging } from "@phosphor-icons/react";
 import { DotsThree } from "phosphor-react";
-import { downloadCatalogFile } from "@/services/dataQuality/dataQuality";
+import {
+  downloadCatalogFile,
+  uploadMassiveOrHistoricalFile
+} from "@/services/dataQuality/dataQuality";
 import { message } from "antd";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -43,7 +47,7 @@ export default function DataQualityClientDetails() {
     const hide = message.open({
       type: "loading",
       content: "Descargando catálogo...",
-      duration: 0,
+      duration: 0
     });
 
     try {
@@ -59,12 +63,9 @@ export default function DataQualityClientDetails() {
 
       message.success("Catálogo descargado exitosamente.");
       setIsActionsModalOpen(false);
-
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al descargar el catálogo.";
+        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
 
       message.error(errorMessage);
     } finally {
@@ -72,6 +73,27 @@ export default function DataQualityClientDetails() {
       setIsDownloadCatalogLoading(false);
     }
   };
+
+  const handleOpenFileUploadModal = () => {
+    message.info("Funcionalidad de carga de archivos en desarrollo.");
+  };
+
+  // const handleUploadMassive = async () => {
+  //   const requestData: IUploadMassiveOrHistoricalRequest = {
+  //     id_client: Number(clientId),
+  //     id_country: Number(clientDetail?.id_country),
+  //     id_type_archive: 1, // Assuming '1' is the type for massive upload
+  //     data_type: ""
+  //   };
+  //   try {
+  //     await uploadMassiveOrHistoricalFile({ clientId, requestObject: requestData });
+  //     message.success("Archivo cargado exitosamente.");
+  //     setIsActionsModalOpen(false);
+  //     mutate();
+  //   } catch (error) {
+  //     message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+  //   }
+  // };
 
   // Handle loading state
   if (isLoading) {
@@ -221,6 +243,7 @@ export default function DataQualityClientDetails() {
         onClose={() => setIsActionsModalOpen(false)}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onUploadFile={handleOpenFileUploadModal}
       />
     </div>
   );
