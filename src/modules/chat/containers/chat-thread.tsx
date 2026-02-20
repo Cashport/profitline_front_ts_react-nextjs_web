@@ -1008,6 +1008,8 @@ export default function ChatThread({
             else if (payload.templateId === "saludo") await sendBasicTemplate("saludo");
             else if (payload.templateId === "soportes")
               await sendTemplateNeedingPayload("soportes");
+            else if (payload.templateId === "cartera_vencida_femsa")
+              await sendTemplateNeedingPayload("cartera_vencida_femsa");
           } finally {
             setTemplateLoading(false);
           }
