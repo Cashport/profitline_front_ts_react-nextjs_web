@@ -8,7 +8,7 @@ import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
 
-import { downloadCatalogFile } from "@/services/dataQuality/dataQuality";
+import { downloadCatalogFile, uploadCatalogMaterial } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -21,6 +21,7 @@ import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import CountriesClientsTable from "../../components/countries-clients-table/CountriesClientsTable";
 import { DataQualityGeneralFilter } from "../../components/general-filter";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import Header from "@/components/organisms/header";
 
 import { IClientData } from "@/types/dataQuality/IDataQuality";
@@ -47,9 +48,10 @@ export default function CountriesClientsView() {
     fileType: "all",
     intakeType: "all"
   });
-  const [isModalClientOpen, setIsModalClientOpen] = useState(false);
-  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+  const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
+  const closeAllModals = () => setWhichModalIsOpen(0);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -93,11 +95,33 @@ export default function CountriesClientsView() {
       link.click();
       document.body.removeChild(link);
 
-      setIsActionsModalOpen(false);
+      closeAllModals();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
     }
     setIsDownloadCatalogLoading(false);
+  };
+
+  const handleOpenAuxiliaryUpload = () => {
+    setWhichModalIsOpen(2);
+  };
+
+  const handleUploadMaterialsAuxiliary = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      await uploadCatalogMaterial(file);
+      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      closeAllModals();
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cargar el archivo de auxiliar de materiales."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
   };
 
   const countryName = clientsData.length > 0 ? clientsData[0].country_name : "";
@@ -132,7 +156,7 @@ export default function CountriesClientsView() {
                 className="flex items-center gap-2 px-4 !h-[48px] !bg-[#f7f7f7] !border-none rounded-lg !font-semibold text-base cursor-pointer hover:!border-[#dddddd]"
                 size="large"
                 icon={<DotsThree size={"1.5rem"} />}
-                onClick={() => setIsActionsModalOpen(true)}
+                onClick={() => setWhichModalIsOpen(1)}
               >
                 {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
               </AntButton>
@@ -158,7 +182,7 @@ export default function CountriesClientsView() {
               </Link>
               <Button
                 className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-                onClick={() => setIsModalClientOpen(true)}
+                onClick={() => setWhichModalIsOpen(3)}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Crear cliente
@@ -184,14 +208,33 @@ export default function CountriesClientsView() {
         </CardContent>
       </Card>
       <CountryClientsActionsModal
-        isOpen={isActionsModalOpen}
-        onClose={() => setIsActionsModalOpen(false)}
+        isOpen={whichModalIsOpen === 1}
+        onClose={closeAllModals}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+      />
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 2}
+        onClose={closeAllModals}
+        onFileUpload={handleUploadMaterialsAuxiliary}
+        loading={isUploadLoading}
+        allowedExtensions={[
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".xls",
+          ".xlsx",
+          ".csv",
+          ".txt",
+          ".eml",
+          ".msg"
+        ]}
       />
       <ModalCreateEditClient
-        isOpen={isModalClientOpen}
-        onClose={() => setIsModalClientOpen(false)}
+        isOpen={whichModalIsOpen === 3}
+        onClose={closeAllModals}
         onSuccess={mutate}
         countryName=""
         countryId={countryId}
