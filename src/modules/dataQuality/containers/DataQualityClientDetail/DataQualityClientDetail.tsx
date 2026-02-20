@@ -3,10 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Edit, ArrowLeft } from "lucide-react";
+import { message } from "antd";
+import { ArrowLeft } from "lucide-react";
+import { BellSimpleRinging } from "@phosphor-icons/react";
+import { DotsThree } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
+import {
+  downloadCatalogFile,
+  uploadCatalogMaterial,
+  uploadMassiveOrHistoricalFile
+} from "@/services/dataQuality/dataQuality";
 
 import Header from "@/components/organisms/header";
 import { Button } from "@/modules/chat/ui/button";
@@ -15,11 +23,10 @@ import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailTable } from "../../components/ClientDetailTable";
-import { BellSimpleRinging } from "@phosphor-icons/react";
-import { DotsThree } from "phosphor-react";
-import { downloadCatalogFile } from "@/services/dataQuality/dataQuality";
-import { message } from "antd";
+import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+
+import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -27,9 +34,10 @@ export default function DataQualityClientDetails() {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
 
   const clientId = params.clientId as string;
-  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
-  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
+  const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
+  const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
@@ -43,7 +51,7 @@ export default function DataQualityClientDetails() {
     const hide = message.open({
       type: "loading",
       content: "Descargando catálogo...",
-      duration: 0,
+      duration: 0
     });
 
     try {
@@ -58,18 +66,64 @@ export default function DataQualityClientDetails() {
       link.remove();
 
       message.success("Catálogo descargado exitosamente.");
-      setIsActionsModalOpen(false);
-
+      setWhichModalIsOpen(0);
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al descargar el catálogo.";
+        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
 
       message.error(errorMessage);
     } finally {
       hide();
       setIsDownloadCatalogLoading(false);
+    }
+  };
+
+  const handleOpenMassiveUpload = () => {
+    setUploadType("massive");
+    setWhichModalIsOpen(3);
+  };
+
+  const handleOpenAuxiliaryUpload = () => {
+    setUploadType("auxiliary");
+    setWhichModalIsOpen(3);
+  };
+
+  const handleUploadMassive = async (file: File) => {
+    setIsUploadLoading(true);
+    const requestObject: IUploadMassiveOrHistoricalRequest = {
+      id_client: Number(clientId),
+      id_country: Number(clientDetail?.id_country),
+      id_type_archive: 1,
+      data_type: ""
+    };
+    try {
+      await uploadMassiveOrHistoricalFile({ file, requestObject });
+      message.success("Archivo cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleUploadMaterialsAuxiliary = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      // Implement the upload logic here, similar to handleUploadMassive
+      await uploadCatalogMaterial(file);
+      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cargar el archivo de auxiliar de materiales."
+      );
+    } finally {
+      setIsUploadLoading(false);
     }
   };
 
@@ -147,7 +201,7 @@ export default function DataQualityClientDetails() {
                 Atrás
               </Button>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="" onClick={() => setIsActionsModalOpen(true)}>
+                <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
                   <DotsThree size={"1.5rem"} />
                   Generar acción
                 </Button>
@@ -182,7 +236,7 @@ export default function DataQualityClientDetails() {
             <ClientDetailInfo
               clientName={clientDetail?.client_name}
               stakeholder={clientDetail?.stakeholder?.toString()}
-              setIsEditClientOpen={setIsEditClientOpen}
+              setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
             />
             <ClientDetailIntakesTable
               clientId={clientId}
@@ -203,8 +257,8 @@ export default function DataQualityClientDetails() {
       </main>
 
       <ModalCreateEditClient
-        isOpen={isEditClientOpen}
-        onClose={() => setIsEditClientOpen(false)}
+        isOpen={whichModalIsOpen === 1}
+        onClose={() => setWhichModalIsOpen(0)}
         onSuccess={() => mutate()}
         countryName={countryName || ""}
         countryId={String(clientDetail.id_country || "")}
@@ -217,10 +271,34 @@ export default function DataQualityClientDetails() {
       />
 
       <CountryClientsActionsModal
-        isOpen={isActionsModalOpen}
-        onClose={() => setIsActionsModalOpen(false)}
+        isOpen={whichModalIsOpen === 2}
+        isInDetailView
+        onClose={() => setWhichModalIsOpen(0)}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onUploadFile={handleOpenMassiveUpload}
+        onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 3}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={
+          uploadType === "massive" ? handleUploadMassive : handleUploadMaterialsAuxiliary
+        }
+        loading={isUploadLoading}
+        allowedExtensions={[
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".xls",
+          ".xlsx",
+          ".csv",
+          ".txt",
+          ".eml",
+          ".msg"
+        ]}
       />
     </div>
   );

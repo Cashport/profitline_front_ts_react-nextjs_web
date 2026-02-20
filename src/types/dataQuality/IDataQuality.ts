@@ -351,3 +351,10 @@ export interface IGetAlerts {
   limit: number;
   total_pages: number;
 }
+
+export interface IUploadMassiveOrHistoricalRequest {
+  id_client: number;
+  id_country: number;
+  id_type_archive: number;
+  data_type: string;
+}

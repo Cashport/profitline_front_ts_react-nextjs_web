@@ -15,7 +15,8 @@ import {
   ICatalogMaterial,
   ICatalogSelectOption,
   ICreateCatalogRequest,
-  IGetFiltersAlerts
+  IGetFiltersAlerts,
+  IUploadMassiveOrHistoricalRequest
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -343,6 +344,43 @@ export const downloadCatalogFile = async ({
     }> = await API.get(`${config.API_HOST}/data/catalog/materials/download${queryString}`);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadMassiveOrHistoricalFile = async ({
+  file,
+  requestObject
+}: {
+  file: File;
+  requestObject: IUploadMassiveOrHistoricalRequest;
+}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("request", JSON.stringify(requestObject));
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/massive-upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading massive or historical file:", error);
+    throw error;
+  }
+};
+
+export const uploadCatalogMaterial = async (file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials/upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading catalog material file:", error);
     throw error;
   }
 };
