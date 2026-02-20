@@ -369,3 +369,18 @@ export const uploadMassiveOrHistoricalFile = async ({
     throw error;
   }
 };
+
+export const uploadCatalogMaterial = async (file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials/upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading catalog material file:", error);
+    throw error;
+  }
+};

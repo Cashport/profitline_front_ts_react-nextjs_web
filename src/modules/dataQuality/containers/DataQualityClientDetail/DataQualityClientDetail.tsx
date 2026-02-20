@@ -12,6 +12,7 @@ import { useAppStore } from "@/lib/store/store";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import {
   downloadCatalogFile,
+  uploadCatalogMaterial,
   uploadMassiveOrHistoricalFile
 } from "@/services/dataQuality/dataQuality";
 
@@ -36,6 +37,7 @@ export default function DataQualityClientDetails() {
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
+  const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
@@ -76,7 +78,13 @@ export default function DataQualityClientDetails() {
     }
   };
 
-  const handleOpenFileUploadModal = () => {
+  const handleOpenMassiveUpload = () => {
+    setUploadType("massive");
+    setWhichModalIsOpen(3);
+  };
+
+  const handleOpenAuxiliaryUpload = () => {
+    setUploadType("auxiliary");
     setWhichModalIsOpen(3);
   };
 
@@ -93,10 +101,27 @@ export default function DataQualityClientDetails() {
       message.success("Archivo cargado exitosamente.");
       setWhichModalIsOpen(0);
       mutate();
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || error?.message || "Error al cargar el archivo.";
-      message.error(errorMessage);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleUploadMaterialsAuxiliary = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      // Implement the upload logic here, similar to handleUploadMassive
+      await uploadCatalogMaterial(file);
+      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cargar el archivo de auxiliar de materiales."
+      );
     } finally {
       setIsUploadLoading(false);
     }
@@ -251,13 +276,16 @@ export default function DataQualityClientDetails() {
         onClose={() => setWhichModalIsOpen(0)}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
-        onUploadFile={handleOpenFileUploadModal}
+        onUploadFile={handleOpenMassiveUpload}
+        onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
       />
 
       <ModalUploadFile
         isOpen={whichModalIsOpen === 3}
         onClose={() => setWhichModalIsOpen(0)}
-        onFileUpload={handleUploadMassive}
+        onFileUpload={
+          uploadType === "massive" ? handleUploadMassive : handleUploadMaterialsAuxiliary
+        }
         loading={isUploadLoading}
         allowedExtensions={[
           ".pdf",
