@@ -1,0 +1,12 @@
+@import "@styles/variables.scss";
+
+.buttonSeeProject {
+    background-color: $dark-gray !important;
+    width: 32px !important;
+    height: 32px !important;
+    aspect-ratio: 1/1 !important;
+
+    &:hover {
+        background-color: $white !important;
+    }
+}
