@@ -189,3 +189,22 @@ a {
 .standardSearch {
     width: 460px;
 }
+
+// Sheet slide animation (uses @keyframes so Radix waits for animationend)
+@keyframes sheetSlideIn {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+@keyframes sheetSlideOut {
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+}
+
+[data-slot="sheet-content"][data-state="open"] {
+    animation: sheetSlideIn 0.3s ease-in-out;
+}
+
+[data-slot="sheet-content"][data-state="closed"] {
+    animation: sheetSlideOut 0.3s ease-in-out forwards;
+}

@@ -72,7 +72,6 @@ export function BalancesView() {
 
   const closeDetailSheet = () => {
     setIsDetailSheetOpen(false);
-    setSelectedSaldoForDetail(null);
   };
 
   const saldoCounts = getSaldoCounts();
@@ -452,7 +451,13 @@ export function BalancesView() {
       </main>
 
       {/* Detail Sheet */}
-      <Sheet open={isDetailSheetOpen} onOpenChange={setIsDetailSheetOpen}>
+      <Sheet
+        open={isDetailSheetOpen}
+        onOpenChange={(open) => {
+          setIsDetailSheetOpen(open);
+          if (!open) setTimeout(() => setSelectedSaldoForDetail(null), 300);
+        }}
+      >
         <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0" hideClose>
           {selectedSaldoForDetail && (
             <BalanceDetailModal
