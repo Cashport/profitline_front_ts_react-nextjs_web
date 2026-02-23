@@ -31,6 +31,7 @@ type Props = {
   isOpen?: boolean;
   onClose?: () => void;
   onOpenAddClientModal?: () => void;
+  onAccountStatement?: () => void;
   mutateTickets: () => void;
 };
 
@@ -39,6 +40,7 @@ export default function ChatDetails({
   isOpen,
   onClose,
   onOpenAddClientModal,
+  onAccountStatement,
   mutateTickets
 }: Props) {
   const { toast } = useToast();
@@ -104,6 +106,11 @@ export default function ChatDetails({
               </button>
               <ChatActions
                 items={[
+                  {
+                    key: "account-statement",
+                    label: "Estado de cuenta",
+                    onClick: onAccountStatement
+                  },
                   {
                     key: "add-client",
                     label: "Agregar cliente",
@@ -234,6 +241,7 @@ export default function ChatDetails({
           okText="Inactivar"
           okLoading={isActionLoading}
         />
+
       </div>
     </aside>
   );
