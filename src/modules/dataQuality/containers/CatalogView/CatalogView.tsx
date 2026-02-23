@@ -11,6 +11,7 @@ import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { CatalogsTable } from "../../components/CatalogsTable";
+import { CatalogPacksTable } from "../../components/CatalogPacksTable";
 import ModalAddEditCatalog, {
   CatalogFormData
 } from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
@@ -147,7 +148,7 @@ export default function CatalogView() {
             {
               key: "packs",
               label: "Packs",
-              children: <div />
+              children: <CatalogPacksTable />
             },
             {
               key: "puntos-de-venta",

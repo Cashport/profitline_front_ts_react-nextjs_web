@@ -351,3 +351,26 @@ export interface IGetAlerts {
   limit: number;
   total_pages: number;
 }
+
+export interface IMaterialPackMaterial {
+  productType: string;
+  productTypeName: string;
+  typeVol: string;
+  typeVolName: string;
+  idCatalogMaterial: number;
+  materialCode: string;
+  materialName: string;
+  factor: number;
+}
+
+export interface IMaterialPack {
+  id: number;
+  idCatalogMaterialAux: number;
+  idClient: number;
+  idProject: number;
+  idCountry: number;
+  clientName: string;
+  customerProductCod: string;
+  customerProductDescription: string;
+  materials: IMaterialPackMaterial[];
+}
