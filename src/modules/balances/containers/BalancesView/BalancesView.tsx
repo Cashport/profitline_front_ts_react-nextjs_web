@@ -5,29 +5,18 @@ import { useState } from "react";
 import {
   Search,
   Filter,
-  Eye,
   ChevronDown,
   Calendar,
   Building,
   MoreHorizontal,
-  ArrowUpDown,
   CheckCircle,
   Clock,
   XCircle,
-  CircleDot,
-  Info
+  CircleDot
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/modules/chat/ui/tooltip";
-import { Popover, PopoverContent, PopoverTrigger } from "@/modules/chat/ui/popover";
-import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Input } from "@/modules/chat/ui/input";
 import {
@@ -37,22 +26,20 @@ import {
   DropdownMenuTrigger
 } from "@/modules/chat/ui/dropdown-menu";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
+import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { useSaldos } from "../../context/saldos-context";
+import type { SaldoData } from "../../context/saldos-context";
 
-const estadoConfig: Record<any, { color: string; icon: typeof CheckCircle; textColor: string }> = {
-  "Pendiente NC": { color: "#FF9800", icon: Clock, textColor: "text-black" },
-  Pendiente: { color: "#FFC107", icon: Clock, textColor: "text-black" },
-  "En revisión": { color: "#2196F3", icon: CircleDot, textColor: "text-white" },
-  Aprobado: { color: "#4CAF50", icon: CheckCircle, textColor: "text-white" },
-  Aplicado: { color: "#2E7D32", icon: CheckCircle, textColor: "text-white" },
-  Rechazado: { color: "#E53935", icon: XCircle, textColor: "text-white" },
-  "Aplicado parcial": { color: "#9C27B0", icon: CircleDot, textColor: "text-white" }
-};
-
-const tipoConfig: Record<any, { color: string; label: string }> = {
-  Devolución: { color: "#FF5722", label: "Devolución" },
-  "Acuerdo comercial": { color: "#3F51B5", label: "Acuerdo comercial" }
-};
+const estadoConfig: Record<string, { color: string; icon: typeof CheckCircle; textColor: string }> =
+  {
+    "Pendiente NC": { color: "#FF9800", icon: Clock, textColor: "text-black" },
+    Pendiente: { color: "#FFC107", icon: Clock, textColor: "text-black" },
+    "En revisión": { color: "#2196F3", icon: CircleDot, textColor: "text-white" },
+    Aprobado: { color: "#4CAF50", icon: CheckCircle, textColor: "text-white" },
+    Aplicado: { color: "#2E7D32", icon: CheckCircle, textColor: "text-white" },
+    Rechazado: { color: "#E53935", icon: XCircle, textColor: "text-white" },
+    "Aplicado parcial": { color: "#9C27B0", icon: CircleDot, textColor: "text-white" }
+  };
 
 export function BalancesView() {
   const {
@@ -75,14 +62,10 @@ export function BalancesView() {
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showKamDropdown, setShowKamDropdown] = useState(false);
   const [showGroupedFiltersDropdown, setShowGroupedFiltersDropdown] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sortColumn, setSortColumn] = useState<string | null>("estado");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<any | null>(null);
+  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<SaldoData | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
-  const openDetailSheet = (saldo: any) => {
+  const openDetailSheet = (saldo: SaldoData) => {
     setSelectedSaldoForDetail(saldo);
     setIsDetailSheetOpen(true);
   };
@@ -97,64 +80,12 @@ export function BalancesView() {
   const uniqueClientes = getUniqueClientes();
   const uniqueKams = getUniqueKams();
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const calcularDiasSaldo = (fechaEmision: string): number => {
-    const fecha = new Date(fechaEmision);
-    const hoy = new Date();
-    const diffTime = Math.abs(hoy.getTime() - fecha.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const formatDiasSaldo = (fechaEmision: string): string => {
-    const dias = calcularDiasSaldo(fechaEmision);
-    if (dias >= 30) {
-      const meses = Math.floor(dias / 30);
-      return meses === 1 ? "1 mes" : `${meses} meses`;
-    }
-    return dias === 1 ? "1 día" : `${dias} días`;
-  };
-
-  const getCarteraColor = (estadoCartera: string): string => {
-    switch (estadoCartera) {
-      case "Al día":
-        return "#22c55e";
-      case "Preventiva":
-        return "#eab308";
-      case "Alerta incumplimiento":
-        return "#f97316";
-      case "Alerta bloqueo":
-        return "#ef4444";
-      case "Crítica":
-        return "#171717";
-      default:
-        return "#9ca3af";
-    }
-  };
-
   const handleStateFilter = (stateName: string) => {
     if (state.filterState === stateName) {
       setFilter(null);
     } else {
       setFilter(stateName);
     }
-    setCurrentPage(1);
   };
 
   const handleKamFilter = (kam: string) => {
@@ -163,7 +94,6 @@ export function BalancesView() {
     } else {
       setKamFilter(kam);
     }
-    setCurrentPage(1);
   };
 
   const handleClienteFilter = (cliente: string) => {
@@ -172,12 +102,10 @@ export function BalancesView() {
     } else {
       setClienteFilter(cliente);
     }
-    setCurrentPage(1);
   };
 
   const handleDateRangeChange = (start: string, end: string) => {
     setDateRangeFilter({ start: start || null, end: end || null });
-    setCurrentPage(1);
   };
 
   const searchFilteredSaldos = filteredSaldos.filter(
@@ -192,101 +120,6 @@ export function BalancesView() {
       saldo.kam.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getEstadoOrder = (estado: any) => {
-    const order: Record<string, number> = {
-      "Pendiente NC": 0,
-      Pendiente: 1,
-      "En revisión": 2,
-      Aprobado: 3,
-      "Aplicado parcial": 4,
-      Aplicado: 5,
-      Rechazado: 6
-    };
-    return order[estado] ?? 999;
-  };
-
-  const sortedSaldos = [...searchFilteredSaldos].sort((a, b) => {
-    if (!sortColumn) return 0;
-
-    let aValue: string | number | Date;
-    let bValue: string | number | Date;
-
-    switch (sortColumn) {
-      case "autoId":
-        aValue = a.autoId;
-        bValue = b.autoId;
-        break;
-      case "id":
-        aValue = a.id;
-        bValue = b.id;
-        break;
-      case "fecha":
-        aValue = new Date(a.fechaEmision);
-        bValue = new Date(b.fechaEmision);
-        break;
-      case "cliente":
-        aValue = a.cliente.toLowerCase();
-        bValue = b.cliente.toLowerCase();
-        break;
-      case "tipo":
-        aValue = a.tipoNotaCredito;
-        bValue = b.tipoNotaCredito;
-        break;
-      case "estado":
-        aValue = getEstadoOrder(a.estado);
-        bValue = getEstadoOrder(b.estado);
-        break;
-      case "montoOriginal":
-        aValue = a.montoOriginal;
-        bValue = b.montoOriginal;
-        break;
-      case "montoDisponible":
-        aValue = a.montoDisponible;
-        bValue = b.montoDisponible;
-        break;
-      case "kam":
-        aValue = a.kam.toLowerCase();
-        bValue = b.kam.toLowerCase();
-        break;
-      case "diasSaldo":
-        aValue = calcularDiasSaldo(a.fechaEmision);
-        bValue = calcularDiasSaldo(b.fechaEmision);
-        break;
-      default:
-        return 0;
-    }
-
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  const totalPages = Math.ceil(sortedSaldos.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedSaldos = sortedSaldos.slice(startIndex, endIndex);
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      selectAllSaldos(paginatedSaldos.map((saldo) => saldo.id));
-    } else {
-      clearSelection();
-    }
-  };
-
-  const isAllSelected =
-    paginatedSaldos.length > 0 &&
-    paginatedSaldos.every((saldo) => state.selectedSaldoIds.includes(saldo.id));
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   return (
     <>
       <main>
@@ -299,10 +132,7 @@ export function BalancesView() {
                   <Input
                     placeholder="Buscar por nota, cliente o motivo..."
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 w-80 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-gray-300 focus:ring-0"
                   />
                 </div>
@@ -367,7 +197,7 @@ export function BalancesView() {
                           </div>
                         </button>
 
-                        {(Object.keys(estadoConfig) as any[]).map((estadoKey) => {
+                        {(Object.keys(estadoConfig) as string[]).map((estadoKey) => {
                           const config = estadoConfig[estadoKey];
                           const count = saldoCounts[estadoKey] || 0;
                           const isActive = state.filterState === estadoKey;
@@ -449,7 +279,7 @@ export function BalancesView() {
                           </div>
                         </button>
 
-                        {uniqueKams.map((kam: any) => {
+                        {uniqueKams.map((kam) => {
                           const count = state.saldos.filter((s) => s.kam === kam).length;
                           const isActive = state.filterKam === kam;
 
@@ -514,14 +344,12 @@ export function BalancesView() {
                                   ? "bg-cashport-green text-cashport-black font-medium"
                                   : "text-cashport-black"
                               }`}
-                              onClick={() => {
-                                setClienteFilter(null);
-                              }}
+                              onClick={() => setClienteFilter(null)}
                             >
                               Todos los clientes
                             </button>
 
-                            {uniqueClientes?.map((cliente: any) => (
+                            {uniqueClientes?.map((cliente) => (
                               <button
                                 type="button"
                                 key={cliente}
@@ -530,9 +358,7 @@ export function BalancesView() {
                                     ? "bg-cashport-green text-cashport-black font-medium"
                                     : "text-cashport-black"
                                 }`}
-                                onClick={() => {
-                                  handleClienteFilter(cliente);
-                                }}
+                                onClick={() => handleClienteFilter(cliente)}
                               >
                                 <div className="truncate" title={cliente}>
                                   {cliente}
@@ -586,9 +412,7 @@ export function BalancesView() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => {
-                                setDateRangeFilter({ start: null, end: null });
-                              }}
+                              onClick={() => setDateRangeFilter({ start: null, end: null })}
                               className="w-full border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter"
                             >
                               Limpiar fechas
@@ -615,321 +439,14 @@ export function BalancesView() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-cashport-gray-light">
-                    <th className="text-left py-3 px-4 text-xs font-medium text-cashport-black w-10">
-                      <Checkbox
-                        checked={isAllSelected}
-                        onCheckedChange={handleSelectAll}
-                        className="border-cashport-gray-light"
-                      />
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("autoId")}
-                    >
-                      <div className="flex items-center">
-                        Id
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("fecha")}
-                    >
-                      <div className="flex items-center">
-                        Fecha saldo
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("diasSaldo")}
-                    >
-                      <div className="flex items-center">
-                        {"Días"}
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("cliente")}
-                    >
-                      <div className="flex items-center">
-                        Cliente
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("kam")}
-                    >
-                      <div className="flex items-center">
-                        KAM
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("tipo")}
-                    >
-                      <div className="flex items-center">
-                        Tipo
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-3 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter w-[130px]"
-                      onClick={() => handleSort("estado")}
-                    >
-                      <div className="flex items-center">
-                        Estado
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-right py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("montoOriginal")}
-                    >
-                      <div className="flex items-center justify-end">
-                        Saldo inicial
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-right py-3 px-4 text-xs font-medium text-cashport-black cursor-pointer hover:bg-cashport-gray-lighter"
-                      onClick={() => handleSort("montoDisponible")}
-                    >
-                      <div className="flex items-center justify-end">
-                        Pendiente
-                        <ArrowUpDown className="h-3 w-3 ml-1" />
-                      </div>
-                    </th>
-                    <th className="py-3 px-4 w-12" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedSaldos.map((saldo) => {
-                    const estadoStyle = estadoConfig[saldo.estado];
-                    const tipoStyle = tipoConfig[saldo.tipoNotaCredito];
-                    const isSelected = state.selectedSaldoIds.includes(saldo.id);
-
-                    return (
-                      <tr
-                        key={saldo.id}
-                        className={`border-b border-cashport-gray-lighter hover:bg-cashport-gray-lighter/50 transition-colors ${
-                          isSelected ? "bg-cashport-green/10" : ""
-                        }`}
-                      >
-                        {/* Checkbox */}
-                        <td className="py-3 px-4">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => toggleSaldoSelection(saldo.id)}
-                            className="border-cashport-gray-light"
-                          />
-                        </td>
-                        {/* Id */}
-                        <td className="py-3 px-4 text-sm text-cashport-black">{saldo.autoId}</td>
-                        {/* Fecha saldo */}
-                        <td className="py-3 px-4 text-sm text-cashport-black">
-                          {formatDate(saldo.fechaEmision)}
-                        </td>
-                        {/* Dias */}
-                        <td className="py-3 px-4 text-sm text-cashport-black">
-                          {formatDiasSaldo(saldo.fechaEmision)}
-                        </td>
-                        {/* Cliente */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2 max-w-[260px]">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <button type="button" className="shrink-0">
-                                  <span
-                                    className="inline-block h-2.5 w-2.5 rounded-full"
-                                    style={{
-                                      backgroundColor: getCarteraColor(saldo.estadoCartera)
-                                    }}
-                                  />
-                                </button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                side="bottom"
-                                align="start"
-                                className="w-72 rounded-xl shadow-lg border border-gray-100 p-0"
-                              >
-                                <div className="px-4 pt-3 pb-2">
-                                  <div className="flex items-center gap-2">
-                                    <span
-                                      className="inline-block h-2.5 w-2.5 rounded-full"
-                                      style={{
-                                        backgroundColor: getCarteraColor(saldo.estadoCartera)
-                                      }}
-                                    />
-                                    <span className="text-sm font-bold text-cashport-black">
-                                      {saldo.estadoCartera}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="px-4 pb-3 space-y-1.5">
-                                  <div className="flex items-baseline justify-between">
-                                    <span className="text-sm text-gray-500">Cartera</span>
-                                    <span className="text-sm font-bold text-cashport-black">
-                                      {formatCurrency(saldo.carteraTotal)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-baseline justify-between">
-                                    <span className="text-sm text-gray-500">Vencida</span>
-                                    <span className="text-sm font-bold text-cashport-black">
-                                      {saldo.carteraVencidaPct}%
-                                    </span>
-                                  </div>
-                                  <div className="flex items-baseline justify-between">
-                                    <span className="text-sm text-gray-500">Acuerdo de pago</span>
-                                    {saldo.acuerdoPago ? (
-                                      <div className="text-right">
-                                        <span className="text-sm font-bold text-cashport-black">
-                                          {formatCurrency(saldo.acuerdoPago.monto || 0)}
-                                        </span>
-                                        {saldo.acuerdoPago.fecha && (
-                                          <p
-                                            className={`text-xs ${saldo.acuerdoPago.vencido ? "text-orange-500" : "text-gray-400"}`}
-                                          >
-                                            {formatDate(saldo.acuerdoPago.fecha)}
-                                            {saldo.acuerdoPago.vencido ? " Vencido" : ""}
-                                          </p>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <span className="text-sm font-bold text-cashport-black">
-                                        Sin acuerdo
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                            <span
-                              className="text-sm text-cashport-black truncate"
-                              title={saldo.cliente}
-                            >
-                              {saldo.cliente}
-                            </span>
-                          </div>
-                        </td>
-                        {/* KAM */}
-                        <td className="py-3 px-4">
-                          <span className="text-sm text-cashport-black">{saldo.kam}</span>
-                        </td>
-                        {/* Tipo */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm text-cashport-black">{tipoStyle.label}</span>
-                            {saldo.motivo && (
-                              <TooltipProvider delayDuration={200}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button
-                                      type="button"
-                                      className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                      <Info className="h-3.5 w-3.5" />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent
-                                    side="bottom"
-                                    align="start"
-                                    className="max-w-[240px] rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-md"
-                                  >
-                                    <p className="text-sm text-cashport-black">{saldo.motivo}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </div>
-                        </td>
-                        {/* Estado */}
-                        <td className="py-3 px-3">
-                          <Badge
-                            className={`${estadoStyle.textColor} text-xs font-medium whitespace-nowrap`}
-                            style={{ backgroundColor: estadoStyle.color }}
-                          >
-                            {saldo.estado}
-                          </Badge>
-                        </td>
-                        {/* Saldo inicial */}
-                        <td className="py-3 px-4 text-sm text-cashport-black text-right font-medium">
-                          {formatCurrency(saldo.montoOriginal)}
-                        </td>
-                        {/* Pendiente */}
-                        <td className="py-3 px-4 text-right">
-                          <span className="text-sm font-bold text-cashport-black">
-                            {formatCurrency(saldo.montoDisponible)}
-                          </span>
-                        </td>
-                        {/* Acciones */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center justify-center">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0 hover:bg-cashport-gray-lighter"
-                                    onClick={() => openDetailSheet(saldo)}
-                                  >
-                                    <Eye className="h-4 w-4 text-cashport-black" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Ver detalle</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-cashport-gray-light">
-                <div className="text-sm text-gray-600">
-                  Mostrando {startIndex + 1} a {Math.min(endIndex, sortedSaldos.length)} de{" "}
-                  {sortedSaldos.length} saldos
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter disabled:opacity-50"
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-cashport-black">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter disabled:opacity-50"
-                  >
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            )}
+            <BalancesTable
+              data={searchFilteredSaldos}
+              selectedSaldoIds={state.selectedSaldoIds}
+              onToggleSelection={toggleSaldoSelection}
+              onSelectAll={selectAllSaldos}
+              onClearSelection={clearSelection}
+              onOpenDetail={openDetailSheet}
+            />
           </CardContent>
         </Card>
       </main>
