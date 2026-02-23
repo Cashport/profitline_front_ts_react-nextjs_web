@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { message } from "antd";
 
-import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
+import {
+  convertMaterialToPack,
+  createCatalog,
+  deleteCatalog,
+  editCatalog
+} from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 
@@ -109,6 +114,18 @@ export default function CatalogView() {
     }
   };
 
+  const handleMarkAsPack = async (item: IGetCatalogs) => {
+    try {
+      await convertMaterialToPack(item.id);
+      mutate();
+      message.success("Material marcado como pack exitosamente");
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      }
+    }
+  };
+
   const handleGoBack = () => {
     router.back();
   };
@@ -142,6 +159,7 @@ export default function CatalogView() {
                     setSelectedCatalog(item);
                     setWhichModalOpen({ selected: 2 });
                   }}
+                  onMarkAsPack={handleMarkAsPack}
                 />
               )
             },

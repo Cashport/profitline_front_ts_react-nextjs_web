@@ -346,3 +346,15 @@ export const downloadCatalogFile = async ({
     throw error;
   }
 };
+
+export const convertMaterialToPack = async (materialId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/data/catalog/material/${materialId}/convert-to-pack`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error converting material to pack:", error);
+    throw error;
+  }
+};
