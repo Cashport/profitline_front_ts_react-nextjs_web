@@ -1,7 +1,11 @@
 "use client";
 
 import { Button, Popover, Table, TableProps, Tag, Tooltip } from "antd";
-import { Eye, Info } from "lucide-react";
+import { Info } from "lucide-react";
+import { Eye } from "@phosphor-icons/react";
+import "./BalancesTable.scss";
+import useScreenHeight from "@/components/hooks/useScreenHeight";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 import type { EstadoSaldo, SaldoData } from "../../context/saldos-context";
 
@@ -99,6 +103,8 @@ export function BalancesTable({
   onClearSelection,
   onOpenDetail
 }: BalancesTableProps) {
+  const height = useScreenHeight();
+  const width = useScreenWidth();
   const columns: TableProps<SaldoData>["columns"] = [
     {
       title: "Id",
@@ -112,8 +118,7 @@ export function BalancesTable({
       title: "Fecha saldo",
       dataIndex: "fechaEmision",
       key: "fecha",
-      sorter: (a, b) =>
-        new Date(a.fechaEmision).getTime() - new Date(b.fechaEmision).getTime(),
+      sorter: (a, b) => new Date(a.fechaEmision).getTime() - new Date(b.fechaEmision).getTime(),
       showSorterTooltip: false,
       render: (value: string) => (
         <span className="text-sm text-cashport-black">{formatDate(value)}</span>
@@ -123,8 +128,7 @@ export function BalancesTable({
       title: "Días",
       dataIndex: "fechaEmision",
       key: "diasSaldo",
-      sorter: (a, b) =>
-        calcularDiasSaldo(a.fechaEmision) - calcularDiasSaldo(b.fechaEmision),
+      sorter: (a, b) => calcularDiasSaldo(a.fechaEmision) - calcularDiasSaldo(b.fechaEmision),
       showSorterTooltip: false,
       render: (value: string) => (
         <span className="text-sm text-cashport-black">{formatDiasSaldo(value)}</span>
@@ -216,9 +220,7 @@ export function BalancesTable({
       showSorterTooltip: false,
       render: (value: string, record: SaldoData) => (
         <div className="flex items-center gap-1.5">
-          <span className="text-sm text-cashport-black">
-            {tipoConfig[value]?.label ?? value}
-          </span>
+          <span className="text-sm text-cashport-black">{tipoConfig[value]?.label ?? value}</span>
           {record.motivo && (
             <Tooltip title={record.motivo} placement="bottom">
               <button
@@ -260,7 +262,9 @@ export function BalancesTable({
       sorter: (a, b) => a.montoOriginal - b.montoOriginal,
       showSorterTooltip: false,
       render: (value: number) => (
-        <span className="text-sm text-cashport-black font-medium">{formatCurrency(value)}</span>
+        <span className="text-sm text-cashport-black font-medium fontMonoSpace">
+          {formatCurrency(value)}
+        </span>
       )
     },
     {
@@ -271,7 +275,9 @@ export function BalancesTable({
       sorter: (a, b) => a.montoDisponible - b.montoDisponible,
       showSorterTooltip: false,
       render: (value: number) => (
-        <span className="text-sm font-bold text-cashport-black">{formatCurrency(value)}</span>
+        <span className="text-sm font-bold text-cashport-black fontMonoSpace">
+          {formatCurrency(value)}
+        </span>
       )
     },
     {
@@ -279,14 +285,11 @@ export function BalancesTable({
       key: "acciones",
       width: 48,
       render: (_: unknown, record: SaldoData) => (
-        <Tooltip title="Ver detalle">
-          <Button
-            type="text"
-            size="small"
-            icon={<Eye className="h-4 w-4 text-cashport-black" />}
-            onClick={() => onOpenDetail(record)}
-          />
-        </Tooltip>
+        <Button
+          onClick={() => onOpenDetail(record)}
+          className="buttonSeeProject"
+          icon={<Eye size={"1.3rem"} />}
+        />
       )
     }
   ];
@@ -311,6 +314,7 @@ export function BalancesTable({
       dataSource={data.map((s) => ({ ...s, key: s.id }))}
       rowSelection={rowSelection}
       pagination={{ pageSize: 10, showSizeChanger: false, position: ["bottomRight"] }}
+      scroll={{ y: width > 1280 ? height - 345 : height - 370, x: undefined }}
       rowClassName={(record) =>
         selectedSaldoIds.includes(record.id) ? "ant-table-row-selected" : ""
       }
