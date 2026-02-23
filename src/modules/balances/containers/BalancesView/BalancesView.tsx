@@ -453,7 +453,7 @@ export function BalancesView() {
 
       {/* Detail Sheet */}
       <Sheet open={isDetailSheetOpen} onOpenChange={setIsDetailSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0" hideClose>
           {selectedSaldoForDetail && (
             <BalanceDetailModal
               saldoData={selectedSaldoForDetail}

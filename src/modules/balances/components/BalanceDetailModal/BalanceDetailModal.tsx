@@ -2,7 +2,8 @@
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { ArrowLeft, FileText, Plus, Paperclip } from "lucide-react";
+import { FileText, Plus, Paperclip } from "lucide-react";
+import { CaretDoubleRight } from "phosphor-react";
 
 const estadoConfig: Record<any, { color: string; textColor: string }> = {
   "Pendiente NC": { color: "#FF9800", textColor: "text-white" },
@@ -55,16 +56,13 @@ export function BalanceDetailModal({
       <div className={isModal ? "px-6 pt-5 pb-4" : "px-6 lg:px-8 pt-5 pb-4"}>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            {!isModal && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBack}
-                className="text-gray-400 hover:text-cashport-black hover:bg-gray-50 mt-0.5"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-8 h-8 flex items-center justify-center bg-white border-none cursor-pointer hover:bg-[#f7f7f7]"
+            >
+              <CaretDoubleRight size={20} />
+            </button>
             <div>
               <h1 className="text-lg font-bold text-cashport-black">{saldoData.id}</h1>
               <p className="text-sm text-gray-400 mt-0.5">{saldoData.cliente}</p>

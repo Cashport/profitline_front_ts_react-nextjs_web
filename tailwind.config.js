@@ -69,5 +69,5 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [require("tw-animate-css")]
 };
