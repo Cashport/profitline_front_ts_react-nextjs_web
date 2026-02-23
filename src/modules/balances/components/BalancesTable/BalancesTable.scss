@@ -1,5 +1,10 @@
 @import "@styles/variables.scss";
 
+:global(.ant-table-pagination) {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
 .buttonSeeProject {
     background-color: $dark-gray !important;
     width: 32px !important;

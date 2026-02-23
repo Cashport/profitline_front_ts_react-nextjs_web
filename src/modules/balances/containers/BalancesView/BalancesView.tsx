@@ -3,17 +3,17 @@
 import { useState } from "react";
 
 import {
-  Search,
   Filter,
   ChevronDown,
   Calendar,
   Building,
-  MoreHorizontal,
   CheckCircle,
   Clock,
   XCircle,
   CircleDot
 } from "lucide-react";
+import UiSearchInput from "@/components/ui/search-input/search-input";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
@@ -123,46 +123,21 @@ export function BalancesView() {
     <>
       <main>
         <Card className="bg-cashport-white border-0 shadow-sm">
-          <CardContent className="px-6 pt-2 pb-4">
+          <CardContent>
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Buscar por nota, cliente o motivo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-80 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-500 focus:border-gray-300 focus:ring-0"
-                  />
-                </div>
+                <UiSearchInput
+                  placeholder="Buscar"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-gray-200 text-gray-700 hover:bg-gray-100 bg-gray-50"
-                    >
-                      <MoreHorizontal className="h-4 w-4 mr-2" />
-                      Generar acción
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem onClick={() => console.log("Exportar saldos")}>
-                      Exportar a Excel
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => console.log("Aplicar saldo")}>
-                      Aplicar saldo
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <GenerateActionButton />
 
                 {/* Estado Filter Dropdown */}
                 <div className="relative">
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
+                    className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
                     onClick={() => setShowStateDropdown(!showStateDropdown)}
                   >
                     <Filter className="h-4 w-4 mr-2" />
@@ -243,8 +218,7 @@ export function BalancesView() {
                 <div className="relative">
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
+                    className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
                     onClick={() => setShowKamDropdown(!showKamDropdown)}
                   >
                     <Filter className="h-4 w-4 mr-2" />
@@ -317,8 +291,7 @@ export function BalancesView() {
                 <div className="relative">
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
+                    className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent"
                     onClick={() => setShowGroupedFiltersDropdown(!showGroupedFiltersDropdown)}
                   >
                     <Filter className="h-4 w-4 mr-2" />
