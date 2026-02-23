@@ -17,7 +17,16 @@ const DashboardCollectApply: FC<DashboardCollectApplyProps> = ({
   pendingApplication = "$0",
   unidentifiedPayments = "$0"
 }) => {
-  const parseMoney = (value: string): number => parseFloat(value.replace(/[^0-9.-]+/g, "")) || 0;
+  const parseMoney = (value: string): number => {
+    if (!value) return 0;
+
+    const normalized = value
+      .replace(/\./g, "") // 1. Quita los puntos de miles: "7.219,2" -> "7219,2"
+      .replace(",", ".") // 2. Cambia coma por punto: "7219,2" -> "7219.2"
+      .replace(/[^0-9.-]+/g, ""); // 3. Limpia basura ($ o espacios)
+
+    return parseFloat(normalized) || 0;
+  };
 
   const collectionValue = parseMoney(collection);
   const totalAppliedValue = parseMoney(totalApplied);
