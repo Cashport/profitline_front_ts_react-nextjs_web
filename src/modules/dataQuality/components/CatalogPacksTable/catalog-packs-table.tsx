@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -38,6 +38,12 @@ export function CatalogPacksTable() {
 
   const [packSearch, setPackSearch] = useState("");
   const [expandedPacks, setExpandedPacks] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (packs && packs.length > 0) {
+      setExpandedPacks(new Set(packs.map((p) => p.idCatalogMaterialAux)));
+    }
+  }, [packs]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [selectedPackId, setSelectedPackId] = useState<number | null>(null);
@@ -123,9 +129,9 @@ export function CatalogPacksTable() {
       setModalOpen(false);
     } catch (error) {
       if (modalMode === "create") {
-        console.error(error instanceof Error ? error.message : "Error al crear material");
+        message.error(error instanceof Error ? error.message : "Error al crear material");
       } else {
-        console.error(error instanceof Error ? error.message : "Error al editar material");
+        message.error(error instanceof Error ? error.message : "Error al editar material");
       }
     } finally {
       setIsLoadingSave(false);
@@ -155,7 +161,9 @@ export function CatalogPacksTable() {
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Pack</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Producto</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Acciones</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
+              Acciones
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -206,7 +214,7 @@ export function CatalogPacksTable() {
                     {firstMaterial?.materialName || "-"}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 justify-end">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -258,7 +266,7 @@ export function CatalogPacksTable() {
                       </TableCell>
                       <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 justify-end">
                           <Button
                             variant="ghost"
                             size="sm"
