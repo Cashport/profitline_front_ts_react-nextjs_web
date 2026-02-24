@@ -147,7 +147,10 @@ const ModalGeneratePaymentLink = ({
         components: [
           {
             type: "body",
-            parameters: [{ type: "text", text: successData.client }]
+            parameters: [
+              { type: "text", text: successData.client },
+              { type: "text", text: `${successData.amount}` }
+            ]
           },
           {
             type: "button",
