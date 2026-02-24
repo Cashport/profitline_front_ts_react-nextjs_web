@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { Pagination } from "antd";
+import { Button as AntButton, Dropdown, Pagination } from "antd";
+import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input";
@@ -16,6 +17,7 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
+import "./catalogs-table.scss";
 
 interface CatalogsTableProps {
   equivalencies: IGetCatalogs[];
@@ -23,6 +25,7 @@ interface CatalogsTableProps {
   onEdit: (item: IGetCatalogs) => void;
   onAddNew: () => void;
   onDelete: (item: IGetCatalogs) => void;
+  onMarkAsPack: (item: IGetCatalogs) => Promise<void>;
 }
 
 const getStatusBadge = (status: string) => {
@@ -53,7 +56,8 @@ export function CatalogsTable({
   clientName,
   onEdit,
   onAddNew,
-  onDelete
+  onDelete,
+  onMarkAsPack
 }: CatalogsTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,19 +143,61 @@ export function CatalogsTable({
                 <span style={{ color: "#141414" }}>-</span>
               </TableCell>
               <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(item)}
-                    title="Editar equivalencia"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => onDelete(item)} title="Eliminar">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                {(() => {
+                  const items = [
+                    {
+                      key: "1",
+                      label: (
+                        <AntButton
+                          icon={<Edit className="w-4 h-4" />}
+                          className="buttonNoBorder"
+                          onClick={() => onEdit(item)}
+                        >
+                          Editar
+                        </AntButton>
+                      )
+                    },
+                    {
+                      key: "2",
+                      label: (
+                        <AntButton
+                          icon={<Trash2 className="w-4 h-4" />}
+                          className="buttonNoBorder"
+                          onClick={() => onDelete(item)}
+                        >
+                          Eliminar
+                        </AntButton>
+                      )
+                    },
+                    {
+                      key: "3",
+                      label: (
+                        <AntButton
+                          icon={<DropboxLogo size={16} />}
+                          className="buttonNoBorder"
+                          onClick={() => onMarkAsPack(item)}
+                        >
+                          Marcar como pack
+                        </AntButton>
+                      )
+                    }
+                  ];
+                  const customDropdown = (menu: ReactNode) => (
+                    <div className="dropdownCatalogsTable">{menu}</div>
+                  );
+                  return (
+                    <Dropdown
+                      dropdownRender={customDropdown}
+                      menu={{ items }}
+                      placement="bottomLeft"
+                      trigger={["click"]}
+                    >
+                      <AntButton className="dotsBtn">
+                        <DotsThreeVertical size={16} />
+                      </AntButton>
+                    </Dropdown>
+                  );
+                })()}
               </TableCell>
             </TableRow>
           ))}

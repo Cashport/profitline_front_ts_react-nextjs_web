@@ -4,13 +4,19 @@ import { useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { message } from "antd";
 
-import { createCatalog, deleteCatalog, editCatalog } from "@/services/dataQuality/dataQuality";
+import {
+  convertMaterialToPack,
+  createCatalog,
+  deleteCatalog,
+  editCatalog
+} from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 
 import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { CatalogsTable } from "../../components/CatalogsTable";
+import { CatalogPacksTable } from "../../components/CatalogPacksTable";
 import ModalAddEditCatalog, {
   CatalogFormData
 } from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
@@ -108,6 +114,18 @@ export default function CatalogView() {
     }
   };
 
+  const handleMarkAsPack = async (item: IGetCatalogs) => {
+    try {
+      await convertMaterialToPack(item.id);
+      mutate();
+      message.success("Material marcado como pack exitosamente");
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      }
+    }
+  };
+
   const handleGoBack = () => {
     router.back();
   };
@@ -141,13 +159,14 @@ export default function CatalogView() {
                     setSelectedCatalog(item);
                     setWhichModalOpen({ selected: 2 });
                   }}
+                  onMarkAsPack={handleMarkAsPack}
                 />
               )
             },
             {
               key: "packs",
               label: "Packs",
-              children: <div />
+              children: <CatalogPacksTable />
             },
             {
               key: "puntos-de-venta",

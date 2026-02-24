@@ -352,6 +352,36 @@ export interface IGetAlerts {
   total_pages: number;
 }
 
+export interface IMaterialPackMaterial {
+  productType: string;
+  productTypeName: string;
+  typeVol: string;
+  typeVolName: string;
+  idCatalogMaterial: number;
+  materialCode: string;
+  materialName: string;
+  factor: number;
+}
+
+export interface IMaterialPack {
+  id: number;
+  idCatalogMaterialAux: number;
+  idClient: number;
+  idProject: number;
+  idCountry: number;
+  clientName: string;
+  customerProductCod: string;
+  customerProductDescription: string;
+  materials: IMaterialPackMaterial[];
+}
+
+export interface IPackMaterialRequest {
+  product_type: number;
+  type_vol: number;
+  id_catalog_material: number;
+  factor: number;
+}
+
 export interface IUploadMassiveOrHistoricalRequest {
   id_client: number;
   id_country: number;
