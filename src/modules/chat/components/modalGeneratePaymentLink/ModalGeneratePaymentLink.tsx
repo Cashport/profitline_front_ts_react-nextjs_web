@@ -139,6 +139,7 @@ const ModalGeneratePaymentLink = ({
     const payload = {
       phoneNumber: ticketInfo.phone || "",
       templateId: "link_de_pago",
+      ticketId: ticketInfo.ticketId,
       senderId: "cmhv6mnla0003no0huiao1u63",
       name: ticketInfo.clientName,
       customerCashportUUID: ticketInfo.clientId || "",
