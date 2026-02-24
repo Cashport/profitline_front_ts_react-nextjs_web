@@ -5,7 +5,12 @@ import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 import { usePacksDataQuality } from "../../hooks/usePacksDataQuality";
-import { createMaterialPack, editMaterialPackRow } from "@/services/dataQuality/dataQuality";
+import {
+  createMaterialPack,
+  deleteMaterialPackRow,
+  editMaterialPackRow
+} from "@/services/dataQuality/dataQuality";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
@@ -22,6 +27,7 @@ import ModalAddEditPackMaterial, {
 } from "../ModalAddEditPackMaterial/ModalAddEditPackMaterial";
 
 import { IMaterialPackMaterial, IPackMaterialRequest } from "@/types/dataQuality/IDataQuality";
+import { message } from "antd";
 
 export function CatalogPacksTable() {
   const params = useParams();
@@ -37,6 +43,8 @@ export function CatalogPacksTable() {
   const [selectedPackId, setSelectedPackId] = useState<number | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<IMaterialPackMaterial | null>(null);
   const [isLoadingSave, setIsLoadingSave] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
   const filteredPacks = (packs ?? []).filter((pack) => {
     const term = packSearch.toLowerCase();
@@ -73,8 +81,24 @@ export function CatalogPacksTable() {
     setModalOpen(true);
   };
 
-  const handleMaterialDelete = (_packId: number, _idCatalogMaterial: number) => {
-    // TODO: implement when CRUD endpoint is available
+  const handleMaterialDelete = (material: IMaterialPackMaterial) => {
+    setSelectedMaterial(material);
+    setIsDeleteModalOpen(true);
+  };
+
+  const deleteRow = async () => {
+    if (!selectedMaterial?.materialPackId) return;
+    setIsLoadingDelete(true);
+    try {
+      await deleteMaterialPackRow(selectedMaterial.materialPackId);
+      message.success("Material eliminado correctamente");
+      mutate();
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al eliminar el material");
+    } finally {
+      setIsLoadingDelete(false);
+    }
   };
 
   const handleModalSave = async (data: PackMaterialFormData) => {
@@ -89,14 +113,20 @@ export function CatalogPacksTable() {
       if (modalMode === "create") {
         if (!selectedPackId) return;
         await createMaterialPack(selectedPackId, payload);
+        message.success("Material agregado al pack correctamente");
       } else {
         if (!selectedMaterial) return;
         await editMaterialPackRow(selectedMaterial?.materialPackId, payload);
+        message.success("Material editado correctamente");
       }
       mutate();
       setModalOpen(false);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      if (modalMode === "create") {
+        console.error(error instanceof Error ? error.message : "Error al crear material");
+      } else {
+        console.error(error instanceof Error ? error.message : "Error al editar material");
+      }
     } finally {
       setIsLoadingSave(false);
     }
@@ -201,12 +231,7 @@ export function CatalogPacksTable() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            handleMaterialDelete(
-                              pack.idCatalogMaterialAux,
-                              firstMaterial.idCatalogMaterial
-                            )
-                          }
+                          onClick={() => handleMaterialDelete(firstMaterial)}
                           title="Eliminar"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
@@ -245,12 +270,7 @@ export function CatalogPacksTable() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              handleMaterialDelete(
-                                pack.idCatalogMaterialAux,
-                                material.idCatalogMaterial
-                              )
-                            }
+                            onClick={() => handleMaterialDelete(material)}
                             title="Eliminar"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
@@ -279,6 +299,15 @@ export function CatalogPacksTable() {
         onSave={handleModalSave}
         countryId={Number(countryId)}
         isLoadingCreateEdit={isLoadingSave}
+      />
+
+      <ModalConfirmAction
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="¿Está seguro de eliminar este producto?"
+        okText="Eliminar"
+        onOk={deleteRow}
+        okLoading={isLoadingDelete}
       />
     </div>
   );
