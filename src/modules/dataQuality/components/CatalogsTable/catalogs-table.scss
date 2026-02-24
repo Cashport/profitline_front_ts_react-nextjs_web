@@ -2,14 +2,14 @@
 
 .dotsBtn {
     background-color: $background !important;
-    border: 1px solid transparent;
+    border: 1px solid transparent !important;
     width: 24px !important;
     height: 24px !important;
     padding: 0 !important;
     border-radius: 4px;
 
     &:hover {
-        border: 1px solid $black;
+        border: 1px solid $black !important;
         background-color: $background !important;
     }
 }

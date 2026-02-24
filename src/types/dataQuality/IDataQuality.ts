@@ -374,3 +374,10 @@ export interface IMaterialPack {
   customerProductDescription: string;
   materials: IMaterialPackMaterial[];
 }
+
+export interface IPackMaterialRequest {
+  product_type: number;
+  type_vol: number;
+  id_catalog_material: number;
+  factor: number;
+}

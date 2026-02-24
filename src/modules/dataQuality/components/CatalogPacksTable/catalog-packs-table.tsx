@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Plus, Edit, Trash2, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 import { usePacksDataQuality } from "../../hooks/usePacksDataQuality";
 
@@ -17,7 +17,7 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 
-import { IMaterialPack, IMaterialPackMaterial } from "@/types/dataQuality/IDataQuality";
+import { IMaterialPackMaterial } from "@/types/dataQuality/IDataQuality";
 
 export function CatalogPacksTable() {
   const params = useParams();
@@ -51,14 +51,6 @@ export function CatalogPacksTable() {
   };
 
   const handlePackAddNew = () => {
-    // TODO: implement when CRUD endpoint is available
-  };
-
-  const handlePackEdit = (_pack: IMaterialPack) => {
-    // TODO: implement when CRUD endpoint is available
-  };
-
-  const handlePackDelete = (_packId: number) => {
     // TODO: implement when CRUD endpoint is available
   };
 
@@ -149,7 +141,7 @@ export function CatalogPacksTable() {
                     {pack.customerProductCod}
                   </TableCell>
                   <TableCell style={{ color: "#141414" }}>{pack.clientName}</TableCell>
-                  <TableCell className="font-mono text-sm" style={{ color: "#141414" }}>
+                  <TableCell className="text-sm" style={{ color: "#141414" }}>
                     {firstMaterial?.materialCode || "-"}
                   </TableCell>
                   <TableCell style={{ color: "#141414" }}>
@@ -180,29 +172,12 @@ export function CatalogPacksTable() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSkuDelete(pack.id, firstMaterial.idCatalogMaterial)}
-                          title="Quitar SKU"
+                          title="Quitar material"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          <X className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePackEdit(pack)}
-                        title="Editar Pack"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePackDelete(pack.id)}
-                        title="Eliminar Pack"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -218,7 +193,7 @@ export function CatalogPacksTable() {
                       <TableCell />
                       <TableCell />
                       <TableCell />
-                      <TableCell className="font-mono text-sm" style={{ color: "#141414" }}>
+                      <TableCell className="text-sm" style={{ color: "#141414" }}>
                         {material.materialCode}
                       </TableCell>
                       <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
@@ -239,7 +214,7 @@ export function CatalogPacksTable() {
                             title="Quitar SKU"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <X className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>

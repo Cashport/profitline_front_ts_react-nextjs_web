@@ -15,7 +15,8 @@ import {
   ICatalogMaterial,
   ICatalogSelectOption,
   ICreateCatalogRequest,
-  IGetFiltersAlerts
+  IGetFiltersAlerts,
+  IPackMaterialRequest
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -313,7 +314,6 @@ export const downloadExcel = async (id_archives_client_data: number) => {
 };
 
 export const deleteIntakeFile = async (fileId: number): Promise<any> => {
-  console.log("Attempting to delete intake file with ID:", fileId);
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/archives-client-data/${fileId}/delete`
@@ -355,6 +355,52 @@ export const convertMaterialToPack = async (materialId: number): Promise<any> =>
     return response.data;
   } catch (error) {
     console.error("Error converting material to pack:", error);
+    throw error;
+  }
+};
+
+// PACKS ENDPOINTS
+
+export const createMaterialPack = async (
+  materialPackId: number,
+  material: IPackMaterialRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/data/catalog/material-pack/${materialPackId}`,
+      { materials: [material] }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating material pack:", error);
+    throw error;
+  }
+};
+
+export const editMaterialPackRow = async (
+  materialPackId: number,
+  material: IPackMaterialRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/data/catalog/material-pack/${materialPackId}`,
+      material
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing material pack row:", error);
+    throw error;
+  }
+};
+
+export const deleteMaterialPackRow = async (materialPackId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `/data/catalog/material-pack/${materialPackId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting material pack row:", error);
     throw error;
   }
 };
