@@ -1,21 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Modal } from "antd";
+import { Modal, Select } from "antd";
 import { Button } from "@/modules/chat/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import { WhatsappLogo } from "@phosphor-icons/react";
 
 type Props = {
   open: boolean;
   clients: { id: string; name: string }[];
-  contacts: { id: string; name: string }[];
+  contacts?: { id: number; contact_name: string; contact_phone: string }[];
   onSelectClient: (clientUUID: string) => void;
   onSelectContact: (contactId: string) => void;
   isContactLoading: boolean;
@@ -63,52 +56,41 @@ export default function SelectClientDialog({
         <div className="w-full space-y-4 mt-4">
           <div className="space-y-2">
             <Select
-              value={selectedClient}
-              onValueChange={(clientUUID) => {
+              showSearch
+              placeholder="Cliente"
+              style={{ width: "100%", height: "48px" }}
+              options={clients.map((c) => ({ value: c.id, label: c.name }))}
+              value={selectedClient || undefined}
+              onChange={(clientUUID: string) => {
                 onSelectClient(clientUUID);
                 setSelectedClient(clientUUID);
               }}
-            >
-              <SelectTrigger className="w-full bg-white border-gray-200 h-12">
-                <SelectValue placeholder="Cliente" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              filterOption={(input, option) =>
+                option?.label ? option.label.toLowerCase().includes(input.toLowerCase()) : false
+              }
+            />
           </div>
 
           <div className="space-y-2">
             <Select
-              value={selectedContact}
-              onValueChange={(contactId) => {
+              showSearch
+              placeholder={isContactLoading ? "Cargando contactos..." : "Contacto"}
+              style={{ width: "100%", height: "48px" }}
+              disabled={isContactLoading || !selectedClient}
+              loading={isContactLoading}
+              options={contacts?.map((c) => ({
+                value: c.id.toString(),
+                label: `${c.contact_name} (${c.contact_phone})`
+              }))}
+              value={selectedContact || undefined}
+              onChange={(contactId: string) => {
                 onSelectContact(contactId);
                 setSelectedContact(contactId);
               }}
-              disabled={isContactLoading || !selectedClient}
-            >
-              {isContactLoading ? (
-                <SelectTrigger className="w-full bg-white border-gray-200 h-12">
-                  <SelectValue placeholder="Cargando contactos..." />
-                </SelectTrigger>
-              ) : (
-                <SelectTrigger className="w-full bg-white border-gray-200 h-12">
-                  <SelectValue placeholder="Contacto" />
-                </SelectTrigger>
-              )}
-
-              <SelectContent className="max-h-[300px]">
-                {contacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    {contact.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              filterOption={(input, option) =>
+                option?.label ? option.label.toLowerCase().includes(input.toLowerCase()) : false
+              }
+            />
           </div>
         </div>
 

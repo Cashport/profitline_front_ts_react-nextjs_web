@@ -254,7 +254,7 @@ export default function ChatInbox() {
         }}
         isContactLoading={loadingContacts}
         isLoading={isSending}
-        contacts={contacts.map((c) => ({ id: c.id.toString(), name: c.contact_name }))}
+        contacts={contacts}
       />
       <TemplateDialog
         open={sendNewMessage}
