@@ -78,9 +78,9 @@ const PaymentAgreementModal: React.FC<Props> = ({
       setInvoicesWithError([]);
     } catch (error: any) {
       const data = error?.response?.data;
+      setIsSecondView(false);
       if (data?.invoices_with_active_agreement?.length) {
         setInvoicesWithError(data.invoices_with_active_agreement);
-        setIsSecondView(false);
         messageShow.error(data.message || "Error al crear el acuerdo de pago.");
       } else {
         messageShow.error("Error al crear el acuerdo de pago. Por favor, intente de nuevo.");
@@ -205,9 +205,13 @@ const PaymentAgreementModal: React.FC<Props> = ({
       key: "actions",
       render: (_, record) => (
         <div className="actions__buttons">
-          {invoicesWithError.includes(record.id_erp) && (
+          {invoicesWithError.includes(String(record.id)) && (
             <Tooltip title="Esta factura ya tiene un acuerdo de pago activo">
-              <Button type="text" className="iconBtn" icon={<Warning size="1.125rem" color="red" />} />
+              <Button
+                type="text"
+                className="iconBtn"
+                icon={<Warning size="1.125rem" color="red" />}
+              />
             </Tooltip>
           )}
           <Button
