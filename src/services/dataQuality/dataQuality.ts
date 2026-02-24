@@ -363,12 +363,12 @@ export const convertMaterialToPack = async (materialId: number): Promise<any> =>
 // PACKS ENDPOINTS
 
 export const createMaterialPack = async (
-  materialPackId: number,
+  idCatalogMaterialAux: number,
   material: IPackMaterialRequest
 ): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.post(
-      `/data/catalog/material-pack/${materialPackId}`,
+      `/data/catalog/material-pack/${idCatalogMaterialAux}`,
       { materials: [material] }
     );
     return response.data;

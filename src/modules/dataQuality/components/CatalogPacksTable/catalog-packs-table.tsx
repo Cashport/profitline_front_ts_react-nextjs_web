@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 import { usePacksDataQuality } from "../../hooks/usePacksDataQuality";
+import { createMaterialPack, editMaterialPackRow } from "@/services/dataQuality/dataQuality";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
@@ -16,15 +17,11 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
-
-import { IMaterialPackMaterial, IPackMaterialRequest } from "@/types/dataQuality/IDataQuality";
-import {
-  createMaterialPack,
-  editMaterialPackRow
-} from "@/services/dataQuality/dataQuality";
 import ModalAddEditPackMaterial, {
   PackMaterialFormData
 } from "../ModalAddEditPackMaterial/ModalAddEditPackMaterial";
+
+import { IMaterialPackMaterial, IPackMaterialRequest } from "@/types/dataQuality/IDataQuality";
 
 export function CatalogPacksTable() {
   const params = useParams();
@@ -62,26 +59,25 @@ export function CatalogPacksTable() {
     });
   };
 
-  const handleSkuAdd = (packId: number) => {
+  const handleAddMaterialToPack = (packId: number) => {
     setSelectedPackId(packId);
     setSelectedMaterial(null);
     setModalMode("create");
     setModalOpen(true);
   };
 
-  const handleSkuEdit = (packId: number, material: IMaterialPackMaterial) => {
+  const handleMaterialEdit = (packId: number, material: IMaterialPackMaterial) => {
     setSelectedPackId(packId);
     setSelectedMaterial(material);
     setModalMode("edit");
     setModalOpen(true);
   };
 
-  const handleSkuDelete = (_packId: number, _idCatalogMaterial: number) => {
+  const handleMaterialDelete = (_packId: number, _idCatalogMaterial: number) => {
     // TODO: implement when CRUD endpoint is available
   };
 
   const handleModalSave = async (data: PackMaterialFormData) => {
-    if (!selectedPackId) return;
     setIsLoadingSave(true);
     try {
       const payload: IPackMaterialRequest = {
@@ -91,9 +87,11 @@ export function CatalogPacksTable() {
         factor: data.factor
       };
       if (modalMode === "create") {
+        if (!selectedPackId) return;
         await createMaterialPack(selectedPackId, payload);
       } else {
-        await editMaterialPackRow(selectedPackId, payload);
+        if (!selectedMaterial) return;
+        await editMaterialPackRow(selectedMaterial?.materialPackId, payload);
       }
       mutate();
       setModalOpen(false);
@@ -139,7 +137,7 @@ export function CatalogPacksTable() {
             </TableRow>
           )}
           {filteredPacks.map((pack) => {
-            const isExpanded = expandedPacks.has(pack.id);
+            const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
             const firstMaterial = pack.materials[0];
             const remainingMaterials = pack.materials.slice(1);
 
@@ -147,7 +145,7 @@ export function CatalogPacksTable() {
               <>
                 {/* Pack main row (shows first material inline) */}
                 <TableRow
-                  key={pack.id}
+                  key={pack.idCatalogMaterialAux}
                   className="hover:bg-gray-50"
                   style={{ borderColor: "#DDDDDD" }}
                 >
@@ -157,7 +155,7 @@ export function CatalogPacksTable() {
                         variant="ghost"
                         size="sm"
                         className="p-0 h-6 w-6"
-                        onClick={() => togglePackExpand(pack.id)}
+                        onClick={() => togglePackExpand(pack.idCatalogMaterialAux)}
                       >
                         {isExpanded ? (
                           <ChevronUp className="w-4 h-4" />
@@ -182,7 +180,7 @@ export function CatalogPacksTable() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleSkuAdd(pack.id)}
+                        onClick={() => handleAddMaterialToPack(pack.idCatalogMaterialAux)}
                         title="Agregar"
                       >
                         <Plus className="w-4 h-4" />
@@ -191,7 +189,9 @@ export function CatalogPacksTable() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSkuEdit(pack.id, firstMaterial)}
+                          onClick={() =>
+                            handleMaterialEdit(pack.idCatalogMaterialAux, firstMaterial)
+                          }
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />
@@ -201,7 +201,12 @@ export function CatalogPacksTable() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSkuDelete(pack.id, firstMaterial.idCatalogMaterial)}
+                          onClick={() =>
+                            handleMaterialDelete(
+                              pack.idCatalogMaterialAux,
+                              firstMaterial.idCatalogMaterial
+                            )
+                          }
                           title="Eliminar"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
@@ -232,7 +237,7 @@ export function CatalogPacksTable() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleSkuEdit(pack.id, material)}
+                            onClick={() => handleMaterialEdit(pack.idCatalogMaterialAux, material)}
                             title="Editar"
                           >
                             <Edit className="w-4 h-4" />
@@ -240,7 +245,12 @@ export function CatalogPacksTable() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleSkuDelete(pack.id, material.idCatalogMaterial)}
+                            onClick={() =>
+                              handleMaterialDelete(
+                                pack.idCatalogMaterialAux,
+                                material.idCatalogMaterial
+                              )
+                            }
                             title="Eliminar"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >

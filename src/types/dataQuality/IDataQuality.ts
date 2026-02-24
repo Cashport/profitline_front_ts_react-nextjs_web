@@ -353,6 +353,7 @@ export interface IGetAlerts {
 }
 
 export interface IMaterialPackMaterial {
+  materialPackId: number;
   productType: string;
   productTypeName: string;
   typeVol: string;
@@ -364,7 +365,6 @@ export interface IMaterialPackMaterial {
 }
 
 export interface IMaterialPack {
-  id: number;
   idCatalogMaterialAux: number;
   idClient: number;
   idProject: number;
