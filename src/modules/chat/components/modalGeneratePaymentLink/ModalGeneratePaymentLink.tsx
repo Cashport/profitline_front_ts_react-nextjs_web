@@ -135,13 +135,26 @@ const ModalGeneratePaymentLink = ({
 
   const handleSendTemplate = async () => {
     setIsSendingTemplate(true);
+    if (!successData) return;
     const payload = {
+      phoneNumber: ticketInfo.phone || "",
+      templateId: "link_de_pago",
+      senderId: "cmhv6mnla0003no0huiao1u63",
+      name: ticketInfo.clientName,
+      customerCashportUUID: ticketInfo.clientId || "",
       templateData: {
-        phoneNumber: ticketInfo.phone || "",
-        templateId: "link_de_pago",
-        senderId: "cmhv6mnla0003no0huiao1u63",
-        name: ticketInfo.clientName,
-        customerCashportUUID: ticketInfo.clientId || ""
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: successData.client }]
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: 0,
+            parameters: [{ type: "text", text: successData.link }]
+          }
+        ]
       }
     };
     try {
