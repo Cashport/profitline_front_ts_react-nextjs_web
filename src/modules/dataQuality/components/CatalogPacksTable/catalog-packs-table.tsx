@@ -17,17 +17,29 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 
-import { IMaterialPackMaterial } from "@/types/dataQuality/IDataQuality";
+import { IMaterialPackMaterial, IPackMaterialRequest } from "@/types/dataQuality/IDataQuality";
+import {
+  createMaterialPack,
+  editMaterialPackRow
+} from "@/services/dataQuality/dataQuality";
+import ModalAddEditPackMaterial, {
+  PackMaterialFormData
+} from "../ModalAddEditPackMaterial/ModalAddEditPackMaterial";
 
 export function CatalogPacksTable() {
   const params = useParams();
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
 
-  const { data: packs } = usePacksDataQuality(clientId, countryId);
+  const { data: packs, mutate } = usePacksDataQuality(clientId, countryId);
 
   const [packSearch, setPackSearch] = useState("");
   const [expandedPacks, setExpandedPacks] = useState<Set<number>>(new Set());
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [selectedPackId, setSelectedPackId] = useState<number | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<IMaterialPackMaterial | null>(null);
+  const [isLoadingSave, setIsLoadingSave] = useState(false);
 
   const filteredPacks = (packs ?? []).filter((pack) => {
     const term = packSearch.toLowerCase();
@@ -50,20 +62,46 @@ export function CatalogPacksTable() {
     });
   };
 
-  const handlePackAddNew = () => {
-    // TODO: implement when CRUD endpoint is available
+  const handleSkuAdd = (packId: number) => {
+    setSelectedPackId(packId);
+    setSelectedMaterial(null);
+    setModalMode("create");
+    setModalOpen(true);
   };
 
-  const handleSkuAdd = (_packId: number) => {
-    // TODO: implement when CRUD endpoint is available
-  };
-
-  const handleSkuEdit = (_packId: number, _material: IMaterialPackMaterial) => {
-    // TODO: implement when CRUD endpoint is available
+  const handleSkuEdit = (packId: number, material: IMaterialPackMaterial) => {
+    setSelectedPackId(packId);
+    setSelectedMaterial(material);
+    setModalMode("edit");
+    setModalOpen(true);
   };
 
   const handleSkuDelete = (_packId: number, _idCatalogMaterial: number) => {
     // TODO: implement when CRUD endpoint is available
+  };
+
+  const handleModalSave = async (data: PackMaterialFormData) => {
+    if (!selectedPackId) return;
+    setIsLoadingSave(true);
+    try {
+      const payload: IPackMaterialRequest = {
+        product_type: Number(data.product_type),
+        type_vol: Number(data.type_vol),
+        id_catalog_material: Number(data.material_code),
+        factor: data.factor
+      };
+      if (modalMode === "create") {
+        await createMaterialPack(selectedPackId, payload);
+      } else {
+        await editMaterialPackRow(selectedPackId, payload);
+      }
+      mutate();
+      setModalOpen(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingSave(false);
+    }
   };
 
   return (
@@ -78,14 +116,6 @@ export function CatalogPacksTable() {
             }}
           />
         </div>
-        <Button
-          onClick={handlePackAddNew}
-          className="text-sm font-medium"
-          style={{ backgroundColor: "#CBE71E", color: "#141414", border: "none" }}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Pack
-        </Button>
       </div>
 
       {/* Table */}
@@ -153,7 +183,7 @@ export function CatalogPacksTable() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleSkuAdd(pack.id)}
-                        title="Agregar SKU"
+                        title="Agregar"
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
@@ -162,7 +192,7 @@ export function CatalogPacksTable() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSkuEdit(pack.id, firstMaterial)}
-                          title="Editar SKU"
+                          title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -172,7 +202,7 @@ export function CatalogPacksTable() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSkuDelete(pack.id, firstMaterial.idCatalogMaterial)}
-                          title="Quitar material"
+                          title="Eliminar"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -203,7 +233,7 @@ export function CatalogPacksTable() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleSkuEdit(pack.id, material)}
-                            title="Editar SKU"
+                            title="Editar"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -211,7 +241,7 @@ export function CatalogPacksTable() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleSkuDelete(pack.id, material.idCatalogMaterial)}
-                            title="Quitar SKU"
+                            title="Eliminar"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -230,6 +260,16 @@ export function CatalogPacksTable() {
         Mostrando {filteredPacks.length} packs con{" "}
         {filteredPacks.reduce((acc, p) => acc + p.materials.length, 0)} productos
       </div>
+
+      <ModalAddEditPackMaterial
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mode={modalMode}
+        materialData={selectedMaterial}
+        onSave={handleModalSave}
+        countryId={Number(countryId)}
+        isLoadingCreateEdit={isLoadingSave}
+      />
     </div>
   );
 }
