@@ -21,15 +21,13 @@ interface AllChatsProps {
   onConversationSelect: (conversation: Conversation) => void;
   onNewChat: () => void;
   onAddClient: () => void;
-  onAccountStatement: () => void;
 }
 
 export default function AllChats({
   activeConversation,
   onConversationSelect,
   onNewChat,
-  onAddClient,
-  onAccountStatement
+  onAddClient
 }: AllChatsProps) {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
@@ -142,7 +140,6 @@ export default function AllChats({
           <ChatActions
             items={[
               { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
-              { key: "account-statement", label: "Estado de cuenta", onClick: onAccountStatement },
               { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
               { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
             ]}
