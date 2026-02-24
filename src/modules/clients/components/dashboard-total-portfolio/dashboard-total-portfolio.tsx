@@ -23,7 +23,16 @@ const DashboardTotalPortfolio: FC<DashboardTotalPortfolioProps> = ({
   countCreditNotes = 0,
   countBalances = 0
 }) => {
-  const parseValue = (val: string) => parseFloat(val.replace(/[^0-9.-]+/g, "")) || 0;
+  const parseValue = (value: string): number => {
+    if (!value) return 0;
+
+    const normalized = value
+      .replace(/\./g, "") // 1. Quita los puntos de miles: "7.219,2" -> "7219,2"
+      .replace(",", ".") // 2. Cambia coma por punto: "7219,2" -> "7219.2"
+      .replace(/[^0-9.-]+/g, ""); // 3. Limpia basura ($ o espacios)
+
+    return parseFloat(normalized) || 0;
+  };
 
   const totalInvoicesNum = parseValue(totalInvoices);
   const totalCreditNotesNum = parseValue(totalCreditNotes);
