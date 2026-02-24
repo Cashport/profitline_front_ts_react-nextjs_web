@@ -123,7 +123,6 @@ export default function ChatInbox() {
           onConversationSelect={handleConversationSelect}
           onNewChat={() => setSendNewMessage(true)}
           onAddClient={() => setShowAddClientModal(true)}
-          onAccountStatement={() => setShowAccountStatementModal(true)}
         />
 
         <section
@@ -150,6 +149,7 @@ export default function ChatInbox() {
             conversation={activeConversation}
             onClose={() => setDetailsOpen(false)}
             onOpenAddClientModal={() => setShowAddClientModal(true)}
+            onAccountStatement={() => setShowAccountStatementModal(true)}
             mutateTickets={revalidateTickets}
           />
         )}
@@ -254,7 +254,7 @@ export default function ChatInbox() {
         }}
         isContactLoading={loadingContacts}
         isLoading={isSending}
-        contacts={contacts.map((c) => ({ id: c.id.toString(), name: c.contact_name }))}
+        contacts={contacts}
       />
       <TemplateDialog
         open={sendNewMessage}
@@ -284,6 +284,7 @@ export default function ChatInbox() {
         showModal={showAccountStatementModal}
         setShowModal={setShowAccountStatementModal}
         clientId={activeConversation?.customerCashportUUID}
+        contactPhone={activeConversation?.phone}
       />
     </div>
   );

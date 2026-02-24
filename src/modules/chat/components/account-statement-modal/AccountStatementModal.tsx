@@ -33,12 +33,14 @@ interface AccountStatementModalProps {
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
   clientId?: string | null;
+  contactPhone?: string | null;
 }
 
 const AccountStatementModal = ({
   showModal,
   setShowModal,
-  clientId
+  clientId,
+  contactPhone
 }: AccountStatementModalProps) => {
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const [activeTab, setActiveTab] = useState<"correo" | "whatsapp" | "descargar">("correo");
@@ -94,6 +96,13 @@ const AccountStatementModal = ({
       try {
         const response = await getDigitalRecordFormInfo(projectId, clientId);
         setRecipients(response.usuarios);
+
+        if (contactPhone) {
+          const match = response.usuarios.find((user) => user.full_phone === contactPhone);
+          if (match) {
+            setValue("recipients", [{ label: match.label, value: match.value }]);
+          }
+        }
 
         // Mapear attachments y establecerlos como seleccionados por defecto
         const mappedAttachments = response.attachments.map((att) => ({

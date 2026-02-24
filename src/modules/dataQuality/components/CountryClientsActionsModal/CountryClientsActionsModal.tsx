@@ -10,6 +10,8 @@ type CountryClientsActionsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onDownloadCatalog: () => void;
+  onUploadFile?: () => void;
+  onUploadMaterialsAuxiliary?: () => void;
   isDownloadCatalogLoading: boolean;
   isInDetailView?: boolean;
 };
@@ -18,6 +20,8 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   isOpen,
   onClose,
   onDownloadCatalog,
+  onUploadFile,
+  onUploadMaterialsAuxiliary,
   isDownloadCatalogLoading,
   isInDetailView = false
 }) => {
@@ -41,13 +45,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         <ButtonGenerateAction
           icon={<UploadSimple size={20} />}
           title="Cargar Auxiliar Materiales"
-          onClick={() => {}}
+          onClick={onUploadMaterialsAuxiliary}
         />
-        {!isInDetailView && (
+        {isInDetailView && (
           <ButtonGenerateAction
             icon={<UploadSimple size={20} />}
             title="Cargar Histórico"
-            onClick={() => {}}
+            onClick={onUploadFile}
           />
         )}
       </div>

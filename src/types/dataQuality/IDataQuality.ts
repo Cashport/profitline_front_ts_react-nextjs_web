@@ -381,3 +381,10 @@ export interface IPackMaterialRequest {
   id_catalog_material: number;
   factor: number;
 }
+
+export interface IUploadMassiveOrHistoricalRequest {
+  id_client: number;
+  id_country: number;
+  id_type_archive: number;
+  data_type: string;
+}
