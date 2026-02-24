@@ -135,9 +135,7 @@ export default function ModalAddEditPackMaterial({
       title={mode === "edit" ? "Editar Material" : "Agregar Material"}
     >
       <p style={{ color: "#8c8c8c" }}>
-        {mode === "edit"
-          ? "Modifica el material del pack."
-          : "Agrega un nuevo material al pack."}
+        {mode === "edit" ? "Modifica el material del pack." : "Agrega un nuevo material al pack."}
       </p>
 
       <form onSubmit={handleSubmit(handleFormSubmit)}>
