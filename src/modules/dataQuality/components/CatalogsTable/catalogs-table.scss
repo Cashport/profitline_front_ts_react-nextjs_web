@@ -1,0 +1,39 @@
+@import "@styles/variables.scss";
+
+.dotsBtn {
+    background-color: $background !important;
+    border: 1px solid transparent !important;
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    border-radius: 4px;
+
+    &:hover {
+        border: 1px solid $black !important;
+        background-color: $background !important;
+    }
+}
+
+.dropdownCatalogsTable {
+    ul {
+        background-color: $white !important;
+    }
+
+    li {
+        &:hover {
+            background-color: inherit !important;
+            cursor: default !important;
+        }
+    }
+
+    .buttonNoBorder {
+        background-color: $background !important;
+        border: none;
+        width: 100%;
+        justify-content: flex-start;
+
+        &:hover {
+            outline: 1px solid $black;
+        }
+    }
+}

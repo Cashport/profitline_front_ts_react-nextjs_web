@@ -19,7 +19,8 @@ import {
   HandTap,
   ChartBar,
   ShoppingCartSimple,
-  Database
+  Database,
+  CurrencyCircleDollar
 } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
@@ -283,6 +284,19 @@ export const ModulesButtons = ({
             }
           >
             {isSideBarLarge && "Data Quality"}
+          </Button>
+        </Link>
+      )}
+      {/* Balances */}
+      {checkUserViewPermissions(project, "Balances") && (
+        <Link href="/balances" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<CurrencyCircleDollar size={iconSize} />}
+            className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
+          >
+            {isSideBarLarge && "Saldos"}
           </Button>
         </Link>
       )}
