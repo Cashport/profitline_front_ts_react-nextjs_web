@@ -16,10 +16,8 @@ import {
   markTicketAsRead,
   sendAttahcment,
   sendMessage,
-  sendWhatsAppTemplate,
-  sendWhatsAppTemplateNew
+  sendTemplate
 } from "@/services/chat/chat";
-import { getPayloadByTicket } from "@/services/chat/clients";
 
 import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
@@ -344,72 +342,33 @@ export default function ChatThread({
     });
   }
 
-  const sendTemplateNeedingPayload = async (templateId: string) => {
-    try {
-      const templatePayload = await getPayloadByTicket(conversation.id, templateId);
-
-      if (!templatePayload) {
-        toast({
-          title: "Error",
-          description: "No se pudo generar el payload para la plantilla.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      await sendWhatsAppTemplate(templatePayload);
-      setTemplateOpen(false);
-      mutate();
+  const handleSendTemplate = async (templateId: string) => {
+    if (!conversation.customerCashportUUID || !conversation.phoneNumber) {
       toast({
-        title: "Plantilla enviada",
-        description: "La plantilla de WhatsApp fue enviada exitosamente."
-      });
-      scrollToBottom();
-    } catch (error) {
-      console.error("Error al enviar la plantilla:", error);
-      toast({
-        title: "Error al enviar",
-        description: "No se pudo enviar la plantilla de WhatsApp.",
+        title: "Datos insuficientes",
+        description: "No se pudo enviar la plantilla porque faltan datos del cliente.",
         variant: "destructive"
       });
+      return;
     }
-  };
-
-  const sendBasicTemplate = async (templateId: "presentacion" | "saludo") => {
     try {
-      const payload = {
-        templateData: {
-          components: [
-            {
-              type: "body",
-              parameters: [
-                {
-                  type: "text",
-                  text: conversation.client_name
-                }
-              ]
-            }
-          ]
-        },
-        phoneNumber: conversation.phoneNumber,
+      await sendTemplate({
         templateId,
-        senderId: "cmhv6mnla0003no0huiao1u63",
-        name: conversation.client_name,
-        customerCashportUUID: conversation.customerCashportUUID || ""
-      };
-      await sendWhatsAppTemplateNew(payload);
+        clientUuid: conversation.customerCashportUUID,
+        destinationNumber: [conversation.phoneNumber]
+      });
       setTemplateOpen(false);
+      mutate();
       toast({
         title: "Plantilla enviada",
         description: "La plantilla de WhatsApp fue enviada exitosamente."
       });
-      mutate();
       scrollToBottom();
     } catch (error) {
-      console.error("Error al enviar la plantilla:", error);
       toast({
         title: "Error al enviar",
-        description: "No se pudo enviar la plantilla de WhatsApp.",
+        description:
+          error instanceof Error ? error.message : "No se pudo enviar la plantilla de WhatsApp.",
         variant: "destructive"
       });
     }
@@ -889,17 +848,7 @@ export default function ChatThread({
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
           setTemplateLoading(true);
           try {
-            if (payload.templateId === "estado_de_cuenta")
-              await sendTemplateNeedingPayload("estado_de_cuenta");
-            else if (payload.templateId === "presentacion") await sendBasicTemplate("presentacion");
-            else if (payload.templateId === "saludo") await sendBasicTemplate("saludo");
-            else if (payload.templateId === "soportes")
-              await sendTemplateNeedingPayload("soportes");
-            else if (
-              payload.templateId === "cartera_vencida" ||
-              payload.templateId === "cartera_vencida_femsa"
-            )
-              await sendTemplateNeedingPayload(payload.templateId);
+            await handleSendTemplate(payload.templateId);
           } finally {
             setTemplateLoading(false);
           }

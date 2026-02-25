@@ -11,12 +11,8 @@ import config from "@/config";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 
 import { useToast } from "@/modules/chat/hooks/use-toast";
-import {
-  getTemplateMessages,
-  getWhatsappClientContacts,
-  getWhatsappClients
-} from "@/services/chat/clients";
-import { sendWhatsAppTemplateNew } from "@/services/chat/chat";
+import { getWhatsappClientContacts, getWhatsappClients } from "@/services/chat/clients";
+import { sendTemplate } from "@/services/chat/chat";
 import AccountStatementModal from "../../components/account-statement-modal";
 import AllChats from "../../components/all-chats";
 import AddClientModal from "../../components/contacts-tab-modal";
@@ -172,47 +168,14 @@ export default function ChatInbox() {
           if (!contact) return;
 
           const templateId = sendConversation?.templateId || "";
-          let payload: any;
-
-          if (templateId === "presentacion" || templateId === "saludo") {
-            payload = {
-              templateData: {
-                components: [
-                  {
-                    type: "body",
-                    parameters: [
-                      {
-                        type: "text",
-                        text: sendConversation?.clientName || ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              phoneNumber: contact.contact_phone,
-              templateId,
-              senderId: "cmhv6mnla0003no0huiao1u63",
-              name: sendConversation?.clientName || "",
-              customerCashportUUID: sendConversation?.clientUUID || ""
-            };
-          } else {
-            const result = await getTemplateMessages(
-              sendConversation?.clientUUID || "",
-              templateId
-            );
-            payload = {
-              ...result,
-              phoneNumber: contact.contact_phone,
-              templateId: templateId,
-              senderId: "cmhv6mnla0003no0huiao1u63",
-              name: contact.contact_name,
-              customerCashportUUID: sendConversation?.clientUUID || ""
-            };
-          }
 
           setIsSending(true);
           try {
-            await sendWhatsAppTemplateNew(payload);
+            await sendTemplate({
+              templateId,
+              clientUuid: sendConversation?.clientUUID || "",
+              destinationNumber: [contact.contact_phone]
+            });
             setSendConversation(null);
             await revalidateTickets();
           } catch (error) {
