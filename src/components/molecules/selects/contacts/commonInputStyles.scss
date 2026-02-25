@@ -50,6 +50,18 @@
     background-color: $background !important;
     font-size: 1rem;
 
+    .ant-select-item {
+        height: auto;
+        min-height: 2rem;
+
+        .ant-select-item-option-content {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            word-break: break-word;
+        }
+    }
+
     .selectOptions {
         background-color: $background !important;
         border-top: 1px solid $white;

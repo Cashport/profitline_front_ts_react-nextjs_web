@@ -28,6 +28,7 @@ interface PropsGeneralSelect<T extends FieldValues> {
   disabled?: boolean;
   suffixIcon?: ReactNode;
   showLabelAndValue?: boolean;
+  showValueInTag?: boolean;
 }
 
 const GeneralSearchSelect = <T extends FieldValues>({
@@ -40,7 +41,8 @@ const GeneralSearchSelect = <T extends FieldValues>({
   customStyleContainer,
   disabled = false,
   suffixIcon,
-  showLabelAndValue
+  showLabelAndValue,
+  showValueInTag
 }: PropsGeneralSelect<T>) => {
   const [usedOptions, setUsedOptions] = useState<
     {
@@ -70,11 +72,12 @@ const GeneralSearchSelect = <T extends FieldValues>({
   }, [options]);
 
   const tagRender: TagRender = (props) => {
-    const { label, onClose, closable } = props;
+    const { label, value, onClose, closable } = props;
     const onPreventMouseDown = (event: React.MouseEvent<HTMLSpanElement>) => {
       event.preventDefault();
       event.stopPropagation();
     };
+    const displayContent = showValueInTag ? (value as string) : label;
     return (
       <Tag
         className="customTag"
@@ -87,7 +90,7 @@ const GeneralSearchSelect = <T extends FieldValues>({
           </button>
         }
       >
-        {label}
+        {displayContent}
       </Tag>
     );
   };

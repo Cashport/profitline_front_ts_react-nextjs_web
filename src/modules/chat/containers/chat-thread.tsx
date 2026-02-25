@@ -6,11 +6,8 @@ import {
   CaretDoubleLeft,
   CodesandboxLogo,
   FileArrowDown,
-  Microphone,
   Paperclip,
   PaperPlaneRight,
-  Smiley,
-  Square,
   X
 } from "@phosphor-icons/react";
 
@@ -88,7 +85,6 @@ export default function ChatThread({
   detailsOpen,
   mutateTickets
 }: Props) {
-  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
   const [message, setMessage] = useState("");
@@ -96,8 +92,6 @@ export default function ChatThread({
   const [body, setBody] = useState("");
   const [emailImages, setEmailImages] = useState<FileItem[]>([]);
   const [emailFiles, setEmailFiles] = useState<FileItem[]>([]);
-  const [recording, setRecording] = useState(false);
-  const [recordSecs, setRecordSecs] = useState(0);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -110,11 +104,7 @@ export default function ChatThread({
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
   const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const waFileInputRef = useRef<HTMLInputElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
@@ -313,49 +303,6 @@ export default function ChatThread({
     setEmailFiles([]);
     setChannel("whatsapp");
     scrollToBottom();
-  }
-
-  async function startRecording() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
-      chunksRef.current = [];
-      mr.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
-      };
-      mr.onstop = () => {
-        //const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        //const url = URL.createObjectURL(blob);
-        stream.getTracks().forEach((t) => t.stop());
-        scrollToBottom();
-      };
-      mediaRecorderRef.current = mr;
-      mr.start();
-      setRecording(true);
-      setRecordSecs(0);
-      timerRef.current = window.setInterval(() => setRecordSecs((s) => s + 1), 1000);
-    } catch {
-      alert("No se pudo acceder al micrófono. Verifica permisos y HTTPS.");
-    }
-  }
-  function stopRecording() {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-  }
-
-  function onPickEmailImages(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    const add = files
-      .filter((f) => f.type.startsWith("image/"))
-      .map((f) => ({ url: URL.createObjectURL(f), name: f.name, size: f.size }));
-    setEmailImages((prev) => [...prev, ...add]);
-    e.target.value = "";
   }
 
   function onPickEmailFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -572,17 +519,12 @@ export default function ChatThread({
                   className="group relative block overflow-hidden rounded-lg"
                   aria-label="Ver imagen"
                 >
-                  <div className="relative w-full max-h-72 aspect-video">
-                    <Image
-                      style={{ position: "relative" }}
-                      src={m.mediaUrl || "/placeholder.svg"}
-                      alt="Imagen enviada"
-                      fill
-                      unoptimized
-                      className="rounded-lg object-cover"
-                      onLoad={scrollToBottom}
-                    />
-                  </div>
+                  <img
+                    src={m.mediaUrl ?? "/placeholder.svg"}
+                    alt="Imagen enviada"
+                    className="rounded-lg object-cover max-h-72 w-full"
+                    onLoad={scrollToBottom}
+                  />
                   <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
                     <ArrowsOut className="h-4 w-4" />
                   </div>
@@ -779,44 +721,6 @@ export default function ChatThread({
                   >
                     <Paperclip className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground"
-                    aria-label="Adjuntar imagen"
-                  >
-                    <CodesandboxLogo className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground"
-                    aria-label="Insertar emoji"
-                  >
-                    <Smiley className="h-4 w-4" />
-                  </Button>
-                  {!recording ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground"
-                      aria-label="Grabar nota de voz"
-                      onClick={startRecording}
-                    >
-                      <Microphone className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-8 gap-1 px-2"
-                      onClick={stopRecording}
-                      aria-label="Detener grabación"
-                    >
-                      <Square className="h-4 w-4" />
-                      {recordSecs}s
-                    </Button>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -931,29 +835,12 @@ export default function ChatThread({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <input
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={onPickEmailImages}
-                />
-                <input
                   ref={fileInputRef}
                   type="file"
                   multiple
                   className="hidden"
                   onChange={onPickEmailFiles}
                 />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground"
-                  aria-label="Adjuntar imágenes"
-                  onClick={() => imageInputRef.current?.click()}
-                >
-                  <CodesandboxLogo className="h-4 w-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
