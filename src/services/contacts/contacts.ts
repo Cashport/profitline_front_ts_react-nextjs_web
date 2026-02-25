@@ -42,12 +42,13 @@ export const putContact = async (
 
 export const deleteContact = async (
   contactsIds: { contacts_ids: number[] },
+  inactivate: boolean,
   clientId: string,
   projectId: number
 ): Promise<genericResponse> => {
   try {
     const customConfig = {
-      data: contactsIds
+      data: { contacts_ids: contactsIds.contacts_ids, inactivate }
     };
 
     const response: genericResponse = await API.delete(

@@ -97,9 +97,10 @@ export const useClientContacts = (clientId: string) => {
     showMessage: (type: MessageType, content: string) => void
   ) => {
     const formattedIds = { contacts_ids: contactsIds };
+    const inactivate = false;
 
     try {
-      const response = await deleteContact(formattedIds, clientId, projectId);
+      const response = await deleteContact(formattedIds, inactivate, clientId, projectId);
       if (response.status === 200) {
         showMessage("success", "Contactos eliminados exitosamente");
       }
