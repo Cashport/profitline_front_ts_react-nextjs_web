@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Select } from "antd";
 import { Button } from "@/modules/chat/ui/button";
 import { WhatsappLogo } from "@phosphor-icons/react";
@@ -30,6 +30,13 @@ export default function SelectClientDialog({
 }: Props) {
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedClient("");
+      setSelectedContact("");
+    }
+  }, [open]);
 
   const handleConfirm = () => {
     onConfirm();
