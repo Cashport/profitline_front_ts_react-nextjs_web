@@ -48,7 +48,7 @@ export const deleteContact = async (
 ): Promise<genericResponse> => {
   try {
     const customConfig = {
-      data: { contactsIds, inactivate }
+      data: { contacts_ids: contactsIds.contacts_ids, inactivate }
     };
 
     const response: genericResponse = await API.delete(
