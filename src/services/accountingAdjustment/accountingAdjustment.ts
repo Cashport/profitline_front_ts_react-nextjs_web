@@ -205,6 +205,7 @@ interface IAttachments {
 }
 
 export interface IUser {
+  contact_id: number;
   label: string;
   value: string;
   full_phone: string;

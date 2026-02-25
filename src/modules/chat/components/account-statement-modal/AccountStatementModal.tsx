@@ -329,6 +329,7 @@ const AccountStatementModal = ({
                     suffixIcon={null}
                     showLabelAndValue
                     showValueInTag
+                    optionKeyField="contact_id"
                   />
                 )}
               />
@@ -345,6 +346,7 @@ const AccountStatementModal = ({
                     title="Para"
                     placeholder="Seleccione o escriba destinatarios"
                     options={recipients.map((user) => ({
+                      contact_id: user.contact_id,
                       value: user.full_phone,
                       label: user.label
                     }))}
@@ -352,6 +354,7 @@ const AccountStatementModal = ({
                     suffixIcon={null}
                     showLabelAndValue
                     showValueInTag
+                    optionKeyField="contact_id"
                   />
                 )}
               />

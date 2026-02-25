@@ -22,13 +22,14 @@ interface PropsGeneralSelect<T extends FieldValues> {
   field: ControllerRenderProps<T, any>;
   title?: string;
   placeholder: string;
-  options?: { value: number | string; label: string }[] | string[];
+  options?: ({ value: number | string; label: string; [key: string]: any } | string)[];
   loading?: boolean;
   customStyleContainer?: React.CSSProperties;
   disabled?: boolean;
   suffixIcon?: ReactNode;
   showLabelAndValue?: boolean;
   showValueInTag?: boolean;
+  optionKeyField?: string;
 }
 
 const GeneralSearchSelect = <T extends FieldValues>({
@@ -42,12 +43,14 @@ const GeneralSearchSelect = <T extends FieldValues>({
   disabled = false,
   suffixIcon,
   showLabelAndValue,
-  showValueInTag
+  showValueInTag,
+  optionKeyField
 }: PropsGeneralSelect<T>) => {
   const [usedOptions, setUsedOptions] = useState<
     {
       value: number | string;
       label: string;
+      [key: string]: any;
     }[]
   >();
 
@@ -61,10 +64,7 @@ const GeneralSearchSelect = <T extends FieldValues>({
             label: option
           };
         }
-        return {
-          value: option.value,
-          label: option.label
-        };
+        return { ...option };
       });
 
       setUsedOptions(formattedOptions);
@@ -111,28 +111,42 @@ const GeneralSearchSelect = <T extends FieldValues>({
         variant="borderless"
         optionLabelProp="label"
         popupClassName="selectSearchCustomDrop"
-        options={usedOptions}
+        options={optionKeyField ? undefined : usedOptions}
         labelInValue
         disabled={disabled}
         optionRender={
-          showLabelAndValue
-            ? (option) => {
-                return (
+          optionKeyField
+            ? undefined
+            : showLabelAndValue
+              ? (option) => (
                   <div className="option">
                     <p className="label">{option.label}</p>
                     <p className="value">{option.value}</p>
                   </div>
-                );
-              }
-            : (option) => {
-                return (
+                )
+              : (option) => (
                   <div className="option">
                     <p className="label">{option.label}</p>
                   </div>
-                );
-              }
+                )
         }
-      />
+      >
+        {optionKeyField &&
+          usedOptions?.map((opt) => (
+            <Select.Option key={opt[optionKeyField]} value={opt.value} label={opt.label}>
+              {showLabelAndValue ? (
+                <div className="option">
+                  <p className="label">{opt.label}</p>
+                  <p className="value">{opt.value}</p>
+                </div>
+              ) : (
+                <div className="option">
+                  <p className="label">{opt.label}</p>
+                </div>
+              )}
+            </Select.Option>
+          ))}
+      </Select>
       {errors && <Typography.Text className="textError">{title} es obligatorio *</Typography.Text>}
     </Flex>
   );
