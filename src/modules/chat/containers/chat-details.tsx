@@ -74,7 +74,8 @@ export default function ChatDetails({
       const contactIdValue = clientDetails?.client.contact_id;
       if (!contactIdValue) return;
       const contactId = { contacts_ids: [contactIdValue] };
-      await deleteContact(contactId, clientDetails?.client.uuid || "", projectId);
+      const inactivate = true;
+      await deleteContact(contactId, inactivate, clientDetails?.client.uuid || "", projectId);
       message.success("Contacto inactivado exitosamente");
       handleCloseModals();
       mutateTickets();
