@@ -40,26 +40,6 @@ export async function getTemplateMessages(clientUUID: string, templateId: string
   }
 }
 
-export const getPayloadByTicket = async (
-  ticketId: string,
-  templateId: string
-): Promise<PayloadByTicket | null> => {
-  try {
-    const response: GenericResponse<any> = await API.get(
-      `${config.API_HOST}/client/get-payload-by-ticket`,
-      {
-        params: { ticketId, templateId }
-      }
-    );
-    const data = response?.data?.data || response?.data || response;
-
-    return data;
-  } catch (error) {
-    console.error("error getting payload by ticket: ", error);
-    return null;
-  }
-};
-
 export const sendDigitalRecordWhatsapp = async (clientId: string, recipients: number[]) => {
   try {
     const response: GenericResponse<any> = await API.post(

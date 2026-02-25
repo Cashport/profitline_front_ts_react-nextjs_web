@@ -195,3 +195,9 @@ export interface IDigitalRecordFile {
   fileName: string;
   url: string;
 }
+
+export interface ITemplateRequest {
+  templateId: string;
+  clientUuid: string;
+  destinationNumber: [string];
+}

@@ -5,7 +5,7 @@ import {
   GenericResponsePaginated,
   PaginationSimple
 } from "@/types/global/IGlobal";
-import { IChatData, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import { IChatData, ITemplateRequest, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
 
 // Toggle para usar mock data mientras el backend no está disponible
@@ -138,17 +138,6 @@ export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
   }
 };
 
-export const sendWhatsAppTemplate = async (payload: any): Promise<void> => {
-  try {
-    await API.post("/whatsapp-templates/send", payload, {
-      baseURL: config.API_CHAT
-    });
-  } catch (error) {
-    console.error("Error sending WhatsApp template:", error);
-    throw error;
-  }
-};
-
 export const markTicketAsRead = async (ticketId: string): Promise<void> => {
   try {
     await API.put(
@@ -158,17 +147,6 @@ export const markTicketAsRead = async (ticketId: string): Promise<void> => {
     );
   } catch (error) {
     console.error("Error marking ticket as read:", error);
-    throw error;
-  }
-};
-
-export const sendWhatsAppTemplateNew = async (payload: any): Promise<void> => {
-  try {
-    await API.post("/whatsapp-templates/send-new", payload, {
-      baseURL: config.API_CHAT
-    });
-  } catch (error) {
-    console.error("Error sending WhatsApp template:", error);
     throw error;
   }
 };
@@ -193,6 +171,15 @@ export const sendAttahcment: (modelData: {
     return res.data;
   } catch (error) {
     console.error("Error sending attachment:", error);
+    throw error;
+  }
+};
+
+export const sendTemplate = async (payload: ITemplateRequest) => {
+  try {
+    await API.post("/cashport-whatsapp/send-template", payload);
+  } catch (error) {
+    console.error("Error sending WhatsApp template:", error);
     throw error;
   }
 };
