@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Controller, useForm, Resolver, FieldErrors } from "react-hook-form";
 import { Flex, Modal, Typography, message } from "antd";
 
@@ -48,6 +48,7 @@ const AccountStatementModal = ({
   const [attachments, setAttachments] = useState<{ value: string; label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isFirstRender = useRef(true);
 
   // Custom validation that checks activeTab state
   const validateForm: Resolver<IAccountStatementForm> = async (data) => {
@@ -100,7 +101,9 @@ const AccountStatementModal = ({
         if (contactPhone) {
           const match = response.usuarios.find((user) => user.full_phone === contactPhone);
           if (match) {
-            setValue("recipients", [{ label: match.label, value: match.value }]);
+            setValue("recipients", [{ label: match.label, value: match.value }], {
+              shouldValidate: true
+            });
           }
         }
 
@@ -133,7 +136,11 @@ const AccountStatementModal = ({
   // Update method field when tab changes
   useEffect(() => {
     setValue("method", activeTab);
-    trigger(); // Force re-validation with new activeTab value
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return; // Don't validate on first render — data isn't loaded yet
+    }
+    trigger();
   }, [activeTab, setValue, trigger]);
 
   const onSubmit = async (data: IAccountStatementForm) => {
