@@ -118,21 +118,9 @@ export default function ChatDetails({
                     onClick: () => onOpenAddClientModal?.()
                   },
                   {
-                    key: "register-payment-agreement",
-                    label: "Registrar acuerdo de pago"
-                  },
-                  {
                     key: "generate-payment-link",
                     label: "Generar link de pago",
                     onClick: handleOpenGeneratePaymentLink
-                  },
-                  {
-                    key: "apply-payment",
-                    label: "Aplicar pago"
-                  },
-                  {
-                    key: "edit-contact",
-                    label: "Editar contacto"
                   },
                   {
                     key: "deactivate-contact",
@@ -242,7 +230,6 @@ export default function ChatDetails({
           okText="Inactivar"
           okLoading={isActionLoading}
         />
-
       </div>
     </aside>
   );
