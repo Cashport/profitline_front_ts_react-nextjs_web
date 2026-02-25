@@ -239,7 +239,6 @@ export function BalancesTable({
       dataIndex: "estado",
       key: "estado",
       width: 140,
-      defaultSortOrder: "ascend",
       sorter: (a, b) => getEstadoOrder(a.estado) - getEstadoOrder(b.estado),
       showSorterTooltip: false,
       render: (value: string) => {
