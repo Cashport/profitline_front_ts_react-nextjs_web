@@ -106,11 +106,22 @@ export default function ModalAddEditPOS({
       width={686}
       destroyOnClose
       title="Nuevo POS"
+      styles={{
+        body: {
+          maxHeight: "calc(70vh - 55px)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden"
+        }
+      }}
     >
       <p style={{ color: "#8c8c8c" }}>Completa los datos para crear un nuevo Punto de Venta.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-2 gap-4 py-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}
+      >
+        <div className="grid grid-cols-2 gap-4 py-4" style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", minHeight: 0 }}>
           {/* POS ID */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>
