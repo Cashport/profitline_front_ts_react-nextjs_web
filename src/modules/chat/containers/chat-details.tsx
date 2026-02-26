@@ -263,7 +263,6 @@ export default function ChatDetails({
           if (!open) setTemplateTarget(null);
         }}
         channel="whatsapp"
-        ticketId={conversation.id}
         loading={templateLoading}
         onUse={async (payload) => {
           if (!templateTarget) return;

@@ -20,16 +20,6 @@ import { useToast } from "@/modules/chat/hooks/use-toast";
 import { IAddClientForm, ITicket } from "@/types/chat/IChat";
 import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
 import { sendTemplate } from "@/services/chat/chat";
-import { getWhatsappClientContacts, getWhatsappClients } from "@/services/chat/clients";
-
-type NewConversation = {
-  stage: "selectClient" | "selectContact" | "confirm" | "completed";
-  clientUUID: string;
-  clientName: string;
-  contactId: string;
-  contactNumber: string;
-  templateId: string;
-};
 
 interface AllChatsProps {
   activeConversation: Conversation | null;
@@ -43,13 +33,7 @@ export default function AllChats({
   onNewChat
 }: AllChatsProps) {
   const [showAddClientModal, setShowAddClientModal] = useState(false);
-  const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
-  const [contacts, setContacts] = useState<
-    { id: number; contact_name: string; contact_phone: string }[]
-  >([]);
-  const [loadingContacts, setLoadingContacts] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
   const [templateTarget, setTemplateTarget] = useState<
     | { mode: "direct"; clientUuid: string; destinationNumber: string }
     | { mode: "newChat" }
@@ -118,36 +102,6 @@ export default function AllChats({
     });
   }, [isConnected, subscribeToTicketUpdates, activeConversation?.id, mutateTickets]);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const res = await getWhatsappClients();
-        setClients(res.map((c) => ({ id: c.uuid, name: c.client_name })));
-      } catch (error) {
-        console.error("Error fetching WhatsApp clients:", error);
-      }
-    };
-    fetchClients();
-  }, []);
-
-  useEffect(() => {
-    setContacts([]);
-    if (sendConversation?.clientUUID) {
-      const fetchContacts = async () => {
-        setLoadingContacts(true);
-        try {
-          const res = await getWhatsappClientContacts(sendConversation.clientUUID);
-          setContacts(res);
-        } catch (error) {
-          console.error("Error fetching WhatsApp contacts:", error);
-        } finally {
-          setLoadingContacts(false);
-        }
-      };
-      fetchContacts();
-    }
-  }, [sendConversation?.clientUUID]);
-
   const conversations = useMemo(() => {
     return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
   }, [ticketsData, unreadTickets]);
@@ -180,14 +134,7 @@ export default function AllChats({
 
     if (templateTarget.mode === "newChat") {
       setTemplateTarget(null);
-      setSendConversation({
-        stage: "selectClient",
-        clientUUID: "",
-        clientName: "",
-        contactId: "",
-        contactNumber: "",
-        templateId: payload.templateId
-      });
+      setPendingTemplateId(payload.templateId);
     } else {
       setTemplateLoading(true);
       try {
@@ -385,56 +332,10 @@ export default function AllChats({
       />
 
       <SelectClientDialog
-        open={!!sendConversation}
-        onOpenChange={() => setSendConversation(null)}
-        clients={clients}
-        contacts={contacts}
-        isContactLoading={loadingContacts}
-        isLoading={isSending}
-        onSelectClient={(clientUUID) => {
-          const selectedClient = clients.find((c) => c.id === clientUUID);
-          setSendConversation((prev) => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              stage: "confirm",
-              clientUUID,
-              clientName: selectedClient?.name || "",
-              contactId: "",
-              contactNumber: ""
-            };
-          });
-        }}
-        onSelectContact={(contactId) => {
-          setSendConversation((prev) => {
-            if (!prev) return null;
-            return { ...prev, contactId };
-          });
-        }}
-        onConfirm={async () => {
-          const contact = contacts.find(
-            (c) => c.id.toString() === (sendConversation?.contactId || "")
-          );
-          if (!contact) return;
-          setIsSending(true);
-          try {
-            await sendTemplate({
-              templateId: sendConversation?.templateId || "",
-              clientUuid: sendConversation?.clientUUID || "",
-              destinationNumber: [contact.contact_phone]
-            });
-            setSendConversation(null);
-            await mutateTickets();
-          } catch {
-            toast({
-              title: "Error enviando",
-              description: "No se pudo enviar el mensaje de WhatsApp.",
-              variant: "destructive"
-            });
-          } finally {
-            setIsSending(false);
-          }
-        }}
+        open={!!pendingTemplateId}
+        templateId={pendingTemplateId ?? ""}
+        onOpenChange={() => setPendingTemplateId(null)}
+        onSuccess={() => mutateTickets()}
       />
     </aside>
   );
