@@ -388,3 +388,32 @@ export interface IUploadMassiveOrHistoricalRequest {
   id_type_archive: number;
   data_type: string;
 }
+
+export interface IPOS {
+  id: number;
+  region: string;
+  country_name: string;
+  id_client: number;
+  ship_to: string;
+  customer_name: string;
+  pos_id: string;
+  pos_name: string;
+  pos_tax_code: string;
+  channel: string;
+  sub_channel: string;
+  pos_chain_name: string;
+  pos_format_store: string;
+  pos_active: number;
+  pos_internal_zone: string;
+  pos_external_zone: string;
+  department: number;
+  city: number;
+  pos_neighborhood: string;
+  pos_address: string;
+  pos_geolongitud: number;
+  pos_geolatitud: number;
+  pos_supervisor: string;
+  pos_internal_sales_representative: string;
+  pos_external_sales_representative: string;
+  pos_cod_sfe: string;
+}

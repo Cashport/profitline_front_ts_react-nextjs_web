@@ -17,7 +17,8 @@ import {
   ICreateCatalogRequest,
   IGetFiltersAlerts,
   IPackMaterialRequest,
-  IUploadMassiveOrHistoricalRequest
+  IUploadMassiveOrHistoricalRequest,
+  IPOS
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -406,6 +407,8 @@ export const deleteMaterialPackRow = async (materialPackId: number): Promise<any
   }
 };
 
+// END PACKS ENDPOINTS
+
 export const uploadMassiveOrHistoricalFile = async ({
   file,
   requestObject
@@ -439,6 +442,20 @@ export const uploadCatalogMaterial = async (file: File): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error uploading catalog material file:", error);
+    throw error;
+  }
+};
+
+// Points Of Sale ENDPOINTS
+
+export const getPointsOfSale = async (idClient: string, idCountry: number): Promise<IPOS> => {
+  try {
+    const response: GenericResponse<IPOS> = await API.get(
+      `${config.API_HOST}/data/all-pos?id_client=${idClient}&id_country=${idCountry}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching points of sale:", error);
     throw error;
   }
 };
