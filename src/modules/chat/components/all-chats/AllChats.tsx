@@ -10,17 +10,31 @@ import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import { Scroll } from "@/components/ui/scroll";
 import AddClientModal from "@/modules/chat/components/contacts-tab-modal";
+import TemplateDialog from "@/modules/chat/components/template-dialog/template-dialog";
+import SelectClientDialog from "@/modules/chat/components/select-client-dialog/select-client-dialog";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useSocket } from "@/context/ChatContext";
-import { ITicket } from "@/types/chat/IChat";
+import { useToast } from "@/modules/chat/hooks/use-toast";
+import { IAddClientForm, ITicket } from "@/types/chat/IChat";
 import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
+import { sendTemplate } from "@/services/chat/chat";
+import { getWhatsappClientContacts, getWhatsappClients } from "@/services/chat/clients";
+
+type NewConversation = {
+  stage: "selectClient" | "selectContact" | "confirm" | "completed";
+  clientUUID: string;
+  clientName: string;
+  contactId: string;
+  contactNumber: string;
+  templateId: string;
+};
 
 interface AllChatsProps {
   activeConversation: Conversation | null;
   onConversationSelect: (conversation: Conversation) => void;
-  onNewChat: () => void;
+  onNewChat: () => void; // opens MassMessageSheet in parent
 }
 
 export default function AllChats({
@@ -29,6 +43,20 @@ export default function AllChats({
   onNewChat
 }: AllChatsProps) {
   const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [contacts, setContacts] = useState<
+    { id: number; contact_name: string; contact_phone: string }[]
+  >([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [templateTarget, setTemplateTarget] = useState<
+    | { mode: "direct"; clientUuid: string; destinationNumber: string }
+    | { mode: "newChat" }
+    | null
+  >(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const { toast } = useToast();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos">("todos");
@@ -90,6 +118,36 @@ export default function AllChats({
     });
   }, [isConnected, subscribeToTicketUpdates, activeConversation?.id, mutateTickets]);
 
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const res = await getWhatsappClients();
+        setClients(res.map((c) => ({ id: c.uuid, name: c.client_name })));
+      } catch (error) {
+        console.error("Error fetching WhatsApp clients:", error);
+      }
+    };
+    fetchClients();
+  }, []);
+
+  useEffect(() => {
+    setContacts([]);
+    if (sendConversation?.clientUUID) {
+      const fetchContacts = async () => {
+        setLoadingContacts(true);
+        try {
+          const res = await getWhatsappClientContacts(sendConversation.clientUUID);
+          setContacts(res);
+        } catch (error) {
+          console.error("Error fetching WhatsApp contacts:", error);
+        } finally {
+          setLoadingContacts(false);
+        }
+      };
+      fetchContacts();
+    }
+  }, [sendConversation?.clientUUID]);
+
   const conversations = useMemo(() => {
     return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
   }, [ticketsData, unreadTickets]);
@@ -105,6 +163,48 @@ export default function AllChats({
   useEffect(() => {
     setPage(1);
   }, [debouncedQuery, activeTab]);
+
+  const handleAddClientSuccess = (data: IAddClientForm) => {
+    const clientUuid = String(data.client.value);
+    const callingCode = data.indicative.label.split(" ")[0];
+    const destinationNumber = callingCode + data.phone;
+    setTemplateTarget({ mode: "direct", clientUuid, destinationNumber });
+  };
+
+  const handleOnSelectTemplate = async (payload: {
+    channel: "whatsapp";
+    content: string;
+    templateId: string;
+  }) => {
+    if (!templateTarget) return;
+
+    if (templateTarget.mode === "newChat") {
+      setTemplateTarget(null);
+      setSendConversation({
+        stage: "selectClient",
+        clientUUID: "",
+        clientName: "",
+        contactId: "",
+        contactNumber: "",
+        templateId: payload.templateId
+      });
+    } else {
+      setTemplateLoading(true);
+      try {
+        await sendTemplate({
+          templateId: payload.templateId,
+          clientUuid: templateTarget.clientUuid,
+          destinationNumber: [templateTarget.destinationNumber]
+        });
+        setTemplateTarget(null);
+        toast({ title: "Plantilla enviada exitosamente" });
+      } catch {
+        toast({ title: "Error al enviar la plantilla", variant: "destructive" });
+      } finally {
+        setTemplateLoading(false);
+      }
+    }
+  };
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -145,7 +245,7 @@ export default function AllChats({
                 label: "Agregar cliente",
                 onClick: () => setShowAddClientModal(true)
               },
-              { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
+              { key: "new-chat", label: "Nuevo chat", onClick: () => setTemplateTarget({ mode: "newChat" }) }
             ]}
           />
         </div>
@@ -271,6 +371,70 @@ export default function AllChats({
         showAddClientModal={showAddClientModal}
         setShowAddClientModal={setShowAddClientModal}
         isActionLoading={false}
+        onSuccess={handleAddClientSuccess}
+      />
+
+      <TemplateDialog
+        open={templateTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setTemplateTarget(null);
+        }}
+        channel="whatsapp"
+        loading={templateLoading}
+        onUse={handleOnSelectTemplate}
+      />
+
+      <SelectClientDialog
+        open={!!sendConversation}
+        onOpenChange={() => setSendConversation(null)}
+        clients={clients}
+        contacts={contacts}
+        isContactLoading={loadingContacts}
+        isLoading={isSending}
+        onSelectClient={(clientUUID) => {
+          const selectedClient = clients.find((c) => c.id === clientUUID);
+          setSendConversation((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              stage: "confirm",
+              clientUUID,
+              clientName: selectedClient?.name || "",
+              contactId: "",
+              contactNumber: ""
+            };
+          });
+        }}
+        onSelectContact={(contactId) => {
+          setSendConversation((prev) => {
+            if (!prev) return null;
+            return { ...prev, contactId };
+          });
+        }}
+        onConfirm={async () => {
+          const contact = contacts.find(
+            (c) => c.id.toString() === (sendConversation?.contactId || "")
+          );
+          if (!contact) return;
+          setIsSending(true);
+          try {
+            await sendTemplate({
+              templateId: sendConversation?.templateId || "",
+              clientUuid: sendConversation?.clientUUID || "",
+              destinationNumber: [contact.contact_phone]
+            });
+            setSendConversation(null);
+            await mutateTickets();
+          } catch {
+            toast({
+              title: "Error enviando",
+              description: "No se pudo enviar el mensaje de WhatsApp.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsSending(false);
+          }
+        }}
       />
     </aside>
   );

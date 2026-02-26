@@ -19,7 +19,6 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   channel: "whatsapp" | "email";
   onUse: (p: Payload) => void;
-  ticketId: string;
   loading?: boolean;
 };
 
@@ -43,7 +42,6 @@ export default function TemplateDialog({
   onOpenChange,
   channel,
   onUse,
-  ticketId,
   loading = false
 }: Props) {
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
@@ -79,162 +77,162 @@ export default function TemplateDialog({
           </div>
         )}
 
-          <Tabs defaultValue="usar" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
-              <TabsTrigger value="usar">Usar</TabsTrigger>
-              <TabsTrigger disabled value="crear">
-                Crear
-              </TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="usar" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
+            <TabsTrigger value="usar">Usar</TabsTrigger>
+            <TabsTrigger disabled value="crear">
+              Crear
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="usar" className="space-y-4 pt-4">
-              {channel === "whatsapp" ? (
-                <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-                  {waTemplates.map((tpl) => {
-                    // Tomamos solo el componente BODY para mostrar en preview
-                    const components = tpl.components;
-                    const bodyComponent = components.find((c: any) => c.type === "BODY");
-                    return (
-                      <div
-                        key={tpl.id}
-                        className="w-full rounded-lg border p-4"
-                        style={{ borderColor: "#DDDDDD" }}
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <div className="font-medium">{tpl.id}</div>
-                          <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
-                            Texto
-                          </Badge>
-                        </div>
-                        <pre className="whitespace-pre-wrap text-sm text-[#606060]">
-                          {bodyComponent?.text}
-                        </pre>
-                        <div className="mt-3 flex justify-end">
-                          <Button
-                            className="text-[#141414]"
-                            style={{ backgroundColor: "#CBE71E" }}
-                            onClick={() =>
-                              onUse({
-                                channel: "whatsapp",
-                                content: bodyComponent?.text || "",
-                                templateId: tpl.id
-                              })
-                            }
-                          >
-                            Enviar
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-                  {emailTemplates.map((tpl) => (
+          <TabsContent value="usar" className="space-y-4 pt-4">
+            {channel === "whatsapp" ? (
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+                {waTemplates.map((tpl) => {
+                  // Tomamos solo el componente BODY para mostrar en preview
+                  const components = tpl.components;
+                  const bodyComponent = components.find((c: any) => c.type === "BODY");
+                  return (
                     <div
                       key={tpl.id}
                       className="w-full rounded-lg border p-4"
                       style={{ borderColor: "#DDDDDD" }}
                     >
                       <div className="mb-2 flex items-center justify-between">
-                        <div className="font-medium">{tpl.name}</div>
+                        <div className="font-medium">{tpl.id}</div>
                         <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
-                          Correo
+                          Texto
                         </Badge>
                       </div>
-                      <div className="text-sm">
-                        <div className="font-semibold">Asunto</div>
-                        <div className="text-[#606060]">{tpl.subject}</div>
-                        <div className="mt-2 font-semibold">Cuerpo</div>
-                        <pre className="whitespace-pre-wrap text-sm text-[#606060]">{tpl.body}</pre>
-                      </div>
+                      <pre className="whitespace-pre-wrap text-sm text-[#606060]">
+                        {bodyComponent?.text}
+                      </pre>
                       <div className="mt-3 flex justify-end">
                         <Button
                           className="text-[#141414]"
                           style={{ backgroundColor: "#CBE71E" }}
-                          onClick={() => {
-                            onOpenChange(false);
-                          }}
+                          onClick={() =>
+                            onUse({
+                              channel: "whatsapp",
+                              content: bodyComponent?.text || "",
+                              templateId: tpl.id
+                            })
+                          }
                         >
-                          Insertar
+                          Enviar
                         </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+                {emailTemplates.map((tpl) => (
+                  <div
+                    key={tpl.id}
+                    className="w-full rounded-lg border p-4"
+                    style={{ borderColor: "#DDDDDD" }}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="font-medium">{tpl.name}</div>
+                      <Badge className="rounded-full bg-[#F7F7F7] text-[#141414] border border-[#DDDDDD]">
+                        Correo
+                      </Badge>
+                    </div>
+                    <div className="text-sm">
+                      <div className="font-semibold">Asunto</div>
+                      <div className="text-[#606060]">{tpl.subject}</div>
+                      <div className="mt-2 font-semibold">Cuerpo</div>
+                      <pre className="whitespace-pre-wrap text-sm text-[#606060]">{tpl.body}</pre>
+                    </div>
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        className="text-[#141414]"
+                        style={{ backgroundColor: "#CBE71E" }}
+                        onClick={() => {
+                          onOpenChange(false);
+                        }}
+                      >
+                        Insertar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-            <TabsContent value="crear" className="space-y-3 pt-4">
-              <Input
-                placeholder="Nombre de la plantilla"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-[#F7F7F7]"
-                style={{ borderColor: "#DDDDDD" }}
-              />
-              {channel === "whatsapp" ? (
-                <>
-                  <Textarea
-                    placeholder="Contenido con variables: Hola {nombre}, ..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="min-h-[160px] bg-[#F7F7F7]"
-                    style={{ borderColor: "#DDDDDD" }}
-                  />
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">
-                      Tip: Usa variables entre llaves, por ejemplo {"{nombre}"}.
-                    </div>
-                    <Button
-                      disabled={!canCreateWA}
-                      className="text-[#141414]"
-                      style={{ backgroundColor: "#CBE71E" }}
-                      onClick={() => {
-                        onUse({ channel: "whatsapp", content, templateId: "" });
-                        onOpenChange(false);
-                      }}
-                    >
-                      Insertar en el mensaje
-                    </Button>
+          <TabsContent value="crear" className="space-y-3 pt-4">
+            <Input
+              placeholder="Nombre de la plantilla"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="bg-[#F7F7F7]"
+              style={{ borderColor: "#DDDDDD" }}
+            />
+            {channel === "whatsapp" ? (
+              <>
+                <Textarea
+                  placeholder="Contenido con variables: Hola {nombre}, ..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="min-h-[160px] bg-[#F7F7F7]"
+                  style={{ borderColor: "#DDDDDD" }}
+                />
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    Tip: Usa variables entre llaves, por ejemplo {"{nombre}"}.
                   </div>
-                </>
-              ) : (
-                <>
-                  <Input
-                    placeholder="Asunto del correo"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="bg-[#F7F7F7]"
-                    style={{ borderColor: "#DDDDDD" }}
-                  />
-                  <Textarea
-                    placeholder="Cuerpo del correo con variables: Estimado {nombre}, ..."
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    className="min-h-[160px] bg-[#F7F7F7]"
-                    style={{ borderColor: "#DDDDDD" }}
-                  />
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">
-                      Tip: Puedes usar variables como {"{nombre}"} y {"{periodo}"}.
-                    </div>
-                    <Button
-                      disabled={!canCreateEmail}
-                      className="text-[#141414]"
-                      style={{ backgroundColor: "#CBE71E" }}
-                      onClick={() => {
-                        onOpenChange(false);
-                      }}
-                    >
-                      Insertar en el correo
-                    </Button>
+                  <Button
+                    disabled={!canCreateWA}
+                    className="text-[#141414]"
+                    style={{ backgroundColor: "#CBE71E" }}
+                    onClick={() => {
+                      onUse({ channel: "whatsapp", content, templateId: "" });
+                      onOpenChange(false);
+                    }}
+                  >
+                    Insertar en el mensaje
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Input
+                  placeholder="Asunto del correo"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="bg-[#F7F7F7]"
+                  style={{ borderColor: "#DDDDDD" }}
+                />
+                <Textarea
+                  placeholder="Cuerpo del correo con variables: Estimado {nombre}, ..."
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className="min-h-[160px] bg-[#F7F7F7]"
+                  style={{ borderColor: "#DDDDDD" }}
+                />
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    Tip: Puedes usar variables como {"{nombre}"} y {"{periodo}"}.
                   </div>
-                </>
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
+                  <Button
+                    disabled={!canCreateEmail}
+                    className="text-[#141414]"
+                    style={{ backgroundColor: "#CBE71E" }}
+                    onClick={() => {
+                      onOpenChange(false);
+                    }}
+                  >
+                    Insertar en el correo
+                  </Button>
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </Modal>
   );
 }
