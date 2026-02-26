@@ -11,6 +11,37 @@ import UiSearchInput from "@/components/ui/search-input";
 import { Plus } from "@phosphor-icons/react";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
+import { ModalAddEditPOS } from "../ModalAddEditPOS";
+
+const MOCK_POS: IPOS[] = Array.from({ length: 10 }, (_, i) => ({
+  id: i + 1,
+  pos_id: `POS-${String(i + 1).padStart(3, "0")}`,
+  pos_name: `Point of Sale ${i + 1}`,
+  channel: ["Retail", "Wholesale", "Online"][i % 3],
+  sub_channel: ["Direct", "Distributor", "Agent"][i % 3],
+  city: 1000 + i,
+  pos_internal_sales_representative: `Rep ${i + 1}`,
+  // unused fields
+  region: "",
+  country_name: "",
+  id_client: 0,
+  ship_to: "",
+  customer_name: "",
+  pos_tax_code: "",
+  pos_chain_name: "",
+  pos_format_store: "",
+  pos_active: true,
+  pos_internal_zone: "",
+  pos_external_zone: "",
+  department: 0,
+  pos_neighborhood: "",
+  pos_address: "",
+  pos_geolongitud: 0,
+  pos_geolatitud: 0,
+  pos_supervisor: "",
+  pos_external_sales_representative: "",
+  pos_cod_sfe: ""
+}));
 
 const columns: ColumnsType<IPOS> = [
   {
@@ -76,11 +107,12 @@ export function PointsOfSaleTable() {
   const clientId = params.clientId as string;
   const countryId = params.countryId as string;
 
-  const { data: pointsOfSale, isLoading } = usePointsOfSale(clientId, countryId);
+  const { isLoading, mutate } = usePointsOfSale(clientId, countryId);
 
   const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredPOS = (pointsOfSale ?? []).filter((pos) => {
+  const filteredPOS = MOCK_POS.filter((pos) => {
     const term = search.toLowerCase();
     return (
       pos.pos_id?.toLowerCase().includes(term) ||
@@ -103,6 +135,7 @@ export function PointsOfSaleTable() {
             color: "#141414",
             border: "none"
           }}
+          onClick={() => setIsModalOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuevo POS
@@ -113,7 +146,16 @@ export function PointsOfSaleTable() {
         dataSource={filteredPOS}
         rowKey="id"
         loading={isLoading}
-        pagination={{ pageSize: 20 }}
+        pagination={{ pageSize: 7 }}
+        size="small"
+      />
+
+      <ModalAddEditPOS
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        clientId={Number(clientId)}
+        countryId={Number(countryId)}
+        onSuccess={mutate}
       />
     </div>
   );

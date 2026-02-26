@@ -403,7 +403,7 @@ export interface IPOS {
   sub_channel: string;
   pos_chain_name: string;
   pos_format_store: string;
-  pos_active: number;
+  pos_active: boolean;
   pos_internal_zone: string;
   pos_external_zone: string;
   department: number;
@@ -417,3 +417,29 @@ export interface IPOS {
   pos_external_sales_representative: string;
   pos_cod_sfe: string;
 }
+
+type IPosPayloadBase = Omit<
+  IPOS,
+  | "id"
+  | "region"
+  | "country_name"
+  | "customer_name"
+  | "channel"
+  | "sub_channel"
+  | "department"
+  | "city"
+> & {
+  // campos que vienen distintos en el JSON
+  id_country: number;
+  id_pos_channel?: number;
+  id_state?: number;
+  id_city?: number;
+  pos_active?: boolean; // en JSON es boolean
+};
+
+// id_client, id_country, pos_id y pos_name obligatorios; el resto opcional
+export type IPosPayload = Pick<
+  IPosPayloadBase,
+  "id_client" | "id_country" | "pos_id" | "pos_name"
+> &
+  Partial<Omit<IPosPayloadBase, "id_client" | "id_country" | "pos_id" | "pos_name">>;

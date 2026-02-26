@@ -18,7 +18,8 @@ import {
   IGetFiltersAlerts,
   IPackMaterialRequest,
   IUploadMassiveOrHistoricalRequest,
-  IPOS
+  IPOS,
+  IPosPayload
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -456,6 +457,16 @@ export const getPointsOfSale = async (idClient: string, idCountry: number): Prom
     return response.data;
   } catch (error) {
     console.error("Error fetching points of sale:", error);
+    throw error;
+  }
+};
+
+export const createPointOfSale = async (posData: IPosPayload): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post("/data/create-pos", posData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating point of sale:", error);
     throw error;
   }
 };
