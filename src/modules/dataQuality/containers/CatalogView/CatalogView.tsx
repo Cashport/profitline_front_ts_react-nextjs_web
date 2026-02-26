@@ -17,6 +17,7 @@ import Header from "@/components/organisms/header";
 import UiTab from "@/components/ui/ui-tab";
 import { CatalogsTable } from "../../components/CatalogsTable";
 import { CatalogPacksTable } from "../../components/CatalogPacksTable";
+import { PointsOfSaleTable } from "../../components/PointsOfSaleTable";
 import ModalAddEditCatalog, {
   CatalogFormData
 } from "../../components/ModalAddEditCatalog/ModalAddEditCatalog";
@@ -171,7 +172,7 @@ export default function CatalogView() {
             {
               key: "puntos-de-venta",
               label: "Puntos de venta",
-              children: <div />
+              children: <PointsOfSaleTable />
             }
           ]}
         />
