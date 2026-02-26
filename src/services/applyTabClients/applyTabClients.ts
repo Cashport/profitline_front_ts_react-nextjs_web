@@ -1,5 +1,5 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IApplicationInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import { IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
@@ -20,7 +20,7 @@ export const addItemsToTable = async (
     ...(adding_type === "discounts" && { discount_ids: selected_items_ids })
   };
   try {
-    const response: GenericResponse<{ applications: number[] }> = await API.post(
+    const response: GenericResponse<{ applications: number[] }> = await instance.post(
       `${config.API_HOST}/paymentApplication/applications/batch`,
       modelData
     );
@@ -251,12 +251,9 @@ export const applyWithCashportAI = async (
   if (comment) formData.append("content", comment);
 
   try {
-    const isDemo =
-      projectId === PROJECTID_DEMO && clientId === CLIENTUUID_DEMO;
+    const isDemo = projectId === PROJECTID_DEMO && clientId === CLIENTUUID_DEMO;
 
-    const endpoint = isDemo
-      ? config.API_APPLY_TAB_AI_DEMO!
-      : config.API_APPLY_TAB_AI!;
+    const endpoint = isDemo ? config.API_APPLY_TAB_AI_DEMO! : config.API_APPLY_TAB_AI!;
 
     const response: GenericResponse<any> = await API.post(endpoint, formData);
 
@@ -324,8 +321,7 @@ export const createPrompt = async (
   prompt: string
 ) => {
   try {
-    const isInvalidClientUUID =
-      clientUUID == null || clientUUID === "" || clientUUID === "0";
+    const isInvalidClientUUID = clientUUID == null || clientUUID === "" || clientUUID === "0";
 
     const validClientUUID = isInvalidClientUUID ? CLIENTUUID_DEMO : clientUUID;
 
@@ -335,7 +331,7 @@ export const createPrompt = async (
         id_project: projectId,
         clientUUID: validClientUUID,
         id_ai_type_task: aiTypeTaskId,
-        prompt: prompt,
+        prompt: prompt
       }
     );
 
@@ -345,7 +341,6 @@ export const createPrompt = async (
     throw error;
   }
 };
-
 
 export interface IPrompt {
   id: number;
@@ -364,10 +359,7 @@ export const getPromptByClientAndAITask = async (
 ) => {
   try {
     const validClientUUID =
-      clientUUID === undefined ||
-      clientUUID === null ||
-      clientUUID === "" ||
-      clientUUID === "0"
+      clientUUID === undefined || clientUUID === null || clientUUID === "" || clientUUID === "0"
         ? CLIENTUUID_DEMO
         : clientUUID;
 
@@ -376,7 +368,7 @@ export const getPromptByClientAndAITask = async (
       {
         id_project: projectId,
         clientUUID: validClientUUID,
-        id_ai_type_task: aiTypeTaskId,
+        id_ai_type_task: aiTypeTaskId
       }
     );
 
@@ -386,7 +378,6 @@ export const getPromptByClientAndAITask = async (
     throw error;
   }
 };
-
 
 export const updatePrompt = async (id: number, prompt: string, updatedBy: string) => {
   try {

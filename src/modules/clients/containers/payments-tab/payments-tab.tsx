@@ -134,7 +134,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
       if (error instanceof AxiosError) {
         showMessage(
           "error",
-          `Error al añadir pagos a la tabla de aplicación de pagos ${error.message}`
+          `${error.response?.data?.message || "Error al añadir pagos a la tabla de aplicación de pagos"}`
         );
       } else {
         showMessage("error", `Error al añadir pagos a la tabla de aplicación de pagos`);
