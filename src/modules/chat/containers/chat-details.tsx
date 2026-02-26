@@ -21,6 +21,7 @@ import {
 } from "@/modules/chat/ui/accordion";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import ChatActions from "@/modules/chat/components/chat-actions";
+import AddClientModal from "../components/contacts-tab-modal";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
@@ -30,7 +31,6 @@ type Props = {
   conversation: Conversation;
   isOpen?: boolean;
   onClose?: () => void;
-  onOpenAddClientModal?: () => void;
   onAccountStatement?: () => void;
   mutateTickets: () => void;
 };
@@ -39,10 +39,10 @@ export default function ChatDetails({
   conversation,
   isOpen,
   onClose,
-  onOpenAddClientModal,
   onAccountStatement,
   mutateTickets
 }: Props) {
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const { toast } = useToast();
   const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
     conversation.customerCashportUUID,
@@ -115,7 +115,7 @@ export default function ChatDetails({
                   {
                     key: "add-client",
                     label: "Agregar cliente",
-                    onClick: () => onOpenAddClientModal?.()
+                    onClick: () => setShowAddClientModal(true)
                   },
                   {
                     key: "generate-payment-link",
@@ -231,6 +231,14 @@ export default function ChatDetails({
           okLoading={isActionLoading}
         />
       </div>
+
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={conversation.customer}
+        initialPhone={conversation.phone}
+      />
     </aside>
   );
 }

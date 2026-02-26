@@ -9,6 +9,7 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import { Scroll } from "@/components/ui/scroll";
+import AddClientModal from "@/modules/chat/components/contacts-tab-modal";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -20,15 +21,14 @@ interface AllChatsProps {
   activeConversation: Conversation | null;
   onConversationSelect: (conversation: Conversation) => void;
   onNewChat: () => void;
-  onAddClient: () => void;
 }
 
 export default function AllChats({
   activeConversation,
   onConversationSelect,
-  onNewChat,
-  onAddClient
+  onNewChat
 }: AllChatsProps) {
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos">("todos");
@@ -140,7 +140,7 @@ export default function AllChats({
           <ChatActions
             items={[
               { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
-              { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
+              { key: "add-client", label: "Agregar cliente", onClick: () => setShowAddClientModal(true) },
               { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
             ]}
           />
@@ -261,6 +261,12 @@ export default function AllChats({
           style={{ borderColor: "#DDDDDD" }}
         />
       )}
+
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+      />
     </aside>
   );
 }

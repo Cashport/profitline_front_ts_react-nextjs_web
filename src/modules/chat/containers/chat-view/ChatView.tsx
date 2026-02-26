@@ -15,7 +15,6 @@ import { getWhatsappClientContacts, getWhatsappClients } from "@/services/chat/c
 import { sendTemplate } from "@/services/chat/chat";
 import AccountStatementModal from "../../components/account-statement-modal";
 import AllChats from "../../components/all-chats";
-import AddClientModal from "../../components/contacts-tab-modal";
 import ChatDetails from "../chat-details";
 import ChatThread from "../chat-thread";
 import MassMessageSheet from "../../components/mass-message-sheet/mass-message-sheet";
@@ -48,7 +47,6 @@ export default function ChatInbox() {
   const [sendNewMessage, setSendNewMessage] = useState(false);
   const [sendConversation, setSendConversation] = useState<NewConversation | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [showAccountStatementModal, setShowAccountStatementModal] = useState(false);
 
   const [contacts, setContacts] = useState<
@@ -118,7 +116,6 @@ export default function ChatInbox() {
           activeConversation={activeConversation}
           onConversationSelect={handleConversationSelect}
           onNewChat={() => setSendNewMessage(true)}
-          onAddClient={() => setShowAddClientModal(true)}
         />
 
         <section
@@ -144,7 +141,6 @@ export default function ChatInbox() {
             isOpen={detailsOpen}
             conversation={activeConversation}
             onClose={() => setDetailsOpen(false)}
-            onOpenAddClientModal={() => setShowAddClientModal(true)}
             onAccountStatement={() => setShowAccountStatementModal(true)}
             mutateTickets={revalidateTickets}
           />
@@ -235,13 +231,6 @@ export default function ChatInbox() {
             templateId: payload.templateId
           });
         }}
-      />
-      <AddClientModal
-        showAddClientModal={showAddClientModal}
-        setShowAddClientModal={setShowAddClientModal}
-        isActionLoading={false}
-        initialName={activeConversation?.customer}
-        initialPhone={activeConversation?.phone}
       />
       <AccountStatementModal
         showModal={showAccountStatementModal}
