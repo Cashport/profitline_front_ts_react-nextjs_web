@@ -118,6 +118,7 @@ export default function TemplateDialog({
                               templateId: tpl.id
                             })
                           }
+                          disabled={tpl.usage === "INTERNAL"}
                         >
                           Enviar
                         </Button>
