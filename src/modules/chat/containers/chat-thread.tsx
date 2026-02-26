@@ -843,7 +843,6 @@ export default function ChatThread({
         open={templateOpen}
         onOpenChange={setTemplateOpen}
         channel={channel}
-        ticketId={conversation.id}
         loading={templateLoading}
         onUse={async (payload: { channel: "whatsapp"; content: string; templateId: string }) => {
           setTemplateLoading(true);

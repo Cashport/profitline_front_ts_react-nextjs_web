@@ -270,6 +270,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -300,6 +301,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -328,6 +330,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "BODY",
@@ -347,6 +350,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -377,6 +381,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -405,6 +410,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "BODY",
@@ -424,6 +430,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -454,6 +461,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "HEADER",
@@ -482,6 +490,7 @@ export const mockWhatsAppTemplates: IWhatsAppTemplate[] = [
     category: "UTILITY",
     language: "es",
     status: "APPROVED",
+    usage: "INTERNAL",
     components: [
       {
         type: "BODY",

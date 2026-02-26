@@ -26,6 +26,7 @@ interface PropsInvoicesTable {
   isActionLoading: boolean;
   initialName?: string;
   initialPhone?: string;
+  onSuccess?: (data: IAddClientForm) => void;
 }
 
 const AddClientModal = ({
@@ -33,7 +34,8 @@ const AddClientModal = ({
   setShowAddClientModal,
   isActionLoading,
   initialName,
-  initialPhone
+  initialPhone,
+  onSuccess
 }: PropsInvoicesTable) => {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
@@ -103,6 +105,7 @@ const AddClientModal = ({
 
       message.success("Cliente agregado exitosamente");
       setShowAddClientModal(false);
+      onSuccess && onSuccess(data);
     } catch (error) {
       if (error instanceof ApiError) {
         message.error(error.message);
