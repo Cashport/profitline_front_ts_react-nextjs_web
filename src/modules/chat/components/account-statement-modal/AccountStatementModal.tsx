@@ -345,11 +345,13 @@ const AccountStatementModal = ({
                     field={field}
                     title="Para"
                     placeholder="Seleccione o escriba destinatarios"
-                    options={recipients.map((user) => ({
-                      contact_id: user.contact_id,
-                      value: user.full_phone,
-                      label: user.label
-                    }))}
+                    options={recipients
+                      .filter((user) => !user.full_phone.includes("INACTIVE"))
+                      .map((user) => ({
+                        contact_id: user.contact_id,
+                        value: user.full_phone,
+                        label: user.label
+                      }))}
                     loading={isLoading}
                     suffixIcon={null}
                     showLabelAndValue

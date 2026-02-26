@@ -140,7 +140,11 @@ export default function AllChats({
           <ChatActions
             items={[
               { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
-              { key: "add-client", label: "Agregar cliente", onClick: () => setShowAddClientModal(true) },
+              {
+                key: "add-client",
+                label: "Agregar cliente",
+                onClick: () => setShowAddClientModal(true)
+              },
               { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
             ]}
           />
@@ -156,6 +160,7 @@ export default function AllChats({
             style={{ borderColor: "#DDDDDD" }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
           />
         </div>
       </div>
