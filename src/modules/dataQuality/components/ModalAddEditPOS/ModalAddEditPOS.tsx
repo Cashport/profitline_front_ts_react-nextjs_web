@@ -96,7 +96,7 @@ export default function ModalAddEditPOS({
     watch
   } = useForm<PosFormData>({
     resolver: yupResolver(posFormSchema),
-    defaultValues: { ...INITIAL_VALUES, id_country: countryId },
+    defaultValues: { ...INITIAL_VALUES },
     mode: "onChange"
   });
 
@@ -193,9 +193,18 @@ export default function ModalAddEditPOS({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          minHeight: 0
+        }}
       >
-        <div className="grid grid-cols-2 gap-4 py-4" style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", minHeight: 0 }}>
+        <div
+          className="grid grid-cols-2 gap-4 py-4"
+          style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", minHeight: 0 }}
+        >
           {/* POS ID */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>
@@ -284,14 +293,19 @@ export default function ModalAddEditPOS({
                     field.onChange(num);
                     handleCountryChange(num);
                   }}
-                  options={countries.map((c) => ({ value: c.id.toString(), label: c.country_name }))}
+                  options={countries.map((c) => ({
+                    value: c.id.toString(),
+                    label: c.country_name
+                  }))}
                   placeholder="Seleccionar país"
                   hasError={!!errors.id_country}
                 />
               )}
             />
             {errors.id_country && (
-              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.id_country.message}</span>
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.id_country.message}
+              </span>
             )}
           </div>
 
