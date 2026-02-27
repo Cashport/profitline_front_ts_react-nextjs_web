@@ -107,12 +107,12 @@ export function PointsOfSaleTable() {
   const clientId = params.clientId as string;
   const countryId = params.countryId as string;
 
-  const { isLoading, mutate } = usePointsOfSale(clientId, countryId);
+  const { data, isLoading, mutate } = usePointsOfSale(clientId, countryId);
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredPOS = MOCK_POS.filter((pos) => {
+  const filteredPOS = data?.filter((pos) => {
     const term = search.toLowerCase();
     return (
       pos.pos_id?.toLowerCase().includes(term) ||

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as yup from "yup";
 import { Modal, Spin, message } from "antd";
 import { useForm, Controller } from "react-hook-form";
@@ -8,12 +8,21 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
+import Select from "@/modules/dataQuality/components/atoms/select/Select";
 
-import { createPointOfSale } from "@/services/dataQuality/dataQuality";
+import {
+  createPointOfSale,
+  getAllPOSChannels,
+  getAllPOSSubChannels,
+  getAllCountries,
+  getAllRegions
+} from "@/services/dataQuality/dataQuality";
 
 const posFormSchema = yup.object().shape({
   pos_id: yup.string().required("El POS ID es requerido"),
   pos_name: yup.string().required("El nombre del POS es requerido"),
+  id_country: yup.number().required("El país es requerido"),
+  id_state: yup.number().optional(),
   ship_to: yup.string().optional(),
   pos_tax_code: yup.string().optional(),
   pos_chain_name: yup.string().optional(),
@@ -35,6 +44,8 @@ type PosFormData = yup.InferType<typeof posFormSchema>;
 const INITIAL_VALUES: PosFormData = {
   pos_id: "",
   pos_name: "",
+  id_country: 0,
+  id_state: undefined,
   ship_to: "",
   pos_tax_code: "",
   pos_chain_name: "",
@@ -68,26 +79,89 @@ export default function ModalAddEditPOS({
 }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
+  const [channels, setChannels] = useState<{ id: number; name: string }[]>([]);
+  const [subChannels, setSubChannels] = useState<{ id: number; name: string }[]>([]);
+  const [countries, setCountries] = useState<{ id: number; country_name: string }[]>([]);
+  const [regions, setRegions] = useState<{ id: number; region_name: string }[]>([]);
+  const [isLoadingSubChannels, setIsLoadingSubChannels] = useState(false);
+  const [isLoadingRegions, setIsLoadingRegions] = useState(false);
+  const [selectedChannelId, setSelectedChannelId] = useState<number | undefined>(undefined);
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    setValue,
+    watch
   } = useForm<PosFormData>({
     resolver: yupResolver(posFormSchema),
-    defaultValues: INITIAL_VALUES,
+    defaultValues: { ...INITIAL_VALUES, id_country: countryId },
     mode: "onChange"
   });
 
+  const watchedCountryId = watch("id_country");
+
+  useEffect(() => {
+    Promise.all([getAllPOSChannels(), getAllCountries()])
+      .then(([ch, co]) => {
+        setChannels(ch);
+        setCountries(co);
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (countryId) {
+      getAllRegions(countryId).then(setRegions).catch(console.error);
+    }
+  }, [countryId]);
+
+  const handleChannelChange = async (channelId: number | undefined) => {
+    setSelectedChannelId(channelId);
+    setValue("id_pos_channel", undefined);
+    setSubChannels([]);
+    if (channelId) {
+      setIsLoadingSubChannels(true);
+      try {
+        const data = await getAllPOSSubChannels(channelId);
+        setSubChannels(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoadingSubChannels(false);
+      }
+    }
+  };
+
+  const handleCountryChange = async (newCountryId: number | undefined) => {
+    setValue("id_state", undefined);
+    setRegions([]);
+    if (newCountryId) {
+      setIsLoadingRegions(true);
+      try {
+        const data = await getAllRegions(newCountryId);
+        setRegions(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoadingRegions(false);
+      }
+    }
+  };
+
   const handleClose = () => {
-    reset(INITIAL_VALUES);
+    reset({ ...INITIAL_VALUES, id_country: countryId });
+    setSelectedChannelId(undefined);
+    setSubChannels([]);
+    setRegions([]);
     onClose();
   };
 
   const onSubmit = async (data: PosFormData) => {
     setIsLoading(true);
     try {
-      await createPointOfSale({ ...data, id_client: clientId, id_country: countryId });
+      await createPointOfSale({ ...data, id_client: clientId });
       message.success("POS creado exitosamente");
       onSuccess?.();
       handleClose();
@@ -162,6 +236,82 @@ export default function ModalAddEditPOS({
             {errors.pos_name && (
               <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.pos_name.message}</span>
             )}
+          </div>
+
+          {/* Canal */}
+          <div className="grid gap-2">
+            <Label style={{ color: "#141414" }}>Canal</Label>
+            <Select
+              value={selectedChannelId?.toString()}
+              onChange={(val) => handleChannelChange(val ? Number(val) : undefined)}
+              options={channels.map((c) => ({ value: c.id.toString(), label: c.name }))}
+              placeholder="Seleccionar canal"
+            />
+          </div>
+
+          {/* Sub Canal → id_pos_channel */}
+          <div className="grid gap-2">
+            <Label style={{ color: "#141414" }}>Sub Canal</Label>
+            <Controller
+              name="id_pos_channel"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value?.toString()}
+                  onChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                  options={subChannels.map((s) => ({ value: s.id.toString(), label: s.name }))}
+                  placeholder="Seleccionar sub canal"
+                  disabled={!selectedChannelId}
+                  loading={isLoadingSubChannels}
+                />
+              )}
+            />
+          </div>
+
+          {/* País → id_country */}
+          <div className="grid gap-2">
+            <Label style={{ color: "#141414" }}>
+              País <span style={{ color: "#ff4d4f" }}>*</span>
+            </Label>
+            <Controller
+              name="id_country"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value ? field.value.toString() : undefined}
+                  onChange={(val) => {
+                    const num = val ? Number(val) : undefined;
+                    field.onChange(num);
+                    handleCountryChange(num);
+                  }}
+                  options={countries.map((c) => ({ value: c.id.toString(), label: c.country_name }))}
+                  placeholder="Seleccionar país"
+                  hasError={!!errors.id_country}
+                />
+              )}
+            />
+            {errors.id_country && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.id_country.message}</span>
+            )}
+          </div>
+
+          {/* Región → id_state */}
+          <div className="grid gap-2">
+            <Label style={{ color: "#141414" }}>Región</Label>
+            <Controller
+              name="id_state"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value?.toString()}
+                  onChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                  options={regions.map((r) => ({ value: r.id.toString(), label: r.region_name }))}
+                  placeholder="Seleccionar región"
+                  disabled={!watchedCountryId}
+                  loading={isLoadingRegions}
+                />
+              )}
+            />
           </div>
 
           {/* Ship To */}
@@ -268,27 +418,6 @@ export default function ModalAddEditPOS({
               control={control}
               render={({ field }) => (
                 <Input {...field} value={field.value ?? ""} placeholder="Ej: Juan Pérez" />
-              )}
-            />
-          </div>
-
-          {/* POS Channel */}
-          <div className="grid gap-2">
-            <Label style={{ color: "#141414" }}>Canal POS</Label>
-            <Controller
-              name="id_pos_channel"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  type="number"
-                  placeholder="Ej: 1"
-                  value={field.value ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    field.onChange(val === "" ? undefined : Number(val));
-                  }}
-                />
               )}
             />
           </div>
