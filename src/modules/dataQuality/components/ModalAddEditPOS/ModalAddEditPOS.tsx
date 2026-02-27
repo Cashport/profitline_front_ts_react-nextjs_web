@@ -21,10 +21,11 @@ import {
 import { IPOS } from "@/types/dataQuality/IDataQuality";
 
 const posFormSchema = yup.object().shape({
+  sold_to: yup.number().required(),
   pos_id: yup.string().required("El POS ID es requerido"),
   pos_name: yup.string().required("El nombre del POS es requerido"),
   id_country: yup.number().required("El país es requerido"),
-  id_state: yup.number().optional(),
+  department_id: yup.number().optional(),
   ship_to: yup.string().optional(),
   pos_tax_code: yup.string().optional(),
   pos_chain_name: yup.string().optional(),
@@ -37,17 +38,19 @@ const posFormSchema = yup.object().shape({
   pos_internal_sales_representative: yup.string().optional(),
   pos_external_sales_representative: yup.string().optional(),
   pos_cod_sfe: yup.string().optional(),
-  id_pos_channel: yup.number().optional(),
+  channel_id: yup.number().optional(),
+  sub_channel_id: yup.number().optional(),
   pos_active: yup.boolean().optional()
 });
 
 type PosFormData = yup.InferType<typeof posFormSchema>;
 
 const INITIAL_VALUES: PosFormData = {
+  sold_to: 0,
   pos_id: "",
   pos_name: "",
   id_country: 0,
-  id_state: undefined,
+  department_id: undefined,
   ship_to: "",
   pos_tax_code: "",
   pos_chain_name: "",
@@ -60,7 +63,8 @@ const INITIAL_VALUES: PosFormData = {
   pos_internal_sales_representative: "",
   pos_external_sales_representative: "",
   pos_cod_sfe: "",
-  id_pos_channel: undefined,
+  channel_id: undefined,
+  sub_channel_id: undefined,
   pos_active: false
 };
 
@@ -91,7 +95,6 @@ export default function ModalAddEditPOS({
   const [regions, setRegions] = useState<{ id: number; region_name: string }[]>([]);
   const [isLoadingSubChannels, setIsLoadingSubChannels] = useState(false);
   const [isLoadingRegions, setIsLoadingRegions] = useState(false);
-  const [selectedChannelId, setSelectedChannelId] = useState<number | undefined>(undefined);
 
   const {
     control,
@@ -126,6 +129,7 @@ export default function ModalAddEditPOS({
   useEffect(() => {
     if (isOpen && mode === "edit" && posData) {
       reset({
+        sold_to: clientId,
         pos_id: posData.pos_id,
         pos_name: posData.pos_name,
         id_country: countryId,
@@ -141,17 +145,19 @@ export default function ModalAddEditPOS({
         pos_internal_sales_representative: posData.pos_internal_sales_representative,
         pos_external_sales_representative: posData.pos_external_sales_representative,
         pos_cod_sfe: posData.pos_cod_sfe,
+        channel_id: posData.channel_id,
+        sub_channel_id: posData.sub_channel_id,
         pos_active: posData.pos_active
       });
     }
     if (!isOpen) {
-      reset({ ...INITIAL_VALUES, id_country: countryId });
+      reset({ ...INITIAL_VALUES, sold_to: clientId, id_country: countryId });
     }
-  }, [isOpen, mode, posData, reset, countryId]);
+  }, [isOpen, mode, posData, reset, countryId, clientId]);
 
   const handleChannelChange = async (channelId: number | undefined) => {
-    setSelectedChannelId(channelId);
-    setValue("id_pos_channel", undefined);
+    setValue("channel_id", channelId);
+    setValue("sub_channel_id", undefined);
     setSubChannels([]);
     if (channelId) {
       setIsLoadingSubChannels(true);
@@ -167,7 +173,7 @@ export default function ModalAddEditPOS({
   };
 
   const handleCountryChange = async (newCountryId: number | undefined) => {
-    setValue("id_state", undefined);
+    setValue("department_id", undefined);
     setRegions([]);
     if (newCountryId) {
       setIsLoadingRegions(true);
@@ -183,8 +189,7 @@ export default function ModalAddEditPOS({
   };
 
   const handleClose = () => {
-    reset({ ...INITIAL_VALUES, id_country: countryId });
-    setSelectedChannelId(undefined);
+    reset({ ...INITIAL_VALUES, sold_to: clientId, id_country: countryId });
     setSubChannels([]);
     setRegions([]);
     onClose();
@@ -194,10 +199,10 @@ export default function ModalAddEditPOS({
     setIsLoading(true);
     try {
       if (mode === "edit" && posData) {
-        await editPointOfSale(posData.id, { ...data, id_client: clientId });
+        await editPointOfSale(posData.id, data);
         message.success("POS actualizado exitosamente");
       } else {
-        await createPointOfSale({ ...data, id_client: clientId });
+        await createPointOfSale(data);
         message.success("POS creado exitosamente");
       }
       onSuccess?.();
@@ -294,22 +299,28 @@ export default function ModalAddEditPOS({
             )}
           </div>
 
-          {/* Canal */}
+          {/* Canal → channel_id */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>Canal</Label>
-            <Select
-              value={selectedChannelId?.toString()}
-              onChange={(val) => handleChannelChange(val ? Number(val) : undefined)}
-              options={channels.map((c) => ({ value: c.id.toString(), label: c.name }))}
-              placeholder="Seleccionar canal"
+            <Controller
+              name="channel_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value?.toString()}
+                  onChange={(val) => handleChannelChange(val ? Number(val) : undefined)}
+                  options={channels.map((c) => ({ value: c.id.toString(), label: c.name }))}
+                  placeholder="Seleccionar canal"
+                />
+              )}
             />
           </div>
 
-          {/* Sub Canal → id_pos_channel */}
+          {/* Sub Canal → sub_channel_id */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>Sub Canal</Label>
             <Controller
-              name="id_pos_channel"
+              name="sub_channel_id"
               control={control}
               render={({ field }) => (
                 <Select
@@ -317,7 +328,7 @@ export default function ModalAddEditPOS({
                   onChange={(val) => field.onChange(val ? Number(val) : undefined)}
                   options={subChannels.map((s) => ({ value: s.id.toString(), label: s.name }))}
                   placeholder="Seleccionar sub canal"
-                  disabled={!selectedChannelId}
+                  disabled={!watch("channel_id")}
                   loading={isLoadingSubChannels}
                 />
               )}
@@ -356,11 +367,11 @@ export default function ModalAddEditPOS({
             )}
           </div>
 
-          {/* Región → id_state */}
+          {/* Región → department_id */}
           <div className="grid gap-2">
             <Label style={{ color: "#141414" }}>Región</Label>
             <Controller
-              name="id_state"
+              name="department_id"
               control={control}
               render={({ field }) => (
                 <Select

@@ -19,7 +19,7 @@ import {
   IPackMaterialRequest,
   IUploadMassiveOrHistoricalRequest,
   IPOS,
-  IPosPayload
+  IPOSPayload
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -461,7 +461,7 @@ export const getPointsOfSale = async (idClient: string, idCountry: number): Prom
   }
 };
 
-export const createPointOfSale = async (posData: IPosPayload): Promise<any> => {
+export const createPointOfSale = async (posData: IPOSPayload): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.post("/data/create-pos", posData);
     return response.data;
@@ -471,7 +471,7 @@ export const createPointOfSale = async (posData: IPosPayload): Promise<any> => {
   }
 };
 
-export const editPointOfSale = async (posId: number, posData: IPosPayload): Promise<any> => {
+export const editPointOfSale = async (posId: number, posData: IPOSPayload): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(`/data/update-pos/${posId}`, posData);
     return response.data;
