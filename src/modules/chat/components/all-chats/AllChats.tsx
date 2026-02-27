@@ -33,11 +33,10 @@ export default function AllChats({
   onNewChat
 }: AllChatsProps) {
   const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [addClientInitial, setAddClientInitial] = useState<{ name?: string; phone?: string }>({});
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
   const [templateTarget, setTemplateTarget] = useState<
-    | { mode: "direct"; clientUuid: string; destinationNumber: string }
-    | { mode: "newChat" }
-    | null
+    { mode: "direct"; clientUuid: string; destinationNumber: string } | { mode: "newChat" } | null
   >(null);
   const [templateLoading, setTemplateLoading] = useState(false);
   const { toast } = useToast();
@@ -173,6 +172,26 @@ export default function AllChats({
     }
   ];
 
+  const handleAddClient = () => {
+    if (selectedIds.length > 1) {
+      toast({
+        title: "Seleccione uno a la vez para esta acción",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (selectedIds.length === 1) {
+      const conv = conversations.find((c) => c.id === selectedIds[0]);
+      setAddClientInitial({
+        name: conv?.customer,
+        phone: conv?.phone
+      });
+    } else {
+      setAddClientInitial({});
+    }
+    setShowAddClientModal(true);
+  };
+
   return (
     <aside
       className="border-r md:col-span-3 overflow-hidden min-h-0 flex flex-col"
@@ -190,9 +209,13 @@ export default function AllChats({
               {
                 key: "add-client",
                 label: "Agregar cliente",
-                onClick: () => setShowAddClientModal(true)
+                onClick: handleAddClient
               },
-              { key: "new-chat", label: "Nuevo chat", onClick: () => setTemplateTarget({ mode: "newChat" }) }
+              {
+                key: "new-chat",
+                label: "Nuevo chat",
+                onClick: () => setTemplateTarget({ mode: "newChat" })
+              }
             ]}
           />
         </div>
@@ -316,8 +339,13 @@ export default function AllChats({
 
       <AddClientModal
         showAddClientModal={showAddClientModal}
-        setShowAddClientModal={setShowAddClientModal}
+        setShowAddClientModal={(show) => {
+          if (!show) setAddClientInitial({});
+          setShowAddClientModal(show);
+        }}
         isActionLoading={false}
+        initialName={addClientInitial.name}
+        initialPhone={addClientInitial.phone}
         onSuccess={handleAddClientSuccess}
       />
 
