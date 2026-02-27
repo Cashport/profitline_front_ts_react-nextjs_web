@@ -51,3 +51,21 @@ export interface IFinancialDiscountsResponse {
   count: number;
   rows: StatusFinancialDiscounts[];
 }
+
+export interface IBalance {
+  id: number;
+  project_id: number;
+  client_id: string;
+  client_name: string;
+  kam_id: number;
+  kam_name: string;
+  motive_name: string;
+  status_id: number;
+  status_name: string;
+  status_code: string;
+  status_color: string;
+  initial_amount: number;
+  pending_amount: number;
+  balance_date: string;
+  created_at: string;
+}
