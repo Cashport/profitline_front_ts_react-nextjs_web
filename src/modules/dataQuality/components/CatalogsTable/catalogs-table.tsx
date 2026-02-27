@@ -1,8 +1,9 @@
 "use client";
 
 import { ReactNode, useState } from "react";
+import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { Button as AntButton, Dropdown, Pagination, message } from "antd";
+import { Button as AntButton, Dropdown, Pagination, Spin, message } from "antd";
 import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -24,18 +25,11 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import {
   createCatalog,
   editCatalog,
-  deleteCatalog
+  deleteCatalog,
+  convertMaterialToPack
 } from "@/services/dataQuality/dataQuality";
+import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import "./catalogs-table.scss";
-
-interface CatalogsTableProps {
-  equivalencies: IGetCatalogs[];
-  clientName: string;
-  countryId: number;
-  clientId: number;
-  mutate: () => void;
-  onMarkAsPack: (item: IGetCatalogs) => Promise<void>;
-}
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -60,14 +54,17 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-export function CatalogsTable({
-  equivalencies,
-  clientName,
-  countryId,
-  clientId,
-  mutate,
-  onMarkAsPack
-}: CatalogsTableProps) {
+export function CatalogsTable() {
+  const params = useParams();
+  const countryId = Number(params.countryId) || 0;
+  const clientId = Number(params.clientId) || 0;
+
+  const {
+    data: equivalencies = [],
+    isLoading,
+    mutate
+  } = useCatalogsDataQuality(String(params.clientId), String(params.countryId));
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -99,6 +96,18 @@ export function CatalogsTable({
     setMode("edit");
     setSelectedCatalog(item);
     setWhichModalOpen({ selected: 1 });
+  };
+
+  const handleMarkAsPack = async (item: IGetCatalogs) => {
+    try {
+      await convertMaterialToPack(item.id);
+      mutate();
+      message.success("Material marcado como pack exitosamente");
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      }
+    }
   };
 
   const handleAddNew = () => {
@@ -162,6 +171,7 @@ export function CatalogsTable({
   };
 
   return (
+    <Spin spinning={isLoading}>
     <div>
       {/* Toolbar */}
       <div className="flex items-center justify-between pb-4 gap-2 ">
@@ -258,7 +268,7 @@ export function CatalogsTable({
                         <AntButton
                           icon={<DropboxLogo size={16} />}
                           className="buttonNoBorder"
-                          onClick={() => onMarkAsPack(item)}
+                          onClick={() => handleMarkAsPack(item)}
                         >
                           Marcar como pack
                         </AntButton>
@@ -324,5 +334,6 @@ export function CatalogsTable({
         okLoading={isLoadingAction}
       />
     </div>
+    </Spin>
   );
 }
