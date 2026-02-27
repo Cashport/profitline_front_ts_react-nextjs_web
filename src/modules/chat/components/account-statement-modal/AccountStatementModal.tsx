@@ -21,6 +21,7 @@ import { ApiError } from "@/utils/api/api";
 interface ISelectOption {
   value: string;
   label: string;
+  contact_id?: number;
 }
 
 interface IAccountStatementForm {
@@ -103,9 +104,19 @@ const AccountStatementModal = ({
         if (contactPhone) {
           const match = response.usuarios.find((user) => user.full_phone === contactPhone);
           if (match) {
-            setValue("recipients", [{ label: match.label, value: match.value }], {
-              shouldValidate: true
-            });
+            setValue(
+              "recipients",
+              [
+                {
+                  label: match.label,
+                  value: String(match.contact_id),
+                  contact_id: match.contact_id
+                }
+              ],
+              {
+                shouldValidate: true
+              }
+            );
           }
         }
 
@@ -146,24 +157,15 @@ const AccountStatementModal = ({
       return; // Don't validate on first render — data isn't loaded yet
     }
 
-    // Convert recipients between email and phone when switching tabs
-    if (prev !== activeTab && recipients.length > 0) {
+    // Filter out recipients with inactive phones when switching to whatsapp
+    if (prev !== activeTab && activeTab === "whatsapp" && recipients.length > 0) {
       const current = getValues("recipients") || [];
-
-      if (prev === "correo" && activeTab === "whatsapp") {
-        const converted = current.map((r) => {
-          const user = recipients.find((u) => u.value === r.value);
-          if (user) return { label: user.label, value: user.full_phone };
-          return r;
-        });
-        setValue("recipients", converted, { shouldValidate: false });
-      } else if (prev === "whatsapp" && activeTab === "correo") {
-        const converted = current.map((r) => {
-          const user = recipients.find((u) => u.full_phone === r.value);
-          if (user) return { label: user.label, value: user.value };
-          return r;
-        });
-        setValue("recipients", converted, { shouldValidate: false });
+      const filtered = current.filter((r) => {
+        const user = recipients.find((u) => u.contact_id === Number(r.value));
+        return user && !user.full_phone.includes("INACTIVE");
+      });
+      if (filtered.length !== current.length) {
+        setValue("recipients", filtered, { shouldValidate: false });
       }
     }
 
@@ -180,8 +182,12 @@ const AccountStatementModal = ({
     try {
       switch (data.method) {
         case "correo": {
+          const emailRecipients = (data.recipients || []).map((r) => {
+            const user = recipients.find((u) => u.contact_id === Number(r.value));
+            return { ...r, value: user?.value ?? r.value };
+          });
           const emailData: IFormDigitalRecordModal = {
-            forward_to: data.recipients || [],
+            forward_to: emailRecipients,
             subject: ""
           };
           await sendDigitalRecord(clientId, emailData);
@@ -190,18 +196,11 @@ const AccountStatementModal = ({
         }
 
         case "whatsapp": {
-          const emailToPhoneMap = new Map(recipients.map((user) => [user.value, user.full_phone]));
-
-          // For each recipient, get phone number
           const recipientPhoneNumbers =
             data.recipients
               ?.map((recipient) => {
-                // If recipient exists in map (selected from dropdown), use their phone
-                if (emailToPhoneMap.has(recipient.value)) {
-                  return emailToPhoneMap.get(recipient.value)!;
-                }
-                // Otherwise, it's a typed phone number, use value directly
-                return recipient.value.trim();
+                const user = recipients.find((u) => u.contact_id === Number(recipient.value));
+                return user ? user.full_phone : recipient.value.trim();
               })
               .map(Number) || [];
 
