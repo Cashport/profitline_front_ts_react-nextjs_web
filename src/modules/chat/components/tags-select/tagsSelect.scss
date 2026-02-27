@@ -1,0 +1,171 @@
+@import "@styles/_variables.scss";
+
+.tagsSelectContainer {
+  .tagsSelectContainer__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $gray;
+    margin-bottom: 0.25rem;
+  }
+
+  .tagsSelectContainer__select {
+    min-height: 3rem;
+    background-color: $background !important;
+    border-radius: 0.25rem;
+    width: 100% !important;
+    font-size: 1rem !important;
+    padding: 0.5rem 0.75rem !important;
+
+    .ant-select-selector {
+      font-size: 1rem !important;
+      flex-wrap: wrap;
+
+      .ant-select-selection-overflow-item {
+        max-width: 100%;
+
+        .ant-tag {
+          max-width: 100%;
+          display: inline-flex !important;
+          flex-wrap: nowrap !important;
+          white-space: nowrap !important;
+        }
+      }
+
+      .ant-select-selection-search {
+        font-weight: 300 !important;
+        font-size: 1rem;
+      }
+
+      .ant-select-selection-placeholder {
+        color: $dark-gray;
+        font-weight: 300 !important;
+      }
+    }
+
+    &.ant-select-disabled {
+      background-color: $dark-gray !important;
+
+      .ant-select-selector {
+        background-color: inherit !important;
+      }
+
+      .tagsSelect__tag {
+        color: $darker-gray;
+        border: 1px solid $gray;
+      }
+    }
+  }
+
+  .tagsSelectContainer__selectError {
+    width: 100%;
+    border: 1px dashed $error;
+    min-height: 3rem;
+    margin-bottom: 0.2rem;
+    background-color: $background;
+    padding: 0.45rem;
+    border-radius: 0.25rem;
+    font-weight: 300;
+
+    .ant-select-selector {
+      flex-wrap: wrap;
+
+      .ant-select-selection-overflow-item {
+        max-width: 100%;
+
+        .ant-tag {
+          max-width: 100%;
+          display: inline-flex !important;
+          flex-wrap: nowrap !important;
+          white-space: nowrap !important;
+        }
+      }
+
+      .ant-select-selection-placeholder {
+        color: $dark-gray;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .tagsSelectContainer__error {
+    color: $error;
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+}
+
+.tagsSelect__tag {
+  background-color: transparent;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-size: 14px !important;
+  font-weight: 300;
+  padding: 0.25rem 0.5rem;
+
+  &__closebtn {
+    background-color: $dark-gray;
+    width: 1rem;
+    height: 1rem;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+}
+
+.tagsSelectDrop {
+  background-color: $white !important;
+  padding: 0.5rem !important;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 300px !important;
+
+  .rc-virtual-list-holder-inner {
+    gap: 0.25rem;
+
+    .ant-select-item-option {
+      background-color: $background;
+      padding: 12px;
+      font-weight: 300;
+    }
+
+    .ant-select-item-option-selected {
+      background-color: $dark-gray !important;
+
+      .tagsSelectDrop__option {
+        background-color: $dark-gray !important;
+      }
+    }
+
+    .ant-select-item-option-active {
+      background-color: $dark-gray !important;
+      .tagsSelectDrop__option {
+        background-color: $dark-gray !important;
+      }
+    }
+  }
+
+  &__option {
+    background-color: $background !important;
+    font-size: 1rem;
+    transition: all 0.19s ease-in-out;
+
+    &__label {
+      font-size: 0.875rem;
+    }
+
+    &__value {
+      font-weight: 300;
+      font-size: 0.625rem;
+      color: $gray;
+    }
+  }
+}

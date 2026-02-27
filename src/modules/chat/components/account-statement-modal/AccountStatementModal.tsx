@@ -4,7 +4,7 @@ import { Flex, Modal, Typography, message } from "antd";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import GeneralSearchSelect from "@/components/ui/general-search-select";
+import TagsSelect from "@/modules/chat/components/tags-select/TagsSelect";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/modules/chat/ui/tabs";
 
 import "./accountStatementModal.scss";
@@ -319,7 +319,7 @@ const AccountStatementModal = ({
                 name="recipients"
                 control={control}
                 render={({ field }) => (
-                  <GeneralSearchSelect
+                  <TagsSelect
                     errors={errors.recipients}
                     field={field}
                     title="Para"
@@ -340,7 +340,7 @@ const AccountStatementModal = ({
                 name="recipients"
                 control={control}
                 render={({ field }) => (
-                  <GeneralSearchSelect
+                  <TagsSelect
                     errors={errors.recipients}
                     field={field}
                     title="Para"
@@ -367,7 +367,7 @@ const AccountStatementModal = ({
                 name="files"
                 control={control}
                 render={({ field }) => (
-                  <GeneralSearchSelect
+                  <TagsSelect
                     errors={errors.files}
                     field={field}
                     title="Archivos"
