@@ -121,10 +121,14 @@ export default function ModalAddEditPOS({
   }, []);
 
   useEffect(() => {
-    if (countryId) {
-      getAllRegions(countryId).then(setRegions).catch(console.error);
+    if (isOpen && countryId) {
+      setIsLoadingRegions(true);
+      getAllRegions(countryId)
+        .then(setRegions)
+        .catch(console.error)
+        .finally(() => setIsLoadingRegions(false));
     }
-  }, [countryId]);
+  }, [isOpen, countryId]);
 
   useEffect(() => {
     if (isOpen && mode === "edit" && posData) {
@@ -133,6 +137,7 @@ export default function ModalAddEditPOS({
         pos_id: posData.pos_id,
         pos_name: posData.pos_name,
         id_country: countryId,
+        department_id: posData.department_id,
         ship_to: posData.ship_to,
         pos_tax_code: posData.pos_tax_code,
         pos_chain_name: posData.pos_chain_name,
@@ -149,6 +154,14 @@ export default function ModalAddEditPOS({
         sub_channel_id: posData.sub_channel_id,
         pos_active: posData.pos_active
       });
+
+      if (posData.channel_id) {
+        setIsLoadingSubChannels(true);
+        getAllPOSSubChannels(posData.channel_id)
+          .then(setSubChannels)
+          .catch(console.error)
+          .finally(() => setIsLoadingSubChannels(false));
+      }
     }
     if (!isOpen) {
       reset({ ...INITIAL_VALUES, sold_to: clientId, id_country: countryId });
