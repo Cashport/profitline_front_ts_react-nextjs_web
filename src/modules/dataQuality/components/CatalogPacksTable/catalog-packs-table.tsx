@@ -161,6 +161,7 @@ export function CatalogPacksTable() {
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Pack</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Producto</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Factor</TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
               Acciones
             </TableHead>
@@ -213,6 +214,7 @@ export function CatalogPacksTable() {
                   <TableCell style={{ color: "#141414" }}>
                     {firstMaterial?.materialName || "-"}
                   </TableCell>
+                  <TableCell style={{ color: "#141414" }}>{firstMaterial?.factor ?? "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 justify-end">
                       <Button
@@ -265,6 +267,7 @@ export function CatalogPacksTable() {
                         {material.materialCode}
                       </TableCell>
                       <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
+                      <TableCell style={{ color: "#141414" }}>{material.factor}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 justify-end">
                           <Button

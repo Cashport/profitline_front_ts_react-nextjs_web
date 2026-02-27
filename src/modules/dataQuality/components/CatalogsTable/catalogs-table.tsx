@@ -112,6 +112,7 @@ export function CatalogsTable({
             <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
             <TableHead style={{ color: "#141414" }}>SKU</TableHead>
             <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
+            <TableHead style={{ color: "#141414" }}>Factor</TableHead>
             <TableHead style={{ color: "#141414" }}>Estado</TableHead>
             <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
             <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
@@ -134,6 +135,9 @@ export function CatalogsTable({
               </TableCell>
               <TableCell>
                 <span style={{ color: "#141414" }}>{item.material_name}</span>
+              </TableCell>
+              <TableCell>
+                <span style={{ color: "#141414" }}>{item.factor}</span>
               </TableCell>
               <TableCell>{getStatusBadge(item.status)}</TableCell>
               <TableCell>
