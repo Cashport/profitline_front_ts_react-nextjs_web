@@ -26,9 +26,16 @@ export function PointsOfSaleTable() {
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedPOS, setSelectedPOS] = useState<IPOS | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+
+  const handleEdit = (record: IPOS) => {
+    setMode("edit");
+    setSelectedPOS(record);
+    setIsModalOpen(true);
+  };
 
   const handleDeletePOS = async () => {
     if (!selectedPOS) return;
@@ -90,7 +97,7 @@ export function PointsOfSaleTable() {
       onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } }),
       render: (_, record) => (
         <div className="flex items-center gap-1 justify-end">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(record)}>
             <Edit className="w-4 h-4" />
           </Button>
           <Button
@@ -132,7 +139,11 @@ export function PointsOfSaleTable() {
             color: "#141414",
             border: "none"
           }}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setMode("create");
+            setSelectedPOS(null);
+            setIsModalOpen(true);
+          }}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuevo POS
@@ -149,10 +160,15 @@ export function PointsOfSaleTable() {
 
       <ModalAddEditPOS
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPOS(null);
+        }}
         clientId={Number(clientId)}
         countryId={Number(countryId)}
         onSuccess={mutate}
+        mode={mode}
+        posData={selectedPOS}
       />
 
       <ModalConfirmAction

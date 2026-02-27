@@ -12,11 +12,13 @@ import Select from "@/modules/dataQuality/components/atoms/select/Select";
 
 import {
   createPointOfSale,
+  editPointOfSale,
   getAllPOSChannels,
   getAllPOSSubChannels,
   getAllCountries,
   getAllRegions
 } from "@/services/dataQuality/dataQuality";
+import { IPOS } from "@/types/dataQuality/IDataQuality";
 
 const posFormSchema = yup.object().shape({
   pos_id: yup.string().required("El POS ID es requerido"),
@@ -68,6 +70,8 @@ interface Props {
   clientId: number;
   countryId: number;
   onSuccess?: () => void;
+  mode: "create" | "edit";
+  posData?: IPOS | null;
 }
 
 export default function ModalAddEditPOS({
@@ -75,7 +79,9 @@ export default function ModalAddEditPOS({
   onClose,
   clientId,
   countryId,
-  onSuccess
+  onSuccess,
+  mode,
+  posData
 }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -116,6 +122,32 @@ export default function ModalAddEditPOS({
       getAllRegions(countryId).then(setRegions).catch(console.error);
     }
   }, [countryId]);
+
+  useEffect(() => {
+    if (isOpen && mode === "edit" && posData) {
+      reset({
+        pos_id: posData.pos_id,
+        pos_name: posData.pos_name,
+        id_country: countryId,
+        ship_to: posData.ship_to,
+        pos_tax_code: posData.pos_tax_code,
+        pos_chain_name: posData.pos_chain_name,
+        pos_format_store: posData.pos_format_store,
+        pos_internal_zone: posData.pos_internal_zone,
+        pos_external_zone: posData.pos_external_zone,
+        pos_neighborhood: posData.pos_neighborhood,
+        pos_address: posData.pos_address,
+        pos_supervisor: posData.pos_supervisor,
+        pos_internal_sales_representative: posData.pos_internal_sales_representative,
+        pos_external_sales_representative: posData.pos_external_sales_representative,
+        pos_cod_sfe: posData.pos_cod_sfe,
+        pos_active: posData.pos_active
+      });
+    }
+    if (!isOpen) {
+      reset({ ...INITIAL_VALUES, id_country: countryId });
+    }
+  }, [isOpen, mode, posData, reset, countryId]);
 
   const handleChannelChange = async (channelId: number | undefined) => {
     setSelectedChannelId(channelId);
@@ -161,12 +193,23 @@ export default function ModalAddEditPOS({
   const onSubmit = async (data: PosFormData) => {
     setIsLoading(true);
     try {
-      await createPointOfSale({ ...data, id_client: clientId });
-      message.success("POS creado exitosamente");
+      if (mode === "edit" && posData) {
+        await editPointOfSale(posData.id, { ...data, id_client: clientId });
+        message.success("POS actualizado exitosamente");
+      } else {
+        await createPointOfSale({ ...data, id_client: clientId });
+        message.success("POS creado exitosamente");
+      }
       onSuccess?.();
       handleClose();
-    } catch {
-      message.error("Error al crear el POS");
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : mode === "edit"
+            ? "Error al actualizar el POS"
+            : "Error al crear el POS"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +222,7 @@ export default function ModalAddEditPOS({
       footer={null}
       width={686}
       destroyOnClose
-      title="Nuevo POS"
+      title={mode === "edit" ? "Editar POS" : "Nuevo POS"}
       styles={{
         body: {
           maxHeight: "calc(70vh - 55px)",
@@ -189,7 +232,11 @@ export default function ModalAddEditPOS({
         }
       }}
     >
-      <p style={{ color: "#8c8c8c" }}>Completa los datos para crear un nuevo Punto de Venta.</p>
+      <p style={{ color: "#8c8c8c" }}>
+        {mode === "edit"
+          ? "Modifica los datos del Punto de Venta."
+          : "Completa los datos para crear un nuevo Punto de Venta."}
+      </p>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
