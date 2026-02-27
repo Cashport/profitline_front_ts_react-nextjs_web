@@ -74,7 +74,7 @@ export function AlertsTable({ alerts, isLoading, pagination, onPageChange }: Ale
                   {alert.error_message}
                 </span>
               </TableCell>
-              <TableCell>-</TableCell>
+              <TableCell>{alert.error_type}</TableCell>
               <TableCell>
                 <div className="text-sm" style={{ color: "#141414" }}>
                   {dayjs(alert.created_at).format("DD-MM-YY HH:mm")}
