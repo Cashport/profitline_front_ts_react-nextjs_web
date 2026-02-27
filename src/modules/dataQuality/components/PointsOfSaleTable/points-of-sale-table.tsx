@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
+import { message } from "antd";
+
 import { usePointsOfSale } from "../../hooks/usePointsOfSale";
 import { IPOS } from "@/types/dataQuality/IDataQuality";
 import UiSearchInput from "@/components/ui/search-input";
@@ -12,107 +14,109 @@ import { Plus } from "@phosphor-icons/react";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { ModalAddEditPOS } from "../ModalAddEditPOS";
-
-const MOCK_POS: IPOS[] = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  pos_id: `POS-${String(i + 1).padStart(3, "0")}`,
-  pos_name: `Point of Sale ${i + 1}`,
-  channel: ["Retail", "Wholesale", "Online"][i % 3],
-  sub_channel: ["Direct", "Distributor", "Agent"][i % 3],
-  city: 1000 + i,
-  pos_internal_sales_representative: `Rep ${i + 1}`,
-  // unused fields
-  region: "",
-  country_name: "",
-  id_client: 0,
-  ship_to: "",
-  customer_name: "",
-  pos_tax_code: "",
-  pos_chain_name: "",
-  pos_format_store: "",
-  pos_active: true,
-  pos_internal_zone: "",
-  pos_external_zone: "",
-  department: 0,
-  pos_neighborhood: "",
-  pos_address: "",
-  pos_geolongitud: 0,
-  pos_geolatitud: 0,
-  pos_supervisor: "",
-  pos_external_sales_representative: "",
-  pos_cod_sfe: ""
-}));
-
-const columns: ColumnsType<IPOS> = [
-  {
-    title: "POS ID",
-    dataIndex: "pos_id",
-    key: "pos_id",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "POS Name",
-    dataIndex: "pos_name",
-    key: "pos_name",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "Channel",
-    dataIndex: "channel",
-    key: "channel",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "Sub Channel",
-    dataIndex: "sub_channel",
-    key: "sub_channel",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "City",
-    dataIndex: "city",
-    key: "city",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "Internal Sales Representation",
-    dataIndex: "pos_internal_sales_representative",
-    key: "pos_internal_sales_representative",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
-  },
-  {
-    title: "Acciones",
-    key: "acciones",
-    align: "right",
-    onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } }),
-    render: () => (
-      <div className="flex items-center gap-1 justify-end">
-        <Button variant="ghost" size="sm">
-          <Edit className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
-    )
-  }
-];
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { deletePointOfSale } from "@/services/dataQuality/dataQuality";
 
 export function PointsOfSaleTable() {
   const params = useParams();
   const clientId = params.clientId as string;
   const countryId = params.countryId as string;
 
-  const { isLoading, mutate } = usePointsOfSale(clientId, countryId);
+  const { data, isLoading, mutate } = usePointsOfSale(clientId, countryId);
 
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [selectedPOS, setSelectedPOS] = useState<IPOS | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
-  const filteredPOS = MOCK_POS.filter((pos) => {
+  const handleEdit = (record: IPOS) => {
+    setMode("edit");
+    setSelectedPOS(record);
+    setIsModalOpen(true);
+  };
+
+  const handleDeletePOS = async () => {
+    if (!selectedPOS) return;
+    setIsLoadingDelete(true);
+    try {
+      await deletePointOfSale(selectedPOS.id);
+      mutate();
+      message.success("Punto de venta eliminado exitosamente");
+      setIsDeleteModalOpen(false);
+      setSelectedPOS(null);
+    } catch {
+      message.error("Error al eliminar el punto de venta");
+    } finally {
+      setIsLoadingDelete(false);
+    }
+  };
+
+  const columns: ColumnsType<IPOS> = [
+    {
+      title: "POS ID",
+      dataIndex: "pos_id",
+      key: "pos_id",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "POS Name",
+      dataIndex: "pos_name",
+      key: "pos_name",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "Channel",
+      dataIndex: "channel",
+      key: "channel",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "Sub Channel",
+      dataIndex: "sub_channel",
+      key: "sub_channel",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "City",
+      dataIndex: "city",
+      key: "city",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "Internal Sales Representation",
+      dataIndex: "pos_internal_sales_representative",
+      key: "pos_internal_sales_representative",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } })
+    },
+    {
+      title: "Acciones",
+      key: "acciones",
+      align: "right",
+      onHeaderCell: () => ({ style: { color: "#141414", fontWeight: 600 } }),
+      render: (_, record) => (
+        <div className="flex items-center gap-1 justify-end">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(record)}>
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={() => {
+              setSelectedPOS(record);
+              setIsDeleteModalOpen(true);
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )
+    }
+  ];
+
+  const filteredPOS = data?.filter((pos) => {
     const term = search.toLowerCase();
     return (
       pos.pos_id?.toLowerCase().includes(term) ||
@@ -135,7 +139,11 @@ export function PointsOfSaleTable() {
             color: "#141414",
             border: "none"
           }}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setMode("create");
+            setSelectedPOS(null);
+            setIsModalOpen(true);
+          }}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nuevo POS
@@ -152,10 +160,27 @@ export function PointsOfSaleTable() {
 
       <ModalAddEditPOS
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPOS(null);
+        }}
         clientId={Number(clientId)}
         countryId={Number(countryId)}
         onSuccess={mutate}
+        mode={mode}
+        posData={selectedPOS}
+      />
+
+      <ModalConfirmAction
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedPOS(null);
+        }}
+        onOk={handleDeletePOS}
+        title="¿Está seguro de eliminar?"
+        okText="Eliminar"
+        okLoading={isLoadingDelete}
       />
     </div>
   );

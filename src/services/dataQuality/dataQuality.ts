@@ -470,3 +470,69 @@ export const createPointOfSale = async (posData: IPosPayload): Promise<any> => {
     throw error;
   }
 };
+
+export const editPointOfSale = async (posId: number, posData: IPosPayload): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(`/data/update-pos/${posId}`, posData);
+    return response.data;
+  } catch (error) {
+    console.error("Error editing point of sale:", error);
+    throw error;
+  }
+};
+
+export const deletePointOfSale = async (posId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(`/data/delete-pos/${posId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting point of sale:", error);
+    throw error;
+  }
+};
+
+export const getAllPOSChannels = async () => {
+  try {
+    const response: GenericResponse<{ id: number; name: string }[]> =
+      await API.get("/data/pos/channels");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching POS channels:", error);
+    throw error;
+  }
+};
+
+export const getAllPOSSubChannels = async (channelId: number) => {
+  try {
+    const response: GenericResponse<{ id: number; name: string }[]> = await API.get(
+      `/data/pos/subchannels?id_channel=${channelId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching POS sub-channels:", error);
+    throw error;
+  }
+};
+
+export const getAllCountries = async () => {
+  try {
+    const response: GenericResponse<
+      { id: number; country_name: string; address_format: string }[]
+    > = await API.get("/location/countries");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching countries:", error);
+    throw error;
+  }
+};
+
+export const getAllRegions = async (countryId: number) => {
+  try {
+    const response: GenericResponse<{ id: number; region_name: string; country_id: number }[]> =
+      await API.get(`/location/regions/country/${countryId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching regions:", error);
+    throw error;
+  }
+};

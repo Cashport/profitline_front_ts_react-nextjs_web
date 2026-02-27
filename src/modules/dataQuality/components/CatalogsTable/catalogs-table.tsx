@@ -1,8 +1,9 @@
 "use client";
 
 import { ReactNode, useState } from "react";
+import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { Button as AntButton, Dropdown, Pagination } from "antd";
+import { Button as AntButton, Dropdown, Pagination, Spin, message } from "antd";
 import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -16,17 +17,19 @@ import {
   TableHeader,
   TableRow
 } from "@/modules/chat/ui/table";
-import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
+import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
+import ModalAddEditCatalog, {
+  CatalogFormData
+} from "../ModalAddEditCatalog/ModalAddEditCatalog";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import {
+  createCatalog,
+  editCatalog,
+  deleteCatalog,
+  convertMaterialToPack
+} from "@/services/dataQuality/dataQuality";
+import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import "./catalogs-table.scss";
-
-interface CatalogsTableProps {
-  equivalencies: IGetCatalogs[];
-  clientName: string;
-  onEdit: (item: IGetCatalogs) => void;
-  onAddNew: () => void;
-  onDelete: (item: IGetCatalogs) => void;
-  onMarkAsPack: (item: IGetCatalogs) => Promise<void>;
-}
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -51,16 +54,24 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-export function CatalogsTable({
-  equivalencies,
-  clientName,
-  onEdit,
-  onAddNew,
-  onDelete,
-  onMarkAsPack
-}: CatalogsTableProps) {
+export function CatalogsTable() {
+  const params = useParams();
+  const countryId = Number(params.countryId) || 0;
+  const clientId = Number(params.clientId) || 0;
+
+  const {
+    data: equivalencies = [],
+    isLoading,
+    mutate
+  } = useCatalogsDataQuality(String(params.clientId), String(params.countryId));
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
+  const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   const itemsPerPage = 25;
 
@@ -81,7 +92,86 @@ export function CatalogsTable({
     setCurrentPage(1);
   };
 
+  const handleEdit = (item: IGetCatalogs) => {
+    setMode("edit");
+    setSelectedCatalog(item);
+    setWhichModalOpen({ selected: 1 });
+  };
+
+  const handleMarkAsPack = async (item: IGetCatalogs) => {
+    try {
+      await convertMaterialToPack(item.id);
+      mutate();
+      message.success("Material marcado como pack exitosamente");
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      }
+    }
+  };
+
+  const handleAddNew = () => {
+    setMode("create");
+    setSelectedCatalog(null);
+    setWhichModalOpen({ selected: 1 });
+  };
+
+  const handleClose = () => {
+    setWhichModalOpen({ selected: 0 });
+    setSelectedCatalog(null);
+  };
+
+  const handleSave = async (data: CatalogFormData) => {
+    const modelData: ICreateCatalogRequest = {
+      id_client: clientId,
+      id_country: countryId,
+      customer_product_cod: data.customer_product_cod,
+      customer_product_description: data.customer_product_description,
+      product_type: Number(data.product_type),
+      type_vol: Number(data.type_vol),
+      material_code: Number(data.material_code),
+      factor: data.factor
+    };
+    setIsLoadingAction(true);
+    try {
+      if (mode === "create") {
+        await createCatalog(modelData);
+        mutate();
+        message.success("Catálogo creado exitosamente");
+      } else {
+        if (!selectedCatalog) return;
+        await editCatalog(selectedCatalog.id, modelData);
+        mutate();
+        message.success("Catálogo actualizado exitosamente");
+      }
+      setWhichModalOpen({ selected: 0 });
+      setSelectedCatalog(null);
+    } catch (error) {
+      message.error(
+        mode === "create" ? "Error al crear el catálogo" : "Error al actualizar el catálogo"
+      );
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
+  const handleDeleteCatalog = async (catalog: IGetCatalogs) => {
+    setIsLoadingAction(true);
+    try {
+      await deleteCatalog(catalog.id);
+      mutate();
+      message.success("Catálogo eliminado exitosamente");
+      setWhichModalOpen({ selected: 0 });
+      setSelectedCatalog(null);
+    } catch (error) {
+      message.error("Error al eliminar el catálogo");
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
   return (
+    <Spin spinning={isLoading}>
     <div>
       {/* Toolbar */}
       <div className="flex items-center justify-between pb-4 gap-2 ">
@@ -93,7 +183,7 @@ export function CatalogsTable({
           <GenerateActionButton />
         </div>
         <Button
-          onClick={onAddNew}
+          onClick={handleAddNew}
           className="text-sm font-medium"
           style={{
             backgroundColor: "#CBE71E",
@@ -155,7 +245,7 @@ export function CatalogsTable({
                         <AntButton
                           icon={<Edit className="w-4 h-4" />}
                           className="buttonNoBorder"
-                          onClick={() => onEdit(item)}
+                          onClick={() => handleEdit(item)}
                         >
                           Editar
                         </AntButton>
@@ -167,7 +257,10 @@ export function CatalogsTable({
                         <AntButton
                           icon={<Trash2 className="w-4 h-4" />}
                           className="buttonNoBorder"
-                          onClick={() => onDelete(item)}
+                          onClick={() => {
+                            setSelectedCatalog(item);
+                            setWhichModalOpen({ selected: 2 });
+                          }}
                         >
                           Eliminar
                         </AntButton>
@@ -179,7 +272,7 @@ export function CatalogsTable({
                         <AntButton
                           icon={<DropboxLogo size={16} />}
                           className="buttonNoBorder"
-                          onClick={() => onMarkAsPack(item)}
+                          onClick={() => handleMarkAsPack(item)}
                         >
                           Marcar como pack
                         </AntButton>
@@ -223,6 +316,28 @@ export function CatalogsTable({
           showSizeChanger={false}
         />
       </div>
+
+      <ModalAddEditCatalog
+        isOpen={whichModalOpen.selected === 1}
+        onClose={handleClose}
+        mode={mode}
+        catalogData={selectedCatalog}
+        onSave={handleSave}
+        isLoadingCreateEdit={isLoadingAction}
+        countryId={countryId}
+      />
+
+      <ModalConfirmAction
+        isOpen={whichModalOpen.selected === 2}
+        onClose={() => setWhichModalOpen({ selected: 0 })}
+        onOk={() => {
+          if (selectedCatalog) handleDeleteCatalog(selectedCatalog);
+        }}
+        title="¿Está seguro de eliminar?"
+        okText="Eliminar"
+        okLoading={isLoadingAction}
+      />
     </div>
+    </Spin>
   );
 }
