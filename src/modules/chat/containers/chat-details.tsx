@@ -7,6 +7,7 @@ import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { deleteContact } from "@/services/contacts/contacts";
+import { sendTemplate } from "@/services/chat/chat";
 
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 import { cn } from "@/utils/utils";
@@ -21,8 +22,12 @@ import {
 } from "@/modules/chat/ui/accordion";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import ChatActions from "@/modules/chat/components/chat-actions";
+import AddClientModal from "../components/contacts-tab-modal";
+import TemplateDialog from "../components/template-dialog/template-dialog";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+
+import { IAddClientForm } from "@/types/chat/IChat";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 
@@ -30,7 +35,6 @@ type Props = {
   conversation: Conversation;
   isOpen?: boolean;
   onClose?: () => void;
-  onOpenAddClientModal?: () => void;
   onAccountStatement?: () => void;
   mutateTickets: () => void;
 };
@@ -39,10 +43,15 @@ export default function ChatDetails({
   conversation,
   isOpen,
   onClose,
-  onOpenAddClientModal,
   onAccountStatement,
   mutateTickets
 }: Props) {
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [templateTarget, setTemplateTarget] = useState<{
+    clientUuid: string;
+    destinationNumber: string;
+  } | null>(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const { toast } = useToast();
   const { data: clientDetails, isLoading: loading } = useClientSegmentationDetail(
     conversation.customerCashportUUID,
@@ -55,6 +64,13 @@ export default function ChatDetails({
   const [isActionLoading, setIsActionLoading] = useState(false);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
+
+  const handleAddClientSuccess = (data: IAddClientForm) => {
+    const clientUuid = String(data.client.value);
+    const callingCode = data.indicative.label.split(" ")[0];
+    const destinationNumber = callingCode + data.phone;
+    setTemplateTarget({ clientUuid, destinationNumber });
+  };
 
   const handleCloseModals = () => {
     setIsModalOpen({ isOpen: false, selected: 0 });
@@ -115,24 +131,12 @@ export default function ChatDetails({
                   {
                     key: "add-client",
                     label: "Agregar cliente",
-                    onClick: () => onOpenAddClientModal?.()
-                  },
-                  {
-                    key: "register-payment-agreement",
-                    label: "Registrar acuerdo de pago"
+                    onClick: () => setShowAddClientModal(true)
                   },
                   {
                     key: "generate-payment-link",
                     label: "Generar link de pago",
                     onClick: handleOpenGeneratePaymentLink
-                  },
-                  {
-                    key: "apply-payment",
-                    label: "Aplicar pago"
-                  },
-                  {
-                    key: "edit-contact",
-                    label: "Editar contacto"
                   },
                   {
                     key: "deactivate-contact",
@@ -242,8 +246,42 @@ export default function ChatDetails({
           okText="Inactivar"
           okLoading={isActionLoading}
         />
-
       </div>
+
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        initialName={conversation.customer}
+        initialPhone={conversation.phone}
+        onSuccess={handleAddClientSuccess}
+      />
+
+      <TemplateDialog
+        open={templateTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setTemplateTarget(null);
+        }}
+        channel="whatsapp"
+        loading={templateLoading}
+        onUse={async (payload) => {
+          if (!templateTarget) return;
+          setTemplateLoading(true);
+          try {
+            await sendTemplate({
+              templateId: payload.templateId,
+              clientUuid: templateTarget.clientUuid,
+              destinationNumber: [templateTarget.destinationNumber]
+            });
+            setTemplateTarget(null);
+            toast({ title: "Plantilla enviada exitosamente" });
+          } catch {
+            toast({ title: "Error al enviar la plantilla", variant: "destructive" });
+          } finally {
+            setTemplateLoading(false);
+          }
+        }}
+      />
     </aside>
   );
 }

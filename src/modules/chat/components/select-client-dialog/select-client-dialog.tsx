@@ -1,38 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Select } from "antd";
 import { Button } from "@/modules/chat/ui/button";
 import { WhatsappLogo } from "@phosphor-icons/react";
+import { getWhatsappClients, getWhatsappClientContacts } from "@/services/chat/clients";
+import { sendTemplate } from "@/services/chat/chat";
+import { useToast } from "@/modules/chat/hooks/use-toast";
 
 type Props = {
   open: boolean;
-  clients: { id: string; name: string }[];
-  contacts?: { id: number; contact_name: string; contact_phone: string }[];
-  onSelectClient: (clientUUID: string) => void;
-  onSelectContact: (contactId: string) => void;
-  isContactLoading: boolean;
-  isLoading?: boolean;
+  templateId: string;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onSuccess: () => void;
 };
 
-export default function SelectClientDialog({
-  open,
-  clients,
-  contacts,
-  isContactLoading,
-  isLoading,
-  onOpenChange,
-  onConfirm,
-  onSelectClient,
-  onSelectContact
-}: Props) {
+export default function SelectClientDialog({ open, templateId, onOpenChange, onSuccess }: Props) {
+  const { toast } = useToast();
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [contacts, setContacts] = useState<
+    { id: number; contact_name: string; contact_phone: string }[]
+  >([]);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedContact, setSelectedContact] = useState("");
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
-  const handleConfirm = () => {
-    onConfirm();
+  useEffect(() => {
+    getWhatsappClients()
+      .then((res) => setClients(res.map((c) => ({ id: c.uuid, name: c.client_name }))))
+      .catch((err) => console.error("Error fetching WhatsApp clients:", err));
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedClient("");
+      setSelectedContact("");
+      setContacts([]);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    setContacts([]);
+    if (!selectedClient) return;
+    (async () => {
+      setLoadingContacts(true);
+      try {
+        const res = await getWhatsappClientContacts(selectedClient);
+        setContacts(res);
+      } catch (err) {
+        console.error("Error fetching WhatsApp contacts:", err);
+      } finally {
+        setLoadingContacts(false);
+      }
+    })();
+  }, [selectedClient]);
+
+  const handleConfirm = async () => {
+    const contact = contacts.find((c) => c.id.toString() === selectedContact);
+    if (!contact) return;
+    setIsSending(true);
+    try {
+      await sendTemplate({
+        templateId,
+        clientUuid: selectedClient,
+        destinationNumber: [contact.contact_phone]
+      });
+      onOpenChange(false);
+      onSuccess();
+    } catch {
+      toast({
+        title: "Error enviando",
+        description: "No se pudo enviar el mensaje de WhatsApp.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -61,10 +105,7 @@ export default function SelectClientDialog({
               style={{ width: "100%", height: "48px" }}
               options={clients.map((c) => ({ value: c.id, label: c.name }))}
               value={selectedClient || undefined}
-              onChange={(clientUUID: string) => {
-                onSelectClient(clientUUID);
-                setSelectedClient(clientUUID);
-              }}
+              onChange={(clientUUID: string) => setSelectedClient(clientUUID)}
               filterOption={(input, option) =>
                 option?.label ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
@@ -74,19 +115,16 @@ export default function SelectClientDialog({
           <div className="space-y-2">
             <Select
               showSearch
-              placeholder={isContactLoading ? "Cargando contactos..." : "Contacto"}
+              placeholder={loadingContacts ? "Cargando contactos..." : "Contacto"}
               style={{ width: "100%", height: "48px" }}
-              disabled={isContactLoading || !selectedClient}
-              loading={isContactLoading}
-              options={contacts?.map((c) => ({
+              disabled={loadingContacts || !selectedClient}
+              loading={loadingContacts}
+              options={contacts.map((c) => ({
                 value: c.id.toString(),
                 label: `${c.contact_name} (${c.contact_phone})`
               }))}
               value={selectedContact || undefined}
-              onChange={(contactId: string) => {
-                onSelectContact(contactId);
-                setSelectedContact(contactId);
-              }}
+              onChange={(contactId: string) => setSelectedContact(contactId)}
               filterOption={(input, option) =>
                 option?.label ? option.label.toLowerCase().includes(input.toLowerCase()) : false
               }
@@ -107,9 +145,9 @@ export default function SelectClientDialog({
             className="flex-1 h-12 text-[#141414] font-medium hover:opacity-90"
             style={{ backgroundColor: "#CBE71E" }}
             onClick={handleConfirm}
-            disabled={!selectedClient || !selectedContact || isLoading}
+            disabled={!selectedClient || !selectedContact || isSending}
           >
-            {isLoading ? "Enviando..." : "Enviar Whatsapp"}
+            {isSending ? "Enviando..." : "Enviar Whatsapp"}
           </Button>
         </div>
       </div>

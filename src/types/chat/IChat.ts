@@ -126,6 +126,7 @@ export interface IWhatsAppTemplate {
   category: string;
   language: string;
   status: string;
+  usage: "INTERNAL" | "EXTERNAL" | "BOTH";
   components: { [key: string]: string }[];
   metadata: any;
   createdAt: string;
@@ -194,4 +195,10 @@ export interface PayloadByTicket {
 export interface IDigitalRecordFile {
   fileName: string;
   url: string;
+}
+
+export interface ITemplateRequest {
+  templateId: string;
+  clientUuid: string;
+  destinationNumber: [string];
 }

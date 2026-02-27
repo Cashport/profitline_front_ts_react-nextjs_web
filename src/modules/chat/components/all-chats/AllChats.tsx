@@ -9,26 +9,38 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 import ChatActions from "@/modules/chat/components/chat-actions";
 import { Scroll } from "@/components/ui/scroll";
+import AddClientModal from "@/modules/chat/components/contacts-tab-modal";
+import TemplateDialog from "@/modules/chat/components/template-dialog/template-dialog";
+import SelectClientDialog from "@/modules/chat/components/select-client-dialog/select-client-dialog";
 
 import useChatTickets from "@/hooks/useChatTickets";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useSocket } from "@/context/ChatContext";
-import { ITicket } from "@/types/chat/IChat";
+import { useToast } from "@/modules/chat/hooks/use-toast";
+import { IAddClientForm, ITicket } from "@/types/chat/IChat";
 import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
+import { sendTemplate } from "@/services/chat/chat";
 
 interface AllChatsProps {
   activeConversation: Conversation | null;
   onConversationSelect: (conversation: Conversation) => void;
-  onNewChat: () => void;
-  onAddClient: () => void;
+  onNewChat: () => void; // opens MassMessageSheet in parent
 }
 
 export default function AllChats({
   activeConversation,
   onConversationSelect,
-  onNewChat,
-  onAddClient
+  onNewChat
 }: AllChatsProps) {
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
+  const [templateTarget, setTemplateTarget] = useState<
+    | { mode: "direct"; clientUuid: string; destinationNumber: string }
+    | { mode: "newChat" }
+    | null
+  >(null);
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const { toast } = useToast();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos">("todos");
@@ -106,6 +118,41 @@ export default function AllChats({
     setPage(1);
   }, [debouncedQuery, activeTab]);
 
+  const handleAddClientSuccess = (data: IAddClientForm) => {
+    const clientUuid = String(data.client.value);
+    const callingCode = data.indicative.label.split(" ")[0];
+    const destinationNumber = callingCode + data.phone;
+    setTemplateTarget({ mode: "direct", clientUuid, destinationNumber });
+  };
+
+  const handleOnSelectTemplate = async (payload: {
+    channel: "whatsapp";
+    content: string;
+    templateId: string;
+  }) => {
+    if (!templateTarget) return;
+
+    if (templateTarget.mode === "newChat") {
+      setTemplateTarget(null);
+      setPendingTemplateId(payload.templateId);
+    } else {
+      setTemplateLoading(true);
+      try {
+        await sendTemplate({
+          templateId: payload.templateId,
+          clientUuid: templateTarget.clientUuid,
+          destinationNumber: [templateTarget.destinationNumber]
+        });
+        setTemplateTarget(null);
+        toast({ title: "Plantilla enviada exitosamente" });
+      } catch {
+        toast({ title: "Error al enviar la plantilla", variant: "destructive" });
+      } finally {
+        setTemplateLoading(false);
+      }
+    }
+  };
+
   function toggleSelect(id: string) {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
@@ -140,8 +187,12 @@ export default function AllChats({
           <ChatActions
             items={[
               { key: "send-batch", label: "Enviar masivo", onClick: onNewChat },
-              { key: "add-client", label: "Agregar cliente", onClick: onAddClient },
-              { key: "new-chat", label: "Nuevo chat", onClick: onNewChat }
+              {
+                key: "add-client",
+                label: "Agregar cliente",
+                onClick: () => setShowAddClientModal(true)
+              },
+              { key: "new-chat", label: "Nuevo chat", onClick: () => setTemplateTarget({ mode: "newChat" }) }
             ]}
           />
         </div>
@@ -156,6 +207,7 @@ export default function AllChats({
             style={{ borderColor: "#DDDDDD" }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
           />
         </div>
       </div>
@@ -261,6 +313,30 @@ export default function AllChats({
           style={{ borderColor: "#DDDDDD" }}
         />
       )}
+
+      <AddClientModal
+        showAddClientModal={showAddClientModal}
+        setShowAddClientModal={setShowAddClientModal}
+        isActionLoading={false}
+        onSuccess={handleAddClientSuccess}
+      />
+
+      <TemplateDialog
+        open={templateTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setTemplateTarget(null);
+        }}
+        channel="whatsapp"
+        loading={templateLoading}
+        onUse={handleOnSelectTemplate}
+      />
+
+      <SelectClientDialog
+        open={!!pendingTemplateId}
+        templateId={pendingTemplateId ?? ""}
+        onOpenChange={() => setPendingTemplateId(null)}
+        onSuccess={() => mutateTickets()}
+      />
     </aside>
   );
 }

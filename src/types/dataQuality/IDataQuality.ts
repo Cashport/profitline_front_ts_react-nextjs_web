@@ -351,3 +351,95 @@ export interface IGetAlerts {
   limit: number;
   total_pages: number;
 }
+
+export interface IMaterialPackMaterial {
+  materialPackId: number;
+  productType: string;
+  productTypeName: string;
+  typeVol: string;
+  typeVolName: string;
+  idCatalogMaterial: number;
+  materialCode: string;
+  materialName: string;
+  factor: number;
+}
+
+export interface IMaterialPack {
+  idCatalogMaterialAux: number;
+  idClient: number;
+  idProject: number;
+  idCountry: number;
+  clientName: string;
+  customerProductCod: string;
+  customerProductDescription: string;
+  materials: IMaterialPackMaterial[];
+}
+
+export interface IPackMaterialRequest {
+  product_type: number;
+  type_vol: number;
+  id_catalog_material: number;
+  factor: number;
+}
+
+export interface IUploadMassiveOrHistoricalRequest {
+  id_client: number;
+  id_country: number;
+  id_type_archive: number;
+  data_type: string;
+}
+
+export interface IPOS {
+  id: number;
+  region: string;
+  country_name: string;
+  id_client: number;
+  ship_to: string;
+  customer_name: string;
+  pos_id: string;
+  pos_name: string;
+  pos_tax_code: string;
+  channel: string;
+  sub_channel: string;
+  pos_chain_name: string;
+  pos_format_store: string;
+  pos_active: boolean;
+  pos_internal_zone: string;
+  pos_external_zone: string;
+  department: number;
+  city: number;
+  pos_neighborhood: string;
+  pos_address: string;
+  pos_geolongitud: number;
+  pos_geolatitud: number;
+  pos_supervisor: string;
+  pos_internal_sales_representative: string;
+  pos_external_sales_representative: string;
+  pos_cod_sfe: string;
+}
+
+type IPosPayloadBase = Omit<
+  IPOS,
+  | "id"
+  | "region"
+  | "country_name"
+  | "customer_name"
+  | "channel"
+  | "sub_channel"
+  | "department"
+  | "city"
+> & {
+  // campos que vienen distintos en el JSON
+  id_country: number;
+  id_pos_channel?: number;
+  id_state?: number;
+  id_city?: number;
+  pos_active?: boolean; // en JSON es boolean
+};
+
+// id_client, id_country, pos_id y pos_name obligatorios; el resto opcional
+export type IPosPayload = Pick<
+  IPosPayloadBase,
+  "id_client" | "id_country" | "pos_id" | "pos_name"
+> &
+  Partial<Omit<IPosPayloadBase, "id_client" | "id_country" | "pos_id" | "pos_name">>;

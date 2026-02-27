@@ -4,7 +4,7 @@ import { IFinancialDiscountForm } from "@/modules/clients/containers/accounting-
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentDetail } from "@/types/paymentAgreement/IPaymentAgreement";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 
 interface RadicationData {
   invoices_id: number[];
@@ -138,19 +138,23 @@ export const createPaymentAgreement = async (
   adjustmentData: AdjustmentData[],
   file: File | null
 ) => {
-  const formData = new FormData();
-  formData.append("adjustment_data", JSON.stringify(adjustmentData));
+  try {
+    const formData = new FormData();
+    formData.append("adjustment_data", JSON.stringify(adjustmentData));
 
-  if (file) {
-    formData.append("file", file);
+    if (file) {
+      formData.append("file", file);
+    }
+
+    const response = await instance.post(
+      `${config.API_HOST}/invoice/paymentAgreement/project/${projectId}/client/${clientId}`,
+      formData
+    );
+    return response;
+  } catch (error) {
+    console.error("Error creating payment agreement", error);
+    throw error;
   }
-
-  const response = await API.post(
-    `${config.API_HOST}/invoice/paymentAgreement/project/${projectId}/client/${clientId}`,
-    formData
-  );
-
-  return response;
 };
 
 export const getDetailPaymentAgreement = async (incident_id: number) => {
@@ -201,6 +205,7 @@ interface IAttachments {
 }
 
 export interface IUser {
+  contact_id: number;
   label: string;
   value: string;
   full_phone: string;

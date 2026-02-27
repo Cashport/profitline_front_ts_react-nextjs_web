@@ -15,7 +15,11 @@ import {
   ICatalogMaterial,
   ICatalogSelectOption,
   ICreateCatalogRequest,
-  IGetFiltersAlerts
+  IGetFiltersAlerts,
+  IPackMaterialRequest,
+  IUploadMassiveOrHistoricalRequest,
+  IPOS,
+  IPosPayload
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -313,7 +317,6 @@ export const downloadExcel = async (id_archives_client_data: number) => {
 };
 
 export const deleteIntakeFile = async (fileId: number): Promise<any> => {
-  console.log("Attempting to delete intake file with ID:", fileId);
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/data/archives-client-data/${fileId}/delete`
@@ -343,6 +346,127 @@ export const downloadCatalogFile = async ({
     }> = await API.get(`${config.API_HOST}/data/catalog/materials/download${queryString}`);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const convertMaterialToPack = async (materialId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/data/catalog/material/${materialId}/convert-to-pack`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error converting material to pack:", error);
+    throw error;
+  }
+};
+
+// PACKS ENDPOINTS
+
+export const createMaterialPack = async (
+  idCatalogMaterialAux: number,
+  material: IPackMaterialRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/data/catalog/material-pack/${idCatalogMaterialAux}`,
+      { materials: [material] }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating material pack:", error);
+    throw error;
+  }
+};
+
+export const editMaterialPackRow = async (
+  materialPackId: number,
+  material: IPackMaterialRequest
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/data/catalog/material-pack/${materialPackId}`,
+      material
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing material pack row:", error);
+    throw error;
+  }
+};
+
+export const deleteMaterialPackRow = async (materialPackId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `/data/catalog/material-pack/${materialPackId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting material pack row:", error);
+    throw error;
+  }
+};
+
+// END PACKS ENDPOINTS
+
+export const uploadMassiveOrHistoricalFile = async ({
+  file,
+  requestObject
+}: {
+  file: File;
+  requestObject: IUploadMassiveOrHistoricalRequest;
+}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("request", JSON.stringify(requestObject));
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/massive-upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading massive or historical file:", error);
+    throw error;
+  }
+};
+
+export const uploadCatalogMaterial = async (file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials/upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading catalog material file:", error);
+    throw error;
+  }
+};
+
+// Points Of Sale ENDPOINTS
+
+export const getPointsOfSale = async (idClient: string, idCountry: number): Promise<IPOS> => {
+  try {
+    const response: GenericResponse<IPOS> = await API.get(
+      `${config.API_HOST}/data/all-pos?id_client=${idClient}&id_country=${idCountry}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching points of sale:", error);
+    throw error;
+  }
+};
+
+export const createPointOfSale = async (posData: IPosPayload): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post("/data/create-pos", posData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating point of sale:", error);
     throw error;
   }
 };
