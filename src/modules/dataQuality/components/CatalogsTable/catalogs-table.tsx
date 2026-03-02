@@ -67,9 +67,9 @@ export function CatalogsTable({
   const filteredEquivalencies = equivalencies.filter((item) => {
     const term = searchTerm.toLowerCase();
     return (
-      item.customer_product_cod.toLowerCase().includes(term) ||
-      item.customer_product_description.toLowerCase().includes(term) ||
-      item.material_name.toLowerCase().includes(term)
+      item.customer_product_cod?.toLowerCase().includes(term) ||
+      item.customer_product_description?.toLowerCase().includes(term) ||
+      item.material_name?.toLowerCase().includes(term)
     );
   });
 
