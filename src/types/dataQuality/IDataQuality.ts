@@ -273,9 +273,9 @@ export interface IGetCatalogs {
   type_vol_id: number;
   type_vol_code: string;
   type_vol_name: string;
-  material_id: number;
-  material_code: string;
-  material_name: string;
+  material_id: number | null;
+  material_code: string | null;
+  material_name: string | null;
   factor: number;
 }
 
