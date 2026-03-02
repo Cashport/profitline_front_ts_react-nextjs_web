@@ -20,6 +20,9 @@ import { KamFilter } from "../../components/KamFilter/KamFilter";
 import { StatusFilter } from "../../components/StatusFilter/StatusFilter";
 import { useSaldos } from "../../context/saldos-context";
 import type { SaldoData } from "../../context/saldos-context";
+import { useAppStore } from "@/lib/store/store";
+import { useBalances } from "@/hooks/useBalances";
+import { IBalance } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 const estadoConfig: Record<string, { color: string; icon: typeof CheckCircle; textColor: string }> =
   {
@@ -33,12 +36,12 @@ const estadoConfig: Record<string, { color: string; icon: typeof CheckCircle; te
   };
 
 export function BalancesView() {
+  const { data: balancesData, isLoading: balancesLoading } = useBalances();
+
   const {
     state,
     getSaldoCounts,
-    getFilteredSaldos,
     setFilter,
-    setTipoFilter,
     setClienteFilter,
     setKamFilter,
     setDateRangeFilter,
@@ -50,11 +53,11 @@ export function BalancesView() {
   } = useSaldos();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<SaldoData | null>(null);
+  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalance | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
-  const openDetailSheet = (saldo: SaldoData) => {
-    setSelectedSaldoForDetail(saldo);
+  const openDetailSheet = (balance: IBalance) => {
+    setSelectedSaldoForDetail(balance);
     setIsDetailSheetOpen(true);
   };
 
@@ -63,7 +66,6 @@ export function BalancesView() {
   };
 
   const saldoCounts = getSaldoCounts();
-  const filteredSaldos = getFilteredSaldos();
   const uniqueClientes = getUniqueClientes();
   const uniqueKams = getUniqueKams();
 
@@ -74,18 +76,6 @@ export function BalancesView() {
       setFilter(stateName);
     }
   };
-
-  const searchFilteredSaldos = filteredSaldos.filter(
-    (saldo) =>
-      (saldo.notasCredito?.some((nc) =>
-        nc.numero.toLowerCase().includes(searchTerm.toLowerCase())
-      ) ??
-        false) ||
-      saldo.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      saldo.motivo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      saldo.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      saldo.kam.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <>
@@ -147,7 +137,17 @@ export function BalancesView() {
 
             {/* Table */}
             <BalancesTable
-              data={searchFilteredSaldos}
+              data={(balancesData ?? []).filter((b) => {
+                if (!searchTerm) return true;
+                const term = searchTerm.toLowerCase();
+                return (
+                  String(b.id).toLowerCase().includes(term) ||
+                  b.client_name?.toLowerCase().includes(term) ||
+                  b.kam_name?.toLowerCase().includes(term) ||
+                  (b.motive_name ?? "").toLowerCase().includes(term)
+                );
+              })}
+              loading={balancesLoading}
               selectedSaldoIds={state.selectedSaldoIds}
               onToggleSelection={toggleSaldoSelection}
               onSelectAll={selectAllSaldos}
