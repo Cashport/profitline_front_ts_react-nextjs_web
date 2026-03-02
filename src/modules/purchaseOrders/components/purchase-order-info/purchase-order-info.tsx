@@ -164,6 +164,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                         onChange={(e) => field.onChange(e.target.value)}
                         className="mt-1 h-8 text-sm font-semibold"
                         disabled
+                        placeholder="Seleccionar fecha"
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
@@ -223,6 +224,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                           field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
                         }
                         className="mt-1 h-8 text-sm font-semibold w-full"
+                        placeholder="Seleccionar fecha"
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
