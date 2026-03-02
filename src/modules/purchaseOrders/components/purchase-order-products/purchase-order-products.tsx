@@ -174,9 +174,7 @@ export function PurchaseOrderProducts({
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Producto
                 </th>
-                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
-                  Lote
-                </th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">Lote</th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
@@ -223,6 +221,12 @@ export function PurchaseOrderProducts({
                                   label: p.description
                                 }))}
                                 className="w-full"
+                                style={{ maxWidth: 400 }}
+                                optionRender={(option) => (
+                                  <span style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
+                                    {option.label}
+                                  </span>
+                                )}
                                 variant="outlined"
                               />
                             ) : (
