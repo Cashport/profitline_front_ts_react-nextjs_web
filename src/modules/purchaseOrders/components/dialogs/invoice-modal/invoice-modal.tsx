@@ -104,8 +104,7 @@ export function InvoiceModal({
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al agregar las facturas";
+      const errorMessage = error instanceof Error ? error.message : "Error al agregar las facturas";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -127,7 +126,10 @@ export function InvoiceModal({
             generada.
           </p>
 
-          <div className="space-y-3">
+          <div
+            className="space-y-3 max-h-[30vh] overflow-y-auto"
+            style={{ scrollbarWidth: "thin" }}
+          >
             {invoices.map((invoice) => (
               <div key={invoice.id} className="flex items-center gap-3">
                 <div className="flex-shrink-0">
