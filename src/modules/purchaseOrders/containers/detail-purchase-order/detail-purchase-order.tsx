@@ -550,6 +550,7 @@ export function DetailPurchaseOrder() {
               pdfWidth={pdfWidth}
               onSave={handleProductsSave}
               summary={data.summary}
+              purchaseOrderId={orderId!}
             />
 
             {!isPdfCollapsed && (

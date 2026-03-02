@@ -7,9 +7,13 @@ import { Edit, Save } from "lucide-react";
 import { Select } from "antd";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
-import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
+import {
+  IPurchaseOrderSummary,
+  IBatchesByPurchaseOrder
+} from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByClient } from "@/services/commerce/commerce";
+import { getBatchesForProducts } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
 
 interface PurchaseOrderProductsProps {
@@ -19,6 +23,7 @@ interface PurchaseOrderProductsProps {
   onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
   summary: IPurchaseOrderSummary;
   clientId: string;
+  purchaseOrderId: string;
 }
 
 export function PurchaseOrderProducts({
@@ -27,10 +32,12 @@ export function PurchaseOrderProducts({
   pdfWidth,
   onSave,
   summary,
-  clientId
+  clientId,
+  purchaseOrderId
 }: PurchaseOrderProductsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
+  const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -73,6 +80,23 @@ export function PurchaseOrderProducts({
 
     fetchProducts();
   }, [projectId, clientId]);
+
+  // Fetch batches for products
+  useEffect(() => {
+    const fetchBatches = async () => {
+      if (!purchaseOrderId) return;
+      try {
+        const response = await getBatchesForProducts(purchaseOrderId);
+        if (response) {
+          setBatchesByProduct(response);
+        }
+      } catch (error) {
+        console.error("Error fetching batches:", error);
+      }
+    };
+
+    fetchBatches();
+  }, [purchaseOrderId]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
@@ -150,6 +174,9 @@ export function PurchaseOrderProducts({
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Producto
                 </th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                  Lote
+                </th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
@@ -214,6 +241,47 @@ export function PurchaseOrderProducts({
                         )}
                       />
                     </td>
+                    <td className="p-3">
+                      <Controller
+                        name={`products.${index}.batch_id`}
+                        control={control}
+                        render={({ field: controllerField }) => {
+                          const productId = watchedProducts[index]?.product_id;
+                          const productBatches =
+                            batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
+
+                          return (
+                            <div>
+                              {isEditMode ? (
+                                <Select
+                                  showSearch
+                                  allowClear
+                                  optionFilterProp="label"
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                  value={controllerField.value}
+                                  onChange={controllerField.onChange}
+                                  placeholder="Seleccionar lote"
+                                  options={productBatches.map((b) => ({
+                                    value: b.id,
+                                    label: b.batch
+                                  }))}
+                                  className="w-full"
+                                  variant="outlined"
+                                />
+                              ) : (
+                                <span className="text-sm text-cashport-black">
+                                  {field.batch || "-"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    </td>
                     <td className="p-3 text-right">
                       <Controller
                         name={`products.${index}.quantity`}
@@ -264,6 +332,7 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
