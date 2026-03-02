@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Edit, Save } from "lucide-react";
-import { ProductCombobox } from "@/modules/purchaseOrders/components/product-combobox/product-combobox";
+import { Select } from "antd";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
@@ -113,10 +113,7 @@ export function PurchaseOrderProducts({
     : summary.totalTaxes;
 
   const totalAmount = isEditMode
-    ? watchedProducts.reduce(
-        (sum, p) => sum + (p.unit_price + p.tax_amount) * p.quantity,
-        0
-      )
+    ? watchedProducts.reduce((sum, p) => sum + (p.unit_price + p.tax_amount) * p.quantity, 0)
     : summary.grandTotal;
 
   return (
@@ -185,11 +182,21 @@ export function PurchaseOrderProducts({
                         render={({ field: controllerField }) => (
                           <div>
                             {isEditMode ? (
-                              <ProductCombobox
-                                products={internalProducts}
+                              <Select
+                                showSearch
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                  (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
                                 value={controllerField.value}
-                                onValueChange={controllerField.onChange}
+                                onChange={controllerField.onChange}
                                 placeholder="Seleccionar producto"
+                                options={internalProducts.map((p) => ({
+                                  value: p.id,
+                                  label: p.description
+                                }))}
+                                className="w-full"
+                                variant="outlined"
                               />
                             ) : (
                               <div className="flex flex-col">
