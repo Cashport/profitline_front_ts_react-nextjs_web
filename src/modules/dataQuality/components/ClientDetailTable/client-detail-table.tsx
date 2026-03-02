@@ -73,19 +73,20 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
     input.click();
   };
 
-  const handleProcessedFile = async (fileId: number, type: "excel" | "csv") => {
+  const handleProcessedFile = async (file: IClientDetailArchiveClient, type: "excel" | "csv") => {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
+    const fileName = `${file.data_type.description}_${file.description}`;
     try {
-      const res = type === "excel" ? await downloadExcel(fileId) : await downloadCSV(fileId);
+      const res = type === "excel" ? await downloadExcel(file.id) : await downloadCSV(file.id);
       const link = document.createElement("a");
 
       if (res instanceof Blob) {
         const url = window.URL.createObjectURL(res);
         link.href = url;
-        link.setAttribute("download", `archivo_${fileId}`);
+        link.setAttribute("download", fileName);
       } else {
         link.href = res.url;
-        link.setAttribute("download", res.filename || `archivo_${fileId}`);
+        link.setAttribute("download", res.filename || fileName);
       }
 
       document.body.appendChild(link);
@@ -245,12 +246,12 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
                         {
                           key: "download-universal",
                           label: "Descarga universal",
-                          onClick: () => handleProcessedFile(file.id, "csv")
+                          onClick: () => handleProcessedFile(file, "csv")
                         },
                         {
                           key: "download-universal-excel",
                           label: "Descarga universal excel",
-                          onClick: () => handleProcessedFile(file.id, "excel")
+                          onClick: () => handleProcessedFile(file, "excel")
                         },
                         {
                           key: "delete",

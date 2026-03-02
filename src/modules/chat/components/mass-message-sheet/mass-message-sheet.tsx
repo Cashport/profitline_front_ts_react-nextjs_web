@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/modules/chat/ui/sheet";
+import { XIcon } from "lucide-react";
 import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Button } from "@/modules/chat/ui/button";
@@ -20,18 +20,45 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
   const [preview, setPreview] = useState(true);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      {/* Añadimos padding y un ancho un poco mayor en desktop */}
-      <SheetContent className="w-full sm:max-w-xl p-6">
-        <SheetHeader>
-          <SheetTitle>Envío masivo por WhatsApp</SheetTitle>
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-50 bg-black/50"
+        style={{
+          transition: "opacity 300ms ease-in-out",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none"
+        }}
+        onClick={() => onOpenChange(false)}
+      />
+
+      {/* Panel */}
+      <div
+        className="fixed z-50 inset-y-0 right-0 h-full w-full sm:max-w-xl bg-background border-l shadow-lg flex flex-col gap-4 p-6"
+        style={{
+          transition: "transform 300ms ease-in-out",
+          transform: open ? "translateX(0)" : "translateX(100%)"
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100"
+        >
+          <XIcon className="size-4" />
+          <span className="sr-only">Close</span>
+        </button>
+
+        {/* Header */}
+        <div className="flex flex-col gap-1.5 p-4">
+          <h2 className="text-foreground font-semibold">Envío masivo por WhatsApp</h2>
           <div className="text-sm text-muted-foreground">
             Seleccionados:{" "}
             <Badge className="rounded-full bg-[#141414] text-white">{selectedCount}</Badge>
           </div>
-        </SheetHeader>
+        </div>
 
-        {/* El padding del SheetContent ahora asegura márgenes laterales */}
+        {/* Body */}
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
             <Label>Mensaje</Label>
@@ -57,7 +84,8 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
           </div>
         </div>
 
-        <SheetFooter className="mt-4">
+        {/* Footer */}
+        <div className="mt-auto flex flex-col gap-2 p-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -72,8 +100,8 @@ export default function MassMessageSheet({ open, onOpenChange, selectedCount, on
           >
             Enviar a {selectedCount}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </div>
+    </>
   );
 }
