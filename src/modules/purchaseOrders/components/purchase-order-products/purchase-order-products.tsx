@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
@@ -62,28 +62,14 @@ export function PurchaseOrderProducts({
   // Watch for changes to recalculate totals
   const watchedProducts = watch("products");
 
-  // Store ratios (units per box) per product, computed from initial values
-  const ratiosRef = useRef<Map<number, number>>(new Map());
-
-  // Compute ratios from initial products
-  useEffect(() => {
-    const newRatios = new Map<number, number>();
-    initialProducts.products.forEach((p) => {
+  // Check if any product has decimals in quantity_by_box or box_quantity
+  const hasDecimals =
+    isEditMode &&
+    watchedProducts.some((p) => {
       const units = p.quantity_by_box ?? 0;
       const boxes = p.box_quantity ?? 0;
-      if (boxes > 0) {
-        newRatios.set(p.marketplace_order_product_id, units / boxes);
-      }
+      return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
-    ratiosRef.current = newRatios;
-  }, [initialProducts]);
-
-  // Check if any product has decimals in quantity_by_box or box_quantity
-  const hasDecimals = isEditMode && watchedProducts.some((p) => {
-    const units = p.quantity_by_box ?? 0;
-    const boxes = p.box_quantity ?? 0;
-    return !Number.isInteger(units) || !Number.isInteger(boxes);
-  });
 
   // Fetch products on mount
   useEffect(() => {
@@ -153,21 +139,21 @@ export function PurchaseOrderProducts({
   };
 
   const handleUnitsChange = (index: number, newUnits: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.quantity_by_box`, newUnits, { shouldDirty: true });
-    const productId = watchedProducts[index]?.marketplace_order_product_id;
-    const ratio = ratiosRef.current.get(productId);
-    if (ratio && ratio > 0) {
-      setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
-    }
+    if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
   };
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    const productId = watchedProducts[index]?.marketplace_order_product_id;
-    const ratio = ratiosRef.current.get(productId);
-    if (ratio) {
-      setValue(`products.${index}.quantity_by_box`, newBoxes * ratio, { shouldDirty: true });
-    }
+    if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.quantity_by_box`, newBoxes * ratio, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -215,7 +201,7 @@ export function PurchaseOrderProducts({
         </div>
         <div className="overflow-x-auto">
           {isEditMode && hasDecimals && (
-            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded">
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
               No se pueden pedir decimales en cajas o unidades
             </div>
           )}
