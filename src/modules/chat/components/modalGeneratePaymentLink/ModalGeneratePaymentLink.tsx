@@ -156,7 +156,7 @@ const ModalGeneratePaymentLink = ({
             type: "button",
             sub_type: "url",
             index: 0,
-            parameters: [{ type: "text", text: successData.link }]
+            parameters: [{ type: "text", text: successData.link.split("/").pop() || "" }]
           }
         ]
       }
