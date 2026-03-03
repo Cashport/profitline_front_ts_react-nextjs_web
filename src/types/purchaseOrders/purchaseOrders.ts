@@ -135,6 +135,8 @@ export interface IPurchaseOrderProduct {
   total_price: number;
   batch_id: number | null;
   batch: string | null;
+  box_quantity: number | null;
+  quantity_by_box: number | null;
 }
 
 export interface IEditPurchaseOrderProduct {
@@ -143,6 +145,8 @@ export interface IEditPurchaseOrderProduct {
   price?: number;
   product_id?: number;
   batch_id?: number;
+  quantity_by_box?: number;
+  box_quantity?: number;
 }
 
 export interface IPurchaseOrderStatusHistory {

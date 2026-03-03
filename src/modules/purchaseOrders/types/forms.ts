@@ -46,6 +46,8 @@ export interface ProductFormData {
   product_id?: number; // Optional internal product ID
   batch_id?: number; // Batch/lot ID
   batch?: string; // Batch/lot display name
+  quantity_by_box?: number; // Unidades
+  box_quantity?: number; // Cajas
 }
 
 /**
@@ -105,7 +107,9 @@ export const mapApiProductsToForm = (
     total_price: p.total_price || 0,
     product_id: p.product_id ?? undefined,
     batch_id: p.batch_id ?? undefined,
-    batch: p.batch ?? undefined
+    batch: p.batch ?? undefined,
+    quantity_by_box: p.quantity_by_box ?? undefined,
+    box_quantity: p.box_quantity ?? undefined
   }))
 });
 
@@ -122,6 +126,8 @@ export const mapFormProductsToApi = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     quantity: p.quantity,
     product_id: p.product_id,
-    batch_id: p.batch_id
+    batch_id: p.batch_id,
+    quantity_by_box: p.quantity_by_box,
+    box_quantity: p.box_quantity
   }))
 });

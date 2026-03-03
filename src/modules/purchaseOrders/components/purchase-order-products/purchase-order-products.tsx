@@ -46,7 +46,8 @@ export function PurchaseOrderProducts({
     handleSubmit,
     formState: { errors, dirtyFields },
     reset,
-    watch
+    watch,
+    setValue
   } = useForm<PurchaseOrderProductsFormData>({
     resolver: yupResolver<PurchaseOrderProductsFormData>(purchaseOrderProductsSchema),
     defaultValues: initialProducts,
@@ -60,6 +61,15 @@ export function PurchaseOrderProducts({
 
   // Watch for changes to recalculate totals
   const watchedProducts = watch("products");
+
+  // Check if any product has decimals in quantity_by_box or box_quantity
+  const hasDecimals =
+    isEditMode &&
+    watchedProducts.some((p) => {
+      const units = p.quantity_by_box ?? 0;
+      const boxes = p.box_quantity ?? 0;
+      return !Number.isInteger(units) || !Number.isInteger(boxes);
+    });
 
   // Fetch products on mount
   useEffect(() => {
@@ -105,6 +115,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
+      if (hasDecimals) return;
       // Exiting edit mode - save changes
       handleSubmit(onSubmitProducts, (errors) => {
         console.error("Errores de validación:", errors);
@@ -125,6 +136,24 @@ export function PurchaseOrderProducts({
       onSave(data, changedIndices);
     }
     setIsEditMode(false);
+  };
+
+  const handleUnitsChange = (index: number, newUnits: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
+    setValue(`products.${index}.quantity_by_box`, newUnits, { shouldDirty: true });
+    if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
+  };
+
+  const handleBoxesChange = (index: number, newBoxes: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
+    setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
+    if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.quantity_by_box`, newBoxes * ratio, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -150,7 +179,13 @@ export function PurchaseOrderProducts({
       <div>
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
-          <Button type="button" variant="outline" size="sm" onClick={handleEditToggle}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleEditToggle}
+            disabled={isEditMode && hasDecimals}
+          >
             {isEditMode ? (
               <>
                 <Save className="h-4 w-4 mr-2" />
@@ -165,6 +200,11 @@ export function PurchaseOrderProducts({
           </Button>
         </div>
         <div className="overflow-x-auto">
+          {isEditMode && hasDecimals && (
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
+              No se pueden pedir decimales en cajas o unidades
+            </div>
+          )}
           <table className="w-full">
             <thead className="bg-cashport-gray-lighter border-b border-cashport-gray-light">
               <tr>
@@ -175,6 +215,10 @@ export function PurchaseOrderProducts({
                   Producto
                 </th>
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">Lote</th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
+                  Unidades
+                </th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
@@ -288,6 +332,52 @@ export function PurchaseOrderProducts({
                     </td>
                     <td className="p-3 text-right">
                       <Controller
+                        name={`products.${index}.quantity_by_box`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <div>
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                step="any"
+                                value={controllerField.value ?? ""}
+                                onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
+                                className="w-20 h-8 text-sm text-right"
+                              />
+                            ) : (
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {controllerField.value ?? "-"}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Controller
+                        name={`products.${index}.box_quantity`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <div>
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                step="any"
+                                value={controllerField.value ?? ""}
+                                onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
+                                className="w-20 h-8 text-sm text-right"
+                              />
+                            ) : (
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {controllerField.value ?? "-"}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Controller
                         name={`products.${index}.quantity`}
                         control={control}
                         render={({ field: controllerField }) => (
@@ -336,6 +426,8 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3"></td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">

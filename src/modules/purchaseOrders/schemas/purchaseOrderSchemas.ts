@@ -36,7 +36,9 @@ export const productFormSchema = yup.object({
   tax_amount: yup.number().optional(),
   subtotal: yup.number().optional(),
   total_price: yup.number().optional(),
-  product_id: yup.number().optional()
+  product_id: yup.number().optional(),
+  quantity_by_box: yup.number().optional().min(0, "El valor mínimo es 0"),
+  box_quantity: yup.number().optional().min(0, "El valor mínimo es 0")
 }) as yup.ObjectSchema<ProductFormData>;
 
 /**
