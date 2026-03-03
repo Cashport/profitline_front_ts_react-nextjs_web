@@ -9,7 +9,8 @@ import {
   IPurchaseOrderActionPayload,
   IApprover,
   IApproversResponse,
-  IUploadPurchaseOrderResponse
+  IUploadPurchaseOrderResponse,
+  IBatchesByPurchaseOrder
 } from "@/types/purchaseOrders/purchaseOrders";
 import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
@@ -199,6 +200,18 @@ export const sendToBackorderStock = async (
     return response.data;
   } catch (error) {
     console.error("Error sending purchase order to backorder stock:", error);
+    throw error;
+  }
+};
+
+export const getBatchesForProducts = async (purchaseOrderId: string) => {
+  try {
+    const response: GenericResponse<IBatchesByPurchaseOrder[]> = await API.get(
+      `${config.API_HOST}/purchaseOrder/${purchaseOrderId}/batches`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching batches for products:", error);
     throw error;
   }
 };

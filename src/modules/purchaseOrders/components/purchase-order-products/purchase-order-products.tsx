@@ -7,9 +7,13 @@ import { Edit, Save } from "lucide-react";
 import { Select } from "antd";
 import { PurchaseOrderProductsFormData } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
-import { IPurchaseOrderSummary } from "@/types/purchaseOrders/purchaseOrders";
+import {
+  IPurchaseOrderSummary,
+  IBatchesByPurchaseOrder
+} from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByClient } from "@/services/commerce/commerce";
+import { getBatchesForProducts } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
 
 interface PurchaseOrderProductsProps {
@@ -19,6 +23,7 @@ interface PurchaseOrderProductsProps {
   onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
   summary: IPurchaseOrderSummary;
   clientId: string;
+  purchaseOrderId: string;
 }
 
 export function PurchaseOrderProducts({
@@ -27,10 +32,12 @@ export function PurchaseOrderProducts({
   pdfWidth,
   onSave,
   summary,
-  clientId
+  clientId,
+  purchaseOrderId
 }: PurchaseOrderProductsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
+  const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -39,7 +46,8 @@ export function PurchaseOrderProducts({
     handleSubmit,
     formState: { errors, dirtyFields },
     reset,
-    watch
+    watch,
+    setValue
   } = useForm<PurchaseOrderProductsFormData>({
     resolver: yupResolver<PurchaseOrderProductsFormData>(purchaseOrderProductsSchema),
     defaultValues: initialProducts,
@@ -53,6 +61,15 @@ export function PurchaseOrderProducts({
 
   // Watch for changes to recalculate totals
   const watchedProducts = watch("products");
+
+  // Check if any product has decimals in quantity_by_box or box_quantity
+  const hasDecimals =
+    isEditMode &&
+    watchedProducts.some((p) => {
+      const units = p.quantity_by_box ?? 0;
+      const boxes = p.box_quantity ?? 0;
+      return !Number.isInteger(units) || !Number.isInteger(boxes);
+    });
 
   // Fetch products on mount
   useEffect(() => {
@@ -74,6 +91,23 @@ export function PurchaseOrderProducts({
     fetchProducts();
   }, [projectId, clientId]);
 
+  // Fetch batches for products
+  useEffect(() => {
+    const fetchBatches = async () => {
+      if (!purchaseOrderId) return;
+      try {
+        const response = await getBatchesForProducts(purchaseOrderId);
+        if (response) {
+          setBatchesByProduct(response);
+        }
+      } catch (error) {
+        console.error("Error fetching batches:", error);
+      }
+    };
+
+    fetchBatches();
+  }, [purchaseOrderId]);
+
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
     reset(initialProducts);
@@ -81,6 +115,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
+      if (hasDecimals) return;
       // Exiting edit mode - save changes
       handleSubmit(onSubmitProducts, (errors) => {
         console.error("Errores de validación:", errors);
@@ -101,6 +136,24 @@ export function PurchaseOrderProducts({
       onSave(data, changedIndices);
     }
     setIsEditMode(false);
+  };
+
+  const handleUnitsChange = (index: number, newUnits: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
+    setValue(`products.${index}.quantity_by_box`, newUnits, { shouldDirty: true });
+    if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
+  };
+
+  const handleBoxesChange = (index: number, newBoxes: number) => {
+    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
+    setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
+    if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
+    const ratio = currentUnits / currentBoxes;
+    setValue(`products.${index}.quantity_by_box`, newBoxes * ratio, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -126,7 +179,13 @@ export function PurchaseOrderProducts({
       <div>
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
-          <Button type="button" variant="outline" size="sm" onClick={handleEditToggle}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleEditToggle}
+            disabled={isEditMode && hasDecimals}
+          >
             {isEditMode ? (
               <>
                 <Save className="h-4 w-4 mr-2" />
@@ -141,6 +200,11 @@ export function PurchaseOrderProducts({
           </Button>
         </div>
         <div className="overflow-x-auto">
+          {isEditMode && hasDecimals && (
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
+              No se pueden pedir decimales en cajas o unidades
+            </div>
+          )}
           <table className="w-full">
             <thead className="bg-cashport-gray-lighter border-b border-cashport-gray-light">
               <tr>
@@ -150,6 +214,11 @@ export function PurchaseOrderProducts({
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">
                   Producto
                 </th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">Lote</th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
+                  Unidades
+                </th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Cantidad
                 </th>
@@ -196,6 +265,12 @@ export function PurchaseOrderProducts({
                                   label: p.description
                                 }))}
                                 className="w-full"
+                                style={{ maxWidth: 400 }}
+                                optionRender={(option) => (
+                                  <span style={{ whiteSpace: "normal", wordBreak: "break-word" }}>
+                                    {option.label}
+                                  </span>
+                                )}
                                 variant="outlined"
                               />
                             ) : (
@@ -209,6 +284,93 @@ export function PurchaseOrderProducts({
                                   </span>
                                 )}
                               </div>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </td>
+                    <td className="p-3">
+                      <Controller
+                        name={`products.${index}.batch_id`}
+                        control={control}
+                        render={({ field: controllerField }) => {
+                          const productId = watchedProducts[index]?.product_id;
+                          const productBatches =
+                            batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
+
+                          return (
+                            <div>
+                              {isEditMode ? (
+                                <Select
+                                  showSearch
+                                  allowClear
+                                  optionFilterProp="label"
+                                  filterOption={(input, option) =>
+                                    (option?.label ?? "")
+                                      .toLowerCase()
+                                      .includes(input.toLowerCase())
+                                  }
+                                  value={controllerField.value}
+                                  onChange={controllerField.onChange}
+                                  placeholder="Seleccionar lote"
+                                  options={productBatches.map((b) => ({
+                                    value: b.id,
+                                    label: b.batch
+                                  }))}
+                                  className="w-full"
+                                  variant="outlined"
+                                />
+                              ) : (
+                                <span className="text-sm text-cashport-black">
+                                  {field.batch || "-"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Controller
+                        name={`products.${index}.quantity_by_box`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <div>
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                step="any"
+                                value={controllerField.value ?? ""}
+                                onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
+                                className="w-20 h-8 text-sm text-right"
+                              />
+                            ) : (
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {controllerField.value ?? "-"}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </td>
+                    <td className="p-3 text-right">
+                      <Controller
+                        name={`products.${index}.box_quantity`}
+                        control={control}
+                        render={({ field: controllerField }) => (
+                          <div>
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                step="any"
+                                value={controllerField.value ?? ""}
+                                onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
+                                className="w-20 h-8 text-sm text-right"
+                              />
+                            ) : (
+                              <span className="text-sm text-cashport-black fontMonoSpace">
+                                {controllerField.value ?? "-"}
+                              </span>
                             )}
                           </div>
                         )}
@@ -264,6 +426,9 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3"></td>
+                <td className="p-3"></td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}

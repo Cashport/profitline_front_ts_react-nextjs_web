@@ -133,6 +133,10 @@ export interface IPurchaseOrderProduct {
   subtotal: number;
   total_taxes: number;
   total_price: number;
+  batch_id: number | null;
+  batch: string | null;
+  box_quantity: number | null;
+  quantity_by_box: number | null;
 }
 
 export interface IEditPurchaseOrderProduct {
@@ -140,6 +144,9 @@ export interface IEditPurchaseOrderProduct {
   quantity?: number;
   price?: number;
   product_id?: number;
+  batch_id?: number;
+  quantity_by_box?: number;
+  box_quantity?: number;
 }
 
 export interface IPurchaseOrderStatusHistory {
@@ -238,4 +245,14 @@ export interface IUploadPurchaseOrderResponse {
   status: string;
   document_url: string;
   products_count: number;
+}
+
+export interface IBatchByProduct {
+  id: number;
+  batch: string;
+}
+
+export interface IBatchesByPurchaseOrder {
+  product_id: number;
+  batches: IBatchByProduct[];
 }
