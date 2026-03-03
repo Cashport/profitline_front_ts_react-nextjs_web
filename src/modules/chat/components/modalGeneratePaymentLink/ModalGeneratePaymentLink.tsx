@@ -6,7 +6,7 @@ import { Flex, message, Modal, Spin } from "antd";
 import { CaretLeft, PiggyBank, X, Copy, ArrowUpRight } from "@phosphor-icons/react";
 
 import { generatePaymentLink } from "@/services/commerce/commerce";
-import { sendTemplate } from "@/services/chat/chat";
+import { sendWhatsAppTemplate } from "@/services/chat/chat";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { formatCurrency } from "@/modules/new_dashboard/components/Formatters";
@@ -136,12 +136,33 @@ const ModalGeneratePaymentLink = ({
   const handleSendTemplate = async () => {
     setIsSendingTemplate(true);
     if (!successData) return;
+    const payload = {
+      phoneNumber: ticketInfo.phone || "",
+      templateId: "link_de_pago",
+      ticketId: ticketInfo.ticketId,
+      senderId: "cmhv6mnla0003no0huiao1u63",
+      name: ticketInfo.clientName,
+      customerCashportUUID: ticketInfo.clientId || "",
+      templateData: {
+        components: [
+          {
+            type: "body",
+            parameters: [
+              { type: "text", text: successData.client },
+              { type: "text", text: `${successData.amount}` }
+            ]
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: 0,
+            parameters: [{ type: "text", text: successData.link }]
+          }
+        ]
+      }
+    };
     try {
-      await sendTemplate({
-        templateId: "link_de_pago",
-        clientUuid: ticketInfo.clientId,
-        destinationNumber: [ticketInfo.phone]
-      });
+      await sendWhatsAppTemplate(payload);
     } catch (error) {
       message.error("Error al enviar la plantilla por WhatsApp");
     } finally {

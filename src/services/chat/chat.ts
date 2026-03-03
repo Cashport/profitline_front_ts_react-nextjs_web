@@ -183,3 +183,19 @@ export const sendTemplate = async (payload: ITemplateRequest) => {
     throw error;
   }
 };
+
+//deprecado
+/**
+ * @deprecated Usar sendTemplate en su lugar
+ * @param payload
+ */
+export const sendWhatsAppTemplate = async (payload: any): Promise<void> => {
+  try {
+    await API.post("/whatsapp-templates/send", payload, {
+      baseURL: config.API_CHAT
+    });
+  } catch (error) {
+    console.error("Error sending WhatsApp template:", error);
+    throw error;
+  }
+};
