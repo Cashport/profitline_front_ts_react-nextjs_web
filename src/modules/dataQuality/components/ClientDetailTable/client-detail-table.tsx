@@ -26,6 +26,7 @@ import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 interface IClientDetailTableProps {
   files?: IClientDetailArchiveClient[];
   mutate: () => void;
+  clientName?: string | null;
 }
 
 const bytesToMB = (bytes: number): string => {
@@ -37,7 +38,7 @@ const formatDate = (isoDateString: string): string => {
   return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
-export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
+export function ClientDetailTable({ files, mutate, clientName }: IClientDetailTableProps) {
   const [isUploadingLoading, setIsUploadingLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
@@ -75,7 +76,7 @@ export function ClientDetailTable({ files, mutate }: IClientDetailTableProps) {
 
   const handleProcessedFile = async (file: IClientDetailArchiveClient, type: "excel" | "csv") => {
     const hide = message.open({ type: "loading", content: "Descargando archivo...", duration: 0 });
-    const fileName = `${file.data_type.description}_${file.description}`;
+    const fileName = `${file.data_type.description}_${clientName}_${file.date_archive ? formatDate(file.date_archive) : ""}`;
     try {
       const res = type === "excel" ? await downloadExcel(file.id) : await downloadCSV(file.id);
       const link = document.createElement("a");
