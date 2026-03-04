@@ -44,7 +44,7 @@ export function PurchaseOrderProducts({
   const {
     control,
     handleSubmit,
-    formState: { errors, dirtyFields },
+    formState: { dirtyFields },
     reset,
     watch,
     setValue
@@ -66,7 +66,7 @@ export function PurchaseOrderProducts({
   const hasDecimals =
     isEditMode &&
     watchedProducts.some((p) => {
-      const units = p.quantity_by_box ?? 0;
+      const units = p.quantity ?? 0;
       const boxes = p.box_quantity ?? 0;
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
@@ -139,34 +139,40 @@ export function PurchaseOrderProducts({
   };
 
   const handleUnitsChange = (index: number, newUnits: number) => {
-    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentUnits = watchedProducts[index]?.quantity ?? 0;
     const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
-    setValue(`products.${index}.quantity_by_box`, newUnits, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newUnits, { shouldDirty: true });
     if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
     const ratio = currentUnits / currentBoxes;
     setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
   };
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
-    const currentUnits = watchedProducts[index]?.quantity_by_box ?? 0;
+    const currentUnits = watchedProducts[index]?.quantity ?? 0;
     const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
     if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
     const ratio = currentUnits / currentBoxes;
-    setValue(`products.${index}.quantity_by_box`, newBoxes * ratio, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newBoxes * ratio, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
   const totalUnits = isEditMode
-    ? watchedProducts.reduce((sum, producto) => sum + producto.quantity, 0)
+    ? watchedProducts.reduce((sum, producto) => sum + (producto.box_quantity ?? 0), 0)
     : summary.totalQuantity;
 
   const totalIVA = isEditMode
-    ? watchedProducts.reduce((sum, producto) => sum + producto.tax_amount * producto.quantity, 0)
+    ? watchedProducts.reduce(
+        (sum, producto) => sum + producto.tax_amount * (producto.box_quantity ?? 0),
+        0
+      )
     : summary.totalTaxes;
 
   const totalAmount = isEditMode
-    ? watchedProducts.reduce((sum, p) => sum + (p.unit_price + p.tax_amount) * p.quantity, 0)
+    ? watchedProducts.reduce(
+        (sum, p) => sum + (p.unit_price + p.tax_amount) * (p.box_quantity ?? 0),
+        0
+      )
     : summary.grandTotal;
 
   return (
@@ -219,9 +225,6 @@ export function PurchaseOrderProducts({
                   Unidades
                 </th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
-                <th className="text-right p-3 font-semibold text-cashport-black text-xs">
-                  Cantidad
-                </th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Precio unitario
                 </th>
@@ -332,7 +335,7 @@ export function PurchaseOrderProducts({
                     </td>
                     <td className="p-3 text-right">
                       <Controller
-                        name={`products.${index}.quantity_by_box`}
+                        name={`products.${index}.quantity`}
                         control={control}
                         render={({ field: controllerField }) => (
                           <div>
@@ -377,33 +380,6 @@ export function PurchaseOrderProducts({
                       />
                     </td>
                     <td className="p-3 text-right">
-                      <Controller
-                        name={`products.${index}.quantity`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <div>
-                            {isEditMode ? (
-                              <Input
-                                type="number"
-                                {...controllerField}
-                                onChange={(e) => controllerField.onChange(Number(e.target.value))}
-                                className="w-20 h-8 text-sm text-right"
-                              />
-                            ) : (
-                              <span className="text-sm text-cashport-black fontMonoSpace">
-                                {controllerField.value}
-                              </span>
-                            )}
-                            {errors.products?.[index]?.quantity && (
-                              <span className="text-xs text-red-500 block mt-1">
-                                {errors.products[index]?.quantity?.message}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      />
-                    </td>
-                    <td className="p-3 text-right">
                       <span className="text-sm text-cashport-black fontMonoSpace">
                         {formatMoney(watchedProducts[index].unit_price)}
                       </span>
@@ -416,7 +392,7 @@ export function PurchaseOrderProducts({
                     <td className="p-3 text-sm text-cashport-black text-right fontMonoSpace">
                       {formatMoney(
                         (watchedProducts[index].unit_price + watchedProducts[index].tax_amount) *
-                          watchedProducts[index].quantity
+                          (watchedProducts[index].box_quantity ?? 0)
                       )}
                     </td>
                   </tr>
@@ -426,7 +402,6 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
-                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
