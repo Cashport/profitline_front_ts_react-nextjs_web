@@ -158,7 +158,7 @@ export function PurchaseOrderProducts({
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
   const totalUnits = isEditMode
-    ? watchedProducts.reduce((sum, producto) => sum + (producto.box_quantity ?? 0), 0)
+    ? watchedProducts.reduce((sum, producto) => sum + (producto.quantity ?? 0), 0)
     : summary.totalQuantity;
 
   const totalIVA = isEditMode
@@ -404,10 +404,10 @@ export function PurchaseOrderProducts({
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
-                <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
                 </td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {formatMoney(totalIVA)}
