@@ -26,8 +26,10 @@ import {
   createCatalog,
   editCatalog,
   deleteCatalog,
-  convertMaterialToPack
+  convertMaterialToPack,
+  downloadCatalogFile
 } from "@/services/dataQuality/dataQuality";
+import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/CatalogMaterialsActionsModal";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import "./catalogs-table.scss";
 
@@ -72,6 +74,7 @@ export function CatalogsTable() {
   const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
   const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
   const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
 
   const itemsPerPage = 25;
 
@@ -107,6 +110,33 @@ export function CatalogsTable() {
       if (error instanceof Error) {
         message.error(error.message);
       }
+    }
+  };
+
+  const handleDownloadCatalog = async () => {
+    setIsDownloadCatalogLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando catálogo...",
+      duration: 0
+    });
+    try {
+      const res = await downloadCatalogFile({ clientId });
+      const link = document.createElement("a");
+      link.href = res.url;
+      link.setAttribute("download", res.filename || "catalogo.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      message.success("Catálogo descargado exitosamente.");
+      setWhichModalOpen({ selected: 0 });
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadCatalogLoading(false);
     }
   };
 
@@ -180,7 +210,7 @@ export function CatalogsTable() {
             placeholder="Buscar por ID"
             onChange={(e) => handleSearchChange(e.target.value)}
           />
-          <GenerateActionButton />
+          <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 3 })} />
         </div>
         <Button
           onClick={handleAddNew}
@@ -336,6 +366,13 @@ export function CatalogsTable() {
         title="¿Está seguro de eliminar?"
         okText="Eliminar"
         okLoading={isLoadingAction}
+      />
+
+      <CatalogMaterialsActionsModal
+        isOpen={whichModalOpen.selected === 3}
+        onClose={() => setWhichModalOpen({ selected: 0 })}
+        onDownloadCatalog={handleDownloadCatalog}
+        isDownloadCatalogLoading={isDownloadCatalogLoading}
       />
     </div>
     </Spin>
