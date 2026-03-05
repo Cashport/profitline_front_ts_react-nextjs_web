@@ -6,6 +6,12 @@ import type { IValidatedClient } from "../../../lib/mockData";
 const { Text } = Typography;
 const { TextArea } = Input;
 
+const placeholderStyle = `
+  .recipients-textarea::placeholder {
+    color: #0a0a0ad0 !important;
+  }
+`;
+
 interface RecipientsSectionProps {
   rawIds: string;
   onRawIdsChange: (value: string) => void;
@@ -31,6 +37,7 @@ export default function RecipientsSection({
 }: RecipientsSectionProps) {
   return (
     <section className="bg-white border border-[#DDDDDD] rounded-lg p-6">
+      <style>{placeholderStyle}</style>
       <div className="flex items-center gap-2 mb-4">
         <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
           2
@@ -46,20 +53,24 @@ export default function RecipientsSection({
           value={rawIds}
           onChange={(e) => onRawIdsChange(e.target.value)}
           placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
-          className="flex-1 min-h-24 font-mono text-sm"
+          autoSize={{ minRows: 4 }}
+          className="flex-1 font-mono text-sm"
+          classNames={{ textarea: "recipients-textarea" }}
         />
         <Flex vertical gap={8}>
           <Button
             type="primary"
-            onClick={onValidate}
-            disabled={!rawIds.trim()}
+            onClick={rawIds.trim() ? onValidate : undefined}
             icon={<CheckCircle2 size={16} />}
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
+            style={{
+              ...(!rawIds.trim() && { opacity: 0.4, pointerEvents: "none" })
+            }}
           >
             Validar
           </Button>
           {hasValidated && (
-            <Button onClick={onClear} icon={<X size={16} />}>
+            <Button onClick={onClear} icon={<X size={16} />} className="!bg-[#fafafa]">
               Limpiar
             </Button>
           )}
@@ -73,6 +84,14 @@ export default function RecipientsSection({
               color="success"
               icon={<CheckCircle2 size={14} className="mr-1.5" />}
               className="text-[13px] px-3 py-1"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                height: 31,
+                fontSize: 14,
+                fontWeight: 500
+              }}
             >
               {validatedClients.length} clientes encontrados
             </Tag>
@@ -81,6 +100,14 @@ export default function RecipientsSection({
                 color="error"
                 icon={<XCircle size={14} className="mr-1.5" />}
                 className="text-[13px] px-3 py-1"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  height: 31,
+                  fontSize: 14,
+                  fontWeight: 500
+                }}
               >
                 {invalidIds.length} no encontrados
               </Tag>
@@ -89,7 +116,13 @@ export default function RecipientsSection({
               de {totalClients.toLocaleString()} clientes totales
             </Text>
           </Flex>
-          <Button size="small" onClick={onDownloadReport} icon={<FileDown size={14} />}>
+          <Button
+            size="small"
+            onClick={onDownloadReport}
+            icon={<FileDown size={14} />}
+            className="!bg-[#fafafa] !font-medium !text-xs"
+            style={{ height: 31 }}
+          >
             Descargar reporte
           </Button>
         </Flex>

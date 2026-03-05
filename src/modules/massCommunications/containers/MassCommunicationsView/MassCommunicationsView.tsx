@@ -111,9 +111,6 @@ export default function MassCommunicationsView() {
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <Flex align="center" gap={16} className="mb-6">
-          <Button type="text" icon={<ArrowLeft size={16} />}>
-            Inicio
-          </Button>
           <Title level={3} className="!m-0">
             Comunicaciones Masivas
           </Title>
