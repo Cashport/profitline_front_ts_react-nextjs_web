@@ -262,9 +262,9 @@ export function PurchaseOrdersView() {
         isOpen={isActionsModalOpen}
         onClose={() => setIsActionsModalOpen(false)}
         onDownloadCSV={handleDownloadCSV}
-        onMarkInvoiced={handleMarkInvoiced}
         isDownloadingCSV={isDownloadingCSV}
         selectedRowKeys={selectedRowKeys}
+        mutate={mutate}
       />
 
       {showUploadInterface && (

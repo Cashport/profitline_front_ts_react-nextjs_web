@@ -103,17 +103,25 @@ export const getHistoryTimelineEvents = async (
 };
 
 export const downloadPurchaseOrdersCSV = async (
-  orderIds: string[]
+  orderIds?: string[],
+  packageId?: number
 ): Promise<{
   url: string;
   filename: string;
 }> => {
+  if (!orderIds && !packageId) {
+    throw new Error("Debe proporcionar orderIds o packageId para descargar el CSV");
+  }
+  if (orderIds && packageId) {
+    throw new Error("Solo puede proporcionar orderIds o packageId, no ambos");
+  }
   try {
     const response: {
       url: string;
       filename: string;
     } = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
-      order_ids: orderIds
+      order_ids: orderIds,
+      package_id: packageId
     });
     return response;
   } catch (error) {

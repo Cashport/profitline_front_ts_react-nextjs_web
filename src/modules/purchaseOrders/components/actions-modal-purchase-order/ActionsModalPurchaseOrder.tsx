@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import { DownloadSimple, Receipt, Invoice } from "@phosphor-icons/react";
+import { DownloadSimple, Receipt, Invoice, PaperPlaneTilt } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 import { AxiosError } from "axios";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
 import {
   sendPackageToDispatch,
   sendPackageToBilling
@@ -16,29 +17,25 @@ type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
   onClose: () => void;
   onDownloadCSV: () => void;
-  onMarkInvoiced: () => void;
   isDownloadingCSV: boolean;
   selectedRowKeys: React.Key[];
+  mutate?: () => void;
 };
 
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
   isOpen,
   onClose,
   onDownloadCSV,
-  onMarkInvoiced,
   isDownloadingCSV,
-  selectedRowKeys
+  selectedRowKeys,
+  mutate
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isBillingLoading, setIsBillingLoading] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
 
   const handleDownloadCSV = () => {
     onDownloadCSV();
-    onClose();
-  };
-
-  const handleMarkInvoiced = () => {
-    onMarkInvoiced();
     onClose();
   };
 
@@ -98,7 +95,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleRequestApproval = () => {
+    if (!validateSelection()) return;
+    onClose();
+    setIsApprovalModalOpen(true);
+  };
+
   return (
+    <>
     <Modal
       open={isOpen}
       onClose={onClose}
@@ -116,9 +120,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
           disabled={isDownloadingCSV}
         />
         <ButtonGenerateAction
-          icon={<Receipt size={20} />}
-          title="Marcar como facturado"
-          onClick={handleMarkInvoiced}
+          icon={<Invoice size={16} />}
+          title="Enviar a facturación"
+          onClick={handleSendToBilling}
+          disabled={isBillingLoading}
         />
         <ButtonGenerateAction
           icon={<PackageCheck className="h-4 w-4" />}
@@ -127,12 +132,20 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
           disabled={isDispatchLoading}
         />
         <ButtonGenerateAction
-          icon={<Invoice size={16} />}
-          title="Enviar a facturar"
-          onClick={handleSendToBilling}
-          disabled={isBillingLoading}
+          icon={<PaperPlaneTilt className="h-4 w-4" />}
+          title="Solicitar aprobación"
+          onClick={handleRequestApproval}
+          disabled={isDispatchLoading}
         />
       </div>
     </Modal>
+
+    <SendToApprovalModal
+      open={isApprovalModalOpen}
+      onOpenChange={setIsApprovalModalOpen}
+      packageId={selectedRowKeys.length > 0 ? String(selectedRowKeys[0]) : undefined}
+      mutate={mutate}
+    />
+  </>
   );
 };

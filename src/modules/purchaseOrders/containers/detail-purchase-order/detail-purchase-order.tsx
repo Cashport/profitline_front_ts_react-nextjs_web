@@ -338,7 +338,7 @@ export function DetailPurchaseOrder() {
   const actionItems: DropdownItem[] = [
     {
       key: "invoice",
-      label: "Facturar",
+      label: "Cargar factura",
       icon: <Receipt className="h-4 w-4" />,
       onClick: () => setWhichModalIsOpen({ selected: 3 })
     },
