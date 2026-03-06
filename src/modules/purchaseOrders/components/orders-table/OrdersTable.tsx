@@ -91,6 +91,8 @@ interface OrdersTableProps {
   mutate: () => void;
   selectedRowKeys?: React.Key[];
   onRowSelect?: (selectedRowKeys: React.Key[], selectedRows: IPurchaseOrder[]) => void;
+  selectedOrderKeys?: React.Key[];
+  onOrderSelect?: (selectedOrderKeys: React.Key[]) => void;
   onRowClick?: (record: IPurchaseOrder) => void;
   onOrderClick?: (order: IOrder) => void;
 }
@@ -103,6 +105,8 @@ export function OrdersTable({
   mutate,
   selectedRowKeys = [],
   onRowSelect,
+  selectedOrderKeys = [],
+  onOrderSelect,
   onRowClick,
   onOrderClick
 }: OrdersTableProps) {
@@ -120,18 +124,19 @@ export function OrdersTable({
     });
   };
 
+  const allOrderIds = data.flatMap((pkg) => pkg.orders.map((o) => o.id));
   const isAllSelected =
-    data.length > 0 && data.every((pkg) => selectedRowKeys.includes(pkg.packageId));
+    data.length > 0 &&
+    data.every((pkg) => selectedRowKeys.includes(pkg.packageId)) &&
+    allOrderIds.every((id) => selectedOrderKeys.includes(id));
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
-    if (!onRowSelect) return;
     if (checked === true) {
-      onRowSelect(
-        data.map((pkg) => pkg.packageId),
-        data
-      );
+      onRowSelect?.(data.map((pkg) => pkg.packageId), data);
+      onOrderSelect?.(allOrderIds);
     } else {
-      onRowSelect([], []);
+      onRowSelect?.([], []);
+      onOrderSelect?.([]);
     }
   };
 
@@ -141,10 +146,31 @@ export function OrdersTable({
       const newKeys = [...selectedRowKeys, pkg.packageId];
       const newRows = data.filter((p) => newKeys.includes(p.packageId));
       onRowSelect(newKeys, newRows);
+      // For single-order packages, also select the order
+      if (pkg.orders.length === 1 && onOrderSelect) {
+        const orderId = pkg.orders[0].id;
+        if (!selectedOrderKeys.includes(orderId)) {
+          onOrderSelect([...selectedOrderKeys, orderId]);
+        }
+      }
     } else {
       const newKeys = selectedRowKeys.filter((k) => k !== pkg.packageId);
       const newRows = data.filter((p) => newKeys.includes(p.packageId));
       onRowSelect(newKeys, newRows);
+      // For single-order packages, also deselect the order
+      if (pkg.orders.length === 1 && onOrderSelect) {
+        const orderId = pkg.orders[0].id;
+        onOrderSelect(selectedOrderKeys.filter((k) => k !== orderId));
+      }
+    }
+  };
+
+  const handleSelectOrder = (order: IOrder, checked: boolean | "indeterminate") => {
+    if (!onOrderSelect) return;
+    if (checked === true) {
+      onOrderSelect([...selectedOrderKeys, order.id]);
+    } else {
+      onOrderSelect(selectedOrderKeys.filter((k) => k !== order.id));
     }
   };
 
@@ -288,8 +314,19 @@ export function OrdersTable({
                           : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      {/* ID Pedido cell: blank for child rows, full for single-order */}
-                      {isMulti ? <td className="p-4" /> : renderIdPedidoCell()}
+                      {/* ID Pedido cell: checkbox for child rows, full for single-order */}
+                      {isMulti ? (
+                        <td className="p-4">
+                          {onOrderSelect && (
+                            <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={selectedOrderKeys.includes(order.id)}
+                                onCheckedChange={(checked) => handleSelectOrder(order, checked)}
+                              />
+                            </div>
+                          )}
+                        </td>
+                      ) : renderIdPedidoCell()}
 
                       {/* Orden de compra */}
                       <td className="p-4">

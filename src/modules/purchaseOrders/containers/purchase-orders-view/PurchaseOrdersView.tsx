@@ -29,6 +29,7 @@ export function PurchaseOrdersView() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedOrderKeys, setSelectedOrderKeys] = useState<React.Key[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
@@ -88,6 +89,10 @@ export function PurchaseOrdersView() {
     setSelectedRowKeys(selectedKeys);
   };
 
+  const handleOrderSelect = (selectedKeys: React.Key[]) => {
+    setSelectedOrderKeys(selectedKeys);
+  };
+
   // Filter handler functions
   const handleStatusChange = (statusId: number | null) => {
     setSelectedFilters((prev) => ({ ...prev, statusId: statusId ?? undefined }));
@@ -124,8 +129,7 @@ export function PurchaseOrdersView() {
   };
 
   const handleDownloadCSV = async () => {
-    // Validation: Check if any orders are selected
-    if (selectedRowKeys.length === 0) {
+    if (selectedRowKeys.length === 0 && selectedOrderKeys.length === 0) {
       message.warning("Por favor selecciona al menos una orden de compra para descargar");
       return;
     }
@@ -133,18 +137,22 @@ export function PurchaseOrdersView() {
     setIsDownloadingCSV(true);
 
     try {
+      // Collect order IDs from selected packages
       const selectedPackages = data.filter((pkg) => selectedRowKeys.includes(pkg.packageId));
-      const orderIds = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => String(o.id)));
+      const orderIdsFromPackages = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => o.id));
+
+      // Combine with individually selected order IDs and deduplicate
+      const allOrderIds = Array.from(new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)]));
+      const orderIds = allOrderIds.map(String);
+
       const response = await downloadPurchaseOrdersCSV(orderIds);
-      // Open CSV link in new tab (per user requirement)
       window.open(response.url, "_blank");
 
-      // Success feedback
       message.success(
-        `Plano CSV generado exitosamente para ${selectedRowKeys.length} orden${selectedRowKeys.length > 1 ? "es" : ""}`
+        `Plano CSV generado exitosamente para ${orderIds.length} orden${orderIds.length > 1 ? "es" : ""}`
       );
     } catch (error: any) {
-      console.log("CSV downlasdasdoad error:", error);
+      console.error("CSV download error:", error);
       message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
     } finally {
       setIsDownloadingCSV(false);
@@ -237,6 +245,8 @@ export function PurchaseOrdersView() {
                   onPageChange={setCurrentPage}
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
+                  selectedOrderKeys={selectedOrderKeys}
+                  onOrderSelect={handleOrderSelect}
                   onRowClick={handleRowClick}
                   onOrderClick={handleOrderClick}
                   mutate={() => mutate()}
