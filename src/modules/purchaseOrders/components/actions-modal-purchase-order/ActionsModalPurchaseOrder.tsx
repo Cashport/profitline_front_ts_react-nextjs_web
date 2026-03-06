@@ -61,6 +61,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     try {
       await sendPackageToDispatch(String(selectedRowKeys[0]));
       message.success("Pedido enviado a despacho exitosamente");
+      mutate && mutate();
       onClose();
     } catch (error) {
       if (error instanceof ApiError) {
@@ -83,6 +84,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     try {
       await sendPackageToBilling(String(selectedRowKeys[0]));
       message.success("Pedido enviado a facturar exitosamente");
+      mutate && mutate();
       onClose();
     } catch (error) {
       if (error instanceof ApiError) {
