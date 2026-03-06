@@ -102,22 +102,33 @@ export const getHistoryTimelineEvents = async (
   }
 };
 
-export const downloadPurchaseOrdersCSV = async (
-  orderIds: string[]
-): Promise<{
+export const downloadPurchaseOrdersCSV = async ({
+  orderIds,
+  packageId
+}: {
+  orderIds?: string[];
+  packageId?: number;
+}): Promise<{
   url: string;
   filename: string;
 }> => {
+  if (!orderIds && !packageId) {
+    throw new Error("Debe proporcionar orderIds o packageId para descargar el CSV");
+  }
+  if (orderIds && packageId) {
+    throw new Error("Solo puede proporcionar orderIds o packageId, no ambos");
+  }
   try {
-    const response: {
+    const response: GenericResponse<{
       url: string;
       filename: string;
-    } = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
-      order_ids: orderIds
+    }> = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
+      order_ids: orderIds,
+      package_id: packageId
     });
-    return response;
+    return response.data;
   } catch (error) {
-    console.error("CSV download error:", error);
+    console.error("Download plane error:", error);
     throw error;
   }
 };

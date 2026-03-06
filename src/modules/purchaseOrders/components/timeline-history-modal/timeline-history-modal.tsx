@@ -4,22 +4,22 @@ import { X, MessageSquare, Settings, FileText } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
-import { IHistoryTimelineEvent } from "@/types/purchaseOrders/purchaseOrders";
+import { IHistoryTimelineEvent, IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { usePurchaseOrderHistory } from "../../hooks/usePurchaseOrderHistory";
 
 interface TimelineHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  purchaseOrderId?: string;
+  purchaseOrderData?: IPurchaseOrderDetail;
 }
 
 export function TimelineHistoryModal({
   isOpen,
   onClose,
-  purchaseOrderId
+  purchaseOrderData
 }: TimelineHistoryModalProps) {
   const { events, isLoading, error } = usePurchaseOrderHistory({
-    purchaseOrderId,
+    purchaseOrderId: String(purchaseOrderData?.id) || "0",
     enabled: isOpen
   });
 
@@ -64,7 +64,9 @@ export function TimelineHistoryModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Historial completo</h2>
-            <p className="text-sm text-gray-500 mt-0.5">OC {purchaseOrderId}</p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              OC {purchaseOrderData?.purchase_order_number}
+            </p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
             <X className="h-5 w-5" />

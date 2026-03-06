@@ -6,24 +6,21 @@ import { message } from "antd";
 import { getApprovers, purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
 import {
   IApprover,
-  IPurchaseOrderDetail,
   IApproveActionPayload
 } from "@/types/purchaseOrders/purchaseOrders";
-import { GenericResponse } from "@/types/global/IGlobal";
-import { KeyedMutator } from "swr";
 
 interface SendToApprovalModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  purchaseOrderId?: string;
-  mutateOrderDetail: KeyedMutator<GenericResponse<IPurchaseOrderDetail>>;
+  packageId?: string;
+  mutate?: () => void;
 }
 
 export function SendToApprovalModal({
   open,
   onOpenChange,
-  purchaseOrderId,
-  mutateOrderDetail
+  packageId,
+  mutate
 }: SendToApprovalModalProps) {
   const [availableApprovers, setAvailableApprovers] = useState<IApprover[]>();
   const [selectedApprovers, setSelectedApprovers] = useState<number[]>([]);
@@ -45,7 +42,7 @@ export function SendToApprovalModal({
   };
 
   const handleConfirm = async () => {
-    if (!purchaseOrderId) return;
+    if (!packageId) return;
     setIsLoading(true);
     setError(null);
 
@@ -55,20 +52,18 @@ export function SendToApprovalModal({
         order: index + 1
       }));
 
-      const payload: IApproveActionPayload = {
-        action: "approve",
-        data: { approvers },
+      const payload = {
+        data: { approvers, packageId },
         observation: ""
       };
 
-      await purchaseOrderActions(purchaseOrderId, payload);
+      console.log("Payload to send for approval:", payload);
 
       message.success("Orden enviada a aprobación correctamente");
-      mutateOrderDetail();
+      mutate?.();
       onOpenChange(false);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al enviar a aprobación";
+      const errorMessage = error instanceof Error ? error.message : "Error al enviar a aprobación";
       setError(errorMessage);
       message.error(errorMessage);
     } finally {
