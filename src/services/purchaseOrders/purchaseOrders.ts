@@ -215,3 +215,27 @@ export const getBatchesForProducts = async (purchaseOrderId: string) => {
     throw error;
   }
 };
+
+export const sendPackageToDispatch = async (packageId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseorder/${packageId}/send-package-to-dispatch`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending package to dispatch:", error);
+    throw error;
+  }
+};
+
+export const sendPackageToBilling = async (packageId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseorder/${packageId}/send-package-to-billing`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending package to billing:", error);
+    throw error;
+  }
+};
