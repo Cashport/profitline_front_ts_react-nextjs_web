@@ -2,22 +2,22 @@ import { Button } from "@/modules/chat/ui/button";
 import { FileText, Download } from "lucide-react";
 import { LoadError, Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 
 interface PurchaseOrderDocumentProps {
-  pdfUrl?: string;
-  archivoOriginal: string;
-  numeroFactura: string;
+  data: IPurchaseOrderDetail;
   pdfWidth: number;
   onCollapse: () => void;
 }
 
 export function PurchaseOrderDocument({
-  pdfUrl,
-  archivoOriginal,
-  numeroFactura,
+  data,
   pdfWidth,
   onCollapse
 }: PurchaseOrderDocumentProps) {
+  const pdfUrl = data.document_url;
+  const archivoOriginal = data.document_name;
+  const numeroFactura = data.purchase_order_number;
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const handleDownloadPdf = () => {

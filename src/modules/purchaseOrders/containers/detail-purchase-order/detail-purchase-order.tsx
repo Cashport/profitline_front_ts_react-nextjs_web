@@ -11,11 +11,7 @@ import { FileText, GripVertical } from "lucide-react";
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
 import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
-import {
-  downloadPurchaseOrdersCSV,
-  editPurchaseOrder,
-  editPurchaseOrderProducts
-} from "@/services/purchaseOrders/purchaseOrders";
+import { downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
 
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
@@ -32,14 +28,6 @@ import { PurchaseOrderDetailHeader } from "../../components/purchase-order-detai
 import { PurchaseOrderNoveltyCard } from "../../components/purchase-order-novelty-card/purchase-order-novelty-card";
 
 import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
-import {
-  mapApiToFormData,
-  mapFormDataToApi,
-  mapApiProductsToForm,
-  mapFormProductsToApi,
-  PurchaseOrderInfoFormData,
-  PurchaseOrderProductsFormData
-} from "../../types/forms";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -229,34 +217,6 @@ export function DetailPurchaseOrder() {
     setIsEditMode(!isEditMode);
   };
 
-  const handleInfoSave = async (formData: PurchaseOrderInfoFormData) => {
-    try {
-      // Only send changed fields to API
-      const payload = mapFormDataToApi(formData);
-      await editPurchaseOrder(orderId!, payload);
-
-      // Refetch data
-      mutate();
-
-      // Show success message
-      message.success("Información actualizada correctamente");
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar la información");
-    }
-  };
-
-  const handleProductsSave = async (formData: PurchaseOrderProductsFormData) => {
-    try {
-      const payload = mapFormProductsToApi(formData);
-      await editPurchaseOrderProducts(orderId!, payload.products);
-
-      mutate();
-      message.success("Productos actualizados correctamente");
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
-    }
-  };
-
   const handleOpenModal = (modal: number) => {
     setWhichModalIsOpen({ selected: modal });
   };
@@ -322,10 +282,10 @@ export function DetailPurchaseOrder() {
           <PurchaseOrderInfo
             ref={infoFormRef}
             isEditMode={isEditMode}
-            initialData={mapApiToFormData(data)}
-            onSave={handleInfoSave}
+            data={data}
+            orderId={orderId!}
+            mutate={mutate}
             onCancel={() => setIsEditMode(false)}
-            clientId={data.client_nit}
           />
 
           <PurchaseOrderProcess
@@ -340,13 +300,11 @@ export function DetailPurchaseOrder() {
 
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
-              clientId={data.client_nit}
-              initialProducts={mapApiProductsToForm(data.products)}
+              data={data}
+              orderId={orderId!}
+              mutate={mutate}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
-              onSave={handleProductsSave}
-              summary={data.summary}
-              purchaseOrderId={orderId!}
             />
 
             {!isPdfCollapsed && (
@@ -360,9 +318,7 @@ export function DetailPurchaseOrder() {
 
             {!isPdfCollapsed && (
               <PurchaseOrderDocument
-                pdfUrl={data.document_url}
-                archivoOriginal={data.document_name}
-                numeroFactura={data.purchase_order_number}
+                data={data}
                 pdfWidth={pdfWidth}
                 onCollapse={() => setIsPdfCollapsed(true)}
               />

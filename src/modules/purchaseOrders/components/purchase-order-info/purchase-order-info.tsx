@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef, useImperativeHandle, useState } from "react";
+import React, { useEffect, forwardRef, useImperativeHandle, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
@@ -9,15 +9,17 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { DatePicker } from "antd";
+import { DatePicker, message } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { formatDateBars } from "@/utils/utils";
-import { PurchaseOrderInfoFormData } from "../../types/forms";
+import { PurchaseOrderInfoFormData, mapApiToFormData, mapFormDataToApi } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
 import { getAdresses } from "@/services/commerce/commerce";
 import { ICommerceAdresses } from "@/types/commerce/ICommerce";
+import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
+import { editPurchaseOrder } from "@/services/purchaseOrders/purchaseOrders";
 
 // Ref type for exposing methods to parent
 export interface PurchaseOrderInfoRef {
@@ -27,14 +29,17 @@ export interface PurchaseOrderInfoRef {
 // Props del componente
 interface PurchaseOrderInfoProps {
   isEditMode: boolean;
-  initialData: PurchaseOrderInfoFormData;
-  onSave: (data: PurchaseOrderInfoFormData, dirtyFields: string[]) => void;
+  data: IPurchaseOrderDetail;
+  orderId: string;
+  mutate: () => void;
   onCancel: () => void;
-  clientId: string;
 }
 
 export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderInfoProps>(
-  ({ isEditMode, initialData, onSave, clientId }, ref) => {
+  ({ isEditMode, data, orderId, mutate }, ref) => {
+    const initialData = useMemo(() => mapApiToFormData(data), [data]);
+    const clientId = data.client_nit;
+
     const {
       control,
       handleSubmit,
@@ -74,10 +79,16 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
     }, [clientId]);
 
     // Submit handler that will be called by handleSubmit
-    const handleSaveInfo = (formData: PurchaseOrderInfoFormData) => {
-      const changedFields = Object.keys(dirtyFields);
-      if (changedFields.length > 0) {
-        onSave(formData, changedFields);
+    const handleSaveInfo = async (formData: PurchaseOrderInfoFormData) => {
+      try {
+        const payload = mapFormDataToApi(formData);
+        await editPurchaseOrder(orderId, payload);
+        mutate();
+        message.success("Información actualizada correctamente");
+      } catch (error) {
+        message.error(
+          error instanceof Error ? error.message : "Error al actualizar la información"
+        );
       }
     };
 
