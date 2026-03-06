@@ -8,14 +8,18 @@ import { Upload, FileText } from "lucide-react";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import UiSearchInput from "@/components/ui/search-input";
 import { useDebounce } from "@/hooks/useSearch";
-import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { ActionsModalPurchaseOrder } from "../../components/actions-modal-purchase-order/ActionsModalPurchaseOrder";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { UploadInterface } from "../../components/upload-interface/upload-interface";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { IPurchaseOrder, IOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import {
+  IPurchaseOrder,
+  IOrder,
+  IPurchaseOrderFilters
+} from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
@@ -31,6 +35,7 @@ export function PurchaseOrdersView() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedOrderKeys, setSelectedOrderKeys] = useState<React.Key[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
@@ -76,8 +81,9 @@ export function PurchaseOrdersView() {
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
-    if (record.orders.length === 1) {
-      router.push(`/purchase-orders/${record.orders[0].id}`);
+    const firtstOrderId = record.orders[0]?.id;
+    if (firtstOrderId) {
+      router.push(`/purchase-orders/${firtstOrderId}`);
     }
   };
 
@@ -142,7 +148,9 @@ export function PurchaseOrdersView() {
       const orderIdsFromPackages = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => o.id));
 
       // Combine with individually selected order IDs and deduplicate
-      const allOrderIds = Array.from(new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)]));
+      const allOrderIds = Array.from(
+        new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)])
+      );
       const orderIds = allOrderIds.map(String);
 
       const response = await downloadPurchaseOrdersCSV(orderIds);
@@ -159,18 +167,9 @@ export function PurchaseOrdersView() {
     }
   };
 
-  const actionItems: DropdownItem[] = [
-    {
-      key: "download",
-      label: "Descargar plano",
-      onClick: handleDownloadCSV
-    },
-    {
-      key: "mark-invoiced",
-      label: "Marcar como facturado",
-      onClick: () => console.log("Marcar como facturado")
-    }
-  ];
+  const handleMarkInvoiced = () => {
+    console.log("Marcar como facturado");
+  };
 
   return (
     <div className="bg-white rounded-lg">
@@ -188,9 +187,11 @@ export function PurchaseOrdersView() {
                   }}
                 />
 
-                <GeneralDropdown items={actionItems} align="start" disabled={isDownloadingCSV}>
-                  <GenerateActionButton label="Generar acción" disabled={isDownloadingCSV} />
-                </GeneralDropdown>
+                <GenerateActionButton
+                  label="Generar acción"
+                  disabled={isDownloadingCSV}
+                  onClick={() => setIsActionsModalOpen(true)}
+                />
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
@@ -256,6 +257,15 @@ export function PurchaseOrdersView() {
           </CardContent>
         </Card>
       </main>
+
+      <ActionsModalPurchaseOrder
+        isOpen={isActionsModalOpen}
+        onClose={() => setIsActionsModalOpen(false)}
+        onDownloadCSV={handleDownloadCSV}
+        onMarkInvoiced={handleMarkInvoiced}
+        isDownloadingCSV={isDownloadingCSV}
+        selectedRowKeys={selectedRowKeys}
+      />
 
       {showUploadInterface && (
         <UploadInterface

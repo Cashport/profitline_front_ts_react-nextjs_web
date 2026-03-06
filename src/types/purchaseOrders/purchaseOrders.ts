@@ -12,7 +12,7 @@ export interface IOrder {
   openNovelties: number;
   noveltyTypes: string;
   invoiceCount: number;
-  invoices: string[] | null;
+  invoices: IinvoicePurchaseOrder[] | null;
   totalAmount: number;
   warehouseId: number | null;
 }
@@ -32,10 +32,15 @@ export interface IPurchaseOrder {
   openNovelties: number;
   noveltyTypes: string;
   invoiceCount: number;
-  invoices: string[] | null;
+  invoices: IinvoicePurchaseOrder[] | null;
   status: string;
   statusColor: string;
   orders: IOrder[];
+}
+
+export interface IinvoicePurchaseOrder {
+  invoice_id: string;
+  invoice_file_url: string;
 }
 
 export interface IPurchaseOrderStatus {
@@ -145,19 +150,28 @@ export interface IPurchaseOrderProduct {
   image: string | null;
   category_id: number | null;
   product_description: string;
-  po_product_description: string;
   product_sku: string;
   line_id: number | null;
   unit_price: number;
   tax_amount: number;
   quantity: number;
+  quantity_by_box: number | null;
+  box_quantity: number | null;
   subtotal: number;
   total_taxes: number;
   total_price: number;
   batch_id: number | null;
   batch: string | null;
-  box_quantity: number | null;
-  quantity_by_box: number | null;
+  has_novelty: boolean;
+  purchase_order_original: IPurchaseOrderOriginal | null;
+}
+
+export interface IPurchaseOrderOriginal {
+  po_product_description: string;
+  po_quantity: number;
+  po_unit_price: number;
+  po_total_price: number;
+  novelty: string | null;
 }
 
 export interface IEditPurchaseOrderProduct {
