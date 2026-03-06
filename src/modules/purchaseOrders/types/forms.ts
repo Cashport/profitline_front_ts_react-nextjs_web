@@ -1,6 +1,7 @@
 import {
   IPurchaseOrderDetail,
   IPurchaseOrderProduct,
+  IPurchaseOrderOriginal,
   IEditPurchaseOrderProduct,
   IPurchaseOrderInvoice
 } from "@/types/purchaseOrders/purchaseOrders";
@@ -37,7 +38,6 @@ export interface ProductFormData {
   marketplace_order_product_id: number; // For API identification
   product_sku: string; // Read-only display
   product_description: string; // Read-only display
-  po_product_description: string; // Read-only display
   quantity: number; // Editable
   unit_price: number; // Read-only
   tax_amount: number; // Read-only
@@ -48,6 +48,8 @@ export interface ProductFormData {
   batch?: string; // Batch/lot display name
   quantity_by_box?: number; // Unidades
   box_quantity?: number; // Cajas
+  has_novelty?: boolean;
+  purchase_order_original?: IPurchaseOrderOriginal | null;
 }
 
 /**
@@ -99,7 +101,6 @@ export const mapApiProductsToForm = (
     marketplace_order_product_id: p.marketplace_order_product_id,
     product_sku: p.product_sku || "",
     product_description: p.product_description || "",
-    po_product_description: p.po_product_description || "",
     quantity: p.quantity || 0,
     unit_price: p.unit_price || 0,
     tax_amount: p.tax_amount || 0,
@@ -109,7 +110,9 @@ export const mapApiProductsToForm = (
     batch_id: p.batch_id ?? undefined,
     batch: p.batch ?? undefined,
     quantity_by_box: p.quantity_by_box ?? undefined,
-    box_quantity: p.box_quantity ?? undefined
+    box_quantity: p.box_quantity ?? undefined,
+    has_novelty: p.has_novelty,
+    purchase_order_original: p.purchase_order_original ?? null
   }))
 });
 
