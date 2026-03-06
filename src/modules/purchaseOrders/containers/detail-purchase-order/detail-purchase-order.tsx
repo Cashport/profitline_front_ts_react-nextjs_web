@@ -335,36 +335,7 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const handleSendToBilling = async () => {
-    setWhichModalIsOpen({ selected: 7 });
-  };
-
-  const sendOrderToBilling = async (orderId?: string): Promise<any> => {
-    if (!orderId) {
-      message.error("ID de orden de compra no válido");
-      return;
-    }
-    setIsActionLoading(true);
-    try {
-      await sendToBilling(orderId!);
-      message.success("Orden de compra enviada a facturación correctamente");
-      closeModals();
-      mutate();
-    } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al enviar la orden de compra a facturación"
-      );
-    }
-    setIsActionLoading(false);
-  };
-
   const actionItems: DropdownItem[] = [
-    {
-      key: "approval",
-      label: "Enviar a aprobación",
-      icon: <Send className="h-4 w-4" />,
-      onClick: () => setWhichModalIsOpen({ selected: 2 })
-    },
     {
       key: "invoice",
       label: "Facturar",
@@ -437,16 +408,6 @@ export function DetailPurchaseOrder() {
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              {data.status_name === "En aprobaciones" && (
-                <Button
-                  variant="outline"
-                  onClick={handleSendToBilling}
-                  className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
-                >
-                  <Invoice size={16} />
-                  <span className="text-sm font-medium text-black">Enviar a facturación</span>
-                </Button>
-              )}
               {data.status_name === "En aprobaciones" && (
                 <div className="flex items-center gap-2 mr-2">
                   <Button
@@ -600,13 +561,6 @@ export function DetailPurchaseOrder() {
         onConfirm={confirmReject}
       />
 
-      <SendToApprovalModal
-        open={whichModalIsOpen.selected === 2}
-        onOpenChange={closeModals}
-        purchaseOrderId={orderId}
-        mutateOrderDetail={mutate}
-      />
-
       <InvoiceModal
         open={whichModalIsOpen.selected === 3}
         onOpenChange={closeModals}
@@ -626,15 +580,6 @@ export function DetailPurchaseOrder() {
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
         purchaseOrderId={orderId}
-      />
-
-      <ModalConfirmAction
-        isOpen={whichModalIsOpen.selected === 7}
-        onClose={closeModals}
-        onOk={() => sendOrderToBilling(orderId)}
-        title="¿Está seguro que desea enviar esta orden a facturación?"
-        okText="Enviar"
-        okLoading={isActionLoading}
       />
 
       <SendToBackorderModal
