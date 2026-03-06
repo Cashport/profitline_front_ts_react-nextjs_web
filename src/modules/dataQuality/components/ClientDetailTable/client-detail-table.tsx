@@ -86,12 +86,8 @@ export function ClientDetailTable({ files, mutate, clientName }: IClientDetailTa
         link.href = url;
         link.setAttribute("download", fileName);
       } else {
-        const response = await fetch(res.url);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        const fileExtension = res.filename.split(".").pop() || "xlsx";
-        link.setAttribute("download", `${fileName}.${fileExtension}`);
+        link.href = res.url;
+        link.setAttribute("download", res.filename || fileName);
       }
 
       document.body.appendChild(link);
