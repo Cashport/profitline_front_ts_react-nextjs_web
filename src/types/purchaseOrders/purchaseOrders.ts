@@ -12,7 +12,7 @@ export interface IOrder {
   openNovelties: number;
   noveltyTypes: string;
   invoiceCount: number;
-  invoices: string[] | null;
+  invoices: IinvoicePurchaseOrder[] | null;
   totalAmount: number;
   warehouseId: number | null;
 }
@@ -32,10 +32,15 @@ export interface IPurchaseOrder {
   openNovelties: number;
   noveltyTypes: string;
   invoiceCount: number;
-  invoices: string[] | null;
+  invoices: IinvoicePurchaseOrder[] | null;
   status: string;
   statusColor: string;
   orders: IOrder[];
+}
+
+export interface IinvoicePurchaseOrder {
+  invoice_id: string;
+  invoice_file_url: string;
 }
 
 export interface IPurchaseOrderStatus {
