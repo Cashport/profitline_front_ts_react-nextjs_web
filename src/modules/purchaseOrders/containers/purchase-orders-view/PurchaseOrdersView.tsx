@@ -23,6 +23,7 @@ import {
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
+import { ApiError } from "@/utils/api/api";
 
 export function PurchaseOrdersView() {
   const router = useRouter();
@@ -154,7 +155,13 @@ export function PurchaseOrdersView() {
 
       message.success("Plano CSV generado exitosamente");
     } catch (error: any) {
-      message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
+      if (error instanceof ApiError) {
+        message.error(
+          error.message || "Error al generar el plano CSV. Por favor intenta nuevamente"
+        );
+      } else {
+        message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
+      }
     } finally {
       setIsDownloadingCSV(false);
     }
