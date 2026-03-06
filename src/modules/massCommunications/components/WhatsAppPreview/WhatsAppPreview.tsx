@@ -8,11 +8,11 @@ interface WhatsAppPreviewProps {
 export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
   if (!template) {
     return (
-      <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden h-full flex flex-col">
+      <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
         <div className="bg-[#075E54] px-4 py-3">
           <p className="text-xs text-white/80 font-medium">Vista previa de WhatsApp</p>
         </div>
-        <div className="flex-1 flex items-center justify-center p-8 bg-[#ECE5DD]">
+        <div className="flex items-center justify-center p-8 bg-[#ECE5DD]">
           <p className="text-sm text-gray-500 text-center">
             Selecciona una plantilla para ver la vista previa
           </p>
@@ -28,11 +28,11 @@ export default function WhatsAppPreview({ template }: WhatsAppPreviewProps) {
   });
 
   return (
-    <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden h-full flex flex-col">
+    <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden">
       <div className="bg-[#075E54] px-4 py-3">
         <p className="text-xs text-white/80 font-medium">Vista previa de WhatsApp</p>
       </div>
-      <div className="flex-1 p-4 bg-[#ECE5DD]">
+      <div className="p-4 bg-[#ECE5DD]">
         <div className="max-w-[280px] bg-white rounded-lg p-3 shadow-sm">
           <p className="text-sm text-[#141414] leading-relaxed whitespace-pre-wrap">
             {renderedBody}

@@ -39,8 +39,10 @@ export default function EmailTemplateCard({
           {template.name}
         </Text>
         <Tag
-          color={isSelected ? "lime" : "default"}
-          className="shrink-0 text-[10px] !m-0"
+          color={isSelected ? undefined : "default"}
+          className={`shrink-0 text-[10px] !m-0 ${
+            isSelected ? "!bg-[#CBE71E] !text-black !border-[#CBE71E]" : "!text-[#a5a5a5]"
+          }`}
         >
           {isSelected ? "Seleccionado" : "Template"}
         </Tag>
@@ -56,7 +58,11 @@ export default function EmailTemplateCard({
       {template.attachments.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {template.attachments.map((att) => (
-            <Tag key={att.name} icon={<PaperclipIcon size={10} />} className="text-[10px]">
+            <Tag
+              key={att.name}
+              icon={<PaperclipIcon size={10} />}
+              className="!flex !items-center !gap-1 !text-[10px] !font-medium !text-black/70"
+            >
               {att.name}
             </Tag>
           ))}
