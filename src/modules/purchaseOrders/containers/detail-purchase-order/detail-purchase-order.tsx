@@ -4,7 +4,7 @@ import React from "react";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
-import { message } from "antd";
+import { message, Dropdown as AntDropdown } from "antd";
 import dynamic from "next/dynamic";
 import {
   ArrowLeft,
@@ -20,7 +20,8 @@ import {
   FileOutput,
   PackageCheck,
   AlertTriangle,
-  Boxes
+  Boxes,
+  ChevronDown
 } from "lucide-react";
 import { Invoice } from "@phosphor-icons/react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -61,6 +62,7 @@ import {
 } from "../../types/forms";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { GenericResponse } from "@/types/global/IGlobal";
+import { useAppStore } from "@/lib/store/store";
 
 // Dynamic imports for modals to reduce initial bundle size
 const TimelineHistoryModal = dynamic(
@@ -151,6 +153,13 @@ export function DetailPurchaseOrder() {
     fetcher
   );
   const data = orderData?.data;
+  const formatMoney = useAppStore((state) => state.formatMoney);
+
+  const currentSiblingOrder = useMemo(() => {
+    return data?.package?.sibilingOrders?.find(
+      (order) => String(order.id) === orderId
+    );
+  }, [data?.package?.sibilingOrders, orderId]);
 
   // Process tracking data to populate stage completion info
   const processedStages = useMemo(() => {
@@ -421,6 +430,63 @@ export function DetailPurchaseOrder() {
                     <span className="text-sm font-medium text-black">Rechazar</span>
                   </Button>
                 </div>
+              )}
+              {data.package?.sibilingOrders?.length > 1 && (
+                <AntDropdown
+                  trigger={["click"]}
+                  placement="bottomRight"
+                  dropdownRender={() => (
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 min-w-[300px]">
+                      <div className="max-h-[300px] overflow-y-auto py-1">
+                        {data.package.sibilingOrders.map((sibling) => (
+                          <div
+                            key={sibling.id}
+                            onClick={() => router.push(`/purchase-orders/${sibling.id}`)}
+                            className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 ${
+                              String(sibling.id) === orderId ? "bg-gray-100" : ""
+                            }`}
+                          >
+                            <Badge
+                              className="text-white text-xs font-medium border-transparent flex-shrink-0"
+                              style={{
+                                backgroundColor: sibling.statusColor || "#B0BEC5",
+                                fontSize: "11px",
+                                padding: "2px 8px",
+                                borderRadius: "6px"
+                              }}
+                            >
+                              {sibling.status}
+                            </Badge>
+                            <span className="text-sm font-medium truncate flex-1">
+                              {sibling.orderNumber}
+                            </span>
+                            <span className="text-xs text-gray-400 flex-shrink-0">
+                              {formatMoney(sibling.totalAmount)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                          {data.package.totalOrders} ordenes
+                        </span>
+                        <span className="text-sm font-bold">
+                          {formatMoney(data.package.totalAmount)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                >
+                  <button className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer">
+                    <span className="text-sm font-medium">
+                      {currentSiblingOrder?.orderNumber ?? data.purchase_order_number}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {formatMoney(currentSiblingOrder?.totalAmount ?? 0)}
+                    </span>
+                    <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                  </button>
+                </AntDropdown>
               )}
               <Badge
                 className="text-white px-3 py-1 text-sm font-medium"
