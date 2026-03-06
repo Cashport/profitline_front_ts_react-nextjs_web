@@ -134,33 +134,26 @@ export function PurchaseOrdersView() {
     }));
   };
 
-  const handleDownloadCSV = async () => {
-    if (selectedRowKeys.length === 0 && selectedOrderKeys.length === 0) {
-      message.warning("Por favor selecciona al menos una orden de compra para descargar");
+  const handleDownloadPlane = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning("Por favor selecciona un pedido.");
+      return;
+    }
+
+    if (selectedRowKeys.length > 1) {
+      message.warning("Solo puedes descargar un pedido a la vez.");
       return;
     }
 
     setIsDownloadingCSV(true);
 
     try {
-      // Collect order IDs from selected packages
-      const selectedPackages = data.filter((pkg) => selectedRowKeys.includes(pkg.packageId));
-      const orderIdsFromPackages = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => o.id));
-
-      // Combine with individually selected order IDs and deduplicate
-      const allOrderIds = Array.from(
-        new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)])
-      );
-      const orderIds = allOrderIds.map(String);
-
-      const response = await downloadPurchaseOrdersCSV(orderIds);
+      const packageId = selectedRowKeys[0] as number;
+      const response = await downloadPurchaseOrdersCSV({ packageId });
       window.open(response.url, "_blank");
 
-      message.success(
-        `Plano CSV generado exitosamente para ${orderIds.length} orden${orderIds.length > 1 ? "es" : ""}`
-      );
+      message.success("Plano CSV generado exitosamente");
     } catch (error: any) {
-      console.error("CSV download error:", error);
       message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
     } finally {
       setIsDownloadingCSV(false);
@@ -261,10 +254,10 @@ export function PurchaseOrdersView() {
       <ActionsModalPurchaseOrder
         isOpen={isActionsModalOpen}
         onClose={() => setIsActionsModalOpen(false)}
-        onDownloadCSV={handleDownloadCSV}
-        onMarkInvoiced={handleMarkInvoiced}
+        onDownloadCSV={handleDownloadPlane}
         isDownloadingCSV={isDownloadingCSV}
         selectedRowKeys={selectedRowKeys}
+        mutate={mutate}
       />
 
       {showUploadInterface && (

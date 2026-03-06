@@ -13,7 +13,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
-import { formatDateAndTime, formatDateBars, formatDateDMY } from "@/utils/utils";
+import { formatDateBars } from "@/utils/utils";
 import { PurchaseOrderInfoFormData } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
 import { getAdresses } from "@/services/commerce/commerce";
@@ -168,7 +168,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                       />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
-                        {formatDateDMY(field.value)}
+                        {dayjs.utc(field.value).format("YYYY-MM-DD")}
                       </p>
                     )}
                     {errors.created_at && (
