@@ -265,7 +265,6 @@ export function PurchaseOrdersView() {
         onMarkInvoiced={handleMarkInvoiced}
         isDownloadingCSV={isDownloadingCSV}
         selectedRowKeys={selectedRowKeys}
-        selectedOrderKeys={selectedOrderKeys}
       />
 
       {showUploadInterface && (

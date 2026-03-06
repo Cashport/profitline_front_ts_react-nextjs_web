@@ -19,7 +19,6 @@ type ActionsModalPurchaseOrderProps = {
   onMarkInvoiced: () => void;
   isDownloadingCSV: boolean;
   selectedRowKeys: React.Key[];
-  selectedOrderKeys: React.Key[];
 };
 
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
@@ -28,8 +27,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   onDownloadCSV,
   onMarkInvoiced,
   isDownloadingCSV,
-  selectedRowKeys,
-  selectedOrderKeys
+  selectedRowKeys
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isBillingLoading, setIsBillingLoading] = useState(false);
@@ -45,12 +43,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const validateSelection = (): boolean => {
-    if (selectedOrderKeys.length > 0) {
-      message.warning("No debe haber órdenes de compra seleccionadas para esta acción");
-      return false;
-    }
     if (selectedRowKeys.length === 0) {
       message.warning("Selecciona al menos un pedido para realizar esta acción");
+      return false;
+    }
+    if (selectedRowKeys.length > 1) {
+      message.warning("Solo puedes seleccionar un pedido para realizar esta acción");
       return false;
     }
     return true;
