@@ -109,11 +109,40 @@ export interface IPurchaseOrderDetail {
   created_by_email: string;
   products: IPurchaseOrderProduct[];
   status_history: IPurchaseOrderStatusHistory[];
+  package: IPackageInfoPurchaseOrder;
   tracking: IPurchaseOrderTracking[];
   summary: IPurchaseOrderSummary;
   novelties: IPurchaseOrderNovelty[];
   invoices: IPurchaseOrderInvoice[];
   warehouseId: number | null;
+}
+
+export interface IPackageInfoPurchaseOrder {
+  totalOrders: number;
+  totalAmount: number;
+  sibilingOrders: ISibilingOrder[];
+}
+
+export interface ISibilingOrder {
+  packageId: number;
+  id: number;
+  purchaseOrderDetailId: number;
+  statusId: number;
+  orderNumber: string;
+  purchaseOrderId: number;
+  deliveryAddress: string;
+  deliveryDate: string;
+  orderDate: string;
+  status: string;
+  statusColor: string;
+  totalProducts: number;
+  openNovelties: number;
+  noveltyTypes: string;
+  invoiceCount: number;
+  invoices: string[] | null;
+  totalAmount: number;
+  warehouseId: number;
+  clientId: string;
 }
 
 export interface IPurchaseOrderInvoice {

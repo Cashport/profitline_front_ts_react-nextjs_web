@@ -12,6 +12,7 @@ import {
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
+import { ApiError } from "@/utils/api/api";
 
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
@@ -60,10 +61,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     try {
       await sendPackageToDispatch(String(selectedRowKeys[0]));
       message.success("Pedido enviado a despacho exitosamente");
+      mutate && mutate();
       onClose();
     } catch (error) {
-      if (error instanceof AxiosError) {
-        message.error(error.response?.data?.message || "Error enviando pedido a despacho");
+      if (error instanceof ApiError) {
+        message.error(error.message || "Error enviando pedido a despacho");
       } else {
         message.error("Error enviando pedido a despacho");
       }
@@ -82,10 +84,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     try {
       await sendPackageToBilling(String(selectedRowKeys[0]));
       message.success("Pedido enviado a facturar exitosamente");
+      mutate && mutate();
       onClose();
     } catch (error) {
-      if (error instanceof AxiosError) {
-        message.error(error.response?.data?.message || "Error enviando pedido a facturar");
+      if (error instanceof ApiError) {
+        message.error(error.message || "Error enviando pedido a facturar");
       } else {
         message.error("Error enviando pedido a facturar");
       }
@@ -103,49 +106,49 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   return (
     <>
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      title="Selecciona la acción que vas a realizar"
-      footer={null}
-      onCancel={onClose}
-      className="actionsModalPurchaseOrder"
-      centered
-    >
-      <div className="modal-content">
-        <ButtonGenerateAction
-          icon={<DownloadSimple size={20} />}
-          title="Descargar plano"
-          onClick={handleDownloadCSV}
-          disabled={isDownloadingCSV}
-        />
-        <ButtonGenerateAction
-          icon={<Invoice size={16} />}
-          title="Enviar a facturación"
-          onClick={handleSendToBilling}
-          disabled={isBillingLoading}
-        />
-        <ButtonGenerateAction
-          icon={<PackageCheck className="h-4 w-4" />}
-          title="Enviar a despacho"
-          onClick={handleSendToDispatch}
-          disabled={isDispatchLoading}
-        />
-        <ButtonGenerateAction
-          icon={<PaperPlaneTilt className="h-4 w-4" />}
-          title="Solicitar aprobación"
-          onClick={handleRequestApproval}
-          disabled={isDispatchLoading}
-        />
-      </div>
-    </Modal>
+      <Modal
+        open={isOpen}
+        onClose={onClose}
+        title="Selecciona la acción que vas a realizar"
+        footer={null}
+        onCancel={onClose}
+        className="actionsModalPurchaseOrder"
+        centered
+      >
+        <div className="modal-content">
+          <ButtonGenerateAction
+            icon={<DownloadSimple size={20} />}
+            title="Descargar plano"
+            onClick={handleDownloadCSV}
+            disabled={isDownloadingCSV}
+          />
+          <ButtonGenerateAction
+            icon={<Invoice size={16} />}
+            title="Enviar a facturación"
+            onClick={handleSendToBilling}
+            disabled={isBillingLoading}
+          />
+          <ButtonGenerateAction
+            icon={<PackageCheck className="h-4 w-4" />}
+            title="Enviar a despacho"
+            onClick={handleSendToDispatch}
+            disabled={isDispatchLoading}
+          />
+          <ButtonGenerateAction
+            icon={<PaperPlaneTilt className="h-4 w-4" />}
+            title="Solicitar aprobación"
+            onClick={handleRequestApproval}
+            disabled={isDispatchLoading}
+          />
+        </div>
+      </Modal>
 
-    <SendToApprovalModal
-      open={isApprovalModalOpen}
-      onOpenChange={setIsApprovalModalOpen}
-      packageId={selectedRowKeys.length > 0 ? String(selectedRowKeys[0]) : undefined}
-      mutate={mutate}
-    />
-  </>
+      <SendToApprovalModal
+        open={isApprovalModalOpen}
+        onOpenChange={setIsApprovalModalOpen}
+        packageId={selectedRowKeys.length > 0 ? String(selectedRowKeys[0]) : undefined}
+        mutate={mutate}
+      />
+    </>
   );
 };

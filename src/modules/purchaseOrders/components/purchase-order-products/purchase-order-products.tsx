@@ -1,41 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Edit, Save } from "lucide-react";
-import { Select, Popover } from "antd";
+import { Select, Popover, message } from "antd";
 import { Eye } from "lucide-react";
-import { PurchaseOrderProductsFormData } from "../../types/forms";
+import {
+  PurchaseOrderProductsFormData,
+  mapApiProductsToForm,
+  mapFormProductsToApi
+} from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 import {
-  IPurchaseOrderSummary,
+  IPurchaseOrderDetail,
   IBatchesByPurchaseOrder
 } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByClient } from "@/services/commerce/commerce";
-import { getBatchesForProducts } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  getBatchesForProducts,
+  editPurchaseOrderProducts
+} from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
 
 interface PurchaseOrderProductsProps {
-  initialProducts: PurchaseOrderProductsFormData;
+  data: IPurchaseOrderDetail;
+  orderId: string;
+  mutate: () => void;
   isPdfCollapsed: boolean;
   pdfWidth: number;
-  onSave: (data: PurchaseOrderProductsFormData, changedIndices: number[]) => void;
-  summary: IPurchaseOrderSummary;
-  clientId: string;
-  purchaseOrderId: string;
 }
 
 export function PurchaseOrderProducts({
-  initialProducts,
+  data,
+  orderId,
+  mutate,
   isPdfCollapsed,
-  pdfWidth,
-  onSave,
-  summary,
-  clientId,
-  purchaseOrderId
+  pdfWidth
 }: PurchaseOrderProductsProps) {
+  const initialProducts = useMemo(() => mapApiProductsToForm(data.products), [data.products]);
+  const summary = data.summary;
+  const clientId = data.client_nit;
   const [isEditMode, setIsEditMode] = useState(false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
@@ -95,9 +101,9 @@ export function PurchaseOrderProducts({
   // Fetch batches for products
   useEffect(() => {
     const fetchBatches = async () => {
-      if (!purchaseOrderId) return;
+      if (!orderId) return;
       try {
-        const response = await getBatchesForProducts(purchaseOrderId);
+        const response = await getBatchesForProducts(orderId);
         if (response) {
           setBatchesByProduct(response);
         }
@@ -107,7 +113,7 @@ export function PurchaseOrderProducts({
     };
 
     fetchBatches();
-  }, [purchaseOrderId]);
+  }, [orderId]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
@@ -127,14 +133,14 @@ export function PurchaseOrderProducts({
     }
   };
 
-  const onSubmitProducts = (data: PurchaseOrderProductsFormData) => {
-    // Identify which products were modified
-    const changedIndices = data.products
-      .map((_, index) => (dirtyFields.products?.[index] ? index : -1))
-      .filter((index) => index !== -1);
-
-    if (changedIndices.length > 0) {
-      onSave(data, changedIndices);
+  const onSubmitProducts = async (formData: PurchaseOrderProductsFormData) => {
+    try {
+      const payload = mapFormProductsToApi(formData);
+      await editPurchaseOrderProducts(orderId, payload.products);
+      mutate();
+      message.success("Productos actualizados correctamente");
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
     }
     setIsEditMode(false);
   };
