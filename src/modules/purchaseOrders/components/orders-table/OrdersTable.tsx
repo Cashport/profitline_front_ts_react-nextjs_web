@@ -158,6 +158,7 @@ export function OrdersTable({
 
   return (
     <div>
+      <div className="overflow-x-auto">
       <table className="w-full">
         <thead className="bg-white border-b border-gray-200">
           <tr>
@@ -388,6 +389,7 @@ export function OrdersTable({
           })}
         </tbody>
       </table>
+      </div>
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-2 px-4 py-2">
