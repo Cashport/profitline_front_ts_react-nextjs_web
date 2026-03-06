@@ -6,38 +6,15 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
 import { message } from "antd";
 import dynamic from "next/dynamic";
-import {
-  ArrowLeft,
-  FileText,
-  Edit,
-  GripVertical,
-  MoreHorizontal,
-  Save,
-  Receipt,
-  Check,
-  X,
-  Send,
-  FileOutput,
-  PackageCheck,
-  AlertTriangle,
-  Boxes
-} from "lucide-react";
-import { Invoice } from "@phosphor-icons/react";
-import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { FileText, GripVertical } from "lucide-react";
 
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
 import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
-import {
-  downloadPurchaseOrdersCSV,
-  editPurchaseOrder,
-  editPurchaseOrderProducts,
-  sendToBilling
-} from "@/services/purchaseOrders/purchaseOrders";
+import { downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
 
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
-import { Badge } from "@/modules/chat/ui/badge";
 import { Separator } from "@/modules/chat/ui/separator";
 import ProfitLoader from "@/components/ui/profit-loader";
 import {
@@ -47,18 +24,10 @@ import {
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
-import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
-import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { PurchaseOrderDetailHeader } from "../../components/purchase-order-detail-header/purchase-order-detail-header";
+import { PurchaseOrderNoveltyCard } from "../../components/purchase-order-novelty-card/purchase-order-novelty-card";
 
 import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
-import {
-  mapApiToFormData,
-  mapFormDataToApi,
-  mapApiProductsToForm,
-  mapFormProductsToApi,
-  PurchaseOrderInfoFormData,
-  PurchaseOrderProductsFormData
-} from "../../types/forms";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { GenericResponse } from "@/types/global/IGlobal";
 
@@ -235,8 +204,6 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
-  const onBack = () => router.push("/purchase-orders");
-
   const expandPdf = () => {
     setIsPdfCollapsed(false);
     setPdfWidth(40); // Default width when expanding
@@ -250,40 +217,8 @@ export function DetailPurchaseOrder() {
     setIsEditMode(!isEditMode);
   };
 
-  const handleInfoSave = async (formData: PurchaseOrderInfoFormData) => {
-    try {
-      // Only send changed fields to API
-      const payload = mapFormDataToApi(formData);
-      await editPurchaseOrder(orderId!, payload);
-
-      // Refetch data
-      mutate();
-
-      // Show success message
-      message.success("Información actualizada correctamente");
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar la información");
-    }
-  };
-
-  const handleProductsSave = async (formData: PurchaseOrderProductsFormData) => {
-    try {
-      const payload = mapFormProductsToApi(formData);
-      await editPurchaseOrderProducts(orderId!, payload.products);
-
-      mutate();
-      message.success("Productos actualizados correctamente");
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
-    }
-  };
-
-  const handleApprove = () => {
-    setWhichModalIsOpen({ selected: 5 });
-  };
-
-  const handleReject = () => {
-    setWhichModalIsOpen({ selected: 6 });
+  const handleOpenModal = (modal: number) => {
+    setWhichModalIsOpen({ selected: modal });
   };
 
   const handlePrefetchHistory = () => {
@@ -329,162 +264,28 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const actionItems: DropdownItem[] = [
-    {
-      key: "invoice",
-      label: "Cargar factura",
-      icon: <Receipt className="h-4 w-4" />,
-      onClick: () => setWhichModalIsOpen({ selected: 3 })
-    },
-    {
-      key: "dispatch",
-      label: "Confirmar despacho",
-      icon: <PackageCheck className="h-4 w-4" />,
-      onClick: () => setWhichModalIsOpen({ selected: 4 })
-    },
-    {
-      key: "back-order",
-      label: "Marcar como Backorder",
-      icon: <Boxes className="h-4 w-4" />,
-      onClick: () => setWhichModalIsOpen({ selected: 8 })
-    },
-    {
-      key: "divider-1",
-      type: "divider"
-    },
-    {
-      key: "download",
-      label: "Descargar plano",
-      icon: <FileOutput className="h-4 w-4" />,
-      onClick: handleDownloadCSV
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-cashport-gray-lighter">
       <Card className="bg-cashport-white border-0 shadow-sm pt-0">
         <CardContent className="px-6 pb-6 pt-6">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onBack}
-                className="text-cashport-black hover:bg-gray-50"
-              >
-                <ArrowLeft className="h-4 w-4 " />
-                Volver
-              </Button>
-              <GeneralDropdown items={actionItems} align="start" customDropdownClass="m-0">
-                <ButtonGenerateAction
-                  icon={<MoreHorizontal className="h-4 w-4" />}
-                  title="Generar acción"
-                  hideArrow
-                />
-              </GeneralDropdown>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEditToggle}
-                className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
-              >
-                {isEditMode ? (
-                  <>
-                    <Save className="h-4 w-4 " />
-                    Guardar
-                  </>
-                ) : (
-                  <>
-                    <Edit className="h-4 w-4" />
-                    Editar
-                  </>
-                )}
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              {data.status_name === "En aprobaciones" && (
-                <div className="flex items-center gap-2 mr-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleApprove}
-                    className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
-                  >
-                    <Check className="h-4 w-4" style={{ color: "#CBE71E" }} />
-                    <span className="text-sm font-medium text-black">Aprobar</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleReject}
-                    className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4 text-red-500" />
-                    <span className="text-sm font-medium text-black">Rechazar</span>
-                  </Button>
-                </div>
-              )}
-              <Badge
-                className="text-white px-3 py-1 text-sm font-medium"
-                style={{ backgroundColor: data.status_color || "#B0BEC5" }}
-              >
-                {data.status_name ? data.status_name : "Desconocido"}
-              </Badge>
-            </div>
-          </div>
+          <PurchaseOrderDetailHeader
+            data={data}
+            orderId={orderId!}
+            isEditMode={isEditMode}
+            onEditToggle={handleEditToggle}
+            onOpenModal={handleOpenModal}
+            onDownloadCSV={handleDownloadCSV}
+          />
 
-          {data.novelties.length > 0 && (
-            <div
-              className="mb-6 rounded-lg border-2 p-4"
-              style={{
-                backgroundColor: "#FFF3E0",
-                borderColor: "#FFE0B2"
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "#FFA72620" }}
-                >
-                  <AlertTriangle className="h-5 w-5" style={{ color: "#FFA726" }} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-base" style={{ color: "#FFA726" }}>
-                      Novedades
-                    </h3>
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                      style={{
-                        borderColor: "#FFA726",
-                        color: "#FFA726",
-                        backgroundColor: "white"
-                      }}
-                    >
-                      Requiere atención
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    {data.novelties.map((novelty) => (
-                      <div key={novelty.id} className="flex items-start gap-2 text-sm">
-                        <span className="text-orange-500 mt-0.5">•</span>
-                        <p className="text-gray-700 text-xs">
-                          <strong>{novelty.novelty_type_name}:</strong> {novelty.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <PurchaseOrderNoveltyCard novelties={data.novelties} />
 
           <PurchaseOrderInfo
             ref={infoFormRef}
             isEditMode={isEditMode}
-            initialData={mapApiToFormData(data)}
-            onSave={handleInfoSave}
+            data={data}
+            orderId={orderId!}
+            mutate={mutate}
             onCancel={() => setIsEditMode(false)}
-            clientId={data.client_nit}
           />
 
           <PurchaseOrderProcess
@@ -499,13 +300,11 @@ export function DetailPurchaseOrder() {
 
           <div ref={containerRef} className="flex gap-4 overflow-hidden">
             <PurchaseOrderProducts
-              clientId={data.client_nit}
-              initialProducts={mapApiProductsToForm(data.products)}
+              data={data}
+              orderId={orderId!}
+              mutate={mutate}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
-              onSave={handleProductsSave}
-              summary={data.summary}
-              purchaseOrderId={orderId!}
             />
 
             {!isPdfCollapsed && (
@@ -519,9 +318,7 @@ export function DetailPurchaseOrder() {
 
             {!isPdfCollapsed && (
               <PurchaseOrderDocument
-                pdfUrl={data.document_url}
-                archivoOriginal={data.document_name}
-                numeroFactura={data.purchase_order_number}
+                data={data}
                 pdfWidth={pdfWidth}
                 onCollapse={() => setIsPdfCollapsed(true)}
               />
