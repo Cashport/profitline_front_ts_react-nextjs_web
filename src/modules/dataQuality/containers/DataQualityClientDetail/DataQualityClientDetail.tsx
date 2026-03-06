@@ -246,7 +246,11 @@ export default function DataQualityClientDetails() {
               onSuccess={() => mutate()}
             />
 
-            <ClientDetailTable files={clientDetail.archives_client_data} mutate={() => mutate()} />
+            <ClientDetailTable
+              files={clientDetail.archives_client_data}
+              mutate={() => mutate()}
+              clientName={clientName}
+            />
           </CardContent>
         </Card>
 

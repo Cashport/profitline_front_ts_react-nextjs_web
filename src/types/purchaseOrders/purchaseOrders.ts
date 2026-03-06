@@ -1,20 +1,41 @@
-export interface IPurchaseOrder {
+export interface IOrder {
+  packageId: number;
   id: number;
   orderNumber: string;
   purchaseOrderId: number;
-  customerName: string;
   deliveryAddress: string;
   deliveryDate: string;
   orderDate: string;
   status: string;
   statusColor: string;
   totalProducts: number;
-  totalAmount: number;
   openNovelties: number;
   noveltyTypes: string;
   invoiceCount: number;
-  invoiceIds: string[];
+  invoices: string[] | null;
+  totalAmount: number;
   warehouseId: number | null;
+}
+
+export interface IPurchaseOrder {
+  packageId: number;
+  packageNumber: number;
+  clientId: string;
+  customerName: string;
+  totalAmount: number;
+  orderCount: number;
+  totalProducts: number;
+  deliveryDate: string;
+  orderDate: string;
+  created_at: string;
+  max_disruption_level: number;
+  openNovelties: number;
+  noveltyTypes: string;
+  invoiceCount: number;
+  invoices: string[] | null;
+  status: string;
+  statusColor: string;
+  orders: IOrder[];
 }
 
 export interface IPurchaseOrderStatus {

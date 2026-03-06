@@ -15,7 +15,7 @@ import { UploadInterface } from "../../components/upload-interface/upload-interf
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import { IPurchaseOrder, IOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
@@ -29,6 +29,7 @@ export function PurchaseOrdersView() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedOrderKeys, setSelectedOrderKeys] = useState<React.Key[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
@@ -75,12 +76,21 @@ export function PurchaseOrdersView() {
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
-    // TODO: Navigate to detail page or open modal
-    router.push(`/purchase-orders/${record.id}`);
+    if (record.orders.length === 1) {
+      router.push(`/purchase-orders/${record.orders[0].id}`);
+    }
+  };
+
+  const handleOrderClick = (order: IOrder) => {
+    router.push(`/purchase-orders/${order.id}`);
   };
 
   const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
     setSelectedRowKeys(selectedKeys);
+  };
+
+  const handleOrderSelect = (selectedKeys: React.Key[]) => {
+    setSelectedOrderKeys(selectedKeys);
   };
 
   // Filter handler functions
@@ -119,8 +129,7 @@ export function PurchaseOrdersView() {
   };
 
   const handleDownloadCSV = async () => {
-    // Validation: Check if any orders are selected
-    if (selectedRowKeys.length === 0) {
+    if (selectedRowKeys.length === 0 && selectedOrderKeys.length === 0) {
       message.warning("Por favor selecciona al menos una orden de compra para descargar");
       return;
     }
@@ -128,17 +137,22 @@ export function PurchaseOrdersView() {
     setIsDownloadingCSV(true);
 
     try {
-      const orderIds = selectedRowKeys.map((key) => String(key));
+      // Collect order IDs from selected packages
+      const selectedPackages = data.filter((pkg) => selectedRowKeys.includes(pkg.packageId));
+      const orderIdsFromPackages = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => o.id));
+
+      // Combine with individually selected order IDs and deduplicate
+      const allOrderIds = Array.from(new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)]));
+      const orderIds = allOrderIds.map(String);
+
       const response = await downloadPurchaseOrdersCSV(orderIds);
-      // Open CSV link in new tab (per user requirement)
       window.open(response.url, "_blank");
 
-      // Success feedback
       message.success(
-        `Plano CSV generado exitosamente para ${selectedRowKeys.length} orden${selectedRowKeys.length > 1 ? "es" : ""}`
+        `Plano CSV generado exitosamente para ${orderIds.length} orden${orderIds.length > 1 ? "es" : ""}`
       );
     } catch (error: any) {
-      console.log("CSV downlasdasdoad error:", error);
+      console.error("CSV download error:", error);
       message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
     } finally {
       setIsDownloadingCSV(false);
@@ -231,7 +245,10 @@ export function PurchaseOrdersView() {
                   onPageChange={setCurrentPage}
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
+                  selectedOrderKeys={selectedOrderKeys}
+                  onOrderSelect={handleOrderSelect}
                   onRowClick={handleRowClick}
+                  onOrderClick={handleOrderClick}
                   mutate={() => mutate()}
                 />
               </div>

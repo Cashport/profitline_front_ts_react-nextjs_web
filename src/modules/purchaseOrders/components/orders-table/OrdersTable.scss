@@ -7,6 +7,18 @@
     }
 }
 
+.ordersTable__childRow {
+    background-color: rgba(249, 250, 251, 0.3);
+
+    &:hover {
+        background-color: rgba(249, 250, 251, 0.6) !important;
+    }
+
+    td:first-child {
+        border-left: 2px solid #e5e7eb;
+    }
+}
+
 .buttonSeeProject {
     background-color: $dark-gray !important;
     width: 32px !important;

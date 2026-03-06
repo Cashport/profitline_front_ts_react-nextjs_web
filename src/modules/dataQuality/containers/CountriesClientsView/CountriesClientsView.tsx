@@ -87,13 +87,7 @@ export default function CountriesClientsView() {
       const res = await downloadCatalogFile({
         countryId
       });
-      const url = window.URL.createObjectURL(new Blob([res.url]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${res.filename}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.open(res.url, "_blank");
 
       closeAllModals();
     } catch (error) {
