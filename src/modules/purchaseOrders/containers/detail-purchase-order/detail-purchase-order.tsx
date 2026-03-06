@@ -319,15 +319,9 @@ export function DetailPurchaseOrder() {
 
   const handleDownloadCSV = async () => {
     try {
-      const response = await downloadPurchaseOrdersCSV([orderId!]);
+      const response = await downloadPurchaseOrdersCSV({ orderIds: [orderId!] });
       // Crea un link temporal en memoria (no visible ni navegable)
-      const link = document.createElement("a");
-      link.href = response.url;
-      link.setAttribute("download", `orden-${data.purchase_order_number}.csv`);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.open(response.url, "_blank");
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al descargar el plano de la orden de compra"

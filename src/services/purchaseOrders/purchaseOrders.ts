@@ -102,10 +102,13 @@ export const getHistoryTimelineEvents = async (
   }
 };
 
-export const downloadPurchaseOrdersCSV = async (
-  orderIds?: string[],
-  packageId?: number
-): Promise<{
+export const downloadPurchaseOrdersCSV = async ({
+  orderIds,
+  packageId
+}: {
+  orderIds?: string[];
+  packageId?: number;
+}): Promise<{
   url: string;
   filename: string;
 }> => {
@@ -116,16 +119,16 @@ export const downloadPurchaseOrdersCSV = async (
     throw new Error("Solo puede proporcionar orderIds o packageId, no ambos");
   }
   try {
-    const response: {
+    const response: GenericResponse<{
       url: string;
       filename: string;
-    } = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
+    }> = await API.post(`${config.API_HOST}/purchaseorder/export-purchase-orders`, {
       order_ids: orderIds,
       package_id: packageId
     });
-    return response;
+    return response.data;
   } catch (error) {
-    console.error("CSV download error:", error);
+    console.error("Download plane error:", error);
     throw error;
   }
 };
