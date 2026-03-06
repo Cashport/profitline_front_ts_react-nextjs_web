@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
 import { AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import {
@@ -282,7 +282,7 @@ export function OrdersTable({
               );
 
               return (
-                <>
+                <Fragment key={pkg.packageId}>
                   {/* ── GROUP HEADER ROW (multi-order) ── */}
                   {isMulti && (
                     <tr
@@ -444,7 +444,7 @@ export function OrdersTable({
                       </tr>
                     );
                   })}
-                </>
+                </Fragment>
               );
             })}
           </tbody>

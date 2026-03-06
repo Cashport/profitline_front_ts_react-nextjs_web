@@ -15,7 +15,11 @@ import { UploadInterface } from "../../components/upload-interface/upload-interf
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { IPurchaseOrder, IOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import {
+  IPurchaseOrder,
+  IOrder,
+  IPurchaseOrderFilters
+} from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
@@ -76,8 +80,9 @@ export function PurchaseOrdersView() {
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
-    if (record.orders.length === 1) {
-      router.push(`/purchase-orders/${record.orders[0].id}`);
+    const firtstOrderId = record.orders[0]?.id;
+    if (firtstOrderId) {
+      router.push(`/purchase-orders/${firtstOrderId}`);
     }
   };
 
@@ -142,7 +147,9 @@ export function PurchaseOrdersView() {
       const orderIdsFromPackages = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => o.id));
 
       // Combine with individually selected order IDs and deduplicate
-      const allOrderIds = Array.from(new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)]));
+      const allOrderIds = Array.from(
+        new Set([...orderIdsFromPackages, ...selectedOrderKeys.map(Number)])
+      );
       const orderIds = allOrderIds.map(String);
 
       const response = await downloadPurchaseOrdersCSV(orderIds);
