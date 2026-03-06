@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pagination as AntPagination, Spin, Flex } from "antd";
+import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
 import { AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { IPurchaseOrder, IOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { Pagination } from "@/types/global/IGlobal";
@@ -9,7 +9,8 @@ import { useAppStore } from "@/lib/store/store";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { Eye } from "@phosphor-icons/react";
+import { Eye, WarningDiamond } from "@phosphor-icons/react";
+import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 import "./OrdersTable.scss";
 
 const formatDate = (dateString: string) => {
@@ -99,6 +100,7 @@ export function OrdersTable({
   pagination,
   loading,
   onPageChange,
+  mutate,
   selectedRowKeys = [],
   onRowSelect,
   onRowClick,
@@ -106,6 +108,8 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const [expandedPackageIds, setExpandedPackageIds] = useState<Set<number>>(new Set());
+  const [selectedOrder, setSelectedOrder] = useState({ id: 0, warehouse_id: 0 });
+  const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
 
   const toggleExpand = (packageId: number) => {
     setExpandedPackageIds((prev) => {
@@ -259,12 +263,13 @@ export function OrdersTable({
                       {formatMoney(pkg.totalAmount || 0)}
                     </td>
                     <td className="p-4 text-right">
-                      <button
-                        className="h-8 w-8 rounded-md border border-gray-300 hover:bg-gray-100 bg-transparent inline-flex items-center justify-center"
-                        onClick={() => onRowClick?.(pkg)}
-                      >
-                        <Eye className="h-4 w-4 text-gray-600" />
-                      </button>
+                      <Flex gap={8} justify="flex-end">
+                        <Button
+                          onClick={() => onRowClick?.(pkg)}
+                          className="buttonSeeProject"
+                          icon={<Eye size={"1.3rem"} />}
+                        />
+                      </Flex>
                     </td>
                   </tr>
                 )}
@@ -356,12 +361,24 @@ export function OrdersTable({
 
                       {/* Actions */}
                       <td className="p-4 text-right">
-                        <button
-                          className="h-8 w-8 rounded-md border border-gray-300 hover:bg-gray-100 bg-transparent inline-flex items-center justify-center"
-                          onClick={() => onOrderClick?.(order)}
-                        >
-                          <Eye className="h-4 w-4 text-gray-600" />
-                        </button>
+                        <Flex gap={8} justify="flex-end">
+                          <Button
+                            onClick={() => {
+                              setSelectedOrder({
+                                id: order.id,
+                                warehouse_id: order.warehouseId || 0
+                              });
+                              setIsWarehouseModalOpen(true);
+                            }}
+                            className="buttonSeeProject"
+                            icon={<WarningDiamond size={"1.3rem"} />}
+                          />
+                          <Button
+                            onClick={() => onOrderClick?.(order)}
+                            className="buttonSeeProject"
+                            icon={<Eye size={"1.3rem"} />}
+                          />
+                        </Flex>
                       </td>
                     </tr>
                   );
@@ -396,6 +413,13 @@ export function OrdersTable({
           size="small"
         />
       </div>
+      <ChangeWarehouseModal
+        isOpen={isWarehouseModalOpen}
+        selectedOrder={selectedOrder.id}
+        currentWarehouseId={selectedOrder.warehouse_id}
+        onClose={() => setIsWarehouseModalOpen(false)}
+        setFetchMutate={mutate}
+      />
     </div>
   );
 }
