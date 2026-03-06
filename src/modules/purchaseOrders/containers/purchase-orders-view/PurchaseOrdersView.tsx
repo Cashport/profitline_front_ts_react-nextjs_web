@@ -15,7 +15,7 @@ import { UploadInterface } from "../../components/upload-interface/upload-interf
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { IPurchaseOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
+import { IPurchaseOrder, IOrder, IPurchaseOrderFilters } from "@/types/purchaseOrders/purchaseOrders";
 import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
@@ -75,8 +75,13 @@ export function PurchaseOrdersView() {
   };
 
   const handleRowClick = (record: IPurchaseOrder) => {
-    // TODO: Navigate to detail page or open modal
-    router.push(`/purchase-orders/${record.id}`);
+    if (record.orders.length === 1) {
+      router.push(`/purchase-orders/${record.orders[0].id}`);
+    }
+  };
+
+  const handleOrderClick = (order: IOrder) => {
+    router.push(`/purchase-orders/${order.id}`);
   };
 
   const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
@@ -128,7 +133,8 @@ export function PurchaseOrdersView() {
     setIsDownloadingCSV(true);
 
     try {
-      const orderIds = selectedRowKeys.map((key) => String(key));
+      const selectedPackages = data.filter((pkg) => selectedRowKeys.includes(pkg.packageId));
+      const orderIds = selectedPackages.flatMap((pkg) => pkg.orders.map((o) => String(o.id)));
       const response = await downloadPurchaseOrdersCSV(orderIds);
       // Open CSV link in new tab (per user requirement)
       window.open(response.url, "_blank");
@@ -232,6 +238,7 @@ export function PurchaseOrdersView() {
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
                   onRowClick={handleRowClick}
+                  onOrderClick={handleOrderClick}
                   mutate={() => mutate()}
                 />
               </div>
