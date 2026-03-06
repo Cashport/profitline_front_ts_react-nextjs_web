@@ -579,7 +579,7 @@ export function DetailPurchaseOrder() {
       <TimelineHistoryModal
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
-        purchaseOrderId={orderId}
+        purchaseOrderData={data}
       />
 
       <SendToBackorderModal
