@@ -10,7 +10,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { useDebounce } from "@/hooks/useSearch";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ActionsModalPurchaseOrder } from "../../components/actions-modal-purchase-order/ActionsModalPurchaseOrder";
-import { InvoiceModal } from "../../components/dialogs/invoice-modal/invoice-modal";
+import { ModalUploadInvoicesPurchaseOrders } from "../../components/dialogs/modal-upload-invoices-purchase-orders/ModalUploadInvoicesPurchaseOrders";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { UploadInterface } from "../../components/upload-interface/upload-interface";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
@@ -270,12 +270,11 @@ export function PurchaseOrdersView() {
         onSendToBilling={() => setWhichModalIsOpen({ selected: 3 })}
       />
 
-      <InvoiceModal
-        open={whichModalIsOpen.selected === 3}
-        onOpenChange={closeModals}
-        purchaseOrderId={String(selectedRowKeys[0] ?? "")}
+      <ModalUploadInvoicesPurchaseOrders
+        isOpen={whichModalIsOpen.selected === 3}
+        onClose={closeModals}
+        orders={selectedOrders}
         onSuccess={() => mutate()}
-        multiple={selectedOrders.map((o) => o.id)}
       />
 
       {whichModalIsOpen.selected === 2 && (
