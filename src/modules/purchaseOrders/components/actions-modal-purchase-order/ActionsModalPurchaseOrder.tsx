@@ -5,10 +5,12 @@ import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { sendPackageToDispatch } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
+import { IPurchaseOrder, IOrder } from "@/types/purchaseOrders/purchaseOrders";
 
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
@@ -16,7 +18,7 @@ type ActionsModalPurchaseOrderProps = {
   onDownloadCSV: () => void;
   isDownloadingCSV: boolean;
   selectedRowKeys: React.Key[];
-  selectedOrderKeys: React.Key[];
+  selectedOrders: IOrder[];
   mutate?: () => void;
   onSendToBilling: () => void;
 };
@@ -27,12 +29,13 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   onDownloadCSV,
   isDownloadingCSV,
   selectedRowKeys,
-  selectedOrderKeys,
+  selectedOrders,
   mutate,
   onSendToBilling
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
 
   const handleDownloadCSV = () => {
     onDownloadCSV();
@@ -52,7 +55,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const validateOrderSelection = (): boolean => {
-    if (selectedOrderKeys.length === 0) {
+    if (selectedOrders.length === 0) {
       message.warning("Selecciona al menos una orden para realizar esta acción");
       return false;
     }
@@ -94,6 +97,18 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsApprovalModalOpen(true);
   };
 
+  const handleSeparateOrder = () => {
+    if (!validateOrderSelection()) return;
+    onClose();
+    setIsSeparateOrderModalOpen(true);
+  };
+
+  const separateOrderRequest = async (selectedOrders: IOrder[]) => {
+    // Aquí iría la lógica para separar la orden del pedido
+    // Probablemente una llamada a la API con selectedOrderKeys
+    console.log("Separando ordenes: ", selectedOrders);
+    setIsSeparateOrderModalOpen(false);
+  };
   return (
     <>
       <Modal
@@ -130,6 +145,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             onClick={handleRequestApproval}
             disabled={isDispatchLoading}
           />
+          <ButtonGenerateAction
+            icon={<PaperPlaneTilt className="h-4 w-4" />}
+            title="Separar OC del pedido"
+            onClick={handleSeparateOrder}
+            disabled={isDispatchLoading}
+          />
         </div>
       </Modal>
 
@@ -138,6 +159,15 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         onOpenChange={setIsApprovalModalOpen}
         packageId={selectedRowKeys.length > 0 ? String(selectedRowKeys[0]) : undefined}
         mutate={mutate}
+      />
+
+      <ModalConfirmAction
+        isOpen={isSeparateOrderModalOpen}
+        onClose={() => setIsSeparateOrderModalOpen(false)}
+        onOk={() => {
+          separateOrderRequest(selectedOrders);
+        }}
+        title="¿Está seguro de separar las OC del pedido?"
       />
     </>
   );

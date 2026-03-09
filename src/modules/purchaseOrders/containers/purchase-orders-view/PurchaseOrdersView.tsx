@@ -36,7 +36,7 @@ export function PurchaseOrdersView() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [selectedOrderKeys, setSelectedOrderKeys] = useState<React.Key[]>([]);
+  const [selectedOrders, setSelectedOrders] = useState<IOrder[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
@@ -97,8 +97,8 @@ export function PurchaseOrdersView() {
     setSelectedRowKeys(selectedKeys);
   };
 
-  const handleOrderSelect = (selectedKeys: React.Key[]) => {
-    setSelectedOrderKeys(selectedKeys);
+  const handleOrderSelect = (orders: IOrder[]) => {
+    setSelectedOrders(orders);
   };
 
   // Filter handler functions
@@ -247,7 +247,7 @@ export function PurchaseOrdersView() {
                   onPageChange={setCurrentPage}
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
-                  selectedOrderKeys={selectedOrderKeys}
+                  selectedOrders={selectedOrders}
                   onOrderSelect={handleOrderSelect}
                   onRowClick={handleRowClick}
                   onOrderClick={handleOrderClick}
@@ -265,7 +265,7 @@ export function PurchaseOrdersView() {
         onDownloadCSV={handleDownloadPlane}
         isDownloadingCSV={isDownloadingCSV}
         selectedRowKeys={selectedRowKeys}
-        selectedOrderKeys={selectedOrderKeys}
+        selectedOrders={selectedOrders}
         mutate={mutate}
         onSendToBilling={() => setWhichModalIsOpen({ selected: 3 })}
       />
@@ -275,7 +275,7 @@ export function PurchaseOrdersView() {
         onOpenChange={closeModals}
         purchaseOrderId={String(selectedRowKeys[0] ?? "")}
         onSuccess={() => mutate()}
-        multiple={selectedOrderKeys}
+        multiple={selectedOrders.map((o) => o.id)}
       />
 
       {whichModalIsOpen.selected === 2 && (
