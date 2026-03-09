@@ -4,7 +4,10 @@ import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Upload, X, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { message } from "antd";
-import { purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  purchaseOrderActions,
+  sendMultiplePurchaseOrdersToBilling
+} from "@/services/purchaseOrders/purchaseOrders";
 import { IInvoiceActionPayload } from "@/types/purchaseOrders/purchaseOrders";
 
 interface InvoiceEntry {
@@ -18,6 +21,7 @@ interface InvoiceModalProps {
   onOpenChange: (open: boolean) => void;
   purchaseOrderId: string;
   onSuccess?: () => void;
+  multiple?: React.Key[];
 }
 
 const createEmptyInvoice = (): InvoiceEntry => ({
@@ -30,7 +34,8 @@ export function InvoiceModal({
   open,
   onOpenChange,
   purchaseOrderId,
-  onSuccess
+  onSuccess,
+  multiple = []
 }: InvoiceModalProps) {
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([createEmptyInvoice()]);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,33 +87,65 @@ export function InvoiceModal({
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    if (multiple.length > 0) {
+      const request: Array<{ purchase_order_id: string; invoice_id: string }> = [];
+      invoices.forEach((inv) => {
+        multiple.forEach((orderId) => {
+          request.push({
+            purchase_order_id: orderId.toString(),
+            invoice_id: inv.invoiceId.trim()
+          });
+        });
+      });
 
-    try {
-      const invoiceIds = invoices.map((inv) => inv.invoiceId.trim());
-
-      const payload: IInvoiceActionPayload = {
-        action: "invoice",
-        data: {
-          invoice_ids: invoiceIds
-        },
-        observation: ""
+      const modelData = {
+        data: request,
+        files: invoices.map((inv) => inv.file!)
       };
 
-      const files = invoices.map((inv) => inv.file!);
+      try {
+        await sendMultiplePurchaseOrdersToBilling(multiple as string[], modelData);
+        message.success("Facturas agregadas correctamente");
+        onSuccess?.();
+        onOpenChange(false);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error al agregar las facturas";
+        setError(errorMessage);
+        message.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(true);
+      setError(null);
 
-      await purchaseOrderActions(purchaseOrderId, payload, files);
+      try {
+        const invoiceIds = invoices.map((inv) => inv.invoiceId.trim());
 
-      message.success("Facturas agregadas correctamente");
-      onSuccess?.();
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Error al agregar las facturas";
-      setError(errorMessage);
-      message.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+        const payload: IInvoiceActionPayload = {
+          action: "invoice",
+          data: {
+            invoice_ids: invoiceIds
+          },
+          observation: ""
+        };
+
+        const files = invoices.map((inv) => inv.file!);
+
+        await purchaseOrderActions(purchaseOrderId, payload, files);
+
+        message.success("Facturas agregadas correctamente");
+        onSuccess?.();
+        onOpenChange(false);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error al agregar las facturas";
+        setError(errorMessage);
+        message.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -122,8 +159,8 @@ export function InvoiceModal({
         </DialogHeader>
         <div className="space-y-4 py-4">
           <p className="text-sm text-gray-600">
-            Puede dividir esta orden en múltiples facturas. Agregue el ID y el PDF de cada factura
-            generada.
+            Puede dividir esta{multiple.length > 0 ? "s órdenes" : " orden"} en múltiples facturas.
+            Agregue el ID y el PDF de cada factura generada.
           </p>
 
           <div
@@ -211,7 +248,7 @@ export function InvoiceModal({
                 <p className="font-medium mb-1">Información importante</p>
                 <p>
                   Asegúrese de que la suma de todas las facturas corresponda al monto total de la
-                  orden de compra.
+                  {multiple.length > 0 ? "s órdenes" : " orden"} de compra.
                 </p>
               </div>
             </div>
