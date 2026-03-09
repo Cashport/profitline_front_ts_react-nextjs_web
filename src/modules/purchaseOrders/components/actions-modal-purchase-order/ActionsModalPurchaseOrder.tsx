@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import { DownloadSimple, Receipt, Invoice, PaperPlaneTilt } from "@phosphor-icons/react";
+import { DownloadSimple, Invoice, PaperPlaneTilt } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
-import { AxiosError } from "axios";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
-import {
-  sendPackageToDispatch,
-  sendPackageToBilling
-} from "@/services/purchaseOrders/purchaseOrders";
+import { sendPackageToDispatch } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
@@ -20,7 +16,9 @@ type ActionsModalPurchaseOrderProps = {
   onDownloadCSV: () => void;
   isDownloadingCSV: boolean;
   selectedRowKeys: React.Key[];
+  selectedOrderKeys: React.Key[];
   mutate?: () => void;
+  onSendToBilling: () => void;
 };
 
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
@@ -29,10 +27,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   onDownloadCSV,
   isDownloadingCSV,
   selectedRowKeys,
-  mutate
+  selectedOrderKeys,
+  mutate,
+  onSendToBilling
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
-  const [isBillingLoading, setIsBillingLoading] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
 
   const handleDownloadCSV = () => {
@@ -40,7 +39,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     onClose();
   };
 
-  const validateSelection = (): boolean => {
+  const validatePackageSelection = (): boolean => {
     if (selectedRowKeys.length === 0) {
       message.warning("Selecciona al menos un pedido para realizar esta acción");
       return false;
@@ -52,8 +51,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     return true;
   };
 
+  const validateOrderSelection = (): boolean => {
+    if (selectedOrderKeys.length === 0) {
+      message.warning("Selecciona al menos una orden para realizar esta acción");
+      return false;
+    }
+    return true;
+  };
+
   const handleSendToDispatch = async () => {
-    if (!validateSelection()) return;
+    if (!validatePackageSelection()) return;
 
     setIsDispatchLoading(true);
     const hideLoading = message.loading("Enviando pedido a despacho...", 0);
@@ -75,31 +82,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
-  const handleSendToBilling = async () => {
-    if (!validateSelection()) return;
-
-    setIsBillingLoading(true);
-    const hideLoading = message.loading("Enviando pedido a facturar...", 0);
-
-    try {
-      await sendPackageToBilling(String(selectedRowKeys[0]));
-      message.success("Pedido enviado a facturar exitosamente");
-      mutate && mutate();
-      onClose();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        message.error(error.message || "Error enviando pedido a facturar");
-      } else {
-        message.error("Error enviando pedido a facturar");
-      }
-    } finally {
-      hideLoading();
-      setIsBillingLoading(false);
-    }
+  const handleSendToBilling = () => {
+    if (!validateOrderSelection()) return;
+    onClose();
+    onSendToBilling();
   };
 
   const handleRequestApproval = () => {
-    if (!validateSelection()) return;
+    if (!validatePackageSelection()) return;
     onClose();
     setIsApprovalModalOpen(true);
   };
@@ -126,7 +116,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             icon={<Invoice size={16} />}
             title="Enviar a facturación"
             onClick={handleSendToBilling}
-            disabled={isBillingLoading}
+            disabled={false}
           />
           <ButtonGenerateAction
             icon={<PackageCheck className="h-4 w-4" />}
