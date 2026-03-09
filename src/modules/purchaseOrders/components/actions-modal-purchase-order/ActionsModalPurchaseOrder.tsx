@@ -6,7 +6,10 @@ import { PackageCheck } from "lucide-react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
-import { sendPackageToDispatch } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  sendPackageToDispatch,
+  removePurchaseOrdersFromPackage
+} from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
@@ -36,6 +39,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   const handleDownloadCSV = () => {
     onDownloadCSV();
@@ -99,15 +103,32 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const handleSeparateOrder = () => {
     if (!validateOrderSelection()) return;
+    const packageId = selectedOrders[0].packageId;
+    if (selectedOrders.some((order) => order.packageId !== packageId)) {
+      message.error("Todas las órdenes seleccionadas deben pertenecer al mismo pedido");
+      return;
+    }
     onClose();
     setIsSeparateOrderModalOpen(true);
   };
 
   const separateOrderRequest = async (selectedOrders: IOrder[]) => {
-    // Aquí iría la lógica para separar la orden del pedido
-    // Probablemente una llamada a la API con selectedOrderKeys
-    console.log("Separando ordenes: ", selectedOrders);
-    setIsSeparateOrderModalOpen(false);
+    setIsActionLoading(true);
+    const modelData = {
+      package_id: selectedOrders[0].packageId,
+      marketplace_order_ids: selectedOrders.map((order) => order.id)
+    };
+    try {
+      await removePurchaseOrdersFromPackage(modelData);
+      message.success("Órdenes separadas del pedido exitosamente");
+      mutate && mutate();
+      setIsSeparateOrderModalOpen(false);
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error separando las órdenes del pedido"
+      );
+    }
+    setIsActionLoading(false);
   };
   return (
     <>
@@ -167,7 +188,8 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         onOk={() => {
           separateOrderRequest(selectedOrders);
         }}
-        title="¿Está seguro de separar las OC del pedido?"
+        title="¿Está seguro de separar la(s) OC del pedido?"
+        okLoading={isActionLoading}
       />
     </>
   );

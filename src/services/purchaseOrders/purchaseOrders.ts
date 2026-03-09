@@ -277,3 +277,19 @@ export const sendMultiplePurchaseOrdersToBilling = async (
     throw error;
   }
 };
+
+export const removePurchaseOrdersFromPackage = async (modelData: {
+  package_id: number;
+  marketplace_order_ids: number[];
+}): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/split`,
+      modelData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error removing purchase order from package:", error);
+    throw error;
+  }
+};
