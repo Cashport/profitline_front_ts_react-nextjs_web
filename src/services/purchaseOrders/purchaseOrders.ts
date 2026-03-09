@@ -250,3 +250,46 @@ export const sendPackageToBilling = async (packageId: string) => {
     throw error;
   }
 };
+
+export const sendMultiplePurchaseOrdersToBilling = async (
+  orderIds: string[],
+  modelData: {
+    data: {
+      purchase_order_id: string;
+      invoice_id: string;
+    }[];
+    files: File[];
+  }
+) => {
+  console.log("Sending multiple purchase orders to billing with data:", modelData);
+  const formData = new FormData();
+  formData.append("request", JSON.stringify({ data: modelData.data }));
+  modelData.files.forEach((file) => formData.append("file", file));
+
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/invoice-package`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending multiple purchase orders to billing:", error);
+    throw error;
+  }
+};
+
+export const removePurchaseOrdersFromPackage = async (modelData: {
+  package_id: number;
+  marketplace_order_ids: number[];
+}): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/split`,
+      modelData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error removing purchase order from package:", error);
+    throw error;
+  }
+};

@@ -10,6 +10,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { useDebounce } from "@/hooks/useSearch";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ActionsModalPurchaseOrder } from "../../components/actions-modal-purchase-order/ActionsModalPurchaseOrder";
+import { ModalUploadInvoicesPurchaseOrders } from "../../components/dialogs/modal-upload-invoices-purchase-orders/ModalUploadInvoicesPurchaseOrders";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { UploadInterface } from "../../components/upload-interface/upload-interface";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
@@ -29,14 +30,14 @@ export function PurchaseOrdersView() {
   const router = useRouter();
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
-  const [showUploadInterface, setShowUploadInterface] = useState(false);
+  const [whichModalIsOpen, setWhichModalIsOpen] = useState({ selected: 0 });
+  const closeModals = () => setWhichModalIsOpen({ selected: 0 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [selectedOrderKeys, setSelectedOrderKeys] = useState<React.Key[]>([]);
+  const [selectedOrders, setSelectedOrders] = useState<IOrder[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
-  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
@@ -96,8 +97,8 @@ export function PurchaseOrdersView() {
     setSelectedRowKeys(selectedKeys);
   };
 
-  const handleOrderSelect = (selectedKeys: React.Key[]) => {
-    setSelectedOrderKeys(selectedKeys);
+  const handleOrderSelect = (orders: IOrder[]) => {
+    setSelectedOrders(orders);
   };
 
   // Filter handler functions
@@ -190,7 +191,7 @@ export function PurchaseOrdersView() {
                 <GenerateActionButton
                   label="Generar acción"
                   disabled={isDownloadingCSV}
-                  onClick={() => setIsActionsModalOpen(true)}
+                  onClick={() => setWhichModalIsOpen({ selected: 1 })}
                 />
 
                 {/* Estado Filter Dropdown */}
@@ -217,7 +218,7 @@ export function PurchaseOrdersView() {
                 />
               </div>
 
-              <PrincipalButton onClick={() => setShowUploadInterface(true)}>
+              <PrincipalButton onClick={() => setWhichModalIsOpen({ selected: 2 })}>
                 <Upload className="h-4 w-4 mr-2" />
                 Cargar Orden de compra
               </PrincipalButton>
@@ -232,7 +233,7 @@ export function PurchaseOrdersView() {
               <div className="text-center py-12 text-muted-foreground">
                 <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="mb-4">Carga tu primera orden de compra para comenzar el análisis</p>
-                <PrincipalButton onClick={() => setShowUploadInterface(true)}>
+                <PrincipalButton onClick={() => setWhichModalIsOpen({ selected: 2 })}>
                   <Upload className="h-4 w-4 mr-2" />
                   Cargar Orden de compra
                 </PrincipalButton>
@@ -246,7 +247,7 @@ export function PurchaseOrdersView() {
                   onPageChange={setCurrentPage}
                   selectedRowKeys={selectedRowKeys}
                   onRowSelect={handleRowSelect}
-                  selectedOrderKeys={selectedOrderKeys}
+                  selectedOrders={selectedOrders}
                   onOrderSelect={handleOrderSelect}
                   onRowClick={handleRowClick}
                   onOrderClick={handleOrderClick}
@@ -259,19 +260,25 @@ export function PurchaseOrdersView() {
       </main>
 
       <ActionsModalPurchaseOrder
-        isOpen={isActionsModalOpen}
-        onClose={() => setIsActionsModalOpen(false)}
+        isOpen={whichModalIsOpen.selected === 1}
+        onClose={closeModals}
         onDownloadCSV={handleDownloadPlane}
         isDownloadingCSV={isDownloadingCSV}
         selectedRowKeys={selectedRowKeys}
+        selectedOrders={selectedOrders}
         mutate={mutate}
+        onSendToBilling={() => setWhichModalIsOpen({ selected: 3 })}
       />
 
-      {showUploadInterface && (
-        <UploadInterface
-          onFileUpload={handleFileUpload}
-          onClose={() => setShowUploadInterface(false)}
-        />
+      <ModalUploadInvoicesPurchaseOrders
+        isOpen={whichModalIsOpen.selected === 3}
+        onClose={closeModals}
+        orders={selectedOrders}
+        onSuccess={() => mutate()}
+      />
+
+      {whichModalIsOpen.selected === 2 && (
+        <UploadInterface onFileUpload={handleFileUpload} onClose={closeModals} />
       )}
     </div>
   );

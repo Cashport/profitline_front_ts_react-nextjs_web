@@ -116,8 +116,8 @@ interface OrdersTableProps {
   mutate: () => void;
   selectedRowKeys?: React.Key[];
   onRowSelect?: (selectedRowKeys: React.Key[], selectedRows: IPurchaseOrder[]) => void;
-  selectedOrderKeys?: React.Key[];
-  onOrderSelect?: (selectedOrderKeys: React.Key[]) => void;
+  selectedOrders?: IOrder[];
+  onOrderSelect?: (selectedOrders: IOrder[]) => void;
   onRowClick?: (record: IPurchaseOrder) => void;
   onOrderClick?: (order: IOrder) => void;
 }
@@ -130,7 +130,7 @@ export function OrdersTable({
   mutate,
   selectedRowKeys = [],
   onRowSelect,
-  selectedOrderKeys = [],
+  selectedOrders = [],
   onOrderSelect,
   onRowClick,
   onOrderClick
@@ -149,11 +149,11 @@ export function OrdersTable({
     });
   };
 
-  const allOrderIds = data.flatMap((pkg) => pkg.orders.map((o) => o.id));
+  const allOrders = data.flatMap((pkg) => pkg.orders);
   const isAllSelected =
     data.length > 0 &&
     data.every((pkg) => selectedRowKeys.includes(pkg.packageId)) &&
-    allOrderIds.every((id) => selectedOrderKeys.includes(id));
+    allOrders.every((o) => selectedOrders.some((s) => s.id === o.id));
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked === true) {
@@ -161,7 +161,7 @@ export function OrdersTable({
         data.map((pkg) => pkg.packageId),
         data
       );
-      onOrderSelect?.(allOrderIds);
+      onOrderSelect?.(allOrders);
     } else {
       onRowSelect?.([], []);
       onOrderSelect?.([]);
@@ -176,9 +176,9 @@ export function OrdersTable({
       onRowSelect(newKeys, newRows);
       // For single-order packages, also select the order
       if (pkg.orders.length === 1 && onOrderSelect) {
-        const orderId = pkg.orders[0].id;
-        if (!selectedOrderKeys.includes(orderId)) {
-          onOrderSelect([...selectedOrderKeys, orderId]);
+        const order = pkg.orders[0];
+        if (!selectedOrders.some((s) => s.id === order.id)) {
+          onOrderSelect([...selectedOrders, order]);
         }
       }
     } else {
@@ -188,7 +188,7 @@ export function OrdersTable({
       // For single-order packages, also deselect the order
       if (pkg.orders.length === 1 && onOrderSelect) {
         const orderId = pkg.orders[0].id;
-        onOrderSelect(selectedOrderKeys.filter((k) => k !== orderId));
+        onOrderSelect(selectedOrders.filter((s) => s.id !== orderId));
       }
     }
   };
@@ -196,9 +196,9 @@ export function OrdersTable({
   const handleSelectOrder = (order: IOrder, checked: boolean | "indeterminate") => {
     if (!onOrderSelect) return;
     if (checked === true) {
-      onOrderSelect([...selectedOrderKeys, order.id]);
+      onOrderSelect([...selectedOrders, order]);
     } else {
-      onOrderSelect(selectedOrderKeys.filter((k) => k !== order.id));
+      onOrderSelect(selectedOrders.filter((s) => s.id !== order.id));
     }
   };
 
@@ -347,7 +347,7 @@ export function OrdersTable({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <Checkbox
-                                  checked={selectedOrderKeys.includes(order.id)}
+                                  checked={selectedOrders.some((s) => s.id === order.id)}
                                   onCheckedChange={(checked) => handleSelectOrder(order, checked)}
                                 />
                               </div>
