@@ -247,8 +247,8 @@ export default function DataQualityClientDetails() {
             />
 
             <ClientDetailTable
-              files={clientDetail.archives_client_data}
-              mutate={() => mutate()}
+              clientId={clientId}
+              mutateDetail={() => mutate()}
               clientName={clientName}
             />
           </CardContent>
