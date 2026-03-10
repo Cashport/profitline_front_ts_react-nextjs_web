@@ -399,6 +399,7 @@ export function PurchaseOrderProducts({
                       {watchedProducts[index].has_novelty &&
                       watchedProducts[index].purchase_order_original ? (
                         <Popover
+                          open
                           placement="left"
                           arrow={false}
                           overlayInnerStyle={{ padding: 0 }}
@@ -413,7 +414,7 @@ export function PurchaseOrderProducts({
                               <div className="text-xs px-3 pb-3">
                                 <div className="flex justify-between gap-3 py-2.5">
                                   <span className="text-gray-500 shrink-0">Producto</span>
-                                  <span className="text-right font-medium text-cashport-black">
+                                  <span className="text-right font-medium text-cashport-black break-all">
                                     {
                                       watchedProducts[index].purchase_order_original!
                                         .po_product_description
