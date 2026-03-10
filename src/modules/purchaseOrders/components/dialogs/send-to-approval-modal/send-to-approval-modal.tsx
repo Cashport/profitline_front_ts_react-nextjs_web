@@ -3,11 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat
 import { Button } from "@/modules/chat/ui/button";
 import { Check, Loader2, AlertTriangle } from "lucide-react";
 import { message } from "antd";
-import { getApprovers, purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
 import {
-  IApprover,
-  IApproveActionPayload
-} from "@/types/purchaseOrders/purchaseOrders";
+  getApprovers,
+  purchaseOrderActions,
+  sendPackageToApproval
+} from "@/services/purchaseOrders/purchaseOrders";
+import { IApprover } from "@/types/purchaseOrders/purchaseOrders";
 
 interface SendToApprovalModalProps {
   open: boolean;
@@ -57,11 +58,11 @@ export function SendToApprovalModal({
         observation: ""
       };
 
-      console.log("Payload to send for approval:", payload);
+      await sendPackageToApproval(Number(packageId), approvers);
 
       message.success("Orden enviada a aprobación correctamente");
-      mutate?.();
-      onOpenChange(false);
+      // mutate?.();
+      // onOpenChange(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error al enviar a aprobación";
       setError(errorMessage);
