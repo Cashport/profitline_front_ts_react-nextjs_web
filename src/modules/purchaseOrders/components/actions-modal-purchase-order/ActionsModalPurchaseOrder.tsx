@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import { DownloadSimple, Invoice, PaperPlaneTilt } from "@phosphor-icons/react";
+import { DownloadSimple, Invoice, PaperPlaneTilt, SubtractSquare } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
+import { InvoiceModal } from "../dialogs/invoice-modal/invoice-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import {
   sendPackageToDispatch,
@@ -23,7 +24,7 @@ type ActionsModalPurchaseOrderProps = {
   selectedRowKeys: React.Key[];
   selectedOrders: IOrder[];
   mutate?: () => void;
-  onSendToBilling: () => void;
+  onUploadInvoices: () => void;
 };
 
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
@@ -34,11 +35,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   selectedRowKeys,
   selectedOrders,
   mutate,
-  onSendToBilling
+  onUploadInvoices
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   const handleDownloadCSV = () => {
@@ -89,10 +91,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
-  const handleSendToBilling = () => {
+  const handleUploadInvoices = () => {
     if (!validateOrderSelection()) return;
     onClose();
-    onSendToBilling();
+    onUploadInvoices();
   };
 
   const handleRequestApproval = () => {
@@ -130,6 +132,25 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
     setIsActionLoading(false);
   };
+
+  const validateSingleOrderSelection = (): boolean => {
+    if (selectedOrders.length === 0) {
+      message.warning("Selecciona al menos una orden para realizar esta acción");
+      return false;
+    }
+    if (selectedOrders.length > 1) {
+      message.warning("Solo puedes seleccionar una orden para enviar a facturación");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSendToBilling = () => {
+    if (!validateSingleOrderSelection()) return;
+    onClose();
+    setIsInvoiceModalOpen(true);
+  };
+
   return (
     <>
       <Modal
@@ -167,10 +188,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             disabled={isDispatchLoading}
           />
           <ButtonGenerateAction
-            icon={<PaperPlaneTilt className="h-4 w-4" />}
+            icon={<SubtractSquare className="h-4 w-4" />}
             title="Separar OC del pedido"
             onClick={handleSeparateOrder}
             disabled={isDispatchLoading}
+          />
+          <ButtonGenerateAction
+            icon={<Invoice size={16} />}
+            title="Cargar facturas"
+            onClick={handleUploadInvoices}
+            disabled={false}
           />
         </div>
       </Modal>
@@ -190,6 +217,13 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         }}
         title="¿Está seguro de separar la(s) OC del pedido?"
         okLoading={isActionLoading}
+      />
+
+      <InvoiceModal
+        open={isInvoiceModalOpen}
+        onOpenChange={setIsInvoiceModalOpen}
+        purchaseOrderId={selectedOrders.length > 0 ? String(selectedOrders[0].id) : ""}
+        onSuccess={() => mutate?.()}
       />
     </>
   );
