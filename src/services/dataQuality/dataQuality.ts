@@ -19,7 +19,8 @@ import {
   IPackMaterialRequest,
   IUploadMassiveOrHistoricalRequest,
   IPOS,
-  IPOSPayload
+  IPOSPayload,
+  IClientDetailArchiveClient
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -105,6 +106,27 @@ export const getClientDetail = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching client detail:", error);
+    throw error;
+  }
+};
+
+export const getArchivesClientData = async (
+  clientId: string,
+  date_from?: string,
+  date_to?: string
+) => {
+  try {
+    const params = [];
+    if (date_from) params.push(`date_from=${date_from}`);
+    if (date_to) params.push(`date_to=${date_to}`);
+    const queryString = params.length > 0 ? `?${params.join("&")}` : "";
+
+    const response: GenericResponse<IClientDetailArchiveClient[]> = await API.get(
+      `${config.API_HOST}/data/client-detail/${clientId}/archives${queryString}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching archives client data:", error);
     throw error;
   }
 };

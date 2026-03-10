@@ -399,7 +399,6 @@ export function PurchaseOrderProducts({
                       {watchedProducts[index].has_novelty &&
                       watchedProducts[index].purchase_order_original ? (
                         <Popover
-                          open
                           placement="left"
                           arrow={false}
                           overlayInnerStyle={{ padding: 0 }}

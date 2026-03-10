@@ -1,6 +1,6 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Calendar, MoreHorizontal } from "lucide-react";
+import { Calendar, ChevronDown, Filter, MoreHorizontal } from "lucide-react";
 import { Dropdown, message } from "antd";
 
 import {
@@ -9,6 +9,8 @@ import {
   downloadExcel,
   uploadIntakeFile
 } from "@/services/dataQuality/dataQuality";
+import { useArchivesClientData } from "../../hooks/useArchivesClientData";
+import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -24,9 +26,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/toolt
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 
 interface IClientDetailTableProps {
-  files?: IClientDetailArchiveClient[];
-  mutate: () => void;
+  clientId: string;
   clientName?: string | null;
+  mutateDetail?: () => void;
 }
 
 const bytesToMB = (bytes: number): string => {
@@ -38,9 +40,19 @@ const formatDate = (isoDateString: string): string => {
   return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
-export function ClientDetailTable({ files, mutate, clientName }: IClientDetailTableProps) {
+export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClientDetailTableProps) {
   const [isUploadingLoading, setIsUploadingLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
+    start: null,
+    end: null
+  });
+
+  const { archives: files, mutate } = useArchivesClientData(
+    clientId,
+    dateRange.start,
+    dateRange.end
+  );
 
   const handleUploadIntake = async (id: number) => {
     const input = document.createElement("input");
@@ -57,7 +69,7 @@ export function ClientDetailTable({ files, mutate, clientName }: IClientDetailTa
         try {
           await uploadIntakeFile(id, file);
           message.success("Archivo de ingesta subido exitosamente.");
-          mutate();
+          mutateDetail && mutateDetail();
         } catch (error) {
           message.error(
             error instanceof Error
@@ -157,11 +169,34 @@ export function ClientDetailTable({ files, mutate, clientName }: IClientDetailTa
     setIsDeleteLoading(false);
   };
 
+  const filterMenu = (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 p-4">
+      <DateRangeFilter
+        dateRange={dateRange}
+        onDateRangeChange={(start, end) => setDateRange({ start, end })}
+        onClear={() => setDateRange({ start: null, end: null })}
+      />
+    </div>
+  );
+
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-6" style={{ color: "#141414" }}>
-        Archivos
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
+          Archivos
+        </h2>
+        <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filtros
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </Button>
+        </Dropdown>
+      </div>
       <Table>
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
