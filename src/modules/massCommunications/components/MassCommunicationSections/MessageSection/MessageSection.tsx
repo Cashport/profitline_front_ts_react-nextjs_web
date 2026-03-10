@@ -23,6 +23,7 @@ interface MessageSectionProps {
   selectedTemplate: string;
   onSelectTemplate: (id: string) => void;
   currentTemplate: WhatsappTemplate | null;
+  onCreateTemplate: () => void;
 }
 
 export default function MessageSection({
@@ -35,11 +36,9 @@ export default function MessageSection({
   selectedEmailAttachments,
   selectedTemplate,
   onSelectTemplate,
-  currentTemplate
+  currentTemplate,
+  onCreateTemplate
 }: MessageSectionProps) {
-  const handleCreateTemplate = () => {
-    console.log("Crear nuevo template");
-  };
   return (
     <section className="bg-white border border-[#DDDDDD] rounded-lg p-6">
       <div className="flex justify-between mb-4">
@@ -56,7 +55,7 @@ export default function MessageSection({
         {channel === "email" && (
           <button
             type="button"
-            onClick={handleCreateTemplate}
+            onClick={onCreateTemplate}
             className="bg-transparent border-none text-blue-500 cursor-pointer text-[13px] hover:underline"
           >
             Crear template

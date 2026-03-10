@@ -8,6 +8,7 @@ import RecipientsSection from "../../components/MassCommunicationSections/Recipi
 import MessageSection from "../../components/MassCommunicationSections/MessageSection/MessageSection";
 import ActionsBar from "../../components/MassCommunicationSections/ActionsBar/ActionsBar";
 import ModalTestCommunication from "../../components/ModalTestCommunication/ModalTestCommunication";
+import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
 import {
   emailTemplates,
@@ -61,6 +62,7 @@ export default function MassCommunicationsView() {
   );
 
   // Modals
+  const [createTemplateOpen, setCreateTemplateOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmChecked, setConfirmChecked] = useState(false);
@@ -146,6 +148,7 @@ export default function MassCommunicationsView() {
             selectedTemplate={selectedTemplate}
             onSelectTemplate={setSelectedTemplate}
             currentTemplate={currentTemplate}
+            onCreateTemplate={() => setCreateTemplateOpen(true)}
           />
 
           <ActionsBar
@@ -160,6 +163,11 @@ export default function MassCommunicationsView() {
           />
         </Flex>
       </div>
+
+      <ModalCreateEmailTemplate
+        isOpen={createTemplateOpen}
+        onClose={() => setCreateTemplateOpen(false)}
+      />
 
       <ModalTestCommunication
         isOpen={testDialogOpen}
