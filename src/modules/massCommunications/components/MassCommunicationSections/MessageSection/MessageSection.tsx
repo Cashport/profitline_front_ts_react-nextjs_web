@@ -1,6 +1,6 @@
 "use client";
 import { Row, Col, Tag, Typography } from "antd";
-import { FileText, Info } from "lucide-react";
+import { FileText, Info, Plus } from "lucide-react";
 
 import { emailTemplates, whatsappTemplates } from "../../../lib/mockData";
 import type { WhatsappTemplate } from "../../../lib/mockData";
@@ -9,6 +9,7 @@ import WhatsAppPreview from "../../WhatsAppPreview/WhatsAppPreview";
 import EmailTemplateCard from "./EmailTemplateCard";
 import EmailPreview from "./EmailPreview";
 import WhatsAppTemplateCard from "./WhatsAppTemplateCard";
+import { Button } from "@/modules/chat/ui/button";
 
 const { Text } = Typography;
 
@@ -53,13 +54,15 @@ export default function MessageSection({
           <Tag className="ml-2">{channel === "email" ? "Email" : "WhatsApp"}</Tag>
         </div>
         {channel === "email" && (
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onCreateTemplate}
-            className="bg-transparent border-none text-blue-500 cursor-pointer text-[13px] hover:underline"
+            className="border-[#CBE71E] text-[#141414] hover:bg-[#CBE71E]/10 gap-1.5"
           >
+            <Plus className="w-3.5 h-3.5" />
             Crear template
-          </button>
+          </Button>
         )}
       </div>
 
