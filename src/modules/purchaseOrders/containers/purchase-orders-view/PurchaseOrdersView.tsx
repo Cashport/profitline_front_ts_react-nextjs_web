@@ -168,10 +168,6 @@ export function PurchaseOrdersView() {
     }
   };
 
-  const handleMarkInvoiced = () => {
-    console.log("Marcar como facturado");
-  };
-
   return (
     <div className="bg-white rounded-lg">
       {/* Main white card containing all content */}
@@ -284,4 +280,3 @@ export function PurchaseOrdersView() {
     </div>
   );
 }
-//
