@@ -261,7 +261,6 @@ export const sendMultiplePurchaseOrdersToBilling = async (
     files: File[];
   }
 ) => {
-  console.log("Sending multiple purchase orders to billing with data:", modelData);
   const formData = new FormData();
   formData.append("request", JSON.stringify({ data: modelData.data }));
   modelData.files.forEach((file) => formData.append("file", file));
@@ -290,6 +289,27 @@ export const removePurchaseOrdersFromPackage = async (modelData: {
     return response.data;
   } catch (error) {
     console.error("Error removing purchase order from package:", error);
+    throw error;
+  }
+};
+
+export const sendPackageToApproval = async (
+  packageId: number,
+  approvers: { userId: number; order: number }[]
+) => {
+  try {
+    const payload = {
+      data: { approvers, packageId },
+      observation: ""
+    };
+
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/${packageId}/send-package-to-approval`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending package to approval:", error);
     throw error;
   }
 };
