@@ -95,8 +95,7 @@ const ChangeWarehouseModal = dynamic(
     ),
   { ssr: false }
 );
-import { createApproval } from "@/services/approvals/approvals";
-import { ICreateApprovalRequest } from "@/types/approvals/IApprovals";
+import { resolveApproval } from "@/services/approvals/approvals";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -229,16 +228,9 @@ export function DetailPurchaseOrder() {
 
   const confirmApprove = async () => {
     setIsActionLoading(true);
-    const modelData: ICreateApprovalRequest = {
-      typeActionCode: "PURCHASE_ORDER",
-      approvalName: `Aprobación para orden de compra ${data.purchase_order_number}`,
-      approvalLink: `/purchase-orders/${orderId}`,
-      referenceId: orderId!
-    };
-
     try {
-      await createApproval(modelData);
-      message.success("Orden de compra enviada a aprobación");
+      await resolveApproval(data.approvation!.approval_id, { decision: "APPROVE" });
+      message.success("Orden de compra aprobada");
       setWhichModalIsOpen({ selected: 0 });
       mutate();
     } catch (error) {
@@ -247,9 +239,22 @@ export function DetailPurchaseOrder() {
     setIsActionLoading(false);
   };
 
-  const confirmReject = (_reason: string, _observation: string) => {
-    // TODO: Implement rejection logic
-    // Note: Modal handles its own closing via onOpenChange
+  const confirmReject = async (reason: string, observation: string) => {
+    setIsActionLoading(true);
+    try {
+      await resolveApproval(data.approvation!.approval_id, {
+        decision: "REJECT",
+        comment: `${reason} - ${observation}`
+      });
+      message.success("Orden de compra rechazada");
+      setWhichModalIsOpen({ selected: 0 });
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al rechazar la orden de compra"
+      );
+    }
+    setIsActionLoading(false);
   };
 
   const handleDownloadCSV = async () => {

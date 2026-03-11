@@ -119,7 +119,7 @@ export function PurchaseOrderDetailHeader({
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        {data.status_name === "En aprobaciones" && (
+        {!!data.approvation && (
           <div className="flex items-center gap-2 mr-2">
             <Button
               variant="outline"

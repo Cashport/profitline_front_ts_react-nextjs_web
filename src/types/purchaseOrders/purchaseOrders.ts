@@ -84,6 +84,9 @@ export interface IUsePurchaseOrdersParams {
 }
 
 export interface IPurchaseOrderDetail {
+  approvation?: {
+    approval_id: number;
+  };
   id: number;
   operation_number: number;
   project_id: number;
