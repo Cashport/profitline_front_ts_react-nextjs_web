@@ -79,7 +79,7 @@ export default function ModalDetailClientCommunication({
       width={700}
       destroyOnClose
       title={null}
-      styles={{ body: { padding: 0 } }}
+      styles={{ body: { padding: 0 }, content: { padding: 0 } }}
     >
       {/* Header */}
       <div

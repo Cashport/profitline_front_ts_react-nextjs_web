@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Button, Flex, Typography } from "antd";
 import { ArrowLeft } from "lucide-react";
 
@@ -21,6 +22,8 @@ import type { IValidatedClient, WhatsappTemplate } from "../../lib/mockData";
 const { Title } = Typography;
 
 export default function MassCommunicationsView() {
+  const router = useRouter();
+
   // Channel
   const [channel, setChannel] = useState<ChannelType>("email");
 
@@ -64,8 +67,6 @@ export default function MassCommunicationsView() {
   // Modals
   const [createTemplateOpen, setCreateTemplateOpen] = useState(false);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [confirmChecked, setConfirmChecked] = useState(false);
 
   // Derived
   const canOpenPreview =
@@ -157,8 +158,7 @@ export default function MassCommunicationsView() {
             canOpenPreview={canOpenPreview}
             onTestCommunication={() => setTestDialogOpen(true)}
             onPreviewAndSend={() => {
-              setConfirmChecked(false);
-              setPreviewOpen(true);
+              router.push("/mass-communications/listing");
             }}
           />
         </Flex>
