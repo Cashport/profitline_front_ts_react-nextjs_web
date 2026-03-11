@@ -263,7 +263,7 @@ export function PurchaseOrdersView() {
         selectedRowKeys={selectedRowKeys}
         selectedOrders={selectedOrders}
         mutate={mutate}
-        onSendToBilling={() => setWhichModalIsOpen({ selected: 3 })}
+        onUploadInvoices={() => setWhichModalIsOpen({ selected: 3 })}
       />
 
       <ModalUploadInvoicesPurchaseOrders

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Input, message } from "antd";
-import { AlertCircle, Paperclip, Plus, X, Upload } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
+import { Paperclip, Plus, X, Upload } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 
 import { IOrder } from "@/types/purchaseOrders/purchaseOrders";

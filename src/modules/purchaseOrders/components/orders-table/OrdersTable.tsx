@@ -82,13 +82,13 @@ const renderInvoices = (invoices: IinvoicePurchaseOrder[] | null) => {
   if (!invoices || invoices.length === 0) return <span className="text-gray-400">-</span>;
 
   if (invoices.length === 1) {
-    return <span className="text-xs">{invoices[0].invoice_id}</span>;
+    return <span className="text-gray-700">{invoices[0].invoice_id}</span>;
   }
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-help">
+        <span className="cursor-help text-gray-700">
           {invoices[0].invoice_id}
           <span className="ml-1.5 text-xs text-gray-600 border border-gray-300 rounded px-1.5 py-0.5 bg-gray-50">
             +{invoices.length - 1}
@@ -306,7 +306,7 @@ export function OrdersTable({
                       <td className="p-4">
                         {renderStatusBadge(pkg.status, pkg.statusColor, pkg.noveltyTypes)}
                       </td>
-                      <td className="p-4 text-gray-400">{renderInvoices(pkg.invoices)}</td>
+                      <td className="p-4">{renderInvoices(pkg.invoices)}</td>
                       <td className="p-4 text-right font-semibold text-cashport-black">
                         {pkg.totalProducts || 0}
                       </td>
