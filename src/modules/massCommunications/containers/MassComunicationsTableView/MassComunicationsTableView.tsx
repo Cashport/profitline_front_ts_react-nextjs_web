@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -8,6 +9,7 @@ import ClientPreview from "../../components/ClientPreview/ClientPreview";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
 
 export default function MassComunicationsTableView() {
+  const router = useRouter();
   const [showPreview, setShowPreview] = useState(false);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,8 +26,7 @@ export default function MassComunicationsTableView() {
             <button
               type="button"
               onClick={() => {
-                setShowPreview(false);
-                console.log("Navigate to Inicio");
+                router.push("/mass-communications");
               }}
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#141414] transition-colors"
             >
