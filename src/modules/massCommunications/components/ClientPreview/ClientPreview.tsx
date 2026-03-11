@@ -1,3 +1,4 @@
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Paperclip } from "lucide-react";
 import WhatsAppPreview from "../WhatsAppPreview/WhatsAppPreview";
 import { whatsappTemplates } from "../../lib/mockData";
@@ -7,7 +8,6 @@ const mockClient = {
   email: "pagos@cruzverde.com"
 };
 
-const mockChannel: "email" | "whatsapp" = "email";
 
 const mockEmailSubject = "Recordatorio: Cartera vencida - Cruz Verde S.A.";
 const mockEmailBody =
@@ -23,6 +23,9 @@ interface ClientPreviewProps {
 }
 
 export default function ClientPreview({ onBack }: ClientPreviewProps) {
+  const searchParams = useSearchParams();
+  const channel = searchParams.get("channel") ?? "email";
+
   return (
     <section className="bg-white border border-[#DDDDDD] rounded-lg">
       <div className="px-6 py-4 border-b border-[#EEEEEE] flex items-center justify-between">
@@ -47,7 +50,7 @@ export default function ClientPreview({ onBack }: ClientPreviewProps) {
         </div>
       </div>
       <div className="p-6">
-        {mockChannel === "email" ? (
+        {channel === "email" ? (
           <div className="bg-white rounded-lg border border-[#DDDDDD] overflow-hidden max-w-3xl mx-auto">
             <div className="bg-[#141414] px-5 py-3">
               <p className="text-xs text-gray-400 font-medium">

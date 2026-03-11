@@ -158,7 +158,7 @@ export default function MassCommunicationsView() {
             canOpenPreview={canOpenPreview}
             onTestCommunication={() => setTestDialogOpen(true)}
             onPreviewAndSend={() => {
-              router.push("/mass-communications/listing");
+              router.push("/mass-communications/listing?channel=" + channel);
             }}
           />
         </Flex>
