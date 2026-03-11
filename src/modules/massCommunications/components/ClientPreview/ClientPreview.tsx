@@ -18,14 +18,18 @@ const mockAttachments = [
   { name: "Link de pago", type: "Link" }
 ];
 
-export default function ClientPreview() {
+interface ClientPreviewProps {
+  onBack?: () => void;
+}
+
+export default function ClientPreview({ onBack }: ClientPreviewProps) {
   return (
     <section className="bg-white border border-[#DDDDDD] rounded-lg">
       <div className="px-6 py-4 border-b border-[#EEEEEE] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => console.log("Back to list")}
+            onClick={() => onBack?.()}
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#141414] transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />

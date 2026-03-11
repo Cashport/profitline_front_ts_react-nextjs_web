@@ -46,7 +46,7 @@ export default function MassComunicationsTableView() {
         </div>
 
         {/* Main content */}
-        {showPreview ? <ClientPreview /> : <TableMassCommunications />}
+        {showPreview ? <ClientPreview onBack={() => setShowPreview(false)} /> : <TableMassCommunications onPreviewClient={() => setShowPreview(true)} />}
       </div>
     </div>
   );

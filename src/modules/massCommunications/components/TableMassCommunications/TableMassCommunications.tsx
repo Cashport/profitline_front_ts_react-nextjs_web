@@ -17,14 +17,19 @@ import ModalDetailClientCommunication from "../ModalDetailClientCommunication/Mo
 
 const channel = "email";
 
-export default function TableMassCommunications() {
+interface TableMassCommunicationsProps {
+  onPreviewClient?: (client: IValidatedClient) => void;
+}
+
+export default function TableMassCommunications({ onPreviewClient }: TableMassCommunicationsProps) {
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [sendSuccess] = useState(false);
   const [emailModalClient, setEmailModalClient] = useState<IValidatedClient | null>(null);
 
   const handleSend = () => console.log("Send communication");
-  const handlePreviewClient = (client: IValidatedClient) =>
-    console.log("Preview client:", client.name);
+  const handlePreviewClient = (client: IValidatedClient) => {
+    onPreviewClient?.(client);
+  };
   const handleRemoveClient = (clientId: string) =>
     console.log("Remove client:", clientId);
   const handleViewEmail = (client: IValidatedClient) => setEmailModalClient(client);
