@@ -5,10 +5,10 @@ import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
-import { InvoiceModal } from "../dialogs/invoice-modal/invoice-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import {
   sendPackageToDispatch,
+  sendPackageToBilling,
   removePurchaseOrdersFromPackage
 } from "@/services/purchaseOrders/purchaseOrders";
 
@@ -38,9 +38,9 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   onUploadInvoices
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
+  const [isBillingLoading, setIsBillingLoading] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
-  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   const handleDownloadCSV = () => {
@@ -133,22 +133,27 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsActionLoading(false);
   };
 
-  const validateSingleOrderSelection = (): boolean => {
-    if (selectedOrders.length === 0) {
-      message.warning("Selecciona al menos una orden para realizar esta acción");
-      return false;
-    }
-    if (selectedOrders.length > 1) {
-      message.warning("Solo puedes seleccionar una orden para enviar a facturación");
-      return false;
-    }
-    return true;
-  };
+  const handleSendToBilling = async () => {
+    if (!validatePackageSelection()) return;
 
-  const handleSendToBilling = () => {
-    if (!validateSingleOrderSelection()) return;
-    onClose();
-    setIsInvoiceModalOpen(true);
+    setIsBillingLoading(true);
+    const hideLoading = message.loading("Enviando pedido a facturación...", 0);
+
+    try {
+      await sendPackageToBilling(String(selectedRowKeys[0]));
+      message.success("Pedido enviado a facturación exitosamente");
+      mutate && mutate();
+      onClose();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        message.error(error.message || "Error enviando pedido a facturación");
+      } else {
+        message.error("Error enviando pedido a facturación");
+      }
+    } finally {
+      hideLoading();
+      setIsBillingLoading(false);
+    }
   };
 
   return (
@@ -173,7 +178,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             icon={<Invoice size={16} />}
             title="Enviar a facturación"
             onClick={handleSendToBilling}
-            disabled={false}
+            disabled={isBillingLoading}
           />
           <ButtonGenerateAction
             icon={<PackageCheck className="h-4 w-4" />}
@@ -219,12 +224,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         okLoading={isActionLoading}
       />
 
-      <InvoiceModal
-        open={isInvoiceModalOpen}
-        onOpenChange={setIsInvoiceModalOpen}
-        purchaseOrderId={selectedOrders.length > 0 ? String(selectedOrders[0].id) : ""}
-        onSuccess={() => mutate?.()}
-      />
     </>
   );
 };
