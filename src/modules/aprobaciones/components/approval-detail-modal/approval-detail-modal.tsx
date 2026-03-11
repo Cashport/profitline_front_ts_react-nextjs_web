@@ -58,7 +58,9 @@ export default function ApprovalDetailModal({
     setRejectReason("");
   }, [approval]);
 
-  const canTakeAction = approvalDetail?.status === "PENDING";
+  const actionStatus = [ApprovalStepStatus.PENDING, ApprovalStepStatus.IN_PROGRESS];
+
+  const canTakeAction = actionStatus.includes(approvalDetail?.status as ApprovalStepStatus);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
