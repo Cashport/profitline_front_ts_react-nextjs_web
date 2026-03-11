@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { DownloadSimple } from "@phosphor-icons/react";
+import { DownloadSimple, UploadSimple } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -11,13 +11,15 @@ type CatalogMaterialsActionsModalProps = {
   onClose: () => void;
   onDownloadCatalog: () => void;
   isDownloadCatalogLoading: boolean;
+  onUploadMaterialsAuxiliary: () => void;
 };
 
 export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModalProps> = ({
   isOpen,
   onClose,
   onDownloadCatalog,
-  isDownloadCatalogLoading
+  isDownloadCatalogLoading,
+  onUploadMaterialsAuxiliary
 }) => {
   return (
     <Modal
@@ -35,6 +37,11 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
           title="Descargar Auxiliar Materiales"
           onClick={onDownloadCatalog}
           disabled={isDownloadCatalogLoading}
+        />
+        <ButtonGenerateAction
+          icon={<UploadSimple size={20} />}
+          title="Cargar Auxiliar Materiales"
+          onClick={onUploadMaterialsAuxiliary}
         />
       </div>
     </Modal>
