@@ -18,17 +18,17 @@ import {
   TableRow
 } from "@/modules/chat/ui/table";
 import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
-import ModalAddEditCatalog, {
-  CatalogFormData
-} from "../ModalAddEditCatalog/ModalAddEditCatalog";
+import ModalAddEditCatalog, { CatalogFormData } from "../ModalAddEditCatalog/ModalAddEditCatalog";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import {
   createCatalog,
   editCatalog,
   deleteCatalog,
   convertMaterialToPack,
-  downloadCatalogFile
+  downloadCatalogFile,
+  uploadCatalogMaterial
 } from "@/services/dataQuality/dataQuality";
+import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/CatalogMaterialsActionsModal";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
 import "./catalogs-table.scss";
@@ -75,6 +75,7 @@ export function CatalogsTable() {
   const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
 
   const itemsPerPage = 25;
 
@@ -140,6 +141,24 @@ export function CatalogsTable() {
     }
   };
 
+  const handleUploadMaterialsAuxiliary = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      await uploadCatalogMaterial(file);
+      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      setWhichModalOpen({ selected: 0 });
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cargar el archivo de auxiliar de materiales."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
   const handleAddNew = () => {
     setMode("create");
     setSelectedCatalog(null);
@@ -202,179 +221,203 @@ export function CatalogsTable() {
 
   return (
     <Spin spinning={isLoading}>
-    <div>
-      {/* Toolbar */}
-      <div className="flex items-center justify-between pb-4 gap-2 ">
-        <div className="flex items-center gap-3">
-          <UiSearchInput
-            placeholder="Buscar por ID"
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
-          <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 3 })} />
+      <div>
+        {/* Toolbar */}
+        <div className="flex items-center justify-between pb-4 gap-2 ">
+          <div className="flex items-center gap-3">
+            <UiSearchInput
+              placeholder="Buscar por ID"
+              onChange={(e) => handleSearchChange(e.target.value)}
+            />
+            <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 3 })} />
+          </div>
+          <Button
+            onClick={handleAddNew}
+            className="text-sm font-medium"
+            style={{
+              backgroundColor: "#CBE71E",
+              color: "#141414",
+              border: "none"
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Equivalencia
+          </Button>
         </div>
-        <Button
-          onClick={handleAddNew}
-          className="text-sm font-medium"
-          style={{
-            backgroundColor: "#CBE71E",
-            color: "#141414",
-            border: "none"
-          }}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Equivalencia
-        </Button>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
-            <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
-            <TableHead style={{ color: "#141414" }}>SKU</TableHead>
-            <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
-            <TableHead style={{ color: "#141414" }}>Factor</TableHead>
-            <TableHead style={{ color: "#141414" }}>Estado</TableHead>
-            <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
-            <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
-            <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedEquivalencies.map((item) => (
-            <TableRow key={item.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
-              <TableCell>
-                <span className="font-medium" style={{ color: "#141414" }}>
-                  {item.customer_product_cod}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>{item.material_code}</span>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>{item.material_name}</span>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>{item.factor}</span>
-              </TableCell>
-              <TableCell>{getStatusBadge(item.status)}</TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>-</span>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>-</span>
-              </TableCell>
-              <TableCell>
-                {(() => {
-                  const items = [
-                    {
-                      key: "1",
-                      label: (
-                        <AntButton
-                          icon={<Edit className="w-4 h-4" />}
-                          className="buttonNoBorder"
-                          onClick={() => handleEdit(item)}
-                        >
-                          Editar
-                        </AntButton>
-                      )
-                    },
-                    {
-                      key: "2",
-                      label: (
-                        <AntButton
-                          icon={<Trash2 className="w-4 h-4" />}
-                          className="buttonNoBorder"
-                          onClick={() => {
-                            setSelectedCatalog(item);
-                            setWhichModalOpen({ selected: 2 });
-                          }}
-                        >
-                          Eliminar
-                        </AntButton>
-                      )
-                    },
-                    {
-                      key: "3",
-                      label: (
-                        <AntButton
-                          icon={<DropboxLogo size={16} />}
-                          className="buttonNoBorder"
-                          onClick={() => handleMarkAsPack(item)}
-                        >
-                          Marcar como pack
-                        </AntButton>
-                      )
-                    }
-                  ];
-                  const customDropdown = (menu: ReactNode) => (
-                    <div className="dropdownCatalogsTable">{menu}</div>
-                  );
-                  return (
-                    <Dropdown
-                      dropdownRender={customDropdown}
-                      menu={{ items }}
-                      placement="bottomLeft"
-                      trigger={["click"]}
-                    >
-                      <AntButton className="dotsBtn">
-                        <DotsThreeVertical size={16} />
-                      </AntButton>
-                    </Dropdown>
-                  );
-                })()}
-              </TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow style={{ borderColor: "#DDDDDD" }}>
+              <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
+              <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
+              <TableHead style={{ color: "#141414" }}>SKU</TableHead>
+              <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
+              <TableHead style={{ color: "#141414" }}>Factor</TableHead>
+              <TableHead style={{ color: "#141414" }}>Estado</TableHead>
+              <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
+              <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
+              <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {paginatedEquivalencies.map((item) => (
+              <TableRow
+                key={item.id}
+                className="hover:bg-gray-50"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <TableCell>
+                  <span className="font-medium" style={{ color: "#141414" }}>
+                    {item.customer_product_cod}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.material_code}</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.material_name}</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.factor}</span>
+                </TableCell>
+                <TableCell>{getStatusBadge(item.status)}</TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>-</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>-</span>
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const items = [
+                      {
+                        key: "1",
+                        label: (
+                          <AntButton
+                            icon={<Edit className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => handleEdit(item)}
+                          >
+                            Editar
+                          </AntButton>
+                        )
+                      },
+                      {
+                        key: "2",
+                        label: (
+                          <AntButton
+                            icon={<Trash2 className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => {
+                              setSelectedCatalog(item);
+                              setWhichModalOpen({ selected: 2 });
+                            }}
+                          >
+                            Eliminar
+                          </AntButton>
+                        )
+                      },
+                      {
+                        key: "3",
+                        label: (
+                          <AntButton
+                            icon={<DropboxLogo size={16} />}
+                            className="buttonNoBorder"
+                            onClick={() => handleMarkAsPack(item)}
+                          >
+                            Marcar como pack
+                          </AntButton>
+                        )
+                      }
+                    ];
+                    const customDropdown = (menu: ReactNode) => (
+                      <div className="dropdownCatalogsTable">{menu}</div>
+                    );
+                    return (
+                      <Dropdown
+                        dropdownRender={customDropdown}
+                        menu={{ items }}
+                        placement="bottomLeft"
+                        trigger={["click"]}
+                      >
+                        <AntButton className="dotsBtn">
+                          <DotsThreeVertical size={16} />
+                        </AntButton>
+                      </Dropdown>
+                    );
+                  })()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-      <div
-        className="mt-4 pt-4 border-t flex items-center justify-between"
-        style={{ borderColor: "#DDDDDD" }}
-      >
-        <div className="text-sm" style={{ color: "#141414" }}>
-          Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length} productos
+        <div
+          className="mt-4 pt-4 border-t flex items-center justify-between"
+          style={{ borderColor: "#DDDDDD" }}
+        >
+          <div className="text-sm" style={{ color: "#141414" }}>
+            Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length} productos
+          </div>
+          <Pagination
+            current={currentPage}
+            onChange={(page) => setCurrentPage(page)}
+            total={filteredEquivalencies.length}
+            pageSize={itemsPerPage}
+            showSizeChanger={false}
+          />
         </div>
-        <Pagination
-          current={currentPage}
-          onChange={(page) => setCurrentPage(page)}
-          total={filteredEquivalencies.length}
-          pageSize={itemsPerPage}
-          showSizeChanger={false}
+
+        <ModalAddEditCatalog
+          isOpen={whichModalOpen.selected === 1}
+          onClose={handleClose}
+          mode={mode}
+          catalogData={selectedCatalog}
+          onSave={handleSave}
+          isLoadingCreateEdit={isLoadingAction}
+          countryId={countryId}
+        />
+
+        <ModalConfirmAction
+          isOpen={whichModalOpen.selected === 2}
+          onClose={() => setWhichModalOpen({ selected: 0 })}
+          onOk={() => {
+            if (selectedCatalog) handleDeleteCatalog(selectedCatalog);
+          }}
+          title="¿Está seguro de eliminar?"
+          okText="Eliminar"
+          okLoading={isLoadingAction}
+        />
+
+        <CatalogMaterialsActionsModal
+          isOpen={whichModalOpen.selected === 3}
+          onClose={() => setWhichModalOpen({ selected: 0 })}
+          onDownloadCatalog={handleDownloadCatalog}
+          isDownloadCatalogLoading={isDownloadCatalogLoading}
+          onUploadMaterialsAuxiliary={() => setWhichModalOpen({ selected: 4 })}
+        />
+
+        <ModalUploadFile
+          isOpen={whichModalOpen.selected === 4}
+          onClose={handleClose}
+          onFileUpload={handleUploadMaterialsAuxiliary}
+          loading={isUploadLoading}
+          allowedExtensions={[
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".xls",
+            ".xlsx",
+            ".csv",
+            ".txt",
+            ".eml",
+            ".msg"
+          ]}
         />
       </div>
-
-      <ModalAddEditCatalog
-        isOpen={whichModalOpen.selected === 1}
-        onClose={handleClose}
-        mode={mode}
-        catalogData={selectedCatalog}
-        onSave={handleSave}
-        isLoadingCreateEdit={isLoadingAction}
-        countryId={countryId}
-      />
-
-      <ModalConfirmAction
-        isOpen={whichModalOpen.selected === 2}
-        onClose={() => setWhichModalOpen({ selected: 0 })}
-        onOk={() => {
-          if (selectedCatalog) handleDeleteCatalog(selectedCatalog);
-        }}
-        title="¿Está seguro de eliminar?"
-        okText="Eliminar"
-        okLoading={isLoadingAction}
-      />
-
-      <CatalogMaterialsActionsModal
-        isOpen={whichModalOpen.selected === 3}
-        onClose={() => setWhichModalOpen({ selected: 0 })}
-        onDownloadCatalog={handleDownloadCatalog}
-        isDownloadCatalogLoading={isDownloadCatalogLoading}
-      />
-    </div>
     </Spin>
   );
 }
