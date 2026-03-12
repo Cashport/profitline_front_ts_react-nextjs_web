@@ -20,7 +20,8 @@ import {
   ChartBar,
   ShoppingCartSimple,
   Database,
-  CurrencyCircleDollar
+  CurrencyCircleDollar,
+  Chats
 } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
@@ -297,6 +298,21 @@ export const ModulesButtons = ({
             className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Saldos"}
+          </Button>
+        </Link>
+      )}
+      {/* Mass Communications */}
+      {checkUserViewPermissions(project, "MassCommunications") && (
+        <Link href="/mass-communications" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Chats size={iconSize} />}
+            className={
+              path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
+            }
+          >
+            {isSideBarLarge && "Comunicaciones Masivas"}
           </Button>
         </Link>
       )}

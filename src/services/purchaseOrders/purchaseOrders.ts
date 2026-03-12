@@ -1,5 +1,5 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import { API, ApiError } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IPurchaseOrderDetail,
@@ -239,15 +239,16 @@ export const sendPackageToDispatch = async (packageId: string) => {
   }
 };
 
-export const sendPackageToBilling = async (packageId: string) => {
+export const sendPackageToBilling = async (packageId: string, send_approval?: number) => {
+  const modelBody = { send_aprobation: send_approval };
   try {
     const response: GenericResponse<any> = await API.post(
-      `${config.API_HOST}/purchaseorder/${packageId}/send-package-to-billing`
+      `${config.API_HOST}/purchaseorder/${packageId}/send-package-to-billing`,
+      send_approval && modelBody
     );
     return response.data;
   } catch (error) {
-    console.error("Error sending package to billing:", error);
-    throw error;
+    throw error as ApiError;
   }
 };
 

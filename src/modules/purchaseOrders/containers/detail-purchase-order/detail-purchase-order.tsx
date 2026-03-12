@@ -95,6 +95,11 @@ const ChangeWarehouseModal = dynamic(
     ),
   { ssr: false }
 );
+
+const ApprovalDetailModal = dynamic(
+  () => import("@/modules/aprobaciones/components/approval-detail-modal/approval-detail-modal"),
+  { ssr: false }
+);
 import { resolveApproval } from "@/services/approvals/approvals";
 
 export function DetailPurchaseOrder() {
@@ -392,6 +397,12 @@ export function DetailPurchaseOrder() {
         selectedOrder={data.id}
         currentWarehouseId={data.warehouseId!}
         setFetchMutate={() => mutate()}
+      />
+
+      <ApprovalDetailModal
+        approvalId={whichModalIsOpen.selected === 10 ? data.approvation?.approval_id : undefined}
+        onClose={closeModals}
+        mutateList={() => mutate()}
       />
     </div>
   );
