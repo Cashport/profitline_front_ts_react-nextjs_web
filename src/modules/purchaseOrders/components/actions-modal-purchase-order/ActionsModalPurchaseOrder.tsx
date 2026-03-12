@@ -43,6 +43,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  // TODO: Refactor cansSendToBilling because Procesado is not mapped
+  const canSendToBilling =
+    selectedPackageRows.length === 1 &&
+    selectedPackageRows[0].orders.every((o) => o.status === "Procesado");
+  const canSendToDispatch =
+    selectedPackageRows.length === 1 &&
+    selectedPackageRows[0].orders.every((o) => o.status === "Facturado");
+  const canUploadInvoices =
+    selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
+
   const handleDownloadCSV = () => {
     onDownloadCSV();
     onClose();
@@ -174,18 +184,22 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             onClick={handleDownloadCSV}
             disabled={isDownloadingCSV}
           />
-          <ButtonGenerateAction
-            icon={<Invoice size={16} />}
-            title="Enviar a facturación"
-            onClick={handleSendToBilling}
-            disabled={isBillingLoading}
-          />
-          <ButtonGenerateAction
-            icon={<PackageCheck className="h-4 w-4" />}
-            title="Enviar a despacho"
-            onClick={handleSendToDispatch}
-            disabled={isDispatchLoading}
-          />
+          {canSendToBilling && (
+            <ButtonGenerateAction
+              icon={<Invoice size={16} />}
+              title="Enviar a facturación"
+              onClick={handleSendToBilling}
+              disabled={isBillingLoading}
+            />
+          )}
+          {canSendToDispatch && (
+            <ButtonGenerateAction
+              icon={<PackageCheck className="h-4 w-4" />}
+              title="Enviar a despacho"
+              onClick={handleSendToDispatch}
+              disabled={isDispatchLoading}
+            />
+          )}
           <ButtonGenerateAction
             icon={<PaperPlaneTilt className="h-4 w-4" />}
             title="Solicitar aprobación"
@@ -198,12 +212,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             onClick={handleSeparateOrder}
             disabled={isDispatchLoading}
           />
-          <ButtonGenerateAction
-            icon={<Invoice size={16} />}
-            title="Cargar facturas"
-            onClick={handleUploadInvoices}
-            disabled={false}
-          />
+          {canUploadInvoices && (
+            <ButtonGenerateAction
+              icon={<Invoice size={16} />}
+              title="Cargar facturas"
+              onClick={handleUploadInvoices}
+              disabled={false}
+            />
+          )}
         </div>
       </Modal>
 
