@@ -174,21 +174,22 @@ export function OrdersTable({
       const newKeys = [...selectedRowKeys, pkg.packageId];
       const newRows = data.filter((p) => newKeys.includes(p.packageId));
       onRowSelect(newKeys, newRows);
-      // For single-order packages, also select the order
-      if (pkg.orders.length === 1 && onOrderSelect) {
-        const order = pkg.orders[0];
-        if (!selectedOrders.some((s) => s.id === order.id)) {
-          onOrderSelect([...selectedOrders, order]);
+      // Also select all child orders
+      if (onOrderSelect) {
+        const orderIdsAlreadySelected = new Set(selectedOrders.map((s) => s.id));
+        const newOrders = pkg.orders.filter((o) => !orderIdsAlreadySelected.has(o.id));
+        if (newOrders.length > 0) {
+          onOrderSelect([...selectedOrders, ...newOrders]);
         }
       }
     } else {
       const newKeys = selectedRowKeys.filter((k) => k !== pkg.packageId);
       const newRows = data.filter((p) => newKeys.includes(p.packageId));
       onRowSelect(newKeys, newRows);
-      // For single-order packages, also deselect the order
-      if (pkg.orders.length === 1 && onOrderSelect) {
-        const orderId = pkg.orders[0].id;
-        onOrderSelect(selectedOrders.filter((s) => s.id !== orderId));
+      // Also deselect all child orders
+      if (onOrderSelect) {
+        const orderIdsToRemove = new Set(pkg.orders.map((o) => o.id));
+        onOrderSelect(selectedOrders.filter((s) => !orderIdsToRemove.has(s.id)));
       }
     }
   };
