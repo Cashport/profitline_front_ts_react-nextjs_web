@@ -160,6 +160,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.data?.misstake_type === "INSUFFICIENT_QUOTA") {
+          onClose();
           setIsBillingConfirmOpen(true);
         } else {
           message.error(error.message || "Error enviando pedido a facturación");
