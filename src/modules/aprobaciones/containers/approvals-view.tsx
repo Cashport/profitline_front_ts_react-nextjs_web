@@ -96,7 +96,7 @@ export default function ApprovalsView() {
       <ApprovalDetailModal
         approvalId={selectedApproval}
         onClose={() => setSelectedApproval(undefined)}
-        mutateApprovals={mutateApprovals}
+        mutateList={() => mutateApprovals()}
       />
     </div>
   );

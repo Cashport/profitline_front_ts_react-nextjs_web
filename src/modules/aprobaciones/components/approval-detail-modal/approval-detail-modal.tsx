@@ -35,13 +35,13 @@ import { APPROVAL_TYPE_LABELS, ApprovalStepStatus, ApprovalType } from "@/consta
 interface ApprovalDetailModalProps {
   approvalId?: number;
   onClose: () => void;
-  mutateApprovals: KeyedMutator<GenericResponse<IApprovalsResponse>>;
+  mutateList: () => void;
 }
 
 export default function ApprovalDetailModal({
   approvalId,
   onClose,
-  mutateApprovals
+  mutateList
 }: ApprovalDetailModalProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
@@ -93,7 +93,7 @@ export default function ApprovalDetailModal({
 
       setShowRejectForm(false);
       setRejectReason("");
-      mutateApprovals();
+      mutateList();
       onClose();
     } catch (error) {
       console.error("Error al resolver la aprobación:", error);

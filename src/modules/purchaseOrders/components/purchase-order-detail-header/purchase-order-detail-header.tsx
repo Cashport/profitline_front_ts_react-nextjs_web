@@ -141,7 +141,7 @@ export function PurchaseOrderDetailHeader({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {}}
+            onClick={() => onOpenModal(10)}
             className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
           >
             Ver aprobación
