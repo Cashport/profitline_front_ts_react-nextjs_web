@@ -12,6 +12,11 @@ const theme: ThemeConfig = {
     colorBgElevated: "#FFFFFF"
   },
   components: {
+    Button: {
+      primaryShadow: "none",
+      defaultShadow: "none",
+      dangerShadow: "none"
+    },
     Message: {
       contentBg: "#FFFFFF"
     },

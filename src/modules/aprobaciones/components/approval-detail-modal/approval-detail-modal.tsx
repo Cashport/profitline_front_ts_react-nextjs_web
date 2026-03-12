@@ -25,42 +25,41 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IApprovalItem, ApprovalDecision, IApprovalsResponse } from "@/types/approvals/IApprovals";
 import {
-  APPROVAL_STEP_STATUS_COLORS,
-  APPROVAL_TYPE_LABELS,
-  ApprovalStepStatus,
-  ApprovalType
-} from "@/constants/approvalTypes";
+  IApprovalDetail,
+  ApprovalDecision,
+  IApprovalsResponse
+} from "@/types/approvals/IApprovals";
+import { APPROVAL_TYPE_LABELS, ApprovalStepStatus, ApprovalType } from "@/constants/approvalTypes";
 
 interface ApprovalDetailModalProps {
-  approval?: IApprovalItem;
+  approvalId?: number;
   onClose: () => void;
-  mutateApprovals: KeyedMutator<GenericResponse<IApprovalsResponse>>;
+  mutateList: () => void;
 }
 
 export default function ApprovalDetailModal({
-  approval,
+  approvalId,
   onClose,
-  mutateApprovals
+  mutateList
 }: ApprovalDetailModalProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
 
-  const { data: approvalDetail } = useSWR(approval?.id ? `approval-${approval.id}` : null, () =>
-    getApprovalById(approval!.id)
+  const { data: approvalDetail } = useSWR(approvalId ? `approval-${approvalId}` : null, () =>
+    getApprovalById(approvalId!)
   );
 
   useEffect(() => {
     // Reset state when modal is closed
     setShowRejectForm(false);
     setRejectReason("");
-  }, [approval]);
+  }, [approvalId]);
 
   const actionStatus = [ApprovalStepStatus.PENDING, ApprovalStepStatus.IN_PROGRESS];
 
-  const canTakeAction = actionStatus.includes(approvalDetail?.status as ApprovalStepStatus);
+  const canTakeAction = actionStatus.includes(approvalDetail?.status.code as ApprovalStepStatus);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
@@ -80,21 +79,21 @@ export default function ApprovalDetailModal({
     return targetDate.diff(today, "day");
   };
 
-  if (!approval) return null;
+  if (!approvalId) return null;
 
   const handleResolveApproval = async (decision: ApprovalDecision) => {
-    if (!approval?.id) return;
+    if (!approvalId) return;
 
     setIsResolving(true);
     try {
-      await resolveApproval(approval.id, {
+      await resolveApproval(approvalId, {
         decision,
         comment: decision === "REJECT" ? rejectReason : undefined
       });
 
       setShowRejectForm(false);
       setRejectReason("");
-      mutateApprovals();
+      mutateList();
       onClose();
     } catch (error) {
       console.error("Error al resolver la aprobación:", error);
@@ -107,16 +106,16 @@ export default function ApprovalDetailModal({
     return APPROVAL_TYPE_LABELS[typeCode] || typeCode;
   };
 
-  const getStatusClassName = (approval: IApprovalItem) => {
+  const getStatusClassName = (detail?: IApprovalDetail) => {
     const baseClasses = "flex-shrink-0 px-2 py-0.5 rounded-lg text-xs font-medium";
-    if (approval.status) {
-      return `${baseClasses} border ${approval.status.color} bg-${approval.status.backgroundColor}`;
+    if (detail?.status) {
+      return `${baseClasses} border ${detail.status.color} bg-${detail.status.backgroundColor}`;
     }
     return baseClasses;
   };
 
   return (
-    <Dialog open={!!approval} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={!!approvalId} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="!max-w-[1000px] !w-[95vw] md:!w-[90vw] max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="border-b px-4 md:px-8 py-4 pr-8">
           <div className="flex items-center justify-between gap-4">
@@ -127,18 +126,18 @@ export default function ApprovalDetailModal({
               </DialogTitle>
               <Badge
                 variant="outline"
-                className={getStatusClassName(approval)}
+                className={getStatusClassName(approvalDetail)}
                 style={
-                  approval?.status.color
+                  approvalDetail?.status.color
                     ? {
-                        color: approval.status.color,
-                        backgroundColor: approval.status.backgroundColor,
-                        borderColor: approval.status.color
+                        color: approvalDetail.status.color,
+                        backgroundColor: approvalDetail.status.backgroundColor,
+                        borderColor: approvalDetail.status.color
                       }
                     : undefined
                 }
               >
-                {approval?.status.name}
+                {approvalDetail?.status.name}
               </Badge>
             </div>
 

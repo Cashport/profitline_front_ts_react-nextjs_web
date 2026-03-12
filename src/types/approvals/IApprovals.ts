@@ -73,7 +73,7 @@ export interface IApprovalDetail {
   approvalLink: string;
   observation: string;
   description: string;
-  status: ApprovalStepStatus;
+  status: IApprovalStepStatus;
   requester: IRequester;
   createdAt: string;
   updatedAt: string;
