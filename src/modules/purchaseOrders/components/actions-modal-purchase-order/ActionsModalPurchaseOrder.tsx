@@ -150,7 +150,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     const hideLoading = message.loading("Enviando pedido a facturación...", 0);
 
     try {
-      await sendPackageToBilling(String(selectedPackageRows[0].packageId), send_approval ? 1 : 0);
+      await sendPackageToBilling(
+        String(selectedPackageRows[0].packageId),
+        send_approval && send_approval ? 1 : 0
+      );
       message.success("Pedido enviado a facturación exitosamente");
       mutate && mutate();
       onClose();
@@ -192,7 +195,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             <ButtonGenerateAction
               icon={<Invoice size={16} />}
               title="Enviar a facturación"
-              onClick={handleSendToBilling}
+              onClick={() => handleSendToBilling()}
               disabled={isBillingLoading}
             />
           )}
