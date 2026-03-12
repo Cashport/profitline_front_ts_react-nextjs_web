@@ -42,6 +42,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -142,20 +143,24 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsActionLoading(false);
   };
 
-  const handleSendToBilling = async () => {
+  const handleSendToBilling = async (send_approval?: boolean) => {
     if (!validatePackageSelection()) return;
 
     setIsBillingLoading(true);
     const hideLoading = message.loading("Enviando pedido a facturación...", 0);
 
     try {
-      await sendPackageToBilling(String(selectedPackageRows[0].packageId));
+      await sendPackageToBilling(String(selectedPackageRows[0].packageId), send_approval ? 1 : 0);
       message.success("Pedido enviado a facturación exitosamente");
       mutate && mutate();
       onClose();
     } catch (error) {
       if (error instanceof ApiError) {
-        message.error(error.message || "Error enviando pedido a facturación");
+        if (error.data?.misstake_type === "INSUFFICIENT_QUOTA") {
+          setIsBillingConfirmOpen(true);
+        } else {
+          message.error(error.message || "Error enviando pedido a facturación");
+        }
       } else {
         message.error("Error enviando pedido a facturación");
       }
@@ -239,6 +244,19 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         }}
         title="¿Está seguro de separar la(s) OC del pedido?"
         okLoading={isActionLoading}
+      />
+
+      <ModalConfirmAction
+        isOpen={isBillingConfirmOpen}
+        onClose={() => setIsBillingConfirmOpen(false)}
+        onOk={() => {
+          setIsBillingConfirmOpen(false);
+          handleSendToBilling(true);
+        }}
+        title="¿Desea enviar a aprobación? "
+        content="El cliente no tiene cupo suficiente para gestionar el pedido"
+        okText="Enviar aprobación"
+        cancelText="Cancelar"
       />
     </>
   );
