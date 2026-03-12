@@ -287,8 +287,8 @@ export function OrdersTable({
                     >
                       {renderIdPedidoCell()}
                       <td className="p-4 text-gray-500 text-sm">{pkg.orderCount} ordenes</td>
-                      <td className="p-4 text-gray-700 max-w-64">
-                        <span className="truncate" title={pkg.customerName}>
+                      <td className="p-4 text-gray-700">
+                        <span className="block truncate max-w-64" title={pkg.customerName}>
                           {pkg.customerName || "-"}
                         </span>
                       </td>
