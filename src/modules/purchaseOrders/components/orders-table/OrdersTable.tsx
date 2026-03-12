@@ -114,8 +114,8 @@ interface OrdersTableProps {
   loading: boolean;
   onPageChange: (page: number) => void;
   mutate: () => void;
-  selectedRowKeys?: React.Key[];
-  onRowSelect?: (selectedRowKeys: React.Key[], selectedRows: IPurchaseOrder[]) => void;
+  selectedRowKeys?: IPurchaseOrder[];
+  onRowSelect?: (selectedRows: IPurchaseOrder[]) => void;
   selectedOrders?: IOrder[];
   onOrderSelect?: (selectedOrders: IOrder[]) => void;
   onRowClick?: (record: IPurchaseOrder) => void;
@@ -152,18 +152,15 @@ export function OrdersTable({
   const allOrders = data.flatMap((pkg) => pkg.orders);
   const isAllSelected =
     data.length > 0 &&
-    data.every((pkg) => selectedRowKeys.includes(pkg.packageId)) &&
+    data.every((pkg) => selectedRowKeys.some((r) => r.packageId === pkg.packageId)) &&
     allOrders.every((o) => selectedOrders.some((s) => s.id === o.id));
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked === true) {
-      onRowSelect?.(
-        data.map((pkg) => pkg.packageId),
-        data
-      );
+      onRowSelect?.(data);
       onOrderSelect?.(allOrders);
     } else {
-      onRowSelect?.([], []);
+      onRowSelect?.([]);
       onOrderSelect?.([]);
     }
   };
@@ -171,24 +168,23 @@ export function OrdersTable({
   const handleSelectPackage = (pkg: IPurchaseOrder, checked: boolean | "indeterminate") => {
     if (!onRowSelect) return;
     if (checked === true) {
-      const newKeys = [...selectedRowKeys, pkg.packageId];
-      const newRows = data.filter((p) => newKeys.includes(p.packageId));
-      onRowSelect(newKeys, newRows);
-      // For single-order packages, also select the order
-      if (pkg.orders.length === 1 && onOrderSelect) {
-        const order = pkg.orders[0];
-        if (!selectedOrders.some((s) => s.id === order.id)) {
-          onOrderSelect([...selectedOrders, order]);
+      const newRows = [...selectedRowKeys, pkg];
+      onRowSelect(newRows);
+      // Also select all child orders
+      if (onOrderSelect) {
+        const orderIdsAlreadySelected = new Set(selectedOrders.map((s) => s.id));
+        const newOrders = pkg.orders.filter((o) => !orderIdsAlreadySelected.has(o.id));
+        if (newOrders.length > 0) {
+          onOrderSelect([...selectedOrders, ...newOrders]);
         }
       }
     } else {
-      const newKeys = selectedRowKeys.filter((k) => k !== pkg.packageId);
-      const newRows = data.filter((p) => newKeys.includes(p.packageId));
-      onRowSelect(newKeys, newRows);
-      // For single-order packages, also deselect the order
-      if (pkg.orders.length === 1 && onOrderSelect) {
-        const orderId = pkg.orders[0].id;
-        onOrderSelect(selectedOrders.filter((s) => s.id !== orderId));
+      const newRows = selectedRowKeys.filter((r) => r.packageId !== pkg.packageId);
+      onRowSelect(newRows);
+      // Also deselect all child orders
+      if (onOrderSelect) {
+        const orderIdsToRemove = new Set(pkg.orders.map((o) => o.id));
+        onOrderSelect(selectedOrders.filter((s) => !orderIdsToRemove.has(s.id)));
       }
     }
   };
@@ -250,7 +246,7 @@ export function OrdersTable({
               const isExpanded = expandedPackageIds.has(pkg.packageId);
               const isMulti = pkg.orders.length > 1;
               const singleOrder = pkg.orders.length === 1 ? pkg.orders[0] : null;
-              const isSelected = selectedRowKeys.includes(pkg.packageId);
+              const isSelected = selectedRowKeys.some((r) => r.packageId === pkg.packageId);
 
               const renderIdPedidoCell = () => (
                 <td className="p-4">
@@ -291,8 +287,8 @@ export function OrdersTable({
                     >
                       {renderIdPedidoCell()}
                       <td className="p-4 text-gray-500 text-sm">{pkg.orderCount} ordenes</td>
-                      <td className="p-4 text-gray-700 max-w-64">
-                        <span className="truncate" title={pkg.customerName}>
+                      <td className="p-4 text-gray-700">
+                        <span className="block truncate max-w-64" title={pkg.customerName}>
                           {pkg.customerName || "-"}
                         </span>
                       </td>

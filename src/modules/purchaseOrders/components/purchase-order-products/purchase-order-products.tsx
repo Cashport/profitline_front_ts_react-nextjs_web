@@ -396,8 +396,7 @@ export function PurchaseOrderProducts({
                       )}
                     </td>
                     <td className="p-3 text-center">
-                      {watchedProducts[index].has_novelty &&
-                      watchedProducts[index].purchase_order_original ? (
+                      {watchedProducts[index].purchase_order_original ? (
                         <Popover
                           placement="left"
                           arrow={false}
