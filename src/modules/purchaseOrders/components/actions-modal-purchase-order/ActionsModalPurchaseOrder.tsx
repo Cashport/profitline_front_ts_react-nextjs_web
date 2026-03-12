@@ -43,7 +43,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  // TODO: Refactor cansSendToBilling because Procesado is not mapped
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
     selectedPackageRows[0].orders.every((o) => o.status === "Procesado");
