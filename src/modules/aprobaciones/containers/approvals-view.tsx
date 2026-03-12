@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 
 import { useApprovals } from "@/hooks/useApprovals";
 import { useDebounce } from "@/hooks/useDeabouce";
-import {
-  IApprovalItem,
-  IApprovalStatusItem,
-  IGetApprovalTypeActions
-} from "@/types/approvals/IApprovals";
+import { IApprovalStatusItem, IGetApprovalTypeActions } from "@/types/approvals/IApprovals";
 
-import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import ApprovalDetailModal from "@/modules/aprobaciones/components/approval-detail-modal/approval-detail-modal";
 import ApprovalsStateDropdown from "../components/approvals-state-dropdown/approvalsStateDorpdown";
@@ -23,7 +18,7 @@ export default function ApprovalsView() {
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedApproval, setSelectedApproval] = useState<IApprovalItem>();
+  const [selectedApproval, setSelectedApproval] = useState<number>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [statusOptions, setStatusOptions] = useState<IApprovalStatusItem[]>([]);
@@ -86,7 +81,7 @@ export default function ApprovalsView() {
               approvals={data}
               selectedIds={selectedIds}
               onSelectIds={setSelectedIds}
-              onSelectApproval={setSelectedApproval}
+              onSelectApproval={(a) => setSelectedApproval(a.id)}
               isLoading={isLoading}
               pagination={{
                 current: page,
@@ -99,7 +94,7 @@ export default function ApprovalsView() {
       </main>
 
       <ApprovalDetailModal
-        approval={selectedApproval}
+        approvalId={selectedApproval}
         onClose={() => setSelectedApproval(undefined)}
         mutateApprovals={mutateApprovals}
       />

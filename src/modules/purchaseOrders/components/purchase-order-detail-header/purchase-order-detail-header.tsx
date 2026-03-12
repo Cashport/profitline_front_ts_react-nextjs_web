@@ -42,9 +42,7 @@ export function PurchaseOrderDetailHeader({
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const currentSiblingOrder = useMemo(() => {
-    return data.package?.sibilingOrders?.find(
-      (order) => String(order.id) === orderId
-    );
+    return data.package?.sibilingOrders?.find((order) => String(order.id) === orderId);
   }, [data.package?.sibilingOrders, orderId]);
 
   const siblingOrders = data.package?.sibilingOrders ?? [];
@@ -139,6 +137,16 @@ export function PurchaseOrderDetailHeader({
             </Button>
           </div>
         )}
+        {!!data.approvation && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {}}
+            className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
+          >
+            Ver aprobación
+          </Button>
+        )}
         {siblingOrders.length > 1 && (
           <AntDropdown
             trigger={["click"]}
@@ -175,12 +183,8 @@ export function PurchaseOrderDetailHeader({
                   ))}
                 </div>
                 <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {data.package.totalOrders} ordenes
-                  </span>
-                  <span className="text-sm font-bold">
-                    {formatMoney(data.package.totalAmount)}
-                  </span>
+                  <span className="text-xs text-gray-500">{data.package.totalOrders} ordenes</span>
+                  <span className="text-sm font-bold">{formatMoney(data.package.totalAmount)}</span>
                 </div>
               </div>
             )}
