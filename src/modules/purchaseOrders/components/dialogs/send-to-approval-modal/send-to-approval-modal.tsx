@@ -53,16 +53,11 @@ export function SendToApprovalModal({
         order: index + 1
       }));
 
-      const payload = {
-        data: { approvers, packageId },
-        observation: ""
-      };
-
       await sendPackageToApproval(Number(packageId), approvers);
 
       message.success("Orden enviada a aprobación correctamente");
-      // mutate?.();
-      // onOpenChange(false);
+      mutate?.();
+      onOpenChange(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Error al enviar a aprobación";
       setError(errorMessage);
