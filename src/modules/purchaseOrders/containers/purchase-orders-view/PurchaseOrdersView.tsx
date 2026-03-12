@@ -35,7 +35,7 @@ export function PurchaseOrdersView() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedPackageRows, setSelectedPackageRows] = useState<IPurchaseOrder[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<IOrder[]>([]);
   const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
@@ -93,8 +93,8 @@ export function PurchaseOrdersView() {
     router.push(`/purchase-orders/${order.id}`);
   };
 
-  const handleRowSelect = (selectedKeys: React.Key[], selectedRows: IPurchaseOrder[]) => {
-    setSelectedRowKeys(selectedKeys);
+  const handleRowSelect = (selectedRows: IPurchaseOrder[]) => {
+    setSelectedPackageRows(selectedRows);
   };
 
   const handleOrderSelect = (orders: IOrder[]) => {
@@ -137,12 +137,12 @@ export function PurchaseOrdersView() {
   };
 
   const handleDownloadPlane = async () => {
-    if (selectedRowKeys.length === 0) {
+    if (selectedPackageRows.length === 0) {
       message.warning("Por favor selecciona un pedido.");
       return;
     }
 
-    if (selectedRowKeys.length > 1) {
+    if (selectedPackageRows.length > 1) {
       message.warning("Solo puedes descargar un pedido a la vez.");
       return;
     }
@@ -150,7 +150,7 @@ export function PurchaseOrdersView() {
     setIsDownloadingCSV(true);
 
     try {
-      const packageId = selectedRowKeys[0] as number;
+      const packageId = selectedPackageRows[0].packageId;
       const response = await downloadPurchaseOrdersCSV({ packageId });
       window.open(response.url, "_blank");
 
@@ -241,7 +241,7 @@ export function PurchaseOrdersView() {
                   pagination={pagination}
                   loading={isLoading}
                   onPageChange={setCurrentPage}
-                  selectedRowKeys={selectedRowKeys}
+                  selectedRowKeys={selectedPackageRows}
                   onRowSelect={handleRowSelect}
                   selectedOrders={selectedOrders}
                   onOrderSelect={handleOrderSelect}
@@ -260,7 +260,7 @@ export function PurchaseOrdersView() {
         onClose={closeModals}
         onDownloadCSV={handleDownloadPlane}
         isDownloadingCSV={isDownloadingCSV}
-        selectedRowKeys={selectedRowKeys}
+        selectedPackageRows={selectedPackageRows}
         selectedOrders={selectedOrders}
         mutate={mutate}
         onUploadInvoices={() => setWhichModalIsOpen({ selected: 3 })}

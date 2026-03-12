@@ -21,7 +21,7 @@ type ActionsModalPurchaseOrderProps = {
   onClose: () => void;
   onDownloadCSV: () => void;
   isDownloadingCSV: boolean;
-  selectedRowKeys: React.Key[];
+  selectedPackageRows: IPurchaseOrder[];
   selectedOrders: IOrder[];
   mutate?: () => void;
   onUploadInvoices: () => void;
@@ -32,7 +32,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   onClose,
   onDownloadCSV,
   isDownloadingCSV,
-  selectedRowKeys,
+  selectedPackageRows,
   selectedOrders,
   mutate,
   onUploadInvoices
@@ -43,17 +43,26 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  const canSendToBilling =
+    selectedPackageRows.length === 1 &&
+    selectedPackageRows[0].orders.every((o) => o.status === "Procesado");
+  const canSendToDispatch =
+    selectedPackageRows.length === 1 &&
+    selectedPackageRows[0].orders.every((o) => o.status === "Facturado");
+  const canUploadInvoices =
+    selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
+
   const handleDownloadCSV = () => {
     onDownloadCSV();
     onClose();
   };
 
   const validatePackageSelection = (): boolean => {
-    if (selectedRowKeys.length === 0) {
+    if (selectedPackageRows.length === 0) {
       message.warning("Selecciona al menos un pedido para realizar esta acción");
       return false;
     }
-    if (selectedRowKeys.length > 1) {
+    if (selectedPackageRows.length > 1) {
       message.warning("Solo puedes seleccionar un pedido para realizar esta acción");
       return false;
     }
@@ -75,7 +84,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     const hideLoading = message.loading("Enviando pedido a despacho...", 0);
 
     try {
-      await sendPackageToDispatch(String(selectedRowKeys[0]));
+      await sendPackageToDispatch(String(selectedPackageRows[0].packageId));
       message.success("Pedido enviado a despacho exitosamente");
       mutate && mutate();
       onClose();
@@ -140,7 +149,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     const hideLoading = message.loading("Enviando pedido a facturación...", 0);
 
     try {
-      await sendPackageToBilling(String(selectedRowKeys[0]));
+      await sendPackageToBilling(String(selectedPackageRows[0].packageId));
       message.success("Pedido enviado a facturación exitosamente");
       mutate && mutate();
       onClose();
@@ -174,18 +183,22 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             onClick={handleDownloadCSV}
             disabled={isDownloadingCSV}
           />
-          <ButtonGenerateAction
-            icon={<Invoice size={16} />}
-            title="Enviar a facturación"
-            onClick={handleSendToBilling}
-            disabled={isBillingLoading}
-          />
-          <ButtonGenerateAction
-            icon={<PackageCheck className="h-4 w-4" />}
-            title="Enviar a despacho"
-            onClick={handleSendToDispatch}
-            disabled={isDispatchLoading}
-          />
+          {canSendToBilling && (
+            <ButtonGenerateAction
+              icon={<Invoice size={16} />}
+              title="Enviar a facturación"
+              onClick={handleSendToBilling}
+              disabled={isBillingLoading}
+            />
+          )}
+          {canSendToDispatch && (
+            <ButtonGenerateAction
+              icon={<PackageCheck className="h-4 w-4" />}
+              title="Enviar a despacho"
+              onClick={handleSendToDispatch}
+              disabled={isDispatchLoading}
+            />
+          )}
           <ButtonGenerateAction
             icon={<PaperPlaneTilt className="h-4 w-4" />}
             title="Solicitar aprobación"
@@ -198,19 +211,23 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             onClick={handleSeparateOrder}
             disabled={isDispatchLoading}
           />
-          <ButtonGenerateAction
-            icon={<Invoice size={16} />}
-            title="Cargar facturas"
-            onClick={handleUploadInvoices}
-            disabled={false}
-          />
+          {canUploadInvoices && (
+            <ButtonGenerateAction
+              icon={<Invoice size={16} />}
+              title="Cargar facturas"
+              onClick={handleUploadInvoices}
+              disabled={false}
+            />
+          )}
         </div>
       </Modal>
 
       <SendToApprovalModal
         open={isApprovalModalOpen}
         onOpenChange={setIsApprovalModalOpen}
-        packageId={selectedRowKeys.length > 0 ? String(selectedRowKeys[0]) : undefined}
+        packageId={
+          selectedPackageRows.length > 0 ? String(selectedPackageRows[0].packageId) : undefined
+        }
         mutate={mutate}
       />
 
@@ -223,7 +240,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         title="¿Está seguro de separar la(s) OC del pedido?"
         okLoading={isActionLoading}
       />
-
     </>
   );
 };
