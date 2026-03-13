@@ -2,14 +2,7 @@ import React, { useEffect, forwardRef, useImperativeHandle, useState, useMemo } 
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
-import { DatePicker, message } from "antd";
+import { DatePicker, message, Select as AntSelect } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -216,7 +209,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
         <div>
           <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
           <div className="space-y-4">
-            <div>
+            <div className="mt-5">
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
                 Fecha/Hora entrega
               </label>
@@ -249,7 +242,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                 )}
               />
             </div>
-            <div>
+            <div className="!mt-5">
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
                 Dirección completa
               </label>
@@ -264,45 +257,36 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                           name="delivery_address_id"
                           control={control}
                           render={({ field: selectField }) => (
-                            <Select
-                              value={selectField.value?.toString() || ""}
-                              onValueChange={(value) => {
-                                const selectedId = parseInt(value);
-                                selectField.onChange(selectedId);
-
-                                // Update the display address field for consistency
-                                const selectedAddress = addresses.find((a) => a.id === selectedId);
+                            <AntSelect
+                              value={selectField.value || undefined}
+                              onChange={(value) => {
+                                selectField.onChange(value);
+                                const selectedAddress = addresses.find((a) => a.id === value);
                                 if (selectedAddress) {
                                   field.onChange(selectedAddress.address);
                                 }
                               }}
                               disabled={addressesLoading}
-                            >
-                              <SelectTrigger className="mt-1 h-8 w-full">
-                                <SelectValue
-                                  placeholder={
-                                    addressesLoading
-                                      ? "Cargando direcciones..."
-                                      : addresses.length === 0
-                                        ? "No hay direcciones disponibles"
-                                        : "Seleccionar dirección"
-                                  }
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {addresses.length > 0 ? (
-                                  addresses.map((address) => (
-                                    <SelectItem key={address.id} value={address.id.toString()}>
-                                      {address.address}
-                                    </SelectItem>
-                                  ))
-                                ) : (
-                                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                                    No hay direcciones disponibles
-                                  </div>
-                                )}
-                              </SelectContent>
-                            </Select>
+                              showSearch
+                              filterOption={(input, option) =>
+                                ((option?.label as string) ?? "")
+                                  .toLowerCase()
+                                  .includes(input.toLowerCase())
+                              }
+                              placeholder={
+                                addressesLoading
+                                  ? "Cargando direcciones..."
+                                  : addresses.length === 0
+                                    ? "No hay direcciones disponibles"
+                                    : "Seleccionar dirección"
+                              }
+                              options={addresses.map((a) => ({
+                                value: a.id,
+                                label: a.address
+                              }))}
+                              className="mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
+                              notFoundContent="No hay direcciones disponibles"
+                            />
                           )}
                         />
                         {addressesError && (
@@ -323,7 +307,7 @@ export const PurchaseOrderInfo = forwardRef<PurchaseOrderInfoRef, PurchaseOrderI
                 )}
               />
             </div>
-            <div>
+            <div className="!mt-5">
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
                 Observación
               </label>
