@@ -155,6 +155,7 @@ export interface IPurchaseOrderInvoice {
 
 export interface IPurchaseOrderDeliveryAddress {
   id: number;
+  shipping_id?: number;
   city: string;
   email: string;
   address: string;
