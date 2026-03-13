@@ -118,26 +118,6 @@ export function PurchaseOrderDetailHeader({
       </div>
       <div className="flex items-center gap-2">
         {!!data.approvation && (
-          <div className="flex items-center gap-2 mr-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenModal(5)}
-              className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
-            >
-              <Check className="h-4 w-4" style={{ color: "#CBE71E" }} />
-              <span className="text-sm font-medium text-black">Aprobar</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => onOpenModal(6)}
-              className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
-            >
-              <X className="h-4 w-4 text-red-500" />
-              <span className="text-sm font-medium text-black">Rechazar</span>
-            </Button>
-          </div>
-        )}
-        {!!data.approvation && (
           <Button
             variant="ghost"
             size="sm"

@@ -40,30 +40,6 @@ const TimelineHistoryModal = dynamic(
   { ssr: false }
 );
 
-const ApproveOrderModal = dynamic(
-  () =>
-    import("../../components/dialogs/approve-order-modal/approve-order-modal").then((mod) => ({
-      default: mod.ApproveOrderModal
-    })),
-  { ssr: false }
-);
-
-const RejectOrderModal = dynamic(
-  () =>
-    import("../../components/dialogs/reject-order-modal/reject-order-modal").then((mod) => ({
-      default: mod.RejectOrderModal
-    })),
-  { ssr: false }
-);
-
-const SendToApprovalModal = dynamic(
-  () =>
-    import("../../components/dialogs/send-to-approval-modal/send-to-approval-modal").then(
-      (mod) => ({ default: mod.SendToApprovalModal })
-    ),
-  { ssr: false }
-);
-
 const InvoiceModal = dynamic(
   () =>
     import("../../components/dialogs/invoice-modal/invoice-modal").then((mod) => ({
@@ -100,7 +76,6 @@ const ApprovalDetailModal = dynamic(
   () => import("@/modules/aprobaciones/components/approval-detail-modal/approval-detail-modal"),
   { ssr: false }
 );
-import { resolveApproval } from "@/services/approvals/approvals";
 
 export function DetailPurchaseOrder() {
   const params = useParams();
@@ -140,7 +115,6 @@ export function DetailPurchaseOrder() {
   const [whichModalIsOpen, setWhichModalIsOpen] = useState({
     selected: 0
   });
-  const [isActionLoading, setIsActionLoading] = useState(false);
   const closeModals = () => setWhichModalIsOpen({ selected: 0 });
 
   // Dragging handlers
@@ -231,37 +205,6 @@ export function DetailPurchaseOrder() {
     }
   };
 
-  const confirmApprove = async () => {
-    setIsActionLoading(true);
-    try {
-      await resolveApproval(data.approvation!.approval_id, { decision: "APPROVE" });
-      message.success("Orden de compra aprobada");
-      setWhichModalIsOpen({ selected: 0 });
-      mutate();
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al aprobar la orden de compra");
-    }
-    setIsActionLoading(false);
-  };
-
-  const confirmReject = async (reason: string, observation: string) => {
-    setIsActionLoading(true);
-    try {
-      await resolveApproval(data.approvation!.approval_id, {
-        decision: "REJECT",
-        comment: `${reason} - ${observation}`
-      });
-      message.success("Orden de compra rechazada");
-      setWhichModalIsOpen({ selected: 0 });
-      mutate();
-    } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al rechazar la orden de compra"
-      );
-    }
-    setIsActionLoading(false);
-  };
-
   const handleDownloadCSV = async () => {
     try {
       const response = await downloadPurchaseOrdersCSV({ orderIds: [orderId!] });
@@ -348,19 +291,6 @@ export function DetailPurchaseOrder() {
           </Button>
         </div>
       )}
-
-      <ApproveOrderModal
-        open={whichModalIsOpen.selected === 5}
-        onOpenChange={closeModals}
-        onConfirm={confirmApprove}
-        loading={isActionLoading}
-      />
-
-      <RejectOrderModal
-        open={whichModalIsOpen.selected === 6}
-        onOpenChange={closeModals}
-        onConfirm={confirmReject}
-      />
 
       <InvoiceModal
         open={whichModalIsOpen.selected === 3}
