@@ -206,6 +206,13 @@ export function daysLeft(dateString: string): number {
 
   return diffInDays;
 }
+export function monthsUntilExpiration(dateString: string): number {
+  const today = dayjs().utc().startOf("day");
+  const expiration = dayjs(dateString).utc().startOf("day");
+  const months = expiration.diff(today, "month");
+  return months <= 1 ? 0 : months;
+}
+
 export const insertPeriodEveryThreeDigits = (number: number) => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
