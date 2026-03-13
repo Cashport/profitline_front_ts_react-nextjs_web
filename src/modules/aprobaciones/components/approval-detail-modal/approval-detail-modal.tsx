@@ -5,8 +5,8 @@ import useSWR, { KeyedMutator } from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {
-  CheckCircle2,
-  XCircle,
+  Check,
+  X,
   ExternalLink,
   User,
   Calendar,
@@ -146,22 +146,20 @@ export default function ApprovalDetailModal({
               <div className="flex items-center gap-2 mr-4">
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => setShowRejectForm(true)}
-                  className="gap-1 md:gap-2 border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 text-xs md:text-sm px-2 md:px-3"
+                  onClick={() => handleResolveApproval("APPROVE")}
+                  disabled={isResolving}
+                  className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
                 >
-                  <XCircle className="h-3 md:h-4 w-3 md:w-4" />
-                  <span className="hidden sm:inline">Rechazar</span>
+                  <Check className="h-4 w-4" style={{ color: "#CBE71E" }} />
+                  <span className="text-sm font-medium text-black">Aprobar</span>
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => handleResolveApproval("APPROVE")}
-                  disabled={isResolving}
-                  className="gap-1 md:gap-2 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 bg-transparent text-xs md:text-sm px-2 md:px-3"
+                  onClick={() => setShowRejectForm(true)}
+                  className="rounded-full border-gray-300 bg-white hover:bg-gray-50 px-4 py-2 h-auto flex items-center gap-2"
                 >
-                  <CheckCircle2 className="h-3 md:h-4 w-3 md:w-4" />
-                  <span className="hidden sm:inline">Aprobar</span>
+                  <X className="h-4 w-4 text-red-500" />
+                  <span className="text-sm font-medium text-black">Rechazar</span>
                 </Button>
               </div>
             )}
