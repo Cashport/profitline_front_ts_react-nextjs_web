@@ -124,12 +124,15 @@ export function PurchaseOrderProducts({
   const handleEditToggle = () => {
     if (isEditMode) {
       if (hasDecimals) return;
-      // Exiting edit mode - save changes
+      const isDirty = Object.keys(dirtyFields).length > 0;
+      if (!isDirty) {
+        setIsEditMode(false);
+        return;
+      }
       handleSubmit(onSubmitProducts, (errors) => {
         console.error("Errores de validación:", errors);
       })();
     } else {
-      // Entering edit mode
       setIsEditMode(true);
     }
   };
