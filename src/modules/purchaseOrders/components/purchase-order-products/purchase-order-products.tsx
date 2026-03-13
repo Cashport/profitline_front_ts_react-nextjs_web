@@ -23,7 +23,7 @@ import {
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
-import { monthsUntilExpiration } from "@/utils/utils";
+import { monthsUntilExpiration, formatDateDMY } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
   data: IPurchaseOrderDetail;
@@ -226,6 +226,9 @@ export function PurchaseOrderProducts({
                   Producto
                 </th>
                 <th className="text-left p-3 font-semibold text-cashport-black text-xs">Lote</th>
+                <th className="text-left p-3 font-semibold text-cashport-black text-xs">
+                  Vencimiento lote
+                </th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Unidades
                 </th>
@@ -319,7 +322,9 @@ export function PurchaseOrderProducts({
                                   placeholder="Seleccionar lote"
                                   options={productBatches.map((b) => ({
                                     value: b.id,
-                                    label: b.batch
+                                    label: b.batch_expiration_date
+                                      ? `${b.batch} - ${formatDateDMY(b.batch_expiration_date)} - ${monthsUntilExpiration(b.batch_expiration_date)} meses`
+                                      : b.batch
                                   }))}
                                   className="w-full"
                                   variant="outlined"
@@ -340,6 +345,13 @@ export function PurchaseOrderProducts({
                           );
                         }}
                       />
+                    </td>
+                    <td className="p-3 text-center">
+                      <span className="text-sm text-cashport-black text-center">
+                        {field.batch_expiration_date
+                          ? formatDateDMY(field.batch_expiration_date)
+                          : "-"}
+                      </span>
                     </td>
                     <td className="p-3 text-right">
                       <Controller
@@ -479,6 +491,7 @@ export function PurchaseOrderProducts({
             <tfoot className="bg-cashport-gray-lighter border-t-2 border-cashport-gray-light">
               <tr>
                 <td className="p-3 text-sm font-semibold text-cashport-black text-right">Total</td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
