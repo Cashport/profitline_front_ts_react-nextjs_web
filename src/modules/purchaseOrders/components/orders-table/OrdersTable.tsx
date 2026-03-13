@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useState, useMemo, Fragment } from "react";
 import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
-import { AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
 import {
   IPurchaseOrder,
   IOrder,
@@ -16,6 +16,9 @@ import { Checkbox } from "@/modules/chat/ui/checkbox";
 import { Eye, WarningDiamond } from "@phosphor-icons/react";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
 import "./OrdersTable.scss";
+
+type SortDirection = "asc" | "desc" | null;
+type SortableColumn = "deliveryDate" | "totalProducts" | "totalAmount";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
@@ -139,6 +142,53 @@ export function OrdersTable({
   const [expandedPackageIds, setExpandedPackageIds] = useState<Set<number>>(new Set());
   const [selectedOrder, setSelectedOrder] = useState({ id: 0, warehouse_id: 0 });
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ column: SortableColumn | null; direction: SortDirection }>({
+    column: null,
+    direction: null
+  });
+
+  const handleSort = (column: SortableColumn) => {
+    setSortConfig((prev) => {
+      if (prev.column !== column) return { column, direction: "asc" };
+      if (prev.direction === "asc") return { column, direction: "desc" };
+      return { column: null, direction: null };
+    });
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortConfig.column || !sortConfig.direction) return data;
+    return [...data].sort((a, b) => {
+      if (sortConfig.column === "deliveryDate") {
+        const dateA = new Date(a.deliveryDate || "").getTime() || 0;
+        const dateB = new Date(b.deliveryDate || "").getTime() || 0;
+        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+      }
+      const valA = (a[sortConfig.column!] as number) || 0;
+      const valB = (b[sortConfig.column!] as number) || 0;
+      return sortConfig.direction === "asc" ? valA - valB : valB - valA;
+    });
+  }, [data, sortConfig]);
+
+  const renderSortableHeader = (label: string, column: SortableColumn, align: "left" | "right" = "left", extraClass = "") => {
+    const isActive = sortConfig.column === column;
+    const icon = isActive
+      ? sortConfig.direction === "asc"
+        ? <ArrowUp className="h-3.5 w-3.5" />
+        : <ArrowDown className="h-3.5 w-3.5" />
+      : <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />;
+
+    return (
+      <th
+        className={`${align === "right" ? "text-right" : "text-left"} p-4 font-bold text-black cursor-pointer select-none ${extraClass}`}
+        onClick={() => handleSort(column)}
+      >
+        <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
+          <span>{label}</span>
+          {icon}
+        </div>
+      </th>
+    );
+  };
 
   const toggleExpand = (packageId: number) => {
     setExpandedPackageIds((prev) => {
@@ -149,7 +199,7 @@ export function OrdersTable({
     });
   };
 
-  const allOrders = data.flatMap((pkg) => pkg.orders);
+  const allOrders = sortedData.flatMap((pkg) => pkg.orders);
   const isAllSelected =
     data.length > 0 &&
     data.every((pkg) => selectedRowKeys.some((r) => r.packageId === pkg.packageId)) &&
@@ -226,11 +276,11 @@ export function OrdersTable({
               </th>
               <th className="text-left p-4 font-bold text-black">Orden de compra</th>
               <th className="text-left p-4 font-bold text-black">Cliente</th>
-              <th className="text-left p-4 font-bold text-black">Entrega</th>
+              {renderSortableHeader("Entrega", "deliveryDate")}
               <th className="text-left p-4 font-bold text-black">Estado</th>
               <th className="text-left p-4 font-bold text-black">Factura</th>
-              <th className="text-right p-4 font-bold text-black">Productos</th>
-              <th className="text-right p-4 font-bold text-black w-28">Monto</th>
+              {renderSortableHeader("Productos", "totalProducts", "right")}
+              {renderSortableHeader("Monto", "totalAmount", "right", "w-28")}
               <th className="p-4 w-16" />
             </tr>
           </thead>
@@ -242,7 +292,7 @@ export function OrdersTable({
                 </td>
               </tr>
             )}
-            {data.map((pkg) => {
+            {sortedData.map((pkg) => {
               const isExpanded = expandedPackageIds.has(pkg.packageId);
               const isMulti = pkg.orders.length > 1;
               const singleOrder = pkg.orders.length === 1 ? pkg.orders[0] : null;
