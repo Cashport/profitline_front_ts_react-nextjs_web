@@ -46,6 +46,7 @@ export interface ProductFormData {
   product_id?: number; // Optional internal product ID
   batch_id?: number; // Batch/lot ID
   batch?: string; // Batch/lot display name
+  batch_expiration_date?: string; // Batch expiration date
   quantity_by_box?: number; // Unidades
   box_quantity?: number; // Cajas
   has_novelty?: boolean;
@@ -109,6 +110,7 @@ export const mapApiProductsToForm = (
     product_id: p.product_id ?? undefined,
     batch_id: p.batch_id ?? undefined,
     batch: p.batch ?? undefined,
+    batch_expiration_date: p.batch_expiration_date ?? undefined,
     quantity_by_box: p.quantity_by_box ?? undefined,
     box_quantity: p.box_quantity ?? undefined,
     has_novelty: p.has_novelty,

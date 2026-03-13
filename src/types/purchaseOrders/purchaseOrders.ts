@@ -194,6 +194,7 @@ export interface IPurchaseOrderProduct {
   total_price: number;
   batch_id: number | null;
   batch: string | null;
+  batch_expiration_date: string | null;
   has_novelty: boolean;
   purchase_order_original: IPurchaseOrderOriginal | null;
 }
@@ -317,6 +318,7 @@ export interface IUploadPurchaseOrderResponse {
 export interface IBatchByProduct {
   id: number;
   batch: string;
+  batch_expiration_date: string | null;
 }
 
 export interface IBatchesByPurchaseOrder {

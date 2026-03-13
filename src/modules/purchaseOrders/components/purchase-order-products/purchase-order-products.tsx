@@ -23,6 +23,7 @@ import {
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
+import { monthsUntilExpiration } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
   data: IPurchaseOrderDetail;
@@ -324,9 +325,16 @@ export function PurchaseOrderProducts({
                                   variant="outlined"
                                 />
                               ) : (
-                                <span className="text-sm text-cashport-black">
-                                  {field.batch || "-"}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-sm text-cashport-black">
+                                    {field.batch || "-"}
+                                  </span>
+                                  {field.batch_expiration_date && (
+                                    <span className="text-xs text-cashport-gray">
+                                      {monthsUntilExpiration(field.batch_expiration_date)} meses
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </div>
                           );
