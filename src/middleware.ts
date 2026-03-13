@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   const session = request.cookies.get(process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME ?? "");
 
   const { pathname } = request.nextUrl;
-  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil"];
+  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil", "/portal-archivos"];
   //Return to /login if there is no session cookie
   if (noAuthRoutes.some((route) => pathname.startsWith(route))) {
     const res = NextResponse.next({
