@@ -11,6 +11,7 @@ import {
 } from "@/services/dataQuality/dataQuality";
 import { useArchivesClientData } from "../../hooks/useArchivesClientData";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -43,6 +44,8 @@ const formatDate = (isoDateString: string): string => {
 export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClientDetailTableProps) {
   const [isUploadingLoading, setIsUploadingLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
     end: null
@@ -167,6 +170,13 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
       );
     }
     setIsDeleteLoading(false);
+  };
+
+  const handleConfirmDelete = () => {
+    if (fileToDelete !== null) {
+      handleDeleteFile(fileToDelete);
+    }
+    setIsDeleteModalOpen(false);
   };
 
   const filterMenu = (
@@ -296,7 +306,7 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                         {
                           key: "delete",
                           label: "Eliminar archivo",
-                          onClick: () => handleDeleteFile(file.id),
+                          onClick: () => { setFileToDelete(file.id); setIsDeleteModalOpen(true); },
                           disabled: isDeleteLoading
                         }
                       ]
@@ -313,6 +323,15 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
           ))}
         </TableBody>
       </Table>
+      <ModalConfirmAction
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onOk={handleConfirmDelete}
+        title="¿Está seguro de eliminar este archivo?"
+        okText="Eliminar"
+        cancelText="Cancelar"
+        okLoading={isDeleteLoading}
+      />
     </div>
   );
 }
