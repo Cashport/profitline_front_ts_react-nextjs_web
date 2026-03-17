@@ -218,6 +218,13 @@ export const TaskManagerView: React.FC = () => {
     // Sort
     if (sortConfig) {
       filtered = [...filtered].sort((a, b) => {
+        // Handle id sorting
+        if (sortConfig.key === "id") {
+          return sortConfig.direction === "asc"
+            ? (a.id ?? 0) - (b.id ?? 0)
+            : (b.id ?? 0) - (a.id ?? 0);
+        }
+
         // Handle amount sorting
         if (sortConfig.key === "amount") {
           return sortConfig.direction === "asc"

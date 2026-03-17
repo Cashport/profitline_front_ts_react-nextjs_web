@@ -11,6 +11,7 @@ import { ITask } from "@/types/tasks/ITasks";
 
 // Types
 export type SortKey =
+  | "id"
   | "client_name"
   | "task_type"
   | "description"
@@ -80,6 +81,15 @@ const TasksTable: FC<ITasksTableProps> = ({
                     }
                   }}
                 />
+              </th>
+              <th className="text-left p-2 md:p-4 font-bold text-black">
+                <button
+                  onClick={() => onSort("id")}
+                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                >
+                  ID
+                  <ArrowUpDown className="h-3 w-3" />
+                </button>
               </th>
               <th className="text-left p-2 md:p-4 font-bold text-black w-[60%] md:w-auto">
                 <button
@@ -158,6 +168,10 @@ const TasksTable: FC<ITasksTableProps> = ({
                       checked={task.id !== null && selectedIds.includes(task.id)}
                       onCheckedChange={() => onToggleSelection(task.id)}
                     />
+                  </td>
+                  {/* ID */}
+                  <td className="p-2 md:p-4 text-gray-900 font-medium text-xs md:text-sm">
+                    {task.id ?? "-"}
                   </td>
                   {/* Cliente - always visible */}
                   <td className="p-2 md:p-4 text-gray-900 font-medium">
