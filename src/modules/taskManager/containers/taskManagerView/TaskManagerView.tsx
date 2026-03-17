@@ -189,11 +189,6 @@ export const TaskManagerView: React.FC = () => {
     }
   };
 
-  // Reset pagination when filters/search change
-  useEffect(() => {
-    setPaginationByStatus({});
-  }, [searchTerm, selectedFilters, sortConfig]);
-
   // Filter and sort tasks for a group
   const getFilteredAndSortedTasks = (tasks: ITask[]): ITask[] => {
     let filtered = tasks.filter((task) => {
@@ -277,17 +272,9 @@ export const TaskManagerView: React.FC = () => {
           {pagination && pagination.total > pagination.limit && (
             <div className="flex items-center justify-between mt-2 px-4 py-2">
               <span className="text-sm text-gray-500">
-                Mostrando{" "}
-                {Math.min(
-                  (pagination.page - 1) * pagination.limit + 1,
-                  pagination.total
-                )}{" "}
-                a{" "}
-                {Math.min(
-                  pagination.page * pagination.limit,
-                  pagination.total
-                )}{" "}
-                de {pagination.total} resultados
+                Mostrando {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}{" "}
+                a {Math.min(pagination.page * pagination.limit, pagination.total)} de{" "}
+                {pagination.total} resultados
               </span>
               <AntPagination
                 current={pagination.page}
@@ -308,8 +295,8 @@ export const TaskManagerView: React.FC = () => {
 
   return (
     <main>
-      <Card className="bg-cashport-white border-0 shadow-sm">
-        <CardContent className="px-6 pt-2 pb-4">
+      <Card className="bg-cashport-white border-0 shadow-sm p-6">
+        <CardContent className="p-0">
           <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="flex gap-2">
               <UiSearchInput
