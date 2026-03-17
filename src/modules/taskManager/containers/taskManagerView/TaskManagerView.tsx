@@ -14,7 +14,8 @@ import TasksTable, {
   SortDirection
 } from "@/modules/taskManager/components/tasksTable/TasksTable";
 import UiSearchInput from "@/components/ui/search-input";
-import Pagination from "@/components/ui/pagination";
+import { Pagination as AntPagination } from "antd";
+import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
@@ -274,13 +275,31 @@ export const TaskManagerView: React.FC = () => {
             isLoading={isLoadingPagination}
           />
           {pagination && pagination.total > pagination.limit && (
-            <Pagination
-              currentPage={pagination.page}
-              totalItems={pagination.total}
-              pageSize={pagination.limit}
-              onPageChange={(page) => handlePageChange(tab.id, page)}
-              isLoading={isLoadingPagination}
-            />
+            <div className="flex items-center justify-between mt-2 px-4 py-2">
+              <span className="text-sm text-gray-500">
+                Mostrando{" "}
+                {Math.min(
+                  (pagination.page - 1) * pagination.limit + 1,
+                  pagination.total
+                )}{" "}
+                a{" "}
+                {Math.min(
+                  pagination.page * pagination.limit,
+                  pagination.total
+                )}{" "}
+                de {pagination.total} resultados
+              </span>
+              <AntPagination
+                current={pagination.page}
+                pageSize={pagination.limit}
+                total={pagination.total}
+                onChange={(page: number) => handlePageChange(tab.id, page)}
+                showSizeChanger={false}
+                size="small"
+                disabled={isLoadingPagination}
+                itemRender={TablePaginator}
+              />
+            </div>
           )}
         </>
       )
