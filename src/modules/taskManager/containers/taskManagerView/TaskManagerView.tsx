@@ -258,7 +258,7 @@ export const TaskManagerView: React.FC = () => {
       label: tab.status_name,
       count: tab.count,
       children: (
-        <>
+        <div className="flex-1 min-h-0 flex flex-col">
           <TasksTable
             tasks={filteredTasks}
             selectedIds={state.selectedTaskIds}
@@ -288,15 +288,15 @@ export const TaskManagerView: React.FC = () => {
               />
             </div>
           )}
-        </>
+        </div>
       )
     };
   });
 
   return (
-    <main>
-      <Card className="bg-cashport-white border-0 shadow-sm p-6">
-        <CardContent className="p-0">
+    <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <Card className="bg-cashport-white border-0 shadow-sm p-6 flex flex-col min-h-0 max-h-full">
+        <CardContent className="p-0 flex flex-col flex-1 min-h-0">
           <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="flex gap-2">
               <UiSearchInput

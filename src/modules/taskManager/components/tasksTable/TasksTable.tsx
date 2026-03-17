@@ -56,15 +56,15 @@ const TasksTable: FC<ITasksTableProps> = ({
     tasks.some((task) => task.id !== null && selectedIds.includes(task.id)) && !isAllSelected;
 
   return (
-    <div className="relative">
+    <div className="relative flex-1 min-h-0 flex flex-col">
       {isLoading && (
         <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
           <Spin size="large" />
         </div>
       )}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
         <table className="w-full min-w-full">
-          <thead className="bg-white border-b border-gray-200">
+          <thead className="bg-white border-b border-gray-200 sticky top-0 z-[5]">
             <tr>
               {/* Checkbox - hidden on mobile */}
               <th className="hidden md:table-cell text-left p-4 font-bold text-black w-12">
