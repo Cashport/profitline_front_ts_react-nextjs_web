@@ -372,6 +372,28 @@ export const downloadCatalogFile = async ({
   }
 };
 
+export const downloadPointsOfSaleFile = async ({
+  clientId,
+  countryId
+}: {
+  clientId?: number | string;
+  countryId?: number | string;
+}) => {
+  const params = [];
+  if (clientId) params.push(`id_client=${clientId}`);
+  if (countryId) params.push(`id_country=${countryId}`);
+  const queryString = params.length > 0 ? `?${params.join("&")}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/catalog/points-of-sale/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const convertMaterialToPack = async (materialId: number): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(

@@ -11,6 +11,8 @@ type CatalogMaterialsActionsModalProps = {
   onClose: () => void;
   onDownloadCatalog: () => void;
   isDownloadCatalogLoading: boolean;
+  onDownloadPointsOfSale: () => void;
+  isDownloadPointsOfSaleLoading: boolean;
   onUploadMaterialsAuxiliary: () => void;
 };
 
@@ -19,6 +21,8 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
   onClose,
   onDownloadCatalog,
   isDownloadCatalogLoading,
+  onDownloadPointsOfSale,
+  isDownloadPointsOfSaleLoading,
   onUploadMaterialsAuxiliary
 }) => {
   return (
@@ -42,6 +46,12 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
           icon={<UploadSimple size={20} />}
           title="Cargar Auxiliar Materiales"
           onClick={onUploadMaterialsAuxiliary}
+        />
+        <ButtonGenerateAction
+          icon={<DownloadSimple size={20} />}
+          title="Descargar Puntos de venta"
+          onClick={onDownloadPointsOfSale}
+          disabled={isDownloadPointsOfSaleLoading}
         />
       </div>
     </Modal>
