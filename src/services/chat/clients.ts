@@ -72,6 +72,7 @@ export const downloadDigitalRecordFiles = async (
 
 export const downloadDigitalRecordFilesFromToken = async (
   fileKey: string,
+  fileName: string,
   token: string
 ): Promise<any> => {
   try {
@@ -91,7 +92,7 @@ export const downloadDigitalRecordFilesFromToken = async (
     const link = document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "archivo.pdf");
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
 

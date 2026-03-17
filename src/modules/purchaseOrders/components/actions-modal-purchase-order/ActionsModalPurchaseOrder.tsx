@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import { DownloadSimple, Invoice, PaperPlaneTilt, SubtractSquare } from "@phosphor-icons/react";
+import {
+  DownloadSimple,
+  FileMinus,
+  Invoice,
+  PaperPlaneTilt,
+  SubtractSquare
+} from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -174,6 +180,13 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleDeleteOrders = () => {
+    if (!validateOrderSelection()) return;
+    // TODO: Implementar lógica para eliminar órdenes seleccionadas
+    console.log("Eliminar órdenes: ", selectedOrders);
+    onClose();
+  };
+
   return (
     <>
       <Modal
@@ -228,6 +241,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={false}
             />
           )}
+          <ButtonGenerateAction
+            icon={<FileMinus className="h-4 w-4" />}
+            title="Eliminar Ordenes seleccionadas"
+            onClick={handleDeleteOrders}
+            disabled={isDispatchLoading}
+          />
         </div>
       </Modal>
 
