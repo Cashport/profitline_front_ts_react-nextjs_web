@@ -14,7 +14,8 @@ import TasksTable, {
   SortDirection
 } from "@/modules/taskManager/components/tasksTable/TasksTable";
 import UiSearchInput from "@/components/ui/search-input";
-import Pagination from "@/components/ui/pagination";
+import { Pagination as AntPagination } from "antd";
+import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
@@ -188,11 +189,6 @@ export const TaskManagerView: React.FC = () => {
     }
   };
 
-  // Reset pagination when filters/search change
-  useEffect(() => {
-    setPaginationByStatus({});
-  }, [searchTerm, selectedFilters, sortConfig]);
-
   // Filter and sort tasks for a group
   const getFilteredAndSortedTasks = (tasks: ITask[]): ITask[] => {
     let filtered = tasks.filter((task) => {
@@ -222,6 +218,13 @@ export const TaskManagerView: React.FC = () => {
     // Sort
     if (sortConfig) {
       filtered = [...filtered].sort((a, b) => {
+        // Handle id sorting
+        if (sortConfig.key === "id") {
+          return sortConfig.direction === "asc"
+            ? (a.id ?? 0) - (b.id ?? 0)
+            : (b.id ?? 0) - (a.id ?? 0);
+        }
+
         // Handle amount sorting
         if (sortConfig.key === "amount") {
           return sortConfig.direction === "asc"
@@ -262,7 +265,7 @@ export const TaskManagerView: React.FC = () => {
       label: tab.status_name,
       count: tab.count,
       children: (
-        <>
+        <div className="flex-1 min-h-0 flex flex-col">
           <TasksTable
             tasks={filteredTasks}
             selectedIds={state.selectedTaskIds}
@@ -274,23 +277,33 @@ export const TaskManagerView: React.FC = () => {
             isLoading={isLoadingPagination}
           />
           {pagination && pagination.total > pagination.limit && (
-            <Pagination
-              currentPage={pagination.page}
-              totalItems={pagination.total}
-              pageSize={pagination.limit}
-              onPageChange={(page) => handlePageChange(tab.id, page)}
-              isLoading={isLoadingPagination}
-            />
+            <div className="flex items-center justify-between mt-2 px-4 py-2">
+              <span className="text-sm text-gray-500">
+                Mostrando {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}{" "}
+                a {Math.min(pagination.page * pagination.limit, pagination.total)} de{" "}
+                {pagination.total} resultados
+              </span>
+              <AntPagination
+                current={pagination.page}
+                pageSize={pagination.limit}
+                total={pagination.total}
+                onChange={(page: number) => handlePageChange(tab.id, page)}
+                showSizeChanger={false}
+                size="small"
+                disabled={isLoadingPagination}
+                itemRender={TablePaginator}
+              />
+            </div>
           )}
-        </>
+        </div>
       )
     };
   });
 
   return (
-    <main>
-      <Card className="bg-cashport-white border-0 shadow-sm">
-        <CardContent className="px-6 pt-2 pb-4">
+    <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <Card className="bg-cashport-white border-0 shadow-sm p-6 flex flex-col min-h-0 max-h-full">
+        <CardContent className="p-0 flex flex-col flex-1 min-h-0">
           <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="flex gap-2">
               <UiSearchInput

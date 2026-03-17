@@ -9,6 +9,7 @@ import {
   ITaskTypes
 } from "@/types/tasks/ITasks";
 import { API } from "@/utils/api/api";
+import { limit } from "firebase/firestore";
 
 export const getTasksStatus = async (): Promise<ITaskStatus[]> => {
   try {
@@ -47,7 +48,7 @@ export const getTasksByStatus = async (
   statusId: string,
   page: number = 1
 ): Promise<ITaskByStatus> => {
-  const body = { page };
+  const body = { page, limit: 25 };
 
   try {
     const response: GenericResponse<ITaskByStatus> = await API.post(
