@@ -12,6 +12,7 @@ import { useAppStore } from "@/lib/store/store";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import {
   downloadCatalogFile,
+  downloadPointsOfSaleFile,
   uploadCatalogMaterial,
   uploadMassiveOrHistoricalFile
 } from "@/services/dataQuality/dataQuality";
@@ -35,6 +36,7 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
@@ -75,6 +77,39 @@ export default function DataQualityClientDetails() {
     } finally {
       hide();
       setIsDownloadCatalogLoading(false);
+    }
+  };
+
+  const handleDownloadPointsOfSale = async () => {
+    setIsDownloadPointsOfSaleLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando puntos de venta...",
+      duration: 0
+    });
+
+    try {
+      const res = await downloadPointsOfSaleFile({ clientId });
+
+      const link = document.createElement("a");
+      link.href = res.url;
+      link.setAttribute("download", res.filename || "puntos_de_venta.xlsx");
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      message.success("Puntos de venta descargados exitosamente.");
+      setWhichModalIsOpen(0);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Error al descargar los puntos de venta.";
+
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadPointsOfSaleLoading(false);
     }
   };
 
@@ -280,6 +315,8 @@ export default function DataQualityClientDetails() {
         onClose={() => setWhichModalIsOpen(0)}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onDownloadPointsOfSale={handleDownloadPointsOfSale}
+        isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadFile={handleOpenMassiveUpload}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
       />

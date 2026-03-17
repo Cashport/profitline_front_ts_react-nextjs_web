@@ -8,7 +8,7 @@ import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
 
-import { downloadCatalogFile, uploadCatalogMaterial } from "@/services/dataQuality/dataQuality";
+import { downloadCatalogFile, downloadPointsOfSaleFile, uploadCatalogMaterial } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -51,6 +51,7 @@ export default function CountriesClientsView() {
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const closeAllModals = () => setWhichModalIsOpen(0);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
   const [pagination, setPagination] = useState({
@@ -94,6 +95,21 @@ export default function CountriesClientsView() {
       message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
     }
     setIsDownloadCatalogLoading(false);
+  };
+
+  const handleDownloadPointsOfSale = async () => {
+    setIsDownloadPointsOfSaleLoading(true);
+    try {
+      const res = await downloadPointsOfSaleFile({
+        countryId
+      });
+      window.open(res.url, "_blank");
+
+      closeAllModals();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al descargar los puntos de venta");
+    }
+    setIsDownloadPointsOfSaleLoading(false);
   };
 
   const handleOpenAuxiliaryUpload = () => {
@@ -206,6 +222,8 @@ export default function CountriesClientsView() {
         onClose={closeAllModals}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onDownloadPointsOfSale={handleDownloadPointsOfSale}
+        isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
       />
       <ModalUploadFile
