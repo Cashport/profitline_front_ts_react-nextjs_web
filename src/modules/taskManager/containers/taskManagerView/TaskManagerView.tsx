@@ -92,7 +92,7 @@ export const TaskManagerView: React.FC = () => {
 
     // Fetch tasks for the active tab only if not already loaded
     const fetchTasksForActiveTab = async () => {
-      if (activeTabKey && !tasksByStatus[activeTabKey]) {
+      if (activeTabKey) {
         setIsLoadingPagination(true);
         try {
           const response = await getTasksByStatus(activeTabKey, 1);
@@ -265,7 +265,7 @@ export const TaskManagerView: React.FC = () => {
       label: tab.status_name,
       count: tab.count,
       children: (
-        <div className="flex-1 min-h-0 flex flex-col">
+        <div key={tab.id} className="flex-1 min-h-0 flex flex-col">
           <TasksTable
             tasks={filteredTasks}
             selectedIds={state.selectedTaskIds}
