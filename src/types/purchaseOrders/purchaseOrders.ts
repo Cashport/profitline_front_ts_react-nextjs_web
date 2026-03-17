@@ -47,6 +47,7 @@ export interface IPurchaseOrderStatus {
   id: number;
   name: string;
   color: string;
+  checked: boolean;
 }
 
 export interface IPurchaseOrderClient {

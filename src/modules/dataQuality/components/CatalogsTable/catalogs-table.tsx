@@ -26,6 +26,7 @@ import {
   deleteCatalog,
   convertMaterialToPack,
   downloadCatalogFile,
+  downloadPointsOfSaleFile,
   uploadCatalogMaterial
 } from "@/services/dataQuality/dataQuality";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
@@ -75,6 +76,7 @@ export function CatalogsTable() {
   const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
   const itemsPerPage = 25;
@@ -138,6 +140,33 @@ export function CatalogsTable() {
     } finally {
       hide();
       setIsDownloadCatalogLoading(false);
+    }
+  };
+
+  const handleDownloadPointsOfSale = async () => {
+    setIsDownloadPointsOfSaleLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando puntos de venta...",
+      duration: 0
+    });
+    try {
+      const res = await downloadPointsOfSaleFile({ clientId });
+      const link = document.createElement("a");
+      link.href = res.url;
+      link.setAttribute("download", res.filename || "puntos_de_venta.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      message.success("Puntos de venta descargados exitosamente.");
+      setWhichModalOpen({ selected: 0 });
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Error al descargar los puntos de venta.";
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadPointsOfSaleLoading(false);
     }
   };
 
@@ -396,6 +425,8 @@ export function CatalogsTable() {
           onClose={() => setWhichModalOpen({ selected: 0 })}
           onDownloadCatalog={handleDownloadCatalog}
           isDownloadCatalogLoading={isDownloadCatalogLoading}
+          onDownloadPointsOfSale={handleDownloadPointsOfSale}
+          isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
           onUploadMaterialsAuxiliary={() => setWhichModalOpen({ selected: 4 })}
         />
 

@@ -20,7 +20,7 @@ const StatusTab: FC<IStatusTabProps> = ({ tabs, activeKey, onChange }) => {
   const activeTab = tabs?.find((tab) => tab.key === activeKey);
 
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-0">
       <div className="flex items-center gap-1 mb-6 border-b border-gray-200">
         {tabs?.map((tab) => (
           <button
@@ -43,7 +43,7 @@ const StatusTab: FC<IStatusTabProps> = ({ tabs, activeKey, onChange }) => {
         ))}
       </div>
       {activeTab?.children}
-    </>
+    </div>
   );
 };
 

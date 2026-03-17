@@ -10,6 +10,8 @@ type CountryClientsActionsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onDownloadCatalog: () => void;
+  onDownloadPointsOfSale: () => void;
+  isDownloadPointsOfSaleLoading: boolean;
   onUploadFile?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   isDownloadCatalogLoading: boolean;
@@ -20,6 +22,8 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   isOpen,
   onClose,
   onDownloadCatalog,
+  onDownloadPointsOfSale,
+  isDownloadPointsOfSaleLoading,
   onUploadFile,
   onUploadMaterialsAuxiliary,
   isDownloadCatalogLoading,
@@ -54,6 +58,12 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
             onClick={onUploadFile}
           />
         )}
+        <ButtonGenerateAction
+          icon={<DownloadSimple size={20} />}
+          title="Descargar Puntos de venta"
+          onClick={onDownloadPointsOfSale}
+          disabled={isDownloadPointsOfSaleLoading}
+        />
       </div>
     </Modal>
   );
