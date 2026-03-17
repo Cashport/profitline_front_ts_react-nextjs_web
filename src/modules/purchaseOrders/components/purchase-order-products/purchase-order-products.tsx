@@ -381,50 +381,54 @@ export function PurchaseOrderProducts({
                       </span>
                     </td>
                     <td className="p-3 text-right">
-                      <Controller
-                        name={`products.${index}.quantity`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <div>
-                            {isEditMode ? (
-                              <Input
-                                type="number"
-                                step="any"
-                                value={controllerField.value ?? ""}
-                                onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
-                                className="w-20 h-8 text-sm text-right"
-                              />
-                            ) : (
-                              <span className="text-sm text-cashport-black fontMonoSpace">
-                                {controllerField.value ?? "-"}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      />
+                      <div className="flex items-center justify-end">
+                        <Controller
+                          name={`products.${index}.quantity`}
+                          control={control}
+                          render={({ field: controllerField }) => (
+                            <>
+                              {isEditMode ? (
+                                <Input
+                                  type="number"
+                                  step="any"
+                                  value={controllerField.value ?? ""}
+                                  onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
+                                  className="w-20 h-8 text-sm text-right"
+                                />
+                              ) : (
+                                <span className="text-sm text-cashport-black fontMonoSpace">
+                                  {controllerField.value ?? "-"}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        />
+                      </div>
                     </td>
                     <td className="p-3 text-right">
-                      <Controller
-                        name={`products.${index}.box_quantity`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <div>
-                            {isEditMode ? (
-                              <Input
-                                type="number"
-                                step="any"
-                                value={controllerField.value ?? ""}
-                                onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
-                                className="w-20 h-8 text-sm text-right"
-                              />
-                            ) : (
-                              <span className="text-sm text-cashport-black fontMonoSpace">
-                                {controllerField.value ?? "-"}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      />
+                      <div className="flex items-center justify-end">
+                        <Controller
+                          name={`products.${index}.box_quantity`}
+                          control={control}
+                          render={({ field: controllerField }) => (
+                            <>
+                              {isEditMode ? (
+                                <Input
+                                  type="number"
+                                  step="any"
+                                  value={controllerField.value ?? ""}
+                                  onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
+                                  className="w-20 h-8 text-sm text-right"
+                                />
+                              ) : (
+                                <span className="text-sm text-cashport-black fontMonoSpace">
+                                  {controllerField.value ?? "-"}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        />
+                      </div>
                     </td>
                     <td className="p-3 text-right">
                       <span className="text-sm text-cashport-black fontMonoSpace">
