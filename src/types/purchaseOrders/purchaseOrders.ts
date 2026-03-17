@@ -209,7 +209,7 @@ export interface IPurchaseOrderOriginal {
 }
 
 export interface IEditPurchaseOrderProduct {
-  marketplace_order_product_id: number;
+  marketplace_order_product_id?: number;
   quantity?: number;
   price?: number;
   product_id?: number;

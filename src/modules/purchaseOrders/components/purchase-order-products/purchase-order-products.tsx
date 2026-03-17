@@ -146,7 +146,10 @@ export function PurchaseOrderProducts({
       const payload = mapFormProductsToApi(formData);
       const productsToSend = payload.products.map((p) => ({
         ...p,
-        product_id: p.product_id ?? 0
+        marketplace_order_product_id:
+          p.marketplace_order_product_id && p.marketplace_order_product_id !== 0
+            ? Number(p.marketplace_order_product_id)
+            : undefined
       }));
       await editPurchaseOrderProducts(orderId, productsToSend);
       mutate();
