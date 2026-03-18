@@ -15,7 +15,8 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import {
   sendPackageToDispatch,
   sendPackageToBilling,
-  removePurchaseOrdersFromPackage
+  removePurchaseOrdersFromPackage,
+  deletePurchaseOrders
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -190,11 +191,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const deleteOrderRequest = async (selectedOrders: IOrder[]) => {
     setIsActionLoading(true);
     try {
-      // await deleteOrders(
-      //   selectedOrders.map((order) => order.id),
-      //   (type, content) => message[type as "success" | "error"](content)
-      // );
-      throw new Error("Función de eliminación de órdenes no implementada");
+      await deletePurchaseOrders(selectedOrders?.map((order) => order.id));
       mutate && mutate();
       setIsDeleteOrderModalOpen(false);
     } catch (error) {
