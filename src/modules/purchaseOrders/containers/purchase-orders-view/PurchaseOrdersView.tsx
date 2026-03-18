@@ -266,7 +266,11 @@ export function PurchaseOrdersView() {
         isDownloadingCSV={isDownloadingCSV}
         selectedPackageRows={selectedPackageRows}
         selectedOrders={selectedOrders}
-        mutate={mutate}
+        mutate={() => {
+          mutate();
+          setSelectedPackageRows([]);
+          setSelectedOrders([]);
+        }}
         onUploadInvoices={() => setWhichModalIsOpen({ selected: 3 })}
       />
 

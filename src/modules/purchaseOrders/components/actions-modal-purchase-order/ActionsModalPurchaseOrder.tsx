@@ -15,7 +15,8 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import {
   sendPackageToDispatch,
   sendPackageToBilling,
-  removePurchaseOrdersFromPackage
+  removePurchaseOrdersFromPackage,
+  deletePurchaseOrders
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -49,6 +50,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
+  const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -182,9 +184,20 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const handleDeleteOrders = () => {
     if (!validateOrderSelection()) return;
-    // TODO: Implementar lógica para eliminar órdenes seleccionadas
-    console.log("Eliminar órdenes: ", selectedOrders);
     onClose();
+    setIsDeleteOrderModalOpen(true);
+  };
+
+  const deleteOrderRequest = async (selectedOrders: IOrder[]) => {
+    setIsActionLoading(true);
+    try {
+      await deletePurchaseOrders(selectedOrders?.map((order) => order.id));
+      mutate && mutate();
+      setIsDeleteOrderModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al eliminar las órdenes");
+    }
+    setIsActionLoading(false);
   };
 
   return (
@@ -280,6 +293,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         content="El cliente no tiene cupo suficiente para gestionar el pedido"
         okText="Enviar aprobación"
         cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={isDeleteOrderModalOpen}
+        onClose={() => setIsDeleteOrderModalOpen(false)}
+        onOk={() => {
+          deleteOrderRequest(selectedOrders);
+        }}
+        title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
+        okLoading={isActionLoading}
       />
     </>
   );

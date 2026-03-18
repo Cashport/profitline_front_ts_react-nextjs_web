@@ -314,3 +314,16 @@ export const sendPackageToApproval = async (
     throw error;
   }
 };
+
+export const deletePurchaseOrders = async (orderIds: number[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/delete`,
+      { marketplace_order_ids: orderIds }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting purchase orders:", error);
+    throw error;
+  }
+};
