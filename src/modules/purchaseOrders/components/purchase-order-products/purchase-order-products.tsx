@@ -154,11 +154,11 @@ export function PurchaseOrderProducts({
       await editPurchaseOrderProducts(orderId, productsToSend);
       mutate();
       message.success("Productos actualizados correctamente");
+      setLinkedRows({});
+      setIsEditMode(false);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
     }
-    setLinkedRows({});
-    setIsEditMode(false);
   };
 
   const handleUnitsChange = (index: number, newUnits: number) => {
@@ -325,7 +325,22 @@ export function PurchaseOrderProducts({
                                   (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                                 }
                                 value={controllerField.value}
-                                onChange={controllerField.onChange}
+                                onChange={(value) => {
+                                  controllerField.onChange(value);
+                                  const selectedProduct = internalProducts.find(
+                                    (p) => p.id === value
+                                  );
+                                  if (selectedProduct?.product_units) {
+                                    setValue(
+                                      `products.${index}.quantity_by_box`,
+                                      selectedProduct.product_units,
+                                      { shouldDirty: true }
+                                    );
+                                  }
+                                  setValue(`products.${index}.batch_id`, null, {
+                                    shouldDirty: true
+                                  });
+                                }}
                                 placeholder="Seleccionar producto"
                                 options={internalProducts.map((p) => ({
                                   value: p.id,
@@ -377,7 +392,7 @@ export function PurchaseOrderProducts({
                                       .toLowerCase()
                                       .includes(input.toLowerCase())
                                   }
-                                  value={controllerField.value}
+                                  value={controllerField.value ?? null}
                                   onChange={controllerField.onChange}
                                   placeholder="Seleccionar lote"
                                   options={productBatches.map((b) => ({
@@ -527,6 +542,7 @@ export function PurchaseOrderProducts({
                                     total_price: 0,
                                     product_id: undefined,
                                     batch_id: undefined,
+                                    quantity_by_box: undefined,
                                     box_quantity: 0
                                   })
                                 }

@@ -214,7 +214,7 @@ export interface IEditPurchaseOrderProduct {
   quantity?: number;
   price?: number;
   product_id?: number;
-  batch_id?: number;
+  batch_id?: number | null;
   quantity_by_box?: number;
   box_quantity?: number;
 }

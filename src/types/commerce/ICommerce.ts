@@ -19,16 +19,23 @@ export interface IProduct {
   id_line: number;
   id_category: number;
   taxes: number;
-  kit: number;
-  locked: number;
+  kit: number | null;
+  locked: number | null;
   is_available: number;
-  EAN: string;
+  EAN: string | null;
   project_id: number;
   price: number;
   price_taxes: number;
   line_name: string;
   category_name: string;
   shipment_unit: number;
+  created_by?: string;
+  updated_at?: string;
+  is_deleted?: number;
+  discount_code_product_matrix?: null;
+  order_marketplace?: number;
+  product_units?: number;
+  category_id?: number;
 }
 
 export interface ISelectedProduct {
