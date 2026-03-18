@@ -44,7 +44,7 @@ export interface ProductFormData {
   subtotal: number; // Calculated: quantity * unit_price
   total_price: number; // Calculated: subtotal + tax_amount
   product_id?: number; // Optional internal product ID
-  batch_id?: number; // Batch/lot ID
+  batch_id?: number | null; // Batch/lot ID
   batch?: string; // Batch/lot display name
   batch_expiration_date?: string; // Batch expiration date
   quantity_by_box?: number; // Unidades

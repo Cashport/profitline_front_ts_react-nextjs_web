@@ -337,6 +337,9 @@ export function PurchaseOrderProducts({
                                       { shouldDirty: true }
                                     );
                                   }
+                                  setValue(`products.${index}.batch_id`, null, {
+                                    shouldDirty: true
+                                  });
                                 }}
                                 placeholder="Seleccionar producto"
                                 options={internalProducts.map((p) => ({
@@ -389,7 +392,7 @@ export function PurchaseOrderProducts({
                                       .toLowerCase()
                                       .includes(input.toLowerCase())
                                   }
-                                  value={controllerField.value}
+                                  value={controllerField.value ?? null}
                                   onChange={controllerField.onChange}
                                   placeholder="Seleccionar lote"
                                   options={productBatches.map((b) => ({
