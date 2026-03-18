@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { ArrowUpDown, Eye, Sparkles } from "lucide-react";
-import { Spin } from "antd";
+import { Popover, Spin } from "antd";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
@@ -194,13 +194,28 @@ const TasksTable: FC<ITasksTableProps> = ({
                   {/* Tipo de tarea - always visible */}
                   <td className="p-2 md:p-4">
                     {task.task_type ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-xs"
-                        title={task.task_type}
-                      >
-                        {task.task_type}
-                      </Badge>
+                      task.purchase_order_package_id ? (
+                        <Popover
+                          arrow={false}
+                          content={<span>ID Paquete: {task.purchase_order_package_id}</span>}
+                        >
+                          <Badge
+                            variant="outline"
+                            className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-xs cursor-pointer"
+                            title={task.task_type}
+                          >
+                            {task.task_type}
+                          </Badge>
+                        </Popover>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="bg-gray-50 text-gray-700 border-gray-200 truncate block max-w-[100px] md:max-w-none text-xs"
+                          title={task.task_type}
+                        >
+                          {task.task_type}
+                        </Badge>
+                      )
                     ) : (
                       <Badge
                         variant="outline"
