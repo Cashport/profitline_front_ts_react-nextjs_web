@@ -4,7 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
 import { Edit, Save } from "lucide-react";
-import { Trash, Plus, LinkSimpleHorizontal, LinkBreak } from "@phosphor-icons/react";
+import { Trash, Plus } from "@phosphor-icons/react";
 import { Select, Popover, message } from "antd";
 import { Eye } from "lucide-react";
 import {
@@ -45,8 +45,6 @@ export function PurchaseOrderProducts({
   const summary = data.summary;
   const clientId = data.client_nit;
   const [isEditMode, setIsEditMode] = useState(false);
-  const [linkedRows, setLinkedRows] = useState<Record<number, boolean>>({});
-  const [hoveredLinkRow, setHoveredLinkRow] = useState<number | null>(null);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
@@ -81,6 +79,10 @@ export function PurchaseOrderProducts({
       const boxes = p.box_quantity ?? 0;
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
+
+  // Check if any product is missing batch_id
+  const hasMissingBatch =
+    isEditMode && watchedProducts.some((p) => !p.batch_id);
 
   // Fetch products on mount
   useEffect(() => {
@@ -126,10 +128,9 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
-      if (hasDecimals) return;
+      if (hasDecimals || hasMissingBatch) return;
       const isDirty = Object.keys(dirtyFields).length > 0;
       if (!isDirty) {
-        setLinkedRows({});
         setIsEditMode(false);
         return;
       }
@@ -154,18 +155,17 @@ export function PurchaseOrderProducts({
       await editPurchaseOrderProducts(orderId, productsToSend);
       mutate();
       message.success("Productos actualizados correctamente");
-      setLinkedRows({});
       setIsEditMode(false);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
     }
+    setIsEditMode(false);
   };
 
   const handleUnitsChange = (index: number, newUnits: number) => {
     const currentUnits = watchedProducts[index]?.quantity ?? 0;
     const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.quantity`, newUnits, { shouldDirty: true });
-    if (!isRowLinked(index)) return;
     if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
     const ratio = currentUnits / currentBoxes;
     setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
@@ -175,7 +175,6 @@ export function PurchaseOrderProducts({
     const currentUnits = watchedProducts[index]?.quantity ?? 0;
     const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    if (!isRowLinked(index)) return;
     if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
     const ratio = currentUnits / currentBoxes;
     setValue(`products.${index}.quantity`, newBoxes * ratio, { shouldDirty: true });
@@ -204,28 +203,6 @@ export function PurchaseOrderProducts({
 
   const canEditProductsRows = isEditMode && allowEditStatuses.includes(data.status_name);
 
-  const isRowLinked = (index: number): boolean => linkedRows[index] ?? true;
-
-  const toggleRowLink = (index: number) => {
-    setLinkedRows((prev) => ({
-      ...prev,
-      [index]: !(prev[index] ?? true)
-    }));
-  };
-
-  const handleRemoveRow = (index: number) => {
-    remove(index);
-    setLinkedRows((prev) => {
-      const newLinked: Record<number, boolean> = {};
-      Object.entries(prev).forEach(([key, value]) => {
-        const k = Number(key);
-        if (k < index) newLinked[k] = value;
-        else if (k > index) newLinked[k - 1] = value;
-      });
-      return newLinked;
-    });
-  };
-
   return (
     <div
       className="space-y-6 transition-all duration-300 ease-in-out min-w-0"
@@ -244,7 +221,6 @@ export function PurchaseOrderProducts({
                 size="sm"
                 onClick={() => {
                   reset(initialProducts);
-                  setLinkedRows({});
                   setIsEditMode(false);
                 }}
               >
@@ -256,7 +232,7 @@ export function PurchaseOrderProducts({
               variant="outline"
               size="sm"
               onClick={handleEditToggle}
-              disabled={isEditMode && hasDecimals}
+              disabled={isEditMode && (hasDecimals || hasMissingBatch)}
             >
               {isEditMode ? (
                 <>
@@ -278,6 +254,11 @@ export function PurchaseOrderProducts({
               No se pueden pedir decimales en cajas o unidades
             </div>
           )}
+          {isEditMode && hasMissingBatch && (
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
+              Todos los productos deben tener un lote seleccionado
+            </div>
+          )}
           <table className="w-full">
             <thead className="bg-cashport-gray-lighter border-b border-cashport-gray-light">
               <tr>
@@ -291,7 +272,6 @@ export function PurchaseOrderProducts({
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Unidades
                 </th>
-                {isEditMode && <th className="p-1 w-8"></th>}
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Precio unitario
@@ -375,7 +355,7 @@ export function PurchaseOrderProducts({
                       <Controller
                         name={`products.${index}.batch_id`}
                         control={control}
-                        render={({ field: controllerField }) => {
+                        render={({ field: controllerField, fieldState: { error } }) => {
                           const productId = watchedProducts[index]?.product_id;
                           const productBatches =
                             batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
@@ -395,6 +375,7 @@ export function PurchaseOrderProducts({
                                   value={controllerField.value ?? null}
                                   onChange={controllerField.onChange}
                                   placeholder="Seleccionar lote"
+                                  status={error ? "error" : undefined}
                                   options={productBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
@@ -453,25 +434,6 @@ export function PurchaseOrderProducts({
                         />
                       </div>
                     </td>
-                    {isEditMode && (
-                      <td className="p-1 text-center">
-                        <button
-                          type="button"
-                          onClick={() => toggleRowLink(index)}
-                          onMouseEnter={() => setHoveredLinkRow(index)}
-                          onMouseLeave={() => setHoveredLinkRow(null)}
-                          className="inline-flex items-center justify-center h-6 w-6 rounded border-none cursor-pointer hover:bg-gray-100 transition-colors"
-                          title={isRowLinked(index) ? "Desvincular factor" : "Vincular factor"}
-                          style={{ background: "transparent", color: "#9ca3af" }}
-                        >
-                          {isRowLinked(index) !== (hoveredLinkRow === index) ? (
-                            <LinkSimpleHorizontal size={16} />
-                          ) : (
-                            <LinkBreak size={16} />
-                          )}
-                        </button>
-                      </td>
-                    )}
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end">
                         <Controller
@@ -517,16 +479,6 @@ export function PurchaseOrderProducts({
                       <div className="flex items-center justify-center gap-1">
                         {canEditProductsRows && (
                           <>
-                            {fields.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveRow(index)}
-                                className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-red-300 bg-white hover:bg-red-50 transition-colors"
-                                title="Eliminar producto"
-                              >
-                                <Trash size={14} className="text-red-500" />
-                              </button>
-                            )}
                             {index === fields.length - 1 && (
                               <button
                                 type="button"
@@ -625,6 +577,16 @@ export function PurchaseOrderProducts({
                             </button>
                           </Popover>
                         ) : null}
+                        {fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-red-300 bg-white hover:bg-red-50 transition-colors"
+                            title="Eliminar producto"
+                          >
+                            <Trash size={14} className="text-red-500" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -639,7 +601,6 @@ export function PurchaseOrderProducts({
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
                 </td>
-                {isEditMode && <td className="p-3"></td>}
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
