@@ -151,7 +151,6 @@ export function PurchaseOrderProducts({
       await editPurchaseOrderProducts(orderId, productsToSend);
       mutate();
       message.success("Productos actualizados correctamente");
-      setLinkedRows({});
       setIsEditMode(false);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
