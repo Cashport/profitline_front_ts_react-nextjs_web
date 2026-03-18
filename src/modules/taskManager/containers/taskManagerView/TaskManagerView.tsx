@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import useSWR from "swr";
-import { getTasksByStatus, getTaskTabs } from "@/services/tasks/tasks";
-import { ITask } from "@/types/tasks/ITasks";
+import { getTasksByStatus, getTaskTabs, getTaskTypes } from "@/services/tasks/tasks";
+import { ITask, ITaskTypes } from "@/types/tasks/ITasks";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { Card, CardContent } from "@/modules/chat/ui/card";
@@ -55,6 +55,7 @@ export const TaskManagerView: React.FC = () => {
   });
 
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+  const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
 
   // Tasks by status - stores fetched tasks indexed by status ID
   const [tasksByStatus, setTasksByStatus] = useState<Record<string, ITask[]>>({});
@@ -67,6 +68,19 @@ export const TaskManagerView: React.FC = () => {
   }
   const [paginationByStatus, setPaginationByStatus] = useState<Record<string, PaginationInfo>>({});
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
+
+  // Fetch task types once on mount
+  useEffect(() => {
+    const fetchTaskTypes = async () => {
+      try {
+        const types = await getTaskTypes();
+        setTaskTypes(types);
+      } catch (error) {
+        console.error("Error fetching task types:", error);
+      }
+    };
+    fetchTaskTypes();
+  }, []);
 
   // SWR for tabs data
   const { data: tabsData, isLoading: isLoadingTabs } = useSWR("taskTabs", getTaskTabs, {
@@ -203,11 +217,15 @@ export const TaskManagerView: React.FC = () => {
         if (!matchesSearch) return false;
       }
 
-      // State filter
+      // Status filter
+      // TODO - FIX-: The filter Optiosn differ from the statuses coming from the API list
       if (state.filterState && task.status?.name !== state.filterState) return false;
 
       // Comprador filter - use client_name
       if (state.filterComprador && task.client_name !== state.filterComprador) return false;
+
+      // Filter by task type
+      if (selectedFilters.taskTypes.length > 0 && !selectedFilters.taskTypes.includes(task.taskTypeId)) return false;
 
       // Vendedor filter - skip or use user_name
       // if (state.filterVendedor && task.user_name !== state.filterVendedor) return false;
@@ -346,6 +364,7 @@ export const TaskManagerView: React.FC = () => {
           setIsModalOpen({ selected: 0 });
           setSelectedTask(null);
         }}
+        taskTypes={taskTypes}
         onUpdate={(updatedTask: ITask) => {
           console.log("Task updated:", updatedTask);
           // TODO: Implement actual update logic when API is ready

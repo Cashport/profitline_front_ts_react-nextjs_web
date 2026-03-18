@@ -29,6 +29,7 @@ export interface ITask {
   total_portfolio: number;
   order_amount: number;
   queue_id: string | null;
+  purchase_order_package_id: number | null;
 }
 
 export interface ITaskTabState {
