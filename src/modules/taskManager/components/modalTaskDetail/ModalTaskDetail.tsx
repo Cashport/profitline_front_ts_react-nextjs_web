@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import Link from "next/link";
 import { X, Mail, User, Building, FileText, Paperclip, Download, AlertCircle } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -30,7 +31,7 @@ export function ModalTaskDetail({ task, isOpen, onClose }: IModalTaskDetail) {
         try {
           if (task.id) {
             const res = await getTaskDetails({ taskId: String(task.id) });
-            setTaskDetail(res);
+            setTaskDetail({ ...res, purchase_orders: [1123, 2234, 3345] });
           } else if (task.queue_id) {
             const res = await getTaskDetails({ queueId: task.queue_id });
             setTaskDetail(res);
@@ -172,7 +173,7 @@ export function ModalTaskDetail({ task, isOpen, onClose }: IModalTaskDetail) {
       >
         <DialogTitle className="sr-only">{task.id} details</DialogTitle>
 
-        <div className="flex flex-col h-[90vh]">
+        <div className="flex flex-col max-h-[90vh]">
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-semibold text-cashport-black">
@@ -288,9 +289,30 @@ export function ModalTaskDetail({ task, isOpen, onClose }: IModalTaskDetail) {
                           <span className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-0.5">
                             Descripcion
                           </span>
-                          <p className="flex-1 text-sm text-cashport-black px-2 whitespace-pre-wrap">
-                            {taskDetail.description || "—"}
-                          </p>
+                          <div className="flex flex-col">
+                            <p className="flex-1 text-sm text-cashport-black px-2 whitespace-pre-wrap">
+                              {taskDetail.description || "—"}
+                            </p>
+                            {taskDetail.purchase_orders &&
+                              taskDetail.purchase_orders.length > 0 && (
+                                <p className="flex-1 text-sm text-cashport-black px-2 whitespace-pre-wrap">
+                                  (Se crearon las siguientes órdenes de compra:{" "}
+                                  {taskDetail.purchase_orders.map((po, index) => (
+                                    <span key={po}>
+                                      <Link
+                                        href={`/purchase-orders/${po}`}
+                                        target="_blank"
+                                        style={{ color: "#0085FF", textDecoration: "underline" }}
+                                      >
+                                        {po}
+                                      </Link>
+                                      {index < taskDetail.purchase_orders!.length - 1 && ", "}
+                                    </span>
+                                  ))}
+                                  )
+                                </p>
+                              )}
+                          </div>
                         </div>
                       </div>
                     </div>

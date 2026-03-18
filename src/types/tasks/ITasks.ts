@@ -103,4 +103,5 @@ export interface ITaskDetail {
   days_in_status: number;
   is_overdue: boolean;
   emailDetails?: IEmailDetails;
+  purchase_orders?: number[];
 }
