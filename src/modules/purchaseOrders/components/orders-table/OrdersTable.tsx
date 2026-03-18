@@ -2,7 +2,14 @@
 
 import { useState, useMemo, Fragment } from "react";
 import { Pagination as AntPagination, Spin, Flex, Button } from "antd";
-import { AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronRight
+} from "lucide-react";
 import {
   IPurchaseOrder,
   IOrder,
@@ -18,7 +25,13 @@ import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWareho
 import "./OrdersTable.scss";
 
 type SortDirection = "asc" | "desc" | null;
-type SortableColumn = "deliveryDate" | "totalProducts" | "totalAmount";
+type SortableColumn =
+  | "packageNumber"
+  | "customerName"
+  | "status"
+  | "deliveryDate"
+  | "totalProducts"
+  | "totalAmount";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
@@ -142,7 +155,10 @@ export function OrdersTable({
   const [expandedPackageIds, setExpandedPackageIds] = useState<Set<number>>(new Set());
   const [selectedOrder, setSelectedOrder] = useState({ id: 0, warehouse_id: 0 });
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
-  const [sortConfig, setSortConfig] = useState<{ column: SortableColumn | null; direction: SortDirection }>({
+  const [sortConfig, setSortConfig] = useState<{
+    column: SortableColumn | null;
+    direction: SortDirection;
+  }>({
     column: null,
     direction: null
   });
@@ -163,19 +179,34 @@ export function OrdersTable({
         const dateB = new Date(b.deliveryDate || "").getTime() || 0;
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
+      if (sortConfig.column === "customerName" || sortConfig.column === "status") {
+        const strA = (a[sortConfig.column] || "").toLowerCase();
+        const strB = (b[sortConfig.column] || "").toLowerCase();
+        const cmp = strA.localeCompare(strB);
+        return sortConfig.direction === "asc" ? cmp : -cmp;
+      }
       const valA = (a[sortConfig.column!] as number) || 0;
       const valB = (b[sortConfig.column!] as number) || 0;
       return sortConfig.direction === "asc" ? valA - valB : valB - valA;
     });
   }, [data, sortConfig]);
 
-  const renderSortableHeader = (label: string, column: SortableColumn, align: "left" | "right" = "left", extraClass = "") => {
+  const renderSortableHeader = (
+    label: string,
+    column: SortableColumn,
+    align: "left" | "right" = "left",
+    extraClass = ""
+  ) => {
     const isActive = sortConfig.column === column;
-    const icon = isActive
-      ? sortConfig.direction === "asc"
-        ? <ArrowUp className="h-3.5 w-3.5" />
-        : <ArrowDown className="h-3.5 w-3.5" />
-      : <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />;
+    const icon = isActive ? (
+      sortConfig.direction === "asc" ? (
+        <ArrowUp className="h-3.5 w-3.5" />
+      ) : (
+        <ArrowDown className="h-3.5 w-3.5" />
+      )
+    ) : (
+      <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
+    );
 
     return (
       <th
@@ -262,22 +293,38 @@ export function OrdersTable({
         <table className="w-full">
           <thead className="bg-white border-b border-gray-200">
             <tr>
-              <th className="text-left p-4 font-bold text-black">
+              <th className="text-left p-4 font-bold text-black cursor-pointer select-none">
                 <div className="flex items-center gap-2">
                   {onRowSelect && (
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Select all"
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all"
+                      />
+                    </div>
                   )}
-                  <span>ID Pedido</span>
+                  <div
+                    className="flex items-center gap-1"
+                    onClick={() => handleSort("packageNumber")}
+                  >
+                    <span>ID Pedido</span>
+                    {sortConfig.column === "packageNumber" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
+                    )}
+                  </div>
                 </div>
               </th>
               <th className="text-left p-4 font-bold text-black">Orden de compra</th>
-              <th className="text-left p-4 font-bold text-black">Cliente</th>
+              {renderSortableHeader("Cliente", "customerName")}
               {renderSortableHeader("Entrega", "deliveryDate")}
-              <th className="text-left p-4 font-bold text-black">Estado</th>
+              {renderSortableHeader("Estado", "status")}
               <th className="text-left p-4 font-bold text-black">Factura</th>
               {renderSortableHeader("Productos", "totalProducts", "right")}
               {renderSortableHeader("Monto", "totalAmount", "right", "w-28")}
@@ -295,7 +342,6 @@ export function OrdersTable({
             {sortedData.map((pkg) => {
               const isExpanded = expandedPackageIds.has(pkg.packageId);
               const isMulti = pkg.orders.length > 1;
-              const singleOrder = pkg.orders.length === 1 ? pkg.orders[0] : null;
               const isSelected = selectedRowKeys.some((r) => r.packageId === pkg.packageId);
 
               const renderIdPedidoCell = () => (
