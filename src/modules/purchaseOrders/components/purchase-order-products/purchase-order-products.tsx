@@ -80,6 +80,10 @@ export function PurchaseOrderProducts({
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
 
+  // Check if any product is missing batch_id
+  const hasMissingBatch =
+    isEditMode && watchedProducts.some((p) => !p.batch_id);
+
   // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
@@ -124,7 +128,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
-      if (hasDecimals) return;
+      if (hasDecimals || hasMissingBatch) return;
       const isDirty = Object.keys(dirtyFields).length > 0;
       if (!isDirty) {
         setIsEditMode(false);
@@ -228,7 +232,7 @@ export function PurchaseOrderProducts({
               variant="outline"
               size="sm"
               onClick={handleEditToggle}
-              disabled={isEditMode && hasDecimals}
+              disabled={isEditMode && (hasDecimals || hasMissingBatch)}
             >
               {isEditMode ? (
                 <>
@@ -248,6 +252,11 @@ export function PurchaseOrderProducts({
           {isEditMode && hasDecimals && (
             <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
               No se pueden pedir decimales en cajas o unidades
+            </div>
+          )}
+          {isEditMode && hasMissingBatch && (
+            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
+              Todos los productos deben tener un lote seleccionado
             </div>
           )}
           <table className="w-full">
@@ -346,7 +355,7 @@ export function PurchaseOrderProducts({
                       <Controller
                         name={`products.${index}.batch_id`}
                         control={control}
-                        render={({ field: controllerField }) => {
+                        render={({ field: controllerField, fieldState: { error } }) => {
                           const productId = watchedProducts[index]?.product_id;
                           const productBatches =
                             batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
@@ -366,6 +375,7 @@ export function PurchaseOrderProducts({
                                   value={controllerField.value ?? null}
                                   onChange={controllerField.onChange}
                                   placeholder="Seleccionar lote"
+                                  status={error ? "error" : undefined}
                                   options={productBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
@@ -469,16 +479,6 @@ export function PurchaseOrderProducts({
                       <div className="flex items-center justify-center gap-1">
                         {canEditProductsRows && (
                           <>
-                            {fields.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-red-300 bg-white hover:bg-red-50 transition-colors"
-                                title="Eliminar producto"
-                              >
-                                <Trash size={14} className="text-red-500" />
-                              </button>
-                            )}
                             {index === fields.length - 1 && (
                               <button
                                 type="button"
@@ -577,6 +577,16 @@ export function PurchaseOrderProducts({
                             </button>
                           </Popover>
                         ) : null}
+                        {fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-red-300 bg-white hover:bg-red-50 transition-colors"
+                            title="Eliminar producto"
+                          >
+                            <Trash size={14} className="text-red-500" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
