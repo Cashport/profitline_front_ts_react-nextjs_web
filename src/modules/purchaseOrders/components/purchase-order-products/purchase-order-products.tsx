@@ -325,7 +325,19 @@ export function PurchaseOrderProducts({
                                   (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
                                 }
                                 value={controllerField.value}
-                                onChange={controllerField.onChange}
+                                onChange={(value) => {
+                                  controllerField.onChange(value);
+                                  const selectedProduct = internalProducts.find(
+                                    (p) => p.id === value
+                                  );
+                                  if (selectedProduct?.product_units) {
+                                    setValue(
+                                      `products.${index}.quantity_by_box`,
+                                      selectedProduct.product_units,
+                                      { shouldDirty: true }
+                                    );
+                                  }
+                                }}
                                 placeholder="Seleccionar producto"
                                 options={internalProducts.map((p) => ({
                                   value: p.id,
@@ -527,6 +539,7 @@ export function PurchaseOrderProducts({
                                     total_price: 0,
                                     product_id: undefined,
                                     batch_id: undefined,
+                                    quantity_by_box: undefined,
                                     box_quantity: 0
                                   })
                                 }
