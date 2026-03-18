@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import {
   X,
   Mail,
-  Sparkles,
   User,
   Building,
   FileText,
@@ -13,20 +12,10 @@ import {
   Download,
   AlertCircle
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
-import { Label } from "@/modules/chat/ui/label";
-import { Input } from "@/modules/chat/ui/input";
-import { Textarea } from "@/modules/chat/ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
-import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
+import { ITask, ITaskDetail, ITaskStatus, IEmailDetails } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { getTaskDetails } from "@/services/tasks/tasks";
 
@@ -34,11 +23,9 @@ interface IModalTaskDetail {
   task: ITask | null;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate?: (task: ITask) => void;
-  taskTypes: ITaskTypes[];
 }
 
-export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: IModalTaskDetail) {
+export function ModalTaskDetail({ task, isOpen, onClose }: IModalTaskDetail) {
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -76,7 +63,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
     }
   }, [isOpen]);
 
-
   if (!task) return null;
 
   const formatDateTime = (dateString: string) => {
@@ -90,18 +76,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
     });
   };
 
-  const EmailMessage = () => {
-    const emailDetails = taskDetail?.emailDetails;
-
-    if (!emailDetails) {
-      return (
-        <div className="text-center py-8 text-gray-500">
-          <Mail className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>No hay detalles de correo disponibles</p>
-        </div>
-      );
-    }
-
+  const EmailMessage = ({ emailDetails }: { emailDetails: IEmailDetails }) => {
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
@@ -125,7 +100,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
           </div>
           <div className="pt-3 border-t border-gray-200">
             <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-              {taskDetail.description}
+              {emailDetails.details.details}
             </p>
           </div>
           {emailDetails.attachments && emailDetails.attachments.length > 0 && (
@@ -185,67 +160,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
         {tipo}
       </Badge>
     );
-  };
-
-  const handleAssignToAI = () => {
-    if (taskDetail) {
-      setTaskDetail({
-        ...taskDetail,
-        assigned_user: "Cashport AI",
-        status: {
-          ...taskDetail.status,
-          name: "En progreso"
-        }
-      });
-    }
-  };
-
-  const getTaskTypeOptions = (): { value: string; label: string }[] => {
-    const options: { value: string; label: string }[] = [];
-    const seenValues = new Set<string>();
-
-    // Add current value first if it exists
-    if (taskDetail?.task_type && taskDetail.task_type.trim()) {
-      options.push({ value: taskDetail.task_type, label: taskDetail.task_type });
-      seenValues.add(taskDetail.task_type);
-    }
-
-    // Add API options
-    taskTypes.forEach((type) => {
-      if (!seenValues.has(type.NAME)) {
-        options.push({ value: type.NAME, label: type.NAME });
-        seenValues.add(type.NAME);
-      }
-    });
-
-    return options;
-  };
-
-  const getAssignedUserOptions = (): { value: string; label: string; isAI?: boolean }[] => {
-    const STATIC_USERS = [
-      { value: "Yanin Perez", label: "Yanin Perez" },
-      { value: "Maria Rodriguez", label: "Maria Rodriguez" },
-      { value: "Carlos Mendez", label: "Carlos Mendez" },
-      { value: "Ana Gutierrez", label: "Ana Gutierrez" },
-      { value: "Cashport AI", label: "Cashport AI", isAI: true }
-    ];
-
-    const options = [...STATIC_USERS];
-    const existingValues = new Set(STATIC_USERS.map((u) => u.value));
-
-    // Add current user if not in static list (insert before "Cashport AI")
-    if (
-      taskDetail?.assigned_user &&
-      taskDetail.assigned_user.trim() &&
-      !existingValues.has(taskDetail.assigned_user)
-    ) {
-      options.splice(options.length - 1, 0, {
-        value: taskDetail.assigned_user,
-        label: taskDetail.assigned_user
-      });
-    }
-
-    return options;
   };
 
   return (
@@ -319,166 +233,65 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
 
                       <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
                         {/* Cliente */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.client?.name ? "bg-rose-50" : ""}`}
-                        >
+                        <div className="flex items-center gap-3 px-3 py-2">
                           <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          <span className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                             Cliente
-                            {!taskDetail?.client?.name && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Input
-                            value={taskDetail?.client?.name || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({
-                                ...taskDetail,
-                                client: { ...taskDetail.client, name: e.target.value }
-                              })
-                            }
-                            placeholder="Asignar cliente..."
-                            className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                              !taskDetail?.client?.name ? "placeholder:text-rose-400" : ""
-                            }`}
-                          />
+                          </span>
+                          <span className="flex-1 text-sm text-cashport-black px-2">
+                            {taskDetail.client?.name || "—"}
+                          </span>
                         </div>
 
                         {/* Tipo de tarea */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.task_type ? "bg-rose-50" : ""}`}
-                        >
+                        <div className="flex items-center gap-3 px-3 py-2">
                           <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          <span className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                             Tipo de tarea
-                            {!taskDetail?.task_type && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Select
-                            value={taskDetail?.task_type || ""}
-                            onValueChange={(value) =>
-                              taskDetail && setTaskDetail({ ...taskDetail, task_type: value })
-                            }
-                            disabled={taskTypes.length === 0}
-                          >
-                            <SelectTrigger
-                              className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                                !taskDetail?.task_type ? "text-rose-600" : ""
-                              } ${taskTypes.length === 0 ? "opacity-50 cursor-wait" : ""}`}
-                            >
-                              <SelectValue
-                                placeholder={
-                                  taskTypes.length === 0
-                                    ? "Cargando tipos..."
-                                    : "Seleccionar tipo..."
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-gray-200">
-                              {getTaskTypeOptions().map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          </span>
+                          <span className="flex-1 text-sm text-cashport-black px-2">
+                            {taskDetail.task_type || "—"}
+                          </span>
                         </div>
 
                         {/* Responsable */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.assigned_user ? "bg-rose-50" : ""}`}
-                        >
+                        <div className="flex items-center gap-3 px-3 py-2">
                           <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          <span className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                             Responsable
-                            {!taskDetail?.assigned_user && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Select
-                            value={taskDetail?.assigned_user || ""}
-                            onValueChange={(value) => {
-                              if (value === "Cashport AI") {
-                                handleAssignToAI();
-                              } else if (taskDetail) {
-                                setTaskDetail({ ...taskDetail, assigned_user: value });
-                              }
-                            }}
-                          >
-                            <SelectTrigger
-                              className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                                !taskDetail?.assigned_user ? "text-rose-600" : ""
-                              }`}
-                            >
-                              <SelectValue placeholder="Asignar responsable..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-gray-200">
-                              {getAssignedUserOptions().map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.isAI ? (
-                                    <div className="flex items-center gap-2">
-                                      <Sparkles className="h-4 w-4" />
-                                      {option.label}
-                                    </div>
-                                  ) : (
-                                    option.label
-                                  )}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          </span>
+                          <span className="flex-1 text-sm text-cashport-black px-2">
+                            {taskDetail.assigned_user || "—"}
+                          </span>
                         </div>
 
                         {/* Monto */}
-                        <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3 px-3 py-2">
                           <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
                             $
                           </div>
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          <span className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                             Monto
-                          </Label>
-                          <Input
-                            type="number"
-                            value={taskDetail?.amount || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({ ...taskDetail, amount: Number(e.target.value) })
-                            }
-                            placeholder="0"
-                            className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
+                          </span>
+                          <span className="flex-1 text-sm text-cashport-black px-2">
+                            {taskDetail.amount != null
+                              ? taskDetail.amount.toLocaleString("es-CO")
+                              : "—"}
+                          </span>
                         </div>
 
-                        {/* Descripción */}
-                        <div className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
-                          <FileText className="h-4 w-4 text-gray-500 flex-shrink-0 mt-1.5" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-1.5">
-                            Descripción
-                          </Label>
-                          <Textarea
-                            value={taskDetail?.description || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({ ...taskDetail, description: e.target.value })
-                            }
-                            placeholder="Agregar descripción..."
-                            rows={2}
-                            className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 resize-none px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
+                        {/* Descripcion */}
+                        <div className="flex items-start gap-3 px-3 py-2">
+                          <FileText className="h-4 w-4 text-gray-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-0.5">
+                            Descripcion
+                          </span>
+                          <p className="flex-1 text-sm text-cashport-black px-2 whitespace-pre-wrap">
+                            {taskDetail.description || "—"}
+                          </p>
                         </div>
                       </div>
                     </div>
-
-                    {task.is_ai && (
-                      <div className="pt-4">
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          Procesado por Cashport AI
-                        </Badge>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -488,8 +301,8 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                     <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
                       Mensaje Original
                     </h3>
-                    {taskDetail.emailDetails ? (
-                      <EmailMessage />
+                    {mockMessage ? (
+                      <EmailMessage emailDetails={mockMessage} />
                     ) : (
                       <div className="text-center py-12 text-gray-500">
                         <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
@@ -506,44 +319,60 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
               </div>
             ) : null}
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between px-10 py-6 border-t border-gray-200 bg-white flex-shrink-0">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                if (onUpdate && taskDetail) {
-                  // Transform taskDetail (ITaskDetail) to ITask format
-                  const updatedTask: ITask = {
-                    ...task,
-                    description: taskDetail.description,
-                    status: taskDetail.status,
-                    task_type: taskDetail.task_type,
-                    client_name: taskDetail.client.name,
-                    client_uuid: taskDetail.client.uuid,
-                    id_client: taskDetail.client.id,
-                    user_name: taskDetail.assigned_user,
-                    amount: taskDetail.amount,
-                    is_ai: taskDetail.assigned_user === "Cashport AI",
-                    created_at: taskDetail.created_at
-                  };
-                  onUpdate(updatedTask);
-                }
-                onClose();
-              }}
-              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
-            >
-              Guardar cambios
-            </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+const mockMessage: IEmailDetails = {
+  details: {
+    id: 1,
+    email_account_id: 101,
+    message_id: "msg-001",
+    subject: "Factura pendiente de revisión",
+    from_address: "proveedor@empresa.com",
+    to_address: "cuentas@profitline.com",
+    received_date: "2026-03-15T10:30:00Z",
+    has_attachments: 1,
+    details:
+      "Adjunto la factura #4521 correspondiente al pedido de marzo. Por favor confirmar recepción.",
+    created_at: "2026-03-15T10:30:00Z"
+  },
+  attachments: [
+    {
+      id: 1,
+      email_id: 1,
+      file_name: "Factura_4521.pdf",
+      inline: 0,
+      content_type: "application/pdf",
+      size: 245000,
+      s3_key: "attachments/mock/factura_4521.pdf",
+      s3_url: "#",
+      created_at: "2026-03-15T10:30:00Z",
+      status: {
+        id: 1,
+        name: "Disponible",
+        color: "#FFFFFF",
+        backgroundColor: "#22C55E"
+      }
+    },
+    {
+      id: 2,
+      email_id: 1,
+      file_name: "Soporte_pago_marzo.xlsx",
+      inline: 0,
+      content_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      size: 128000,
+      s3_key: "attachments/mock/soporte_pago_marzo.xlsx",
+      s3_url: "#",
+      created_at: "2026-03-15T10:30:00Z",
+      status: {
+        id: 1,
+        name: "Disponible",
+        color: "#FFFFFF",
+        backgroundColor: "#22C55E"
+      }
+    }
+  ]
+};

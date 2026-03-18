@@ -63,6 +63,12 @@ export interface IEmailAttachment {
   s3_key: string;
   s3_url: string;
   created_at: string;
+  status: {
+    id: number;
+    name: string;
+    color: string;
+    backgroundColor: string;
+  };
 }
 
 export interface IEmailDetails {
