@@ -49,6 +49,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
+  const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -182,9 +183,24 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 
   const handleDeleteOrders = () => {
     if (!validateOrderSelection()) return;
-    // TODO: Implementar lógica para eliminar órdenes seleccionadas
-    console.log("Eliminar órdenes: ", selectedOrders);
     onClose();
+    setIsDeleteOrderModalOpen(true);
+  };
+
+  const deleteOrderRequest = async (selectedOrders: IOrder[]) => {
+    setIsActionLoading(true);
+    try {
+      // await deleteOrders(
+      //   selectedOrders.map((order) => order.id),
+      //   (type, content) => message[type as "success" | "error"](content)
+      // );
+      throw new Error("Función de eliminación de órdenes no implementada");
+      mutate && mutate();
+      setIsDeleteOrderModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al eliminar las órdenes");
+    }
+    setIsActionLoading(false);
   };
 
   return (
@@ -280,6 +296,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         content="El cliente no tiene cupo suficiente para gestionar el pedido"
         okText="Enviar aprobación"
         cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={isDeleteOrderModalOpen}
+        onClose={() => setIsDeleteOrderModalOpen(false)}
+        onOk={() => {
+          deleteOrderRequest(selectedOrders);
+        }}
+        title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
+        okLoading={isActionLoading}
       />
     </>
   );
