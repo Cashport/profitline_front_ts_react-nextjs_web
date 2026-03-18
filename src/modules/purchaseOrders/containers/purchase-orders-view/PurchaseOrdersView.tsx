@@ -71,6 +71,10 @@ export function PurchaseOrdersView() {
       try {
         const filters = await getFilters(ID);
         setFilterOptions(filters);
+        const preselectedStatus = filters.statuses?.find((s) => s.checked);
+        if (preselectedStatus) {
+          setSelectedFilters((prev) => ({ ...prev, statusId: preselectedStatus.id }));
+        }
       } catch (error) {
         console.error("Failed to fetch filters:", error);
       }
