@@ -28,23 +28,20 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
 import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
-import { getTaskDetails, getTaskTypes } from "@/services/tasks/tasks";
-import { message } from "antd";
+import { getTaskDetails } from "@/services/tasks/tasks";
 
 interface IModalTaskDetail {
   task: ITask | null;
   isOpen: boolean;
   onClose: () => void;
   onUpdate?: (task: ITask) => void;
+  taskTypes: ITaskTypes[];
 }
 
-export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskDetail) {
+export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: IModalTaskDetail) {
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
-  const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
-  const [isLoadingTaskTypes, setIsLoadingTaskTypes] = useState(false);
-  const [taskTypesError, setTaskTypesError] = useState<string | null>(null);
 
   // Fetch task details when modal opens with a task
   useEffect(() => {
@@ -79,25 +76,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
     }
   }, [isOpen]);
 
-  // Fetch task types when modal opens
-  useEffect(() => {
-    const fetchTaskTypes = async () => {
-      if (isOpen && taskTypes.length === 0) {
-        setIsLoadingTaskTypes(true);
-        setTaskTypesError(null);
-        try {
-          const types = await getTaskTypes();
-          setTaskTypes(types);
-        } catch (error) {
-          console.error("Error fetching task types:", error);
-          setTaskTypesError("Failed to load task types");
-        } finally {
-          setIsLoadingTaskTypes(false);
-        }
-      }
-    };
-    fetchTaskTypes();
-  }, [isOpen, taskTypes.length]);
 
   if (!task) return null;
 
@@ -383,35 +361,27 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate }: IModalTaskD
                             onValueChange={(value) =>
                               taskDetail && setTaskDetail({ ...taskDetail, task_type: value })
                             }
-                            disabled={isLoadingTaskTypes}
+                            disabled={taskTypes.length === 0}
                           >
                             <SelectTrigger
                               className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
                                 !taskDetail?.task_type ? "text-rose-600" : ""
-                              } ${isLoadingTaskTypes ? "opacity-50 cursor-wait" : ""}`}
+                              } ${taskTypes.length === 0 ? "opacity-50 cursor-wait" : ""}`}
                             >
                               <SelectValue
                                 placeholder={
-                                  isLoadingTaskTypes
+                                  taskTypes.length === 0
                                     ? "Cargando tipos..."
-                                    : taskTypesError
-                                      ? "Error al cargar tipos"
-                                      : "Seleccionar tipo..."
+                                    : "Seleccionar tipo..."
                                 }
                               />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-gray-200">
-                              {taskTypesError ? (
-                                <div className="px-2 py-1.5 text-xs text-red-600">
-                                  {taskTypesError}
-                                </div>
-                              ) : (
-                                getTaskTypeOptions().map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))
-                              )}
+                              {getTaskTypeOptions().map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
