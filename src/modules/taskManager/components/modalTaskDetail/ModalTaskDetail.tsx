@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import {
-  X,
-  Mail,
-  User,
-  Building,
-  FileText,
-  Paperclip,
-  Download,
-  AlertCircle
-} from "lucide-react";
+import { X, Mail, User, Building, FileText, Paperclip, Download, AlertCircle } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
@@ -121,14 +112,25 @@ export function ModalTaskDetail({ task, isOpen, onClose }: IModalTaskDetail) {
                       <FileText className="h-4 w-4 text-gray-600" />
                       <span className="text-sm text-gray-900">{attachment.file_name}</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2"
-                      onClick={() => window.open(attachment.s3_url, "_blank")}
-                    >
-                      <Download className="h-3 w-3" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        className="text-xs px-2 py-0.5 rounded-full border-0"
+                        style={{
+                          backgroundColor: attachment.status.backgroundColor,
+                          color: attachment.status.color
+                        }}
+                      >
+                        {attachment.status.name}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        onClick={() => window.open(attachment.s3_url, "_blank")}
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -353,8 +355,8 @@ const mockMessage: IEmailDetails = {
       status: {
         id: 1,
         name: "Disponible",
-        color: "#FFFFFF",
-        backgroundColor: "#22C55E"
+        color: "#0085FF",
+        backgroundColor: "#E3F2FD"
       }
     },
     {
@@ -370,8 +372,8 @@ const mockMessage: IEmailDetails = {
       status: {
         id: 1,
         name: "Disponible",
-        color: "#FFFFFF",
-        backgroundColor: "#22C55E"
+        color: "#0085FF",
+        backgroundColor: "#E3F2FD"
       }
     }
   ]
