@@ -617,7 +617,7 @@ export function PurchaseOrderProducts({
                             </button>
                           </Popover>
                         ) : null}
-                        {fields.length > 1 && (
+                        {fields.length > 1 && canEditProductsRows && (
                           <button
                             type="button"
                             onClick={() => remove(index)}
