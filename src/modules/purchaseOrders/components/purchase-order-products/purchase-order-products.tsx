@@ -162,22 +162,10 @@ export function PurchaseOrderProducts({
     setIsEditMode(false);
   };
 
-  const handleUnitsChange = (index: number, newUnits: number) => {
-    const currentUnits = watchedProducts[index]?.quantity ?? 0;
-    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
-    setValue(`products.${index}.quantity`, newUnits, { shouldDirty: true });
-    if (newUnits === 0 || currentBoxes === 0 || currentUnits === 0) return;
-    const ratio = currentUnits / currentBoxes;
-    setValue(`products.${index}.box_quantity`, newUnits / ratio, { shouldDirty: true });
-  };
-
   const handleBoxesChange = (index: number, newBoxes: number) => {
-    const currentUnits = watchedProducts[index]?.quantity ?? 0;
-    const currentBoxes = watchedProducts[index]?.box_quantity ?? 0;
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    if (newBoxes === 0 || currentUnits === 0 || currentBoxes === 0) return;
-    const ratio = currentUnits / currentBoxes;
-    setValue(`products.${index}.quantity`, newBoxes * ratio, { shouldDirty: true });
+    const qtyByBox = watchedProducts[index]?.quantity_by_box ?? 0;
+    setValue(`products.${index}.quantity`, qtyByBox * newBoxes, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -317,6 +305,11 @@ export function PurchaseOrderProducts({
                                       selectedProduct.product_units,
                                       { shouldDirty: true }
                                     );
+                                    setValue(
+                                      `products.${index}.quantity`,
+                                      selectedProduct.product_units * (watchedProducts[index]?.box_quantity ?? 0),
+                                      { shouldDirty: true }
+                                    );
                                   }
                                   setValue(`products.${index}.batch_id`, null, {
                                     shouldDirty: true
@@ -412,27 +405,11 @@ export function PurchaseOrderProducts({
                     </td>
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end">
-                        <Controller
-                          name={`products.${index}.quantity`}
-                          control={control}
-                          render={({ field: controllerField }) => (
-                            <>
-                              {isEditMode ? (
-                                <Input
-                                  type="number"
-                                  step="any"
-                                  value={controllerField.value ?? ""}
-                                  onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
-                                  className="w-20 h-8 text-sm text-right"
-                                />
-                              ) : (
-                                <span className="text-sm text-cashport-black fontMonoSpace">
-                                  {controllerField.value ?? "-"}
-                                </span>
-                              )}
-                            </>
-                          )}
-                        />
+                        <span className="text-sm text-cashport-black fontMonoSpace">
+                          {isEditMode
+                            ? (watchedProducts[index]?.quantity_by_box ?? 0) * (watchedProducts[index]?.box_quantity ?? 0)
+                            : field.quantity ?? "-"}
+                        </span>
                       </div>
                     </td>
                     <td className="p-3 text-right">
