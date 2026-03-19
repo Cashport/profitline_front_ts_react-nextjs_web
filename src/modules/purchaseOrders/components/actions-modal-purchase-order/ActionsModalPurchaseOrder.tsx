@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Modal, message } from "antd";
 import {
   DownloadSimple,
-  FileMinus,
   Invoice,
   PaperPlaneTilt,
-  SubtractSquare
+  SubtractSquare,
+  Trash
 } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
@@ -255,7 +255,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             />
           )}
           <ButtonGenerateAction
-            icon={<FileMinus className="h-4 w-4" />}
+            icon={<Trash className="h-4 w-4" />}
             title="Eliminar Ordenes seleccionadas"
             onClick={handleDeleteOrders}
             disabled={isDispatchLoading}
