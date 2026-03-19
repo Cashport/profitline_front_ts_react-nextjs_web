@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import { DownloadSimple, Invoice, PaperPlaneTilt, SubtractSquare } from "@phosphor-icons/react";
+import {
+  DownloadSimple,
+  Invoice,
+  PaperPlaneTilt,
+  SubtractSquare,
+  Trash
+} from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -9,7 +15,8 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import {
   sendPackageToDispatch,
   sendPackageToBilling,
-  removePurchaseOrdersFromPackage
+  removePurchaseOrdersFromPackage,
+  deletePurchaseOrders
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -43,6 +50,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
+  const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -174,6 +182,24 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleDeleteOrders = () => {
+    if (!validateOrderSelection()) return;
+    onClose();
+    setIsDeleteOrderModalOpen(true);
+  };
+
+  const deleteOrderRequest = async (selectedOrders: IOrder[]) => {
+    setIsActionLoading(true);
+    try {
+      await deletePurchaseOrders(selectedOrders?.map((order) => order.id));
+      mutate && mutate();
+      setIsDeleteOrderModalOpen(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al eliminar las órdenes");
+    }
+    setIsActionLoading(false);
+  };
+
   return (
     <>
       <Modal
@@ -228,6 +254,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={false}
             />
           )}
+          <ButtonGenerateAction
+            icon={<Trash className="h-4 w-4" />}
+            title="Eliminar Ordenes seleccionadas"
+            onClick={handleDeleteOrders}
+            disabled={isDispatchLoading}
+          />
         </div>
       </Modal>
 
@@ -261,6 +293,16 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         content="El cliente no tiene cupo suficiente para gestionar el pedido"
         okText="Enviar aprobación"
         cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={isDeleteOrderModalOpen}
+        onClose={() => setIsDeleteOrderModalOpen(false)}
+        onOk={() => {
+          deleteOrderRequest(selectedOrders);
+        }}
+        title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
+        okLoading={isActionLoading}
       />
     </>
   );

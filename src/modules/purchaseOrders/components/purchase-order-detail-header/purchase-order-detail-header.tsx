@@ -52,7 +52,8 @@ export function PurchaseOrderDetailHeader({
       key: "invoice",
       label: "Cargar factura",
       icon: <Receipt className="h-4 w-4" />,
-      onClick: () => onOpenModal(3)
+      onClick: () => onOpenModal(3),
+      disabled: data.status_name !== "En facturación"
     },
     {
       key: "dispatch",
