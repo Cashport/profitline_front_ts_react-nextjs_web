@@ -18,12 +18,12 @@ import {
   IBatchesByPurchaseOrder
 } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { getProductsByClient } from "@/services/commerce/commerce";
+import { getProductsByClient, getWarehouseProducts } from "@/services/commerce/commerce";
 import {
   getBatchesForProducts,
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
-import { IProduct } from "@/types/commerce/ICommerce";
+import { IProduct, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
 import { monthsUntilExpiration, formatDateDMY } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
@@ -47,6 +47,7 @@ export function PurchaseOrderProducts({
   const [isEditMode, setIsEditMode] = useState(false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
+  const [warehouseStock, setWarehouseStock] = useState<IWarehouseProductsStock[]>([]);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -81,8 +82,22 @@ export function PurchaseOrderProducts({
     });
 
   // Check if any product is missing batch_id
-  const hasMissingBatch =
-    isEditMode && watchedProducts.some((p) => !p.batch_id);
+  const hasMissingBatch = isEditMode && watchedProducts.some((p) => !p.batch_id);
+
+  const getStockForProduct = (productId: number | undefined) => {
+    if (!productId) return undefined;
+    return warehouseStock.find((s) => s.product_id === productId);
+  };
+
+  const isStockExceeded = (index: number) => {
+    const product = watchedProducts[index];
+    const stock = getStockForProduct(product?.product_id);
+    if (!stock) return false;
+    const totalUnitsRequested = product.quantity ?? 0;
+    return totalUnitsRequested > stock.inWarehouse;
+  };
+
+  const hasStockExceeded = isEditMode && watchedProducts.some((_, index) => isStockExceeded(index));
 
   // Fetch products on mount
   useEffect(() => {
@@ -121,6 +136,19 @@ export function PurchaseOrderProducts({
     fetchBatches();
   }, [orderId]);
 
+  useEffect(() => {
+    const fetchStock = async () => {
+      if (!projectId || !data.warehouseId || !orderId) return;
+      try {
+        const stock = await getWarehouseProducts(projectId, data.warehouseId, Number(orderId));
+        if (stock) setWarehouseStock(stock);
+      } catch (error) {
+        console.error("Error fetching warehouse stock:", error);
+      }
+    };
+    fetchStock();
+  }, [projectId, data.warehouseId, orderId]);
+
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
     reset(initialProducts);
@@ -128,7 +156,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
-      if (hasDecimals || hasMissingBatch) return;
+      if (hasDecimals || hasMissingBatch || hasStockExceeded) return;
       const isDirty = Object.keys(dirtyFields).length > 0;
       if (!isDirty) {
         setIsEditMode(false);
@@ -232,7 +260,7 @@ export function PurchaseOrderProducts({
               variant="outline"
               size="sm"
               onClick={handleEditToggle}
-              disabled={isEditMode && (hasDecimals || hasMissingBatch)}
+              disabled={isEditMode && (hasDecimals || hasMissingBatch || hasStockExceeded)}
             >
               {isEditMode ? (
                 <>
@@ -273,6 +301,7 @@ export function PurchaseOrderProducts({
                   Unidades
                 </th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">Cajas</th>
+                <th className="text-right p-3 font-semibold text-cashport-black text-xs">Stock</th>
                 <th className="text-right p-3 font-semibold text-cashport-black text-xs">
                   Precio unitario
                 </th>
@@ -422,10 +451,12 @@ export function PurchaseOrderProducts({
                                   step="any"
                                   value={controllerField.value ?? ""}
                                   onChange={(e) => handleUnitsChange(index, Number(e.target.value))}
-                                  className="w-20 h-8 text-sm text-right"
+                                  className={`w-20 h-8 text-sm text-right ${isStockExceeded(index) ? "border-red-500 text-red-500" : ""}`}
                                 />
                               ) : (
-                                <span className="text-sm text-cashport-black fontMonoSpace">
+                                <span
+                                  className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500" : "text-cashport-black"}`}
+                                >
                                   {controllerField.value ?? "-"}
                                 </span>
                               )}
@@ -447,10 +478,12 @@ export function PurchaseOrderProducts({
                                   step="any"
                                   value={controllerField.value ?? ""}
                                   onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
-                                  className="w-20 h-8 text-sm text-right"
+                                  className={`w-20 h-8 text-sm text-right ${isStockExceeded(index) ? "border-red-500 text-red-500" : ""}`}
                                 />
                               ) : (
-                                <span className="text-sm text-cashport-black fontMonoSpace">
+                                <span
+                                  className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500" : "text-cashport-black"}`}
+                                >
                                   {controllerField.value ?? "-"}
                                 </span>
                               )}
@@ -458,6 +491,13 @@ export function PurchaseOrderProducts({
                           )}
                         />
                       </div>
+                    </td>
+                    <td className="p-3 text-right">
+                      <span
+                        className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500 font-semibold" : "text-cashport-black"}`}
+                      >
+                        {getStockForProduct(watchedProducts[index]?.product_id)?.inWarehouse ?? "-"}
+                      </span>
                     </td>
                     <td className="p-3 text-right">
                       <span className="text-sm text-cashport-black fontMonoSpace">
@@ -577,7 +617,7 @@ export function PurchaseOrderProducts({
                             </button>
                           </Popover>
                         ) : null}
-                        {fields.length > 1 && (
+                        {fields.length > 1 && canEditProductsRows && (
                           <button
                             type="button"
                             onClick={() => remove(index)}
@@ -601,6 +641,7 @@ export function PurchaseOrderProducts({
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
                 </td>
+                <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
