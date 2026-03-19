@@ -3,7 +3,7 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Button } from "@/modules/chat/ui/button";
-import { Edit, Save } from "lucide-react";
+import { Edit, Check } from "lucide-react";
 import { Trash, Plus } from "@phosphor-icons/react";
 import { Select, Popover, message } from "antd";
 import { Eye } from "lucide-react";
@@ -238,15 +238,16 @@ export function PurchaseOrderProducts({
         flex: isPdfCollapsed ? "1" : `0 0 calc(${100 - pdfWidth}% - 1.5rem)`
       }}
     >
-      <div>
+      <div className="flex flex-col">
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
           <div className="flex items-center gap-2">
             {isEditMode && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="text-gray-500 hover:text-gray-700"
                 onClick={() => {
                   reset(initialProducts);
                   setIsEditMode(false);
@@ -264,8 +265,8 @@ export function PurchaseOrderProducts({
             >
               {isEditMode ? (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Guardar productos
+                  <Check className="h-4 w-4 mr-2" />
+                  Guardar
                 </>
               ) : (
                 <>
@@ -276,7 +277,7 @@ export function PurchaseOrderProducts({
             </Button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           {isEditMode && hasDecimals && (
             <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
               No se pueden pedir decimales en cajas o unidades
@@ -517,35 +518,6 @@ export function PurchaseOrderProducts({
                     </td>
                     <td className="p-3 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        {canEditProductsRows && (
-                          <>
-                            {index === fields.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  append({
-                                    marketplace_order_product_id: 0,
-                                    product_sku: "",
-                                    product_description: "",
-                                    quantity: 0,
-                                    unit_price: 0,
-                                    tax_amount: 0,
-                                    subtotal: 0,
-                                    total_price: 0,
-                                    product_id: undefined,
-                                    batch_id: undefined,
-                                    quantity_by_box: undefined,
-                                    box_quantity: 0
-                                  })
-                                }
-                                className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-green-300 bg-white hover:bg-green-50 transition-colors"
-                                title="Agregar producto"
-                              >
-                                <Plus size={14} className="text-green-600" />
-                              </button>
-                            )}
-                          </>
-                        )}
                         {watchedProducts[index].purchase_order_original ? (
                           <Popover
                             placement="left"
@@ -621,10 +593,10 @@ export function PurchaseOrderProducts({
                           <button
                             type="button"
                             onClick={() => remove(index)}
-                            className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-red-300 bg-white hover:bg-red-50 transition-colors"
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
                             title="Eliminar producto"
                           >
-                            <Trash size={14} className="text-red-500" />
+                            <Trash size={16} className="text-gray-500" />
                           </button>
                         )}
                       </div>
@@ -655,6 +627,31 @@ export function PurchaseOrderProducts({
             </tfoot>
           </table>
         </div>
+        {canEditProductsRows && (
+          <button
+            type="button"
+            onClick={() =>
+              append({
+                marketplace_order_product_id: 0,
+                product_sku: "",
+                product_description: "",
+                quantity: 0,
+                unit_price: 0,
+                tax_amount: 0,
+                subtotal: 0,
+                total_price: 0,
+                product_id: undefined,
+                batch_id: undefined,
+                quantity_by_box: undefined,
+                box_quantity: 0
+              })
+            }
+            className="mt-2 self-end flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <Plus size={14} />
+            Agregar producto
+          </button>
+        )}
       </div>
     </div>
   );
