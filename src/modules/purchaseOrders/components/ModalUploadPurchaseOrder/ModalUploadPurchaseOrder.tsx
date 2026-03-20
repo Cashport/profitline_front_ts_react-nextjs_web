@@ -11,7 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card
 import { Button } from "@/modules/chat/ui/button";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 import { AIProcessingInterface } from "../ai-processing-interface/ai-processing-interface";
-import { uploadPurchaseOrder } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  createPurchaseOrderBulk,
+  uploadPurchaseOrder
+} from "@/services/purchaseOrders/purchaseOrders";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
@@ -161,9 +164,18 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
     setManualFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleContinueManual = useCallback(() => {
+  const handleContinueManual = async () => {
     console.log("Archivos para digitación manual:", manualFiles);
-  }, [manualFiles]);
+
+    try {
+      await createPurchaseOrderBulk(manualFiles);
+      message.success("Órdenes de compra creadas con éxito");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al crear las órdenes de compra";
+      message.error(errorMessage);
+    }
+  };
 
   if (showAIProcessing && processingFile) {
     return <AIProcessingInterface file={processingFile} onClose={handleAIProcessingClose} />;
@@ -254,24 +266,28 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
           {manualFiles.length > 0 && (
             <div className="uploadInterface__fileList">
               <p className="uploadInterface__fileListTitle">Archivos Cargados</p>
-              {manualFiles.map((file, index) => (
-                <div key={index} className="uploadInterface__fileItem">
-                  <div className="uploadInterface__fileInfo">
-                    <CheckCircle size={20} color="#cbe61e" />
-                    <div className="uploadInterface__fileDetails">
-                      <span className="uploadInterface__fileName">{file.name}</span>
-                      <span className="uploadInterface__fileSize">{formatFileSize(file.size)}</span>
+              <div style={{ maxHeight: "150px", overflowY: "auto", scrollbarWidth: "thin" }}>
+                {manualFiles.map((file, index) => (
+                  <div key={index} className="uploadInterface__fileItem">
+                    <div className="uploadInterface__fileInfo">
+                      <CheckCircle size={20} color="#cbe61e" />
+                      <div className="uploadInterface__fileDetails">
+                        <span className="uploadInterface__fileName">{file.name}</span>
+                        <span className="uploadInterface__fileSize">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </div>
                     </div>
+                    <button
+                      className="uploadInterface__removeButton"
+                      onClick={() => handleRemoveManualFile(index)}
+                      type="button"
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
-                  <button
-                    className="uploadInterface__removeButton"
-                    onClick={() => handleRemoveManualFile(index)}
-                    type="button"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 

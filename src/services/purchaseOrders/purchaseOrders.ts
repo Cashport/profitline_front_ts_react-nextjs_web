@@ -327,3 +327,34 @@ export const deletePurchaseOrders = async (orderIds: number[]) => {
     throw error;
   }
 };
+
+export const createPurchaseOrderBulk = async (files: File[]) => {
+  const formData = new FormData();
+
+  const modelTest = {
+    client_id: 123,
+    purchaseOrder: [
+      {
+        purchase_order_number: "PO-001"
+      },
+      {
+        purchase_order_number: "PO-002"
+      }
+    ]
+  };
+  files.forEach((file) => {
+    formData.append("file", file);
+  });
+
+  formData.append("request", JSON.stringify(modelTest));
+  try {
+    const res: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/bulk`,
+      formData
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error creating purchase orders in bulk:", error);
+    throw error;
+  }
+};
