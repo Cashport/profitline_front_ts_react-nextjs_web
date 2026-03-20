@@ -25,6 +25,7 @@ interface PurchaseOrderDetailHeaderProps {
   data: IPurchaseOrderDetail;
   orderId: string;
   isEditMode: boolean;
+  canEdit: boolean;
   onEditToggle: () => void;
   onOpenModal: (modal: number) => void;
   onDownloadCSV: () => void;
@@ -34,6 +35,7 @@ export function PurchaseOrderDetailHeader({
   data,
   orderId,
   isEditMode,
+  canEdit,
   onEditToggle,
   onOpenModal,
   onDownloadCSV
@@ -105,24 +107,26 @@ export function PurchaseOrderDetailHeader({
             hideArrow
           />
         </GeneralDropdown>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onEditToggle}
-          className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
-        >
-          {isEditMode ? (
-            <>
-              <Save className="h-4 w-4 " />
-              Guardar
-            </>
-          ) : (
-            <>
-              <Edit className="h-4 w-4" />
-              Editar
-            </>
-          )}
-        </Button>
+        {canEdit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onEditToggle}
+            className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
+          >
+            {isEditMode ? (
+              <>
+                <Save className="h-4 w-4 " />
+                Guardar
+              </>
+            ) : (
+              <>
+                <Edit className="h-4 w-4" />
+                Editar
+              </>
+            )}
+          </Button>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {!!data.approvation && (
