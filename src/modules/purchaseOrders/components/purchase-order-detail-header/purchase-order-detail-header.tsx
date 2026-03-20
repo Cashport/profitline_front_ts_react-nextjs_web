@@ -49,9 +49,8 @@ export function PurchaseOrderDetailHeader({
 
   const siblingOrders = data.package?.sibilingOrders ?? [];
 
-  const allowedStatesForDispatch = ["Procesado", "En aprobaciones"];
   const allowedStatesForDownload = ["En despacho", "Entregado"];
-  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "En facturación", "Novedad"];
+  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
 
   const actionItems: DropdownItem[] = [
     {
@@ -66,7 +65,7 @@ export function PurchaseOrderDetailHeader({
       label: "Confirmar despacho/entrega",
       icon: <PackageCheck className="h-4 w-4" />,
       onClick: () => onOpenModal(4),
-      disabled: !allowedStatesForDispatch.includes(data.status_name)
+      disabled: data.status_name !== "En despacho"
     },
     {
       key: "back-order",
