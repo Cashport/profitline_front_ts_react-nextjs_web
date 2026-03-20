@@ -15,9 +15,9 @@ import { uploadPurchaseOrder } from "@/services/purchaseOrders/purchaseOrders";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 
-import "./upload-interface.scss";
+import "./modalUploadPurchaseOrder.scss";
 
-interface UploadInterfaceProps {
+interface ModalUploadPurchaseOrderProps {
   onFileUpload?: (files: File[]) => void;
   onClose?: () => void;
 }
@@ -28,7 +28,7 @@ const formatFileSize = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps) {
+export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadPurchaseOrderProps) {
   const router = useRouter();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -193,7 +193,7 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
                 <h3 className="text-lg font-semibold text-cashport-black mb-2">
                   Arrastra tu archivo PDF aquí
                 </h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="mb-4" style={{ color: "#909090" }}>
                   O selecciona un archivo desde tu dispositivo
                 </p>
               </div>
@@ -259,9 +259,7 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
                     <CheckCircle size={20} color="#cbe61e" />
                     <div className="uploadInterface__fileDetails">
                       <span className="uploadInterface__fileName">{file.name}</span>
-                      <span className="uploadInterface__fileSize">
-                        {formatFileSize(file.size)}
-                      </span>
+                      <span className="uploadInterface__fileSize">{formatFileSize(file.size)}</span>
                     </div>
                   </div>
                   <button

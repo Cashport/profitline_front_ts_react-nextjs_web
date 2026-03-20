@@ -1,0 +1,119 @@
+@import "@/styles/variables";
+
+.uploadInterface {
+    .ant-tabs-nav {
+        margin-bottom: 0;
+
+        &::before {
+            display: none;
+        }
+    }
+
+    &__custom-tab-bar {
+        background: $background;
+        border-radius: 8px;
+        padding: 4px;
+        margin-bottom: 1.5rem !important;
+        border-radius: 26px !important;
+
+        .ant-tabs-nav-list {
+            width: 100%;
+            display: flex;
+        }
+
+        .ant-tabs-tab {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            border: none;
+            background: transparent;
+            transition: all 0.3s ease;
+            border-radius: 26px !important;
+
+            .ant-tabs-tab-btn {
+                color: $gray !important;
+                font-weight: 400 !important;
+                font-size: 0.875rem !important;
+                width: 100%;
+                text-align: center;
+            }
+
+            &.ant-tabs-tab {
+                height: 38px !important;
+            }
+
+            &.ant-tabs-tab-active {
+                background: $black;
+                border-radius: 6px;
+
+                .ant-tabs-tab-btn {
+                    color: $white !important;
+                }
+            }
+        }
+
+        .ant-tabs-ink-bar {
+            display: none;
+        }
+    }
+
+    &__fileList {
+        margin-top: 1.5rem;
+    }
+
+    &__fileListTitle {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: $black;
+        margin-bottom: 0.75rem;
+    }
+
+    &__fileItem {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    &__fileInfo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    &__fileDetails {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__fileName {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: $black;
+    }
+
+    &__fileSize {
+        font-size: 0.8rem;
+        color: $gray;
+    }
+
+    &__removeButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: $gray;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            color: $black;
+        }
+    }
+
+    &__continueButton {
+        margin-top: 1.5rem;
+    }
+}

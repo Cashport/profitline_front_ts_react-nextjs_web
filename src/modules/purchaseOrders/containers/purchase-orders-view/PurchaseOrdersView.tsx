@@ -12,7 +12,7 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ActionsModalPurchaseOrder } from "../../components/actions-modal-purchase-order/ActionsModalPurchaseOrder";
 import { ModalUploadInvoicesPurchaseOrders } from "../../components/dialogs/modal-upload-invoices-purchase-orders/ModalUploadInvoicesPurchaseOrders";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { UploadInterface } from "../../components/upload-interface/upload-interface";
+import { ModalUploadPurchaseOrder } from "../../components/ModalUploadPurchaseOrder/ModalUploadPurchaseOrder";
 import { OrdersTable } from "../../components/orders-table/OrdersTable";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useAppStore } from "@/lib/store/store";
@@ -282,7 +282,7 @@ export function PurchaseOrdersView() {
       />
 
       {whichModalIsOpen.selected === 2 && (
-        <UploadInterface onFileUpload={handleFileUpload} onClose={closeModals} />
+        <ModalUploadPurchaseOrder onFileUpload={handleFileUpload} onClose={closeModals} />
       )}
     </div>
   );
