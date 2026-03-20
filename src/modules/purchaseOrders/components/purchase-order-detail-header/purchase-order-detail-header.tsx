@@ -29,6 +29,7 @@ interface PurchaseOrderDetailHeaderProps {
   onEditToggle: () => void;
   onOpenModal: (modal: number) => void;
   onDownloadCSV: () => void;
+  formId?: string;
 }
 
 export function PurchaseOrderDetailHeader({
@@ -38,7 +39,8 @@ export function PurchaseOrderDetailHeader({
   canEdit,
   onEditToggle,
   onOpenModal,
-  onDownloadCSV
+  onDownloadCSV,
+  formId
 }: PurchaseOrderDetailHeaderProps) {
   const router = useRouter();
   const formatMoney = useAppStore((state) => state.formatMoney);
