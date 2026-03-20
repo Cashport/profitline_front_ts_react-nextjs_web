@@ -24,7 +24,7 @@ import {
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
-import { monthsUntilExpiration, formatDateDMY } from "@/utils/utils";
+import { monthsUntilExpiration, formatDateDMY, formatNumber } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
   data: IPurchaseOrderDetail;
@@ -454,9 +454,12 @@ export function PurchaseOrderProducts({
                                 <Input
                                   type="number"
                                   step="any"
+                                  min={0}
                                   value={controllerField.value ?? ""}
-                                  onChange={(e) => handleBoxesChange(index, Number(e.target.value))}
-                                  className={`w-20 h-8 text-sm text-right ${isStockExceeded(index) ? "border-red-500 text-red-500" : ""}`}
+                                  onChange={(e) =>
+                                    handleBoxesChange(index, Math.max(0, Number(e.target.value)))
+                                  }
+                                  className={`w-14 h-8 text-sm text-right pr-0 ${isStockExceeded(index) ? "border-red-500 text-red-500" : ""}`}
                                 />
                               ) : (
                                 <span
@@ -474,7 +477,10 @@ export function PurchaseOrderProducts({
                       <span
                         className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500 font-semibold" : "text-cashport-black"}`}
                       >
-                        {getStockForProduct(watchedProducts[index]?.product_id)?.inWarehouse ?? "-"}
+                        {(() => {
+                          const stock = getStockForProduct(watchedProducts[index]?.product_id)?.inWarehouse;
+                          return stock != null ? formatNumber(stock) : "-";
+                        })()}
                       </span>
                     </td>
                     <td className="p-3 text-right">
