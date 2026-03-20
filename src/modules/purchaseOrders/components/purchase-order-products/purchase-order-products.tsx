@@ -192,8 +192,7 @@ export function PurchaseOrderProducts({
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    const qtyByBox = watchedProducts[index]?.quantity_by_box ?? 0;
-    setValue(`products.${index}.quantity`, qtyByBox * newBoxes, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newBoxes, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -440,7 +439,7 @@ export function PurchaseOrderProducts({
                         {isEditMode
                           ? (watchedProducts[index]?.quantity_by_box ?? 0) *
                             (watchedProducts[index]?.box_quantity ?? 0)
-                          : field.quantity ?? "-"}
+                          : field.quantity * (field.quantity_by_box || 1)}
                       </span>
                     </td>
                     <td className="p-3 text-right">
