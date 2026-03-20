@@ -83,8 +83,6 @@ export function PurchaseOrderProducts({
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
 
-  // Check if any product is missing batch_id
-  const hasMissingBatch = isEditMode && watchedProducts.some((p) => !p.batch_id);
 
   const getStockForProduct = (productId: number | undefined) => {
     if (!productId) return undefined;
@@ -158,7 +156,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
-      if (hasDecimals || hasMissingBatch || hasStockExceeded) return;
+      if (hasDecimals || hasStockExceeded) return;
       const isDirty = Object.keys(dirtyFields).length > 0;
       if (!isDirty) {
         setIsEditMode(false);
@@ -252,7 +250,7 @@ export function PurchaseOrderProducts({
                 variant="outline"
                 size="sm"
                 onClick={handleEditToggle}
-                disabled={isEditMode && (hasDecimals || hasMissingBatch || hasStockExceeded)}
+                disabled={isEditMode && (hasDecimals || hasStockExceeded)}
               >
                 {isEditMode ? (
                   <>
@@ -273,11 +271,6 @@ export function PurchaseOrderProducts({
           {isEditMode && hasDecimals && (
             <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
               No se pueden pedir decimales en cajas o unidades
-            </div>
-          )}
-          {isEditMode && hasMissingBatch && (
-            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
-              Todos los productos deben tener un lote seleccionado
             </div>
           )}
           <table className="w-full">
