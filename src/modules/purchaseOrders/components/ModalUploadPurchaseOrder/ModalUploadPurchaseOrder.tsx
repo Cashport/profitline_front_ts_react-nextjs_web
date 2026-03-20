@@ -248,6 +248,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
             onFileUpload={handleManualFileUpload}
             title="Arrastra tu archivo PDF aquí"
             allowedExtensions={[".pdf"]}
+            multiple
           />
 
           {manualFiles.length > 0 && (

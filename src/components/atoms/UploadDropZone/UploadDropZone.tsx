@@ -8,13 +8,15 @@ interface UploadDropZoneProps {
   allowedExtensions?: string[];
   title?: string;
   subtitle?: string;
+  multiple?: boolean;
 }
 
 export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   onFileUpload,
   allowedExtensions,
   title = "Arrastra tu archivo aquí",
-  subtitle = "O selecciona un archivo desde tu dispositivo"
+  subtitle = "O selecciona un archivo desde tu dispositivo",
+  multiple = false
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,10 +37,14 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
       setIsDragOver(false);
       const files = e.dataTransfer.files;
       if (files.length > 0) {
-        onFileUpload(files[0]);
+        if (multiple) {
+          Array.from(files).forEach((file) => onFileUpload(file));
+        } else {
+          onFileUpload(files[0]);
+        }
       }
     },
-    [onFileUpload]
+    [onFileUpload, multiple]
   );
 
   const handleFileSelect = useCallback(() => {
@@ -49,11 +55,15 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (files && files.length > 0) {
-        onFileUpload(files[0]);
+        if (multiple) {
+          Array.from(files).forEach((file) => onFileUpload(file));
+        } else {
+          onFileUpload(files[0]);
+        }
         e.target.value = "";
       }
     },
-    [onFileUpload]
+    [onFileUpload, multiple]
   );
 
   return (
@@ -79,6 +89,7 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         ref={fileInputRef}
         type="file"
         accept={allowedExtensions?.join(",")}
+        multiple={multiple}
         onChange={handleFileInputChange}
         style={{ display: "none" }}
       />
