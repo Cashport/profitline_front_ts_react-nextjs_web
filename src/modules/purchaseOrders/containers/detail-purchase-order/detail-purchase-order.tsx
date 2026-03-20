@@ -185,6 +185,9 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
+  const noEditStates = ["En Facturación", "Facturado", "En despacho", "Entregado"];
+  const canEdit = !noEditStates.includes(data.status_name);
+
   const expandPdf = () => {
     setIsPdfCollapsed(false);
     setPdfWidth(40); // Default width when expanding
@@ -219,7 +222,6 @@ export function DetailPurchaseOrder() {
   const handleDownloadCSV = async () => {
     try {
       const response = await downloadPurchaseOrdersCSV({ orderIds: [orderId!] });
-      // Crea un link temporal en memoria (no visible ni navegable)
       window.open(response.url, "_blank");
     } catch (error) {
       message.error(
@@ -236,6 +238,7 @@ export function DetailPurchaseOrder() {
             data={data}
             orderId={orderId!}
             isEditMode={isEditMode}
+            canEdit={canEdit}
             onEditToggle={handleEditToggle}
             onOpenModal={handleOpenModal}
             onDownloadCSV={handleDownloadCSV}
@@ -268,6 +271,7 @@ export function DetailPurchaseOrder() {
               mutate={mutate}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
+              canEdit={canEdit}
             />
 
             {!isPdfCollapsed && (

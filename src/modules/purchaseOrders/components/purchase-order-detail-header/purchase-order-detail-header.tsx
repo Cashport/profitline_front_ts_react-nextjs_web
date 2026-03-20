@@ -25,6 +25,7 @@ interface PurchaseOrderDetailHeaderProps {
   data: IPurchaseOrderDetail;
   orderId: string;
   isEditMode: boolean;
+  canEdit: boolean;
   onEditToggle: () => void;
   onOpenModal: (modal: number) => void;
   onDownloadCSV: () => void;
@@ -35,6 +36,7 @@ export function PurchaseOrderDetailHeader({
   data,
   orderId,
   isEditMode,
+  canEdit,
   onEditToggle,
   onOpenModal,
   onDownloadCSV,
@@ -49,6 +51,9 @@ export function PurchaseOrderDetailHeader({
 
   const siblingOrders = data.package?.sibilingOrders ?? [];
 
+  const allowedStatesForDownload = ["En despacho", "Entregado"];
+  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
+
   const actionItems: DropdownItem[] = [
     {
       key: "invoice",
@@ -59,15 +64,17 @@ export function PurchaseOrderDetailHeader({
     },
     {
       key: "dispatch",
-      label: "Confirmar despacho",
+      label: "Confirmar despacho/entrega",
       icon: <PackageCheck className="h-4 w-4" />,
-      onClick: () => onOpenModal(4)
+      onClick: () => onOpenModal(4),
+      disabled: data.status_name !== "En despacho"
     },
     {
       key: "back-order",
       label: "Marcar como Backorder",
       icon: <Boxes className="h-4 w-4" />,
-      onClick: () => onOpenModal(8)
+      onClick: () => onOpenModal(8),
+      disabled: !allowedStatesForBackOrder.includes(data.status_name)
     },
     {
       key: "divider-1",
@@ -77,7 +84,8 @@ export function PurchaseOrderDetailHeader({
       key: "download",
       label: "Descargar plano",
       icon: <FileOutput className="h-4 w-4" />,
-      onClick: onDownloadCSV
+      onClick: onDownloadCSV,
+      disabled: !allowedStatesForDownload.includes(data.status_name)
     }
   ];
 
@@ -100,29 +108,24 @@ export function PurchaseOrderDetailHeader({
             hideArrow
           />
         </GeneralDropdown>
-        {isEditMode ? (
+        {canEdit && (
           <Button
-            key="save-btn"
             variant="ghost"
             size="sm"
-            type="submit"
-            form={formId}
-            className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
-          >
-            <Save className="h-4 w-4" />
-            Guardar
-          </Button>
-        ) : (
-          <Button
-            key="edit-btn"
-            variant="ghost"
-            size="sm"
-            type="button"
             onClick={onEditToggle}
             className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
           >
-            <Edit className="h-4 w-4" />
-            Editar
+            {isEditMode ? (
+              <>
+                <Save className="h-4 w-4 " />
+                Guardar
+              </>
+            ) : (
+              <>
+                <Edit className="h-4 w-4" />
+                Editar
+              </>
+            )}
           </Button>
         )}
       </div>

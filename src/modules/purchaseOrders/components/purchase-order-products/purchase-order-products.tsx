@@ -32,6 +32,7 @@ interface PurchaseOrderProductsProps {
   mutate: () => void;
   isPdfCollapsed: boolean;
   pdfWidth: number;
+  canEdit: boolean;
 }
 
 export function PurchaseOrderProducts({
@@ -39,7 +40,8 @@ export function PurchaseOrderProducts({
   orderId,
   mutate,
   isPdfCollapsed,
-  pdfWidth
+  pdfWidth,
+  canEdit
 }: PurchaseOrderProductsProps) {
   const initialProducts = useMemo(() => mapApiProductsToForm(data.products), [data.products]);
   const summary = data.summary;
@@ -229,41 +231,43 @@ export function PurchaseOrderProducts({
       <div className="flex flex-col">
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
-          <div className="flex items-center gap-2">
-            {isEditMode && (
+          {canEdit && (
+            <div className="flex items-center gap-2">
+              {isEditMode && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    reset(initialProducts);
+                    setIsEditMode(false);
+                  }}
+                >
+                  Cancelar
+                </Button>
+              )}
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="text-gray-500 hover:text-gray-700"
-                onClick={() => {
-                  reset(initialProducts);
-                  setIsEditMode(false);
-                }}
+                onClick={handleEditToggle}
+                disabled={isEditMode && (hasDecimals || hasMissingBatch || hasStockExceeded)}
               >
-                Cancelar
+                {isEditMode ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Guardar
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar productos
+                  </>
+                )}
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleEditToggle}
-              disabled={isEditMode && (hasDecimals || hasMissingBatch || hasStockExceeded)}
-            >
-              {isEditMode ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Guardar
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editar productos
-                </>
-              )}
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           {isEditMode && hasDecimals && (
