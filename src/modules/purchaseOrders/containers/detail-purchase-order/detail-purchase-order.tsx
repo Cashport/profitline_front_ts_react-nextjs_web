@@ -11,7 +11,11 @@ import { FileText, GripVertical } from "lucide-react";
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
 import { mergeTrackingWithStages, getCurrentStage } from "../../utils/processOrderStages";
-import { downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  downloadPurchaseOrdersCSV,
+  editPurchaseOrder
+} from "@/services/purchaseOrders/purchaseOrders";
+import { PurchaseOrderInfoFormData, mapFormDataToApi } from "../../types/forms";
 
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
@@ -19,7 +23,7 @@ import { Separator } from "@/modules/chat/ui/separator";
 import ProfitLoader from "@/components/ui/profit-loader";
 import {
   PurchaseOrderInfo,
-  PurchaseOrderInfoRef
+  PURCHASE_ORDER_INFO_FORM_ID
 } from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProcess } from "../../components/purchase-order-process/purchase-order-process";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
@@ -87,7 +91,6 @@ export function DetailPurchaseOrder() {
   const [isPdfCollapsed, setIsPdfCollapsed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const infoFormRef = useRef<PurchaseOrderInfoRef>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   const {
@@ -182,17 +185,28 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
+  const noEditStates = ["En Facturación", "Facturado", "En despacho", "Entregado"];
+  const canEdit = !noEditStates.includes(data.status_name);
+
   const expandPdf = () => {
     setIsPdfCollapsed(false);
     setPdfWidth(40); // Default width when expanding
   };
 
   const handleEditToggle = () => {
-    if (isEditMode) {
-      // Trigger save before exiting edit mode
-      infoFormRef.current?.submitForm();
+    setIsEditMode(true);
+  };
+
+  const handleSaveInfo = async (formData: PurchaseOrderInfoFormData) => {
+    try {
+      const payload = mapFormDataToApi(formData);
+      await editPurchaseOrder(orderId!, payload);
+      mutate();
+      message.success("Información actualizada correctamente");
+      setIsEditMode(false);
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al actualizar la información");
     }
-    setIsEditMode(!isEditMode);
   };
 
   const handleOpenModal = (modal: number) => {
@@ -208,7 +222,6 @@ export function DetailPurchaseOrder() {
   const handleDownloadCSV = async () => {
     try {
       const response = await downloadPurchaseOrdersCSV({ orderIds: [orderId!] });
-      // Crea un link temporal en memoria (no visible ni navegable)
       window.open(response.url, "_blank");
     } catch (error) {
       message.error(
@@ -225,19 +238,19 @@ export function DetailPurchaseOrder() {
             data={data}
             orderId={orderId!}
             isEditMode={isEditMode}
+            canEdit={canEdit}
             onEditToggle={handleEditToggle}
             onOpenModal={handleOpenModal}
             onDownloadCSV={handleDownloadCSV}
+            formId={PURCHASE_ORDER_INFO_FORM_ID}
           />
 
           <PurchaseOrderNoveltyCard novelties={data.novelties} />
 
           <PurchaseOrderInfo
-            ref={infoFormRef}
             isEditMode={isEditMode}
             data={data}
-            orderId={orderId!}
-            mutate={mutate}
+            onSubmit={handleSaveInfo}
             onCancel={() => setIsEditMode(false)}
           />
 
@@ -258,6 +271,7 @@ export function DetailPurchaseOrder() {
               mutate={mutate}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
+              canEdit={canEdit}
             />
 
             {!isPdfCollapsed && (
