@@ -4,19 +4,29 @@ import type React from "react";
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { message } from "antd";
+import { message, Tabs } from "antd";
 
-import { Upload, FileText, X, Scan, AlertTriangle, Loader2 } from "lucide-react";
+import { Upload, FileText, X, Scan, AlertTriangle, Loader2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 import { AIProcessingInterface } from "../ai-processing-interface/ai-processing-interface";
 import { uploadPurchaseOrder } from "@/services/purchaseOrders/purchaseOrders";
+import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+
+import "./upload-interface.scss";
 
 interface UploadInterfaceProps {
   onFileUpload?: (files: File[]) => void;
   onClose?: () => void;
 }
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
 
 export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps) {
   const router = useRouter();
@@ -25,6 +35,7 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
   const [error, setError] = useState<string | null>(null);
   const [showAIProcessing, setShowAIProcessing] = useState(false);
   const [processingFile, setProcessingFile] = useState<File | null>(null);
+  const [manualFiles, setManualFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -142,26 +153,28 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
     setShowAIProcessing(false);
   }, []);
 
+  const handleManualFileUpload = useCallback((file: File) => {
+    setManualFiles((prev) => [...prev, file]);
+  }, []);
+
+  const handleRemoveManualFile = useCallback((index: number) => {
+    setManualFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleContinueManual = useCallback(() => {
+    console.log("Archivos para digitación manual:", manualFiles);
+  }, [manualFiles]);
+
   if (showAIProcessing && processingFile) {
     return <AIProcessingInterface file={processingFile} onClose={handleAIProcessingClose} />;
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl bg-cashport-white border-cashport-gray-light max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-cashport-black">Cargar Orden de compra</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-cashport-black hover:bg-cashport-gray-lighter"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Upload Area */}
+  const tabItems = [
+    {
+      key: "ai",
+      label: "Procesar con IA",
+      children: (
+        <div className="space-y-6">
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragOver
@@ -209,7 +222,6 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
             </div>
           </div>
 
-          {/* Error Alert */}
           {error && (
             <Alert className="border-red-200 bg-red-50">
               <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -217,13 +229,88 @@ export function UploadInterface({ onFileUpload, onClose }: UploadInterfaceProps)
             </Alert>
           )}
 
-          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
             accept=".pdf"
             onChange={handleFileInputChange}
             className="hidden"
+          />
+        </div>
+      )
+    },
+    {
+      key: "manual",
+      label: "Procesar manualmente",
+      children: (
+        <>
+          <UploadDropZone
+            onFileUpload={handleManualFileUpload}
+            title="Arrastra tu archivo PDF aquí"
+            allowedExtensions={[".pdf"]}
+          />
+
+          {manualFiles.length > 0 && (
+            <div className="uploadInterface__fileList">
+              <p className="uploadInterface__fileListTitle">Archivos Cargados</p>
+              {manualFiles.map((file, index) => (
+                <div key={index} className="uploadInterface__fileItem">
+                  <div className="uploadInterface__fileInfo">
+                    <CheckCircle size={20} color="#cbe61e" />
+                    <div className="uploadInterface__fileDetails">
+                      <span className="uploadInterface__fileName">{file.name}</span>
+                      <span className="uploadInterface__fileSize">
+                        {formatFileSize(file.size)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    className="uploadInterface__removeButton"
+                    onClick={() => handleRemoveManualFile(index)}
+                    type="button"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="uploadInterface__continueButton">
+            <PrincipalButton
+              fullWidth
+              onClick={handleContinueManual}
+              disabled={manualFiles.length === 0}
+            >
+              Continuar a digitación manual
+            </PrincipalButton>
+          </div>
+        </>
+      )
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-2xl bg-cashport-white border-cashport-gray-light max-h-[90vh] overflow-y-auto uploadInterface">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-cashport-black">Cargar Orden de compra</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-cashport-black hover:bg-cashport-gray-lighter"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <Tabs
+            defaultActiveKey="ai"
+            items={tabItems}
+            renderTabBar={(props, DefaultTabBar) => (
+              <DefaultTabBar {...props} className="uploadInterface__custom-tab-bar" />
+            )}
           />
         </CardContent>
       </Card>
