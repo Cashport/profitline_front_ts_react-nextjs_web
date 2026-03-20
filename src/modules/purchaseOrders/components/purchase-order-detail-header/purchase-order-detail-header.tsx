@@ -47,6 +47,10 @@ export function PurchaseOrderDetailHeader({
 
   const siblingOrders = data.package?.sibilingOrders ?? [];
 
+  const allowedStatesForDispatch = ["Procesado", "En aprobaciones"];
+  const allowedStatesForDownload = ["En despacho", "Entregado"];
+  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "En facturación", "Novedad"];
+
   const actionItems: DropdownItem[] = [
     {
       key: "invoice",
@@ -57,15 +61,17 @@ export function PurchaseOrderDetailHeader({
     },
     {
       key: "dispatch",
-      label: "Confirmar despacho",
+      label: "Confirmar despacho/entrega",
       icon: <PackageCheck className="h-4 w-4" />,
-      onClick: () => onOpenModal(4)
+      onClick: () => onOpenModal(4),
+      disabled: !allowedStatesForDispatch.includes(data.status_name)
     },
     {
       key: "back-order",
       label: "Marcar como Backorder",
       icon: <Boxes className="h-4 w-4" />,
-      onClick: () => onOpenModal(8)
+      onClick: () => onOpenModal(8),
+      disabled: !allowedStatesForBackOrder.includes(data.status_name)
     },
     {
       key: "divider-1",
@@ -75,7 +81,8 @@ export function PurchaseOrderDetailHeader({
       key: "download",
       label: "Descargar plano",
       icon: <FileOutput className="h-4 w-4" />,
-      onClick: onDownloadCSV
+      onClick: onDownloadCSV,
+      disabled: !allowedStatesForDownload.includes(data.status_name)
     }
   ];
 
