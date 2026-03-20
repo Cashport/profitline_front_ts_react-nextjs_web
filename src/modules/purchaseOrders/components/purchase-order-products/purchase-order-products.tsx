@@ -32,6 +32,7 @@ interface PurchaseOrderProductsProps {
   mutate: () => void;
   isPdfCollapsed: boolean;
   pdfWidth: number;
+  canEdit: boolean;
 }
 
 export function PurchaseOrderProducts({
@@ -39,7 +40,8 @@ export function PurchaseOrderProducts({
   orderId,
   mutate,
   isPdfCollapsed,
-  pdfWidth
+  pdfWidth,
+  canEdit
 }: PurchaseOrderProductsProps) {
   const initialProducts = useMemo(() => mapApiProductsToForm(data.products), [data.products]);
   const summary = data.summary;
@@ -81,8 +83,6 @@ export function PurchaseOrderProducts({
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
 
-  // Check if any product is missing batch_id
-  const hasMissingBatch = isEditMode && watchedProducts.some((p) => !p.batch_id);
 
   const getStockForProduct = (productId: number | undefined) => {
     if (!productId) return undefined;
@@ -156,7 +156,7 @@ export function PurchaseOrderProducts({
 
   const handleEditToggle = () => {
     if (isEditMode) {
-      if (hasDecimals || hasMissingBatch || hasStockExceeded) return;
+      if (hasDecimals || hasStockExceeded) return;
       const isDirty = Object.keys(dirtyFields).length > 0;
       if (!isDirty) {
         setIsEditMode(false);
@@ -229,51 +229,48 @@ export function PurchaseOrderProducts({
       <div className="flex flex-col">
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
-          <div className="flex items-center gap-2">
-            {isEditMode && (
+          {canEdit && (
+            <div className="flex items-center gap-2">
+              {isEditMode && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    reset(initialProducts);
+                    setIsEditMode(false);
+                  }}
+                >
+                  Cancelar
+                </Button>
+              )}
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="text-gray-500 hover:text-gray-700"
-                onClick={() => {
-                  reset(initialProducts);
-                  setIsEditMode(false);
-                }}
+                onClick={handleEditToggle}
+                disabled={isEditMode && (hasDecimals || hasStockExceeded)}
               >
-                Cancelar
+                {isEditMode ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Guardar
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar productos
+                  </>
+                )}
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleEditToggle}
-              disabled={isEditMode && (hasDecimals || hasMissingBatch || hasStockExceeded)}
-            >
-              {isEditMode ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Guardar
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editar productos
-                </>
-              )}
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           {isEditMode && hasDecimals && (
             <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
               No se pueden pedir decimales en cajas o unidades
-            </div>
-          )}
-          {isEditMode && hasMissingBatch && (
-            <div className="mb-2 p-2 bg-red-100 border border-red-400 text-red-700 text-sm rounded w-fit">
-              Todos los productos deben tener un lote seleccionado
             </div>
           )}
           <table className="w-full">
