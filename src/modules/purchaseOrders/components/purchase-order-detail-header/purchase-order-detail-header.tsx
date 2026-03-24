@@ -62,6 +62,15 @@ export function PurchaseOrderDetailHeader({
   const router = useRouter();
   const formatMoney = useAppStore((state) => state.formatMoney);
 
+  const currentSiblingOrder = useMemo(() => {
+    return data?.package?.sibilingOrders?.find((order) => String(order.id) === orderId);
+  }, [data?.package?.sibilingOrders, orderId]);
+
+  const siblingOrders = data?.package?.sibilingOrders ?? [];
+
+  const allowedStatesForDownload = ["En despacho", "Entregado"];
+  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
+
   if (isCreating) {
     const activeFile = files?.[activeFileIndex];
     return (
@@ -128,15 +137,6 @@ export function PurchaseOrderDetailHeader({
       </div>
     );
   }
-
-  const currentSiblingOrder = useMemo(() => {
-    return data?.package?.sibilingOrders?.find((order) => String(order.id) === orderId);
-  }, [data?.package?.sibilingOrders, orderId]);
-
-  const siblingOrders = data?.package?.sibilingOrders ?? [];
-
-  const allowedStatesForDownload = ["En despacho", "Entregado"];
-  const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
 
   const actionItems: DropdownItem[] = [
     {
