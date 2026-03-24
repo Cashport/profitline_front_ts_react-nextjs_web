@@ -10,7 +10,8 @@ import { Eye } from "lucide-react";
 import {
   PurchaseOrderProductsFormData,
   mapApiProductsToForm,
-  mapFormProductsToApi
+  mapFormProductsToApi,
+  getEmptyProductsFormData
 } from "../../types/forms";
 import { purchaseOrderProductsSchema } from "../../schemas/purchaseOrderSchemas";
 import {
@@ -27,26 +28,35 @@ import { IProduct, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
 import { monthsUntilExpiration, formatDateDMY, formatNumber } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
-  data: IPurchaseOrderDetail;
-  orderId: string;
-  mutate: () => void;
+  isCreating?: boolean;
+  data?: IPurchaseOrderDetail;
+  orderId?: string;
+  mutate?: () => void;
   isPdfCollapsed: boolean;
   pdfWidth: number;
-  canEdit: boolean;
+  canEdit?: boolean;
+  clientId?: string;
+  onProductsChange?: (products: PurchaseOrderProductsFormData) => void;
 }
 
 export function PurchaseOrderProducts({
+  isCreating,
   data,
   orderId,
   mutate,
   isPdfCollapsed,
   pdfWidth,
-  canEdit
+  canEdit,
+  clientId: clientIdProp,
+  onProductsChange
 }: PurchaseOrderProductsProps) {
-  const initialProducts = useMemo(() => mapApiProductsToForm(data.products), [data.products]);
-  const summary = data.summary;
-  const clientId = data.client_nit;
-  const [isEditMode, setIsEditMode] = useState(false);
+  const initialProducts = useMemo(() => {
+    if (isCreating || !data?.products) return getEmptyProductsFormData();
+    return mapApiProductsToForm(data.products);
+  }, [data?.products, isCreating]);
+  const summary = data?.summary ?? { totalQuantity: 0, subtotal: 0, totalTaxes: 0, grandTotal: 0 };
+  const clientId = clientIdProp ?? data?.client_nit;
+  const [isEditMode, setIsEditMode] = useState(isCreating ?? false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
   const [warehouseStock, setWarehouseStock] = useState<IWarehouseProductsStock[]>([]);
@@ -138,7 +148,7 @@ export function PurchaseOrderProducts({
 
   useEffect(() => {
     const fetchStock = async () => {
-      if (!projectId || !data.warehouseId || !orderId) return;
+      if (!projectId || !data?.warehouseId || !orderId) return;
       try {
         const stock = await getWarehouseProducts(projectId, data.warehouseId, Number(orderId));
         if (stock) setWarehouseStock(stock);
@@ -147,12 +157,19 @@ export function PurchaseOrderProducts({
       }
     };
     fetchStock();
-  }, [projectId, data.warehouseId, orderId]);
+  }, [projectId, data?.warehouseId, orderId]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
     reset(initialProducts);
   }, [initialProducts, reset]);
+
+  // Bubble up product changes in create mode
+  useEffect(() => {
+    if (isCreating && onProductsChange) {
+      onProductsChange({ products: watchedProducts });
+    }
+  }, [isCreating, watchedProducts, onProductsChange]);
 
   const handleEditToggle = () => {
     if (isEditMode) {
@@ -171,6 +188,7 @@ export function PurchaseOrderProducts({
   };
 
   const onSubmitProducts = async (formData: PurchaseOrderProductsFormData) => {
+    if (isCreating) return;
     try {
       const payload = mapFormProductsToApi(formData);
       const productsToSend = payload.products.map((p) => ({
@@ -180,8 +198,8 @@ export function PurchaseOrderProducts({
             ? Number(p.marketplace_order_product_id)
             : undefined
       }));
-      await editPurchaseOrderProducts(orderId, productsToSend);
-      mutate();
+      await editPurchaseOrderProducts(orderId!, productsToSend);
+      mutate?.();
       message.success("Productos actualizados correctamente");
       setIsEditMode(false);
     } catch (error) {
@@ -217,7 +235,7 @@ export function PurchaseOrderProducts({
 
   const allowEditStatuses = ["Procesado", "Back order", "Novedad"];
 
-  const canEditProductsRows = isEditMode && allowEditStatuses.includes(data.status_name);
+  const canEditProductsRows = isCreating || (isEditMode && allowEditStatuses.includes(data?.status_name ?? ""));
 
   return (
     <div
@@ -229,7 +247,7 @@ export function PurchaseOrderProducts({
       <div className="flex flex-col">
         <div className="mb-4 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
-          {canEdit && (
+          {!isCreating && canEdit && (
             <div className="flex items-center gap-2">
               {isEditMode && (
                 <Button

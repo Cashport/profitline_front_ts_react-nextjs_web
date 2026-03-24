@@ -1,0 +1,201 @@
+"use client";
+
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { message } from "antd";
+import { FileText, GripVertical } from "lucide-react";
+
+import { useResizablePanel } from "../../hooks/useResizablePanel";
+import { useAppStore } from "@/lib/store/store";
+
+import { Card, CardContent } from "@/modules/chat/ui/card";
+import { Button } from "@/modules/chat/ui/button";
+import { Separator } from "@/modules/chat/ui/separator";
+import {
+  PurchaseOrderInfo,
+  PURCHASE_ORDER_INFO_FORM_ID
+} from "../../components/purchase-order-info/purchase-order-info";
+import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
+import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
+import { PurchaseOrderDetailHeader } from "../../components/purchase-order-detail-header/purchase-order-detail-header";
+
+import { PurchaseOrderInfoFormData, PurchaseOrderProductsFormData } from "../../types/forms";
+
+interface FileFormState {
+  info: PurchaseOrderInfoFormData | null;
+  products: PurchaseOrderProductsFormData | null;
+  clientId?: string;
+}
+
+export function CreatePurchaseOrder() {
+  const router = useRouter();
+  const { pdfWidth, isPdfCollapsed, containerRef, handleMouseDown, expandPdf, collapsePdf } =
+    useResizablePanel();
+
+  const createFiles = useAppStore((state) => state.createFiles);
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Independent form state per file
+  const formStatesRef = useRef<Map<number, FileFormState>>(new Map());
+
+  // Current file's live refs (populated by callbacks from child components)
+  const infoDataRef = useRef<PurchaseOrderInfoFormData | null>(null);
+  const productsDataRef = useRef<PurchaseOrderProductsFormData | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
+
+  // Create objectURL for the active file's PDF preview
+  const [fileUrl, setFileUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    const file = createFiles[activeFileIndex];
+    if (!file) {
+      setFileUrl(undefined);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setFileUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [activeFileIndex, createFiles]);
+
+  // Save current file's state before switching
+  const saveCurrentFileState = useCallback(() => {
+    formStatesRef.current.set(activeFileIndex, {
+      info: infoDataRef.current,
+      products: productsDataRef.current,
+      clientId: selectedClientId
+    });
+  }, [activeFileIndex, selectedClientId]);
+
+  const handleFileChange = useCallback(
+    (index: number) => {
+      if (index === activeFileIndex) return;
+      saveCurrentFileState();
+
+      // Load the target file's saved state
+      const savedState = formStatesRef.current.get(index);
+      infoDataRef.current = savedState?.info ?? null;
+      productsDataRef.current = savedState?.products ?? null;
+      setSelectedClientId(savedState?.clientId);
+
+      setActiveFileIndex(index);
+    },
+    [activeFileIndex, saveCurrentFileState]
+  );
+
+  const handleInfoSubmit = useCallback((data: PurchaseOrderInfoFormData) => {
+    infoDataRef.current = data;
+  }, []);
+
+  const handleProductsChange = useCallback((products: PurchaseOrderProductsFormData) => {
+    productsDataRef.current = products;
+  }, []);
+
+  const handleCreateOrder = async () => {
+    // Trigger info form validation and submission
+    const form = document.getElementById(PURCHASE_ORDER_INFO_FORM_ID) as HTMLFormElement | null;
+    if (form) {
+      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
+
+    // Wait a tick for the form submit handler to populate infoDataRef
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    if (!infoDataRef.current) {
+      message.warning("Por favor complete la información de la orden");
+      return;
+    }
+
+    if (!productsDataRef.current || productsDataRef.current.products.length === 0) {
+      message.warning("Por favor agregue al menos un producto");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // TODO: Call the create API with infoDataRef.current and productsDataRef.current
+      message.success("Orden de compra creada correctamente");
+      router.push("/purchase-orders");
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al crear la orden de compra");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-cashport-gray-lighter">
+      <Card className="bg-cashport-white border-0 shadow-sm pt-0">
+        <CardContent className="px-6 pb-6 pt-6">
+          <PurchaseOrderDetailHeader
+            isCreating
+            files={createFiles}
+            activeFileIndex={activeFileIndex}
+            onFileChange={handleFileChange}
+          />
+
+          <PurchaseOrderInfo
+            key={activeFileIndex}
+            isCreating
+            isEditMode={true}
+            onSubmit={handleInfoSubmit}
+            onCancel={() => router.push("/purchase-orders")}
+            onClientChange={setSelectedClientId}
+          />
+
+          <Separator className="mb-6" />
+
+          <div ref={containerRef} className="flex gap-4 overflow-hidden">
+            <PurchaseOrderProducts
+              key={activeFileIndex}
+              isCreating
+              isPdfCollapsed={isPdfCollapsed}
+              pdfWidth={pdfWidth}
+              clientId={selectedClientId}
+              onProductsChange={handleProductsChange}
+            />
+
+            {!isPdfCollapsed && (
+              <div
+                className="w-px bg-cashport-gray-light hover:bg-cashport-green cursor-col-resize flex items-center justify-center group transition-colors duration-200 flex-shrink-0"
+                onMouseDown={handleMouseDown}
+              >
+                <GripVertical className="h-6 w-6 text-cashport-gray-light group-hover:text-cashport-green transition-colors duration-200" />
+              </div>
+            )}
+
+            {!isPdfCollapsed && (
+              <PurchaseOrderDocument
+                fileUrl={fileUrl}
+                pdfWidth={pdfWidth}
+                onCollapse={collapsePdf}
+              />
+            )}
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <Button
+              onClick={handleCreateOrder}
+              disabled={isSubmitting}
+              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6"
+            >
+              {isSubmitting ? "Creando..." : "Crear Orden de Compra"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {isPdfCollapsed && (
+        <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+          <Button
+            onClick={expandPdf}
+            className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black rounded-l-lg rounded-r-none px-3 py-8 shadow-lg flex flex-col items-center justify-center"
+          >
+            <FileText className="h-5 w-5 mb-1" />
+            <span className="text-xs font-medium">PDF</span>
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

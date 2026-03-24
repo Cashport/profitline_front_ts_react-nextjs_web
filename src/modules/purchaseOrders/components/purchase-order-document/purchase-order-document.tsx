@@ -5,19 +5,21 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 
 interface PurchaseOrderDocumentProps {
-  data: IPurchaseOrderDetail;
+  data?: IPurchaseOrderDetail;
+  fileUrl?: string;
   pdfWidth: number;
   onCollapse: () => void;
 }
 
 export function PurchaseOrderDocument({
   data,
+  fileUrl,
   pdfWidth,
   onCollapse
 }: PurchaseOrderDocumentProps) {
-  const pdfUrl = data.document_url;
-  const archivoOriginal = data.document_name;
-  const numeroFactura = data.purchase_order_number;
+  const pdfUrl = fileUrl ?? data?.document_url;
+  const archivoOriginal = data?.document_name;
+  const numeroFactura = data?.purchase_order_number;
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const handleDownloadPdf = () => {

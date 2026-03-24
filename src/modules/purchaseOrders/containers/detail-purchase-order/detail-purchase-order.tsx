@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
 import { message } from "antd";
 import dynamic from "next/dynamic";
 import { FileText, GripVertical } from "lucide-react";
+
+import { useResizablePanel } from "../../hooks/useResizablePanel";
 
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
@@ -87,10 +89,8 @@ export function DetailPurchaseOrder() {
   const orderId = extractSingleParam(params.orderId);
 
   // All hooks must be called before any conditional returns
-  const [pdfWidth, setPdfWidth] = useState(50);
-  const [isPdfCollapsed, setIsPdfCollapsed] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { pdfWidth, isPdfCollapsed, containerRef, handleMouseDown, expandPdf, collapsePdf } =
+    useResizablePanel();
   const [isEditMode, setIsEditMode] = useState(false);
 
   const {
@@ -120,47 +120,6 @@ export function DetailPurchaseOrder() {
   });
   const closeModals = () => setWhichModalIsOpen({ selected: 0 });
 
-  // Dragging handlers
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging || !containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const newWidth = ((containerRect.right - e.clientX) / containerRect.width) * 100;
-
-      const constrainedWidth = Math.max(20, Math.min(70, newWidth));
-
-      if (constrainedWidth < 25) {
-        setIsPdfCollapsed(true);
-      } else {
-        setIsPdfCollapsed(false);
-        setPdfWidth(constrainedWidth);
-      }
-    },
-    [isDragging]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Dragging effect
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
   // Loading state
   if (isLoading) {
     return (
@@ -187,11 +146,6 @@ export function DetailPurchaseOrder() {
 
   const noEditStates = ["En Facturación", "Facturado", "En despacho", "Entregado"];
   const canEdit = !noEditStates.includes(data.status_name);
-
-  const expandPdf = () => {
-    setIsPdfCollapsed(false);
-    setPdfWidth(40); // Default width when expanding
-  };
 
   const handleEditToggle = () => {
     setIsEditMode(true);
@@ -287,7 +241,7 @@ export function DetailPurchaseOrder() {
               <PurchaseOrderDocument
                 data={data}
                 pdfWidth={pdfWidth}
-                onCollapse={() => setIsPdfCollapsed(true)}
+                onCollapse={collapsePdf}
               />
             )}
           </div>

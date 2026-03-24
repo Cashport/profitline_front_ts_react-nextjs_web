@@ -12,7 +12,8 @@ import {
   Receipt,
   PackageCheck,
   Boxes,
-  FileOutput
+  FileOutput,
+  FileText
 } from "lucide-react";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { Button } from "@/modules/chat/ui/button";
@@ -22,17 +23,33 @@ import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
 
 interface PurchaseOrderDetailHeaderProps {
-  data: IPurchaseOrderDetail;
-  orderId: string;
-  isEditMode: boolean;
-  canEdit: boolean;
-  onEditToggle: () => void;
-  onOpenModal: (modal: number) => void;
-  onDownloadCSV: () => void;
+  isCreating?: boolean;
+  files?: File[];
+  activeFileIndex?: number;
+  onFileChange?: (index: number) => void;
+  data?: IPurchaseOrderDetail;
+  orderId?: string;
+  isEditMode?: boolean;
+  canEdit?: boolean;
+  onEditToggle?: () => void;
+  onOpenModal?: (modal: number) => void;
+  onDownloadCSV?: () => void;
   formId?: string;
 }
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+};
+
 export function PurchaseOrderDetailHeader({
+  isCreating,
+  files,
+  activeFileIndex = 0,
+  onFileChange,
   data,
   orderId,
   isEditMode,
@@ -45,11 +62,78 @@ export function PurchaseOrderDetailHeader({
   const router = useRouter();
   const formatMoney = useAppStore((state) => state.formatMoney);
 
-  const currentSiblingOrder = useMemo(() => {
-    return data.package?.sibilingOrders?.find((order) => String(order.id) === orderId);
-  }, [data.package?.sibilingOrders, orderId]);
+  if (isCreating) {
+    const activeFile = files?.[activeFileIndex];
+    return (
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/purchase-orders")}
+            className="text-cashport-black hover:bg-gray-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          {files && files.length > 1 && (
+            <AntDropdown
+              trigger={["click"]}
+              placement="bottomRight"
+              dropdownRender={() => (
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 min-w-[300px]">
+                  <div className="max-h-[300px] overflow-y-auto py-1">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        onClick={() => onFileChange?.(index)}
+                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 ${
+                          index === activeFileIndex ? "bg-gray-100" : ""
+                        }`}
+                      >
+                        <FileText className="h-4 w-4 text-cashport-green flex-shrink-0" />
+                        <span className="text-sm font-medium truncate flex-1">{file.name}</span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="border-t border-gray-200 px-4 py-2.5">
+                    <span className="text-xs text-gray-500">{files.length} archivos</span>
+                  </div>
+                </div>
+              )}
+            >
+              <button className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer">
+                <FileText className="h-3.5 w-3.5 text-cashport-green" />
+                <span className="text-sm font-medium truncate max-w-[200px]">
+                  {activeFile?.name ?? "Sin archivo"}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+              </button>
+            </AntDropdown>
+          )}
+          {files && files.length === 1 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-200 bg-gray-50">
+              <FileText className="h-3.5 w-3.5 text-cashport-green" />
+              <span className="text-sm font-medium truncate max-w-[200px]">
+                {activeFile?.name ?? "Sin archivo"}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
-  const siblingOrders = data.package?.sibilingOrders ?? [];
+  const currentSiblingOrder = useMemo(() => {
+    return data?.package?.sibilingOrders?.find((order) => String(order.id) === orderId);
+  }, [data?.package?.sibilingOrders, orderId]);
+
+  const siblingOrders = data?.package?.sibilingOrders ?? [];
 
   const allowedStatesForDownload = ["En despacho", "Entregado"];
   const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
@@ -59,22 +143,22 @@ export function PurchaseOrderDetailHeader({
       key: "invoice",
       label: "Cargar factura",
       icon: <Receipt className="h-4 w-4" />,
-      onClick: () => onOpenModal(3),
-      disabled: data.status_name !== "En facturación"
+      onClick: () => onOpenModal?.(3),
+      disabled: data?.status_name !== "En facturación"
     },
     {
       key: "dispatch",
       label: "Confirmar despacho/entrega",
       icon: <PackageCheck className="h-4 w-4" />,
-      onClick: () => onOpenModal(4),
-      disabled: data.status_name !== "En despacho"
+      onClick: () => onOpenModal?.(4),
+      disabled: data?.status_name !== "En despacho"
     },
     {
       key: "back-order",
       label: "Marcar como Backorder",
       icon: <Boxes className="h-4 w-4" />,
-      onClick: () => onOpenModal(8),
-      disabled: !allowedStatesForBackOrder.includes(data.status_name)
+      onClick: () => onOpenModal?.(8),
+      disabled: !allowedStatesForBackOrder.includes(data?.status_name ?? "")
     },
     {
       key: "divider-1",
@@ -85,7 +169,7 @@ export function PurchaseOrderDetailHeader({
       label: "Descargar plano",
       icon: <FileOutput className="h-4 w-4" />,
       onClick: onDownloadCSV,
-      disabled: !allowedStatesForDownload.includes(data.status_name)
+      disabled: !allowedStatesForDownload.includes(data?.status_name ?? "")
     }
   ];
 
@@ -130,11 +214,11 @@ export function PurchaseOrderDetailHeader({
         )}
       </div>
       <div className="flex items-center gap-2">
-        {!!data.approvation && (
+        {!!data?.approvation && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onOpenModal(10)}
+            onClick={() => onOpenModal?.(10)}
             className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
           >
             Ver aprobación
@@ -176,15 +260,15 @@ export function PurchaseOrderDetailHeader({
                   ))}
                 </div>
                 <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
-                  <span className="text-xs text-gray-500">{data.package.totalOrders} ordenes</span>
-                  <span className="text-sm font-bold">{formatMoney(data.package.totalAmount)}</span>
+                  <span className="text-xs text-gray-500">{data?.package.totalOrders} ordenes</span>
+                  <span className="text-sm font-bold">{formatMoney(data?.package.totalAmount ?? 0)}</span>
                 </div>
               </div>
             )}
           >
             <button className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer">
               <span className="text-sm font-medium">
-                {currentSiblingOrder?.orderNumber ?? data.purchase_order_number}
+                {currentSiblingOrder?.orderNumber ?? data?.purchase_order_number}
               </span>
               <span className="text-xs text-gray-400">
                 {formatMoney(currentSiblingOrder?.totalAmount ?? 0)}
@@ -195,9 +279,9 @@ export function PurchaseOrderDetailHeader({
         )}
         <Badge
           className="text-white px-3 py-1 text-sm font-medium"
-          style={{ backgroundColor: data.status_color || "#B0BEC5" }}
+          style={{ backgroundColor: data?.status_color || "#B0BEC5" }}
         >
-          {data.status_name ? data.status_name : "Desconocido"}
+          {data?.status_name ? data.status_name : "Desconocido"}
         </Badge>
       </div>
     </div>

@@ -169,6 +169,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
 
   const handleContinueManual = async () => {
     setCreateFiles(manualFiles);
+    router.push("/purchase-orders/create");
   };
 
   if (showAIProcessing && processingFile) {
