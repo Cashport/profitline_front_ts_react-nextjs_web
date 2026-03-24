@@ -321,6 +321,7 @@ export interface IBatchByProduct {
   id: number;
   batch: string;
   batch_expiration_date: string | null;
+  stock_available: number | null;
 }
 
 export interface IBatchesByPurchaseOrder {
