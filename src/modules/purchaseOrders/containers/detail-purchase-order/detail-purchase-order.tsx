@@ -238,11 +238,7 @@ export function DetailPurchaseOrder() {
             )}
 
             {!isPdfCollapsed && (
-              <PurchaseOrderDocument
-                data={data}
-                pdfWidth={pdfWidth}
-                onCollapse={collapsePdf}
-              />
+              <PurchaseOrderDocument data={data} pdfWidth={pdfWidth} onCollapse={collapsePdf} />
             )}
           </div>
         </CardContent>
