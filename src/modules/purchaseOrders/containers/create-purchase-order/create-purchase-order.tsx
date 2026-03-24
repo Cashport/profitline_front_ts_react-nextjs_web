@@ -11,15 +11,14 @@ import { useAppStore } from "@/lib/store/store";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { Button } from "@/modules/chat/ui/button";
 import { Separator } from "@/modules/chat/ui/separator";
-import {
-  PurchaseOrderInfo,
-  PURCHASE_ORDER_INFO_FORM_ID
-} from "../../components/purchase-order-info/purchase-order-info";
+import { PurchaseOrderInfo } from "../../components/purchase-order-info/purchase-order-info";
 import { PurchaseOrderProducts } from "../../components/purchase-order-products/purchase-order-products";
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
 import { PurchaseOrderDetailHeader } from "../../components/purchase-order-detail-header/purchase-order-detail-header";
 
 import { PurchaseOrderInfoFormData, PurchaseOrderProductsFormData } from "../../types/forms";
+import { createPurchaseOrderBulk } from "@/services/purchaseOrders/purchaseOrders";
+import { ICreatePurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 
 interface FileFormState {
   info: PurchaseOrderInfoFormData | null;
@@ -116,32 +115,51 @@ export function CreatePurchaseOrder() {
   }, []);
 
   const handleCreateOrder = async () => {
-    // Trigger info form validation and submission
-    const form = document.getElementById(PURCHASE_ORDER_INFO_FORM_ID) as HTMLFormElement | null;
-    if (form) {
-      form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-    }
+    // Save the active file's current state first
+    saveCurrentFileState();
 
-    // Wait a tick for the form submit handler to populate infoDataRef
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Build purchase_orders array from all files' form states
+    const purchaseOrders: ICreatePurchaseOrder[] = [];
+    for (let i = 0; i < createFiles.length; i++) {
+      const state = formStatesRef.current.get(i);
+      if (!state?.info?.purchase_order_number) {
+        message.warning(`Archivo "${createFiles[i].name}": falta el número de orden de compra`);
+        return;
+      }
+      if (!state.clientId) {
+        message.warning(`Archivo "${createFiles[i].name}": falta seleccionar un cliente`);
+        return;
+      }
+      if (!state.products?.products?.length) {
+        message.warning(`Archivo "${createFiles[i].name}": debe tener al menos un producto`);
+        return;
+      }
 
-    if (!infoDataRef.current) {
-      message.warning("Por favor complete la información de la orden");
-      return;
-    }
-
-    if (!productsDataRef.current || productsDataRef.current.products.length === 0) {
-      message.warning("Por favor agregue al menos un producto");
-      return;
+      purchaseOrders.push({
+        client_id: state.clientId,
+        purchase_order_number: state.info.purchase_order_number,
+        delivery_date: state.info.delivery_date ?? "",
+        observations: state.info.observations ?? "",
+        products: state.products.products.map((p) => ({
+          id: p.product_id ?? 0,
+          description: p.product_description,
+          quantity: p.quantity,
+          price: p.unit_price,
+          taxes: p.tax_amount
+        }))
+      });
     }
 
     setIsSubmitting(true);
     try {
-      // TODO: Call the create API with infoDataRef.current and productsDataRef.current
-      message.success("Orden de compra creada correctamente");
-      router.push("/purchase-orders");
+      console.log("Creating purchase orders with data:", purchaseOrders);
+      // await createPurchaseOrderBulk(createFiles, { purchase_orders: purchaseOrders });
+      message.success("Órdenes de compra creadas correctamente");
+      // router.push("/purchase-orders");
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al crear la orden de compra");
+      message.error(
+        error instanceof Error ? error.message : "Error al crear las órdenes de compra"
+      );
     } finally {
       setIsSubmitting(false);
     }

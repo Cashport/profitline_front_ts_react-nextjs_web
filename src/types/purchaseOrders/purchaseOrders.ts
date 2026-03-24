@@ -336,7 +336,7 @@ export interface ICreatePurchaseOrderProduct {
   taxes: number;
 }
 
-export interface ICreatePurchaseOrderPayload {
+export interface ICreatePurchaseOrder {
   client_id: string;
   // order_type_id: number;
   // total: number;
@@ -345,4 +345,7 @@ export interface ICreatePurchaseOrderPayload {
   // status_id: number;
   observations: string;
   products: ICreatePurchaseOrderProduct[];
+}
+export interface ICreatePurchaseOrderPayload {
+  purchase_orders: ICreatePurchaseOrder[];
 }
