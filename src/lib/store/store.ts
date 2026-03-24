@@ -52,6 +52,10 @@ export const useAppStore = create<AppStore>()(
     {
       name: "project",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => {
+        const { createFiles, setCreateFiles, ...rest } = state;
+        return rest;
+      },
       onRehydrateStorage: () => (state, error) => {
         if (error) console.error(error);
         if (state) state.setHydrated();

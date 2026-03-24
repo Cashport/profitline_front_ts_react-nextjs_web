@@ -347,5 +347,6 @@ export interface ICreatePurchaseOrder {
   products: ICreatePurchaseOrderProduct[];
 }
 export interface ICreatePurchaseOrderPayload {
-  purchase_orders: ICreatePurchaseOrder[];
+  client_id: string;
+  purchaseOrder: ICreatePurchaseOrder[];
 }

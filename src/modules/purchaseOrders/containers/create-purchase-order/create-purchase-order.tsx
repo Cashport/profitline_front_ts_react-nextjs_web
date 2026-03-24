@@ -49,7 +49,7 @@ export function CreatePurchaseOrder() {
 
   useEffect(() => {
     const file = createFiles[activeFileIndex];
-    if (!file) {
+    if (!file || !(file instanceof File)) {
       setFileUrl(undefined);
       return;
     }
@@ -153,9 +153,12 @@ export function CreatePurchaseOrder() {
     setIsSubmitting(true);
     try {
       console.log("Creating purchase orders with data:", purchaseOrders);
-      // await createPurchaseOrderBulk(createFiles, { purchase_orders: purchaseOrders });
+      await createPurchaseOrderBulk(createFiles, {
+        client_id: selectedClientId || "",
+        purchaseOrder: purchaseOrders
+      });
       message.success("Órdenes de compra creadas correctamente");
-      // router.push("/purchase-orders");
+      router.push("/purchase-orders");
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al crear las órdenes de compra"
