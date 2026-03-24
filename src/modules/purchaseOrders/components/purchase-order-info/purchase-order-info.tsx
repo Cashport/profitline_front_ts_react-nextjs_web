@@ -142,7 +142,11 @@ export function PurchaseOrderInfo({
               render={({ field }) => (
                 <>
                   {isEditMode ? (
-                    <Input {...field} className="mt-1 h-8 text-sm font-semibold" disabled={!isCreating} />
+                    <Input
+                      {...field}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      disabled={!isCreating}
+                    />
                   ) : (
                     <p className="text-sm font-semibold text-cashport-black mt-1">{field.value}</p>
                   )}
@@ -183,7 +187,9 @@ export function PurchaseOrderInfo({
                           }
                         }}
                         loading={clientsLoading}
-                        placeholder={clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"}
+                        placeholder={
+                          clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"
+                        }
                         options={clients.map((c) => ({
                           value: c.client_name,
                           label: c.client_name

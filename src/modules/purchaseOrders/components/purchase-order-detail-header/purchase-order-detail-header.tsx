@@ -196,9 +196,15 @@ export function PurchaseOrderDetailHeader({
           <Button
             variant="ghost"
             size="sm"
-            {...(isEditMode
-              ? { type: "submit" as const, form: formId }
-              : { onClick: onEditToggle })}
+            type="button"
+            onClick={() => {
+              if (isEditMode) {
+                const form = document.getElementById(formId!) as HTMLFormElement;
+                if (form) form.requestSubmit();
+              } else {
+                onEditToggle?.();
+              }
+            }}
             className="h-[48px] px-4 bg-[#f7f7f7] border border-transparent font-semibold text-cashport-black hover:bg-gray-200"
           >
             {isEditMode ? (
@@ -263,7 +269,9 @@ export function PurchaseOrderDetailHeader({
                 </div>
                 <div className="border-t border-gray-200 px-4 py-2.5 flex items-center justify-between">
                   <span className="text-xs text-gray-500">{data?.package.totalOrders} ordenes</span>
-                  <span className="text-sm font-bold">{formatMoney(data?.package.totalAmount ?? 0)}</span>
+                  <span className="text-sm font-bold">
+                    {formatMoney(data?.package.totalAmount ?? 0)}
+                  </span>
                 </div>
               </div>
             )}
