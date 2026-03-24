@@ -21,24 +21,28 @@ interface PurchaseOrderInfoProps {
   isCreating?: boolean;
   isEditMode: boolean;
   data?: IPurchaseOrderDetail;
+  initialFormData?: PurchaseOrderInfoFormData;
   onSubmit: (data: PurchaseOrderInfoFormData) => void;
   onCancel: () => void;
   onClientChange?: (clientId: string) => void;
+  onChange?: (data: PurchaseOrderInfoFormData) => void;
 }
 
 export function PurchaseOrderInfo({
   isCreating,
   isEditMode,
   data,
+  initialFormData,
   onSubmit,
   onCancel,
-  onClientChange
+  onClientChange,
+  onChange
 }: PurchaseOrderInfoProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const initialData = useMemo(() => {
-    if (isCreating || !data) return getEmptyFormData();
+    if (isCreating || !data) return initialFormData ?? getEmptyFormData();
     return mapApiToFormData(data);
-  }, [data, isCreating]);
+  }, [data, isCreating, initialFormData]);
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>(data?.client_nit);
 
   // Client list for create mode
@@ -67,7 +71,8 @@ export function PurchaseOrderInfo({
     control,
     handleSubmit,
     formState: { errors, dirtyFields },
-    reset
+    reset,
+    watch
   } = useForm<PurchaseOrderInfoFormData>({
     resolver: yupResolver(purchaseOrderInfoSchema),
     defaultValues: initialData,
@@ -83,6 +88,15 @@ export function PurchaseOrderInfo({
   useEffect(() => {
     reset(initialData);
   }, [initialData, reset]);
+
+  // Continuously report form changes to parent in create mode
+  useEffect(() => {
+    if (!isCreating || !onChange) return;
+    const subscription = watch((values) => {
+      onChange(values as PurchaseOrderInfoFormData);
+    });
+    return () => subscription.unsubscribe();
+  }, [isCreating, onChange, watch]);
 
   useEffect(() => {
     const fetchAdresses = async () => {

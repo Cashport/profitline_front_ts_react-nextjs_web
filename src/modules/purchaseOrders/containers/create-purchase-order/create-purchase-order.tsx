@@ -39,9 +39,10 @@ export function CreatePurchaseOrder() {
   // Independent form state per file
   const formStatesRef = useRef<Map<number, FileFormState>>(new Map());
 
-  // Current file's live refs (populated by callbacks from child components)
+  // Current file's live state (updated continuously by child callbacks)
   const infoDataRef = useRef<PurchaseOrderInfoFormData | null>(null);
   const productsDataRef = useRef<PurchaseOrderProductsFormData | null>(null);
+  const clientIdRef = useRef<string | undefined>();
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
 
   // Create objectURL for the active file's PDF preview
@@ -58,24 +59,37 @@ export function CreatePurchaseOrder() {
     return () => URL.revokeObjectURL(url);
   }, [activeFileIndex, createFiles]);
 
-  // Save current file's state before switching
+  // Save current file's state into the map
   const saveCurrentFileState = useCallback(() => {
     formStatesRef.current.set(activeFileIndex, {
       info: infoDataRef.current,
       products: productsDataRef.current,
-      clientId: selectedClientId
+      clientId: clientIdRef.current
     });
-  }, [activeFileIndex, selectedClientId]);
+  }, [activeFileIndex]);
+
+  // Get saved state for a file index (used as initial data on mount)
+  const getSavedInfo = useCallback(
+    () => formStatesRef.current.get(activeFileIndex)?.info ?? undefined,
+    [activeFileIndex]
+  );
+
+  const getSavedProducts = useCallback(
+    () => formStatesRef.current.get(activeFileIndex)?.products ?? undefined,
+    [activeFileIndex]
+  );
 
   const handleFileChange = useCallback(
     (index: number) => {
       if (index === activeFileIndex) return;
+      // Save current file's live state
       saveCurrentFileState();
 
-      // Load the target file's saved state
+      // Load the target file's saved state into refs
       const savedState = formStatesRef.current.get(index);
       infoDataRef.current = savedState?.info ?? null;
       productsDataRef.current = savedState?.products ?? null;
+      clientIdRef.current = savedState?.clientId;
       setSelectedClientId(savedState?.clientId);
 
       setActiveFileIndex(index);
@@ -83,12 +97,22 @@ export function CreatePurchaseOrder() {
     [activeFileIndex, saveCurrentFileState]
   );
 
+  // Continuous info form change handler
+  const handleInfoChange = useCallback((data: PurchaseOrderInfoFormData) => {
+    infoDataRef.current = data;
+  }, []);
+
   const handleInfoSubmit = useCallback((data: PurchaseOrderInfoFormData) => {
     infoDataRef.current = data;
   }, []);
 
   const handleProductsChange = useCallback((products: PurchaseOrderProductsFormData) => {
     productsDataRef.current = products;
+  }, []);
+
+  const handleClientChange = useCallback((clientId: string) => {
+    clientIdRef.current = clientId;
+    setSelectedClientId(clientId);
   }, []);
 
   const handleCreateOrder = async () => {
@@ -138,9 +162,11 @@ export function CreatePurchaseOrder() {
             key={activeFileIndex}
             isCreating
             isEditMode={true}
+            initialFormData={getSavedInfo()}
+            onChange={handleInfoChange}
             onSubmit={handleInfoSubmit}
             onCancel={() => router.push("/purchase-orders")}
-            onClientChange={setSelectedClientId}
+            onClientChange={handleClientChange}
           />
 
           <Separator className="mb-6" />
@@ -149,6 +175,7 @@ export function CreatePurchaseOrder() {
             <PurchaseOrderProducts
               key={activeFileIndex}
               isCreating
+              initialProductsData={getSavedProducts()}
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
               clientId={selectedClientId}

@@ -36,6 +36,7 @@ interface PurchaseOrderProductsProps {
   pdfWidth: number;
   canEdit?: boolean;
   clientId?: string;
+  initialProductsData?: PurchaseOrderProductsFormData;
   onProductsChange?: (products: PurchaseOrderProductsFormData) => void;
 }
 
@@ -48,12 +49,13 @@ export function PurchaseOrderProducts({
   pdfWidth,
   canEdit,
   clientId: clientIdProp,
+  initialProductsData,
   onProductsChange
 }: PurchaseOrderProductsProps) {
   const initialProducts = useMemo(() => {
-    if (isCreating || !data?.products) return getEmptyProductsFormData();
+    if (isCreating || !data?.products) return initialProductsData ?? getEmptyProductsFormData();
     return mapApiProductsToForm(data.products);
-  }, [data?.products, isCreating]);
+  }, [data?.products, isCreating, initialProductsData]);
   const summary = data?.summary ?? { totalQuantity: 0, subtotal: 0, totalTaxes: 0, grandTotal: 0 };
   const clientId = clientIdProp ?? data?.client_nit;
   const [isEditMode, setIsEditMode] = useState(isCreating ?? false);
