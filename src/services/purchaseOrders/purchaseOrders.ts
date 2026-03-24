@@ -10,7 +10,8 @@ import {
   IApprover,
   IApproversResponse,
   IUploadPurchaseOrderResponse,
-  IBatchesByPurchaseOrder
+  IBatchesByPurchaseOrder,
+  ICreatePurchaseOrderPayload
 } from "@/types/purchaseOrders/purchaseOrders";
 import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
@@ -324,6 +325,29 @@ export const deletePurchaseOrders = async (orderIds: number[]) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting purchase orders:", error);
+    throw error;
+  }
+};
+
+export const createPurchaseOrderBulk = async (
+  files: File[],
+  createPOBulk: ICreatePurchaseOrderPayload
+) => {
+  const formData = new FormData();
+
+  files.forEach((file) => {
+    formData.append("file", file);
+  });
+
+  formData.append("request", JSON.stringify(createPOBulk));
+  try {
+    const res: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseOrder/bulk`,
+      formData
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error creating purchase orders in bulk:", error);
     throw error;
   }
 };

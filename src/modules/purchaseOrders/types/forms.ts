@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {
   IPurchaseOrderDetail,
   IPurchaseOrderProduct,
@@ -59,6 +60,42 @@ export interface ProductFormData {
 export interface PurchaseOrderProductsFormData {
   products: ProductFormData[];
 }
+
+/**
+ * Returns empty form data for create mode
+ */
+export const getEmptyFormData = (): PurchaseOrderInfoFormData => ({
+  purchase_order_number: "",
+  client_name: "",
+  created_at: dayjs().format("YYYY-MM-DD"),
+  delivery_date: "",
+  delivery_address: "",
+  delivery_address_id: undefined,
+  observations: "",
+  invoices: []
+});
+
+/**
+ * Returns empty products form data for create mode (single empty row)
+ */
+export const getEmptyProductsFormData = (): PurchaseOrderProductsFormData => ({
+  products: [
+    {
+      marketplace_order_product_id: 0,
+      product_sku: "",
+      product_description: "",
+      quantity: 0,
+      unit_price: 0,
+      tax_amount: 0,
+      subtotal: 0,
+      total_price: 0,
+      product_id: undefined,
+      batch_id: undefined,
+      quantity_by_box: undefined,
+      box_quantity: 0
+    }
+  ]
+});
 
 /**
  * Transform API purchase order detail to form data
