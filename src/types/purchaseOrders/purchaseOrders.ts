@@ -327,3 +327,22 @@ export interface IBatchesByPurchaseOrder {
   product_id: number;
   batches: IBatchByProduct[];
 }
+
+export interface ICreatePurchaseOrderProduct {
+  id: number;
+  description: string;
+  quantity: number;
+  price: number;
+  taxes: number;
+}
+
+export interface ICreatePurchaseOrderPayload {
+  client_id: string;
+  // order_type_id: number;
+  // total: number;
+  purchase_order_number: string;
+  delivery_date: string;
+  // status_id: number;
+  observations: string;
+  products: ICreatePurchaseOrderProduct[];
+}

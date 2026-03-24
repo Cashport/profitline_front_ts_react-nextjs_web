@@ -17,6 +17,7 @@ import {
 } from "@/services/purchaseOrders/purchaseOrders";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import { useAppStore } from "@/lib/store/store";
 
 import "./modalUploadPurchaseOrder.scss";
 
@@ -164,17 +165,10 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
     setManualFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleContinueManual = async () => {
-    console.log("Archivos para digitación manual:", manualFiles);
+  const setCreateFiles = useAppStore((state) => state.setCreateFiles);
 
-    try {
-      await createPurchaseOrderBulk(manualFiles);
-      message.success("Órdenes de compra creadas con éxito");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al crear las órdenes de compra";
-      message.error(errorMessage);
-    }
+  const handleContinueManual = async () => {
+    setCreateFiles(manualFiles);
   };
 
   if (showAIProcessing && processingFile) {
