@@ -351,3 +351,15 @@ export const createPurchaseOrderBulk = async (
     throw error;
   }
 };
+
+export const getPurchaseOrderChannels = async () => {
+  try {
+    const res: GenericResponse<{ id: number; name: string }[]> = await API.get(
+      `${config.API_HOST}/purchaseOrder/usage-channels`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching purchase order channels:", error);
+    throw error;
+  }
+};
