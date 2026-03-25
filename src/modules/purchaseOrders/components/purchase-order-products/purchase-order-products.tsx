@@ -21,12 +21,12 @@ import {
   IBatchesByPurchaseOrder
 } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { getProductsByClient, getWarehouseProducts } from "@/services/commerce/commerce";
+import { getProductsByClient } from "@/services/commerce/commerce";
 import {
   getBatchesForProducts,
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
-import { IProduct, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
+import { IProduct } from "@/types/commerce/ICommerce";
 import { monthsUntilExpiration, formatDateDMY, formatNumber } from "@/utils/utils";
 
 interface PurchaseOrderProductsProps {
@@ -63,7 +63,7 @@ export function PurchaseOrderProducts({
   const [isEditMode, setIsEditMode] = useState(isCreating ?? false);
   const [internalProducts, setInternalProducts] = useState<IProduct[]>([]);
   const [batchesByProduct, setBatchesByProduct] = useState<IBatchesByPurchaseOrder[]>([]);
-  const [warehouseStock, setWarehouseStock] = useState<IWarehouseProductsStock[]>([]);
+
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -97,17 +97,20 @@ export function PurchaseOrderProducts({
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
 
-  const getStockForProduct = (productId: number | undefined) => {
-    if (!productId) return undefined;
-    return warehouseStock.find((s) => s.product_id === productId);
+  const getStockForBatch = (productId: number | undefined, batchId: number | null | undefined) => {
+    if (!productId || !batchId) return undefined;
+    const productEntry = batchesByProduct.find((b) => b.product_id === productId);
+    if (!productEntry) return undefined;
+    const batch = productEntry.batches.find((b) => b.id === batchId);
+    return batch?.stock_available ?? undefined;
   };
 
   const isStockExceeded = (index: number) => {
     const product = watchedProducts[index];
-    const stock = getStockForProduct(product?.product_id);
-    if (!stock) return false;
+    const stockAvailable = getStockForBatch(product?.product_id, product?.batch_id);
+    if (stockAvailable == null) return false;
     const totalUnitsRequested = product.quantity ?? 0;
-    return totalUnitsRequested > stock.inWarehouse;
+    return totalUnitsRequested > stockAvailable;
   };
 
   const hasStockExceeded = isEditMode && watchedProducts.some((_, index) => isStockExceeded(index));
@@ -132,6 +135,18 @@ export function PurchaseOrderProducts({
     fetchProducts();
   }, [projectId, clientId]);
 
+  // Sync quantity_by_box from internalProducts when they load
+  useEffect(() => {
+    if (internalProducts.length === 0) return;
+    watchedProducts.forEach((product, index) => {
+      if (!product.product_id) return;
+      const found = internalProducts.find((p) => p.id === product.product_id);
+      if (found?.product_units != null) {
+        setValue(`products.${index}.quantity_by_box`, found.product_units);
+      }
+    });
+  }, [internalProducts]);
+
   // Fetch batches for products
   useEffect(() => {
     const fetchBatches = async () => {
@@ -149,18 +164,6 @@ export function PurchaseOrderProducts({
     fetchBatches();
   }, [orderId]);
 
-  useEffect(() => {
-    const fetchStock = async () => {
-      if (!projectId || !data?.warehouseId || !orderId) return;
-      try {
-        const stock = await getWarehouseProducts(projectId, data.warehouseId, Number(orderId));
-        if (stock) setWarehouseStock(stock);
-      } catch (error) {
-        console.error("Error fetching warehouse stock:", error);
-      }
-    };
-    fetchStock();
-  }, [projectId, data?.warehouseId, orderId]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
@@ -213,7 +216,12 @@ export function PurchaseOrderProducts({
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    setValue(`products.${index}.quantity`, newBoxes, { shouldDirty: true });
+    const productId = watchedProducts[index]?.product_id;
+    const selectedProduct = internalProducts.find((p) => p.id === productId);
+    const quantityByBox =
+      selectedProduct?.product_units ?? watchedProducts[index]?.quantity_by_box ?? 0;
+    setValue(`products.${index}.quantity_by_box`, quantityByBox, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newBoxes * quantityByBox, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -516,9 +524,10 @@ export function PurchaseOrderProducts({
                         className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500 font-semibold" : "text-cashport-black"}`}
                       >
                         {(() => {
-                          const stock = getStockForProduct(
-                            watchedProducts[index]?.product_id
-                          )?.inWarehouse;
+                          const stock = getStockForBatch(
+                            watchedProducts[index]?.product_id,
+                            watchedProducts[index]?.batch_id
+                          );
                           return stock != null ? formatNumber(stock) : "-";
                         })()}
                       </span>
