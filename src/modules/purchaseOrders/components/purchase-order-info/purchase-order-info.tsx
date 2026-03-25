@@ -44,6 +44,7 @@ export function PurchaseOrderInfo({
     return mapApiToFormData(data);
   }, [data, isCreating, initialFormData]);
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>(data?.client_nit);
+  const [selectedCanal, setSelectedCanal] = useState<string>("xxxx");
 
   // Client list for create mode
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
@@ -132,32 +133,60 @@ export function PurchaseOrderInfo({
       <div>
         <h3 className="text-lg font-semibold text-cashport-black mb-4">Información General</h3>
         <div className="space-y-4">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
-              Orden de compra
-            </label>
-            <Controller
-              name="purchase_order_number"
-              control={control}
-              render={({ field }) => (
-                <>
-                  {isEditMode ? (
-                    <Input
-                      {...field}
-                      className="mt-1 h-8 text-sm font-semibold"
-                      disabled={!isCreating}
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">{field.value}</p>
-                  )}
-                  {errors.purchase_order_number && (
-                    <span className="text-xs text-red-500">
-                      {errors.purchase_order_number.message}
-                    </span>
-                  )}
-                </>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                ID Interno OC
+              </label>
+              <p className="text-sm font-semibold text-cashport-black mt-1">{data?.id ?? "xxxx"}</p>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                Orden de compra
+              </label>
+              <Controller
+                name="purchase_order_number"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {isEditMode ? (
+                      <Input
+                        {...field}
+                        className="mt-1 h-8 text-sm font-semibold"
+                        disabled={!isCreating}
+                      />
+                    ) : (
+                      <p className="text-sm font-semibold text-cashport-black mt-1">
+                        {field.value}
+                      </p>
+                    )}
+                    {errors.purchase_order_number && (
+                      <span className="text-xs text-red-500">
+                        {errors.purchase_order_number.message}
+                      </span>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                Canal
+              </label>
+              {isEditMode ? (
+                <AntSelect
+                  value={selectedCanal}
+                  onChange={(value) => setSelectedCanal(value)}
+                  options={[
+                    { value: "Institucional", label: "Institucional" },
+                    { value: "Comercial", label: "Comercial" }
+                  ]}
+                  className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
+                />
+              ) : (
+                <p className="text-sm font-semibold text-cashport-black mt-1">{selectedCanal}</p>
               )}
-            />
+            </div>
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
@@ -302,7 +331,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-5">
+          <div className="!mt-4">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Dirección completa
             </label>
@@ -365,7 +394,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-5">
+          <div className="!mt-4">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Observación
             </label>
