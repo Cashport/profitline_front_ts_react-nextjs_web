@@ -60,6 +60,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     selectedPackageRows[0].orders.every((o) => o.status === "Facturado");
   const canUploadInvoices =
     selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
+  const canRequestApproval = selectedPackageRows[0]?.status === "Procesado";
+  const allowedStatesForSeparate = ["Novedad", "Procesado", "En aprobaciones"];
+  const canSeparateOrder =
+    selectedOrders.length > 0 &&
+    selectedOrders.every((o) => allowedStatesForSeparate.includes(o.status));
 
   const allowedStatesForDownload = ["En despacho", "Entregado"];
   const canDownload =
@@ -219,12 +224,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         centered
       >
         <div className="modal-content">
-          <ButtonGenerateAction
-            icon={<DownloadSimple size={20} />}
-            title="Descargar plano"
-            onClick={handleDownloadCSV}
-            disabled={isDownloadingCSV || !canDownload}
-          />
+          {canDownload && (
+            <ButtonGenerateAction
+              icon={<DownloadSimple size={20} />}
+              title="Descargar plano"
+              onClick={handleDownloadCSV}
+              disabled={isDownloadingCSV}
+            />
+          )}
           {canSendToBilling && (
             <ButtonGenerateAction
               icon={<Invoice size={16} />}
@@ -241,18 +248,22 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={isDispatchLoading}
             />
           )}
-          <ButtonGenerateAction
-            icon={<PaperPlaneTilt className="h-4 w-4" />}
-            title="Solicitar aprobación"
-            onClick={handleRequestApproval}
-            disabled={isDispatchLoading}
-          />
-          <ButtonGenerateAction
-            icon={<SubtractSquare className="h-4 w-4" />}
-            title="Separar OC del pedido"
-            onClick={handleSeparateOrder}
-            disabled={isDispatchLoading}
-          />
+          {canRequestApproval && (
+            <ButtonGenerateAction
+              icon={<PaperPlaneTilt className="h-4 w-4" />}
+              title="Solicitar aprobación"
+              onClick={handleRequestApproval}
+              disabled={isDispatchLoading}
+            />
+          )}
+          {canSeparateOrder && (
+            <ButtonGenerateAction
+              icon={<SubtractSquare className="h-4 w-4" />}
+              title="Separar OC del pedido"
+              onClick={handleSeparateOrder}
+              disabled={isDispatchLoading}
+            />
+          )}
           {canUploadInvoices && (
             <ButtonGenerateAction
               icon={<Invoice size={16} />}
