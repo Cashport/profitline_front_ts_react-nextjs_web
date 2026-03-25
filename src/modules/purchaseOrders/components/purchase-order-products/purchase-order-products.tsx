@@ -164,7 +164,6 @@ export function PurchaseOrderProducts({
     fetchBatches();
   }, [orderId]);
 
-
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
     reset(initialProducts);
@@ -202,7 +201,8 @@ export function PurchaseOrderProducts({
         marketplace_order_product_id:
           p.marketplace_order_product_id && p.marketplace_order_product_id !== 0
             ? Number(p.marketplace_order_product_id)
-            : undefined
+            : undefined,
+        quantity: p.quantity_by_box ?? 0
       }));
       await editPurchaseOrderProducts(orderId!, productsToSend);
       mutate?.();
