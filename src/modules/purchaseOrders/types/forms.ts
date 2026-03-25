@@ -20,6 +20,7 @@ export interface PurchaseOrderInfoFormData {
   delivery_address_id?: number;
   observations?: string;
   invoices?: IPurchaseOrderInvoice[];
+  usage_channel_id?: number;
 }
 
 /**
@@ -30,6 +31,7 @@ export interface PurchaseOrderUpdatePayload {
   delivery_date?: string;
   delivery_address?: { id: number };
   observations?: string;
+  usage_channel_id?: number;
 }
 
 /**
@@ -72,7 +74,8 @@ export const getEmptyFormData = (): PurchaseOrderInfoFormData => ({
   delivery_address: "",
   delivery_address_id: undefined,
   observations: "",
-  invoices: []
+  invoices: [],
+  usage_channel_id: undefined
 });
 
 /**
@@ -110,7 +113,8 @@ export const mapApiToFormData = (data: IPurchaseOrderDetail): PurchaseOrderInfoF
   delivery_address: data.delivery_address?.address || "",
   delivery_address_id: data.delivery_address?.shipping_id ?? data.delivery_address?.id,
   observations: data.observations || "",
-  invoices: data.invoices || []
+  invoices: data.invoices || [],
+  usage_channel_id: data.usage_channel_id
 });
 
 /**
@@ -124,7 +128,8 @@ export const mapFormDataToApi = (
 ): PurchaseOrderUpdatePayload => ({
   delivery_date: formData.delivery_date,
   delivery_address: formData.delivery_address_id ? { id: formData.delivery_address_id } : undefined,
-  observations: formData.observations
+  observations: formData.observations,
+  usage_channel_id: formData.usage_channel_id
 });
 
 /**

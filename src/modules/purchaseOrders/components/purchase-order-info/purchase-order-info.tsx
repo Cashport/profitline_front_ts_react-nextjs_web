@@ -11,6 +11,7 @@ import { formatDateBars } from "@/utils/utils";
 import { PurchaseOrderInfoFormData, mapApiToFormData, getEmptyFormData } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
 import { getAdresses, getClients } from "@/services/commerce/commerce";
+import { getPurchaseOrderChannels } from "@/services/purchaseOrders/purchaseOrders";
 import { ICommerceAdresses, IEcommerceClient } from "@/types/commerce/ICommerce";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
@@ -44,11 +45,36 @@ export function PurchaseOrderInfo({
     return mapApiToFormData(data);
   }, [data, isCreating, initialFormData]);
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>(data?.client_nit);
-  const [selectedCanal, setSelectedCanal] = useState<string>("xxxx");
+
+  // Channel options
+  const [channels, setChannels] = useState<{ value: number; label: string }[]>([]);
+  const [channelsLoading, setChannelsLoading] = useState(false);
 
   // Client list for create mode
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
   const [clientsLoading, setClientsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchChannels = async () => {
+      setChannelsLoading(true);
+      try {
+        const res = await getPurchaseOrderChannels();
+        if (res) {
+          setChannels(
+            res.map((ch) => ({
+              value: ch.id,
+              label: ch.name
+            }))
+          );
+        }
+      } catch {
+        // silent fail
+      } finally {
+        setChannelsLoading(false);
+      }
+    };
+    fetchChannels();
+  }, []);
 
   useEffect(() => {
     if (!isCreating || !projectId) return;
@@ -173,19 +199,36 @@ export function PurchaseOrderInfo({
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
                 Canal
               </label>
-              {isEditMode ? (
-                <AntSelect
-                  value={selectedCanal}
-                  onChange={(value) => setSelectedCanal(value)}
-                  options={[
-                    { value: "Institucional", label: "Institucional" },
-                    { value: "Comercial", label: "Comercial" }
-                  ]}
-                  className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
-                />
-              ) : (
-                <p className="text-sm font-semibold text-cashport-black mt-1">{selectedCanal}</p>
-              )}
+              <Controller
+                name="usage_channel_id"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {isEditMode ? (
+                      isCreating ? (
+                        <AntSelect
+                          value={field.value || undefined}
+                          onChange={(value) => field.onChange(value)}
+                          loading={channelsLoading}
+                          placeholder={channelsLoading ? "Cargando canales..." : "Seleccionar canal"}
+                          options={channels}
+                          className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
+                        />
+                      ) : (
+                        <Input
+                          value={data?.usage_channel_name ?? ""}
+                          className="mt-1 h-8 text-sm font-semibold"
+                          disabled
+                        />
+                      )
+                    ) : (
+                      <p className="text-sm font-semibold text-cashport-black mt-1">
+                        {data?.usage_channel_name ?? "-"}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
             </div>
           </div>
           <div>

@@ -104,6 +104,8 @@ export interface IPurchaseOrderDetail {
   observations: string;
   document_url: string;
   document_name: string;
+  usage_channel_id: number;
+  usage_channel_name: string;
   client_name: string;
   client_nit: string;
   delivery_address: IPurchaseOrderDeliveryAddress;
