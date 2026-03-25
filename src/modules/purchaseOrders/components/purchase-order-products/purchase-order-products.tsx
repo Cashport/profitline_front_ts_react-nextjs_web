@@ -202,7 +202,7 @@ export function PurchaseOrderProducts({
           p.marketplace_order_product_id && p.marketplace_order_product_id !== 0
             ? Number(p.marketplace_order_product_id)
             : undefined,
-        quantity: p.quantity_by_box ?? 0
+        quantity: p.box_quantity ?? 0
       }));
       await editPurchaseOrderProducts(orderId!, productsToSend);
       mutate?.();
