@@ -290,7 +290,7 @@ export function DetailPurchaseOrder() {
         onClose={closeModals}
         selectedOrder={data.id}
         currentWarehouseId={data.warehouseId!}
-        setFetchMutate={() => mutate()}
+        setFetchMutate={() => window.location.reload()}
       />
 
       <ApprovalDetailModal

@@ -61,6 +61,13 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const canUploadInvoices =
     selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
 
+  const allowedStatesForDownload = ["En despacho", "Entregado"];
+  const canDownload =
+    selectedPackageRows.length > 0 &&
+    selectedPackageRows.every((p) =>
+      p.orders.every((o) => allowedStatesForDownload.includes(o.status))
+    );
+
   const handleDownloadCSV = () => {
     onDownloadCSV();
     onClose();
@@ -216,7 +223,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             icon={<DownloadSimple size={20} />}
             title="Descargar plano"
             onClick={handleDownloadCSV}
-            disabled={isDownloadingCSV}
+            disabled={isDownloadingCSV || !canDownload}
           />
           {canSendToBilling && (
             <ButtonGenerateAction
