@@ -205,24 +205,14 @@ export function PurchaseOrderInfo({
                 render={({ field }) => (
                   <>
                     {isEditMode ? (
-                      isCreating ? (
-                        <AntSelect
-                          value={field.value || undefined}
-                          onChange={(value) => field.onChange(value)}
-                          loading={channelsLoading}
-                          placeholder={
-                            channelsLoading ? "Cargando canales..." : "Seleccionar canal"
-                          }
-                          options={channels}
-                          className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
-                        />
-                      ) : (
-                        <Input
-                          value={data?.usage_channel_name ?? ""}
-                          className="mt-1 h-8 text-sm font-semibold"
-                          disabled
-                        />
-                      )
+                      <AntSelect
+                        value={field.value || undefined}
+                        onChange={(value) => field.onChange(value)}
+                        loading={channelsLoading}
+                        placeholder={channelsLoading ? "Cargando canales..." : "Seleccionar canal"}
+                        options={channels}
+                        className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
+                      />
                     ) : (
                       <p className="text-sm font-semibold text-cashport-black mt-1">
                         {data?.usage_channel_name ?? "-"}
@@ -406,7 +396,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-4">
+          <div className="!mt-5">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Dirección completa
             </label>
@@ -469,7 +459,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-2">
+          <div className="4">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Observación
             </label>
