@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
+import dayjs from "dayjs";
+import "./purchase-order-products.scss";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
@@ -94,7 +96,6 @@ export function PurchaseOrderProducts({
       const boxes = p.box_quantity ?? 0;
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
-
 
   const getStockForProduct = (productId: number | undefined) => {
     if (!productId) return undefined;
@@ -236,7 +237,8 @@ export function PurchaseOrderProducts({
 
   const allowEditStatuses = ["Procesado", "Back order", "Novedad"];
 
-  const canEditProductsRows = isCreating || (isEditMode && allowEditStatuses.includes(data?.status_name ?? ""));
+  const canEditProductsRows =
+    isCreating || (isEditMode && allowEditStatuses.includes(data?.status_name ?? ""));
 
   return (
     <div
@@ -416,12 +418,32 @@ export function PurchaseOrderProducts({
                                   onChange={controllerField.onChange}
                                   placeholder="Seleccionar lote"
                                   status={error ? "error" : undefined}
+                                  popupClassName="batch-select-dropdown"
+                                  popupMatchSelectWidth={205}
                                   options={productBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
                                       ? `${b.batch} - ${formatDateDMY(b.batch_expiration_date)} - ${monthsUntilExpiration(b.batch_expiration_date)} meses`
-                                      : b.batch
+                                      : b.batch,
+                                    batch: b.batch,
+                                    batch_expiration_date: b.batch_expiration_date,
+                                    stock_available: b.stock_available
                                   }))}
+                                  optionRender={(option) => (
+                                    <div className="flex flex-col py-0.5">
+                                      <span className="font-semibold">{option.data.batch}</span>
+                                      {option.data.batch_expiration_date && (
+                                        <span className="text-xs text-gray-500">
+                                          Vence:{" "}
+                                          {dayjs(option.data.batch_expiration_date)
+                                            .utc()
+                                            .format("DD/MM/YY")}
+                                          {"  |  "}
+                                          {option.data.stock_available ?? 0} uds
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
                                   className="w-full"
                                   variant="outlined"
                                 />
@@ -494,7 +516,9 @@ export function PurchaseOrderProducts({
                         className={`text-sm fontMonoSpace ${isStockExceeded(index) ? "text-red-500 font-semibold" : "text-cashport-black"}`}
                       >
                         {(() => {
-                          const stock = getStockForProduct(watchedProducts[index]?.product_id)?.inWarehouse;
+                          const stock = getStockForProduct(
+                            watchedProducts[index]?.product_id
+                          )?.inWarehouse;
                           return stock != null ? formatNumber(stock) : "-";
                         })()}
                       </span>

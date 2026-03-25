@@ -321,6 +321,7 @@ export interface IBatchByProduct {
   id: number;
   batch: string;
   batch_expiration_date: string | null;
+  stock_available: number | null;
 }
 
 export interface IBatchesByPurchaseOrder {
@@ -347,5 +348,6 @@ export interface ICreatePurchaseOrder {
   products: ICreatePurchaseOrderProduct[];
 }
 export interface ICreatePurchaseOrderPayload {
-  purchase_orders: ICreatePurchaseOrder[];
+  client_id: string;
+  purchaseOrder: ICreatePurchaseOrder[];
 }
