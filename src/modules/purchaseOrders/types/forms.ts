@@ -21,6 +21,7 @@ export interface PurchaseOrderInfoFormData {
   observations?: string;
   invoices?: IPurchaseOrderInvoice[];
   usage_channel_id?: number;
+  order_date?: string;
 }
 
 /**
@@ -75,7 +76,8 @@ export const getEmptyFormData = (): PurchaseOrderInfoFormData => ({
   delivery_address_id: undefined,
   observations: "",
   invoices: [],
-  usage_channel_id: undefined
+  usage_channel_id: undefined,
+  order_date: ""
 });
 
 /**
