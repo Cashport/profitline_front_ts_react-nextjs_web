@@ -382,7 +382,7 @@ export function PurchaseOrderInfo({
                       className="mt-1 text-sm font-semibold resize-none overflow-y-auto field-sizing-fixed [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300"
                     />
                   ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
+                    <p className="text-sm font-semibold text-cashport-black mt-1 break-words">
                       {field.value || "-"}
                     </p>
                   )}
