@@ -138,7 +138,9 @@ export function CreatePurchaseOrder() {
       purchaseOrders.push({
         client_id: state.clientId,
         purchase_order_number: state.info.purchase_order_number,
+        total: 0,
         delivery_date: state.info.delivery_date ?? "",
+        order_date: state.info.order_date ?? "",
         observations: state.info.observations ?? "",
         products: state.products.products.map((p) => ({
           id: p.product_id ?? 0,
@@ -152,8 +154,19 @@ export function CreatePurchaseOrder() {
 
     setIsSubmitting(true);
     try {
-      console.log("Creating purchase orders with data:", purchaseOrders);
-      await createPurchaseOrderBulk(createFiles, {
+      const renamedFiles = createFiles.map((file, i) => {
+        const ext = file.name.substring(file.name.lastIndexOf("."));
+        const newName = purchaseOrders[i].purchase_order_number + ext;
+        return new File([file], newName, { type: file.type });
+      });
+
+      console.log("Payload for API:", {
+        client_id: selectedClientId,
+        purchaseOrders
+      });
+      console.log("Renamed files:", renamedFiles);
+
+      await createPurchaseOrderBulk(renamedFiles, {
         client_id: selectedClientId || "",
         purchaseOrder: purchaseOrders
       });

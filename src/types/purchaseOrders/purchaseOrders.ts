@@ -341,12 +341,11 @@ export interface ICreatePurchaseOrderProduct {
 
 export interface ICreatePurchaseOrder {
   client_id: string;
-  // order_type_id: number;
-  // total: number;
+  total: number;
   purchase_order_number: string;
   delivery_date: string;
-  // status_id: number;
   observations: string;
+  order_date?: string;
   products: ICreatePurchaseOrderProduct[];
 }
 export interface ICreatePurchaseOrderPayload {

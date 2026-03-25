@@ -11,6 +11,10 @@ export const purchaseOrderInfoSchema = yup.object({
   created_at: yup.string().required("Fecha de creación requerida"),
 
   // Delivery info fields (editable)
+  order_date: yup.string().test("valid-date", "Fecha de orden inválida", (value) => {
+    if (!value) return true;
+    return !isNaN(Date.parse(value));
+  }),
   delivery_date: yup.string().test("valid-date", "Fecha de entrega inválida", (value) => {
     if (!value) return true; // Optional field
     return !isNaN(Date.parse(value));

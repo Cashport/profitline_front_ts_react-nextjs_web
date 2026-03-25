@@ -210,7 +210,9 @@ export function PurchaseOrderInfo({
                           value={field.value || undefined}
                           onChange={(value) => field.onChange(value)}
                           loading={channelsLoading}
-                          placeholder={channelsLoading ? "Cargando canales..." : "Seleccionar canal"}
+                          placeholder={
+                            channelsLoading ? "Cargando canales..." : "Seleccionar canal"
+                          }
                           options={channels}
                           className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8"
                         />
@@ -286,31 +288,60 @@ export function PurchaseOrderInfo({
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Fecha orden de compra
             </label>
-            <Controller
-              name="created_at"
-              control={control}
-              render={({ field }) => (
-                <>
-                  {isEditMode ? (
-                    <Input
-                      type="date"
-                      value={formatDateBars(field.value)}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      className="mt-1 h-8 text-sm font-semibold"
-                      disabled
-                      placeholder="Seleccionar fecha"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1">
-                      {dayjs.utc(field.value).format("YYYY-MM-DD")}
-                    </p>
-                  )}
-                  {errors.created_at && (
-                    <span className="text-xs text-red-500">{errors.created_at.message}</span>
-                  )}
-                </>
-              )}
-            />
+            {isCreating ? (
+              <Controller
+                name="order_date"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {isEditMode ? (
+                      <DatePicker
+                        format="YYYY-MM-DD"
+                        value={field.value ? dayjs.utc(field.value) : null}
+                        onChange={(date) =>
+                          field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD") : "")
+                        }
+                        className="mt-1 h-8 text-sm font-semibold w-full"
+                        placeholder="Seleccionar fecha"
+                      />
+                    ) : (
+                      <p className="text-sm font-semibold text-cashport-black mt-1">
+                        {field.value ? dayjs.utc(field.value).format("YYYY-MM-DD") : "-"}
+                      </p>
+                    )}
+                    {errors.order_date && (
+                      <span className="text-xs text-red-500">{errors.order_date.message}</span>
+                    )}
+                  </>
+                )}
+              />
+            ) : (
+              <Controller
+                name="created_at"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {isEditMode ? (
+                      <Input
+                        type="date"
+                        value={formatDateBars(field.value)}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        className="mt-1 h-8 text-sm font-semibold"
+                        disabled
+                        placeholder="Seleccionar fecha"
+                      />
+                    ) : (
+                      <p className="text-sm font-semibold text-cashport-black mt-1">
+                        {dayjs.utc(field.value).format("YYYY-MM-DD")}
+                      </p>
+                    )}
+                    {errors.created_at && (
+                      <span className="text-xs text-red-500">{errors.created_at.message}</span>
+                    )}
+                  </>
+                )}
+              />
+            )}
           </div>
           {!isCreating && (
             <div>
@@ -355,6 +386,7 @@ export function PurchaseOrderInfo({
                       format="YYYY-MM-DD HH:mm"
                       showTime={{ defaultOpenValue: dayjs("00:00:00", "HH:mm") }}
                       showNow={false}
+                      disabledDate={(current) => current && current < dayjs().startOf("day")}
                       value={field.value ? dayjs.utc(field.value) : null}
                       onChange={(date) =>
                         field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
@@ -437,7 +469,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-4">
+          <div className="!mt-2">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Observación
             </label>
