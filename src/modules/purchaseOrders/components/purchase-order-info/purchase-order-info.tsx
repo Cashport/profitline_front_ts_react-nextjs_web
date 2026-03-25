@@ -8,35 +8,71 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { formatDateBars } from "@/utils/utils";
-import { PurchaseOrderInfoFormData, mapApiToFormData } from "../../types/forms";
+import { PurchaseOrderInfoFormData, mapApiToFormData, getEmptyFormData } from "../../types/forms";
 import { purchaseOrderInfoSchema } from "../../schemas/purchaseOrderSchemas";
-import { getAdresses } from "@/services/commerce/commerce";
-import { ICommerceAdresses } from "@/types/commerce/ICommerce";
+import { getAdresses, getClients } from "@/services/commerce/commerce";
+import { ICommerceAdresses, IEcommerceClient } from "@/types/commerce/ICommerce";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
+import { useAppStore } from "@/lib/store/store";
 
 export const PURCHASE_ORDER_INFO_FORM_ID = "purchase-order-info-form";
 
 interface PurchaseOrderInfoProps {
+  isCreating?: boolean;
   isEditMode: boolean;
-  data: IPurchaseOrderDetail;
+  data?: IPurchaseOrderDetail;
+  initialFormData?: PurchaseOrderInfoFormData;
   onSubmit: (data: PurchaseOrderInfoFormData) => void;
   onCancel: () => void;
+  onClientChange?: (clientId: string) => void;
+  onChange?: (data: PurchaseOrderInfoFormData) => void;
 }
 
 export function PurchaseOrderInfo({
+  isCreating,
   isEditMode,
   data,
+  initialFormData,
   onSubmit,
-  onCancel
+  onCancel,
+  onClientChange,
+  onChange
 }: PurchaseOrderInfoProps) {
-  const initialData = useMemo(() => mapApiToFormData(data), [data]);
-  const clientId = data.client_nit;
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const initialData = useMemo(() => {
+    if (isCreating || !data) return initialFormData ?? getEmptyFormData();
+    return mapApiToFormData(data);
+  }, [data, isCreating, initialFormData]);
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>(data?.client_nit);
+
+  // Client list for create mode
+  const [clients, setClients] = useState<IEcommerceClient[]>([]);
+  const [clientsLoading, setClientsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isCreating || !projectId) return;
+    const fetchClients = async () => {
+      setClientsLoading(true);
+      try {
+        const res = await getClients(projectId);
+        if (res.data) setClients(res.data);
+      } catch {
+        // silent fail
+      } finally {
+        setClientsLoading(false);
+      }
+    };
+    fetchClients();
+  }, [isCreating, projectId]);
+
+  const clientId = selectedClientId ?? data?.client_nit;
 
   const {
     control,
     handleSubmit,
     formState: { errors, dirtyFields },
-    reset
+    reset,
+    watch
   } = useForm<PurchaseOrderInfoFormData>({
     resolver: yupResolver(purchaseOrderInfoSchema),
     defaultValues: initialData,
@@ -52,6 +88,15 @@ export function PurchaseOrderInfo({
   useEffect(() => {
     reset(initialData);
   }, [initialData, reset]);
+
+  // Continuously report form changes to parent in create mode
+  useEffect(() => {
+    if (!isCreating || !onChange) return;
+    const subscription = watch((values) => {
+      onChange(values as PurchaseOrderInfoFormData);
+    });
+    return () => subscription.unsubscribe();
+  }, [isCreating, onChange, watch]);
 
   useEffect(() => {
     const fetchAdresses = async () => {
@@ -97,7 +142,11 @@ export function PurchaseOrderInfo({
               render={({ field }) => (
                 <>
                   {isEditMode ? (
-                    <Input {...field} className="mt-1 h-8 text-sm font-semibold" disabled />
+                    <Input
+                      {...field}
+                      className="mt-1 h-8 text-sm font-semibold"
+                      disabled={!isCreating}
+                    />
                   ) : (
                     <p className="text-sm font-semibold text-cashport-black mt-1">{field.value}</p>
                   )}
@@ -120,7 +169,37 @@ export function PurchaseOrderInfo({
               render={({ field }) => (
                 <>
                   {isEditMode ? (
-                    <Input {...field} className="mt-1 h-8 text-sm font-semibold" disabled />
+                    isCreating ? (
+                      <AntSelect
+                        showSearch
+                        filterOption={(input, option) =>
+                          ((option?.label as string) ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        value={field.value || undefined}
+                        onChange={(value) => {
+                          const selected = clients.find((c) => c.client_name === value);
+                          field.onChange(value);
+                          if (selected) {
+                            setSelectedClientId(selected.client_id);
+                            onClientChange?.(selected.client_id);
+                          }
+                        }}
+                        loading={clientsLoading}
+                        placeholder={
+                          clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"
+                        }
+                        options={clients.map((c) => ({
+                          value: c.client_name,
+                          label: c.client_name
+                        }))}
+                        className="mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
+                        notFoundContent="No hay clientes disponibles"
+                      />
+                    ) : (
+                      <Input {...field} className="mt-1 h-8 text-sm font-semibold" disabled />
+                    )
                   ) : (
                     <p className="text-sm font-semibold text-cashport-black mt-1">{field.value}</p>
                   )}
@@ -161,27 +240,29 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground tracking-wide">
-              Facturas
-            </label>
+          {!isCreating && (
+            <div>
+              <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                Facturas
+              </label>
 
-            <p className="text-sm font-semibold text-cashport-black mt-1">
-              {initialData.invoices && initialData.invoices.length > 0
-                ? initialData.invoices.map((inv) => (
-                    <a
-                      href={inv.invoice_file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      key={inv.invoice_id}
-                      className="text-blue-600 underline"
-                    >
-                      {inv.invoice_id}
-                    </a>
-                  ))
-                : "-"}
-            </p>
-          </div>
+              <p className="text-sm font-semibold text-cashport-black mt-1">
+                {initialData.invoices && initialData.invoices.length > 0
+                  ? initialData.invoices.map((inv) => (
+                      <a
+                        href={inv.invoice_file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={inv.invoice_id}
+                        className="text-blue-600 underline"
+                      >
+                        {inv.invoice_id}
+                      </a>
+                    ))
+                  : "-"}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
