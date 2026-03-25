@@ -213,7 +213,12 @@ export function PurchaseOrderProducts({
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
     setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
-    setValue(`products.${index}.quantity`, newBoxes, { shouldDirty: true });
+    const productId = watchedProducts[index]?.product_id;
+    const selectedProduct = internalProducts.find((p) => p.id === productId);
+    const quantityByBox =
+      selectedProduct?.product_units ?? watchedProducts[index]?.quantity_by_box ?? 0;
+    setValue(`products.${index}.quantity_by_box`, quantityByBox, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newBoxes * quantityByBox, { shouldDirty: true });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
