@@ -132,6 +132,18 @@ export function PurchaseOrderProducts({
     fetchProducts();
   }, [projectId, clientId]);
 
+  // Sync quantity_by_box from internalProducts when they load
+  useEffect(() => {
+    if (internalProducts.length === 0) return;
+    watchedProducts.forEach((product, index) => {
+      if (!product.product_id) return;
+      const found = internalProducts.find((p) => p.id === product.product_id);
+      if (found?.product_units != null) {
+        setValue(`products.${index}.quantity_by_box`, found.product_units);
+      }
+    });
+  }, [internalProducts]);
+
   // Fetch batches for products
   useEffect(() => {
     const fetchBatches = async () => {
