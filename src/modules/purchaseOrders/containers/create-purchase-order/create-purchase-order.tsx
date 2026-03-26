@@ -156,7 +156,7 @@ export function CreatePurchaseOrder() {
     try {
       const renamedFiles = createFiles.map((file, i) => {
         const ext = file.name.substring(file.name.lastIndexOf("."));
-        const newName = purchaseOrders[i].purchase_order_number + ext;
+        const newName = purchaseOrders[i].purchase_order_number;
         return new File([file], newName, { type: file.type });
       });
 
