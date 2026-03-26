@@ -70,7 +70,7 @@ export function PurchaseOrderProducts({
   const {
     control,
     handleSubmit,
-    formState: { dirtyFields },
+    formState: { dirtyFields, isValid },
     reset,
     watch,
     setValue
@@ -225,13 +225,19 @@ export function PurchaseOrderProducts({
   };
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
-    setValue(`products.${index}.box_quantity`, newBoxes, { shouldDirty: true });
+    setValue(`products.${index}.box_quantity`, newBoxes, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
     const productId = watchedProducts[index]?.product_id;
     const selectedProduct = internalProducts.find((p) => p.id === productId);
     const quantityByBox =
       selectedProduct?.product_units ?? watchedProducts[index]?.quantity_by_box ?? 0;
     setValue(`products.${index}.quantity_by_box`, quantityByBox, { shouldDirty: true });
-    setValue(`products.${index}.quantity`, newBoxes * quantityByBox, { shouldDirty: true });
+    setValue(`products.${index}.quantity`, newBoxes * quantityByBox, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
@@ -241,14 +247,10 @@ export function PurchaseOrderProducts({
 
   const totalUnits = isEditMode
     ? watchedProducts.reduce(
-        (sum, producto) =>
-          sum + (producto.quantity_by_box ?? 0) * (producto.box_quantity ?? 0),
+        (sum, producto) => sum + (producto.quantity_by_box ?? 0) * (producto.box_quantity ?? 0),
         0
       )
-    : fields.reduce(
-        (sum, field) => sum + field.quantity * (field.quantity_by_box || 1),
-        0
-      );
+    : fields.reduce((sum, field) => sum + field.quantity * (field.quantity_by_box || 1), 0);
 
   const totalIVA = isEditMode
     ? watchedProducts.reduce(
@@ -300,7 +302,7 @@ export function PurchaseOrderProducts({
                 variant="outline"
                 size="sm"
                 onClick={handleEditToggle}
-                disabled={isEditMode && (hasDecimals || hasStockExceeded)}
+                disabled={(isEditMode && (hasDecimals || hasStockExceeded)) || !isValid}
               >
                 {isEditMode ? (
                   <>
@@ -385,7 +387,7 @@ export function PurchaseOrderProducts({
                                       `products.${index}.quantity`,
                                       selectedProduct.product_units *
                                         (watchedProducts[index]?.box_quantity ?? 0),
-                                      { shouldDirty: true }
+                                      { shouldDirty: true, shouldValidate: true }
                                     );
                                   }
                                   setValue(`products.${index}.batch_id`, null, {
