@@ -23,7 +23,7 @@ import {
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByClient } from "@/services/commerce/commerce";
 import {
-  getBatchesForProducts,
+  getBatchesByProduct,
   editPurchaseOrderProducts
 } from "@/services/purchaseOrders/purchaseOrders";
 import { IProduct } from "@/types/commerce/ICommerce";
@@ -97,6 +97,21 @@ export function PurchaseOrderProducts({
       return !Number.isInteger(units) || !Number.isInteger(boxes);
     });
 
+  const fetchBatchesForProduct = async (productId: number) => {
+    if (!orderId) return;
+    try {
+      const response = await getBatchesByProduct(orderId, String(productId));
+      if (response) {
+        setBatchesByProduct((prev) => {
+          const filtered = prev.filter((b) => b.product_id !== productId);
+          return [...filtered, ...response];
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching batches for product:", error);
+    }
+  };
+
   const getStockForBatch = (productId: number | undefined, batchId: number | null | undefined) => {
     if (!productId || !batchId) return undefined;
     const productEntry = batchesByProduct.find((b) => b.product_id === productId);
@@ -147,21 +162,16 @@ export function PurchaseOrderProducts({
     });
   }, [internalProducts]);
 
-  // Fetch batches for products
+  // Fetch batches for each product on initial load
   useEffect(() => {
-    const fetchBatches = async () => {
-      if (!orderId) return;
-      try {
-        const response = await getBatchesForProducts(orderId);
-        if (response) {
-          setBatchesByProduct(response);
-        }
-      } catch (error) {
-        console.error("Error fetching batches:", error);
-      }
-    };
+    if (!orderId) return;
+    const productIds = watchedProducts
+      .map((p) => p.product_id)
+      .filter((id): id is number => id != null);
 
-    fetchBatches();
+    productIds.forEach((productId) => {
+      fetchBatchesForProduct(productId);
+    });
   }, [orderId]);
 
   // Reset form when initialProducts changes (API refetch)
@@ -370,6 +380,9 @@ export function PurchaseOrderProducts({
                                   setValue(`products.${index}.batch_id`, null, {
                                     shouldDirty: true
                                   });
+                                  if (value) {
+                                    fetchBatchesForProduct(value);
+                                  }
                                 }}
                                 placeholder="Seleccionar producto"
                                 options={internalProducts.map((p) => ({
