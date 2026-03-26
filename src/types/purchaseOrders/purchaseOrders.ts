@@ -337,6 +337,7 @@ export interface ICreatePurchaseOrderProduct {
   quantity: number;
   price: number;
   taxes: number;
+  batch_id?: number | null;
 }
 
 export interface ICreatePurchaseOrder {
