@@ -109,7 +109,7 @@ export function PurchaseOrderProducts({
     const product = watchedProducts[index];
     const stockAvailable = getStockForBatch(product?.product_id, product?.batch_id);
     if (stockAvailable == null) return false;
-    const totalUnitsRequested = product.quantity ?? 0;
+    const totalUnitsRequested = product.box_quantity ?? 0;
     return totalUnitsRequested > stockAvailable;
   };
 
