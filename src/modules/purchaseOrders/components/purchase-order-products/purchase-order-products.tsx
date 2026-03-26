@@ -380,6 +380,13 @@ export function PurchaseOrderProducts({
                                   setValue(`products.${index}.batch_id`, null, {
                                     shouldDirty: true
                                   });
+                                  if (selectedProduct) {
+                                    setValue(
+                                      `products.${index}.unit_price`,
+                                      selectedProduct.price ?? 0,
+                                      { shouldDirty: true }
+                                    );
+                                  }
                                   if (value) {
                                     fetchBatchesForProduct(value);
                                   }
@@ -423,9 +430,14 @@ export function PurchaseOrderProducts({
                           const productBatches =
                             batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
                           const usedBatchIds = watchedProducts
-                            .filter((p, i) => i !== index && p.product_id === productId && p.batch_id != null)
+                            .filter(
+                              (p, i) =>
+                                i !== index && p.product_id === productId && p.batch_id != null
+                            )
                             .map((p) => p.batch_id);
-                          const availableBatches = productBatches.filter((b) => !usedBatchIds.includes(b.id));
+                          const availableBatches = productBatches.filter(
+                            (b) => !usedBatchIds.includes(b.id)
+                          );
 
                           return (
                             <div>
