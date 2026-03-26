@@ -362,7 +362,7 @@ export function PurchaseOrderInfo({
       <div>
         <h3 className="text-lg font-semibold text-cashport-black mb-4">Información de Entrega</h3>
         <div className="space-y-4">
-          <div className="mt-5">
+          <div className="mt-4">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Fecha/Hora entrega
             </label>
@@ -381,7 +381,7 @@ export function PurchaseOrderInfo({
                       onChange={(date) =>
                         field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
                       }
-                      className="mt-1 h-8 text-sm font-semibold w-full"
+                      className="!mt-1 h-8 text-sm font-semibold w-full"
                       placeholder="Seleccionar fecha"
                     />
                   ) : (
@@ -396,7 +396,7 @@ export function PurchaseOrderInfo({
               )}
             />
           </div>
-          <div className="!mt-5">
+          <div className="!mt-4">
             <label className="text-xs font-medium text-muted-foreground tracking-wide">
               Dirección completa
             </label>
@@ -438,7 +438,7 @@ export function PurchaseOrderInfo({
                               value: a.id,
                               label: a.address
                             }))}
-                            className="mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
+                            className="!mt-1 w-full [&_.ant-select-selector]:!h-8 [&_.ant-select-selector]:!flex [&_.ant-select-selector]:!items-center [&_.ant-select-selection-search-input]:!h-8 [&_.ant-select-selection-item]:!text-sm [&_.ant-select-selection-item]:!font-semibold [&_.ant-select-selection-item]:!leading-8 [&_.ant-select-selection-placeholder]:!text-sm [&_.ant-select-selection-placeholder]:!leading-8"
                             notFoundContent="No hay direcciones disponibles"
                           />
                         )}
