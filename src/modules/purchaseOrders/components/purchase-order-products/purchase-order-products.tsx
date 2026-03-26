@@ -235,9 +235,20 @@ export function PurchaseOrderProducts({
   };
 
   // Calculate totals - use local calculations in edit mode, API summary otherwise
-  const totalUnits = isEditMode
-    ? watchedProducts.reduce((sum, producto) => sum + (producto.quantity ?? 0), 0)
+  const totalBoxes = isEditMode
+    ? watchedProducts.reduce((sum, producto) => sum + (producto.box_quantity ?? 0), 0)
     : summary.totalQuantity;
+
+  const totalUnits = isEditMode
+    ? watchedProducts.reduce(
+        (sum, producto) =>
+          sum + (producto.quantity_by_box ?? 0) * (producto.box_quantity ?? 0),
+        0
+      )
+    : fields.reduce(
+        (sum, field) => sum + field.quantity * (field.quantity_by_box || 1),
+        0
+      );
 
   const totalIVA = isEditMode
     ? watchedProducts.reduce(
@@ -671,7 +682,9 @@ export function PurchaseOrderProducts({
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
                   {totalUnits.toLocaleString()}
                 </td>
-                <td className="p-3"></td>
+                <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
+                  {totalBoxes?.toLocaleString()}
+                </td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
