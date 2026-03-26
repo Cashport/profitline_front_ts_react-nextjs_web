@@ -162,12 +162,6 @@ export function CreatePurchaseOrder() {
         return new File([file], newName, { type: file.type });
       });
 
-      console.log("Payload for API:", {
-        client_id: selectedClientId,
-        purchaseOrders
-      });
-      console.log("Renamed files:", renamedFiles);
-
       await createPurchaseOrderBulk(renamedFiles, {
         client_id: selectedClientId || "",
         purchaseOrder: purchaseOrders
