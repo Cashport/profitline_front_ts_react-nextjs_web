@@ -302,7 +302,7 @@ export function PurchaseOrderProducts({
                 variant="outline"
                 size="sm"
                 onClick={handleEditToggle}
-                disabled={(isEditMode && (hasDecimals || hasStockExceeded)) || !isValid}
+                disabled={isEditMode && (hasDecimals || hasStockExceeded || !isValid)}
               >
                 {isEditMode ? (
                   <>
