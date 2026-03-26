@@ -146,9 +146,10 @@ export function CreatePurchaseOrder() {
         products: state.products.products.map((p) => ({
           id: p.product_id ?? 0,
           description: p.product_description,
-          quantity: p.quantity,
+          quantity: p.box_quantity ?? 0,
           price: p.unit_price,
-          taxes: p.tax_amount
+          taxes: p.tax_amount,
+          batch_id: p.batch_id
         }))
       });
     }
