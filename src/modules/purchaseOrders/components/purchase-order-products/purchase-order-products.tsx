@@ -523,9 +523,11 @@ export function PurchaseOrderProducts({
                         className={`text-sm ${isStockExceeded(index) ? "text-red-500" : "text-cashport-black"} fontMonoSpace`}
                       >
                         {isEditMode
-                          ? (watchedProducts[index]?.quantity_by_box ?? 0) *
-                            (watchedProducts[index]?.box_quantity ?? 0)
-                          : field.quantity * (field.quantity_by_box || 1)}
+                          ? formatNumber(
+                              (watchedProducts[index]?.quantity_by_box ?? 0) *
+                                (watchedProducts[index]?.box_quantity ?? 0)
+                            )
+                          : formatNumber(field.quantity * (field.quantity_by_box || 1))}
                       </span>
                     </td>
                     <td className="p-3 text-right">
@@ -682,10 +684,10 @@ export function PurchaseOrderProducts({
                 <td className="p-3"></td>
                 <td className="p-3"></td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
-                  {totalUnits.toLocaleString()}
+                  {formatNumber(totalUnits)}
                 </td>
                 <td className="p-3 text-sm font-bold text-cashport-black text-right fontMonoSpace">
-                  {totalBoxes?.toLocaleString()}
+                  {formatNumber(totalBoxes)}
                 </td>
                 <td className="p-3"></td>
                 <td className="p-3"></td>

@@ -91,16 +91,12 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
         payment_type: clientPaymentTypeMap[value.value] || ""
       };
 
-      console.log("Cliente seleccionado:", enrichedValue); // <-- aquí
-
       // Enviar al formulario
       field.onChange(enrichedValue);
     } else {
       field.onChange(null);
-      console.log("Cliente deseleccionado");
     }
   };
-
 
   return (
     <Select

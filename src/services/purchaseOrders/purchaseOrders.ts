@@ -81,7 +81,6 @@ export const uploadPurchaseOrder = async (file: File): Promise<IUploadPurchaseOr
       `${config.API_PURCHASE_ORDERS_AI}`,
       formData
     );
-    console.log("File upload response:", response);
     return response.data;
   } catch (error) {
     console.error("File upload error:", error);
