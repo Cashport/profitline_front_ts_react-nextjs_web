@@ -363,3 +363,15 @@ export const getPurchaseOrderChannels = async () => {
     throw error;
   }
 };
+
+export const getBatchesByProduct = async (purchaseOrderId: string, productId: string) => {
+  try {
+    const res: GenericResponse<IBatchesByPurchaseOrder[]> = await API.get(
+      `${config.API_HOST}/purchaseOrder/${purchaseOrderId}/${productId}/batches-by-product`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching batches by product:", error);
+    throw error;
+  }
+};
