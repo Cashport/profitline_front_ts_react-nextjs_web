@@ -422,6 +422,10 @@ export function PurchaseOrderProducts({
                           const productId = watchedProducts[index]?.product_id;
                           const productBatches =
                             batchesByProduct.find((b) => b.product_id === productId)?.batches ?? [];
+                          const usedBatchIds = watchedProducts
+                            .filter((p, i) => i !== index && p.product_id === productId && p.batch_id != null)
+                            .map((p) => p.batch_id);
+                          const availableBatches = productBatches.filter((b) => !usedBatchIds.includes(b.id));
 
                           return (
                             <div>
@@ -441,7 +445,7 @@ export function PurchaseOrderProducts({
                                   status={error ? "error" : undefined}
                                   popupClassName="batch-select-dropdown"
                                   popupMatchSelectWidth={205}
-                                  options={productBatches.map((b) => ({
+                                  options={availableBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
                                       ? `${b.batch} - ${formatDateDMY(b.batch_expiration_date)} - ${monthsUntilExpiration(b.batch_expiration_date)} meses`
