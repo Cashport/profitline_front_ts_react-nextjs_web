@@ -435,10 +435,6 @@ export function PurchaseOrderProducts({
                                 i !== index && p.product_id === productId && p.batch_id != null
                             )
                             .map((p) => p.batch_id);
-                          const availableBatches = productBatches.filter(
-                            (b) => !usedBatchIds.includes(b.id)
-                          );
-
                           return (
                             <div>
                               {isEditMode ? (
@@ -457,11 +453,12 @@ export function PurchaseOrderProducts({
                                   status={error ? "error" : undefined}
                                   popupClassName="batch-select-dropdown"
                                   popupMatchSelectWidth={205}
-                                  options={availableBatches.map((b) => ({
+                                  options={productBatches.map((b) => ({
                                     value: b.id,
                                     label: b.batch_expiration_date
                                       ? `${b.batch} - ${formatDateDMY(b.batch_expiration_date)} - ${monthsUntilExpiration(b.batch_expiration_date)} meses`
                                       : b.batch,
+                                    disabled: usedBatchIds.includes(b.id),
                                     batch: b.batch,
                                     batch_expiration_date: b.batch_expiration_date,
                                     stock_available: b.stock_available
