@@ -336,7 +336,7 @@ export const createPurchaseOrderBulk = async (
   const formData = new FormData();
 
   files.forEach((file) => {
-    formData.append("file", file);
+    formData.append(file.name.slice(0, file.name.lastIndexOf(".")), file);
   });
 
   formData.append("request", JSON.stringify(createPOBulk));
