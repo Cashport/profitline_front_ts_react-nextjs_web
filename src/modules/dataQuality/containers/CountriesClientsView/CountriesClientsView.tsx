@@ -8,7 +8,11 @@ import { BellSimpleRinging } from "phosphor-react";
 import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
 
-import { downloadCatalogFile, downloadPointsOfSaleFile, uploadCatalogMaterial } from "@/services/dataQuality/dataQuality";
+import {
+  downloadCatalogFile,
+  downloadPointsOfSaleFile,
+  uploadCatalogMaterial
+} from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -107,7 +111,9 @@ export default function CountriesClientsView() {
 
       closeAllModals();
     } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al descargar los puntos de venta");
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar los puntos de venta"
+      );
     }
     setIsDownloadPointsOfSaleLoading(false);
   };
@@ -128,6 +134,23 @@ export default function CountriesClientsView() {
         error instanceof Error
           ? error.message
           : "Error al cargar el archivo de auxiliar de materiales."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleOpenPointsOfSaleUpload = () => {
+    setWhichModalIsOpen(4);
+  };
+
+  const handleUploadPointsOfSale = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      console.log("Uploading points of sale file:", file);
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
       );
     } finally {
       setIsUploadLoading(false);
@@ -225,6 +248,7 @@ export default function CountriesClientsView() {
         onDownloadPointsOfSale={handleDownloadPointsOfSale}
         isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+        onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
       />
       <ModalUploadFile
         isOpen={whichModalIsOpen === 2}
@@ -251,6 +275,24 @@ export default function CountriesClientsView() {
         countryName=""
         countryId={countryId}
         mode="create"
+      />
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 4}
+        onClose={closeAllModals}
+        onFileUpload={handleUploadPointsOfSale}
+        loading={isUploadLoading}
+        allowedExtensions={[
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".xls",
+          ".xlsx",
+          ".csv",
+          ".txt",
+          ".eml",
+          ".msg"
+        ]}
       />
     </div>
   );

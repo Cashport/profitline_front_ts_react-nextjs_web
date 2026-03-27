@@ -10,12 +10,15 @@ import { message } from "antd";
 import { usePointsOfSale } from "../../hooks/usePointsOfSale";
 import { IPOS } from "@/types/dataQuality/IDataQuality";
 import UiSearchInput from "@/components/ui/search-input";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { Plus } from "@phosphor-icons/react";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { ModalAddEditPOS } from "../ModalAddEditPOS";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
-import { deletePointOfSale } from "@/services/dataQuality/dataQuality";
+import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/CatalogMaterialsActionsModal";
+import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
+import { deletePointOfSale, downloadPointsOfSaleFile } from "@/services/dataQuality/dataQuality";
 
 export function PointsOfSaleTable() {
   const params = useParams();
@@ -30,6 +33,54 @@ export function PointsOfSaleTable() {
   const [selectedPOS, setSelectedPOS] = useState<IPOS | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const [whichModalOpen, setWhichModalOpen] = useState({ selected: 0 });
+  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
+
+  const handleDownloadPointsOfSale = async () => {
+    setIsDownloadPointsOfSaleLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando puntos de venta...",
+      duration: 0
+    });
+    try {
+      const res = await downloadPointsOfSaleFile({ clientId });
+      const link = document.createElement("a");
+      link.href = res.url;
+      link.setAttribute("download", res.filename || "puntos_de_venta.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      message.success("Puntos de venta descargados exitosamente.");
+      setWhichModalOpen({ selected: 0 });
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al descargar los puntos de venta.";
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadPointsOfSaleLoading(false);
+    }
+  };
+
+  const handleUploadPointsOfSale = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      console.log("Uploading points of sale file:", file);
+      message.success("Archivo de puntos de venta cargado exitosamente.");
+      setWhichModalOpen({ selected: 0 });
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
 
   const handleEdit = (record: IPOS) => {
     setMode("edit");
@@ -130,7 +181,10 @@ export function PointsOfSaleTable() {
   return (
     <div>
       <div className="flex items-center justify-between pb-4">
-        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+        <div className="flex items-center gap-3">
+          <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
+          <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 1 })} />
+        </div>
 
         <Button
           className="text-sm font-medium"
@@ -181,6 +235,34 @@ export function PointsOfSaleTable() {
         title="¿Está seguro de eliminar?"
         okText="Eliminar"
         okLoading={isLoadingDelete}
+      />
+
+      <CatalogMaterialsActionsModal
+        isOpen={whichModalOpen.selected === 1}
+        onClose={() => setWhichModalOpen({ selected: 0 })}
+        activeTab="puntos-de-venta"
+        onDownloadPointsOfSale={handleDownloadPointsOfSale}
+        isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
+        onUploadPointsOfSale={() => setWhichModalOpen({ selected: 2 })}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalOpen.selected === 2}
+        onClose={() => setWhichModalOpen({ selected: 0 })}
+        onFileUpload={handleUploadPointsOfSale}
+        loading={isUploadLoading}
+        allowedExtensions={[
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".xls",
+          ".xlsx",
+          ".csv",
+          ".txt",
+          ".eml",
+          ".msg"
+        ]}
       />
     </div>
   );

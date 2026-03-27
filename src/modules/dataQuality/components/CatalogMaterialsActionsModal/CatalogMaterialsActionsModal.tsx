@@ -6,24 +6,30 @@ import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/Bu
 
 import "./catalogMaterialsActionsModal.scss";
 
+export type CatalogTab = "materiales" | "packs" | "puntos-de-venta";
+
 type CatalogMaterialsActionsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onDownloadCatalog: () => void;
-  isDownloadCatalogLoading: boolean;
-  onDownloadPointsOfSale: () => void;
-  isDownloadPointsOfSaleLoading: boolean;
-  onUploadMaterialsAuxiliary: () => void;
+  activeTab: CatalogTab;
+  onDownloadCatalog?: () => void;
+  isDownloadCatalogLoading?: boolean;
+  onDownloadPointsOfSale?: () => void;
+  isDownloadPointsOfSaleLoading?: boolean;
+  onUploadMaterialsAuxiliary?: () => void;
+  onUploadPointsOfSale?: () => void;
 };
 
 export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModalProps> = ({
   isOpen,
   onClose,
+  activeTab,
   onDownloadCatalog,
   isDownloadCatalogLoading,
   onDownloadPointsOfSale,
   isDownloadPointsOfSaleLoading,
-  onUploadMaterialsAuxiliary
+  onUploadMaterialsAuxiliary,
+  onUploadPointsOfSale
 }) => {
   return (
     <Modal
@@ -36,23 +42,36 @@ export const CatalogMaterialsActionsModal: React.FC<CatalogMaterialsActionsModal
       centered
     >
       <div className="modal-content">
-        <ButtonGenerateAction
-          icon={<DownloadSimple size={20} />}
-          title="Descargar Auxiliar Materiales"
-          onClick={onDownloadCatalog}
-          disabled={isDownloadCatalogLoading}
-        />
-        <ButtonGenerateAction
-          icon={<UploadSimple size={20} />}
-          title="Cargar Auxiliar Materiales"
-          onClick={onUploadMaterialsAuxiliary}
-        />
-        <ButtonGenerateAction
-          icon={<DownloadSimple size={20} />}
-          title="Descargar Puntos de venta"
-          onClick={onDownloadPointsOfSale}
-          disabled={isDownloadPointsOfSaleLoading}
-        />
+        {activeTab === "materiales" && (
+          <>
+            <ButtonGenerateAction
+              icon={<DownloadSimple size={20} />}
+              title="Descargar Auxiliar Materiales"
+              onClick={onDownloadCatalog}
+              disabled={isDownloadCatalogLoading}
+            />
+            <ButtonGenerateAction
+              icon={<UploadSimple size={20} />}
+              title="Cargar Auxiliar Materiales"
+              onClick={onUploadMaterialsAuxiliary}
+            />
+          </>
+        )}
+        {activeTab === "puntos-de-venta" && (
+          <>
+            <ButtonGenerateAction
+              icon={<DownloadSimple size={20} />}
+              title="Descargar Puntos de venta"
+              onClick={onDownloadPointsOfSale}
+              disabled={isDownloadPointsOfSaleLoading}
+            />
+            <ButtonGenerateAction
+              icon={<UploadSimple size={20} />}
+              title="Cargar Puntos de venta"
+              onClick={onUploadPointsOfSale}
+            />
+          </>
+        )}
       </div>
     </Modal>
   );
