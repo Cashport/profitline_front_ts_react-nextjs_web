@@ -349,7 +349,7 @@ export interface ICreatePurchaseOrder {
   order_date?: string;
   products: ICreatePurchaseOrderProduct[];
   usage_channel_id: number;
-  delivery_address: {
+  shipping_info: {
     id: number;
   };
 }

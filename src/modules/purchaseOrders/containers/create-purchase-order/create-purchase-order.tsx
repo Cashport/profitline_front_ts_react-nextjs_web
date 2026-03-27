@@ -143,7 +143,7 @@ export function CreatePurchaseOrder() {
         order_date: state.info.order_date ?? "",
         observations: state.info.observations ?? "",
         usage_channel_id: state.info.usage_channel_id ?? 0,
-        delivery_address: {
+        shipping_info: {
           id: state.info.delivery_address_id ?? 0
         },
         products: state.products.products.map((p) => ({
