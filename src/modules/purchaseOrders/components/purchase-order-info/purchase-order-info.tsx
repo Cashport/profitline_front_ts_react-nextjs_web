@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
-import { DatePicker, Select as AntSelect } from "antd";
+import { DatePicker, Select as AntSelect, Tooltip } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
@@ -289,7 +289,7 @@ export function PurchaseOrderInfo({
                         format="YYYY-MM-DD"
                         value={field.value ? dayjs.utc(field.value) : null}
                         onChange={(date) =>
-                          field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD") : "")
+                          field.onChange(date ? date.format("YYYY-MM-DD") : "")
                         }
                         className="mt-1 h-8 text-sm font-semibold w-full"
                         placeholder="Seleccionar fecha"
@@ -379,7 +379,7 @@ export function PurchaseOrderInfo({
                       disabledDate={(current) => current && current < dayjs().startOf("day")}
                       value={field.value ? dayjs.utc(field.value) : null}
                       onChange={(date) =>
-                        field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
+                        field.onChange(date ? date.format("YYYY-MM-DD HH:mm") : "")
                       }
                       className="!mt-1 h-8 text-sm font-semibold w-full"
                       placeholder="Seleccionar fecha"
@@ -476,9 +476,18 @@ export function PurchaseOrderInfo({
                       className="mt-1 text-sm font-semibold resize-none overflow-y-auto field-sizing-fixed [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300"
                     />
                   ) : (
-                    <p className="text-sm font-semibold text-cashport-black mt-1 break-words">
-                      {field.value || "-"}
-                    </p>
+                    <Tooltip
+                      title={field.value || "-"}
+                      overlayStyle={{
+                        maxWidth: 440,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word"
+                      }}
+                    >
+                      <p className="text-sm font-semibold text-cashport-black mt-1 break-words line-clamp-2">
+                        {field.value || "-"}
+                      </p>
+                    </Tooltip>
                   )}
                   {errors.observations && (
                     <span className="text-xs text-red-500">{errors.observations.message}</span>
