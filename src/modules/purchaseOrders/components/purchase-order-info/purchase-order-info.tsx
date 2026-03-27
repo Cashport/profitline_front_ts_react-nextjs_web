@@ -289,7 +289,7 @@ export function PurchaseOrderInfo({
                         format="YYYY-MM-DD"
                         value={field.value ? dayjs.utc(field.value) : null}
                         onChange={(date) =>
-                          field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD") : "")
+                          field.onChange(date ? date.format("YYYY-MM-DD") : "")
                         }
                         className="mt-1 h-8 text-sm font-semibold w-full"
                         placeholder="Seleccionar fecha"
@@ -379,7 +379,7 @@ export function PurchaseOrderInfo({
                       disabledDate={(current) => current && current < dayjs().startOf("day")}
                       value={field.value ? dayjs.utc(field.value) : null}
                       onChange={(date) =>
-                        field.onChange(date ? dayjs.utc(date).format("YYYY-MM-DD HH:mm") : "")
+                        field.onChange(date ? date.format("YYYY-MM-DD HH:mm") : "")
                       }
                       className="!mt-1 h-8 text-sm font-semibold w-full"
                       placeholder="Seleccionar fecha"
