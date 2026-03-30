@@ -160,12 +160,14 @@ export function PurchaseOrderInfo({
         <h3 className="text-lg font-semibold text-cashport-black mb-4">Información General</h3>
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground tracking-wide">
-                ID Interno OC
-              </label>
-              <p className="text-sm font-semibold text-cashport-black mt-1">{data?.id ?? "xxxx"}</p>
-            </div>
+            {!isCreating && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground tracking-wide">
+                  ID Interno OC
+                </label>
+                <p className="text-sm font-semibold text-cashport-black mt-1">{data?.id ?? "xxxx"}</p>
+              </div>
+            )}
             <div>
               <label className="text-xs font-medium text-muted-foreground tracking-wide">
                 Orden de compra
