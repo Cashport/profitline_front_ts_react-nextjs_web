@@ -17,8 +17,8 @@ export default function MassComunicationsTableView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#EBEBEB] px-8 py-8">
-      <h1 className="text-2xl font-bold text-[#141414] mb-4">Envio masivo de comunicacion</h1>
+    <div className="min-h-screen">
+      <h1 className="text-2xl font-semibold text-[#141414] mb-4">Envio masivo de comunicacion</h1>
       <div className="bg-white rounded-xl px-8 py-6">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-5">
@@ -46,7 +46,11 @@ export default function MassComunicationsTableView() {
         </div>
 
         {/* Main content */}
-        {showPreview ? <ClientPreview onBack={() => setShowPreview(false)} /> : <TableMassCommunications onPreviewClient={() => setShowPreview(true)} />}
+        {showPreview ? (
+          <ClientPreview onBack={() => setShowPreview(false)} />
+        ) : (
+          <TableMassCommunications onPreviewClient={() => setShowPreview(true)} />
+        )}
       </div>
     </div>
   );
