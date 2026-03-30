@@ -134,6 +134,13 @@ export function CreatePurchaseOrder() {
         message.warning(`Archivo "${createFiles[i].name}": debe tener al menos un producto`);
         return;
       }
+      const hasProductWithoutSelection = state.products.products.some((p) => !p.product_id);
+      if (hasProductWithoutSelection) {
+        message.warning(
+          `Archivo "${createFiles[i].name}": todos los productos deben tener un producto seleccionado`
+        );
+        return;
+      }
 
       purchaseOrders.push({
         client_id: state.clientId,

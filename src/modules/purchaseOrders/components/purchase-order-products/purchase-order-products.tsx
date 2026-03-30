@@ -454,6 +454,7 @@ export function PurchaseOrderProducts({
                                 <Select
                                   showSearch
                                   allowClear
+                                  disabled={isCreating}
                                   optionFilterProp="label"
                                   filterOption={(input, option) =>
                                     (option?.label ?? "")
