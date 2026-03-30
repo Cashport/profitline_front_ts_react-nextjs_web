@@ -144,7 +144,13 @@ export function DetailPurchaseOrder() {
     return null; // Loading state is already handled above
   }
 
-  const noEditStates = ["En facturación", "Facturado", "En despacho", "Entregado"];
+  const noEditStates = [
+    "En facturación",
+    "Facturado",
+    "En despacho",
+    "Entregado",
+    "En aprobaciones"
+  ];
   const canEdit = !noEditStates.includes(data.status_name);
 
   const handleEditToggle = () => {
