@@ -154,6 +154,15 @@ export function CreatePurchaseOrder() {
       });
     }
 
+    // Validate all files belong to the same client
+    const uniqueClientIds = new Set(purchaseOrders.map((po) => po.client_id));
+    if (uniqueClientIds.size > 1) {
+      message.error(
+        "Todos los archivos deben pertenecer al mismo cliente. Por favor verifica los clientes seleccionados."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const renamedFiles = createFiles.map((file, i) => {
