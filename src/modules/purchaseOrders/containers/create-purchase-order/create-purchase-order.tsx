@@ -155,8 +155,8 @@ export function CreatePurchaseOrder() {
     }
 
     // Validate all files belong to the same client
-    const uniqueClientIds = new Set(purchaseOrders.map((po) => po.client_id));
-    if (uniqueClientIds.size > 1) {
+    const firstClientId = purchaseOrders[0].client_id;
+    if (purchaseOrders.some((po) => po.client_id !== firstClientId)) {
       message.error(
         "Todos los archivos deben pertenecer al mismo cliente. Por favor verifica los clientes seleccionados."
       );
