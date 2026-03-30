@@ -4,6 +4,8 @@ import { SUCCESS } from "@/utils/constants/globalConstants";
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
 import { IGroupsByUser } from "@/types/clientsGroups/IClientsGroups";
 import { MessageType } from "@/context/MessageContext";
+import axios from "axios";
+import config from "@/config";
 
 export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
@@ -201,4 +203,9 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
     console.warn("error getting groups by user: ", error);
     return error as any;
   }
+};
+
+export const sendEmailResetPassword = async (email: string): Promise<any> => {
+  const response = await axios.post(`${config.API_HOST}/user/reset-password`, { email });
+  return response;
 };
