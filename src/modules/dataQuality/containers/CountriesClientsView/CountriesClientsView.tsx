@@ -89,34 +89,54 @@ export default function CountriesClientsView() {
 
   const handleDownloadCatalog = async () => {
     setIsDownloadCatalogLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando catálogo...",
+      duration: 0
+    });
+
     try {
       const res = await downloadCatalogFile({
         countryId
       });
       window.open(res.url, "_blank");
 
+      message.success("Catálogo descargado exitosamente.");
       closeAllModals();
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al descargar el catálogo");
+    } finally {
+      hide();
+      setIsDownloadCatalogLoading(false);
     }
-    setIsDownloadCatalogLoading(false);
   };
 
   const handleDownloadPointsOfSale = async () => {
     setIsDownloadPointsOfSaleLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando puntos de venta...",
+      duration: 0
+    });
+
     try {
       const res = await downloadPointsOfSaleFile({
         countryId
       });
       window.open(res.url, "_blank");
 
+      message.success("Puntos de venta descargados exitosamente.");
       closeAllModals();
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al descargar los puntos de venta"
       );
+    } finally {
+      hide();
+      setIsDownloadPointsOfSaleLoading(false);
     }
-    setIsDownloadPointsOfSaleLoading(false);
   };
 
   const handleOpenAuxiliaryUpload = () => {
