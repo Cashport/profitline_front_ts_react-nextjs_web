@@ -7,7 +7,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import styles from "./restartPassword.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { sendEmailResetPassword } from "../../../../../firebase-utils";
+import { sendEmailResetPassword } from "@/services/users/users";
+import { AxiosError } from "axios";
 
 interface IAuthLogin {
   email: string;
@@ -34,8 +35,12 @@ export const RestartPassword = ({ setResetPassword }: RestartFormProps) => {
 
   const onSubmitHandler = async ({ email }: IAuthLogin) => {
     setIsLoading(true);
-    sendEmailResetPassword(email);
-    setEmail(email);
+    try {
+      await sendEmailResetPassword(email);
+      setEmail(email);
+    } catch (error) {
+      console.error("error sending reset password email: ", error);
+    }
     setIsLoading(false);
   };
 
