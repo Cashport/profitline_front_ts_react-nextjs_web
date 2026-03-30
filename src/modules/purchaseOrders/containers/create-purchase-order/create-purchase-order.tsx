@@ -134,6 +134,13 @@ export function CreatePurchaseOrder() {
         message.warning(`Archivo "${createFiles[i].name}": debe tener al menos un producto`);
         return;
       }
+      const hasProductWithoutSelection = state.products.products.some((p) => !p.product_id);
+      if (hasProductWithoutSelection) {
+        message.warning(
+          `Archivo "${createFiles[i].name}": todos los productos deben tener un producto seleccionado`
+        );
+        return;
+      }
 
       purchaseOrders.push({
         client_id: state.clientId,
@@ -143,6 +150,9 @@ export function CreatePurchaseOrder() {
         order_date: state.info.order_date ?? "",
         observations: state.info.observations ?? "",
         usage_channel_id: state.info.usage_channel_id ?? 0,
+        shipping_info: {
+          id: state.info.delivery_address_id ?? 0
+        },
         products: state.products.products.map((p) => ({
           id: p.product_id ?? 0,
           description: p.product_description,
@@ -152,6 +162,15 @@ export function CreatePurchaseOrder() {
           batch_id: p.batch_id
         }))
       });
+    }
+
+    // Validate all files belong to the same client
+    const firstClientId = purchaseOrders[0].client_id;
+    if (purchaseOrders.some((po) => po.client_id !== firstClientId)) {
+      message.error(
+        "Todos los archivos deben pertenecer al mismo cliente. Por favor verifica los clientes seleccionados."
+      );
+      return;
     }
 
     setIsSubmitting(true);

@@ -159,6 +159,8 @@ export function PurchaseOrdersView() {
       window.open(response.url, "_blank");
 
       message.success("Plano CSV generado exitosamente");
+      setSelectedPackageRows([]);
+      setSelectedOrders([]);
     } catch (error: any) {
       if (error instanceof ApiError) {
         message.error(
@@ -278,7 +280,11 @@ export function PurchaseOrdersView() {
         isOpen={whichModalIsOpen.selected === 3}
         onClose={closeModals}
         orders={selectedOrders}
-        onSuccess={() => mutate()}
+        onSuccess={() => {
+          mutate();
+          setSelectedPackageRows([]);
+          setSelectedOrders([]);
+        }}
       />
 
       {whichModalIsOpen.selected === 2 && (

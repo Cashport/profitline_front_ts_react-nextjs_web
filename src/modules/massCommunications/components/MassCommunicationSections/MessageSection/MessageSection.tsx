@@ -41,7 +41,7 @@ export default function MessageSection({
   onCreateTemplate
 }: MessageSectionProps) {
   return (
-    <section className="bg-white border border-[#DDDDDD] rounded-lg p-6">
+    <section className="bg-white rounded-lg p-6">
       <div className="flex justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">

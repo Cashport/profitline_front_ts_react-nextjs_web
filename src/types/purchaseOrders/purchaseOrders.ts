@@ -349,6 +349,9 @@ export interface ICreatePurchaseOrder {
   order_date?: string;
   products: ICreatePurchaseOrderProduct[];
   usage_channel_id: number;
+  shipping_info: {
+    id: number;
+  };
 }
 export interface ICreatePurchaseOrderPayload {
   client_id: string;
