@@ -580,3 +580,18 @@ export const getAllRegions = async (countryId: number) => {
     throw error;
   }
 };
+
+export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/points-of-sale/upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading points of sale file:", error);
+    throw error;
+  }
+};

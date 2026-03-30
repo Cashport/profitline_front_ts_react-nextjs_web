@@ -11,7 +11,8 @@ import { Button as AntButton, message } from "antd";
 import {
   downloadCatalogFile,
   downloadPointsOfSaleFile,
-  uploadCatalogMaterial
+  uploadCatalogMaterial,
+  uploadPointsOfSaleFile
 } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -147,7 +148,10 @@ export default function CountriesClientsView() {
   const handleUploadPointsOfSale = async (file: File) => {
     setIsUploadLoading(true);
     try {
-      console.log("Uploading points of sale file:", file);
+      await uploadPointsOfSaleFile(file);
+      message.success("Archivo de puntos de venta cargado exitosamente.");
+      closeAllModals();
+      mutate();
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
@@ -281,18 +285,7 @@ export default function CountriesClientsView() {
         onClose={closeAllModals}
         onFileUpload={handleUploadPointsOfSale}
         loading={isUploadLoading}
-        allowedExtensions={[
-          ".pdf",
-          ".jpg",
-          ".jpeg",
-          ".png",
-          ".xls",
-          ".xlsx",
-          ".csv",
-          ".txt",
-          ".eml",
-          ".msg"
-        ]}
+        allowedExtensions={[".xls", ".xlsx", ".csv"]}
       />
     </div>
   );

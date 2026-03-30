@@ -18,7 +18,11 @@ import { ModalAddEditPOS } from "../ModalAddEditPOS";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/CatalogMaterialsActionsModal";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
-import { deletePointOfSale, downloadPointsOfSaleFile } from "@/services/dataQuality/dataQuality";
+import {
+  deletePointOfSale,
+  downloadPointsOfSaleFile,
+  uploadPointsOfSaleFile
+} from "@/services/dataQuality/dataQuality";
 
 export function PointsOfSaleTable() {
   const params = useParams();
@@ -69,7 +73,7 @@ export function PointsOfSaleTable() {
   const handleUploadPointsOfSale = async (file: File) => {
     setIsUploadLoading(true);
     try {
-      console.log("Uploading points of sale file:", file);
+      await uploadPointsOfSaleFile(file);
       message.success("Archivo de puntos de venta cargado exitosamente.");
       setWhichModalOpen({ selected: 0 });
       mutate();
@@ -251,18 +255,7 @@ export function PointsOfSaleTable() {
         onClose={() => setWhichModalOpen({ selected: 0 })}
         onFileUpload={handleUploadPointsOfSale}
         loading={isUploadLoading}
-        allowedExtensions={[
-          ".pdf",
-          ".jpg",
-          ".jpeg",
-          ".png",
-          ".xls",
-          ".xlsx",
-          ".csv",
-          ".txt",
-          ".eml",
-          ".msg"
-        ]}
+        allowedExtensions={[".xls", ".xlsx", ".csv"]}
       />
     </div>
   );
