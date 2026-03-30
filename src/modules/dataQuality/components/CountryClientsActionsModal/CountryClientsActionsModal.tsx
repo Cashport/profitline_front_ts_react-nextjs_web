@@ -14,6 +14,7 @@ type CountryClientsActionsModalProps = {
   isDownloadPointsOfSaleLoading: boolean;
   onUploadFile?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
+  onUploadPointsOfSale?: () => void;
   isDownloadCatalogLoading: boolean;
   isInDetailView?: boolean;
 };
@@ -26,6 +27,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   isDownloadPointsOfSaleLoading,
   onUploadFile,
   onUploadMaterialsAuxiliary,
+  onUploadPointsOfSale,
   isDownloadCatalogLoading,
   isInDetailView = false
 }) => {
@@ -62,6 +64,12 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           icon={<DownloadSimple size={20} />}
           title="Descargar Puntos de venta"
           onClick={onDownloadPointsOfSale}
+          disabled={isDownloadPointsOfSaleLoading}
+        />
+        <ButtonGenerateAction
+          icon={<UploadSimple size={20} />}
+          title="Cargar Puntos de venta"
+          onClick={onUploadPointsOfSale}
           disabled={isDownloadPointsOfSaleLoading}
         />
       </div>
