@@ -152,7 +152,15 @@ export default function ModalCreateEmailTemplate({
       onCancel={onClose}
       footer={null}
       width={900}
+      centered
       destroyOnClose
+      styles={{
+        body: {
+          maxHeight: "calc(90vh - 110px)",
+          overflowY: "auto",
+          scrollbarWidth: "thin"
+        }
+      }}
       title={
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#CBE71E]/20 flex items-center justify-center">
@@ -381,7 +389,7 @@ export default function ModalCreateEmailTemplate({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 mt-6">
+      <div className="sticky bottom-0 bg-white pt-4 pb-1 flex items-center justify-end gap-3 mt-1">
         <Button variant="outline" onClick={onClose} className="border-[#DDDDDD] h-9">
           Cancelar
         </Button>
