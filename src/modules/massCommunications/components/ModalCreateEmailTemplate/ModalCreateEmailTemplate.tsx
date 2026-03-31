@@ -2,7 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "antd";
 import { Pencil, Users, Paperclip, Plus, Tag } from "lucide-react";
+import { Spin } from "antd";
 
+import { getAllAtachments } from "@/services/communications/communications";
+import { getContactOptions } from "@/services/contacts/contacts";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Label } from "@/modules/chat/ui/label";
@@ -25,7 +28,13 @@ export default function ModalCreateEmailTemplate({
   const [body, setBody] = useState("");
   const [activeField, setActiveField] = useState<"subject" | "body">("body");
   const [templateRoles, setTemplateRoles] = useState<Set<string>>(new Set());
-  const [attachments, setAttachments] = useState<Set<string>>(new Set());
+  const [roleOptions, setRoleOptions] = useState<{ value: string; label: string }[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [selectedAttachments, setSelectedAttachments] = useState<Set<number>>(new Set());
+  const [attachmentOptions, setAttachmentOptions] = useState<{ value: number; label: string }[]>(
+    []
+  );
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
 
   const subjectInputRef = useRef<HTMLInputElement>(null);
@@ -38,9 +47,44 @@ export default function ModalCreateEmailTemplate({
       setBody("");
       setActiveField("body");
       setTemplateRoles(new Set());
-      setAttachments(new Set());
+      setSelectedAttachments(new Set());
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      setLoadingAttachments(true);
+      try {
+        const response = await getAllAtachments();
+        setAttachmentOptions(
+          response.map((att: { id: number; name: string }) => ({
+            value: att.id,
+            label: att.name
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching attachments", error);
+      }
+      setLoadingAttachments(false);
+    };
+    fetchAttachments();
+
+    const fetchRoles = async () => {
+      setLoadingRoles(true);
+      try {
+        const contactPositionsData = await getContactOptions();
+        const contactPositions = contactPositionsData.contact_position.map((position) => ({
+          value: `0_${position.id}`,
+          label: `Cliente - ${position.name}`
+        }));
+        setRoleOptions(contactPositions);
+      } catch (error) {
+        console.error("Error fetching contact options", error);
+      }
+      setLoadingRoles(false);
+    };
+    fetchRoles();
+  }, []);
 
   const handleInsertTag = (tag: string) => {
     const insertion = `{{${tag}}}`;
@@ -75,7 +119,7 @@ export default function ModalCreateEmailTemplate({
   const handleSave = () => {
     console.log("Form data:", { name, subject, body });
     console.log("Selected roles:", Array.from(templateRoles));
-    console.log("Selected attachments:", Array.from(attachments));
+    console.log("Selected attachments:", Array.from(selectedAttachments));
   };
 
   const renderedSubject = subject.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
@@ -168,21 +212,21 @@ export default function ModalCreateEmailTemplate({
                   <span className="text-gray-400 italic">El contenido aparecera aqui...</span>
                 )}
               </div>
-              {attachments.size > 0 && (
+              {selectedAttachments.size > 0 && (
                 <div className="mt-3 pt-2.5 border-t border-[#EEEEEE]">
                   <p className="text-[10px] text-gray-400 font-medium mb-1.5 uppercase tracking-wide">
                     Adjuntos
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {predefinedAttachments
-                      .filter((a) => attachments.has(a.name))
+                    {attachmentOptions
+                      .filter((a) => selectedAttachments.has(a.value))
                       .map((att) => (
                         <span
-                          key={att.name}
+                          key={att.value}
                           className="inline-flex items-center gap-1 text-[11px] bg-[#F5F5F5] text-gray-600 px-2 py-1 rounded-md border border-[#EEEEEE]"
                         >
                           <Paperclip className="w-2.5 h-2.5 text-gray-400" />
-                          {att.name}
+                          {att.label}
                         </span>
                       ))}
                   </div>
@@ -231,35 +275,39 @@ export default function ModalCreateEmailTemplate({
         <Label className="text-sm text-[#141414] font-medium mb-2 block">
           Roles destinatarios
         </Label>
-        <div className="flex flex-wrap gap-2">
-          {predefinedRoles.map((role) => {
-            const isSelected = templateRoles.has(role);
-            return (
-              <button
-                key={role}
-                type="button"
-                onClick={() =>
-                  setTemplateRoles((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(role)) next.delete(role);
-                    else next.add(role);
-                    return next;
-                  })
-                }
-                className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
-                    : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Users
-                  className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
-                />
-                {role}
-              </button>
-            );
-          })}
-        </div>
+        {loadingRoles ? (
+          <Spin size="small" />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {roleOptions.map((role) => {
+              const isSelected = templateRoles.has(role.value);
+              return (
+                <button
+                  key={role.value}
+                  type="button"
+                  onClick={() =>
+                    setTemplateRoles((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(role.value)) next.delete(role.value);
+                      else next.add(role.value);
+                      return next;
+                    })
+                  }
+                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
+                      : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <Users
+                    className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
+                  />
+                  {role.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Attachments selector */}
@@ -267,40 +315,39 @@ export default function ModalCreateEmailTemplate({
         <Label className="text-sm text-[#141414] font-medium mb-2 block">
           Adjuntos del template
         </Label>
-        <div className="flex flex-wrap gap-2">
-          {predefinedAttachments.map((att) => {
-            const isSelected = attachments.has(att.name);
-            return (
-              <button
-                key={att.name}
-                type="button"
-                onClick={() =>
-                  setAttachments((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(att.name)) next.delete(att.name);
-                    else next.add(att.name);
-                    return next;
-                  })
-                }
-                className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
-                    : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Paperclip
-                  className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
-                />
-                {att.name}
-                <span
-                  className={`text-[9px] ${isSelected ? "text-[#141414]/50" : "text-gray-400"}`}
+        {loadingAttachments ? (
+          <Spin size="small" />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {attachmentOptions.map((att) => {
+              const isSelected = selectedAttachments.has(att.value);
+              return (
+                <button
+                  key={att.value}
+                  type="button"
+                  onClick={() =>
+                    setSelectedAttachments((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(att.value)) next.delete(att.value);
+                      else next.add(att.value);
+                      return next;
+                    })
+                  }
+                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
+                      : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
                 >
-                  {att.type}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  <Paperclip
+                    className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
+                  />
+                  {att.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
@@ -320,20 +367,3 @@ export default function ModalCreateEmailTemplate({
   );
 }
 
-const predefinedRoles = [
-  "Gerentes",
-  "Tesoreros",
-  "Analistas de pagos",
-  "Directores financieros",
-  "Contadores",
-  "Asistentes administrativos"
-];
-
-const predefinedAttachments = [
-  { name: "Estado de cuenta", type: "PDF" },
-  { name: "Link de pago", type: "Link" },
-  { name: "Reporte de cartera", type: "Excel" },
-  { name: "Comprobante de pago", type: "PDF" },
-  { name: "Carta pre-juridica", type: "PDF" },
-  { name: "Catalogo de productos", type: "PDF" }
-];
