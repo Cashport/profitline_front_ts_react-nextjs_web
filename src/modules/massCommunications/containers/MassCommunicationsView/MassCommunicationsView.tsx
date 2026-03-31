@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex, Typography } from "antd";
 import { ArrowLeft } from "lucide-react";
@@ -12,10 +12,11 @@ import ModalTestCommunication from "../../components/ModalTestCommunication/Moda
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
 import {
-  emailTemplates,
   whatsappTemplates,
   validatedClients as mockClients
 } from "../../lib/mockData";
+import { getMassiveCommunicationTemplates } from "@/services/communications/communications";
+import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { IValidatedClient, WhatsappTemplate } from "../../lib/mockData";
 
@@ -34,9 +35,29 @@ export default function MassCommunicationsView() {
   const [invalidIds, setInvalidIds] = useState<string[]>([]);
 
   // Email message
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+
+  useEffect(() => {
+    getMassiveCommunicationTemplates().then((data) => {
+      const mapped: EmailTemplate[] = data.map((t) => ({
+        id: t.id.toString(),
+        name: t.name,
+        description: t.description,
+        subject: t.subject,
+        body: t.message,
+        attachments: t.attachments.map((att) => {
+          const parts = att.split(".");
+          const ext = parts.length > 1 ? parts.pop()!.toUpperCase() : "FILE";
+          const name = parts.join(".");
+          return { name, type: ext };
+        })
+      }));
+      setEmailTemplates(mapped);
+    });
+  }, []);
 
   const emailTags = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
@@ -50,12 +71,12 @@ export default function MassCommunicationsView() {
       }
     }
     return tags;
-  }, [selectedEmailTemplate]);
+  }, [selectedEmailTemplate, emailTemplates]);
 
   const selectedEmailAttachments = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
     return tpl?.attachments ?? [];
-  }, [selectedEmailTemplate]);
+  }, [selectedEmailTemplate, emailTemplates]);
 
   // WhatsApp message
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -136,6 +157,7 @@ export default function MassCommunicationsView() {
 
           <MessageSection
             channel={channel}
+            emailTemplates={emailTemplates}
             selectedEmailTemplate={selectedEmailTemplate}
             onSelectEmailTemplate={(id, subject, body) => {
               setSelectedEmailTemplate(id);

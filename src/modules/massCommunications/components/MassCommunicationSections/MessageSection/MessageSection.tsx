@@ -2,8 +2,9 @@
 import { Row, Col, Tag, Typography } from "antd";
 import { FileText, Info, Plus } from "lucide-react";
 
-import { emailTemplates, whatsappTemplates } from "../../../lib/mockData";
+import { whatsappTemplates } from "../../../lib/mockData";
 import type { WhatsappTemplate } from "../../../lib/mockData";
+import type { EmailTemplate } from "./EmailTemplateCard";
 import type { ChannelType } from "../ChannelSection/ChannelSection";
 import WhatsAppPreview from "../../WhatsAppPreview/WhatsAppPreview";
 import EmailTemplateCard from "./EmailTemplateCard";
@@ -15,6 +16,7 @@ const { Text } = Typography;
 
 interface MessageSectionProps {
   channel: ChannelType;
+  emailTemplates: EmailTemplate[];
   selectedEmailTemplate: string;
   onSelectEmailTemplate: (id: string, subject: string, body: string) => void;
   emailSubject: string;
@@ -29,6 +31,7 @@ interface MessageSectionProps {
 
 export default function MessageSection({
   channel,
+  emailTemplates,
   selectedEmailTemplate,
   onSelectEmailTemplate,
   emailSubject,

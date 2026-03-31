@@ -216,6 +216,20 @@ export interface ITemplateCommunication {
   recipients: string[]; // Array of recipient emails
 }
 
+export interface IMassiveCommunicationTemplate {
+  id: number;
+  id_project: number;
+  name: string;
+  description: string;
+  subject: string;
+  message: string;
+  via: string;
+  attachments: string[];
+  action_type_ids: number[];
+  sub_action_type_ids: number[];
+  id_comunicacion_type: number;
+}
+
 export interface ICreateCommunicationTemplate {
   project_id: number;
   name: string;
