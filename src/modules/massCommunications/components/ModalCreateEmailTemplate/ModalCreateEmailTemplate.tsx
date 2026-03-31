@@ -1,19 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Modal } from "antd";
+import { useForm, Controller } from "react-hook-form";
+import { message, Modal, Spin } from "antd";
 import { Pencil, Users, Paperclip } from "lucide-react";
 
+import {
+  createCommunicationTemplate,
+  getAllAtachments,
+  getTemplateTags
+} from "@/services/communications/communications";
+import { useAppStore } from "@/lib/store/store";
+import { getContactOptions } from "@/services/contacts/contacts";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
 import { Button } from "@/modules/chat/ui/button";
 import { CustomTextArea } from "@/components/atoms/CustomTextArea/CustomTextArea";
-import { getTemplateTags } from "@/services/communications/communications";
 import SelectOuterTags from "@/components/ui/select-outer-tags";
 import { OptionType } from "@/components/ui/select-outer-tags/select-outer-tags";
 
 interface ISelectTag {
   value: number;
   label: string;
+}
+
+interface IEmailTemplateForm {
+  name: string;
+  subject: string;
+  body: string;
+  templateRoles: Set<string>;
+  selectedAttachments: Set<number>;
 }
 
 interface ModalCreateEmailTemplateProps {
@@ -25,29 +40,93 @@ export default function ModalCreateEmailTemplate({
   isOpen,
   onClose
 }: ModalCreateEmailTemplateProps) {
-  const [name, setName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    register,
+    formState: { isSubmitting, isValid }
+  } = useForm<IEmailTemplateForm>({
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      subject: "",
+      body: "",
+      templateRoles: new Set(),
+      selectedAttachments: new Set()
+    }
+  });
+
+  register("templateRoles", {
+    validate: (value) => value.size > 0 || "Debe seleccionar al menos un rol"
+  });
+
   const [activeField, setActiveField] = useState<"subject" | "body">("body");
-  const [templateRoles, setTemplateRoles] = useState<Set<string>>(new Set());
-  const [attachments, setAttachments] = useState<Set<string>>(new Set());
+  const [roleOptions, setRoleOptions] = useState<{ value: string; label: string }[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [attachmentOptions, setAttachmentOptions] = useState<{ value: number; label: string }[]>(
+    []
+  );
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [templateTags, setTemplateTags] = useState<ISelectTag[]>([]);
+
+  const subjectValue = watch("subject");
+  const bodyValue = watch("body");
+  const templateRoles = watch("templateRoles");
+  const selectedAttachments = watch("selectedAttachments");
 
   useEffect(() => {
     if (!isOpen) {
-      setName("");
-      setSubject("");
-      setBody("");
+      reset();
       setActiveField("body");
-      setTemplateRoles(new Set());
-      setAttachments(new Set());
     }
-  }, [isOpen]);
+  }, [isOpen, reset]);
 
   useEffect(() => {
+    const fetchAttachments = async () => {
+      setLoadingAttachments(true);
+      try {
+        const response = await getAllAtachments();
+        setAttachmentOptions(
+          response.map((att: { id: number; name: string }) => ({
+            value: att.id,
+            label: att.name
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching attachments", error);
+      }
+      setLoadingAttachments(false);
+    };
+    fetchAttachments();
+
+    const fetchRoles = async () => {
+      setLoadingRoles(true);
+      try {
+        const contactPositionsData = await getContactOptions();
+        const contactPositions = contactPositionsData.contact_position.map((position) => ({
+          value: `0_${position.id}`,
+          label: `Cliente - ${position.name}`
+        }));
+        setRoleOptions(contactPositions);
+      } catch (error) {
+        console.error("Error fetching contact options", error);
+      }
+      setLoadingRoles(false);
+    };
+    fetchRoles();
+
     const fetchTemplateTags = async () => {
-      const tags = await getTemplateTags();
-      setTemplateTags(tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      try {
+        const tags = await getTemplateTags();
+        setTemplateTags(tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      } catch (error) {
+        console.error("Error fetching template tags", error);
+      }
     };
     fetchTemplateTags();
   }, []);
@@ -60,20 +139,40 @@ export default function ModalCreateEmailTemplate({
     const insertion = `{{${lastAddedTag?.label}}}`;
 
     if (activeField === "subject") {
-      setSubject((prev) => `${prev}${insertion}`);
+      setValue("subject", `${subjectValue}${insertion}`);
     } else {
-      setBody((prev) => `${prev}${insertion}`);
+      setValue("body", `${bodyValue}${insertion}`);
     }
   };
 
-  const handleSave = () => {
-    console.log("Form data:", { name, subject, body });
-    console.log("Selected roles:", Array.from(templateRoles));
-    console.log("Selected attachments:", Array.from(attachments));
+  const onSubmit = async (data: IEmailTemplateForm) => {
+    try {
+      await createCommunicationTemplate({
+        project_id: projectId,
+        name: data.name,
+        description: data.name,
+        subject: data.subject,
+        message: data.body,
+        via: "email",
+        contact_roles: Array.from(data.templateRoles).map((role) => Number(role.split("_")[1])),
+        other_mails: [],
+        comunication_type: 3,
+        action_type_ids: [17]
+      });
+      message.success("Template creado exitosamente");
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocurrió un error al crear el template";
+      message.error(errorMessage);
+    }
   };
 
-  const renderedSubject = subject.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
-  const renderedBody = body.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
+  const renderedSubject = subjectValue.replace(
+    /\{\{(.+?)\}\}/g,
+    (_: string, tag: string) => `[${tag}]`
+  );
+  const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => `[${tag}]`);
 
   return (
     <Modal
@@ -81,7 +180,15 @@ export default function ModalCreateEmailTemplate({
       onCancel={onClose}
       footer={null}
       width={900}
+      centered
       destroyOnClose
+      styles={{
+        body: {
+          maxHeight: "calc(90vh - 110px)",
+          overflowY: "auto",
+          scrollbarWidth: "thin"
+        }
+      }}
       title={
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#CBE71E]/20 flex items-center justify-center">
@@ -101,11 +208,17 @@ export default function ModalCreateEmailTemplate({
         <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
           Nombre del template
         </Label>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ej: Recordatorio mensual de cartera"
-          className="border-[#DDDDDD] h-10"
+        <Controller
+          name="name"
+          control={control}
+          rules={{ required: "El nombre es obligatorio" }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              placeholder="Ej: Recordatorio mensual de cartera"
+              className="border-[#DDDDDD] h-10 placeholder:text-[#DDDDDD] font-light"
+            />
+          )}
         />
       </div>
 
@@ -115,47 +228,63 @@ export default function ModalCreateEmailTemplate({
         <div className="flex flex-col gap-4">
           <div>
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Asunto</Label>
-            <CustomTextArea
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              onFocus={() => setActiveField("subject")}
-              placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
-              highlightWords={highlightWords}
-              customStyles={{
-                height: "40px"
-              }}
-              customStyleTextArea={{
-                height: "40px",
-                minHeight: "40px",
-                padding: "8px 12px",
-                scrollbarWidth: "none",
-                border: "1px solid #DDDDDD",
-                borderRadius: "8px"
-              }}
+            <Controller
+              name="subject"
+              control={control}
+              rules={{ required: "El asunto es obligatorio" }}
+              render={({ field }) => (
+                <CustomTextArea
+                  {...field}
+                  onFocus={() => setActiveField("subject")}
+                  placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
+                  highlightWords={highlightWords}
+                  customStyles={{
+                    height: "40px",
+                    background: "transparent"
+                  }}
+                  customStyleTextArea={{
+                    height: "40px",
+                    minHeight: "40px",
+                    padding: "8px 12px",
+                    scrollbarWidth: "none",
+                    border: "1px solid #DDDDDD",
+                    borderRadius: "8px",
+                    fontSize: "14px"
+                  }}
+                />
+              )}
             />
           </div>
           <div className="flex flex-col flex-1">
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
               Cuerpo del mensaje
             </Label>
-            <CustomTextArea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onFocus={() => setActiveField("body")}
-              placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
-              highlightWords={highlightWords}
-              customStyles={{
-                height: "200px",
-                maxHeight: "200px",
-                overflow: "hidden"
-              }}
-              customStyleTextArea={{
-                height: "200px",
-                minHeight: "200px",
-                lineHeight: "1.625",
-                border: "1px solid #DDDDDD",
-                borderRadius: "8px"
-              }}
+            <Controller
+              name="body"
+              control={control}
+              rules={{ required: "El cuerpo es obligatorio" }}
+              render={({ field }) => (
+                <CustomTextArea
+                  {...field}
+                  onFocus={() => setActiveField("body")}
+                  placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
+                  highlightWords={highlightWords}
+                  customStyles={{
+                    height: "200px",
+                    maxHeight: "200px",
+                    overflow: "hidden",
+                    background: "transparent"
+                  }}
+                  customStyleTextArea={{
+                    height: "200px",
+                    minHeight: "200px",
+                    lineHeight: "1.625",
+                    border: "1px solid #DDDDDD",
+                    borderRadius: "8px",
+                    fontSize: "14px"
+                  }}
+                />
+              )}
             />
           </div>
         </div>
@@ -181,21 +310,21 @@ export default function ModalCreateEmailTemplate({
                   <span className="text-gray-400 italic">El contenido aparecera aqui...</span>
                 )}
               </div>
-              {attachments.size > 0 && (
+              {selectedAttachments.size > 0 && (
                 <div className="mt-3 pt-2.5 border-t border-[#EEEEEE]">
                   <p className="text-[10px] text-gray-400 font-medium mb-1.5 uppercase tracking-wide">
                     Adjuntos
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {predefinedAttachments
-                      .filter((a) => attachments.has(a.name))
+                    {attachmentOptions
+                      .filter((a) => selectedAttachments.has(a.value))
                       .map((att) => (
                         <span
-                          key={att.name}
+                          key={att.value}
                           className="inline-flex items-center gap-1 text-[11px] bg-[#F5F5F5] text-gray-600 px-2 py-1 rounded-md border border-[#EEEEEE]"
                         >
                           <Paperclip className="w-2.5 h-2.5 text-gray-400" />
-                          {att.name}
+                          {att.label}
                         </span>
                       ))}
                   </div>
@@ -209,7 +338,6 @@ export default function ModalCreateEmailTemplate({
       {/* Tag inserter */}
       <div className="flex items-center gap-3 mt-5">
         <SelectOuterTags
-          title="Tags"
           placeholder="Seleccionar tag"
           options={templateTags}
           errors={undefined}
@@ -217,7 +345,13 @@ export default function ModalCreateEmailTemplate({
           hiddenTags
           addedOnchangeBehaviour={handleAddTagToField}
           disableValueRetention
-          customStyleContainer={{ width: "200px" }}
+          customStyleContainer={{ width: "270px", fontSize: "14px" }}
+          customStyleSelect={{
+            background: "transparent",
+            border: "1px solid #DDDDDD",
+            borderRadius: "8px",
+            fontSize: "14px"
+          }}
         />
         <span className="text-xs text-gray-400">
           Se insertara en {activeField === "subject" ? "el asunto" : "el cuerpo"}
@@ -226,38 +360,36 @@ export default function ModalCreateEmailTemplate({
 
       {/* Roles selector */}
       <div className="mt-5">
-        <Label className="text-sm text-[#141414] font-medium mb-2 block">
-          Roles destinatarios
-        </Label>
-        <div className="flex flex-wrap gap-2">
-          {predefinedRoles.map((role) => {
-            const isSelected = templateRoles.has(role);
-            return (
-              <button
-                key={role}
-                type="button"
-                onClick={() =>
-                  setTemplateRoles((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(role)) next.delete(role);
-                    else next.add(role);
-                    return next;
-                  })
-                }
-                className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
-                    : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Users
-                  className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
-                />
-                {role}
-              </button>
-            );
-          })}
-        </div>
+        <Label className="text-sm text-[#141414] font-medium mb-2 block">Roles destinatarios</Label>
+        {loadingRoles ? (
+          <Spin size="small" />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {roleOptions.map((role) => {
+              const isSelected = templateRoles.has(role.value);
+              return (
+                <button
+                  key={role.value}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(templateRoles);
+                    if (next.has(role.value)) next.delete(role.value);
+                    else next.add(role.value);
+                    setValue("templateRoles", next, { shouldValidate: true });
+                  }}
+                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
+                      : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <Users className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`} />
+                  {role.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Attachments selector */}
@@ -265,50 +397,47 @@ export default function ModalCreateEmailTemplate({
         <Label className="text-sm text-[#141414] font-medium mb-2 block">
           Adjuntos del template
         </Label>
-        <div className="flex flex-wrap gap-2">
-          {predefinedAttachments.map((att) => {
-            const isSelected = attachments.has(att.name);
-            return (
-              <button
-                key={att.name}
-                type="button"
-                onClick={() =>
-                  setAttachments((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(att.name)) next.delete(att.name);
-                    else next.add(att.name);
-                    return next;
-                  })
-                }
-                className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
-                    : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Paperclip
-                  className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
-                />
-                {att.name}
-                <span
-                  className={`text-[9px] ${isSelected ? "text-[#141414]/50" : "text-gray-400"}`}
+        {loadingAttachments ? (
+          <Spin size="small" />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {attachmentOptions.map((att) => {
+              const isSelected = selectedAttachments.has(att.value);
+              return (
+                <button
+                  key={att.value}
+                  type="button"
+                  onClick={() => {
+                    const next = new Set(selectedAttachments);
+                    if (next.has(att.value)) next.delete(att.value);
+                    else next.add(att.value);
+                    setValue("selectedAttachments", next);
+                  }}
+                  className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
+                      : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
                 >
-                  {att.type}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  <Paperclip
+                    className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
+                  />
+                  {att.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 mt-6">
+      <div className="sticky bottom-0 bg-white pt-4 pb-1 flex items-center justify-end gap-3 mt-1">
         <Button variant="outline" onClick={onClose} className="border-[#DDDDDD] h-9">
           Cancelar
         </Button>
         <Button
-          onClick={handleSave}
-          disabled={!subject.trim() || !body.trim()}
+          onClick={handleSubmit(onSubmit)}
+          disabled={!isValid || isSubmitting}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
           Guardar template
@@ -317,21 +446,3 @@ export default function ModalCreateEmailTemplate({
     </Modal>
   );
 }
-
-const predefinedRoles = [
-  "Gerentes",
-  "Tesoreros",
-  "Analistas de pagos",
-  "Directores financieros",
-  "Contadores",
-  "Asistentes administrativos"
-];
-
-const predefinedAttachments = [
-  { name: "Estado de cuenta", type: "PDF" },
-  { name: "Link de pago", type: "Link" },
-  { name: "Reporte de cartera", type: "Excel" },
-  { name: "Comprobante de pago", type: "PDF" },
-  { name: "Carta pre-juridica", type: "PDF" },
-  { name: "Catalogo de productos", type: "PDF" }
-];
