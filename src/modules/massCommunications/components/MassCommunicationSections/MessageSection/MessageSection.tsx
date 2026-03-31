@@ -75,7 +75,7 @@ export default function MessageSection({
             <Text strong className="block text-[13px] mb-3">
               Templates de email
             </Text>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded">
               {emailTemplates.map((tpl) => (
                 <EmailTemplateCard
                   key={tpl.id}

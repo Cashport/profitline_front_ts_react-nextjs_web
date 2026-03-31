@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Flex, Typography } from "antd";
 import { ArrowLeft } from "lucide-react";
@@ -44,7 +44,7 @@ export default function MassCommunicationsView() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
 
-  useEffect(() => {
+  const fetchEmailTemplates = useCallback(() => {
     getMassiveCommunicationTemplates().then((data) => {
       const mapped: EmailTemplate[] = data.map((t) => ({
         id: t.id.toString(),
@@ -61,6 +61,10 @@ export default function MassCommunicationsView() {
       }));
       setEmailTemplates(mapped);
     });
+  }, []);
+
+  useEffect(() => {
+    fetchEmailTemplates();
 
     getTemplateTags()
       .then((tags) => setApiTags(tags))
@@ -199,6 +203,7 @@ export default function MassCommunicationsView() {
         isOpen={createTemplateOpen}
         onClose={() => setCreateTemplateOpen(false)}
         templateTags={apiTags.map((t) => ({ value: t.id, label: t.name }))}
+        onSuccess={fetchEmailTemplates}
       />
 
       <ModalTestCommunication

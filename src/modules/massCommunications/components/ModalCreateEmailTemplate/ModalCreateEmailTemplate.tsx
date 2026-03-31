@@ -34,12 +34,14 @@ interface ModalCreateEmailTemplateProps {
   isOpen: boolean;
   onClose: () => void;
   templateTags: ISelectTag[];
+  onSuccess?: () => void;
 }
 
 export default function ModalCreateEmailTemplate({
   isOpen,
   onClose,
-  templateTags
+  templateTags,
+  onSuccess
 }: ModalCreateEmailTemplateProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
@@ -118,7 +120,6 @@ export default function ModalCreateEmailTemplate({
       setLoadingRoles(false);
     };
     fetchRoles();
-
   }, []);
 
   const highlightWords = templateTags.map((tag) => `{{${tag.label}}}`);
@@ -150,6 +151,7 @@ export default function ModalCreateEmailTemplate({
         action_type_ids: [17]
       });
       message.success("Template creado exitosamente");
+      onSuccess?.();
       onClose();
     } catch (error) {
       const errorMessage =
