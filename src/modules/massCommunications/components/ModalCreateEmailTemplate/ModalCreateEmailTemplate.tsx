@@ -1,23 +1,26 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { Modal } from "antd";
-import { Pencil, Users, Paperclip, Plus, Tag } from "lucide-react";
-import { Spin } from "antd";
+import { useEffect, useState } from "react";
+import { Modal, Spin } from "antd";
+import { Pencil, Users, Paperclip } from "lucide-react";
 
-import { getAllAtachments } from "@/services/communications/communications";
+import { getAllAtachments, getTemplateTags } from "@/services/communications/communications";
 import { getContactOptions } from "@/services/contacts/contacts";
 import { Input } from "@/modules/chat/ui/input";
-import { Textarea } from "@/modules/chat/ui/textarea";
 import { Label } from "@/modules/chat/ui/label";
 import { Button } from "@/modules/chat/ui/button";
-import { Popover, PopoverTrigger, PopoverContent } from "@/modules/chat/ui/popover";
+import { CustomTextArea } from "@/components/atoms/CustomTextArea/CustomTextArea";
+import SelectOuterTags from "@/components/ui/select-outer-tags";
+import { OptionType } from "@/components/ui/select-outer-tags/select-outer-tags";
+
+interface ISelectTag {
+  value: number;
+  label: string;
+}
 
 interface ModalCreateEmailTemplateProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const emailTags = ["Nombre Cliente", "Cartera", "Firma", "Fecha", "Empresa"];
 
 export default function ModalCreateEmailTemplate({
   isOpen,
@@ -35,10 +38,7 @@ export default function ModalCreateEmailTemplate({
     []
   );
   const [loadingAttachments, setLoadingAttachments] = useState(false);
-  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
-
-  const subjectInputRef = useRef<HTMLInputElement>(null);
-  const bodyInputRef = useRef<HTMLTextAreaElement>(null);
+  const [templateTags, setTemplateTags] = useState<ISelectTag[]>([]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -84,36 +84,30 @@ export default function ModalCreateEmailTemplate({
       setLoadingRoles(false);
     };
     fetchRoles();
+
+    const fetchTemplateTags = async () => {
+      try {
+        const tags = await getTemplateTags();
+        setTemplateTags(tags.map((tag) => ({ value: tag.id, label: tag.name })));
+      } catch (error) {
+        console.error("Error fetching template tags", error);
+      }
+    };
+    fetchTemplateTags();
   }, []);
 
-  const handleInsertTag = (tag: string) => {
-    const insertion = `{{${tag}}}`;
+  const highlightWords = templateTags.map((tag) => `{{${tag.label}}}`);
+
+  const handleAddTagToField = (value: OptionType[]) => {
+    if (value.length === 0) return;
+    const lastAddedTag = value[value.length - 1];
+    const insertion = `{{${lastAddedTag?.label}}}`;
+
     if (activeField === "subject") {
-      const el = subjectInputRef.current;
-      if (el) {
-        const start = el.selectionStart ?? subject.length;
-        const end = el.selectionEnd ?? subject.length;
-        const newValue = subject.slice(0, start) + insertion + subject.slice(end);
-        setSubject(newValue);
-        requestAnimationFrame(() => {
-          el.focus();
-          el.setSelectionRange(start + insertion.length, start + insertion.length);
-        });
-      }
+      setSubject((prev) => `${prev}${insertion}`);
     } else {
-      const el = bodyInputRef.current;
-      if (el) {
-        const start = el.selectionStart ?? body.length;
-        const end = el.selectionEnd ?? body.length;
-        const newValue = body.slice(0, start) + insertion + body.slice(end);
-        setBody(newValue);
-        requestAnimationFrame(() => {
-          el.focus();
-          el.setSelectionRange(start + insertion.length, start + insertion.length);
-        });
-      }
+      setBody((prev) => `${prev}${insertion}`);
     }
-    setTagPopoverOpen(false);
   };
 
   const handleSave = () => {
@@ -165,28 +159,47 @@ export default function ModalCreateEmailTemplate({
         <div className="flex flex-col gap-4">
           <div>
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Asunto</Label>
-            <Input
-              ref={subjectInputRef}
+            <CustomTextArea
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               onFocus={() => setActiveField("subject")}
               placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
-              className="border-[#DDDDDD] h-10"
+              highlightWords={highlightWords}
+              customStyles={{
+                height: "40px"
+              }}
+              customStyleTextArea={{
+                height: "40px",
+                minHeight: "40px",
+                padding: "8px 12px",
+                scrollbarWidth: "none",
+                border: "1px solid #DDDDDD",
+                borderRadius: "8px"
+              }}
             />
           </div>
           <div className="flex flex-col flex-1">
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
               Cuerpo del mensaje
             </Label>
-            <Textarea
-              ref={bodyInputRef}
+            <CustomTextArea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               onFocus={() => setActiveField("body")}
-              placeholder={
-                "Estimado {{Nombre Cliente}},\n\nLe informamos que su cartera actual es de {{Cartera}}...\n\nQuedamos atentos,\n{{Firma}}"
-              }
-              className="flex-1 border-[#DDDDDD] min-h-[200px] resize-none leading-relaxed"
+              placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
+              highlightWords={highlightWords}
+              customStyles={{
+                height: "200px",
+                maxHeight: "200px",
+                overflow: "hidden"
+              }}
+              customStyleTextArea={{
+                height: "200px",
+                minHeight: "200px",
+                lineHeight: "1.625",
+                border: "1px solid #DDDDDD",
+                borderRadius: "8px"
+              }}
             />
           </div>
         </div>
@@ -207,7 +220,7 @@ export default function ModalCreateEmailTemplate({
                   {renderedSubject || "Sin asunto"}
                 </p>
               </div>
-              <div className="text-[13px] text-[#141414] leading-relaxed whitespace-pre-wrap">
+              <div className="text-[13px] text-[#141414] leading-relaxed whitespace-pre-wrap max-h-[200px] overflow-auto">
                 {renderedBody || (
                   <span className="text-gray-400 italic">El contenido aparecera aqui...</span>
                 )}
@@ -239,32 +252,17 @@ export default function ModalCreateEmailTemplate({
 
       {/* Tag inserter */}
       <div className="flex items-center gap-3 mt-5">
-        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-[#DDDDDD] bg-white text-[#141414] hover:bg-gray-50 transition-all cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <Tag className="w-3.5 h-3.5" />
-              Insertar tag
-            </button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-48 p-1">
-            <div className="flex flex-col">
-              {emailTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => handleInsertTag(tag)}
-                  className="text-left text-sm px-3 py-2 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  {`{{${tag}}}`}
-                </button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+        <SelectOuterTags
+          title="Tags"
+          placeholder="Seleccionar tag"
+          options={templateTags}
+          errors={undefined}
+          field={{ value: [], onChange: () => {}, onBlur: () => {}, name: "tags", ref: () => {} }}
+          hiddenTags
+          addedOnchangeBehaviour={handleAddTagToField}
+          disableValueRetention
+          customStyleContainer={{ width: "200px" }}
+        />
         <span className="text-xs text-gray-400">
           Se insertara en {activeField === "subject" ? "el asunto" : "el cuerpo"}
         </span>
