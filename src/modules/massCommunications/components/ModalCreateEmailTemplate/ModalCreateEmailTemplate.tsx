@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { message, Modal, Spin } from "antd";
 import { Pencil, Users, Paperclip } from "lucide-react";
 
@@ -22,6 +23,14 @@ interface ISelectTag {
   label: string;
 }
 
+interface IEmailTemplateForm {
+  name: string;
+  subject: string;
+  body: string;
+  templateRoles: Set<string>;
+  selectedAttachments: Set<number>;
+}
+
 interface ModalCreateEmailTemplateProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,31 +41,50 @@ export default function ModalCreateEmailTemplate({
   onClose
 }: ModalCreateEmailTemplateProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const [name, setName] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    register,
+    formState: { isSubmitting, isValid }
+  } = useForm<IEmailTemplateForm>({
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      subject: "",
+      body: "",
+      templateRoles: new Set(),
+      selectedAttachments: new Set()
+    }
+  });
+
+  register("templateRoles", {
+    validate: (value) => value.size > 0 || "Debe seleccionar al menos un rol"
+  });
+
   const [activeField, setActiveField] = useState<"subject" | "body">("body");
-  const [templateRoles, setTemplateRoles] = useState<Set<string>>(new Set());
   const [roleOptions, setRoleOptions] = useState<{ value: string; label: string }[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
-  const [selectedAttachments, setSelectedAttachments] = useState<Set<number>>(new Set());
   const [attachmentOptions, setAttachmentOptions] = useState<{ value: number; label: string }[]>(
     []
   );
   const [loadingAttachments, setLoadingAttachments] = useState(false);
-  const [isLoadingSave, setIsLoadingSave] = useState(false);
   const [templateTags, setTemplateTags] = useState<ISelectTag[]>([]);
+
+  const subjectValue = watch("subject");
+  const bodyValue = watch("body");
+  const templateRoles = watch("templateRoles");
+  const selectedAttachments = watch("selectedAttachments");
 
   useEffect(() => {
     if (!isOpen) {
-      setName("");
-      setSubject("");
-      setBody("");
+      reset();
       setActiveField("body");
-      setTemplateRoles(new Set());
-      setSelectedAttachments(new Set());
     }
-  }, [isOpen]);
+  }, [isOpen, reset]);
 
   useEffect(() => {
     const fetchAttachments = async () => {
@@ -111,23 +139,22 @@ export default function ModalCreateEmailTemplate({
     const insertion = `{{${lastAddedTag?.label}}}`;
 
     if (activeField === "subject") {
-      setSubject((prev) => `${prev}${insertion}`);
+      setValue("subject", `${subjectValue}${insertion}`);
     } else {
-      setBody((prev) => `${prev}${insertion}`);
+      setValue("body", `${bodyValue}${insertion}`);
     }
   };
 
-  const handleSave = async () => {
-    setIsLoadingSave(true);
+  const onSubmit = async (data: IEmailTemplateForm) => {
     try {
       await createCommunicationTemplate({
         project_id: projectId,
-        name,
-        description: name,
-        subject,
-        message: body,
+        name: data.name,
+        description: data.name,
+        subject: data.subject,
+        message: data.body,
         via: "email",
-        contact_roles: Array.from(templateRoles).map((role) => Number(role.split("_")[1])),
+        contact_roles: Array.from(data.templateRoles).map((role) => Number(role.split("_")[1])),
         other_mails: [],
         comunication_type: 3,
         action_type_ids: [17]
@@ -138,13 +165,11 @@ export default function ModalCreateEmailTemplate({
       const errorMessage =
         error instanceof Error ? error.message : "Ocurrió un error al crear el template";
       message.error(errorMessage);
-    } finally {
-      setIsLoadingSave(false);
     }
   };
 
-  const renderedSubject = subject.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
-  const renderedBody = body.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
+  const renderedSubject = subjectValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => `[${tag}]`);
+  const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => `[${tag}]`);
 
   return (
     <Modal
@@ -180,11 +205,17 @@ export default function ModalCreateEmailTemplate({
         <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
           Nombre del template
         </Label>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ej: Recordatorio mensual de cartera"
-          className="border-[#DDDDDD] h-10 placeholder:text-[#DDDDDD] font-light"
+        <Controller
+          name="name"
+          control={control}
+          rules={{ required: "El nombre es obligatorio" }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              placeholder="Ej: Recordatorio mensual de cartera"
+              className="border-[#DDDDDD] h-10 placeholder:text-[#DDDDDD] font-light"
+            />
+          )}
         />
       </div>
 
@@ -194,51 +225,63 @@ export default function ModalCreateEmailTemplate({
         <div className="flex flex-col gap-4">
           <div>
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">Asunto</Label>
-            <CustomTextArea
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              onFocus={() => setActiveField("subject")}
-              placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
-              highlightWords={highlightWords}
-              customStyles={{
-                height: "40px",
-                background: "transparent"
-              }}
-              customStyleTextArea={{
-                height: "40px",
-                minHeight: "40px",
-                padding: "8px 12px",
-                scrollbarWidth: "none",
-                border: "1px solid #DDDDDD",
-                borderRadius: "8px",
-                fontSize: "14px"
-              }}
+            <Controller
+              name="subject"
+              control={control}
+              rules={{ required: "El asunto es obligatorio" }}
+              render={({ field }) => (
+                <CustomTextArea
+                  {...field}
+                  onFocus={() => setActiveField("subject")}
+                  placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
+                  highlightWords={highlightWords}
+                  customStyles={{
+                    height: "40px",
+                    background: "transparent"
+                  }}
+                  customStyleTextArea={{
+                    height: "40px",
+                    minHeight: "40px",
+                    padding: "8px 12px",
+                    scrollbarWidth: "none",
+                    border: "1px solid #DDDDDD",
+                    borderRadius: "8px",
+                    fontSize: "14px"
+                  }}
+                />
+              )}
             />
           </div>
           <div className="flex flex-col flex-1">
             <Label className="text-sm text-[#141414] font-medium mb-1.5 block">
               Cuerpo del mensaje
             </Label>
-            <CustomTextArea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onFocus={() => setActiveField("body")}
-              placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
-              highlightWords={highlightWords}
-              customStyles={{
-                height: "200px",
-                maxHeight: "200px",
-                overflow: "hidden",
-                background: "transparent"
-              }}
-              customStyleTextArea={{
-                height: "200px",
-                minHeight: "200px",
-                lineHeight: "1.625",
-                border: "1px solid #DDDDDD",
-                borderRadius: "8px",
-                fontSize: "14px"
-              }}
+            <Controller
+              name="body"
+              control={control}
+              rules={{ required: "El cuerpo es obligatorio" }}
+              render={({ field }) => (
+                <CustomTextArea
+                  {...field}
+                  onFocus={() => setActiveField("body")}
+                  placeholder="Estimado {{Nombre Cliente}},&#10;&#10;Le informamos que su cartera actual es de {{Cartera}}...&#10;&#10;Quedamos atentos,&#10;{{Firma}}"
+                  highlightWords={highlightWords}
+                  customStyles={{
+                    height: "200px",
+                    maxHeight: "200px",
+                    overflow: "hidden",
+                    background: "transparent"
+                  }}
+                  customStyleTextArea={{
+                    height: "200px",
+                    minHeight: "200px",
+                    lineHeight: "1.625",
+                    border: "1px solid #DDDDDD",
+                    borderRadius: "8px",
+                    fontSize: "14px"
+                  }}
+                />
+              )}
             />
           </div>
         </div>
@@ -325,14 +368,12 @@ export default function ModalCreateEmailTemplate({
                 <button
                   key={role.value}
                   type="button"
-                  onClick={() =>
-                    setTemplateRoles((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(role.value)) next.delete(role.value);
-                      else next.add(role.value);
-                      return next;
-                    })
-                  }
+                  onClick={() => {
+                    const next = new Set(templateRoles);
+                    if (next.has(role.value)) next.delete(role.value);
+                    else next.add(role.value);
+                    setValue("templateRoles", next, { shouldValidate: true });
+                  }}
                   className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
                     isSelected
                       ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
@@ -363,14 +404,12 @@ export default function ModalCreateEmailTemplate({
                 <button
                   key={att.value}
                   type="button"
-                  onClick={() =>
-                    setSelectedAttachments((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(att.value)) next.delete(att.value);
-                      else next.add(att.value);
-                      return next;
-                    })
-                  }
+                  onClick={() => {
+                    const next = new Set(selectedAttachments);
+                    if (next.has(att.value)) next.delete(att.value);
+                    else next.add(att.value);
+                    setValue("selectedAttachments", next);
+                  }}
                   className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition-all cursor-pointer ${
                     isSelected
                       ? "bg-[#CBE71E]/10 border-[#CBE71E] text-[#141414] font-medium shadow-sm"
@@ -394,8 +433,8 @@ export default function ModalCreateEmailTemplate({
           Cancelar
         </Button>
         <Button
-          onClick={handleSave}
-          disabled={!subject.trim() || !body.trim() || isLoadingSave}
+          onClick={handleSubmit(onSubmit)}
+          disabled={!isValid || isSubmitting}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
           Guardar template
