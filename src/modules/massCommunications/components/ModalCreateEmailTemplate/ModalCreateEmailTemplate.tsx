@@ -1,9 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Modal, Spin } from "antd";
+import { message, Modal, Spin } from "antd";
 import { Pencil, Users, Paperclip } from "lucide-react";
 
-import { getAllAtachments, getTemplateTags } from "@/services/communications/communications";
+import {
+  createCommunicationTemplate,
+  getAllAtachments,
+  getTemplateTags
+} from "@/services/communications/communications";
+import { useAppStore } from "@/lib/store/store";
 import { getContactOptions } from "@/services/contacts/contacts";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
@@ -26,6 +31,7 @@ export default function ModalCreateEmailTemplate({
   isOpen,
   onClose
 }: ModalCreateEmailTemplateProps) {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -38,6 +44,7 @@ export default function ModalCreateEmailTemplate({
     []
   );
   const [loadingAttachments, setLoadingAttachments] = useState(false);
+  const [isLoadingSave, setIsLoadingSave] = useState(false);
   const [templateTags, setTemplateTags] = useState<ISelectTag[]>([]);
 
   useEffect(() => {
@@ -110,10 +117,30 @@ export default function ModalCreateEmailTemplate({
     }
   };
 
-  const handleSave = () => {
-    console.log("Form data:", { name, subject, body });
-    console.log("Selected roles:", Array.from(templateRoles));
-    console.log("Selected attachments:", Array.from(selectedAttachments));
+  const handleSave = async () => {
+    setIsLoadingSave(true);
+    try {
+      const response = await createCommunicationTemplate({
+        project_id: projectId,
+        name,
+        description: name,
+        subject,
+        message: body,
+        via: "email",
+        contact_roles: Array.from(templateRoles).map((role) => Number(role.split("_")[1])),
+        other_mails: [],
+        comunication_type: 3,
+        action_type_ids: [17]
+      });
+      message.success("Template creado exitosamente");
+      onClose();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocurrió un error al crear el template";
+      message.error(errorMessage);
+    } finally {
+      setIsLoadingSave(false);
+    }
   };
 
   const renderedSubject = subject.replace(/\{\{(.+?)\}\}/g, (_, tag) => `[${tag}]`);
@@ -270,9 +297,7 @@ export default function ModalCreateEmailTemplate({
 
       {/* Roles selector */}
       <div className="mt-5">
-        <Label className="text-sm text-[#141414] font-medium mb-2 block">
-          Roles destinatarios
-        </Label>
+        <Label className="text-sm text-[#141414] font-medium mb-2 block">Roles destinatarios</Label>
         {loadingRoles ? (
           <Spin size="small" />
         ) : (
@@ -297,9 +322,7 @@ export default function ModalCreateEmailTemplate({
                       : "bg-white border-[#DDDDDD] text-gray-500 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  <Users
-                    className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`}
-                  />
+                  <Users className={`w-3 h-3 ${isSelected ? "text-[#141414]" : "text-gray-400"}`} />
                   {role.label}
                 </button>
               );
@@ -355,7 +378,7 @@ export default function ModalCreateEmailTemplate({
         </Button>
         <Button
           onClick={handleSave}
-          disabled={!subject.trim() || !body.trim()}
+          disabled={!subject.trim() || !body.trim() || isLoadingSave}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
           Guardar template
@@ -364,4 +387,3 @@ export default function ModalCreateEmailTemplate({
     </Modal>
   );
 }
-
