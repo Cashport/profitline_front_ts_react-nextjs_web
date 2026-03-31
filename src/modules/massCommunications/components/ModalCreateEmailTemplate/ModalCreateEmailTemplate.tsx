@@ -120,7 +120,7 @@ export default function ModalCreateEmailTemplate({
   const handleSave = async () => {
     setIsLoadingSave(true);
     try {
-      const response = await createCommunicationTemplate({
+      await createCommunicationTemplate({
         project_id: projectId,
         name,
         description: name,
@@ -193,7 +193,8 @@ export default function ModalCreateEmailTemplate({
               placeholder="Ej: Reporte de {{Cartera}} - {{Nombre Cliente}}"
               highlightWords={highlightWords}
               customStyles={{
-                height: "40px"
+                height: "40px",
+                background: "transparent"
               }}
               customStyleTextArea={{
                 height: "40px",
@@ -201,7 +202,8 @@ export default function ModalCreateEmailTemplate({
                 padding: "8px 12px",
                 scrollbarWidth: "none",
                 border: "1px solid #DDDDDD",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                fontSize: "14px"
               }}
             />
           </div>
@@ -218,14 +220,16 @@ export default function ModalCreateEmailTemplate({
               customStyles={{
                 height: "200px",
                 maxHeight: "200px",
-                overflow: "hidden"
+                overflow: "hidden",
+                background: "transparent"
               }}
               customStyleTextArea={{
                 height: "200px",
                 minHeight: "200px",
                 lineHeight: "1.625",
                 border: "1px solid #DDDDDD",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                fontSize: "14px"
               }}
             />
           </div>
@@ -280,7 +284,6 @@ export default function ModalCreateEmailTemplate({
       {/* Tag inserter */}
       <div className="flex items-center gap-3 mt-5">
         <SelectOuterTags
-          title="Tags"
           placeholder="Seleccionar tag"
           options={templateTags}
           errors={undefined}
@@ -288,7 +291,13 @@ export default function ModalCreateEmailTemplate({
           hiddenTags
           addedOnchangeBehaviour={handleAddTagToField}
           disableValueRetention
-          customStyleContainer={{ width: "200px" }}
+          customStyleContainer={{ width: "270px", fontSize: "14px" }}
+          customStyleSelect={{
+            background: "transparent",
+            border: "1px solid #DDDDDD",
+            borderRadius: "8px",
+            fontSize: "14px"
+          }}
         />
         <span className="text-xs text-gray-400">
           Se insertara en {activeField === "subject" ? "el asunto" : "el cuerpo"}
