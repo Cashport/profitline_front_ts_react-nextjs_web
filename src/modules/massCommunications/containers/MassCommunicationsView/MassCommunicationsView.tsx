@@ -15,7 +15,10 @@ import {
   whatsappTemplates,
   validatedClients as mockClients
 } from "../../lib/mockData";
-import { getMassiveCommunicationTemplates } from "@/services/communications/communications";
+import {
+  getMassiveCommunicationTemplates,
+  getTemplateTags
+} from "@/services/communications/communications";
 import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { IValidatedClient, WhatsappTemplate } from "../../lib/mockData";
@@ -36,6 +39,7 @@ export default function MassCommunicationsView() {
 
   // Email message
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [apiTags, setApiTags] = useState<{ id: number; name: string; mock: string }[]>([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
@@ -57,6 +61,10 @@ export default function MassCommunicationsView() {
       }));
       setEmailTemplates(mapped);
     });
+
+    getTemplateTags()
+      .then((tags) => setApiTags(tags))
+      .catch((err) => console.error("Error fetching template tags", err));
   }, []);
 
   const emailTags = useMemo(() => {
@@ -67,11 +75,12 @@ export default function MassCommunicationsView() {
     let match;
     while ((match = regex.exec(tpl.body + " " + tpl.subject)) !== null) {
       if (!tags.some((t) => t.key === match![1])) {
-        tags.push({ key: match[1], example: `[${match[1]}]` });
+        const apiTag = apiTags.find((t) => t.name === match![1]);
+        tags.push({ key: match[1], example: apiTag?.mock ?? `[${match[1]}]` });
       }
     }
     return tags;
-  }, [selectedEmailTemplate, emailTemplates]);
+  }, [selectedEmailTemplate, emailTemplates, apiTags]);
 
   const selectedEmailAttachments = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
@@ -189,6 +198,7 @@ export default function MassCommunicationsView() {
       <ModalCreateEmailTemplate
         isOpen={createTemplateOpen}
         onClose={() => setCreateTemplateOpen(false)}
+        templateTags={apiTags.map((t) => ({ value: t.id, label: t.name }))}
       />
 
       <ModalTestCommunication

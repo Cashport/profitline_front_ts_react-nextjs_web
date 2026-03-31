@@ -79,6 +79,7 @@ export const getSubActions = async (action_ids: string[]): Promise<IGetSelect[]>
 
 interface IGetTags extends IGetSelect {
   description: string;
+  mock: string;
 }
 
 export const getTemplateTags = async (): Promise<IGetTags[]> => {

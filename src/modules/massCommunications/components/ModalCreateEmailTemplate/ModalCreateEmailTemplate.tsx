@@ -6,8 +6,7 @@ import { Pencil, Users, Paperclip } from "lucide-react";
 
 import {
   createCommunicationTemplate,
-  getAllAtachments,
-  getTemplateTags
+  getAllAtachments
 } from "@/services/communications/communications";
 import { useAppStore } from "@/lib/store/store";
 import { getContactOptions } from "@/services/contacts/contacts";
@@ -34,11 +33,13 @@ interface IEmailTemplateForm {
 interface ModalCreateEmailTemplateProps {
   isOpen: boolean;
   onClose: () => void;
+  templateTags: ISelectTag[];
 }
 
 export default function ModalCreateEmailTemplate({
   isOpen,
-  onClose
+  onClose,
+  templateTags
 }: ModalCreateEmailTemplateProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
@@ -72,8 +73,6 @@ export default function ModalCreateEmailTemplate({
     []
   );
   const [loadingAttachments, setLoadingAttachments] = useState(false);
-  const [templateTags, setTemplateTags] = useState<ISelectTag[]>([]);
-
   const subjectValue = watch("subject");
   const bodyValue = watch("body");
   const templateRoles = watch("templateRoles");
@@ -120,15 +119,6 @@ export default function ModalCreateEmailTemplate({
     };
     fetchRoles();
 
-    const fetchTemplateTags = async () => {
-      try {
-        const tags = await getTemplateTags();
-        setTemplateTags(tags.map((tag) => ({ value: tag.id, label: tag.name })));
-      } catch (error) {
-        console.error("Error fetching template tags", error);
-      }
-    };
-    fetchTemplateTags();
   }, []);
 
   const highlightWords = templateTags.map((tag) => `{{${tag.label}}}`);
