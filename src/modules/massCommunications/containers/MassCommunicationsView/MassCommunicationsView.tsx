@@ -202,7 +202,7 @@ export default function MassCommunicationsView() {
       <ModalCreateEmailTemplate
         isOpen={createTemplateOpen}
         onClose={() => setCreateTemplateOpen(false)}
-        templateTags={apiTags.map((t) => ({ value: t.id, label: t.name }))}
+        templateTags={apiTags.map((t) => ({ value: t.id, label: t.name, mock: t.mock }))}
         onSuccess={fetchEmailTemplates}
       />
 

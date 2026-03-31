@@ -20,6 +20,7 @@ import { OptionType } from "@/components/ui/select-outer-tags/select-outer-tags"
 interface ISelectTag {
   value: number;
   label: string;
+  mock?: string;
 }
 
 interface IEmailTemplateForm {
@@ -162,9 +163,15 @@ export default function ModalCreateEmailTemplate({
 
   const renderedSubject = subjectValue.replace(
     /\{\{(.+?)\}\}/g,
-    (_: string, tag: string) => `[${tag}]`
+    (_: string, tag: string) => {
+      const found = templateTags.find((t) => t.label === tag);
+      return found?.mock ?? `[${tag}]`;
+    }
   );
-  const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => `[${tag}]`);
+  const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => {
+    const found = templateTags.find((t) => t.label === tag);
+    return found?.mock ?? `[${tag}]`;
+  });
 
   return (
     <Modal
