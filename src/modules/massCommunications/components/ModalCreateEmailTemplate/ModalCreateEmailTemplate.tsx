@@ -176,7 +176,7 @@ export default function ModalCreateEmailTemplate({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ej: Recordatorio mensual de cartera"
-          className="border-[#DDDDDD] h-10"
+          className="border-[#DDDDDD] h-10 placeholder:text-[#DDDDDD] font-light"
         />
       </div>
 
