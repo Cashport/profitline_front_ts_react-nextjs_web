@@ -621,14 +621,7 @@ export const CommunicationProjectForm = ({ onGoBackTable, showCommunicationDetai
                   />
                 )}
               />
-              {/* <InputForm
-                customStyle={{ width: "75%" }}
-                titleInput="Asunto"
-                control={control}
-                nameInput="template.subject"
-                error={errors.template?.subject}
-                readOnly={!isEditAvailable && !!showCommunicationDetails.communicationId}
-              /> */}
+
               <Controller
                 name="template.subject"
                 control={control}

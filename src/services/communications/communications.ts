@@ -11,6 +11,7 @@ import {
   ICreateCommunication,
   IPeriodicityModalForm,
   ICreateCommunicationTemplate,
+  IMassiveCommunicationTemplate,
   ITemplateCommunication,
   Iattachments
 } from "@/types/communications/ICommunications";
@@ -78,6 +79,7 @@ export const getSubActions = async (action_ids: string[]): Promise<IGetSelect[]>
 
 interface IGetTags extends IGetSelect {
   description: string;
+  mock: string;
 }
 
 export const getTemplateTags = async (): Promise<IGetTags[]> => {
@@ -280,6 +282,18 @@ export const createCommunicationTemplate = async (body: ICreateCommunicationTemp
     return response;
   } catch (error) {
     console.error("Error creating communication template", error);
+    throw error;
+  }
+};
+
+export const getMassiveCommunicationTemplates = async () => {
+  try {
+    const response: IMassiveCommunicationTemplate[] = await API.get(
+      `${config.API_HOST}/comunication/available-to-massive`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting massive communication templates", error);
     throw error;
   }
 };
