@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Flex, Typography } from "antd";
 
@@ -11,10 +11,14 @@ import ModalTestCommunication from "../../components/ModalTestCommunication/Moda
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
 import {
-  emailTemplates,
   whatsappTemplates,
   validatedClients as mockClients
 } from "../../lib/mockData";
+import {
+  getMassiveCommunicationTemplates,
+  getTemplateTags
+} from "@/services/communications/communications";
+import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { IValidatedClient, WhatsappTemplate } from "../../lib/mockData";
 
@@ -33,9 +37,38 @@ export default function MassCommunicationsView() {
   const [invalidIds, setInvalidIds] = useState<string[]>([]);
 
   // Email message
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [apiTags, setApiTags] = useState<{ id: number; name: string; mock: string }[]>([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+
+  const fetchEmailTemplates = useCallback(() => {
+    getMassiveCommunicationTemplates().then((data) => {
+      const mapped: EmailTemplate[] = data.map((t) => ({
+        id: t.id.toString(),
+        name: t.name,
+        description: t.description,
+        subject: t.subject,
+        body: t.message,
+        attachments: t.attachments.map((att) => {
+          const parts = att.split(".");
+          const ext = parts.length > 1 ? parts.pop()!.toUpperCase() : "FILE";
+          const name = parts.join(".");
+          return { name, type: ext };
+        })
+      }));
+      setEmailTemplates(mapped);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchEmailTemplates();
+
+    getTemplateTags()
+      .then((tags) => setApiTags(tags))
+      .catch((err) => console.error("Error fetching template tags", err));
+  }, []);
 
   const emailTags = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
@@ -45,16 +78,17 @@ export default function MassCommunicationsView() {
     let match;
     while ((match = regex.exec(tpl.body + " " + tpl.subject)) !== null) {
       if (!tags.some((t) => t.key === match![1])) {
-        tags.push({ key: match[1], example: `[${match[1]}]` });
+        const apiTag = apiTags.find((t) => t.name === match![1]);
+        tags.push({ key: match[1], example: apiTag?.mock ?? `[${match[1]}]` });
       }
     }
     return tags;
-  }, [selectedEmailTemplate]);
+  }, [selectedEmailTemplate, emailTemplates, apiTags]);
 
   const selectedEmailAttachments = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
     return tpl?.attachments ?? [];
-  }, [selectedEmailTemplate]);
+  }, [selectedEmailTemplate, emailTemplates]);
 
   // WhatsApp message
   const [selectedTemplate, setSelectedTemplate] = useState("");
@@ -135,6 +169,7 @@ export default function MassCommunicationsView() {
 
           <MessageSection
             channel={channel}
+            emailTemplates={emailTemplates}
             selectedEmailTemplate={selectedEmailTemplate}
             onSelectEmailTemplate={(id, subject, body) => {
               setSelectedEmailTemplate(id);
@@ -166,6 +201,8 @@ export default function MassCommunicationsView() {
       <ModalCreateEmailTemplate
         isOpen={createTemplateOpen}
         onClose={() => setCreateTemplateOpen(false)}
+        templateTags={apiTags.map((t) => ({ value: t.id, label: t.name, mock: t.mock }))}
+        onSuccess={fetchEmailTemplates}
       />
 
       <ModalTestCommunication

@@ -62,7 +62,7 @@ export function PurchaseOrderDocument({
               className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black"
             >
               <Download className="h-4 w-4 mr-2" />
-              Descargar PDF
+              Descargar
             </Button>
           </div>
         </div>
