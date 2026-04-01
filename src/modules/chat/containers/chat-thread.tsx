@@ -31,7 +31,9 @@ import { Input } from "@/modules/chat/ui/input";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import dayjs from "dayjs";
 import { BubbleMessage } from "../components/bubble-message";
+import { DateSeparator } from "../components/date-separator";
 import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
@@ -86,6 +88,17 @@ export default function ChatThread({
     isLoading
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
   const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
+
+  const messagesByDay = useMemo(() => {
+    const map = new Map<string, IMessage[]>();
+    for (const m of ticketMessages) {
+      const day = dayjs(m.timestamp).format("YYYY-MM-DD");
+      const group = map.get(day);
+      if (group) group.push(m);
+      else map.set(day, [m]);
+    }
+    return map;
+  }, [ticketMessages]);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -426,16 +439,21 @@ export default function ChatThread({
 
       {/* History */}
       <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
-        <div className="space-y-6 px-4 py-6">
-          {ticketMessages.map((m) => (
-            <BubbleMessage
-              key={m.id}
-              message={m}
-              customerName={conversation.customer}
-              templateMap={templateMap}
-              onPreviewImage={setPreviewImage}
-              onScrollToBottom={scrollToBottom}
-            />
+        <div className="px-4 py-6">
+          {Array.from(messagesByDay.entries()).map(([day, messages]) => (
+            <div key={`group-${day}`} className="space-y-6">
+              <DateSeparator date={messages[0].timestamp} />
+              {messages.map((m) => (
+                <BubbleMessage
+                  key={m.id}
+                  message={m}
+                  customerName={conversation.customer}
+                  templateMap={templateMap}
+                  onPreviewImage={setPreviewImage}
+                  onScrollToBottom={scrollToBottom}
+                />
+              ))}
+            </div>
           ))}
         </div>
       </ScrollArea>

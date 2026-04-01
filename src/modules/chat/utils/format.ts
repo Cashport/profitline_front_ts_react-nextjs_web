@@ -1,3 +1,16 @@
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+
+export function formatDateLabel(iso: string): string {
+  const date = dayjs(iso).startOf("day");
+  const today = dayjs().startOf("day");
+  const diff = today.diff(date, "day");
+
+  if (diff === 0) return "Hoy";
+  if (diff === 1) return "Ayer";
+  return date.locale("es").format("D MMM YYYY");
+}
+
 export function formatTime(iso: string): string {
   const d = new Date(iso);
   let hours = d.getHours();
