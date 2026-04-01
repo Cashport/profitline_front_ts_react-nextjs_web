@@ -2,10 +2,6 @@ import { FC, useContext } from "react";
 import dynamic from "next/dynamic";
 
 import DashboardTotalPortfolio from "../../components/dashboard-total-portfolio";
-import DashboardExpiredPortfolio from "../../components/dashboard-expired-portfolio";
-import DashboardBudget from "../../components/dashboard-budget";
-import DashboardInvoiceStatus from "../../components/dashboard-invoice-status";
-import DashboardAlerts from "../../components/dashboard-alerts";
 import DashboardGenericItem from "../../components/dashboard-generic-item";
 import DashboardSellsVsPayments from "../../components/dashboard-sells-vs-payments";
 import DashboardHistoricDso from "../../components/dashboard-historic-dso";
@@ -27,22 +23,11 @@ const Dashboard: FC<DashboardProps> = () => {
   const {
     totalWallet,
     pastDuePortfolio,
-    expiredPercentage,
-    budget,
-    budgetPercentage,
     invoiceAges,
     totalUnreconciled,
     totalUnreconciledCount,
-    totalReconciled,
-    totalReconciledCount,
-    totalBalance,
-    totalBalanceCount,
     openAlerts,
     openAlertsCount,
-    discount,
-    discountCount,
-    creditNotes,
-    creditNotesCount,
     appliedPayments,
     unappliedPayments,
     quota,
@@ -50,15 +35,12 @@ const Dashboard: FC<DashboardProps> = () => {
     dsoValue,
     sellsVsPaymentsData,
     history_dso,
-    sinRadicarValue,
-    sinRadicarCount,
     totalInvoices,
     countInvoices,
     totalBalancesNew,
     countBalancesNew,
     totalCreditNotes,
     countCreditNotes,
-    grandTotalWallet,
     collection,
     unidentifiedPayments
   } = useDashboardInfo(portfolioData);

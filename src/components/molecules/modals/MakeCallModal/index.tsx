@@ -47,7 +47,8 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
   });
 
   const [userToCall, setUserToCall] = useState<UserPhoneOption | null>(null);
-  const [callInProgress, setCallInProgress] = useState(false);
+  // #UNUSED REACT STATE
+  const [_callInProgress, setCallInProgress] = useState(false);
   const [textAlignment, setTextAlignment] = useState<"left" | "center" | "right">("left");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [editorState, setEditorState] = useState<EditorState>(EditorState.createEmpty());
@@ -158,13 +159,8 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
 
   const submit = async () => {
     setLoadingSubmit(true);
-    const alignedHTML = applyAlignment(getHTML(), textAlignment);
-    const createEmailData = {
-      forward_to: userToCall,
-      body: alignedHTML,
-      attachments: phoneCallData.attachments
-    };
-    // await sendEmail(createEmailData);
+    applyAlignment(getHTML(), textAlignment);
+    // await sendEmail({ forward_to: userToCall, body: alignedHTML, attachments: phoneCallData.attachments });
     setLoadingSubmit(false);
   };
 

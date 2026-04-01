@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, Space, Typography } from "antd";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { QuestionType } from "../../controllers/formSchema";

@@ -20,7 +20,7 @@ const OptionList: React.FC<OptionListProps> = ({
   name,
   type,
   options,
-  setValue,
+  setValue: _setValue,
   error,
   required = false
 }) => {

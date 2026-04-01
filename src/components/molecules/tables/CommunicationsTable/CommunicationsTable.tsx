@@ -27,7 +27,8 @@ export const CommunicationsTable = ({
 }: PropsCommunicationsTable) => {
   const pathname = usePathname();
   const [communications, setCommunications] = useState<ICommunication[]>([]);
-  const [search, setSearch] = useState("");
+  // #UNUSED REACT STATE
+  const [_search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);

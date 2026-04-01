@@ -1,8 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex, Typography } from "antd";
-import { ArrowLeft } from "lucide-react";
+import { Flex, Typography } from "antd";
 
 import ChannelSection from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import RecipientsSection from "../../components/MassCommunicationSections/RecipientsSection/RecipientsSection";

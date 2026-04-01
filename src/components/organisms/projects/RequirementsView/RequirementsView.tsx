@@ -67,6 +67,7 @@ const mockedData: IClientType[] = [
 ];
 const { Text } = Typography;
 export const RequirementsView = () => {
+  // #UNUSED REACT STATE
   const [search, setSearch] = useState<string>("");
   const [isGenerateActionOpen, setIsGenerateActionOpen] = useState<boolean>(false);
   const [selectedClientType, setSelectedClientType] = useState<number | null>(null);

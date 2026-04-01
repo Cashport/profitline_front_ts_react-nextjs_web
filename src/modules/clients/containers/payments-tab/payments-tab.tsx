@@ -30,11 +30,10 @@ import { ISingleBank } from "@/types/banks/IBanks";
 import "./payments-tab.scss";
 
 interface PaymentProd {
-  // eslint-disable-next-line no-unused-vars
   onChangeTab?: (activeKey: string) => void;
 }
 
-const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
+const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
   const params = useParams();
   const clientId = extractSingleParam(params.clientId);
   const projectId = extractSingleParam(params.projectId);
@@ -45,7 +44,8 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
-  const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
+  // #UNUSED REACT STATE
+  const [mutatedPaymentDetail, _setMutatePaymentDetail] = useState<boolean>(false);
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
@@ -98,7 +98,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
     });
   };
 
-  const onChangetabWithCloseModal = (activeKey: string) => {
+  const onChangetabWithCloseModal = (_activeKey: string) => {
     setIsModalActionPaymentOpen(false);
     // onChangeTab(activeKey);
   };

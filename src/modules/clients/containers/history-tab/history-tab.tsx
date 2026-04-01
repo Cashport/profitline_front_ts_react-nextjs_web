@@ -23,6 +23,7 @@ const HistoryTab = () => {
   const clientIdParam = extractSingleParam(params.clientId);
   const [rowDetailID, setRowDetailID] = useState<string>();
   const [selectedRows, setSelectedRows] = useState<IHistoryRow[] | undefined>(undefined);
+  // #UNUSED REACT STATE
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState({ selected: 0 });
   const isLoading = false;

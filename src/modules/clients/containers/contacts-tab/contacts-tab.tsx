@@ -23,6 +23,7 @@ const ContactsTab = () => {
   const [showContactModal, setShowContactModal] = useState<showContactModalType>(
     {} as showContactModalType
   );
+  // #UNUSED REACT STATE
   const [search, setSearch] = useState("");
   const { showMessage } = useMessageApi();
   const params = useParams();

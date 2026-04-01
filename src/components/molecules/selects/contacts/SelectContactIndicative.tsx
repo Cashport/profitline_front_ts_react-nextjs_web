@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import { Select, Typography } from "antd";
-import useSWR from "swr";
-import { fetcher } from "@/utils/api/api";
 import {
   FieldError as OriginalFieldError,
   ControllerRenderProps,
@@ -9,8 +7,6 @@ import {
   Merge,
   FieldValues
 } from "react-hook-form";
-
-import { IResponseContactOptions } from "@/types/contacts/IContacts";
 
 import "./commonInputStyles.scss";
 

@@ -6,8 +6,6 @@ import {
   Edit,
   MoreHorizontal,
   Save,
-  Check,
-  X,
   ChevronDown,
   Receipt,
   PackageCheck,

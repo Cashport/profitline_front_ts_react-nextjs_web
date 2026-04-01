@@ -30,6 +30,7 @@ export function SendToBackorderModal({
 }: SendToBackorderModalProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [phase, setPhase] = useState<IPhase>("loading");
+  // #UNUSED REACT STATE
   const [products, setProducts] = useState<IWarehouseProductsStock[]>([]);
   const [isActionLoading, setIsActionLoading] = useState(false);
 

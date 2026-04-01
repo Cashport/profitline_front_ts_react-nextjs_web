@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Button, Flex } from "antd";
+import { Button } from "antd";
 import { ShoppingCartSimple } from "@phosphor-icons/react";
 
 import styles from "./button-cart.module.scss";

@@ -11,7 +11,6 @@ import "./modalActionPayment.scss";
 type ModalActionPaymentProps = {
   isOpen: boolean;
   onClose: () => void;
-  // eslint-disable-next-line no-unused-vars
   onChangeTab: (activeKey: string) => void;
   setIsSelectedActionModalOpen: Dispatch<
     SetStateAction<{
@@ -26,7 +25,7 @@ type ModalActionPaymentProps = {
 export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   isOpen,
   onClose,
-  onChangeTab,
+  onChangeTab: _onChangeTab,
   setIsSelectedActionModalOpen,
   setIsModalActionPaymentOpen,
   addPaymentsToApplicationTable,

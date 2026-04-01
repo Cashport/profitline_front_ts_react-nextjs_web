@@ -14,7 +14,7 @@ interface TotalDebtProps {
   onPay?: () => void;
 }
 
-const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, ppToPay, onPay }) => {
+const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   return (

@@ -36,9 +36,11 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   /* -------------------- Header State -------------------- */
-  const [modalSize, setModalSize] = useState({ width: 660, height: 520 });
+  // #UNUSED REACT STATE
+  const [_modalSize, setModalSize] = useState({ width: 660, height: 520 });
   const [mask, setMask] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("default");
+  // #UNUSED REACT STATE
+  const [_viewMode, setViewMode] = useState<ViewMode>("default");
 
   /* -------------------- Form State -------------------- */
   const [managementType, setManagementType] = useState<number | null>(null);

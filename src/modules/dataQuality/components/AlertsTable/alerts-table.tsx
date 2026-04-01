@@ -8,7 +8,6 @@ import dayjs from "dayjs";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
 import { IAlert } from "@/types/dataQuality/IDataQuality";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
 
 interface AlertsTableProps {
   alerts: IAlert[];

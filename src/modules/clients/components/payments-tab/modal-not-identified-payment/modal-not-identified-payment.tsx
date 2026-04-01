@@ -36,8 +36,7 @@ interface IFormNotIdentifiedPaymentModal {
 }
 
 const ModalNotIdentifiedPayment: FC<ModalNotIdentifiedPaymentProps> = ({
-  setViewInfo,
-  onClose
+  setViewInfo
 }) => {
   const { showMessage } = useMessageApi();
   const [isSubmitting, setIsSubmitting] = useState(false);

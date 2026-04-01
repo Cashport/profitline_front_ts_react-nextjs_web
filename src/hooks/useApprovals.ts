@@ -2,7 +2,7 @@ import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
 
-import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
+import { GenericResponse } from "@/types/global/IGlobal";
 import { IApprovalsResponse } from "@/types/approvals/IApprovals";
 
 interface UseApprovalsParams {

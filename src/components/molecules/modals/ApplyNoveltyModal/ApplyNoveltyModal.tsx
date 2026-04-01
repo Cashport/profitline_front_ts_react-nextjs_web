@@ -57,7 +57,8 @@ export const ApplyNoveltyModal = ({
   const [currentAdjustment, setCurrentAdjustment] = useState(
     selectedNotes.map((row) => row.current_value)
   );
-  const [currentAdjustmentStatic, setCurrentAdjustmentStatic] = useState(
+  // #UNUSED REACT STATE
+  const [currentAdjustmentStatic, _setCurrentAdjustmentStatic] = useState(
     selectedNotes.map((row) => row.current_value)
   );
   const [applyValues, setApplyValues] = useState<{

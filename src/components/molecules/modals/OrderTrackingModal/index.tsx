@@ -1,9 +1,7 @@
-import { FC, useMemo, useState } from "react";
-import useSWR from "swr";
+import { FC, useState } from "react";
 import { CaretDoubleRight, ArrowsClockwise } from "phosphor-react";
 import styles from "./OrderTrackingModal.module.scss";
-import { Dropdown, Flex, MenuProps, Skeleton, Typography, message } from "antd";
-import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal/invoice-download-modal";
+import { Dropdown, Flex, MenuProps, Skeleton, Typography } from "antd";
 
 import "dayjs/locale/es"; // Importar el idioma español
 // import { formatMoney } from "@/utils/utils";
@@ -13,7 +11,7 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { invoiceMock } from "./mocked-data";
 import ModalHeader from "./components/ModalHeader";
-import { formatCurrencyMoney, formatDate } from "@/utils/utils";
+import { formatCurrencyMoney } from "@/utils/utils";
 import { Tag } from "@/components/atoms/Tag/Tag";
 // import { ModalVehicleFollowUp } from "./components/ModalVehicleFollowUp";
 // import ModalHeader from "./components/ModalHeader";
@@ -26,8 +24,9 @@ interface ModalProps {
   idInvoice: number;
 }
 
-const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInvoice }) => {
+  // #UNUSED REACT STATE
+  const [_isModalOpen, _setIsModalOpen] = useState(false);
 
   const invoice = invoiceMock;
   const timeLineData = invoice?.tracking;

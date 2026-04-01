@@ -4,7 +4,6 @@ import Image from "next/image";
 import {
   ArrowsOut,
   CaretDoubleLeft,
-  CodesandboxLogo,
   FileArrowDown,
   Paperclip,
   PaperPlaneRight,
@@ -39,7 +38,6 @@ import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
 import { TypeContactMessage } from "@/types/chat/messages";
-import { useAppStore } from "@/lib/store/store";
 import { message as messageApi } from "antd";
 
 type FileItem = { url: string; name: string; size: number };

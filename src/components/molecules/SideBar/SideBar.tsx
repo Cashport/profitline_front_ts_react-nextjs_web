@@ -21,6 +21,7 @@ import "./sidebar.scss";
 export const SideBar = () => {
   usePermissionRedirect();
 
+  // #UNUSED REACT STATE
   const [isSideBarLarge, setIsSideBarLarge] = useState(false);
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
