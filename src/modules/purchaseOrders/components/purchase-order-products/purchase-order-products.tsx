@@ -172,7 +172,7 @@ export function PurchaseOrderProducts({
     productIds.forEach((productId) => {
       fetchBatchesForProduct(productId);
     });
-  }, [orderId]);
+  }, [orderId, data?.products]);
 
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
