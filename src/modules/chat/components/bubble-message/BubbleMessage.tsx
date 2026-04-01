@@ -237,7 +237,7 @@ export default function BubbleMessage({
   // Default: TEXT
   return (
     <BubbleWrapper mine={mine} customerName={customerName}>
-      {m.content}
+      <span className="whitespace-pre-wrap">{m.content}</span>
       {footer}
     </BubbleWrapper>
   );
