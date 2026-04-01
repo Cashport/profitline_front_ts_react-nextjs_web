@@ -32,7 +32,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
 import { Input } from "@/modules/chat/ui/input";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
-import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
@@ -62,6 +61,15 @@ function formatBytes(bytes?: number) {
 function normalizePhoneForWA(phone: string) {
   // WhatsApp Cloud espera el número en formato internacional sin símbolos, ej: 51993346829
   return phone.replace(/\D/g, "");
+}
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  let hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, "0");
+  const period = hours >= 12 ? "p. m." : "a. m.";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${period}`;
 }
 
 function formatWhatsAppText(text: string): string {
@@ -404,10 +412,12 @@ export default function ChatThread({
       const status = m.status;
       const wrapper = "max-w-[80%] md:max-w-[70%]";
       const bubble =
-        "rounded-2xl border px-3 py-2 text-sm " +
-        (mine
-          ? "bg-[#141414] text-white border-[#141414]"
-          : "bg-white text-[#141414] border-[#DDDDDD]");
+        "rounded-2xl px-3 py-2 text-sm " +
+        (mine ? "bg-[#011822] text-white" : "bg-[#EAEAEA] text-[#141414]");
+
+      const senderName = !mine ? (
+        <div className="text-xs font-semibold text-[#141414] mb-2">{conversation.customer}</div>
+      ) : null;
 
       const calcReadStatus = (mine: boolean, status: string) => {
         return (
@@ -435,9 +445,12 @@ export default function ChatThread({
           return (
             <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
               <div className={wrapper}>
-                <div className={bubble + " p-2"}>Contacto sin datos</div>
-                <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                  {formatRelativeTime(m.timestamp)}
+                {senderName}
+                <div className={bubble + " p-2"}>
+                  Contacto sin datos
+                  <div className="text-[11px] text-right text-[#8C8C8C] mt-1">
+                    {formatTime(m.timestamp)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -446,6 +459,7 @@ export default function ChatThread({
         return (
           <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
             <div className={wrapper}>
+              {senderName}
               <div className={bubble + " p-2 space-y-2"}>
                 {contacts.map((contact, index) => (
                   <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
@@ -458,10 +472,10 @@ export default function ChatThread({
                     </div>
                   </div>
                 ))}
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
+                <div className="flex items-center justify-end gap-1">
+                  <div className="text-[11px] text-[#8C8C8C]">{formatTime(m.timestamp)}</div>
+                  {calcReadStatus(mine, status)}
+                </div>
               </div>
             </div>
           </div>
@@ -472,6 +486,7 @@ export default function ChatThread({
         return (
           <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
             <div className={wrapper}>
+              {senderName}
               <div className={bubble + " p-2"}>
                 <button
                   onClick={() => setPreviewImage(m.mediaUrl!)}
@@ -488,10 +503,10 @@ export default function ChatThread({
                     <ArrowsOut className="h-4 w-4" />
                   </div>
                 </button>
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
+                <div className="flex items-center justify-end gap-1 mt-1">
+                  <div className="text-[11px] text-[#8C8C8C]">{formatTime(m.timestamp)}</div>
+                  {calcReadStatus(mine, status)}
+                </div>
               </div>
             </div>
           </div>
@@ -502,24 +517,25 @@ export default function ChatThread({
         return (
           <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
             <div className={wrapper}>
+              {senderName}
               <div className={bubble + " p-3"}>
                 <button
                   onClick={() => window.open(m.mediaUrl!, "_blank")}
                   className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
                   aria-label="Abrir documento"
                 >
-                  <div className="rounded-lg bg-[#F7F7F7] p-3">
-                    <FileArrowDown className="h-6 w-6 text-[#141414]" />
+                  <div className="rounded-lg bg-[#011822] p-3 border border-white/20">
+                    <FileArrowDown className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
                     <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
                   </div>
                 </button>
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
+                <div className="flex items-center justify-end gap-1 mt-1">
+                  <div className="text-[11px] text-[#8C8C8C]">{formatTime(m.timestamp)}</div>
+                  {calcReadStatus(mine, status)}
+                </div>
               </div>
             </div>
           </div>
@@ -566,24 +582,30 @@ export default function ChatThread({
 
         return (
           <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-              <div
-                className="text-sm text-[#141414] whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-              />
+            <div className="max-w-[80%]">
+              {senderName}
+              <div className="rounded-2xl bg-[#011822] p-3">
+                <div
+                  className="text-sm text-white whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
+                />
 
-              {buttonText && (
-                <a
-                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-                >
-                  Ver detalle
-                </a>
-              )}
+                {buttonText && (
+                  <a
+                    href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
+                  >
+                    Ver detalle
+                  </a>
+                )}
+                <div className="flex items-center justify-end gap-1 mt-1">
+                  <div className="text-[11px] text-[#8C8C8C]">{formatTime(m.timestamp)}</div>
+                  {calcReadStatus(mine, status)}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
           </div>
         );
       }
@@ -592,18 +614,19 @@ export default function ChatThread({
       return (
         <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
           <div className={wrapper}>
-            <div className="flex items-center gap-1">
-              <div className={bubble}>{m.content}</div>
-              {calcReadStatus(mine, status)}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
+            {senderName}
+            <div className={bubble}>
+              {m.content}
+              <div className="flex items-center justify-end gap-1 mt-1">
+                <div className="text-[11px] text-[#8C8C8C]">{formatTime(m.timestamp)}</div>
+                {calcReadStatus(mine, status)}
+              </div>
             </div>
           </div>
         </div>
       );
     },
-    [templateMap, setPreviewImage, scrollToBottom]
+    [templateMap, setPreviewImage, scrollToBottom, conversation.customer]
   );
 
   return (
