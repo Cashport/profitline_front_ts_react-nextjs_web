@@ -273,7 +273,6 @@ export default function ChatThread({
       <ChatFooter
         channel={channel}
         conversation={conversation}
-        mutate={mutate}
         scrollToBottom={scrollToBottom}
         setTemplateOpen={setTemplateOpen}
       />

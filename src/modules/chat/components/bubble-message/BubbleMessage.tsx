@@ -24,23 +24,23 @@ function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
 
   const iconMap: Record<string, React.ReactNode> = {
     DELIVERED: (
-      <div className="text-[10px] text-muted-foreground self-end">
-        <Checks size={12} />
+      <div className="text-[10px] text-muted-foreground">
+        <Checks size={14} />
       </div>
     ),
     PENDING: (
-      <div className="text-[10px] text-muted-foreground self-end">
-        <Clock size={12} />
+      <div className="text-[10px] text-muted-foreground">
+        <Clock size={14} color="#9c9c9c" />
       </div>
     ),
     SENT: (
-      <div className="text-[10px] text-muted-foreground self-end">
-        <Check size={12} />
+      <div className="text-[10px] text-muted-foreground">
+        <Check size={14} />
       </div>
     ),
     READ: (
-      <div className="text-[10px] self-end text-green-500">
-        <Checks size={12} />
+      <div className="text-[10px] text-green-500">
+        <Checks size={14} />
       </div>
     ),
     FAILED: (
@@ -56,7 +56,7 @@ function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
 function Footer({ timestamp, mine, status }: { timestamp: string; mine: boolean; status: string }) {
   return (
     <div className="flex items-center justify-end gap-1 mt-1">
-      <div className="text-[11px] text-[#8C8C8C]">{formatTime(timestamp)}</div>
+      <div className="text-[11px] text-[#9c9c9c]">{formatTime(timestamp)}</div>
       <ReadStatus mine={mine} status={status} />
     </div>
   );

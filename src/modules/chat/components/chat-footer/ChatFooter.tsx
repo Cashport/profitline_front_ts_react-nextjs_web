@@ -6,12 +6,14 @@ import { File, FileArrowDown, Paperclip, PaperPlaneTilt, X } from "@phosphor-ico
 
 import { sendAttahcment, sendMessage } from "@/services/chat/chat";
 import { cn } from "@/utils/utils";
+import useTicketMessages from "@/hooks/useTicketMessages";
 
 import { Button } from "@/modules/chat/ui/button";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
+import { IMessage } from "@/types/chat/IChat";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import { message as messageApi } from "antd";
 
@@ -32,7 +34,6 @@ function normalizePhoneForWA(phone: string) {
 type ChatFooterProps = {
   channel: "whatsapp" | "email";
   conversation: Conversation;
-  mutate: () => void;
   scrollToBottom: () => void;
   setTemplateOpen: (v: boolean) => void;
 };
@@ -40,11 +41,11 @@ type ChatFooterProps = {
 export default function ChatFooter({
   channel,
   conversation,
-  mutate,
   scrollToBottom,
   setTemplateOpen
 }: ChatFooterProps) {
   const { toast } = useToast();
+  const { mutate } = useTicketMessages({ ticketId: conversation.id, page: 1 });
 
   // WhatsApp state
   const [message, setMessage] = useState("");
@@ -96,6 +97,23 @@ export default function ChatFooter({
       setIsSendingWA(true);
       await sendMessage(conversation.customerId, text);
       setMessage("");
+
+      const tempMessage: IMessage = {
+        id: `temp_${Date.now()}_${Math.random()}`,
+        content: text,
+        type: "TEXT",
+        direction: "OUTBOUND",
+        status: "SENT",
+        timestamp: new Date().toISOString(),
+        mediaUrl: null,
+        metadata: {}
+      };
+
+      mutate((currentData) => {
+        if (!currentData) return currentData;
+        return { ...currentData, messages: [tempMessage, ...currentData.messages] };
+      }, false);
+
       toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
       mutate();
       setTimeout(() => mutate(), 2000);
@@ -197,7 +215,7 @@ export default function ChatFooter({
 
   if (channel === "whatsapp") {
     return (
-      <div className="flex items-center gap-2 p-3">
+      <div className="flex items-end gap-2 p-3">
         <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
 
         <Button
