@@ -1,46 +1,27 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
-import {
-  ArrowsOut,
-  CaretDoubleLeft,
-  FileArrowDown,
-  Paperclip,
-  PaperPlaneRight,
-  X
-} from "@phosphor-icons/react";
+import { CaretDoubleLeft } from "@phosphor-icons/react";
 
-import {
-  getWhatsAppTemplates,
-  markTicketAsRead,
-  sendAttahcment,
-  sendMessage,
-  sendTemplate
-} from "@/services/chat/chat";
+import { getWhatsAppTemplates, markTicketAsRead, sendTemplate } from "@/services/chat/chat";
 
-import { cn } from "@/utils/utils";
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 
-import { Button } from "@/modules/chat/ui/button";
-import { Textarea } from "@/modules/chat/ui/textarea";
 import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
-import { Input } from "@/modules/chat/ui/input";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
-import { formatRelativeTime } from "@/modules/chat/lib/mock-data";
 import { IMessage, IMessageSocket, IWhatsAppTemplate } from "@/types/chat/IChat";
+import dayjs from "dayjs";
+import { BubbleMessage } from "../components/bubble-message";
+import { DateSeparator } from "../components/date-separator";
+import { ChatFooter } from "../components/chat-footer";
 import TemplateDialog from "../components/template-dialog/template-dialog";
 import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
-
-import { TypeContactMessage } from "@/types/chat/messages";
-import { message as messageApi } from "antd";
-
-type FileItem = { url: string; name: string; size: number };
 
 type Props = {
   conversation: Conversation;
@@ -48,32 +29,6 @@ type Props = {
   onShowDetails?: () => void;
   detailsOpen?: boolean;
 };
-
-function formatBytes(bytes?: number) {
-  if (!bytes) return "";
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(0)} KB`;
-  const mb = kb / 1024;
-  return `${mb.toFixed(2)} MB`;
-}
-
-function normalizePhoneForWA(phone: string) {
-  // WhatsApp Cloud espera el número en formato internacional sin símbolos, ej: 51993346829
-  return phone.replace(/\D/g, "");
-}
-
-function formatWhatsAppText(text: string): string {
-  if (!text) return "";
-
-  return text
-    .replace(/_\*(.*?)\*_/g, "<b><i>$1</i></b>")
-    .replace(/\*(.*?)\*/g, "<b>$1</b>")
-    .replace(/_(.*?)_/g, "<i>$1</i>")
-    .replace(/~(.*?)~/g, "<s>$1</s>")
-    .replace(/```(.*?)```/g, "<code>$1</code>")
-    .replace(/`(.*?)`/g, "<code>$1</code>")
-    .replace(/\n/g, "<br/>");
-}
 
 export default function ChatThread({
   conversation,
@@ -83,16 +38,9 @@ export default function ChatThread({
 }: Props) {
   const { toast } = useToast();
   const [channel, setChannel] = useState<"whatsapp" | "email">("whatsapp");
-  const [message, setMessage] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-  const [emailImages, setEmailImages] = useState<FileItem[]>([]);
-  const [emailFiles, setEmailFiles] = useState<FileItem[]>([]);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isSendingWA, setIsSendingWA] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const {
     data: ticketData,
     mutate,
@@ -100,9 +48,18 @@ export default function ChatThread({
   } = useTicketMessages({ ticketId: conversation.id, page: 1 });
   const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
+  const messagesByDay = useMemo(() => {
+    const map = new Map<string, IMessage[]>();
+    for (const m of ticketMessages) {
+      const day = dayjs(m.timestamp).format("YYYY-MM-DD");
+      const group = map.get(day);
+      if (group) group.push(m);
+      else map.set(day, [m]);
+    }
+    return map;
+  }, [ticketMessages]);
+
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const waFileInputRef = useRef<HTMLInputElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
   // Memoized template lookup map for O(1) access
@@ -204,15 +161,6 @@ export default function ChatThread({
   }, [conversation.id, isLoading, ticketMessages.length, waTemplates.length]);
 
   useEffect(() => {
-    // Cleanup ObjectURLs en unmount
-    return () => {
-      emailImages.forEach((i) => URL.revokeObjectURL(i.url));
-      emailFiles.forEach((f) => URL.revokeObjectURL(f.url));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (channel === "whatsapp") {
       getWhatsAppTemplates()
         .then((res) => {
@@ -221,124 +169,6 @@ export default function ChatThread({
         .catch((err) => console.error("Error cargando plantillas:", err));
     }
   }, [channel]);
-
-  async function sendWhatsapp() {
-    const text = message.trim();
-    if (!text) return;
-    const to = normalizePhoneForWA(conversation.phone || "");
-    if (!to) {
-      toast({
-        title: "No hay número",
-        description: "Este contacto no tiene teléfono válido.",
-        variant: "destructive"
-      });
-      return;
-    }
-    try {
-      setIsSendingWA(true);
-      await sendMessage(conversation.customerId, text);
-      setMessage("");
-
-      // Create a temporary message for immediate UI feedback
-      const tempMessage: IMessage = {
-        id: `temp_${Date.now()}_${Math.random()}`, // Temporary ID until we get the real one from socket
-        content: text,
-        type: "TEXT",
-        direction: "OUTBOUND",
-        status: "SENT",
-        timestamp: new Date().toISOString(),
-        mediaUrl: null,
-        metadata: {}
-      };
-
-      // Add the sent message immediately to ticketMessages (at beginning of array since we reverse it)
-      mutate((currentData) => {
-        if (!currentData) return currentData;
-        return {
-          ...currentData,
-          messages: [tempMessage, ...currentData.messages]
-        };
-      }, false);
-
-      toast({ title: "Mensaje enviado", description: "WhatsApp Cloud aceptó el mensaje." });
-      mutate();
-      // double mutate ensures correct lastMessage status, so it displays READ for example
-      setTimeout(() => {
-        mutate();
-      }, 2000);
-      scrollToBottom();
-    } catch (err: any) {
-      toast({
-        title: "Error al enviar",
-        description: err?.message || "No se pudo enviar por WhatsApp Cloud.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSendingWA(false);
-    }
-  }
-
-  function cleanupEmailObjectUrls() {
-    emailImages.forEach((i) => URL.revokeObjectURL(i.url));
-    emailFiles.forEach((f) => URL.revokeObjectURL(f.url));
-  }
-
-  function sendEmail() {
-    const s = subject.trim();
-    const b = body.trim();
-    if (!s || !b) return;
-    const images = emailImages.map((i) => i.url);
-    const files = emailFiles.map((f) => ({ url: f.url, name: f.name, size: f.size }));
-
-    console.info("Sending email:", { subject: s, body: b, images, files });
-
-    setSubject("");
-    setBody("");
-    cleanupEmailObjectUrls();
-    setEmailImages([]);
-    setEmailFiles([]);
-    setChannel("whatsapp");
-    scrollToBottom();
-  }
-
-  function onPickEmailFiles(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    const add = files.map((f) => ({ url: URL.createObjectURL(f), name: f.name, size: f.size }));
-    setEmailFiles((prev) => [...prev, ...add]);
-    e.target.value = "";
-  }
-
-  function onDropEmail(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files ?? []);
-    if (files.length === 0) return;
-    const imgs = files
-      .filter((f) => f.type.startsWith("image/"))
-      .map((f) => ({ url: URL.createObjectURL(f), name: f.name, size: f.size }));
-    const others = files
-      .filter((f) => !f.type.startsWith("image/"))
-      .map((f) => ({ url: URL.createObjectURL(f), name: f.name, size: f.size }));
-    setEmailImages((prev) => [...prev, ...imgs]);
-    setEmailFiles((prev) => [...prev, ...others]);
-  }
-
-  function removeEmailImage(idx: number) {
-    setEmailImages((prev) => {
-      const copy = [...prev];
-      const [removed] = copy.splice(idx, 1);
-      if (removed) URL.revokeObjectURL(removed.url);
-      return copy;
-    });
-  }
-  function removeEmailFile(idx: number) {
-    setEmailFiles((prev) => {
-      const copy = [...prev];
-      const [removed] = copy.splice(idx, 1);
-      if (removed) URL.revokeObjectURL(removed.url);
-      return copy;
-    });
-  }
 
   const handleSendTemplate = async (templateId: string) => {
     if (!conversation.customerCashportUUID || !conversation.phoneNumber) {
@@ -371,238 +201,6 @@ export default function ChatThread({
       });
     }
   };
-
-  const handleAttachFile = () => {
-    waFileInputRef.current?.click();
-  };
-
-  async function onPickWAFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    try {
-      await sendAttahcment({
-        customerId: conversation.customerId,
-        caption: file.name,
-        file
-      });
-      messageApi.success("Archivo enviado correctamente");
-      mutate();
-      setTimeout(() => {
-        scrollToBottom();
-      }, 2000);
-    } catch (error) {
-      messageApi.error("Error al enviar el archivo");
-    }
-  }
-
-  const renderBubble = useCallback(
-    (m: IMessage) => {
-      const mine = m.direction === "OUTBOUND";
-      const status = m.status;
-      const wrapper = "max-w-[80%] md:max-w-[70%]";
-      const bubble =
-        "rounded-2xl border px-3 py-2 text-sm " +
-        (mine
-          ? "bg-[#141414] text-white border-[#141414]"
-          : "bg-white text-[#141414] border-[#DDDDDD]");
-
-      const calcReadStatus = (mine: boolean, status: string) => {
-        return (
-          <>
-            {mine && status === "DELIVERED" && (
-              <div className="text-[10px] text-muted-foreground self-end">✓</div>
-            )}
-            {mine && status === "PENDING" && (
-              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-            )}
-            {mine && status === "SENT" && (
-              <div className="text-[10px] text-muted-foreground self-end">⧗</div>
-            )}
-            {mine && status === "READ" && (
-              <div className="text-[10px] self-end text-green-500">✓✓</div>
-            )}
-            {mine && status === "FAILED" && <div className="text-[20px] text-red-500">!</div>}
-          </>
-        );
-      };
-
-      if (m.type === "CONTACTS") {
-        const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
-        if (contacts?.length === 0) {
-          return (
-            <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-              <div className={wrapper}>
-                <div className={bubble + " p-2"}>Contacto sin datos</div>
-                <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                  {formatRelativeTime(m.timestamp)}
-                </div>
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-            <div className={wrapper}>
-              <div className={bubble + " p-2 space-y-2"}>
-                {contacts.map((contact, index) => (
-                  <div key={index} className={contacts.length > 1 ? "border rounded-lg p-2" : ""}>
-                    <div className="font-semibold">
-                      {contact.name.formatted_name || "Sin nombre"}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {contact.phones.map((phone) => phone.wa_id || phone.phone).join(", ") ||
-                        "Sin teléfono"}
-                    </div>
-                  </div>
-                ))}
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if ((m.type === "IMAGE" || m.type === "STICKER") && m.mediaUrl) {
-        return (
-          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-            <div className={wrapper}>
-              <div className={bubble + " p-2"}>
-                <button
-                  onClick={() => setPreviewImage(m.mediaUrl!)}
-                  className="group relative block overflow-hidden rounded-lg"
-                  aria-label="Ver imagen"
-                >
-                  <img
-                    src={m.mediaUrl ?? "/placeholder.svg"}
-                    alt="Imagen enviada"
-                    className="rounded-lg object-cover max-h-72 w-full"
-                    onLoad={scrollToBottom}
-                  />
-                  <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
-                    <ArrowsOut className="h-4 w-4" />
-                  </div>
-                </button>
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (m.type === "DOCUMENT" && m.mediaUrl) {
-        return (
-          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-            <div className={wrapper}>
-              <div className={bubble + " p-3"}>
-                <button
-                  onClick={() => window.open(m.mediaUrl!, "_blank")}
-                  className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity"
-                  aria-label="Abrir documento"
-                >
-                  <div className="rounded-lg bg-[#F7F7F7] p-3">
-                    <FileArrowDown className="h-6 w-6 text-[#141414]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{m.content || "Documento"}</div>
-                    <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
-                  </div>
-                </button>
-                {calcReadStatus(mine, status)}
-              </div>
-              <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-                {formatRelativeTime(m.timestamp)}
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (m.type === "TEMPLATE") {
-        let parsedData: any = null;
-        try {
-          parsedData =
-            typeof m.templateData === "string" ? JSON.parse(m.templateData) : m.templateData;
-        } catch {
-          parsedData = null;
-        }
-
-        // If templates haven't loaded yet, show loading state
-        if (templateMap.size === 0) {
-          return <div className="text-gray-500">Cargando plantilla...</div>;
-        }
-
-        const template = templateMap.get(m.templateName!);
-
-        if (!template) {
-          return (
-            <div className="text-red-500">Plantilla &quot;{m.templateName}&quot; no encontrada</div>
-          );
-        }
-
-        const templateComponents = template.components;
-        const bodyComponent = templateComponents.find((c: any) => c.type === "BODY");
-
-        // Renderizamos los parámetros reales del mensaje
-        const bodyParams =
-          parsedData?.components?.find((c: any) => c.type === "body")?.parameters || [];
-        let bodyText = bodyComponent?.text || "";
-
-        bodyParams.forEach((p: any, i: number) => {
-          bodyText = bodyText.replace(`{{${i + 1}}}`, p.text || "");
-        });
-
-        const buttonParam = parsedData?.components?.find((c: any) => c.type === "button")
-          ?.parameters?.[0]?.text;
-        const buttonText = buttonParam || null;
-
-        return (
-          <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-            <div className="max-w-[80%] rounded-lg bg-[#F7F7F7] p-3">
-              <div
-                className="text-sm text-[#141414] whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
-              />
-
-              {buttonText && (
-                <a
-                  href={`http://cashport.ai/mobile?token=${encodeURIComponent(buttonText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-block rounded-lg bg-[#CBE71E] px-3 py-1 text-xs font-semibold text-[#141414] hover:opacity-90"
-                >
-                  Ver detalle
-                </a>
-              )}
-            </div>
-            <div className="flex items-center gap-1">{calcReadStatus(mine, status)}</div>
-          </div>
-        );
-      }
-
-      // Texto por defecto
-      return (
-        <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-          <div className={wrapper}>
-            <div className="flex items-center gap-1">
-              <div className={bubble}>{m.content}</div>
-              {calcReadStatus(mine, status)}
-            </div>
-            <div className={"mt-1 text-[11px] " + (mine ? "text-right" : "text-left")}>
-              {formatRelativeTime(m.timestamp)}
-            </div>
-          </div>
-        </div>
-      );
-    },
-    [templateMap, setPreviewImage, scrollToBottom]
-  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -646,9 +244,21 @@ export default function ChatThread({
 
       {/* History */}
       <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
-        <div className="space-y-6 px-4 py-6">
-          {ticketMessages.map((m) => (
-            <div key={m.id}>{renderBubble(m)}</div>
+        <div className="px-4 py-6">
+          {Array.from(messagesByDay.entries()).map(([day, messages]) => (
+            <div key={`group-${day}`} className="space-y-6">
+              <DateSeparator date={messages[0].timestamp} />
+              {messages.map((m) => (
+                <BubbleMessage
+                  key={m.id}
+                  message={m}
+                  customerName={conversation.customer}
+                  templateMap={templateMap}
+                  onPreviewImage={setPreviewImage}
+                  onScrollToBottom={scrollToBottom}
+                />
+              ))}
+            </div>
           ))}
         </div>
       </ScrollArea>
@@ -656,185 +266,12 @@ export default function ChatThread({
       <Separator style={{ backgroundColor: "#DDDDDD" }} />
 
       {/* Composer */}
-      <div className="flex flex-col gap-2 p-3">
-        {channel === "whatsapp" ? (
-          <div className="flex items-end gap-2">
-            <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
-            <div className="flex-1">
-              <Textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Escribe un mensaje para WhatsApp..."
-                className="min-h-[72px] resize-none border-[#DDDDDD] bg-[#F7F7F7]"
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground"
-                    aria-label="Adjuntar archivo"
-                    onClick={handleAttachFile}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    style={{ borderColor: "#DDDDDD" }}
-                    onClick={() => setTemplateOpen(true)}
-                  >
-                    Plantillas
-                  </Button>
-                  <Button
-                    className="gap-2 text-[#141414]"
-                    style={{ backgroundColor: "#CBE71E" }}
-                    onClick={sendWhatsapp}
-                    disabled={isSendingWA || !message.trim()}
-                  >
-                    {isSendingWA ? "Enviando..." : "Enviar"}
-                    <PaperPlaneRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // Email composer con drag-and-drop y eliminación de adjuntos
-          <div
-            className={cn(
-              "space-y-2 rounded-md",
-              isDragging ? "outline outline-2 outline-dashed outline-[#CBE71E]" : "outline-none"
-            )}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragEnter={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-            }}
-            onDrop={onDropEmail}
-          >
-            <Input
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Asunto del correo"
-              className="bg-[#F7F7F7]"
-              style={{ borderColor: "#DDDDDD" }}
-            />
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Escribe el cuerpo del correo..."
-              className="min-h-[140px] bg-[#F7F7F7]"
-              style={{ borderColor: "#DDDDDD" }}
-            />
-
-            {(emailImages.length > 0 || emailFiles.length > 0) && (
-              <div className="rounded-md border p-2" style={{ borderColor: "#DDDDDD" }}>
-                {emailImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {emailImages.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="relative overflow-hidden rounded-md border h-20"
-                        style={{ borderColor: "#DDDDDD" }}
-                      >
-                        <Image
-                          src={img.url || "/placeholder.svg"}
-                          alt={"Adjunto " + img.name}
-                          fill
-                          unoptimized
-                          className="object-cover"
-                        />
-                        <button
-                          onClick={() => removeEmailImage(idx)}
-                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white z-10"
-                          aria-label={"Quitar imagen " + img.name}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {emailFiles.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {emailFiles.map((f, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-sm">
-                        <FileArrowDown className="h-4 w-4" />
-                        <span className="truncate">{f.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          · {formatBytes(f.size)}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="ml-auto h-7 w-7 text-muted-foreground"
-                          aria-label={"Quitar adjunto " + f.name}
-                          onClick={() => removeEmailFile(idx)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={onPickEmailFiles}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground"
-                  aria-label="Adjuntar archivos"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  style={{ borderColor: "#DDDDDD" }}
-                  onClick={() => setTemplateOpen(true)}
-                >
-                  Plantillas
-                </Button>
-                <Button
-                  className="gap-2 text-[#141414]"
-                  style={{ backgroundColor: "#CBE71E" }}
-                  onClick={sendEmail}
-                  disabled={!subject.trim() || !body.trim()}
-                >
-                  Enviar correo
-                  <PaperPlaneRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {isDragging && (
-              <div className="pointer-events-none -mt-2 rounded-md border border-dashed border-[#CBE71E] p-3 text-center text-xs text-muted-foreground">
-                Suelta archivos o imágenes para adjuntar
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <ChatFooter
+        channel={channel}
+        conversation={conversation}
+        scrollToBottom={scrollToBottom}
+        setTemplateOpen={setTemplateOpen}
+      />
 
       {/* Template dialog (channel-aware) */}
       <TemplateDialog
