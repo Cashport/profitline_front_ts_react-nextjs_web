@@ -47,7 +47,6 @@ const MakeCallModal: React.FC<MakeCallModalProps> = ({ visible, onClose }) => {
   });
 
   const [userToCall, setUserToCall] = useState<UserPhoneOption | null>(null);
-  // #UNUSED REACT STATE
   const [_callInProgress, setCallInProgress] = useState(false);
   const [textAlignment, setTextAlignment] = useState<"left" | "center" | "right">("left");
   const [loadingSubmit, setLoadingSubmit] = useState(false);

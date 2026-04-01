@@ -67,8 +67,6 @@ const mockedData: IClientType[] = [
 ];
 const { Text } = Typography;
 export const RequirementsView = () => {
-  // #UNUSED REACT STATE
-  const [search, setSearch] = useState<string>("");
   const [isGenerateActionOpen, setIsGenerateActionOpen] = useState<boolean>(false);
   const [selectedClientType, setSelectedClientType] = useState<number | null>(null);
 
@@ -133,15 +131,7 @@ export const RequirementsView = () => {
   return (
     <Flex vertical className="requirementsView" gap={"2rem"}>
       <Flex gap={"0.5rem"}>
-        <UiSearchInput
-          className="search"
-          placeholder="Buscar"
-          onChange={(event) => {
-            setTimeout(() => {
-              setSearch(event.target.value);
-            }, 1000);
-          }}
-        />
+        <UiSearchInput className="search" placeholder="Buscar" />
         <Button
           className="button__actions"
           size="large"

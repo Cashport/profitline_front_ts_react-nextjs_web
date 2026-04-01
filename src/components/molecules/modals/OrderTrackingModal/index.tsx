@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import { CaretDoubleRight, ArrowsClockwise } from "phosphor-react";
 import styles from "./OrderTrackingModal.module.scss";
 import { Dropdown, Flex, MenuProps, Skeleton, Typography } from "antd";
@@ -25,9 +25,6 @@ interface ModalProps {
 }
 
 const OrderTrackingModal: FC<ModalProps> = ({ isOpen, onClose, idInvoice: _idInvoice }) => {
-  // #UNUSED REACT STATE
-  const [_isModalOpen, _setIsModalOpen] = useState(false);
-
   const invoice = invoiceMock;
   const timeLineData = invoice?.tracking;
 

@@ -57,7 +57,6 @@ export const ApplyAccountingAdjustment = ({
   const [currentAdjustment, setCurrentAdjustment] = useState(
     selectedNotes.map((row) => row.current_value)
   );
-  // #UNUSED REACT STATE
   const [currentAdjustmentStatic, _setCurrentAdjustmentStatic] = useState(
     selectedNotes.map((row) => row.current_value)
   );

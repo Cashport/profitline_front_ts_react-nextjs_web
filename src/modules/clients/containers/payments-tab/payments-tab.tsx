@@ -44,8 +44,6 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
-  // #UNUSED REACT STATE
-  const [mutatedPaymentDetail, _setMutatePaymentDetail] = useState<boolean>(false);
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
@@ -94,7 +92,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
       paymentId: paymentId,
       handleActionInDetail: handleActionInDetail,
       handleOpenPaymentDetail,
-      mutatedPaymentDetail
+      mutatedPaymentDetail: false
     });
   };
 

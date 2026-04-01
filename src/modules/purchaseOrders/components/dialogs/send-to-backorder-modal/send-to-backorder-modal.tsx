@@ -7,8 +7,6 @@ import { sendToBackorder, sendToBackorderStock } from "@/services/purchaseOrders
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useAppStore } from "@/lib/store/store";
 
-import { IWarehouseProductsStock } from "@/types/commerce/ICommerce";
-
 import "./send-to-backorder-modal.scss";
 
 type IPhase = "loading" | "noData" | "allStock" | "noStock" | "partial" | "processAvailable";
@@ -30,14 +28,12 @@ export function SendToBackorderModal({
 }: SendToBackorderModalProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [phase, setPhase] = useState<IPhase>("loading");
-  // #UNUSED REACT STATE
-  const [products, setProducts] = useState<IWarehouseProductsStock[]>([]);
+
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setPhase("loading");
-      setProducts([]);
       return;
     }
 
@@ -48,11 +44,8 @@ export function SendToBackorderModal({
 
         if (!data || data.length === 0) {
           setPhase("noData");
-          setProducts([]);
           return;
         }
-
-        setProducts(data);
 
         const allHaveStock = data.every((p) => p.inWarehouse >= p.requested);
         const noneHaveStock = data.every((p) => p.inWarehouse < p.requested);
