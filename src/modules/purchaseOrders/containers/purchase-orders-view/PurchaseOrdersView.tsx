@@ -156,7 +156,16 @@ export function PurchaseOrdersView() {
     try {
       const packageId = selectedPackageRows[0].packageId;
       const response = await downloadPurchaseOrdersCSV({ packageId });
-      window.open(response.url, "_blank");
+      const res = await fetch(response.url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = response.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
 
       message.success("Plano CSV generado exitosamente");
       setSelectedPackageRows([]);
