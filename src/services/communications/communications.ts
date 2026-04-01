@@ -108,13 +108,10 @@ interface ICreateCommunicationProps {
 export const createCommunication = async ({
   data,
   selectedPeriodicity,
-  zones,
-  selectedBusinessRules,
   assignedGroups,
   projectId,
   showMessage
 }: ICreateCommunicationProps) => {
-  const token = await getIdToken();
   const eventTriggerDays = data?.trigger?.settings?.noticeDaysEvent;
 
   const sendToRoles = data.template.send_to
@@ -212,14 +209,6 @@ export const createCommunication = async ({
 
 export const sendEmailNotification = async (data: IFormEmailNotification) => {
   const token = await getIdToken();
-
-  const modelData = {
-    subject: data.subject,
-    body: data.body,
-    to: data.forward_to.map((email) => email.value),
-    copy: data.copy_to?.map((email) => email.value),
-    files: data.attachments
-  };
 
   const formData = new FormData();
 

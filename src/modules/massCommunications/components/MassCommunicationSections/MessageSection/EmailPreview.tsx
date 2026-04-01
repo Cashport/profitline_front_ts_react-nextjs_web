@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
-import { Tag, Typography } from "antd";
-import { Paperclip, PaperclipIcon } from "lucide-react";
+import { Typography } from "antd";
+import { Paperclip } from "lucide-react";
 
 const { Text } = Typography;
 

@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { Modal, Form, Select, Switch, Typography, Flex, Divider } from "antd";
+import { Modal, Form, Switch, Typography, Flex } from "antd";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { useForm } from "react-hook-form";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import UploadButton from "../UploadButton";
-import { DividerCustom } from "@/components/atoms/DividerCustom/DividerCustom";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
-const { Option } = Select;
 const { Text, Title } = Typography;
 
 type CreateDocumentModalProps = {
@@ -37,10 +35,8 @@ export const CreateDocument: React.FC<CreateDocumentModalProps> = ({
 
   const {
     control,
-    handleSubmit,
     formState: { errors },
     setValue,
-    reset,
     watch
   } = useForm<CreateDocumentFormValues>({});
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import { formatCurrency, formatCompactCurrency } from './Formatters';
+import { formatCompactCurrency } from './Formatters';
 import RiskBadge from './RiskBadge';
 import ExpandableCard from './ExpandableCard';
 import { CUSTOMERS_RISK, RISK_STATS, STRATEGIES_DATA } from '../lib/constants';

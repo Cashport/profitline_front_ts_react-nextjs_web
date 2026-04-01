@@ -8,7 +8,6 @@ import styles from "./restartPassword.module.scss";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { sendEmailResetPassword } from "@/services/users/users";
-import { AxiosError } from "axios";
 
 interface IAuthLogin {
   email: string;

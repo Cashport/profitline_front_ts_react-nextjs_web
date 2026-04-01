@@ -2,7 +2,7 @@
 import React from "react";
 import { ArrowUUpLeft } from "@phosphor-icons/react";
 import BaseCard from "../atoms/BaseCard/BaseCard";
-import { CreditBalance, CreditBalanceFormated } from "@/types/clients/IClients";
+import { CreditBalanceFormated } from "@/types/clients/IClients";
 
 export interface CreditBalanceCardProps {
   credit: CreditBalanceFormated;

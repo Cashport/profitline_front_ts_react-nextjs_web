@@ -385,10 +385,6 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     setLoadingRequest(false);
   };
 
-  const handleEditAdjustment = (record: IApplyTabRecord) => {
-    setIsModalOpen({ selected: 5 });
-    setSelectedRows([record]);
-  };
 
   const isConfirmDisabled = useMemo(() => {
     if (useDefaultFileInEvidence) {

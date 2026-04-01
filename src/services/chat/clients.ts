@@ -1,5 +1,5 @@
 import config from "@/config";
-import { PayloadByTicket, IDigitalRecordFile } from "@/types/chat/IChat";
+import { IDigitalRecordFile } from "@/types/chat/IChat";
 import { IClientSegmentationDetail } from "@/types/clients/IClients";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";

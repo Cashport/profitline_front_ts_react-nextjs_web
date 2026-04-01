@@ -82,7 +82,7 @@ export function PurchaseOrdersView() {
     fetchFilters();
   }, [ID]);
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = (_files: File[]) => {
     mutate();
   };
 

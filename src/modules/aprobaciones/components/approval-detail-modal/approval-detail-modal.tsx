@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useSWR, { KeyedMutator } from "swr";
+import useSWR from "swr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {
@@ -24,11 +24,9 @@ import { Label } from "@/modules/chat/ui/label";
 import { Textarea } from "@/modules/chat/ui/textarea";
 import { ApproversTimeline } from "../approvers-timeline/approvers-timeline";
 
-import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IApprovalDetail,
-  ApprovalDecision,
-  IApprovalsResponse
+  ApprovalDecision
 } from "@/types/approvals/IApprovals";
 import { APPROVAL_TYPE_LABELS, ApprovalStepStatus, ApprovalType } from "@/constants/approvalTypes";
 

@@ -57,8 +57,6 @@ const DigitalRecordModal = ({
     handleSubmit,
     formState: { errors, isValid },
     setValue,
-    watch,
-    trigger,
     reset
   } = useForm<IFormDigitalRecordModal>();
 

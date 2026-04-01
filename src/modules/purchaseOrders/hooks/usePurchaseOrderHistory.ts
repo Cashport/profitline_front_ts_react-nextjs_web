@@ -19,7 +19,7 @@ export const usePurchaseOrderHistory = ({
   const pathKey =
     purchaseOrderId && enabled ? `/purchaseorder/${purchaseOrderId}/events` : null;
 
-  const { data, error, isLoading, mutate } = useSWR<HistoryTimelineResponse>(
+  const { data, error, mutate } = useSWR<HistoryTimelineResponse>(
     pathKey,
     fetcher,
     {

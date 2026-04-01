@@ -33,14 +33,12 @@ import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 import styles from "./ModulesButtons.module.scss";
 
 interface ModulesButtonsProps {
-  isSideBarLarge: boolean;
   path: string;
   project: ISelectedProject | undefined;
   isMobileMenu?: boolean;
 }
 
 export const ModulesButtons = ({
-  isSideBarLarge,
   path,
   project,
   isMobileMenu = false
@@ -59,9 +57,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<SquaresFour size={iconSize} />}
             className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Dashboard"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -73,9 +69,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<User size={iconSize} />}
             className={path.startsWith("/clientes") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Clientes"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -87,9 +81,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<SealPercent size={iconSize} />}
             className={path.startsWith("/descuentos") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Descuentos"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -103,9 +95,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/notificaciones") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Notificaciones"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -117,9 +107,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Storefront size={iconSize} />}
             className={path.startsWith("/comercio") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Comercio"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -131,9 +119,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Bank size={iconSize} />}
             className={path === "/banco" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Bancos"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -149,9 +135,7 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Configuración"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -167,9 +151,7 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Proveedores"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -181,9 +163,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<HandTap size={iconSize} />}
             className={path === "/applyModule" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Apply"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -195,9 +175,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Stack size={iconSize} />}
             className={path === "/client-management" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Admin Clientes"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -209,9 +187,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ChatCircleDots size={iconSize} />}
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Chat"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -223,9 +199,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ListChecks size={iconSize} />}
             className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Aprobaciones"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -237,9 +211,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ChartBar size={iconSize} />}
             className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "New Dashboard"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -251,9 +223,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ClipboardText size={iconSize} />}
             className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Gestor Tareas"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -267,9 +237,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/purchase-orders") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Purchase Orders"}
-          </Button>
+          />
         </Link>
       )}
 
@@ -283,9 +251,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/data-quality") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Data Quality"}
-          </Button>
+          />
         </Link>
       )}
       {/* Balances */}
@@ -296,9 +262,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<CurrencyCircleDollar size={iconSize} />}
             className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Saldos"}
-          </Button>
+          />
         </Link>
       )}
       {/* Mass Communications */}
@@ -311,9 +275,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Comunicaciones Masivas"}
-          </Button>
+          />
         </Link>
       )}
     </div>

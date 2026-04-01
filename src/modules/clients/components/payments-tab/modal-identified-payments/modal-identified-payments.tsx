@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
-import { extractSingleParam, formatDateDMY } from "@/utils/utils";
+import { extractSingleParam } from "@/utils/utils";
 import { matchPayment } from "@/services/clientsPayments/clientsPayments";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";

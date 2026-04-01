@@ -3,11 +3,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { CaretDoubleLeft } from "@phosphor-icons/react";
 
-import {
-  getWhatsAppTemplates,
-  markTicketAsRead,
-  sendTemplate
-} from "@/services/chat/chat";
+import { getWhatsAppTemplates, markTicketAsRead, sendTemplate } from "@/services/chat/chat";
 
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
