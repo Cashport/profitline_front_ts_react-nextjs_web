@@ -1,7 +1,12 @@
 "use client";
+import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Tag, Typography, Flex } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
-import type { IValidatedClient } from "../../../lib/mockData";
+import {
+  validateClients,
+  getCurrentValidatedClients
+} from "@/services/communications/communications";
+import type { IValidatedClients } from "@/types/communications/ICommunications";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -13,28 +18,68 @@ const placeholderStyle = `
 `;
 
 interface RecipientsSectionProps {
-  rawIds: string;
-  onRawIdsChange: (value: string) => void;
-  hasValidated: boolean;
-  validatedClients: IValidatedClient[];
-  invalidIds: string[];
-  totalClients: number;
-  onValidate: () => void;
-  onClear: () => void;
-  onDownloadReport: () => void;
+  onValidatedCountChange: (count: number) => void;
 }
 
-export default function RecipientsSection({
-  rawIds,
-  onRawIdsChange,
-  hasValidated,
-  validatedClients,
-  invalidIds,
-  totalClients,
-  onValidate,
-  onClear,
-  onDownloadReport
-}: RecipientsSectionProps) {
+export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
+  const [rawIds, setRawIds] = useState("");
+  const [hasValidated, setHasValidated] = useState(false);
+  const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
+  const [invalidIds, setInvalidIds] = useState<string[]>([]);
+  const [totalClients, setTotalClients] = useState(0);
+  const [isValidating, setIsValidating] = useState(false);
+
+  useEffect(() => {
+    getCurrentValidatedClients()
+      .then((data) => setTotalClients(data.length))
+      .catch((err) => console.error("Error fetching client list", err));
+  }, []);
+
+  const handleRawIdsChange = useCallback(
+    (value: string) => {
+      setRawIds(value);
+      if (hasValidated) setHasValidated(false);
+    },
+    [hasValidated]
+  );
+
+  const handleValidate = useCallback(async () => {
+    const ids = rawIds
+      .split(/[,\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (ids.length === 0) return;
+
+    setIsValidating(true);
+    try {
+      const result = await validateClients(ids);
+      const valid = result.filter((c) => c.isValid);
+      const invalid = result.filter((c) => !c.isValid).map((c) => c.clientId);
+
+      setValidClients(valid);
+      setInvalidIds(invalid);
+      setHasValidated(true);
+      onValidatedCountChange(valid.length);
+    } catch (error) {
+      console.error("Error validating clients", error);
+    } finally {
+      setIsValidating(false);
+    }
+  }, [rawIds, onValidatedCountChange]);
+
+  const handleClear = useCallback(() => {
+    setRawIds("");
+    setHasValidated(false);
+    setValidClients([]);
+    setInvalidIds([]);
+    onValidatedCountChange(0);
+  }, [onValidatedCountChange]);
+
+  const handleDownloadReport = useCallback(() => {
+    console.log("Downloading validation report...");
+  }, []);
+
   return (
     <section className="bg-white rounded-lg p-6">
       <style>{placeholderStyle}</style>
@@ -51,7 +96,7 @@ export default function RecipientsSection({
       <Flex gap={12}>
         <TextArea
           value={rawIds}
-          onChange={(e) => onRawIdsChange(e.target.value)}
+          onChange={(e) => handleRawIdsChange(e.target.value)}
           placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
           autoSize={{ minRows: 4 }}
           className="flex-1 font-mono text-sm"
@@ -60,9 +105,10 @@ export default function RecipientsSection({
         <Flex vertical gap={8}>
           <Button
             type="primary"
-            onClick={rawIds.trim() ? onValidate : undefined}
+            onClick={rawIds.trim() ? handleValidate : undefined}
             icon={<CheckCircle2 size={16} />}
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
+            loading={isValidating}
             style={{
               ...(!rawIds.trim() && { opacity: 0.4, pointerEvents: "none" })
             }}
@@ -70,7 +116,7 @@ export default function RecipientsSection({
             Validar
           </Button>
           {hasValidated && (
-            <Button onClick={onClear} icon={<X size={16} />} className="!bg-[#fafafa]">
+            <Button onClick={handleClear} icon={<X size={16} />} className="!bg-[#fafafa]">
               Limpiar
             </Button>
           )}
@@ -93,7 +139,7 @@ export default function RecipientsSection({
                 fontWeight: 500
               }}
             >
-              {validatedClients.length} clientes encontrados
+              {validClients.length} clientes encontrados
             </Tag>
             {invalidIds.length > 0 && (
               <Tag
@@ -118,7 +164,7 @@ export default function RecipientsSection({
           </Flex>
           <Button
             size="small"
-            onClick={onDownloadReport}
+            onClick={handleDownloadReport}
             icon={<FileDown size={14} />}
             className="!bg-[#fafafa] !font-medium !text-xs"
             style={{ height: 31 }}

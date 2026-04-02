@@ -242,3 +242,14 @@ export interface ICreateCommunicationTemplate {
   comunication_type: number;
   action_type_ids: number[];
 }
+
+export interface IValidatedClients {
+  clientId: string;
+  isValid: boolean;
+  name: string;
+}
+
+export interface IGetValidatedClientsResponse {
+  clientId: string;
+  clientName: string;
+}
