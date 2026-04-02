@@ -252,4 +252,5 @@ export interface IValidatedClients {
 export interface IGetValidatedClientsResponse {
   clientId: string;
   clientName: string;
+  isValid?: boolean;
 }

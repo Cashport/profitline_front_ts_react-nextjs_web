@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Button, Input, Tag, Typography, Flex } from "antd";
+import useSWR from "swr";
+import { Button, Input, Tag, Typography, Flex, message } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
-import {
-  validateClients,
-  getCurrentValidatedClients
-} from "@/services/communications/communications";
-import type { IValidatedClients } from "@/types/communications/ICommunications";
+import { fetcher } from "@/utils/api/api";
+import { validateClients } from "@/services/communications/communications";
+import type {
+  IValidatedClients,
+  IGetValidatedClientsResponse
+} from "@/types/communications/ICommunications";
+import type { GenericResponse } from "@/types/global/IGlobal";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -17,6 +20,8 @@ const placeholderStyle = `
   }
 `;
 
+const SWR_KEY = "/comunication/my-client-list";
+
 interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
 }
@@ -26,14 +31,21 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
   const [hasValidated, setHasValidated] = useState(false);
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
   const [invalidIds, setInvalidIds] = useState<string[]>([]);
-  const [totalClients, setTotalClients] = useState(0);
   const [isValidating, setIsValidating] = useState(false);
 
+  const { data: clientListResponse, mutate } = useSWR<
+    GenericResponse<IGetValidatedClientsResponse[]>
+  >(SWR_KEY, fetcher);
+
+  const clientList = clientListResponse?.data ?? [];
+
   useEffect(() => {
-    getCurrentValidatedClients()
-      .then((data) => setTotalClients(data.length))
-      .catch((err) => console.error("Error fetching client list", err));
-  }, []);
+    const validIds = clientList.filter((c) => c.isValid).map((c) => c.clientId);
+
+    if (validIds.length > 0) {
+      setRawIds(validIds.join("\n"));
+    }
+  }, [clientList]);
 
   const handleRawIdsChange = useCallback(
     (value: string) => {
@@ -61,12 +73,16 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       setInvalidIds(invalid);
       setHasValidated(true);
       onValidatedCountChange(valid.length);
+      message.success(
+        `Validación completada: ${valid.length} válidos, ${invalid.length} no encontrados`
+      );
     } catch (error) {
-      console.error("Error validating clients", error);
+      const errorMsg = error instanceof Error ? error.message : "Error al validar los clientes";
+      message.error(errorMsg);
     } finally {
       setIsValidating(false);
     }
-  }, [rawIds, onValidatedCountChange]);
+  }, [rawIds, onValidatedCountChange, mutate]);
 
   const handleClear = useCallback(() => {
     setRawIds("");
@@ -159,7 +175,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
               </Tag>
             )}
             <Text type="secondary" className="text-xs">
-              de {totalClients.toLocaleString()} clientes totales
+              de {clientList.length.toLocaleString()} clientes totales
             </Text>
           </Flex>
           <Button
