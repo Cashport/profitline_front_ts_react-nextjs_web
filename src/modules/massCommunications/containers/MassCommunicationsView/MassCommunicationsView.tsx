@@ -61,6 +61,7 @@ export default function MassCommunicationsView() {
   }, []);
 
   useEffect(() => {
+    if (channel !== "email") return;
     fetchEmailTemplates();
 
     getTemplateTags()
