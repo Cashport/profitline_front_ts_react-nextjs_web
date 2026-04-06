@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import dayjs from "dayjs";
 import "./purchase-order-products.scss";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -40,6 +40,8 @@ interface PurchaseOrderProductsProps {
   clientId?: string;
   initialProductsData?: PurchaseOrderProductsFormData;
   onProductsChange?: (products: PurchaseOrderProductsFormData) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
 
 export function PurchaseOrderProducts({
@@ -52,7 +54,9 @@ export function PurchaseOrderProducts({
   canEdit,
   clientId: clientIdProp,
   initialProductsData,
-  onProductsChange
+  onProductsChange,
+  onDirtyChange,
+  saveRef
 }: PurchaseOrderProductsProps) {
   const initialProducts = useMemo(() => {
     if (isCreating || !data?.products) return initialProductsData ?? getEmptyProductsFormData();
@@ -174,6 +178,12 @@ export function PurchaseOrderProducts({
     });
   }, [orderId, data?.products]);
 
+  // Notify parent about dirty state changes
+  const productsIsDirty = isEditMode && Object.keys(dirtyFields).length > 0;
+  useEffect(() => {
+    onDirtyChange?.(productsIsDirty);
+  }, [productsIsDirty, onDirtyChange]);
+
   // Reset form when initialProducts changes (API refetch)
   useEffect(() => {
     reset(initialProducts);
@@ -220,9 +230,20 @@ export function PurchaseOrderProducts({
       setIsEditMode(false);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al actualizar los productos");
+      throw error;
     }
     setIsEditMode(false);
   };
+
+  // Expose save function to parent via ref
+  const internalSubmitRef = useRef<(() => Promise<void>) | null>(null);
+  internalSubmitRef.current = handleSubmit(onSubmitProducts);
+  useEffect(() => {
+    if (saveRef) saveRef.current = () => internalSubmitRef.current!();
+    return () => {
+      if (saveRef) saveRef.current = null;
+    };
+  }, [saveRef]);
 
   const handleBoxesChange = (index: number, newBoxes: number) => {
     setValue(`products.${index}.box_quantity`, newBoxes, {
