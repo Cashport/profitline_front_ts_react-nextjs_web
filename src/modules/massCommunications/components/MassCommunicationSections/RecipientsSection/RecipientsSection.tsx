@@ -1,15 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import useSWR from "swr";
 import { Button, Input, Tag, Typography, Flex, message } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
-import { fetcher } from "@/utils/api/api";
 import { validateClients } from "@/services/communications/communications";
-import type {
-  IValidatedClients,
-  IGetValidatedClientsResponse
-} from "@/types/communications/ICommunications";
-import type { GenericResponse } from "@/types/global/IGlobal";
+import { useClientList } from "@/modules/massCommunications/hooks/useClientList";
+import type { IValidatedClients } from "@/types/communications/ICommunications";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -19,8 +14,6 @@ const placeholderStyle = `
     color: #0a0a0ad0 !important;
   }
 `;
-
-const SWR_KEY = "/comunication/my-client-list";
 
 const normalizeIds = (input: string): string[] => {
   return Array.from(
@@ -43,12 +36,9 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
   const [invalidIds, setInvalidIds] = useState<string[]>([]);
   const [isValidating, setIsValidating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data: clientListResponse, mutate } = useSWR<
-    GenericResponse<IGetValidatedClientsResponse[]>
-  >(SWR_KEY, fetcher);
-
-  const clientList = clientListResponse?.data ?? [];
+  const { data: clientList, mutate, getExportClientList } = useClientList();
 
   useEffect(() => {
     const validIds = clientList.filter((c) => c.isValid).map((c) => c.clientId);
@@ -113,9 +103,26 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
     onValidatedCountChange(0);
   }, [onValidatedCountChange]);
 
-  const handleDownloadReport = useCallback(() => {
-    console.log("Downloading validation report...");
-  }, []);
+  const handleDownloadReport = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const blob = await getExportClientList();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "validation-report.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Error al descargar el reporte";
+      message.error(errorMsg);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [getExportClientList]);
 
   return (
     <section className="bg-white rounded-lg p-6">
@@ -206,6 +213,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
             icon={<FileDown size={14} />}
             className="!bg-[#fafafa] !font-medium !text-xs"
             style={{ height: 31 }}
+            loading={isExporting}
           >
             Descargar reporte
           </Button>

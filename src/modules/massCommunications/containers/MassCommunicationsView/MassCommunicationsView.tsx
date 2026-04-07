@@ -10,7 +10,6 @@ import ActionsBar from "../../components/MassCommunicationSections/ActionsBar/Ac
 import ModalTestCommunication from "../../components/ModalTestCommunication/ModalTestCommunication";
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
-import { validatedClients as mockClients } from "../../lib/mockData";
 import {
   getMassiveCommunicationTemplates,
   getTemplateTags
