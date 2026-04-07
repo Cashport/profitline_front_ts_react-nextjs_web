@@ -11,13 +11,11 @@ import { useAppStore } from "@/lib/store/store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from "@/modules/chat/ui/tooltip";
 import {
   ISalesDashboardSellerLeader,
-  ISalesDashboardSeller,
   ISalesDashboardTotal
 } from "@/types/commerce/ICommerce";
 

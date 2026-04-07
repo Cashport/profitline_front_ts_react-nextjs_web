@@ -21,7 +21,6 @@ import "./sidebar.scss";
 export const SideBar = () => {
   usePermissionRedirect();
 
-  const [isSideBarLarge, setIsSideBarLarge] = useState(false);
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
@@ -129,7 +128,7 @@ export const SideBar = () => {
   }, [isHy]);
 
   return (
-    <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`} ref={mobileMenuRef}>
+    <div className="sidebar main" ref={mobileMenuRef}>
       {isMobile && (
         <Button
           type="text"
@@ -143,7 +142,6 @@ export const SideBar = () => {
       {isMobile && isModuleMenuOpen && (
         <div className="mobileMenuWrapper">
           <ModulesButtons
-            isSideBarLarge={isSideBarLarge}
             path={path}
             project={project}
             isMobileMenu={true}
@@ -166,7 +164,6 @@ export const SideBar = () => {
 
         {!isMobile && (
           <ModulesButtons
-            isSideBarLarge={isSideBarLarge}
             path={path}
             project={project}
             isMobileMenu={false}
@@ -181,7 +178,6 @@ export const SideBar = () => {
           icon={<ArrowLineRight size={iconSize} />}
           className="buttonExit"
         >
-          {isSideBarLarge && "Salir"}
         </Button>
       </Flex>
 

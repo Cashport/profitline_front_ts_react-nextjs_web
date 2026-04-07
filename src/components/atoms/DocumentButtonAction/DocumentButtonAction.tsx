@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { Flex, Spin, Typography } from "antd";
+import { Flex, Spin } from "antd";
 import { FileArrowUp, Pencil } from "phosphor-react";
 import "./documentButtonAction.scss";
 import { FileDownloadModal } from "@/components/molecules/modals/FileDownloadModal/FileDownloadModal";

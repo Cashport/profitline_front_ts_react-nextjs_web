@@ -10,11 +10,12 @@ import ActionsBar from "../../components/MassCommunicationSections/ActionsBar/Ac
 import ModalTestCommunication from "../../components/ModalTestCommunication/ModalTestCommunication";
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
-import { whatsappTemplates } from "../../lib/mockData";
+import { validatedClients as mockClients } from "../../lib/mockData";
 import {
   getMassiveCommunicationTemplates,
   getTemplateTags
 } from "@/services/communications/communications";
+import { getWhatsAppTemplates } from "@/services/chat/chat";
 import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { WhatsappTemplate } from "../../lib/mockData";
@@ -57,12 +58,13 @@ export default function MassCommunicationsView() {
   }, []);
 
   useEffect(() => {
+    if (channel !== "email") return;
     fetchEmailTemplates();
 
     getTemplateTags()
       .then((tags) => setApiTags(tags))
       .catch((err) => console.error("Error fetching template tags", err));
-  }, []);
+  }, [channel]);
 
   const emailTags = useMemo(() => {
     const tpl = emailTemplates.find((t) => t.id === selectedEmailTemplate);
@@ -85,10 +87,45 @@ export default function MassCommunicationsView() {
   }, [selectedEmailTemplate, emailTemplates]);
 
   // WhatsApp message
+  const [waTemplates, setWaTemplates] = useState<WhatsappTemplate[]>([]);
+  const [waTemplatesLoading, setWaTemplatesLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("");
+
+  useEffect(() => {
+    if (channel !== "whatsapp") return;
+    setWaTemplatesLoading(true);
+    getWhatsAppTemplates()
+      .then((data) => {
+        const mapped: WhatsappTemplate[] = data.map((t) => {
+          const bodyComponent = t.components.find((c: Record<string, string>) => c.type === "BODY");
+          const bodyText = (bodyComponent?.text ?? "").replace(/\*/g, "");
+          const variables: string[] = [];
+          const varRegex = /\{\{(\d+)\}\}/g;
+          let match;
+          while ((match = varRegex.exec(bodyText)) !== null) {
+            if (!variables.includes(match[1])) variables.push(match[1]);
+          }
+          const attachments = t.components
+            .filter((c: Record<string, string>) => c.type === "BUTTON" && c.sub_type === "URL")
+            .map((c: Record<string, string>) => ({ name: c.text, type: "Link" }));
+
+          return {
+            id: t.id,
+            name: t.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+            body: bodyText,
+            variables,
+            attachments
+          };
+        });
+        setWaTemplates(mapped);
+      })
+      .catch((err) => console.error("Error fetching WhatsApp templates:", err))
+      .finally(() => setWaTemplatesLoading(false));
+  }, [channel]);
+
   const currentTemplate = useMemo<WhatsappTemplate | null>(
-    () => whatsappTemplates.find((t) => t.id === selectedTemplate) ?? null,
-    [selectedTemplate]
+    () => waTemplates.find((t) => t.id === selectedTemplate) ?? null,
+    [selectedTemplate, waTemplates]
   );
 
   // Modals
@@ -127,6 +164,8 @@ export default function MassCommunicationsView() {
             emailBody={emailBody}
             emailTags={emailTags}
             selectedEmailAttachments={selectedEmailAttachments}
+            waTemplates={waTemplates}
+            waTemplatesLoading={waTemplatesLoading}
             selectedTemplate={selectedTemplate}
             onSelectTemplate={setSelectedTemplate}
             currentTemplate={currentTemplate}

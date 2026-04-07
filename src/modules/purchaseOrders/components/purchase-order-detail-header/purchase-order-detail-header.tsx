@@ -6,8 +6,6 @@ import {
   Edit,
   MoreHorizontal,
   Save,
-  Check,
-  X,
   ChevronDown,
   Receipt,
   PackageCheck,
@@ -40,6 +38,7 @@ interface PurchaseOrderDetailHeaderProps {
   onDownloadCSV?: () => void;
   formId?: string;
   mutate?: () => void;
+  onNavigate?: (url: string) => void;
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -63,7 +62,8 @@ export function PurchaseOrderDetailHeader({
   onOpenModal,
   onDownloadCSV,
   formId,
-  mutate
+  mutate,
+  onNavigate
 }: PurchaseOrderDetailHeaderProps) {
   const router = useRouter();
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -223,7 +223,7 @@ export function PurchaseOrderDetailHeader({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push("/purchase-orders")}
+            onClick={() => (onNavigate ?? router.push)("/purchase-orders")}
             className="text-cashport-black hover:bg-gray-50"
           >
             <ArrowLeft className="h-4 w-4 " />
@@ -286,7 +286,7 @@ export function PurchaseOrderDetailHeader({
                     {siblingOrders.map((sibling) => (
                       <div
                         key={sibling.id}
-                        onClick={() => router.push(`/purchase-orders/${sibling.id}`)}
+                        onClick={() => (onNavigate ?? router.push)(`/purchase-orders/${sibling.id}`)}
                         className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 ${
                           String(sibling.id) === orderId ? "bg-gray-100" : ""
                         }`}

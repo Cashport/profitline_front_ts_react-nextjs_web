@@ -2,7 +2,6 @@
 import { Row, Col, Tag, Typography } from "antd";
 import { FileText, Info, Plus } from "lucide-react";
 
-import { whatsappTemplates } from "../../../lib/mockData";
 import type { WhatsappTemplate } from "../../../lib/mockData";
 import type { EmailTemplate } from "./EmailTemplateCard";
 import type { ChannelType } from "../ChannelSection/ChannelSection";
@@ -23,6 +22,8 @@ interface MessageSectionProps {
   emailBody: string;
   emailTags: { key: string; example: string }[];
   selectedEmailAttachments: { name: string; type: string }[];
+  waTemplates: WhatsappTemplate[];
+  waTemplatesLoading: boolean;
   selectedTemplate: string;
   onSelectTemplate: (id: string) => void;
   currentTemplate: WhatsappTemplate | null;
@@ -38,6 +39,8 @@ export default function MessageSection({
   emailBody,
   emailTags,
   selectedEmailAttachments,
+  waTemplates,
+  waTemplatesLoading,
   selectedTemplate,
   onSelectTemplate,
   currentTemplate,
@@ -107,14 +110,24 @@ export default function MessageSection({
               Selecciona una plantilla aprobada
             </Text>
             <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
-              {whatsappTemplates.map((tpl) => (
-                <WhatsAppTemplateCard
-                  key={tpl.id}
-                  template={tpl}
-                  isSelected={selectedTemplate === tpl.id}
-                  onSelect={() => onSelectTemplate(tpl.id)}
-                />
-              ))}
+              {waTemplatesLoading ? (
+                <Text type="secondary" className="text-sm text-center py-4">
+                  Cargando plantillas…
+                </Text>
+              ) : waTemplates.length === 0 ? (
+                <Text type="secondary" className="text-sm text-center py-4">
+                  No hay plantillas disponibles
+                </Text>
+              ) : (
+                waTemplates.map((tpl) => (
+                  <WhatsAppTemplateCard
+                    key={tpl.id}
+                    template={tpl}
+                    isSelected={selectedTemplate === tpl.id}
+                    onSelect={() => onSelectTemplate(tpl.id)}
+                  />
+                ))
+              )}
             </div>
           </Col>
           <Col span={12}>

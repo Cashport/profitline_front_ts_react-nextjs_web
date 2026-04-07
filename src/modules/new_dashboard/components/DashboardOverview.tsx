@@ -4,7 +4,7 @@ import {
   ComposedChart, Line, CartesianGrid
 } from 'recharts';
 import { Clock, FileQuestion, Timer } from 'lucide-react';
-import { formatCompactCurrency, formatCurrency } from './Formatters';
+import { formatCompactCurrency } from './Formatters';
 import ExpandableCard from './ExpandableCard';
 import { COLLECTION_TREND } from '../lib/constants';
 

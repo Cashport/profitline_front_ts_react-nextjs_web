@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Maximize2, Minimize2, ArrowLeft, X } from 'lucide-react';
+import { Maximize2, Minimize2, ArrowLeft } from 'lucide-react';
 
 interface ExpandableCardProps {
   title: React.ReactNode;

@@ -72,9 +72,6 @@ export const BankRuleModal = ({ showBankRuleModal, onClose, mutate }: Props) => 
     }[];
   }>({});
 
-  const handleAddRule = () => {
-    setRuleCount((prevCount) => prevCount + 1);
-  };
 
   const handleAddEditRule = async (data: any) => {
     // If editing a rule, we need to pass the ruleId

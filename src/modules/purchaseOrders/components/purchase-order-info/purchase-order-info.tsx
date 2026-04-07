@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/modules/chat/ui/input";
@@ -23,10 +23,12 @@ interface PurchaseOrderInfoProps {
   isEditMode: boolean;
   data?: IPurchaseOrderDetail;
   initialFormData?: PurchaseOrderInfoFormData;
-  onSubmit: (data: PurchaseOrderInfoFormData) => void;
+  onSubmit: (data: PurchaseOrderInfoFormData) => void | Promise<void>;
   onCancel: () => void;
   onClientChange?: (clientId: string) => void;
   onChange?: (data: PurchaseOrderInfoFormData) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
+  saveRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
 
 export function PurchaseOrderInfo({
@@ -37,7 +39,9 @@ export function PurchaseOrderInfo({
   onSubmit,
   onCancel,
   onClientChange,
-  onChange
+  onChange,
+  onDirtyChange,
+  saveRef
 }: PurchaseOrderInfoProps) {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const initialData = useMemo(() => {
@@ -111,6 +115,12 @@ export function PurchaseOrderInfo({
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [addressesError, setAddressesError] = useState<string | null>(null);
 
+  // Notify parent about dirty state changes
+  const infoIsDirty = isEditMode && Object.keys(dirtyFields).length > 0;
+  useEffect(() => {
+    onDirtyChange?.(infoIsDirty);
+  }, [infoIsDirty, onDirtyChange]);
+
   // Reset form when initialData changes (API refetch)
   useEffect(() => {
     reset(initialData);
@@ -149,6 +159,18 @@ export function PurchaseOrderInfo({
     }
     onSubmit(formData);
   });
+
+  // Expose save function to parent via ref
+  const internalSubmitRef = useRef<(() => Promise<void>) | null>(null);
+  internalSubmitRef.current = handleSubmit(async (formData) => {
+    await onSubmit(formData);
+  });
+  useEffect(() => {
+    if (saveRef) saveRef.current = () => internalSubmitRef.current!();
+    return () => {
+      if (saveRef) saveRef.current = null;
+    };
+  }, [saveRef]);
 
   return (
     <form
