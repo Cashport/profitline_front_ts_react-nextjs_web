@@ -245,8 +245,9 @@ export interface ICreateCommunicationTemplate {
 
 export interface IValidatedClients {
   clientId: string;
-  isValid: boolean;
-  name: string;
+  identifier: string;
+  clientName: null;
+  status: "NOT_FOUND" | "FOUND";
 }
 
 export interface IGetValidatedClientsResponse {

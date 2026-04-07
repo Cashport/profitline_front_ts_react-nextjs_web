@@ -22,6 +22,17 @@ const placeholderStyle = `
 
 const SWR_KEY = "/comunication/my-client-list";
 
+const normalizeIds = (input: string): string[] => {
+  return Array.from(
+    new Set(
+      input
+        .split(/[\s,;]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    )
+  );
+};
+
 interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
 }
@@ -55,19 +66,29 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
     [hasValidated]
   );
 
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      e.preventDefault();
+      const pasted = e.clipboardData.getData("text");
+      const target = e.currentTarget;
+      const { selectionStart, selectionEnd, value } = target;
+      const merged = value.slice(0, selectionStart) + pasted + value.slice(selectionEnd);
+      const organized = normalizeIds(merged).join("\n");
+      handleRawIdsChange(organized);
+    },
+    [handleRawIdsChange]
+  );
+
   const handleValidate = useCallback(async () => {
-    const ids = rawIds
-      .split(/[,\n]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const ids = normalizeIds(rawIds);
 
     if (ids.length === 0) return;
 
     setIsValidating(true);
     try {
       const result = await validateClients(ids);
-      const valid = result.filter((c) => c.isValid);
-      const invalid = result.filter((c) => !c.isValid).map((c) => c.clientId);
+      const valid = result.filter((c) => c.status === "FOUND");
+      const invalid = result.filter((c) => c.status === "NOT_FOUND").map((c) => c.clientId);
 
       setValidClients(valid);
       setInvalidIds(invalid);
@@ -113,6 +134,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
         <TextArea
           value={rawIds}
           onChange={(e) => handleRawIdsChange(e.target.value)}
+          onPaste={handlePaste}
           placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
           autoSize={{ minRows: 4 }}
           className="flex-1 font-mono text-sm"
