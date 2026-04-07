@@ -27,6 +27,7 @@ import {
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
+import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 
@@ -46,6 +47,11 @@ export const ModulesButtons = ({
   const height = useScreenHeight();
   const width = useScreenWidth();
   const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
+  const { attemptNavigation } = useUnsavedChanges();
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (attemptNavigation(href)) e.preventDefault();
+  };
 
   return (
     <div className={`${styles.containerButtons} ${isMobileMenu ? styles.mobile : ""}`}>
@@ -57,6 +63,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<SquaresFour size={iconSize} />}
             className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/dashboard")}
           />
         </Link>
       )}
@@ -69,6 +76,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<User size={iconSize} />}
             className={path.startsWith("/clientes") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/clientes/all")}
           />
         </Link>
       )}
@@ -81,6 +89,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<SealPercent size={iconSize} />}
             className={path.startsWith("/descuentos") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/descuentos")}
           />
         </Link>
       )}
@@ -95,6 +104,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/notificaciones") ? styles.buttonIcon : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/notificaciones")}
           />
         </Link>
       )}
@@ -107,6 +117,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Storefront size={iconSize} />}
             className={path.startsWith("/comercio") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/comercio")}
           />
         </Link>
       )}
@@ -119,6 +130,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Bank size={iconSize} />}
             className={path === "/banco" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/banco")}
           />
         </Link>
       )}
@@ -135,6 +147,7 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/settings")}
           />
         </Link>
       )}
@@ -151,6 +164,7 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/proveedores")}
           />
         </Link>
       )}
@@ -163,6 +177,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<HandTap size={iconSize} />}
             className={path === "/applyModule" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/applyModule")}
           />
         </Link>
       )}
@@ -175,6 +190,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<Stack size={iconSize} />}
             className={path === "/client-management" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/client-management")}
           />
         </Link>
       )}
@@ -187,6 +203,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ChatCircleDots size={iconSize} />}
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/chat")}
           />
         </Link>
       )}
@@ -199,6 +216,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ListChecks size={iconSize} />}
             className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/aprobaciones")}
           />
         </Link>
       )}
@@ -211,6 +229,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ChartBar size={iconSize} />}
             className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/newDashboard")}
           />
         </Link>
       )}
@@ -223,6 +242,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<ClipboardText size={iconSize} />}
             className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/task-manager")}
           />
         </Link>
       )}
@@ -237,6 +257,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/purchase-orders") ? styles.buttonIcon : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/purchase-orders")}
           />
         </Link>
       )}
@@ -251,6 +272,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/data-quality") ? styles.buttonIcon : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/data-quality")}
           />
         </Link>
       )}
@@ -262,6 +284,7 @@ export const ModulesButtons = ({
             size="large"
             icon={<CurrencyCircleDollar size={iconSize} />}
             className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/balances")}
           />
         </Link>
       )}
@@ -275,6 +298,7 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
             }
+            onClick={(e) => handleNavClick(e, "/mass-communications")}
           />
         </Link>
       )}
