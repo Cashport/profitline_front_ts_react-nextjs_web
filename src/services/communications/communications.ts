@@ -13,7 +13,9 @@ import {
   ICreateCommunicationTemplate,
   IMassiveCommunicationTemplate,
   ITemplateCommunication,
-  Iattachments
+  Iattachments,
+  IValidatedClients,
+  IGetValidatedClientsResponse
 } from "@/types/communications/ICommunications";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IFormEmailNotification } from "@/components/molecules/modals/ModalSendEmail/ModalSendEmail";
@@ -283,6 +285,31 @@ export const getMassiveCommunicationTemplates = async () => {
     return response;
   } catch (error) {
     console.error("Error getting massive communication templates", error);
+    throw error;
+  }
+};
+
+export const validateClients = async (clientIds: string[]) => {
+  try {
+    const response: GenericResponse<IValidatedClients[]> = await API.post(
+      `${config.API_HOST}/comunication/validate-client-list`,
+      { client_ids: clientIds }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error validating clients", error);
+    throw error;
+  }
+};
+
+export const getCurrentValidatedClients = async () => {
+  try {
+    const response: GenericResponse<IGetValidatedClientsResponse[]> = await API.get(
+      `${config.API_HOST}/comunication/my-client-list`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting current validated clients", error);
     throw error;
   }
 };
