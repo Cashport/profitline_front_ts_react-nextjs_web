@@ -40,7 +40,6 @@ export const CommunicationsTable = ({
 }: PropsCommunicationsTable) => {
   const pathname = usePathname();
   const [communications, setCommunications] = useState<ICommunication[]>([]);
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);
@@ -211,15 +210,7 @@ export const CommunicationsTable = ({
     <main className="mainCommunicationsTable">
       <Flex justify="space-between">
         <Flex gap={"0.625rem"}>
-          <UiSearchInput
-            className="search"
-            placeholder="Buscar"
-            onChange={(event) => {
-              setTimeout(() => {
-                setSearch(event.target.value);
-              }, 1000);
-            }}
-          />
+          <UiSearchInput className="search" placeholder="Buscar" />
           <UiFilterDropdown />
           <DotsDropdown items={items} />
         </Flex>

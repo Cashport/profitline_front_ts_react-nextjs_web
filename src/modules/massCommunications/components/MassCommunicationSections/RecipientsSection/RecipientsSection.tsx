@@ -1,7 +1,10 @@
 "use client";
-import { Button, Input, Tag, Typography, Flex } from "antd";
+import { useState, useEffect, useCallback } from "react";
+import { Button, Input, Tag, Typography, Flex, message } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
-import type { IValidatedClient } from "../../../lib/mockData";
+import { validateClients } from "@/services/communications/communications";
+import { useClientList } from "@/modules/massCommunications/hooks/useClientList";
+import type { IValidatedClients } from "@/types/communications/ICommunications";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -12,29 +15,115 @@ const placeholderStyle = `
   }
 `;
 
+const normalizeIds = (input: string): string[] => {
+  return Array.from(
+    new Set(
+      input
+        .split(/[\s,;]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    )
+  );
+};
+
 interface RecipientsSectionProps {
-  rawIds: string;
-  onRawIdsChange: (value: string) => void;
-  hasValidated: boolean;
-  validatedClients: IValidatedClient[];
-  invalidIds: string[];
-  totalClients: number;
-  onValidate: () => void;
-  onClear: () => void;
-  onDownloadReport: () => void;
+  onValidatedCountChange: (count: number) => void;
 }
 
-export default function RecipientsSection({
-  rawIds,
-  onRawIdsChange,
-  hasValidated,
-  validatedClients,
-  invalidIds,
-  totalClients,
-  onValidate,
-  onClear,
-  onDownloadReport
-}: RecipientsSectionProps) {
+export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
+  const [rawIds, setRawIds] = useState("");
+  const [hasValidated, setHasValidated] = useState(false);
+  const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
+  const [invalidIds, setInvalidIds] = useState<string[]>([]);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const { data: clientList, mutate, getExportClientList } = useClientList();
+
+  useEffect(() => {
+    const validIds = clientList.filter((c) => c.isValid).map((c) => c.clientId);
+
+    if (validIds.length > 0) {
+      setRawIds(validIds.join("\n"));
+    }
+  }, [clientList]);
+
+  const handleRawIdsChange = useCallback(
+    (value: string) => {
+      setRawIds(value);
+      if (hasValidated) setHasValidated(false);
+    },
+    [hasValidated]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      e.preventDefault();
+      const pasted = e.clipboardData.getData("text");
+      const target = e.currentTarget;
+      const { selectionStart, selectionEnd, value } = target;
+      const merged = value.slice(0, selectionStart) + pasted + value.slice(selectionEnd);
+      const organized = normalizeIds(merged).join("\n");
+      handleRawIdsChange(organized);
+    },
+    [handleRawIdsChange]
+  );
+
+  const handleValidate = useCallback(async () => {
+    const ids = normalizeIds(rawIds);
+
+    if (ids.length === 0) return;
+
+    setIsValidating(true);
+    try {
+      const result = await validateClients(ids);
+      const valid = result.filter((c) => c.status === "FOUND");
+      const invalid = result.filter((c) => c.status === "NOT_FOUND").map((c) => c.clientId);
+
+      setValidClients(valid);
+      setInvalidIds(invalid);
+      setHasValidated(true);
+      onValidatedCountChange(valid.length);
+      message.success(
+        `Validación completada: ${valid.length} válidos, ${invalid.length} no encontrados`
+      );
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Error al validar los clientes";
+      message.error(errorMsg);
+    } finally {
+      setIsValidating(false);
+    }
+  }, [rawIds, onValidatedCountChange, mutate]);
+
+  const handleClear = useCallback(() => {
+    setRawIds("");
+    setHasValidated(false);
+    setValidClients([]);
+    setInvalidIds([]);
+    onValidatedCountChange(0);
+  }, [onValidatedCountChange]);
+
+  const handleDownloadReport = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const blob = await getExportClientList();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "validation-report.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Error al descargar el reporte";
+      message.error(errorMsg);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [getExportClientList]);
+
   return (
     <section className="bg-white rounded-lg p-6">
       <style>{placeholderStyle}</style>
@@ -51,7 +140,8 @@ export default function RecipientsSection({
       <Flex gap={12}>
         <TextArea
           value={rawIds}
-          onChange={(e) => onRawIdsChange(e.target.value)}
+          onChange={(e) => handleRawIdsChange(e.target.value)}
+          onPaste={handlePaste}
           placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
           autoSize={{ minRows: 4 }}
           className="flex-1 font-mono text-sm"
@@ -60,9 +150,10 @@ export default function RecipientsSection({
         <Flex vertical gap={8}>
           <Button
             type="primary"
-            onClick={rawIds.trim() ? onValidate : undefined}
+            onClick={rawIds.trim() ? handleValidate : undefined}
             icon={<CheckCircle2 size={16} />}
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
+            loading={isValidating}
             style={{
               ...(!rawIds.trim() && { opacity: 0.4, pointerEvents: "none" })
             }}
@@ -70,7 +161,7 @@ export default function RecipientsSection({
             Validar
           </Button>
           {hasValidated && (
-            <Button onClick={onClear} icon={<X size={16} />} className="!bg-[#fafafa]">
+            <Button onClick={handleClear} icon={<X size={16} />} className="!bg-[#fafafa]">
               Limpiar
             </Button>
           )}
@@ -93,7 +184,7 @@ export default function RecipientsSection({
                 fontWeight: 500
               }}
             >
-              {validatedClients.length} clientes encontrados
+              {validClients.length} clientes encontrados
             </Tag>
             {invalidIds.length > 0 && (
               <Tag
@@ -113,15 +204,16 @@ export default function RecipientsSection({
               </Tag>
             )}
             <Text type="secondary" className="text-xs">
-              de {totalClients.toLocaleString()} clientes totales
+              de {clientList.length.toLocaleString()} clientes totales
             </Text>
           </Flex>
           <Button
             size="small"
-            onClick={onDownloadReport}
+            onClick={handleDownloadReport}
             icon={<FileDown size={14} />}
             className="!bg-[#fafafa] !font-medium !text-xs"
             style={{ height: 31 }}
+            loading={isExporting}
           >
             Descargar reporte
           </Button>

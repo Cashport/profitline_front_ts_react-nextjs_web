@@ -19,7 +19,6 @@ import {
 } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order.module.scss";
-import { number } from "yup";
 
 export interface ISelectedCategories {
   category_id: number;

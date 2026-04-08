@@ -7,8 +7,7 @@ import { AxiosError } from "axios";
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
 import {
-  markInvoiceAsBalance,
-  sendDigitalRecord
+  markInvoiceAsBalance
 } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";

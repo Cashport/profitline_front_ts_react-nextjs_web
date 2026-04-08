@@ -82,7 +82,7 @@ export function PurchaseOrdersView() {
     fetchFilters();
   }, [ID]);
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = (_files: File[]) => {
     mutate();
   };
 
@@ -156,7 +156,16 @@ export function PurchaseOrdersView() {
     try {
       const packageId = selectedPackageRows[0].packageId;
       const response = await downloadPurchaseOrdersCSV({ packageId });
-      window.open(response.url, "_blank");
+      const res = await fetch(response.url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = response.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
 
       message.success("Plano CSV generado exitosamente");
       setSelectedPackageRows([]);
@@ -172,6 +181,21 @@ export function PurchaseOrdersView() {
     } finally {
       setIsDownloadingCSV(false);
     }
+  };
+
+  const handleOpenActionsModal = () => {
+    if (selectedPackageRows.length === 0 && selectedOrders.length === 0) {
+      message.info("Por favor selecciona al menos un pedido u orden para generar acciones.");
+      return;
+    }
+    const isDelivered =
+      selectedPackageRows.some((p) => p.orders.some((o) => o.status === "Entregado")) ||
+      selectedOrders.some((o) => o.status === "Entregado");
+    if (isDelivered) {
+      message.warning("No se pueden generar acciones para pedidos/ordenes con estado 'Entregado'.");
+      return;
+    }
+    setWhichModalIsOpen({ selected: 1 });
   };
 
   return (
@@ -193,7 +217,7 @@ export function PurchaseOrdersView() {
                 <GenerateActionButton
                   label="Generar acción"
                   disabled={isDownloadingCSV}
-                  onClick={() => setWhichModalIsOpen({ selected: 1 })}
+                  onClick={handleOpenActionsModal}
                 />
 
                 {/* Estado Filter Dropdown */}

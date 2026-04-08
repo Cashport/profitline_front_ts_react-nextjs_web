@@ -1,4 +1,4 @@
-import { ApprovalStepStatus, ApprovalType } from "@/constants/approvalTypes";
+import { ApprovalType } from "@/constants/approvalTypes";
 
 export interface IApprovalItem {
   id: number;

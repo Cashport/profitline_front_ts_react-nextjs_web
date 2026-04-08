@@ -2,8 +2,8 @@
 import { Row, Col, Tag, Typography } from "antd";
 import { FileText, Info, Plus } from "lucide-react";
 
-import { emailTemplates, whatsappTemplates } from "../../../lib/mockData";
 import type { WhatsappTemplate } from "../../../lib/mockData";
+import type { EmailTemplate } from "./EmailTemplateCard";
 import type { ChannelType } from "../ChannelSection/ChannelSection";
 import WhatsAppPreview from "../../WhatsAppPreview/WhatsAppPreview";
 import EmailTemplateCard from "./EmailTemplateCard";
@@ -15,12 +15,15 @@ const { Text } = Typography;
 
 interface MessageSectionProps {
   channel: ChannelType;
+  emailTemplates: EmailTemplate[];
   selectedEmailTemplate: string;
   onSelectEmailTemplate: (id: string, subject: string, body: string) => void;
   emailSubject: string;
   emailBody: string;
   emailTags: { key: string; example: string }[];
   selectedEmailAttachments: { name: string; type: string }[];
+  waTemplates: WhatsappTemplate[];
+  waTemplatesLoading: boolean;
   selectedTemplate: string;
   onSelectTemplate: (id: string) => void;
   currentTemplate: WhatsappTemplate | null;
@@ -29,12 +32,15 @@ interface MessageSectionProps {
 
 export default function MessageSection({
   channel,
+  emailTemplates,
   selectedEmailTemplate,
   onSelectEmailTemplate,
   emailSubject,
   emailBody,
   emailTags,
   selectedEmailAttachments,
+  waTemplates,
+  waTemplatesLoading,
   selectedTemplate,
   onSelectTemplate,
   currentTemplate,
@@ -72,7 +78,7 @@ export default function MessageSection({
             <Text strong className="block text-[13px] mb-3">
               Templates de email
             </Text>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded">
               {emailTemplates.map((tpl) => (
                 <EmailTemplateCard
                   key={tpl.id}
@@ -104,14 +110,24 @@ export default function MessageSection({
               Selecciona una plantilla aprobada
             </Text>
             <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-1">
-              {whatsappTemplates.map((tpl) => (
-                <WhatsAppTemplateCard
-                  key={tpl.id}
-                  template={tpl}
-                  isSelected={selectedTemplate === tpl.id}
-                  onSelect={() => onSelectTemplate(tpl.id)}
-                />
-              ))}
+              {waTemplatesLoading ? (
+                <Text type="secondary" className="text-sm text-center py-4">
+                  Cargando plantillas…
+                </Text>
+              ) : waTemplates.length === 0 ? (
+                <Text type="secondary" className="text-sm text-center py-4">
+                  No hay plantillas disponibles
+                </Text>
+              ) : (
+                waTemplates.map((tpl) => (
+                  <WhatsAppTemplateCard
+                    key={tpl.id}
+                    template={tpl}
+                    isSelected={selectedTemplate === tpl.id}
+                    onSelect={() => onSelectTemplate(tpl.id)}
+                  />
+                ))
+              )}
             </div>
           </Col>
           <Col span={12}>

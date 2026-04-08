@@ -16,7 +16,6 @@ import SelectOuterTags from "@/components/ui/select-outer-tags";
 import InputClickable from "@/components/ui/input-clickable";
 import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
 import {
-  Iattachments,
   ICommunicationDetail,
   ICommunicationForm,
   IPeriodicityModalForm
@@ -38,7 +37,6 @@ import { capitalize, stringFromArrayOfSelect } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 import dayjs from "dayjs";
 import { selectDayOptions } from "@/components/atoms/SelectDay/SelectDay";
-import { getAllRoles } from "@/services/roles/roles";
 import { getContactOptions } from "@/services/contacts/contacts";
 
 const { Title } = Typography;

@@ -7,20 +7,12 @@ import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/modules/chat/ui/dropdown-menu";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
 import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { GroupedFilters } from "../../components/GroupedFilters/GroupedFilters";
 import { KamFilter } from "../../components/KamFilter/KamFilter";
 import { StatusFilter } from "../../components/StatusFilter/StatusFilter";
 import { useSaldos } from "../../context/saldos-context";
-import type { SaldoData } from "../../context/saldos-context";
-import { useAppStore } from "@/lib/store/store";
 import { useBalances } from "@/hooks/useBalances";
 import { IBalance } from "@/types/financialDiscounts/IFinancialDiscounts";
 

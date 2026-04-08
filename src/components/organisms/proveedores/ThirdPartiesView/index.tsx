@@ -61,7 +61,7 @@ const ThirdPartiesView: React.FC = () => {
     setModalOpen(true);
   };
 
-  const { data, error, isLoading } = useSWR<GenericResponsePage<IThirdPartiesData[]>>(
+  const { data, isLoading } = useSWR<GenericResponsePage<IThirdPartiesData[]>>(
     `/subject/${activeTab}?page=${currentPage}&limit=${pageSize}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
     fetcher
   );
