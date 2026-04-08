@@ -93,7 +93,9 @@ export const ClientsViewTable = () => {
         )
           return undefined;
         return pages.length + 1;
-      }
+      },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false
     }
   );
 
