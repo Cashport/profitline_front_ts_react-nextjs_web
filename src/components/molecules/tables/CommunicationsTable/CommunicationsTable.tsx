@@ -1,7 +1,17 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Button, Flex, Table, TableProps, Typography, Spin, MenuProps } from "antd";
-import { Eye, Plus, Triangle } from "phosphor-react";
+import {
+  Button,
+  Dropdown,
+  Flex,
+  Table,
+  TableProps,
+  Typography,
+  Spin,
+  MenuProps,
+  message
+} from "antd";
+import { DotsThreeVertical, Eye, Plus, Triangle } from "phosphor-react";
 
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import UiSearchInput from "@/components/ui/search-input";
@@ -9,7 +19,10 @@ import UiFilterDropdown from "@/components/ui/ui-filter-dropdown";
 
 import "./communicationsTable.scss";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { getAllCommunications } from "@/services/communications/communications";
+import {
+  getAllCommunications,
+  sendIndividualCommunication
+} from "@/services/communications/communications";
 import { useAppStore } from "@/lib/store/store";
 import { ICommunication } from "@/types/communications/ICommunications";
 
@@ -31,6 +44,7 @@ export const CommunicationsTable = ({
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);
+  const [sendingId, setSendingId] = useState<number | null>(null);
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const loading = false;
@@ -46,6 +60,18 @@ export const CommunicationsTable = ({
   function handleSeeCommunicationDetails(communicationId: number) {
     showCommunicationDetails(communicationId);
   }
+
+  const handleSendNow = async (communicationId: number) => {
+    setSendingId(communicationId);
+    try {
+      await sendIndividualCommunication(projectId, communicationId);
+      message.success("Comunicación enviada exitosamente");
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al enviar comunicación");
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRow: any) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -124,15 +150,49 @@ export const CommunicationsTable = ({
     {
       title: "",
       key: "seeProject",
-      width: 50,
+      width: 90,
       dataIndex: "",
-      render: (_, row) => (
-        <Button
-          className="buttonEye"
-          onClick={() => handleSeeCommunicationDetails(row.id)}
-          icon={<Eye size={"1.3rem"} />}
-        />
-      )
+      render: (_, row) => {
+        const rowItems: MenuProps["items"] = [
+          {
+            key: "send-now",
+            label: (
+              <Button
+                className="buttonNoBorder"
+                loading={sendingId === row.id}
+                disabled={sendingId === row.id}
+                onClick={() => handleSendNow(row.id)}
+              >
+                Enviar ahora
+              </Button>
+            )
+          }
+        ];
+
+        const customDropdown = (menu: ReactNode) => (
+          <div className="dropdownCommunicationsTable">{menu}</div>
+        );
+
+        return (
+          <Flex gap={8} align="center">
+            <Dropdown
+              dropdownRender={customDropdown}
+              menu={{ items: rowItems }}
+              placement="bottomRight"
+              trigger={["click"]}
+            >
+              <Button className="dotsBtn">
+                <DotsThreeVertical size={"1.3rem"} />
+              </Button>
+            </Dropdown>
+            <Button
+              className="buttonEye"
+              onClick={() => handleSeeCommunicationDetails(row.id)}
+              icon={<Eye size={"1.3rem"} />}
+            />
+          </Flex>
+        );
+      }
     }
   ];
 

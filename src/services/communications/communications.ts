@@ -272,3 +272,21 @@ export const getTemplateByEvent = async (
     throw error;
   }
 };
+
+export const sendIndividualCommunication = async (projectId: number, communicationId: number) => {
+  const body = {
+    id_project: projectId,
+    id_comunicacion: communicationId
+  };
+
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/activate`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending individual communication", error);
+    throw error;
+  }
+};
