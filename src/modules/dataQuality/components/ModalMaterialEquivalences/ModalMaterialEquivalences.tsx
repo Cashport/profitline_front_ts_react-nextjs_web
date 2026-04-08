@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Modal, Button as AntButton, Dropdown, Spin } from "antd";
 import { History, MoreHorizontal, Plus, Edit, Trash2 } from "lucide-react";
 import { useCatalogMaterialEquivalences } from "../../hooks/useCatalogMaterialEquivalences";
+import { ModalAddMaterialEquivalences } from "../ModalAddMaterialEquivalences/ModalAddMaterialEquivalences";
 
 interface ModalMaterialEquivalencesProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ModalMaterialEquivalencesProps {
   catalogMaterialId?: number;
   clientCode?: string;
   clientName?: string;
+  onReopenParent?: () => void;
 }
 
 const formatDate = (iso: string | null) => {
@@ -23,13 +25,34 @@ export function ModalMaterialEquivalences({
   onClose,
   catalogMaterialId,
   clientCode,
-  clientName
+  clientName,
+  onReopenParent
 }: ModalMaterialEquivalencesProps) {
-  const { data: equivalences, isLoading } = useCatalogMaterialEquivalences(catalogMaterialId);
+  const {
+    data: equivalences,
+    isLoading,
+    mutate
+  } = useCatalogMaterialEquivalences(catalogMaterialId);
+  const [addOpen, setAddOpen] = useState(false);
+
+  const handleOpenAdd = () => {
+    setAddOpen(true);
+    onClose();
+  };
+
+  const handleCloseAdd = () => {
+    setAddOpen(false);
+    onReopenParent?.();
+  };
+
+  const handleCreated = () => {
+    mutate();
+  };
 
   const customDropdown = (menu: ReactNode) => <div>{menu}</div>;
 
   return (
+    <>
     <Modal
       open={isOpen}
       onCancel={onClose}
@@ -221,6 +244,8 @@ export function ModalMaterialEquivalences({
       {/* Add link */}
       <div className=" pt-2 pb-4">
         <button
+          type="button"
+          onClick={handleOpenAdd}
           className="text-sm font-medium flex items-center gap-1 hover:opacity-70 transition-opacity"
           style={{ color: "#141414" }}
         >
@@ -249,6 +274,15 @@ export function ModalMaterialEquivalences({
         </AntButton>
       </div>
     </Modal>
+    {catalogMaterialId !== undefined && (
+      <ModalAddMaterialEquivalences
+        isOpen={addOpen}
+        onClose={handleCloseAdd}
+        catalogMaterialId={catalogMaterialId}
+        onCreated={handleCreated}
+      />
+    )}
+    </>
   );
 }
 
