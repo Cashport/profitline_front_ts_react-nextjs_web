@@ -1,49 +1,17 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Modal, Button as AntButton, Dropdown } from "antd";
+import { Modal, Button as AntButton, Dropdown, Spin } from "antd";
 import { History, MoreHorizontal, Plus, Edit, Trash2 } from "lucide-react";
+import { useCatalogMaterialEquivalences } from "../../hooks/useCatalogMaterialEquivalences";
 
 interface ModalMaterialEquivalencesProps {
   isOpen: boolean;
   onClose: () => void;
+  catalogMaterialId?: number;
   clientCode?: string;
   clientName?: string;
 }
-
-interface MaterialEquivalence {
-  id: number;
-  catalog_material_id: number;
-  internal_sku: string;
-  internal_name: string;
-  conversion_factor: number;
-  valid_from: string;
-  valid_to: string | null;
-  is_active: number;
-}
-
-const MOCK_EQUIVALENCES: MaterialEquivalence[] = [
-  {
-    id: 3,
-    catalog_material_id: 145358,
-    internal_sku: "FAKE-SKU-145358",
-    internal_name: "Material fake 145358",
-    conversion_factor: 1.25,
-    valid_from: "2001-11-12T00:00:00.000Z",
-    valid_to: "2002-11-12T00:00:00.000Z",
-    is_active: 0
-  },
-  {
-    id: 2,
-    catalog_material_id: 145358,
-    internal_sku: "FAKE-SKU-145358",
-    internal_name: "Material fake 145358",
-    conversion_factor: 1.25,
-    valid_from: "2003-01-01T00:00:00.000Z",
-    valid_to: null,
-    is_active: 1
-  }
-];
 
 const formatDate = (iso: string | null) => {
   if (!iso) return null;
@@ -53,18 +21,11 @@ const formatDate = (iso: string | null) => {
 export function ModalMaterialEquivalences({
   isOpen,
   onClose,
+  catalogMaterialId,
   clientCode,
   clientName
 }: ModalMaterialEquivalencesProps) {
-  const skus = MOCK_EQUIVALENCES.map((m) => ({
-    id: m.id,
-    productName: m.internal_name,
-    sku: m.internal_sku,
-    factor: m.conversion_factor,
-    desde: formatDate(m.valid_from),
-    hasta: formatDate(m.valid_to),
-    isVigente: m.is_active === 1
-  }));
+  const { data: equivalences, isLoading } = useCatalogMaterialEquivalences(catalogMaterialId);
 
   const customDropdown = (menu: ReactNode) => <div>{menu}</div>;
 
@@ -156,92 +117,103 @@ export function ModalMaterialEquivalences({
             </tr>
           </thead>
           <tbody>
-            {skus.length === 0 && (
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="text-center py-8">
+                  <Spin />
+                </td>
+              </tr>
+            )}
+            {!isLoading && equivalences.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center py-8 text-sm" style={{ color: "#888" }}>
                   No hay periodos registrados.
                 </td>
               </tr>
             )}
-            {skus.map((sku) => {
-              const rowColor = sku.isVigente ? "#1a6600" : "#BBBBBB";
-              const rowBg = sku.isVigente ? "rgba(203,231,30,0.10)" : "transparent";
-              return (
-                <tr
-                  key={sku.id}
-                  style={{ borderBottom: "1px solid #F3F3F3", backgroundColor: rowBg }}
-                >
-                  <td className="py-3 pr-4 rounded-l">
-                    <span className="font-medium" style={{ color: rowColor }}>
-                      {sku.productName}
-                    </span>
-                  </td>
-                  <td className="py-3 pr-4" style={{ color: rowColor }}>
-                    {sku.sku}
-                  </td>
-                  <td className="py-3" style={{ color: rowColor }}>
-                    {sku.factor}
-                  </td>
-                  <td className="py-3" style={{ color: rowColor }}>
-                    {sku.desde || "–"}
-                  </td>
-                  <td className="py-3">
-                    {sku.hasta ? (
-                      <span style={{ color: rowColor }}>{sku.hasta}</span>
-                    ) : (
-                      <span
-                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: "#CBE71E", color: "#141414" }}
-                      >
-                        Vigente
+            {!isLoading &&
+              equivalences.map((equivalence) => {
+                const isActive = equivalence.is_active === 1;
+                const rowColor = isActive ? "#1a6600" : "#BBBBBB";
+                const rowBg = isActive ? "rgba(203,231,30,0.10)" : "transparent";
+                return (
+                  <tr
+                    key={equivalence.id}
+                    style={{ borderBottom: "1px solid #F3F3F3", backgroundColor: rowBg }}
+                  >
+                    <td className="py-3 pr-4 rounded-l">
+                      <span className="font-medium" style={{ color: rowColor }}>
+                        {equivalence.internal_name}
                       </span>
-                    )}
-                  </td>
-                  <td className="py-3 text-right">
-                    <Dropdown
-                      dropdownRender={customDropdown}
-                      placement="bottomRight"
-                      trigger={["click"]}
-                      menu={{
-                        items: [
-                          {
-                            key: "edit",
-                            label: (
-                              <AntButton
-                                className="buttonNoBorder"
-                                icon={<Edit className="w-3.5 h-3.5" />}
-                                onClick={() => {}}
-                              >
-                                Editar
-                              </AntButton>
-                            )
-                          },
-                          {
-                            key: "delete",
-                            label: (
-                              <AntButton
-                                className="buttonNoBorder"
-                                icon={<Trash2 className="w-3.5 h-3.5" />}
-                                onClick={() => {}}
-                              >
-                                Eliminar
-                              </AntButton>
-                            )
-                          }
-                        ]
-                      }}
-                    >
-                      <button
-                        className="w-7 h-7 rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
-                        style={{ color: "#888" }}
+                    </td>
+                    <td className="py-3 pr-4" style={{ color: rowColor }}>
+                      {equivalence.internal_sku}
+                    </td>
+                    <td className="py-3" style={{ color: rowColor }}>
+                      {equivalence.conversion_factor}
+                    </td>
+                    <td className="py-3" style={{ color: rowColor }}>
+                      {formatDate(equivalence.valid_from) || "–"}
+                    </td>
+                    <td className="py-3">
+                      {isActive ? (
+                        <span
+                          className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: "#CBE71E", color: "#141414" }}
+                        >
+                          Vigente
+                        </span>
+                      ) : equivalence.valid_to ? (
+                        <span style={{ color: rowColor }}>{formatDate(equivalence.valid_to)}</span>
+                      ) : (
+                        <span style={{ color: rowColor }}>–</span>
+                      )}
+                    </td>
+                    <td className="py-3 text-right">
+                      <Dropdown
+                        dropdownRender={customDropdown}
+                        placement="bottomRight"
+                        trigger={["click"]}
+                        menu={{
+                          items: [
+                            {
+                              key: "edit",
+                              label: (
+                                <AntButton
+                                  className="buttonNoBorder"
+                                  icon={<Edit className="w-3.5 h-3.5" />}
+                                  onClick={() => {}}
+                                >
+                                  Editar
+                                </AntButton>
+                              )
+                            },
+                            {
+                              key: "delete",
+                              label: (
+                                <AntButton
+                                  className="buttonNoBorder"
+                                  icon={<Trash2 className="w-3.5 h-3.5" />}
+                                  onClick={() => {}}
+                                >
+                                  Eliminar
+                                </AntButton>
+                              )
+                            }
+                          ]
+                        }}
                       >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </Dropdown>
-                  </td>
-                </tr>
-              );
-            })}
+                        <button
+                          className="w-7 h-7 rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
+                          style={{ color: "#888" }}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </Dropdown>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>

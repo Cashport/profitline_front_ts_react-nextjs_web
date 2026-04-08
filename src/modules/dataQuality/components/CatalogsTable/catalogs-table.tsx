@@ -420,6 +420,7 @@ export function CatalogsTable() {
         <ModalMaterialEquivalences
           isOpen={historyOpen}
           onClose={() => setHistoryOpen(false)}
+          catalogMaterialId={selectedCatalog?.id}
           clientCode={selectedCatalog?.customer_product_cod}
           clientName={selectedCatalog?.customer_product_description}
         />

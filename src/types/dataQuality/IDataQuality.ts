@@ -423,3 +423,19 @@ export interface IPOS {
 
 export type IPOSPayload = Pick<IPOS, "sold_to" | "id_country" | "pos_id" | "pos_name"> &
   Partial<Omit<IPOS, "sold_to" | "id_country" | "pos_id" | "pos_name">>;
+
+export interface IGetCatalogMaterialEquivalence {
+  id: number;
+  catalog_material_id: number;
+  internal_sku: string;
+  internal_name: string;
+  conversion_factor: number;
+  valid_from: string;
+  valid_to: string | null;
+  is_active: number;
+}
+
+export type IPostCatalogMaterialEquivalence = Omit<
+  IGetCatalogMaterialEquivalence,
+  "id" | "catalog_material_id"
+>;
