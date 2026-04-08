@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { useParams } from "next/navigation";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, History } from "lucide-react";
 import { Button as AntButton, Dropdown, Pagination, Spin, message } from "antd";
 import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
 import { Badge } from "@/modules/chat/ui/badge";
@@ -19,6 +19,7 @@ import {
 } from "@/modules/chat/ui/table";
 import { IGetCatalogs, ICreateCatalogRequest } from "@/types/dataQuality/IDataQuality";
 import ModalAddEditCatalog, { CatalogFormData } from "../ModalAddEditCatalog/ModalAddEditCatalog";
+import { ModalMaterialEquivalences } from "../ModalMaterialEquivalences/ModalMaterialEquivalences";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import {
   createCatalog,
@@ -76,6 +77,7 @@ export function CatalogsTable() {
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const itemsPerPage = 25;
 
@@ -249,7 +251,7 @@ export function CatalogsTable() {
             <TableRow style={{ borderColor: "#DDDDDD" }}>
               <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
               <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
-              <TableHead style={{ color: "#141414" }}>SKU</TableHead>
+              <TableHead style={{ color: "#141414" }}>GMN</TableHead>
               <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
               <TableHead style={{ color: "#141414" }}>Factor</TableHead>
               <TableHead style={{ color: "#141414" }}>Estado</TableHead>
@@ -330,6 +332,21 @@ export function CatalogsTable() {
                             Marcar como pack
                           </AntButton>
                         )
+                      },
+                      {
+                        key: "4",
+                        label: (
+                          <AntButton
+                            icon={<History className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => {
+                              setSelectedCatalog(item);
+                              setHistoryOpen(true);
+                            }}
+                          >
+                            Ver histórico
+                          </AntButton>
+                        )
                       }
                     ];
                     const customDropdown = (menu: ReactNode) => (
@@ -398,6 +415,13 @@ export function CatalogsTable() {
           onDownloadCatalog={handleDownloadCatalog}
           isDownloadCatalogLoading={isDownloadCatalogLoading}
           onUploadMaterialsAuxiliary={() => setWhichModalOpen({ selected: 4 })}
+        />
+
+        <ModalMaterialEquivalences
+          isOpen={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          clientCode={selectedCatalog?.customer_product_cod}
+          clientName={selectedCatalog?.customer_product_description}
         />
 
         <ModalUploadFile
