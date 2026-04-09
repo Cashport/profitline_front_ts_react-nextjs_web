@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Modal, Button as AntButton, Dropdown, Spin } from "antd";
 import { History, MoreHorizontal, Plus, Edit, Trash2 } from "lucide-react";
 import { useCatalogMaterialEquivalences } from "../../hooks/useCatalogMaterialEquivalences";
@@ -36,6 +36,12 @@ export function ModalMaterialEquivalences({
     mutate
   } = useCatalogMaterialEquivalences(catalogMaterialId);
   const [addOpen, setAddOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      mutate();
+    }
+  }, [isOpen]);
 
   const handleOpenAdd = () => {
     setAddOpen(true);
