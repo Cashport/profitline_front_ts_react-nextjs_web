@@ -424,6 +424,7 @@ export function CatalogsTable() {
           clientCode={selectedCatalog?.customer_product_cod}
           clientName={selectedCatalog?.customer_product_description}
           onReopenParent={() => setHistoryOpen(true)}
+          mutateMaterials={() => mutate()}
         />
 
         <ModalUploadFile

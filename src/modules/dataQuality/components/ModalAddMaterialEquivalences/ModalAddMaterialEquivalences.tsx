@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import * as yup from "yup";
 import { Modal, Spin, message } from "antd";
 import { useForm, Controller } from "react-hook-form";
@@ -11,12 +12,18 @@ import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
-import { createCatalogMaterialEquivalence } from "@/services/dataQuality/dataQuality";
-import { IPostCatalogMaterialEquivalence } from "@/types/dataQuality/IDataQuality";
+import Select from "@/modules/dataQuality/components/atoms/select/Select";
+import {
+  createCatalogMaterialEquivalence,
+  getCatalogMaterialsForSelect
+} from "@/services/dataQuality/dataQuality";
+import {
+  ICatalogMaterial,
+  IPostCatalogMaterialEquivalence
+} from "@/types/dataQuality/IDataQuality";
 
 const equivalenceSchema = yup.object().shape({
-  internal_sku: yup.string().required("El SKU es requerido"),
-  internal_name: yup.string().required("El nombre del producto es requerido"),
+  material_code: yup.string().required("El material es requerido"),
   conversion_factor: yup
     .number()
     .typeError("El factor debe ser un número")
@@ -35,8 +42,7 @@ const equivalenceSchema = yup.object().shape({
 });
 
 type EquivalenceFormData = {
-  internal_sku: string;
-  internal_name: string;
+  material_code: string;
   conversion_factor: number;
   valid_from: string;
   valid_to?: string | null;
@@ -44,8 +50,7 @@ type EquivalenceFormData = {
 };
 
 const INITIAL_VALUES: EquivalenceFormData = {
-  internal_sku: "",
-  internal_name: "",
+  material_code: "",
   conversion_factor: 1,
   valid_from: "",
   valid_to: "",
@@ -65,7 +70,11 @@ export function ModalAddMaterialEquivalences({
   catalogMaterialId,
   onCreated
 }: ModalAddMaterialEquivalencesProps) {
+  const params = useParams();
+  const countryId = Number(params.countryId) || 0;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [materials, setMaterials] = useState<ICatalogMaterial[]>([]);
 
   const {
     control,
@@ -86,6 +95,18 @@ export function ModalAddMaterialEquivalences({
     if (!isOpen) reset(INITIAL_VALUES);
   }, [isOpen, reset]);
 
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      try {
+        const data = await getCatalogMaterialsForSelect(countryId);
+        setMaterials(data);
+      } catch (error) {
+        console.error("Error fetching materials:", error);
+      }
+    };
+    fetchMaterials();
+  }, []);
+
   const handleClose = () => {
     reset(INITIAL_VALUES);
     onClose();
@@ -95,8 +116,7 @@ export function ModalAddMaterialEquivalences({
     try {
       setIsSubmitting(true);
       const body: IPostCatalogMaterialEquivalence = {
-        internal_sku: data.internal_sku,
-        internal_name: data.internal_name,
+        material_code: Number(data.material_code),
         conversion_factor: data.conversion_factor,
         valid_from: data.valid_from,
         valid_to: data.is_active === 1 ? null : data.valid_to ?? null,
@@ -107,8 +127,9 @@ export function ModalAddMaterialEquivalences({
       onCreated?.();
       handleClose();
     } catch (error) {
-      console.error(error);
-      message.error("Error al crear la equivalencia");
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al crear la equivalencia";
+      message.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -135,54 +156,40 @@ export function ModalAddMaterialEquivalences({
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Body */}
         <div className="py-6">
-          {/* Row 1: SKU + Nombre producto */}
-          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "1fr 2fr" }}>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm font-medium" style={{ color: "#141414" }}>
-                SKU
-              </Label>
-              <Controller
-                name="internal_sku"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    placeholder="Ej: SKU-CEN-PERF-V3"
-                    style={{ borderColor: errors.internal_sku ? "#ff4d4f" : "#DDDDDD" }}
-                  />
-                )}
-              />
-              {errors.internal_sku && (
-                <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
-                  {errors.internal_sku.message}
-                </span>
+          {/* Row 1: Material */}
+          <div className="flex flex-col gap-1.5 mb-4">
+            <Label className="text-sm font-medium" style={{ color: "#141414" }}>
+              Material
+            </Label>
+            <Controller
+              name="material_code"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  showSearch
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Seleccionar material"
+                  hasError={!!errors.material_code}
+                  options={materials.map((material) => ({
+                    value: String(material.id),
+                    label: `${material.material_code} - ${material.material_name}`
+                  }))}
+                />
               )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm font-medium" style={{ color: "#141414" }}>
-                Nombre del producto
-              </Label>
-              <Controller
-                name="internal_name"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    placeholder="Ej: Centrum Performance Ultra 60 Tabs"
-                    style={{ borderColor: errors.internal_name ? "#ff4d4f" : "#DDDDDD" }}
-                  />
-                )}
-              />
-              {errors.internal_name && (
-                <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
-                  {errors.internal_name.message}
-                </span>
-              )}
-            </div>
+            />
+            {errors.material_code && (
+              <span style={{ color: "#ff4d4f", fontSize: "12px" }}>
+                {errors.material_code.message}
+              </span>
+            )}
           </div>
 
           {/* Row 2: Factor + Desde + Hasta + checkbox Activo */}
-          <div className="grid gap-4 items-end" style={{ gridTemplateColumns: "80px 1fr 1fr auto" }}>
+          <div
+            className="grid gap-4 items-end"
+            style={{ gridTemplateColumns: "80px 1fr 1fr auto" }}
+          >
             <div className="flex flex-col gap-1.5">
               <Label className="text-sm font-medium" style={{ color: "#141414" }}>
                 Factor

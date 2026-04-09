@@ -435,7 +435,10 @@ export interface IGetCatalogMaterialEquivalence {
   is_active: number;
 }
 
-export type IPostCatalogMaterialEquivalence = Omit<
-  IGetCatalogMaterialEquivalence,
-  "id" | "catalog_material_id"
->;
+export interface IPostCatalogMaterialEquivalence {
+  material_code: number;
+  conversion_factor: number;
+  valid_from: string;
+  valid_to: string | null;
+  is_active: number;
+}
