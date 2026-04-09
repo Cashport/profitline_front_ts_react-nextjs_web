@@ -21,7 +21,7 @@ export let idProject: number | null = null;
 
 const instance = axios.create({
   baseURL: config.API_HOST,
-  timeout: 10000,
+  timeout: 20000,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json; charset=utf-8"
