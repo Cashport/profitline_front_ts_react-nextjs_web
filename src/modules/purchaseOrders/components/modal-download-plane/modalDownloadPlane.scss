@@ -64,4 +64,11 @@
         color: #8c8c8c;
         margin-left: 12px;
     }
+
+    &__loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+    }
 }
