@@ -6,6 +6,7 @@ import { Upload, X, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { message } from "antd";
 import { purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
 import { IInvoiceActionPayload } from "@/types/purchaseOrders/purchaseOrders";
+import { ApiError } from "@/utils/api/api";
 
 interface InvoiceEntry {
   id: string;
@@ -35,12 +36,14 @@ export function InvoiceModal({
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([createEmptyInvoice()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorInvoiceIds, setErrorInvoiceIds] = useState<string[]>([]);
   const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   useEffect(() => {
     if (!open) {
       setInvoices([createEmptyInvoice()]);
       setError(null);
+      setErrorInvoiceIds([]);
       setIsLoading(false);
     }
   }, [open]);
@@ -64,6 +67,7 @@ export function InvoiceModal({
     setInvoices((prev) =>
       prev.map((inv) => (inv.id === invoiceEntryId ? { ...inv, invoiceId: value } : inv))
     );
+    setErrorInvoiceIds((prev) => prev.filter((id) => id !== value));
   };
 
   const handleAddInvoice = () => {
@@ -84,6 +88,7 @@ export function InvoiceModal({
 
     setIsLoading(true);
     setError(null);
+    setErrorInvoiceIds([]);
 
     try {
       const invoiceIds = invoices.map((inv) => inv.invoiceId.trim());
@@ -107,6 +112,9 @@ export function InvoiceModal({
       const errorMessage = error instanceof Error ? error.message : "Error al agregar las facturas";
       setError(errorMessage);
       message.error(errorMessage);
+      if (error instanceof ApiError && Array.isArray(error.data?.invoices)) {
+        setErrorInvoiceIds(error.data.invoices);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +170,7 @@ export function InvoiceModal({
                     placeholder="ID de factura (Ej: FV-2024-001)"
                     value={invoice.invoiceId}
                     onChange={(e) => handleInvoiceIdChange(invoice.id, e.target.value)}
-                    className="border-gray-300"
+                    className={errorInvoiceIds.includes(invoice.invoiceId) ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50" : "border-gray-300"}
                   />
                 </div>
 
