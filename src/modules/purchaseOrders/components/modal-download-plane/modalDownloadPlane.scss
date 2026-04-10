@@ -1,67 +1,67 @@
 .modalDownloadPlane {
-  &__subtitle {
-    margin: 0 0 16px 0;
-    font-size: 14px;
-    color: #1f1f1f;
-  }
-
-  &__selectAllRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-top: 1px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 8px;
-  }
-
-  &__counter {
-    font-size: 12px;
-    color: #8c8c8c;
-  }
-
-  &__list {
-    max-height: 280px;
-    overflow-y: auto;
-    margin-bottom: 16px;
-  }
-
-  &__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-
-    &:last-child {
-      border-bottom: none;
+    &__subtitle {
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        color: #1f1f1f;
     }
 
-    .ant-checkbox-wrapper {
-      flex: 1;
-      align-items: center;
+    &__selectAllRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-top: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 8px;
     }
-  }
 
-  &__fileInfo {
-    display: flex;
-    flex-direction: column;
-    margin-left: 4px;
-  }
+    &__counter {
+        font-size: 12px;
+        color: #8c8c8c;
+    }
 
-  &__fileName {
-    font-size: 14px;
-    color: #1f1f1f;
-  }
+    &__list {
+        max-height: 330px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+    }
 
-  &__formatType {
-    font-size: 12px;
-    color: #8c8c8c;
-  }
+    &__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
 
-  &__fileType {
-    font-size: 12px;
-    color: #8c8c8c;
-    margin-left: 12px;
-  }
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .ant-checkbox-wrapper {
+            flex: 1;
+            align-items: center;
+        }
+    }
+
+    &__fileInfo {
+        display: flex;
+        flex-direction: column;
+        margin-left: 4px;
+    }
+
+    &__fileName {
+        font-size: 14px;
+        color: #1f1f1f;
+    }
+
+    &__formatType {
+        font-size: 12px;
+        color: #8c8c8c;
+    }
+
+    &__fileType {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-left: 12px;
+    }
 }
