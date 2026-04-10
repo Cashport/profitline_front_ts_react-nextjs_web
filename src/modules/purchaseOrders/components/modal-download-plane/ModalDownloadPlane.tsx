@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Modal, Checkbox, message, Spin } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
-import { getDownloadableFiles } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  getDownloadableFiles,
+  downloadAvailableDocuments
+} from "@/services/purchaseOrders/purchaseOrders";
 import { IAvailableDocument } from "@/types/purchaseOrders/purchaseOrders";
 
 import "./modalDownloadPlane.scss";
@@ -17,6 +20,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [files, setFiles] = useState<IAvailableDocument[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,11 +60,30 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     );
   };
 
-  const handleDownload = () => {
-    const selectedFiles = files.filter((f) => selectedTypes.includes(f.type));
-    // eslint-disable-next-line no-console
-    console.log(selectedFiles);
-    onClose();
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const blob = await downloadAvailableDocuments({
+        packageId: Number(packageId),
+        documents: selectedTypes
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "documentos.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      message.success("Archivos descargados exitosamente");
+      handleClose();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar los archivos"
+      );
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleClose = () => {
@@ -119,7 +142,8 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
       <FooterButtons
         titleConfirm="Descargar"
         titleCancel="Cancelar"
-        isConfirmDisabled={selectedCount === 0}
+        isConfirmDisabled={selectedCount === 0 || isDownloading}
+        isConfirmLoading={isDownloading}
         onClose={handleClose}
         handleOk={handleDownload}
       />
