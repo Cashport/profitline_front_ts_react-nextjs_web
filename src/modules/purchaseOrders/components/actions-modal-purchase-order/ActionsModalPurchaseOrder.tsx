@@ -220,6 +220,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const handleOpenDownloadPlaneModal = () => {
+    if (!validatePackageSelection()) return;
     onClose();
     setIsDownloadPlaneOpen(true);
   };
@@ -329,6 +330,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       <ModalDownloadPlane
         isOpen={isDownloadPlaneOpen}
         onClose={() => setIsDownloadPlaneOpen(false)}
+        packageId={String(selectedPackageRows[0]?.packageId)}
       />
     </>
   );

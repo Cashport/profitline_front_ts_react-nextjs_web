@@ -11,7 +11,8 @@ import {
   IApproversResponse,
   IUploadPurchaseOrderResponse,
   IBatchesByPurchaseOrder,
-  ICreatePurchaseOrderPayload
+  ICreatePurchaseOrderPayload,
+  IGetAvailableDocuments
 } from "@/types/purchaseOrders/purchaseOrders";
 import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
@@ -371,6 +372,30 @@ export const getBatchesByProduct = async (purchaseOrderId: string, productId: st
     return res.data;
   } catch (error) {
     console.error("Error fetching batches by product:", error);
+    throw error;
+  }
+};
+
+export const getDownloadableFiles = async (packageId?: string, orderIds?: string[]) => {
+  if (!packageId && !orderIds) {
+    throw new Error(
+      "Debe proporcionar packageId o orderIds para obtener los archivos descargables"
+    );
+  }
+  if (packageId && orderIds) {
+    throw new Error("Solo puede proporcionar packageId o orderIds, no ambos");
+  }
+  try {
+    const response: GenericResponse<IGetAvailableDocuments> = await API.post(
+      `${config.API_HOST}/purchaseOrder/documents/available`,
+      {
+        ...(orderIds && { order_ids: orderIds }),
+        ...(packageId && { package_id: packageId })
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching downloadable files:", error);
     throw error;
   }
 };

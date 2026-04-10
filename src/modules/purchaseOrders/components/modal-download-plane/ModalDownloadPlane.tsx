@@ -1,74 +1,71 @@
-import React, { useState } from "react";
-import { Modal, Checkbox } from "antd";
+import React, { useEffect, useState } from "react";
+import { Modal, Checkbox, message, Spin } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { getDownloadableFiles } from "@/services/purchaseOrders/purchaseOrders";
+import { IAvailableDocument } from "@/types/purchaseOrders/purchaseOrders";
 
 import "./modalDownloadPlane.scss";
-
-type FileItem = {
-  id: string;
-  name: string;
-  fileType: string;
-  formatType: string;
-};
-
-const MOCK_FILES: FileItem[] = [
-  {
-    id: "1",
-    name: "OC_20250831334N.pdf",
-    fileType: "PDF",
-    formatType: "Orden de compra"
-  },
-  {
-    id: "2",
-    name: "Formato_facturacion_20250831334N.xlsx",
-    fileType: "Excel",
-    formatType: "Formato facturación"
-  },
-  {
-    id: "3",
-    name: "Productos_20250831334N.xlsx",
-    fileType: "Excel",
-    formatType: "Listado de productos"
-  }
-];
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  packageId: string;
 };
 
-export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose }) => {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId }) => {
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [files, setFiles] = useState<IAvailableDocument[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const total = MOCK_FILES.length;
-  const selectedCount = selectedIds.length;
-  const allSelected = selectedCount === total;
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchFiles = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getDownloadableFiles(packageId);
+        setFiles(data.documents);
+      } catch (error) {
+        message.error("Error al obtener los archivos disponibles");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFiles();
+  }, [isOpen, packageId]);
+
+  const total = files.length;
+  const selectedCount = selectedTypes.length;
+  const allSelected = total > 0 && selectedCount === total;
   const someSelected = selectedCount > 0 && !allSelected;
 
   const handleToggleAll = () => {
     if (allSelected) {
-      setSelectedIds([]);
+      setSelectedTypes([]);
     } else {
-      setSelectedIds(MOCK_FILES.map((f) => f.id));
+      setSelectedTypes(files.map((f) => f.type));
     }
   };
 
-  const handleToggleOne = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  const handleToggleOne = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((x) => x !== type) : [...prev, type]
     );
   };
 
   const handleDownload = () => {
-    const selectedFiles = MOCK_FILES.filter((f) => selectedIds.includes(f.id));
+    const selectedFiles = files.filter((f) => selectedTypes.includes(f.type));
     // eslint-disable-next-line no-console
     console.log(selectedFiles);
     onClose();
   };
 
   const handleClose = () => {
-    setSelectedIds([]);
+    setSelectedTypes([]);
+    setFiles([]);
     onClose();
   };
 
@@ -83,39 +80,41 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose }) => {
       className="modalDownloadPlane"
       width={520}
     >
-      <p className="modalDownloadPlane__subtitle">
-        Selecciona los archivos que deseas descargar:
-      </p>
+      <p className="modalDownloadPlane__subtitle">Selecciona los archivos que deseas descargar:</p>
 
-      <div className="modalDownloadPlane__selectAllRow">
-        <Checkbox
-          checked={allSelected}
-          indeterminate={someSelected}
-          onChange={handleToggleAll}
-        >
-          Seleccionar todos
-        </Checkbox>
-        <span className="modalDownloadPlane__counter">
-          {selectedCount} de {total} seleccionados
-        </span>
-      </div>
-
-      <div className="modalDownloadPlane__list">
-        {MOCK_FILES.map((file) => (
-          <div className="modalDownloadPlane__row" key={file.id}>
-            <Checkbox
-              checked={selectedIds.includes(file.id)}
-              onChange={() => handleToggleOne(file.id)}
-            >
-              <div className="modalDownloadPlane__fileInfo">
-                <span className="modalDownloadPlane__fileName">{file.name}</span>
-                <span className="modalDownloadPlane__formatType">{file.formatType}</span>
-              </div>
+      {isLoading ? (
+        <div className="modalDownloadPlane__loading">
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <div className="modalDownloadPlane__selectAllRow">
+            <Checkbox checked={allSelected} indeterminate={someSelected} onChange={handleToggleAll}>
+              Seleccionar todos
             </Checkbox>
-            <span className="modalDownloadPlane__fileType">{file.fileType}</span>
+            <span className="modalDownloadPlane__counter">
+              {selectedCount} de {total} seleccionados
+            </span>
           </div>
-        ))}
-      </div>
+
+          <div className="modalDownloadPlane__list">
+            {files.map((file) => (
+              <div className="modalDownloadPlane__row" key={file.id}>
+                <Checkbox
+                  checked={selectedTypes.includes(file.type)}
+                  onChange={() => handleToggleOne(file.type)}
+                >
+                  <div className="modalDownloadPlane__fileInfo">
+                    <span className="modalDownloadPlane__fileName">{file.label}</span>
+                    <span className="modalDownloadPlane__formatType">{file.type}</span>
+                  </div>
+                </Checkbox>
+                <span className="modalDownloadPlane__fileType">{file.type.split("_").pop()}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <FooterButtons
         titleConfirm="Descargar"
