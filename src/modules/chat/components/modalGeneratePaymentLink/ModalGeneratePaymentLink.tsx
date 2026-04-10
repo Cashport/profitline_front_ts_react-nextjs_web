@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import dayjs from "dayjs";
-import { Flex, message, Modal, Spin } from "antd";
+import { message, Modal, Spin } from "antd";
 import { CaretLeft, PiggyBank, X, Copy, ArrowUpRight } from "@phosphor-icons/react";
 
 import { generatePaymentLink } from "@/services/commerce/commerce";

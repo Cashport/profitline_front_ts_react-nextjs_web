@@ -15,7 +15,6 @@ import { IAddAddressData } from "@/types/locations/ILocations";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { MessageType } from "@/context/MessageContext";
 import { stringToBoolean } from "@/utils/utils";
-import { PayloadByTicket } from "@/types/chat/IChat";
 
 // create
 

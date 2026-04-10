@@ -47,7 +47,6 @@ const TasksTable: FC<ITasksTableProps> = ({
   onToggleSelection,
   onSelectAll,
   onViewTask,
-  sortConfig,
   onSort,
   isLoading = false
 }) => {

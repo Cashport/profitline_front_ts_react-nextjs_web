@@ -12,7 +12,6 @@ import { Button } from "@/modules/chat/ui/button";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 import { AIProcessingInterface } from "../ai-processing-interface/ai-processing-interface";
 import {
-  createPurchaseOrderBulk,
   uploadPurchaseOrder
 } from "@/services/purchaseOrders/purchaseOrders";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";

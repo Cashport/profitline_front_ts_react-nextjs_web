@@ -357,3 +357,16 @@ export interface ICreatePurchaseOrderPayload {
   client_id: string;
   purchaseOrder: ICreatePurchaseOrder[];
 }
+
+export interface IAvailableDocument {
+  type: string;
+  label: string;
+  available: boolean;
+  count: number;
+}
+
+export interface IGetAvailableDocuments {
+  package_id: number;
+  order_ids: number[];
+  documents: IAvailableDocument[];
+}

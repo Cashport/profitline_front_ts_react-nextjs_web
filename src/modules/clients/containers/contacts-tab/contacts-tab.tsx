@@ -23,7 +23,6 @@ const ContactsTab = () => {
   const [showContactModal, setShowContactModal] = useState<showContactModalType>(
     {} as showContactModalType
   );
-  const [search, setSearch] = useState("");
   const { showMessage } = useMessageApi();
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -63,15 +62,7 @@ const ContactsTab = () => {
         <div className="contactsTab">
           <Flex justify="space-between" className="contactsTab__header">
             <Flex gap={"0.5rem"}>
-              <UiSearchInput
-                className="standardSearch"
-                placeholder="Buscar"
-                onChange={(event) => {
-                  setTimeout(() => {
-                    setSearch(event.target.value);
-                  }, 1000);
-                }}
-              />
+              <UiSearchInput className="standardSearch" placeholder="Buscar" />
               <DotsDropdown items={items} />
             </Flex>
 

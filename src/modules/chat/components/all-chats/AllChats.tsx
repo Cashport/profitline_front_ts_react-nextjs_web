@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CaretDown, ChatCircleDots, MagnifyingGlass } from "@phosphor-icons/react";
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
 import { Dropdown, MenuProps, Pagination } from "antd";
 import { cn, formatChatDate } from "@/utils/utils";
 import { Input } from "@/modules/chat/ui/input";

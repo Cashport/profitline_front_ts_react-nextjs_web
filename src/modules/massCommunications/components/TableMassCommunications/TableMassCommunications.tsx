@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Table, Tooltip, Dropdown } from "antd";
-import type { ColumnsType, TableProps } from "antd/es/table";
+import type { ColumnsType } from "antd/es/table";
 import type { MenuProps } from "antd";
 import { Eye, MoreHorizontal, Trash2, Users, CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";

@@ -23,7 +23,6 @@ const HistoryTab = () => {
   const clientIdParam = extractSingleParam(params.clientId);
   const [rowDetailID, setRowDetailID] = useState<string>();
   const [selectedRows, setSelectedRows] = useState<IHistoryRow[] | undefined>(undefined);
-  const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState({ selected: 0 });
   const isLoading = false;
 
@@ -55,15 +54,7 @@ const HistoryTab = () => {
         <div className={styles.historyTab}>
           <Flex justify="space-between">
             <Flex gap={"0.5rem"}>
-              <UiSearchInput
-                className="standardSearch"
-                placeholder="Buscar"
-                onChange={(event) => {
-                  setTimeout(() => {
-                    setSearch(event.target.value);
-                  }, 1000);
-                }}
-              />
+              <UiSearchInput className="standardSearch" placeholder="Buscar" />
               <Button
                 className={styles.button__actions}
                 size="large"

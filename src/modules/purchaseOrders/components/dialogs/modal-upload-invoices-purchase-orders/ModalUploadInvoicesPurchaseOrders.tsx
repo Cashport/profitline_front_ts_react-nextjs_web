@@ -6,7 +6,7 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { IOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { sendMultiplePurchaseOrdersToBilling } from "@/services/purchaseOrders/purchaseOrders";
 
-const renderStatusBadge = (status: string, statusColor: string, noveltyTypes: string) => (
+const renderStatusBadge = (status: string, statusColor: string, _noveltyTypes: string) => (
   <>
     <Badge
       variant="outline"

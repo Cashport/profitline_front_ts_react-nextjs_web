@@ -7,11 +7,10 @@ import {
 } from "react-hook-form";
 import { selectClientForm } from "../create-order-search-client/create-order-search-client";
 import { useAppStore } from "@/lib/store/store";
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getClients } from "@/services/commerce/commerce";
 import "./create-order-select-client.scss";
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
-import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 type ExtendedFieldError =
   | OriginalFieldError
@@ -26,7 +25,6 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
-  const { setClient } = useContext(OrderViewContext); // Obtenemos la función del contexto
 
   useEffect(() => {
     if (!ID) return;

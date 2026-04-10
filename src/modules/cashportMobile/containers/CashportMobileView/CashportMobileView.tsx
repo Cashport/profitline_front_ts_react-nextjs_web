@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
 
@@ -29,46 +29,6 @@ export const formatDate = (dateString?: string): string => {
   return date.toLocaleDateString("en-US", options);
 };
 
-const getInvoiceStatus = (
-  expirationDate: string,
-  estado: string
-): "overdue" | "dueToday" | "dueTomorrow" | "normal" => {
-  if (estado === "Vencida") return "overdue";
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const expDate = new Date(expirationDate);
-  // Adjust for timezone if necessary, but assuming local date or UTC consistent
-  // If expirationDate is ISO string with time, we strip time.
-  // If it's YYYY-MM-DD, new Date() might treat as UTC.
-  // To be safe with "today", we should probably use UTC or local consistently.
-  // Assuming simple comparison for now.
-  // However, new Date("2025-06-03") is UTC, new Date() is local.
-  // Let's try to be consistent.
-  // If expirationDate is "2025-06-03T00:00:00", it works.
-  
-  // A safer way for "today" check without timezone issues if we only care about date part:
-  const exp = new Date(expirationDate);
-  const t = new Date();
-  
-  const isSameDay = (d1: Date, d2: Date) => 
-    d1.getDate() === d2.getDate() && 
-    d1.getMonth() === d2.getMonth() && 
-    d1.getFullYear() === d2.getFullYear();
-
-  if (isSameDay(exp, t)) return "dueToday";
-  
-  const tmr = new Date();
-  tmr.setDate(tmr.getDate() + 1);
-  if (isSameDay(exp, tmr)) return "dueTomorrow";
-
-  return "normal";
-};
-
 // Helper function to map API invoice data to component format
 const mapPendingInvoices = (listadoFacturas?: IClientWalletData["invoices_list"]): InvoiceFormated[] => {
   if (!listadoFacturas) return [];
@@ -95,7 +55,6 @@ const mapCreditBalances = (saldosAFavor?: CreditBalance[]): CreditBalanceFormate
 };
 
 const CashportMobileView: React.FC = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const paramsToken = searchParams.get("token");
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,6 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { discountTypeByAnnual } from "@/components/organisms/discounts/constants/discountTypes";
 import { DiscountSchema } from "@/components/organisms/discounts/discount-rules/create/resolvers/generalResolver";
-import config from "@/config";
 import {
   DiscountBasics,
   DiscountCreateResponse,

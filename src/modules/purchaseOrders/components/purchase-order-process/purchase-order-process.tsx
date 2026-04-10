@@ -73,7 +73,6 @@ export function PurchaseOrderProcess({
             const StageIcon = stage.icon;
             const isCompleted = stage.id < currentStage;
             const isCurrent = stage.id === currentStage;
-            const isPending = stage.id > currentStage;
 
             return (
               <React.Fragment key={stage.id}>

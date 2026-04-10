@@ -126,7 +126,6 @@ export function ModalDataIntake({
   mode,
   clientId,
   clientName,
-  idCountry,
   intakeData,
   onSuccess
 }: IModalDataIntakeProps) {

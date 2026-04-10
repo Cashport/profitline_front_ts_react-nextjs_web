@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Typography, Button, Table, Flex, Radio, message } from "antd";
 import { CaretLeft, Eye } from "phosphor-react";
 import { ColumnsType } from "antd/es/table";
