@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/modules/chat/ui/dialog";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
@@ -6,6 +6,7 @@ import { Upload, X, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { message } from "antd";
 import { purchaseOrderActions } from "@/services/purchaseOrders/purchaseOrders";
 import { IInvoiceActionPayload } from "@/types/purchaseOrders/purchaseOrders";
+import { ApiError } from "@/utils/api/api";
 
 interface InvoiceEntry {
   id: string;
@@ -35,12 +36,14 @@ export function InvoiceModal({
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([createEmptyInvoice()]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorInvoiceIds, setErrorInvoiceIds] = useState<string[]>([]);
   const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
   useEffect(() => {
     if (!open) {
       setInvoices([createEmptyInvoice()]);
       setError(null);
+      setErrorInvoiceIds([]);
       setIsLoading(false);
     }
   }, [open]);
@@ -64,6 +67,7 @@ export function InvoiceModal({
     setInvoices((prev) =>
       prev.map((inv) => (inv.id === invoiceEntryId ? { ...inv, invoiceId: value } : inv))
     );
+    setErrorInvoiceIds((prev) => prev.filter((id) => id !== value));
   };
 
   const handleAddInvoice = () => {
@@ -84,6 +88,7 @@ export function InvoiceModal({
 
     setIsLoading(true);
     setError(null);
+    setErrorInvoiceIds([]);
 
     try {
       const invoiceIds = invoices.map((inv) => inv.invoiceId.trim());
@@ -107,12 +112,22 @@ export function InvoiceModal({
       const errorMessage = error instanceof Error ? error.message : "Error al agregar las facturas";
       setError(errorMessage);
       message.error(errorMessage);
+      if (error instanceof ApiError && Array.isArray(error.data?.invoices)) {
+        setErrorInvoiceIds(error.data.invoices);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isFormValid = invoices.every((inv) => inv.invoiceId.trim() && inv.file);
+  const duplicateInvoiceIds = useMemo(() => {
+    const ids = invoices.map((inv) => inv.invoiceId.trim()).filter(Boolean);
+    return ids.filter((id, index) => ids.indexOf(id) !== index);
+  }, [invoices]);
+
+  const hasDuplicates = duplicateInvoiceIds.length > 0;
+
+  const isFormValid = invoices.every((inv) => inv.invoiceId.trim() && inv.file) && !hasDuplicates;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,7 +177,13 @@ export function InvoiceModal({
                     placeholder="ID de factura (Ej: FV-2024-001)"
                     value={invoice.invoiceId}
                     onChange={(e) => handleInvoiceIdChange(invoice.id, e.target.value)}
-                    className="border-gray-300"
+                    className={
+                      errorInvoiceIds.includes(invoice.invoiceId) ||
+                      (invoice.invoiceId.trim() &&
+                        duplicateInvoiceIds.includes(invoice.invoiceId.trim()))
+                        ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50"
+                        : "border-gray-300"
+                    }
                   />
                 </div>
 
@@ -195,11 +216,13 @@ export function InvoiceModal({
             + Agregar otra factura
           </Button>
 
-          {error && (
+          {(error || hasDuplicates) && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center align-center">
                 <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{error}</p>
+                <p className="text-sm text-red-800">
+                  {hasDuplicates ? "Hay IDs de factura duplicados" : error}
+                </p>
               </div>
             </div>
           )}
