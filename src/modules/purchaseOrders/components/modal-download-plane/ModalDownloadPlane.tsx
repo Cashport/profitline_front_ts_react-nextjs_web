@@ -78,9 +78,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
       message.success("Archivos descargados exitosamente");
       handleClose();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar los archivos"
-      );
+      message.error(error instanceof Error ? error.message : "Error al descargar los archivos");
     } finally {
       setIsDownloading(false);
     }
@@ -122,7 +120,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
 
           <div className="modalDownloadPlane__list">
             {files.map((file) => (
-              <div className="modalDownloadPlane__row" key={file.id}>
+              <div className="modalDownloadPlane__row" key={`${file.label}-${file.type}`}>
                 <Checkbox
                   checked={selectedTypes.includes(file.type)}
                   onChange={() => handleToggleOne(file.type)}
