@@ -37,7 +37,6 @@ export function PurchaseOrdersView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPackageRows, setSelectedPackageRows] = useState<IPurchaseOrder[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<IOrder[]>([]);
-  const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
@@ -140,49 +139,6 @@ export function PurchaseOrdersView() {
     }));
   };
 
-  const handleDownloadPlane = async () => {
-    if (selectedPackageRows.length === 0) {
-      message.warning("Por favor selecciona un pedido.");
-      return;
-    }
-
-    if (selectedPackageRows.length > 1) {
-      message.warning("Solo puedes descargar un pedido a la vez.");
-      return;
-    }
-
-    setIsDownloadingCSV(true);
-
-    try {
-      const packageId = selectedPackageRows[0].packageId;
-      const response = await downloadPurchaseOrdersCSV({ packageId });
-      const res = await fetch(response.url);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = response.filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-
-      message.success("Plano CSV generado exitosamente");
-      setSelectedPackageRows([]);
-      setSelectedOrders([]);
-    } catch (error: any) {
-      if (error instanceof ApiError) {
-        message.error(
-          error.message || "Error al generar el plano CSV. Por favor intenta nuevamente"
-        );
-      } else {
-        message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
-      }
-    } finally {
-      setIsDownloadingCSV(false);
-    }
-  };
-
   const handleOpenActionsModal = () => {
     if (selectedPackageRows.length === 0 && selectedOrders.length === 0) {
       message.info("Por favor selecciona al menos un pedido u orden para generar acciones.");
@@ -214,11 +170,7 @@ export function PurchaseOrdersView() {
                   }}
                 />
 
-                <GenerateActionButton
-                  label="Generar acción"
-                  disabled={isDownloadingCSV}
-                  onClick={handleOpenActionsModal}
-                />
+                <GenerateActionButton label="Generar acción" onClick={handleOpenActionsModal} />
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
@@ -288,8 +240,6 @@ export function PurchaseOrdersView() {
       <ActionsModalPurchaseOrder
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
-        onDownloadCSV={handleDownloadPlane}
-        isDownloadingCSV={isDownloadingCSV}
         selectedPackageRows={selectedPackageRows}
         selectedOrders={selectedOrders}
         mutate={() => {

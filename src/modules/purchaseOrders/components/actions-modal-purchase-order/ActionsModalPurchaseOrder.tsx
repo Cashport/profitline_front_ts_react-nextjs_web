@@ -21,8 +21,6 @@ import { ModalDownloadPlane } from "../modal-download-plane/ModalDownloadPlane";
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
   onClose: () => void;
-  onDownloadCSV: () => void;
-  isDownloadingCSV: boolean;
   selectedPackageRows: IPurchaseOrder[];
   selectedOrders: IOrder[];
   mutate?: () => void;
@@ -32,8 +30,6 @@ type ActionsModalPurchaseOrderProps = {
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
   isOpen,
   onClose,
-  onDownloadCSV,
-  isDownloadingCSV,
   selectedPackageRows,
   selectedOrders,
   mutate,
@@ -85,11 +81,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     selectedPackageRows.every((p) =>
       p.orders.every((o) => allowedStatesForDownload.includes(o.status))
     );
-
-  const handleDownloadCSV = () => {
-    onDownloadCSV();
-    onClose();
-  };
 
   const validatePackageSelection = (): boolean => {
     if (selectedPackageRows.length === 0) {
@@ -271,10 +262,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
           )}
           {canDownload && (
             <ButtonGenerateAction
-              icon={<DownloadSimple size={20} />}
+              icon={<DownloadSimple className="h-4 w-4" />}
               title="Descargar plano"
-              onClick={handleDownloadCSV}
-              disabled={isDownloadingCSV}
+              onClick={handleOpenDownloadPlaneModal}
+              disabled={isDispatchLoading}
             />
           )}
           {canSendToDispatch && (
@@ -285,12 +276,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={isDispatchLoading}
             />
           )}
-          <ButtonGenerateAction
-            icon={<PackageCheck className="h-4 w-4" />}
-            title="Descargar plano NUEVO"
-            onClick={handleOpenDownloadPlaneModal}
-            disabled={isDispatchLoading}
-          />
         </div>
       </Modal>
 
