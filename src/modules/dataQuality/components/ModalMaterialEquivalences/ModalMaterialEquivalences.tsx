@@ -208,6 +208,7 @@ export function ModalMaterialEquivalences({
                           dropdownRender={customDropdown}
                           placement="bottomRight"
                           trigger={["click"]}
+                          disabled={!isActive}
                           menu={{
                             items: [
                               {
