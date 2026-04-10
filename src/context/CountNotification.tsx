@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 
-const POLLING_INTERVAL_MS = 60000;
+const POLLING_INTERVAL_MS = 600000; // 10 minutes
 
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let visibilityHandler: (() => void) | null = null;

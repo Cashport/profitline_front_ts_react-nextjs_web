@@ -242,3 +242,16 @@ export interface ICreateCommunicationTemplate {
   comunication_type: number;
   action_type_ids: number[];
 }
+
+export interface IValidatedClients {
+  clientId: string;
+  identifier: string;
+  clientName: null;
+  status: "NOT_FOUND" | "FOUND";
+}
+
+export interface IGetValidatedClientsResponse {
+  clientId: string;
+  clientName: string;
+  isValid?: boolean;
+}

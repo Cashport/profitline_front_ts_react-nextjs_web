@@ -1,16 +1,28 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
+import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
+
 const POPSTATE_SENTINEL = "__popstate__";
 
 export function useUnsavedChangesAlert(isDirty: boolean) {
   const router = useRouter();
+  const { registerGuard } = useUnsavedChanges();
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const isDirtyRef = useRef(isDirty);
 
   useEffect(() => {
     isDirtyRef.current = isDirty;
   }, [isDirty]);
+
+  // Register guard in global context so external navigators (sidebar, etc.)
+  // can intercept navigation when there are unsaved changes.
+  useEffect(() => {
+    return registerGuard({
+      isDirty,
+      onAttempt: (url: string) => setPendingUrl(url)
+    });
+  }, [isDirty, registerGuard]);
 
   // beforeunload — native browser dialog for refresh/close
   useEffect(() => {

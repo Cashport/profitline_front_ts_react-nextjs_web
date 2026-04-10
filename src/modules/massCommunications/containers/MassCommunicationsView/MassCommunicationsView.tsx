@@ -10,7 +10,6 @@ import ActionsBar from "../../components/MassCommunicationSections/ActionsBar/Ac
 import ModalTestCommunication from "../../components/ModalTestCommunication/ModalTestCommunication";
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
-import { validatedClients as mockClients } from "../../lib/mockData";
 import {
   getMassiveCommunicationTemplates,
   getTemplateTags
@@ -18,7 +17,7 @@ import {
 import { getWhatsAppTemplates } from "@/services/chat/chat";
 import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
-import type { IValidatedClient, WhatsappTemplate } from "../../lib/mockData";
+import type { WhatsappTemplate } from "../../lib/mockData";
 
 const { Title } = Typography;
 
@@ -29,10 +28,7 @@ export default function MassCommunicationsView() {
   const [channel, setChannel] = useState<ChannelType>("email");
 
   // Recipients
-  const [rawIds, setRawIds] = useState("");
-  const [hasValidated, setHasValidated] = useState(false);
-  const [clients, setClients] = useState<IValidatedClient[]>([]);
-  const [invalidIds, setInvalidIds] = useState<string[]>([]);
+  const [validatedCount, setValidatedCount] = useState(0);
 
   // Email message
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
@@ -137,44 +133,7 @@ export default function MassCommunicationsView() {
 
   // Derived
   const canOpenPreview =
-    clients.length > 0 && (channel === "email" ? !!selectedEmailTemplate : !!selectedTemplate);
-
-  // Handlers
-  const handleValidateIds = () => {
-    const ids = rawIds
-      .split(/[,\n]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const found: IValidatedClient[] = [];
-    const notFound: string[] = [];
-
-    ids.forEach((id) => {
-      const client = mockClients.find((c) => c.id === id);
-      if (client) found.push(client);
-      else notFound.push(id);
-    });
-
-    setClients(found);
-    setInvalidIds(notFound);
-    setHasValidated(true);
-  };
-
-  const handleClearRecipients = () => {
-    setRawIds("");
-    setHasValidated(false);
-    setClients([]);
-    setInvalidIds([]);
-  };
-
-  const handleDownloadValidationReport = () => {
-    console.log("Downloading validation report...");
-  };
-
-  const handleRawIdsChange = (value: string) => {
-    setRawIds(value);
-    if (hasValidated) setHasValidated(false);
-  };
+    validatedCount > 0 && (channel === "email" ? !!selectedEmailTemplate : !!selectedTemplate);
 
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
@@ -189,17 +148,7 @@ export default function MassCommunicationsView() {
         <Flex vertical gap={24}>
           <ChannelSection channel={channel} onChannelChange={setChannel} />
 
-          <RecipientsSection
-            rawIds={rawIds}
-            onRawIdsChange={handleRawIdsChange}
-            hasValidated={hasValidated}
-            validatedClients={clients}
-            invalidIds={invalidIds}
-            totalClients={mockClients.length}
-            onValidate={handleValidateIds}
-            onClear={handleClearRecipients}
-            onDownloadReport={handleDownloadValidationReport}
-          />
+          <RecipientsSection onValidatedCountChange={setValidatedCount} />
 
           <MessageSection
             channel={channel}
@@ -223,7 +172,7 @@ export default function MassCommunicationsView() {
           />
 
           <ActionsBar
-            recipientCount={clients.length}
+            recipientCount={validatedCount}
             channel={channel}
             canOpenPreview={canOpenPreview}
             onTestCommunication={() => setTestDialogOpen(true)}

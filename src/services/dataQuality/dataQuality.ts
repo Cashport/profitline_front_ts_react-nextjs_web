@@ -20,7 +20,8 @@ import {
   IUploadMassiveOrHistoricalRequest,
   IPOS,
   IPOSPayload,
-  IClientDetailArchiveClient
+  IClientDetailArchiveClient,
+  IPostCatalogMaterialEquivalence
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -592,6 +593,22 @@ export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error uploading points of sale file:", error);
+    throw error;
+  }
+};
+
+export const createCatalogMaterialEquivalence = async (
+  catalogMaterialId: number,
+  equivalenceData: IPostCatalogMaterialEquivalence
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/catalog/materials/${catalogMaterialId}/equivalence`,
+      equivalenceData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating catalog material equivalence:", error);
     throw error;
   }
 };
