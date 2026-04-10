@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import {
-  DownloadSimple,
-  Invoice,
-  SubtractSquare,
-  Trash
-} from "@phosphor-icons/react";
+import { DownloadSimple, Invoice, SubtractSquare, Trash } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -21,6 +16,7 @@ import {
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
 import { IPurchaseOrder, IOrder } from "@/types/purchaseOrders/purchaseOrders";
+import { ModalDownloadPlane } from "../modal-download-plane/ModalDownloadPlane";
 
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
@@ -50,6 +46,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
   const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
+  const [isDownloadPlaneOpen, setIsDownloadPlaneOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -60,12 +57,24 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const canUploadInvoices =
     selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
 
-  const allowedStatesForDelete = ["Procesado", "En aprobaciones", "Novedad", "Back order", "Rechazado"];
+  const allowedStatesForDelete = [
+    "Procesado",
+    "En aprobaciones",
+    "Novedad",
+    "Back order",
+    "Rechazado"
+  ];
   const canDelete =
     selectedOrders.length > 0 &&
     selectedOrders.every((o) => allowedStatesForDelete.includes(o.status));
 
-  const allowedStatesForSeparate = ["Novedad", "Procesado", "En aprobaciones", "Back order", "Rechazado"];
+  const allowedStatesForSeparate = [
+    "Novedad",
+    "Procesado",
+    "En aprobaciones",
+    "Back order",
+    "Rechazado"
+  ];
   const canSeparateOrder =
     selectedOrders.length > 0 &&
     selectedOrders.every((o) => allowedStatesForSeparate.includes(o.status));
@@ -130,7 +139,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     onClose();
     onUploadInvoices();
   };
-
 
   const handleSeparateOrder = () => {
     if (!validateOrderSelection()) return;
@@ -211,6 +219,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsActionLoading(false);
   };
 
+  const handleOpenDownloadPlaneModal = () => {
+    if (!validatePackageSelection()) return;
+    onClose();
+    setIsDownloadPlaneOpen(true);
+  };
+
   return (
     <>
       <Modal
@@ -271,9 +285,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={isDispatchLoading}
             />
           )}
+          <ButtonGenerateAction
+            icon={<PackageCheck className="h-4 w-4" />}
+            title="Descargar plano NUEVO"
+            onClick={handleOpenDownloadPlaneModal}
+            disabled={isDispatchLoading}
+          />
         </div>
       </Modal>
-
 
       <ModalConfirmAction
         isOpen={isSeparateOrderModalOpen}
@@ -306,6 +325,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         }}
         title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
         okLoading={isActionLoading}
+      />
+
+      <ModalDownloadPlane
+        isOpen={isDownloadPlaneOpen}
+        onClose={() => setIsDownloadPlaneOpen(false)}
+        packageId={String(selectedPackageRows[0]?.packageId)}
       />
     </>
   );
