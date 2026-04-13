@@ -254,6 +254,7 @@ export function PurchaseOrdersView() {
         isOpen={whichModalIsOpen.selected === 3}
         onClose={closeModals}
         orders={selectedOrders}
+        packages={data}
         onSuccess={() => {
           mutate();
           setSelectedPackageRows([]);
