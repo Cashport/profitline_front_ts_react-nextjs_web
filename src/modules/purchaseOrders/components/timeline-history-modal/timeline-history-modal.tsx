@@ -35,12 +35,6 @@ export function TimelineHistoryModal({
     return <Settings className="h-4 w-4 text-gray-600" />;
   };
 
-  const getEventBadgeColor = (event: IHistoryTimelineEvent) => {
-    if (event.is_novelty === 1) {
-      return "bg-blue-50 text-blue-700 border-blue-200";
-    }
-    return "bg-gray-50 text-gray-700 border-gray-200";
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -95,9 +89,8 @@ export function TimelineHistoryModal({
                   <div className="absolute left-[19px] top-6 bottom-0 w-0.5 bg-gradient-to-b from-green-400 via-blue-400 to-gray-300"></div>
 
                   <div className="space-y-6">
-                    {events.map((event, index) => {
+                    {events.map((event) => {
                       const { date, time } = formatDate(event.created_at);
-                      const isLast = index === events.length - 1;
 
                       return (
                         <div key={event.id} className="relative pl-12">

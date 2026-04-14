@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Flex, message } from "antd";
+import { Flex } from "antd";
 import { PencilSimpleLine } from "@phosphor-icons/react";
 
 import { signInWithCustomToken } from "@firebase/auth";

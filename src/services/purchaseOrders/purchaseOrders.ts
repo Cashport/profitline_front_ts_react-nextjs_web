@@ -1,5 +1,6 @@
 import config from "@/config";
 import { API, ApiError } from "@/utils/api/api";
+import instance from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IPurchaseOrderDetail,
@@ -11,7 +12,8 @@ import {
   IApproversResponse,
   IUploadPurchaseOrderResponse,
   IBatchesByPurchaseOrder,
-  ICreatePurchaseOrderPayload
+  ICreatePurchaseOrderPayload,
+  IGetAvailableDocuments
 } from "@/types/purchaseOrders/purchaseOrders";
 import { PurchaseOrderUpdatePayload } from "@/modules/purchaseOrders/types/forms";
 
@@ -371,6 +373,62 @@ export const getBatchesByProduct = async (purchaseOrderId: string, productId: st
     return res.data;
   } catch (error) {
     console.error("Error fetching batches by product:", error);
+    throw error;
+  }
+};
+
+export const downloadAvailableDocuments = async ({
+  packageId,
+  orderIds,
+  documents
+}: {
+  packageId?: number;
+  orderIds?: number[];
+  documents: string[];
+}): Promise<Blob> => {
+  if (!packageId && !orderIds) {
+    throw new Error("Debe proporcionar packageId o orderIds para descargar los documentos");
+  }
+  if (packageId && orderIds) {
+    throw new Error("Solo puede proporcionar packageId o orderIds, no ambos");
+  }
+  try {
+    const response = await instance.post(
+      `${config.API_HOST}/purchaseOrder/documents/download`,
+      {
+        ...(orderIds && { order_ids: orderIds }),
+        ...(packageId && { package_id: packageId }),
+        documents
+      },
+      { responseType: "blob", timeout: 60000 }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error downloading documents:", error);
+    throw error;
+  }
+};
+
+export const getDownloadableFiles = async (packageId?: string, orderIds?: string[]) => {
+  if (!packageId && !orderIds) {
+    throw new Error(
+      "Debe proporcionar packageId o orderIds para obtener los archivos descargables"
+    );
+  }
+  if (packageId && orderIds) {
+    throw new Error("Solo puede proporcionar packageId o orderIds, no ambos");
+  }
+  try {
+    const response: GenericResponse<IGetAvailableDocuments> = await API.post(
+      `${config.API_HOST}/purchaseOrder/documents/available`,
+      {
+        ...(orderIds && { order_ids: orderIds }),
+        ...(packageId && { package_id: packageId })
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching downloadable files:", error);
     throw error;
   }
 };

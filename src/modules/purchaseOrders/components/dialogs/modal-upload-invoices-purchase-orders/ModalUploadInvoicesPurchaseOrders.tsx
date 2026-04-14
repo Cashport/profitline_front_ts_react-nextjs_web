@@ -3,10 +3,10 @@ import { Modal, Button, Input, message } from "antd";
 import { Paperclip, Plus, X, Upload } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 
-import { IOrder } from "@/types/purchaseOrders/purchaseOrders";
+import { IOrder, IPurchaseOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { sendMultiplePurchaseOrdersToBilling } from "@/services/purchaseOrders/purchaseOrders";
 
-const renderStatusBadge = (status: string, statusColor: string, noveltyTypes: string) => (
+const renderStatusBadge = (status: string, statusColor: string, _noveltyTypes: string) => (
   <>
     <Badge
       variant="outline"
@@ -32,6 +32,7 @@ interface ModalUploadInvoicesPurchaseOrdersProps {
   isOpen: boolean;
   onClose: () => void;
   orders: IOrder[];
+  packages?: IPurchaseOrder[];
   onSuccess?: () => void;
 }
 
@@ -39,6 +40,7 @@ export function ModalUploadInvoicesPurchaseOrders({
   isOpen,
   onClose,
   orders,
+  packages = [],
   onSuccess
 }: ModalUploadInvoicesPurchaseOrdersProps) {
   const [facturaInputs, setFacturaInputs] = useState<Record<number, FacturaRow[]>>({});
@@ -133,7 +135,7 @@ export function ModalUploadInvoicesPurchaseOrders({
         </div>
       }
       centered
-      width={900}
+      width={1200}
     >
       {Object.keys(facturaInputs).length === 0 ? (
         <p className="text-sm text-gray-500 py-4 text-center">
@@ -145,6 +147,7 @@ export function ModalUploadInvoicesPurchaseOrders({
             <thead>
               <tr className="border-b-2 border-gray-200 bg-gray-50">
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 w-44">OC</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Cliente</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 w-36">Estado</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-700 w-36">Monto</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">No. Factura</th>
@@ -167,6 +170,31 @@ export function ModalUploadInvoicesPurchaseOrders({
                           {order.orderNumber}
                         </span>
                       ) : null}
+                    </td>
+                    {/* Cliente — only on first row */}
+                    <td className="px-4 py-2.5 align-middle max-w-64">
+                      {rowIdx === 0
+                        ? (() => {
+                            const customerName =
+                              packages.find((p) => p.packageId === order.packageId)
+                                ?.customerName || "";
+                            return (
+                              <div className="flex flex-col">
+                                <span className="truncate" title={customerName}>
+                                  {customerName || "-"}
+                                </span>
+                                {order.deliveryAddress && (
+                                  <span
+                                    className="text-xs text-gray-500 truncate"
+                                    title={order.deliveryAddress}
+                                  >
+                                    {order.deliveryAddress}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()
+                        : null}
                     </td>
 
                     {/* Estado — only on first row */}

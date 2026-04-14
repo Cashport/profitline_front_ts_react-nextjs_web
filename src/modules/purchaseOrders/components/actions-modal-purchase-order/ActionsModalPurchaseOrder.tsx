@@ -1,16 +1,10 @@
 import React, { useState } from "react";
 import { Modal, message } from "antd";
-import {
-  DownloadSimple,
-  Invoice,
-  PaperPlaneTilt,
-  SubtractSquare,
-  Trash
-} from "@phosphor-icons/react";
+import { DownloadSimple, Invoice, SubtractSquare, Trash } from "@phosphor-icons/react";
 import { PackageCheck } from "lucide-react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
-import { SendToApprovalModal } from "../dialogs/send-to-approval-modal/send-to-approval-modal";
+
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import {
   sendPackageToDispatch,
@@ -22,12 +16,11 @@ import {
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
 import { IPurchaseOrder, IOrder } from "@/types/purchaseOrders/purchaseOrders";
+import { ModalDownloadPlane } from "../modal-download-plane/ModalDownloadPlane";
 
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
   onClose: () => void;
-  onDownloadCSV: () => void;
-  isDownloadingCSV: boolean;
   selectedPackageRows: IPurchaseOrder[];
   selectedOrders: IOrder[];
   mutate?: () => void;
@@ -37,8 +30,6 @@ type ActionsModalPurchaseOrderProps = {
 export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps> = ({
   isOpen,
   onClose,
-  onDownloadCSV,
-  isDownloadingCSV,
   selectedPackageRows,
   selectedOrders,
   mutate,
@@ -46,11 +37,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
 }) => {
   const [isDispatchLoading, setIsDispatchLoading] = useState(false);
   const [isBillingLoading, setIsBillingLoading] = useState(false);
-  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+
   const [isSeparateOrderModalOpen, setIsSeparateOrderModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
   const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
+  const [isDownloadPlaneOpen, setIsDownloadPlaneOpen] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -60,23 +52,35 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     selectedPackageRows[0].orders.every((o) => o.status === "Facturado");
   const canUploadInvoices =
     selectedOrders.length > 0 && selectedOrders.every((o) => o.status === "En facturación");
-  const canRequestApproval = selectedPackageRows[0]?.status === "Procesado";
-  const allowedStatesForSeparate = ["Novedad", "Procesado", "En aprobaciones"];
+
+  const allowedStatesForDelete = [
+    "Procesado",
+    "En aprobaciones",
+    "Novedad",
+    "Back order",
+    "Rechazado"
+  ];
+  const canDelete =
+    selectedOrders.length > 0 &&
+    selectedOrders.every((o) => allowedStatesForDelete.includes(o.status));
+
+  const allowedStatesForSeparate = [
+    "Novedad",
+    "Procesado",
+    "En aprobaciones",
+    "Back order",
+    "Rechazado"
+  ];
   const canSeparateOrder =
     selectedOrders.length > 0 &&
     selectedOrders.every((o) => allowedStatesForSeparate.includes(o.status));
 
-  const allowedStatesForDownload = ["En despacho", "Entregado"];
+  const allowedStatesForDownload = ["En facturación", "Facturado", "En despacho"];
   const canDownload =
     selectedPackageRows.length > 0 &&
     selectedPackageRows.every((p) =>
       p.orders.every((o) => allowedStatesForDownload.includes(o.status))
     );
-
-  const handleDownloadCSV = () => {
-    onDownloadCSV();
-    onClose();
-  };
 
   const validatePackageSelection = (): boolean => {
     if (selectedPackageRows.length === 0) {
@@ -125,12 +129,6 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     if (!validateOrderSelection()) return;
     onClose();
     onUploadInvoices();
-  };
-
-  const handleRequestApproval = () => {
-    if (!validatePackageSelection()) return;
-    onClose();
-    setIsApprovalModalOpen(true);
   };
 
   const handleSeparateOrder = () => {
@@ -212,6 +210,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsActionLoading(false);
   };
 
+  const handleOpenDownloadPlaneModal = () => {
+    if (!validatePackageSelection()) return;
+    onClose();
+    setIsDownloadPlaneOpen(true);
+  };
+
   return (
     <>
       <Modal
@@ -224,35 +228,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         centered
       >
         <div className="modal-content">
-          {canDownload && (
+          {canDelete && (
             <ButtonGenerateAction
-              icon={<DownloadSimple size={20} />}
-              title="Descargar plano"
-              onClick={handleDownloadCSV}
-              disabled={isDownloadingCSV}
-            />
-          )}
-          {canSendToBilling && (
-            <ButtonGenerateAction
-              icon={<Invoice size={16} />}
-              title="Enviar a facturación"
-              onClick={() => handleSendToBilling()}
-              disabled={isBillingLoading}
-            />
-          )}
-          {canSendToDispatch && (
-            <ButtonGenerateAction
-              icon={<PackageCheck className="h-4 w-4" />}
-              title="Enviar a despacho"
-              onClick={handleSendToDispatch}
-              disabled={isDispatchLoading}
-            />
-          )}
-          {canRequestApproval && (
-            <ButtonGenerateAction
-              icon={<PaperPlaneTilt className="h-4 w-4" />}
-              title="Solicitar aprobación"
-              onClick={handleRequestApproval}
+              icon={<Trash className="h-4 w-4" />}
+              title="Eliminar Ordenes seleccionadas"
+              onClick={handleDeleteOrders}
               disabled={isDispatchLoading}
             />
           )}
@@ -264,6 +244,14 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={isDispatchLoading}
             />
           )}
+          {canSendToBilling && (
+            <ButtonGenerateAction
+              icon={<Invoice size={16} />}
+              title="Enviar a facturación"
+              onClick={() => handleSendToBilling()}
+              disabled={isBillingLoading}
+            />
+          )}
           {canUploadInvoices && (
             <ButtonGenerateAction
               icon={<Invoice size={16} />}
@@ -272,23 +260,24 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={false}
             />
           )}
-          <ButtonGenerateAction
-            icon={<Trash className="h-4 w-4" />}
-            title="Eliminar Ordenes seleccionadas"
-            onClick={handleDeleteOrders}
-            disabled={isDispatchLoading}
-          />
+          {canDownload && (
+            <ButtonGenerateAction
+              icon={<DownloadSimple className="h-4 w-4" />}
+              title="Descargar plano"
+              onClick={handleOpenDownloadPlaneModal}
+              disabled={isDispatchLoading}
+            />
+          )}
+          {canSendToDispatch && (
+            <ButtonGenerateAction
+              icon={<PackageCheck className="h-4 w-4" />}
+              title="Enviar a despacho"
+              onClick={handleSendToDispatch}
+              disabled={isDispatchLoading}
+            />
+          )}
         </div>
       </Modal>
-
-      <SendToApprovalModal
-        open={isApprovalModalOpen}
-        onOpenChange={setIsApprovalModalOpen}
-        packageId={
-          selectedPackageRows.length > 0 ? String(selectedPackageRows[0].packageId) : undefined
-        }
-        mutate={mutate}
-      />
 
       <ModalConfirmAction
         isOpen={isSeparateOrderModalOpen}
@@ -321,6 +310,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         }}
         title="¿Estás seguro de eliminar la(s) orden(es) de compra?"
         okLoading={isActionLoading}
+      />
+
+      <ModalDownloadPlane
+        isOpen={isDownloadPlaneOpen}
+        onClose={() => setIsDownloadPlaneOpen(false)}
+        packageId={String(selectedPackageRows[0]?.packageId)}
       />
     </>
   );

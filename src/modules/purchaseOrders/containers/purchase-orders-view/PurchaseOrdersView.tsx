@@ -37,7 +37,6 @@ export function PurchaseOrdersView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPackageRows, setSelectedPackageRows] = useState<IPurchaseOrder[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<IOrder[]>([]);
-  const [isDownloadingCSV, setIsDownloadingCSV] = useState(false);
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<IPurchaseOrderFilters>({
@@ -82,7 +81,7 @@ export function PurchaseOrdersView() {
     fetchFilters();
   }, [ID]);
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = (_files: File[]) => {
     mutate();
   };
 
@@ -140,38 +139,19 @@ export function PurchaseOrdersView() {
     }));
   };
 
-  const handleDownloadPlane = async () => {
-    if (selectedPackageRows.length === 0) {
-      message.warning("Por favor selecciona un pedido.");
+  const handleOpenActionsModal = () => {
+    if (selectedPackageRows.length === 0 && selectedOrders.length === 0) {
+      message.info("Por favor selecciona al menos un pedido u orden para generar acciones.");
       return;
     }
-
-    if (selectedPackageRows.length > 1) {
-      message.warning("Solo puedes descargar un pedido a la vez.");
+    const isDelivered =
+      selectedPackageRows.some((p) => p.orders.some((o) => o.status === "Entregado")) ||
+      selectedOrders.some((o) => o.status === "Entregado");
+    if (isDelivered) {
+      message.warning("No se pueden generar acciones para pedidos/ordenes con estado 'Entregado'.");
       return;
     }
-
-    setIsDownloadingCSV(true);
-
-    try {
-      const packageId = selectedPackageRows[0].packageId;
-      const response = await downloadPurchaseOrdersCSV({ packageId });
-      window.open(response.url, "_blank");
-
-      message.success("Plano CSV generado exitosamente");
-      setSelectedPackageRows([]);
-      setSelectedOrders([]);
-    } catch (error: any) {
-      if (error instanceof ApiError) {
-        message.error(
-          error.message || "Error al generar el plano CSV. Por favor intenta nuevamente"
-        );
-      } else {
-        message.error("Error al generar el plano CSV. Por favor intenta nuevamente");
-      }
-    } finally {
-      setIsDownloadingCSV(false);
-    }
+    setWhichModalIsOpen({ selected: 1 });
   };
 
   return (
@@ -190,11 +170,7 @@ export function PurchaseOrdersView() {
                   }}
                 />
 
-                <GenerateActionButton
-                  label="Generar acción"
-                  disabled={isDownloadingCSV}
-                  onClick={() => setWhichModalIsOpen({ selected: 1 })}
-                />
+                <GenerateActionButton label="Generar acción" onClick={handleOpenActionsModal} />
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
@@ -264,8 +240,6 @@ export function PurchaseOrdersView() {
       <ActionsModalPurchaseOrder
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
-        onDownloadCSV={handleDownloadPlane}
-        isDownloadingCSV={isDownloadingCSV}
         selectedPackageRows={selectedPackageRows}
         selectedOrders={selectedOrders}
         mutate={() => {
@@ -280,6 +254,7 @@ export function PurchaseOrdersView() {
         isOpen={whichModalIsOpen.selected === 3}
         onClose={closeModals}
         orders={selectedOrders}
+        packages={data}
         onSuccess={() => {
           mutate();
           setSelectedPackageRows([]);

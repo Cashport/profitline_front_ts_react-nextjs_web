@@ -27,7 +27,7 @@ export const InvoicesTable = ({
   stateId,
   dataInvoiceByStatus: data,
   setSelectedRows,
-  fetchData,
+  fetchData: _fetchData,
   selectedRows,
   openInvoiceDetail
 }: PropsInvoicesTable) => {

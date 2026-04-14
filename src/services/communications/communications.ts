@@ -10,8 +10,12 @@ import {
   ICommunicationForm,
   ICreateCommunication,
   IPeriodicityModalForm,
+  ICreateCommunicationTemplate,
+  IMassiveCommunicationTemplate,
   ITemplateCommunication,
-  Iattachments
+  Iattachments,
+  IValidatedClients,
+  IGetValidatedClientsResponse
 } from "@/types/communications/ICommunications";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IFormEmailNotification } from "@/components/molecules/modals/ModalSendEmail/ModalSendEmail";
@@ -77,6 +81,7 @@ export const getSubActions = async (action_ids: string[]): Promise<IGetSelect[]>
 
 interface IGetTags extends IGetSelect {
   description: string;
+  mock: string;
 }
 
 export const getTemplateTags = async (): Promise<IGetTags[]> => {
@@ -105,13 +110,10 @@ interface ICreateCommunicationProps {
 export const createCommunication = async ({
   data,
   selectedPeriodicity,
-  zones,
-  selectedBusinessRules,
   assignedGroups,
   projectId,
   showMessage
 }: ICreateCommunicationProps) => {
-  const token = await getIdToken();
   const eventTriggerDays = data?.trigger?.settings?.noticeDaysEvent;
 
   const sendToRoles = data.template.send_to
@@ -210,14 +212,6 @@ export const createCommunication = async ({
 export const sendEmailNotification = async (data: IFormEmailNotification) => {
   const token = await getIdToken();
 
-  const modelData = {
-    subject: data.subject,
-    body: data.body,
-    to: data.forward_to.map((email) => email.value),
-    copy: data.copy_to?.map((email) => email.value),
-    files: data.attachments
-  };
-
   const formData = new FormData();
 
   formData.append("subject", data.subject);
@@ -269,6 +263,71 @@ export const getTemplateByEvent = async (
     return response.data;
   } catch (error) {
     console.error("Error getting template by event", error);
+    throw error;
+  }
+};
+
+export const sendIndividualCommunication = async (projectId: number, communicationId: number) => {
+  const body = {
+    id_project: projectId,
+    id_comunicacion: communicationId
+  };
+
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/activate`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending individual communication", error);
+    throw error;
+  }
+};
+
+export const createCommunicationTemplate = async (body: ICreateCommunicationTemplate) => {
+  try {
+    const response: GenericResponse<any> = await API.post(`${config.API_HOST}/comunication`, body);
+    return response;
+  } catch (error) {
+    console.error("Error creating communication template", error);
+    throw error;
+  }
+};
+
+export const getMassiveCommunicationTemplates = async () => {
+  try {
+    const response: IMassiveCommunicationTemplate[] = await API.get(
+      `${config.API_HOST}/comunication/available-to-massive`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting massive communication templates", error);
+    throw error;
+  }
+};
+
+export const validateClients = async (clientIds: string[]) => {
+  try {
+    const response: GenericResponse<IValidatedClients[]> = await API.post(
+      `${config.API_HOST}/comunication/validate-client-list`,
+      { client_ids: clientIds }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error validating clients", error);
+    throw error;
+  }
+};
+
+export const getCurrentValidatedClients = async () => {
+  try {
+    const response: GenericResponse<IGetValidatedClientsResponse[]> = await API.get(
+      `${config.API_HOST}/comunication/my-client-list`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting current validated clients", error);
     throw error;
   }
 };

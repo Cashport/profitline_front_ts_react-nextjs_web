@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR, { preload } from "swr";
 import { message } from "antd";
@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import { FileText, GripVertical } from "lucide-react";
 
 import { useResizablePanel } from "../../hooks/useResizablePanel";
+import { useUnsavedChangesAlert } from "../../hooks/useUnsavedChangesAlert";
 
 import { extractSingleParam } from "@/utils/utils";
 import { fetcher } from "@/utils/api/api";
@@ -32,6 +33,7 @@ import { PurchaseOrderProducts } from "../../components/purchase-order-products/
 import { PurchaseOrderDocument } from "../../components/purchase-order-document/purchase-order-document";
 import { PurchaseOrderDetailHeader } from "../../components/purchase-order-detail-header/purchase-order-detail-header";
 import { PurchaseOrderNoveltyCard } from "../../components/purchase-order-novelty-card/purchase-order-novelty-card";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { ORDER_STAGES_CONFIG } from "../../constants/orderStagesConfig";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
@@ -92,6 +94,13 @@ export function DetailPurchaseOrder() {
   const { pdfWidth, isPdfCollapsed, containerRef, handleMouseDown, expandPdf, collapsePdf } =
     useResizablePanel();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isInfoDirty, setIsInfoDirty] = useState(false);
+  const [isProductsDirty, setIsProductsDirty] = useState(false);
+  const infoSaveRef = useRef<(() => Promise<void>) | null>(null);
+  const productsSaveRef = useRef<(() => Promise<void>) | null>(null);
+  const hasUnsavedChanges = isInfoDirty || isProductsDirty;
+  const { showUnsavedModal, attemptNavigation, confirmNavigation, cancelNavigation } =
+    useUnsavedChangesAlert(hasUnsavedChanges);
 
   const {
     data: orderData,
@@ -166,6 +175,7 @@ export function DetailPurchaseOrder() {
       setIsEditMode(false);
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al actualizar la información");
+      throw error;
     }
   };
 
@@ -182,11 +192,32 @@ export function DetailPurchaseOrder() {
   const handleDownloadCSV = async () => {
     try {
       const response = await downloadPurchaseOrdersCSV({ orderIds: [orderId!] });
-      window.open(response.url, "_blank");
+      const res = await fetch(response.url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = response.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
     } catch (error) {
       message.error(
         error instanceof Error ? error.message : "Error al descargar el plano de la orden de compra"
       );
+    }
+  };
+
+  const handleSaveAndLeave = async () => {
+    try {
+      const saves: Promise<void>[] = [];
+      if (isInfoDirty && infoSaveRef.current) saves.push(infoSaveRef.current());
+      if (isProductsDirty && productsSaveRef.current) saves.push(productsSaveRef.current());
+      await Promise.all(saves);
+      confirmNavigation();
+    } catch {
+      // Error ya mostrado por el componente hijo via message.error
     }
   };
 
@@ -203,6 +234,7 @@ export function DetailPurchaseOrder() {
             onOpenModal={handleOpenModal}
             onDownloadCSV={handleDownloadCSV}
             formId={PURCHASE_ORDER_INFO_FORM_ID}
+            onNavigate={attemptNavigation}
           />
 
           <PurchaseOrderNoveltyCard novelties={data.novelties} />
@@ -212,6 +244,8 @@ export function DetailPurchaseOrder() {
             data={data}
             onSubmit={handleSaveInfo}
             onCancel={() => setIsEditMode(false)}
+            onDirtyChange={setIsInfoDirty}
+            saveRef={infoSaveRef}
           />
 
           <PurchaseOrderProcess
@@ -232,6 +266,8 @@ export function DetailPurchaseOrder() {
               isPdfCollapsed={isPdfCollapsed}
               pdfWidth={pdfWidth}
               canEdit={canEdit}
+              onDirtyChange={setIsProductsDirty}
+              saveRef={productsSaveRef}
             />
 
             {!isPdfCollapsed && (
@@ -303,6 +339,17 @@ export function DetailPurchaseOrder() {
         approvalId={whichModalIsOpen.selected === 10 ? data.approvation?.approval_id : undefined}
         onClose={closeModals}
         mutateList={() => mutate()}
+      />
+
+      <ModalConfirmAction
+        isOpen={showUnsavedModal}
+        onClose={cancelNavigation}
+        onOk={handleSaveAndLeave}
+        onCancel={confirmNavigation}
+        title="Cambios sin guardar"
+        content="Tienes cambios sin guardar. ¿Deseas guardarlos antes de salir?"
+        okText="Guardar"
+        cancelText="No guardar"
       />
     </div>
   );

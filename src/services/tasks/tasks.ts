@@ -1,7 +1,6 @@
 import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
-  ITask,
   ITaskByStatus,
   ITaskDetail,
   ITaskStatus,
@@ -9,7 +8,6 @@ import {
   ITaskTypes
 } from "@/types/tasks/ITasks";
 import { API } from "@/utils/api/api";
-import { limit } from "firebase/firestore";
 
 export const getTasksStatus = async (): Promise<ITaskStatus[]> => {
   try {

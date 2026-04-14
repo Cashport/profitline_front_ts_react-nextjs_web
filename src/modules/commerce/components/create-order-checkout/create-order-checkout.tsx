@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex, Modal } from "antd";
+import { Button, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CartButton from "../button-cart";

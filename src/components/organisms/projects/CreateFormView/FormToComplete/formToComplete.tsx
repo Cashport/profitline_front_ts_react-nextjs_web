@@ -14,10 +14,8 @@ const { Text, Title } = Typography;
 const CompleteForm: React.FC = () => {
   const {
     control,
-    register,
     handleSubmit,
     watch,
-    reset,
     formState: { errors, isValid, isSubmitting },
     setValue
   } = useForm<FormValues>({
@@ -28,7 +26,6 @@ const CompleteForm: React.FC = () => {
   const [loadedForm, setLoadedForm] = useState<FormLoaded>(defaultFormLoaded);
 
   console.log("formState", isValid);
-  const [loading, setLoading] = useState(false);
   const { fields } = useFieldArray({
     control,
     name: "answers",
@@ -36,10 +33,8 @@ const CompleteForm: React.FC = () => {
   });
   // Simulación de carga de datos desde la API
   useEffect(() => {
-    setLoading(true);
     setTimeout(() => {
       setLoadedForm(mockForm);
-      setLoading(false);
     }, 1000);
   }, []);
   const formNow = watch();

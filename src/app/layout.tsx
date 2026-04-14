@@ -6,6 +6,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { MessageProvider } from "@/context/MessageContext";
 import { Poppins } from "next/font/google";
 import { ModalProvider } from "@/context/ModalContext";
+import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext";
 import localFont from "next/font/local"; // Import localFont from next/font/local
 
 import Loader from "@/components/atoms/loaders/loader";
@@ -68,7 +69,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <Loader />
               ) : (
                 <MessageProvider>
-                  <ModalProvider>{children}</ModalProvider>
+                  <ModalProvider>
+                    <UnsavedChangesProvider>{children}</UnsavedChangesProvider>
+                  </ModalProvider>
                 </MessageProvider>
               )}
             </AntdRegistry>

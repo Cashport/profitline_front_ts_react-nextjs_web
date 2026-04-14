@@ -37,7 +37,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onOpenSettin
         <div className="flex justify-around md:justify-center items-center h-full w-full md:gap-8">
           {menuItems.map((item) => {
             const isActive = activeTab === item.id;
-            const isAction = item.id === 'settings' || item.id === 'reports';
             
             return (
               <button

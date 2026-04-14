@@ -13,11 +13,10 @@ import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
 
 import { IAddClientForm } from "@/types/chat/IChat";
-import { ICreateEditContact, IResponseContactOptions } from "@/types/contacts/IContacts";
+import { ICreateEditContact } from "@/types/contacts/IContacts";
 
 import "./addClientModal.scss";
-import { ApiError, fetcher } from "@/utils/api/api";
-import useSWR from "swr";
+import { ApiError } from "@/utils/api/api";
 import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
 interface PropsInvoicesTable {
