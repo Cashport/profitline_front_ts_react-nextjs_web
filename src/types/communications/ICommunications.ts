@@ -224,7 +224,7 @@ export interface IMassiveCommunicationTemplate {
   subject: string;
   message: string;
   via: string;
-  attachments: string[];
+  attachments: Array<string | { id: number; name: string }>;
   action_type_ids: number[];
   sub_action_type_ids: number[];
   id_comunicacion_type: number;
