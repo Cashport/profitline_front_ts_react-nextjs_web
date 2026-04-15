@@ -238,7 +238,7 @@ export interface ICreateCommunicationTemplate {
   message: string;
   via: string;
   contact_roles: number[];
-  other_mails: string[];
+  attachment_ids: number[];
   comunication_type: number;
   action_type_ids: number[];
 }
