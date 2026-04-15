@@ -3,6 +3,7 @@ import UiTab from "@/components/ui/ui-tab";
 
 import styles from "./banks-view.module.scss";
 import ActivePaymentsTab from "../active-payments-tab";
+import PaymentApplicationsTab from "../payment-applications-tab";
 
 export const BanksView: FC = () => {
   const items = [
@@ -13,8 +14,8 @@ export const BanksView: FC = () => {
     },
     {
       key: "2",
-      label: "Historial",
-      children: <h4>Historial...</h4>
+      label: "Aplicaciones de pago",
+      children: <PaymentApplicationsTab />
     }
   ];
 
