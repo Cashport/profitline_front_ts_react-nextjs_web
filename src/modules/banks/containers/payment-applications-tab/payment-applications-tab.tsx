@@ -12,9 +12,9 @@ import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabC
 import BanksRules from "../bank-rules";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import {
-  FilterActivePaymentsTab,
-  IActivePaymentsFilters
-} from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
+  FilterPaymentApplicationsTab,
+  IPaymentApplicationsFilters
+} from "@/components/atoms/Filters/FilterPaymentApplicationsTab/FilterPaymentApplicationsTab";
 import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
@@ -36,15 +36,14 @@ export const PaymentApplicationsTab: FC = () => {
   const [isSelectOpen, setIsSelectOpen] = useState({ selected: 0 });
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedFilters, setSelectedFilters] = useState<IActivePaymentsFilters>({
-    dates: [],
-    active: []
+  const [selectedFilters, setSelectedFilters] = useState<IPaymentApplicationsFilters>({
+    dates: []
   });
   const [customDate, setCustomDate] = useState<string>("");
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = usePaymentApplications({});
+  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters });
 
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);
@@ -68,10 +67,9 @@ export const PaymentApplicationsTab: FC = () => {
 
   const handleFilterDates = (data: IFormFilterDates) => {
     const { start_date, end_date } = data;
-    setSelectedFilters((prev) => ({
-      ...prev,
+    setSelectedFilters({
       dates: [`${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`]
-    }));
+    });
     setCustomDate(
       `${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`
     );
@@ -85,7 +83,7 @@ export const PaymentApplicationsTab: FC = () => {
         <Flex className={styles.activePaymentsTab} vertical>
           <div className={`${styles.header} banksStickyHeader`}>
             <OptimizedSearchComponent title="Buscar" onSearch={handleSearch} />
-            <FilterActivePaymentsTab
+            <FilterPaymentApplicationsTab
               setSelectedFilters={setSelectedFilters}
               handleOpenCustomDate={() => setIsSelectOpen({ selected: 7 })}
               customDate={customDate}
