@@ -1,12 +1,18 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Flex, Table, TableProps, Typography } from "antd";
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
+import { Button, Dropdown, Flex, MenuProps, Table, TableProps, Typography } from "antd";
+import {
+  DotsThreeVertical,
+  DownloadSimple,
+  File,
+  FileArrowDown,
+  FileArrowUp
+} from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
 
 import "./payment-applications-table.scss";
-import { Eye } from "phosphor-react";
 
 const { Text } = Typography;
 
@@ -119,18 +125,6 @@ export const PaymentApplicationsTable = ({
       width: 115
     },
     {
-      title: "Recaudo",
-      key: "amount",
-      dataIndex: "amount",
-      align: "right",
-      render: (text) => (
-        <p className="fontMonoSpace money">{formatMoney(text, { hideDecimals: true })}</p>
-      ),
-      sorter: (a, b) => (a.amount ?? 0) - (b.amount ?? 0),
-      showSorterTooltip: false,
-      width: 150
-    },
-    {
       title: "Id Pago",
       key: "payment_ids",
       dataIndex: "payment_ids",
@@ -164,15 +158,67 @@ export const PaymentApplicationsTable = ({
       width: 160
     },
     {
+      title: "Recaudo",
+      key: "amount",
+      dataIndex: "amount",
+      align: "right",
+      render: (text) => (
+        <p className="fontMonoSpace money">{formatMoney(text, { hideDecimals: true })}</p>
+      ),
+      sorter: (a, b) => (a.amount ?? 0) - (b.amount ?? 0),
+      showSorterTooltip: false,
+      width: 200
+    },
+    {
       title: "",
       key: "seeDetail",
-      width: 60,
+      align: "right",
       dataIndex: "",
-      render: (_, record) => (
-        <Flex gap={"0.5rem"} justify="end">
-          <Button className="buttonSeeClient" icon={<Eye size={"1.3rem"} />} />
-        </Flex>
-      )
+      render: (_, record) => {
+        const items: MenuProps["items"] = [
+          {
+            key: "pdf",
+            label: (
+              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+                PDF
+              </Button>
+            )
+          },
+          {
+            key: "template",
+            label: (
+              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+                Template
+              </Button>
+            )
+          },
+          {
+            key: "upload-template",
+            label: (
+              <Button icon={<FileArrowUp size={20} />} className="buttonNoBorder">
+                Cargar Template
+              </Button>
+            )
+          }
+        ];
+
+        const customDropdown = (menu: ReactNode) => (
+          <div className="dropdownApplicationTable">{menu}</div>
+        );
+
+        return (
+          <Flex justify="end">
+            <Dropdown
+              dropdownRender={customDropdown}
+              menu={{ items }}
+              placement="bottomLeft"
+              trigger={["click"]}
+            >
+              <Button className="dotsBtn" icon={<DotsThreeVertical size={20} />} />
+            </Dropdown>
+          </Flex>
+        );
+      }
     }
   ];
 
