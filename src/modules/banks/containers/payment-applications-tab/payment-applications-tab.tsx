@@ -16,42 +16,39 @@ import {
   IActivePaymentsFilters
 } from "@/components/atoms/Filters/FilterActivePaymentsTab/FilterActivePaymentsTab";
 import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
+import Collapse from "@/components/ui/collapse";
+import LabelCollapse from "@/components/ui/label-collapse";
+import PaymentApplicationsTable from "../../components/payment-applications-table/PaymentApplicationsTable";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
+import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
 import { IFormFilterDates } from "../../components/modal-filter-select-dates/modal-filter-select-dates";
 
 import styles from "./payment-applications-tab.module.scss";
 import { usePaymentApplications } from "@/hooks/usePaymentApplications";
 
 export const PaymentApplicationsTab: FC = () => {
-  const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
+  const [selectedRows, setSelectedRows] = useState<IPaymentApplication[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
   const [clearSelected, setClearSelected] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState({ selected: 0 });
   const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [loadingApprove, setLoadingApprove] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<IActivePaymentsFilters>({
     dates: [],
     active: []
   });
   const [customDate, setCustomDate] = useState<string>("");
 
-  const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
   const { data, isLoading, mutate } = usePaymentApplications({});
 
-  console.log("data", data);
-  const handleOpenBankRules = () => {
-    setShowBankRules(true);
-  };
-
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);
-    setSelectedRows([selectedPayment as ISingleBank]);
+    setSelectedRows([selectedPayment as unknown as IPaymentApplication]);
     mutate();
   };
 
@@ -62,56 +59,6 @@ export const PaymentApplicationsTab: FC = () => {
       handleOpenPaymentDetail,
       mutatedPaymentDetail
     });
-  };
-
-  const onCloseModal = (cancelClicked?: Boolean) => {
-    setIsSelectOpen({ selected: 0 });
-
-    if (cancelClicked) return setisGenerateActionOpen(!isGenerateActionOpen);
-
-    setClearSelected(!clearSelected);
-    setSelectedRows([]);
-    mutate();
-
-    mutatePaymentDetail((prev) => !prev);
-    openModal("payment", {
-      paymentId: selectedRows?.[0]?.id || 0,
-      handleActionInDetail,
-      handleOpenPaymentDetail,
-      mutatedPaymentDetail: !mutatedPaymentDetail
-    });
-  };
-
-  const handleApproveAssignment = async () => {
-    setLoadingApprove(true);
-    try {
-      await approvePayment({
-        payments: selectedRows?.map((row) => row.id) || [],
-        project_id: ID,
-        client_id: selectedRows?.[0]?.id_client || ""
-      });
-
-      showMessage("success", "Asignación aprobada correctamente");
-      onCloseModal();
-    } catch (error) {
-      showMessage("error", "Error al aprobar la asignación");
-    }
-    setLoadingApprove(false);
-  };
-
-  const handlePaymentUnidentified = async () => {
-    try {
-      await markPaymentsAsUnidentified(selectedRows?.map((payment) => payment.id) || []);
-      showMessage("success", "Pago(s) marcados como no identificados");
-      mutate();
-      setSelectedRows([]);
-    } catch (error) {
-      showMessage(
-        "error",
-        "Ha ocurrido un error al marcar los pagos seleccionados como no identificados"
-      );
-    }
-    setIsSelectOpen({ selected: 0 });
   };
 
   const handleSearch = (query: string) => {
@@ -159,7 +106,7 @@ export const PaymentApplicationsTab: FC = () => {
             </Button>
           </div>
 
-          {/* {isLoading ? (
+          {isLoading ? (
             <Flex justify="center">
               <Spin style={{ margin: "30px" }} />
             </Flex>
@@ -168,31 +115,31 @@ export const PaymentApplicationsTab: FC = () => {
               stickyLabel
               labelStickyOffset={"6rem"}
               items={data?.map((status) => ({
-                key: status.payments_status_id,
+                key: status.status_id,
                 label: (
                   <LabelCollapse
-                    status={status.payments_status}
+                    status={status.name}
                     color={status.color}
-                    quantity={status.payments.length}
-                    total={status.total_account || 0}
+                    quantity={status.applications.length}
+                    total={status.total || 0}
                   />
                 ),
                 children: (
-                  <BanksTable
-                    clientsByStatus={status.payments.map((client) => ({
-                      ...client,
-                      client_status_id: status.payments_status_id
+                  <PaymentApplicationsTable
+                    applicationsByStatus={status.applications.map((application) => ({
+                      ...application,
+                      status_id: status.status_id
                     }))}
-                    handleOpenPaymentDetail={handleOpenPaymentDetail}
+                    handleOpenDetail={handleOpenPaymentDetail}
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
-                    bankStatusId={status.payments_status_id}
+                    statusId={status.status_id}
                     clearSelected={clearSelected}
                   />
                 )
               }))}
             />
-          )} */}
+          )}
 
           <ModalFilterSelectDates
             isOpen={isSelectOpen.selected === 7}

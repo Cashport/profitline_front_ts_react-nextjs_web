@@ -1,0 +1,52 @@
+@import "@/styles/variables.scss";
+
+.paymentApplicationsTable {
+    margin-top: 1rem;
+
+    .ant-table-column-title {
+        font-size: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    .ant-table-tbody {
+        overflow-x: hidden;
+
+        &-virtual-scrollbar-horizontal {
+            display: none;
+        }
+    }
+
+    .ant-table-container {
+        table {
+            .ant-table-cell {
+                padding-top: 0.4rem;
+                padding-bottom: 0.4rem;
+                font-size: 1rem !important;
+            }
+        }
+    }
+
+    .idText {
+        color: $link;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .paymentIdsText {
+        color: $link;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .money {
+        font-size: 0.875rem;
+    }
+
+    .buttonSeeClient {
+        background-color: $background !important;
+    }
+
+    .pagination {
+        justify-content: center;
+    }
+}
