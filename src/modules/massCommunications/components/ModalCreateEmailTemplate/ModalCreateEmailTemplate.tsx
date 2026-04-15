@@ -147,7 +147,7 @@ export default function ModalCreateEmailTemplate({
         message: data.body,
         via: "email",
         contact_roles: Array.from(data.templateRoles).map((role) => Number(role.split("_")[1])),
-        other_mails: [],
+        attachment_ids: Array.from(data.selectedAttachments).map((att) => Number(att)),
         comunication_type: 3,
         action_type_ids: [17]
       });
@@ -161,13 +161,10 @@ export default function ModalCreateEmailTemplate({
     }
   };
 
-  const renderedSubject = subjectValue.replace(
-    /\{\{(.+?)\}\}/g,
-    (_: string, tag: string) => {
-      const found = templateTags.find((t) => t.label === tag);
-      return found?.mock ?? `[${tag}]`;
-    }
-  );
+  const renderedSubject = subjectValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => {
+    const found = templateTags.find((t) => t.label === tag);
+    return found?.mock ?? `[${tag}]`;
+  });
   const renderedBody = bodyValue.replace(/\{\{(.+?)\}\}/g, (_: string, tag: string) => {
     const found = templateTags.find((t) => t.label === tag);
     return found?.mock ?? `[${tag}]`;
