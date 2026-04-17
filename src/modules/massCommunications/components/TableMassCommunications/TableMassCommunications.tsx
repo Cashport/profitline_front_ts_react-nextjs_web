@@ -17,13 +17,21 @@ interface TableMassCommunicationsProps {
   onPreviewClient?: (client: IPreviewClient) => void;
   onClientRemoved?: () => void;
   loading?: boolean;
+  page: number;
+  total: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 export default function TableMassCommunications({
   clients,
   onPreviewClient,
   onClientRemoved,
-  loading
+  loading,
+  page,
+  total,
+  pageSize,
+  onPageChange
 }: TableMassCommunicationsProps) {
   const { communicationId } = useParams<{ communicationId: string }>();
   const [confirmChecked, setConfirmChecked] = useState(false);
@@ -164,7 +172,13 @@ export default function TableMassCommunications({
         columns={columns}
         dataSource={clients}
         rowKey="client_id"
-        pagination={false}
+        pagination={{
+          current: page,
+          pageSize,
+          total,
+          showSizeChanger: false,
+          onChange: onPageChange
+        }}
         size="middle"
         loading={loading}
         rowClassName="border-b border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors"
