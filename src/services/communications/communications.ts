@@ -380,11 +380,11 @@ export const getCircularizationClientContacts = async (
   }
 };
 
-export const addClientToCircularization = async (communicationId: number, clientId: string) => {
+export const addClientToCircularization = async (communicationId: number, clientIds: string[]) => {
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/comunication/circularizations/${communicationId}/clients`,
-      { client_id: clientId }
+      { client_ids: clientIds }
     );
     return response;
   } catch (error) {

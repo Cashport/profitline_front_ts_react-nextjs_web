@@ -228,6 +228,9 @@ export interface IMassiveCommunicationTemplate {
   action_type_ids: number[];
   sub_action_type_ids: number[];
   id_comunicacion_type: number;
+  client_group: number[];
+  json_clients: string[];
+  has_cache: boolean;
 }
 
 export interface ICreateCommunicationTemplate {

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Flex, Typography } from "antd";
+import { Flex, Typography, message } from "antd";
 
 import ChannelSection from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import RecipientsSection from "../../components/MassCommunicationSections/RecipientsSection/RecipientsSection";
@@ -11,6 +11,7 @@ import ModalTestCommunication from "../../components/ModalTestCommunication/Moda
 import ModalCreateEmailTemplate from "../../components/ModalCreateEmailTemplate/ModalCreateEmailTemplate";
 
 import {
+  addClientToCircularization,
   getMassiveCommunicationTemplates,
   getTemplateTags
 } from "@/services/communications/communications";
@@ -18,6 +19,7 @@ import { getWhatsAppTemplates } from "@/services/chat/chat";
 import type { EmailTemplate } from "../../components/MassCommunicationSections/MessageSection/EmailTemplateCard";
 import type { ChannelType } from "../../components/MassCommunicationSections/ChannelSection/ChannelSection";
 import type { WhatsappTemplate } from "../../lib/mockData";
+import type { IMassiveCommunicationTemplate } from "@/types/communications/ICommunications";
 
 const { Title } = Typography;
 
@@ -32,10 +34,12 @@ export default function MassCommunicationsView() {
 
   // Email message
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [rawEmailTemplates, setRawEmailTemplates] = useState<IMassiveCommunicationTemplate[]>([]);
   const [apiTags, setApiTags] = useState<{ id: number; name: string; mock: string }[]>([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [isSendingPreview, setIsSendingPreview] = useState(false);
 
   const fetchEmailTemplates = useCallback(async () => {
     try {
@@ -55,6 +59,7 @@ export default function MassCommunicationsView() {
         })
       }));
       setEmailTemplates(mapped);
+      setRawEmailTemplates(data);
     } catch (err) {
       console.error("Error fetching email templates:", err);
     }
@@ -139,10 +144,27 @@ export default function MassCommunicationsView() {
   const canOpenPreview =
     validatedCount > 0 && (channel === "email" ? !!selectedEmailTemplate : !!selectedTemplate);
 
-  const handlePreviewAndSend = () => {
+  const handlePreviewAndSend = async () => {
     if (!canOpenPreview) return;
 
-    router.push("/mass-communications/" + selectedEmailTemplate);
+    const raw = rawEmailTemplates.find((t) => t.id.toString() === selectedEmailTemplate);
+
+    if (!raw || raw.has_cache) {
+      router.push("/mass-communications/" + selectedEmailTemplate);
+      return;
+    }
+
+    try {
+      setIsSendingPreview(true);
+      await addClientToCircularization(raw.id, raw.json_clients);
+      router.push("/mass-communications/" + selectedEmailTemplate);
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al preparar la circularización"
+      );
+    } finally {
+      setIsSendingPreview(false);
+    }
   };
 
   return (
@@ -187,6 +209,7 @@ export default function MassCommunicationsView() {
             canOpenPreview={canOpenPreview}
             onTestCommunication={() => setTestDialogOpen(true)}
             onPreviewAndSend={handlePreviewAndSend}
+            isSendingPreview={isSendingPreview}
           />
         </Flex>
       </div>
