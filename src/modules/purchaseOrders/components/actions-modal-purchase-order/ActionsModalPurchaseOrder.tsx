@@ -94,6 +94,19 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     return true;
   };
 
+  const validatePackagesSelection = (): boolean => {
+    if (selectedPackageRows.length === 0) {
+      message.warning("Selecciona al menos un pedido para realizar esta acción");
+      return false;
+    }
+    const firstStatus = selectedPackageRows[0].status;
+    if (selectedPackageRows.some((p) => p.status !== firstStatus)) {
+      message.warning("Todos los pedidos seleccionados deben tener el mismo estado");
+      return false;
+    }
+    return true;
+  };
+
   const validateOrderSelection = (): boolean => {
     if (selectedOrders.length === 0) {
       message.warning("Selecciona al menos una orden para realizar esta acción");
@@ -211,7 +224,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const handleOpenDownloadPlaneModal = () => {
-    if (!validatePackageSelection()) return;
+    if (!validatePackagesSelection()) return;
     onClose();
     setIsDownloadPlaneOpen(true);
   };
@@ -315,7 +328,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       <ModalDownloadPlane
         isOpen={isDownloadPlaneOpen}
         onClose={() => setIsDownloadPlaneOpen(false)}
-        packageId={String(selectedPackageRows[0]?.packageId)}
+        packageIds={selectedPackageRows.map((row) => String(row.packageId)) || []}
       />
     </>
   );

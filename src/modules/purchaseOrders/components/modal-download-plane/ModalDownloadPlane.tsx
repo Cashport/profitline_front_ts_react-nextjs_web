@@ -13,10 +13,10 @@ import "./modalDownloadPlane.scss";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  packageId: string;
+  packageIds: string[];
 };
 
-export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId }) => {
+export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageIds }) => {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [files, setFiles] = useState<IAvailableDocument[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     const fetchFiles = async () => {
       setIsLoading(true);
       try {
-        const data = await getDownloadableFiles(packageId);
+        const data = await getDownloadableFiles(packageIds);
         setFiles(data.documents);
       } catch (error) {
         message.error("Error al obtener los archivos disponibles");
@@ -39,7 +39,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     };
 
     fetchFiles();
-  }, [isOpen, packageId]);
+  }, [isOpen, packageIds]);
 
   const total = files.length;
   const selectedCount = selectedTypes.length;
@@ -64,7 +64,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
     setIsDownloading(true);
     try {
       const blob = await downloadAvailableDocuments({
-        packageId: Number(packageId),
+        packageIds: packageIds.map((id) => Number(id)),
         documents: selectedTypes
       });
       const url = window.URL.createObjectURL(blob);
