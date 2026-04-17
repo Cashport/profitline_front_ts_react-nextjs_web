@@ -378,26 +378,26 @@ export const getBatchesByProduct = async (purchaseOrderId: string, productId: st
 };
 
 export const downloadAvailableDocuments = async ({
-  packageId,
+  packageIds,
   orderIds,
   documents
 }: {
-  packageId?: number;
+  packageIds?: number[];
   orderIds?: number[];
   documents: string[];
 }): Promise<Blob> => {
-  if (!packageId && !orderIds) {
-    throw new Error("Debe proporcionar packageId o orderIds para descargar los documentos");
+  if (!packageIds && !orderIds) {
+    throw new Error("Debe proporcionar packageIds o orderIds para descargar los documentos");
   }
-  if (packageId && orderIds) {
-    throw new Error("Solo puede proporcionar packageId o orderIds, no ambos");
+  if (packageIds && orderIds) {
+    throw new Error("Solo puede proporcionar packageIds o orderIds, no ambos");
   }
   try {
     const response = await instance.post(
       `${config.API_HOST}/purchaseOrder/documents/download`,
       {
         ...(orderIds && { order_ids: orderIds }),
-        ...(packageId && { package_id: packageId }),
+        ...(packageIds && { package_ids: packageIds }),
         documents
       },
       { responseType: "blob", timeout: 60000 }
@@ -409,13 +409,13 @@ export const downloadAvailableDocuments = async ({
   }
 };
 
-export const getDownloadableFiles = async (packageId?: string, orderIds?: string[]) => {
-  if (!packageId && !orderIds) {
+export const getDownloadableFiles = async (packageIds?: string[], orderIds?: string[]) => {
+  if (!packageIds && !orderIds) {
     throw new Error(
       "Debe proporcionar packageId o orderIds para obtener los archivos descargables"
     );
   }
-  if (packageId && orderIds) {
+  if (packageIds && orderIds) {
     throw new Error("Solo puede proporcionar packageId o orderIds, no ambos");
   }
   try {
@@ -423,7 +423,7 @@ export const getDownloadableFiles = async (packageId?: string, orderIds?: string
       `${config.API_HOST}/purchaseOrder/documents/available`,
       {
         ...(orderIds && { order_ids: orderIds }),
-        ...(packageId && { package_id: packageId })
+        ...(packageIds && { package_ids: packageIds })
       }
     );
     return response.data;
