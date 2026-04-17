@@ -15,7 +15,6 @@ export default function MassComunicationsTableView() {
   const [showPreview, setShowPreview] = useState(false);
 
   const { data, loading } = useClientCommunication({ communicationId });
-  console.log("useClientCommunication data:", data);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("Search:", e.target.value);
@@ -54,7 +53,11 @@ export default function MassComunicationsTableView() {
         {showPreview ? (
           <ClientPreview onBack={() => setShowPreview(false)} />
         ) : (
-          <TableMassCommunications onPreviewClient={() => setShowPreview(true)} loading={loading} />
+          <TableMassCommunications
+            clients={data?.clients ?? []}
+            onPreviewClient={() => setShowPreview(true)}
+            loading={loading}
+          />
         )}
       </div>
     </div>
