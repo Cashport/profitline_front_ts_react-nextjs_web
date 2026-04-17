@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -11,9 +11,10 @@ import { useClientCommunication } from "../../hooks/useClientCommunication";
 
 export default function MassComunicationsTableView() {
   const router = useRouter();
+  const { communicationId } = useParams<{ communicationId: string }>();
   const [showPreview, setShowPreview] = useState(false);
 
-  const { data, loading } = useClientCommunication();
+  const { data, loading } = useClientCommunication({ communicationId });
   console.log("useClientCommunication data:", data);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,10 +54,7 @@ export default function MassComunicationsTableView() {
         {showPreview ? (
           <ClientPreview onBack={() => setShowPreview(false)} />
         ) : (
-          <TableMassCommunications
-            onPreviewClient={() => setShowPreview(true)}
-            loading={loading}
-          />
+          <TableMassCommunications onPreviewClient={() => setShowPreview(true)} loading={loading} />
         )}
       </div>
     </div>

@@ -139,6 +139,12 @@ export default function MassCommunicationsView() {
   const canOpenPreview =
     validatedCount > 0 && (channel === "email" ? !!selectedEmailTemplate : !!selectedTemplate);
 
+  const handlePreviewAndSend = () => {
+    if (!canOpenPreview) return;
+
+    router.push("/mass-communications/" + selectedEmailTemplate);
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       <div className="max-w-[1400px] mx-auto">
@@ -180,9 +186,7 @@ export default function MassCommunicationsView() {
             channel={channel}
             canOpenPreview={canOpenPreview}
             onTestCommunication={() => setTestDialogOpen(true)}
-            onPreviewAndSend={() => {
-              router.push("/mass-communications/listing?channel=" + channel);
-            }}
+            onPreviewAndSend={handlePreviewAndSend}
           />
         </Flex>
       </div>

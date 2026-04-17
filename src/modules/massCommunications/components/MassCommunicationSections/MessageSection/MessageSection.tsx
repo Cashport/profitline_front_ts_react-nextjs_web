@@ -124,7 +124,9 @@ export default function MessageSection({
                     key={tpl.id}
                     template={tpl}
                     isSelected={selectedTemplate === tpl.id}
-                    onSelect={() => onSelectTemplate(tpl.id)}
+                    onSelect={() => {
+                      onSelectTemplate(tpl.id);
+                    }}
                   />
                 ))
               )}
