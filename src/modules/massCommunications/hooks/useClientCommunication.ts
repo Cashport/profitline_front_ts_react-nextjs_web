@@ -1,7 +1,8 @@
 import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
-import { useAppStore } from "@/lib/store/store";
+import type { GenericResponse } from "@/types/global/IGlobal";
+import type { IGetPreviewClients } from "@/types/communications/ICommunications";
 
 interface Props {
   communicationId: string;
@@ -18,11 +19,13 @@ export const useClientCommunication = ({ communicationId, page, limit, search }:
 
   const query = params.toString();
   const pathKey = `/comunication/circularizations/${communicationId}/clients${query ? `?${query}` : ""}`;
-  // TO DO: Cambiar el any por el tipo correcto
-  const { data, error, isLoading, mutate } = useSWR(pathKey, fetcher);
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetPreviewClients>>(
+    pathKey,
+    fetcher
+  );
 
   return {
-    data,
+    data: data?.data,
     loading: isLoading,
     error,
     mutate

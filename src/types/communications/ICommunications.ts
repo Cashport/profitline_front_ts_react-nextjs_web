@@ -275,3 +275,20 @@ export interface ICircularizationClientContacts {
   channel: string;
   address: string;
 }
+
+export interface IPreviewClient {
+  client_id: string;
+  client_name: string;
+  total_portfolio: number;
+  past_due_amount: number;
+  active_payment_agreements: number;
+  total_contacts: number;
+}
+
+export interface IGetPreviewClients {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+  clients: IPreviewClient[];
+}
