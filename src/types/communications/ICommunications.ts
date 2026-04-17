@@ -255,3 +255,23 @@ export interface IGetValidatedClientsResponse {
   clientName: string;
   isValid?: boolean;
 }
+
+export interface IMessagePreviewAttachment {
+  type: number;
+  name: string;
+}
+
+export interface IMessagePreview {
+  client_id: string;
+  via: string;
+  subject: string;
+  body: string;
+  recipient_addresses: string[];
+  attachments: IMessagePreviewAttachment[];
+}
+
+export interface ICircularizationClientContacts {
+  contact_name: string;
+  channel: string;
+  address: string;
+}
