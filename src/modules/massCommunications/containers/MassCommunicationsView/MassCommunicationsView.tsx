@@ -180,7 +180,10 @@ export default function MassCommunicationsView() {
         <Flex vertical gap={24}>
           <ChannelSection channel={channel} onChannelChange={setChannel} />
 
-          <RecipientsSection onValidatedCountChange={setValidatedCount} />
+          <RecipientsSection
+            onValidatedCountChange={setValidatedCount}
+            selectedTemplateId={selectedEmailTemplate}
+          />
 
           <MessageSection
             channel={channel}

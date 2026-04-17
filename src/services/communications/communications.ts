@@ -309,11 +309,11 @@ export const getMassiveCommunicationTemplates = async () => {
   }
 };
 
-export const validateClients = async (clientIds: string[]) => {
+export const validateClients = async (clientIds: string[], communicationId: number) => {
   try {
     const response: GenericResponse<IValidatedClients[]> = await API.post(
       `${config.API_HOST}/comunication/validate-client-list`,
-      { client_ids: clientIds }
+      { client_ids: clientIds, id_comunicacion: communicationId }
     );
     return response.data;
   } catch (error) {

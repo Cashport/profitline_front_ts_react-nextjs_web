@@ -28,9 +28,13 @@ const normalizeIds = (input: string): string[] => {
 
 interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
+  selectedTemplateId: string;
 }
 
-export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
+export default function RecipientsSection({
+  onValidatedCountChange,
+  selectedTemplateId
+}: RecipientsSectionProps) {
   const [rawIds, setRawIds] = useState("");
   const [hasValidated, setHasValidated] = useState(false);
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
@@ -47,6 +51,14 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       setRawIds(validIds.join("\n"));
     }
   }, [clientList]);
+
+  useEffect(() => {
+    if (!hasValidated) return;
+    setHasValidated(false);
+    setValidClients([]);
+    setInvalidIds([]);
+    onValidatedCountChange(0);
+  }, [selectedTemplateId]);
 
   const handleRawIdsChange = useCallback(
     (value: string) => {
@@ -76,7 +88,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
 
     setIsValidating(true);
     try {
-      const result = await validateClients(ids);
+      const result = await validateClients(ids, Number(selectedTemplateId));
       const valid = result.filter((c) => c.status === "FOUND");
       const invalid = result.filter((c) => c.status === "NOT_FOUND").map((c) => c.clientId);
 
@@ -93,7 +105,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
     } finally {
       setIsValidating(false);
     }
-  }, [rawIds, onValidatedCountChange, mutate]);
+  }, [rawIds, onValidatedCountChange, mutate, selectedTemplateId]);
 
   const handleClear = useCallback(() => {
     setRawIds("");
@@ -150,12 +162,16 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
         <Flex vertical gap={8}>
           <Button
             type="primary"
-            onClick={rawIds.trim() ? handleValidate : undefined}
+            onClick={rawIds.trim() && selectedTemplateId ? handleValidate : undefined}
             icon={<CheckCircle2 size={16} />}
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
             loading={isValidating}
+            title={!selectedTemplateId ? "Seleccioná un template primero" : undefined}
             style={{
-              ...(!rawIds.trim() && { opacity: 0.4, pointerEvents: "none" })
+              ...((!rawIds.trim() || !selectedTemplateId) && {
+                opacity: 0.4,
+                pointerEvents: "none"
+              })
             }}
           >
             Validar
