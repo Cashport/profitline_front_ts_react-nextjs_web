@@ -116,8 +116,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "Error al descargar el reporte";
+      const errorMsg = error instanceof Error ? error.message : "Error al descargar el reporte";
       message.error(errorMsg);
     } finally {
       setIsExporting(false);
@@ -204,7 +203,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
               </Tag>
             )}
             <Text type="secondary" className="text-xs">
-              de {clientList.length.toLocaleString()} clientes totales
+              de {(validClients.length + invalidIds.length).toLocaleString()} clientes totales
             </Text>
           </Flex>
           <Button
