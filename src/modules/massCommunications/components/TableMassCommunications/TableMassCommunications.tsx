@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { Table, Dropdown } from "antd";
+import { Table, Dropdown, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { MenuProps } from "antd";
 import { Eye, MoreHorizontal, Trash2, Users, CheckCircle2, Send } from "lucide-react";
@@ -10,28 +10,43 @@ import { Button } from "@/modules/chat/ui/button";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import ModalDetailClientCommunication from "../ModalDetailClientCommunication/ModalDetailClientCommunication";
 import { IPreviewClient } from "@/types/communications/ICommunications";
+import { removeClientFromCircularization } from "@/services/communications/communications";
 
 interface TableMassCommunicationsProps {
   clients: IPreviewClient[];
   onPreviewClient?: (client: IPreviewClient) => void;
+  onClientRemoved?: () => void;
   loading?: boolean;
 }
 
 export default function TableMassCommunications({
   clients,
   onPreviewClient,
+  onClientRemoved,
   loading
 }: TableMassCommunicationsProps) {
   const { communicationId } = useParams<{ communicationId: string }>();
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [sendSuccess] = useState(false);
   const [emailModalClientId, setEmailModalClientId] = useState<string | null>(null);
+  const [isRemovingClient, setIsRemovingClient] = useState(false);
 
   const handleSend = () => console.log("Send communication");
   const handlePreviewClient = (client: IPreviewClient) => {
     onPreviewClient?.(client);
   };
-  const handleRemoveClient = (clientId: string) => console.log("Remove client:", clientId);
+  const handleRemoveClient = async (clientId: string) => {
+    setIsRemovingClient(true);
+    try {
+      await removeClientFromCircularization(Number(communicationId), clientId);
+      message.success("Cliente eliminado del envío");
+      onClientRemoved?.();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al eliminar cliente");
+    } finally {
+      setIsRemovingClient(false);
+    }
+  };
   const handleViewEmail = (client: IPreviewClient) => setEmailModalClientId(client.client_id);
 
   const columns: ColumnsType<IPreviewClient> = [
@@ -54,7 +69,6 @@ export default function TableMassCommunications({
       title: "Contactos",
       key: "contacts",
       align: "center",
-      // TODO: restaurar tooltip cuando tengamos endpoint de contactos
       render: (_, record) => (
         <button
           type="button"
@@ -71,9 +85,7 @@ export default function TableMassCommunications({
       key: "total_portfolio",
       align: "right",
       render: (total_portfolio: number) => (
-        <span className="text-sm text-[#141414]">
-          ${total_portfolio.toLocaleString("es-CO")}
-        </span>
+        <span className="text-sm text-[#141414]">${total_portfolio.toLocaleString("es-CO")}</span>
       )
     },
     {
@@ -111,6 +123,7 @@ export default function TableMassCommunications({
         const menuItems: MenuProps["items"] = [
           {
             key: "remove",
+            disabled: isRemovingClient,
             label: (
               <span className="flex items-center gap-2 text-red-600 text-xs">
                 <Trash2 className="w-3.5 h-3.5" />
