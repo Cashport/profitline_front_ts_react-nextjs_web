@@ -7,10 +7,14 @@ import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
+import { useClientCommunication } from "../../hooks/useClientCommunication";
 
 export default function MassComunicationsTableView() {
   const router = useRouter();
   const [showPreview, setShowPreview] = useState(false);
+
+  const { data, loading } = useClientCommunication();
+  console.log("useClientCommunication data:", data);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("Search:", e.target.value);
@@ -49,7 +53,10 @@ export default function MassComunicationsTableView() {
         {showPreview ? (
           <ClientPreview onBack={() => setShowPreview(false)} />
         ) : (
-          <TableMassCommunications onPreviewClient={() => setShowPreview(true)} />
+          <TableMassCommunications
+            onPreviewClient={() => setShowPreview(true)}
+            loading={loading}
+          />
         )}
       </div>
     </div>

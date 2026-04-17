@@ -19,9 +19,13 @@ const channel = "email";
 
 interface TableMassCommunicationsProps {
   onPreviewClient?: (client: IValidatedClient) => void;
+  loading?: boolean;
 }
 
-export default function TableMassCommunications({ onPreviewClient }: TableMassCommunicationsProps) {
+export default function TableMassCommunications({
+  onPreviewClient,
+  loading
+}: TableMassCommunicationsProps) {
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [sendSuccess] = useState(false);
   const [emailModalClient, setEmailModalClient] = useState<IValidatedClient | null>(null);
@@ -188,6 +192,7 @@ export default function TableMassCommunications({ onPreviewClient }: TableMassCo
         rowKey="id"
         pagination={false}
         size="middle"
+        loading={loading}
         rowClassName="border-b border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors"
       />
 
