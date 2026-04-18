@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
+import { useDebounce } from "@/hooks/useDeabouce";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
 import { useClientCommunication } from "../../hooks/useClientCommunication";
@@ -14,11 +16,21 @@ export default function MassComunicationsTableView() {
   const { communicationId } = useParams<{ communicationId: string }>();
   const [showPreview, setShowPreview] = useState(false);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
 
-  const { data, loading, mutate } = useClientCommunication({ communicationId, page });
+  const { data, loading, mutate } = useClientCommunication({
+    communicationId,
+    page,
+    search: debouncedSearch
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Search:", e.target.value);
+    setSearch(e.target.value);
   };
 
   return (
