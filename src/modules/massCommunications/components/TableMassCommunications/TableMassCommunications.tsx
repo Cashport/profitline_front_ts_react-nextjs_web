@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { Table, Dropdown, message } from "antd";
+import { useParams, useRouter } from "next/navigation";
+import { Table, Dropdown, message, Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { MenuProps } from "antd";
-import { Eye, MoreHorizontal, Trash2, Users, CheckCircle2, Send } from "lucide-react";
+import { Eye, MoreHorizontal, Trash2, Users, Send } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
 import ModalDetailClientCommunication from "../ModalDetailClientCommunication/ModalDetailClientCommunication";
 import { IPreviewClient } from "@/types/communications/ICommunications";
-import { removeClientFromCircularization } from "@/services/communications/communications";
+import {
+  removeClientFromCircularization,
+  sendIndividualCommunication
+} from "@/services/communications/communications";
+import { useAppStore } from "@/lib/store/store";
 
 interface TableMassCommunicationsProps {
   clients: IPreviewClient[];
@@ -34,12 +38,27 @@ export default function TableMassCommunications({
   onPageChange
 }: TableMassCommunicationsProps) {
   const { communicationId } = useParams<{ communicationId: string }>();
+  const router = useRouter();
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [confirmChecked, setConfirmChecked] = useState(false);
-  const [sendSuccess] = useState(false);
   const [emailModalClientId, setEmailModalClientId] = useState<string | null>(null);
   const [isRemovingClient, setIsRemovingClient] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSend = () => console.log("Send communication");
+  const handleSend = async () => {
+    setIsSending(true);
+    try {
+      await sendIndividualCommunication(projectId, Number(communicationId));
+      message.success("Comunicación activada correctamente");
+      router.push("/mass-communications");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al activar la comunicación"
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
   const handlePreviewClient = (client: IPreviewClient) => {
     onPreviewClient?.(client);
   };
@@ -199,13 +218,13 @@ export default function TableMassCommunications({
         </label>
         <Button
           onClick={handleSend}
-          disabled={!confirmChecked || sendSuccess}
+          disabled={!confirmChecked || isSending}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-10 px-6"
         >
-          {sendSuccess ? (
+          {isSending ? (
             <>
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Comunicacion enviada
+              <Spin size="small" className="mr-2" />
+              Enviando...
             </>
           ) : (
             <>
