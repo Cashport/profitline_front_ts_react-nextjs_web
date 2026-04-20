@@ -490,8 +490,9 @@ const CreateOrderCheckout: FC = ({}) => {
                   {...field}
                   placeholder="Ingresar un comentario"
                   style={errors.comment ? { borderColor: "red" } : {}}
-                  maxLength={35}
+                  maxLength={64}
                 />
+                <p className={styles.textArea__hint}>Máximo 64 caracteres</p>
               </div>
             )}
           />
