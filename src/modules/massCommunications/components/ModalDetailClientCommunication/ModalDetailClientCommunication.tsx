@@ -36,7 +36,9 @@ export default function ModalDetailClientCommunication({
           body: extractBodyText(response.data.body)
         });
       } catch (error) {
-        message.error("No se pudo cargar la vista previa del mensaje.");
+        message.error(
+          error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
+        );
       } finally {
         setLoading(false);
       }
