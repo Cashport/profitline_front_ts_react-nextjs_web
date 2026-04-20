@@ -1,19 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
+import { useDebounce } from "@/hooks/useDeabouce";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
+import { useClientCommunication } from "../../hooks/useClientCommunication";
+import type { IPreviewClient } from "@/types/communications/ICommunications";
 
 export default function MassComunicationsTableView() {
   const router = useRouter();
-  const [showPreview, setShowPreview] = useState(false);
+  const { communicationId } = useParams<{ communicationId: string }>();
+  const [selectedClient, setSelectedClient] = useState<IPreviewClient | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const { data, loading, mutate } = useClientCommunication({
+    communicationId,
+    page,
+    search: debouncedSearch
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Search:", e.target.value);
+    setSearch(e.target.value);
   };
 
   return (
@@ -46,10 +64,24 @@ export default function MassComunicationsTableView() {
         </div>
 
         {/* Main content */}
-        {showPreview ? (
-          <ClientPreview onBack={() => setShowPreview(false)} />
+        {selectedClient ? (
+          <ClientPreview
+            communicationId={communicationId}
+            clientId={selectedClient.client_id}
+            clientName={selectedClient.client_name}
+            onBack={() => setSelectedClient(null)}
+          />
         ) : (
-          <TableMassCommunications onPreviewClient={() => setShowPreview(true)} />
+          <TableMassCommunications
+            clients={data?.clients ?? []}
+            onPreviewClient={(client) => setSelectedClient(client)}
+            onClientRemoved={() => mutate()}
+            loading={loading}
+            page={page}
+            total={data?.total ?? 0}
+            pageSize={data?.limit ?? 10}
+            onPageChange={setPage}
+          />
         )}
       </div>
     </div>

@@ -15,7 +15,9 @@ import {
   ITemplateCommunication,
   Iattachments,
   IValidatedClients,
-  IGetValidatedClientsResponse
+  IGetValidatedClientsResponse,
+  IMessagePreview,
+  ICircularizationClientContacts
 } from "@/types/communications/ICommunications";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IFormEmailNotification } from "@/components/molecules/modals/ModalSendEmail/ModalSendEmail";
@@ -307,11 +309,11 @@ export const getMassiveCommunicationTemplates = async () => {
   }
 };
 
-export const validateClients = async (clientIds: string[]) => {
+export const validateClients = async (clientIds: string[], communicationId: number) => {
   try {
     const response: GenericResponse<IValidatedClients[]> = await API.post(
       `${config.API_HOST}/comunication/validate-client-list`,
-      { client_ids: clientIds }
+      { client_ids: clientIds, id_comunicacion: communicationId }
     );
     return response.data;
   } catch (error) {
@@ -328,6 +330,80 @@ export const getCurrentValidatedClients = async () => {
     return response.data;
   } catch (error) {
     console.error("Error getting current validated clients", error);
+    throw error;
+  }
+};
+
+export const activateCircularizationClients = async (
+  communicationId: number,
+  clientIds: string[]
+) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/activate-clients`,
+      { id_comunicacion: communicationId, client_ids: clientIds }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error activating circularization clients", error);
+    throw error;
+  }
+};
+
+export const getCircularizationMessagePreview = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<IMessagePreview> = await API.get(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}/message-preview`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting circularization message preview", error);
+    throw error;
+  }
+};
+
+export const getCircularizationClientContacts = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<ICircularizationClientContacts[]> = await API.get(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}/contacts`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting circularization client contacts", error);
+    throw error;
+  }
+};
+
+export const addClientToCircularization = async (communicationId: number, clientIds: string[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients`,
+      { client_ids: clientIds }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error adding client to circularization", error);
+    throw error;
+  }
+};
+
+export const removeClientFromCircularization = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error removing client from circularization", error);
     throw error;
   }
 };
