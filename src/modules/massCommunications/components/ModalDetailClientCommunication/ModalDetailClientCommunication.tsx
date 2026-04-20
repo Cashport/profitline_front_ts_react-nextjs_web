@@ -4,6 +4,7 @@ import { PaperClipOutlined } from "@ant-design/icons";
 
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
 import type { IMessagePreview } from "@/types/communications/ICommunications";
+import { extractBodyText } from "@/utils/utils";
 
 const { Text } = Typography;
 
@@ -29,11 +30,11 @@ export default function ModalDetailClientCommunication({
     const fetchPreview = async () => {
       setLoading(true);
       try {
-        const response = await getCircularizationMessagePreview(
-          Number(communicationId),
-          clientId
-        );
-        setData(response.data);
+        const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
+        setData({
+          ...response.data,
+          body: extractBodyText(response.data.body)
+        });
       } catch (error) {
         message.error("No se pudo cargar la vista previa del mensaje.");
       } finally {
