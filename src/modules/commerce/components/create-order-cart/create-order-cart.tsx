@@ -63,9 +63,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const MINIMUM_ORDER_AMOUNT = 1600000;
+  const totalWithTaxes = (confirmOrderData?.total ?? 0) + (confirmOrderData?.taxes ?? 0);
   const isTotalLessThanMinimum = useMemo(
-    () => confirmOrderData?.total && confirmOrderData.total < MINIMUM_ORDER_AMOUNT,
-    [confirmOrderData]
+    () => totalWithTaxes > 0 && totalWithTaxes < MINIMUM_ORDER_AMOUNT,
+    [totalWithTaxes]
   );
 
   const hasNoCanulasOrAgua = useMemo(() => {
@@ -82,25 +83,18 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
       if (isTotalLessThanMinimum) {
         setShowConfirmModal(true);
-      } else if (hasNoCanulasOrAgua) {
-        setShowCanulasModal(true);
-      } else {
-        setCheckingOut(true);
-        onClose && onClose();
+        return;
       }
+      if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+        return;
+      }
+      setCheckingOut(true);
+      onClose && onClose();
       return;
     }
 
     setCheckingOut(true);
-  };
-
-  const handleConfirmPurchase = () => {
-    setShowConfirmModal(false);
-    if (hasNoCanulasOrAgua) {
-      setShowCanulasModal(true);
-    } else {
-      setCheckingOut(true);
-    }
   };
 
   const handleConfirmCanulas = () => {
@@ -313,18 +307,17 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showConfirmModal}
         onClose={handleCloseModal}
-        onOk={handleConfirmPurchase}
-        title="¿Está seguro que desea continuar?"
+        title="No puedes continuar con la compra"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El pedido es inferior a {formatMoney(MINIMUM_ORDER_AMOUNT)}
+              El pedido debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)} (IVA incluido)
             </p>
-            <p>Te sugerimos que incrementes la compra</p>
+            <p>Agrega más productos al carrito para continuar.</p>
           </Flex>
         }
-        okText="Confirmar"
-        cancelText="Cancelar"
+        cancelText="Entendido"
+        hideOkButton
       />
 
       <ModalConfirmAction

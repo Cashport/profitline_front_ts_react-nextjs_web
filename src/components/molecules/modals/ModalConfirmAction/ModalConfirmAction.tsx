@@ -13,6 +13,7 @@ interface Props {
   cancelText?: string;
   okLoading?: boolean;
   cancelLoading?: boolean;
+  hideOkButton?: boolean;
 }
 
 export const ModalConfirmAction = ({
@@ -25,14 +26,19 @@ export const ModalConfirmAction = ({
   okText = "Aceptar",
   cancelText = "Cancelar",
   okLoading,
-  cancelLoading
+  cancelLoading,
+  hideOkButton
 }: Props) => {
   return (
     <Modal
       className="ModalConfirmAction"
       open={isOpen}
       onCancel={onClose}
-      okButtonProps={{ className: "acceptButton", loading: okLoading }}
+      okButtonProps={{
+        className: "acceptButton",
+        loading: okLoading,
+        style: hideOkButton ? { display: "none" } : undefined
+      }}
       okText={okText}
       cancelButtonProps={{
         className: "cancelButton",
