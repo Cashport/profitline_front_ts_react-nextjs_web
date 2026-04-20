@@ -10,11 +10,12 @@ import { useDebounce } from "@/hooks/useDeabouce";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
 import { useClientCommunication } from "../../hooks/useClientCommunication";
+import type { IPreviewClient } from "@/types/communications/ICommunications";
 
 export default function MassComunicationsTableView() {
   const router = useRouter();
   const { communicationId } = useParams<{ communicationId: string }>();
-  const [showPreview, setShowPreview] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<IPreviewClient | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -63,12 +64,17 @@ export default function MassComunicationsTableView() {
         </div>
 
         {/* Main content */}
-        {showPreview ? (
-          <ClientPreview onBack={() => setShowPreview(false)} />
+        {selectedClient ? (
+          <ClientPreview
+            communicationId={communicationId}
+            clientId={selectedClient.client_id}
+            clientName={selectedClient.client_name}
+            onBack={() => setSelectedClient(null)}
+          />
         ) : (
           <TableMassCommunications
             clients={data?.clients ?? []}
-            onPreviewClient={() => setShowPreview(true)}
+            onPreviewClient={(client) => setSelectedClient(client)}
             onClientRemoved={() => mutate()}
             loading={loading}
             page={page}
