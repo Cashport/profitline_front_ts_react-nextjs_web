@@ -40,6 +40,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
+  const [showOnlyCanulasOrAguaModal, setShowOnlyCanulasOrAguaModal] = useState(false);
 
   const {
     selectedCategories,
@@ -79,8 +80,21 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     );
   }, [selectedCategories]);
 
+  const hasOnlyCanulasOrAgua = useMemo(() => {
+    const allProducts = selectedCategories.flatMap((c) => c.products);
+    if (allProducts.length === 0) return false;
+    return allProducts.every((product) => {
+      const name = product.name?.toLowerCase() ?? "";
+      return name.includes("canula") || name.includes("agua");
+    });
+  }, [selectedCategories]);
+
   const handleContinuePurchase = () => {
     if (projectId === GALDERMA_PROJECT_ID) {
+      if (hasOnlyCanulasOrAgua) {
+        setShowOnlyCanulasOrAguaModal(true);
+        return;
+      }
       if (isTotalLessThanMinimum) {
         setShowConfirmModal(true);
         return;
@@ -109,6 +123,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
   const handleCloseCanulasModal = () => {
     setShowCanulasModal(false);
+  };
+
+  const handleCloseOnlyCanulasOrAguaModal = () => {
+    setShowOnlyCanulasOrAguaModal(false);
   };
 
   useEffect(() => {
@@ -335,6 +353,22 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         }
         okText="Confirmar"
         cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={showOnlyCanulasOrAguaModal}
+        onClose={handleCloseOnlyCanulasOrAguaModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              No se pueden facturar solo cánulas ni aguas
+            </p>
+            <p>Agrega otros productos al carrito para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
       />
     </div>
   );
