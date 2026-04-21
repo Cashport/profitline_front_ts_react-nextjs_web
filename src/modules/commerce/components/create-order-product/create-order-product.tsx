@@ -35,6 +35,9 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
 
   const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
+  const isLocked = alreadySelectedProduct?.autoAssigned === true;
+  const lockedTitle = "Cantidad calculada automáticamente";
+
   return (
     <div className={styles.productCard}>
       <div className={styles.imageContainer}>
@@ -83,6 +86,8 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           <PrincipalButton
             customStyles={{ padding: "0.5rem" }}
             onClick={() => handleDecrementQuantity(product.id)}
+            disabled={isLocked}
+            title={isLocked ? lockedTitle : undefined}
           >
             <Minus size={20} />
           </PrincipalButton>
@@ -97,10 +102,15 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
                 return e.preventDefault();
               }
             }}
+            disabled={isLocked}
+            readOnly={isLocked}
+            title={isLocked ? lockedTitle : undefined}
           />
           <PrincipalButton
             customStyles={{ padding: "0.5rem" }}
             onClick={() => handleIncrementQuantity(product.id)}
+            disabled={isLocked}
+            title={isLocked ? lockedTitle : undefined}
           >
             <Plus size={20} />
           </PrincipalButton>

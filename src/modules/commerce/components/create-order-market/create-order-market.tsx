@@ -76,6 +76,7 @@ const CreateOrderMarket: FC = () => {
             image: product.image,
             category_id: Number(product.id_category),
             SKU: product.SKU,
+            EAN: product.EAN,
             stock: true,
             category_name: product.category_name,
             shipment_unit: product.shipment_unit

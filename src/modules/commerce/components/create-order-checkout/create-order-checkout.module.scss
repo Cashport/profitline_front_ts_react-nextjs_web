@@ -54,13 +54,19 @@
                     margin-bottom: 0.25rem;
                 }
 
+                &__hint {
+                    font-size: 0.75rem;
+                    color: $gray;
+                    margin-top: 0.25rem;
+                }
+
                 textarea {
                     background-color: $background;
                     border: none;
                     border-radius: 0.25rem;
                     padding: 0.875rem 1rem;
                     width: 100%;
-                    min-height: 6rem;
+                    height: 3.25rem;
                     resize: none;
                     font-family: inherit;
                     font-size: 1rem;
