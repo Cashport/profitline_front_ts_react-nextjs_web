@@ -50,6 +50,7 @@ export interface ISelectedProduct {
   category_id: number;
   category_name: string;
   SKU: string;
+  EAN?: string | null;
   stock: boolean;
   shipment_unit: number;
 }

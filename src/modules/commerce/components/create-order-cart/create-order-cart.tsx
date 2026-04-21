@@ -14,6 +14,11 @@ import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import {
+  EVEN_QUANTITY_PRODUCT,
+  EVEN_QUANTITY_GROUP_PRODUCTS,
+  matchesProductIdentifier
+} from "../../utils/constants/evenQuantityProducts";
 
 import { ISelectType } from "@/types/clients/IClients";
 
@@ -41,6 +46,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
   const [showOnlyCanulasOrAguaModal, setShowOnlyCanulasOrAguaModal] = useState(false);
+  const [showOddSBVitalModal, setShowOddSBVitalModal] = useState(false);
+  const [showOddGroupModal, setShowOddGroupModal] = useState(false);
 
   const {
     selectedCategories,
@@ -89,8 +96,40 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     });
   }, [selectedCategories]);
 
+  const hasOddSBVital = useMemo(() => {
+    return selectedCategories.some((category) =>
+      category.products.some(
+        (p) =>
+          matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
+      )
+    );
+  }, [selectedCategories]);
+
+  const hasOddRestylaneGroupSum = useMemo(() => {
+    const total = selectedCategories.reduce((sum, category) => {
+      return (
+        sum +
+        category.products.reduce((catSum, p) => {
+          const inGroup = EVEN_QUANTITY_GROUP_PRODUCTS.some((id) =>
+            matchesProductIdentifier(p, id)
+          );
+          return inGroup ? catSum + p.quantity : catSum;
+        }, 0)
+      );
+    }, 0);
+    return total > 0 && total % 2 !== 0;
+  }, [selectedCategories]);
+
   const handleContinuePurchase = () => {
     if (projectId === GALDERMA_PROJECT_ID) {
+      if (hasOddSBVital) {
+        setShowOddSBVitalModal(true);
+        return;
+      }
+      if (hasOddRestylaneGroupSum) {
+        setShowOddGroupModal(true);
+        return;
+      }
       if (hasOnlyCanulasOrAgua) {
         setShowOnlyCanulasOrAguaModal(true);
         return;
@@ -127,6 +166,14 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
   const handleCloseOnlyCanulasOrAguaModal = () => {
     setShowOnlyCanulasOrAguaModal(false);
+  };
+
+  const handleCloseOddSBVitalModal = () => {
+    setShowOddSBVitalModal(false);
+  };
+
+  const handleCloseOddGroupModal = () => {
+    setShowOddGroupModal(false);
   };
 
   useEffect(() => {
@@ -365,6 +412,37 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               No se pueden facturar solo cánulas ni aguas
             </p>
             <p>Agrega otros productos al carrito para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOddSBVitalModal}
+        onClose={handleCloseOddSBVitalModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              Solo se pueden pedir unidades pares para Restyline
+            </p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOddGroupModal}
+        onClose={handleCloseOddGroupModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO,
+              LIDOCAINA, KYSSE, DEFYNE) debe ser un número par.
+            </p>
           </Flex>
         }
         cancelText="Entendido"
