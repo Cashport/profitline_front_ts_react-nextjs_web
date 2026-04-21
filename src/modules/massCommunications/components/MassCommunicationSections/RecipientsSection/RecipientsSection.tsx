@@ -28,12 +28,10 @@ const normalizeIds = (input: string): string[] => {
 
 interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
-  selectedTemplateId: string;
 }
 
 export default function RecipientsSection({
-  onValidatedCountChange,
-  selectedTemplateId
+  onValidatedCountChange
 }: RecipientsSectionProps) {
   const [rawIds, setRawIds] = useState("");
   const [hasValidated, setHasValidated] = useState(false);
@@ -51,14 +49,6 @@ export default function RecipientsSection({
       setRawIds(validIds.join("\n"));
     }
   }, [clientList]);
-
-  useEffect(() => {
-    if (!hasValidated) return;
-    setHasValidated(false);
-    setValidClients([]);
-    setInvalidIds([]);
-    onValidatedCountChange(0);
-  }, [selectedTemplateId]);
 
   const handleRawIdsChange = useCallback(
     (value: string) => {
@@ -88,7 +78,7 @@ export default function RecipientsSection({
 
     setIsValidating(true);
     try {
-      const result = await validateClients(ids, Number(selectedTemplateId));
+      const result = await validateClients(ids);
       const valid = result.filter((c) => c.status === "FOUND");
       const invalid = result.filter((c) => c.status === "NOT_FOUND").map((c) => c.clientId);
 
@@ -105,7 +95,7 @@ export default function RecipientsSection({
     } finally {
       setIsValidating(false);
     }
-  }, [rawIds, onValidatedCountChange, mutate, selectedTemplateId]);
+  }, [rawIds, onValidatedCountChange, mutate]);
 
   const handleClear = useCallback(() => {
     setRawIds("");
@@ -162,13 +152,12 @@ export default function RecipientsSection({
         <Flex vertical gap={8}>
           <Button
             type="primary"
-            onClick={rawIds.trim() && selectedTemplateId ? handleValidate : undefined}
+            onClick={rawIds.trim() ? handleValidate : undefined}
             icon={<CheckCircle2 size={16} />}
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
             loading={isValidating}
-            title={!selectedTemplateId ? "Seleccioná un template primero" : undefined}
             style={{
-              ...((!rawIds.trim() || !selectedTemplateId) && {
+              ...(!rawIds.trim() && {
                 opacity: 0.4,
                 pointerEvents: "none"
               })

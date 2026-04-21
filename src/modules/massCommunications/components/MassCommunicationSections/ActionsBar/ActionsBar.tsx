@@ -11,7 +11,6 @@ interface ActionsBarProps {
   canOpenPreview: boolean;
   onTestCommunication: () => void;
   onPreviewAndSend: () => void;
-  isSendingPreview?: boolean;
 }
 
 export default function ActionsBar({
@@ -19,8 +18,7 @@ export default function ActionsBar({
   channel,
   canOpenPreview,
   onTestCommunication,
-  onPreviewAndSend,
-  isSendingPreview = false
+  onPreviewAndSend
 }: ActionsBarProps) {
   return (
     <div className="sticky bottom-[-1rem] pt-2 pb-4 z-10 bg-[#F7F7F7]">
@@ -47,8 +45,7 @@ export default function ActionsBar({
           <Button
             type="primary"
             onClick={onPreviewAndSend}
-            disabled={!canOpenPreview || isSendingPreview}
-            loading={isSendingPreview}
+            disabled={!canOpenPreview}
             icon={<Eye size={16} />}
             className="!bg-[#CBE71E] !border-[#CBE71E] !text-[#141414] font-semibold hover:!bg-[#b8d119]"
           >
