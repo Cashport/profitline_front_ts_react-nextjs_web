@@ -53,6 +53,7 @@ export interface ISelectedProduct {
   EAN?: string | null;
   stock: boolean;
   shipment_unit: number;
+  autoAssigned?: boolean;
 }
 
 export interface IFetchedCategories {

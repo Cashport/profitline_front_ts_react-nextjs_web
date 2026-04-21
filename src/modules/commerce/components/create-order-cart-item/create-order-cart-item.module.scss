@@ -84,6 +84,15 @@
             &:hover {
                 outline: 1px solid $black;
             }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+
+                &:hover {
+                    outline: none;
+                }
+            }
         }
 
         .quantityInput {
@@ -101,6 +110,11 @@
             &::-webkit-inner-spin-button {
                 -webkit-appearance: none;
                 margin: 0;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
         }
     }

@@ -26,3 +26,21 @@ export const matchesProductIdentifier = (
   if (identifier.EAN && product.EAN && identifier.EAN === product.EAN) return true;
   return !!product.SKU && product.SKU === identifier.SKU;
 };
+
+export const SCULPTRA_MAIN_PRODUCT: ProductIdentifier = {
+  SKU: "085255",
+  EAN: null,
+  description: "SCULPTRA INJPRO 2 VIAL"
+};
+
+export const CANULA_COMPLEMENT: ProductIdentifier = {
+  SKU: "011022",
+  EAN: null,
+  description: "CANULA 22G X 50mm COL"
+};
+
+export const AGUA_COMPLEMENT: ProductIdentifier = {
+  SKU: "011025",
+  EAN: null,
+  description: "AGUA ESTERIL"
+};
