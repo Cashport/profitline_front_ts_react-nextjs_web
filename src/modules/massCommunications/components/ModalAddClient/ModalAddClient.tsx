@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { message, Modal, Select } from "antd";
+import { message, Modal, Select, Spin } from "antd";
 import { UserPlus } from "lucide-react";
 
 import { Button } from "@/modules/chat/ui/button";
@@ -127,6 +127,7 @@ export default function ModalAddClient({
           disabled={!selectedClientId || isSubmitting}
           className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold h-9"
         >
+          {isSubmitting && <Spin size="small" className="mr-2" />}
           Añadir
         </Button>
       </div>
