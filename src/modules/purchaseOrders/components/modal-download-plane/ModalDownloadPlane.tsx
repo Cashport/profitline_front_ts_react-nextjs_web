@@ -127,7 +127,7 @@ export const ModalDownloadPlane: React.FC<Props> = ({ isOpen, onClose, packageId
                 >
                   <div className="modalDownloadPlane__fileInfo">
                     <span className="modalDownloadPlane__fileName">{file.label}</span>
-                    <span className="modalDownloadPlane__formatType">{file.type}</span>
+                    <span className="modalDownloadPlane__formatType">{file.label}</span>
                   </div>
                 </Checkbox>
                 <span className="modalDownloadPlane__fileType">{file.type.split("_").pop()}</span>
