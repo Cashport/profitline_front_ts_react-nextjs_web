@@ -94,6 +94,14 @@ export const PaymentApplicationsTable = ({
     onChange: onSelectChange
   };
 
+  const handleDownload = (url?: string | null) => {
+    if (!url) {
+      message.error("No hay archivo disponible para descargar");
+      return;
+    }
+    window.open(url, "_blank");
+  };
+
   const handleUploadFile = (applicationId: number) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -200,7 +208,11 @@ export const PaymentApplicationsTable = ({
           {
             key: "pdf",
             label: (
-              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+              <Button
+                icon={<DownloadSimple size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleDownload(record.pdf_url)}
+              >
                 PDF
               </Button>
             )
@@ -208,7 +220,11 @@ export const PaymentApplicationsTable = ({
           {
             key: "template",
             label: (
-              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+              <Button
+                icon={<DownloadSimple size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleDownload(record.excel_url)}
+              >
                 Template
               </Button>
             )
