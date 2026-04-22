@@ -274,10 +274,14 @@ export const deleteCatalog = async (catalogId: number): Promise<any> => {
 
 export const uploadIntakeFile = async (
   id_archives_client_data: number,
-  file: File
+  file: File,
+  evidence?: File
 ): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
+  if (evidence) {
+    formData.append("evidence", evidence);
+  }
   formData.append("id_archives_client_data", id_archives_client_data.toString());
   try {
     const response: GenericResponse<any> = await API.post(
@@ -291,10 +295,7 @@ export const uploadIntakeFile = async (
   }
 };
 
-export const uploadEvidence = async (
-  id_archives_client_data: number,
-  file: File
-): Promise<any> => {
+export const uploadEvidence = async (id_archives_client_data: number, file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("evidence", file);
   formData.append("id_archives_client_data", id_archives_client_data.toString());
