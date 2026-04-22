@@ -291,6 +291,25 @@ export const uploadIntakeFile = async (
   }
 };
 
+export const uploadEvidence = async (
+  id_archives_client_data: number,
+  file: File
+): Promise<any> => {
+  const formData = new FormData();
+  formData.append("evidence", file);
+  formData.append("id_archives_client_data", id_archives_client_data.toString());
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/load-evidence`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading evidence file:", error);
+    throw error;
+  }
+};
+
 export const getAlertsFilters = async (): Promise<IGetFiltersAlerts> => {
   try {
     const response: GenericResponse<IGetFiltersAlerts> = await API.get(
