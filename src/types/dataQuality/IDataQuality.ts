@@ -167,6 +167,7 @@ export interface IClientDetailArchiveClient {
   user_upload: string | null;
   size: number;
   procesed_url: string | null;
+  evidence_url: string | null;
   acciones: string[];
   created_at: string;
   updated_at: string | null;
