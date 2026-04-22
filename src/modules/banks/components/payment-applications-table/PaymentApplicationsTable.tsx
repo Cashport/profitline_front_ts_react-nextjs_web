@@ -1,16 +1,11 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { Button, Dropdown, Flex, MenuProps, Table, TableProps, Typography } from "antd";
-import {
-  DotsThreeVertical,
-  DownloadSimple,
-  File,
-  FileArrowDown,
-  FileArrowUp
-} from "phosphor-react";
+import { Button, Dropdown, Flex, MenuProps, Table, TableProps, Typography, message } from "antd";
+import { DotsThreeVertical, DownloadSimple, FileArrowUp } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
+import { UploadFinalFile } from "@/services/paymentApplications/paymentApplications";
 
 import "./payment-applications-table.scss";
 
@@ -28,6 +23,7 @@ interface PropsPaymentApplicationsTable {
   handleOpenDetail?: (paymentId: number) => void;
   statusId: number;
   clearSelected: boolean;
+  mutate: () => void;
 }
 
 export const PaymentApplicationsTable = ({
@@ -36,7 +32,8 @@ export const PaymentApplicationsTable = ({
   setSelectedRows,
   handleOpenDetail,
   statusId,
-  clearSelected
+  clearSelected,
+  mutate
 }: PropsPaymentApplicationsTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -95,6 +92,38 @@ export const PaymentApplicationsTable = ({
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange
+  };
+
+  const handleDownload = (url?: string | null) => {
+    if (!url) {
+      message.error("No hay archivo disponible para descargar");
+      return;
+    }
+    window.open(url, "_blank");
+  };
+
+  const handleUploadFile = (applicationId: number) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const hide = message.open({
+        type: "loading",
+        content: "Cargando archivo...",
+        duration: 0
+      });
+      try {
+        await UploadFinalFile(String(applicationId), file);
+        message.success("Archivo cargado exitosamente");
+        mutate();
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : "Error al cargar el archivo");
+      } finally {
+        hide();
+      }
+    };
+    input.click();
   };
 
   const columns: TableProps<applicationByStatus>["columns"] = [
@@ -179,7 +208,11 @@ export const PaymentApplicationsTable = ({
           {
             key: "pdf",
             label: (
-              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+              <Button
+                icon={<DownloadSimple size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleDownload(record.pdf_url)}
+              >
                 PDF
               </Button>
             )
@@ -187,7 +220,11 @@ export const PaymentApplicationsTable = ({
           {
             key: "template",
             label: (
-              <Button icon={<DownloadSimple size={20} />} className="buttonNoBorder">
+              <Button
+                icon={<DownloadSimple size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleDownload(record.excel_url)}
+              >
                 Template
               </Button>
             )
@@ -195,7 +232,11 @@ export const PaymentApplicationsTable = ({
           {
             key: "upload-template",
             label: (
-              <Button icon={<FileArrowUp size={20} />} className="buttonNoBorder">
+              <Button
+                icon={<FileArrowUp size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleUploadFile(record.id)}
+              >
                 Cargar Template
               </Button>
             )
