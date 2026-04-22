@@ -8,6 +8,7 @@ import { Button } from "@/modules/chat/ui/button";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { useDebounce } from "@/hooks/useDeabouce";
 import ClientPreview from "../../components/ClientPreview/ClientPreview";
+import ModalAddClient from "../../components/ModalAddClient/ModalAddClient";
 import TableMassCommunications from "../../components/TableMassCommunications/TableMassCommunications";
 import { useClientCommunication } from "../../hooks/useClientCommunication";
 import type { IPreviewClient } from "@/types/communications/ICommunications";
@@ -16,6 +17,7 @@ export default function MassComunicationsTableView() {
   const router = useRouter();
   const { communicationId } = useParams<{ communicationId: string }>();
   const [selectedClient, setSelectedClient] = useState<IPreviewClient | null>(null);
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -56,7 +58,7 @@ export default function MassComunicationsTableView() {
           <Button
             size="sm"
             className="bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] font-semibold gap-1.5 px-5 h-9"
-            onClick={() => console.log("Add client")}
+            onClick={() => setIsAddClientOpen(true)}
           >
             <UserPlus className="w-3.5 h-3.5" />
             +Añadir cliente
@@ -84,6 +86,13 @@ export default function MassComunicationsTableView() {
           />
         )}
       </div>
+
+      <ModalAddClient
+        isOpen={isAddClientOpen}
+        onClose={() => setIsAddClientOpen(false)}
+        communicationId={communicationId}
+        onSuccess={mutate}
+      />
     </div>
   );
 }

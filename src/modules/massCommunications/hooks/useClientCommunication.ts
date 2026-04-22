@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-import { fetcher } from "@/utils/api/api";
+import instance from "@/utils/api/api";
 import type { GenericResponse } from "@/types/global/IGlobal";
 import type { IGetPreviewClients } from "@/types/communications/ICommunications";
 
@@ -10,6 +10,22 @@ interface Props {
   limit?: number;
   search?: string;
 }
+
+const fetcher40s = (url: string) =>
+  instance
+    .get(url, { timeout: 40000 })
+    .then((res) => {
+      if (!res.data) throw Error(res.data.message);
+      return res.data;
+    })
+    .catch((error) => {
+      if (error.code === "ECONNABORTED") {
+        throw new Error("La solicitud ha sido cancelada debido a un timeout");
+      }
+      if (error.response?.data) throw new Error(error.response.data.message);
+      if (error?.message) throw new Error(error.message);
+      throw new Error("error");
+    });
 
 export const useClientCommunication = ({ communicationId, page, limit, search }: Props) => {
   const params = new URLSearchParams();
@@ -21,7 +37,7 @@ export const useClientCommunication = ({ communicationId, page, limit, search }:
   const pathKey = `/comunication/circularizations/${communicationId}/clients${query ? `?${query}` : ""}`;
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetPreviewClients>>(
     pathKey,
-    fetcher
+    fetcher40s
   );
 
   return {
