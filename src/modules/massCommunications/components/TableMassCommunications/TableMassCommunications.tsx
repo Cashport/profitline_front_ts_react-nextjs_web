@@ -12,9 +12,8 @@ import ModalDetailClientCommunication from "../ModalDetailClientCommunication/Mo
 import { IPreviewClient } from "@/types/communications/ICommunications";
 import {
   removeClientFromCircularization,
-  sendIndividualCommunication
+  sendCommunicationFromCache
 } from "@/services/communications/communications";
-import { useAppStore } from "@/lib/store/store";
 
 interface TableMassCommunicationsProps {
   clients: IPreviewClient[];
@@ -39,7 +38,6 @@ export default function TableMassCommunications({
 }: TableMassCommunicationsProps) {
   const { communicationId } = useParams<{ communicationId: string }>();
   const router = useRouter();
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [emailModalClientId, setEmailModalClientId] = useState<string | null>(null);
   const [isRemovingClient, setIsRemovingClient] = useState(false);
@@ -48,7 +46,7 @@ export default function TableMassCommunications({
   const handleSend = async () => {
     setIsSending(true);
     try {
-      await sendIndividualCommunication(projectId, Number(communicationId));
+      await sendCommunicationFromCache(Number(communicationId));
       message.success("Comunicación activada correctamente");
       router.push("/mass-communications");
     } catch (error) {
