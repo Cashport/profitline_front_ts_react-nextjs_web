@@ -184,7 +184,6 @@ export default function MassCommunicationsView() {
             recipientCount={validatedCount}
             channel={channel}
             canOpenPreview={canOpenPreview}
-            onTestCommunication={() => setTestDialogOpen(true)}
             onPreviewAndSend={handlePreviewAndSend}
           />
         </Flex>

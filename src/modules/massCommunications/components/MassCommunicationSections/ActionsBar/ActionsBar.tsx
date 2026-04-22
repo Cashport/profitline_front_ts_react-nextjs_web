@@ -9,7 +9,7 @@ interface ActionsBarProps {
   recipientCount: number;
   channel: ChannelType;
   canOpenPreview: boolean;
-  onTestCommunication: () => void;
+  onTestCommunication?: () => void;
   onPreviewAndSend: () => void;
 }
 
@@ -35,13 +35,13 @@ export default function ActionsBar({
         </Text>
 
         <Flex gap={12}>
-          <Button
+          {/* <Button
             onClick={onTestCommunication}
             disabled={!canOpenPreview}
             icon={<FlaskConical size={16} />}
           >
             Probar comunicacion
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             onClick={onPreviewAndSend}
