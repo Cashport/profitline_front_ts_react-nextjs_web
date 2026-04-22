@@ -1,13 +1,10 @@
 import { FC, useState } from "react";
 import { Button, Flex, Spin } from "antd";
-import { Bank, DotsThree } from "phosphor-react";
+import { DotsThree } from "phosphor-react";
 import dayjs from "dayjs";
 
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
-import { useAppStore } from "@/lib/store/store";
-import { approvePayment } from "@/services/banksPayments/banksPayments";
-import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
 import BanksRules from "../bank-rules";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
@@ -133,6 +130,7 @@ export const PaymentApplicationsTab: FC = () => {
                     setSelectedRows={setSelectedRows}
                     statusId={status.status_id}
                     clearSelected={clearSelected}
+                    mutate={mutate}
                   />
                 )
               }))}
