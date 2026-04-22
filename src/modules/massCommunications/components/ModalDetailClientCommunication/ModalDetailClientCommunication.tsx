@@ -1,75 +1,54 @@
-import { useMemo, useState } from "react";
-import { Modal, Typography, Tag, Flex, Select } from "antd";
+import { useEffect, useState } from "react";
+import { Modal, Typography, Tag, Flex, Spin, message } from "antd";
 import { PaperClipOutlined } from "@ant-design/icons";
 
-import {
-  mockContacts,
-  emailTemplates,
-  type IValidatedClient
-} from "../../lib/mockData";
+import { getCircularizationMessagePreview } from "@/services/communications/communications";
+import type { IMessagePreview } from "@/types/communications/ICommunications";
+import { extractBodyText } from "@/utils/utils";
 
 const { Text } = Typography;
 
 interface ModalDetailClientCommunicationProps {
   open: boolean;
   onClose: () => void;
-  clientInfo: IValidatedClient;
-}
-
-const TAG_REPLACEMENTS: Record<string, (client: IValidatedClient) => string> = {
-  "{{Nombre Cliente}}": (c) => c.name,
-  "{{ID Cliente}}": (c) => c.id,
-  "{{Contacto Principal}}": () => "XXXXX",
-  "{{Cartera Vencida}}": (c) => `$${c.overdueTotal.toLocaleString()}`,
-  "{{Cartera 0-30 dias}}": (c) => `$${c.overdue30.toLocaleString()}`,
-  "{{Cartera 31-60 dias}}": (c) => `$${c.overdue60.toLocaleString()}`,
-  "{{Cartera 61-90 dias}}": (c) => `$${c.overdue90.toLocaleString()}`,
-  "{{Cartera 90+ dias}}": (c) => `$${c.overdue120.toLocaleString()}`,
-  "{{Cartera}}": (c) => `$${c.overdueTotal.toLocaleString()}`,
-  "{{Fecha Actual}}": () => new Date().toLocaleDateString("es-CO"),
-  "{{Fecha Limite Pago}}": () => "XXXXX",
-  "{{Periodo}}": () => "XXXXX",
-  "{{Limite de Credito}}": () => "XXXXX",
-  "{{Saldo Disponible}}": () => "XXXXX",
-  "{{Ultimo Pago Monto}}": () => "XXXXX",
-  "{{Ultimo Pago Fecha}}": () => "XXXXX",
-  "{{Nombre Ejecutivo}}": () => "XXXXX",
-  "{{Telefono Ejecutivo}}": () => "XXXXX",
-  "{{Email Ejecutivo}}": () => "XXXXX",
-  "{{Firma}}": () => "XXXXX"
-};
-
-function personalizeForClient(text: string, client: IValidatedClient): string {
-  let result = text;
-  for (const [tag, resolver] of Object.entries(TAG_REPLACEMENTS)) {
-    result = result.replaceAll(tag, resolver(client));
-  }
-  return result;
+  communicationId: string;
+  clientId: string;
 }
 
 export default function ModalDetailClientCommunication({
   open,
   onClose,
-  clientInfo
+  communicationId,
+  clientId
 }: ModalDetailClientCommunicationProps) {
-  const [selectedTemplateId, setSelectedTemplateId] = useState(emailTemplates[0].id);
+  const [data, setData] = useState<IMessagePreview | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const template = useMemo(
-    () => emailTemplates.find((t) => t.id === selectedTemplateId) ?? emailTemplates[0],
-    [selectedTemplateId]
-  );
+  useEffect(() => {
+    if (!open) return;
 
-  const contacts = mockContacts[clientInfo.id] ?? [
-    {
-      name: clientInfo.name,
-      cargo: "Contacto principal",
-      email: clientInfo.email,
-      phone: clientInfo.phone
-    }
-  ];
+    const fetchPreview = async () => {
+      setLoading(true);
+      try {
+        const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
+        setData({
+          ...response.data,
+          body: extractBodyText(response.data.body)
+        });
+      } catch (error) {
+        message.error(
+          error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const subject = personalizeForClient(template.subject, clientInfo);
-  const body = personalizeForClient(template.body, clientInfo);
+    fetchPreview();
+  }, [open, communicationId, clientId]);
+
+  const recipients = data?.recipient_addresses ?? [];
+  const attachments = data?.attachments ?? [];
 
   return (
     <Modal
@@ -107,115 +86,115 @@ export default function ModalDetailClientCommunication({
             flexShrink: 0
           }}
         >
-          {clientInfo.name.charAt(0)}
+          {clientId.charAt(0).toUpperCase()}
         </div>
         <div>
           <Text style={{ color: "#fff", fontSize: 14, fontWeight: 600, display: "block" }}>
-            {clientInfo.name}
+            {clientId}
           </Text>
           <Text style={{ color: "#999", fontSize: 11 }}>
-            {contacts.length} destinatario{contacts.length !== 1 ? "s" : ""}
+            {recipients.length} destinatario{recipients.length !== 1 ? "s" : ""}
           </Text>
         </div>
       </div>
 
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-        {/* Recipients */}
-        <Flex wrap="wrap" gap={8}>
-          {contacts.map((ct, i) => (
-            <Tag key={i} style={{ borderRadius: 20, padding: "4px 12px", margin: 0 }}>
-              <Text style={{ fontWeight: 500, fontSize: 12 }}>{ct.name}</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {" · "}
-                {ct.cargo}
-              </Text>
-              <Text style={{ fontSize: 12, color: "#2563EB" }}>
-                {" · "}
-                {clientInfo.channel === "email" ? ct.email : ct.phone}
-              </Text>
-            </Tag>
-          ))}
-        </Flex>
+        {loading && (
+          <Flex justify="center" align="center" style={{ padding: 24 }}>
+            <Spin />
+          </Flex>
+        )}
 
-        {/* Template selector */}
-        <div>
-          <Text type="secondary" style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>
-            Template
-          </Text>
-          <Select
-            value={selectedTemplateId}
-            onChange={setSelectedTemplateId}
-            style={{ width: "100%", marginTop: 4 }}
-            options={emailTemplates.map((t) => ({ value: t.id, label: t.name }))}
-          />
-        </div>
+        {!loading && data && (
+          <>
+            {/* Recipients */}
+            <Flex wrap="wrap" gap={8}>
+              {recipients.map((address, i) => (
+                <Tag key={i} style={{ borderRadius: 20, padding: "4px 12px", margin: 0 }}>
+                  <Text style={{ fontSize: 12, color: "#2563EB" }}>{address}</Text>
+                </Tag>
+              ))}
+            </Flex>
 
-        {/* Email preview */}
-        <div
-          style={{
-            border: "1px solid #d9d9d9",
-            borderRadius: 8,
-            overflow: "hidden"
-          }}
-        >
-          <div style={{ borderBottom: "1px solid #f0f0f0", padding: "12px 20px", background: "#fafafa" }}>
-            <Text
-              style={{ fontSize: 10, color: "#999", textTransform: "uppercase", letterSpacing: 1 }}
-            >
-              Asunto
-            </Text>
-            <br />
-            <Text strong style={{ fontSize: 14 }}>
-              {subject || "Sin asunto"}
-            </Text>
-          </div>
-
-          <div
-            style={{
-              padding: "16px 20px",
-              fontSize: 13,
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.6,
-              minHeight: 100
-            }}
-          >
-            {body || (
-              <Text type="secondary" italic>
-                Sin contenido
-              </Text>
-            )}
-          </div>
-
-          {template.attachments.length > 0 && (
+            {/* Email preview */}
             <div
               style={{
-                padding: "12px 20px",
-                borderTop: "1px solid #f0f0f0",
-                background: "#fafafa"
+                border: "1px solid #d9d9d9",
+                borderRadius: 8,
+                overflow: "hidden"
               }}
             >
-              <Text
+              <div
                 style={{
-                  fontSize: 10,
-                  color: "#999",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  display: "block",
-                  marginBottom: 8
+                  borderBottom: "1px solid #f0f0f0",
+                  padding: "12px 20px",
+                  background: "#fafafa"
                 }}
               >
-                Adjuntos
-              </Text>
-              <Flex wrap="wrap" gap={8}>
-                {template.attachments.map((att) => (
-                  <Tag key={att.name} icon={<PaperClipOutlined />}>
-                    {att.name}
-                  </Tag>
-                ))}
-              </Flex>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: "#999",
+                    textTransform: "uppercase",
+                    letterSpacing: 1
+                  }}
+                >
+                  Asunto
+                </Text>
+                <br />
+                <Text strong style={{ fontSize: 14 }}>
+                  {data.subject || "Sin asunto"}
+                </Text>
+              </div>
+
+              <div
+                style={{
+                  padding: "16px 20px",
+                  fontSize: 13,
+                  whiteSpace: "pre-wrap",
+                  lineHeight: 1.6,
+                  minHeight: 100
+                }}
+              >
+                {data.body || (
+                  <Text type="secondary" italic>
+                    Sin contenido
+                  </Text>
+                )}
+              </div>
+
+              {attachments.length > 0 && (
+                <div
+                  style={{
+                    padding: "12px 20px",
+                    borderTop: "1px solid #f0f0f0",
+                    background: "#fafafa"
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 10,
+                      color: "#999",
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                      display: "block",
+                      marginBottom: 8
+                    }}
+                  >
+                    Adjuntos
+                  </Text>
+                  <Flex wrap="wrap" gap={8}>
+                    {attachments.map((att, i) => (
+                      <Tag key={i} icon={<PaperClipOutlined />}>
+                        {att.name}
+                      </Tag>
+                    ))}
+                  </Flex>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </Modal>
   );

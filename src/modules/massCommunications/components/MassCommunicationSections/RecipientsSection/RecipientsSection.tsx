@@ -30,7 +30,9 @@ interface RecipientsSectionProps {
   onValidatedCountChange: (count: number) => void;
 }
 
-export default function RecipientsSection({ onValidatedCountChange }: RecipientsSectionProps) {
+export default function RecipientsSection({
+  onValidatedCountChange
+}: RecipientsSectionProps) {
   const [rawIds, setRawIds] = useState("");
   const [hasValidated, setHasValidated] = useState(false);
   const [validClients, setValidClients] = useState<IValidatedClients[]>([]);
@@ -116,8 +118,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "Error al descargar el reporte";
+      const errorMsg = error instanceof Error ? error.message : "Error al descargar el reporte";
       message.error(errorMsg);
     } finally {
       setIsExporting(false);
@@ -155,7 +156,10 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
             className="bg-[#141414] border-[#141414] hover:bg-[#2a2a2a]"
             loading={isValidating}
             style={{
-              ...(!rawIds.trim() && { opacity: 0.4, pointerEvents: "none" })
+              ...(!rawIds.trim() && {
+                opacity: 0.4,
+                pointerEvents: "none"
+              })
             }}
           >
             Validar
@@ -204,7 +208,7 @@ export default function RecipientsSection({ onValidatedCountChange }: Recipients
               </Tag>
             )}
             <Text type="secondary" className="text-xs">
-              de {clientList.length.toLocaleString()} clientes totales
+              de {(validClients.length + invalidIds.length).toLocaleString()} clientes totales
             </Text>
           </Flex>
           <Button

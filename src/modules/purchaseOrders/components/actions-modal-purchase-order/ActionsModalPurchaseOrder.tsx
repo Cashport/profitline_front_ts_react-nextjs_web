@@ -75,7 +75,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     selectedOrders.length > 0 &&
     selectedOrders.every((o) => allowedStatesForSeparate.includes(o.status));
 
-  const allowedStatesForDownload = ["En facturación", "Facturado", "En despacho"];
+  const allowedStatesForDownload = ["En facturación"];
   const canDownload =
     selectedPackageRows.length > 0 &&
     selectedPackageRows.every((p) =>
@@ -89,6 +89,19 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
     if (selectedPackageRows.length > 1) {
       message.warning("Solo puedes seleccionar un pedido para realizar esta acción");
+      return false;
+    }
+    return true;
+  };
+
+  const validatePackagesSelection = (): boolean => {
+    if (selectedPackageRows.length === 0) {
+      message.warning("Selecciona al menos un pedido para realizar esta acción");
+      return false;
+    }
+    const firstStatus = selectedPackageRows[0].status;
+    if (selectedPackageRows.some((p) => p.status !== firstStatus)) {
+      message.warning("Todos los pedidos seleccionados deben tener el mismo estado");
       return false;
     }
     return true;
@@ -211,7 +224,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const handleOpenDownloadPlaneModal = () => {
-    if (!validatePackageSelection()) return;
+    if (!validatePackagesSelection()) return;
     onClose();
     setIsDownloadPlaneOpen(true);
   };
@@ -315,7 +328,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       <ModalDownloadPlane
         isOpen={isDownloadPlaneOpen}
         onClose={() => setIsDownloadPlaneOpen(false)}
-        packageId={String(selectedPackageRows[0]?.packageId)}
+        packageIds={selectedPackageRows.map((row) => String(row.packageId)) || []}
       />
     </>
   );

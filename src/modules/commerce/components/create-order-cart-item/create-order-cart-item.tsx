@@ -34,6 +34,9 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
   // Determinar el precio a mostrar según la configuración de IVA
   const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
+  const isLocked = product.autoAssigned === true;
+  const lockedTitle = "Cantidad calculada automáticamente";
+
   return (
     <div className={styles.cartItemCard}>
       <div className={styles.imageContainer}>
@@ -61,6 +64,9 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
             fontSize="0.75rem"
           />
         )}
+        {isLocked && (
+          <SimpleTag text="Auto" colorTag="#CBE71E" colorText="#000000" fontSize="0.75rem" />
+        )}
       </h4>
 
       <div className={styles.price}>
@@ -83,6 +89,8 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
         <Button
           className={styles.buttonChangeQuantity}
           onClick={() => handleDecrementQuantity(product.id)}
+          disabled={isLocked}
+          title={isLocked ? lockedTitle : undefined}
         >
           {alreadySelectedProduct?.quantity === 1 ? (
             <Trash size={14} weight="bold" />
@@ -101,10 +109,15 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
               return e.preventDefault();
             }
           }}
+          disabled={isLocked}
+          readOnly={isLocked}
+          title={isLocked ? lockedTitle : undefined}
         />
         <Button
           className={styles.buttonChangeQuantity}
           onClick={() => handleIncrementQuantity(product.id)}
+          disabled={isLocked}
+          title={isLocked ? lockedTitle : undefined}
         >
           <Plus size={14} weight="bold" />
         </Button>

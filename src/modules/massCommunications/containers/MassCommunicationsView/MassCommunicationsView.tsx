@@ -37,8 +37,9 @@ export default function MassCommunicationsView() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
 
-  const fetchEmailTemplates = useCallback(() => {
-    getMassiveCommunicationTemplates().then((data) => {
+  const fetchEmailTemplates = useCallback(async () => {
+    try {
+      const data = await getMassiveCommunicationTemplates();
       const mapped: EmailTemplate[] = data.map((t) => ({
         id: t.id.toString(),
         name: t.name,
@@ -46,14 +47,17 @@ export default function MassCommunicationsView() {
         subject: t.subject,
         body: t.message,
         attachments: t.attachments.map((att) => {
-          const parts = att.split(".");
+          const fileName = typeof att === "string" ? att : att.name;
+          const parts = fileName.split(".");
           const ext = parts.length > 1 ? parts.pop()!.toUpperCase() : "FILE";
           const name = parts.join(".");
           return { name, type: ext };
         })
       }));
       setEmailTemplates(mapped);
-    });
+    } catch (err) {
+      console.error("Error fetching email templates:", err);
+    }
   }, []);
 
   useEffect(() => {
@@ -135,6 +139,11 @@ export default function MassCommunicationsView() {
   const canOpenPreview =
     validatedCount > 0 && (channel === "email" ? !!selectedEmailTemplate : !!selectedTemplate);
 
+  const handlePreviewAndSend = () => {
+    if (!canOpenPreview) return;
+    router.push("/mass-communications/" + selectedEmailTemplate);
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F7F7]">
       <div className="max-w-[1400px] mx-auto">
@@ -175,10 +184,7 @@ export default function MassCommunicationsView() {
             recipientCount={validatedCount}
             channel={channel}
             canOpenPreview={canOpenPreview}
-            onTestCommunication={() => setTestDialogOpen(true)}
-            onPreviewAndSend={() => {
-              router.push("/mass-communications/listing?channel=" + channel);
-            }}
+            onPreviewAndSend={handlePreviewAndSend}
           />
         </Flex>
       </div>

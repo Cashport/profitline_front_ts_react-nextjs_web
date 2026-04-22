@@ -464,3 +464,10 @@ export function formatChatDate(dateString: string): string {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const extractBodyText = (html: string): string => {
+  if (!html) return "";
+  if (typeof window === "undefined") return html;
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return (doc.body?.textContent ?? "").trim();
+};

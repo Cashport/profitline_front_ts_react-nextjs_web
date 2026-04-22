@@ -14,8 +14,19 @@ import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import {
+  EVEN_QUANTITY_PRODUCT,
+  EVEN_QUANTITY_GROUP_PRODUCTS,
+  matchesProductIdentifier,
+  CANULA_COMPLEMENT,
+  AGUA_COMPLEMENT,
+  ProductIdentifier
+} from "../../utils/constants/evenQuantityProducts";
+import { computeComplementRequirements } from "../../utils/complementCalculation";
+import { ISelectedCategories } from "../../containers/create-order/create-order";
 
 import { ISelectType } from "@/types/clients/IClients";
+import { ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-cart.module.scss";
 export interface selectClientForm {
@@ -40,6 +51,11 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
+  const [showOnlyCanulasOrAguaModal, setShowOnlyCanulasOrAguaModal] = useState(false);
+  const [showOddSBVitalModal, setShowOddSBVitalModal] = useState(false);
+  const [showOddGroupModal, setShowOddGroupModal] = useState(false);
+  const [showComplementMismatchModal, setShowComplementMismatchModal] = useState(false);
+  const [complementCatalogMissing, setComplementCatalogMissing] = useState<string | null>(null);
 
   const {
     selectedCategories,
@@ -63,9 +79,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const MINIMUM_ORDER_AMOUNT = 1600000;
+  const totalWithTaxes = (confirmOrderData?.total ?? 0) + (confirmOrderData?.taxes ?? 0);
   const isTotalLessThanMinimum = useMemo(
-    () => confirmOrderData?.total && confirmOrderData.total < MINIMUM_ORDER_AMOUNT,
-    [confirmOrderData]
+    () => totalWithTaxes > 0 && totalWithTaxes < MINIMUM_ORDER_AMOUNT,
+    [totalWithTaxes]
   );
 
   const hasNoCanulasOrAgua = useMemo(() => {
@@ -78,29 +95,93 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     );
   }, [selectedCategories]);
 
+  const hasOnlyCanulasOrAgua = useMemo(() => {
+    const allProducts = selectedCategories.flatMap((c) => c.products);
+    if (allProducts.length === 0) return false;
+    return allProducts.every((product) => {
+      const name = product.name?.toLowerCase() ?? "";
+      return name.includes("canula") || name.includes("agua");
+    });
+  }, [selectedCategories]);
+
+  const hasOddSBVital = useMemo(() => {
+    return selectedCategories.some((category) =>
+      category.products.some(
+        (p) =>
+          matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
+      )
+    );
+  }, [selectedCategories]);
+
+  const hasOddRestylaneGroupSum = useMemo(() => {
+    const total = selectedCategories.reduce((sum, category) => {
+      return (
+        sum +
+        category.products.reduce((catSum, p) => {
+          const inGroup = EVEN_QUANTITY_GROUP_PRODUCTS.some((id) =>
+            matchesProductIdentifier(p, id)
+          );
+          return inGroup ? catSum + p.quantity : catSum;
+        }, 0)
+      );
+    }, 0);
+    return total > 0 && total % 2 !== 0;
+  }, [selectedCategories]);
+
+  const complementMismatch = useMemo(() => {
+    const req = computeComplementRequirements(selectedCategories);
+    if (!req.hasMainProduct) return null;
+
+    const allProducts = selectedCategories.flatMap((c) => c.products);
+    const actualCanulas = allProducts
+      .filter((p) => matchesProductIdentifier(p, CANULA_COMPLEMENT))
+      .reduce((sum, p) => sum + p.quantity, 0);
+    const actualAgua = allProducts
+      .filter((p) => matchesProductIdentifier(p, AGUA_COMPLEMENT))
+      .reduce((sum, p) => sum + p.quantity, 0);
+
+    if (actualCanulas === req.requiredCanulas && actualAgua === req.requiredAgua) return null;
+
+    return {
+      expectedCanulas: req.requiredCanulas,
+      expectedAgua: req.requiredAgua,
+      actualCanulas,
+      actualAgua
+    };
+  }, [selectedCategories]);
+
   const handleContinuePurchase = () => {
     if (projectId === GALDERMA_PROJECT_ID) {
+      if (hasOddSBVital) {
+        setShowOddSBVitalModal(true);
+        return;
+      }
+      if (hasOddRestylaneGroupSum) {
+        setShowOddGroupModal(true);
+        return;
+      }
+      if (hasOnlyCanulasOrAgua) {
+        setShowOnlyCanulasOrAguaModal(true);
+        return;
+      }
       if (isTotalLessThanMinimum) {
         setShowConfirmModal(true);
-      } else if (hasNoCanulasOrAgua) {
-        setShowCanulasModal(true);
-      } else {
-        setCheckingOut(true);
-        onClose && onClose();
+        return;
       }
+      if (complementMismatch) {
+        setShowComplementMismatchModal(true);
+        return;
+      }
+      if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+        return;
+      }
+      setCheckingOut(true);
+      onClose && onClose();
       return;
     }
 
     setCheckingOut(true);
-  };
-
-  const handleConfirmPurchase = () => {
-    setShowConfirmModal(false);
-    if (hasNoCanulasOrAgua) {
-      setShowCanulasModal(true);
-    } else {
-      setCheckingOut(true);
-    }
   };
 
   const handleConfirmCanulas = () => {
@@ -115,6 +196,18 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
   const handleCloseCanulasModal = () => {
     setShowCanulasModal(false);
+  };
+
+  const handleCloseOnlyCanulasOrAguaModal = () => {
+    setShowOnlyCanulasOrAguaModal(false);
+  };
+
+  const handleCloseOddSBVitalModal = () => {
+    setShowOddSBVitalModal(false);
+  };
+
+  const handleCloseOddGroupModal = () => {
+    setShowOddGroupModal(false);
   };
 
   useEffect(() => {
@@ -175,6 +268,113 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     }));
     setCategories(updatedCategories);
   }, [insufficientStockProducts]);
+
+  useEffect(() => {
+    if (projectId !== GALDERMA_PROJECT_ID) return;
+    if (categories.length === 0) return;
+
+    const req = computeComplementRequirements(selectedCategories);
+
+    const findCatalogProduct = (identifier: ProductIdentifier): ISelectedProduct | undefined => {
+      for (const cat of categories) {
+        const match = cat.products.find((p) => matchesProductIdentifier(p, identifier));
+        if (match) return match;
+      }
+      return undefined;
+    };
+
+    const plan: { identifier: ProductIdentifier; requiredQty: number }[] = [
+      { identifier: CANULA_COMPLEMENT, requiredQty: req.requiredCanulas },
+      { identifier: AGUA_COMPLEMENT, requiredQty: req.requiredAgua }
+    ];
+
+    let mutated = false;
+    const next: ISelectedCategories[] = selectedCategories.map((c) => ({
+      ...c,
+      products: [...c.products]
+    }));
+
+    for (const { identifier, requiredQty } of plan) {
+      let catIdx = -1;
+      let prodIdx = -1;
+      for (let i = 0; i < next.length && prodIdx === -1; i++) {
+        const j = next[i].products.findIndex((p) => matchesProductIdentifier(p, identifier));
+        if (j !== -1) {
+          catIdx = i;
+          prodIdx = j;
+        }
+      }
+      const existing = catIdx !== -1 ? next[catIdx].products[prodIdx] : undefined;
+
+      if (!req.hasMainProduct) {
+        if (existing && existing.autoAssigned === true) {
+          next[catIdx].products.splice(prodIdx, 1);
+          if (next[catIdx].products.length === 0) next.splice(catIdx, 1);
+          mutated = true;
+        }
+        continue;
+      }
+
+      if (requiredQty === 0) {
+        if (existing && existing.autoAssigned === true) {
+          next[catIdx].products.splice(prodIdx, 1);
+          if (next[catIdx].products.length === 0) next.splice(catIdx, 1);
+          mutated = true;
+        }
+        continue;
+      }
+
+      if (existing) {
+        if (existing.quantity !== requiredQty || existing.autoAssigned !== true) {
+          next[catIdx].products[prodIdx] = {
+            ...existing,
+            quantity: requiredQty,
+            autoAssigned: true
+          };
+          mutated = true;
+        }
+        continue;
+      }
+
+      const catalogProduct = findCatalogProduct(identifier);
+      if (!catalogProduct) {
+        setComplementCatalogMissing(identifier.description);
+        continue;
+      }
+
+      const toInsert: ISelectedProduct = {
+        id: catalogProduct.id,
+        name: catalogProduct.name,
+        price: catalogProduct.price,
+        price_taxes: catalogProduct.price_taxes,
+        discount: catalogProduct.discount,
+        discount_percentage: catalogProduct.discount_percentage,
+        quantity: requiredQty,
+        image: catalogProduct.image,
+        category_id: catalogProduct.category_id,
+        category_name: catalogProduct.category_name,
+        SKU: catalogProduct.SKU,
+        EAN: catalogProduct.EAN,
+        stock: catalogProduct.stock,
+        shipment_unit: catalogProduct.shipment_unit,
+        autoAssigned: true
+      };
+
+      const existingCatIdx = next.findIndex((c) => c.category_id === toInsert.category_id);
+      if (existingCatIdx === -1) {
+        next.push({
+          category_id: toInsert.category_id,
+          category: toInsert.category_name,
+          products: [toInsert]
+        });
+      } else {
+        next[existingCatIdx].products.push(toInsert);
+      }
+      mutated = true;
+    }
+
+    if (mutated) setSelectedCategories(next);
+  }, [selectedCategories, categories, projectId]);
 
   return (
     <div className={styles.cartContainer}>
@@ -313,18 +513,17 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showConfirmModal}
         onClose={handleCloseModal}
-        onOk={handleConfirmPurchase}
-        title="¿Está seguro que desea continuar?"
+        title="No puedes continuar con la compra"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El pedido es inferior a {formatMoney(MINIMUM_ORDER_AMOUNT)}
+              El pedido debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)} (IVA incluido)
             </p>
-            <p>Te sugerimos que incrementes la compra</p>
+            <p>Agrega más productos al carrito para continuar.</p>
           </Flex>
         }
-        okText="Confirmar"
-        cancelText="Cancelar"
+        cancelText="Entendido"
+        hideOkButton
       />
 
       <ModalConfirmAction
@@ -342,6 +541,99 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         }
         okText="Confirmar"
         cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={showOnlyCanulasOrAguaModal}
+        onClose={handleCloseOnlyCanulasOrAguaModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              No se pueden facturar solo cánulas ni aguas
+            </p>
+            <p>Agrega otros productos al carrito para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOddSBVitalModal}
+        onClose={handleCloseOddSBVitalModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              Solo se pueden pedir unidades pares para Restyline
+            </p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOddGroupModal}
+        onClose={handleCloseOddGroupModal}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO,
+              LIDOCAINA, KYSSE, DEFYNE) debe ser un número par.
+            </p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showComplementMismatchModal}
+        onClose={() => setShowComplementMismatchModal(false)}
+        title="No puedes continuar con la compra"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              Las cantidades de cánulas y agua estéril no coinciden con lo requerido por los
+              productos principales.
+            </p>
+            {complementMismatch && (
+              <>
+                <p>
+                  Cánulas requeridas: <strong>{complementMismatch.expectedCanulas}</strong> — En
+                  carrito: <strong>{complementMismatch.actualCanulas}</strong>
+                </p>
+                <p>
+                  Agua estéril requerida: <strong>{complementMismatch.expectedAgua}</strong> — En
+                  carrito: <strong>{complementMismatch.actualAgua}</strong>
+                </p>
+                <p>Vuelve a cargar el carrito o contacta a soporte.</p>
+              </>
+            )}
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={!!complementCatalogMissing}
+        onClose={() => setComplementCatalogMissing(null)}
+        title="Producto complemento no disponible"
+        content={
+          <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
+            <p className={styles.confirmationModalContent__totalLabel}>
+              El producto &ldquo;{complementCatalogMissing}&rdquo; no se encontró en el catálogo y
+              no se pudo agregar automáticamente.
+            </p>
+            <p>Contacta al administrador del catálogo.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
       />
     </div>
   );

@@ -7,11 +7,12 @@ import {
   deleteIntakeFile,
   downloadCSV,
   downloadExcel,
-  uploadIntakeFile
+  uploadEvidence
 } from "@/services/dataQuality/dataQuality";
 import { useArchivesClientData } from "../../hooks/useArchivesClientData";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -42,10 +43,12 @@ const formatDate = (isoDateString: string): string => {
 };
 
 export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClientDetailTableProps) {
-  const [isUploadingLoading, setIsUploadingLoading] = useState(false);
+  const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<number | null>(null);
+  const [isUploadIntakeModalOpen, setIsUploadIntakeModalOpen] = useState(false);
+  const [fileIdToUpload, setFileIdToUpload] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
     end: null
@@ -57,36 +60,9 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
     dateRange.end
   );
 
-  const handleUploadIntake = async (id: number) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        setIsUploadingLoading(true);
-        const hide = message.open({
-          type: "loading",
-          content: "Subiendo archivo de ingesta...",
-          duration: 0
-        });
-        try {
-          await uploadIntakeFile(id, file);
-          message.success("Archivo de ingesta subido exitosamente.");
-          mutateDetail && mutateDetail();
-        } catch (error) {
-          message.error(
-            error instanceof Error
-              ? error.message
-              : "Error al subir el archivo de ingesta. Por favor, inténtalo de nuevo."
-          );
-        } finally {
-          hide();
-          setIsUploadingLoading(false);
-        }
-      }
-      input.remove();
-    };
-    input.click();
+  const handleUploadIntake = (id: number) => {
+    setFileIdToUpload(id);
+    setIsUploadIntakeModalOpen(true);
   };
 
   const handleProcessedFile = async (file: IClientDetailArchiveClient, type: "excel" | "csv") => {
@@ -177,6 +153,38 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
       handleDeleteFile(fileToDelete);
     }
     setIsDeleteModalOpen(false);
+  };
+
+  const handleUploadEvidence = async (id: number) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        setIsUploadingEvidenceLoading(true);
+        const hide = message.open({
+          type: "loading",
+          content: "Subiendo evidencia...",
+          duration: 0
+        });
+        try {
+          await uploadEvidence(id, file);
+          message.success("Evidencia cargada exitosamente.");
+          mutate();
+        } catch (error) {
+          message.error(
+            error instanceof Error
+              ? error.message
+              : "Error al cargar la evidencia. Por favor, inténtalo de nuevo."
+          );
+        } finally {
+          hide();
+          setIsUploadingEvidenceLoading(false);
+        }
+      }
+      input.remove();
+    };
+    input.click();
   };
 
   const filterMenu = (
@@ -285,8 +293,13 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                         {
                           key: "upload",
                           label: "Subir ingesta",
-                          onClick: () => handleUploadIntake(file.id),
-                          disabled: isUploadingLoading
+                          onClick: () => handleUploadIntake(file.id)
+                        },
+                        {
+                          key: "load-evidence",
+                          label: "Cargar prueba",
+                          onClick: () => handleUploadEvidence(file.id),
+                          disabled: isUploadingEvidenceLoading
                         },
                         {
                           key: "download-original",
@@ -306,7 +319,10 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                         {
                           key: "delete",
                           label: "Eliminar archivo",
-                          onClick: () => { setFileToDelete(file.id); setIsDeleteModalOpen(true); },
+                          onClick: () => {
+                            setFileToDelete(file.id);
+                            setIsDeleteModalOpen(true);
+                          },
                           disabled: isDeleteLoading
                         }
                       ]
@@ -331,6 +347,15 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
         okText="Eliminar"
         cancelText="Cancelar"
         okLoading={isDeleteLoading}
+      />
+      <ModalUploadIntakeFiles
+        isOpen={isUploadIntakeModalOpen}
+        archiveId={fileIdToUpload}
+        onClose={() => setIsUploadIntakeModalOpen(false)}
+        onSuccess={() => {
+          mutateDetail?.();
+          mutate();
+        }}
       />
     </div>
   );
