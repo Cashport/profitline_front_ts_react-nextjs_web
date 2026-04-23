@@ -23,7 +23,9 @@ const MIME_TYPE_MAP: Record<string, string> = {
   gif: "image/gif",
   zip: "application/zip",
   rar: "application/x-rar-compressed",
-  "7z": "application/x-7z-compressed"
+  "7z": "application/x-7z-compressed",
+  msg: "application/vnd.ms-outlook",
+  eml: "message/rfc822"
 };
 
 // Helper function to get correct MIME type from file extension
