@@ -7,7 +7,8 @@ import {
   deleteIntakeFile,
   downloadCSV,
   downloadExcel,
-  uploadEvidence
+  uploadEvidence,
+  uploadGenericIntakeFile
 } from "@/services/dataQuality/dataQuality";
 import { useArchivesClientData } from "../../hooks/useArchivesClientData";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
@@ -187,6 +188,33 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
     input.click();
   };
 
+  const handleUploadGenericIntake = (id: number) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const hide = message.open({
+          type: "loading",
+          content: "Subiendo ingesta genérica...",
+          duration: 0
+        });
+        try {
+          await uploadGenericIntakeFile(id, file);
+          message.success("Carga exitosa.");
+          mutateDetail?.();
+          mutate();
+        } catch (error) {
+          message.error(error instanceof Error ? error.message : "Error al cargar.");
+        } finally {
+          hide();
+        }
+      }
+      input.remove();
+    };
+    input.click();
+  };
+
   const filterMenu = (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 p-4">
       <DateRangeFilter
@@ -294,6 +322,11 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                           key: "upload",
                           label: "Subir ingesta",
                           onClick: () => handleUploadIntake(file.id)
+                        },
+                        {
+                          key: "upload-generic",
+                          label: "Cargar Universal",
+                          onClick: () => handleUploadGenericIntake(file.id)
                         },
                         {
                           key: "load-evidence",
