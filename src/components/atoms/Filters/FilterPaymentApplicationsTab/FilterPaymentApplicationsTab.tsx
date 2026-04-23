@@ -177,16 +177,6 @@ export const FilterPaymentApplicationsTab = ({
     []
   );
 
-  const defaultDateValue = useMemo(() => {
-    return dates.find((d) => d.label === "Últimos 30 días")?.value;
-  }, [dates]);
-
-  useEffect(() => {
-    if (selectedValues.length === 0 && defaultDateValue) {
-      setSelectedValues([["Fechas", defaultDateValue]]);
-    }
-  }, [defaultDateValue]);
-
   return (
     <Cascader
       dropdownRender={(menu) => {
