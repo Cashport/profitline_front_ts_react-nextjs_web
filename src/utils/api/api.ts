@@ -87,6 +87,10 @@ instance.interceptors.request.use(async (request) => {
 
 API.interceptors.request.use(async (request) => {
   request.headers.set("Accept", "application/json, text/plain, */*");
+  // Don't set Content-Type for FormData - let axios handle it automatically
+  if (!(request.data instanceof FormData)) {
+    request.headers.set("Content-Type", "application/json");
+  }
   if (!request?.url?.includes("/user/accept-invitation"))
     request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
   return request;
