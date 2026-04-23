@@ -25,7 +25,11 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 import styles from "./payment-applications-tab.module.scss";
 import { usePaymentApplications } from "@/hooks/usePaymentApplications";
 
-export const PaymentApplicationsTab: FC = () => {
+interface PaymentApplicationsTabProps {
+  isActive: boolean;
+}
+
+export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<IPaymentApplication[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -40,7 +44,7 @@ export const PaymentApplicationsTab: FC = () => {
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters });
+  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters, enabled: isActive });
 
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);

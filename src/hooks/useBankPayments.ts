@@ -8,9 +8,10 @@ import { IActivePaymentsFilters } from "@/components/atoms/Filters/FilterActiveP
 interface Props {
   like?: string;
   selectedFilters?: IActivePaymentsFilters;
+  enabled?: boolean;
 }
 
-export const useBankPayments = ({ like, selectedFilters }: Props) => {
+export const useBankPayments = ({ like, selectedFilters, enabled = true }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const startDate = selectedFilters?.dates?.length
@@ -26,7 +27,9 @@ export const useBankPayments = ({ like, selectedFilters }: Props) => {
   const endDateQuery = endDate ? `&end_date=${endDate}` : "";
   const statusQuery = status !== undefined ? `&status=${status}` : "";
 
-  const pathKey = `/bank/get-payments?project_id=${projectId}${likeQuery}${startDateQuery}${endDateQuery}${statusQuery}`;
+  const pathKey = enabled
+    ? `/bank/get-payments?project_id=${projectId}${likeQuery}${startDateQuery}${endDateQuery}${statusQuery}`
+    : null;
 
   const { data, error, mutate } = useSWR<GenericResponse<IPaymentsByStatus[]>>(pathKey, fetcher, {
     revalidateOnFocus: true,
