@@ -370,12 +370,7 @@ export const addCommentHistoricAction = async (
   try {
     const response: GenericResponse = await API.post(
       `${config.API_HOST}/portfolio/add-comment-history/client/${clientId}/project/${project_id}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      }
+      formData
     );
     return response;
   } catch (error) {
