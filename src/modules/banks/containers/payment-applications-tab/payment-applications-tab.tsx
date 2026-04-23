@@ -91,7 +91,7 @@ export const PaymentApplicationsTab: FC = () => {
               icon={<DotsThree size={"1.5rem"} />}
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
-                  showMessage("error", "Seleccione al menos un pago");
+                  showMessage("error", "Seleccione al menos una aplicación de pago");
                   return;
                 }
                 setisGenerateActionOpen(true);
@@ -129,6 +129,7 @@ export const PaymentApplicationsTab: FC = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     statusId={status.status_id}
+                    statusName={status.name}
                     clearSelected={clearSelected}
                     mutate={mutate}
                   />
