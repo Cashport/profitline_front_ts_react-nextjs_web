@@ -135,6 +135,11 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
 
   const handleDeleteFile = async (fileId: number) => {
     setIsDeleteLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Eliminando archivo...",
+      duration: 0
+    });
     try {
       await deleteIntakeFile(fileId);
       message.success("Archivo eliminado exitosamente.");
@@ -145,8 +150,10 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
           ? error.message
           : "Error al eliminar el archivo. Por favor, inténtalo de nuevo."
       );
+    } finally {
+      hide();
+      setIsDeleteLoading(false);
     }
-    setIsDeleteLoading(false);
   };
 
   const handleConfirmDelete = () => {
@@ -403,8 +410,8 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
         title="Confirmar carga de ingesta genérica"
         content={
           <p>
-            Al usar este método de carga usted es responsable de la exactitud de los datos
-            cargados. ¿Desea continuar?
+            Al usar este método de carga usted es responsable de la exactitud de los datos cargados.
+            ¿Desea continuar?
           </p>
         }
         okText="Continuar"
