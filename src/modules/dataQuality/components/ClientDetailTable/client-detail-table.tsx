@@ -47,9 +47,9 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
   const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState<number | null>(null);
   const [isUploadIntakeModalOpen, setIsUploadIntakeModalOpen] = useState(false);
-  const [fileIdToUpload, setFileIdToUpload] = useState<number | null>(null);
+  const [isGenericIntakeModalOpen, setIsGenericIntakeModalOpen] = useState(false);
+  const [activeFileId, setActiveFileId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
     end: null
@@ -62,7 +62,7 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
   );
 
   const handleUploadIntake = (id: number) => {
-    setFileIdToUpload(id);
+    setActiveFileId(id);
     setIsUploadIntakeModalOpen(true);
   };
 
@@ -150,8 +150,8 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
   };
 
   const handleConfirmDelete = () => {
-    if (fileToDelete !== null) {
-      handleDeleteFile(fileToDelete);
+    if (activeFileId !== null) {
+      handleDeleteFile(activeFileId);
     }
     setIsDeleteModalOpen(false);
   };
@@ -189,6 +189,15 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
   };
 
   const handleUploadGenericIntake = (id: number) => {
+    setActiveFileId(id);
+    setIsGenericIntakeModalOpen(true);
+  };
+
+  const handleConfirmGenericIntake = () => {
+    const id = activeFileId;
+    setIsGenericIntakeModalOpen(false);
+    if (id === null) return;
+
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = async (e) => {
@@ -353,7 +362,7 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                           key: "delete",
                           label: "Eliminar archivo",
                           onClick: () => {
-                            setFileToDelete(file.id);
+                            setActiveFileId(file.id);
                             setIsDeleteModalOpen(true);
                           },
                           disabled: isDeleteLoading
@@ -374,17 +383,40 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
       </Table>
       <ModalConfirmAction
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setActiveFileId(null);
+        }}
         onOk={handleConfirmDelete}
         title="¿Está seguro de eliminar este archivo?"
         okText="Eliminar"
         cancelText="Cancelar"
         okLoading={isDeleteLoading}
       />
+      <ModalConfirmAction
+        isOpen={isGenericIntakeModalOpen}
+        onClose={() => {
+          setIsGenericIntakeModalOpen(false);
+          setActiveFileId(null);
+        }}
+        onOk={handleConfirmGenericIntake}
+        title="Confirmar carga de ingesta genérica"
+        content={
+          <p>
+            Al usar este método de carga usted es responsable de la exactitud de los datos
+            cargados. ¿Desea continuar?
+          </p>
+        }
+        okText="Continuar"
+        cancelText="Cancelar"
+      />
       <ModalUploadIntakeFiles
         isOpen={isUploadIntakeModalOpen}
-        archiveId={fileIdToUpload}
-        onClose={() => setIsUploadIntakeModalOpen(false)}
+        archiveId={activeFileId}
+        onClose={() => {
+          setIsUploadIntakeModalOpen(false);
+          setActiveFileId(null);
+        }}
         onSuccess={() => {
           mutateDetail?.();
           mutate();
