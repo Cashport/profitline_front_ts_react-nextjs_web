@@ -3,7 +3,7 @@ import { Modal, Typography, Tag, Flex, Spin, message } from "antd";
 import { PaperClipOutlined } from "@ant-design/icons";
 
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
-import type { IMessagePreview } from "@/types/communications/ICommunications";
+import type { IMessagePreview, IPreviewClient } from "@/types/communications/ICommunications";
 import { extractBodyText } from "@/utils/utils";
 
 const { Text } = Typography;
@@ -12,14 +12,14 @@ interface ModalDetailClientCommunicationProps {
   open: boolean;
   onClose: () => void;
   communicationId: string;
-  clientId: string;
+  client: IPreviewClient;
 }
 
 export default function ModalDetailClientCommunication({
   open,
   onClose,
   communicationId,
-  clientId
+  client
 }: ModalDetailClientCommunicationProps) {
   const [data, setData] = useState<IMessagePreview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,10 @@ export default function ModalDetailClientCommunication({
     const fetchPreview = async () => {
       setLoading(true);
       try {
-        const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
+        const response = await getCircularizationMessagePreview(
+          Number(communicationId),
+          client.client_id
+        );
         setData({
           ...response.data,
           body: extractBodyText(response.data.body)
@@ -45,7 +48,7 @@ export default function ModalDetailClientCommunication({
     };
 
     fetchPreview();
-  }, [open, communicationId, clientId]);
+  }, [open, communicationId, client.client_id]);
 
   const recipients = data?.recipient_addresses ?? [];
   const attachments = data?.attachments ?? [];
@@ -86,11 +89,11 @@ export default function ModalDetailClientCommunication({
             flexShrink: 0
           }}
         >
-          {clientId.charAt(0).toUpperCase()}
+          {client.client_name.charAt(0).toUpperCase()}
         </div>
         <div>
           <Text style={{ color: "#fff", fontSize: 14, fontWeight: 600, display: "block" }}>
-            {clientId}
+            {client.client_name}
           </Text>
           <Text style={{ color: "#999", fontSize: 11 }}>
             {recipients.length} destinatario{recipients.length !== 1 ? "s" : ""}

@@ -1,19 +1,14 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Button, Input, Tag, Typography, Flex, message } from "antd";
+import { Button, Tag, Typography, Flex, message } from "antd";
 import { CheckCircle2, XCircle, FileDown, Users, X } from "lucide-react";
 import { validateClients } from "@/services/communications/communications";
 import { useClientList } from "@/modules/massCommunications/hooks/useClientList";
 import type { IValidatedClients } from "@/types/communications/ICommunications";
 
-const { Text } = Typography;
-const { TextArea } = Input;
+import "./recipientsSection.scss";
 
-const placeholderStyle = `
-  .recipients-textarea::placeholder {
-    color: #0a0a0ad0 !important;
-  }
-`;
+const { Text } = Typography;
 
 const normalizeIds = (input: string): string[] => {
   return Array.from(
@@ -127,7 +122,6 @@ export default function RecipientsSection({
 
   return (
     <section className="bg-white rounded-lg p-6">
-      <style>{placeholderStyle}</style>
       <div className="flex items-center gap-2 mb-4">
         <div className="w-6 h-6 rounded-full bg-[#141414] text-white flex items-center justify-center text-xs font-bold">
           2
@@ -139,14 +133,12 @@ export default function RecipientsSection({
       </div>
 
       <Flex gap={12}>
-        <TextArea
+        <textarea
           value={rawIds}
           onChange={(e) => handleRawIdsChange(e.target.value)}
           onPaste={handlePaste}
           placeholder={"COL-001, COL-002, MEX-001\no uno por linea:\nCOL-001\nCOL-002\nMEX-001"}
-          autoSize={{ minRows: 4 }}
-          className="flex-1 font-mono text-sm"
-          classNames={{ textarea: "recipients-textarea" }}
+          className="recipientsTextarea flex-1 font-mono"
         />
         <Flex vertical gap={8}>
           <Button
