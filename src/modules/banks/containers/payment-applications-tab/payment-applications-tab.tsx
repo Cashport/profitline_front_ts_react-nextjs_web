@@ -25,7 +25,11 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 import styles from "./payment-applications-tab.module.scss";
 import { usePaymentApplications } from "@/hooks/usePaymentApplications";
 
-export const PaymentApplicationsTab: FC = () => {
+interface PaymentApplicationsTabProps {
+  isActive: boolean;
+}
+
+export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<IPaymentApplication[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -40,7 +44,7 @@ export const PaymentApplicationsTab: FC = () => {
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters });
+  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters, enabled: isActive });
 
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);
@@ -91,7 +95,7 @@ export const PaymentApplicationsTab: FC = () => {
               icon={<DotsThree size={"1.5rem"} />}
               onClick={() => {
                 if (!selectedRows || selectedRows.length === 0) {
-                  showMessage("error", "Seleccione al menos un pago");
+                  showMessage("error", "Seleccione al menos una aplicación de pago");
                   return;
                 }
                 setisGenerateActionOpen(true);
@@ -129,6 +133,7 @@ export const PaymentApplicationsTab: FC = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     statusId={status.status_id}
+                    statusName={status.name}
                     clearSelected={clearSelected}
                     mutate={mutate}
                   />
