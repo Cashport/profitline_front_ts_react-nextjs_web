@@ -39,7 +39,7 @@ export default function TableMassCommunications({
   const { communicationId } = useParams<{ communicationId: string }>();
   const router = useRouter();
   const [confirmChecked, setConfirmChecked] = useState(false);
-  const [emailModalClientId, setEmailModalClientId] = useState<string | null>(null);
+  const [emailModalClientId, setEmailModalClientId] = useState<IPreviewClient | null>(null);
   const [isRemovingClient, setIsRemovingClient] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
@@ -50,9 +50,7 @@ export default function TableMassCommunications({
       message.success("Comunicación activada correctamente");
       router.push("/mass-communications");
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al activar la comunicación"
-      );
+      message.error(error instanceof Error ? error.message : "Error al activar la comunicación");
     } finally {
       setIsSending(false);
     }
@@ -72,7 +70,7 @@ export default function TableMassCommunications({
       setIsRemovingClient(false);
     }
   };
-  const handleViewEmail = (client: IPreviewClient) => setEmailModalClientId(client.client_id);
+  const handleViewEmail = (client: IPreviewClient) => setEmailModalClientId(client);
 
   const columns: ColumnsType<IPreviewClient> = [
     {
@@ -238,7 +236,7 @@ export default function TableMassCommunications({
           open={!!emailModalClientId}
           onClose={() => setEmailModalClientId(null)}
           communicationId={communicationId}
-          clientId={emailModalClientId}
+          client={emailModalClientId}
         />
       )}
     </>
