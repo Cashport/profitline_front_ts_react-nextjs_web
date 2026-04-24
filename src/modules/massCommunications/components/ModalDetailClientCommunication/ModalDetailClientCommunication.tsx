@@ -4,7 +4,7 @@ import { PaperClipOutlined } from "@ant-design/icons";
 
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
 import type { IMessagePreview, IPreviewClient } from "@/types/communications/ICommunications";
-import { extractBodyText } from "@/utils/utils";
+import { formatEmailBodyHtml } from "@/utils/utils";
 
 const { Text } = Typography;
 
@@ -34,10 +34,7 @@ export default function ModalDetailClientCommunication({
           Number(communicationId),
           client.client_id
         );
-        setData({
-          ...response.data,
-          body: extractBodyText(response.data.body)
-        });
+        setData(response.data);
       } catch (error) {
         message.error(
           error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
@@ -150,21 +147,30 @@ export default function ModalDetailClientCommunication({
                 </Text>
               </div>
 
-              <div
-                style={{
-                  padding: "16px 20px",
-                  fontSize: 13,
-                  whiteSpace: "pre-wrap",
-                  lineHeight: 1.6,
-                  minHeight: 100
-                }}
-              >
-                {data.body || (
+              {data.body ? (
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    minHeight: 100
+                  }}
+                  dangerouslySetInnerHTML={{ __html: formatEmailBodyHtml(data.body) }}
+                />
+              ) : (
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    minHeight: 100
+                  }}
+                >
                   <Text type="secondary" italic>
                     Sin contenido
                   </Text>
-                )}
-              </div>
+                </div>
+              )}
 
               {attachments.length > 0 && (
                 <div

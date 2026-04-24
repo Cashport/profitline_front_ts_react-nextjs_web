@@ -6,7 +6,7 @@ import WhatsAppPreview from "../WhatsAppPreview/WhatsAppPreview";
 import { whatsappTemplates } from "../../lib/mockData";
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
 import type { IMessagePreview } from "@/types/communications/ICommunications";
-import { extractBodyText } from "@/utils/utils";
+import { formatEmailBodyHtml } from "@/utils/utils";
 
 interface ClientPreviewProps {
   communicationId: string;
@@ -33,10 +33,7 @@ export default function ClientPreview({
       setLoading(true);
       try {
         const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
-        setData({
-          ...response.data,
-          body: extractBodyText(response.data.body)
-        });
+        setData(response.data);
       } catch (error) {
         message.error(
           error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
@@ -101,9 +98,16 @@ export default function ClientPreview({
                       {data.subject || "Sin asunto"}
                     </p>
                   </div>
-                  <div className="text-sm text-[#141414] leading-relaxed whitespace-pre-wrap">
-                    {data.body || <span className="italic text-gray-400">Sin contenido</span>}
-                  </div>
+                  {data.body ? (
+                    <div
+                      className="text-sm text-[#141414] leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: formatEmailBodyHtml(data.body) }}
+                    />
+                  ) : (
+                    <div className="text-sm text-[#141414] leading-relaxed">
+                      <span className="italic text-gray-400">Sin contenido</span>
+                    </div>
+                  )}
                   {attachments.length > 0 && (
                     <div className="mt-5 pt-4 border-t border-[#EEEEEE]">
                       <p className="text-xs text-gray-500 font-medium mb-2">Adjuntos:</p>

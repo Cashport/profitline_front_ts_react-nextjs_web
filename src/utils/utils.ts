@@ -465,9 +465,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const extractBodyText = (html: string): string => {
-  if (!html) return "";
-  if (typeof window === "undefined") return html;
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return (doc.body?.textContent ?? "").trim();
+export const formatEmailBodyHtml = (body: string): string => {
+  if (!body) return "";
+  const trimmed = body.trim();
+  const isHtml = /<[a-z][\s\S]*>/i.test(trimmed);
+  if (isHtml) return trimmed;
+  return trimmed
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br/>");
 };
