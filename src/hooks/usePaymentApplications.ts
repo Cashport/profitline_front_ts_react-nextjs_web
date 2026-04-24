@@ -5,9 +5,10 @@ import { IPaymentApplicationByStatus } from "@/types/paymentApplications/IPaymen
 
 interface Props {
   selectedFilters?: any;
+  enabled?: boolean;
 }
 
-export const usePaymentApplications = ({ selectedFilters }: Props) => {
+export const usePaymentApplications = ({ selectedFilters, enabled = true }: Props) => {
   const startDate = selectedFilters?.dates?.length
     ? selectedFilters.dates[0].split("|")[0]
     : undefined;
@@ -18,7 +19,7 @@ export const usePaymentApplications = ({ selectedFilters }: Props) => {
   const startDateQuery = startDate ? `&start_date=${startDate}` : "";
   const endDateQuery = endDate ? `&end_date=${endDate}` : "";
 
-  const pathKey = `/paymentApplication/list?${startDateQuery}${endDateQuery}`;
+  const pathKey = enabled ? `/paymentApplication/list?${startDateQuery}${endDateQuery}` : null;
 
   const { data, error, mutate } = useSWR<GenericResponse<IPaymentApplicationByStatus[]>>(pathKey, fetcher, {
     revalidateOnFocus: true,

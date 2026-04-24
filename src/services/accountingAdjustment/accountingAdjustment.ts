@@ -6,6 +6,41 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentDetail } from "@/types/paymentAgreement/IPaymentAgreement";
 import instance, { API } from "@/utils/api/api";
 
+// Map file extensions to proper MIME types
+const MIME_TYPE_MAP: Record<string, string> = {
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  txt: "text/plain",
+  csv: "text/csv",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  zip: "application/zip",
+  rar: "application/x-rar-compressed",
+  "7z": "application/x-7z-compressed",
+  msg: "application/vnd.ms-outlook",
+  eml: "message/rfc822"
+};
+
+// Helper function to get correct MIME type from file extension
+const getCorrectMimeType = (file: File): File => {
+  if (!file.type || file.type === "application/octet-stream") {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    const correctType = extension ? MIME_TYPE_MAP[extension] : file.type;
+    
+    if (correctType && correctType !== file.type) {
+      return new File([file], file.name, { type: correctType });
+    }
+  }
+  return file;
+};
+
 interface RadicationData {
   invoices_id: number[];
   radication_type: string;
@@ -44,7 +79,8 @@ export const applyAccountingAdjustment = async (
   if (comment) formData.append("comment", comment);
   if (docFiles) {
     docFiles.forEach((file) => {
-      formData.append("doc", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("doc", correctedFile);
     });
   }
 
@@ -69,7 +105,8 @@ export const changeStatusInvoice = async (
   formData.append("comments", comments);
   if (docFiles) {
     docFiles.forEach((file) => {
-      formData.append("files", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("files", correctedFile);
     });
   }
 
@@ -98,7 +135,8 @@ export const reportInvoiceIncident = async (
 
   if (files) {
     files.forEach((file) => {
-      formData.append("files", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("files", correctedFile);
     });
   }
 
@@ -121,7 +159,8 @@ export const radicateInvoice = async (
   radicationData.comments && formData.append("comments", radicationData.comments);
 
   files.forEach((file) => {
-    formData.append("files", file);
+    const correctedFile = getCorrectMimeType(file);
+    formData.append("files", correctedFile);
   });
 
   const response = await API.post(
@@ -143,7 +182,8 @@ export const createPaymentAgreement = async (
     formData.append("adjustment_data", JSON.stringify(adjustmentData));
 
     if (file) {
-      formData.append("file", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("file", correctedFile);
     }
 
     const response = await instance.post(
@@ -364,7 +404,8 @@ export const addCommentHistoricAction = async (
   }
 
   if (file) {
-    formData.append("file", file);
+    const correctedFile = getCorrectMimeType(file);
+    formData.append("file", correctedFile);
   }
 
   try {

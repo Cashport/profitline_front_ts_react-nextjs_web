@@ -22,6 +22,7 @@ interface PropsPaymentApplicationsTable {
   // eslint-disable-next-line no-unused-vars
   handleOpenDetail?: (paymentId: number) => void;
   statusId: number;
+  statusName: string;
   clearSelected: boolean;
   mutate: () => void;
 }
@@ -32,6 +33,7 @@ export const PaymentApplicationsTable = ({
   setSelectedRows,
   handleOpenDetail,
   statusId,
+  statusName,
   clearSelected,
   mutate
 }: PropsPaymentApplicationsTable) => {
@@ -229,18 +231,22 @@ export const PaymentApplicationsTable = ({
               </Button>
             )
           },
-          {
-            key: "upload-template",
-            label: (
-              <Button
-                icon={<FileArrowUp size={20} />}
-                className="buttonNoBorder"
-                onClick={() => handleUploadFile(record.id)}
-              >
-                Cargar Template
-              </Button>
-            )
-          }
+          ...(statusName === "Por revisar"
+            ? [
+                {
+                  key: "upload-template",
+                  label: (
+                    <Button
+                      icon={<FileArrowUp size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleUploadFile(record.id)}
+                    >
+                      Cargar Template
+                    </Button>
+                  )
+                }
+              ]
+            : [])
         ];
 
         const customDropdown = (menu: ReactNode) => (

@@ -35,7 +35,11 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 
 import styles from "./active-payments-tab.module.scss";
 
-export const ActivePaymentsTab: FC = () => {
+interface ActivePaymentsTabProps {
+  isActive: boolean;
+}
+
+export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -53,7 +57,11 @@ export const ActivePaymentsTab: FC = () => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery, selectedFilters });
+  const { data, isLoading, mutate } = useBankPayments({
+    like: searchQuery,
+    selectedFilters,
+    enabled: isActive
+  });
 
   const handleOpenBankRules = () => {
     setShowBankRules(true);
