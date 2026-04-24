@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { message, Modal, Typography } from "antd";
+import { Input, message, Modal, Typography } from "antd";
 import type { UploadFile } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
 
@@ -24,11 +24,13 @@ export const ModalConfirmRebilling = ({
   purchaseOrderDetailId,
   onSuccess
 }: Props) => {
+  const [invoiceId, setInvoiceId] = useState("");
   const [creditNoteFile, setCreditNoteFile] = useState<File | undefined>();
   const [newInvoiceFile, setNewInvoiceFile] = useState<File | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const resetState = () => {
+    setInvoiceId("");
     setCreditNoteFile(undefined);
     setNewInvoiceFile(undefined);
   };
@@ -65,15 +67,16 @@ export const ModalConfirmRebilling = ({
     };
 
   const handleSubmit = async () => {
-    if (!creditNoteFile || !newInvoiceFile) return;
+    const cleanedInvoiceId = invoiceId.trim();
+    if (!cleanedInvoiceId || !creditNoteFile || !newInvoiceFile) return;
     setIsLoading(true);
-    const hide = message.open({
-      type: "loading",
-      content: "Confirmando refacturación...",
-      duration: 0
-    });
     try {
-      await confirmPurchaseOrderRebilling(purchaseOrderDetailId, creditNoteFile, newInvoiceFile);
+      await confirmPurchaseOrderRebilling(
+        purchaseOrderDetailId,
+        cleanedInvoiceId,
+        creditNoteFile,
+        newInvoiceFile
+      );
       message.success("Refacturación confirmada exitosamente.");
       onSuccess?.();
       resetState();
@@ -85,7 +88,6 @@ export const ModalConfirmRebilling = ({
           : "Error al confirmar la refacturación. Por favor, inténtalo de nuevo."
       );
     } finally {
-      hide();
       setIsLoading(false);
     }
   };
@@ -103,12 +105,36 @@ export const ModalConfirmRebilling = ({
           titleCancel="Cancelar"
           onClose={handleClose}
           handleOk={handleSubmit}
-          isConfirmDisabled={!creditNoteFile || !newInvoiceFile}
+          isConfirmDisabled={!invoiceId.trim() || !creditNoteFile || !newInvoiceFile}
           isConfirmLoading={isLoading}
         />
       }
       destroyOnClose
     >
+      <div className="fileRow">
+        <Text className="label">Id de factura</Text>
+        <div className="invoiceInputWrapper">
+          <Input
+            value={invoiceId}
+            onChange={(e) => setInvoiceId(e.target.value)}
+            placeholder="Ingresa el Id de factura"
+            maxLength={50}
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+      <div className="fileRow mt-[-16px]">
+        <Text className="label">Nueva factura</Text>
+        <div className="documentButtonWrapper">
+          <DocumentButton
+            title="Nueva factura"
+            fileName={newInvoiceFile?.name}
+            fileSize={newInvoiceFile?.size}
+            handleOnChange={handleChange(setNewInvoiceFile)}
+            handleOnDelete={handleDelete(setNewInvoiceFile)}
+          />
+        </div>
+      </div>
       <div className="fileRow">
         <Text className="label">Nota crédito</Text>
         <div className="documentButtonWrapper">
@@ -118,18 +144,6 @@ export const ModalConfirmRebilling = ({
             fileSize={creditNoteFile?.size}
             handleOnChange={handleChange(setCreditNoteFile)}
             handleOnDelete={handleDelete(setCreditNoteFile)}
-          />
-        </div>
-      </div>
-      <div className="fileRow">
-        <Text className="label">Nueva factura</Text>
-        <div className="documentButtonWrapper">
-          <DocumentButton
-            title="Nueva factura"
-            fileName={newInvoiceFile?.name}
-            fileSize={newInvoiceFile?.size}
-            handleOnChange={handleChange(setNewInvoiceFile)}
-            handleOnDelete={handleDelete(setNewInvoiceFile)}
           />
         </div>
       </div>

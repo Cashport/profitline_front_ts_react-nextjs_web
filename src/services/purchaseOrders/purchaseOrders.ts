@@ -409,9 +409,7 @@ export const downloadAvailableDocuments = async ({
   }
 };
 
-export const sendPurchaseOrderToRebilling = async (
-  purchaseOrderDetailId: string
-): Promise<any> => {
+export const sendPurchaseOrderToRebilling = async (purchaseOrderDetailId: string): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/purchaseorder/${purchaseOrderDetailId}/send-to-rebilling`
@@ -425,11 +423,13 @@ export const sendPurchaseOrderToRebilling = async (
 
 export const confirmPurchaseOrderRebilling = async (
   purchaseOrderDetailId: string,
+  invoiceId: string,
   creditNote: File,
   newInvoice: File
 ): Promise<any> => {
   try {
     const formData = new FormData();
+    formData.append("rebilling_invoice_id", invoiceId);
     formData.append("credit_note", creditNote);
     formData.append("new_invoice", newInvoice);
 

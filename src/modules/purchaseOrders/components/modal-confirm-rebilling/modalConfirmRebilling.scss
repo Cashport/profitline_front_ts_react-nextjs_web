@@ -33,5 +33,11 @@
             min-width: 0;
             height: 100px;
         }
+
+        .invoiceInputWrapper {
+            .ant-input {
+                height: 40px !important;
+            }
+        }
     }
 }
