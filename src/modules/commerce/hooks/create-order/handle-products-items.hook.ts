@@ -63,7 +63,8 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
 
       const updatedProduct = {
         ...newState[categoryIndex].products[productIndex],
-        quantity: selectedCategories[categoryIndex].products[productIndex].quantity - 1
+        quantity: selectedCategories[categoryIndex].products[productIndex].quantity - 1,
+        autoAssigned: false
       };
 
       if (updatedProduct.quantity === 0) {
@@ -93,7 +94,8 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
 
       const updatedProduct = {
         ...newState[categoryIndex].products[productIndex],
-        quantity: newState[categoryIndex].products[productIndex].quantity + 1
+        quantity: newState[categoryIndex].products[productIndex].quantity + 1,
+        autoAssigned: false
       };
 
       // Replace the old product with the updated product in the products array
@@ -134,7 +136,7 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
           const updatedProducts = category.products.map((product) => {
             if (product.id === productId) {
               // Update the quantity of the matched product
-              return { ...product, quantity: newQuantity };
+              return { ...product, quantity: newQuantity, autoAssigned: false };
             }
             return product;
           });

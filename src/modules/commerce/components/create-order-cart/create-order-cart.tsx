@@ -323,6 +323,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       }
 
       if (existing) {
+        if (existing.autoAssigned === false) {
+          continue;
+        }
         if (existing.quantity !== requiredQty || existing.autoAssigned !== true) {
           next[catIdx].products[prodIdx] = {
             ...existing,
@@ -564,7 +567,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Restyline
+              Solo se pueden pedir unidades pares para Restylane
             </p>
           </Flex>
         }
