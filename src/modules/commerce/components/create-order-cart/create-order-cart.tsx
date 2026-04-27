@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple, X } from "phosphor-react";
@@ -57,6 +57,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [showComplementMismatchModal, setShowComplementMismatchModal] = useState(false);
   const [complementCatalogMissing, setComplementCatalogMissing] = useState<string | null>(null);
 
+  const rejectedComplementSKUsRef = useRef<Set<string>>(new Set());
+  const prevAutoAssignedSKUsRef = useRef<Set<string>>(new Set());
+
   const {
     selectedCategories,
     setSelectedCategories,
@@ -79,10 +82,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const MINIMUM_ORDER_AMOUNT = 1600000;
-  const totalWithTaxes = (confirmOrderData?.total ?? 0) + (confirmOrderData?.taxes ?? 0);
   const isTotalLessThanMinimum = useMemo(
-    () => totalWithTaxes > 0 && totalWithTaxes < MINIMUM_ORDER_AMOUNT,
-    [totalWithTaxes]
+    () => confirmOrderData?.total < MINIMUM_ORDER_AMOUNT,
+    [confirmOrderData?.total]
   );
 
   const hasNoCanulasOrAgua = useMemo(() => {
@@ -107,8 +109,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const hasOddSBVital = useMemo(() => {
     return selectedCategories.some((category) =>
       category.products.some(
-        (p) =>
-          matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
+        (p) => matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
       )
     );
   }, [selectedCategories]);
@@ -275,6 +276,22 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
     const req = computeComplementRequirements(selectedCategories);
 
+    const currentSKUs = new Set<string>();
+    for (const cat of selectedCategories) {
+      for (const p of cat.products) {
+        if (p.SKU) currentSKUs.add(p.SKU);
+      }
+    }
+    for (const prevSKU of prevAutoAssignedSKUsRef.current) {
+      if (!currentSKUs.has(prevSKU)) {
+        rejectedComplementSKUsRef.current.add(prevSKU);
+      }
+    }
+
+    if (!req.hasMainProduct) {
+      rejectedComplementSKUsRef.current.clear();
+    }
+
     const findCatalogProduct = (identifier: ProductIdentifier): ISelectedProduct | undefined => {
       for (const cat of categories) {
         const match = cat.products.find((p) => matchesProductIdentifier(p, identifier));
@@ -325,6 +342,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       }
 
       if (existing) {
+        if (existing.autoAssigned === false) {
+          continue;
+        }
         if (existing.quantity !== requiredQty || existing.autoAssigned !== true) {
           next[catIdx].products[prodIdx] = {
             ...existing,
@@ -339,6 +359,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       const catalogProduct = findCatalogProduct(identifier);
       if (!catalogProduct) {
         setComplementCatalogMissing(identifier.description);
+        continue;
+      }
+
+      if (rejectedComplementSKUsRef.current.has(catalogProduct.SKU)) {
         continue;
       }
 
@@ -372,6 +396,14 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       }
       mutated = true;
     }
+
+    const newSnapshot = new Set<string>();
+    for (const cat of next) {
+      for (const p of cat.products) {
+        if (p.autoAssigned !== undefined && p.SKU) newSnapshot.add(p.SKU);
+      }
+    }
+    prevAutoAssignedSKUsRef.current = newSnapshot;
 
     if (mutated) setSelectedCategories(next);
   }, [selectedCategories, categories, projectId]);
@@ -566,7 +598,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Restyline
+              Solo se pueden pedir unidades pares para Restylane
             </p>
           </Flex>
         }

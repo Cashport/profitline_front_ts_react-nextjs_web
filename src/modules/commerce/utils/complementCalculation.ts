@@ -36,7 +36,7 @@ export const computeComplementRequirements = (
     });
   });
 
-  const canulasFromSculptra = sculptraQty * 4;
+  const canulasFromSculptra = sculptraQty * 2;
   const canulasFromRestylane = Math.floor(restylaneTotalQty / 2);
 
   return {

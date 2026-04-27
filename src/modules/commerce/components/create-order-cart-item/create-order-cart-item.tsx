@@ -89,7 +89,6 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
         <Button
           className={styles.buttonChangeQuantity}
           onClick={() => handleDecrementQuantity(product.id)}
-          disabled={isLocked}
           title={isLocked ? lockedTitle : undefined}
         >
           {alreadySelectedProduct?.quantity === 1 ? (
@@ -109,14 +108,11 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
               return e.preventDefault();
             }
           }}
-          disabled={isLocked}
-          readOnly={isLocked}
           title={isLocked ? lockedTitle : undefined}
         />
         <Button
           className={styles.buttonChangeQuantity}
           onClick={() => handleIncrementQuantity(product.id)}
-          disabled={isLocked}
           title={isLocked ? lockedTitle : undefined}
         >
           <Plus size={14} weight="bold" />
