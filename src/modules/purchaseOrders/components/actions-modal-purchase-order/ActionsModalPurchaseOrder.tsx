@@ -231,6 +231,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   };
 
   const handleDownloadSalesPlane = async () => {
+    const hideLoading = message.loading("Descargando plano de ventas...", 0);
     try {
       const res = await getSalesPlane();
       window.open(res.url, "_blank");
@@ -238,6 +239,8 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       message.error(
         error instanceof Error ? error.message : "Error al descargar el plano de ventas"
       );
+    } finally {
+      hideLoading();
     }
   };
 
