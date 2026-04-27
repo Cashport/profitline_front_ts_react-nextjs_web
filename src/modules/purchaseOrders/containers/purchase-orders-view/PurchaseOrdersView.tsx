@@ -140,17 +140,6 @@ export function PurchaseOrdersView() {
   };
 
   const handleOpenActionsModal = () => {
-    if (selectedPackageRows.length === 0 && selectedOrders.length === 0) {
-      message.info("Por favor selecciona al menos un pedido u orden para generar acciones.");
-      return;
-    }
-    const isDelivered =
-      selectedPackageRows.some((p) => p.orders.some((o) => o.status === "Entregado")) ||
-      selectedOrders.some((o) => o.status === "Entregado");
-    if (isDelivered) {
-      message.warning("No se pueden generar acciones para pedidos/ordenes con estado 'Entregado'.");
-      return;
-    }
     setWhichModalIsOpen({ selected: 1 });
   };
 
