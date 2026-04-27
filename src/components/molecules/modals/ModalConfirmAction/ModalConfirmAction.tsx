@@ -41,9 +41,10 @@ export const ModalConfirmAction = ({
       }}
       okText={okText}
       cancelButtonProps={{
-        className: "cancelButton",
+        className: !hideOkButton ? "cancelButton" : "acceptButton",
         onClick: onCancel ? onCancel : onClose,
-        loading: cancelLoading
+        loading: cancelLoading,
+        style: hideOkButton ? { gridColumn: "1 / span 2" } : undefined
       }}
       cancelText={cancelText}
       title={title}

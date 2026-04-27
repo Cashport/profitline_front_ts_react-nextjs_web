@@ -409,6 +409,42 @@ export const downloadAvailableDocuments = async ({
   }
 };
 
+export const sendPurchaseOrderToRebilling = async (purchaseOrderDetailId: string): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseorder/${purchaseOrderDetailId}/send-to-rebilling`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending purchase order to rebilling:", error);
+    throw error;
+  }
+};
+
+export const confirmPurchaseOrderRebilling = async (
+  purchaseOrderDetailId: string,
+  invoiceId: string,
+  creditNote: File,
+  newInvoice: File
+): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append("rebilling_invoice_id", invoiceId);
+    formData.append("credit_note", creditNote);
+    formData.append("new_invoice", newInvoice);
+
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/purchaseorder/${purchaseOrderDetailId}/confirm-rebilling`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error confirming purchase order rebilling:", error);
+    throw error;
+  }
+};
+
 export const getDownloadableFiles = async (packageIds?: string[], orderIds?: string[]) => {
   if (!packageIds && !orderIds) {
     throw new Error(

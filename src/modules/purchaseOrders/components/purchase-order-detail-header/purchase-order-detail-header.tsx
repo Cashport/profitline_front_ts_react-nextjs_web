@@ -19,7 +19,10 @@ import { Badge } from "@/modules/chat/ui/badge";
 import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown";
 import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
-import { sendPackageToBilling } from "@/services/purchaseOrders/purchaseOrders";
+import {
+  sendPackageToBilling,
+  sendPurchaseOrderToRebilling
+} from "@/services/purchaseOrders/purchaseOrders";
 import { ApiError } from "@/utils/api/api";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { Invoice } from "@phosphor-icons/react";
@@ -76,6 +79,7 @@ export function PurchaseOrderDetailHeader({
 
   const [isBillingLoading, setIsBillingLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
+  const [isRebillingConfirmOpen, setIsRebillingConfirmOpen] = useState(false);
 
   const allowedStatesForDownload = ["En despacho", "Entregado"];
   const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
@@ -174,6 +178,26 @@ export function PurchaseOrderDetailHeader({
     }
   };
 
+  const handleSendToRebilling = async () => {
+    if (!orderId) return;
+
+    const hideLoading = message.loading("Enviando orden a refacturación...", 0);
+
+    try {
+      await sendPurchaseOrderToRebilling(orderId);
+      message.success("Orden enviada a refacturación exitosamente");
+      mutate?.();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        message.error(error.message || "Error enviando orden a refacturación");
+      } else {
+        message.error("Error enviando orden a refacturación");
+      }
+    } finally {
+      hideLoading();
+    }
+  };
+
   const actionItems: DropdownItem[] = [
     {
       key: "billing",
@@ -202,6 +226,20 @@ export function PurchaseOrderDetailHeader({
       icon: <Boxes className="h-4 w-4" />,
       onClick: () => onOpenModal?.(8),
       disabled: !allowedStatesForBackOrder.includes(data?.status_name ?? "")
+    },
+    {
+      key: "rebilling",
+      label: "Refacturar",
+      icon: <Invoice className="h-4 w-4" />,
+      onClick: () => setIsRebillingConfirmOpen(true),
+      disabled: data?.status_name !== "En facturación"
+    },
+    {
+      key: "confirm-rebilling",
+      label: "Confirmar refacturación",
+      icon: <Receipt className="h-4 w-4" />,
+      onClick: () => onOpenModal?.(11),
+      disabled: data?.status_name !== "En refacturación"
     },
     {
       key: "divider-1",
@@ -286,7 +324,9 @@ export function PurchaseOrderDetailHeader({
                     {siblingOrders.map((sibling) => (
                       <div
                         key={sibling.id}
-                        onClick={() => (onNavigate ?? router.push)(`/purchase-orders/${sibling.id}`)}
+                        onClick={() =>
+                          (onNavigate ?? router.push)(`/purchase-orders/${sibling.id}`)
+                        }
                         className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 ${
                           String(sibling.id) === orderId ? "bg-gray-100" : ""
                         }`}
@@ -352,6 +392,19 @@ export function PurchaseOrderDetailHeader({
         title="¿Desea enviar a aprobación? "
         content="El cliente no tiene cupo suficiente para gestionar el pedido"
         okText="Enviar aprobación"
+        cancelText="Cancelar"
+      />
+
+      <ModalConfirmAction
+        isOpen={isRebillingConfirmOpen}
+        onClose={() => setIsRebillingConfirmOpen(false)}
+        onOk={() => {
+          setIsRebillingConfirmOpen(false);
+          handleSendToRebilling();
+        }}
+        title="¿Está seguro que quiere refacturar?"
+        content="Esta opción no se puede regresar"
+        okText="Confirmar"
         cancelText="Cancelar"
       />
     </>
