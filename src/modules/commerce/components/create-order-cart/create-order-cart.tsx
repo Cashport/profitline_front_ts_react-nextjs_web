@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { BagSimple, X } from "phosphor-react";
@@ -56,6 +56,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [showOddGroupModal, setShowOddGroupModal] = useState(false);
   const [showComplementMismatchModal, setShowComplementMismatchModal] = useState(false);
   const [complementCatalogMissing, setComplementCatalogMissing] = useState<string | null>(null);
+
+  const rejectedComplementSKUsRef = useRef<Set<string>>(new Set());
+  const prevAutoAssignedSKUsRef = useRef<Set<string>>(new Set());
 
   const {
     selectedCategories,
@@ -273,6 +276,22 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
     const req = computeComplementRequirements(selectedCategories);
 
+    const currentSKUs = new Set<string>();
+    for (const cat of selectedCategories) {
+      for (const p of cat.products) {
+        if (p.SKU) currentSKUs.add(p.SKU);
+      }
+    }
+    for (const prevSKU of prevAutoAssignedSKUsRef.current) {
+      if (!currentSKUs.has(prevSKU)) {
+        rejectedComplementSKUsRef.current.add(prevSKU);
+      }
+    }
+
+    if (!req.hasMainProduct) {
+      rejectedComplementSKUsRef.current.clear();
+    }
+
     const findCatalogProduct = (identifier: ProductIdentifier): ISelectedProduct | undefined => {
       for (const cat of categories) {
         const match = cat.products.find((p) => matchesProductIdentifier(p, identifier));
@@ -343,6 +362,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         continue;
       }
 
+      if (rejectedComplementSKUsRef.current.has(catalogProduct.SKU)) {
+        continue;
+      }
+
       const toInsert: ISelectedProduct = {
         id: catalogProduct.id,
         name: catalogProduct.name,
@@ -373,6 +396,14 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       }
       mutated = true;
     }
+
+    const newSnapshot = new Set<string>();
+    for (const cat of next) {
+      for (const p of cat.products) {
+        if (p.autoAssigned !== undefined && p.SKU) newSnapshot.add(p.SKU);
+      }
+    }
+    prevAutoAssignedSKUsRef.current = newSnapshot;
 
     if (mutated) setSelectedCategories(next);
   }, [selectedCategories, categories, projectId]);
