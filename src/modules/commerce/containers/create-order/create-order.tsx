@@ -70,11 +70,14 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
-  const [isCartVisible, setIsCartVisible] = useState(false);
+  const [isCartVisible, setIsCartVisible] = useState(
+    () => typeof window !== "undefined" && window.innerWidth > 1000
+  );
+  console.log("isCartVisible", isCartVisible);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
 
   const toggleCart = () => {
-    setIsCartVisible(!isCartVisible);
+    setIsCartVisible((prev) => !prev);
   };
 
   // Fetch discounts cuando el cliente cambia
