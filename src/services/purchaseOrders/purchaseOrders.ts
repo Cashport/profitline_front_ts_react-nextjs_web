@@ -468,3 +468,15 @@ export const getDownloadableFiles = async (packageIds?: string[], orderIds?: str
     throw error;
   }
 };
+
+export const getSalesPlane = async () => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `${config.API_HOST}/purchaseOrder/products/export-all`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales plane:", error);
+    throw error;
+  }
+};
