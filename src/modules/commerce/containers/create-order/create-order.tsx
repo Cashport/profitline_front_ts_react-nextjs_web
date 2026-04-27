@@ -73,7 +73,6 @@ export const CreateOrderView: FC = () => {
   const [isCartVisible, setIsCartVisible] = useState(
     () => typeof window !== "undefined" && window.innerWidth > 1000
   );
-  console.log("isCartVisible", isCartVisible);
   const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
 
   const toggleCart = () => {
