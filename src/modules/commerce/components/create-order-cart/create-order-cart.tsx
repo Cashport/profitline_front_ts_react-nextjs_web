@@ -79,10 +79,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   };
 
   const MINIMUM_ORDER_AMOUNT = 1600000;
-  const totalWithTaxes = (confirmOrderData?.total ?? 0) + (confirmOrderData?.taxes ?? 0);
   const isTotalLessThanMinimum = useMemo(
-    () => totalWithTaxes > 0 && totalWithTaxes < MINIMUM_ORDER_AMOUNT,
-    [totalWithTaxes]
+    () => confirmOrderData?.total < MINIMUM_ORDER_AMOUNT,
+    [confirmOrderData?.total]
   );
 
   const hasNoCanulasOrAgua = useMemo(() => {
@@ -107,8 +106,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const hasOddSBVital = useMemo(() => {
     return selectedCategories.some((category) =>
       category.products.some(
-        (p) =>
-          matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
+        (p) => matchesProductIdentifier(p, EVEN_QUANTITY_PRODUCT) && p.quantity % 2 !== 0
       )
     );
   }, [selectedCategories]);
@@ -325,6 +323,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       }
 
       if (existing) {
+        if (existing.autoAssigned === false) {
+          continue;
+        }
         if (existing.quantity !== requiredQty || existing.autoAssigned !== true) {
           next[catIdx].products[prodIdx] = {
             ...existing,
@@ -566,7 +567,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Restyline
+              Solo se pueden pedir unidades pares para Restylane
             </p>
           </Flex>
         }

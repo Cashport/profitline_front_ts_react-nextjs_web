@@ -3,8 +3,8 @@ import { Modal, Typography, Tag, Flex, Spin, message } from "antd";
 import { PaperClipOutlined } from "@ant-design/icons";
 
 import { getCircularizationMessagePreview } from "@/services/communications/communications";
-import type { IMessagePreview } from "@/types/communications/ICommunications";
-import { extractBodyText } from "@/utils/utils";
+import type { IMessagePreview, IPreviewClient } from "@/types/communications/ICommunications";
+import { formatEmailBodyHtml } from "@/utils/utils";
 
 const { Text } = Typography;
 
@@ -12,14 +12,14 @@ interface ModalDetailClientCommunicationProps {
   open: boolean;
   onClose: () => void;
   communicationId: string;
-  clientId: string;
+  client: IPreviewClient;
 }
 
 export default function ModalDetailClientCommunication({
   open,
   onClose,
   communicationId,
-  clientId
+  client
 }: ModalDetailClientCommunicationProps) {
   const [data, setData] = useState<IMessagePreview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,11 +30,11 @@ export default function ModalDetailClientCommunication({
     const fetchPreview = async () => {
       setLoading(true);
       try {
-        const response = await getCircularizationMessagePreview(Number(communicationId), clientId);
-        setData({
-          ...response.data,
-          body: extractBodyText(response.data.body)
-        });
+        const response = await getCircularizationMessagePreview(
+          Number(communicationId),
+          client.client_id
+        );
+        setData(response.data);
       } catch (error) {
         message.error(
           error instanceof Error ? error.message : "No se pudo cargar la vista previa del mensaje."
@@ -45,7 +45,7 @@ export default function ModalDetailClientCommunication({
     };
 
     fetchPreview();
-  }, [open, communicationId, clientId]);
+  }, [open, communicationId, client.client_id]);
 
   const recipients = data?.recipient_addresses ?? [];
   const attachments = data?.attachments ?? [];
@@ -86,11 +86,11 @@ export default function ModalDetailClientCommunication({
             flexShrink: 0
           }}
         >
-          {clientId.charAt(0).toUpperCase()}
+          {client.client_name.charAt(0).toUpperCase()}
         </div>
         <div>
           <Text style={{ color: "#fff", fontSize: 14, fontWeight: 600, display: "block" }}>
-            {clientId}
+            {client.client_name}
           </Text>
           <Text style={{ color: "#999", fontSize: 11 }}>
             {recipients.length} destinatario{recipients.length !== 1 ? "s" : ""}
@@ -147,21 +147,30 @@ export default function ModalDetailClientCommunication({
                 </Text>
               </div>
 
-              <div
-                style={{
-                  padding: "16px 20px",
-                  fontSize: 13,
-                  whiteSpace: "pre-wrap",
-                  lineHeight: 1.6,
-                  minHeight: 100
-                }}
-              >
-                {data.body || (
+              {data.body ? (
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    minHeight: 100
+                  }}
+                  dangerouslySetInnerHTML={{ __html: formatEmailBodyHtml(data.body) }}
+                />
+              ) : (
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    minHeight: 100
+                  }}
+                >
                   <Text type="secondary" italic>
                     Sin contenido
                   </Text>
-                )}
-              </div>
+                </div>
+              )}
 
               {attachments.length > 0 && (
                 <div
