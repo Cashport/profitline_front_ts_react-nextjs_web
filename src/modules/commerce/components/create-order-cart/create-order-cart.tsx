@@ -191,6 +191,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     onClose && onClose();
   };
 
+  const handleConfirmComplementMismatch = () => {
+    setShowComplementMismatchModal(false);
+    if (hasNoCanulasOrAgua) {
+      setShowCanulasModal(true);
+      return;
+    }
+    setCheckingOut(true);
+    onClose && onClose();
+  };
+
   const handleCloseModal = () => {
     setShowConfirmModal(false);
   };
@@ -598,7 +608,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Restylane
+              Solo se pueden pedir unidades pares para Skinboosters
             </p>
           </Flex>
         }
@@ -625,6 +635,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showComplementMismatchModal}
         onClose={() => setShowComplementMismatchModal(false)}
+        onOk={handleConfirmComplementMismatch}
         title="No puedes continuar con la compra"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
@@ -647,8 +658,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             )}
           </Flex>
         }
-        cancelText="Entendido"
-        hideOkButton
+        cancelText="Modificar"
+        okText="Continuar"
       />
 
       <ModalConfirmAction
