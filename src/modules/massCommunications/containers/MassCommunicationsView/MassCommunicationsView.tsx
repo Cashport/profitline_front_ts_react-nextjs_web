@@ -141,7 +141,8 @@ export default function MassCommunicationsView() {
 
   const handlePreviewAndSend = () => {
     if (!canOpenPreview) return;
-    router.push("/mass-communications/" + selectedEmailTemplate);
+    const templateId = channel === "email" ? selectedEmailTemplate : selectedTemplate;
+    router.push("/mass-communications/" + templateId);
   };
 
   return (
