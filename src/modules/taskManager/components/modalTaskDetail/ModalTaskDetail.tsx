@@ -141,15 +141,15 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                 {emailDetails.attachments.map((attachment) => (
                   <div
                     key={attachment.id}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between gap-2 p-2 bg-gray-50 rounded border border-gray-200 hover:bg-gray-100 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-900">{attachment.file_name}</span>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <FileText className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                      <span className="text-sm text-gray-900 truncate">{attachment.file_name}</span>
                     </div>
                     <Dropdown
                       dropdownRender={(menu: ReactNode) => (
-                        <div className="dropdownApplicationTable">{menu}</div>
+                        <div className="dropdownTaskDetail">{menu}</div>
                       )}
                       menu={{
                         items: [
@@ -184,7 +184,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                       overlayStyle={{ zIndex: 10000 }}
                     >
                       <AntButton className="dotsBtn">
-                        <DotsThreeVertical size={16} />
+                        <DotsThreeVertical weight="bold" size={16} />
                       </AntButton>
                     </Dropdown>
                   </div>

@@ -19,28 +19,29 @@
             color: $black !important;
         }
     }
+}
 
-    .dropdownApplicationTable {
-        ul {
-            background-color: $white !important;
+.dropdownTaskDetail {
+    ul {
+        background-color: $white !important;
+    }
+
+    li {
+        padding: 6px !important;
+        &:hover {
+            background-color: inherit !important;
+            cursor: default !important;
         }
+    }
 
-        li {
-            &:hover {
-                background-color: inherit !important;
-                cursor: default !important;
-            }
-        }
+    .buttonNoBorder {
+        background-color: $background !important;
+        border: none;
+        width: 100%;
+        justify-content: flex-start;
 
-        .buttonNoBorder {
-            background-color: $background !important;
-            border: none;
-            width: 100%;
-            justify-content: flex-start;
-
-            &:hover {
-                outline: 1px solid $black;
-            }
+        &:hover {
+            outline: 1px solid $black;
         }
     }
 }
