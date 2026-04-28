@@ -279,6 +279,11 @@ export interface ICircularizationClientContacts {
   address: string;
 }
 
+export interface IPreviewClientContact {
+  name: string;
+  phone: string;
+}
+
 export interface IPreviewClient {
   client_id: string;
   client_name: string;
@@ -286,6 +291,7 @@ export interface IPreviewClient {
   past_due_amount: number;
   active_payment_agreements: number;
   total_contacts: number;
+  contacts?: IPreviewClientContact[];
 }
 
 export interface IGetPreviewClients {

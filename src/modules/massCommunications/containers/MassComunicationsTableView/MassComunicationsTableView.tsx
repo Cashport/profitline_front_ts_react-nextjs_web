@@ -16,6 +16,8 @@ import type { IPreviewClient } from "@/types/communications/ICommunications";
 export default function MassComunicationsTableView() {
   const router = useRouter();
   const { communicationId } = useParams<{ communicationId: string }>();
+  const isEmail = /^\d+$/.test(communicationId);
+
   const [selectedClient, setSelectedClient] = useState<IPreviewClient | null>(null);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -83,6 +85,7 @@ export default function MassComunicationsTableView() {
             total={data?.total ?? 0}
             pageSize={data?.limit ?? 10}
             onPageChange={setPage}
+            isWhatsapp={!isEmail}
           />
         )}
       </div>
