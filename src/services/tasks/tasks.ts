@@ -83,3 +83,11 @@ export const getTaskDetails = async ({
     throw error;
   }
 };
+
+export const reprocessAttachmentTask = async (attachmentId: number): Promise<void> => {
+  try {
+    await API.post(`${config.API_HOST}/task/reprocess-attachment`, { attachmentId });
+  } catch (error) {
+    throw error;
+  }
+};

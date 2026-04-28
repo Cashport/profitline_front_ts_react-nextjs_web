@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 
 import {
   X,
@@ -13,6 +13,9 @@ import {
   Download,
   AlertCircle
 } from "lucide-react";
+import { Button as AntButton, Dropdown, Modal } from "antd";
+import { DotsThreeVertical, ArrowCounterClockwise } from "@phosphor-icons/react";
+import "./modalTaskDetail.scss";
 import {
   Select,
   SelectContent,
@@ -25,7 +28,6 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
-import { Dialog, DialogContent, DialogTitle } from "@/modules/chat/ui/dialog";
 import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { getTaskDetails } from "@/services/tasks/tasks";
@@ -75,7 +77,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
       setDetailError(null);
     }
   }, [isOpen]);
-
 
   if (!task) return null;
 
@@ -146,14 +147,46 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                       <FileText className="h-4 w-4 text-gray-600" />
                       <span className="text-sm text-gray-900">{attachment.file_name}</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2"
-                      onClick={() => window.open(attachment.s3_url, "_blank")}
+                    <Dropdown
+                      dropdownRender={(menu: ReactNode) => (
+                        <div className="dropdownApplicationTable">{menu}</div>
+                      )}
+                      menu={{
+                        items: [
+                          {
+                            key: "reprocess",
+                            label: (
+                              <AntButton
+                                icon={<ArrowCounterClockwise size={14} />}
+                                className="buttonNoBorder"
+                                onClick={() => console.log(task)}
+                              >
+                                Reprocesar
+                              </AntButton>
+                            )
+                          },
+                          {
+                            key: "download",
+                            label: (
+                              <AntButton
+                                icon={<Download className="h-3 w-3" />}
+                                className="buttonNoBorder"
+                                onClick={() => window.open(attachment.s3_url, "_blank")}
+                              >
+                                Descargar
+                              </AntButton>
+                            )
+                          }
+                        ]
+                      }}
+                      trigger={["click"]}
+                      placement="bottomRight"
+                      overlayStyle={{ zIndex: 10000 }}
                     >
-                      <Download className="h-3 w-3" />
-                    </Button>
+                      <AntButton className="dotsBtn">
+                        <DotsThreeVertical size={16} />
+                      </AntButton>
+                    </Dropdown>
                   </div>
                 ))}
               </div>
@@ -249,301 +282,300 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        showCloseButton={false}
-        className="!w-[80vw] !max-w-[80vw] max-h-[90vh] p-0 bg-white text-cashport-black border-gray-200"
-      >
-        <DialogTitle className="sr-only">{task.id} details</DialogTitle>
-
-        <div className="flex flex-col h-[90vh]">
-          <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-semibold text-cashport-black">
-                TASK-{task.id ? task.id : task.queue_id ? task.queue_id : "N/A"}
-              </h2>
-              {taskDetail && getTipoTareaBadge(taskDetail.task_type)}
-              {taskDetail && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
-                    {new Date(taskDetail.created_at).toLocaleDateString("es-CO", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric"
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <TaskActionsDropdown task={task} />
-              {taskDetail && getEstadoBadge(taskDetail.status)}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="text-gray-500 hover:text-cashport-black hover:bg-gray-100"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      footer={null}
+      closable={false}
+      width="80vw"
+      centered
+      destroyOnClose
+      styles={{ body: { padding: 0 } }}
+      className="modalTaskDetail"
+    >
+      <div className="flex flex-col" style={{ height: "90vh", borderRadius: "8px" }}>
+        <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0 rounded-t-lg">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-semibold text-cashport-black">
+              TASK-{task.id ? task.id : task.queue_id ? task.queue_id : "N/A"}
+            </h2>
+            {taskDetail && getTipoTareaBadge(taskDetail.task_type)}
+            {taskDetail && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
+                <Mail className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {new Date(taskDetail.created_at).toLocaleDateString("es-CO", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                  })}
+                </span>
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 overflow-hidden bg-gray-50">
-            {isLoadingDetail ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center py-12">
-                  <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
-                  <p className="text-gray-500">Cargando detalles...</p>
-                </div>
-              </div>
-            ) : detailError ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center py-12 text-red-500">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-3" />
-                  <p>{detailError}</p>
-                </div>
-              </div>
-            ) : taskDetail ? (
-              <div className="h-full grid grid-cols-2 gap-12">
-                {/* Left Column - Task Details */}
-                <div className="overflow-y-auto px-10 py-8">
-                  <div className="space-y-8 max-w-[700px]">
-                    {/* Custom Fields */}
-                    <div className="space-y-0">
-                      <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
-                        Campos personalizados
-                      </h3>
-
-                      <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-                        {/* Cliente */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.client?.name ? "bg-rose-50" : ""}`}
-                        >
-                          <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                            Cliente
-                            {!taskDetail?.client?.name && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Input
-                            value={taskDetail?.client?.name || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({
-                                ...taskDetail,
-                                client: { ...taskDetail.client, name: e.target.value }
-                              })
-                            }
-                            placeholder="Asignar cliente..."
-                            className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                              !taskDetail?.client?.name ? "placeholder:text-rose-400" : ""
-                            }`}
-                          />
-                        </div>
-
-                        {/* Tipo de tarea */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.task_type ? "bg-rose-50" : ""}`}
-                        >
-                          <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                            Tipo de tarea
-                            {!taskDetail?.task_type && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Select
-                            value={taskDetail?.task_type || ""}
-                            onValueChange={(value) =>
-                              taskDetail && setTaskDetail({ ...taskDetail, task_type: value })
-                            }
-                            disabled={taskTypes.length === 0}
-                          >
-                            <SelectTrigger
-                              className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                                !taskDetail?.task_type ? "text-rose-600" : ""
-                              } ${taskTypes.length === 0 ? "opacity-50 cursor-wait" : ""}`}
-                            >
-                              <SelectValue
-                                placeholder={
-                                  taskTypes.length === 0
-                                    ? "Cargando tipos..."
-                                    : "Seleccionar tipo..."
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-gray-200">
-                              {getTaskTypeOptions().map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Responsable */}
-                        <div
-                          className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.assigned_user ? "bg-rose-50" : ""}`}
-                        >
-                          <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                            Responsable
-                            {!taskDetail?.assigned_user && (
-                              <span className="text-rose-600 ml-1">*</span>
-                            )}
-                          </Label>
-                          <Select
-                            value={taskDetail?.assigned_user || ""}
-                            onValueChange={(value) => {
-                              if (value === "Cashport AI") {
-                                handleAssignToAI();
-                              } else if (taskDetail) {
-                                setTaskDetail({ ...taskDetail, assigned_user: value });
-                              }
-                            }}
-                          >
-                            <SelectTrigger
-                              className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                                !taskDetail?.assigned_user ? "text-rose-600" : ""
-                              }`}
-                            >
-                              <SelectValue placeholder="Asignar responsable..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-gray-200">
-                              {getAssignedUserOptions().map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.isAI ? (
-                                    <div className="flex items-center gap-2">
-                                      <Sparkles className="h-4 w-4" />
-                                      {option.label}
-                                    </div>
-                                  ) : (
-                                    option.label
-                                  )}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Monto */}
-                        <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
-                          <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
-                            $
-                          </div>
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                            Monto
-                          </Label>
-                          <Input
-                            type="number"
-                            value={taskDetail?.amount || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({ ...taskDetail, amount: Number(e.target.value) })
-                            }
-                            placeholder="0"
-                            className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
-                        </div>
-
-                        {/* Descripción */}
-                        <div className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
-                          <FileText className="h-4 w-4 text-gray-500 flex-shrink-0 mt-1.5" />
-                          <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-1.5">
-                            Descripción
-                          </Label>
-                          <Textarea
-                            value={taskDetail?.description || ""}
-                            onChange={(e) =>
-                              taskDetail &&
-                              setTaskDetail({ ...taskDetail, description: e.target.value })
-                            }
-                            placeholder="Agregar descripción..."
-                            rows={2}
-                            className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 resize-none px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {task.is_ai && (
-                      <div className="pt-4">
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-                          <Sparkles className="h-3 w-3 mr-1" />
-                          Procesado por Cashport AI
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right Column - Original Message */}
-                <div className="overflow-y-auto px-10 py-8 border-l border-gray-200 bg-white">
-                  <div className="space-y-6">
-                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
-                      Mensaje Original
-                    </h3>
-                    {taskDetail.emailDetails ? (
-                      <EmailMessage />
-                    ) : (
-                      <div className="text-center py-12 text-gray-500">
-                        <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                        <p>No hay mensaje original disponible</p>
-                        {taskDetail.description && (
-                          <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
-                            <p className="text-gray-700 text-sm">{taskDetail.description}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between px-10 py-6 border-t border-gray-200 bg-white flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <TaskActionsDropdown task={task} />
+            {taskDetail && getEstadoBadge(taskDetail.status)}
             <Button
-              variant="outline"
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
+              className="text-gray-500 hover:text-cashport-black hover:bg-gray-100"
             >
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                if (onUpdate && taskDetail) {
-                  // Transform taskDetail (ITaskDetail) to ITask format
-                  const updatedTask: ITask = {
-                    ...task,
-                    description: taskDetail.description,
-                    status: taskDetail.status,
-                    task_type: taskDetail.task_type,
-                    client_name: taskDetail.client.name,
-                    client_uuid: taskDetail.client.uuid,
-                    id_client: taskDetail.client.id,
-                    user_name: taskDetail.assigned_user,
-                    amount: taskDetail.amount,
-                    is_ai: taskDetail.assigned_user === "Cashport AI",
-                    created_at: taskDetail.created_at
-                  };
-                  onUpdate(updatedTask);
-                }
-                onClose();
-              }}
-              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
-            >
-              Guardar cambios
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div className="flex-1 overflow-hidden bg-gray-50">
+          {isLoadingDetail ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center py-12">
+                <div className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-3" />
+                <p className="text-gray-500">Cargando detalles...</p>
+              </div>
+            </div>
+          ) : detailError ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center py-12 text-red-500">
+                <AlertCircle className="h-12 w-12 mx-auto mb-3" />
+                <p>{detailError}</p>
+              </div>
+            </div>
+          ) : taskDetail ? (
+            <div className="h-full grid grid-cols-2 gap-12">
+              {/* Left Column - Task Details */}
+              <div className="overflow-y-auto px-10 py-8">
+                <div className="space-y-8 max-w-[700px]">
+                  {/* Custom Fields */}
+                  <div className="space-y-0">
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
+                      Campos personalizados
+                    </h3>
+
+                    <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+                      {/* Cliente */}
+                      <div
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.client?.name ? "bg-rose-50" : ""}`}
+                      >
+                        <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                        <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          Cliente
+                          {!taskDetail?.client?.name && (
+                            <span className="text-rose-600 ml-1">*</span>
+                          )}
+                        </Label>
+                        <Input
+                          value={taskDetail?.client?.name || ""}
+                          onChange={(e) =>
+                            taskDetail &&
+                            setTaskDetail({
+                              ...taskDetail,
+                              client: { ...taskDetail.client, name: e.target.value }
+                            })
+                          }
+                          placeholder="Asignar cliente..."
+                          className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
+                            !taskDetail?.client?.name ? "placeholder:text-rose-400" : ""
+                          }`}
+                        />
+                      </div>
+
+                      {/* Tipo de tarea */}
+                      <div
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.task_type ? "bg-rose-50" : ""}`}
+                      >
+                        <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                        <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          Tipo de tarea
+                          {!taskDetail?.task_type && <span className="text-rose-600 ml-1">*</span>}
+                        </Label>
+                        <Select
+                          value={taskDetail?.task_type || ""}
+                          onValueChange={(value) =>
+                            taskDetail && setTaskDetail({ ...taskDetail, task_type: value })
+                          }
+                          disabled={taskTypes.length === 0}
+                        >
+                          <SelectTrigger
+                            className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
+                              !taskDetail?.task_type ? "text-rose-600" : ""
+                            } ${taskTypes.length === 0 ? "opacity-50 cursor-wait" : ""}`}
+                          >
+                            <SelectValue
+                              placeholder={
+                                taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-gray-200">
+                            {getTaskTypeOptions().map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Responsable */}
+                      <div
+                        className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskDetail?.assigned_user ? "bg-rose-50" : ""}`}
+                      >
+                        <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                        <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          Responsable
+                          {!taskDetail?.assigned_user && (
+                            <span className="text-rose-600 ml-1">*</span>
+                          )}
+                        </Label>
+                        <Select
+                          value={taskDetail?.assigned_user || ""}
+                          onValueChange={(value) => {
+                            if (value === "Cashport AI") {
+                              handleAssignToAI();
+                            } else if (taskDetail) {
+                              setTaskDetail({ ...taskDetail, assigned_user: value });
+                            }
+                          }}
+                        >
+                          <SelectTrigger
+                            className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
+                              !taskDetail?.assigned_user ? "text-rose-600" : ""
+                            }`}
+                          >
+                            <SelectValue placeholder="Asignar responsable..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-gray-200">
+                            {getAssignedUserOptions().map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.isAI ? (
+                                  <div className="flex items-center gap-2">
+                                    <Sparkles className="h-4 w-4" />
+                                    {option.label}
+                                  </div>
+                                ) : (
+                                  option.label
+                                )}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Monto */}
+                      <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
+                        <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
+                          $
+                        </div>
+                        <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
+                          Monto
+                        </Label>
+                        <Input
+                          type="number"
+                          value={taskDetail?.amount || ""}
+                          onChange={(e) =>
+                            taskDetail &&
+                            setTaskDetail({ ...taskDetail, amount: Number(e.target.value) })
+                          }
+                          placeholder="0"
+                          className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                      </div>
+
+                      {/* Descripción */}
+                      <div className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
+                        <FileText className="h-4 w-4 text-gray-500 flex-shrink-0 mt-1.5" />
+                        <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-1.5">
+                          Descripción
+                        </Label>
+                        <Textarea
+                          value={taskDetail?.description || ""}
+                          onChange={(e) =>
+                            taskDetail &&
+                            setTaskDetail({ ...taskDetail, description: e.target.value })
+                          }
+                          placeholder="Agregar descripción..."
+                          rows={2}
+                          className="flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 resize-none px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {task.is_ai && (
+                    <div className="pt-4">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Procesado por Cashport AI
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column - Original Message */}
+              <div className="overflow-y-auto px-10 py-8 border-l border-gray-200 bg-white">
+                <div className="space-y-6">
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
+                    Mensaje Original
+                  </h3>
+                  {taskDetail.emailDetails ? (
+                    <EmailMessage />
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                      <p>No hay mensaje original disponible</p>
+                      {taskDetail.description && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg text-left">
+                          <p className="text-gray-700 text-sm">{taskDetail.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-10 py-6 border-t border-gray-200 bg-white flex-shrink-0 rounded-b-lg">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              if (onUpdate && taskDetail) {
+                // Transform taskDetail (ITaskDetail) to ITask format
+                const updatedTask: ITask = {
+                  ...task,
+                  description: taskDetail.description,
+                  status: taskDetail.status,
+                  task_type: taskDetail.task_type,
+                  client_name: taskDetail.client.name,
+                  client_uuid: taskDetail.client.uuid,
+                  id_client: taskDetail.client.id,
+                  user_name: taskDetail.assigned_user,
+                  amount: taskDetail.amount,
+                  is_ai: taskDetail.assigned_user === "Cashport AI",
+                  created_at: taskDetail.created_at
+                };
+                onUpdate(updatedTask);
+              }
+              onClose();
+            }}
+            className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
+          >
+            Guardar cambios
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
