@@ -287,7 +287,7 @@ export const sendIndividualCommunication = async (projectId: number, communicati
   }
 };
 
-export const sendCommunicationFromCache = async (communicationId: number) => {
+export const sendEmailCommunicationFromCache = async (communicationId: number) => {
   try {
     const response: GenericResponse<any> = await API.post(
       `${config.API_HOST}/comunication/circularizations/${communicationId}/activate-from-cache`,
@@ -296,6 +296,19 @@ export const sendCommunicationFromCache = async (communicationId: number) => {
     return response;
   } catch (error) {
     console.error("Error sending communication from cache", error);
+    throw error;
+  }
+};
+
+export const sendWhatsappComunicationFromCache = async (whatsappTemplateId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/cashport-whatsapp/send-template-bulk`,
+      { templateId: whatsappTemplateId }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending whatsapp communication from cache", error);
     throw error;
   }
 };

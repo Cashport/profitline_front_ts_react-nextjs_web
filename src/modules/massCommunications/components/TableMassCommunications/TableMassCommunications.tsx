@@ -12,7 +12,8 @@ import ModalDetailClientCommunication from "../ModalDetailClientCommunication/Mo
 import { IPreviewClient } from "@/types/communications/ICommunications";
 import {
   removeClientFromCircularization,
-  sendCommunicationFromCache
+  sendEmailCommunicationFromCache,
+  sendWhatsappComunicationFromCache
 } from "@/services/communications/communications";
 
 interface TableMassCommunicationsProps {
@@ -48,7 +49,11 @@ export default function TableMassCommunications({
   const handleSend = async () => {
     setIsSending(true);
     try {
-      await sendCommunicationFromCache(Number(communicationId));
+      if (isWhatsapp) {
+        await sendWhatsappComunicationFromCache(communicationId);
+      } else {
+        await sendEmailCommunicationFromCache(Number(communicationId));
+      }
       message.success("Comunicación activada correctamente");
       router.push("/mass-communications");
     } catch (error) {
