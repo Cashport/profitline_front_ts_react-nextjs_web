@@ -232,7 +232,7 @@ export function PurchaseOrderDetailHeader({
       label: "Refacturar",
       icon: <Invoice className="h-4 w-4" />,
       onClick: () => setIsRebillingConfirmOpen(true),
-      disabled: data?.status_name !== "En facturación"
+      disabled: data?.status_name !== "Facturado"
     },
     {
       key: "confirm-rebilling",
