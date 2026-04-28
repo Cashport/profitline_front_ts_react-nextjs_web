@@ -28,13 +28,19 @@ const fetcher40s = (url: string) =>
     });
 
 export const useClientCommunication = ({ communicationId, page, limit, search }: Props) => {
+  const isEmail = /^\d+$/.test(communicationId);
+
   const params = new URLSearchParams();
   if (page) params.append("page", String(page));
   if (limit) params.append("limit", String(limit));
   if (search && search.trim()) params.append("search", search.trim());
 
+  const basePath = isEmail
+    ? `/comunication/circularizations/${communicationId}/clients`
+    : `/cashport-whatsapp/send-template-bulk/preview`;
+
   const query = params.toString();
-  const pathKey = `/comunication/circularizations/${communicationId}/clients${query ? `?${query}` : ""}`;
+  const pathKey = `${basePath}${query ? `?${query}` : ""}`;
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetPreviewClients>>(
     pathKey,
     fetcher40s

@@ -24,6 +24,7 @@ interface TableMassCommunicationsProps {
   total: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  isWhatsapp?: boolean;
 }
 
 export default function TableMassCommunications({
@@ -34,7 +35,8 @@ export default function TableMassCommunications({
   page,
   total,
   pageSize,
-  onPageChange
+  onPageChange,
+  isWhatsapp
 }: TableMassCommunicationsProps) {
   const { communicationId } = useParams<{ communicationId: string }>();
   const router = useRouter();
@@ -82,6 +84,7 @@ export default function TableMassCommunications({
         <button
           type="button"
           onClick={() => handlePreviewClient(record)}
+          disabled={isWhatsapp}
           className="text-sm font-medium text-[#2563EB] hover:underline text-left"
         >
           {client_name}
@@ -164,10 +167,11 @@ export default function TableMassCommunications({
               onClick={() => handleViewEmail(record)}
               className="inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-[#141414] hover:bg-gray-100 transition-all"
               title={`Ver correo de ${record.client_name}`}
+              disabled={isWhatsapp}
             >
               <Eye className="w-4 h-4" />
             </button>
-            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]} disabled={isWhatsapp}>
               <button
                 type="button"
                 className="inline-flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-[#141414] hover:bg-gray-100 transition-all"
