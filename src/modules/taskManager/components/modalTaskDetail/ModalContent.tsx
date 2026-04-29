@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import {
   Mail,
@@ -11,17 +11,12 @@ import {
   Paperclip,
   Download
 } from "lucide-react";
-import { Button as AntButton, Dropdown, message } from "antd";
+import { Button as AntButton, Dropdown, Select as AntSelect, message } from "antd";
 import { DotsThreeVertical, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
+import "./modalContent.scss";
+
 import { Badge } from "@/modules/chat/ui/badge";
 import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
@@ -34,14 +29,30 @@ import {
   IEmailAttachment,
   IEmailDetails
 } from "@/types/tasks/ITasks";
+import { IEcommerceClient } from "@/types/commerce/ICommerce";
 import { reprocessAttachmentTask } from "@/services/tasks/tasks";
+import { getClients } from "@/services/commerce/commerce";
+import { useAppStore } from "@/lib/store/store";
 
 export type TaskFormValues = {
-  client_name: string;
-  task_type: string;
-  assigned_user: string;
+  client_id: string;
+  task_type: number | null;
+  assigned_to: number | null;
   status: ITaskStatus;
 };
+
+export const STATIC_USERS = [
+  { id: 1, name: "Yanin Perez" },
+  { id: 2, name: "Maria Rodriguez" },
+  { id: 3, name: "Carlos Mendez" },
+  { id: 4, name: "Ana Gutierrez" },
+  { id: 999, name: "Cashport AI", isAI: true }
+] as const;
+
+export const CASHPORT_AI_USER_ID = 999;
+
+const ANT_SELECT_CLASS = (isEmpty: boolean) =>
+  `taskDetailAntSelect${isEmpty ? " taskDetailAntSelect--empty" : ""}`;
 
 interface IModalContentProps {
   task: ITask;
@@ -69,56 +80,61 @@ export function ModalContent({
 }: IModalContentProps) {
   const { control, setValue, getValues } = useFormContext<TaskFormValues>();
 
-  const clientName = useWatch({ control, name: "client_name" });
+  const clientId = useWatch({ control, name: "client_id" });
   const taskType = useWatch({ control, name: "task_type" });
-  const assignedUser = useWatch({ control, name: "assigned_user" });
+  const assignedTo = useWatch({ control, name: "assigned_to" });
+
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const [clients, setClients] = useState<IEcommerceClient[]>([]);
+  const [clientsLoading, setClientsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!projectId) return;
+    let cancelled = false;
+    setClientsLoading(true);
+    getClients(projectId)
+      .then((res) => {
+        if (!cancelled && res?.data) setClients(res.data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setClientsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
 
   const handleAssignToAI = () => {
     const currentStatus = getValues("status");
-    setValue("assigned_user", "Cashport AI");
+    setValue("assigned_to", CASHPORT_AI_USER_ID);
     setValue("status", { ...currentStatus, name: "En progreso" });
   };
 
-  const getTaskTypeOptions = (): { value: string; label: string }[] => {
-    const options: { value: string; label: string }[] = [];
-    const seenValues = new Set<string>();
-
-    if (taskType && taskType.trim()) {
-      options.push({ value: taskType, label: taskType });
-      seenValues.add(taskType);
+  const taskTypeOptions = (() => {
+    const options = taskTypes.map((t) => ({ value: t.ID, label: t.NAME }));
+    const knownIds = new Set(options.map((o) => o.value));
+    if (
+      taskType !== null &&
+      taskType !== undefined &&
+      !knownIds.has(taskType) &&
+      taskDetail?.task_type
+    ) {
+      options.unshift({ value: taskType, label: taskDetail.task_type });
     }
-
-    taskTypes.forEach((type) => {
-      if (!seenValues.has(type.NAME)) {
-        options.push({ value: type.NAME, label: type.NAME });
-        seenValues.add(type.NAME);
-      }
-    });
-
     return options;
-  };
+  })();
 
-  const getAssignedUserOptions = (): { value: string; label: string; isAI?: boolean }[] => {
-    const STATIC_USERS = [
-      { value: "Yanin Perez", label: "Yanin Perez" },
-      { value: "Maria Rodriguez", label: "Maria Rodriguez" },
-      { value: "Carlos Mendez", label: "Carlos Mendez" },
-      { value: "Ana Gutierrez", label: "Ana Gutierrez" },
-      { value: "Cashport AI", label: "Cashport AI", isAI: true }
-    ];
+  const assignedUserOptions = STATIC_USERS.map((u) => ({
+    value: u.id,
+    label: u.name,
+    isAI: "isAI" in u ? u.isAI : false
+  }));
 
-    const options = [...STATIC_USERS];
-    const existingValues = new Set(STATIC_USERS.map((u) => u.value));
-
-    if (assignedUser && assignedUser.trim() && !existingValues.has(assignedUser)) {
-      options.splice(options.length - 1, 0, {
-        value: assignedUser,
-        label: assignedUser
-      });
-    }
-
-    return options;
-  };
+  const clientOptions = clients.map((c) => ({
+    value: c.client_id,
+    label: c.client_name
+  }));
 
   const EmailMessage = ({ emailDetails }: { emailDetails: IEmailDetails }) => {
     const handleReprocessAttachment = async (attachment: IEmailAttachment) => {
@@ -251,23 +267,33 @@ export function ModalContent({
             <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
               {/* Cliente */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!clientName ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!clientId ? "bg-rose-50" : ""}`}
               >
                 <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
                 <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                   Cliente
-                  {!clientName && <span className="text-rose-600 ml-1">*</span>}
+                  {!clientId && <span className="text-rose-600 ml-1">*</span>}
                 </Label>
                 <Controller
                   control={control}
-                  name="client_name"
+                  name="client_id"
                   render={({ field }) => (
-                    <Input
-                      {...field}
-                      placeholder="Asignar cliente..."
-                      className={`flex-1 bg-transparent border-0 text-cashport-black placeholder:text-gray-400 h-8 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                        !field.value ? "placeholder:text-rose-400" : ""
-                      }`}
+                    <AntSelect
+                      showSearch
+                      value={field.value || undefined}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      options={clientOptions}
+                      loading={clientsLoading}
+                      placeholder={clientsLoading ? "Cargando clientes..." : "Asignar cliente..."}
+                      notFoundContent="No hay clientes disponibles"
+                      filterOption={(input, option) =>
+                        ((option?.label as string) ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      variant="borderless"
+                      className={ANT_SELECT_CLASS(!field.value)}
                     />
                   )}
                 />
@@ -275,90 +301,72 @@ export function ModalContent({
 
               {/* Tipo de tarea */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!taskType ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${taskType === null ? "bg-rose-50" : ""}`}
               >
                 <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
                 <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                   Tipo de tarea
-                  {!taskType && <span className="text-rose-600 ml-1">*</span>}
+                  {taskType === null && <span className="text-rose-600 ml-1">*</span>}
                 </Label>
                 <Controller
                   control={control}
                   name="task_type"
                   render={({ field }) => (
-                    <Select
-                      value={field.value || ""}
-                      onValueChange={field.onChange}
+                    <AntSelect
+                      value={field.value ?? undefined}
+                      onChange={(value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      options={taskTypeOptions}
+                      loading={taskTypes.length === 0}
                       disabled={taskTypes.length === 0}
-                    >
-                      <SelectTrigger
-                        className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                          !field.value ? "text-rose-600" : ""
-                        } ${taskTypes.length === 0 ? "opacity-50 cursor-wait" : ""}`}
-                      >
-                        <SelectValue
-                          placeholder={
-                            taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-gray-200">
-                        {getTaskTypeOptions().map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder={
+                        taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
+                      }
+                      variant="borderless"
+                      className={ANT_SELECT_CLASS(field.value === null || field.value === undefined)}
+                    />
                   )}
                 />
               </div>
 
               {/* Responsable */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!assignedUser ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${assignedTo === null ? "bg-rose-50" : ""}`}
               >
                 <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
                 <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
                   Responsable
-                  {!assignedUser && <span className="text-rose-600 ml-1">*</span>}
+                  {assignedTo === null && <span className="text-rose-600 ml-1">*</span>}
                 </Label>
                 <Controller
                   control={control}
-                  name="assigned_user"
+                  name="assigned_to"
                   render={({ field }) => (
-                    <Select
-                      value={field.value || ""}
-                      onValueChange={(value) => {
-                        if (value === "Cashport AI") {
+                    <AntSelect
+                      value={field.value ?? undefined}
+                      onChange={(value) => {
+                        if (value === CASHPORT_AI_USER_ID) {
                           handleAssignToAI();
                         } else {
                           field.onChange(value);
                         }
                       }}
-                    >
-                      <SelectTrigger
-                        className={`flex-1 bg-transparent border-0 text-cashport-black h-8 px-2 focus:ring-0 focus:ring-offset-0 ${
-                          !field.value ? "text-rose-600" : ""
-                        }`}
-                      >
-                        <SelectValue placeholder="Asignar responsable..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-gray-200">
-                        {getAssignedUserOptions().map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.isAI ? (
-                              <div className="flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" />
-                                {option.label}
-                              </div>
-                            ) : (
-                              option.label
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onBlur={field.onBlur}
+                      options={assignedUserOptions}
+                      placeholder="Asignar responsable..."
+                      variant="borderless"
+                      className={ANT_SELECT_CLASS(field.value === null || field.value === undefined)}
+                      optionRender={(option) =>
+                        option.data.isAI ? (
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            {option.data.label}
+                          </div>
+                        ) : (
+                          option.data.label
+                        )
+                      }
+                    />
                   )}
                 />
               </div>

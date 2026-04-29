@@ -13,7 +13,7 @@ import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITask
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { getTaskDetails } from "@/services/tasks/tasks";
 
-import { ModalContent, TaskFormValues } from "./ModalContent";
+import { ModalContent, STATIC_USERS, TaskFormValues } from "./ModalContent";
 
 interface IModalTaskDetail {
   task: ITask | null;
@@ -31,9 +31,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
 
   const formMethods = useForm<TaskFormValues>({
     defaultValues: {
-      client_name: "",
-      task_type: "",
-      assigned_user: "",
+      client_id: "",
+      task_type: null,
+      assigned_to: null,
       status: DEFAULT_STATUS
     }
   });
@@ -41,6 +41,8 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
 
   const watchedTaskType = useWatch({ control, name: "task_type" });
   const watchedStatus = useWatch({ control, name: "status" });
+  const watchedTaskTypeLabel =
+    taskTypes.find((t) => t.ID === watchedTaskType)?.NAME ?? "";
 
   const fetchTaskDetail = async () => {
     if ((task?.id || task?.queue_id) && isOpen) {
@@ -55,12 +57,6 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
         }
         if (res) {
           setTaskDetail(res);
-          reset({
-            client_name: res.client.name,
-            task_type: res.task_type,
-            assigned_user: res.assigned_user,
-            status: res.status
-          });
         }
       } catch (error) {
         console.error("Error fetching task details:", error);
@@ -74,6 +70,18 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
   useEffect(() => {
     fetchTaskDetail();
   }, [task, isOpen]);
+
+  useEffect(() => {
+    if (!taskDetail) return;
+    const matchedTaskType = taskTypes.find((t) => t.NAME === taskDetail.task_type);
+    const matchedUser = STATIC_USERS.find((u) => u.name === taskDetail.assigned_user);
+    reset({
+      client_id: taskDetail.client.id ?? "",
+      task_type: matchedTaskType ? matchedTaskType.ID : taskDetail.task_type ? -1 : null,
+      assigned_to: matchedUser ? matchedUser.id : null,
+      status: taskDetail.status
+    });
+  }, [taskDetail, taskTypes, reset]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -130,7 +138,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
               <h2 className="text-2xl font-semibold text-cashport-black">
                 TASK-{task.id ? task.id : task.queue_id ? task.queue_id : "N/A"}
               </h2>
-              {taskDetail && getTipoTareaBadge(watchedTaskType)}
+              {taskDetail && getTipoTareaBadge(watchedTaskTypeLabel)}
               {taskDetail && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
                   <Mail className="h-4 w-4 text-gray-500" />
