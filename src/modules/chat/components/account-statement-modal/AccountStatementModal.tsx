@@ -32,14 +32,14 @@ interface IAccountStatementForm {
 
 interface AccountStatementModalProps {
   showModal: boolean;
-  setShowModal: Dispatch<SetStateAction<boolean>>;
+  onClose: () => void;
   clientId?: string | null;
   contactPhone?: string | null;
 }
 
 const AccountStatementModal = ({
   showModal,
-  setShowModal,
+  onClose,
   clientId,
   contactPhone
 }: AccountStatementModalProps) => {
@@ -230,7 +230,7 @@ const AccountStatementModal = ({
       }
 
       // Cerrar modal y resetear form después de éxito
-      setShowModal(false);
+      onClose();
       reset();
     } catch (error) {
       console.error("Error processing account statement:", error);
@@ -257,7 +257,7 @@ const AccountStatementModal = ({
   };
 
   const handleClose = () => {
-    setShowModal(false);
+    onClose();
   };
 
   // Show error if clientId is missing

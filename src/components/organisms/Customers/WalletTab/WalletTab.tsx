@@ -6,9 +6,7 @@ import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
 import { addItemsToTable } from "@/services/applyTabClients/applyTabClients";
-import {
-  markInvoiceAsBalance
-} from "@/services/accountingAdjustment/accountingAdjustment";
+import { markInvoiceAsBalance } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -26,7 +24,7 @@ import PaymentAgreementModal from "@/modules/clients/components/wallet-tab-payme
 import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalActionDiscountCredit/ModalActionDiscountCredit";
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
 import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNews";
-import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
+import AccountStatementModal from "@/modules/chat/components/account-statement-modal";
 import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 import ModalEnterProcess from "@/components/molecules/modals/ModalEnterProcess/ModalEnterProcess";
@@ -329,12 +327,9 @@ export const WalletTab = () => {
           });
         }}
       />
-      <DigitalRecordModal
-        isOpen={isSelectOpen.selected === 7}
+      <AccountStatementModal
+        showModal={isSelectOpen.selected === 7}
         onClose={onCloseModal}
-        messageShow={messageShow}
-        projectId={projectId}
-        invoiceSelected={selectedRows}
         clientId={clientId}
       />
       <SendExternalLinkModal

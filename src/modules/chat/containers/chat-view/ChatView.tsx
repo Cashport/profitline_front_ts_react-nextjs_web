@@ -105,7 +105,7 @@ export default function ChatInbox() {
 
       <AccountStatementModal
         showModal={showAccountStatementModal}
-        setShowModal={setShowAccountStatementModal}
+        onClose={() => setShowAccountStatementModal(false)}
         clientId={activeConversation?.customerCashportUUID}
         contactPhone={activeConversation?.phone}
       />
