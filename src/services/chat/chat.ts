@@ -1,5 +1,5 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import { API, ApiError } from "@/utils/api/api";
 import {
   GenericResponse,
   GenericResponsePaginated,
@@ -118,10 +118,10 @@ export const sendMessage = async (customerId: string, message: string): Promise<
     });
   } catch (error) {
     console.error("Error sending message:", error);
-    if (error instanceof AxiosError && error.response) {
-      const res = error.response.data as { error: { message: string } };
-      if (res?.error?.message) {
-        throw new Error(res.error.message || "Error sending message");
+    if (error instanceof ApiError && error?.data?.message) {
+      const res = error.data as { message: string };
+      if (res?.message) {
+        throw new Error(res.message || "Error sending message");
       }
     }
     throw error;

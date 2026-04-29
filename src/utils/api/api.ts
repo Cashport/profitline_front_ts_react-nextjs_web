@@ -104,7 +104,7 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    throw new ApiError(response?.status, error.message, response?.data?.data);
+    throw new ApiError(response?.status, error.message, response?.data?.data || response?.data?.error);
   }
 );
 
