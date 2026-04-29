@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { X, Mail, AlertCircle } from "lucide-react";
-import { Modal } from "antd";
+import { message, Modal } from "antd";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import "./modalTaskDetail.scss";
 
@@ -11,7 +11,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
-import { getTaskDetails } from "@/services/tasks/tasks";
+import { getTaskDetails, patchTask } from "@/services/tasks/tasks";
 
 import { ModalContent, STATIC_USERS, TaskFormValues } from "./ModalContent";
 
@@ -28,6 +28,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const formMethods = useForm<TaskFormValues>({
     defaultValues: {
@@ -41,8 +42,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
 
   const watchedTaskType = useWatch({ control, name: "task_type" });
   const watchedStatus = useWatch({ control, name: "status" });
-  const watchedTaskTypeLabel =
-    taskTypes.find((t) => t.ID === watchedTaskType)?.NAME ?? "";
+  const watchedTaskTypeLabel = taskTypes.find((t) => t.ID === watchedTaskType)?.NAME ?? "";
 
   const fetchTaskDetail = async () => {
     if ((task?.id || task?.queue_id) && isOpen) {
@@ -114,9 +114,21 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
     );
   };
 
-  const onSubmit = (_values: TaskFormValues) => {
-    console.log("Form submitted with values:", _values);
-    // onClose();
+  const onSubmit = async (data: TaskFormValues) => {
+    console.log("Form submitted with values:", data);
+    setIsSaving(true);
+    try {
+      await patchTask(taskDetail?.id ?? 0, {
+        client_id: data.client_id,
+        task_type: data.task_type ?? undefined,
+        assigned_to: data.assigned_to ?? undefined
+      });
+      message.success("Tarea actualizada exitosamente");
+      await fetchTaskDetail();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al actualizar la tarea");
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -204,6 +216,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
             <Button
               onClick={handleSubmit(onSubmit)}
               className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
+              disabled={isSaving}
             >
               Guardar cambios
             </Button>
