@@ -7,6 +7,7 @@ import {
 } from "@/types/global/IGlobal";
 import { IChatData, ITemplateRequest, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
+import { AxiosError } from "axios";
 
 // Toggle para usar mock data mientras el backend no está disponible
 const USE_MOCK = false;
@@ -117,6 +118,12 @@ export const sendMessage = async (customerId: string, message: string): Promise<
     });
   } catch (error) {
     console.error("Error sending message:", error);
+    if (error instanceof AxiosError && error.response) {
+      const res = error.response.data as { error: { message: string } };
+      if (res?.error?.message) {
+        throw new Error(res.error.message || "Error sending message");
+      }
+    }
     throw error;
   }
 };
