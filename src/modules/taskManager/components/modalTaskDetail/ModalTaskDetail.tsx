@@ -13,7 +13,7 @@ import {
   Download,
   AlertCircle
 } from "lucide-react";
-import { Button as AntButton, Dropdown, Modal } from "antd";
+import { Button as AntButton, Dropdown, message, Modal } from "antd";
 import { DotsThreeVertical, ArrowCounterClockwise } from "@phosphor-icons/react";
 import "./modalTaskDetail.scss";
 import {
@@ -28,9 +28,15 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { Label } from "@/modules/chat/ui/label";
 import { Input } from "@/modules/chat/ui/input";
 import { Textarea } from "@/modules/chat/ui/textarea";
-import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
+import {
+  ITask,
+  ITaskDetail,
+  ITaskTypes,
+  ITaskStatus,
+  IEmailAttachment
+} from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
-import { getTaskDetails } from "@/services/tasks/tasks";
+import { getTaskDetails, reprocessAttachmentTask } from "@/services/tasks/tasks";
 
 interface IModalTaskDetail {
   task: ITask | null;
@@ -47,28 +53,29 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
 
   // Fetch task details when modal opens with a task
   useEffect(() => {
-    const fetchTaskDetail = async () => {
-      if ((task?.id || task?.queue_id) && isOpen) {
-        setIsLoadingDetail(true);
-        setDetailError(null);
-        try {
-          if (task.id) {
-            const res = await getTaskDetails({ taskId: String(task.id) });
-            setTaskDetail(res);
-          } else if (task.queue_id) {
-            const res = await getTaskDetails({ queueId: task.queue_id });
-            setTaskDetail(res);
-          }
-        } catch (error) {
-          console.error("Error fetching task details:", error);
-          setDetailError("Failed to load task details");
-        } finally {
-          setIsLoadingDetail(false);
-        }
-      }
-    };
     fetchTaskDetail();
   }, [task, isOpen]);
+
+  const fetchTaskDetail = async () => {
+    if ((task?.id || task?.queue_id) && isOpen) {
+      setIsLoadingDetail(true);
+      setDetailError(null);
+      try {
+        if (task.id) {
+          const res = await getTaskDetails({ taskId: String(task.id) });
+          setTaskDetail(res);
+        } else if (task.queue_id) {
+          const res = await getTaskDetails({ queueId: task.queue_id });
+          setTaskDetail(res);
+        }
+      } catch (error) {
+        console.error("Error fetching task details:", error);
+        setDetailError("Failed to load task details");
+      } finally {
+        setIsLoadingDetail(false);
+      }
+    }
+  };
 
   // Reset state when modal closes
   useEffect(() => {
@@ -93,6 +100,19 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
 
   const EmailMessage = () => {
     const emailDetails = taskDetail?.emailDetails;
+
+    const handleReprocessAttachment = async (attachment: IEmailAttachment) => {
+      const hideMessage = message.loading(`Reprocesando adjunto: ${attachment.file_name}`, 0);
+      try {
+        await reprocessAttachmentTask(attachment.process_id);
+        message.success(`Reprocesando adjunto: ${attachment.file_name}`);
+        fetchTaskDetail();
+      } catch (error) {
+        message.error(error instanceof Error ? error.message : "Error al reprocesar adjunto");
+      } finally {
+        hideMessage();
+      }
+    };
 
     if (!emailDetails) {
       return (
@@ -166,7 +186,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                               <AntButton
                                 icon={<ArrowCounterClockwise size={14} />}
                                 className="buttonNoBorder"
-                                onClick={() => console.log(task)}
+                                onClick={() => handleReprocessAttachment(attachment)}
                               >
                                 Reprocesar
                               </AntButton>
@@ -351,7 +371,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
               </div>
             </div>
           ) : taskDetail ? (
-            <div className="h-full grid grid-cols-2 gap-12">
+            <div className="h-full grid grid-cols-2">
               {/* Left Column - Task Details */}
               <div className="overflow-y-auto px-10 py-8">
                 <div className="space-y-8 max-w-[700px]">
