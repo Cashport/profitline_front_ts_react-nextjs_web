@@ -147,6 +147,13 @@ export function ModalTaskDetail({ task, isOpen, onClose, onUpdate, taskTypes }: 
                       <FileText className="h-4 w-4 text-gray-600 flex-shrink-0" />
                       <span className="text-sm text-gray-900 truncate">{attachment.file_name}</span>
                     </div>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs text-white"
+                      style={{ backgroundColor: attachment.process_status_color }}
+                    >
+                      {attachment.process_status_name}
+                    </Badge>
                     <Dropdown
                       dropdownRender={(menu: ReactNode) => (
                         <div className="dropdownTaskDetail">{menu}</div>
