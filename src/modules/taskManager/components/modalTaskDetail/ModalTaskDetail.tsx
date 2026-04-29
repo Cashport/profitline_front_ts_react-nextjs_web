@@ -131,6 +131,9 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
     setIsSaving(false);
   };
 
+  const canEdistStates = ["Sin empezar", "Spam"];
+  const canEdit = taskDetail ? canEdistStates.includes(taskDetail.status.name) : false;
+
   return (
     <Modal
       open={isOpen}
@@ -179,7 +182,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden bg-gray-50">
+          <div className="flex-1 overflow-hidden bg-gray-50 rounded-b-lg">
             {isLoadingDetail ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center py-12">
@@ -205,22 +208,24 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-10 py-6 border-t border-gray-200 bg-white flex-shrink-0 rounded-b-lg">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
-              disabled={isSaving}
-            >
-              Guardar cambios
-            </Button>
-          </div>
+          {canEdit && (
+            <div className="flex items-center justify-between px-10 py-6 border-t border-gray-200 bg-white flex-shrink-0 rounded-b-lg">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-cashport-black bg-transparent px-6 py-2.5"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit(onSubmit)}
+                className="bg-cashport-green hover:bg-cashport-green/90 text-cashport-black font-semibold px-6 py-2.5"
+                disabled={isSaving}
+              >
+                Guardar cambios
+              </Button>
+            </div>
+          )}
         </div>
       </FormProvider>
     </Modal>
