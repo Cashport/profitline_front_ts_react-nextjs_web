@@ -85,6 +85,14 @@ const ApprovalDetailModal = dynamic(
   { ssr: false }
 );
 
+const ModalConfirmRebilling = dynamic(
+  () =>
+    import("../../components/modal-confirm-rebilling/ModalConfirmRebilling").then((mod) => ({
+      default: mod.ModalConfirmRebilling
+    })),
+  { ssr: false }
+);
+
 export function DetailPurchaseOrder() {
   const params = useParams();
   const router = useRouter();
@@ -339,6 +347,13 @@ export function DetailPurchaseOrder() {
         approvalId={whichModalIsOpen.selected === 10 ? data.approvation?.approval_id : undefined}
         onClose={closeModals}
         mutateList={() => mutate()}
+      />
+
+      <ModalConfirmRebilling
+        isOpen={whichModalIsOpen.selected === 11}
+        onClose={closeModals}
+        purchaseOrderDetailId={orderId!}
+        onSuccess={() => mutate()}
       />
 
       <ModalConfirmAction

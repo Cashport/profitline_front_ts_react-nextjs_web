@@ -10,7 +10,8 @@ import {
   sendPackageToDispatch,
   sendPackageToBilling,
   removePurchaseOrdersFromPackage,
-  deletePurchaseOrders
+  deletePurchaseOrders,
+  getSalesPlane
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -229,6 +230,20 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     setIsDownloadPlaneOpen(true);
   };
 
+  const handleDownloadSalesPlane = async () => {
+    const hideLoading = message.loading("Descargando plano de ventas...", 0);
+    try {
+      const res = await getSalesPlane();
+      window.open(res.url, "_blank");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar el plano de ventas"
+      );
+    } finally {
+      hideLoading();
+    }
+  };
+
   return (
     <>
       <Modal
@@ -289,6 +304,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
               disabled={isDispatchLoading}
             />
           )}
+          <ButtonGenerateAction
+            icon={<PackageCheck className="h-4 w-4" />}
+            title="Exportar plano de ventas"
+            onClick={handleDownloadSalesPlane}
+            disabled={isDispatchLoading}
+          />
         </div>
       </Modal>
 
