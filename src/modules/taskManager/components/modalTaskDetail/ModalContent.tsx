@@ -2,15 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 
-import {
-  Mail,
-  Sparkles,
-  User,
-  Building,
-  FileText,
-  Paperclip,
-  Download
-} from "lucide-react";
+import { Mail, Sparkles, User, Building, FileText, Paperclip, Download } from "lucide-react";
 import { Button as AntButton, Dropdown, Select as AntSelect, message } from "antd";
 import { DotsThreeVertical, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
@@ -169,7 +161,7 @@ export function ModalContent({
           </div>
           <div className="pt-3 border-t border-gray-200">
             <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-              {taskDetail.description}
+              {taskDetail.emailDetails?.details.details}
             </p>
           </div>
           {emailDetails.attachments && emailDetails.attachments.length > 0 && (
@@ -188,9 +180,7 @@ export function ModalContent({
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <FileText className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                      <span className="text-sm text-gray-900 truncate">
-                        {attachment.file_name}
-                      </span>
+                      <span className="text-sm text-gray-900 truncate">{attachment.file_name}</span>
                     </div>
                     <Badge
                       variant="secondary"
@@ -319,7 +309,9 @@ export function ModalContent({
                         taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
                       }
                       variant="borderless"
-                      className={ANT_SELECT_CLASS(field.value === null || field.value === undefined)}
+                      className={ANT_SELECT_CLASS(
+                        field.value === null || field.value === undefined
+                      )}
                     />
                   )}
                 />
@@ -360,7 +352,9 @@ export function ModalContent({
                           .includes(input.toLowerCase())
                       }
                       variant="borderless"
-                      className={ANT_SELECT_CLASS(field.value === null || field.value === undefined)}
+                      className={ANT_SELECT_CLASS(
+                        field.value === null || field.value === undefined
+                      )}
                       optionRender={(option) =>
                         option.data.isAI ? (
                           <div className="flex items-center gap-2">
@@ -422,9 +416,9 @@ export function ModalContent({
       </div>
 
       {/* Right Column - Original Message */}
-      <div className="overflow-y-auto px-10 py-8 border-l border-gray-200 bg-white">
+      <div className="overflow-y-auto px-10 py-8 pt-0 border-l border-gray-200 bg-white">
         <div className="space-y-6">
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 z-10">
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide sticky top-0 bg-white py-2 pt-[40px] z-10">
             Mensaje Original
           </h3>
           {taskDetail.emailDetails ? (
