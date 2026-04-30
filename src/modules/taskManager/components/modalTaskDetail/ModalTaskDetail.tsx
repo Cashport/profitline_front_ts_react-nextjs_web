@@ -166,14 +166,17 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
       onCancel={onClose}
       footer={null}
       closable={false}
-      width="80vw"
+      width="min(80vw, 1100px)"
       centered
       destroyOnClose
       styles={{ body: { padding: 0 } }}
       className="modalTaskDetail"
     >
       <FormProvider {...formMethods}>
-        <div className="flex flex-col" style={{ height: "90vh", borderRadius: "8px" }}>
+        <div
+          className="flex flex-col"
+          style={{ height: "90vh", maxHeight: "850px", borderRadius: "8px" }}
+        >
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0 rounded-t-lg">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-semibold text-cashport-black">
