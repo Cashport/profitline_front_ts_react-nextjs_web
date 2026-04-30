@@ -46,6 +46,7 @@ interface IModalContentProps {
   users: IUser[];
   usersLoading: boolean;
   onAttachmentReprocessed: () => void;
+  canEdit: boolean;
 }
 
 const formatDateTime = (dateString: string) => {
@@ -65,7 +66,8 @@ export function ModalContent({
   taskTypes,
   users,
   usersLoading,
-  onAttachmentReprocessed
+  onAttachmentReprocessed,
+  canEdit
 }: IModalContentProps) {
   const { control, setValue, getValues } = useFormContext<TaskFormValues>();
 
@@ -263,8 +265,10 @@ export function ModalContent({
                 <Controller
                   control={control}
                   name="client_id"
+                  disabled={!canEdit}
                   render={({ field }) => (
                     <AntSelect
+                      disabled={!canEdit}
                       showSearch
                       value={field.value || undefined}
                       onChange={(value) => field.onChange(value)}
@@ -297,6 +301,7 @@ export function ModalContent({
                 <Controller
                   control={control}
                   name="task_type"
+                  disabled={!canEdit}
                   render={({ field }) => (
                     <AntSelect
                       value={field.value ?? undefined}
@@ -304,7 +309,7 @@ export function ModalContent({
                       onBlur={field.onBlur}
                       options={taskTypeOptions}
                       loading={taskTypes.length === 0}
-                      disabled={taskTypes.length === 0}
+                      disabled={!canEdit || taskTypes.length === 0}
                       placeholder={
                         taskTypes.length === 0 ? "Cargando tipos..." : "Seleccionar tipo..."
                       }
@@ -332,6 +337,7 @@ export function ModalContent({
                   render={({ field }) => (
                     <AntSelect
                       showSearch
+                      disabled={!canEdit}
                       value={field.value ?? undefined}
                       onChange={(value) => {
                         if (value === CASHPORT_AI_USER_ID) {
