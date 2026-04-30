@@ -83,3 +83,30 @@ export const getTaskDetails = async ({
     throw error;
   }
 };
+
+export const patchTask = async (
+  taskId: number,
+  data: { client_id?: string; task_type?: number; assigned_to?: number }
+) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/task/${taskId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const reprocessAttachmentTask = async (attachmentId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/task/reprocess-attachment`,
+      { attachment_id: attachmentId }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
