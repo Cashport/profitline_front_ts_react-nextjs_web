@@ -12,8 +12,11 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { ITask, ITaskDetail, ITaskTypes, ITaskStatus } from "@/types/tasks/ITasks";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { getTaskDetails, patchTask } from "@/services/tasks/tasks";
+import { getUsersByProject } from "@/services/users/users";
+import { IUser } from "@/types/users/IUser";
+import { useAppStore } from "@/lib/store/store";
 
-import { ModalContent, STATIC_USERS, TaskFormValues } from "./ModalContent";
+import { ModalContent, TaskFormValues } from "./ModalContent";
 
 interface IModalTaskDetail {
   task: ITask | null;
@@ -29,6 +32,10 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const formMethods = useForm<TaskFormValues>({
     defaultValues: {
@@ -72,16 +79,35 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
   }, [task, isOpen]);
 
   useEffect(() => {
+    if (!isOpen || !projectId) return;
+    let cancelled = false;
+    setUsersLoading(true);
+    getUsersByProject(projectId)
+      .then((res) => {
+        if (!cancelled && res && "data" in res && Array.isArray(res.data)) {
+          setUsers(res.data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setUsersLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, isOpen]);
+
+  useEffect(() => {
     if (!taskDetail) return;
     const matchedTaskType = taskTypes.find((t) => t.NAME === taskDetail.task_type);
-    const matchedUser = STATIC_USERS.find((u) => u.name === taskDetail.assigned_user);
+    const matchedUser = users.find((u) => u.user_name === taskDetail.assigned_user);
     reset({
       client_id: taskDetail.client.id ?? "",
       task_type: matchedTaskType ? matchedTaskType.ID : taskDetail.task_type ? -1 : null,
       assigned_to: matchedUser ? matchedUser.id : null,
       status: taskDetail.status
     });
-  }, [taskDetail, taskTypes, reset]);
+  }, [taskDetail, taskTypes, users, reset]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -202,6 +228,8 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
                 task={task}
                 taskDetail={taskDetail}
                 taskTypes={taskTypes}
+                users={users}
+                usersLoading={usersLoading}
                 onAttachmentReprocessed={fetchTaskDetail}
               />
             ) : null}

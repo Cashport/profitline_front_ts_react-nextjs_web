@@ -30,6 +30,7 @@ import {
   IEmailDetails
 } from "@/types/tasks/ITasks";
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
+import { IUser } from "@/types/users/IUser";
 import { reprocessAttachmentTask } from "@/services/tasks/tasks";
 import { getClients } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
@@ -41,14 +42,6 @@ export type TaskFormValues = {
   status: ITaskStatus;
 };
 
-export const STATIC_USERS = [
-  { id: 1, name: "Yanin Perez" },
-  { id: 2, name: "Maria Rodriguez" },
-  { id: 3, name: "Carlos Mendez" },
-  { id: 4, name: "Ana Gutierrez" },
-  { id: 999, name: "Cashport AI", isAI: true }
-] as const;
-
 export const CASHPORT_AI_USER_ID = 999;
 
 const ANT_SELECT_CLASS = (isEmpty: boolean) =>
@@ -58,6 +51,8 @@ interface IModalContentProps {
   task: ITask;
   taskDetail: ITaskDetail;
   taskTypes: ITaskTypes[];
+  users: IUser[];
+  usersLoading: boolean;
   onAttachmentReprocessed: () => void;
 }
 
@@ -76,6 +71,8 @@ export function ModalContent({
   task,
   taskDetail,
   taskTypes,
+  users,
+  usersLoading,
   onAttachmentReprocessed
 }: IModalContentProps) {
   const { control, setValue, getValues } = useFormContext<TaskFormValues>();
@@ -125,11 +122,10 @@ export function ModalContent({
     return options;
   })();
 
-  const assignedUserOptions = STATIC_USERS.map((u) => ({
-    value: u.id,
-    label: u.name,
-    isAI: "isAI" in u ? u.isAI : false
-  }));
+  const assignedUserOptions = [
+    ...users.map((u) => ({ value: u.id, label: u.user_name, isAI: false })),
+    { value: CASHPORT_AI_USER_ID, label: "Cashport AI", isAI: true }
+  ];
 
   const clientOptions = clients.map((c) => ({
     value: c.client_id,
@@ -343,6 +339,7 @@ export function ModalContent({
                   name="assigned_to"
                   render={({ field }) => (
                     <AntSelect
+                      showSearch
                       value={field.value ?? undefined}
                       onChange={(value) => {
                         if (value === CASHPORT_AI_USER_ID) {
@@ -353,7 +350,15 @@ export function ModalContent({
                       }}
                       onBlur={field.onBlur}
                       options={assignedUserOptions}
-                      placeholder="Asignar responsable..."
+                      loading={usersLoading}
+                      placeholder={
+                        usersLoading ? "Cargando responsables..." : "Asignar responsable..."
+                      }
+                      filterOption={(input, option) =>
+                        ((option?.label as string) ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
                       variant="borderless"
                       className={ANT_SELECT_CLASS(field.value === null || field.value === undefined)}
                       optionRender={(option) =>
