@@ -244,6 +244,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
                 users={users}
                 usersLoading={usersLoading}
                 onAttachmentReprocessed={fetchTaskDetail}
+                canEdit={canEdit}
               />
             ) : null}
           </div>
