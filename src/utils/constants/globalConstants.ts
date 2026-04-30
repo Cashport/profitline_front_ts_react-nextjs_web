@@ -30,7 +30,8 @@ export const FILE_EXTENSIONS = [
   ".xml",
   ".msg",
   ".eml",
-  ".zip"
+  ".zip",
+  ".html"
 ];
 
 export const GALDERMA_PROJECT_ID = 165;
