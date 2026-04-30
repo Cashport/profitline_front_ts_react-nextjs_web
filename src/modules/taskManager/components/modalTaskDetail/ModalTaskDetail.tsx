@@ -81,17 +81,27 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
   useEffect(() => {
     if (!isOpen || !projectId) return;
     let cancelled = false;
-    setUsersLoading(true);
-    getUsersByProject(projectId)
-      .then((res) => {
-        if (!cancelled && res && "data" in res && Array.isArray(res.data)) {
-          setUsers(res.data);
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const res = await getUsersByProject(projectId);
+        if (
+          !cancelled &&
+          res &&
+          typeof res === "object" &&
+          "data" in res &&
+          Array.isArray(res.data)
+        ) {
+          setUsers(res.data as IUser[]);
         }
-      })
-      .catch(() => {})
-      .finally(() => {
+      } catch (error) {
+        // ignore
+        console.error("Error fetching users for project:", projectId, error);
+      } finally {
         if (!cancelled) setUsersLoading(false);
-      });
+      }
+    };
+    fetchUsers();
     return () => {
       cancelled = true;
     };
