@@ -112,14 +112,14 @@ export const BanksTable = ({
   const columns: TableProps<ISingleBank>["columns"] = [
     {
       title: "ID",
-      dataIndex: "id",
-      key: "id",
-      render: (id) => (
+      dataIndex: "ID_ERP",
+      key: "ID_ERP",
+      render: (ID_ERP, row) => (
         <Text
           className="idText"
-          onClick={() => handleOpenPaymentDetail && handleOpenPaymentDetail(id)}
+          onClick={() => handleOpenPaymentDetail && handleOpenPaymentDetail(row.id)}
         >
-          {id}
+          {ID_ERP}
         </Text>
       ),
       sorter: (a, b) => a.id - b.id,
