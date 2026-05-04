@@ -1,4 +1,4 @@
-import { Dispatch, FC, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
@@ -8,10 +8,11 @@ import { OrderViewContext } from "../../contexts/orderViewContext";
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
 import CreateOrderCart from "../../components/create-order-cart";
-import CreateOrderCheckout from "../../components/create-order-checkout";
+import CreateOrderCheckout from "../../components/create-order-checkoutNEW";
 
 import {
   IDiscountPackageAvailable,
+  IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
   ISelectedProduct,
@@ -53,6 +54,8 @@ interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  executiveDiscounts: IExecutiveDiscount[];
+  setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
@@ -70,6 +73,7 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
   const [isCartVisible, setIsCartVisible] = useState(
     () => typeof window !== "undefined" && window.innerWidth > 1000
   );
@@ -170,6 +174,8 @@ export const CreateOrderView: FC = () => {
         discounts,
         setDiscounts,
         discountsLoading,
+        executiveDiscounts,
+        setExecutiveDiscounts,
         toggleCart,
         isCartVisible,
         numberOfItems

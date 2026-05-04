@@ -1,5 +1,5 @@
 "use client";
-import { Dispatch, FC, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getDiscounts } from "@/services/commerce/commerce";
@@ -10,6 +10,7 @@ import CreateOrderCheckout from "@/modules/commerce/components/create-order-chec
 
 import {
   IDiscountPackageAvailable,
+  IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
   ISelectedProduct,
@@ -55,6 +56,8 @@ export interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  executiveDiscounts: IExecutiveDiscount[];
+  setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
@@ -75,6 +78,7 @@ const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
   const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
   const token = localStorage.getItem(STORAGE_TOKEN);
@@ -141,7 +145,9 @@ const CreateOrderView: FC = () => {
         setCategories,
         discounts,
         setDiscounts,
-        discountsLoading
+        discountsLoading,
+        executiveDiscounts,
+        setExecutiveDiscounts
       }}
     >
       <div className={styles.ordersView}>

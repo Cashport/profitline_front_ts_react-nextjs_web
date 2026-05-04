@@ -61,12 +61,18 @@ export interface IFetchedCategories {
   products: ISelectedProduct[];
 }
 
+export interface IExecutiveDiscount {
+  product_sku: string;
+  primary_discount_pct: number;
+  secondary_discount_pct: number;
+}
 export interface IConfirmOrderData {
   discount_package: IDiscountPackageAvailable | undefined;
   order_summary: {
     product_sku: string;
     quantity: number;
   }[];
+  executive_discounts: IExecutiveDiscount[];
 }
 
 export interface IProductInDetail {
@@ -99,16 +105,20 @@ export interface PrimaryDiscount {
   unit_discount: number;
   discount_applied: DiscountApplied;
   new_price: number;
+  new_price_taxes: number;
 }
 
 export interface Discount {
   subtotalDiscount: number;
   primary: PrimaryDiscount;
+  secondary?: PrimaryDiscount;
 }
 export interface DiscountItem {
   product_sku: string;
   quantity: number;
+  shipment_unit: number;
   price: number;
+  price_taxes: number;
   taxes: number;
   image: string;
   category_id: number;
