@@ -104,7 +104,7 @@ export default function ProductsDetailsAndDiscounts({
         secondary_discount_pct:
           idx >= 0
             ? prev[idx].secondary_discount_pct
-            : (item.discount?.secondary?.discount_applied?.discount ?? 0)
+            : item.discount?.secondary?.discount_applied?.discount ?? 0
       };
       return idx >= 0 ? prev.map((e, i) => (i === idx ? nextEntry : e)) : [...prev, nextEntry];
     });
@@ -124,7 +124,7 @@ export default function ProductsDetailsAndDiscounts({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#F7F7F7]">
-      <div className="flex-1 flex flex-col overflow-hidden m-3 bg-white rounded-xl border border-[#DDDDDD]">
+      <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl border border-[#DDDDDD]">
         {/* Card header */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-[#DDDDDD] flex-shrink-0">
           <button
@@ -261,9 +261,7 @@ export default function ProductsDetailsAndDiscounts({
                       {formatPrice(subtotalProductos - monto)}
                     </span>
                     <button
-                      onClick={() =>
-                        setOtrosDescuentos((prev) => ({ ...prev, [key]: !activo }))
-                      }
+                      onClick={() => setOtrosDescuentos((prev) => ({ ...prev, [key]: !activo }))}
                       className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
                         activo
                           ? "bg-[#141414] border-[#141414] text-white"

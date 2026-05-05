@@ -6,9 +6,7 @@ import { CheckCircle2 } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
-import OrderShipmentConfirm, {
-  Entrega
-} from "./order-shipment-confirm/order-shipment-confirm";
+import OrderShipmentConfirm, { Entrega } from "./order-shipment-confirm/order-shipment-confirm";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -22,9 +20,7 @@ export default function CheckoutPage() {
     entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
 
   const cantidadesAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
-    entregas
-      .filter((e) => e.id !== excludeId)
-      .reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+    entregas.filter((e) => e.id !== excludeId).reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
 
   if (confirmado) {
     return (
@@ -51,7 +47,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="flex h-full bg-[#F7F7F7] overflow-hidden">
+    <div className="flex h-full gap-6 bg-[#F7F7F7] overflow-hidden">
       <ProductsDetailsAndDiscounts
         multiEntrega={multiEntrega}
         cantidadesAsignadas={cantidadesAsignadas}

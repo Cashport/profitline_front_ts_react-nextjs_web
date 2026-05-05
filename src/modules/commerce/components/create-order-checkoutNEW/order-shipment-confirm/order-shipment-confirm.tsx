@@ -94,9 +94,7 @@ export default function OrderShipmentConfirm({
       const id = `e${Date.now()}`;
       setEntregas((prev) => [...prev, { id, ...modalDraft }]);
     } else if (modalEntrega) {
-      setEntregas((prev) =>
-        prev.map((e) => (e.id === modalEntrega ? { ...e, ...modalDraft } : e))
-      );
+      setEntregas((prev) => prev.map((e) => (e.id === modalEntrega ? { ...e, ...modalDraft } : e)));
     }
     setModalEntrega(null);
   };
@@ -135,7 +133,7 @@ export default function OrderShipmentConfirm({
 
   return (
     <div className="flex flex-col w-[420px] flex-shrink-0 bg-[#F7F7F7]">
-      <div className="flex-1 flex flex-col m-3 bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
         {/* Card header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#DDDDDD] flex-shrink-0">
           <div>
@@ -195,9 +193,7 @@ export default function OrderShipmentConfirm({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#666666]">
-                  Teléfono de contacto
-                </label>
+                <label className="text-xs font-semibold text-[#666666]">Teléfono de contacto</label>
                 <div className="flex gap-2">
                   <select
                     value={form.indicativo}
@@ -267,10 +263,7 @@ export default function OrderShipmentConfirm({
                     {discountItems.map((item) => {
                       const asignado = entrega.cantidades[item.product_sku] ?? 0;
                       return (
-                        <div
-                          key={item.product_sku}
-                          className="flex items-center gap-2 px-3 py-2"
-                        >
+                        <div key={item.product_sku} className="flex items-center gap-2 px-3 py-2">
                           <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
                             {item.description}
                           </p>
@@ -333,9 +326,7 @@ export default function OrderShipmentConfirm({
                     </label>
                     <select
                       value={modalDraft.direccion}
-                      onChange={(e) =>
-                        setModalDraft((d) => ({ ...d, direccion: e.target.value }))
-                      }
+                      onChange={(e) => setModalDraft((d) => ({ ...d, direccion: e.target.value }))}
                       className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
                     >
                       {DIRECCIONES_MOCK.map((d) => (
@@ -367,9 +358,7 @@ export default function OrderShipmentConfirm({
                         type="tel"
                         placeholder="3001234567"
                         value={modalDraft.telefono}
-                        onChange={(e) =>
-                          setModalDraft((d) => ({ ...d, telefono: e.target.value }))
-                        }
+                        onChange={(e) => setModalDraft((d) => ({ ...d, telefono: e.target.value }))}
                         className="flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
                       />
                     </div>
