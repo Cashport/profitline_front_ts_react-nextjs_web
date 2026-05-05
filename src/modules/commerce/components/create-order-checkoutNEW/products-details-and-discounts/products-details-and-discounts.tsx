@@ -6,6 +6,16 @@ import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import { DiscountItem, IExecutiveDiscount } from "@/types/commerce/ICommerce";
 
+const getPrimaryMaxPct = (item: DiscountItem) =>
+  item.discount?.primary?.discount_applied?.max_discount ??
+  item.discount?.primary?.discount_applied?.discount ??
+  0;
+
+const getSecondaryMaxPct = (item: DiscountItem) =>
+  item.discount?.secondary?.discount_applied?.max_discount ??
+  item.discount?.secondary?.discount_applied?.discount ??
+  0;
+
 function formatPrice(n: number) {
   return "$" + (n ?? 0).toLocaleString("es-CO");
 }
@@ -86,14 +96,6 @@ export default function ProductsDetailsAndDiscounts({
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
   const otrosDescuentosItems = discountItems.filter((it) => it.discount?.secondary);
-  const initialOtrosState = Object.fromEntries(
-    otrosDescuentosItems.map((it) => [
-      `${it.product_sku}-${it.discount.secondary!.discount_applied.id}`,
-      true
-    ])
-  );
-  const [otrosDescuentos, setOtrosDescuentos] =
-    useState<Record<string, boolean>>(initialOtrosState);
 
   const updatePrimaryDiscount = (item: DiscountItem, newValue: number) => {
     setExecutiveDiscounts((prev) => {
@@ -102,9 +104,22 @@ export default function ProductsDetailsAndDiscounts({
         product_sku: item.product_sku,
         primary_discount_pct: newValue,
         secondary_discount_pct:
-          idx >= 0
-            ? prev[idx].secondary_discount_pct
-            : item.discount?.secondary?.discount_applied?.discount ?? 0
+          idx >= 0 ? prev[idx].secondary_discount_pct : getSecondaryMaxPct(item)
+      };
+      return idx >= 0 ? prev.map((e, i) => (i === idx ? nextEntry : e)) : [...prev, nextEntry];
+    });
+  };
+
+  const toggleSecondaryDiscount = (item: DiscountItem) => {
+    setExecutiveDiscounts((prev) => {
+      const idx = prev.findIndex((e) => e.product_sku === item.product_sku);
+      const original = getSecondaryMaxPct(item);
+      const currentSecondary = idx >= 0 ? prev[idx].secondary_discount_pct : original;
+      const currentPrimary = idx >= 0 ? prev[idx].primary_discount_pct : getPrimaryMaxPct(item);
+      const nextEntry: IExecutiveDiscount = {
+        product_sku: item.product_sku,
+        primary_discount_pct: currentPrimary,
+        secondary_discount_pct: currentSecondary > 0 ? 0 : original
       };
       return idx >= 0 ? prev.map((e, i) => (i === idx ? nextEntry : e)) : [...prev, nextEntry];
     });
@@ -165,11 +180,11 @@ export default function ProductsDetailsAndDiscounts({
               const precioFinal = item.discount?.primary?.new_price ?? item.price;
               const totalLinea = precioFinal * item.quantity;
               const restante = item.quantity - cantidadesAsignadas(item.product_sku);
-              const primaryPct = item.discount?.primary?.discount_applied?.discount ?? 0;
+              const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
               const executiveEntry = executiveDiscounts.find(
                 (e) => e.product_sku === item.product_sku
               );
-              const cellValue = executiveEntry?.primary_discount_pct ?? primaryPct;
+              const cellValue = executiveEntry?.primary_discount_pct ?? maxPercentage;
 
               return (
                 <div
@@ -191,7 +206,7 @@ export default function ProductsDetailsAndDiscounts({
                   <div className="flex justify-center">
                     <DescuentoCell
                       value={cellValue}
-                      max={primaryPct}
+                      max={maxPercentage}
                       onChange={(v) => updatePrimaryDiscount(item, v)}
                     />
                   </div>
@@ -247,7 +262,8 @@ export default function ProductsDetailsAndDiscounts({
               {otrosDescuentosItems.map((it) => {
                 const sec = it.discount.secondary!;
                 const key = `${it.product_sku}-${sec.discount_applied.id}`;
-                const activo = otrosDescuentos[key] ?? true;
+                const entry = executiveDiscounts.find((e) => e.product_sku === it.product_sku);
+                const activo = entry ? entry.secondary_discount_pct > 0 : true;
                 const porcentaje = sec.discount_applied.discount;
                 const monto = Math.round((subtotalProductos * porcentaje) / 100);
                 const label = sec.discount_applied.discount_name || sec.description;
@@ -261,7 +277,7 @@ export default function ProductsDetailsAndDiscounts({
                       {formatPrice(subtotalProductos - monto)}
                     </span>
                     <button
-                      onClick={() => setOtrosDescuentos((prev) => ({ ...prev, [key]: !activo }))}
+                      onClick={() => toggleSecondaryDiscount(it)}
                       className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
                         activo
                           ? "bg-[#141414] border-[#141414] text-white"

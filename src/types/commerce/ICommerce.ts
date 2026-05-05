@@ -95,6 +95,7 @@ export interface DiscountApplied {
   discount: number;
   description: string;
   discount_name: string;
+  max_discount: number;
 }
 
 export interface PrimaryDiscount {

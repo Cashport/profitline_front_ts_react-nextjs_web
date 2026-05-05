@@ -1,20 +1,62 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 import { CheckCircle2 } from "lucide-react";
 
+import { useAppStore } from "@/lib/store/store";
+import { confirmOrder } from "@/services/commerce/commerce";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
+import { IConfirmOrderData } from "@/types/commerce/ICommerce";
 import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
 import OrderShipmentConfirm, { Entrega } from "./order-shipment-confirm/order-shipment-confirm";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { client } = useContext(OrderViewContext);
+  const projectId = useAppStore((state) => state.selectedProject.ID);
+  const { client, selectedCategories, selectedDiscount, executiveDiscounts, setConfirmOrderData } =
+    useContext(OrderViewContext);
 
   const [multiEntrega, setMultiEntrega] = useState(false);
   const [entregas, setEntregas] = useState<Entrega[]>([]);
   const [confirmado, setConfirmado] = useState(false);
+
+  useEffect(() => {
+    const fetchTotalValues = async () => {
+      if (selectedCategories.length === 0) return;
+      const products = selectedCategories
+        .flatMap((category) => category.products)
+        .map((product) => ({
+          product_sku: product.SKU,
+          quantity: product.quantity
+        }));
+      const payload: IConfirmOrderData = {
+        discount_package: selectedDiscount,
+        order_summary: products,
+        executive_discounts: executiveDiscounts
+      };
+      try {
+        const response = await confirmOrder(projectId, client?.id || "", payload);
+        if (response.status === 200) {
+          setConfirmOrderData(response.data);
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error("Error confirmando orden", error.message);
+        } else {
+          console.error("Unexpected error", error);
+        }
+      }
+    };
+
+    const timeOut = setTimeout(() => {
+      fetchTotalValues();
+    }, 500);
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
 
   const cantidadesAsignadas = (sku: string) =>
     entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
