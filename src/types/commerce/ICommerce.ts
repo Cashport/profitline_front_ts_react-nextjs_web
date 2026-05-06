@@ -61,12 +61,18 @@ export interface IFetchedCategories {
   products: ISelectedProduct[];
 }
 
+export interface IExecutiveDiscount {
+  product_sku: string;
+  primary_discount_pct: number;
+  secondary_discount_pct: number;
+}
 export interface IConfirmOrderData {
   discount_package: IDiscountPackageAvailable | undefined;
   order_summary: {
     product_sku: string;
     quantity: number;
   }[];
+  executive_discounts: IExecutiveDiscount[];
 }
 
 export interface IProductInDetail {
@@ -89,6 +95,7 @@ export interface DiscountApplied {
   discount: number;
   description: string;
   discount_name: string;
+  max_discount: number;
 }
 
 export interface PrimaryDiscount {
@@ -99,16 +106,20 @@ export interface PrimaryDiscount {
   unit_discount: number;
   discount_applied: DiscountApplied;
   new_price: number;
+  new_price_taxes: number;
 }
 
 export interface Discount {
   subtotalDiscount: number;
   primary: PrimaryDiscount;
+  secondary?: PrimaryDiscount;
 }
 export interface DiscountItem {
   product_sku: string;
   quantity: number;
+  shipment_unit: number;
   price: number;
+  price_taxes: number;
   taxes: number;
   image: string;
   category_id: number;
@@ -134,13 +145,18 @@ export interface IOrderConfirmedResponse {
     id: number;
     idAnnualDiscount: number;
   };
-  products?: IProductInDetail[];
+  products?: Omit<DiscountItem, "discount">[];
   subtotal: number;
   taxes: number;
   discounts: OrderDiscount;
   total: number;
   total_pronto_pago: number;
   insufficientStockProducts: string[];
+}
+
+export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
+  discount_package: IDiscountPackageAvailable;
+  executive_discounts: IExecutiveDiscount[];
 }
 
 export interface IShippingInformation {
@@ -151,12 +167,39 @@ export interface IShippingInformation {
   phone_number: string;
   comments: string;
   // selected id address
-  id?: string;
+  id?: number | string;
+}
+
+export interface IOrderSplitShippingInfo {
+  address: string;
+  city: string;
+  dispatch_address: string;
+  email: string;
+  phone_number: string;
+  comments: string;
+  id?: number;
+}
+
+export interface IOrderSplitDetail {
+  index: number;
+  shipping_information: IOrderSplitShippingInfo;
+  products: DiscountItem[];
 }
 
 export interface ICreateOrderData {
-  shipping_information: IShippingInformation;
-  order_summary: IOrderConfirmedResponse;
+  order_summary: IOrderSummaryPayload;
+  is_electronic_invoicing: number;
+  order_split_details: IOrderSplitDetail[];
+}
+
+export interface ISucessCreateOrder {
+  packageId: number;
+  draftId: number;
+  orders: {
+    orderId: number;
+    index: number;
+  }[];
+  notificationId: number;
 }
 
 export interface ICommerceAddressAndDetails {
@@ -251,6 +294,45 @@ export interface IOrder {
   files: string | null;
   notification_id: number | null;
 }
+export interface IDraftOrder {
+  id: number;
+  mongo_id: string;
+  client_id: string;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  order_date: string;
+  warehouseid: number;
+  client_name: string;
+  vendor_name: string;
+  warehousename: string;
+  is_draft: boolean;
+}
+
+export interface IDraftOrderDetail {
+  id: number;
+  mongo_id: string;
+  project_id: number;
+  client_id: string;
+  created_by: number;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  created_at: string;
+  client_name: string;
+  vendor_name: string;
+  order_summary: IOrderSummaryPayload;
+  shipping_info: IShippingInformation;
+  executive_discounts: IExecutiveDiscount[];
+}
 
 export interface IDiscount {
   id: number;
@@ -265,6 +347,8 @@ export interface IDiscountPackageAvailable {
   idAnnualDiscount: number;
   name: string;
   description: string;
+  priority?: number;
+  is_combinable?: number;
 }
 
 // Define la interfaz para los vendedores individuales.
