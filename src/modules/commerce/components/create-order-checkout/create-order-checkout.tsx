@@ -178,16 +178,15 @@ const CreateOrderCheckout: FC = ({}) => {
     if (!client) return;
 
     try {
-      const response = (await createDraft(
-        projectId,
-        client.id,
-        createOrderModelData,
-        showMessage
-      )) as GenericResponse<{ id_order: number }>;
-
-      if (response.status === 200) {
-        router.push(`/comercio`);
-      }
+      // const response = (await createDraft(
+      //   projectId,
+      //   client.id,
+      //   createOrderModelData,
+      //   showMessage
+      // )) as GenericResponse<{ id_order: number }>;
+      // if (response.status === 200) {
+      //   router.push(`/comercio`);
+      // }
     } catch (error) {
       showMessage("error", "Error creating draft");
     }
@@ -227,41 +226,41 @@ const CreateOrderCheckout: FC = ({}) => {
         selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
 
       if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
-        const response = (await createOrderFromDraft(
-          projectId,
-          client.id,
-          draftInfo.id,
-          createOrderModelData,
-          showMessage,
-          paymentSupportFile
-        )) as GenericResponse<{ id_order: number }>;
+        // const response = (await createOrderFromDraft(
+        //   projectId,
+        //   client.id,
+        //   draftInfo.id,
+        //   createOrderModelData,
+        //   showMessage,
+        //   paymentSupportFile
+        // )) as GenericResponse<{ id_order: number }>;
 
-        if (response.status === 200) {
-          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
-          router.prefetch(url);
-          router.push(url);
-        }
+        // if (response.status === 200) {
+        //   const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+        //   router.prefetch(url);
+        //   router.push(url);
+        // }
         setLoading(false);
         return;
       }
 
-      const response = await createOrder(
-        projectId,
-        client.id,
-        createOrderModelData,
-        showMessage,
-        paymentSupportFile
-      );
-      if (response.status === 200) {
-        const queryParams = [];
-        if (response.data?.notificationId) {
-          queryParams.push(`notification=${response.data.notificationId}`);
-        }
-        const queryParamsString = queryParams.join("&");
-        const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
-        router.prefetch(url);
-        router.push(url);
-      }
+      // const response = await createOrder(
+      //   projectId,
+      //   client.id,
+      //   createOrderModelData,
+      //   showMessage,
+      //   paymentSupportFile
+      // );
+      // if (response.status === 200) {
+      //   const queryParams = [];
+      //   if (response.data?.notificationId) {
+      //     queryParams.push(`notification=${response.data.notificationId}`);
+      //   }
+      //   const queryParamsString = queryParams.join("&");
+      //   const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
+      //   router.prefetch(url);
+      //   router.push(url);
+      // }
 
       setLoading(false);
     } catch (error) {

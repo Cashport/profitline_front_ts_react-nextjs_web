@@ -13,6 +13,7 @@ import {
   IOrderData,
   IPaymentLinkData,
   IProductData,
+  ISucessCreateOrder,
   ISalesDashboard,
   ISingleOrder,
   IWarehouseProductsStock
@@ -98,8 +99,8 @@ export const createOrder = async (
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
   paymentSupport?: File
-): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
-  let response: GenericResponse<{ id_order: number; notificationId: number }>;
+): Promise<GenericResponse<ISucessCreateOrder>> => {
+  let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
   if (paymentSupport) {
     const formData = new FormData();

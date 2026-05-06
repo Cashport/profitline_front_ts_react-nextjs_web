@@ -12,6 +12,7 @@ import {
 } from "@/types/commerce/ICommerce";
 import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 import { getAdresses as getAdressesAndNumber } from "@/services/commerce/commerce";
+import { useAppStore } from "@/lib/store/store";
 
 import ModalShippingInfo from "../modal-shipping-info";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
@@ -28,6 +29,9 @@ interface OrderShipmentConfirmProps {
   setEntregas: Dispatch<SetStateAction<IShippingInfo[]>>;
   cantidadesAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
   onConfirm: () => void;
+  onDraft: () => void;
+  loadingFinish?: boolean;
+  loadingDraft?: boolean;
 }
 
 type SingleForm = {
@@ -48,10 +52,14 @@ export default function OrderShipmentConfirm({
   entregas,
   setEntregas,
   cantidadesAsignadasExcluyendo,
-  onConfirm
+  onConfirm,
+  onDraft,
+  loadingFinish,
+  loadingDraft
 }: OrderShipmentConfirmProps) {
   const { client, confirmOrderData, setOrderSplitDetails } = useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
+  const draftInfo = useAppStore((state) => state.draftInfo);
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
@@ -537,15 +545,19 @@ export default function OrderShipmentConfirm({
 
         {/* Actions */}
         <div className="flex gap-3 px-5 pb-4 flex-shrink-0">
-          <button className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors">
-            Guardar borrador
+          <button
+            onClick={onDraft}
+            disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
+            className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {loadingDraft ? "Guardando…" : "Guardar borrador"}
           </button>
           <button
             onClick={onConfirm}
-            disabled={multiEntrega && hayDesbalance}
+            disabled={loadingFinish || loadingDraft || (multiEntrega && hayDesbalance)}
             className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Finalizar pedido
+            {loadingFinish ? "Procesando…" : "Finalizar pedido"}
           </button>
         </div>
       </div>

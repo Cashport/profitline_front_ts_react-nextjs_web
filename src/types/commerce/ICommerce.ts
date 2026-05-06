@@ -154,6 +154,11 @@ export interface IOrderConfirmedResponse {
   insufficientStockProducts: string[];
 }
 
+export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
+  discount_package: IDiscountPackageAvailable;
+  executive_discounts: IExecutiveDiscount[];
+}
+
 export interface IShippingInformation {
   address: string;
   city: string;
@@ -182,8 +187,19 @@ export interface IOrderSplitDetail {
 }
 
 export interface ICreateOrderData {
-  shipping_information: IShippingInformation;
-  order_summary: IOrderConfirmedResponse;
+  order_summary: IOrderSummaryPayload;
+  is_electronic_invoicing: number;
+  order_split_details: IOrderSplitDetail[];
+}
+
+export interface ISucessCreateOrder {
+  packageId: number;
+  draftId: number;
+  orders: {
+    orderId: number;
+    index: number;
+  }[];
+  notificationId: number;
 }
 
 export interface ICommerceAddressAndDetails {
@@ -292,6 +308,8 @@ export interface IDiscountPackageAvailable {
   idAnnualDiscount: number;
   name: string;
   description: string;
+  priority?: number;
+  is_combinable?: number;
 }
 
 // Define la interfaz para los vendedores individuales.

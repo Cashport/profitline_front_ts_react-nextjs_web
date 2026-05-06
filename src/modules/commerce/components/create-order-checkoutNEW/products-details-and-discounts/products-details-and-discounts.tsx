@@ -94,7 +94,6 @@ export default function ProductsDetailsAndDiscounts({
     useContext(OrderViewContext);
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
-  console.log("discountItems", discountItems);
 
   const otrosDescuentosItems = discountItems.filter((it) => it.discount?.secondary);
 
