@@ -145,7 +145,7 @@ export interface IOrderConfirmedResponse {
     id: number;
     idAnnualDiscount: number;
   };
-  products?: IProductInDetail[];
+  products?: Omit<DiscountItem, "discount">[];
   subtotal: number;
   taxes: number;
   discounts: OrderDiscount;
@@ -167,7 +167,7 @@ export interface IShippingInformation {
   phone_number: string;
   comments: string;
   // selected id address
-  id?: string;
+  id?: number | string;
 }
 
 export interface IOrderSplitShippingInfo {
@@ -293,6 +293,45 @@ export interface IOrder {
   last_datestamp: string | null;
   files: string | null;
   notification_id: number | null;
+}
+export interface IDraftOrder {
+  id: number;
+  mongo_id: string;
+  client_id: string;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  order_date: string;
+  warehouseid: number;
+  client_name: string;
+  vendor_name: string;
+  warehousename: string;
+  is_draft: boolean;
+}
+
+export interface IDraftOrderDetail {
+  id: number;
+  mongo_id: string;
+  project_id: number;
+  client_id: string;
+  created_by: number;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  created_at: string;
+  client_name: string;
+  vendor_name: string;
+  order_summary: IOrderSummaryPayload;
+  shipping_info: IShippingInformation;
+  executive_discounts: IExecutiveDiscount[];
 }
 
 export interface IDiscount {

@@ -5,6 +5,7 @@ import {
   IConfirmOrderData,
   ICreateOrderData,
   IDiscountPackageAvailable,
+  IDraftOrderDetail,
   IEcommerceClient,
   IGeneratePaymentLinkResponse,
   IInventoriesByWarehouse,
@@ -436,6 +437,18 @@ export const generatePaymentLink = async (clientId: string, modelData: IPaymentL
     return response.data;
   } catch (error) {
     console.error("Error al generar el link de pago:", error);
+    throw error;
+  }
+};
+
+export const getOrderDraft = async (projectId: number, draftId: number) => {
+  try {
+    const response: GenericResponse<IDraftOrderDetail> = await API.get(
+      `/marketplace/projects/${projectId}/draft/${draftId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el borrador de la orden:", error);
     throw error;
   }
 };

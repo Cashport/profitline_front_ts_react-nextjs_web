@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from "react";
 import { GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
@@ -56,13 +56,15 @@ export default function OrderShipmentConfirm({
   loadingFinish,
   loadingDraft
 }: OrderShipmentConfirmProps) {
-  const { client, confirmOrderData, setOrderSplitDetails } = useContext(OrderViewContext);
+  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo } =
+    useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
+  const [addressesFetched, setAddressesFetched] = useState(false);
 
   const [singleForm, setSingleForm] = useState<SingleForm>({
     addressSelectValue: "",
@@ -75,6 +77,7 @@ export default function OrderShipmentConfirm({
     observaciones: ""
   });
   const isNewAddressSingle = singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value;
+  const didHydrateFromDraftRef = useRef(false);
 
   const [modalEntrega, setModalEntrega] = useState<null | "new" | string>(null);
   const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
@@ -101,6 +104,8 @@ export default function OrderShipmentConfirm({
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setAddressesFetched(true);
       }
     })();
   }, [client?.id]);
@@ -112,15 +117,47 @@ export default function OrderShipmentConfirm({
     }
   }, [client?.email]);
 
+  // Hydrate singleForm from draft's shipping_info (runs once when both
+  // shippingInfo and addresses are available, so the <select> already has the
+  // matching <option> when we set its value).
+  useEffect(() => {
+    if (didHydrateFromDraftRef.current) return;
+    if (!shippingInfo) return;
+    if (!addressesFetched) return;
+
+    const draftAddressId =
+      typeof shippingInfo.id === "string" ? Number(shippingInfo.id) : shippingInfo.id;
+    const matchedAddress =
+      draftAddressId !== undefined
+        ? addresses.find((a) => a.id === draftAddressId)
+        : undefined;
+
+    const phoneRaw = shippingInfo.phone_number ?? "";
+    const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
+    const indicativo = phoneMatch ? phoneMatch[1] : "+57";
+    const telefono = phoneMatch ? phoneMatch[2] : phoneRaw;
+
+    setSingleForm({
+      addressSelectValue: matchedAddress
+        ? String(matchedAddress.id)
+        : NEW_ADDRESS_OPTION.value,
+      addressId: matchedAddress?.id,
+      city: shippingInfo.city ?? "",
+      dispatch_address: shippingInfo.dispatch_address ?? "",
+      email: shippingInfo.email ?? "",
+      indicativo,
+      telefono,
+      observaciones: shippingInfo.comments ?? ""
+    });
+
+    didHydrateFromDraftRef.current = true;
+  }, [shippingInfo, addresses, addressesFetched]);
+
   // Auto-fill city/dispatch_address from selected address (single mode)
   useEffect(() => {
     if (singleForm.addressSelectValue === "") return;
     if (singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value) {
-      if (
-        singleForm.addressId !== undefined ||
-        singleForm.city ||
-        singleForm.dispatch_address
-      ) {
+      if (singleForm.addressId !== undefined) {
         setSingleForm((f) => ({
           ...f,
           addressId: undefined,
