@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
-import { IShippingInfo } from "../../create-order-checkoutNEW/create-order-checkout";
+import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
 interface ModalShippingInfoProps {
   mode: "new" | string;

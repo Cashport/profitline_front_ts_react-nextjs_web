@@ -16,7 +16,7 @@ import { useAppStore } from "@/lib/store/store";
 
 import ModalShippingInfo from "../modal-shipping-info";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
-import { IShippingInfo } from "../../create-order-checkoutNEW/create-order-checkout";
+import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
 function formatPrice(n: number) {
   return "$" + (n ?? 0).toLocaleString("es-CO");
