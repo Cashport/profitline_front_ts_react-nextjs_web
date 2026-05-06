@@ -15,6 +15,7 @@ import {
   IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
+  IOrderSplitDetail,
   ISelectedProduct,
   IShippingInformation
 } from "@/types/commerce/ICommerce";
@@ -74,6 +75,7 @@ export const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
+  const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
   const [isCartVisible, setIsCartVisible] = useState(
     () => typeof window !== "undefined" && window.innerWidth > 1000
   );
@@ -176,6 +178,8 @@ export const CreateOrderView: FC = () => {
         discountsLoading,
         executiveDiscounts,
         setExecutiveDiscounts,
+        order_split_details: orderSplitDetails,
+        setOrderSplitDetails,
         toggleCart,
         isCartVisible,
         numberOfItems

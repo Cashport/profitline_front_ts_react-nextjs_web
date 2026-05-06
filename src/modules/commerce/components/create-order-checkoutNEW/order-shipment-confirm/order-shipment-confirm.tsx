@@ -1,40 +1,46 @@
 "use client";
 
-import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
-import { DiscountItem } from "@/types/commerce/ICommerce";
+import {
+  DiscountItem,
+  ICommerceAdresses,
+  IOrderSplitDetail,
+  IOrderSplitShippingInfo
+} from "@/types/commerce/ICommerce";
+import { useContactModalOptions } from "@/hooks/useContactModalOptions";
+import { getAdresses as getAdressesAndNumber } from "@/services/commerce/commerce";
 
-const INDICATIVOS = ["+57", "+1", "+34", "+52", "+56", "+58"];
-
-const DIRECCIONES_MOCK = [
-  "AV. ENRIQUILLO # 54 PLAZA ENRIQUILLO",
-  "CALLE 90 # 19A-49 CONSULTORIO 306",
-  "CRA 15 # 88-64 LOCAL 102"
-];
+import ModalShippingInfo from "../modal-shipping-info";
+import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
+import { IShippingInfo } from "../create-order-checkout";
 
 function formatPrice(n: number) {
   return "$" + (n ?? 0).toLocaleString("es-CO");
 }
 
-export type Entrega = {
-  id: string;
-  direccion: string;
-  indicativo: string;
-  telefono: string;
-  observaciones: string;
-  cantidades: Record<string, number>;
-};
-
 interface OrderShipmentConfirmProps {
   multiEntrega: boolean;
   setMultiEntrega: (v: boolean) => void;
-  entregas: Entrega[];
-  setEntregas: Dispatch<SetStateAction<Entrega[]>>;
+  entregas: IShippingInfo[];
+  setEntregas: Dispatch<SetStateAction<IShippingInfo[]>>;
   cantidadesAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
   onConfirm: () => void;
 }
+
+type SingleForm = {
+  addressSelectValue: string;
+  addressId?: number;
+  direccion: string;
+  city: string;
+  dispatch_address: string;
+  email: string;
+  indicativo: string;
+  telefono: string;
+  observaciones: string;
+};
 
 export default function OrderShipmentConfirm({
   multiEntrega,
@@ -44,29 +50,109 @@ export default function OrderShipmentConfirm({
   cantidadesAsignadasExcluyendo,
   onConfirm
 }: OrderShipmentConfirmProps) {
-  const { client, confirmOrderData } = useContext(OrderViewContext);
+  const { client, confirmOrderData, setOrderSplitDetails } = useContext(OrderViewContext);
+  const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
-  const [form, setForm] = useState({
-    direccion: DIRECCIONES_MOCK[0],
+  const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
+
+  const [singleForm, setSingleForm] = useState<SingleForm>({
+    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressId: undefined,
+    direccion: "",
+    city: "",
+    dispatch_address: "",
     email: "",
     indicativo: "+57",
     telefono: "",
     observaciones: ""
   });
+  const isNewAddressSingle = singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value;
 
   const [modalEntrega, setModalEntrega] = useState<null | "new" | string>(null);
-  const [modalDraft, setModalDraft] = useState<Omit<Entrega, "id">>({
-    direccion: DIRECCIONES_MOCK[0],
+  const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
+    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressId: undefined,
+    direccion: "",
+    city: "",
+    dispatch_address: "",
+    email: "",
     indicativo: "+57",
     telefono: "",
     observaciones: "",
     cantidades: {}
   });
 
-  const makeBlankEntrega = (): Omit<Entrega, "id"> => ({
-    direccion: DIRECCIONES_MOCK[0],
+  // Fetch client addresses + saved phone
+  useEffect(() => {
+    if (!client?.id) return;
+    (async () => {
+      try {
+        const resp = await getAdressesAndNumber(client.id);
+        setAddresses(resp.otherAddresses ?? []);
+        if (resp.phone) {
+          setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone }));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [client?.id]);
+
+  // Default email from client
+  useEffect(() => {
+    if (client?.email) {
+      setSingleForm((f) => ({ ...f, email: f.email || client.email }));
+    }
+  }, [client?.email]);
+
+  // Auto-fill city/dispatch_address from selected address (single mode)
+  useEffect(() => {
+    if (singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value) {
+      if (
+        singleForm.addressId !== undefined ||
+        singleForm.city ||
+        singleForm.dispatch_address ||
+        singleForm.direccion
+      ) {
+        setSingleForm((f) => ({
+          ...f,
+          addressId: undefined,
+          city: "",
+          dispatch_address: "",
+          direccion: ""
+        }));
+      }
+      return;
+    }
+    const sel = addresses.find((a) => String(a.id) === singleForm.addressSelectValue);
+    if (sel) {
+      const same =
+        singleForm.addressId === sel.id &&
+        singleForm.city === sel.city &&
+        singleForm.dispatch_address === sel.address &&
+        singleForm.direccion === sel.address;
+      if (!same) {
+        setSingleForm((f) => ({
+          ...f,
+          addressId: sel.id,
+          city: sel.city,
+          dispatch_address: sel.address,
+          direccion: sel.address,
+          email: f.email || sel.email
+        }));
+      }
+    }
+  }, [singleForm.addressSelectValue, addresses]);
+
+  const makeBlankEntrega = (): Omit<IShippingInfo, "id"> => ({
+    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressId: undefined,
+    direccion: "",
+    city: "",
+    dispatch_address: "",
+    email: client?.email ?? "",
     indicativo: "+57",
     telefono: "",
     observaciones: "",
@@ -78,9 +164,14 @@ export default function OrderShipmentConfirm({
     setModalEntrega("new");
   };
 
-  const openEditModal = (entrega: Entrega) => {
+  const openEditModal = (entrega: IShippingInfo) => {
     setModalDraft({
+      addressSelectValue: entrega.addressSelectValue,
+      addressId: entrega.addressId,
       direccion: entrega.direccion,
+      city: entrega.city,
+      dispatch_address: entrega.dispatch_address,
+      email: entrega.email,
       indicativo: entrega.indicativo,
       telefono: entrega.telefono,
       observaciones: entrega.observaciones,
@@ -104,13 +195,22 @@ export default function OrderShipmentConfirm({
 
   const activarMultiEntrega = () => {
     setMultiEntrega(true);
-    const blank = makeBlankEntrega();
-    const e1: Entrega = { id: `e${Date.now()}`, ...blank, direccion: DIRECCIONES_MOCK[0] };
-    const e2: Entrega = {
-      id: `e${Date.now() + 1}`,
-      ...blank,
-      direccion: DIRECCIONES_MOCK[1] ?? DIRECCIONES_MOCK[0]
-    };
+    const e1: IShippingInfo = { id: `e${Date.now()}`, ...makeBlankEntrega() };
+    const e2: IShippingInfo = { id: `e${Date.now() + 1}`, ...makeBlankEntrega() };
+    if (addresses[0]) {
+      e1.addressSelectValue = String(addresses[0].id);
+      e1.addressId = addresses[0].id;
+      e1.direccion = addresses[0].address;
+      e1.city = addresses[0].city;
+      e1.dispatch_address = addresses[0].address;
+    }
+    if (addresses[1]) {
+      e2.addressSelectValue = String(addresses[1].id);
+      e2.addressId = addresses[1].id;
+      e2.direccion = addresses[1].address;
+      e2.city = addresses[1].city;
+      e2.dispatch_address = addresses[1].address;
+    }
     setEntregas([e1, e2]);
   };
 
@@ -126,10 +226,62 @@ export default function OrderShipmentConfirm({
     (i) => cantidadesAsignadas(i.product_sku) !== i.quantity
   );
 
+  // Sync order_split_details on context
+  useEffect(() => {
+    const buildShipping = (e: {
+      addressSelectValue: string;
+      addressId?: number;
+      direccion: string;
+      city: string;
+      dispatch_address: string;
+      email: string;
+      indicativo: string;
+      telefono: string;
+      observaciones: string;
+    }): IOrderSplitShippingInfo => ({
+      // Solo incluir id_address si NO es una nueva dirección
+      ...(e.addressSelectValue !== NEW_ADDRESS_OPTION.value && e.addressId !== undefined
+        ? { id: e.addressId }
+        : {}),
+      address: e.direccion,
+      city: e.city,
+      dispatch_address: e.dispatch_address,
+      email: e.email,
+      phone_number: `${e.indicativo}${e.telefono}`,
+      comments: e.observaciones
+    });
+
+    const buildProductsForSplit = (cantidades: Record<string, number>): DiscountItem[] =>
+      discountItems
+        .map((item) => ({ ...item, quantity: cantidades[item.product_sku] ?? 0 }))
+        .filter((item) => item.quantity > 0);
+
+    const splits: IOrderSplitDetail[] = multiEntrega
+      ? entregas.map((e, idx) => ({
+          index: idx,
+          shipping_information: buildShipping(e),
+          products: buildProductsForSplit(e.cantidades)
+        }))
+      : [
+          {
+            index: 0,
+            shipping_information: buildShipping(singleForm),
+            products: discountItems
+          }
+        ];
+
+    setOrderSplitDetails(splits);
+  }, [multiEntrega, entregas, singleForm, discountItems, setOrderSplitDetails]);
+
   const subtotal = confirmOrderData?.subtotal ?? 0;
   const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
   const total = confirmOrderData?.total ?? 0;
   const iva = confirmOrderData?.taxes ?? 0;
+
+  const addressOptions = [
+    NEW_ADDRESS_OPTION,
+    ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
+  ];
 
   return (
     <div className="flex flex-col w-[420px] flex-shrink-0 bg-[#F7F7F7]">
@@ -164,21 +316,50 @@ export default function OrderShipmentConfirm({
         <div className="flex-1 overflow-y-auto">
           {/* SINGLE MODE */}
           {!multiEntrega && (
-            <div className="px-5 py-5 flex flex-col gap-5">
+            <div className="px-5 py-5 flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[#666666]">Dirección de entrega</label>
+                <select
+                  value={singleForm.addressSelectValue}
+                  onChange={(e) =>
+                    setSingleForm((f) => ({ ...f, addressSelectValue: e.target.value }))
+                  }
+                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] appearance-none"
+                >
+                  {addressOptions.map((o) => (
+                    <option key={String(o.value)} value={String(o.value)}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-[#666666]">Ciudad</label>
+                <input
+                  type="text"
+                  placeholder="Bogotá"
+                  value={singleForm.city}
+                  disabled={!isNewAddressSingle}
+                  onChange={(e) => setSingleForm((f) => ({ ...f, city: e.target.value }))}
+                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed"
+                />
+              </div>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">
                   Dirección de despacho
                 </label>
-                <select
-                  value={form.direccion}
-                  onChange={(e) => setForm((f) => ({ ...f, direccion: e.target.value }))}
-                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] appearance-none"
-                >
-                  {DIRECCIONES_MOCK.map((d) => (
-                    <option key={d}>{d}</option>
-                  ))}
-                  <option>+ Nueva dirección</option>
-                </select>
+                <input
+                  type="text"
+                  placeholder="Cl. 76 9-88"
+                  value={singleForm.dispatch_address}
+                  readOnly={!isNewAddressSingle}
+                  onChange={(e) =>
+                    setSingleForm((f) => ({ ...f, dispatch_address: e.target.value }))
+                  }
+                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -186,8 +367,8 @@ export default function OrderShipmentConfirm({
                 <input
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  value={singleForm.email}
+                  onChange={(e) => setSingleForm((f) => ({ ...f, email: e.target.value }))}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
                 />
               </div>
@@ -196,19 +377,26 @@ export default function OrderShipmentConfirm({
                 <label className="text-xs font-semibold text-[#666666]">Teléfono de contacto</label>
                 <div className="flex gap-2">
                   <select
-                    value={form.indicativo}
-                    onChange={(e) => setForm((f) => ({ ...f, indicativo: e.target.value }))}
+                    value={singleForm.indicativo}
+                    disabled={isLoadingOptions}
+                    onChange={(e) => setSingleForm((f) => ({ ...f, indicativo: e.target.value }))}
                     className="w-20 px-2 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] appearance-none text-center"
                   >
-                    {INDICATIVOS.map((i) => (
-                      <option key={i}>{i}</option>
-                    ))}
+                    {callingCodeOptions.length === 0 && <option value="+57">+57</option>}
+                    {callingCodeOptions.map((o) => {
+                      const code = o.label.split(" ")[0];
+                      return (
+                        <option key={o.value} value={code}>
+                          {code}
+                        </option>
+                      );
+                    })}
                   </select>
                   <input
                     type="tel"
                     placeholder="3001234567"
-                    value={form.telefono}
-                    onChange={(e) => setForm((f) => ({ ...f, telefono: e.target.value }))}
+                    value={singleForm.telefono}
+                    onChange={(e) => setSingleForm((f) => ({ ...f, telefono: e.target.value }))}
                     className="flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
                   />
                 </div>
@@ -219,8 +407,8 @@ export default function OrderShipmentConfirm({
                 <textarea
                   placeholder="Ingresar un comentario"
                   maxLength={64}
-                  value={form.observaciones}
-                  onChange={(e) => setForm((f) => ({ ...f, observaciones: e.target.value }))}
+                  value={singleForm.observaciones}
+                  onChange={(e) => setSingleForm((f) => ({ ...f, observaciones: e.target.value }))}
                   rows={3}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
@@ -242,7 +430,7 @@ export default function OrderShipmentConfirm({
                       {eIdx + 1}
                     </span>
                     <p className="flex-1 text-xs font-medium text-[#141414] truncate">
-                      {entrega.direccion}
+                      {entrega.direccion || "Sin dirección"}
                     </p>
                     <button
                       onClick={() => openEditModal(entrega)}
@@ -303,159 +491,19 @@ export default function OrderShipmentConfirm({
             </div>
           )}
 
-          {/* MODAL */}
           {modalEntrega !== null && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white rounded-2xl border border-[#DDDDDD] w-[480px] max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-[#EEEEEE]">
-                  <h3 className="text-sm font-bold text-[#141414]">
-                    {modalEntrega === "new" ? "Nuevo destino" : "Editar destino"}
-                  </h3>
-                  <button
-                    onClick={() => setModalEntrega(null)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[#999999] hover:bg-[#F7F7F7] transition-colors"
-                  >
-                    <X size={15} />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold text-[#666666]">
-                      Dirección de entrega
-                    </label>
-                    <select
-                      value={modalDraft.direccion}
-                      onChange={(e) => setModalDraft((d) => ({ ...d, direccion: e.target.value }))}
-                      className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
-                    >
-                      {DIRECCIONES_MOCK.map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
-                      <option value="__nueva__">+ Nueva dirección</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold text-[#666666]">
-                      Teléfono de contacto
-                    </label>
-                    <div className="flex gap-2">
-                      <select
-                        value={modalDraft.indicativo}
-                        onChange={(e) =>
-                          setModalDraft((d) => ({ ...d, indicativo: e.target.value }))
-                        }
-                        className="w-20 px-2 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] text-center"
-                      >
-                        {INDICATIVOS.map((i) => (
-                          <option key={i}>{i}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="tel"
-                        placeholder="3001234567"
-                        value={modalDraft.telefono}
-                        onChange={(e) => setModalDraft((d) => ({ ...d, telefono: e.target.value }))}
-                        className="flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold text-[#666666]">
-                      Observaciones
-                    </label>
-                    <textarea
-                      placeholder="Instrucciones especiales para esta entrega"
-                      maxLength={128}
-                      value={modalDraft.observaciones}
-                      onChange={(e) =>
-                        setModalDraft((d) => ({ ...d, observaciones: e.target.value }))
-                      }
-                      rows={2}
-                      className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-semibold text-[#666666]">
-                      Unidades por producto
-                    </label>
-                    <div className="border border-[#EEEEEE] rounded-lg overflow-hidden">
-                      <div className="grid grid-cols-[1fr_56px_72px] px-3 py-2 bg-[#F7F7F7] border-b border-[#EEEEEE]">
-                        <span className="text-[10px] text-[#999999] font-semibold">Producto</span>
-                        <span className="text-[10px] text-[#999999] font-semibold text-center">
-                          Disp.
-                        </span>
-                        <span className="text-[10px] text-[#999999] font-semibold text-center">
-                          Cant.
-                        </span>
-                      </div>
-                      {discountItems.map((item, iIdx) => {
-                        const asignado = modalDraft.cantidades[item.product_sku] ?? 0;
-                        const asignadoOtros = cantidadesAsignadasExcluyendo(
-                          item.product_sku,
-                          modalEntrega === "new" ? null : modalEntrega
-                        );
-                        const disponible = item.quantity - asignadoOtros;
-                        const puedeAsignar = disponible;
-                        return (
-                          <div
-                            key={item.product_sku}
-                            className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${iIdx < discountItems.length - 1 ? "border-b border-[#EEEEEE]" : ""}`}
-                          >
-                            <p className="text-xs text-[#141414] leading-tight pr-2">
-                              {item.description}
-                            </p>
-                            <p
-                              className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
-                            >
-                              {puedeAsignar}
-                            </p>
-                            <input
-                              type="number"
-                              min={0}
-                              max={puedeAsignar}
-                              value={asignado === 0 ? "" : asignado}
-                              placeholder="0"
-                              onChange={(e) => {
-                                const v = Math.min(
-                                  Math.max(parseInt(e.target.value) || 0, 0),
-                                  puedeAsignar
-                                );
-                                setModalDraft((d) => ({
-                                  ...d,
-                                  cantidades: { ...d.cantidades, [item.product_sku]: v }
-                                }));
-                              }}
-                              className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 px-5 py-4 border-t border-[#EEEEEE]">
-                  <button
-                    onClick={() => setModalEntrega(null)}
-                    className="flex-1 py-2.5 text-sm font-semibold text-[#666666] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:text-[#141414] transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={saveModal}
-                    className="flex-1 py-2.5 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors"
-                  >
-                    {modalEntrega === "new" ? "Agregar destino" : "Guardar cambios"}
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ModalShippingInfo
+              mode={modalEntrega}
+              draft={modalDraft}
+              setDraft={setModalDraft}
+              onSave={saveModal}
+              onClose={() => setModalEntrega(null)}
+              discountItems={discountItems}
+              cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+              addresses={addresses}
+              callingCodeOptions={callingCodeOptions}
+              isLoadingOptions={isLoadingOptions}
+            />
           )}
         </div>
 

@@ -165,6 +165,22 @@ export interface IShippingInformation {
   id?: string;
 }
 
+export interface IOrderSplitShippingInfo {
+  address: string;
+  city: string;
+  dispatch_address: string;
+  email: string;
+  phone_number: string;
+  comments: string;
+  id?: number;
+}
+
+export interface IOrderSplitDetail {
+  index: number;
+  shipping_information: IOrderSplitShippingInfo;
+  products: DiscountItem[];
+}
+
 export interface ICreateOrderData {
   shipping_information: IShippingInformation;
   order_summary: IOrderConfirmedResponse;

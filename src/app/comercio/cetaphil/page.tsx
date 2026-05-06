@@ -13,6 +13,7 @@ import {
   IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
+  IOrderSplitDetail,
   ISelectedProduct,
   IShippingInformation
 } from "@/types/commerce/ICommerce";
@@ -58,6 +59,8 @@ export interface IOrderViewContext {
   discountsLoading: boolean;
   executiveDiscounts: IExecutiveDiscount[];
   setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
+  order_split_details: IOrderSplitDetail[];
+  setOrderSplitDetails: Dispatch<SetStateAction<IOrderSplitDetail[]>>;
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
@@ -79,6 +82,7 @@ const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
+  const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
   const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
   const token = localStorage.getItem(STORAGE_TOKEN);
@@ -147,7 +151,9 @@ const CreateOrderView: FC = () => {
         setDiscounts,
         discountsLoading,
         executiveDiscounts,
-        setExecutiveDiscounts
+        setExecutiveDiscounts,
+        order_split_details: orderSplitDetails,
+        setOrderSplitDetails
       }}
     >
       <div className={styles.ordersView}>

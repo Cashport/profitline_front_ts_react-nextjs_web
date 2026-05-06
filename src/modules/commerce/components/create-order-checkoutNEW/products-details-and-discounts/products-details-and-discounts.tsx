@@ -94,6 +94,7 @@ export default function ProductsDetailsAndDiscounts({
     useContext(OrderViewContext);
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
+  console.log("discountItems", discountItems);
 
   const otrosDescuentosItems = discountItems.filter((it) => it.discount?.secondary);
 
@@ -131,14 +132,12 @@ export default function ProductsDetailsAndDiscounts({
     return s + pf * i.quantity;
   }, 0);
 
-  const subtotalProductos = totalMonto;
-
   const cols = multiEntrega
     ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px]"
     : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px]";
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#F7F7F7]">
+    <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-[#F7F7F7]">
       <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl border border-[#DDDDDD]">
         {/* Card header */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-[#DDDDDD] flex-shrink-0">
@@ -157,98 +156,101 @@ export default function ProductsDetailsAndDiscounts({
         </div>
 
         {/* Table wrapper */}
-        <div className="flex-1 flex flex-col overflow-hidden mx-5 rounded-xl border border-[#EEEEEE]">
-          {/* Table header */}
-          <div
-            className={`grid ${cols} px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-xl flex-shrink-0`}
-          >
-            <span className="text-xs font-medium text-[#AAAAAA]">Producto</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">SKU</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Original</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-center">Descuento</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Final</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">Cant.</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">Total</span>
-            {multiEntrega && (
-              <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
-            )}
-          </div>
+        <div className="flex-1 min-h-0 mx-5 rounded-xl border border-[#EEEEEE] overflow-x-auto overflow-y-hidden">
+          <div className="min-w-max h-full flex flex-col">
+            {/* Table header */}
+            <div
+              className={`grid ${cols} px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-xl flex-shrink-0`}
+            >
+              <span className="text-xs font-medium text-[#AAAAAA]">Producto</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">SKU</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Original</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-center">Descuento</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Final</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">Cant.</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">Total</span>
+              {multiEntrega && (
+                <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
+              )}
+            </div>
 
-          {/* Rows */}
-          <div className="overflow-y-auto flex-1">
-            {discountItems.map((item, idx) => {
-              const precioFinal = item.discount?.primary?.new_price ?? item.price;
-              const totalLinea = precioFinal * item.quantity;
-              const restante = item.quantity - cantidadesAsignadas(item.product_sku);
-              const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
-              const executiveEntry = executiveDiscounts.find(
-                (e) => e.product_sku === item.product_sku
-              );
-              const cellValue = executiveEntry?.primary_discount_pct ?? maxPercentage;
+            {/* Rows */}
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {discountItems.map((item, idx) => {
+                const precioFinal = item.discount?.primary?.new_price ?? item.price;
+                const totalLinea = precioFinal * item.quantity;
+                const restante = item.quantity - cantidadesAsignadas(item.product_sku);
+                const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
+                const executiveEntry = executiveDiscounts.find(
+                  (e) => e.product_sku === item.product_sku
+                );
+                const cellValue = executiveEntry?.primary_discount_pct ?? maxPercentage;
 
-              return (
-                <div
-                  key={item.product_sku}
-                  className={`grid ${cols} items-center px-4 py-4 ${
-                    idx < discountItems.length - 1 ? "border-b border-[#F4F4F4]" : ""
-                  }`}
-                >
-                  <p
-                    className="text-sm font-medium text-[#141414] leading-tight pr-4 truncate"
-                    title={item.description}
+                return (
+                  <div
+                    key={item.product_sku}
+                    className={`grid ${cols} items-center px-4 py-4 ${
+                      idx < discountItems.length - 1 ? "border-b border-[#F4F4F4]" : ""
+                    }`}
                   >
-                    {item.description}
-                  </p>
-                  <p className="text-xs text-[#CCCCCC] text-right">{item.product_sku}</p>
-                  <p className="text-xs text-[#CCCCCC] line-through text-right">
-                    {formatPrice(item.price)}
-                  </p>
-                  <div className="flex justify-center">
-                    <DescuentoCell
-                      value={cellValue}
-                      max={maxPercentage}
-                      onChange={(v) => updatePrimaryDiscount(item, v)}
-                    />
-                  </div>
-                  <p className="text-sm font-semibold text-[#141414] text-right">
-                    {formatPrice(precioFinal)}
-                  </p>
-                  <p className="text-sm text-[#141414] text-right">{item.quantity}</p>
-                  <p className="text-sm font-semibold text-[#141414] text-right">
-                    {formatPrice(totalLinea)}
-                  </p>
-                  {multiEntrega && (
                     <p
-                      className={`text-sm font-bold text-right ${
-                        restante === 0
-                          ? "text-green-600"
-                          : restante < 0
-                            ? "text-red-500"
-                            : "text-amber-500"
-                      }`}
+                      className="text-sm font-medium text-[#141414] leading-tight pr-4 truncate"
+                      title={item.description}
                     >
-                      {restante}
+                      {item.description}
                     </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    <p className="text-xs text-[#CCCCCC] text-right">{item.product_sku}</p>
+                    <p className="text-xs text-[#CCCCCC] line-through text-right">
+                      {formatPrice(item.price)}
+                    </p>
+                    <div className="flex justify-center">
+                      <DescuentoCell
+                        value={cellValue}
+                        max={maxPercentage}
+                        onChange={(v) => updatePrimaryDiscount(item, v)}
+                      />
+                    </div>
+                    <p className="text-sm font-semibold text-[#141414] text-right">
+                      {formatPrice(precioFinal)}
+                    </p>
+                    <p className="text-sm text-[#141414] text-right">{item.quantity}</p>
+                    <p className="text-sm font-semibold text-[#141414] text-right">
+                      {formatPrice(totalLinea)}
+                    </p>
+                    {multiEntrega && (
+                      <p
+                        className={`text-sm font-bold text-right ${
+                          restante === 0
+                            ? "text-green-600"
+                            : restante < 0
+                              ? "text-red-500"
+                              : "text-amber-500"
+                        }`}
+                        title={String(restante)}
+                      >
+                        {restante}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
-          {/* Totals row */}
-          <div
-            className={`grid ${cols} items-center px-4 py-3 bg-[#FAFAFA] border-t border-[#EEEEEE] rounded-b-xl flex-shrink-0`}
-          >
-            <span className="text-xs font-semibold text-[#141414]">Totales</span>
-            <span />
-            <span />
-            <span />
-            <span />
-            <span className="text-sm font-bold text-[#141414] text-right">{totalCantidad}</span>
-            <span className="text-sm font-bold text-[#141414] text-right">
-              {formatPrice(totalMonto)}
-            </span>
-            {multiEntrega && <span />}
+            {/* Totals row */}
+            <div
+              className={`grid ${cols} items-center px-4 py-3 bg-[#FAFAFA] border-t border-[#EEEEEE] rounded-b-xl flex-shrink-0`}
+            >
+              <span className="text-xs font-semibold text-[#141414]">Totales</span>
+              <span />
+              <span />
+              <span />
+              <span />
+              <span className="text-sm font-bold text-[#141414] text-right">{totalCantidad}</span>
+              <span className="text-sm font-bold text-[#141414] text-right">
+                {formatPrice(totalMonto)}
+              </span>
+              {multiEntrega && <span />}
+            </div>
           </div>
         </div>
 
@@ -264,8 +266,8 @@ export default function ProductsDetailsAndDiscounts({
                 const key = `${it.product_sku}-${sec.discount_applied.id}`;
                 const entry = executiveDiscounts.find((e) => e.product_sku === it.product_sku);
                 const activo = entry ? entry.secondary_discount_pct > 0 : true;
-                const porcentaje = sec.discount_applied.discount;
-                const monto = Math.round((subtotalProductos * porcentaje) / 100);
+                const porcentaje = sec.discount_applied.max_discount;
+                const monto = sec.new_price;
                 const label = sec.discount_applied.discount_name || sec.description;
                 return (
                   <div key={key} className="flex items-center gap-3 px-4 py-3">
@@ -274,7 +276,7 @@ export default function ProductsDetailsAndDiscounts({
                       {porcentaje}%
                     </span>
                     <span className="text-sm text-[#666666] w-24 text-right">
-                      {formatPrice(subtotalProductos - monto)}
+                      {formatPrice(monto)}
                     </span>
                     <button
                       onClick={() => toggleSecondaryDiscount(it)}
