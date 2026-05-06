@@ -37,7 +37,6 @@ interface OrderShipmentConfirmProps {
 type SingleForm = {
   addressSelectValue: string;
   addressId?: number;
-  direccion: string;
   city: string;
   dispatch_address: string;
   email: string;
@@ -66,9 +65,8 @@ export default function OrderShipmentConfirm({
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
 
   const [singleForm, setSingleForm] = useState<SingleForm>({
-    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressSelectValue: "",
     addressId: undefined,
-    direccion: "",
     city: "",
     dispatch_address: "",
     email: "",
@@ -80,9 +78,8 @@ export default function OrderShipmentConfirm({
 
   const [modalEntrega, setModalEntrega] = useState<null | "new" | string>(null);
   const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
-    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressSelectValue: "",
     addressId: undefined,
-    direccion: "",
     city: "",
     dispatch_address: "",
     email: "",
@@ -117,19 +114,18 @@ export default function OrderShipmentConfirm({
 
   // Auto-fill city/dispatch_address from selected address (single mode)
   useEffect(() => {
+    if (singleForm.addressSelectValue === "") return;
     if (singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value) {
       if (
         singleForm.addressId !== undefined ||
         singleForm.city ||
-        singleForm.dispatch_address ||
-        singleForm.direccion
+        singleForm.dispatch_address
       ) {
         setSingleForm((f) => ({
           ...f,
           addressId: undefined,
           city: "",
-          dispatch_address: "",
-          direccion: ""
+          dispatch_address: ""
         }));
       }
       return;
@@ -139,15 +135,13 @@ export default function OrderShipmentConfirm({
       const same =
         singleForm.addressId === sel.id &&
         singleForm.city === sel.city &&
-        singleForm.dispatch_address === sel.address &&
-        singleForm.direccion === sel.address;
+        singleForm.dispatch_address === sel.address;
       if (!same) {
         setSingleForm((f) => ({
           ...f,
           addressId: sel.id,
           city: sel.city,
           dispatch_address: sel.address,
-          direccion: sel.address,
           email: f.email || sel.email
         }));
       }
@@ -155,9 +149,8 @@ export default function OrderShipmentConfirm({
   }, [singleForm.addressSelectValue, addresses]);
 
   const makeBlankEntrega = (): Omit<IShippingInfo, "id"> => ({
-    addressSelectValue: NEW_ADDRESS_OPTION.value,
+    addressSelectValue: "",
     addressId: undefined,
-    direccion: "",
     city: "",
     dispatch_address: "",
     email: client?.email ?? "",
@@ -176,7 +169,6 @@ export default function OrderShipmentConfirm({
     setModalDraft({
       addressSelectValue: entrega.addressSelectValue,
       addressId: entrega.addressId,
-      direccion: entrega.direccion,
       city: entrega.city,
       dispatch_address: entrega.dispatch_address,
       email: entrega.email,
@@ -208,14 +200,12 @@ export default function OrderShipmentConfirm({
     if (addresses[0]) {
       e1.addressSelectValue = String(addresses[0].id);
       e1.addressId = addresses[0].id;
-      e1.direccion = addresses[0].address;
       e1.city = addresses[0].city;
       e1.dispatch_address = addresses[0].address;
     }
     if (addresses[1]) {
       e2.addressSelectValue = String(addresses[1].id);
       e2.addressId = addresses[1].id;
-      e2.direccion = addresses[1].address;
       e2.city = addresses[1].city;
       e2.dispatch_address = addresses[1].address;
     }
@@ -234,12 +224,18 @@ export default function OrderShipmentConfirm({
     (i) => cantidadesAsignadas(i.product_sku) !== i.quantity
   );
 
+  const isSingleFormValid =
+    singleForm.addressSelectValue !== "" &&
+    singleForm.city.trim() !== "" &&
+    singleForm.dispatch_address.trim() !== "" &&
+    singleForm.email.trim() !== "" &&
+    singleForm.telefono.trim() !== "";
+
   // Sync order_split_details on context
   useEffect(() => {
     const buildShipping = (e: {
       addressSelectValue: string;
       addressId?: number;
-      direccion: string;
       city: string;
       dispatch_address: string;
       email: string;
@@ -251,7 +247,7 @@ export default function OrderShipmentConfirm({
       ...(e.addressSelectValue !== NEW_ADDRESS_OPTION.value && e.addressId !== undefined
         ? { id: e.addressId }
         : {}),
-      address: e.direccion,
+      address: e.dispatch_address,
       city: e.city,
       dispatch_address: e.dispatch_address,
       email: e.email,
@@ -334,6 +330,9 @@ export default function OrderShipmentConfirm({
                   }
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] appearance-none"
                 >
+                  <option value="" disabled>
+                    Seleccione una dirección
+                  </option>
                   {addressOptions.map((o) => (
                     <option key={String(o.value)} value={String(o.value)}>
                       {o.label}
@@ -438,7 +437,7 @@ export default function OrderShipmentConfirm({
                       {eIdx + 1}
                     </span>
                     <p className="flex-1 text-xs font-medium text-[#141414] truncate">
-                      {entrega.direccion || "Sin dirección"}
+                      {entrega.dispatch_address || "Sin dirección"}
                     </p>
                     <button
                       onClick={() => openEditModal(entrega)}
@@ -554,7 +553,11 @@ export default function OrderShipmentConfirm({
           </button>
           <button
             onClick={onConfirm}
-            disabled={loadingFinish || loadingDraft || (multiEntrega && hayDesbalance)}
+            disabled={
+              loadingFinish ||
+              loadingDraft ||
+              (multiEntrega ? hayDesbalance : !isSingleFormValid)
+            }
             className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loadingFinish ? "Procesando…" : "Finalizar pedido"}

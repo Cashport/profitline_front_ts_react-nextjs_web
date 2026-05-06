@@ -34,6 +34,12 @@ export default function ModalShippingInfo({
   isLoadingOptions
 }: ModalShippingInfoProps) {
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
+  const isSaveDisabled =
+    !draft.addressSelectValue.trim() ||
+    !draft.city.trim() ||
+    !draft.dispatch_address.trim() ||
+    !draft.email.trim() ||
+    !draft.telefono.trim();
 
   const addressOptions = useMemo(
     () => [
@@ -44,19 +50,14 @@ export default function ModalShippingInfo({
   );
 
   useEffect(() => {
+    if (draft.addressSelectValue === "") return;
     if (draft.addressSelectValue === NEW_ADDRESS_OPTION.value) {
-      if (
-        draft.addressId !== undefined ||
-        draft.city ||
-        draft.dispatch_address ||
-        draft.direccion
-      ) {
+      if (draft.addressId !== undefined || draft.city || draft.dispatch_address) {
         setDraft((d) => ({
           ...d,
           addressId: undefined,
           city: "",
-          dispatch_address: "",
-          direccion: ""
+          dispatch_address: ""
         }));
       }
       return;
@@ -66,15 +67,13 @@ export default function ModalShippingInfo({
       const same =
         draft.addressId === sel.id &&
         draft.city === sel.city &&
-        draft.dispatch_address === sel.address &&
-        draft.direccion === sel.address;
+        draft.dispatch_address === sel.address;
       if (!same) {
         setDraft((d) => ({
           ...d,
           addressId: sel.id,
           city: sel.city,
           dispatch_address: sel.address,
-          direccion: sel.address,
           email: d.email || sel.email
         }));
       }
@@ -104,6 +103,9 @@ export default function ModalShippingInfo({
               onChange={(e) => setDraft((d) => ({ ...d, addressSelectValue: e.target.value }))}
               className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
             >
+              <option value="" disabled>
+                Seleccione una dirección
+              </option>
               {addressOptions.map((o) => (
                 <option key={String(o.value)} value={String(o.value)}>
                   {o.label}
@@ -252,8 +254,17 @@ export default function ModalShippingInfo({
             Cancelar
           </button>
           <button
-            onClick={onSave}
-            className="flex-1 py-2.5 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors"
+            onClick={() => {
+              if (!isSaveDisabled) {
+                onSave();
+              }
+            }}
+            disabled={isSaveDisabled}
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
+              isSaveDisabled
+                ? "bg-[#E8EEB7] text-[#7D8258] cursor-not-allowed"
+                : "text-[#141414] bg-[#CBE71E] hover:bg-[#b8d11a]"
+            }`}
           >
             {mode === "new" ? "Agregar destino" : "Guardar cambios"}
           </button>
