@@ -16,7 +16,7 @@ import { useAppStore } from "@/lib/store/store";
 
 import ModalShippingInfo from "../modal-shipping-info";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
-import { IShippingInfo } from "../create-order-checkout";
+import { IShippingInfo } from "../../create-order-checkoutNEW/create-order-checkout";
 
 function formatPrice(n: number) {
   return "$" + (n ?? 0).toLocaleString("es-CO");
@@ -128,9 +128,7 @@ export default function OrderShipmentConfirm({
     const draftAddressId =
       typeof shippingInfo.id === "string" ? Number(shippingInfo.id) : shippingInfo.id;
     const matchedAddress =
-      draftAddressId !== undefined
-        ? addresses.find((a) => a.id === draftAddressId)
-        : undefined;
+      draftAddressId !== undefined ? addresses.find((a) => a.id === draftAddressId) : undefined;
 
     const phoneRaw = shippingInfo.phone_number ?? "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
@@ -138,9 +136,7 @@ export default function OrderShipmentConfirm({
     const telefono = phoneMatch ? phoneMatch[2] : phoneRaw;
 
     setSingleForm({
-      addressSelectValue: matchedAddress
-        ? String(matchedAddress.id)
-        : NEW_ADDRESS_OPTION.value,
+      addressSelectValue: matchedAddress ? String(matchedAddress.id) : NEW_ADDRESS_OPTION.value,
       addressId: matchedAddress?.id,
       city: shippingInfo.city ?? "",
       dispatch_address: shippingInfo.dispatch_address ?? "",
@@ -591,9 +587,7 @@ export default function OrderShipmentConfirm({
           <button
             onClick={onConfirm}
             disabled={
-              loadingFinish ||
-              loadingDraft ||
-              (multiEntrega ? hayDesbalance : !isSingleFormValid)
+              loadingFinish || loadingDraft || (multiEntrega ? hayDesbalance : !isSingleFormValid)
             }
             className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >

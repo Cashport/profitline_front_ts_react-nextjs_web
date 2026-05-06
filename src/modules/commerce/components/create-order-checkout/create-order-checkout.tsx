@@ -1,273 +1,192 @@
-import { FC, useContext, useEffect, useState } from "react";
+"use client";
+
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex } from "antd";
-import { CaretLeft } from "phosphor-react";
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import CartButton from "../button-cart";
-import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import { Controller, useForm } from "react-hook-form";
-import styles from "./create-order-checkout.module.scss";
-import GeneralSelect from "@/components/ui/general-select";
-import AlternativeBlackButton from "@/components/atoms/buttons/alternativeBlackButton/alternativeBlackButton";
-import {
-  createDraft,
-  createOrder,
-  createOrderFromDraft,
-  getAdresses as getAdressesAndNumber
-} from "@/services/commerce/commerce";
+import { AxiosError } from "axios";
+
 import { useAppStore } from "@/lib/store/store";
 import {
-  ICommerceAdresses,
+  confirmOrder,
+  createDraft,
+  createOrder,
+  createOrderFromDraft
+} from "@/services/commerce/commerce";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
+import {
+  IConfirmOrderData,
+  ICreateOrderData,
   IDiscountPackageAvailable,
-  IShippingInformation
+  IOrderSummaryPayload
 } from "@/types/commerce/ICommerce";
 import { useMessageApi } from "@/context/MessageContext";
-import { GenericResponse } from "@/types/global/IGlobal";
-import InputRadioRightSide from "@/components/ui/input-radio-right-side";
-import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
-import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
-import { OrderViewContext } from "../../contexts/orderViewContext";
-import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { ApiError } from "@/utils/api/api";
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
-import { ApiError } from "@/utils/api/api";
-import { useContactModalOptions } from "@/hooks/useContactModalOptions";
+import { GenericResponse } from "@/types/global/IGlobal";
 
-interface IShippingInfoForm {
-  isElectronicInvoicing: number;
-  addresses: {
-    value: string;
-    label: string;
-  };
-  city: {
-    value: string;
-    label: string;
-  };
-  address: string;
+import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
+import OrderShipmentConfirm from "./order-shipment-confirm/order-shipment-confirm";
+
+export type IShippingInfo = {
+  id: string;
+  addressSelectValue: string;
+  addressId?: number;
+  city: string;
+  dispatch_address: string;
   email: string;
-  indicative: {
-    value: string;
-    label: string;
-  };
-  phone: string;
-  comment: string;
-}
-
-// Constante para identificar la opción de nueva dirección
-const NEW_ADDRESS_OPTION = {
-  value: "new_address",
-  label: "+ Nueva dirección"
+  indicativo: string;
+  telefono: string;
+  observaciones: string;
+  cantidades: Record<string, number>;
 };
 
-const CreateOrderCheckout: FC = ({}) => {
-  const {
-    setCheckingOut,
-    client,
-    confirmOrderData,
-    shippingInfo,
-    selectedDiscount,
-    setSelectedDiscount,
-    discounts,
-    toggleCart,
-    numberOfItems
-  } = useContext(OrderViewContext);
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const { draftInfo } = useAppStore((state) => state);
-  const [loading, setLoading] = useState(false);
-  const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
-  const [isNewAddress, setIsNewAddress] = useState(false);
-  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
-  const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
-  const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
-  const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
+export default function CheckoutPage() {
   const router = useRouter();
-  const { showMessage } = useMessageApi();
-  const { callingCodeOptions, isLoading } = useContactModalOptions();
-
+  const projectId = useAppStore((state) => state.selectedProject.ID);
+  const draftInfo = useAppStore((state) => state.draftInfo);
   const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isValid }
-  } = useForm<IShippingInfoForm>({
-    mode: "onChange",
-    defaultValues: shippingInfo ? shippingInfoToForm(shippingInfo) : undefined
-  });
-  const watchSelectAddress = watch("addresses");
+    client,
+    selectedCategories,
+    selectedDiscount,
+    executiveDiscounts,
+    setConfirmOrderData,
+    confirmOrderData,
+    order_split_details
+  } = useContext(OrderViewContext);
+  const { showMessage } = useMessageApi();
 
-  useEffect(() => {
-    // Verificar si se seleccionó "Nueva dirección"
-    if (watchSelectAddress?.value === NEW_ADDRESS_OPTION.value) {
-      setIsNewAddress(true);
-      // Limpiar los campos para permitir entrada manual
-      setValue("city", { label: "", value: "" });
-      setValue("address", "");
-    } else if (watchSelectAddress) {
-      setIsNewAddress(false);
-      // Buscar la dirección seleccionada en el array de direcciones
-      const selectedAddress = addresses.find(
-        (address) => address.address === watchSelectAddress.label
-      );
-      if (selectedAddress) {
-        setValue("city", {
-          label: selectedAddress.city,
-          value: selectedAddress.city
-        });
-        setValue("address", selectedAddress.address);
-      }
-    }
-  }, [watchSelectAddress, addresses, setValue]);
+  const [multiEntrega, setMultiEntrega] = useState(false);
+  const [entregas, setEntregas] = useState<IShippingInfo[]>([]);
 
-  // when mounting
-  useEffect(() => {
-    if (!client) return;
-    setValue("email", client.email);
-    const fetchAdresses = async () => {
-      const response = await getAdressesAndNumber(client.id);
-      setAddresses(response.otherAddresses);
-      if (response.phone) {
-        setValue("phone", response.phone);
-      }
-    };
-    fetchAdresses();
-  }, []);
-
-  const handleGoBack = () => {
-    setCheckingOut(false);
-  };
-
-  const handleRadioClick = (value: IDiscountPackageAvailable) => {
-    if (selectedDiscount === value) setSelectedDiscount(undefined);
-    else setSelectedDiscount(value);
-  };
-
+  const [loadingFinish, setLoadingFinish] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
+  const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
   const [showWompiModal, setShowWompiModal] = useState(false);
+  const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
 
-  const handleWompiClose = async (transactionResult?: any) => {
-    setShowWompiModal(false); // cerramos modal
-
-    if (!pendingFormData) return;
-
-    if (transactionResult?.transaction?.status === "APPROVED") {
-      await processOrderCreation(pendingFormData);
-    } else {
-      showMessage("info", "Pago no completado, orden no generada");
-    }
-
-    setPendingFormData(null); // limpiamos después de procesar
-  };
-
-  const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
-    setLoading(true);
-    router.prefetch("/comercio");
-    const createOrderModelData = {
-      shipping_information: {
-        address: data.address,
-        city: data.city.label,
-        dispatch_address: data.address,
-        email: data.email,
-        phone_number: `${data.indicative}${data.phone}`,
-        comments: data.comment,
-        id: data.addresses.value
-      },
-      order_summary: confirmOrderData
+  useEffect(() => {
+    const fetchTotalValues = async () => {
+      if (selectedCategories.length === 0) return;
+      const products = selectedCategories
+        .flatMap((category) => category.products)
+        .map((product) => ({
+          product_sku: product.SKU,
+          quantity: product.quantity
+        }));
+      const payload: IConfirmOrderData = {
+        discount_package: selectedDiscount,
+        order_summary: products,
+        executive_discounts: executiveDiscounts
+      };
+      try {
+        const response = await confirmOrder(projectId, client?.id || "", payload);
+        if (response.status === 200) {
+          setConfirmOrderData(response.data);
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error("Error confirmando orden", error.message);
+        } else {
+          console.error("Unexpected error", error);
+        }
+      }
     };
 
-    if (!client) return;
+    const timeOut = setTimeout(() => {
+      fetchTotalValues();
+    }, 500);
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
 
-    try {
-      // const response = (await createDraft(
-      //   projectId,
-      //   client.id,
-      //   createOrderModelData,
-      //   showMessage
-      // )) as GenericResponse<{ id_order: number }>;
-      // if (response.status === 200) {
-      //   router.push(`/comercio`);
-      // }
-    } catch (error) {
-      showMessage("error", "Error creating draft");
-    }
-    setLoading(false);
+  const cantidadesAsignadas = (sku: string) =>
+    entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+
+  const cantidadesAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas.filter((e) => e.id !== excludeId).reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+
+  const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
+    const orderSummary: IOrderSummaryPayload = {
+      ...confirmOrderData,
+      discount_package: selectedDiscount as IDiscountPackageAvailable,
+      executive_discounts: executiveDiscounts
+    };
+    return {
+      order_summary: orderSummary,
+      is_electronic_invoicing: isElectronicInvoicing,
+      order_split_details
+    };
   };
 
-  // Función helper para procesar la creación de la orden
-  const processOrderCreation = async (data: IShippingInfoForm) => {
+  const processOrderCreation = async (isElectronic: number) => {
     try {
-      setLoading(true);
-
-      if (!client) {
+      setLoadingFinish(true);
+      if (!client?.id) {
         showMessage("error", "Cliente no encontrado");
-        setLoading(false);
+        return;
+      }
+      const payload = buildOrderPayload(isElectronic);
+      const paymentSupportFile = selectedPaymentSupport[0];
+
+      if (draftInfo?.id) {
+        const response = (await createOrderFromDraft(
+          projectId,
+          client.id,
+          draftInfo.id,
+          payload,
+          showMessage,
+          paymentSupportFile
+        )) as GenericResponse<{ id_order: number }>;
+
+        if (response.status === 200) {
+          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
+          router.prefetch(url);
+          router.push(url);
+        }
         return;
       }
 
-      const indicative = data.indicative.label.split(" ")[0];
-      const createOrderModelData = {
-        shipping_information: {
-          address: data.address,
-          city: data.city.label,
-          dispatch_address: data.address,
-          email: data.email,
-          phone_number: `${indicative}${data.phone}`,
-          comments: data.comment,
-          // Solo incluir id_address si NO es una nueva dirección
-          ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
-            id: data.addresses.value
-          })
-        },
-        order_summary: confirmOrderData,
-        is_electronic_invoicing: data.isElectronicInvoicing ?? 0
-      };
+      const response = await createOrder(
+        projectId,
+        client.id,
+        payload,
+        showMessage,
+        paymentSupportFile
+      );
+      if (response.status === 200) {
+        const queryParams = [];
+        if (response.data?.notificationId) {
+          queryParams.push(`notification=${response.data.notificationId}`);
+        }
+        const queryParamsString = queryParams.join("&");
 
-      const paymentSupportFile =
-        selectedPaymentSupport.length > 0 ? selectedPaymentSupport[0] : undefined;
+        const orders = response.data?.orders ?? [];
+        if (orders.length === 0) {
+          throw new Error("No se pudo obtener la orden creada");
+        }
 
-      if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
-        // const response = (await createOrderFromDraft(
-        //   projectId,
-        //   client.id,
-        //   draftInfo.id,
-        //   createOrderModelData,
-        //   showMessage,
-        //   paymentSupportFile
-        // )) as GenericResponse<{ id_order: number }>;
+        const [firstOrder, ...restOrders] = orders;
 
-        // if (response.status === 200) {
-        //   const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
-        //   router.prefetch(url);
-        //   router.push(url);
-        // }
-        setLoading(false);
-        return;
+        restOrders.forEach((o) => {
+          const extraUrl = `/comercio/pedidoConfirmado/${o.orderId}`;
+          window.open(extraUrl, "_blank", "noopener,noreferrer");
+        });
+
+        const firstUrl = `/comercio/pedidoConfirmado/${firstOrder.orderId}${
+          queryParamsString ? `?${queryParamsString}` : ""
+        }`;
+        router.prefetch(firstUrl);
+        router.push(firstUrl);
       }
-
-      // const response = await createOrder(
-      //   projectId,
-      //   client.id,
-      //   createOrderModelData,
-      //   showMessage,
-      //   paymentSupportFile
-      // );
-      // if (response.status === 200) {
-      //   const queryParams = [];
-      //   if (response.data?.notificationId) {
-      //     queryParams.push(`notification=${response.data.notificationId}`);
-      //   }
-      //   const queryParamsString = queryParams.join("&");
-      //   const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
-      //   router.prefetch(url);
-      //   router.push(url);
-      // }
-
-      setLoading(false);
     } catch (error) {
       console.error(error);
       if (error instanceof ApiError) {
         showMessage("error", error.message || "Error al crear la orden");
-        if (error.status === 400 && error.data?.length) {
+        if (error.status === 400 && Array.isArray(error.data)) {
           error.data.forEach((err: { msg?: string }) => {
             if (err.msg) showMessage("error", err.msg);
           });
@@ -276,36 +195,45 @@ const CreateOrderCheckout: FC = ({}) => {
         showMessage("error", "Error al crear la orden");
       }
     } finally {
-      setLoading(false);
+      setLoadingFinish(false);
     }
   };
 
-  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
-    if (confirmOrderData.total <= 0) {
-      showMessage("error", "El total no es valido");
+  const handleFinishOrder = async () => {
+    if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
+      showMessage("error", "El total no es válido");
+      return;
+    }
+    if (!order_split_details?.length) {
+      showMessage("error", "Faltan datos de envío");
       return;
     }
 
-    // Si es cliente de contado (payment_type === 2), mostrar vista de soporte de pago
     if (client.payment_type === 2) {
-      setPendingFormData(data);
       setShowPaymentSupportView(true);
       return;
     }
 
     if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
-      setPendingFormData(data);
       setShowWompiModal(true);
       return;
     }
 
     if (CETAPHIL_PROJECT_ID === projectId) {
-      setPendingFormData(data);
       setIsElectronicBillingModalOpen(true);
       return;
     }
 
-    await processOrderCreation(data);
+    await processOrderCreation(0);
+  };
+
+  const handleWompiClose = async (transactionResult?: any) => {
+    setShowWompiModal(false);
+    if (transactionResult?.transaction?.status === "APPROVED") {
+      setIsElectronicBillingModalOpen(true);
+    } else {
+      showMessage("info", "Pago no completado, orden no generada");
+    }
   };
 
   const handleElectronicBillingClose = async (isElectronic?: boolean) => {
@@ -313,19 +241,8 @@ const CreateOrderCheckout: FC = ({}) => {
       setIsElectronicBillingModalOpen(false);
       return;
     }
-    if (!pendingFormData) return;
-    setLoading(true);
-
-    // Agregamos el campo para saber si el usuario eligió Sí o No
-    const formDataWithElectronic = {
-      ...pendingFormData,
-      isElectronicInvoicing: isElectronic ? 1 : 0
-    };
-
-    await processOrderCreation(formDataWithElectronic);
     setIsElectronicBillingModalOpen(false);
-    setPendingFormData(null);
-    setLoading(false);
+    await processOrderCreation(isElectronic ? 1 : 0);
   };
 
   const handlePaymentSupportSubmit = async () => {
@@ -334,241 +251,99 @@ const CreateOrderCheckout: FC = ({}) => {
       return;
     }
 
-    if (!pendingFormData) return;
-
-    // Si es proyecto Cetaphil, continuar con flujo de facturación electrónica
     if (CETAPHIL_PROJECT_ID === projectId) {
       setShowPaymentSupportView(false);
       setIsElectronicBillingModalOpen(true);
       return;
     }
 
-    // Si no es Cetaphil, procesar la orden directamente
-    await processOrderCreation(pendingFormData);
     setShowPaymentSupportView(false);
-    setPendingFormData(null);
+    await processOrderCreation(0);
   };
 
   const handlePaymentSupportCancel = () => {
     setShowPaymentSupportView(false);
     setSelectedPaymentSupport([]);
-    setPendingFormData(null);
   };
 
-  // Preparar opciones del select con "Nueva dirección" al principio
-  const addressOptions = [
-    NEW_ADDRESS_OPTION,
-    ...addresses.map((address) => ({
-      label: address.address,
-      value: address.id
-    }))
-  ];
+  const handleDraftOrder = async () => {
+    if (!client?.id) return;
+    if (!order_split_details?.length) {
+      showMessage("error", "Faltan datos de envío");
+      return;
+    }
+    setLoadingDraft(true);
+    router.prefetch("/comercio");
+    try {
+      const payload = buildOrderPayload(0);
+      const response = (await createDraft(
+        projectId,
+        client.id,
+        payload,
+        showMessage
+      )) as GenericResponse<{ id_order: number }>;
+
+      if (response.status === 200) {
+        router.push("/comercio");
+      }
+    } catch {
+      showMessage("error", "Error creating draft");
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
+
+  const wompiPrimaryShipping = order_split_details?.[0]?.shipping_information;
+  const wompiPhoneRaw = wompiPrimaryShipping?.phone_number ?? "";
+  const wompiPhoneMatch = wompiPhoneRaw.match(/^(\+\d{1,3})(\d+)$/);
+  const wompiIndicative = wompiPhoneMatch ? wompiPhoneMatch[1] : "+57";
+  const wompiPhone = wompiPhoneMatch ? wompiPhoneMatch[2] : wompiPhoneRaw;
 
   return (
-    <div className={styles.checkoutContainer}>
-      <Flex justify="space-between" align="center">
-        <Button
-          type="text"
-          size="large"
-          className={styles.buttonGoBack}
-          icon={<CaretLeft size={"1.3rem"} />}
-          onClick={handleGoBack}
-        >
-          Volver
-        </Button>
-        <CartButton onClick={toggleCart} numberOfItems={numberOfItems} />
-      </Flex>
-      <h3 className={styles.title}>Confirma datos de envío</h3>
-
-      <div className={styles.checkoutContainer__content}>
-        <div className={styles.shippingInfo}>
-          <Controller
-            name="addresses"
-            control={control}
-            rules={{ required: true, minLength: 1 }}
-            render={({ field }) => (
-              <GeneralSelect
-                errors={errors.addresses}
-                field={field}
-                title="Direcciones"
-                placeholder="Seleccione una dirección"
-                options={addressOptions}
-                customStyleContainer={{ gridColumn: "1 / span 2" }}
-                autoSelectFirst={true}
-              />
-            )}
-          />
-          <Controller
-            name="city"
-            control={control}
-            rules={
-              isNewAddress
-                ? {
-                    required: "La ciudad es obligatoria",
-                    minLength: {
-                      value: 2,
-                      message: "La ciudad debe tener al menos 2 caracteres"
-                    }
-                  }
-                : undefined
-            }
-            render={({ field }) => (
-              <SelectLocations errors={errors?.city} field={field} disabled={!isNewAddress} />
-            )}
-          />
-          <InputForm
-            readOnly={!isNewAddress}
-            titleInput="Dirección de despacho"
-            control={control}
-            nameInput="address"
-            error={errors.address}
-            validationRules={
-              isNewAddress
-                ? {
-                    required: "La dirección es obligatoria",
-                    minLength: {
-                      value: 5,
-                      message: "La dirección debe tener al menos 5 caracteres"
-                    }
-                  }
-                : undefined
-            }
-          />
-          <InputForm titleInput="Email" control={control} nameInput="email" error={errors.email} />
-          <Flex gap={"0.5rem"} align="flex-start">
-            <Flex vertical>
-              <p className={styles.inputLabel}>Indicativo</p>
-
-              <Controller
-                name="indicative"
-                control={control}
-                rules={{ required: "El indicativo es obligatorio" }}
-                render={({ field }) => (
-                  <SelectContactIndicative
-                    errors={errors.indicative}
-                    field={field}
-                    readOnly={false}
-                    className={styles.selectIndicative}
-                    options={callingCodeOptions}
-                    isLoading={isLoading}
-                    isColombia
-                  />
-                )}
-              />
-            </Flex>
-            <InputForm
-              titleInput="Teléfono de contacto"
-              control={control}
-              nameInput="phone"
-              error={errors.phone}
-              changeInterceptor={(value) => {
-                // Eliminar caracteres no numéricos
-                const numericValue = value.replace(/\D/g, "");
-                // Limitar a 10 dígitos
-                const truncatedValue = numericValue.slice(0, 10);
-                // Actualizar el valor en el formulario
-                setValue("phone", truncatedValue);
-              }}
-              validationRules={{
-                required: "El teléfono es obligatorio",
-                pattern: {
-                  value: /^\d{10}$/,
-                  message: "El teléfono debe tener exactamente 10 dígitos"
-                }
-              }}
-              customStyle={{ width: "100%" }}
-            />
-          </Flex>
-          <Controller
-            name="comment"
-            control={control}
-            render={({ field }) => (
-              <div className={styles.textArea}>
-                <p className={styles.textArea__label}>Observaciones</p>
-                <textarea
-                  {...field}
-                  placeholder="Ingresar un comentario"
-                  style={errors.comment ? { borderColor: "red" } : {}}
-                  maxLength={64}
-                />
-                <p className={styles.textArea__hint}>Máximo 64 caracteres</p>
-              </div>
-            )}
-          />
-        </div>
-
-        <div className={styles.discounts}>
-          <h4 className={styles.discounts__title}>Seleccionar descuento a aplicar</h4>
-          <div className={styles.radioGroup}>
-            {discounts.map((discountPackage) => (
-              <InputRadioRightSide
-                key={discountPackage.id}
-                value={discountPackage.id}
-                customStyles={{ border: "2px solid #e0e0e0", borderRadius: "8px", padding: "1rem" }}
-                onClick={() => handleRadioClick(discountPackage)}
-                checked={
-                  selectedDiscount &&
-                  selectedDiscount.id === discountPackage.id &&
-                  selectedDiscount.idAnnualDiscount === discountPackage.idAnnualDiscount
-                }
-              >
-                <div className={styles.radioGroup__label}>
-                  <p>{discountPackage.name}</p>
-                </div>
-              </InputRadioRightSide>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.actionButtons}>
-          <AlternativeBlackButton
-            onClick={handleSubmit(onSubmitSaveDraft)}
-            fullWidth
-            loading={loading}
-            disabled={!!draftInfo?.id || !!draftInfo.client_name}
-          >
-            Guardar borrador
-          </AlternativeBlackButton>
-          <PrincipalButton
-            onClick={handleSubmit(onSubmitFinishOrder)}
-            fullWidth
-            disabled={!isValid}
-            loading={loading}
-          >
-            Finalizar pedido
-          </PrincipalButton>
-        </div>
-      </div>
+    <div className="flex h-full gap-6 bg-[#F7F7F7] overflow-hidden">
+      <ProductsDetailsAndDiscounts
+        multiEntrega={multiEntrega}
+        cantidadesAsignadas={cantidadesAsignadas}
+      />
+      <OrderShipmentConfirm
+        multiEntrega={multiEntrega}
+        setMultiEntrega={setMultiEntrega}
+        entregas={entregas}
+        setEntregas={setEntregas}
+        cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+        onConfirm={handleFinishOrder}
+        onDraft={handleDraftOrder}
+        loadingFinish={loadingFinish}
+        loadingDraft={loadingDraft}
+      />
 
       <ModalConfirmAction
         isOpen={isElectronicBillingModalOpen}
-        onClose={() => handleElectronicBillingClose(undefined)} // Cierra sin acción
-        onOk={() => handleElectronicBillingClose(true)} // “Sí, necesito”
-        onCancel={() => handleElectronicBillingClose(false)} // “No”
+        onClose={() => handleElectronicBillingClose(undefined)}
+        onOk={() => handleElectronicBillingClose(true)}
+        onCancel={() => handleElectronicBillingClose(false)}
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
-        cancelLoading={loading}
-        okLoading={loading}
+        cancelLoading={loadingFinish}
+        okLoading={loadingFinish}
       />
 
-      {showWompiModal && pendingFormData && (
-        <>
-          <WompiModal
-            visible={showWompiModal}
-            onClose={handleWompiClose}
-            client={{
-              name: client.name,
-              email: pendingFormData.email || client.email,
-              phone: pendingFormData.phone || "",
-              indicative: {
-                value: pendingFormData.indicative?.label || "+57"
-              }
-            }}
-            amountInCents={(confirmOrderData.total || 0) * 100}
-            orderId={draftInfo?.id?.toString() || Date.now().toString()}
-          />
-        </>
+      {showWompiModal && (
+        <WompiModal
+          visible={showWompiModal}
+          onClose={handleWompiClose}
+          client={{
+            name: client.name,
+            email: wompiPrimaryShipping?.email || client.email,
+            phone: wompiPhone,
+            indicative: {
+              value: wompiIndicative
+            }
+          }}
+          amountInCents={(confirmOrderData.total || 0) * 100}
+          orderId={draftInfo?.id?.toString() || Date.now().toString()}
+        />
       )}
 
       <ModalAttachEvidence
@@ -587,36 +362,8 @@ const CreateOrderCheckout: FC = ({}) => {
         noComment={true}
         noDescription={true}
         isMandatory={{ evidence: true }}
-        loading={loading}
+        loading={loadingFinish}
       />
     </div>
   );
-};
-
-export default CreateOrderCheckout;
-
-const shippingInfoToForm = (shippingInfo: IShippingInformation) => {
-  // Extraer el indicativo y el número del phone_number
-  const phoneMatch = shippingInfo.phone_number?.match(/^(\+\d{1,3})(\d+)$/);
-  const indicative = phoneMatch ? phoneMatch[1] : "+57"; // Por defecto Colombia
-  const phoneNumber = phoneMatch ? phoneMatch[2] : shippingInfo.phone_number;
-
-  return {
-    addresses: {
-      label: shippingInfo.address,
-      value: shippingInfo.address
-    },
-    city: {
-      label: shippingInfo.city,
-      value: shippingInfo.city
-    },
-    address: shippingInfo.address,
-    email: shippingInfo.email,
-    indicative: {
-      label: indicative,
-      value: indicative
-    },
-    phone: phoneNumber || "",
-    comment: shippingInfo.comments
-  };
-};
+}

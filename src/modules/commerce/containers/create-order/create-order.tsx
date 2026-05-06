@@ -8,7 +8,7 @@ import { OrderViewContext } from "../../contexts/orderViewContext";
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
 import CreateOrderCart from "../../components/create-order-cart";
-import CreateOrderCheckout from "../../components/create-order-checkoutNEW";
+import CreateOrderCheckout from "../../components/create-order-checkout";
 
 import {
   IDiscountPackageAvailable,
