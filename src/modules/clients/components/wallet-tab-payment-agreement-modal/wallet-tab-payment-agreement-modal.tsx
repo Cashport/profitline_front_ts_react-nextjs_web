@@ -304,7 +304,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
             </Button>
             <Button
               className="acceptButton"
-              disabled={globalDate === null || tableData.length === 0}
+              disabled={tableData.length === 0 || tableData.some((row) => !row.newDate)}
               onClick={() => setIsSecondView(true)}
             >
               Guardar cambios
