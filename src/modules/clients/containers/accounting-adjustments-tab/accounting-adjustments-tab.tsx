@@ -19,6 +19,7 @@ import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-
 import Collapse from "@/components/ui/collapse";
 import { SelectedFiltersAccountingAdjustments } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 
 import {
   FinancialDiscount,
@@ -145,6 +146,13 @@ const AccountingAdjustmentsTab = () => {
 
   return (
     <>
+      {selectedRows && selectedRows.length > 0 && (
+        <DraggableTotalModal
+          totalAmount={selectedRows.reduce((acc, adjustment) => acc + adjustment.current_value, 0)}
+          itemName="Ajustes"
+          count={selectedRows.length}
+        />
+      )}
       <div className="accountingAdjustmentsTab">
         <Flex
           justify="space-between"
