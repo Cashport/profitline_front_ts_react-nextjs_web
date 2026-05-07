@@ -244,6 +244,7 @@ export const WalletTab = () => {
                   stateId={invoiceState.status_id}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
+                  isSearchActive={Boolean(debouncedSearchQuery)}
                   // fetchData={(page: number) => {
                   //   getAccountingAdjustmentsById(invoiceState.status_id, page);
                   // }}

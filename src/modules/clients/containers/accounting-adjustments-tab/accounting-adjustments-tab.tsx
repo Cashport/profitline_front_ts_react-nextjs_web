@@ -196,6 +196,7 @@ const AccountingAdjustmentsTab = () => {
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
+                    isSearchActive={Boolean(debouncedSearchQuery)}
                     selectedRows={selectedRows?.map((item) => ({
                       ...item,
                       label_status_id: financialState.status_id
