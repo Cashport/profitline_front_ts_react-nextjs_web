@@ -1,11 +1,16 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { Button, Dropdown, Flex, MenuProps, Table, TableProps, Typography, message } from "antd";
-import { DotsThreeVertical, DownloadSimple, FileArrowUp } from "phosphor-react";
+import {
+  ArrowCounterClockwise,
+  DotsThreeVertical,
+  DownloadSimple,
+  FileArrowUp
+} from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
-import { UploadFinalFile } from "@/services/paymentApplications/paymentApplications";
+import { ReprocessExcel, UploadFinalFile } from "@/services/paymentApplications/paymentApplications";
 
 import "./payment-applications-table.scss";
 
@@ -128,6 +133,22 @@ export const PaymentApplicationsTable = ({
     input.click();
   };
 
+  const handleRegenerate = async (applicationId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Regenerando archivo...",
+      duration: 0
+    });
+    try {
+      const data = await ReprocessExcel(applicationId);
+      hide();
+      handleDownload(data.excel_url);
+    } catch (error) {
+      hide();
+      message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
+    }
+  };
+
   const columns: TableProps<applicationByStatus>["columns"] = [
     {
       title: "Id",
@@ -228,6 +249,18 @@ export const PaymentApplicationsTable = ({
                 onClick={() => handleDownload(record.excel_url)}
               >
                 Template
+              </Button>
+            )
+          },
+          {
+            key: "regenerate",
+            label: (
+              <Button
+                icon={<ArrowCounterClockwise size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleRegenerate(record.id)}
+              >
+                Regenerar
               </Button>
             )
           },
