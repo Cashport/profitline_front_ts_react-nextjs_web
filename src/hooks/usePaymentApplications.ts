@@ -2,13 +2,17 @@ import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentApplicationByStatus } from "@/types/paymentApplications/IPaymentApplication";
+import { useDebounce } from "@/hooks/useDeabouce";
 
 interface Props {
   selectedFilters?: any;
+  searchQuery?: string;
   enabled?: boolean;
 }
 
-export const usePaymentApplications = ({ selectedFilters, enabled = true }: Props) => {
+export const usePaymentApplications = ({ selectedFilters, searchQuery, enabled = true }: Props) => {
+  const debouncedSearchQuery = useDebounce(searchQuery ?? "", 500);
+
   const startDate = selectedFilters?.dates?.length
     ? selectedFilters.dates[0].split("|")[0]
     : undefined;
@@ -18,8 +22,9 @@ export const usePaymentApplications = ({ selectedFilters, enabled = true }: Prop
 
   const startDateQuery = startDate ? `&start_date=${startDate}` : "";
   const endDateQuery = endDate ? `&end_date=${endDate}` : "";
+  const searchQueryParam = debouncedSearchQuery ? `&searchQuery=${debouncedSearchQuery}` : "";
 
-  const pathKey = enabled ? `/paymentApplication/list?${startDateQuery}${endDateQuery}` : null;
+  const pathKey = enabled ? `/paymentApplication/list?${startDateQuery}${endDateQuery}${searchQueryParam}` : null;
 
   const { data, error, mutate } = useSWR<GenericResponse<IPaymentApplicationByStatus[]>>(pathKey, fetcher, {
     revalidateOnFocus: true,
