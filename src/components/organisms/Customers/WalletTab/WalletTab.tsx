@@ -28,6 +28,7 @@ import AccountStatementModal from "@/modules/chat/components/account-statement-m
 import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 import ModalEnterProcess from "@/components/molecules/modals/ModalEnterProcess/ModalEnterProcess";
+import { ModalAgreementDetail } from "@/components/molecules/modals/ModalAgreementDetail/ModalAgreementDetail";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
@@ -61,6 +62,10 @@ export const WalletTab = () => {
   });
   const [isSelectOpen, setIsSelectOpen] = useState({
     selected: 0
+  });
+  const [isModalPaymentAgreementOpen, setIsModalPaymentAgreementOpen] = useState({
+    isOpen: false,
+    incident_id: 0
   });
   const [messageShow, contextHolder] = message.useMessage();
   const clientId = clientIdParam || "";
@@ -244,6 +249,9 @@ export const WalletTab = () => {
                   stateId={invoiceState.status_id}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
+                  onOpenPaymentAgreement={(incidentId) =>
+                    setIsModalPaymentAgreementOpen({ isOpen: true, incident_id: incidentId })
+                  }
                   // fetchData={(page: number) => {
                   //   getAccountingAdjustmentsById(invoiceState.status_id, page);
                   // }}
@@ -344,6 +352,13 @@ export const WalletTab = () => {
         isOpen={isSelectOpen.selected === 9}
         onClose={onCloseModal}
         clientId={clientId}
+      />
+      <ModalAgreementDetail
+        isModalPaymentAgreementOpen={isModalPaymentAgreementOpen}
+        onClose={() => {
+          mutate();
+          setIsModalPaymentAgreementOpen({ isOpen: false, incident_id: 0 });
+        }}
       />
     </>
   );
