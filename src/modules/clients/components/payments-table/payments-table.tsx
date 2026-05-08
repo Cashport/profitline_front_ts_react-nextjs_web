@@ -77,6 +77,15 @@ const PaymentsTable = ({
       width: 130
     },
     {
+      title: "Id ERP",
+      dataIndex: "ID_ERP",
+      key: "ID_ERP",
+      render: (erpId) => <p>{erpId || "-"}</p>,
+      sorter: (a, b) => a.id - b.id,
+      showSorterTooltip: false,
+      width: 130
+    },
+    {
       title: "Ingreso",
       dataIndex: "payment_date",
       key: "payment_date",
