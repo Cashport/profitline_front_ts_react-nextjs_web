@@ -7,6 +7,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { useBankPayments } from "@/hooks/useBankPayments";
+import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
@@ -60,7 +61,8 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const { data, isLoading, mutate } = useBankPayments({
     like: searchQuery,
     selectedFilters,
-    enabled: isActive
+    enabled: isActive,
+    transaction_type: [PaymentTransactionType.Formal, PaymentTransactionType.Homemarket]
   });
 
   const handleOpenBankRules = () => {
