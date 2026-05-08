@@ -1,5 +1,15 @@
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { Button, Dropdown, Flex, MenuProps, Table, TableProps, Typography, message } from "antd";
+import {
+  Button,
+  Dropdown,
+  Flex,
+  Grid,
+  MenuProps,
+  Table,
+  TableProps,
+  Typography,
+  message
+} from "antd";
 import {
   ArrowCounterClockwise,
   DotsThreeVertical,
@@ -46,6 +56,9 @@ export const PaymentApplicationsTable = ({
   mutate
 }: PropsPaymentApplicationsTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+
+  const screens = Grid.useBreakpoint();
+  const isXXL = !!screens.xxl;
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -154,31 +167,12 @@ export const PaymentApplicationsTable = ({
 
   const columns: TableProps<applicationByStatus>["columns"] = [
     {
-      title: "Id",
+      title: "Id. Aplicación",
       dataIndex: "id",
       key: "id",
       render: (id) => <Text className="idText">{id}</Text>,
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false,
-      width: 110
-    },
-    {
-      title: "Id ERP",
-      key: "id_erps",
-      dataIndex: "id_erps",
-      render: (ids: string[]) =>
-        ids?.length ? (
-          <span>
-            {ids.map((erpId, index) => (
-              <span key={`${erpId}-${index}`}>
-                <Text>{erpId}</Text>
-                {index < ids.length - 1 ? ", " : ""}
-              </span>
-            ))}
-          </span>
-        ) : (
-          <Text>-</Text>
-        ),
       width: 130
     },
     {
@@ -199,7 +193,7 @@ export const PaymentApplicationsTable = ({
       width: 115
     },
     {
-      title: "Id Pago",
+      title: "Id. Pago Cashport",
       key: "payment_ids",
       dataIndex: "payment_ids",
       render: (ids: number[]) =>
@@ -213,6 +207,25 @@ export const PaymentApplicationsTable = ({
                 >
                   {paymentId}
                 </Text>
+                {index < ids.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </span>
+        ) : (
+          <Text>-</Text>
+        ),
+      width: isXXL ? "auto" : 130
+    },
+    {
+      title: "Id. Pago ERP",
+      key: "id_erps",
+      dataIndex: "id_erps",
+      render: (ids: string[]) =>
+        ids?.length ? (
+          <span>
+            {ids.map((erpId, index) => (
+              <span key={`${erpId}-${index}`}>
+                <Text>{erpId}</Text>
                 {index < ids.length - 1 ? ", " : ""}
               </span>
             ))}
@@ -241,13 +254,14 @@ export const PaymentApplicationsTable = ({
       ),
       sorter: (a, b) => (a.amount ?? 0) - (b.amount ?? 0),
       showSorterTooltip: false,
-      width: 200
+      width: 150
     },
     {
       title: "",
       key: "seeDetail",
       align: "right",
       dataIndex: "",
+      width: 50,
       render: (_, record) => {
         const items: MenuProps["items"] = [
           {
