@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Table, TableProps, Typography } from "antd";
+import { Button, Checkbox, Table, TableProps, Typography } from "antd";
 import { Eye } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -20,6 +20,7 @@ interface PropsInvoicesTable {
   financialStatusId: number;
   legalized?: boolean;
   selectedRows?: ISelectedAccountingRows[];
+  isSearchActive?: boolean;
 }
 
 const AccountingAdjustmentsTable = ({
@@ -28,7 +29,8 @@ const AccountingAdjustmentsTable = ({
   openAdjustmentDetail,
   financialStatusId,
   legalized,
-  selectedRows
+  selectedRows,
+  isSearchActive = false
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -100,9 +102,45 @@ const AccountingAdjustmentsTable = ({
     }
   };
 
-  const rowSelection = {
+  const allAdjustmentIds = (data || []).map((adjustment) => adjustment.id);
+  const isAllAdjustmentsSelected =
+    allAdjustmentIds.length > 0 && allAdjustmentIds.every((id) => selectedRowKeys.includes(id));
+  const isAnyAdjustmentSelected = selectedRowKeys.length > 0 && !isAllAdjustmentsSelected;
+
+  const handleSelectAllAcrossPages = (checked: boolean) => {
+    if (checked) {
+      setSelectedRowKeys(allAdjustmentIds);
+      setSelectedRows((prevSelectedRows) => {
+        const otherStatusRows = (prevSelectedRows || []).filter(
+          (row) => row.financial_status_id !== financialStatusId
+        );
+        const newRows: ISelectedAccountingRows[] = (data || []).map((adjustment) => ({
+          ...adjustment,
+          financial_status_id: financialStatusId,
+          label_status_id: financialStatusId
+        }));
+        return [...otherStatusRows, ...newRows];
+      });
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRows((prevSelectedRows) =>
+        (prevSelectedRows || []).filter((row) => row.financial_status_id !== financialStatusId)
+      );
+    }
+  };
+
+  const rowSelection: TableProps<FinancialDiscount>["rowSelection"] = {
     selectedRowKeys,
-    onChange: onSelectChange
+    onChange: onSelectChange,
+    ...(isSearchActive && {
+      columnTitle: (
+        <Checkbox
+          checked={isAllAdjustmentsSelected}
+          indeterminate={isAnyAdjustmentSelected}
+          onChange={(e) => handleSelectAllAcrossPages(e.target.checked)}
+        />
+      )
+    })
   };
 
   const columns: TableProps<FinancialDiscount>["columns"] = [

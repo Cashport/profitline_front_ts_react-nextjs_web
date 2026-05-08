@@ -23,6 +23,7 @@ import PaymentsTable from "@/modules/clients/components/payments-table";
 import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPayment/ModalActionPayment";
 import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 
 import { IClientPayment, IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { ISingleBank } from "@/types/banks/IBanks";
@@ -157,6 +158,13 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
 
   return (
     <>
+      {selectedPayments && selectedPayments.length > 0 && (
+        <DraggableTotalModal
+          totalAmount={selectedPayments.reduce((acc, payment) => acc + payment.current_value, 0)}
+          itemName="Pagos"
+          count={selectedPayments.length}
+        />
+      )}
       <div className="paymentsTab">
         <Flex justify="space-between" className="paymentsTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>

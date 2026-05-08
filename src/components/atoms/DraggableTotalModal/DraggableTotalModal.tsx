@@ -1,23 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { NewspaperClipping } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
-import { IInvoice } from "@/types/invoices/IInvoices";
 
-import styles from "./modal-estimate-total-invoices.module.scss";
+import styles from "./DraggableTotalModal.module.scss";
 
 interface Props {
-  selectedInvoices: IInvoice[];
+  totalAmount: number;
+  itemName: string;
+  count: number;
+  icon?: ReactNode;
 }
 
-export const ModalEstimateTotalInvoices = ({ selectedInvoices }: Props) => {
+export const DraggableTotalModal = ({ totalAmount, itemName, count, icon }: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
-  const totalInfo = {
-    total: selectedInvoices?.reduce((acc, invoice) => acc + invoice.current_value, 0),
-    selectedInvoices: selectedInvoices?.length
-  };
+  const draggleRef = useRef<HTMLDivElement>(null);
+  const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
+  const [defaultPosition, setDefaultPosition] = useState({ x: 0, y: -160 });
 
   const updateDefaultPosition = () => {
     const modalWidth = draggleRef.current?.offsetWidth || 240;
@@ -29,10 +30,6 @@ export const ModalEstimateTotalInvoices = ({ selectedInvoices }: Props) => {
     window.addEventListener("resize", updateDefaultPosition);
     return () => window.removeEventListener("resize", updateDefaultPosition);
   }, []);
-
-  const draggleRef = useRef<HTMLDivElement>(null);
-  const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-  const [defaultPosition, setDefaultPosition] = useState({ x: 0, y: -160 });
 
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
@@ -58,11 +55,11 @@ export const ModalEstimateTotalInvoices = ({ selectedInvoices }: Props) => {
     >
       <div ref={draggleRef}>
         <p className={styles.modal__title}>Total</p>
-        <p className={styles.modal__total}>{formatMoney(totalInfo?.total.toString())}</p>
-        <div className={styles.modal__invoices}>
-          <NewspaperClipping size={16} />
+        <p className={styles.modal__total}>{formatMoney(totalAmount.toString())}</p>
+        <div className={styles.modal__count}>
+          {icon ?? <NewspaperClipping size={16} />}
           <p>
-            Facturas <strong>{totalInfo?.selectedInvoices}</strong>
+            {itemName} <strong>{count}</strong>
           </p>
         </div>
       </div>

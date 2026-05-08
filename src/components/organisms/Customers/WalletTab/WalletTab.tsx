@@ -16,7 +16,7 @@ import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
 import UiSearchInput from "@/components/ui/search-input";
-import { ModalEstimateTotalInvoices } from "@/components/molecules/modals/modal-estimate-total-invoices/modal-estimate-total-invoices";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
 import WalletTabChangeStatusModal from "@/modules/clients/components/wallet-tab-change-status-modal";
@@ -198,7 +198,11 @@ export const WalletTab = () => {
     <>
       {contextHolder}
       {selectedRows && selectedRows?.length > 0 && (
-        <ModalEstimateTotalInvoices selectedInvoices={selectedRows} />
+        <DraggableTotalModal
+          totalAmount={selectedRows.reduce((acc, invoice) => acc + invoice.current_value, 0)}
+          itemName="Facturas"
+          count={selectedRows.length}
+        />
       )}
       <div className="walletTab">
         <div className="walletTab__header clientStickyHeader">
@@ -244,6 +248,7 @@ export const WalletTab = () => {
                   stateId={invoiceState.status_id}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
+                  isSearchActive={Boolean(debouncedSearchQuery)}
                   // fetchData={(page: number) => {
                   //   getAccountingAdjustmentsById(invoiceState.status_id, page);
                   // }}
