@@ -146,7 +146,7 @@ export const ModalGenerateAction = ({
         />
         <ButtonGenerateAction
           icon={<PaperPlaneTilt size={16} />}
-          title="Acta digital"
+          title="Estado de cuenta"
           onClick={() => {
             handleOpenModal(7);
           }}
