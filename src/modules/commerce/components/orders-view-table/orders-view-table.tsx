@@ -12,7 +12,7 @@ import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 // import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
 // import { Tag } from "@/components/atoms/Tag/Tag";
 
-import { IOrder, IOrderData } from "@/types/commerce/ICommerce";
+import { IDraftOrder, IOrder, IOrderData } from "@/types/commerce/ICommerce";
 
 import "./orders-view-table.scss";
 const { Text } = Typography;
@@ -51,20 +51,22 @@ const OrdersViewTable = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
 
-  const handleSeeDetail = (order: IOrder) => {
-    const { id: orderId, order_status } = order;
-    const notificationQuery = order.notification_id ? `?notification=${order.notification_id}` : "";
-    if (order_status === "Pedidos en borrador") {
-      const draftInfo = {
-        id: orderId,
+  const handleSeeDetail = (order: IOrder | IDraftOrder) => {
+    if ("is_draft" in order) {
+      setDraftInfo({
+        id: order.id,
         client_name: order.client_name
-      };
-      setDraftInfo(draftInfo);
+      });
       window.open("/comercio/pedido", "_blank");
-    } else {
-      const url = `/comercio/pedidoConfirmado/${orderId}${notificationQuery}`;
-      window.open(url, "_blank");
+      return;
     }
+
+    const notificationQuery = order.notification_id ? `?notification=${order.notification_id}` : "";
+    setDraftInfo({
+      id: undefined,
+      client_name: undefined
+    });
+    window.open(`/comercio/pedidoConfirmado/${order.id}${notificationQuery}`, "_blank");
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: IOrder[]) => {
