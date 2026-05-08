@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Table, TableProps, Tooltip, Typography } from "antd";
+import { Button, Checkbox, Table, TableProps, Tooltip, Typography } from "antd";
 import { CheckCircle, Eye, Handshake, Warning, WarningCircle } from "phosphor-react";
 import dayjs from "dayjs";
 
@@ -23,6 +23,7 @@ interface PropsInvoicesTable {
   onOpenPaymentAgreement?: (incidentId: number) => void;
 
   selectedRows?: IInvoice[];
+  isSearchActive?: boolean;
 }
 
 export const InvoicesTable = ({
@@ -32,6 +33,7 @@ export const InvoicesTable = ({
   fetchData: _fetchData,
   selectedRows,
   openInvoiceDetail,
+  isSearchActive = false,
   onOpenPaymentAgreement
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -101,9 +103,38 @@ export const InvoicesTable = ({
     }
   };
 
-  const rowSelection = {
+  const allInvoiceIds = data.invoices.map((invoice) => invoice.id);
+  const isAllInvoicesSelected =
+    allInvoiceIds.length > 0 && allInvoiceIds.every((id) => selectedRowKeys.includes(id));
+  const isAnyInvoiceSelected = selectedRowKeys.length > 0 && !isAllInvoicesSelected;
+
+  const handleSelectAllAcrossPages = (checked: boolean) => {
+    if (checked) {
+      setSelectedRowKeys(allInvoiceIds);
+      setSelectedRows((prevSelectedRows) => {
+        const otherStatusRows = (prevSelectedRows || []).filter((row) => row.status_id !== stateId);
+        return [...otherStatusRows, ...data.invoices];
+      });
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRows((prevSelectedRows) =>
+        (prevSelectedRows || []).filter((row) => row.status_id !== stateId)
+      );
+    }
+  };
+
+  const rowSelection: TableProps<IInvoice>["rowSelection"] = {
     selectedRowKeys,
-    onChange: onSelectChange
+    onChange: onSelectChange,
+    ...(isSearchActive && {
+      columnTitle: (
+        <Checkbox
+          checked={isAllInvoicesSelected}
+          indeterminate={isAnyInvoiceSelected}
+          onChange={(e) => handleSelectAllAcrossPages(e.target.checked)}
+        />
+      )
+    })
   };
 
   const columns: TableProps<IInvoice>["columns"] = [
