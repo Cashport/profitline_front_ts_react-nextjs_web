@@ -10,7 +10,10 @@ import {
 import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
-import { ReprocessExcel, UploadFinalFile } from "@/services/paymentApplications/paymentApplications";
+import {
+  ReprocessExcel,
+  UploadFinalFile
+} from "@/services/paymentApplications/paymentApplications";
 
 import "./payment-applications-table.scss";
 
@@ -158,6 +161,25 @@ export const PaymentApplicationsTable = ({
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false,
       width: 110
+    },
+    {
+      title: "Id ERP",
+      key: "id_erps",
+      dataIndex: "id_erps",
+      render: (ids: string[]) =>
+        ids?.length ? (
+          <span>
+            {ids.map((erpId, index) => (
+              <span key={`${erpId}-${index}`}>
+                <Text>{erpId}</Text>
+                {index < ids.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </span>
+        ) : (
+          <Text>-</Text>
+        ),
+      width: 130
     },
     {
       title: "Cliente",

@@ -29,6 +29,7 @@ export interface IClientPayment {
   bank_description: string;
   account_number: string;
   type_account: string;
+  ID_ERP: string | null;
 }
 
 export interface IClientPaymentStatus {
@@ -62,6 +63,7 @@ export interface IIdentifiedPayment {
   CLIENT_NAME: string | null;
   account_number: string;
   bank_name: string;
+  ID_ERP: string | null;
 }
 
 interface ISelect {
