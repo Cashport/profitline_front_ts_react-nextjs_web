@@ -19,8 +19,6 @@ interface PropsInvoicesTable {
   openInvoiceDetail: (invoice: IInvoice) => void;
   // eslint-disable-next-line no-unused-vars
   fetchData?: (newPage: number) => void;
-  // eslint-disable-next-line no-unused-vars
-  onOpenPaymentAgreement?: (incidentId: number) => void;
 
   selectedRows?: IInvoice[];
   isSearchActive?: boolean;
@@ -33,11 +31,7 @@ export const InvoicesTable = ({
   fetchData: _fetchData,
   selectedRows,
   openInvoiceDetail,
-<<<<<<< HEAD
   isSearchActive = false
-=======
-  onOpenPaymentAgreement
->>>>>>> staging
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -273,11 +267,6 @@ export const InvoicesTable = ({
               key={`A${record.id}`}
             >
               <Button
-                onClick={() => {
-                  if (record.agreement_info?.id) {
-                    onOpenPaymentAgreement?.(record.agreement_info.id);
-                  }
-                }}
                 icon={
                   <Handshake
                     size={"1.2rem"}

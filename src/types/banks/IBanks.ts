@@ -38,7 +38,6 @@ export interface ISingleBank {
   USER_NAME: string | null;
   evidence: string | null;
   account_number: string;
-  ID_ERP: string | null;
 }
 
 export interface IPaymentDetail extends ISingleBank {

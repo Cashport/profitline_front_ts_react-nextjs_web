@@ -304,7 +304,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
             </Button>
             <Button
               className="acceptButton"
-              disabled={tableData.length === 0 || tableData.some((row) => !row.newDate)}
+              disabled={globalDate === null || tableData.length === 0}
               onClick={() => setIsSecondView(true)}
             >
               Guardar cambios
@@ -322,6 +322,7 @@ const PaymentAgreementModal: React.FC<Props> = ({
           loading={isSubmitting}
           handleCancel={() => setIsSecondView(false)}
           noModal
+          multipleFiles
         />
       )}
     </Modal>

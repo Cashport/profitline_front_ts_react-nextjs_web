@@ -48,7 +48,6 @@ export interface IInvoice {
     radication_type: string;
   } | null;
   agreement_info: {
-    id?: number;
     Fecha: string;
     Monto: number;
     Cumplido: string;
