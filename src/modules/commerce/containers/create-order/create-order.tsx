@@ -1,7 +1,7 @@
-import { Dispatch, FC, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
-import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+import { getDiscounts, getOrderDraft, getProductsByClient } from "@/services/commerce/commerce";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 
@@ -12,8 +12,11 @@ import CreateOrderCheckout from "../../components/create-order-checkout";
 
 import {
   IDiscountPackageAvailable,
+  IDraftOrderDetail,
+  IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
+  IOrderSplitDetail,
   ISelectedProduct,
   IShippingInformation
 } from "@/types/commerce/ICommerce";
@@ -53,6 +56,8 @@ interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  executiveDiscounts: IExecutiveDiscount[];
+  setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
@@ -70,6 +75,9 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
+  const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
+  const [draftDetail, setDraftDetail] = useState<IDraftOrderDetail | null>(null);
   const [isCartVisible, setIsCartVisible] = useState(
     () => typeof window !== "undefined" && window.innerWidth > 1000
   );
@@ -104,47 +112,99 @@ export const CreateOrderView: FC = () => {
   }, [client?.id, selectedProject?.ID]);
 
   useEffect(() => {
-    if (draftInfo.client_name) {
-      const fetchDraft = async () => {
-        if (!selectedProject.ID || !draftInfo.id) return;
-        const response = await getSingleOrder(selectedProject.ID, draftInfo.id);
-        setClient({
-          name: response.data[0].client_name,
-          id: response.data[0].client_id,
-          email: "",
-          payment_type: 1
-        });
-
-        const selectedCategories = response.data[0].detail.products.map((category) => ({
-          category_id: category.id_category,
+    const projectId = selectedProject?.ID;
+    const draftId = draftInfo.id;
+    if (!draftInfo.client_name || !draftId || !projectId) return;
+    const fetchDraft = async () => {
+      const draftResponse = await getOrderDraft(projectId, draftId);
+      const productsResponse = await getProductsByClient(projectId, draftResponse.client_id);
+      if (productsResponse.data) {
+        const categoriesList: IFetchedCategories[] = productsResponse.data.map((category) => ({
           category: category.category,
           products: category.products.map((product) => ({
-            id: product.id,
-            name: product.product_name,
+            id: Number(product.id),
+            name: product.description,
             price: product.price,
             price_taxes: product.price_taxes,
-            discount: product.discount,
-            discount_percentage: product.discount_percentage,
-            quantity: product.quantity,
+            discount: 0,
+            discount_percentage: 0,
+            quantity: 0,
             image: product.image,
-            category_id: product.id_category,
-            SKU: product.product_sku,
+            category_id: Number(product.id_category),
+            SKU: product.SKU,
+            EAN: product.EAN,
             stock: true,
             category_name: product.category_name,
             shipment_unit: product.shipment_unit
           }))
         }));
-        setSelectedCategories(selectedCategories);
-        setShippingInfo(response.data[0].shipping_info);
-      };
-      fetchDraft();
-      setCheckingOut(true);
-    }
+        setCategories(categoriesList);
+      }
+      setDraftDetail(draftResponse);
+    };
+    fetchDraft();
 
     return () => {
       setDraftInfo({ id: 0, client_name: undefined });
     };
   }, []);
+
+  useEffect(() => {
+    console.log("Draft detail changed:", draftDetail);
+    if (!draftDetail || categories.length === 0) return;
+
+    const { client_name, client_id, shipping_info, order_summary, executive_discounts } =
+      draftDetail;
+
+    setClient({
+      name: client_name,
+      id: client_id,
+      email: shipping_info?.email ?? "",
+      payment_type: 1
+    });
+    setShippingInfo(shipping_info);
+    setSelectedDiscount(order_summary.discount_package);
+    setConfirmOrderData(order_summary);
+    setExecutiveDiscounts(executive_discounts ?? []);
+
+    const grouped =
+      order_summary.products?.reduce<ISelectedCategories[]>((acc, p) => {
+        const matchedCategory = categories.find((c) =>
+          c.products.some((cp) => cp.category_id === p.category_id)
+        );
+        const productMapped: ISelectedProduct = {
+          id: p.product_id,
+          name: p.description,
+          price: p.price,
+          price_taxes: p.price_taxes,
+          discount: undefined,
+          discount_percentage: undefined,
+          quantity: p.quantity,
+          image: p.image,
+          category_id: p.category_id,
+          category_name: matchedCategory?.category ?? "",
+          SKU: p.product_sku,
+          stock: true,
+          shipment_unit: p.shipment_unit
+        };
+        const found = acc.find((c) => c.category_id === p.category_id);
+        if (found) {
+          found.products.push(productMapped);
+        } else {
+          acc.push({
+            category_id: p.category_id,
+            category: matchedCategory?.category ?? "",
+            products: [productMapped]
+          });
+        }
+        return acc;
+      }, []) ?? [];
+
+    setSelectedCategories(grouped);
+    setCheckingOut(true);
+    setDraftDetail(null);
+    setIsCartVisible(false);
+  }, [draftDetail, categories]);
 
   const numberOfItems = selectedCategories.reduce((total, category) => {
     return total + category.products.reduce((catTotal, product) => catTotal + product.quantity, 0);
@@ -170,6 +230,10 @@ export const CreateOrderView: FC = () => {
         discounts,
         setDiscounts,
         discountsLoading,
+        executiveDiscounts,
+        setExecutiveDiscounts,
+        order_split_details: orderSplitDetails,
+        setOrderSplitDetails,
         toggleCart,
         isCartVisible,
         numberOfItems

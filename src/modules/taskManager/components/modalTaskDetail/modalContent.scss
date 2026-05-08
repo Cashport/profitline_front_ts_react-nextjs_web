@@ -1,0 +1,28 @@
+@import "@styles/variables.scss";
+
+.taskDetailAntSelect {
+    flex: 1;
+
+    .ant-select-selector {
+        background-color: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        height: 32px !important;
+        padding: 0 8px !important;
+    }
+
+    .ant-select-selection-item,
+    .ant-select-selection-placeholder {
+        line-height: 32px !important;
+    }
+
+    .ant-select-selection-search-input {
+        height: 32px !important;
+    }
+
+    &.taskDetailAntSelect--empty {
+        .ant-select-selection-placeholder {
+            color: #fb7185;
+        }
+    }
+}
