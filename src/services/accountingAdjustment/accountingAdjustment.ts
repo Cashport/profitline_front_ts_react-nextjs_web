@@ -33,7 +33,7 @@ const getCorrectMimeType = (file: File): File => {
   if (!file.type || file.type === "application/octet-stream") {
     const extension = file.name.split(".").pop()?.toLowerCase();
     const correctType = extension ? MIME_TYPE_MAP[extension] : file.type;
-    
+
     if (correctType && correctType !== file.type) {
       return new File([file], file.name, { type: correctType });
     }
@@ -188,7 +188,12 @@ export const createPaymentAgreement = async (
 
     const response = await instance.post(
       `${config.API_HOST}/invoice/paymentAgreement/project/${projectId}/client/${clientId}`,
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": undefined
+        }
+      }
     );
     return response;
   } catch (error) {
