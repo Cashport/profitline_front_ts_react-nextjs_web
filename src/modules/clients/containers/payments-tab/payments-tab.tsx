@@ -62,11 +62,13 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
       const description = payment.description?.toLowerCase() || "";
       const currentValue = payment.current_value?.toString() || "";
       const initialValue = payment.initial_value?.toString() || "";
+      const idErp = payment.ID_ERP?.toLowerCase() || "";
 
       return (
         description.includes(normalizedSearch) ||
         currentValue.includes(normalizedSearch) ||
-        initialValue.includes(normalizedSearch)
+        initialValue.includes(normalizedSearch) ||
+        idErp.includes(normalizedSearch)
       );
     });
   };
