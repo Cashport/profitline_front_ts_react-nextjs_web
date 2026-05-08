@@ -13,6 +13,7 @@ export interface IPaymentApplication {
   client_name: string;
   created_at: string;
   payment_ids: number[];
+  id_erps: string[];
   userName: string;
   amount: number;
 }
