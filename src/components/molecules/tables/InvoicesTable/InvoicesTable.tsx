@@ -33,11 +33,8 @@ export const InvoicesTable = ({
   fetchData: _fetchData,
   selectedRows,
   openInvoiceDetail,
-<<<<<<< HEAD
-  isSearchActive = false
-=======
+  isSearchActive = false,
   onOpenPaymentAgreement
->>>>>>> staging
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
@@ -115,9 +112,7 @@ export const InvoicesTable = ({
     if (checked) {
       setSelectedRowKeys(allInvoiceIds);
       setSelectedRows((prevSelectedRows) => {
-        const otherStatusRows = (prevSelectedRows || []).filter(
-          (row) => row.status_id !== stateId
-        );
+        const otherStatusRows = (prevSelectedRows || []).filter((row) => row.status_id !== stateId);
         return [...otherStatusRows, ...data.invoices];
       });
     } else {
