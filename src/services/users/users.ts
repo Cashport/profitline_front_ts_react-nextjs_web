@@ -1,4 +1,4 @@
-import { IUser, IUserForm, WelcomeData } from "@/types/users/IUser";
+import { IUserForm, WelcomeData } from "@/types/users/IUser";
 import { API } from "@/utils/api/api";
 import { SUCCESS } from "@/utils/constants/globalConstants";
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
@@ -6,7 +6,6 @@ import { IGroupsByUser } from "@/types/clientsGroups/IClientsGroups";
 import { MessageType } from "@/context/MessageContext";
 import axios from "axios";
 import config from "@/config";
-import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
@@ -209,14 +208,4 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
 export const sendEmailResetPassword = async (email: string): Promise<any> => {
   const response = await axios.post(`${config.API_HOST}/user/reset-password`, { email });
   return response;
-};
-
-export const getUsersByProject = async (projectId: number) => {
-  try {
-    const response: GenericResponse<IUser[]> = await API.get(`/user/lte/${projectId}`);
-    return response;
-  } catch (error) {
-    console.warn("error getting users by project: ", error);
-    return error;
-  }
 };

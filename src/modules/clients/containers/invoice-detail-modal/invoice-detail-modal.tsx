@@ -354,17 +354,9 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                               )}
                               {item.event_type_name === "Acuerdo de pago" ? (
                                 <div>
-                                  {item.files[0] && (
-                                    <div className={styles.icons}>
-                                      <Envelope
-                                        size={14}
-                                        onClick={() => {
-                                          window.open(item.files[0], "_blank");
-                                        }}
-                                      />
-                                    </div>
-                                  )}
-
+                                  <div className={styles.icons}>
+                                    <Envelope size={14} onClick={() => {}} />
+                                  </div>
                                   <div className={styles.name}>{`Acción: ${item.user_name}`}</div>
                                   <div
                                     className={styles.name}

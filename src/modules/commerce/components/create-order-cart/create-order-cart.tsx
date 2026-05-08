@@ -70,8 +70,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     setConfirmOrderData,
     selectedDiscount,
     categories,
-    setCategories,
-    executiveDiscounts
+    setCategories
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -233,8 +232,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           }));
         const confirmOrderData = {
           discount_package: selectedDiscount,
-          order_summary: products,
-          executive_discounts: executiveDiscounts
+          order_summary: products
         };
         try {
           const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
@@ -260,7 +258,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
+  }, [selectedCategories, selectedDiscount]);
 
   useEffect(() => {
     const newState = selectedCategories.map((category) => ({

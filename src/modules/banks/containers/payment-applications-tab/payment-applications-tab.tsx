@@ -44,7 +44,7 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActi
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters, enabled: isActive });
+  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters, searchQuery, enabled: isActive });
 
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);
