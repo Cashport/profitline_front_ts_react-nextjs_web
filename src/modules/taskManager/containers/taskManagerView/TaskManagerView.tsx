@@ -225,7 +225,11 @@ export const TaskManagerView: React.FC = () => {
       if (state.filterComprador && task.client_name !== state.filterComprador) return false;
 
       // Filter by task type
-      if (selectedFilters.taskTypes.length > 0 && !selectedFilters.taskTypes.includes(task.taskTypeId)) return false;
+      if (
+        selectedFilters.taskTypes.length > 0 &&
+        !selectedFilters.taskTypes.includes(task.taskTypeId)
+      )
+        return false;
 
       // Vendedor filter - skip or use user_name
       // if (state.filterVendedor && task.user_name !== state.filterVendedor) return false;
@@ -365,10 +369,6 @@ export const TaskManagerView: React.FC = () => {
           setSelectedTask(null);
         }}
         taskTypes={taskTypes}
-        onUpdate={(updatedTask: ITask) => {
-          console.log("Task updated:", updatedTask);
-          // TODO: Implement actual update logic when API is ready
-        }}
       />
     </main>
   );

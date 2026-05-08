@@ -63,6 +63,11 @@ export interface IEmailAttachment {
   s3_key: string;
   s3_url: string;
   created_at: string;
+  process_id: number;
+  process_status_id: number;
+  process_retry_count: number;
+  process_status_name: string;
+  process_status_color: string;
 }
 
 export interface IEmailDetails {

@@ -5,6 +5,7 @@ import {
   IConfirmOrderData,
   ICreateOrderData,
   IDiscountPackageAvailable,
+  IDraftOrderDetail,
   IEcommerceClient,
   IGeneratePaymentLinkResponse,
   IInventoriesByWarehouse,
@@ -13,6 +14,7 @@ import {
   IOrderData,
   IPaymentLinkData,
   IProductData,
+  ISucessCreateOrder,
   ISalesDashboard,
   ISingleOrder,
   IWarehouseProductsStock
@@ -98,8 +100,8 @@ export const createOrder = async (
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
   paymentSupport?: File
-): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
-  let response: GenericResponse<{ id_order: number; notificationId: number }>;
+): Promise<GenericResponse<ISucessCreateOrder>> => {
+  let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
   if (paymentSupport) {
     const formData = new FormData();
@@ -435,6 +437,18 @@ export const generatePaymentLink = async (clientId: string, modelData: IPaymentL
     return response.data;
   } catch (error) {
     console.error("Error al generar el link de pago:", error);
+    throw error;
+  }
+};
+
+export const getOrderDraft = async (projectId: number, draftId: number) => {
+  try {
+    const response: GenericResponse<IDraftOrderDetail> = await API.get(
+      `/marketplace/projects/${projectId}/draft/${draftId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el borrador de la orden:", error);
     throw error;
   }
 };
