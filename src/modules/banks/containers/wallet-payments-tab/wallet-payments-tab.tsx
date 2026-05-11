@@ -171,6 +171,7 @@ export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
         <ModalActionsWalletPayments
           isOpen={isGenerateActionOpen}
           onClose={() => setisGenerateActionOpen(false)}
+          selectedRows={selectedRows}
         />
 
         <ModalFilterSelectDates
