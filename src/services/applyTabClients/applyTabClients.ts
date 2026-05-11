@@ -5,6 +5,7 @@ import { IApplicationInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import { IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { StatusGroup } from "@/hooks/useAcountingAdjustment";
 import { CLIENTUUID_DEMO, PROJECTID_DEMO } from "@/utils/constants/globalConstants";
+import { getCorrectMimeType } from "@/utils/files/getCorrectMimeType";
 
 export const addItemsToTable = async (
   project_id: number,
@@ -157,7 +158,7 @@ export const saveApplication = async ({
     formData.append("useExistingFile", "true"); // O "1"
   } else if (file) {
     // Adjunta el archivo, pero NO el flag
-    formData.append("files", file);
+    formData.append("files", getCorrectMimeType(file));
   }
 
   try {
