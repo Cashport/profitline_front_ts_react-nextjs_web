@@ -13,14 +13,11 @@ import {
 import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 import { getAdresses as getAdressesAndNumber } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
+import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
-
-function formatPrice(n: number) {
-  return "$" + (n ?? 0).toLocaleString("es-CO");
-}
 
 interface OrderShipmentConfirmProps {
   multiEntrega: boolean;
@@ -56,7 +53,7 @@ export default function OrderShipmentConfirm({
   loadingFinish,
   loadingDraft
 }: OrderShipmentConfirmProps) {
-  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo } =
+  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo, selectedDiscount } =
     useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
@@ -310,11 +307,6 @@ export default function OrderShipmentConfirm({
     setOrderSplitDetails(splits);
   }, [multiEntrega, entregas, singleForm, discountItems, setOrderSplitDetails]);
 
-  const subtotal = confirmOrderData?.subtotal ?? 0;
-  const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
-  const total = confirmOrderData?.total ?? 0;
-  const iva = confirmOrderData?.taxes ?? 0;
-
   const addressOptions = [
     NEW_ADDRESS_OPTION,
     ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
@@ -547,52 +539,77 @@ export default function OrderShipmentConfirm({
           )}
         </div>
 
-        {/* Totals */}
-        <div className="border-t border-[#EEEEEE] px-5 py-3 flex-shrink-0">
-          <div className="rounded-lg bg-[#F7F7F7] px-4 py-3 flex flex-col gap-1.5">
-            <div className="flex justify-between text-xs text-[#666666]">
-              <span>Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
+        {/* Footer */}
+        <div className="border-t border-[#EEEEEE]  px-5 py-3 pb-4 flex-shrink-0 bg-[#fcffed]">
+          {/* Totals */}
+          <div className="rounded-[7px] py-3 flex flex-col gap-1">
+            <div className="flex justify-between font-medium">
+              <p>Subtotal</p>
+              <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </div>
-            {totalDescuento > 0 && (
-              <div className="flex justify-between text-xs text-red-500">
-                <span>Descuentos aplicados</span>
-                <span>-{formatPrice(totalDescuento)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-sm font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
-              <span>Total</span>
-              <span>{formatPrice(total)}</span>
+            <div className="flex justify-between font-medium">
+              <p>Descuentos ({selectedDiscount?.name})</p>
+              {confirmOrderData?.discounts ? (
+                <p>-${formatNumber(confirmOrderData.discounts?.totalDiscount)}</p>
+              ) : (
+                <p>-$0</p>
+              )}
             </div>
-            <div className="flex justify-between text-xs text-[#999999]">
-              <span>IVA (19%)</span>
-              <span>{formatPrice(iva)}</span>
+            <div className="flex justify-between mt-[0.2rem]">
+              <p className="text-sm text-[#909090]">Descuentos de productos</p>
+              {confirmOrderData?.discounts ? (
+                <p className="text-sm text-[#909090]">
+                  -${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}
+                </p>
+              ) : (
+                <p className="text-sm text-[#909090]">-$0</p>
+              )}
             </div>
-            <div className="flex justify-between text-xs font-semibold text-[#141414]">
-              <span>Total con IVA</span>
-              <span>{formatPrice(total + iva)}</span>
+            <div className="flex justify-between mt-[0.2rem]">
+              <p className="text-sm text-[#909090]">Descuentos de la orden (Cross selling)</p>
+              {confirmOrderData?.discounts ? (
+                <p className="text-sm text-[#909090]">
+                  -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
+                </p>
+              ) : (
+                <p className="text-sm text-[#909090]">-$0</p>
+              )}
+            </div>
+            <div className="flex justify-between mt-2">
+              <strong className="font-extrabold text-[1.25rem]">Total</strong>
+              <strong className="font-extrabold text-[1.25rem]">
+                ${formatNumber(confirmOrderData?.total)}
+              </strong>
+            </div>
+            <div className="flex justify-between font-medium">
+              <p>IVA</p>
+              <p>${formatNumber(confirmOrderData?.taxes)}</p>
+            </div>
+            <div className="flex justify-between font-medium">
+              <p>Total con pronto pago</p>
+              <p>${formatNumber(confirmOrderData?.total_pronto_pago)}</p>
             </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 px-5 pb-4 flex-shrink-0">
-          <button
-            onClick={onDraft}
-            disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
-            className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {loadingDraft ? "Guardando…" : "Guardar borrador"}
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={
-              loadingFinish || loadingDraft || (multiEntrega ? hayDesbalance : !isSingleFormValid)
-            }
-            className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {loadingFinish ? "Procesando…" : "Finalizar pedido"}
-          </button>
+          {/* Actions */}
+          <div className="flex gap-3 pt-2 pb-4 flex-shrink-0">
+            <button
+              onClick={onDraft}
+              disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
+              className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {loadingDraft ? "Guardando…" : "Guardar borrador"}
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={
+                loadingFinish || loadingDraft || (multiEntrega ? hayDesbalance : !isSingleFormValid)
+              }
+              className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {loadingFinish ? "Procesando…" : "Finalizar pedido"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
