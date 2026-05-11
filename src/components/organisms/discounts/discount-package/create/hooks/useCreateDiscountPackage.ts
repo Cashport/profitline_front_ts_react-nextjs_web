@@ -105,21 +105,49 @@ export default function useCreateDiscountPackage({ params }: Props) {
     {}
   );
 
-  const optionsDiscounts = useMemo(
+  const CROSS_DISCOUNT_TYPE_IDS = [3, 4];
+
+  const optionsPrimaryDiscounts = useMemo(
     () =>
-      dataDiscountList?.data.map((option) => ({
-        value: option.id,
-        label: option.discount_name ?? ""
-      })),
+      dataDiscountList?.data
+        .filter((option) => !CROSS_DISCOUNT_TYPE_IDS.includes(option.discount_type_id!))
+        .map((option) => ({
+          value: option.id,
+          label: option.discount_name ?? ""
+        })),
     [dataDiscountList]
   );
 
-  const discountList = useMemo(
+  const optionsSecondaryDiscounts = useMemo(
     () =>
-      dataDiscountList?.data.map((discount) => ({
-        ...discount,
-        packageId: discount.id
-      })),
+      dataDiscountList?.data
+        .filter((option) => CROSS_DISCOUNT_TYPE_IDS.includes(option.discount_type_id!))
+        .map((option) => ({
+          value: option.id,
+          label: option.discount_name ?? ""
+        })),
+    [dataDiscountList]
+  );
+
+  const primaryDiscountList = useMemo(
+    () =>
+      dataDiscountList?.data
+        .filter((discount) => !CROSS_DISCOUNT_TYPE_IDS.includes(discount.discount_type_id!))
+        .map((discount) => ({
+          ...discount,
+          packageId: discount.id
+        })),
+    [dataDiscountList]
+  );
+
+  const secondaryDiscountList = useMemo(
+    () =>
+      dataDiscountList?.data
+        .filter((discount) => CROSS_DISCOUNT_TYPE_IDS.includes(discount.discount_type_id!))
+        .map((discount) => ({
+          ...discount,
+          packageId: discount.id
+        })),
     [dataDiscountList]
   );
 
@@ -183,9 +211,11 @@ export default function useCreateDiscountPackage({ params }: Props) {
     removeDiscount,
     removeAdditionalDiscount,
     watch,
-    optionsDiscounts,
+    optionsPrimaryDiscounts,
+    optionsSecondaryDiscounts,
     isLoadingSelect,
-    discountList,
+    primaryDiscountList,
+    secondaryDiscountList,
     discountId: discountPackageId,
     isFormDisabled: disabled,
     clients,
