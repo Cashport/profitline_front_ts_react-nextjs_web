@@ -158,8 +158,12 @@ export function extractSingleParam(value: string | string[] | undefined): string
   }
   return value;
 }
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale?: "es-CO" | string): string {
   const date = new Date(dateString);
+  if (locale === "es-CO") {
+    const hsToSub = 5;
+    date.setHours(date.getHours() - hsToSub);
+  }
 
   if (isNaN(date.getTime())) {
     return "-"; // Return empty string for invalid dates
