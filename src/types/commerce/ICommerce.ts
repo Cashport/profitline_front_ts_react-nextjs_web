@@ -73,6 +73,7 @@ export interface IConfirmOrderData {
     quantity: number;
   }[];
   executive_discounts: IExecutiveDiscount[];
+  deactivate_cross_selling: boolean;
 }
 
 export interface IProductInDetail {
@@ -138,6 +139,10 @@ export interface OrderDiscount {
   totalProductDiscount: number;
   discountOrder: DiscountOrder[];
   discountItems: DiscountItem[];
+  secondaryDiscount: {
+    id: number;
+    name: string;
+  }
 }
 
 export interface IOrderConfirmedResponse {
@@ -157,6 +162,7 @@ export interface IOrderConfirmedResponse {
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
   discount_package: IDiscountPackageAvailable;
   executive_discounts: IExecutiveDiscount[];
+  deactivate_cross_selling: boolean;
 }
 
 export interface IShippingInformation {

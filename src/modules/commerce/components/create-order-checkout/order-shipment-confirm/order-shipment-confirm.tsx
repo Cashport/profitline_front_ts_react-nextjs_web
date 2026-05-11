@@ -307,6 +307,13 @@ export default function OrderShipmentConfirm({
     setOrderSplitDetails(splits);
   }, [multiEntrega, entregas, singleForm, discountItems, setOrderSplitDetails]);
 
+  const subtotal = confirmOrderData?.subtotal ?? 0;
+  const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
+  const descuentoDeOrden = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
+  const descuentoDeProductos = confirmOrderData?.discounts?.totalProductDiscount ?? 0;
+  const total = confirmOrderData?.total ?? 0;
+  const iva = confirmOrderData?.taxes ?? 0;
+
   const addressOptions = [
     NEW_ADDRESS_OPTION,
     ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
@@ -550,36 +557,26 @@ export default function OrderShipmentConfirm({
             <div className="flex justify-between font-medium">
               <p>Descuentos ({selectedDiscount?.name})</p>
               {confirmOrderData?.discounts ? (
-                <p>-${formatNumber(confirmOrderData.discounts?.totalDiscount)}</p>
+                <p>-${formatNumber(descuentoDeProductos)}</p>
               ) : (
                 <p>-$0</p>
               )}
             </div>
-            <div className="flex justify-between mt-[0.2rem]">
-              <p className="text-sm text-[#909090]">Descuentos de productos</p>
-              {confirmOrderData?.discounts ? (
-                <p className="text-sm text-[#909090]">
-                  -${formatNumber(confirmOrderData.discounts?.totalProductDiscount)}
-                </p>
-              ) : (
-                <p className="text-sm text-[#909090]">-$0</p>
-              )}
-            </div>
-            <div className="flex justify-between mt-[0.2rem]">
-              <p className="text-sm text-[#909090]">Descuentos de la orden (Cross selling)</p>
-              {confirmOrderData?.discounts ? (
-                <p className="text-sm text-[#909090]">
-                  -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
-                </p>
-              ) : (
-                <p className="text-sm text-[#909090]">-$0</p>
-              )}
-            </div>
-            <div className="flex justify-between mt-2">
-              <strong className="font-extrabold text-[1.25rem]">Total</strong>
-              <strong className="font-extrabold text-[1.25rem]">
-                ${formatNumber(confirmOrderData?.total)}
-              </strong>
+            {descuentoDeOrden > 0 && (
+              <div className="flex justify-between font-medium">
+                <p>Descuento de orden</p>
+                <p>-${formatNumber(descuentoDeOrden)}</p>
+              </div>
+            )}
+            {totalDescuento > 0 && (
+              <div className="flex justify-between text-xs text-red-500">
+                <span>Descuentos aplicados</span>
+                <span>-{formatNumber(totalDescuento)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
+              <span>Total</span>
+              <span>{formatNumber(total)}</span>
             </div>
             <div className="flex justify-between font-medium">
               <p>IVA</p>
