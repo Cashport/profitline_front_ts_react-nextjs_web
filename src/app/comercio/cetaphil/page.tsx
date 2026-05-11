@@ -59,6 +59,8 @@ export interface IOrderViewContext {
   discountsLoading: boolean;
   executiveDiscounts: IExecutiveDiscount[];
   setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
+  deactivateCrossSelling: boolean;
+  setDeactivateCrossSelling: Dispatch<SetStateAction<boolean>>;
   order_split_details: IOrderSplitDetail[];
   setOrderSplitDetails: Dispatch<SetStateAction<IOrderSplitDetail[]>>;
   toggleCart?: () => void;
@@ -82,6 +84,7 @@ const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
+  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(false);
   const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
   const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
@@ -152,6 +155,8 @@ const CreateOrderView: FC = () => {
         discountsLoading,
         executiveDiscounts,
         setExecutiveDiscounts,
+        deactivateCrossSelling,
+        setDeactivateCrossSelling,
         order_split_details: orderSplitDetails,
         setOrderSplitDetails
       }}

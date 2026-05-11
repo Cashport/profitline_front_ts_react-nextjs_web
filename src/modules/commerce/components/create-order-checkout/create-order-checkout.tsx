@@ -53,7 +53,8 @@ export default function CheckoutPage() {
     executiveDiscounts,
     setConfirmOrderData,
     confirmOrderData,
-    order_split_details
+    order_split_details,
+    deactivateCrossSelling
   } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
 
@@ -79,7 +80,8 @@ export default function CheckoutPage() {
       const payload: IConfirmOrderData = {
         discount_package: selectedDiscount,
         order_summary: products,
-        executive_discounts: executiveDiscounts
+        executive_discounts: executiveDiscounts,
+        deactivate_cross_selling: !deactivateCrossSelling
       };
       try {
         const response = await confirmOrder(projectId, client?.id || "", payload);
@@ -101,7 +103,7 @@ export default function CheckoutPage() {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
+  }, [selectedCategories, selectedDiscount, executiveDiscounts, deactivateCrossSelling]);
 
   const cantidadesAsignadas = (sku: string) =>
     entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
@@ -113,7 +115,8 @@ export default function CheckoutPage() {
     const orderSummary: IOrderSummaryPayload = {
       ...confirmOrderData,
       discount_package: selectedDiscount as IDiscountPackageAvailable,
-      executive_discounts: executiveDiscounts
+      executive_discounts: executiveDiscounts,
+      deactivate_cross_selling: !deactivateCrossSelling
     };
     return {
       order_summary: orderSummary,

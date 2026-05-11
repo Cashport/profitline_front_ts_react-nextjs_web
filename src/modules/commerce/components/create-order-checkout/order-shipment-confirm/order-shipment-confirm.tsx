@@ -312,6 +312,8 @@ export default function OrderShipmentConfirm({
 
   const subtotal = confirmOrderData?.subtotal ?? 0;
   const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
+  const orderTotalDiscount = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
+  const productsTotalDiscount = confirmOrderData?.discounts?.totalProductDiscount ?? 0;
   const total = confirmOrderData?.total ?? 0;
   const iva = confirmOrderData?.taxes ?? 0;
 
@@ -554,12 +556,18 @@ export default function OrderShipmentConfirm({
               <span>Subtotal</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
-            {totalDescuento > 0 && (
+            {
               <div className="flex justify-between text-xs text-red-500">
-                <span>Descuentos aplicados</span>
-                <span>-{formatPrice(totalDescuento)}</span>
+                <span>Descuentos de productos</span>
+                <span>-{formatPrice(productsTotalDiscount)}</span>
               </div>
-            )}
+            }
+            {
+              <div className="flex justify-between text-xs text-red-500">
+                <span>Descuentos de la orden (Cross selling)</span>
+                <span>-{formatPrice(orderTotalDiscount)}</span>
+              </div>
+            }
             <div className="flex justify-between text-sm font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
               <span>Total</span>
               <span>{formatPrice(total)}</span>
