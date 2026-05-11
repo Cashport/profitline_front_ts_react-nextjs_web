@@ -39,8 +39,10 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     removeDiscount,
     removeAdditionalDiscount,
     isLoadingSelect,
-    optionsDiscounts,
-    discountList,
+    optionsPrimaryDiscounts,
+    optionsSecondaryDiscounts,
+    primaryDiscountList,
+    secondaryDiscountList,
     //discountId,
     isFormDisabled,
     form,
@@ -51,7 +53,8 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
 
   const handleConfirmModal = (id: number) => {
-    const completeOptionSelected = discountList?.find((d) => d.id === id);
+    const list = typeDiscount === "principal" ? primaryDiscountList : secondaryDiscountList;
+    const completeOptionSelected = list?.find((d) => d.id === id);
     if (completeOptionSelected) {
       if (typeDiscount === "principal") {
         appendDiscount(completeOptionSelected);
@@ -76,11 +79,11 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
   const filteredOptions = useMemo(
     () =>
       filterAvailableDiscountOptions(
-        optionsDiscounts,
+        typeDiscount === "principal" ? optionsPrimaryDiscounts : optionsSecondaryDiscounts,
         primaryDiscountsFields,
         secondaryDiscountsFields
       ),
-    [optionsDiscounts, primaryDiscountsFields, secondaryDiscountsFields]
+    [typeDiscount, optionsPrimaryDiscounts, optionsSecondaryDiscounts, primaryDiscountsFields, secondaryDiscountsFields]
   );
 
   return (
