@@ -592,7 +592,7 @@ export default function OrderShipmentConfirm({
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2 pb-4 flex-shrink-0">
+          <div className="flex gap-3 pt-2 pb-1 flex-shrink-0">
             <button
               onClick={onDraft}
               disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
