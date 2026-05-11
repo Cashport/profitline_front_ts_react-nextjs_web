@@ -10,7 +10,6 @@
     padding: 1.625rem 1.5rem;
     border-radius: 1rem;
     border: 1px solid $dark-gray;
-    overflow-y: auto;
     background-color: $white;
 
     .buttonGoBack {
@@ -26,6 +25,33 @@
         &:hover {
             opacity: 0.8;
             color: black;
+        }
+    }
+
+    :global {
+        .tabsContainer {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+
+            .ant-tabs {
+                flex: 1 1 auto;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .ant-tabs-content-holder {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+            }
+
+            .ant-tabs-content,
+            .ant-tabs-tabpane {
+                height: 100%;
+            }
         }
     }
 

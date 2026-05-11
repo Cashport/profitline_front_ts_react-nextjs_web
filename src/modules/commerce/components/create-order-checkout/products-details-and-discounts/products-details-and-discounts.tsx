@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ArrowLeft, Check, Pencil } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import { DiscountItem, IExecutiveDiscount } from "@/types/commerce/ICommerce";
@@ -85,8 +85,28 @@ export default function ProductsDetailsAndDiscounts({
   multiEntrega,
   cantidadesAsignadas
 }: ProductsDetailsAndDiscountsProps) {
-  const { client, confirmOrderData, setCheckingOut, executiveDiscounts, setExecutiveDiscounts, deactivateCrossSelling, setDeactivateCrossSelling } =
-    useContext(OrderViewContext);
+  const {
+    client,
+    confirmOrderData,
+    setCheckingOut,
+    executiveDiscounts,
+    setExecutiveDiscounts,
+    selectedCategories,
+    setSelectedCategories,
+    deactivateCrossSelling,
+    setDeactivateCrossSelling,
+  } = useContext(OrderViewContext);
+
+  const handleRemoveProduct = (productSku: string) => {
+    const next = selectedCategories
+      .map((cat) => ({
+        ...cat,
+        products: cat.products.filter((p) => p.SKU !== productSku)
+      }))
+      .filter((cat) => cat.products.length > 0);
+    setSelectedCategories(next);
+    setExecutiveDiscounts((prev) => prev.filter((e) => e.product_sku !== productSku));
+  };
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
@@ -112,8 +132,8 @@ export default function ProductsDetailsAndDiscounts({
   }, 0);
 
   const cols = multiEntrega
-    ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px]"
-    : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px]";
+    ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px_32px]"
+    : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_32px]";
 
   return (
     <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-[#F7F7F7]">
@@ -151,6 +171,7 @@ export default function ProductsDetailsAndDiscounts({
               {multiEntrega && (
                 <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
               )}
+              <span />
             </div>
 
             {/* Rows */}
@@ -210,6 +231,17 @@ export default function ProductsDetailsAndDiscounts({
                         {restante}
                       </p>
                     )}
+                    {precioFinal === 0 ? (
+                      <button
+                        onClick={() => handleRemoveProduct(item.product_sku)}
+                        title="Eliminar producto"
+                        className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    ) : (
+                      <span />
+                    )}
                   </div>
                 );
               })}
@@ -229,6 +261,7 @@ export default function ProductsDetailsAndDiscounts({
                 {formatPrice(totalMonto)}
               </span>
               {multiEntrega && <span />}
+              <span />
             </div>
           </div>
         </div>
