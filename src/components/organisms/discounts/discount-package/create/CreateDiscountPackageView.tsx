@@ -239,7 +239,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                 columns={discountsFormColumns({ remove: removeAdditionalDiscount, isFormDisabled })}
                 pagination={false}
               />
-              {!isFormDisabled && (
+              {!isFormDisabled && secondaryDiscountsFields.length === 0 && (
                 <Flex justify="flex-end">
                   <PrincipalButton
                     onClick={() => {
