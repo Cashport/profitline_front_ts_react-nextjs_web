@@ -530,7 +530,15 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                   {item.payment_id && (
                                     <div className={styles.adjustment}>
                                       ID del pago:
-                                      <div className={styles.idAdjustment}>{item.payment_id}</div>
+                                      <div
+                                        className={styles.idAdjustment}
+                                        onClick={() =>
+                                          item.payment_identification_url &&
+                                          handleDocumentClick(item.payment_identification_url)
+                                        }
+                                      >
+                                        {item.payment_id}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
