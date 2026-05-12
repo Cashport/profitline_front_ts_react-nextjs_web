@@ -6,10 +6,12 @@ import UiTab from "@/components/ui/ui-tab";
 import styles from "./banks-view.module.scss";
 import ActivePaymentsTab from "../active-payments-tab";
 import PaymentApplicationsTab from "../payment-applications-tab";
+import WalletPaymentsTab from "../wallet-payments-tab";
 
 const TAB_KEYS = {
   activePayments: "active-payments",
-  paymentApplications: "payment-applications"
+  paymentApplications: "payment-applications",
+  walletPayments: "wallet-payments"
 };
 
 const VALID_TABS = new Set<string>(Object.values(TAB_KEYS));
@@ -41,6 +43,11 @@ export const BanksView: FC = () => {
       key: TAB_KEYS.paymentApplications,
       label: "Aplicaciones de pago",
       children: <PaymentApplicationsTab isActive={activeKey === TAB_KEYS.paymentApplications} />
+    },
+    {
+      key: TAB_KEYS.walletPayments,
+      label: "Pagos wallet",
+      children: <WalletPaymentsTab isActive={activeKey === TAB_KEYS.walletPayments} />
     }
   ];
 
