@@ -17,5 +17,9 @@ export default function ComercioLayout({ children }: ComercioLayoutClientProps) 
     headerTitle = "Dashboard";
   }
 
-  return <ViewWrapper headerTitle={headerTitle}>{children}</ViewWrapper>;
+  return (
+    <ViewWrapper headerTitle={headerTitle} hideHeader={pathname.startsWith("/comercio/pedido")}>
+      {children}
+    </ViewWrapper>
+  );
 }

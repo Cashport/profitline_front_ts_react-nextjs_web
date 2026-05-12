@@ -57,7 +57,7 @@ const AccountingAdjustmentsTab = () => {
     mutate: mutateFinancialDiscounts
   } = useFinancialDiscounts({
     clientId,
-    id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
+    search: debouncedSearchQuery ? debouncedSearchQuery : undefined,
     line: filters.lines,
     zone: filters.zones,
     channel: filters.channels,

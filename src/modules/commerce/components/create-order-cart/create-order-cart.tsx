@@ -71,7 +71,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     selectedDiscount,
     categories,
     setCategories,
-    executiveDiscounts
+    executiveDiscounts,
+    deactivateCrossSelling
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -234,7 +235,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         const confirmOrderData = {
           discount_package: selectedDiscount,
           order_summary: products,
-          executive_discounts: executiveDiscounts
+          executive_discounts: executiveDiscounts,
+          deactivate_cross_selling: !deactivateCrossSelling
         };
         try {
           const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);

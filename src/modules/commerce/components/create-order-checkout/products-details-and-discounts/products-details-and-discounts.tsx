@@ -1,15 +1,10 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { ArrowLeft, Check, Pencil } from "lucide-react";
+import { useContext, useEffect, useState } from "react";
+import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import { DiscountItem, IExecutiveDiscount } from "@/types/commerce/ICommerce";
-
-const getPrimaryMaxPct = (item: DiscountItem) =>
-  item.discount?.primary?.discount_applied?.max_discount ??
-  item.discount?.primary?.discount_applied?.discount ??
-  0;
 
 const getSecondaryMaxPct = (item: DiscountItem) =>
   item.discount?.secondary?.discount_applied?.max_discount ??
@@ -90,12 +85,41 @@ export default function ProductsDetailsAndDiscounts({
   multiEntrega,
   cantidadesAsignadas
 }: ProductsDetailsAndDiscountsProps) {
-  const { client, confirmOrderData, setCheckingOut, executiveDiscounts, setExecutiveDiscounts } =
-    useContext(OrderViewContext);
+  const {
+    client,
+    confirmOrderData,
+    setCheckingOut,
+    executiveDiscounts,
+    setExecutiveDiscounts,
+    selectedCategories,
+    setSelectedCategories,
+    deactivateCrossSelling,
+    setDeactivateCrossSelling
+  } = useContext(OrderViewContext);
+
+  const handleRemoveProduct = (productSku: string) => {
+    const next = selectedCategories
+      .map((cat) => ({
+        ...cat,
+        products: cat.products.filter((p) => p.SKU !== productSku)
+      }))
+      .filter((cat) => cat.products.length > 0);
+    setSelectedCategories(next);
+    setExecutiveDiscounts((prev) => prev.filter((e) => e.product_sku !== productSku));
+  };
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
-  const otrosDescuentosItems = discountItems.filter((it) => it.discount?.secondary);
+  const secondaryDiscount = confirmOrderData?.discounts?.secondaryDiscount;
+
+  const [orderTotalDiscount, setOrderTotalDiscount] = useState(0);
+
+  useEffect(() => {
+    const incoming = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
+    if (incoming > 0) {
+      setOrderTotalDiscount(incoming);
+    }
+  }, [confirmOrderData?.discounts?.totalOrderDiscount]);
 
   const updatePrimaryDiscount = (item: DiscountItem, newValue: number) => {
     setExecutiveDiscounts((prev) => {
@@ -110,21 +134,6 @@ export default function ProductsDetailsAndDiscounts({
     });
   };
 
-  const toggleSecondaryDiscount = (item: DiscountItem) => {
-    setExecutiveDiscounts((prev) => {
-      const idx = prev.findIndex((e) => e.product_sku === item.product_sku);
-      const original = getSecondaryMaxPct(item);
-      const currentSecondary = idx >= 0 ? prev[idx].secondary_discount_pct : original;
-      const currentPrimary = idx >= 0 ? prev[idx].primary_discount_pct : getPrimaryMaxPct(item);
-      const nextEntry: IExecutiveDiscount = {
-        product_sku: item.product_sku,
-        primary_discount_pct: currentPrimary,
-        secondary_discount_pct: currentSecondary > 0 ? 0 : original
-      };
-      return idx >= 0 ? prev.map((e, i) => (i === idx ? nextEntry : e)) : [...prev, nextEntry];
-    });
-  };
-
   const totalCantidad = discountItems.reduce((s, i) => s + i.quantity, 0);
   const totalMonto = discountItems.reduce((s, i) => {
     const pf = i.discount?.primary?.new_price ?? i.price;
@@ -132,8 +141,8 @@ export default function ProductsDetailsAndDiscounts({
   }, 0);
 
   const cols = multiEntrega
-    ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px]"
-    : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px]";
+    ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px_32px]"
+    : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_32px]";
 
   return (
     <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-[#F7F7F7]">
@@ -171,6 +180,7 @@ export default function ProductsDetailsAndDiscounts({
               {multiEntrega && (
                 <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
               )}
+              <span />
             </div>
 
             {/* Rows */}
@@ -230,6 +240,17 @@ export default function ProductsDetailsAndDiscounts({
                         {restante}
                       </p>
                     )}
+                    {precioFinal === 0 ? (
+                      <button
+                        onClick={() => handleRemoveProduct(item.product_sku)}
+                        title="Eliminar producto"
+                        className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    ) : (
+                      <span />
+                    )}
                   </div>
                 );
               })}
@@ -249,47 +270,32 @@ export default function ProductsDetailsAndDiscounts({
                 {formatPrice(totalMonto)}
               </span>
               {multiEntrega && <span />}
+              <span />
             </div>
           </div>
         </div>
 
         {/* Otros descuentos */}
-        {otrosDescuentosItems.length > 0 && (
+        {secondaryDiscount && (
           <div className="mx-5 mt-4 mb-5 rounded-xl border border-[#EEEEEE] overflow-hidden flex-shrink-0">
             <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
               <p className="text-xs font-semibold text-[#141414]">Otros descuentos</p>
             </div>
-            <div className="flex flex-col divide-y divide-[#F4F4F4]">
-              {otrosDescuentosItems.map((it) => {
-                const sec = it.discount.secondary!;
-                const key = `${it.product_sku}-${sec.discount_applied.id}`;
-                const entry = executiveDiscounts.find((e) => e.product_sku === it.product_sku);
-                const activo = entry ? entry.secondary_discount_pct > 0 : true;
-                const porcentaje = sec.discount_applied.max_discount;
-                const monto = sec.new_price;
-                const label = sec.discount_applied.discount_name || sec.description;
-                return (
-                  <div key={key} className="flex items-center gap-3 px-4 py-3">
-                    <span className="flex-1 text-sm text-[#141414]">{label}</span>
-                    <span className="text-sm font-semibold text-red-500 w-8 text-right">
-                      {porcentaje}%
-                    </span>
-                    <span className="text-sm text-[#666666] w-24 text-right">
-                      {formatPrice(monto)}
-                    </span>
-                    <button
-                      onClick={() => toggleSecondaryDiscount(it)}
-                      className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
-                        activo
-                          ? "bg-[#141414] border-[#141414] text-white"
-                          : "bg-white border-[#DDDDDD] hover:border-[#141414]"
-                      }`}
-                    >
-                      {activo && <Check size={11} />}
-                    </button>
-                  </div>
-                );
-              })}
+            <div className="flex items-center gap-3 px-4 py-3">
+              <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount.name}</span>
+              <span className="text-sm font-semibold text-red-500">
+                -{formatPrice(orderTotalDiscount)}
+              </span>
+              <button
+                onClick={() => setDeactivateCrossSelling((prev) => !prev)}
+                className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
+                  deactivateCrossSelling
+                    ? "bg-[#141414] border-[#141414] text-white"
+                    : "bg-white border-[#DDDDDD] hover:border-[#141414]"
+                }`}
+              >
+                {deactivateCrossSelling && <Check size={11} />}
+              </button>
             </div>
           </div>
         )}
