@@ -25,7 +25,7 @@ interface Props {
 interface IcurrentInvoices {
   id: number;
   id_erp?: string;
-  current_value: number;
+  current_amount: number;
   newBalance: number;
 }
 interface NormalizedValue {
@@ -55,10 +55,10 @@ export const ApplyAccountingAdjustment = ({
   const [selectTab, setSelectTab] = useState(0);
   const [currentInvoices, setCurrentInvoices] = useState<IcurrentInvoices[]>([]);
   const [currentAdjustment, setCurrentAdjustment] = useState(
-    selectedNotes.map((row) => row.current_value)
+    selectedNotes.map((row) => row.current_amount)
   );
   const [currentAdjustmentStatic, _setCurrentAdjustmentStatic] = useState(
-    selectedNotes.map((row) => row.current_value)
+    selectedNotes.map((row) => row.current_amount)
   );
   const [applyValues, setApplyValues] = useState<{
     [key: string]: {
@@ -75,8 +75,8 @@ export const ApplyAccountingAdjustment = ({
       invoiceSelected.map((invoice) => ({
         id: invoice.id,
         id_erp: invoice.id_erp,
-        current_value: invoice.current_value,
-        newBalance: invoice.current_value
+        current_amount: invoice.current_amount,
+        newBalance: invoice.current_amount
       }))
     );
   }, [invoiceSelected]);
@@ -106,7 +106,7 @@ export const ApplyAccountingAdjustment = ({
     if (value && value > currentAdjustment[selectTab] && previousValue <= 0) {
       value = 0;
     }
-    if (value && value > selectedNotes[selectTab].current_value) {
+    if (value && value > selectedNotes[selectTab].current_amount) {
       value = 0;
     }
     if (value && value > previousValue && value > currentAdjustment[selectTab] + previousValue) {
@@ -143,6 +143,7 @@ export const ApplyAccountingAdjustment = ({
     handleValueChange(value ?? 0, selectTab, record);
   };
 
+  console.log("applyValues", invoiceSelected, applyValues);
   const handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentary(e.target.value);
   };
@@ -232,8 +233,8 @@ export const ApplyAccountingAdjustment = ({
     },
     {
       title: "Pendiente",
-      dataIndex: "current_value",
-      key: "current_value",
+      dataIndex: "current_amount",
+      key: "current_amount",
       render: (text) => `$${text}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     },
     {

@@ -55,10 +55,10 @@ export const ApplyNoveltyModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentInvoices, setCurrentInvoices] = useState<IcurrentInvoices[]>([]);
   const [currentAdjustment, setCurrentAdjustment] = useState(
-    selectedNotes.map((row) => row.current_value)
+    selectedNotes.map((row) => row.current_amount)
   );
   const [currentAdjustmentStatic, _setCurrentAdjustmentStatic] = useState(
-    selectedNotes.map((row) => row.current_value)
+    selectedNotes.map((row) => row.current_amount)
   );
   const [applyValues, setApplyValues] = useState<{
     [key: string]: {
@@ -100,7 +100,7 @@ export const ApplyNoveltyModal = ({
     if (value && value > currentAdjustment[selectTab] && previousValue <= 0) {
       value = 0;
     }
-    if (value && value > selectedNotes[selectTab].current_value) {
+    if (value && value > selectedNotes[selectTab].current_amount) {
       value = 0;
     }
     if (value && value > previousValue && value > currentAdjustment[selectTab] + previousValue) {
