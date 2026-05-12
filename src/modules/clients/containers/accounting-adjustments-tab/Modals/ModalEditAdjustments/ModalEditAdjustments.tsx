@@ -77,7 +77,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
           label: row.motive_description || ""
         },
         commentary: row.entity_description || "",
-        amount: String(row.current_value) || "",
+        amount: String(row.current_amount) || "",
         applicationId: row.id
       }));
 
