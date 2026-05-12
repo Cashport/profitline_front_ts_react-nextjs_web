@@ -307,12 +307,10 @@ export default function OrderShipmentConfirm({
     setOrderSplitDetails(splits);
   }, [multiEntrega, entregas, singleForm, discountItems, setOrderSplitDetails]);
 
-  const subtotal = confirmOrderData?.subtotal ?? 0;
   const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
   const descuentoDeOrden = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
   const descuentoDeProductos = confirmOrderData?.discounts?.totalProductDiscount ?? 0;
   const total = confirmOrderData?.total ?? 0;
-  const iva = confirmOrderData?.taxes ?? 0;
 
   const addressOptions = [
     NEW_ADDRESS_OPTION,
@@ -562,12 +560,12 @@ export default function OrderShipmentConfirm({
                 <p>-$0</p>
               )}
             </div>
-            {descuentoDeOrden > 0 && (
-              <div className="flex justify-between font-medium">
-                <p>Descuento de orden</p>
-                <p>-${formatNumber(descuentoDeOrden)}</p>
-              </div>
-            )}
+
+            <div className="flex justify-between font-medium">
+              <p>Descuento de orden</p>
+              <p>-${formatNumber(descuentoDeOrden)}</p>
+            </div>
+
             {totalDescuento > 0 && (
               <div className="flex justify-between text-xs text-red-500">
                 <span>Descuentos aplicados</span>

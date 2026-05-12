@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
@@ -94,7 +94,7 @@ export default function ProductsDetailsAndDiscounts({
     selectedCategories,
     setSelectedCategories,
     deactivateCrossSelling,
-    setDeactivateCrossSelling,
+    setDeactivateCrossSelling
   } = useContext(OrderViewContext);
 
   const handleRemoveProduct = (productSku: string) => {
@@ -111,6 +111,15 @@ export default function ProductsDetailsAndDiscounts({
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
   const secondaryDiscount = confirmOrderData?.discounts?.secondaryDiscount;
+
+  const [orderTotalDiscount, setOrderTotalDiscount] = useState(0);
+
+  useEffect(() => {
+    const incoming = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
+    if (incoming > 0) {
+      setOrderTotalDiscount(incoming);
+    }
+  }, [confirmOrderData?.discounts?.totalOrderDiscount]);
 
   const updatePrimaryDiscount = (item: DiscountItem, newValue: number) => {
     setExecutiveDiscounts((prev) => {
@@ -274,6 +283,9 @@ export default function ProductsDetailsAndDiscounts({
             </div>
             <div className="flex items-center gap-3 px-4 py-3">
               <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount.name}</span>
+              <span className="text-sm font-semibold text-red-500">
+                -{formatPrice(orderTotalDiscount)}
+              </span>
               <button
                 onClick={() => setDeactivateCrossSelling((prev) => !prev)}
                 className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
