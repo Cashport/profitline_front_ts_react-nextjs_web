@@ -19,6 +19,7 @@ interface Props {
 interface ItemsSelected {
   id: number;
   current_value: number;
+  current_amount: number;
   selected: boolean;
   motive_name: string | null;
   percentage?: number | null;
@@ -59,6 +60,7 @@ export const SelectAccountingAdjustment = ({
           .map((item) => ({
             id: item.id,
             current_value: item.current_value,
+            current_amount: item.current_amount,
             selected: selectedRows.some((row) => row.id === item.id),
             motive_name: item.motive_name,
             percentage: item.percentage,
