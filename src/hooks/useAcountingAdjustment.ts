@@ -11,6 +11,7 @@ export interface IFinancialDiscount {
   dependecy_sucursal: number;
   initial_value: number;
   current_value: number;
+  current_amount: number;
   expiration_date: string;
   comments: string | null;
   files: string | null;

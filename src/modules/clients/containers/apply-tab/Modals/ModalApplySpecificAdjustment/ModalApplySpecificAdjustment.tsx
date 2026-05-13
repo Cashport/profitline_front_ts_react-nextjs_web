@@ -50,8 +50,8 @@ const ModalApplySpecificAdjustment = ({
     selectedInvoices?.map((invoice) => ({
       id: invoice.financial_record_id ?? 0,
       id_erp: invoice.id_erp,
-      current_value: invoice.current_value,
-      new_balance: invoice.current_value
+      current_value: invoice.current_amount,
+      new_balance: invoice.current_amount
     })) ?? []
   );
 
