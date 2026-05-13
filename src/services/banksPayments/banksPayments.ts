@@ -215,24 +215,16 @@ export const approvePayment = async ({ payments, project_id, client_id }: IAppro
   }
 };
 
-export const downloadPaymentsPlane = async (payment_ids: number[]): Promise<Blob> => {
+export const downloadPaymentsPlane = async (
+  payment_ids: number[]
+): Promise<{ url: string; filename?: string }> => {
   try {
-    const response = await API.post(
+    const response: GenericResponse<{ url: string; filename?: string }> = await API.post(
       "/bank/generate-atemco-txt",
-      { payment_ids },
-      { responseType: "blob" }
+      { payment_ids }
     );
     return response.data;
-  } catch (error: any) {
-    if (error?.response?.data instanceof Blob) {
-      const text = await error.response.data.text();
-      try {
-        const parsed = JSON.parse(text);
-        throw new Error(parsed.message || "Error al descargar el plano");
-      } catch {
-        throw new Error("Error al descargar el plano");
-      }
-    }
+  } catch (error) {
     console.error("Error al descargar el plano:", error);
     throw error;
   }
