@@ -24,16 +24,8 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows }: Props) =>
     const paymentIds = selectedRows.map((row) => row.id);
     const hideLoading = message.loading("Descargando plano...", 0);
     try {
-      const blob = await downloadPaymentsPlane(paymentIds);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `plano_atemco_${Date.now()}.txt`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
+      const res = await downloadPaymentsPlane(paymentIds);
+      window.open(res.url, "_blank");
       message.success("Plano descargado correctamente");
       onClose();
     } catch (error) {

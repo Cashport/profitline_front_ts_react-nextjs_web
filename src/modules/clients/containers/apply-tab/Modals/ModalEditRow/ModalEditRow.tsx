@@ -90,18 +90,16 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
                 hiddenTitle
                 nameInput={`adjustments.${index}.amount`}
                 control={control}
-                error={
-                  errors?.adjustments?.[index]?.amount && {
-                    type: "required",
-                    message: "Campo requerido"
-                  }
-                }
-                customStyle={{ width: "80%", textAlign: "center" }}
+                error={errors?.adjustments?.[index]?.amount}
+                customStyle={{ paddingRight: "1rem", textAlign: "center" }}
                 validationRules={{
                   pattern: {
                     value: /^-?\d+(\.\d+)?$/,
                     message: "Solo se permiten números"
-                  }
+                  },
+                  validate: (value) =>
+                    Number(value) <= amount ||
+                    `El valor no puede superar ${formatMoney(amount, { hideCurrencySymbol: true })}`
                 }}
               />
 
@@ -170,14 +168,6 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
       showMessage("error", "Error al guardar los cambios");
     }
 
-    // Merge form input (amount) with original row data (id and adjustment name)
-    // Below is an example of how to merge the form data with the original row data for the adjustments if needed
-    // const formattedData = row?.adjustments?.map((adjustment, index) => ({
-    //   id: adjustment.adjustment_id,
-    //   adjustment: adjustment.description,
-    //   amount: adjustmentsData.adjustments[index]?.amount
-    // }));
-
     setLoading(false);
   };
 
@@ -201,7 +191,7 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
       open={visible}
       onCancel={() => onCancel()}
       footer={null}
-      width={650}
+      width={680}
       className="modalEditRow"
     >
       <div className="header">

@@ -1,0 +1,232 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666666;
+  margin: 0;
+}
+
+.tabRow {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.tab {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #f5f5f5;
+  color: #666666;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #eeeeee;
+  }
+}
+
+.tabActive {
+  @extend .tab;
+  background: #141414;
+  color: #ffffff;
+
+  &:hover {
+    background: #141414;
+  }
+}
+
+.grupos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Pool table */
+.poolTable {
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fffef5;
+}
+
+.poolHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #fef9e7;
+  border-bottom: 1px solid #fde68a;
+  font-size: 11px;
+  color: #92400e;
+}
+
+.poolCount {
+  font-weight: 700;
+}
+
+/* Fixed table */
+.fixedTable {
+  border: 1px solid #d4edda;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f0fff4;
+}
+
+.fixedHeader {
+  padding: 6px 10px;
+  background: #e8f5e9;
+  border-bottom: 1px solid #d4edda;
+  font-size: 11px;
+  font-weight: 500;
+  color: #2e7d32;
+}
+
+.fixedBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #4caf50;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Generic table */
+.genericTable {
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Shared table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cellName {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #141414;
+  background: #ffffff;
+}
+
+.cellControl {
+  padding: 4px 8px;
+  text-align: right;
+  width: 6rem;
+  background: #ffffff;
+}
+
+.cellBadge {
+  padding: 6px 10px;
+  text-align: right;
+  width: 4rem;
+  background: #ffffff;
+}
+
+.rowBorder {
+  border-bottom: 1px solid #eeeeee;
+}
+
+.rowBorderGreen {
+  border-bottom: 1px solid #e8f5e9;
+}
+
+.saldoHint {
+  font-size: 10px;
+  color: #999999;
+  margin-left: 6px;
+}
+
+/* Counter controls */
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.counterBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666666;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #f7f7f7;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+.counterVal {
+  width: 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #141414;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eeeeee;
+  margin-top: 0.25rem;
+}
+
+.footerTotal {
+  font-size: 12px;
+  color: #666666;
+  margin: 0;
+
+  strong {
+    color: #141414;
+  }
+}
+
+.confirmBtn {
+  padding: 6px 16px;
+  background: #cbe71e;
+  font-size: 12px;
+  font-weight: 600;
+  color: #141414;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #b8d11a;
+  }
+}

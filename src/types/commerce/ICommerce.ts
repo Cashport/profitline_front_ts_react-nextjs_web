@@ -74,6 +74,7 @@ export interface IConfirmOrderData {
   }[];
   executive_discounts: IExecutiveDiscount[];
   deactivate_cross_selling: boolean;
+  promotion_id?: number;
 }
 
 export interface IProductInDetail {
@@ -142,7 +143,58 @@ export interface OrderDiscount {
   secondaryDiscount: {
     id: number;
     name: string;
-  }
+  };
+}
+
+export interface IGiftItem {
+  product_id: number;
+  qty: number;
+  sku: string;
+  description: string;
+  image: string;
+}
+
+export interface IBonus {
+  id: number;
+  bonusOptions: {
+    cards: {
+      fixed: boolean;
+      items: Omit<IGiftItem, "image">[];
+    }[];
+  }[];
+}
+
+export interface IGiftItemGroup {
+  gift_item_group_id: number;
+  gift_group_id: number;
+  max_selection_qty: number;
+  items: IGiftItem[];
+  fixed: boolean;
+  subgroup_number: number;
+}
+
+export interface IGiftOption {
+  gift_group_id: number;
+  option_number: number;
+  items: IGiftItemGroup[];
+}
+
+export interface IPromotionRange {
+  range_id: number;
+  range_number: number;
+  min_amount: number;
+  is_eligible: boolean;
+  amount_remaining: number;
+  progress_message: string;
+  gift_options: IGiftOption[];
+}
+
+export interface IPromotion {
+  promotion_id: number;
+  promotion_name: string;
+  promotion_type: string;
+  active_range: IPromotionRange;
+  ranges: IPromotionRange[];
 }
 
 export interface IOrderConfirmedResponse {
@@ -157,6 +209,7 @@ export interface IOrderConfirmedResponse {
   total: number;
   total_pronto_pago: number;
   insufficientStockProducts: string[];
+  promotion?: IPromotion;
 }
 
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
