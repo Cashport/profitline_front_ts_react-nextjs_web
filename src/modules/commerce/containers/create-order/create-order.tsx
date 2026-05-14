@@ -153,7 +153,6 @@ export const CreateOrderView: FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Draft detail changed:", draftDetail);
     if (!draftDetail || categories.length === 0) return;
 
     const { client_name, client_id, shipping_info, order_summary, executive_discounts } =
