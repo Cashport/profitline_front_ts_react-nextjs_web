@@ -25,7 +25,6 @@ export interface IInvoice {
   cufe: string;
   initial_value: number;
   current_value: number;
-  current_amount: number;
   expiration_date: string;
   financial_record_date: string;
   comments: string;

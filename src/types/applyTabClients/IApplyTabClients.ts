@@ -18,7 +18,7 @@ export interface IApplyTabRecord {
   entity_type_name: string;
   entity_description: string | null;
   initial_value: number;
-  current_amount: number;
+  current_value: number;
   created_by_name: string | null;
   applied_amount: number;
   total_adjustments: number | null;

@@ -31,7 +31,7 @@ interface Props {
 }
 export interface ISelectedAccountingAdjustment {
   id: number;
-  current_amount: number;
+  current_value: number;
   motive_name: string | null;
   percentage?: number | null;
   intialAmount?: number;

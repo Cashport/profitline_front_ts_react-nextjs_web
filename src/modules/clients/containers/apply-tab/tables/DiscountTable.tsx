@@ -76,7 +76,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       dataIndex: "current_value",
       key: "current_value",
       render: (current_value) => <p className="fontMonoSpace">{formatMoney(current_value)}</p>,
-      sorter: (a, b) => a.current_amount - b.current_amount,
+      sorter: (a, b) => a.current_value - b.current_value,
       showSorterTooltip: false,
       align: "right"
     },
