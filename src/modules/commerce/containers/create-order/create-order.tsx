@@ -79,7 +79,7 @@ export const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
-  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(false);
+  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(true);
   const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
   const [bonus, setBonus] = useState<IBonus | undefined>();
   const [draftDetail, setDraftDetail] = useState<IDraftOrderDetail | null>(null);

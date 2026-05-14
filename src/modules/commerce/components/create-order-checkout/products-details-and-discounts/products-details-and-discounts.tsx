@@ -316,9 +316,7 @@ export default function ProductsDetailsAndDiscounts({
                         </p>
                         <span
                           className={`flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                            b.fixed
-                              ? "bg-[#E8F5C0] text-[#4A7A00]"
-                              : "bg-[#EEF4FF] text-[#3B5BDB]"
+                            b.fixed ? "bg-[#E8F5C0] text-[#4A7A00]" : "bg-[#EEF4FF] text-[#3B5BDB]"
                           }`}
                         >
                           {b.fixed ? "Promo auto" : "Manual"}
