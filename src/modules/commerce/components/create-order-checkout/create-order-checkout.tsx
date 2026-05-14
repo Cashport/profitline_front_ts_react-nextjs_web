@@ -166,8 +166,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      console.log("bonus", bonus);
-
       const response = await createOrder(
         projectId,
         client.id,
@@ -285,7 +283,6 @@ export default function CheckoutPage() {
   };
 
   const handleDraftOrder = async () => {
-    console.log("bonus", bonus);
     if (!client?.id) return;
     if (!order_split_details?.length) {
       showMessage("error", "Faltan datos de envío");
