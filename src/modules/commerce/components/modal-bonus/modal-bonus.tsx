@@ -23,9 +23,7 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
   const giftOptions: IGiftOption[] = promotion?.active_range?.gift_options ?? [];
 
   const tabOptions = giftOptions.filter((o) => o.items.some((g) => !g.fixed));
-  const fixedGroups: IGiftItemGroup[] = giftOptions.flatMap((o) =>
-    o.items.filter((g) => g.fixed)
-  );
+  const fixedGroups: IGiftItemGroup[] = giftOptions.flatMap((o) => o.items.filter((g) => g.fixed));
 
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
@@ -57,7 +55,9 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
   };
 
   const totalBonificados = () => {
-    const poolTotal = Object.values(poolQty).flatMap(Object.values).reduce((s, v) => s + v, 0);
+    const poolTotal = Object.values(poolQty)
+      .flatMap(Object.values)
+      .reduce((s, v) => s + v, 0);
     const fixedTotal = fixedGroups.reduce(
       (s, g) => s + (fixedQty[g.gift_item_group_id] ?? g.max_selection_qty),
       0
@@ -76,8 +76,8 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
               .map(({ image: _img, ...rest }) => ({
                 ...rest,
                 qty: group.fixed
-                  ? (fixedQty[group.gift_item_group_id] ?? group.max_selection_qty)
-                  : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
+                  ? fixedQty[group.gift_item_group_id] ?? group.max_selection_qty
+                  : poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
               }))
               .filter((item) => item.qty > 0)
           }))
@@ -139,7 +139,8 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
                           <table className={styles.table}>
                             <tbody>
                               {group.items.map((item, idx) => {
-                                const qty = poolQty[group.gift_item_group_id]?.[item.product_id] ?? 0;
+                                const qty =
+                                  poolQty[group.gift_item_group_id]?.[item.product_id] ?? 0;
                                 return (
                                   <tr
                                     key={item.product_id}
@@ -191,7 +192,8 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
               </div>
             )}
 
-            {fixedGroups.length > 0 && (
+            {/* TO DO: Integrate wneh other bonus is avail */}
+            {/* {fixedGroups.length > 0 && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Otros bonificados</p>
                 <div className={styles.genericTable}>
@@ -246,6 +248,39 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
                           </tr>
                         );
                       })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )} */}
+
+            {fixedGroups.length > 0 && (
+              <div className={styles.section}>
+                <div className={styles.fixedTable}>
+                  <div className={styles.fixedHeader}>
+                    <span>Incluidos:</span>
+                  </div>
+                  <table className={styles.table}>
+                    <tbody>
+                      {fixedGroups
+                        .flatMap((group) =>
+                          group.items.map((item) => ({
+                            item,
+                            qty: group.max_selection_qty,
+                            groupId: group.gift_item_group_id
+                          }))
+                        )
+                        .map((row, idx, arr) => (
+                          <tr
+                            key={`${row.groupId}-${row.item.product_id}`}
+                            className={idx < arr.length - 1 ? styles.rowBorderGreen : ""}
+                          >
+                            <td className={styles.cellName}>{row.item.description}</td>
+                            <td className={styles.cellBadge}>
+                              <span className={styles.fixedBadge}>{row.qty}</span>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
