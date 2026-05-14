@@ -40,14 +40,14 @@ export const BanksView: FC = () => {
       children: <ActivePaymentsTab isActive={activeKey === TAB_KEYS.activePayments} />
     },
     {
+      key: TAB_KEYS.walletPayments,
+      label: "Otros pagos",
+      children: <WalletPaymentsTab isActive={activeKey === TAB_KEYS.walletPayments} />
+    },
+    {
       key: TAB_KEYS.paymentApplications,
       label: "Aplicaciones de pago",
       children: <PaymentApplicationsTab isActive={activeKey === TAB_KEYS.paymentApplications} />
-    },
-    {
-      key: TAB_KEYS.walletPayments,
-      label: "Pagos wallet",
-      children: <WalletPaymentsTab isActive={activeKey === TAB_KEYS.walletPayments} />
     }
   ];
 
