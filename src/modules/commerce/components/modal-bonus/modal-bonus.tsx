@@ -1,84 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Modal, Typography } from "antd";
 
+import { IBonus, IGiftItemGroup, IGiftOption } from "@/types/commerce/ICommerce";
 import { IPromotion } from "@/services/promotion/promotion";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 import styles from "./modal-bonus.module.scss";
 
 const { Title } = Typography;
-
-interface ProductoPromocion {
-  id: string;
-  nombre: string;
-}
-
-interface GrupoProductos {
-  id: string;
-  modo: "pool" | "fijo";
-  unidadesPool?: number;
-  productos: ProductoPromocion[];
-  cantidadesFijas?: Record<string, number>;
-}
-
-interface OpcionPromocion {
-  id: string;
-  label: string;
-  grupos: GrupoProductos[];
-}
-
-interface PromocionDisponible {
-  id: string;
-  nombre: string;
-  opciones: OpcionPromocion[];
-}
-
-interface BonificadoGenerico {
-  id: string;
-  nombre: string;
-  saldoDisponible: number;
-  saldoTotal: number;
-}
-
-const MOCK_PROMOCIONES: PromocionDisponible[] = [
-  {
-    id: "promo-1",
-    nombre: "Promo Verano",
-    opciones: [
-      {
-        id: "op-1",
-        label: "Opción A",
-        grupos: [
-          {
-            id: "grupo-pool-1",
-            modo: "pool",
-            unidadesPool: 3,
-            productos: [
-              { id: "p1", nombre: "Producto Pool 1" },
-              { id: "p2", nombre: "Producto Pool 2" }
-            ]
-          }
-        ]
-      },
-      {
-        id: "op-2",
-        label: "Opción B",
-        grupos: [
-          {
-            id: "grupo-fijo-1",
-            modo: "fijo",
-            productos: [{ id: "p3", nombre: "Producto Fijo 1" }],
-            cantidadesFijas: { p3: 2 }
-          }
-        ]
-      }
-    ]
-  }
-];
-
-const MOCK_GENERICOS: BonificadoGenerico[] = [
-  { id: "gen-1", nombre: "Bonificado Genérico 1", saldoDisponible: 5, saldoTotal: 10 }
-];
 
 interface Props {
   isOpen: boolean;
@@ -87,51 +17,73 @@ interface Props {
 }
 
 const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
-  const [seleccionPromo, setSeleccionPromo] = useState<Record<string, string>>({});
-  const [seleccionPool, setSeleccionPool] = useState<Record<string, Record<string, number>>>({});
-  const [seleccionGenericos, setSeleccionGenericos] = useState<Record<string, number>>({});
+  const { confirmOrderData, setBonus } = useContext(OrderViewContext);
 
-  const updatePoolCantidad = (grupoId: string, productoId: string, delta: number, maxPool: number) => {
-    setSeleccionPool((prev) => {
-      const grupo = prev[grupoId] ?? {};
-      const actual = grupo[productoId] ?? 0;
-      const totalGrupo = Object.values(grupo).reduce((s, v) => s + v, 0);
-      const nuevo = Math.max(0, actual + delta);
-      if (delta > 0 && totalGrupo >= maxPool) return prev;
-      return { ...prev, [grupoId]: { ...grupo, [productoId]: nuevo } };
+  const promotion = confirmOrderData?.promotion;
+  const giftOptions: IGiftOption[] = promotion?.active_range?.gift_options ?? [];
+
+  const tabOptions = giftOptions.filter((o) => o.items.some((g) => !g.fixed));
+  const fixedGroups: IGiftItemGroup[] = giftOptions.flatMap((o) =>
+    o.items.filter((g) => g.fixed)
+  );
+
+  const [activeTab, setActiveTab] = useState(0);
+  const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
+  const [fixedQty, setFixedQty] = useState<Record<number, number>>(() =>
+    Object.fromEntries(fixedGroups.map((g) => [g.gift_item_group_id, g.max_selection_qty]))
+  );
+
+  const getPoolGroupTotal = (groupId: number) => {
+    const group = poolQty[groupId] ?? {};
+    return Object.values(group).reduce((s, v) => s + v, 0);
+  };
+
+  const updatePool = (groupId: number, productId: number, delta: number, max: number) => {
+    setPoolQty((prev) => {
+      const group = prev[groupId] ?? {};
+      const current = group[productId] ?? 0;
+      const groupTotal = Object.values(group).reduce((s, v) => s + v, 0);
+      const next = Math.max(0, current + delta);
+      if (delta > 0 && groupTotal >= max) return prev;
+      return { ...prev, [groupId]: { ...group, [productId]: next } };
     });
   };
 
-  const getPoolTotal = (grupoId: string) => {
-    const grupo = seleccionPool[grupoId] ?? {};
-    return Object.values(grupo).reduce((s, v) => s + v, 0);
-  };
-
-  const updateGenerico = (id: string, delta: number, max: number) => {
-    setSeleccionGenericos((prev) => {
-      const actual = prev[id] ?? 0;
-      const nuevo = Math.max(0, Math.min(max, actual + delta));
-      return { ...prev, [id]: nuevo };
+  const updateFixed = (groupId: number, delta: number, max: number) => {
+    setFixedQty((prev) => {
+      const current = prev[groupId] ?? max;
+      return { ...prev, [groupId]: Math.max(0, Math.min(max, current + delta)) };
     });
   };
 
   const totalBonificados = () => {
-    let total = 0;
-    MOCK_PROMOCIONES.forEach((promo) => {
-      const opcionId = seleccionPromo[promo.id] ?? promo.opciones[0]?.id;
-      const opcion = promo.opciones.find((o) => o.id === opcionId);
-      if (opcion) {
-        opcion.grupos.forEach((g) => {
-          if (g.modo === "fijo") {
-            total += Object.values(g.cantidadesFijas ?? {}).reduce((s, v) => s + v, 0);
-          } else {
-            total += getPoolTotal(g.id);
-          }
-        });
-      }
-    });
-    total += Object.values(seleccionGenericos).reduce((s, v) => s + v, 0);
-    return total;
+    const poolTotal = Object.values(poolQty).flatMap(Object.values).reduce((s, v) => s + v, 0);
+    const fixedTotal = fixedGroups.reduce(
+      (s, g) => s + (fixedQty[g.gift_item_group_id] ?? g.max_selection_qty),
+      0
+    );
+    return poolTotal + fixedTotal;
+  };
+
+  const handleConfirm = () => {
+    if (promotion) {
+      const bonusState: IBonus = {
+        id: promotion.promotion_id,
+        bonusOptions: giftOptions.map((opt) => ({
+          cards: opt.items.map((group) => ({
+            fixed: group.fixed,
+            items: group.items.map(({ image: _img, ...rest }) => ({
+              ...rest,
+              qty: group.fixed
+                ? (fixedQty[group.gift_item_group_id] ?? group.max_selection_qty)
+                : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
+            }))
+          }))
+        }))
+      };
+      setBonus(bonusState);
+    }
+    onClose();
   };
 
   return (
@@ -145,145 +97,166 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
       destroyOnClose
     >
       <div className={styles.content}>
-        {MOCK_PROMOCIONES.length > 0 && (
-          <div className={styles.section}>
-            <p className={styles.sectionLabel}>Bonificados promoción</p>
-            {MOCK_PROMOCIONES.map((promo) => {
-              const opcionSeleccionada = seleccionPromo[promo.id] ?? promo.opciones[0]?.id;
-              const opcionActual = promo.opciones.find((o) => o.id === opcionSeleccionada);
+        {!promotion ? (
+          <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
+            No hay bonificados disponibles
+          </p>
+        ) : (
+          <>
+            {tabOptions.length > 0 && (
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>Bonificados promoción</p>
 
-              return (
-                <div key={promo.id}>
-                  {promo.opciones.length > 1 && (
-                    <div className={styles.tabRow}>
-                      {promo.opciones.map((op) => (
-                        <button
-                          key={op.id}
-                          onClick={() => setSeleccionPromo((prev) => ({ ...prev, [promo.id]: op.id }))}
-                          className={opcionSeleccionada === op.id ? styles.tabActive : styles.tab}
-                        >
-                          {op.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                {tabOptions.length > 1 && (
+                  <div className={styles.tabRow}>
+                    {tabOptions.map((opt, idx) => (
+                      <button
+                        key={opt.gift_group_id}
+                        onClick={() => setActiveTab(idx)}
+                        className={activeTab === idx ? styles.tabActive : styles.tab}
+                      >
+                        Opción {opt.option_number}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                  {opcionActual && (
-                    <div className={styles.grupos}>
-                      {opcionActual.grupos.map((grupo) => (
-                        <div key={grupo.id}>
-                          {grupo.modo === "pool" ? (
-                            <div className={styles.poolTable}>
-                              <div className={styles.poolHeader}>
-                                <span>Elige {grupo.unidadesPool} und.</span>
-                                <span className={styles.poolCount}>
-                                  {getPoolTotal(grupo.id)}/{grupo.unidadesPool}
-                                </span>
-                              </div>
-                              <table className={styles.table}>
-                                <tbody>
-                                  {grupo.productos.map((pp, idx) => {
-                                    const cantidad = seleccionPool[grupo.id]?.[pp.id] ?? 0;
-                                    return (
-                                      <tr key={pp.id} className={idx < grupo.productos.length - 1 ? styles.rowBorder : ""}>
-                                        <td className={styles.cellName}>{pp.nombre}</td>
-                                        <td className={styles.cellControl}>
-                                          <div className={styles.counter}>
-                                            <button
-                                              onClick={() => updatePoolCantidad(grupo.id, pp.id, -1, grupo.unidadesPool!)}
-                                              disabled={cantidad <= 0}
-                                              className={styles.counterBtn}
-                                            >-</button>
-                                            <span className={styles.counterVal}>{cantidad}</span>
-                                            <button
-                                              onClick={() => updatePoolCantidad(grupo.id, pp.id, 1, grupo.unidadesPool!)}
-                                              disabled={getPoolTotal(grupo.id) >= grupo.unidadesPool!}
-                                              className={styles.counterBtn}
-                                            >+</button>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          ) : (
-                            <div className={styles.fixedTable}>
-                              <div className={styles.fixedHeader}>
-                                <span>Incluidos:</span>
-                              </div>
-                              <table className={styles.table}>
-                                <tbody>
-                                  {grupo.productos.map((pp, idx) => (
-                                    <tr key={pp.id} className={idx < grupo.productos.length - 1 ? styles.rowBorderGreen : ""}>
-                                      <td className={styles.cellName}>{pp.nombre}</td>
-                                      <td className={styles.cellBadge}>
-                                        <span className={styles.fixedBadge}>
-                                          {grupo.cantidadesFijas?.[pp.id] ?? 1}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {MOCK_GENERICOS.length > 0 && (
-          <div className={styles.section}>
-            <p className={styles.sectionLabel}>Otros bonificados</p>
-            <div className={styles.genericTable}>
-              <table className={styles.table}>
-                <tbody>
-                  {MOCK_GENERICOS.map((g, idx) => {
-                    const cantidad = seleccionGenericos[g.id] ?? 0;
-                    return (
-                      <tr key={g.id} className={idx < MOCK_GENERICOS.length - 1 ? styles.rowBorder : ""}>
-                        <td className={styles.cellName}>
-                          {g.nombre}
-                          <span className={styles.saldoHint}>
-                            ({g.saldoDisponible - cantidad}/{g.saldoTotal})
-                          </span>
-                        </td>
-                        <td className={styles.cellControl}>
-                          <div className={styles.counter}>
-                            <button
-                              onClick={() => updateGenerico(g.id, -1, g.saldoDisponible)}
-                              disabled={cantidad <= 0}
-                              className={styles.counterBtn}
-                            >-</button>
-                            <span className={styles.counterVal}>{cantidad}</span>
-                            <button
-                              onClick={() => updateGenerico(g.id, 1, g.saldoDisponible)}
-                              disabled={cantidad >= g.saldoDisponible}
-                              className={styles.counterBtn}
-                            >+</button>
+                <div className={styles.grupos}>
+                  {tabOptions[activeTab]?.items
+                    .filter((g) => !g.fixed)
+                    .map((group) => {
+                      const groupTotal = getPoolGroupTotal(group.gift_item_group_id);
+                      return (
+                        <div key={group.gift_item_group_id} className={styles.poolTable}>
+                          <div className={styles.poolHeader}>
+                            <span>Elige {group.max_selection_qty} und.</span>
+                            <span className={styles.poolCount}>
+                              {groupTotal}/{group.max_selection_qty}
+                            </span>
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                          <table className={styles.table}>
+                            <tbody>
+                              {group.items.map((item, idx) => {
+                                const qty = poolQty[group.gift_item_group_id]?.[item.product_id] ?? 0;
+                                return (
+                                  <tr
+                                    key={item.product_id}
+                                    className={idx < group.items.length - 1 ? styles.rowBorder : ""}
+                                  >
+                                    <td className={styles.cellName}>{item.description}</td>
+                                    <td className={styles.cellControl}>
+                                      <div className={styles.counter}>
+                                        <button
+                                          onClick={() =>
+                                            updatePool(
+                                              group.gift_item_group_id,
+                                              item.product_id,
+                                              -1,
+                                              group.max_selection_qty
+                                            )
+                                          }
+                                          disabled={qty <= 0}
+                                          className={styles.counterBtn}
+                                        >
+                                          -
+                                        </button>
+                                        <span className={styles.counterVal}>{qty}</span>
+                                        <button
+                                          onClick={() =>
+                                            updatePool(
+                                              group.gift_item_group_id,
+                                              item.product_id,
+                                              1,
+                                              group.max_selection_qty
+                                            )
+                                          }
+                                          disabled={groupTotal >= group.max_selection_qty}
+                                          className={styles.counterBtn}
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {fixedGroups.length > 0 && (
+              <div className={styles.section}>
+                <p className={styles.sectionLabel}>Otros bonificados</p>
+                <div className={styles.genericTable}>
+                  <table className={styles.table}>
+                    <tbody>
+                      {fixedGroups.map((group, gIdx) => {
+                        const item = group.items[0];
+                        if (!item) return null;
+                        const qty = fixedQty[group.gift_item_group_id] ?? group.max_selection_qty;
+                        return (
+                          <tr
+                            key={group.gift_item_group_id}
+                            className={gIdx < fixedGroups.length - 1 ? styles.rowBorder : ""}
+                          >
+                            <td className={styles.cellName}>
+                              {item.description}
+                              <span className={styles.saldoHint}>
+                                ({qty}/{group.max_selection_qty})
+                              </span>
+                            </td>
+                            <td className={styles.cellControl}>
+                              <div className={styles.counter}>
+                                <button
+                                  onClick={() =>
+                                    updateFixed(
+                                      group.gift_item_group_id,
+                                      -1,
+                                      group.max_selection_qty
+                                    )
+                                  }
+                                  disabled={qty <= 0}
+                                  className={styles.counterBtn}
+                                >
+                                  -
+                                </button>
+                                <span className={styles.counterVal}>{qty}</span>
+                                <button
+                                  onClick={() =>
+                                    updateFixed(
+                                      group.gift_item_group_id,
+                                      1,
+                                      group.max_selection_qty
+                                    )
+                                  }
+                                  disabled={qty >= group.max_selection_qty}
+                                  className={styles.counterBtn}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div className={styles.footer}>
           <p className={styles.footerTotal}>
             Total: <strong>{totalBonificados()}</strong>
           </p>
-          <button onClick={onClose} className={styles.confirmBtn}>
+          <button onClick={handleConfirm} className={styles.confirmBtn}>
             Confirmar
           </button>
         </div>

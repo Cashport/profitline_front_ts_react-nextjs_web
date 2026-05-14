@@ -53,6 +53,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [promotions, setPromotions] = useState<IPromotion[]>([]);
   const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
+  const [promotionId, setPromotionId] = useState<number | undefined>(undefined);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
@@ -90,7 +91,6 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       try {
         const promotions = await getPromotions(client.id);
         setPromotions(promotions.promotions);
-        console.log("Fetched promotions:", promotions);
       } catch (error) {
         console.error("Error fetching promotions:", error);
       }
@@ -255,7 +255,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           discount_package: selectedDiscount,
           order_summary: products,
           executive_discounts: executiveDiscounts,
-          deactivate_cross_selling: !deactivateCrossSelling
+          deactivate_cross_selling: !deactivateCrossSelling,
+          ...(promotionId !== undefined && { promotion_id: promotionId })
         };
         try {
           const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
@@ -264,6 +265,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             setInsufficientStockProducts(response.data.insufficientStockProducts);
             if (response.data.discounts?.discountItems?.length > 0)
               setAppliedDiscounts(response.data.discounts?.discountItems);
+            if (response.data.promotion) setPromotionId(response.data.promotion.promotion_id);
           }
         } catch (error) {
           if (error instanceof AxiosError) {
@@ -281,7 +283,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
+  }, [selectedCategories, selectedDiscount, executiveDiscounts, promotionId]);
 
   useEffect(() => {
     const newState = selectedCategories.map((category) => ({
@@ -504,7 +506,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         <div className={styles.cartContainer__footer}>
           {promotions.length > 0 && (
             <button
-              onClick={() => setIsBonusModalOpen(true)}
+              onClick={() => {
+                setIsBonusModalOpen(true);
+                if (promotions[0]) setPromotionId(promotions[0].id);
+              }}
               className="w-full flex items-center gap-2 px-4 py-3 bg-[#FAFAFA] hover:bg-[#F3F3F3] transition-colors border border-[#EEEEEE] rounded-xl"
             >
               <Gift size={13} className="text-[#141414] flex-shrink-0" />

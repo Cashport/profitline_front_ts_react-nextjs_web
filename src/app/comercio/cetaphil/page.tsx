@@ -9,6 +9,7 @@ import CreateOrderCart from "@/modules/commerce/components/create-order-cart";
 import CreateOrderCheckout from "@/modules/commerce/components/create-order-checkout";
 
 import {
+  IBonus,
   IDiscountPackageAvailable,
   IExecutiveDiscount,
   IFetchedCategories,
@@ -66,6 +67,8 @@ export interface IOrderViewContext {
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
+  bonus: IBonus | undefined;
+  setBonus: Dispatch<SetStateAction<IBonus | undefined>>;
 }
 
 const CreateOrderView: FC = () => {
@@ -86,6 +89,7 @@ const CreateOrderView: FC = () => {
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
   const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(false);
   const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
+  const [bonus, setBonus] = useState<IBonus | undefined>(undefined);
   const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
   const token = localStorage.getItem(STORAGE_TOKEN);
@@ -158,7 +162,9 @@ const CreateOrderView: FC = () => {
         deactivateCrossSelling,
         setDeactivateCrossSelling,
         order_split_details: orderSplitDetails,
-        setOrderSplitDetails
+        setOrderSplitDetails,
+        bonus,
+        setBonus
       }}
     >
       <div className={styles.ordersView}>
