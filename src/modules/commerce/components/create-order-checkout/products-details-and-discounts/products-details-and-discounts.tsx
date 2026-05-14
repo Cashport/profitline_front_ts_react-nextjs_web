@@ -99,10 +99,11 @@ export default function ProductsDetailsAndDiscounts({
     setBonus
   } = useContext(OrderViewContext);
 
-  const bonificados = (bonus?.bonusOptions ?? []).flatMap((option, optionIdx) =>
+  const promoBonificados = (bonus?.bonusOptions ?? []).flatMap((option, optionIdx) =>
     option.cards.flatMap((card, cardIdx) =>
       card.items.map((item) => ({
-        key: `${optionIdx}-${cardIdx}-${item.product_id}`,
+        key: `promo-${optionIdx}-${cardIdx}-${item.product_id}`,
+        kind: "promo" as const,
         optionIdx,
         cardIdx,
         product_id: item.product_id,
@@ -113,7 +114,18 @@ export default function ProductsDetailsAndDiscounts({
     )
   );
 
-  const handleRemoveBonus = (optionIdx: number, cardIdx: number, productId: number) => {
+  const otherBonificados = (bonus?.otherBonificated ?? []).map((item) => ({
+    key: `other-${item.product_id}`,
+    kind: "other" as const,
+    product_id: item.product_id,
+    fixed: true,
+    description: item.description,
+    qty: item.qty
+  }));
+
+  const bonificados = [...promoBonificados, ...otherBonificados];
+
+  const handleRemovePromoBonus = (optionIdx: number, cardIdx: number, productId: number) => {
     if (!bonus) return;
     const nextOptions = bonus.bonusOptions
       .map((option, oi) => {
@@ -128,11 +140,22 @@ export default function ProductsDetailsAndDiscounts({
       })
       .filter((option) => option.cards.length > 0);
 
-    if (nextOptions.length === 0) {
+    if (nextOptions.length === 0 && bonus.otherBonificated.length === 0) {
       setBonus(undefined);
       return;
     }
     const next: IBonus = { ...bonus, bonusOptions: nextOptions };
+    setBonus(next);
+  };
+
+  const handleRemoveOtherBonus = (productId: number) => {
+    if (!bonus) return;
+    const nextOther = bonus.otherBonificated.filter((it) => it.product_id !== productId);
+    if (bonus.bonusOptions.length === 0 && nextOther.length === 0) {
+      setBonus(undefined);
+      return;
+    }
+    const next: IBonus = { ...bonus, otherBonificated: nextOther };
     setBonus(next);
   };
 
@@ -336,7 +359,11 @@ export default function ProductsDetailsAndDiscounts({
                       </p>
                       {multiEntrega && <span />}
                       <button
-                        onClick={() => handleRemoveBonus(b.optionIdx, b.cardIdx, b.product_id)}
+                        onClick={() =>
+                          b.kind === "promo"
+                            ? handleRemovePromoBonus(b.optionIdx, b.cardIdx, b.product_id)
+                            : handleRemoveOtherBonus(b.product_id)
+                        }
                         title="Quitar bonificado"
                         className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
                       >

@@ -2,7 +2,7 @@
 import { useContext, useState } from "react";
 import { Modal, Typography } from "antd";
 
-import { IBonus, IGiftItemGroup, IGiftOption } from "@/types/commerce/ICommerce";
+import { IBonus, IGiftOption } from "@/types/commerce/ICommerce";
 import { IPromotion } from "@/services/promotion/promotion";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
@@ -21,15 +21,12 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
 
   const promotion = confirmOrderData?.promotion;
   const giftOptions: IGiftOption[] = promotion?.active_range?.gift_options ?? [];
+  const otherBonificated = confirmOrderData?.other_bonificated_products ?? [];
 
   const tabOptions = giftOptions.filter((o) => o.items.some((g) => !g.fixed));
-  const fixedGroups: IGiftItemGroup[] = giftOptions.flatMap((o) => o.items.filter((g) => g.fixed));
 
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
-  const [fixedQty, setFixedQty] = useState<Record<number, number>>(() =>
-    Object.fromEntries(fixedGroups.map((g) => [g.gift_item_group_id, g.max_selection_qty]))
-  );
 
   const getPoolGroupTotal = (groupId: number) => {
     const group = poolQty[groupId] ?? {};
@@ -47,41 +44,38 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
     });
   };
 
-  const updateFixed = (groupId: number, delta: number, max: number) => {
-    setFixedQty((prev) => {
-      const current = prev[groupId] ?? max;
-      return { ...prev, [groupId]: Math.max(0, Math.min(max, current + delta)) };
-    });
-  };
-
   const totalBonificados = () => {
     const poolTotal = Object.values(poolQty)
       .flatMap(Object.values)
       .reduce((s, v) => s + v, 0);
-    const fixedTotal = fixedGroups.reduce(
-      (s, g) => s + (fixedQty[g.gift_item_group_id] ?? g.max_selection_qty),
-      0
-    );
-    return poolTotal + fixedTotal;
+    const otherTotal = otherBonificated.reduce((s, p) => s + p.qty, 0);
+    return poolTotal + otherTotal;
   };
 
   const handleConfirm = () => {
-    if (promotion) {
-      const bonusState: IBonus = {
-        id: promotion.promotion_id,
-        bonusOptions: giftOptions.map((opt) => ({
+    const bonusOptions = promotion
+      ? giftOptions.map((opt) => ({
           cards: opt.items.map((group) => ({
             fixed: group.fixed,
             items: group.items
               .map(({ image: _img, ...rest }) => ({
                 ...rest,
-                qty: group.fixed
-                  ? fixedQty[group.gift_item_group_id] ?? group.max_selection_qty
-                  : poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
+                qty: poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
               }))
               .filter((item) => item.qty > 0)
           }))
         }))
+      : [];
+
+    const otherBonificatedPayload = otherBonificated
+      .map(({ image: _img, max_selection_qty: _max, ...rest }) => rest)
+      .filter((item) => item.qty > 0);
+
+    if (promotion || otherBonificatedPayload.length > 0) {
+      const bonusState: IBonus = {
+        id: promotion?.promotion_id,
+        bonusOptions,
+        otherBonificated: otherBonificatedPayload
       };
       setBonus(bonusState);
     }
@@ -99,13 +93,13 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
       destroyOnClose
     >
       <div className={styles.content}>
-        {!promotion ? (
+        {!promotion && otherBonificated.length === 0 ? (
           <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
             No hay bonificados disponibles
           </p>
         ) : (
           <>
-            {tabOptions.length > 0 && (
+            {promotion && tabOptions.length > 0 && (
               <div className={styles.section}>
                 <p className={styles.sectionLabel}>Bonificados promoción</p>
 
@@ -192,69 +186,7 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
               </div>
             )}
 
-            {/* TO DO: Integrate wneh other bonus is avail */}
-            {/* {fixedGroups.length > 0 && (
-              <div className={styles.section}>
-                <p className={styles.sectionLabel}>Otros bonificados</p>
-                <div className={styles.genericTable}>
-                  <table className={styles.table}>
-                    <tbody>
-                      {fixedGroups.map((group, gIdx) => {
-                        const item = group.items[0];
-                        if (!item) return null;
-                        const qty = fixedQty[group.gift_item_group_id] ?? group.max_selection_qty;
-                        return (
-                          <tr
-                            key={group.gift_item_group_id}
-                            className={gIdx < fixedGroups.length - 1 ? styles.rowBorder : ""}
-                          >
-                            <td className={styles.cellName}>
-                              {item.description}
-                              <span className={styles.saldoHint}>
-                                ({qty}/{group.max_selection_qty})
-                              </span>
-                            </td>
-                            <td className={styles.cellControl}>
-                              <div className={styles.counter}>
-                                <button
-                                  onClick={() =>
-                                    updateFixed(
-                                      group.gift_item_group_id,
-                                      -1,
-                                      group.max_selection_qty
-                                    )
-                                  }
-                                  disabled={qty <= 0}
-                                  className={styles.counterBtn}
-                                >
-                                  -
-                                </button>
-                                <span className={styles.counterVal}>{qty}</span>
-                                <button
-                                  onClick={() =>
-                                    updateFixed(
-                                      group.gift_item_group_id,
-                                      1,
-                                      group.max_selection_qty
-                                    )
-                                  }
-                                  disabled={qty >= group.max_selection_qty}
-                                  className={styles.counterBtn}
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )} */}
-
-            {fixedGroups.length > 0 && (
+            {otherBonificated.length > 0 && (
               <div className={styles.section}>
                 <div className={styles.fixedTable}>
                   <div className={styles.fixedHeader}>
@@ -262,25 +194,17 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
                   </div>
                   <table className={styles.table}>
                     <tbody>
-                      {fixedGroups
-                        .flatMap((group) =>
-                          group.items.map((item) => ({
-                            item,
-                            qty: group.max_selection_qty,
-                            groupId: group.gift_item_group_id
-                          }))
-                        )
-                        .map((row, idx, arr) => (
-                          <tr
-                            key={`${row.groupId}-${row.item.product_id}`}
-                            className={idx < arr.length - 1 ? styles.rowBorderGreen : ""}
-                          >
-                            <td className={styles.cellName}>{row.item.description}</td>
-                            <td className={styles.cellBadge}>
-                              <span className={styles.fixedBadge}>{row.qty}</span>
-                            </td>
-                          </tr>
-                        ))}
+                      {otherBonificated.map((item, idx, arr) => (
+                        <tr
+                          key={item.product_id}
+                          className={idx < arr.length - 1 ? styles.rowBorderGreen : ""}
+                        >
+                          <td className={styles.cellName}>{item.description}</td>
+                          <td className={styles.cellBadge}>
+                            <span className={styles.fixedBadge}>{item.qty}</span>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
