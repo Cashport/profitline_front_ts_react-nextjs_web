@@ -40,6 +40,8 @@ interface ActivePaymentsTabProps {
   isActive: boolean;
 }
 
+const STATUS_ORDER = ["Sin identificar", "Pendiente ingreso a SAP", "Identificado", "Pago aplicado"];
+
 export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
@@ -191,7 +193,11 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
             <Collapse
               stickyLabel
               labelStickyOffset={"6rem"}
-              items={data?.map((status) => ({
+              items={data?.slice().sort((a, b) => {
+                const ia = STATUS_ORDER.indexOf(a.payments_status);
+                const ib = STATUS_ORDER.indexOf(b.payments_status);
+                return (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib);
+              }).map((status) => ({
                 key: status.payments_status_id,
                 label: (
                   <LabelCollapse
