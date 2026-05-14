@@ -72,12 +72,14 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
         bonusOptions: giftOptions.map((opt) => ({
           cards: opt.items.map((group) => ({
             fixed: group.fixed,
-            items: group.items.map(({ image: _img, ...rest }) => ({
-              ...rest,
-              qty: group.fixed
-                ? (fixedQty[group.gift_item_group_id] ?? group.max_selection_qty)
-                : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
-            }))
+            items: group.items
+              .map(({ image: _img, ...rest }) => ({
+                ...rest,
+                qty: group.fixed
+                  ? (fixedQty[group.gift_item_group_id] ?? group.max_selection_qty)
+                  : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
+              }))
+              .filter((item) => item.qty > 0)
           }))
         }))
       };

@@ -54,7 +54,8 @@ export default function CheckoutPage() {
     setConfirmOrderData,
     confirmOrderData,
     order_split_details,
-    deactivateCrossSelling
+    deactivateCrossSelling,
+    bonus
   } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
 
@@ -203,6 +204,7 @@ export default function CheckoutPage() {
   };
 
   const handleFinishOrder = async () => {
+    console.log("bonus", bonus);
     if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
       showMessage("error", "El total no es válido");
       return;
@@ -270,6 +272,7 @@ export default function CheckoutPage() {
   };
 
   const handleDraftOrder = async () => {
+    console.log("bonus", bonus);
     if (!client?.id) return;
     if (!order_split_details?.length) {
       showMessage("error", "Faltan datos de envío");
