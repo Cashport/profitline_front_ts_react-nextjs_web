@@ -1,12 +1,13 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
-import { X } from "lucide-react";
+import { Gift, X } from "lucide-react";
 
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
+import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
 
 interface ModalShippingInfoProps {
   mode: "new" | string;
@@ -16,6 +17,10 @@ interface ModalShippingInfoProps {
   onClose: () => void;
   discountItems: DiscountItem[];
   cantidadesAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  bonusItems: BonusRow[];
+  otherBonusItems: BonusRow[];
+  bonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  otherBonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
   addresses: ICommerceAdresses[];
   callingCodeOptions: { value: number; label: string; className: string }[];
   isLoadingOptions: boolean;
@@ -29,10 +34,15 @@ export default function ModalShippingInfo({
   onClose,
   discountItems,
   cantidadesAsignadasExcluyendo,
+  bonusItems,
+  otherBonusItems,
+  bonusAsignadasExcluyendo,
+  otherBonusAsignadasExcluyendo,
   addresses,
   callingCodeOptions,
   isLoadingOptions
 }: ModalShippingInfoProps) {
+  const hasBonus = bonusItems.length + otherBonusItems.length > 0;
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const isSaveDisabled =
     !draft.addressSelectValue.trim() ||
@@ -210,10 +220,11 @@ export default function ModalShippingInfo({
                 );
                 const disponible = item.quantity - asignadoOtros;
                 const puedeAsignar = disponible;
+                const isLastRow = iIdx === discountItems.length - 1 && !hasBonus;
                 return (
                   <div
                     key={item.product_sku}
-                    className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${iIdx < discountItems.length - 1 ? "border-b border-[#EEEEEE]" : ""}`}
+                    className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${!isLastRow ? "border-b border-[#EEEEEE]" : ""}`}
                   >
                     <p className="text-xs text-[#141414] leading-tight pr-2">{item.description}</p>
                     <p
@@ -242,6 +253,106 @@ export default function ModalShippingInfo({
                   </div>
                 );
               })}
+              {hasBonus && (
+                <>
+                  <div className="grid grid-cols-[1fr_56px_72px] px-3 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
+                    <span className="text-[10px] text-[#6AB000] font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                      <Gift size={10} />
+                      Bonificados
+                    </span>
+                    <span />
+                    <span />
+                  </div>
+                  {bonusItems.map((item, iIdx) => {
+                    const asignado = draft.bonusCantidades[item.product_sku] ?? 0;
+                    const asignadoOtros = bonusAsignadasExcluyendo(
+                      item.product_sku,
+                      mode === "new" ? null : mode
+                    );
+                    const puedeAsignar = item.quantity - asignadoOtros;
+                    const isLastBonus =
+                      iIdx === bonusItems.length - 1 && otherBonusItems.length === 0;
+                    return (
+                      <div
+                        key={`promo-${item.product_sku}`}
+                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastBonus ? "border-b border-[#F0F9D8]" : ""}`}
+                      >
+                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                          {item.description}
+                        </p>
+                        <p
+                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                        >
+                          {puedeAsignar}
+                        </p>
+                        <input
+                          type="number"
+                          min={0}
+                          max={puedeAsignar}
+                          value={asignado === 0 ? "" : asignado}
+                          placeholder="0"
+                          onChange={(e) => {
+                            const v = Math.min(
+                              Math.max(parseInt(e.target.value) || 0, 0),
+                              puedeAsignar
+                            );
+                            setDraft((d) => ({
+                              ...d,
+                              bonusCantidades: { ...d.bonusCantidades, [item.product_sku]: v }
+                            }));
+                          }}
+                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                        />
+                      </div>
+                    );
+                  })}
+                  {otherBonusItems.map((item, iIdx) => {
+                    const asignado = draft.otherBonusCantidades[item.product_sku] ?? 0;
+                    const asignadoOtros = otherBonusAsignadasExcluyendo(
+                      item.product_sku,
+                      mode === "new" ? null : mode
+                    );
+                    const puedeAsignar = item.quantity - asignadoOtros;
+                    const isLastOther = iIdx === otherBonusItems.length - 1;
+                    return (
+                      <div
+                        key={`other-${item.product_sku}`}
+                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastOther ? "border-b border-[#F0F9D8]" : ""}`}
+                      >
+                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                          {item.description}
+                        </p>
+                        <p
+                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                        >
+                          {puedeAsignar}
+                        </p>
+                        <input
+                          type="number"
+                          min={0}
+                          max={puedeAsignar}
+                          value={asignado === 0 ? "" : asignado}
+                          placeholder="0"
+                          onChange={(e) => {
+                            const v = Math.min(
+                              Math.max(parseInt(e.target.value) || 0, 0),
+                              puedeAsignar
+                            );
+                            setDraft((d) => ({
+                              ...d,
+                              otherBonusCantidades: {
+                                ...d.otherBonusCantidades,
+                                [item.product_sku]: v
+                              }
+                            }));
+                          }}
+                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                        />
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
           </div>
         </div>

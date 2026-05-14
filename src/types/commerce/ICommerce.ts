@@ -146,6 +146,22 @@ export interface OrderDiscount {
   };
 }
 
+export interface IOtherBonificatedProduct {
+  product_id: number;
+  qty: number;
+  max_selection_qty: number;
+  sku: string;
+  description: string;
+  image: string;
+}
+
+export interface IBonificatedProductsPost {
+  product_id: number;
+  quantity: number;
+  product_sku: string;
+  description: string;
+}
+
 export interface IGiftItem {
   product_id: number;
   qty: number;
@@ -155,13 +171,14 @@ export interface IGiftItem {
 }
 
 export interface IBonus {
-  id: number;
+  id?: number;
   bonusOptions: {
     cards: {
       fixed: boolean;
       items: Omit<IGiftItem, "image">[];
     }[];
   }[];
+  otherBonificated: Omit<IGiftItem, "image">[];
 }
 
 export interface IGiftItemGroup {
@@ -210,6 +227,7 @@ export interface IOrderConfirmedResponse {
   total_pronto_pago: number;
   insufficientStockProducts: string[];
   promotion?: IPromotion;
+  other_bonificated_products?: IOtherBonificatedProduct[];
 }
 
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
@@ -243,6 +261,8 @@ export interface IOrderSplitDetail {
   index: number;
   shipping_information: IOrderSplitShippingInfo;
   products: DiscountItem[];
+  bonificated_products?: IBonificatedProductsPost[];
+  other_bonificated_products?: IBonificatedProductsPost[];
 }
 
 export interface ICreateOrderData {

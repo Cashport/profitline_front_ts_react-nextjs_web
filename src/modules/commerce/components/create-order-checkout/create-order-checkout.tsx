@@ -40,6 +40,8 @@ export type IShippingInfo = {
   telefono: string;
   observaciones: string;
   cantidades: Record<string, number>;
+  bonusCantidades: Record<string, number>;
+  otherBonusCantidades: Record<string, number>;
 };
 
 export default function CheckoutPage() {
@@ -111,6 +113,16 @@ export default function CheckoutPage() {
 
   const cantidadesAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
     entregas.filter((e) => e.id !== excludeId).reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+
+  const bonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.bonusCantidades[sku] ?? 0), 0);
+
+  const otherBonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
 
   const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
     const orderSummary: IOrderSummaryPayload = {
@@ -204,7 +216,6 @@ export default function CheckoutPage() {
   };
 
   const handleFinishOrder = async () => {
-    console.log("bonus", bonus);
     if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
       showMessage("error", "El total no es válido");
       return;
@@ -272,7 +283,6 @@ export default function CheckoutPage() {
   };
 
   const handleDraftOrder = async () => {
-    console.log("bonus", bonus);
     if (!client?.id) return;
     if (!order_split_details?.length) {
       showMessage("error", "Faltan datos de envío");
@@ -317,6 +327,8 @@ export default function CheckoutPage() {
         entregas={entregas}
         setEntregas={setEntregas}
         cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+        bonusAsignadasExcluyendo={bonusAsignadasExcluyendo}
+        otherBonusAsignadasExcluyendo={otherBonusAsignadasExcluyendo}
         onConfirm={handleFinishOrder}
         onDraft={handleDraftOrder}
         loadingFinish={loadingFinish}
