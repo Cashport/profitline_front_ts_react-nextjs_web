@@ -50,7 +50,6 @@ const AccountingAdjustmentsTab = () => {
     zones: [],
     channels: []
   });
-  const JustOthersMotiveType = 2; // no trae ajustes financieros
   const {
     data,
     isLoading,
@@ -60,8 +59,7 @@ const AccountingAdjustmentsTab = () => {
     search: debouncedSearchQuery ? debouncedSearchQuery : undefined,
     line: filters.lines,
     zone: filters.zones,
-    channel: filters.channels,
-    motive_id: JustOthersMotiveType
+    channel: filters.channels
   });
 
   const { clientFilters } = useContext(ClientDetailsContext);
