@@ -595,11 +595,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         <CreateOrderDiscountsModal setOpenDiscountsModal={setOpenDiscountsModal} />
       )}
 
-      <ModalBonus
-        isOpen={isBonusModalOpen}
-        onClose={() => setIsBonusModalOpen(false)}
-        promotions={promotions}
-      />
+      <ModalBonus isOpen={isBonusModalOpen} onClose={() => setIsBonusModalOpen(false)} />
 
       <ModalConfirmAction
         isOpen={showConfirmModal}

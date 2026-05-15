@@ -13,10 +13,9 @@ const { Title } = Typography;
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  promotions: IPromotion[];
 }
 
-const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
+const ModalBonus = ({ isOpen, onClose }: Props) => {
   const { confirmOrderData, setBonus } = useContext(OrderViewContext);
 
   const promotion = confirmOrderData?.promotion;
@@ -49,7 +48,12 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
       .flatMap(Object.values)
       .reduce((s, v) => s + v, 0);
     const otherTotal = otherBonificated.reduce((s, p) => s + p.qty, 0);
-    return poolTotal + otherTotal;
+    const fixedTotal = giftOptions
+      .flatMap((opt) => opt.items)
+      .filter((g) => g.fixed)
+      .flatMap((g) => g.items)
+      .reduce((s, it) => s + (it.qty ?? 0), 0);
+    return poolTotal + otherTotal + fixedTotal;
   };
 
   const handleConfirm = () => {
@@ -60,7 +64,9 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
             items: group.items
               .map(({ image: _img, ...rest }) => ({
                 ...rest,
-                qty: poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
+                qty: group.fixed
+                  ? rest.qty
+                  : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
               }))
               .filter((item) => item.qty > 0)
           }))
@@ -182,27 +188,48 @@ const ModalBonus = ({ isOpen, onClose, promotions: _promotions }: Props) => {
                         </div>
                       );
                     })}
+
+                  {tabOptions[activeTab]?.items
+                    .filter((g) => g.fixed)
+                    .map((group) => (
+                      <div key={group.gift_item_group_id} className={styles.fixedTable}>
+                        <div className={styles.fixedHeader}>
+                          <span>Incluido</span>
+                        </div>
+                        <table className={styles.table}>
+                          <tbody>
+                            {group.items.map((item, idx) => (
+                              <tr
+                                key={item.product_id}
+                                className={idx < group.items.length - 1 ? styles.rowBorderGreen : ""}
+                              >
+                                <td className={styles.cellName}>{item.description}</td>
+                                <td className={styles.cellBadge}>
+                                  <span className={styles.fixedBadge}>{item.qty}</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
 
             {otherBonificated.length > 0 && (
               <div className={styles.section}>
-                <div className={styles.fixedTable}>
-                  <div className={styles.fixedHeader}>
-                    <span>Incluidos:</span>
-                  </div>
+                <p className={styles.sectionLabel}>Otros bonificados</p>
+                <div className={styles.genericTable}>
                   <table className={styles.table}>
                     <tbody>
                       {otherBonificated.map((item, idx, arr) => (
                         <tr
                           key={item.product_id}
-                          className={idx < arr.length - 1 ? styles.rowBorderGreen : ""}
+                          className={idx < arr.length - 1 ? styles.rowBorder : ""}
                         >
                           <td className={styles.cellName}>{item.description}</td>
-                          <td className={styles.cellBadge}>
-                            <span className={styles.fixedBadge}>{item.qty}</span>
-                          </td>
+                          <td className={styles.cellBadge}>{item.qty}</td>
                         </tr>
                       ))}
                     </tbody>
