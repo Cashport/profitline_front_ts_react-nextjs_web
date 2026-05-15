@@ -97,9 +97,16 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
                     value: /^-?\d+(\.\d+)?$/,
                     message: "Solo se permiten números"
                   },
-                  validate: (value) =>
-                    Number(value) <= amount ||
-                    `El valor no puede superar ${formatMoney(amount, { hideCurrencySymbol: true })}`
+                  validate: (value) => {
+                    const isNegativeFinancialRecord =
+                      row?.entity_type_name === "FINANCIAL_RECORD" && amount < 0;
+                    if (isNegativeFinancialRecord) return true;
+
+                    return (
+                      Number(value) <= amount ||
+                      `El valor no puede superar ${formatMoney(amount, { hideCurrencySymbol: true })}`
+                    );
+                  }
                 }}
               />
 
