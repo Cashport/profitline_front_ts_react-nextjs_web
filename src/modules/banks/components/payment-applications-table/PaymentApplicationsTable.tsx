@@ -21,8 +21,9 @@ import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
 import {
-  ReprocessExcel,
-  UploadFinalFile
+  reprocessExcel,
+  reprocessPDF,
+  uploadFinalFile
 } from "@/services/paymentApplications/paymentApplications";
 
 import "./payment-applications-table.scss";
@@ -137,7 +138,7 @@ export const PaymentApplicationsTable = ({
         duration: 0
       });
       try {
-        await UploadFinalFile(String(applicationId), file);
+        await uploadFinalFile(String(applicationId), file);
         message.success("Archivo cargado exitosamente");
         mutate();
       } catch (error) {
@@ -149,16 +150,32 @@ export const PaymentApplicationsTable = ({
     input.click();
   };
 
-  const handleRegenerate = async (applicationId: number) => {
+  const handleRegenerateExcel = async (applicationId: number) => {
     const hide = message.open({
       type: "loading",
       content: "Regenerando archivo...",
       duration: 0
     });
     try {
-      const data = await ReprocessExcel(applicationId);
+      const data = await reprocessExcel(applicationId);
       hide();
       handleDownload(data.excel_url);
+    } catch (error) {
+      hide();
+      message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
+    }
+  };
+
+  const handleRegeneratePDF = async (applicationId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Regenerando archivo...",
+      duration: 0
+    });
+    try {
+      const data = await reprocessPDF(applicationId);
+      hide();
+      handleDownload(data.pdf_url);
     } catch (error) {
       hide();
       message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
@@ -294,9 +311,21 @@ export const PaymentApplicationsTable = ({
               <Button
                 icon={<ArrowCounterClockwise size={20} />}
                 className="buttonNoBorder"
-                onClick={() => handleRegenerate(record.id)}
+                onClick={() => handleRegenerateExcel(record.id)}
               >
-                Regenerar
+                Regenerar Excel
+              </Button>
+            )
+          },
+          {
+            key: "regenerate",
+            label: (
+              <Button
+                icon={<ArrowCounterClockwise size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleRegeneratePDF(record.id)}
+              >
+                Regenerar PDF
               </Button>
             )
           },

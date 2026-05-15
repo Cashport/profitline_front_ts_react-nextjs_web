@@ -1,15 +1,33 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
 
-export const ReprocessExcel = async (applicationId: number): Promise<{ excel_url: string }> => {
-  const response: GenericResponse<{ excel_url: string }> = await API.post(
-    `/paymentApplication/reprocess-excel`,
-    { id: applicationId }
-  );
-  return response.data;
+export const reprocessExcel = async (applicationId: number): Promise<{ excel_url: string }> => {
+  try {
+    const response: GenericResponse<{ excel_url: string }> = await API.post(
+      `/paymentApplication/reprocess-excel`,
+      { id: applicationId }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reprocessing Excel:", error);
+    throw error;
+  }
 };
 
-export const UploadFinalFile = async (applicationId: string, file: File): Promise<any> => {
+export const reprocessPDF = async (applicationId: number): Promise<{ pdf_url: string }> => {
+  try {
+    const response: GenericResponse<{ pdf_url: string }> = await API.post(
+      `/paymentApplication/reprocess-pdf`,
+      { id: applicationId }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error reprocessing PDF:", error);
+    throw error;
+  }
+};
+
+export const uploadFinalFile = async (applicationId: string, file: File): Promise<any> => {
   const formData = new FormData();
   formData.append("file", file);
   try {
@@ -19,6 +37,7 @@ export const UploadFinalFile = async (applicationId: string, file: File): Promis
     );
     return response.data;
   } catch (error) {
+    console.error("Error uploading final file:", error);
     throw error;
   }
 };
