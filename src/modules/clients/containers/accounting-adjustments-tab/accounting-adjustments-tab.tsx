@@ -142,6 +142,12 @@ const AccountingAdjustmentsTab = () => {
     setIsModalOpen({ selected });
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value?.trim();
+    // Separar los IDs por saltos de línea y luego unirlos con comas
+    const formattedValue = value.split(/\s+/).join(",");
+    setSearch(formattedValue);
+  };
   return (
     <>
       {selectedRows && selectedRows.length > 0 && (
@@ -160,9 +166,7 @@ const AccountingAdjustmentsTab = () => {
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"
-              onChange={(event) => {
-                setSearch(event.target.value);
-              }}
+              onChange={handleSearchChange}
             />
             {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
             <Button
