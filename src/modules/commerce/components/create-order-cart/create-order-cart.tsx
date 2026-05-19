@@ -478,13 +478,15 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
+                const discountSource = productDiscount?.primary ?? productDiscount?.secondary;
                 const subtotal = config?.include_iva
-                  ? productDiscount?.primary?.new_price_taxes || productDiscount?.primary?.new_price
-                  : productDiscount?.primary?.new_price;
+                  ? discountSource?.new_price_taxes || discountSource?.new_price
+                  : discountSource?.new_price;
+
                 const productDiscountData =
                   productDiscount && productDiscount.subtotalDiscount > 0
                     ? {
-                        discountPercentage: productDiscount.primary?.discount_applied?.discount,
+                        discountPercentage: discountSource?.discount_applied?.discount,
                         subtotal
                       }
                     : undefined;
