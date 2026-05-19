@@ -134,7 +134,8 @@ export default function CheckoutPage() {
     return {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
-      order_split_details
+      order_split_details,
+      promotion_id: bonus?.id || 0
     };
   };
 

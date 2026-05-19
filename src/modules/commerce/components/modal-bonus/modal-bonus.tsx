@@ -22,10 +22,13 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
   const giftOptions: IGiftOption[] = promotion?.active_range?.gift_options ?? [];
   const otherBonificated = confirmOrderData?.other_bonificated_products ?? [];
 
-  const tabOptions = giftOptions.filter((o) => o.items.some((g) => !g.fixed));
+  const tabOptions = giftOptions;
 
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
+  const [otherQty, setOtherQty] = useState<Record<number, number>>(() =>
+    Object.fromEntries(otherBonificated.map((p) => [p.product_id, p.qty]))
+  );
 
   const getPoolGroupTotal = (groupId: number) => {
     const group = poolQty[groupId] ?? {};
@@ -43,11 +46,20 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
     });
   };
 
+  const updateOther = (productId: number, delta: number, max: number) => {
+    setOtherQty((prev) => {
+      const current = prev[productId] ?? 0;
+      const next = Math.max(0, current + delta);
+      if (delta > 0 && next > max) return prev;
+      return { ...prev, [productId]: next };
+    });
+  };
+
   const totalBonificados = () => {
     const poolTotal = Object.values(poolQty)
       .flatMap(Object.values)
       .reduce((s, v) => s + v, 0);
-    const otherTotal = otherBonificated.reduce((s, p) => s + p.qty, 0);
+    const otherTotal = Object.values(otherQty).reduce((s, v) => s + v, 0);
     const fixedTotal = giftOptions
       .flatMap((opt) => opt.items)
       .filter((g) => g.fixed)
@@ -66,7 +78,7 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
                 ...rest,
                 qty: group.fixed
                   ? rest.qty
-                  : (poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0)
+                  : poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
               }))
               .filter((item) => item.qty > 0)
           }))
@@ -74,7 +86,10 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
       : [];
 
     const otherBonificatedPayload = otherBonificated
-      .map(({ image: _img, max_selection_qty: _max, ...rest }) => rest)
+      .map(({ image: _img, max_selection_qty: _max, ...rest }) => ({
+        ...rest,
+        qty: otherQty[rest.product_id] ?? 0
+      }))
       .filter((item) => item.qty > 0);
 
     if (promotion || otherBonificatedPayload.length > 0) {
@@ -201,7 +216,9 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
                             {group.items.map((item, idx) => (
                               <tr
                                 key={item.product_id}
-                                className={idx < group.items.length - 1 ? styles.rowBorderGreen : ""}
+                                className={
+                                  idx < group.items.length - 1 ? styles.rowBorderGreen : ""
+                                }
                               >
                                 <td className={styles.cellName}>{item.description}</td>
                                 <td className={styles.cellBadge}>
@@ -223,15 +240,45 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
                 <div className={styles.genericTable}>
                   <table className={styles.table}>
                     <tbody>
-                      {otherBonificated.map((item, idx, arr) => (
-                        <tr
-                          key={item.product_id}
-                          className={idx < arr.length - 1 ? styles.rowBorder : ""}
-                        >
-                          <td className={styles.cellName}>{item.description}</td>
-                          <td className={styles.cellBadge}>{item.qty}</td>
-                        </tr>
-                      ))}
+                      {otherBonificated.map((item, idx, arr) => {
+                        const qty = otherQty[item.product_id] ?? 0;
+                        return (
+                          <tr
+                            key={item.product_id}
+                            className={idx < arr.length - 1 ? styles.rowBorder : ""}
+                          >
+                            <td className={styles.cellName}>
+                              {item.description}
+                              <span className={styles.saldoHint}>
+                                ({qty}/{item.max_selection_qty})
+                              </span>
+                            </td>
+                            <td className={styles.cellControl}>
+                              <div className={styles.counter}>
+                                <button
+                                  onClick={() =>
+                                    updateOther(item.product_id, -1, item.max_selection_qty)
+                                  }
+                                  disabled={qty <= 0}
+                                  className={styles.counterBtn}
+                                >
+                                  -
+                                </button>
+                                <span className={styles.counterVal}>{qty}</span>
+                                <button
+                                  onClick={() =>
+                                    updateOther(item.product_id, 1, item.max_selection_qty)
+                                  }
+                                  disabled={qty >= item.max_selection_qty}
+                                  className={styles.counterBtn}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

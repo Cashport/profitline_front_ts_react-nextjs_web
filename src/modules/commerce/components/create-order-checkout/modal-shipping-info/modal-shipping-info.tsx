@@ -1,6 +1,7 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Flex } from "antd";
 import { Gift, X } from "lucide-react";
 
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
@@ -8,6 +9,11 @@ import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
+import { useAppStore } from "@/lib/store/store";
+
+const MINIMUM_ORDER_AMOUNT = 1_600_000;
 
 interface ModalShippingInfoProps {
   mode: "new" | string;
@@ -42,6 +48,11 @@ export default function ModalShippingInfo({
   callingCodeOptions,
   isLoadingOptions
 }: ModalShippingInfoProps) {
+  const { projectId, formatMoney } = useAppStore((s) => ({
+    projectId: s.selectedProject.ID,
+    formatMoney: s.formatMoney
+  }));
+
   const hasBonus = bonusItems.length + otherBonusItems.length > 0;
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const isSaveDisabled =
@@ -50,6 +61,56 @@ export default function ModalShippingInfo({
     !draft.dispatch_address.trim() ||
     !draft.email.trim() ||
     !draft.telefono.trim();
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCanulasModal, setShowCanulasModal] = useState(false);
+  const [showOnlyCanulasOrAguaModal, setShowOnlyCanulasOrAguaModal] = useState(false);
+
+  const splitTotal = useMemo(() => {
+    return discountItems.reduce((sum, item) => {
+      const qty = draft.cantidades[item.product_sku] ?? 0;
+      const unitPrice = item.discount?.primary?.new_price ?? item.price;
+      return sum + unitPrice * qty;
+    }, 0);
+  }, [discountItems, draft.cantidades]);
+
+  const isTotalLessThanMinimum = splitTotal < MINIMUM_ORDER_AMOUNT;
+
+  const splitProductDescriptions = useMemo(() => {
+    const descs: string[] = [];
+    for (const i of discountItems) {
+      if ((draft.cantidades[i.product_sku] ?? 0) > 0) descs.push(i.description ?? "");
+    }
+    for (const b of bonusItems) {
+      if ((draft.bonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
+    }
+    for (const b of otherBonusItems) {
+      if ((draft.otherBonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
+    }
+    return descs;
+  }, [
+    discountItems,
+    bonusItems,
+    otherBonusItems,
+    draft.cantidades,
+    draft.bonusCantidades,
+    draft.otherBonusCantidades
+  ]);
+
+  const hasNoCanulasOrAgua = useMemo(() => {
+    return !splitProductDescriptions.some((d) => {
+      const n = d.toLowerCase();
+      return n.includes("canula") || n.includes("agua");
+    });
+  }, [splitProductDescriptions]);
+
+  const hasOnlyCanulasOrAgua = useMemo(() => {
+    if (splitProductDescriptions.length === 0) return false;
+    return splitProductDescriptions.every((d) => {
+      const n = d.toLowerCase();
+      return n.includes("canula") || n.includes("agua");
+    });
+  }, [splitProductDescriptions]);
 
   const addressOptions = useMemo(
     () => [
@@ -89,6 +150,32 @@ export default function ModalShippingInfo({
       }
     }
   }, [draft.addressSelectValue, addresses]);
+
+  const handleSave = () => {
+    if (isSaveDisabled) return;
+
+    if (projectId === GALDERMA_PROJECT_ID) {
+      if (hasOnlyCanulasOrAgua) {
+        setShowOnlyCanulasOrAguaModal(true);
+        return;
+      }
+      if (isTotalLessThanMinimum) {
+        setShowConfirmModal(true);
+        return;
+      }
+      if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+        return;
+      }
+    }
+
+    onSave();
+  };
+
+  const handleConfirmCanulas = () => {
+    setShowCanulasModal(false);
+    onSave();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -365,11 +452,7 @@ export default function ModalShippingInfo({
             Cancelar
           </button>
           <button
-            onClick={() => {
-              if (!isSaveDisabled) {
-                onSave();
-              }
-            }}
+            onClick={handleSave}
             disabled={isSaveDisabled}
             className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
               isSaveDisabled
@@ -381,6 +464,49 @@ export default function ModalShippingInfo({
           </button>
         </div>
       </div>
+
+      <ModalConfirmAction
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="No puedes guardar esta entrega"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>Cada entrega debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)}</p>
+            <p>Reasigna cantidades a esta entrega para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOnlyCanulasOrAguaModal}
+        onClose={() => setShowOnlyCanulasOrAguaModal(false)}
+        title="No puedes guardar esta entrega"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>No se pueden facturar solo cánulas ni aguas</p>
+            <p>Agrega otros productos a esta entrega para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showCanulasModal}
+        onClose={() => setShowCanulasModal(false)}
+        onOk={handleConfirmCanulas}
+        title="¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>No has seleccionado Cánulas y/o Agua estéril en esta entrega</p>
+            <p>Te recomendamos revisar la orden</p>
+          </Flex>
+        }
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 }
