@@ -24,11 +24,12 @@ export interface IApplyTabRecord {
   total_adjustments: number | null;
   adjustments_detail: string | null;
   adjustments_breakdown: IAdjustmentBreakdown;
-  adjustments?: IApplyTabAdjustment[];
   erp_id: string | null;
   motive_description?: string;
   motive_id?: number;
   cp_id: string;
+  adjustments?: IApplyTabAdjustment[];
+  invoices?: IApplyTabNestedInvoice[];
 }
 
 export interface IApplyTabClients {
@@ -51,10 +52,19 @@ interface IApplyTabAdjustment {
   amount: number;
   description: string;
   is_global: number;
-  motive_id: number;
+  motive_id: number | null;
   motive_type: string;
   timestamp: string;
   user_name: string;
+  id_erp?: string;
+}
+
+interface IApplyTabNestedInvoice {
+  invoice_id: number;
+  financial_discount_id: number;
+  CURRENT_VALUE: number;
+  description: string;
+  id_erp: string;
 }
 
 interface IAdjustmentBreakdown {
