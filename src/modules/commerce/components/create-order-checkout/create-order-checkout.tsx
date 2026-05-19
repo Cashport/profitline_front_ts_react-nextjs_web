@@ -40,6 +40,8 @@ export type IShippingInfo = {
   telefono: string;
   observaciones: string;
   cantidades: Record<string, number>;
+  bonusCantidades: Record<string, number>;
+  otherBonusCantidades: Record<string, number>;
 };
 
 export default function CheckoutPage() {
@@ -54,7 +56,8 @@ export default function CheckoutPage() {
     setConfirmOrderData,
     confirmOrderData,
     order_split_details,
-    deactivateCrossSelling
+    deactivateCrossSelling,
+    bonus
   } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
 
@@ -111,6 +114,16 @@ export default function CheckoutPage() {
   const cantidadesAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
     entregas.filter((e) => e.id !== excludeId).reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
 
+  const bonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.bonusCantidades[sku] ?? 0), 0);
+
+  const otherBonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
+
   const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
     const orderSummary: IOrderSummaryPayload = {
       ...confirmOrderData,
@@ -121,7 +134,8 @@ export default function CheckoutPage() {
     return {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
-      order_split_details
+      order_split_details,
+      promotion_id: bonus?.id || 0
     };
   };
 
@@ -314,6 +328,8 @@ export default function CheckoutPage() {
         entregas={entregas}
         setEntregas={setEntregas}
         cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+        bonusAsignadasExcluyendo={bonusAsignadasExcluyendo}
+        otherBonusAsignadasExcluyendo={otherBonusAsignadasExcluyendo}
         onConfirm={handleFinishOrder}
         onDraft={handleDraftOrder}
         loadingFinish={loadingFinish}

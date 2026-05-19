@@ -1,5 +1,6 @@
 import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Typography } from "antd";
+import { Eye, Gift } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
 import { BagSimple, X } from "phosphor-react";
 
@@ -8,12 +9,14 @@ import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
+import { getPromotions, IPromotion } from "@/services/promotion/promotion";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import CreateOrderDiscountsModal from "../create-order-discounts-modal";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import ModalBonus from "../modal-bonus";
 import {
   EVEN_QUANTITY_PRODUCT,
   EVEN_QUANTITY_GROUP_PRODUCTS,
@@ -48,6 +51,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const width = useScreenWidth();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
+  const [promotions, setPromotions] = useState<IPromotion[]>([]);
+  const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
+  const [promotionId, setPromotionId] = useState<number | undefined>(undefined);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
@@ -78,6 +84,19 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     (acc, category) => acc + category.products.length,
     0
   );
+
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      if (!client?.id) return;
+      try {
+        const promotions = await getPromotions(client.id);
+        setPromotions(promotions.promotions);
+      } catch (error) {
+        console.error("Error fetching promotions:", error);
+      }
+    };
+    fetchPromotions();
+  }, [client?.id]);
 
   const handleOpenDiscountsModal = () => {
     setOpenDiscountsModal(true);
@@ -236,7 +255,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           discount_package: selectedDiscount,
           order_summary: products,
           executive_discounts: executiveDiscounts,
-          deactivate_cross_selling: !deactivateCrossSelling
+          deactivate_cross_selling: !deactivateCrossSelling,
+          ...(promotionId !== undefined && { promotion_id: promotionId })
         };
         try {
           const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
@@ -245,6 +265,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             setInsufficientStockProducts(response.data.insufficientStockProducts);
             if (response.data.discounts?.discountItems?.length > 0)
               setAppliedDiscounts(response.data.discounts?.discountItems);
+            if (response.data.promotion) setPromotionId(response.data.promotion.promotion_id);
           }
         } catch (error) {
           if (error instanceof AxiosError) {
@@ -262,7 +283,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, selectedDiscount, executiveDiscounts]);
+  }, [selectedCategories, selectedDiscount, executiveDiscounts, promotionId]);
 
   useEffect(() => {
     const newState = selectedCategories.map((category) => ({
@@ -457,13 +478,15 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 const productDiscount = appliedDiscounts?.find(
                   (discount: any) => discount.product_sku === product.SKU
                 )?.discount;
+                const discountSource = productDiscount?.primary ?? productDiscount?.secondary;
                 const subtotal = config?.include_iva
-                  ? productDiscount?.primary?.new_price_taxes || productDiscount?.primary?.new_price
-                  : productDiscount?.primary?.new_price;
+                  ? discountSource?.new_price_taxes || discountSource?.new_price
+                  : discountSource?.new_price;
+
                 const productDiscountData =
                   productDiscount && productDiscount.subtotalDiscount > 0
                     ? {
-                        discountPercentage: productDiscount.primary?.discount_applied?.discount,
+                        discountPercentage: discountSource?.discount_applied?.discount,
                         subtotal
                       }
                     : undefined;
@@ -483,6 +506,24 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
+          {promotions.length > 0 && (
+            <button
+              onClick={() => {
+                setIsBonusModalOpen(true);
+                if (promotions[0]) setPromotionId(promotions[0].id);
+              }}
+              className="w-full flex items-center gap-2 px-4 py-3 bg-[#FAFAFA] hover:bg-[#F3F3F3] transition-colors border border-[#EEEEEE] rounded-xl"
+            >
+              <Gift size={13} className="text-[#141414] flex-shrink-0" />
+              <span className="flex-1 text-xs font-semibold text-[#141414] text-left">
+                Bonificados
+              </span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
+                {promotions.length} disp.
+              </span>
+              <Eye size={14} className="text-[#999999]" />
+            </button>
+          )}
           {!checkingOut && (
             <>
               <button
@@ -555,6 +596,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       {openDiscountsModal && (
         <CreateOrderDiscountsModal setOpenDiscountsModal={setOpenDiscountsModal} />
       )}
+
+      <ModalBonus isOpen={isBonusModalOpen} onClose={() => setIsBonusModalOpen(false)} />
 
       <ModalConfirmAction
         isOpen={showConfirmModal}

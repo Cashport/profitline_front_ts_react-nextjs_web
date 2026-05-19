@@ -1,12 +1,19 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
-import { X } from "lucide-react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Flex } from "antd";
+import { Gift, X } from "lucide-react";
 
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
+import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
+import { useAppStore } from "@/lib/store/store";
+
+const MINIMUM_ORDER_AMOUNT = 1_600_000;
 
 interface ModalShippingInfoProps {
   mode: "new" | string;
@@ -16,6 +23,10 @@ interface ModalShippingInfoProps {
   onClose: () => void;
   discountItems: DiscountItem[];
   cantidadesAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  bonusItems: BonusRow[];
+  otherBonusItems: BonusRow[];
+  bonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  otherBonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
   addresses: ICommerceAdresses[];
   callingCodeOptions: { value: number; label: string; className: string }[];
   isLoadingOptions: boolean;
@@ -29,10 +40,20 @@ export default function ModalShippingInfo({
   onClose,
   discountItems,
   cantidadesAsignadasExcluyendo,
+  bonusItems,
+  otherBonusItems,
+  bonusAsignadasExcluyendo,
+  otherBonusAsignadasExcluyendo,
   addresses,
   callingCodeOptions,
   isLoadingOptions
 }: ModalShippingInfoProps) {
+  const { projectId, formatMoney } = useAppStore((s) => ({
+    projectId: s.selectedProject.ID,
+    formatMoney: s.formatMoney
+  }));
+
+  const hasBonus = bonusItems.length + otherBonusItems.length > 0;
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const isSaveDisabled =
     !draft.addressSelectValue.trim() ||
@@ -40,6 +61,56 @@ export default function ModalShippingInfo({
     !draft.dispatch_address.trim() ||
     !draft.email.trim() ||
     !draft.telefono.trim();
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showCanulasModal, setShowCanulasModal] = useState(false);
+  const [showOnlyCanulasOrAguaModal, setShowOnlyCanulasOrAguaModal] = useState(false);
+
+  const splitTotal = useMemo(() => {
+    return discountItems.reduce((sum, item) => {
+      const qty = draft.cantidades[item.product_sku] ?? 0;
+      const unitPrice = item.discount?.primary?.new_price ?? item.price;
+      return sum + unitPrice * qty;
+    }, 0);
+  }, [discountItems, draft.cantidades]);
+
+  const isTotalLessThanMinimum = splitTotal < MINIMUM_ORDER_AMOUNT;
+
+  const splitProductDescriptions = useMemo(() => {
+    const descs: string[] = [];
+    for (const i of discountItems) {
+      if ((draft.cantidades[i.product_sku] ?? 0) > 0) descs.push(i.description ?? "");
+    }
+    for (const b of bonusItems) {
+      if ((draft.bonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
+    }
+    for (const b of otherBonusItems) {
+      if ((draft.otherBonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
+    }
+    return descs;
+  }, [
+    discountItems,
+    bonusItems,
+    otherBonusItems,
+    draft.cantidades,
+    draft.bonusCantidades,
+    draft.otherBonusCantidades
+  ]);
+
+  const hasNoCanulasOrAgua = useMemo(() => {
+    return !splitProductDescriptions.some((d) => {
+      const n = d.toLowerCase();
+      return n.includes("canula") || n.includes("agua");
+    });
+  }, [splitProductDescriptions]);
+
+  const hasOnlyCanulasOrAgua = useMemo(() => {
+    if (splitProductDescriptions.length === 0) return false;
+    return splitProductDescriptions.every((d) => {
+      const n = d.toLowerCase();
+      return n.includes("canula") || n.includes("agua");
+    });
+  }, [splitProductDescriptions]);
 
   const addressOptions = useMemo(
     () => [
@@ -79,6 +150,32 @@ export default function ModalShippingInfo({
       }
     }
   }, [draft.addressSelectValue, addresses]);
+
+  const handleSave = () => {
+    if (isSaveDisabled) return;
+
+    if (projectId === GALDERMA_PROJECT_ID) {
+      if (hasOnlyCanulasOrAgua) {
+        setShowOnlyCanulasOrAguaModal(true);
+        return;
+      }
+      if (isTotalLessThanMinimum) {
+        setShowConfirmModal(true);
+        return;
+      }
+      if (hasNoCanulasOrAgua) {
+        setShowCanulasModal(true);
+        return;
+      }
+    }
+
+    onSave();
+  };
+
+  const handleConfirmCanulas = () => {
+    setShowCanulasModal(false);
+    onSave();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -210,10 +307,11 @@ export default function ModalShippingInfo({
                 );
                 const disponible = item.quantity - asignadoOtros;
                 const puedeAsignar = disponible;
+                const isLastRow = iIdx === discountItems.length - 1 && !hasBonus;
                 return (
                   <div
                     key={item.product_sku}
-                    className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${iIdx < discountItems.length - 1 ? "border-b border-[#EEEEEE]" : ""}`}
+                    className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${!isLastRow ? "border-b border-[#EEEEEE]" : ""}`}
                   >
                     <p className="text-xs text-[#141414] leading-tight pr-2">{item.description}</p>
                     <p
@@ -242,6 +340,106 @@ export default function ModalShippingInfo({
                   </div>
                 );
               })}
+              {hasBonus && (
+                <>
+                  <div className="grid grid-cols-[1fr_56px_72px] px-3 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
+                    <span className="text-[10px] text-[#6AB000] font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                      <Gift size={10} />
+                      Bonificados
+                    </span>
+                    <span />
+                    <span />
+                  </div>
+                  {bonusItems.map((item, iIdx) => {
+                    const asignado = draft.bonusCantidades[item.product_sku] ?? 0;
+                    const asignadoOtros = bonusAsignadasExcluyendo(
+                      item.product_sku,
+                      mode === "new" ? null : mode
+                    );
+                    const puedeAsignar = item.quantity - asignadoOtros;
+                    const isLastBonus =
+                      iIdx === bonusItems.length - 1 && otherBonusItems.length === 0;
+                    return (
+                      <div
+                        key={`promo-${item.product_sku}`}
+                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastBonus ? "border-b border-[#F0F9D8]" : ""}`}
+                      >
+                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                          {item.description}
+                        </p>
+                        <p
+                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                        >
+                          {puedeAsignar}
+                        </p>
+                        <input
+                          type="number"
+                          min={0}
+                          max={puedeAsignar}
+                          value={asignado === 0 ? "" : asignado}
+                          placeholder="0"
+                          onChange={(e) => {
+                            const v = Math.min(
+                              Math.max(parseInt(e.target.value) || 0, 0),
+                              puedeAsignar
+                            );
+                            setDraft((d) => ({
+                              ...d,
+                              bonusCantidades: { ...d.bonusCantidades, [item.product_sku]: v }
+                            }));
+                          }}
+                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                        />
+                      </div>
+                    );
+                  })}
+                  {otherBonusItems.map((item, iIdx) => {
+                    const asignado = draft.otherBonusCantidades[item.product_sku] ?? 0;
+                    const asignadoOtros = otherBonusAsignadasExcluyendo(
+                      item.product_sku,
+                      mode === "new" ? null : mode
+                    );
+                    const puedeAsignar = item.quantity - asignadoOtros;
+                    const isLastOther = iIdx === otherBonusItems.length - 1;
+                    return (
+                      <div
+                        key={`other-${item.product_sku}`}
+                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastOther ? "border-b border-[#F0F9D8]" : ""}`}
+                      >
+                        <p className="text-xs text-[#141414] leading-tight pr-2">
+                          {item.description}
+                        </p>
+                        <p
+                          className={`text-xs font-semibold text-center ${puedeAsignar === 0 ? "text-red-400" : "text-[#666666]"}`}
+                        >
+                          {puedeAsignar}
+                        </p>
+                        <input
+                          type="number"
+                          min={0}
+                          max={puedeAsignar}
+                          value={asignado === 0 ? "" : asignado}
+                          placeholder="0"
+                          onChange={(e) => {
+                            const v = Math.min(
+                              Math.max(parseInt(e.target.value) || 0, 0),
+                              puedeAsignar
+                            );
+                            setDraft((d) => ({
+                              ...d,
+                              otherBonusCantidades: {
+                                ...d.otherBonusCantidades,
+                                [item.product_sku]: v
+                              }
+                            }));
+                          }}
+                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                        />
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -254,11 +452,7 @@ export default function ModalShippingInfo({
             Cancelar
           </button>
           <button
-            onClick={() => {
-              if (!isSaveDisabled) {
-                onSave();
-              }
-            }}
+            onClick={handleSave}
             disabled={isSaveDisabled}
             className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
               isSaveDisabled
@@ -270,6 +464,49 @@ export default function ModalShippingInfo({
           </button>
         </div>
       </div>
+
+      <ModalConfirmAction
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="No puedes guardar esta entrega"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>Cada entrega debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)}</p>
+            <p>Reasigna cantidades a esta entrega para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showOnlyCanulasOrAguaModal}
+        onClose={() => setShowOnlyCanulasOrAguaModal(false)}
+        title="No puedes guardar esta entrega"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>No se pueden facturar solo cánulas ni aguas</p>
+            <p>Agrega otros productos a esta entrega para continuar.</p>
+          </Flex>
+        }
+        cancelText="Entendido"
+        hideOkButton
+      />
+
+      <ModalConfirmAction
+        isOpen={showCanulasModal}
+        onClose={() => setShowCanulasModal(false)}
+        onOk={handleConfirmCanulas}
+        title="¿Está seguro que desea continuar?"
+        content={
+          <Flex vertical gap="0.5rem">
+            <p>No has seleccionado Cánulas y/o Agua estéril en esta entrega</p>
+            <p>Te recomendamos revisar la orden</p>
+          </Flex>
+        }
+        okText="Confirmar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 }

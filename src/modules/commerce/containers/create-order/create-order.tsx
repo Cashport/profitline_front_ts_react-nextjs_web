@@ -11,6 +11,7 @@ import CreateOrderCart from "../../components/create-order-cart";
 import CreateOrderCheckout from "../../components/create-order-checkout";
 
 import {
+  IBonus,
   IDiscountPackageAvailable,
   IDraftOrderDetail,
   IExecutiveDiscount,
@@ -78,8 +79,9 @@ export const CreateOrderView: FC = () => {
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
-  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(false);
+  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(true);
   const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
+  const [bonus, setBonus] = useState<IBonus | undefined>();
   const [draftDetail, setDraftDetail] = useState<IDraftOrderDetail | null>(null);
   const [isCartVisible, setIsCartVisible] = useState(
     () => typeof window !== "undefined" && window.innerWidth > 1000
@@ -153,7 +155,6 @@ export const CreateOrderView: FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Draft detail changed:", draftDetail);
     if (!draftDetail || categories.length === 0) return;
 
     const { client_name, client_id, shipping_info, order_summary, executive_discounts } =
@@ -241,7 +242,9 @@ export const CreateOrderView: FC = () => {
         setOrderSplitDetails,
         toggleCart,
         isCartVisible,
-        numberOfItems
+        numberOfItems,
+        bonus,
+        setBonus
       }}
     >
       <div className={styles.ordersView}>

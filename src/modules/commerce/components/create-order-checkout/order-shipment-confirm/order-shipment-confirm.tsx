@@ -1,11 +1,12 @@
 "use client";
 
-import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from "react";
-import { GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Dispatch, SetStateAction, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Gift, GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import {
   DiscountItem,
+  IBonificatedProductsPost,
   ICommerceAdresses,
   IOrderSplitDetail,
   IOrderSplitShippingInfo
@@ -19,12 +20,21 @@ import ModalShippingInfo from "../modal-shipping-info";
 import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
+export type BonusRow = {
+  product_id: number;
+  product_sku: string;
+  description: string;
+  quantity: number;
+};
+
 interface OrderShipmentConfirmProps {
   multiEntrega: boolean;
   setMultiEntrega: (v: boolean) => void;
   entregas: IShippingInfo[];
   setEntregas: Dispatch<SetStateAction<IShippingInfo[]>>;
   cantidadesAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  bonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
+  otherBonusAsignadasExcluyendo: (productSku: string, excludeId: string | null) => number;
   onConfirm: () => void;
   onDraft: () => void;
   loadingFinish?: boolean;
@@ -48,17 +58,45 @@ export default function OrderShipmentConfirm({
   entregas,
   setEntregas,
   cantidadesAsignadasExcluyendo,
+  bonusAsignadasExcluyendo,
+  otherBonusAsignadasExcluyendo,
   onConfirm,
   onDraft,
   loadingFinish,
   loadingDraft
 }: OrderShipmentConfirmProps) {
-  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo, selectedDiscount } =
+  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo, selectedDiscount, bonus } =
     useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
+
+  const bonusItems = useMemo<BonusRow[]>(
+    () =>
+      (bonus?.bonusOptions ?? []).flatMap((opt) =>
+        opt.cards.flatMap((card) =>
+          card.items.map((item) => ({
+            product_id: item.product_id,
+            product_sku: item.sku,
+            description: item.description,
+            quantity: item.qty
+          }))
+        )
+      ),
+    [bonus]
+  );
+
+  const otherBonusItems = useMemo<BonusRow[]>(
+    () =>
+      (bonus?.otherBonificated ?? []).map((item) => ({
+        product_id: item.product_id,
+        product_sku: item.sku,
+        description: item.description,
+        quantity: item.qty
+      })),
+    [bonus]
+  );
 
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const [addressesFetched, setAddressesFetched] = useState(false);
@@ -86,7 +124,9 @@ export default function OrderShipmentConfirm({
     indicativo: "+57",
     telefono: "",
     observaciones: "",
-    cantidades: {}
+    cantidades: {},
+    bonusCantidades: {},
+    otherBonusCantidades: {}
   });
 
   // Fetch client addresses + saved phone
@@ -187,7 +227,9 @@ export default function OrderShipmentConfirm({
     indicativo: "+57",
     telefono: "",
     observaciones: "",
-    cantidades: Object.fromEntries(discountItems.map((i) => [i.product_sku, 0]))
+    cantidades: Object.fromEntries(discountItems.map((i) => [i.product_sku, 0])),
+    bonusCantidades: Object.fromEntries(bonusItems.map((i) => [i.product_sku, 0])),
+    otherBonusCantidades: Object.fromEntries(otherBonusItems.map((i) => [i.product_sku, 0]))
   });
 
   const openNewModal = () => {
@@ -205,7 +247,9 @@ export default function OrderShipmentConfirm({
       indicativo: entrega.indicativo,
       telefono: entrega.telefono,
       observaciones: entrega.observaciones,
-      cantidades: { ...entrega.cantidades }
+      cantidades: { ...entrega.cantidades },
+      bonusCantidades: { ...entrega.bonusCantidades },
+      otherBonusCantidades: { ...entrega.otherBonusCantidades }
     });
     setModalEntrega(entrega.id);
   };
@@ -223,6 +267,13 @@ export default function OrderShipmentConfirm({
   const removeEntrega = (id: string) =>
     setEntregas((prev) => (prev.length > 1 ? prev.filter((e) => e.id !== id) : prev));
 
+  const splitQty = (totalQty: number, deliveryIdx: number, deliveryCount: number) => {
+    if (deliveryCount <= 0) return 0;
+    const base = Math.floor(totalQty / deliveryCount);
+    const excess = totalQty - base * deliveryCount;
+    return base + (deliveryIdx === 0 ? excess : 0);
+  };
+
   const activarMultiEntrega = () => {
     setMultiEntrega(true);
     const e1: IShippingInfo = { id: `e${Date.now()}`, ...makeBlankEntrega() };
@@ -239,6 +290,14 @@ export default function OrderShipmentConfirm({
       e2.city = addresses[1].city;
       e2.dispatch_address = addresses[1].address;
     }
+    bonusItems.forEach((b) => {
+      e1.bonusCantidades[b.product_sku] = splitQty(b.quantity, 0, 2);
+      e2.bonusCantidades[b.product_sku] = splitQty(b.quantity, 1, 2);
+    });
+    otherBonusItems.forEach((b) => {
+      e1.otherBonusCantidades[b.product_sku] = splitQty(b.quantity, 0, 2);
+      e2.otherBonusCantidades[b.product_sku] = splitQty(b.quantity, 1, 2);
+    });
     setEntregas([e1, e2]);
   };
 
@@ -250,9 +309,14 @@ export default function OrderShipmentConfirm({
 
   const cantidadesAsignadas = (sku: string) =>
     entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
-  const hayDesbalance = discountItems.some(
-    (i) => cantidadesAsignadas(i.product_sku) !== i.quantity
-  );
+  const bonusAsignadas = (sku: string) =>
+    entregas.reduce((s, e) => s + (e.bonusCantidades[sku] ?? 0), 0);
+  const otherBonusAsignadas = (sku: string) =>
+    entregas.reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
+  const hayDesbalance =
+    discountItems.some((i) => cantidadesAsignadas(i.product_sku) !== i.quantity) ||
+    bonusItems.some((i) => bonusAsignadas(i.product_sku) !== i.quantity) ||
+    otherBonusItems.some((i) => otherBonusAsignadas(i.product_sku) !== i.quantity);
 
   const isSingleFormValid =
     singleForm.addressSelectValue !== "" &&
@@ -290,22 +354,64 @@ export default function OrderShipmentConfirm({
         .map((item) => ({ ...item, quantity: cantidades[item.product_sku] ?? 0 }))
         .filter((item) => item.quantity > 0);
 
-    const splits: IOrderSplitDetail[] = multiEntrega
-      ? entregas.map((e, idx) => ({
-          index: idx,
-          shipping_information: buildShipping(e),
-          products: buildProductsForSplit(e.cantidades)
+    const buildBonusForSplit = (
+      map: Record<string, number>,
+      source: BonusRow[]
+    ): IBonificatedProductsPost[] =>
+      source
+        .map((b) => ({
+          product_id: b.product_id,
+          quantity: map[b.product_sku] ?? 0,
+          product_sku: b.product_sku,
+          description: b.description
         }))
+        .filter((item) => item.quantity > 0);
+
+    const bonusFull: IBonificatedProductsPost[] = bonusItems.map((b) => ({
+      product_id: b.product_id,
+      quantity: b.quantity,
+      product_sku: b.product_sku,
+      description: b.description
+    }));
+    const otherBonusFull: IBonificatedProductsPost[] = otherBonusItems.map((b) => ({
+      product_id: b.product_id,
+      quantity: b.quantity,
+      product_sku: b.product_sku,
+      description: b.description
+    }));
+
+    const splits: IOrderSplitDetail[] = multiEntrega
+      ? entregas.map((e, idx) => {
+          const splitBonus = buildBonusForSplit(e.bonusCantidades, bonusItems);
+          const splitOther = buildBonusForSplit(e.otherBonusCantidades, otherBonusItems);
+          return {
+            index: idx,
+            shipping_information: buildShipping(e),
+            products: buildProductsForSplit(e.cantidades),
+            ...(splitBonus.length > 0 ? { bonificated_products: splitBonus } : {}),
+            ...(splitOther.length > 0 ? { other_bonificated_products: splitOther } : {})
+          };
+        })
       : [
           {
             index: 0,
             shipping_information: buildShipping(singleForm),
-            products: discountItems
+            products: discountItems,
+            ...(bonusFull.length > 0 ? { bonificated_products: bonusFull } : {}),
+            ...(otherBonusFull.length > 0 ? { other_bonificated_products: otherBonusFull } : {})
           }
         ];
 
     setOrderSplitDetails(splits);
-  }, [multiEntrega, entregas, singleForm, discountItems, setOrderSplitDetails]);
+  }, [
+    multiEntrega,
+    entregas,
+    singleForm,
+    discountItems,
+    bonusItems,
+    otherBonusItems,
+    setOrderSplitDetails
+  ]);
 
   const totalDescuento = confirmOrderData?.discounts?.totalDiscount ?? 0;
   const descuentoDeOrden = confirmOrderData?.discounts?.totalOrderDiscount ?? 0;
@@ -501,6 +607,54 @@ export default function OrderShipmentConfirm({
                       );
                     })}
                   </div>
+                  {bonusItems.length + otherBonusItems.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F7FDE8] border-t border-[#F0F9D8]">
+                        <Gift size={10} className="text-[#6AB000] flex-shrink-0" />
+                        <span className="text-[10px] font-semibold text-[#6AB000] uppercase tracking-wide">
+                          Bonificados
+                        </span>
+                      </div>
+                      <div className="divide-y divide-[#F0F9D8] bg-[#FDFFF5]">
+                        {bonusItems.map((item) => {
+                          const asignado = entrega.bonusCantidades[item.product_sku] ?? 0;
+                          return (
+                            <div
+                              key={`promo-${item.product_sku}`}
+                              className="flex items-center gap-2 px-3 py-2"
+                            >
+                              <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
+                                {item.description}
+                              </p>
+                              <span
+                                className={`text-[11px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
+                              >
+                                {asignado}
+                              </span>
+                            </div>
+                          );
+                        })}
+                        {otherBonusItems.map((item) => {
+                          const asignado = entrega.otherBonusCantidades[item.product_sku] ?? 0;
+                          return (
+                            <div
+                              key={`other-${item.product_sku}`}
+                              className="flex items-center gap-2 px-3 py-2"
+                            >
+                              <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
+                                {item.description}
+                              </p>
+                              <span
+                                className={`text-[11px] font-semibold w-6 text-right ${asignado === 0 ? "text-[#CCCCCC]" : "text-[#6AB000]"}`}
+                              >
+                                {asignado}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                   {(entrega.telefono || entrega.observaciones) && (
                     <div className="px-3 py-2 bg-[#FAFAFA] border-t border-[#F0F0F0] flex flex-col gap-0.5">
                       {entrega.telefono && (
@@ -537,6 +691,10 @@ export default function OrderShipmentConfirm({
               onClose={() => setModalEntrega(null)}
               discountItems={discountItems}
               cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+              bonusItems={bonusItems}
+              otherBonusItems={otherBonusItems}
+              bonusAsignadasExcluyendo={bonusAsignadasExcluyendo}
+              otherBonusAsignadasExcluyendo={otherBonusAsignadasExcluyendo}
               addresses={addresses}
               callingCodeOptions={callingCodeOptions}
               isLoadingOptions={isLoadingOptions}
