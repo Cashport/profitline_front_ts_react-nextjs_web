@@ -20,11 +20,11 @@ function DashboardContent() {
       {activeTab === "resumen" ? (
         <>
           <div className="grid grid-cols-2 gap-6 items-stretch">
-            <DashboardKPICards mockData />
-            <NovedadesChart mockData />
+            <DashboardKPICards />
+            <NovedadesChart />
           </div>
-          <DashboardIngestionStatus mockData />
-          <PeriodicityChart mockData />
+          <DashboardIngestionStatus />
+          <PeriodicityChart />
         </>
       ) : (
         <DataExplorationCard />
