@@ -98,13 +98,14 @@ const ModalEditRow: React.FC<IModalEditRowProps> = ({
                     message: "Solo se permiten números"
                   },
                   validate: (value) => {
+                    const maxAmount = row?.current_value ?? row?.current_amount ?? amount;
                     const isNegativeFinancialRecord =
-                      row?.entity_type_name === "FINANCIAL_RECORD" && amount < 0;
+                      row?.entity_type_name === "FINANCIAL_RECORD" && maxAmount < 0;
                     if (isNegativeFinancialRecord) return true;
-
                     return (
-                      Number(value) <= amount ||
-                      `El valor no puede superar ${formatMoney(amount, { hideCurrencySymbol: true })}`
+                      parseFloat(value) <=
+                        maxAmount ||
+                      `El valor no puede superar ${formatMoney(maxAmount, { hideCurrencySymbol: true })}`
                     );
                   }
                 }}

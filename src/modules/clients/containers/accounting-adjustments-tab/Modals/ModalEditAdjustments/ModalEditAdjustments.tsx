@@ -184,7 +184,9 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
           placeholder="Valor"
           validationRules={{
             required: "Valor es obligatorio",
-            validate: (value) => parseFloat(value) != 0 || "El valor debe ser distinto a 0"
+            validate: (value) =>
+              parseFloat(value?.replaceAll(".", "").replaceAll(",", ".") || "0") != 0 ||
+              "El valor debe ser distinto a 0"
           }}
           allowNegative={true}
           fixedDecimalScale={true}
