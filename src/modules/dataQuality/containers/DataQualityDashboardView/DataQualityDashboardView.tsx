@@ -4,12 +4,10 @@ import Header from "@/components/organisms/header";
 import { DataExplorationCard } from "@/modules/dataQuality/components/Dashboard/DataExplorationCard";
 
 export default function DataQualityDashboardView() {
-  const { ID } = useAppStore((projects) => projects.selectedProject);
-
   return (
     <div className="flex flex-col gap-4">
       <Header title="Dashboard de ingesta" />
-      <DataExplorationCard idCountry={6} />
+      <DataExplorationCard />
     </div>
   );
 }

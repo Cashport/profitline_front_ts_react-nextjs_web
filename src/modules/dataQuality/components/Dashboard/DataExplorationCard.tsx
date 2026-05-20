@@ -20,6 +20,7 @@ import {
 } from "@/modules/chat/ui/select";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
+import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const months = [
   { id: "2026-05", name: "Mayo 2026" },
@@ -30,114 +31,8 @@ const months = [
   { id: "2025-12", name: "Diciembre 2025" }
 ];
 
-type DayData = {
-  value: number | null;
-  novedades: number;
-  status: "received" | "missing" | "not-expected" | "future-expected";
-};
-
-type ClientDataRow = {
-  client: string;
-  country: string;
-  periodicidad: "Diario" | "Semanal" | "Mensual";
-  fileType: string;
-  days: DayData[];
-  total: number;
-  totalNovedades: number;
-};
-
-const TODAY = 20;
-
-const HARDCODED_COUNTRY = "all";
-const HARDCODED_FILE_TYPE = "all";
-
-function generateSampleData(): ClientDataRow[] {
-  const clients = [
-    { client: "Oxxo", country: "Mexico", periodicidad: "Semanal" as const, fileType: "Sales" },
-    { client: "Soriana", country: "Mexico", periodicidad: "Diario" as const, fileType: "Stock" },
-    { client: "Femsa", country: "Mexico", periodicidad: "Diario" as const, fileType: "Sales" },
-    { client: "Fanasa", country: "Mexico", periodicidad: "Mensual" as const, fileType: "Stock" },
-    {
-      client: "Chedraui",
-      country: "Mexico",
-      periodicidad: "Semanal" as const,
-      fileType: "Stock in transit"
-    },
-    { client: "Walmart", country: "Mexico", periodicidad: "Diario" as const, fileType: "Sales" },
-    {
-      client: "Farmacity",
-      country: "Argentina",
-      periodicidad: "Diario" as const,
-      fileType: "Stock"
-    },
-    {
-      client: "Disval",
-      country: "Argentina",
-      periodicidad: "Semanal" as const,
-      fileType: "Sales"
-    },
-    {
-      client: "Maxiconsumo",
-      country: "Argentina",
-      periodicidad: "Diario" as const,
-      fileType: "Stock"
-    },
-    {
-      client: "Farmatodo",
-      country: "Colombia",
-      periodicidad: "Diario" as const,
-      fileType: "Sales"
-    },
-    { client: "Cafam", country: "Colombia", periodicidad: "Semanal" as const, fileType: "Stock" },
-    {
-      client: "Locatel",
-      country: "Colombia",
-      periodicidad: "Mensual" as const,
-      fileType: "Stock in transit"
-    },
-    { client: "Nadro", country: "Mexico", periodicidad: "Mensual" as const, fileType: "Sales" }
-  ];
-
-  return clients.map((c) => {
-    const days: DayData[] = [];
-    let total = 0;
-    let totalNovedades = 0;
-
-    for (let d = 1; d <= 31; d++) {
-      let expected = false;
-
-      if (c.periodicidad === "Diario") {
-        expected = true;
-      } else if (c.periodicidad === "Semanal") {
-        expected = [1, 8, 15, 22, 29].includes(d);
-      } else if (c.periodicidad === "Mensual") {
-        expected = d === 31;
-      }
-
-      if (!expected) {
-        days.push({ value: null, novedades: 0, status: "not-expected" });
-      } else if (d > TODAY) {
-        days.push({ value: null, novedades: 0, status: "future-expected" });
-      } else {
-        const received = Math.random() > 0.15;
-        if (received) {
-          const value = Math.floor(200 + Math.random() * 400);
-          const hasNovedades = Math.random() > 0.7;
-          const novedades = hasNovedades ? Math.floor(value * (0.05 + Math.random() * 0.2)) : 0;
-          days.push({ value, novedades, status: "received" });
-          total += value;
-          totalNovedades += novedades;
-        } else {
-          days.push({ value: 0, novedades: 0, status: "missing" });
-        }
-      }
-    }
-
-    return { ...c, days, total, totalNovedades };
-  });
-}
-
-const allData = generateSampleData();
+const DAYS_IN_MONTH = 31;
+const TOTAL_COLUMNS = 34;
 
 interface DataExplorationCardProps {
   idCountry?: number | string;
@@ -148,28 +43,36 @@ export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}
   const [selectedMonth, setSelectedMonth] = useState("2026-05");
   const debouncedSearch = useDebounce(search, 400);
 
-  const { data, error, isLoading } = useDataExploration(idCountry, {
+  const { data, error, isLoading } = useDataExploration({
+    id_country: idCountry,
     month: selectedMonth,
     search: debouncedSearch || undefined
   });
 
-  console.log("Data Exploration - data:", data, "error:", error, "isLoading:", isLoading);
+  const dayNumbers = useMemo(
+    () => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1),
+    []
+  );
 
-  const filteredData = useMemo(() => {
-    return allData.filter((row) => {
-      if (HARDCODED_COUNTRY !== "all" && row.country.toLowerCase() !== HARDCODED_COUNTRY)
-        return false;
-      if (HARDCODED_FILE_TYPE !== "all" && row.fileType !== HARDCODED_FILE_TYPE) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        return row.client.toLowerCase().includes(q) || row.country.toLowerCase().includes(q);
+  const rows = useMemo(() => {
+    return (data?.clients ?? []).map((client) => {
+      const dayMap = new Map<number, IDataExplorationTotals>();
+      for (const d of client.dates) {
+        const dayNum = Number(d.date.slice(-2));
+        if (!Number.isNaN(dayNum)) dayMap.set(dayNum, d.totals);
       }
-      return true;
-    });
-  }, [search]);
+      const days = dayNumbers.map((n) => dayMap.get(n) ?? null);
 
-  const daysInMonth = 31;
-  const dayNumbers = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+      return {
+        id_client: client.id_client,
+        client_name: client.client_name,
+        country: client.dates[0]?.rows[0]?.country ?? "",
+        days,
+        total: client.totals.total_registros,
+        totalNovedades: client.totals.novedades
+      };
+    });
+  }, [data, dayNumbers]);
 
   return (
     <Card
@@ -254,12 +157,15 @@ export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}
               >
                 Cliente
               </th>
+              {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
+              {/*
               <th
                 className="text-left px-2 py-1.5 font-medium sticky left-[90px] bg-[#F9FAFB] z-10"
                 style={{ color: "#374151", minWidth: "65px" }}
               >
                 Periodicidad
               </th>
+              */}
               {dayNumbers.map((d) => (
                 <th
                   key={d}
@@ -284,19 +190,43 @@ export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}
             </tr>
           </thead>
           <tbody>
-            {filteredData.length === 0 ? (
+            {isLoading ? (
               <tr>
-                <td colSpan={35} className="text-center py-8 text-xs" style={{ color: "#6B7280" }}>
+                <td
+                  colSpan={TOTAL_COLUMNS}
+                  className="text-center py-8 text-xs"
+                  style={{ color: "#6B7280" }}
+                >
+                  Cargando…
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td
+                  colSpan={TOTAL_COLUMNS}
+                  className="text-center py-8 text-xs"
+                  style={{ color: "#991B1B" }}
+                >
+                  Error al cargar los datos.
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={TOTAL_COLUMNS}
+                  className="text-center py-8 text-xs"
+                  style={{ color: "#6B7280" }}
+                >
                   No se encontraron datos con los filtros actuales.
                 </td>
               </tr>
             ) : (
-              filteredData.map((row, idx) => {
+              rows.map((row, idx) => {
                 const novedadesPct =
                   row.total > 0 ? Math.round((row.totalNovedades / row.total) * 100) : 0;
                 return (
                   <tr
-                    key={`${row.client}-${row.fileType}-${idx}`}
+                    key={`${row.id_client}-${idx}`}
                     className="border-b hover:bg-gray-50 transition-colors"
                     style={{ borderColor: "#F3F4F6" }}
                   >
@@ -306,62 +236,48 @@ export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}
                     >
                       <div className="leading-tight">
                         <span className="block truncate" style={{ maxWidth: "85px" }}>
-                          {row.client}
+                          {row.client_name}
                         </span>
                         <span className="block" style={{ color: "#9CA3AF", fontSize: "9px" }}>
                           {row.country}
                         </span>
                       </div>
                     </td>
+                    {/* TODO: re-enable Periodicidad column once API exposes per-client periodicity */}
+                    {/*
                     <td
                       className="px-2 py-1 sticky left-[90px] bg-white z-10"
                       style={{ color: "#6B7280" }}
                     >
                       {row.periodicidad}
                     </td>
-                    {row.days.map((day, dayIdx) => {
-                      let bgColor = "#ffffff";
-                      let textColor = "#9CA3AF";
-                      let borderStyle = "none";
-                      const hasNovedades = day.novedades > 0;
-                      const novedadesDayPct = day.value
-                        ? Math.round((day.novedades / day.value) * 100)
-                        : 0;
-
-                      if (day.status === "received") {
-                        if (hasNovedades) {
-                          bgColor = "#FEF3C7";
-                          textColor = "#92400E";
-                        } else {
-                          bgColor = "#D1FAE5";
-                          textColor = "#065F46";
-                        }
-                      } else if (day.status === "missing") {
-                        bgColor = "#FEE2E2";
-                        textColor = "#991B1B";
-                      } else if (day.status === "future-expected") {
-                        bgColor = "#F9FAFB";
-                        textColor = "#D1D5DB";
-                        borderStyle = "1px dashed #E5E7EB";
+                    */}
+                    {row.days.map((dayTotals, dayIdx) => {
+                      if (dayTotals === null) {
+                        return (
+                          <td
+                            key={dayIdx}
+                            className="text-center py-1 font-medium tabular-nums"
+                            style={{ backgroundColor: "#ffffff", color: "#9CA3AF" }}
+                          />
+                        );
                       }
+
+                      const hasNovedades = dayTotals.novedades > 0;
+                      const bgColor = hasNovedades ? "#FEF3C7" : "#D1FAE5";
+                      const textColor = hasNovedades ? "#92400E" : "#065F46";
+                      const novedadesDayPct =
+                        dayTotals.total_registros > 0
+                          ? Math.round((dayTotals.novedades / dayTotals.total_registros) * 100)
+                          : 0;
 
                       const cellContent = (
                         <td
                           key={dayIdx}
                           className="text-center py-1 font-medium tabular-nums relative"
-                          style={{
-                            backgroundColor: bgColor,
-                            color: textColor,
-                            border: borderStyle
-                          }}
+                          style={{ backgroundColor: bgColor, color: textColor }}
                         >
-                          {day.status === "received"
-                            ? day.value
-                            : day.status === "missing"
-                              ? "-"
-                              : day.status === "future-expected"
-                                ? "..."
-                                : ""}
+                          {dayTotals.total_registros}
                           {hasNovedades && (
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
@@ -387,7 +303,7 @@ export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {day.novedades} novedades ({novedadesDayPct}%)
+                                    {dayTotals.novedades} novedades ({novedadesDayPct}%)
                                   </span>
                                 </div>
                               </TooltipContent>
