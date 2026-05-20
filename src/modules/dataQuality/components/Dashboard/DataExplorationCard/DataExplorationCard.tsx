@@ -52,8 +52,8 @@ export function DataExplorationCard() {
     []
   );
 
-  const rows = useMemo(() => {
-    return (data?.clients ?? []).map((client) => {
+  const { rows, lastDataDayIdx } = useMemo(() => {
+    const computedRows = (data?.clients ?? []).map((client) => {
       const dayMap = new Map<number, IDataExplorationTotals>();
       for (const d of client.dates) {
         const dayNum = Number(d.date.slice(-2));
@@ -70,6 +70,18 @@ export function DataExplorationCard() {
         totalNovedades: client.totals.novedades
       };
     });
+
+    let lastDataDayIdx = -1;
+    for (const row of computedRows) {
+      for (let i = row.days.length - 1; i >= 0; i--) {
+        if (row.days[i] !== null) {
+          if (i > lastDataDayIdx) lastDataDayIdx = i;
+          break;
+        }
+      }
+    }
+
+    return { rows: computedRows, lastDataDayIdx };
   }, [data, dayNumbers]);
 
   return (
@@ -252,12 +264,19 @@ export function DataExplorationCard() {
                     */}
                     {row.days.map((dayTotals, dayIdx) => {
                       if (dayTotals === null) {
+                        const isMissing = dayIdx < lastDataDayIdx;
                         return (
                           <td
                             key={dayIdx}
                             className="text-center py-1 font-medium tabular-nums"
-                            style={{ backgroundColor: "#ffffff", color: "#9CA3AF" }}
-                          />
+                            style={
+                              isMissing
+                                ? { backgroundColor: "#FEE2E2", color: "#991B1B" }
+                                : { backgroundColor: "#ffffff", color: "#9CA3AF" }
+                            }
+                          >
+                            {isMissing ? "-" : ""}
+                          </td>
                         );
                       }
 
