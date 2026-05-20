@@ -9,7 +9,7 @@ export default function DataQualityDashboardView() {
   return (
     <div className="flex flex-col gap-4">
       <Header title="Dashboard de ingesta" />
-      <DataExplorationCard />
+      <DataExplorationCard idCountry={6} />
     </div>
   );
 }

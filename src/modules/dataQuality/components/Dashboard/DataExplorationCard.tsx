@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 
 const months = [
   { id: "2026-05", name: "Mayo 2026" },
@@ -137,9 +139,21 @@ function generateSampleData(): ClientDataRow[] {
 
 const allData = generateSampleData();
 
-export function DataExplorationCard() {
+interface DataExplorationCardProps {
+  idCountry?: number | string;
+}
+
+export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}) {
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("2026-05");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const { data, error, isLoading } = useDataExploration(idCountry, {
+    month: selectedMonth,
+    search: debouncedSearch || undefined
+  });
+
+  console.log("Data Exploration - data:", data, "error:", error, "isLoading:", isLoading);
 
   const filteredData = useMemo(() => {
     return allData.filter((row) => {
