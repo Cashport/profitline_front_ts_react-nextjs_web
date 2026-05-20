@@ -20,6 +20,7 @@ import {
 } from "@/modules/chat/ui/select";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
+import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const months = [
@@ -34,17 +35,14 @@ const months = [
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 34;
 
-interface DataExplorationCardProps {
-  idCountry?: number | string;
-}
-
-export function DataExplorationCard({ idCountry }: DataExplorationCardProps = {}) {
+export function DataExplorationCard() {
+  const { selectedCountry } = useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("2026-05");
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
-    id_country: idCountry,
+    id_country: selectedCountry || undefined,
     month: selectedMonth,
     search: debouncedSearch || undefined
   });

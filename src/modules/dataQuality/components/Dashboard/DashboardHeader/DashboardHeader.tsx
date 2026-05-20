@@ -13,8 +13,8 @@ import {
 import { getAllCountries } from "@/services/countries/countries";
 import {
   TabType,
-  useDashboardFilters
-} from "@/modules/dataQuality/containers/DataQualityDashboardView/DashboardFiltersContext";
+  useDataQualityDashboardContext
+} from "@/modules/dataQuality/context/DataQualityDashboardContext";
 
 const SPANISH_MONTHS = [
   "Enero",
@@ -51,7 +51,7 @@ export function DashboardHeader() {
     setSelectedPeriod,
     selectedFileType,
     setSelectedFileType
-  } = useDashboardFilters();
+  } = useDataQualityDashboardContext();
 
   const { data: countriesData } = useSWR("dashboard-header-countries", getAllCountries);
   const countries = useMemo(

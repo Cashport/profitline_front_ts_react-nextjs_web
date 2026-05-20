@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 
 export type TabType = "resumen" | "detalle";
 
-interface DashboardFiltersContextValue {
+interface DataQualityDashboardContextValue {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   selectedCountry: string;
@@ -15,7 +15,7 @@ interface DashboardFiltersContextValue {
   setSelectedFileType: (type: string) => void;
 }
 
-const DashboardFiltersContext = createContext<DashboardFiltersContextValue | null>(null);
+const DataQualityDashboardContext = createContext<DataQualityDashboardContextValue | null>(null);
 
 const getCurrentPeriodId = () => {
   const now = new Date();
@@ -24,13 +24,13 @@ const getCurrentPeriodId = () => {
   return `${year}-${month}`;
 };
 
-export function DashboardFiltersProvider({ children }: { children: ReactNode }) {
+export function DataQualityDashboardProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTab] = useState<TabType>("resumen");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState(getCurrentPeriodId);
   const [selectedFileType, setSelectedFileType] = useState("");
 
-  const value = useMemo<DashboardFiltersContextValue>(
+  const value = useMemo<DataQualityDashboardContextValue>(
     () => ({
       activeTab,
       setActiveTab,
@@ -45,14 +45,18 @@ export function DashboardFiltersProvider({ children }: { children: ReactNode }) 
   );
 
   return (
-    <DashboardFiltersContext.Provider value={value}>{children}</DashboardFiltersContext.Provider>
+    <DataQualityDashboardContext.Provider value={value}>
+      {children}
+    </DataQualityDashboardContext.Provider>
   );
 }
 
-export function useDashboardFilters() {
-  const ctx = useContext(DashboardFiltersContext);
+export function useDataQualityDashboardContext() {
+  const ctx = useContext(DataQualityDashboardContext);
   if (!ctx) {
-    throw new Error("useDashboardFilters must be used within a DashboardFiltersProvider");
+    throw new Error(
+      "useDataQualityDashboardContext must be used within a DataQualityDashboardProvider"
+    );
   }
   return ctx;
 }
