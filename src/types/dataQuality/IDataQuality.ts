@@ -443,3 +443,50 @@ export interface IPostCatalogMaterialEquivalence {
   valid_to: string | null;
   is_active: number;
 }
+
+// Dashboard
+
+// Dashboard - Data Exploration
+export interface IDataExplorationTotals {
+  units_haleon: number;
+  vol_reported: number;
+  value: number;
+  total_registros: number;
+  novedades: number;
+}
+
+export interface IDataExplorationRow {
+  id_client: number;
+  client_name: string;
+  data_type: string;
+  date: string;
+  region: string;
+  country: string;
+  ship_to_id: string;
+  sold_to_id: string;
+  units_haleon: number;
+  vol_reported: number;
+  value: number;
+  total_registros: number;
+  novedades: number;
+}
+
+export interface IDataExplorationDate {
+  date: string;
+  rows: IDataExplorationRow[];
+  totals: IDataExplorationTotals;
+}
+
+export interface IDataExplorationClient {
+  id_client: number;
+  client_name: string;
+  dates: IDataExplorationDate[];
+  totals: IDataExplorationTotals;
+}
+
+export interface IGetDataExploration {
+  clients: IDataExplorationClient[];
+  id_country: number;
+  month: string;
+  totals: IDataExplorationTotals;
+}
