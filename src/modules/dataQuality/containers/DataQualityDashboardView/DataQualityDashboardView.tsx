@@ -1,13 +1,17 @@
-import { useAppStore } from "@/lib/store/store";
+"use client";
 
-import Header from "@/components/organisms/header";
-import { DataExplorationCard } from "@/modules/dataQuality/components/Dashboard/DataExplorationCard";
+import { DashboardHeader } from "@/modules/dataQuality/components/Dashboard/DashboardHeader";
+import { DataExplorationCard } from "@/modules/dataQuality/components/Dashboard/DataExplorationCard/DataExplorationCard";
+
+import { DashboardFiltersProvider } from "./DashboardFiltersContext";
 
 export default function DataQualityDashboardView() {
   return (
-    <div className="flex flex-col gap-4">
-      <Header title="Dashboard de ingesta" />
-      <DataExplorationCard />
-    </div>
+    <DashboardFiltersProvider>
+      <div className="flex flex-col gap-4">
+        <DashboardHeader />
+        <DataExplorationCard />
+      </div>
+    </DashboardFiltersProvider>
   );
 }
