@@ -96,14 +96,21 @@ export default function DataQualityView() {
           </BadgeUI>
         </div>
 
-        <Link href="/data-quality/alerts">
-          <Badge count={totalAlerts} color="#E53935">
-            <Button variant="outline">
-              <BellSimpleRinging size={18} />
-              Alertas
+        <div className="flex gap-2">
+          <Link href="/data-quality/alerts">
+            <Badge count={totalAlerts} color="#E53935">
+              <Button variant="outline">
+                <BellSimpleRinging size={18} />
+                Alertas
+              </Button>
+            </Badge>
+          </Link>
+          <Link href={`/data-quality/dashboard`}>
+            <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
+              Dashboard
             </Button>
-          </Badge>
-        </Link>
+          </Link>
+        </div>
       </div>
 
       {/* Main Content */}
