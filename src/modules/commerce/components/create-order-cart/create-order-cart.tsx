@@ -24,7 +24,8 @@ import {
   matchesProductIdentifier,
   CANULA_COMPLEMENT,
   AGUA_COMPLEMENT,
-  ProductIdentifier
+  ProductIdentifier,
+  isCanulaProduct
 } from "../../utils/constants/evenQuantityProducts";
 import { computeComplementRequirements } from "../../utils/complementCalculation";
 import { ISelectedCategories } from "../../containers/create-order/create-order";
@@ -166,7 +167,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
     const allProducts = selectedCategories.flatMap((c) => c.products);
     const actualCanulas = allProducts
-      .filter((p) => matchesProductIdentifier(p, CANULA_COMPLEMENT))
+      .filter(isCanulaProduct)
       .reduce((sum, p) => sum + p.quantity, 0);
     const actualAgua = allProducts
       .filter((p) => matchesProductIdentifier(p, AGUA_COMPLEMENT))
@@ -357,10 +358,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     }));
 
     for (const { identifier, requiredQty } of plan) {
+      const isCanulaPlanItem = identifier === CANULA_COMPLEMENT;
       let catIdx = -1;
       let prodIdx = -1;
       for (let i = 0; i < next.length && prodIdx === -1; i++) {
-        const j = next[i].products.findIndex((p) => matchesProductIdentifier(p, identifier));
+        const j = next[i].products.findIndex((p) =>
+          isCanulaPlanItem ? isCanulaProduct(p) : matchesProductIdentifier(p, identifier)
+        );
         if (j !== -1) {
           catIdx = i;
           prodIdx = j;
@@ -721,6 +725,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         }
         cancelText="Modificar"
         okText="Continuar"
+        hideOkButton={
+          !!complementMismatch &&
+          complementMismatch.actualCanulas > complementMismatch.expectedCanulas
+        }
       />
 
       <ModalConfirmAction

@@ -39,6 +39,11 @@ export const CANULA_COMPLEMENT: ProductIdentifier = {
   description: "CANULA 22G X 50mm COL"
 };
 
+export const CANULA_CATEGORY_NAME = "CANNULS";
+
+export const isCanulaProduct = (product: { category_name?: string }): boolean =>
+  product.category_name?.toUpperCase() === CANULA_CATEGORY_NAME;
+
 export const AGUA_COMPLEMENT: ProductIdentifier = {
   SKU: "011025",
   EAN: null,
