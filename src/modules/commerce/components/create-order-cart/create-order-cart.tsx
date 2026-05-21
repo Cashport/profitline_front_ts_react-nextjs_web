@@ -506,7 +506,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
-          {promotions.length > 0 && (
+          {((promotions.length > 0 &&
+            (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1) ||
+            (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0) && (
             <button
               onClick={() => {
                 setIsBonusModalOpen(true);
@@ -519,7 +521,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 Bonificados
               </span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
-                {promotions.length} disp.
+                {confirmOrderData?.promotion?.active_range?.gift_options &&
+                (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1
+                  ? `${confirmOrderData?.promotion?.active_range?.gift_options?.length} disp.`
+                  : (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0 && "1 disp."}
               </span>
               <Eye size={14} className="text-[#999999]" />
             </button>
