@@ -31,6 +31,12 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   addPaymentsToApplicationTable,
   selectedPayments
 }) => {
+  const isApplyDisabled =
+    selectedPayments.length === 0 ||
+    selectedPayments.some(
+      (p) => p.payments_status_id !== 1 || p.status_description === "Identificado"
+    );
+
   return (
     <Modal
       open={isOpen}
@@ -63,6 +69,7 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
             }
             addPaymentsToApplicationTable();
           }}
+          disabled={isApplyDisabled}
         />
         <ButtonGenerateAction
           icon={<PushPin size={20} />}
