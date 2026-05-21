@@ -3,7 +3,6 @@ import { useContext, useState } from "react";
 import { Modal, Typography } from "antd";
 
 import { IBonus, IGiftOption } from "@/types/commerce/ICommerce";
-import { IPromotion } from "@/services/promotion/promotion";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 import styles from "./modal-bonus.module.scss";
@@ -69,21 +68,28 @@ const ModalBonus = ({ isOpen, onClose }: Props) => {
   };
 
   const handleConfirm = () => {
-    const bonusOptions = promotion
-      ? giftOptions.map((opt) => ({
-          cards: opt.items.map((group) => ({
-            fixed: group.fixed,
-            items: group.items
-              .map(({ image: _img, ...rest }) => ({
-                ...rest,
-                qty: group.fixed
-                  ? rest.qty
-                  : poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
-              }))
-              .filter((item) => item.qty > 0)
-          }))
-        }))
-      : [];
+    const activeOption = tabOptions[activeTab];
+
+    const bonusOptions =
+      promotion && activeOption
+        ? [
+            {
+              cards: activeOption.items
+                .map((group) => ({
+                  fixed: group.fixed,
+                  items: group.items
+                    .map(({ image: _img, ...rest }) => ({
+                      ...rest,
+                      qty: group.fixed
+                        ? rest.qty
+                        : poolQty[group.gift_item_group_id]?.[rest.product_id] ?? 0
+                    }))
+                    .filter((item) => item.qty > 0)
+                }))
+                .filter((card) => card.items.length > 0)
+            }
+          ]
+        : [];
 
     const otherBonificatedPayload = otherBonificated
       .map(({ image: _img, max_selection_qty: _max, ...rest }) => ({
