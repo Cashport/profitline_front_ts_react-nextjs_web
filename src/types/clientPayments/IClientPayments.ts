@@ -30,6 +30,7 @@ export interface IClientPayment {
   account_number: string;
   type_account: string;
   ID_ERP: string | null;
+  payments_status_id?: number;
 }
 
 export interface IClientPaymentStatus {
