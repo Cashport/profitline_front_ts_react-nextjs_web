@@ -17,7 +17,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
-import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
+import { NEW_ADDRESS_OPTION, isValidEmail } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
 export type BonusRow = {
@@ -322,8 +322,11 @@ export default function OrderShipmentConfirm({
     singleForm.addressSelectValue !== "" &&
     singleForm.city.trim() !== "" &&
     singleForm.dispatch_address.trim() !== "" &&
-    singleForm.email.trim() !== "" &&
+    isValidEmail(singleForm.email) &&
     singleForm.telefono.trim() !== "";
+
+  const isSingleEmailInvalid =
+    singleForm.email.trim() !== "" && !isValidEmail(singleForm.email);
 
   // Sync order_split_details on context
   useEffect(() => {
@@ -512,8 +515,15 @@ export default function OrderShipmentConfirm({
                   placeholder="correo@ejemplo.com"
                   value={singleForm.email}
                   onChange={(e) => setSingleForm((f) => ({ ...f, email: e.target.value }))}
-                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
+                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                    isSingleEmailInvalid
+                      ? "border-red-400 focus:border-red-500"
+                      : "border-[#DDDDDD] focus:border-[#141414]"
+                  }`}
                 />
+                {isSingleEmailInvalid && (
+                  <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
