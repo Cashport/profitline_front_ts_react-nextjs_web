@@ -10,6 +10,7 @@ import { useAppStore } from "@/lib/store/store";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
 import { getPromotions, IPromotion } from "@/services/promotion/promotion";
+import { useMessageApi } from "@/context/MessageContext";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
@@ -49,6 +50,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     projectId: state.selectedProject.ID
   }));
   const width = useScreenWidth();
+  const { showMessage } = useMessageApi();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [promotions, setPromotions] = useState<IPromotion[]>([]);
@@ -91,12 +93,20 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       try {
         const promotions = await getPromotions(client.id);
         setPromotions(promotions.promotions);
+        if (promotions.promotions[0]) setPromotionId(promotions.promotions[0].id);
       } catch (error) {
         console.error("Error fetching promotions:", error);
       }
     };
     fetchPromotions();
   }, [client?.id]);
+
+  useEffect(() => {
+    const activeRange = confirmOrderData?.promotion?.active_range;
+    if (activeRange?.progress_message) {
+      showMessage("info", activeRange.progress_message);
+    }
+  }, [confirmOrderData?.promotion?.active_range?.range_id]);
 
   const handleOpenDiscountsModal = () => {
     setOpenDiscountsModal(true);
@@ -512,7 +522,6 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             <button
               onClick={() => {
                 setIsBonusModalOpen(true);
-                if (promotions[0]) setPromotionId(promotions[0].id);
               }}
               className="w-full flex items-center gap-2 px-4 py-3 bg-[#FAFAFA] hover:bg-[#F3F3F3] transition-colors border border-[#EEEEEE] rounded-xl"
             >
