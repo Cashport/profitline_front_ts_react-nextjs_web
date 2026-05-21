@@ -32,10 +32,7 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   selectedPayments
 }) => {
   const isApplyDisabled =
-    selectedPayments.length === 0 ||
-    selectedPayments.some(
-      (p) => p.payments_status_id !== 1 || p.status_description === "Identificado"
-    );
+    selectedPayments.length === 0 || selectedPayments.some((p) => p.payments_status_id !== 1);
 
   return (
     <Modal
