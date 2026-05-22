@@ -2,19 +2,11 @@
 
 import { Card } from "@/modules/chat/ui/card";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
+import { IDashboardSummaryPeriodicity } from "@/types/dataQuality/IDataQuality";
 
 interface PeriodicityChartProps {
-  mockData?: boolean;
+  periodicity?: IDashboardSummaryPeriodicity[];
 }
-
-type PeriodicityData = {
-  label: string;
-  count: number;
-  processado: number;
-  novedad: number;
-  retraso: number;
-  pendiente: number;
-};
 
 const COLORS = {
   processado: "#30EA03",
@@ -23,40 +15,15 @@ const COLORS = {
   pendiente: "#D0D3D4"
 };
 
-const periodicityByFileType: Record<string, PeriodicityData[]> = {
-  all: [
-    { label: "Diario", count: 17, processado: 10, novedad: 3, retraso: 0, pendiente: 4 },
-    { label: "Semanal", count: 10, processado: 4, novedad: 0, retraso: 3, pendiente: 3 },
-    { label: "Mensual", count: 35, processado: 14, novedad: 0, retraso: 7, pendiente: 14 }
-  ],
-  Sales: [
-    { label: "Diario", count: 8, processado: 5, novedad: 2, retraso: 0, pendiente: 1 },
-    { label: "Semanal", count: 4, processado: 2, novedad: 0, retraso: 1, pendiente: 1 },
-    { label: "Mensual", count: 12, processado: 5, novedad: 0, retraso: 3, pendiente: 4 }
-  ],
-  Stock: [
-    { label: "Diario", count: 7, processado: 4, novedad: 1, retraso: 0, pendiente: 2 },
-    { label: "Semanal", count: 4, processado: 1, novedad: 0, retraso: 2, pendiente: 1 },
-    { label: "Mensual", count: 18, processado: 7, novedad: 0, retraso: 3, pendiente: 8 }
-  ],
-  "Stock in transit": [
-    { label: "Diario", count: 2, processado: 1, novedad: 0, retraso: 0, pendiente: 1 },
-    { label: "Semanal", count: 2, processado: 1, novedad: 0, retraso: 0, pendiente: 1 },
-    { label: "Mensual", count: 5, processado: 2, novedad: 0, retraso: 1, pendiente: 2 }
-  ]
-};
-
-export function PeriodicityChart({ mockData = false }: PeriodicityChartProps) {
+export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
   const { selectedFileType } = useDataQualityDashboardContext();
-  const fileTypeKey =
-    selectedFileType && periodicityByFileType[selectedFileType] ? selectedFileType : "all";
-  const data = mockData ? periodicityByFileType[fileTypeKey] : [];
+  const data = periodicity ?? [];
 
   const totals = {
-    processado: data.reduce((sum, d) => sum + d.processado, 0),
-    novedad: data.reduce((sum, d) => sum + d.novedad, 0),
-    retraso: data.reduce((sum, d) => sum + d.retraso, 0),
-    pendiente: data.reduce((sum, d) => sum + d.pendiente, 0)
+    processado: data.reduce((sum, d) => sum + d.procesados, 0),
+    novedad: data.reduce((sum, d) => sum + d.novedades, 0),
+    retraso: data.reduce((sum, d) => sum + d.retrasados, 0),
+    pendiente: data.reduce((sum, d) => sum + d.pendientes, 0)
   };
 
   return (
@@ -97,20 +64,20 @@ export function PeriodicityChart({ mockData = false }: PeriodicityChartProps) {
 
       <div className="space-y-4">
         {data.map((item) => {
-          const total = item.count;
-          const processadoWidth = (item.processado / total) * 100;
-          const novedadWidth = (item.novedad / total) * 100;
-          const retrasoWidth = (item.retraso / total) * 100;
-          const pendienteWidth = (item.pendiente / total) * 100;
+          const total = item.total_archivos;
+          const processadoWidth = total > 0 ? (item.procesados / total) * 100 : 0;
+          const novedadWidth = total > 0 ? (item.novedades / total) * 100 : 0;
+          const retrasoWidth = total > 0 ? (item.retrasados / total) * 100 : 0;
+          const pendienteWidth = total > 0 ? (item.pendientes / total) * 100 : 0;
 
           return (
-            <div key={item.label} className="flex items-center gap-4">
+            <div key={item.periodicity} className="flex items-center gap-4">
               <div className="w-16">
                 <div className="text-xs font-semibold" style={{ color: "#111827" }}>
-                  {item.label}
+                  {item.periodicity}
                 </div>
                 <div className="text-xs" style={{ color: "#9CA3AF" }}>
-                  {item.count} arch.
+                  {item.total_archivos} arch.
                 </div>
               </div>
 
@@ -119,42 +86,42 @@ export function PeriodicityChart({ mockData = false }: PeriodicityChartProps) {
                   className="flex-1 h-7 rounded-lg overflow-hidden flex"
                   style={{ backgroundColor: "#F3F4F6" }}
                 >
-                  {item.processado > 0 && (
+                  {item.procesados > 0 && (
                     <div
                       className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
                       style={{ width: `${processadoWidth}%`, backgroundColor: COLORS.processado }}
                     >
-                      <span className="absolute">{item.processado}</span>
+                      <span className="absolute">{item.procesados}</span>
                     </div>
                   )}
-                  {item.novedad > 0 && (
+                  {item.novedades > 0 && (
                     <div
                       className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
                       style={{ width: `${novedadWidth}%`, backgroundColor: COLORS.novedad }}
                     >
-                      <span className="absolute">{item.novedad}</span>
+                      <span className="absolute">{item.novedades}</span>
                     </div>
                   )}
-                  {item.retraso > 0 && (
+                  {item.retrasados > 0 && (
                     <div
                       className="h-full flex items-center justify-center text-xs font-semibold text-white relative"
                       style={{ width: `${retrasoWidth}%`, backgroundColor: COLORS.retraso }}
                     >
-                      <span className="absolute">{item.retraso}</span>
+                      <span className="absolute">{item.retrasados}</span>
                     </div>
                   )}
-                  {item.pendiente > 0 && (
+                  {item.pendientes > 0 && (
                     <div
                       className="h-full flex items-center justify-center text-xs font-semibold relative"
                       style={{ width: `${pendienteWidth}%`, backgroundColor: COLORS.pendiente, color: "#555" }}
                     >
-                      <span className="absolute">{item.pendiente}</span>
+                      <span className="absolute">{item.pendientes}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="text-xs text-right" style={{ color: "#9CA3AF", minWidth: "60px" }}>
-                  {item.count - item.processado} pend.
+                  {item.total_archivos - item.procesados} pend.
                 </div>
               </div>
             </div>

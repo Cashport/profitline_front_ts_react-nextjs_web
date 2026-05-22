@@ -21,7 +21,6 @@ function DashboardContent() {
     id_country: selectedCountry ? Number(selectedCountry) : undefined,
     id_type_archive: selectedFileType ? [Number(selectedFileType)] : undefined
   });
-  console.log("dashboard summary", dashboardSummary);
 
   return (
     <div className="flex flex-col gap-4">
@@ -33,7 +32,7 @@ function DashboardContent() {
             <NovedadesChart />
           </div>
           <DashboardIngestionStatus />
-          <PeriodicityChart />
+          <PeriodicityChart periodicity={dashboardSummary?.periodicity} />
         </>
       ) : (
         <DataExplorationCard />
