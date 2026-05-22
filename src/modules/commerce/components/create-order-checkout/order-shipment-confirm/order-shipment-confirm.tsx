@@ -17,7 +17,12 @@ import { useAppStore } from "@/lib/store/store";
 import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
-import { NEW_ADDRESS_OPTION, isValidEmail } from "@/modules/commerce/utils/constants/checkout";
+import {
+  NEW_ADDRESS_OPTION,
+  isValidEmail,
+  isValidPhone,
+  phoneErrorMessage
+} from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
 export type BonusRow = {
@@ -323,10 +328,14 @@ export default function OrderShipmentConfirm({
     singleForm.city.trim() !== "" &&
     singleForm.dispatch_address.trim() !== "" &&
     isValidEmail(singleForm.email) &&
-    singleForm.telefono.trim() !== "";
+    isValidPhone(singleForm.telefono, singleForm.indicativo);
 
   const isSingleEmailInvalid =
     singleForm.email.trim() !== "" && !isValidEmail(singleForm.email);
+
+  const isSinglePhoneInvalid =
+    singleForm.telefono.trim() !== "" &&
+    !isValidPhone(singleForm.telefono, singleForm.indicativo);
 
   // Sync order_split_details on context
   useEffect(() => {
@@ -549,10 +558,21 @@ export default function OrderShipmentConfirm({
                     type="tel"
                     placeholder="3001234567"
                     value={singleForm.telefono}
-                    onChange={(e) => setSingleForm((f) => ({ ...f, telefono: e.target.value }))}
-                    className="flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
+                    onChange={(e) =>
+                      setSingleForm((f) => ({ ...f, telefono: e.target.value.replace(/\D/g, "") }))
+                    }
+                    className={`flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                      isSinglePhoneInvalid
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-[#DDDDDD] focus:border-[#141414]"
+                    }`}
                   />
                 </div>
+                {isSinglePhoneInvalid && (
+                  <p className="text-[10px] text-red-500">
+                    {phoneErrorMessage(singleForm.indicativo)}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
