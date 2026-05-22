@@ -28,7 +28,7 @@ function DashboardContent() {
       {activeTab === "resumen" ? (
         <>
           <div className="grid grid-cols-2 gap-6 items-stretch">
-            <DashboardKPICards />
+            <DashboardKPICards kpis={dashboardSummary?.kpis} />
             <NovedadesChart />
           </div>
           <DashboardIngestionStatus />
