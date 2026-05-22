@@ -1,6 +1,8 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Modal } from "antd";
 
+import { useAdaptiveImageModalWidth } from "@/components/molecules/modals/FileDownloadModal/useAdaptiveImageModalWidth";
+
 
 interface InvoiceDownloadModalProps {
   isModalOpen: boolean;
@@ -15,6 +17,8 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
   handleCloseModal,
   title
 }) => {
+  const { modalWidth, imgRef, onImgLoad } = useAdaptiveImageModalWidth(url, isModalOpen);
+
   return (
     <Modal
       title={
@@ -26,6 +30,8 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
       }
       className="file-download-modal"
       open={isModalOpen}
+      centered
+      width={modalWidth}
       footer={
         <div className="footer">
           <a
@@ -46,7 +52,13 @@ const InvoiceDownloadModal: React.FC<InvoiceDownloadModalProps> = ({
     >
       <div className="modal-content">
         <div className="img-container">
-          <img src={url} alt="Document" />
+          <img
+            ref={imgRef}
+            src={url}
+            alt="Document"
+            onLoad={onImgLoad}
+            style={{ visibility: modalWidth ? "visible" : "hidden" }}
+          />
         </div>
       </div>
     </Modal>
