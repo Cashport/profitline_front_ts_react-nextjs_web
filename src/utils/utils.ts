@@ -199,6 +199,32 @@ export const formatDatePlane = (dateString: string): string => {
 
   return `${day} ${month}, ${year}`;
 };
+
+export const formatDatePlaneWithTime = (dateString: string): string => {
+  if (!dateString || dateString === "0000-00-00") {
+    return "Fecha no disponible";
+  }
+
+  let iso = dateString;
+  const mysqlMatch = iso.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(\.\d+)?$/);
+  if (mysqlMatch) {
+    iso = `${mysqlMatch[1]}T${mysqlMatch[2]}Z`;
+  }
+
+  const d = new Date(iso);
+
+  if (isNaN(d.getTime())) {
+    return "Fecha inválida";
+  }
+
+  const year = d.getUTCFullYear();
+  const month = new Intl.DateTimeFormat("es-ES", { month: "long", timeZone: "UTC" }).format(d);
+  const day = d.getUTCDate();
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+
+  return `${day} ${month}, ${year} ${hours}:${minutes}`;
+};
 export function daysLeft(dateString: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);

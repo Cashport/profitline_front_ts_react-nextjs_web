@@ -95,7 +95,10 @@ export default function AllChats({
         { revalidate: false }
       );
 
-      if (activeConversation?.id !== data.ticketId) {
+      if (
+        activeConversation?.id !== data.ticketId &&
+        data.message.direction === "INBOUND"
+      ) {
         setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
       }
     });

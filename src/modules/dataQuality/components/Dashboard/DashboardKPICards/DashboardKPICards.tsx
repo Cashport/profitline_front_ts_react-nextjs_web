@@ -3,43 +3,20 @@
 import { useState } from "react";
 
 import { Card } from "@/modules/chat/ui/card";
-import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
+import { IDashboardSummaryKpis } from "@/types/dataQuality/IDataQuality";
 
 interface DashboardKPICardsProps {
-  mockData?: boolean;
+  kpis?: IDashboardSummaryKpis;
 }
 
 type ViewMode = "tipo" | "pais";
 
-const byTipo = [
-  { label: "Sales", esperados: 62, transformados: 31, novedades: 8, pendientes: 23 },
-  { label: "Stock", esperados: 50, transformados: 25, novedades: 5, pendientes: 20 },
-  { label: "Stock in transit", esperados: 50, transformados: 25, novedades: 5, pendientes: 20 }
-];
-
-const byPais = [
-  { label: "Argentina", esperados: 37, transformados: 22, novedades: 56, pendientes: 11 },
-  { label: "Colombia", esperados: 10, transformados: 5, novedades: 27, pendientes: 3 },
-  { label: "Mexico", esperados: 15, transformados: 5, novedades: 32, pendientes: 9 },
-  { label: "Peru", esperados: 6, transformados: 3, novedades: 1, pendientes: 2 },
-  { label: "Chile", esperados: 5, transformados: 3, novedades: 0, pendientes: 2 },
-  { label: "Ecuador", esperados: 5, transformados: 2, novedades: 1, pendientes: 2 }
-];
-
-export function DashboardKPICards({ mockData = false }: DashboardKPICardsProps) {
-  const { selectedFileType } = useDataQualityDashboardContext();
+export function DashboardKPICards({ kpis }: DashboardKPICardsProps) {
   const [view, setView] = useState<ViewMode>("pais");
 
-  const baseRows = view === "tipo" ? byTipo : byPais;
-  const filteredBase =
-    view === "tipo" && selectedFileType && selectedFileType !== "all"
-      ? baseRows.filter((r) => r.label === selectedFileType)
-      : baseRows;
-  const rows = mockData ? filteredBase : [];
-  const totalEsperados = rows.reduce((s, r) => s + r.esperados, 0);
-  const totalTransformados = rows.reduce((s, r) => s + r.transformados, 0);
-  const receivedPercent =
-    totalEsperados > 0 ? Math.round((totalTransformados / totalEsperados) * 100) : 0;
+  const rows = view === "tipo" ? kpis?.byTypeArchive ?? [] : kpis?.byRegion ?? [];
+  // TODO: connect to dashboardSummary.globalStatus.estado (or aggregate of current view)
+  const receivedPercent = 0;
 
   return (
     <Card className="bg-white overflow-hidden flex flex-col p-6" style={{ borderColor: "#E5E7EB" }}>
@@ -130,7 +107,7 @@ export function DashboardKPICards({ mockData = false }: DashboardKPICardsProps) 
             const pct =
               row.esperados > 0 ? Math.round((row.transformados / row.esperados) * 100) : 0;
             return (
-              <tr key={row.label} className="border-b" style={{ borderColor: "#F3F4F6" }}>
+              <tr key={String(row.key)} className="border-b" style={{ borderColor: "#F3F4F6" }}>
                 <td className="px-3 py-3 text-sm font-medium" style={{ color: "#111827" }}>
                   {row.label}
                 </td>

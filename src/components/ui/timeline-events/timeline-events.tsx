@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 
-import { formatDatePlane } from "@/utils/utils";
+import { formatDatePlane, formatDatePlaneWithTime } from "@/utils/utils";
 
 import StepperContentSkeleton from "@/modules/clients/containers/invoice-detail-modal/skeleton/skeleton-invoid-detail";
 
@@ -12,6 +12,7 @@ interface TimelineEventsProps {
         id: number;
         title: string;
         date?: string;
+        showTime?: boolean;
         content?: React.ReactNode;
         leftIcon?: { children: React.ReactNode; onClick?: () => void };
       }[]
@@ -43,7 +44,13 @@ const TimelineEvents: FC<TimelineEventsProps> = ({ events }) => {
               <div className={styles.stepLabel}>
                 <div className={styles.cardInvoiceFiling}>
                   <h5 className={styles.title}>{event.title}</h5>
-                  {event.date ? <p className={styles.date}>{formatDatePlane(event.date)}</p> : null}
+                  {event.date ? (
+                    <p className={styles.date}>
+                      {event.showTime
+                        ? formatDatePlaneWithTime(event.date)
+                        : formatDatePlane(event.date)}
+                    </p>
+                  ) : null}
                   {event.content}
                 </div>
               </div>

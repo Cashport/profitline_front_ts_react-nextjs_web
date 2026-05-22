@@ -40,9 +40,9 @@ const PaymentsTable = ({
     setSelectedPayments((prevSelectedPayments) => {
       if (newSelectedRowKeys.length >= 1) {
         // Filter out newly selected rows that aren't already in prevSelectedPayments
-        const filteredNewRows = newSelectedRows.filter(
-          (newRow) => !prevSelectedPayments.some((prevRow) => prevRow.id === newRow.id)
-        );
+        const filteredNewRows = newSelectedRows
+          .filter((newRow) => !prevSelectedPayments.some((prevRow) => prevRow.id === newRow.id))
+          .map((newRow) => ({ ...newRow, payments_status_id: paymentStatusId }));
 
         // Filter out unselected rows for this payment status
         const remainingRows = prevSelectedPayments.filter(
