@@ -31,7 +31,7 @@ function DashboardContent() {
             <DashboardKPICards kpis={dashboardSummary?.kpis} />
             <NovedadesChart />
           </div>
-          <DashboardIngestionStatus />
+          <DashboardIngestionStatus clientStatus={dashboardSummary?.clientStatus} />
           <PeriodicityChart periodicity={dashboardSummary?.periodicity} />
         </>
       ) : (
