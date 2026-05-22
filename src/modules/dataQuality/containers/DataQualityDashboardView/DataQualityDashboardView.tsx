@@ -29,7 +29,7 @@ function DashboardContent() {
         <>
           <div className="grid grid-cols-2 gap-6 items-stretch">
             <DashboardKPICards kpis={dashboardSummary?.kpis} />
-            <NovedadesChart />
+            <NovedadesChart alerts={dashboardSummary?.alerts} />
           </div>
           <DashboardIngestionStatus clientStatus={dashboardSummary?.clientStatus} />
           <PeriodicityChart periodicity={dashboardSummary?.periodicity} />
