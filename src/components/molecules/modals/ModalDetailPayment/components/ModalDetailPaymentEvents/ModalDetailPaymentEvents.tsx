@@ -124,10 +124,15 @@ const ModalDetailPaymentEvents: FC<ModalDetailPaymentProps> = ({
       </div>
     );
 
+    const showTime =
+      event.payments_events_types_name === "Identificación" ||
+      event.payments_events_types_name === "Identificación automática";
+
     return {
       id: event.id,
       title: event.payments_events_types_name,
-      date: event.event_date,
+      date: showTime ? event.created_at : event.event_date,
+      showTime,
       content,
       leftIcon
     };
