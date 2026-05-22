@@ -10,9 +10,18 @@ import {
   DataQualityDashboardProvider,
   useDataQualityDashboardContext
 } from "@/modules/dataQuality/context/DataQualityDashboardContext";
+import { useDashboardSummary } from "@/modules/dataQuality/hooks/useDashboardSummary";
 
 function DashboardContent() {
-  const { activeTab } = useDataQualityDashboardContext();
+  const { activeTab, selectedPeriod, selectedCountry, selectedFileType } =
+    useDataQualityDashboardContext();
+
+  const { data: dashboardSummary } = useDashboardSummary({
+    month: selectedPeriod,
+    id_country: selectedCountry ? Number(selectedCountry) : undefined,
+    id_type_archive: selectedFileType ? [Number(selectedFileType)] : undefined
+  });
+  console.log("dashboard summary", dashboardSummary);
 
   return (
     <div className="flex flex-col gap-4">
