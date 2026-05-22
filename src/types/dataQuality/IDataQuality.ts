@@ -475,6 +475,8 @@ export interface IDataExplorationDate {
   date: string;
   rows: IDataExplorationRow[];
   totals: IDataExplorationTotals;
+  novedades_percent?: number;
+  status?: string;
 }
 
 export interface IDataExplorationClient {
@@ -489,4 +491,101 @@ export interface IGetDataExploration {
   id_country: number;
   month: string;
   totals: IDataExplorationTotals;
+}
+
+// Dashboard - Summary
+
+export interface IDashboardSummaryAppliedFilters {
+  id_country: number;
+  month: string;
+}
+
+export interface IDashboardSummaryStatus {
+  esperados: number;
+  transformados: number;
+  novedades: number;
+  pendientes: number;
+  estado: number;
+}
+
+export interface IDashboardSummaryKpiByRegion extends IDashboardSummaryStatus {
+  key: string;
+  label: string;
+}
+
+export interface IDashboardSummaryKpiByTypeArchive extends IDashboardSummaryStatus {
+  key: number;
+  label: string;
+}
+
+export interface IDashboardSummaryKpis {
+  byRegion: IDashboardSummaryKpiByRegion[];
+  byTypeArchive: IDashboardSummaryKpiByTypeArchive[];
+}
+
+export interface IDashboardSummaryAlertClient {
+  id_client: number;
+  client_name: string;
+}
+
+export interface IDashboardSummaryAlert {
+  name: string;
+  count: number;
+  color: string;
+  clients: IDashboardSummaryAlertClient[];
+}
+
+export interface IDashboardSummaryExploration {
+  month: string;
+  id_country: number;
+  totals: IDataExplorationTotals;
+  clients: IDataExplorationClient[];
+}
+
+export interface IDashboardSummaryClientStatusFile {
+  id_client_data_archives: number;
+  id_type_archive: number;
+  type_archive: string;
+  status: string;
+  transformation: string;
+  sent: string | null;
+  observation: string | null;
+  periodicity: string;
+}
+
+export interface IDashboardSummaryClientStatusClient extends IDashboardSummaryStatus {
+  id_client: number;
+  client_name: string;
+  files_count: number;
+  files: IDashboardSummaryClientStatusFile[];
+}
+
+export interface IDashboardSummaryClientStatus extends IDashboardSummaryStatus {
+  region: string;
+  id_country: number;
+  country_name: string;
+  clients_count: number;
+  files_count: number;
+  clients: IDashboardSummaryClientStatusClient[];
+}
+
+// periodicity
+
+export interface IDashboardSummaryPeriodicity {
+  periodicity: string;
+  total_archivos: number;
+  procesados: number;
+  novedades: number;
+  retrasados: number;
+  pendientes: number;
+}
+
+export interface IDashboardSummary {
+  filters: IDashboardSummaryAppliedFilters;
+  globalStatus: IDashboardSummaryStatus;
+  kpis: IDashboardSummaryKpis;
+  alerts: IDashboardSummaryAlert[];
+  clientStatus: IDashboardSummaryClientStatus[];
+  periodicity: IDashboardSummaryPeriodicity[];
+  exploration: IDashboardSummaryExploration[];
 }
