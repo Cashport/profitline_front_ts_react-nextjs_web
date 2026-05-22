@@ -26,7 +26,9 @@ export function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<stri
     tags: ticket.tags ? [ticket.tags] : [],
     timeline: [],
     metrics: { totalVencido: 0, ultimoPago: "" },
-    hasUnreadUpdate: ticket.lastViewedAt === null || unreadTicketsSet.has(ticket.id),
+    hasUnreadUpdate:
+      (ticket.lastViewedAt === null && ticket.lastMessage?.direction === "INBOUND") ||
+      unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt,
     countMessages: ticket._count?.messages || 0
   };
