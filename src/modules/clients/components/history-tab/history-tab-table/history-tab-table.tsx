@@ -18,12 +18,18 @@ interface PropsHistoryTable {
   setSelectedRows: Dispatch<SetStateAction<IHistoryRow[] | undefined>>;
   // eslint-disable-next-line no-unused-vars
   handleOpenDetail: (row: IHistoryRow, url: string | null) => void;
+  // eslint-disable-next-line no-unused-vars
+  handleRegenerateExcel: (row: IHistoryRow) => Promise<void>;
+  // eslint-disable-next-line no-unused-vars
+  handleRegeneratePDF: (row: IHistoryRow) => Promise<void>;
 }
 
 const HistoryTable = ({
   dataAllRecords: data,
   setSelectedRows,
-  handleOpenDetail
+  handleOpenDetail,
+  handleRegenerateExcel,
+  handleRegeneratePDF
 }: PropsHistoryTable) => {
   const [page, setPage] = useState(1);
   const height = useScreenHeight();
@@ -86,7 +92,7 @@ const HistoryTable = ({
                 icon={<FileXls size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
-                  handleOpenDetail(row, row.payment_identification_excel_url);
+                  handleRegenerateExcel(row);
                 }}
               >
                 Descargar plano
@@ -100,7 +106,7 @@ const HistoryTable = ({
                 icon={<FileText size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
-                  handleOpenDetail(row, row.payment_identification_url);
+                  handleRegeneratePDF(row);
                 }}
               >
                 Ver pdf
