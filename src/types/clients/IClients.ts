@@ -182,6 +182,7 @@ export interface CreditBalanceFormated {
 export interface IClientSegmentationDetail {
   client: {
     uuid: string;
+    nit: string | null;
     business_name: string;
     phone: string;
     email: string;
