@@ -159,8 +159,58 @@ export default function ChatDetails({
                     >
                       <div className="font-medium">{clientDetails?.client.business_name}</div>
                     </Link>
+                    <div className="text-muted-foreground">NIT</div>
+                    <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
+                      <span className="truncate">{clientDetails?.client.nit}</span>
+                      {clientDetails?.client.nit ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground"
+                          aria-label="Copiar NIT"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(clientDetails.client.nit!);
+                              toast({
+                                title: "NIT copiado",
+                                description: clientDetails.client.nit!
+                              });
+                            } catch {
+                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                          <span className="sr-only">Copiar NIT</span>
+                        </Button>
+                      ) : null}
+                    </div>
                     <div className="text-muted-foreground">Teléfono</div>
-                    <div className="font-medium">{clientDetails?.client.phone}</div>
+                    <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
+                      <span className="truncate">{clientDetails?.client.phone}</span>
+                      {clientDetails?.client.phone ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground"
+                          aria-label="Copiar teléfono"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(clientDetails.client.phone);
+                              toast({
+                                title: "Teléfono copiado",
+                                description: clientDetails.client.phone
+                              });
+                            } catch {
+                              toast({ title: "No se pudo copiar", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                          <span className="sr-only">Copiar teléfono</span>
+                        </Button>
+                      ) : null}
+                    </div>
                     <div className="text-muted-foreground">Correo</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                       <span className="truncate">{clientDetails?.client.email}</span>
