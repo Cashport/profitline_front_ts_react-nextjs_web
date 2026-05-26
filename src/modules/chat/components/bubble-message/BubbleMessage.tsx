@@ -10,6 +10,7 @@ import {
 import { IMessage, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { TypeContactMessage } from "@/types/chat/messages";
 import { formatTime, formatWhatsAppText } from "@/modules/chat/utils/format";
+import AudioMessage from "@/modules/chat/components/audio-message/AudioMessage";
 
 interface BubbleMessageProps {
   message: IMessage;
@@ -168,6 +169,15 @@ export default function BubbleMessage({
             <div className="text-xs text-muted-foreground">Haz clic para abrir</div>
           </div>
         </button>
+        {footer}
+      </BubbleWrapper>
+    );
+  }
+
+  if (m.type === "AUDIO" && m.mediaUrl) {
+    return (
+      <BubbleWrapper mine={mine} customerName={customerName} padding="p-2">
+        <AudioMessage src={m.mediaUrl} mine={mine} />
         {footer}
       </BubbleWrapper>
     );
