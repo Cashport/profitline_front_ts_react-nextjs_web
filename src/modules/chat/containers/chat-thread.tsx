@@ -58,6 +58,15 @@ export default function ChatThread({
     return map;
   }, [ticketMessages]);
 
+  const messagesByWaId = useMemo(() => {
+    const map = new Map<string, IMessage>();
+    for (const m of ticketMessages) {
+      const waId = m.metadata?.whatsapp_message_id;
+      if (waId) map.set(waId, m);
+    }
+    return map;
+  }, [ticketMessages]);
+
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
@@ -253,6 +262,7 @@ export default function ChatThread({
                   message={m}
                   customerName={conversation.customer}
                   templateMap={templateMap}
+                  messagesByWaId={messagesByWaId}
                   onPreviewImage={setPreviewImage}
                   onScrollToBottom={scrollToBottom}
                 />
