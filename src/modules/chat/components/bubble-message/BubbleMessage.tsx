@@ -270,7 +270,7 @@ export default function BubbleMessage({
         padding="p-3"
       >
         <div
-          className="text-sm text-white whitespace-pre-wrap"
+          className="text-sm text-white whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
         />
         {buttonText && (
@@ -291,7 +291,7 @@ export default function BubbleMessage({
   // Default: TEXT
   return (
     <BubbleWrapper mine={mine} customerName={customerName}>
-      <span className="whitespace-pre-wrap">{m.content}</span>
+      <span className="whitespace-pre-wrap break-words">{m.content}</span>
       {footer}
     </BubbleWrapper>
   );
