@@ -84,6 +84,20 @@ export function DataExplorationCard() {
     return { rows: computedRows, lastDataDayIdx };
   }, [data, dayNumbers]);
 
+  const todayDayCutoff = useMemo(() => {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return Infinity;
+    }
+    if (year > currentYear || (year === currentYear && month > currentMonth)) {
+      return 0;
+    }
+    return today.getDate();
+  }, [selectedMonth]);
+
   return (
     <Card
       className="bg-white overflow-hidden border-0 shadow-none"
@@ -131,7 +145,7 @@ export function DataExplorationCard() {
             </div>
             <div className="flex items-center gap-1.5">
               <div
-                className="w-3 h-3 rounded border border-dashed"
+                className="w-3 h-3 rounded border"
                 style={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }}
               />
               <span>Esperado</span>
@@ -263,39 +277,40 @@ export function DataExplorationCard() {
                     </td>
                     */}
                     {row.days.map((dayTotals, dayIdx) => {
+                      const dayNumber = dayIdx + 1;
+                      const isFutureDay = dayNumber > todayDayCutoff;
+                      const isWithinReportedRange = dayIdx < lastDataDayIdx;
+
                       if (dayTotals === null) {
-                        const isMissing = dayIdx < lastDataDayIdx;
+                        const showAsExpected = isFutureDay || isWithinReportedRange;
                         return (
                           <td
                             key={dayIdx}
                             className="text-center py-1 font-medium tabular-nums"
                             style={
-                              isMissing
-                                ? { backgroundColor: "#FEE2E2", color: "#991B1B" }
+                              showAsExpected
+                                ? { backgroundColor: "#F9FAFB", color: "#9CA3AF" }
                                 : { backgroundColor: "#ffffff", color: "#9CA3AF" }
                             }
                           >
-                            {isMissing ? "-" : ""}
+                            {showAsExpected ? "⋯" : ""}
                           </td>
                         );
                       }
 
-                      const hasNovedades = dayTotals.novedades > 0;
-                      const bgColor = hasNovedades ? "#FEF3C7" : "#D1FAE5";
-                      const textColor = hasNovedades ? "#92400E" : "#065F46";
-                      const novedadesDayPct =
-                        dayTotals.total_registros > 0
-                          ? Math.round((dayTotals.novedades / dayTotals.total_registros) * 100)
-                          : 0;
+                      if (dayTotals.novedades > 0) {
+                        const novedadesDayPct =
+                          dayTotals.total_registros > 0
+                            ? Math.round((dayTotals.novedades / dayTotals.total_registros) * 100)
+                            : 0;
 
-                      const cellContent = (
-                        <td
-                          key={dayIdx}
-                          className="text-center py-1 font-medium tabular-nums relative"
-                          style={{ backgroundColor: bgColor, color: textColor }}
-                        >
-                          {dayTotals.total_registros}
-                          {hasNovedades && (
+                        const cellContent = (
+                          <td
+                            key={dayIdx}
+                            className="text-center py-1 font-medium tabular-nums relative"
+                            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
+                          >
+                            {dayTotals.total_registros}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -303,11 +318,9 @@ export function DataExplorationCard() {
                                 borderTop: "6px solid #F59E0B"
                               }}
                             />
-                          )}
-                        </td>
-                      );
+                          </td>
+                        );
 
-                      if (hasNovedades) {
                         return (
                           <TooltipProvider key={dayIdx} delayDuration={100}>
                             <Tooltip>
@@ -329,7 +342,42 @@ export function DataExplorationCard() {
                         );
                       }
 
-                      return cellContent;
+                      if (dayTotals.total_registros === 0) {
+                        if (isFutureDay) {
+                          return (
+                            <td
+                              key={dayIdx}
+                              className="text-center py-1 font-medium tabular-nums"
+                              style={{ backgroundColor: "#F9FAFB", color: "#9CA3AF" }}
+                            >
+                              ⋯
+                            </td>
+                          );
+                        }
+                        return (
+                          <td
+                            key={dayIdx}
+                            className="text-center py-1 font-medium tabular-nums"
+                            style={
+                              isWithinReportedRange
+                                ? { backgroundColor: "#FEE2E2", color: "#991B1B" }
+                                : { backgroundColor: "#ffffff", color: "#9CA3AF" }
+                            }
+                          >
+                            {isWithinReportedRange ? "-" : ""}
+                          </td>
+                        );
+                      }
+
+                      return (
+                        <td
+                          key={dayIdx}
+                          className="text-center py-1 font-medium tabular-nums"
+                          style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
+                        >
+                          {dayTotals.total_registros}
+                        </td>
+                      );
                     })}
                     <td
                       className="text-right px-2 py-1 font-semibold tabular-nums"
