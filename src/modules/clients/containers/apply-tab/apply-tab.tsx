@@ -75,7 +75,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   className,
   defaultPositionDragModal,
   isInApplyModule = false,
-  clientUUID,
+  clientUUID
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
@@ -124,10 +124,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   useEffect(() => {
-    if (applicationData?.summary.url_attachment) {
-      setUseDefaultFileInEvidence(true);
+    if (isModalOpen.selected === 1) {
+      setUseDefaultFileInEvidence(Boolean(applicationData?.summary?.url_attachment));
     }
-  }, [applicationData?.summary, isModalOpen.selected]);
+  }, [isModalOpen.selected]);
 
   const handleCancel = () => {
     setIsModalAddToTableOpen({
@@ -232,7 +232,9 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       mutate();
       setIsModalOpen({ selected: 0 });
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al guardar la aplicación");
+      const errormessage =
+        error instanceof Error ? error.message : "Ha ocurrido un error al guardar la aplicación";
+      showMessage("error", errormessage);
     }
     setLoadingSave(false);
     setPreventRevalidation(false);
@@ -384,7 +386,6 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     }
     setLoadingRequest(false);
   };
-
 
   const isConfirmDisabled = useMemo(() => {
     if (useDefaultFileInEvidence) {
