@@ -161,6 +161,7 @@ export const closeWhatsAppTicket = async (ticketId: string): Promise<void> => {
   try {
     await API.put(
       `/whatsapp-tickets/${ticketId}/close`,
+      {},
       { baseURL: config.API_CHAT }
     );
   } catch (error) {
