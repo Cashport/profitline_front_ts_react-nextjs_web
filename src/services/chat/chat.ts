@@ -159,10 +159,9 @@ export const markTicketAsRead = async (ticketId: string): Promise<void> => {
 
 export const closeWhatsAppTicket = async (ticketId: string): Promise<void> => {
   try {
-    await API.patch(
+    await API.put(
       `/whatsapp-tickets/${ticketId}/close`,
-      {},
-      { baseURL: config.API_CHAT, method: "PATCH" }
+      { baseURL: config.API_CHAT }
     );
   } catch (error) {
     console.error("Error closing WhatsApp ticket:", error);
