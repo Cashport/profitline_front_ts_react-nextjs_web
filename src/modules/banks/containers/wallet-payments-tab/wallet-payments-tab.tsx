@@ -172,6 +172,11 @@ export const WalletPaymentsTab: FC<WalletPaymentsTabProps> = ({ isActive }) => {
           isOpen={isGenerateActionOpen}
           onClose={() => setisGenerateActionOpen(false)}
           selectedRows={selectedRows}
+          onSuccess={() => {
+            setClearSelected((prev) => !prev);
+            setSelectedRows([]);
+            mutate();
+          }}
         />
 
         <ModalFilterSelectDates
