@@ -15,6 +15,7 @@ import { ISingleBank } from "@/types/banks/IBanks";
 import "./modal-actions-wallet-payments.scss";
 
 const IDENTIFICADO_STATUS_ID = 1;
+const CARGADO_ERP_STATUS_ID = 20;
 
 interface Props {
   isOpen: boolean;
@@ -41,9 +42,7 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
       window.open(res.url, "_blank");
       message.success("Plano descargado correctamente");
       onClose();
-      const allIdentificado = selectedRows.every(
-        (row) => row.id_status === IDENTIFICADO_STATUS_ID
-      );
+      const allIdentificado = selectedRows.every((row) => row.id_status === IDENTIFICADO_STATUS_ID);
       if (allIdentificado) {
         setIsConfirmOpen(true);
       }
@@ -92,8 +91,8 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
       return;
     }
 
-    if (selectedRows[0].id_status !== IDENTIFICADO_STATUS_ID) {
-      message.warning("El pago seleccionado debe estar en estado Identificado");
+    if (selectedRows[0].id_status !== CARGADO_ERP_STATUS_ID) {
+      message.warning("El pago seleccionado debe estar en estado Cargado al ERP");
       return;
     }
 
