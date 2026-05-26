@@ -41,6 +41,12 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
       window.open(res.url, "_blank");
       message.success("Plano descargado correctamente");
       onClose();
+      const allIdentificado = selectedRows.every(
+        (row) => row.id_status === IDENTIFICADO_STATUS_ID
+      );
+      if (allIdentificado) {
+        setIsConfirmOpen(true);
+      }
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Error al descargar el plano");
     } finally {
