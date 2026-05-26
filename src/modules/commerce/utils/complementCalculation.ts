@@ -41,7 +41,7 @@ export const computeComplementRequirements = (
 
   return {
     requiredCanulas: canulasFromSculptra + canulasFromRestylane,
-    requiredAgua: sculptraQty,
+    requiredAgua: sculptraQty * 4,
     sculptraQty,
     restylaneTotalQty,
     hasMainProduct: sculptraQty > 0 || restylaneTotalQty > 0

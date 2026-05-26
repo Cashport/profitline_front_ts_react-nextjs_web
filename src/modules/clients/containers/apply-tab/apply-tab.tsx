@@ -495,6 +495,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       handleDeleteRow={handleRemoveRow}
                       handleEditRow={handleEditRow}
                       rowSelection={rowSelection("invoices")}
+                      clientId={clientId}
+                      projectId={projectId}
                     />
                   )}
                   {section.statusName === "pagos" && (
@@ -512,6 +514,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
                       handleEditRow={(row) => handleEditRow(row, "discount")}
+                      clientId={clientId}
+                      projectId={projectId}
                     />
                   )}
                 </div>

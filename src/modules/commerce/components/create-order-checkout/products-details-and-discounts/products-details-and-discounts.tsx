@@ -96,7 +96,8 @@ export default function ProductsDetailsAndDiscounts({
     deactivateCrossSelling,
     setDeactivateCrossSelling,
     bonus,
-    setBonus
+    setBonus,
+    toggleCart
   } = useContext(OrderViewContext);
 
   const promoBonificados = (bonus?.bonusOptions ?? []).flatMap((option, optionIdx) =>
@@ -206,13 +207,18 @@ export default function ProductsDetailsAndDiscounts({
     ? "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_56px_32px]"
     : "grid-cols-[2fr_90px_100px_120px_100px_70px_110px_32px]";
 
+  const handleGoBack = () => {
+    setCheckingOut(false);
+    toggleCart?.();
+  };
+
   return (
     <div className="flex-1 min-w-0 flex flex-col overflow-hidden bg-[#F7F7F7]">
       <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl border border-[#DDDDDD]">
         {/* Card header */}
         <div className="flex items-center gap-3 px-5 py-3 border-b border-[#DDDDDD] flex-shrink-0">
           <button
-            onClick={() => setCheckingOut(false)}
+            onClick={handleGoBack}
             className="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-[#F7F7F7] transition-colors"
           >
             <ArrowLeft size={15} className="text-[#666666]" />

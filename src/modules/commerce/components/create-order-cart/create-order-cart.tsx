@@ -10,6 +10,7 @@ import { useAppStore } from "@/lib/store/store";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
 import { getPromotions, IPromotion } from "@/services/promotion/promotion";
+import { useMessageApi } from "@/context/MessageContext";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
@@ -23,7 +24,8 @@ import {
   matchesProductIdentifier,
   CANULA_COMPLEMENT,
   AGUA_COMPLEMENT,
-  ProductIdentifier
+  ProductIdentifier,
+  isCanulaProduct
 } from "../../utils/constants/evenQuantityProducts";
 import { computeComplementRequirements } from "../../utils/complementCalculation";
 import { ISelectedCategories } from "../../containers/create-order/create-order";
@@ -49,6 +51,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     projectId: state.selectedProject.ID
   }));
   const width = useScreenWidth();
+  const { showMessage } = useMessageApi();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [promotions, setPromotions] = useState<IPromotion[]>([]);
@@ -91,12 +94,20 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       try {
         const promotions = await getPromotions(client.id);
         setPromotions(promotions.promotions);
+        if (promotions.promotions[0]) setPromotionId(promotions.promotions[0].id);
       } catch (error) {
         console.error("Error fetching promotions:", error);
       }
     };
     fetchPromotions();
   }, [client?.id]);
+
+  useEffect(() => {
+    const activeRange = confirmOrderData?.promotion?.active_range;
+    if (activeRange?.progress_message) {
+      showMessage("info", activeRange.progress_message);
+    }
+  }, [confirmOrderData?.promotion?.active_range?.range_id]);
 
   const handleOpenDiscountsModal = () => {
     setOpenDiscountsModal(true);
@@ -156,7 +167,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
     const allProducts = selectedCategories.flatMap((c) => c.products);
     const actualCanulas = allProducts
-      .filter((p) => matchesProductIdentifier(p, CANULA_COMPLEMENT))
+      .filter(isCanulaProduct)
       .reduce((sum, p) => sum + p.quantity, 0);
     const actualAgua = allProducts
       .filter((p) => matchesProductIdentifier(p, AGUA_COMPLEMENT))
@@ -347,10 +358,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     }));
 
     for (const { identifier, requiredQty } of plan) {
+      const isCanulaPlanItem = identifier === CANULA_COMPLEMENT;
       let catIdx = -1;
       let prodIdx = -1;
       for (let i = 0; i < next.length && prodIdx === -1; i++) {
-        const j = next[i].products.findIndex((p) => matchesProductIdentifier(p, identifier));
+        const j = next[i].products.findIndex((p) =>
+          isCanulaPlanItem ? isCanulaProduct(p) : matchesProductIdentifier(p, identifier)
+        );
         if (j !== -1) {
           catIdx = i;
           prodIdx = j;
@@ -506,11 +520,12 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
-          {promotions.length > 0 && (
+          {((promotions.length > 0 &&
+            (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1) ||
+            (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0) && (
             <button
               onClick={() => {
                 setIsBonusModalOpen(true);
-                if (promotions[0]) setPromotionId(promotions[0].id);
               }}
               className="w-full flex items-center gap-2 px-4 py-3 bg-[#FAFAFA] hover:bg-[#F3F3F3] transition-colors border border-[#EEEEEE] rounded-xl"
             >
@@ -519,7 +534,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 Bonificados
               </span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#CBE71E] text-[#141414] rounded-md">
-                {promotions.length} disp.
+                {confirmOrderData?.promotion?.active_range?.gift_options &&
+                (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1
+                  ? `${confirmOrderData?.promotion?.active_range?.gift_options?.length} disp.`
+                  : (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0 && "1 disp."}
               </span>
               <Eye size={14} className="text-[#999999]" />
             </button>
@@ -707,6 +725,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         }
         cancelText="Modificar"
         okText="Continuar"
+        hideOkButton={
+          !!complementMismatch &&
+          complementMismatch.actualCanulas > complementMismatch.expectedCanulas
+        }
       />
 
       <ModalConfirmAction

@@ -3,6 +3,7 @@ import { Button, Dropdown, Table, TableProps } from "antd";
 import { Trash, DotsThreeVertical, Pencil } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 
 import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
 
@@ -10,6 +11,8 @@ import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 interface DiscountTableProps {
   data?: IApplyTabRecord[];
+  clientId: string;
+  projectId: number;
   // eslint-disable-next-line no-unused-vars
   handleDeleteRow?: (id: number) => void;
   // eslint-disable-next-line no-unused-vars
@@ -24,11 +27,14 @@ interface DiscountTableProps {
 
 const DiscountTable: React.FC<DiscountTableProps> = ({
   data,
+  clientId,
+  projectId,
   handleDeleteRow,
   rowSelection,
   handleEditRow
 }) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const { openModal } = useModalDetail();
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
   const [removeModal, setRemoveModal] = useState(false);
 
@@ -37,7 +43,22 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       title: "ID ajuste",
       dataIndex: "erp_id",
       key: "erp_id",
-      render: (id) => <p className="sectionContainerTable__id">{id}</p>,
+      render: (id, row) => {
+        return (
+          <p
+            className="sectionContainerTable__id"
+            onClick={() =>
+              openModal("adjustment", {
+                adjusmentId: Number(row.financial_discount_id),
+                clientId,
+                projectId
+              })
+            }
+          >
+            {id}
+          </p>
+        );
+      },
       showSorterTooltip: false
     },
     {
@@ -54,11 +75,43 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       key: "entity_description"
     },
     {
-      title: "Monto",
+      title: "Monto inicial",
       dataIndex: "amount",
       key: "amount",
       render: (amount) => <p className="fontMonoSpace">{formatMoney(amount)}</p>,
       sorter: (a, b) => a.amount - b.amount,
+      showSorterTooltip: false,
+      align: "right"
+    },
+    {
+      title: "Factura",
+      dataIndex: "invoices",
+      key: "invoices",
+      render: (_, row: IApplyTabRecord) => {
+        const invoices = row.invoices;
+        if (!invoices?.length) return <p>-</p>;
+        return (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {invoices.map((inv) => (
+              <p
+                key={inv.invoice_id}
+                className="sectionContainerTable__id"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openModal("invoice", {
+                    invoiceId: inv.financial_discount_id,
+                    showId: inv.id_erp,
+                    clientId,
+                    projectId
+                  });
+                }}
+              >
+                {inv.id_erp}
+              </p>
+            ))}
+          </div>
+        );
+      },
       showSorterTooltip: false,
       align: "right"
     },
@@ -68,15 +121,6 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       key: "applied_amount",
       render: (applied_amount) => <p className="fontMonoSpace">{formatMoney(applied_amount)}</p>,
       sorter: (a, b) => a.applied_amount - b.applied_amount,
-      showSorterTooltip: false,
-      align: "right"
-    },
-    {
-      title: "Saldo",
-      dataIndex: "current_value",
-      key: "current_value",
-      render: (current_value) => <p className="fontMonoSpace">{formatMoney(current_value)}</p>,
-      sorter: (a, b) => a.current_value - b.current_value,
       showSorterTooltip: false,
       align: "right"
     },
@@ -92,7 +136,6 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                 icon={<Pencil size={20} />}
                 className="buttonNoBorder"
                 onClick={() => {
-                  // Logic to edit the row
                   handleEditRow && handleEditRow(row);
                 }}
               >

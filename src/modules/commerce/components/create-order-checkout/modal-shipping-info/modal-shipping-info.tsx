@@ -6,7 +6,12 @@ import { Gift, X } from "lucide-react";
 
 import { DiscountItem, ICommerceAdresses } from "@/types/commerce/ICommerce";
 
-import { NEW_ADDRESS_OPTION } from "@/modules/commerce/utils/constants/checkout";
+import {
+  NEW_ADDRESS_OPTION,
+  isValidEmail,
+  isValidPhone,
+  phoneErrorMessage
+} from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
@@ -59,8 +64,13 @@ export default function ModalShippingInfo({
     !draft.addressSelectValue.trim() ||
     !draft.city.trim() ||
     !draft.dispatch_address.trim() ||
-    !draft.email.trim() ||
-    !draft.telefono.trim();
+    !isValidEmail(draft.email) ||
+    !isValidPhone(draft.telefono, draft.indicativo);
+
+  const isEmailInvalid = draft.email.trim() !== "" && !isValidEmail(draft.email);
+
+  const isPhoneInvalid =
+    draft.telefono.trim() !== "" && !isValidPhone(draft.telefono, draft.indicativo);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
@@ -244,8 +254,15 @@ export default function ModalShippingInfo({
               placeholder="correo@ejemplo.com"
               value={draft.email}
               onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-              className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
+              className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                isEmailInvalid
+                  ? "border-red-400 focus:border-red-500"
+                  : "border-[#DDDDDD] focus:border-[#141414]"
+              }`}
             />
+            {isEmailInvalid && (
+              <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -271,10 +288,19 @@ export default function ModalShippingInfo({
                 type="tel"
                 placeholder="3001234567"
                 value={draft.telefono}
-                onChange={(e) => setDraft((d) => ({ ...d, telefono: e.target.value }))}
-                className="flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, telefono: e.target.value.replace(/\D/g, "") }))
+                }
+                className={`flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                  isPhoneInvalid
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-[#DDDDDD] focus:border-[#141414]"
+                }`}
               />
             </div>
+            {isPhoneInvalid && (
+              <p className="text-[10px] text-red-500">{phoneErrorMessage(draft.indicativo)}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
