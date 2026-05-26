@@ -16,8 +16,29 @@ interface BubbleMessageProps {
   message: IMessage;
   customerName: string;
   templateMap: Map<string, IWhatsAppTemplate>;
+  messagesByWaId: Map<string, IMessage>;
   onPreviewImage: (url: string) => void;
   onScrollToBottom: () => void;
+}
+
+function quotedPreviewFor(referenced: IMessage | undefined): string {
+  if (!referenced) return "mensaje no disponible";
+  switch (referenced.type) {
+    case "IMAGE":
+      return "imagen";
+    case "STICKER":
+      return "sticker";
+    case "AUDIO":
+      return "audio";
+    case "DOCUMENT":
+      return referenced.content || "documento";
+    case "CONTACTS":
+      return "contacto";
+    case "TEMPLATE":
+      return "plantilla";
+    default:
+      return referenced.content || "mensaje";
+  }
 }
 
 function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
@@ -96,11 +117,34 @@ export default function BubbleMessage({
   message: m,
   customerName,
   templateMap,
+  messagesByWaId,
   onPreviewImage,
   onScrollToBottom
 }: BubbleMessageProps) {
   const mine = m.direction === "OUTBOUND";
   const footer = <Footer timestamp={m.timestamp} mine={mine} status={m.status} />;
+
+  const aditionals = m.metadata?.aditionals;
+  if (aditionals?.type === "reaction" && aditionals?.reaction?.emoji) {
+    const referenced = messagesByWaId.get(aditionals.reaction.message_id);
+    const quoted = quotedPreviewFor(referenced);
+    const truncated = quoted.length > 80 ? `${quoted.slice(0, 80)}…` : quoted;
+    const quoteIsMissing = !referenced;
+
+    return (
+      <BubbleWrapper mine={mine} customerName={customerName} padding="px-3 py-2">
+        <div className="text-xs opacity-80">
+          Reaccionó <span className="text-base align-middle">{aditionals.reaction.emoji}</span> a:
+        </div>
+        <div
+          className={`mt-1 border-l-2 pl-2 text-xs ${mine ? "border-white/40" : "border-black/30"} opacity-80 ${quoteIsMissing ? "italic" : ""}`}
+        >
+          «{truncated}»
+        </div>
+        {footer}
+      </BubbleWrapper>
+    );
+  }
 
   if (m.type === "CONTACTS") {
     const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
