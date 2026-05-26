@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import Image from "next/image";
+import { Image as AntImage } from "antd";
 import { CaretDoubleLeft } from "@phosphor-icons/react";
 
 import { getWhatsAppTemplates, markTicketAsRead, sendTemplate } from "@/services/chat/chat";
@@ -20,7 +20,6 @@ import { BubbleMessage } from "../components/bubble-message";
 import { DateSeparator } from "../components/date-separator";
 import { ChatFooter } from "../components/chat-footer";
 import TemplateDialog from "../components/template-dialog/template-dialog";
-import { Dialog, DialogContent } from "@/modules/chat/ui/dialog";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 
 type Props = {
@@ -55,6 +54,15 @@ export default function ChatThread({
       const group = map.get(day);
       if (group) group.push(m);
       else map.set(day, [m]);
+    }
+    return map;
+  }, [ticketMessages]);
+
+  const messagesByWaId = useMemo(() => {
+    const map = new Map<string, IMessage>();
+    for (const m of ticketMessages) {
+      const waId = m.metadata?.whatsapp_message_id;
+      if (waId) map.set(waId, m);
     }
     return map;
   }, [ticketMessages]);
@@ -254,6 +262,7 @@ export default function ChatThread({
                   message={m}
                   customerName={conversation.customer}
                   templateMap={templateMap}
+                  messagesByWaId={messagesByWaId}
                   onPreviewImage={setPreviewImage}
                   onScrollToBottom={scrollToBottom}
                 />
@@ -289,22 +298,20 @@ export default function ChatThread({
         }}
       />
 
-      {/* Image preview */}
-      <Dialog open={!!previewImage} onOpenChange={(o) => !o && setPreviewImage(null)}>
-        <DialogContent className="max-w-3xl">
-          {previewImage && (
-            <div className="relative w-full h-[70dvh]">
-              <Image
-                src={previewImage || "/placeholder.svg"}
-                alt="Vista previa"
-                fill
-                unoptimized
-                className="rounded-xl object-contain"
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Image preview (Ant Design - supports zoom, rotate, flip) */}
+      {previewImage && (
+        <AntImage
+          style={{ display: "none" }}
+          src={previewImage}
+          preview={{
+            visible: true,
+            src: previewImage,
+            onVisibleChange: (visible) => {
+              if (!visible) setPreviewImage(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

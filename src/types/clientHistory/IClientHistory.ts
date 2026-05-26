@@ -1,5 +1,8 @@
 export interface IHistoryRow {
   id: number;
+  id_payment_application?: number | null;
+  id_aplication_payment?: number | null;
+  id_application_payment?: number | null;
   event: string;
   description: string;
   project_id: number;

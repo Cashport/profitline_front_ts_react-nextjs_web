@@ -10,13 +10,35 @@ import {
 import { IMessage, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { TypeContactMessage } from "@/types/chat/messages";
 import { formatTime, formatWhatsAppText } from "@/modules/chat/utils/format";
+import AudioMessage from "@/modules/chat/components/audio-message/AudioMessage";
 
 interface BubbleMessageProps {
   message: IMessage;
   customerName: string;
   templateMap: Map<string, IWhatsAppTemplate>;
+  messagesByWaId: Map<string, IMessage>;
   onPreviewImage: (url: string) => void;
   onScrollToBottom: () => void;
+}
+
+function quotedPreviewFor(referenced: IMessage | undefined): string {
+  if (!referenced) return "mensaje no disponible";
+  switch (referenced.type) {
+    case "IMAGE":
+      return "imagen";
+    case "STICKER":
+      return "sticker";
+    case "AUDIO":
+      return "audio";
+    case "DOCUMENT":
+      return referenced.content || "documento";
+    case "CONTACTS":
+      return "contacto";
+    case "TEMPLATE":
+      return "plantilla";
+    default:
+      return referenced.content || "mensaje";
+  }
 }
 
 function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
@@ -95,11 +117,34 @@ export default function BubbleMessage({
   message: m,
   customerName,
   templateMap,
+  messagesByWaId,
   onPreviewImage,
   onScrollToBottom
 }: BubbleMessageProps) {
   const mine = m.direction === "OUTBOUND";
   const footer = <Footer timestamp={m.timestamp} mine={mine} status={m.status} />;
+
+  const aditionals = m.metadata?.aditionals;
+  if (aditionals?.type === "reaction" && aditionals?.reaction?.emoji) {
+    const referenced = messagesByWaId.get(aditionals.reaction.message_id);
+    const quoted = quotedPreviewFor(referenced);
+    const truncated = quoted.length > 80 ? `${quoted.slice(0, 80)}…` : quoted;
+    const quoteIsMissing = !referenced;
+
+    return (
+      <BubbleWrapper mine={mine} customerName={customerName} padding="px-3 py-2">
+        <div className="text-xs opacity-80">
+          Reaccionó <span className="text-base align-middle">{aditionals.reaction.emoji}</span> a:
+        </div>
+        <div
+          className={`mt-1 border-l-2 pl-2 text-xs ${mine ? "border-white/40" : "border-black/30"} opacity-80 ${quoteIsMissing ? "italic" : ""}`}
+        >
+          «{truncated}»
+        </div>
+        {footer}
+      </BubbleWrapper>
+    );
+  }
 
   if (m.type === "CONTACTS") {
     const contacts: TypeContactMessage[] = m.metadata?.contacts || [];
@@ -173,6 +218,15 @@ export default function BubbleMessage({
     );
   }
 
+  if (m.type === "AUDIO" && m.mediaUrl) {
+    return (
+      <BubbleWrapper mine={mine} customerName={customerName} padding="p-2">
+        <AudioMessage src={m.mediaUrl} mine={mine} />
+        {footer}
+      </BubbleWrapper>
+    );
+  }
+
   if (m.type === "TEMPLATE") {
     let parsedData: any = null;
     try {
@@ -216,7 +270,7 @@ export default function BubbleMessage({
         padding="p-3"
       >
         <div
-          className="text-sm text-white whitespace-pre-wrap"
+          className="text-sm text-white whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: formatWhatsAppText(bodyText) }}
         />
         {buttonText && (
@@ -237,7 +291,7 @@ export default function BubbleMessage({
   // Default: TEXT
   return (
     <BubbleWrapper mine={mine} customerName={customerName}>
-      <span className="whitespace-pre-wrap">{m.content}</span>
+      <span className="whitespace-pre-wrap break-words">{m.content}</span>
       {footer}
     </BubbleWrapper>
   );

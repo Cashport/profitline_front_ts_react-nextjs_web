@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
     font-src 'self' https://fonts.gstatic.com;
     connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
+    media-src 'self' blob: ${amazonFiles};
     object-src 'none';
     frame-ancestors 'self';
     base-uri 'self';
