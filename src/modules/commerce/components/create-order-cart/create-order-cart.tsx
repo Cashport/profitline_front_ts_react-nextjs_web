@@ -521,7 +521,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
           {((promotions.length > 0 &&
-            (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1) ||
+            (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 0) ||
             (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0) && (
             <button
               onClick={() => {
