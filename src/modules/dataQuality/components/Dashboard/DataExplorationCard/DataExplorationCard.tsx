@@ -21,16 +21,8 @@ import {
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
+import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
-
-const months = [
-  { id: "2026-05", name: "Mayo 2026" },
-  { id: "2026-04", name: "Abril 2026" },
-  { id: "2026-03", name: "Marzo 2026" },
-  { id: "2026-02", name: "Febrero 2026" },
-  { id: "2026-01", name: "Enero 2026" },
-  { id: "2025-12", name: "Diciembre 2025" }
-];
 
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 35;
@@ -38,7 +30,8 @@ const TOTAL_COLUMNS = 35;
 export function DataExplorationCard() {
   const { selectedCountry } = useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("2026-05");
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthId);
+  const months = useMemo(buildLastSixMonths, []);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
