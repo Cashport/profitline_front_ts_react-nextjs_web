@@ -10,11 +10,11 @@ interface UseTicketMessagesParams {
 
 const useTicketMessages = ({ ticketId, limit = 20, page }: UseTicketMessagesParams) => {
   const params = new URLSearchParams();
-  params.append('limit', limit.toString());
+  params.append("limit", limit.toString());
   if (page !== undefined) {
-    params.append('page', page.toString());
+    params.append("page", page.toString());
   }
-  
+
   const { data, isLoading, error, mutate } = useSWR<IChatData>(
     `/whatsapp-messages/ticket/${ticketId}?${params.toString()}`,
     () => getOneTicket(ticketId, limit, page)

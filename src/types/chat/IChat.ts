@@ -50,6 +50,17 @@ export interface IMessage {
   templateName?: string;
   templateData?: any;
   metadata: any;
+  ticket?: {
+    id: string;
+    subject: string;
+    status: "CLOSED" | "OPEN";
+    closedAt: string | null;
+    closedBy?: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
 }
 
 interface IPagination {
