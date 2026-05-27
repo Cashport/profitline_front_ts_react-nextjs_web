@@ -22,6 +22,7 @@ import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
+import { formatNumber } from "@/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const DAYS_IN_MONTH = 31;
@@ -310,7 +311,7 @@ export function DataExplorationCard() {
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {dayTotals.total_registros}
+                            {formatNumber(dayTotals.total_registros)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -333,7 +334,7 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {dayTotals.novedades} novedades ({novedadesDayPct}%)
+                                    {formatNumber(dayTotals.novedades)} novedades ({novedadesDayPct}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -375,7 +376,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {dayTotals.total_registros}
+                          {formatNumber(dayTotals.total_registros)}
                         </td>
                       );
                     })}
@@ -383,13 +384,13 @@ export function DataExplorationCard() {
                       className="text-right px-2 py-1 font-semibold tabular-nums"
                       style={{ color: "#111827" }}
                     >
-                      {row.total.toLocaleString()}
+                      {formatNumber(row.total)}
                     </td>
                     <td className="text-right px-2 py-1 tabular-nums">
                       {row.totalNovedades > 0 ? (
                         <div className="flex items-center justify-end gap-1">
                           <span className="font-semibold" style={{ color: "#F59E0B" }}>
-                            {row.totalNovedades.toLocaleString()}
+                            {formatNumber(row.totalNovedades)}
                           </span>
                           <span
                             className="text-[9px] px-1 py-0.5 rounded"
@@ -433,7 +434,7 @@ export function DataExplorationCard() {
                             className="text-right px-2 py-1 font-semibold tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {lastMonth.units_haleon.toLocaleString()}
+                            {formatNumber(lastMonth.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -456,7 +457,7 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {lastMonth.novedades} novedades ({lastMonth.novedades_percent}%)
+                                    {formatNumber(lastMonth.novedades)} novedades ({lastMonth.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -470,7 +471,7 @@ export function DataExplorationCard() {
                           className="text-right px-2 py-1 font-semibold tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {lastMonth.units_haleon.toLocaleString()}
+                          {formatNumber(lastMonth.units_haleon)}
                         </td>
                       );
                     })()}
