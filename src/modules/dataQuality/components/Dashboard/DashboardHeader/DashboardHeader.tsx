@@ -16,31 +16,7 @@ import {
   TabType,
   useDataQualityDashboardContext
 } from "@/modules/dataQuality/context/DataQualityDashboardContext";
-
-const SPANISH_MONTHS = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre"
-];
-
-const buildLastSixMonths = () => {
-  const now = new Date();
-  return Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const id = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const name = `${SPANISH_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-    return { id, name };
-  });
-};
+import { buildLastSixMonths } from "@/modules/dataQuality/utils/months";
 
 export function DashboardHeader() {
   const {
