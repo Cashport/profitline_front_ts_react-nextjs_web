@@ -95,10 +95,7 @@ export default function AllChats({
         { revalidate: false }
       );
 
-      if (
-        activeConversation?.id !== data.ticketId &&
-        data.message.direction === "INBOUND"
-      ) {
+      if (activeConversation?.id !== data.ticketId && data.message.direction === "INBOUND") {
         setUnreadTickets((prev) => new Set(prev).add(data.ticketId));
       }
     });
@@ -266,6 +263,7 @@ export default function AllChats({
             conversations.map((c) => {
               const isActive = c.id === activeConversation?.id;
               const isSelected = selectedIds.includes(c.id);
+              console.log(c)
               return (
                 <li
                   key={c.id}
@@ -283,8 +281,10 @@ export default function AllChats({
                   />
                   <div className="ml-6 min-w-0 flex-1">
                     <div className="flex w-full items-baseline gap-2">
-                      <p className="min-w-0 flex-1 truncate text-sm font-semibold">
-                        {c.client_name}
+                      <p className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.status === "CLOSED" ? "text-[#72737f]" : ""}`}>
+                        {c.status === "CLOSED"
+                          ? `${c.client_name || ""} - Cerrado ⚠️ `
+                          : `${c.client_name || ""}`}
                       </p>
                       <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                         {formatChatDate(c.lastMessageAt)}

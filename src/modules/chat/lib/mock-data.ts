@@ -42,6 +42,7 @@ export type Conversation = {
   lastMessageAt: string;
   timeline: TimelineItem[];
   countMessages: number;
+  status: "OPEN" | "CLOSED";
 };
 
 export function formatRelativeTime(iso: string) {

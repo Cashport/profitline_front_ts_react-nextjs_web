@@ -22,7 +22,7 @@ export interface ITicket {
   customerId: string;
   clientName: string;
   assignedTo: string | null;
-  status: string;
+  status: "OPEN" | "CLOSED";
   priority: string;
   subject: string;
   tags: string | null;
