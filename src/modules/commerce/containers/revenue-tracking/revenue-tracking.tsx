@@ -13,6 +13,8 @@ import FiltersBar from "@/modules/commerce/components/revenue-tracking/filters-b
 import StatCards from "@/modules/commerce/components/revenue-tracking/stat-cards/stat-cards";
 import RevenueChart from "@/modules/commerce/components/revenue-tracking/revenue-chart/revenue-chart";
 import TopSales from "@/modules/commerce/components/revenue-tracking/top-sales/top-sales";
+import ProductTreemap from "@/modules/commerce/components/revenue-tracking/product-treemap/product-treemap";
+import { DashboardBottomSection } from "@/modules/commerce/components/revenue-tracking/dashboard-bottom-section/dashboard-bottom-section";
 import { RevenueTrackingProvider } from "@/modules/commerce/contexts/revenue-tracking-context";
 
 export default function RevenueTracking() {
@@ -53,6 +55,15 @@ export default function RevenueTracking() {
             <TopSales />
           </div>
         </div>
+
+        {/* Secondary Info */}
+        <div className="w-full">
+          <ProductTreemap />
+        </div>
+
+        {/* Bottom Section with tabs */}
+        <DashboardBottomSection />
+
         <SalesTable seller_leaders={seller_leaders} iaTotal={iaTotal} />
       </main>
     </RevenueTrackingProvider>
