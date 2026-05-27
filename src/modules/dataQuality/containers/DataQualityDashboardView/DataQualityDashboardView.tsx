@@ -19,7 +19,8 @@ function DashboardContent() {
   const { data: dashboardSummary } = useDashboardSummary({
     month: selectedPeriod,
     id_country: selectedCountry ? Number(selectedCountry) : undefined,
-    id_type_archive: selectedFileType ? [Number(selectedFileType)] : undefined
+    id_type_archive:
+      selectedFileType && selectedFileType !== "all" ? [Number(selectedFileType)] : undefined
   });
 
   return (

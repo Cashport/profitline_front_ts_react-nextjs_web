@@ -11,6 +11,7 @@ import {
   SelectValue
 } from "@/modules/chat/ui/select";
 import { getAllCountries } from "@/services/countries/countries";
+import { useFileTypes } from "@/modules/dataQuality/hooks/useFileTypes";
 import {
   TabType,
   useDataQualityDashboardContext
@@ -54,6 +55,8 @@ export function DashboardHeader() {
   } = useDataQualityDashboardContext();
 
   const { data: countriesData } = useSWR("dashboard-header-countries", getAllCountries);
+  const { data: fileTypesData } = useFileTypes();
+
   const countries = useMemo(
     () =>
       (countriesData ?? []).map((c) => ({
@@ -61,6 +64,15 @@ export function DashboardHeader() {
         name: c.country_name
       })),
     [countriesData]
+  );
+
+  const fileTypes = useMemo(
+    () =>
+      (fileTypesData ?? []).map((t) => ({
+        id: String(t.id),
+        name: t.description
+      })),
+    [fileTypesData]
   );
 
   const periods = useMemo(buildLastSixMonths, []);
@@ -135,15 +147,21 @@ export function DashboardHeader() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">Tipo de archivo</span>
-            {/* TODO: wire options once the API exposes file types */}
-            <Select value={selectedFileType} onValueChange={setSelectedFileType} disabled>
+            <Select value={selectedFileType} onValueChange={setSelectedFileType}>
               <SelectTrigger
                 className="w-[180px]"
                 style={{ borderColor: "#DDDDDD", color: "#141414" }}
               >
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent />
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {fileTypes.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
         </div>

@@ -589,3 +589,8 @@ export interface IDashboardSummary {
   periodicity: IDashboardSummaryPeriodicity[];
   exploration: IDashboardSummaryExploration[];
 }
+
+export interface IFileType {
+  id: number;
+  description: string;
+}
