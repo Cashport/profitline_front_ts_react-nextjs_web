@@ -479,11 +479,18 @@ export interface IDataExplorationDate {
   status?: string;
 }
 
+export interface ILastMonthDataExploration {
+  novedades: number;
+  novedades_percent: number;
+  units_haleon: number;
+}
+
 export interface IDataExplorationClient {
   id_client: number;
   client_name: string;
   dates: IDataExplorationDate[];
   totals: IDataExplorationTotals;
+  last_month: ILastMonthDataExploration | null;
 }
 
 export interface IGetDataExploration {
@@ -588,4 +595,9 @@ export interface IDashboardSummary {
   clientStatus: IDashboardSummaryClientStatus[];
   periodicity: IDashboardSummaryPeriodicity[];
   exploration: IDashboardSummaryExploration[];
+}
+
+export interface IFileType {
+  id: number;
+  description: string;
 }
