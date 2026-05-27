@@ -28,7 +28,7 @@ export function DataQualityDashboardProvider({ children }: { children: ReactNode
   const [activeTab, setActiveTab] = useState<TabType>("resumen");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState(getCurrentPeriodId);
-  const [selectedFileType, setSelectedFileType] = useState("");
+  const [selectedFileType, setSelectedFileType] = useState("all");
 
   const value = useMemo<DataQualityDashboardContextValue>(
     () => ({

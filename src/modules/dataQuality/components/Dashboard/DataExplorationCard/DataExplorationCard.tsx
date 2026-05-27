@@ -33,7 +33,7 @@ const months = [
 ];
 
 const DAYS_IN_MONTH = 31;
-const TOTAL_COLUMNS = 34;
+const TOTAL_COLUMNS = 35;
 
 export function DataExplorationCard() {
   const { selectedCountry } = useDataQualityDashboardContext();
@@ -67,7 +67,8 @@ export function DataExplorationCard() {
         country: client.dates[0]?.rows[0]?.country ?? "",
         days,
         total: client.totals.total_registros,
-        totalNovedades: client.totals.novedades
+        totalNovedades: client.totals.novedades,
+        lastMonth: client.last_month
       };
     });
 
@@ -210,6 +211,12 @@ export function DataExplorationCard() {
                 style={{ color: "#374151", minWidth: "55px" }}
               >
                 Novedades
+              </th>
+              <th
+                className="text-right px-2 py-1.5 font-semibold"
+                style={{ color: "#374151", minWidth: "70px" }}
+              >
+                Total mes ant.
               </th>
             </tr>
           </thead>
@@ -402,6 +409,78 @@ export function DataExplorationCard() {
                         <span style={{ color: "#9CA3AF" }}>-</span>
                       )}
                     </td>
+                    {(() => {
+                      const lastMonth = row.lastMonth;
+
+                      if (lastMonth == null) {
+                        return (
+                          <td
+                            className="text-center px-2 py-1 font-semibold tabular-nums"
+                            style={{ backgroundColor: "#F9FAFB", color: "#9CA3AF" }}
+                          >
+                            ⋯
+                          </td>
+                        );
+                      }
+
+                      if (lastMonth.units_haleon === 0 && lastMonth.novedades === 0) {
+                        return (
+                          <td
+                            className="text-center px-2 py-1 font-semibold tabular-nums"
+                            style={{ backgroundColor: "#FEE2E2", color: "#991B1B" }}
+                          >
+                            -
+                          </td>
+                        );
+                      }
+
+                      if (lastMonth.novedades > 0) {
+                        const cellContent = (
+                          <td
+                            className="text-right px-2 py-1 font-semibold tabular-nums relative"
+                            style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
+                          >
+                            {lastMonth.units_haleon.toLocaleString()}
+                            <div
+                              className="absolute top-0 right-0 w-0 h-0"
+                              style={{
+                                borderLeft: "6px solid transparent",
+                                borderTop: "6px solid #F59E0B"
+                              }}
+                            />
+                          </td>
+                        );
+
+                        return (
+                          <TooltipProvider delayDuration={100}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>{cellContent}</TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                className="text-xs px-2 py-1.5"
+                                style={{ backgroundColor: "#1F2937", color: "#fff" }}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
+                                  <span>
+                                    {lastMonth.novedades} novedades ({lastMonth.novedades_percent}%)
+                                  </span>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        );
+                      }
+
+                      return (
+                        <td
+                          className="text-right px-2 py-1 font-semibold tabular-nums"
+                          style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
+                        >
+                          {lastMonth.units_haleon.toLocaleString()}
+                        </td>
+                      );
+                    })()}
                   </tr>
                 );
               })
