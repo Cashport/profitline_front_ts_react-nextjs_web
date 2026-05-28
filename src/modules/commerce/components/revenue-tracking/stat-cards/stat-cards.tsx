@@ -2,7 +2,23 @@
 
 import { DollarSign, Tag, Package, TrendingUp, TrendingDown } from "lucide-react";
 
+import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { useDashboardSalesKpis } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesKpis";
+import { formatCurrencyMoney, formatNumber } from "@/utils/utils";
+import type { IKpiMetric } from "@/types/dashboardSales/IDashboardSales";
+
+const PLACEHOLDER = "—";
+
+const metricTrend = (metric?: IKpiMetric) => {
+  const pct = metric?.vs_goal_pct;
+  if (pct === null || pct === undefined) return {};
+  return { trend: `${Math.abs(pct)}%`, isPositive: pct >= 0 };
+};
+
 export default function StatCards() {
+  const { filters } = useRevenueTracking();
+  const { data } = useDashboardSalesKpis(filters);
+
   const stats: Array<{
     title: string;
     value: string;
@@ -15,41 +31,37 @@ export default function StatCards() {
   }> = [
     {
       title: "Total Revenue",
-      value: "$15.487.287.011",
+      value: data ? formatCurrencyMoney(data.total_revenue.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
-      trend: "12.5%",
-      isPositive: true,
-      icon: DollarSign
+      icon: DollarSign,
+      ...metricTrend(data?.total_revenue)
     },
     {
       title: "Avg Ticket",
-      value: "$15.487.287.011",
+      value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
-      trend: "8.2%",
-      isPositive: true,
-      icon: Tag
+      icon: Tag,
+      ...metricTrend(data?.avg_ticket)
     },
     {
       title: "Total Sales",
-      value: "1.487",
+      value: data ? formatNumber(data.total_orders.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
-      trend: "2.4%",
-      isPositive: false,
-      icon: Package
+      icon: Package,
+      ...metricTrend(data?.total_orders)
     },
     {
       title: "Unique Customers",
-      value: "346",
+      value: data ? formatNumber(data.unique_customers.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
-      trend: "5.1%",
-      isPositive: true,
-      icon: Package
+      icon: Package,
+      ...metricTrend(data?.unique_customers)
     },
     {
       title: "Orders in process",
-      value: "$ 14.500.200",
+      value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
       subtitle: "En proceso de fact.",
-      badge: "84 Unid"
+      badge: data ? `${data.orders_in_process.count} Unid` : undefined
     }
   ];
 
