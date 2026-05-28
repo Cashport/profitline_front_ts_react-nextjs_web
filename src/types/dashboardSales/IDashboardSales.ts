@@ -42,3 +42,21 @@ export interface IDashboardSalesEvolucion {
   cumulative: boolean;
 }
 export type IDashboardSalesEvolucionResponse = GenericResponse<IDashboardSalesEvolucion>;
+
+export interface IDashboardSalesRankingItem {
+  rank: number;
+  name: string;
+  orders: number;
+  units: number;
+  sales: number;
+  participation_pct: number;
+}
+export interface IDashboardSalesRanking {
+  dimension: string;
+  total_entities: number;
+  pareto_count: number;
+  grand_total: number;
+  items: IDashboardSalesRankingItem[];
+  period: { start: string; end: string };
+}
+export type IDashboardSalesRankingResponse = GenericResponse<IDashboardSalesRanking>;
