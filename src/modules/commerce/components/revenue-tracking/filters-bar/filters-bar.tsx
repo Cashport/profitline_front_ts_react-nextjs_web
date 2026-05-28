@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Filter, X, Check, Search, ChevronRight } from "lucide-react";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import ThemeToggle from "@/modules/commerce/components/revenue-tracking/theme-toggle/theme-toggle";
 
 const generateOptions = (prefix: string, count: number) =>
   Array.from({ length: count }, (_, i) => `${prefix} ${i + 1}`);
@@ -227,6 +228,10 @@ export default function FiltersBar() {
               Limpiar todos
             </button>
           )}
+        </div>
+
+        <div className="shrink-0 sm:ml-auto">
+          <ThemeToggle />
         </div>
       </div>
 
