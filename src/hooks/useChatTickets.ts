@@ -8,13 +8,21 @@ interface UseChatTicketsParams {
   page?: number;
   search?: string;
   isRead?: boolean;
+  justOpen?: boolean;
 }
 
-const useChatTickets = ({ limit = 200, page = 1, search, isRead }: UseChatTicketsParams = {}) => {
+const useChatTickets = ({ limit = 200, page = 1, search, isRead, justOpen }: UseChatTicketsParams = {}) => {
   const params = [`limit=${limit}`, `page=${page}`];
 
   if (search) {
     params.push(`searchQuery=${search}`);
+  }
+  if (typeof justOpen === "boolean") {
+    if (justOpen) {
+      params.push(`is_active=1`);
+    } else {
+      params.push(`is_active=0`);
+    }
   }
   if (typeof isRead === "boolean") {
     if (isRead) {

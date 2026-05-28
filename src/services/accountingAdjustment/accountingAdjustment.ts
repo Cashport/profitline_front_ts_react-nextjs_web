@@ -362,7 +362,8 @@ export const addCommentHistoricAction = async (
   management_type_id: number,
   management_status_id: number,
   contact_id?: number,
-  file?: File
+  file?: File,
+  extraFields?: Record<string, string | number | boolean>
 ): Promise<GenericResponse> => {
   const formData = new FormData();
 
@@ -377,6 +378,12 @@ export const addCommentHistoricAction = async (
   if (file) {
     const correctedFile = getCorrectMimeType(file);
     formData.append("file", correctedFile);
+  }
+
+  if (extraFields) {
+    Object.entries(extraFields).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
   }
 
   try {
