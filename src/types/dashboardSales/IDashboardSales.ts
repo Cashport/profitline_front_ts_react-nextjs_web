@@ -30,3 +30,15 @@ export interface IDashboardSalesKpis {
   meta: IDashboardSalesKpisMeta;
 }
 export type IDashboardSalesKpisResponse = GenericResponse<IDashboardSalesKpis>;
+
+export interface IDashboardSalesEvolucionPoint {
+  date: string;
+  value: number;
+}
+export interface IDashboardSalesEvolucion {
+  series: IDashboardSalesEvolucionPoint[];
+  period: { start: string; end: string };
+  frequency: string;
+  cumulative: boolean;
+}
+export type IDashboardSalesEvolucionResponse = GenericResponse<IDashboardSalesEvolucion>;

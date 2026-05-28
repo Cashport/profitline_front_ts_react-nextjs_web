@@ -14,7 +14,7 @@ import type { IDashboardSalesFilter } from "@/types/dashboardSales/IDashboardSal
 type FilterCategory = {
   key: string;
   label: string;
-  options?: string[];
+  options?: FilterOption[];
   entity?: string;
 };
 
@@ -23,22 +23,23 @@ const FILTER_CATEGORIES: FilterCategory[] = [
     key: "fecha",
     label: "Fecha",
     options: [
-      "Hoy",
-      "Ayer",
-      "Últimos 7 días",
-      "Mes actual",
-      "Mes anterior",
-      "YTD",
-      "Q1",
-      "Q2",
-      "Q3",
-      "Q4"
+      { id: "mes_actual", name: "Mes actual" },
+      { id: "ultimo_mes", name: "Último mes" },
+      { id: "ultimo_trimestre", name: "Último trimestre" },
+      { id: "ytd", name: "YTD" },
+      { id: "ultimos_12_meses", name: "Últimos 12 meses" }
     ]
   },
   {
     key: "frecuencia",
     label: "Frecuencia",
-    options: ["Diario", "Semanal", "Mensual", "Trimestral", "Anual"]
+    options: [
+      { id: "diaria", name: "Diaria" },
+      { id: "semanal", name: "Semanal" },
+      { id: "mensual", name: "Mensual" },
+      { id: "trimestral", name: "Trimestral" },
+      { id: "anual", name: "Anual" }
+    ]
   },
   { key: "productIds", label: "Producto", entity: "producto" },
   { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
@@ -132,7 +133,7 @@ export default function FiltersBar() {
   const currentCategory = FILTER_CATEGORIES.find((c) => c.key === activeTab)!;
   const currentOptions: FilterOption[] = currentCategory.entity
     ? optionsByEntity[currentCategory.entity] ?? []
-    : (currentCategory.options ?? []).map((s) => ({ id: s, name: s }));
+    : currentCategory.options ?? [];
   const currentStatus = currentCategory.entity
     ? statusByEntity[currentCategory.entity]
     : undefined;

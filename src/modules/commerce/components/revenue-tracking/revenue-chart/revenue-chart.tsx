@@ -16,74 +16,37 @@ import {
 } from "recharts";
 import { Maximize2, Minimize2, TrendingUp } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
+import dayjs from "dayjs";
 
-import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import {
+  useRevenueTracking,
+  type FilterOption
+} from "@/modules/commerce/contexts/revenue-tracking-context";
+import { useDashboardSalesEvolucion } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesEvolucion";
 
-const dailyData = [
-  { label: "01", revenue: 450000 },
-  { label: "02", revenue: 520000 },
-  { label: "03", revenue: 600000 },
-  { label: "04", revenue: 750000 },
-  { label: "05", revenue: 850000 },
-  { label: "06", revenue: 420000 },
-  { label: "07", revenue: 500000 },
-  { label: "08", revenue: 680000 },
-  { label: "09", revenue: 700000 },
-  { label: "10", revenue: 820000 },
-  { label: "11", revenue: 950000 },
-  { label: "12", revenue: 580000 },
-  { label: "13", revenue: 650000 },
-  { label: "14", revenue: 720000 },
-  { label: "15", revenue: 800000 },
-  { label: "16", revenue: 980000 },
-  { label: "17", revenue: 1100000 },
-  { label: "18", revenue: 850000 },
-  { label: "19", revenue: 900000 },
-  { label: "20", revenue: 1150000 },
-  { label: "21", revenue: 1200000 },
-  { label: "22", revenue: 950000 },
-  { label: "23", revenue: 1050000 },
-  { label: "24", revenue: 1250000 },
-  { label: "25", revenue: 1300000 },
-  { label: "26", revenue: 880000 },
-  { label: "27", revenue: 950000 },
-  { label: "28", revenue: 1100000 },
-  { label: "29", revenue: 1150000 },
-  { label: "30", revenue: 1250000 },
-  { label: "31", revenue: 1400000 }
-];
+type ChartDatum = { label: string; revenue: number; cumulative: number };
 
-const weeklyData = [
-  { label: "Sem 1", revenue: 2500000 },
-  { label: "Sem 2", revenue: 3200000 },
-  { label: "Sem 3", revenue: 4100000 },
-  { label: "Sem 4", revenue: 3800000 }
-];
+const MONTHS_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-const monthlyData = [
-  { label: "Ene", revenue: 12000000 },
-  { label: "Feb", revenue: 13500000 },
-  { label: "Mar", revenue: 15000000 },
-  { label: "Abr", revenue: 14200000 },
-  { label: "May", revenue: 16800000 },
-  { label: "Jun", revenue: 15500000 },
-  { label: "Jul", revenue: 17200000 },
-  { label: "Ago", revenue: 18000000 },
-  { label: "Sep", revenue: 16500000 },
-  { label: "Oct", revenue: 19000000 },
-  { label: "Nov", revenue: 21000000 },
-  { label: "Dic", revenue: 24500000 }
-];
+// The evolución endpoint encodes `date` differently per frequency, so a single dayjs parse fails
+// for the non-daily forms (semanal "2026-W19", mensual "2026-05", trimestral "2026-Q2", anual "2026").
+const formatSeriesLabel = (raw: string): string => {
+  const week = raw.match(/^\d{4}-W(\d{1,2})$/);
+  if (week) return `S${Number(week[1])}`;
 
-const ChartContent = ({
-  data,
-  xLabel,
-  targetGoal
-}: {
-  data: any[];
-  xLabel: string;
-  targetGoal: number;
-}) => (
+  const quarter = raw.match(/^\d{4}-Q(\d)$/);
+  if (quarter) return `Q${quarter[1]}`;
+
+  const month = raw.match(/^\d{4}-(\d{2})$/);
+  if (month) return MONTHS_ES[Number(month[1]) - 1] ?? raw;
+
+  if (/^\d{4}$/.test(raw)) return raw;
+
+  const day = dayjs(raw);
+  return day.isValid() ? day.format("DD/MM") : raw;
+};
+
+const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: number }) => (
   <div className="h-full w-full min-h-[440px]">
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
@@ -100,7 +63,6 @@ const ChartContent = ({
           fontSize={10}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(val) => `${xLabel} ${val}`.trim()}
         />
         <YAxis
           stroke="#a1a1aa"
@@ -132,23 +94,24 @@ const ChartContent = ({
             if (name === "revenue") return [`$ ${value.toLocaleString()}`, "Venta Periodo"];
             return [`$ ${value.toLocaleString()}`, name];
           }}
-          labelFormatter={(label) => `${xLabel} ${label}`.trim()}
         />
 
-        <ReferenceLine
-          y={targetGoal}
-          stroke="#22c55e"
-          strokeDasharray="3 3"
-          strokeWidth={2}
-          label={{
-            position: "top",
-            value: `META: $${(targetGoal / 1000000).toFixed(1)}M`,
-            fill: "#22c55e",
-            fontSize: 10,
-            fontWeight: "bold",
-            className: "tracking-wider"
-          }}
-        />
+        {targetGoal != null && (
+          <ReferenceLine
+            y={targetGoal}
+            stroke="#22c55e"
+            strokeDasharray="3 3"
+            strokeWidth={2}
+            label={{
+              position: "top",
+              value: `META: $${(targetGoal / 1000000).toFixed(1)}M`,
+              fill: "#22c55e",
+              fontSize: 10,
+              fontWeight: "bold",
+              className: "tracking-wider"
+            }}
+          />
+        )}
 
         <Bar
           dataKey="revenue"
@@ -190,59 +153,70 @@ const ChartContent = ({
   </div>
 );
 
+const FREQUENCY_OPTIONS: { short: string; option: FilterOption }[] = [
+  { short: "D", option: { id: "diaria", name: "Diaria" } },
+  { short: "S", option: { id: "semanal", name: "Semanal" } },
+  { short: "M", option: { id: "mensual", name: "Mensual" } }
+];
+
+const SUBTEXT_BY_FREQUENCY: Record<string, string> = {
+  diaria: "Ventas diarias y avance acumulado",
+  semanal: "Ventas semanales acumuladas",
+  mensual: "Evolución mensual acumulada",
+  trimestral: "Evolución trimestral acumulada",
+  anual: "Evolución anual acumulada"
+};
+
 export default function RevenueChart() {
   const { filters, setFilters } = useRevenueTracking();
+  const { data, isLoading } = useDashboardSalesEvolucion(filters);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const frequency = filters?.frecuencia?.[0]?.name || "Diario";
+  const frequency = filters?.frecuencia?.[0]?.id || "diaria";
+  const frequencyLabel = filters?.frecuencia?.[0]?.name || "Diaria";
   const dateRange = filters?.fecha?.[0]?.name || "Mes actual";
 
-  const handleFrequencyChange = (newFreq: string) => {
+  const handleFrequencyChange = (option: FilterOption) => {
     setFilters({
       ...filters,
-      frecuencia: [{ id: newFreq, name: newFreq }]
+      frecuencia: [option]
     });
   };
 
-  const { chartData, xLabel, subtext, targetGoal } = useMemo(() => {
-    let rawData;
-    let label;
-    let text;
-    let target;
+  const chartData = useMemo<ChartDatum[]>(() => {
+    const series = data?.series ?? [];
+    const isCumulative = data?.cumulative ?? false;
 
-    switch (frequency) {
-      case "Semanal":
-        rawData = weeklyData;
-        label = "";
-        text = "Ventas semanales acumuladas";
-        target = 15000000;
-        break;
-      case "Mensual":
-        rawData = monthlyData;
-        label = "";
-        text = "Evolución mensual histórica vs Meta";
-        target = 180000000;
-        break;
-      case "Diario":
-      default:
-        rawData = dailyData;
-        label = "Día";
-        text = "Ventas diarias y avance mensual";
-        target = 25000000;
-        break;
-    }
-
-    const enrichedData = rawData.reduce((acc: any[], item) => {
-      const prevTotal = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
-      acc.push({
-        ...item,
-        cumulative: prevTotal + item.revenue
-      });
+    return series.reduce<ChartDatum[]>((acc, point, i) => {
+      const prevValue = i > 0 ? series[i - 1].value : 0;
+      const prevCumulative = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
+      const revenue = isCumulative ? point.value - prevValue : point.value;
+      const cumulative = isCumulative ? point.value : prevCumulative + point.value;
+      acc.push({ label: formatSeriesLabel(point.date), revenue, cumulative });
       return acc;
     }, []);
+  }, [data]);
 
-    return { chartData: enrichedData, xLabel: label, subtext: text, targetGoal: target };
-  }, [frequency]);
+  const subtext = SUBTEXT_BY_FREQUENCY[frequency] ?? "Evolución de ingresos";
+  const hasData = chartData.length > 0;
+
+  const renderBody = () => {
+    if (isLoading && !data) {
+      return (
+        <div className="h-full w-full min-h-[440px] flex items-center justify-center text-sm text-muted-foreground">
+          Cargando…
+        </div>
+      );
+    }
+    if (!hasData) {
+      return (
+        <div className="h-full w-full min-h-[440px] flex items-center justify-center text-sm text-muted-foreground">
+          Sin datos
+        </div>
+      );
+    }
+    return <ChartContent data={chartData} />;
+  };
 
   return (
     <Dialog.Root open={isFullscreen} onOpenChange={setIsFullscreen}>
@@ -262,36 +236,19 @@ export default function RevenueChart() {
 
           <div className="flex items-center gap-3 ml-auto sm:ml-0">
             <div className="flex items-center gap-1 bg-secondary/50 rounded-xl border border-border p-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              <button
-                onClick={() => handleFrequencyChange("Diario")}
-                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
-                  frequency === "Diario"
-                    ? "bg-background text-primary shadow-sm border border-border font-black"
-                    : "hover:text-foreground opacity-60"
-                }`}
-              >
-                D
-              </button>
-              <button
-                onClick={() => handleFrequencyChange("Semanal")}
-                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
-                  frequency === "Semanal"
-                    ? "bg-background text-primary shadow-sm border border-border font-black"
-                    : "hover:text-foreground opacity-60"
-                }`}
-              >
-                S
-              </button>
-              <button
-                onClick={() => handleFrequencyChange("Mensual")}
-                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
-                  frequency === "Mensual"
-                    ? "bg-background text-primary shadow-sm border border-border font-black"
-                    : "hover:text-foreground opacity-60"
-                }`}
-              >
-                M
-              </button>
+              {FREQUENCY_OPTIONS.map(({ short, option }) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleFrequencyChange(option)}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all ${
+                    frequency === option.id
+                      ? "bg-background text-primary shadow-sm border border-border font-black"
+                      : "hover:text-foreground opacity-60"
+                  }`}
+                >
+                  {short}
+                </button>
+              ))}
             </div>
 
             <Dialog.Trigger asChild>
@@ -302,9 +259,7 @@ export default function RevenueChart() {
           </div>
         </div>
 
-        <div className="flex-1 w-full relative">
-          <ChartContent data={chartData} xLabel={xLabel} targetGoal={targetGoal} />
-        </div>
+        <div className="flex-1 w-full relative">{renderBody()}</div>
       </div>
 
       <Dialog.Portal>
@@ -318,7 +273,7 @@ export default function RevenueChart() {
               </Dialog.Title>
               <Dialog.Description className="text-muted-foreground mt-2 text-base">
                 {subtext} en <span className="text-foreground font-bold">{dateRange}</span> (
-                {frequency.toLowerCase()}).
+                {frequencyLabel.toLowerCase()}).
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
@@ -327,9 +282,7 @@ export default function RevenueChart() {
               </button>
             </Dialog.Close>
           </div>
-          <div className="flex-1 w-full min-h-0">
-            <ChartContent data={chartData} xLabel={xLabel} targetGoal={targetGoal} />
-          </div>
+          <div className="flex-1 w-full min-h-0">{renderBody()}</div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
