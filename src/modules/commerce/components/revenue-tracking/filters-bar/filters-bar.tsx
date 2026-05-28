@@ -1,15 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
-import { Filter, X, Check, Search, ChevronRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Filter, X, Check, Search, ChevronRight, Loader2 } from "lucide-react";
 
-import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import {
+  useRevenueTracking,
+  type FilterOption
+} from "@/modules/commerce/contexts/revenue-tracking-context";
 import ThemeToggle from "@/modules/commerce/components/revenue-tracking/theme-toggle/theme-toggle";
+import { getDashboardSalesFilters } from "@/services/dashboardSales/dashboardSales";
+import type { IDashboardSalesFilter } from "@/types/dashboardSales/IDashboardSales";
 
-const generateOptions = (prefix: string, count: number) =>
-  Array.from({ length: count }, (_, i) => `${prefix} ${i + 1}`);
+type FilterCategory = {
+  key: string;
+  label: string;
+  options?: string[];
+  entity?: string;
+};
 
-const FILTER_CATEGORIES = [
+const FILTER_CATEGORIES: FilterCategory[] = [
   {
     key: "fecha",
     label: "Fecha",
@@ -31,67 +40,21 @@ const FILTER_CATEGORIES = [
     label: "Frecuencia",
     options: ["Diario", "Semanal", "Mensual", "Trimestral", "Anual"]
   },
-  {
-    key: "producto",
-    label: "Producto",
-    options: [
-      "Cetaphil Limpiadora",
-      "Toallitas Cetaphil",
-      "Sun Oil Color",
-      "Loción Hidratante",
-      "Ceta HA Serum",
-      "Shampoo suave",
-      "Eucerin pH5",
-      ...generateOptions("Producto", 193)
-    ]
-  },
-  {
-    key: "vendedor",
-    label: "Vendedor",
-    options: [
-      "Cashport AI",
-      "Juan Pérez",
-      "María Gómez",
-      "Carlos Ruiz",
-      ...generateOptions("Vendedor", 46)
-    ]
-  },
-  {
-    key: "cliente",
-    label: "Cliente",
-    options: [
-      "Farmasanitas",
-      "Cruz Verde",
-      "Vidamedical",
-      "Farmacias del Ahorro",
-      "Droguerías Médicas",
-      ...generateOptions("Cliente", 995)
-    ]
-  },
-  {
-    key: "ciudad",
-    label: "Ciudad",
-    options: [
-      "Bogotá",
-      "Medellín",
-      "Cali",
-      "Barranquilla",
-      "Cartagena",
-      "Bucaramanga",
-      ...generateOptions("Ciudad", 24)
-    ]
-  },
-  {
-    key: "lineaNegocio",
-    label: "Línea de negocio",
-    options: ["Dermatología", "Pediatría", "Cuidado Facial", "Corporal", "Solar"]
-  },
-  {
-    key: "canalVenta",
-    label: "Canal de venta",
-    options: ["Farmacia", "Marketplace", "Directo", "Distribuidores", "Institucional"]
-  }
+  { key: "productIds", label: "Producto", entity: "producto" },
+  { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
+  { key: "clientIds", label: "Cliente", entity: "cliente" },
+  { key: "cityIds", label: "Ciudad", entity: "ciudad" },
+  { key: "lineIds", label: "Línea de negocio", entity: "linea" },
+  { key: "channelIds", label: "Canal de venta", entity: "canal" }
 ];
+
+const normalizeOptions = (data: unknown): FilterOption[] => {
+  const items = (data as IDashboardSalesFilter | undefined)?.items;
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((it) => ({ id: String(it.id ?? ""), name: String(it.name ?? "") }))
+    .filter((o) => o.name !== "");
+};
 
 export default function FiltersBar() {
   const { filters, setFilters } = useRevenueTracking();
@@ -99,7 +62,32 @@ export default function FiltersBar() {
   const [activeTab, setActiveTab] = useState(FILTER_CATEGORIES[0].key);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [localFilters, setLocalFilters] = useState<Record<string, string[]>>(filters);
+  const [localFilters, setLocalFilters] = useState<Record<string, FilterOption[]>>(filters);
+  const [optionsByEntity, setOptionsByEntity] = useState<Record<string, FilterOption[]>>({});
+  const [statusByEntity, setStatusByEntity] = useState<
+    Record<string, "loading" | "loaded" | "error">
+  >({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const entity = FILTER_CATEGORIES.find((c) => c.key === activeTab)?.entity;
+    if (!entity || statusByEntity[entity]) return;
+
+    setStatusByEntity((prev) => ({ ...prev, [entity]: "loading" }));
+    getDashboardSalesFilters(entity)
+      .then((data) => {
+        setOptionsByEntity((prev) => ({ ...prev, [entity]: normalizeOptions(data) }));
+        setStatusByEntity((prev) => ({ ...prev, [entity]: "loaded" }));
+      })
+      .catch(() => setStatusByEntity((prev) => ({ ...prev, [entity]: "error" })));
+  }, [activeTab, isOpen, statusByEntity]);
+
+  const retryEntity = (entity: string) =>
+    setStatusByEntity((prev) => {
+      const next = { ...prev };
+      delete next[entity];
+      return next;
+    });
 
   const openModal = () => {
     setLocalFilters(filters);
@@ -114,24 +102,24 @@ export default function FiltersBar() {
   };
 
   const clearAll = () => {
-    const empty: Record<string, string[]> = {};
+    const empty: Record<string, FilterOption[]> = {};
     FILTER_CATEGORIES.forEach((c) => (empty[c.key] = []));
     setLocalFilters(empty);
   };
 
-  const toggleSelection = (category: string, value: string) => {
+  const toggleSelection = (category: string, option: FilterOption) => {
     setLocalFilters((prev) => {
       const current = prev[category] || [];
       const isSingleSelect = ["fecha", "frecuencia"].includes(category);
 
       if (isSingleSelect) {
-        return { ...prev, [category]: [value] };
+        return { ...prev, [category]: [option] };
       }
 
-      if (current.includes(value)) {
-        return { ...prev, [category]: current.filter((v) => v !== value) };
+      if (current.some((v) => v.id === option.id)) {
+        return { ...prev, [category]: current.filter((v) => v.id !== option.id) };
       } else {
-        return { ...prev, [category]: [...current, value] };
+        return { ...prev, [category]: [...current, option] };
       }
     });
   };
@@ -142,28 +130,36 @@ export default function FiltersBar() {
   );
 
   const currentCategory = FILTER_CATEGORIES.find((c) => c.key === activeTab)!;
-  const filteredOptions = currentCategory.options.filter((opt) =>
-    opt.toLowerCase().includes(searchTerm.toLowerCase())
+  const currentOptions: FilterOption[] = currentCategory.entity
+    ? optionsByEntity[currentCategory.entity] ?? []
+    : (currentCategory.options ?? []).map((s) => ({ id: s, name: s }));
+  const currentStatus = currentCategory.entity
+    ? statusByEntity[currentCategory.entity]
+    : undefined;
+  const isLoadingOptions = currentStatus === "loading";
+  const isErrorOptions = currentStatus === "error";
+  const filteredOptions = currentOptions.filter((opt) =>
+    opt.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const selectedInCategory = localFilters[activeTab] || [];
 
   const isAllSelected =
     filteredOptions.length > 0 &&
-    filteredOptions.every((opt) => selectedInCategory.includes(opt));
+    filteredOptions.every((opt) => selectedInCategory.some((v) => v.id === opt.id));
 
   const toggleAll = () => {
+    const filteredIds = new Set(filteredOptions.map((o) => o.id));
     if (isAllSelected) {
       setLocalFilters((prev) => ({
         ...prev,
-        [activeTab]: (prev[activeTab] || []).filter((v) => !filteredOptions.includes(v))
+        [activeTab]: (prev[activeTab] || []).filter((v) => !filteredIds.has(v.id))
       }));
     } else {
       setLocalFilters((prev) => {
-        const newValues = new Set([...(prev[activeTab] || []), ...filteredOptions]);
-        return {
-          ...prev,
-          [activeTab]: Array.from(newValues)
-        };
+        const existing = prev[activeTab] || [];
+        const existingIds = new Set(existing.map((o) => o.id));
+        const toAdd = filteredOptions.filter((o) => !existingIds.has(o.id));
+        return { ...prev, [activeTab]: [...existing, ...toAdd] };
       });
     }
   };
@@ -175,7 +171,7 @@ export default function FiltersBar() {
 
       const categoryLabel = FILTER_CATEGORIES.find((c) => c.key === key)?.label || key;
       const displayValue =
-        values.length === 1 ? values[0] : `${values.length} seleccionados`;
+        values.length === 1 ? values[0].name : `${values.length} seleccionados`;
 
       tags.push(
         <div
@@ -219,7 +215,7 @@ export default function FiltersBar() {
           {activeFiltersCount > 0 && (
             <button
               onClick={() => {
-                const empty: Record<string, string[]> = {};
+                const empty: Record<string, FilterOption[]> = {};
                 FILTER_CATEGORIES.forEach((c) => (empty[c.key] = []));
                 setFilters(empty);
               }}
@@ -230,9 +226,10 @@ export default function FiltersBar() {
           )}
         </div>
 
-        <div className="shrink-0 sm:ml-auto">
+        {/* theme toggle off for now */}
+        {/* <div className="shrink-0 sm:ml-auto">
           <ThemeToggle />
-        </div>
+        </div> */}
       </div>
 
       {isOpen && (
@@ -299,9 +296,7 @@ export default function FiltersBar() {
                         )}
                         <ChevronRight
                           className={`w-4 h-4 transition-transform ${
-                            isActive
-                              ? "text-foreground translate-x-0"
-                              : "opacity-0 -translate-x-2"
+                            isActive ? "text-foreground translate-x-0" : "opacity-0 -translate-x-2"
                           }`}
                         />
                       </div>
@@ -330,15 +325,14 @@ export default function FiltersBar() {
                       ? "Selecciona un periodo"
                       : `${filteredOptions.length} resultados`}
                   </span>
-                  {filteredOptions.length > 0 &&
-                    !["fecha", "frecuencia"].includes(activeTab) && (
-                      <button
-                        onClick={toggleAll}
-                        className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-                      >
-                        {isAllSelected ? "Deseleccionar todos" : "Seleccionar todos"}
-                      </button>
-                    )}
+                  {filteredOptions.length > 0 && !["fecha", "frecuencia"].includes(activeTab) && (
+                    <button
+                      onClick={toggleAll}
+                      className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {isAllSelected ? "Deseleccionar todos" : "Seleccionar todos"}
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-3">
@@ -362,7 +356,23 @@ export default function FiltersBar() {
                       </div>
                     </div>
                   )}
-                  {filteredOptions.length === 0 ? (
+                  {isLoadingOptions ? (
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                      <Loader2 className="w-8 h-8 mb-3 animate-spin opacity-60" />
+                      <p className="text-sm">Cargando opciones...</p>
+                    </div>
+                  ) : isErrorOptions ? (
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                      <X className="w-8 h-8 opacity-20 mb-3" />
+                      <p className="text-sm mb-3">No se pudieron cargar las opciones</p>
+                      <button
+                        onClick={() => currentCategory.entity && retryEntity(currentCategory.entity)}
+                        className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  ) : filteredOptions.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
                       <Search className="w-8 h-8 opacity-20 mb-3" />
                       <p className="text-sm">No se encontraron resultados</p>
@@ -370,10 +380,10 @@ export default function FiltersBar() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 auto-rows-max">
                       {filteredOptions.map((opt) => {
-                        const isSelected = selectedInCategory.includes(opt);
+                        const isSelected = selectedInCategory.some((v) => v.id === opt.id);
                         return (
                           <label
-                            key={opt}
+                            key={opt.id}
                             className={`flex items-start gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors group ${
                               isSelected
                                 ? "bg-primary/5 hover:bg-primary/10"
@@ -404,9 +414,9 @@ export default function FiltersBar() {
                                   ? "text-foreground font-bold"
                                   : "text-foreground/80 font-medium group-hover:text-foreground"
                               }`}
-                              title={opt}
+                              title={opt.name}
                             >
-                              {opt}
+                              {opt.name}
                             </span>
                             <input
                               type="checkbox"

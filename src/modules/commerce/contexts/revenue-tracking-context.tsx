@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-type Filters = Record<string, string[]>;
+export type FilterOption = { id: string; name: string };
+type Filters = Record<string, FilterOption[]>;
 type ThemePreference = "light" | "dark" | "system";
 type ResolvedTheme = "light" | "dark";
 

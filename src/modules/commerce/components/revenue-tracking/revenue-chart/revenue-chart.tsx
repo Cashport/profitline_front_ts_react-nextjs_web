@@ -194,13 +194,13 @@ export default function RevenueChart() {
   const { filters, setFilters } = useRevenueTracking();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const frequency = filters?.frecuencia?.[0] || "Diario";
-  const dateRange = filters?.fecha?.[0] || "Mes actual";
+  const frequency = filters?.frecuencia?.[0]?.name || "Diario";
+  const dateRange = filters?.fecha?.[0]?.name || "Mes actual";
 
   const handleFrequencyChange = (newFreq: string) => {
     setFilters({
       ...filters,
-      frecuencia: [newFreq]
+      frecuencia: [{ id: newFreq, name: newFreq }]
     });
   };
 

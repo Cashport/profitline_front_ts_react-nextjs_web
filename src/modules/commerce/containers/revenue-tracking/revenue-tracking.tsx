@@ -5,10 +5,7 @@ import useSWR from "swr";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
 import { getSalesDashboard } from "@/services/commerce/commerce";
-import {
-  ISalesDashboardSellerLeader,
-  ISalesDashboardTotal
-} from "@/types/commerce/ICommerce";
+import { ISalesDashboardSellerLeader, ISalesDashboardTotal } from "@/types/commerce/ICommerce";
 
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 import FiltersBar from "@/modules/commerce/components/revenue-tracking/filters-bar/filters-bar";
