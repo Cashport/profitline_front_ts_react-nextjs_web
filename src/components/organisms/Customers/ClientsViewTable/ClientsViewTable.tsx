@@ -79,7 +79,8 @@ export const ClientsViewTable = () => {
 
     const pathKey = `/portfolio/client/project/${ID}?${queryParams}`;
 
-    return fetcher(pathKey);
+    return fetcher(pathKey, 30000);
+    // se agrega un timeout de 30 segundos para esta consulta debido a que puede tardar más de lo normal en responder cuando se tienen muchos datos o filtros aplicados
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery(
