@@ -28,6 +28,8 @@ import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 35;
 
+type DayCell = IDataExplorationTotals & { novedades_percent: number };
+
 export function DataExplorationCard() {
   const { selectedCountry } = useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
@@ -48,10 +50,12 @@ export function DataExplorationCard() {
 
   const { rows, lastDataDayIdx } = useMemo(() => {
     const computedRows = (data?.clients ?? []).map((client) => {
-      const dayMap = new Map<number, IDataExplorationTotals>();
+      const dayMap = new Map<number, DayCell>();
       for (const d of client.dates) {
         const dayNum = Number(d.date.slice(-2));
-        if (!Number.isNaN(dayNum)) dayMap.set(dayNum, d.totals);
+        if (!Number.isNaN(dayNum)) {
+          dayMap.set(dayNum, { ...d.totals, novedades_percent: d.novedades_percent ?? 0 });
+        }
       }
       const days = dayNumbers.map((n) => dayMap.get(n) ?? null);
 
@@ -300,18 +304,13 @@ export function DataExplorationCard() {
                       }
 
                       if (dayTotals.novedades > 0) {
-                        const novedadesDayPct =
-                          dayTotals.total_registros > 0
-                            ? Math.round((dayTotals.novedades / dayTotals.total_registros) * 100)
-                            : 0;
-
                         const cellContent = (
                           <td
                             key={dayIdx}
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatNumber(dayTotals.total_registros)}
+                            {formatNumber(dayTotals.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -334,7 +333,7 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {formatNumber(dayTotals.novedades)} novedades ({novedadesDayPct}%)
+                                    {formatNumber(dayTotals.novedades)} novedades ({dayTotals.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -343,7 +342,7 @@ export function DataExplorationCard() {
                         );
                       }
 
-                      if (dayTotals.total_registros === 0) {
+                      if (dayTotals.units_haleon === 0) {
                         if (isFutureDay) {
                           return (
                             <td
@@ -376,7 +375,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatNumber(dayTotals.total_registros)}
+                          {formatNumber(dayTotals.units_haleon)}
                         </td>
                       );
                     })}
