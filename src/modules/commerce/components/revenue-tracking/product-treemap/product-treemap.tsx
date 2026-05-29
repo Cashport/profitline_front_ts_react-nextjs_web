@@ -5,7 +5,11 @@ import { ResponsiveContainer, Treemap, Tooltip } from "recharts";
 import { Maximize2, Minimize2, ChevronDown } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 
-const dimensionOptions = [
+import { useDashboardSalesTreemap } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesTreemap";
+
+type DimensionKey = "linea" | "producto" | "cliente" | "ciudad" | "vendedor" | "canal";
+
+const dimensionOptions: { value: DimensionKey; label: string }[] = [
   { value: "linea", label: "Línea de Negocio" },
   { value: "producto", label: "Producto" },
   { value: "vendedor", label: "Vendedor" },
@@ -13,41 +17,6 @@ const dimensionOptions = [
   { value: "cliente", label: "Cliente" },
   { value: "canal", label: "Canal de Venta" }
 ];
-
-const DIMENSIONS = {
-  linea: ["Dermatología", "Pediatría", "Cuidado Facial", "Solar", "Corporal"],
-  producto: [
-    "Cetaphil Limp.",
-    "Ceta HA Serum",
-    "Sun Oil Color",
-    "Crema bebé",
-    "Shampoo suave",
-    "Loción Hid.",
-    "Toallitas Ds",
-    "Eucerin ph5"
-  ],
-  vendedor: [
-    "Carlos Rojas",
-    "Maria Gomez",
-    "Cashport AI",
-    "Diana Martinez",
-    "Juan Silva",
-    "Venta Directa"
-  ],
-  ciudad: ["Bogotá", "Medellín", "Cali", "Barranquilla", "Bucaramanga", "Cartagena"],
-  cliente: ["Cruz Verde", "Farmatodo", "Pasteur", "Locatel", "La Rebaja", "Kopservir"],
-  canal: ["Retail", "Mayorista", "E-commerce", "Institucional", "Portales B2B"]
-};
-
-const rawData = Array.from({ length: 300 }).map((_, i) => ({
-  linea: DIMENSIONS.linea[i % DIMENSIONS.linea.length],
-  producto: DIMENSIONS.producto[i % DIMENSIONS.producto.length],
-  vendedor: DIMENSIONS.vendedor[i % DIMENSIONS.vendedor.length],
-  ciudad: DIMENSIONS.ciudad[i % DIMENSIONS.ciudad.length],
-  cliente: DIMENSIONS.cliente[i % DIMENSIONS.cliente.length],
-  canal: DIMENSIONS.canal[i % DIMENSIONS.canal.length],
-  value: ((i * 13) % 50000) + 5000
-}));
 
 const COLORS = [
   "#00E5FF",
@@ -61,32 +30,6 @@ const COLORS = [
   "#ec4899"
 ];
 
-function groupData(
-  data: typeof rawData,
-  dim1: keyof typeof DIMENSIONS,
-  dim2: keyof typeof DIMENSIONS
-) {
-  const grouped: Record<string, Record<string, number>> = {};
-
-  data.forEach((item) => {
-    const k1 = item[dim1];
-    const k2 = item[dim2];
-    if (!grouped[k1]) grouped[k1] = {};
-    if (!grouped[k1][k2]) grouped[k1][k2] = 0;
-    grouped[k1][k2] += item.value;
-  });
-
-  const children = Object.keys(grouped).map((k1) => ({
-    name: k1,
-    children: Object.keys(grouped[k1]).map((k2) => ({
-      name: k2,
-      value: grouped[k1][k2]
-    }))
-  }));
-
-  return { name: "root", children };
-}
-
 function formatCurrency(val: number) {
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -94,6 +37,13 @@ function formatCurrency(val: number) {
     maximumFractionDigits: 0
   }).format(val);
 }
+
+const isLightColor = (hex: string) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150;
+};
 
 const HEADER_H = 22;
 
@@ -148,7 +98,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           y={y}
           width={width}
           height={height}
-          style={{ fill: baseColor, stroke: "#fff", strokeWidth: 2 }}
+          style={{ fill: baseColor, stroke: "#fff", strokeWidth: 1 }}
         />
       </g>
     );
@@ -167,7 +117,8 @@ const CustomizedContent = (props: CustomizedContentProps) => {
     const labelY = inHeaderStrip ? Math.max(y + HEADER_H + 12, y + 12) : y + 12;
     const labelVisible = width > 30 && height > 16 && (!inHeaderStrip || height > HEADER_H + 14);
 
-    const headerTextFill = parent && parent.color === "#C6F135" ? "#000" : "#fff";
+    const headerTextFill = parent && isLightColor(parent.color) ? "#0a0a0a" : "#fff";
+    const itemTextFill = parent && isLightColor(parent.color) ? "#0a0a0a" : "#fff";
 
     return (
       <g>
@@ -176,19 +127,23 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           y={y}
           width={width}
           height={height}
-          style={{ fill: "transparent", stroke: "#fff", strokeWidth: 1 }}
+          style={{ fill: "transparent", stroke: "#fff", strokeWidth: 0.5 }}
         />
         {labelVisible ? (
           <text
             x={x + 4}
             y={labelY}
-            fill="#fff"
-            fontSize={9}
+            fontSize={8}
             fontWeight={300}
-            style={{ textShadow: "0px 1px 1px rgba(0,0,0,0.25)" }}
+            style={{
+              fill: itemTextFill,
+              ...(itemTextFill === "#fff"
+                ? { textShadow: "0px 1px 1px rgba(0,0,0,0.25)" }
+                : {})
+            }}
           >
-            {name.length * 5.5 > width
-              ? `${name.substring(0, Math.max(1, Math.floor(width / 5.5)))}…`
+            {name.length * 5 > width
+              ? `${name.substring(0, Math.max(1, Math.floor(width / 5)))}…`
               : name}
           </text>
         ) : null}
@@ -199,14 +154,14 @@ const CustomizedContent = (props: CustomizedContentProps) => {
               y={parent.y}
               width={parent.width}
               height={HEADER_H}
-              style={{ fill: parent.color, stroke: "#fff", strokeWidth: 1 }}
+              style={{ fill: parent.color, stroke: "#fff", strokeWidth: 0.5 }}
             />
             <text
               x={parent.x + 8}
               y={parent.y + 15}
-              fill={headerTextFill}
-              fontSize={11}
-              fontWeight={500}
+              fontSize={10}
+              fontWeight={400}
+              style={{ fill: headerTextFill }}
             >
               {parent.name}
             </text>
@@ -251,8 +206,16 @@ function TreemapRender({
             const node: any = payload[0].payload;
             return (
               <div className="bg-popover/95 text-popover-foreground border border-border p-3 rounded-lg shadow-xl backdrop-blur-md">
+                {node.group ? (
+                  <div className="text-xs text-muted-foreground mb-0.5">{node.group}</div>
+                ) : null}
                 <div className="font-bold text-base">{node.name}</div>
                 <div className="text-primary">{formatCurrency(node.value)}</div>
+                {typeof node.percentage === "number" ? (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {node.percentage.toFixed(1)}% del total
+                  </div>
+                ) : null}
               </div>
             );
           }}
@@ -264,13 +227,27 @@ function TreemapRender({
 
 export default function ProductTreemap() {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeDim1, setActiveDim1] = useState<keyof typeof DIMENSIONS>("linea");
-  const [activeDim2, setActiveDim2] = useState<keyof typeof DIMENSIONS>("producto");
+  const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
+  const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
 
-  const chartData = useMemo(() => groupData(rawData, activeDim1, activeDim2), [
-    activeDim1,
-    activeDim2
-  ]);
+  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2);
+
+  const chartData = useMemo(
+    () => ({
+      name: "root",
+      children: (data?.groups ?? []).map((g) => ({
+        name: g.key,
+        percentage: g.percentage,
+        children: g.children.map((c) => ({
+          name: c.key,
+          value: c.value,
+          percentage: c.percentage,
+          group: g.key
+        }))
+      }))
+    }),
+    [data]
+  );
 
   const colorMapping = useMemo(() => {
     const mapping: Record<string, string> = {};
@@ -279,6 +256,24 @@ export default function ProductTreemap() {
     });
     return mapping;
   }, [chartData]);
+
+  const renderChart = () => {
+    if (isLoading && !data) {
+      return (
+        <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+          Cargando…
+        </div>
+      );
+    }
+    if (chartData.children.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+          Sin datos
+        </div>
+      );
+    }
+    return <TreemapRender data={chartData} colorMapping={colorMapping} />;
+  };
 
   return (
     <Dialog.Root open={isFullscreen} onOpenChange={setIsFullscreen}>
@@ -299,9 +294,7 @@ export default function ProductTreemap() {
                 <select
                   className="appearance-none bg-transparent text-foreground text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
                   value={activeDim1}
-                  onChange={(e) =>
-                    setActiveDim1(e.target.value as keyof typeof DIMENSIONS)
-                  }
+                  onChange={(e) => setActiveDim1(e.target.value as DimensionKey)}
                 >
                   {dimensionOptions.map((opt) => (
                     <option key={opt.value} value={opt.value} disabled={opt.value === activeDim2}>
@@ -318,9 +311,7 @@ export default function ProductTreemap() {
                 <select
                   className="appearance-none bg-transparent text-foreground text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none w-32 sm:w-36 cursor-pointer"
                   value={activeDim2}
-                  onChange={(e) =>
-                    setActiveDim2(e.target.value as keyof typeof DIMENSIONS)
-                  }
+                  onChange={(e) => setActiveDim2(e.target.value as DimensionKey)}
                 >
                   {dimensionOptions.map((opt) => (
                     <option key={opt.value} value={opt.value} disabled={opt.value === activeDim1}>
@@ -343,9 +334,7 @@ export default function ProductTreemap() {
           </div>
         </div>
 
-        <div className="w-full h-[420px] bg-background relative">
-          <TreemapRender data={chartData} colorMapping={colorMapping} />
-        </div>
+        <div className="w-full h-[420px] bg-background relative">{renderChart()}</div>
       </div>
 
       <Dialog.Portal>
@@ -374,9 +363,7 @@ export default function ProductTreemap() {
               </button>
             </Dialog.Close>
           </div>
-          <div className="flex-1 w-full min-h-0 relative">
-            <TreemapRender data={chartData} colorMapping={colorMapping} />
-          </div>
+          <div className="flex-1 w-full min-h-0 relative">{renderChart()}</div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

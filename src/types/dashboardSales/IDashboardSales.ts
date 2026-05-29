@@ -60,3 +60,24 @@ export interface IDashboardSalesRanking {
   period: { start: string; end: string };
 }
 export type IDashboardSalesRankingResponse = GenericResponse<IDashboardSalesRanking>;
+
+export interface IDashboardSalesTreemapChild {
+  key: string;
+  value: number;
+  percentage: number;
+}
+export interface IDashboardSalesTreemapGroup {
+  key: string;
+  value: number;
+  percentage: number;
+  children: IDashboardSalesTreemapChild[];
+}
+export interface IDashboardSalesTreemap {
+  total: number;
+  dim1: string;
+  dim2: string;
+  revenue_basis: string;
+  groups: IDashboardSalesTreemapGroup[];
+  period: { start: string; end: string };
+}
+export type IDashboardSalesTreemapResponse = GenericResponse<IDashboardSalesTreemap>;
