@@ -7,7 +7,7 @@ import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { deleteContact } from "@/services/contacts/contacts";
-import { closeWhatsAppTicket, sendTemplate } from "@/services/chat/chat";
+import { sendTemplate } from "@/services/chat/chat";
 
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 import { cn } from "@/utils/utils";
@@ -25,11 +25,12 @@ import ChatActions from "@/modules/chat/components/chat-actions";
 import AddClientModal from "../components/contacts-tab-modal";
 import TemplateDialog from "../components/template-dialog/template-dialog";
 import ModalGeneratePaymentLink from "../components/modalGeneratePaymentLink/ModalGeneratePaymentLink";
-import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import ModalEnterProcess from "@/components/molecules/modals/ModalEnterProcess/ModalEnterProcess";
 
 import { IAddClientForm } from "@/types/chat/IChat";
 
 import type { Conversation } from "@/modules/chat/lib/mock-data";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 type Props = {
   conversation: Conversation;
@@ -101,20 +102,6 @@ export default function ChatDetails({
       mutateTickets();
     } catch (error) {
       message.error("Error al inactivar el contacto");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleCloseChat = async () => {
-    setIsActionLoading(true);
-    try {
-      await closeWhatsAppTicket(conversation.id);
-      message.success("Chat cerrado exitosamente");
-      handleCloseModals();
-      mutateTickets();
-    } catch {
-      message.error("Error al cerrar el chat");
     } finally {
       setIsActionLoading(false);
     }
@@ -320,13 +307,22 @@ export default function ChatDetails({
           okLoading={isActionLoading}
         />
 
-        <ModalConfirmAction
+        <ModalEnterProcess
           isOpen={isModalOpen.selected === 3}
-          onClose={() => handleCloseModals()}
-          onOk={handleCloseChat}
-          title="¿Está seguro de cerrar este chat?"
-          okText="Cerrar chat"
-          okLoading={isActionLoading}
+          onClose={handleCloseModals}
+          clientId={clientDetails?.client.uuid || ""}
+          initialValues={{
+            contactId: clientDetails?.client.contact_id,
+            managementTypeId: 4, // Gestión de cierre de chat
+          }}
+          lockSelects
+          extraFields={{
+            ticketId: conversation.id,
+            close_ticket: true
+          }}
+          onSuccess={() => {
+            mutateTickets();
+          }}
         />
       </div>
 

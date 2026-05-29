@@ -15,6 +15,7 @@ import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import AttachmentList from "@/components/molecules/modals/SendEmailModal/components/AttachmentList";
 import { Header } from "@/components/molecules/modals/SendEmailModal/components/Header";
 import { CustomButton } from "@/components/molecules/modals/SendEmailModal/components/CustomButton";
+import { GenericResponse } from "@/types/global/IGlobal";
 import {
   addCommentHistoricAction,
   getManagementTypes,
@@ -28,11 +29,27 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   clientId?: string;
+  initialValues?: {
+    managementTypeId?: number;
+    managementStatusId?: number;
+    contactId?: number;
+  };
+  lockSelects?: boolean;
+  extraFields?: Record<string, string | number | boolean>;
+  onSuccess?: (response: GenericResponse) => void;
 }
 
 type ViewMode = "default" | "minimized" | "maximized";
 
-const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
+const ModalEnterProcess: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  clientId,
+  initialValues,
+  lockSelects = false,
+  extraFields,
+  onSuccess
+}) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   /* -------------------- Header State -------------------- */
@@ -63,9 +80,9 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
     setModalSize({ width: 660, height: 520 });
     setMask(false);
 
-    setManagementType(null);
-    setManagementStatus(null);
-    setContactId(null);
+    setManagementType(initialValues?.managementTypeId ?? null);
+    setManagementStatus(initialValues?.managementStatusId ?? null);
+    setContactId(initialValues?.contactId ?? null);
     setEditorState(EditorState.createEmpty());
     setAttachments([]);
 
@@ -77,10 +94,10 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
           getContactsByClient(clientId, projectId)
         ]);
 
-        setManagementTypes(typesRes.data || []);
-        setManagementStatuses(statusRes.data || []);
+        const nextManagementTypes = typesRes.data || [];
+        const nextManagementStatuses = statusRes.data || [];
         // concatenamos nombre, apellido, teléfono y correo
-        const mappedContacts = (contactsRes.data || []).map(
+        const nextContacts = (contactsRes.data || []).map(
           (c: {
             CONTACT_NAME: any;
             CONTACT_LASTNAME: any;
@@ -91,14 +108,33 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
             label: `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE} - ${c.CONTACT_EMAIL}`
           })
         );
-        setContacts(mappedContacts);
+
+        setManagementTypes(nextManagementTypes);
+        setManagementStatuses(nextManagementStatuses);
+        setContacts(nextContacts);
+
+        if (lockSelects) {
+          setManagementType(initialValues?.managementTypeId ?? nextManagementTypes[0]?.id ?? null);
+          setManagementStatus(
+            initialValues?.managementStatusId ?? nextManagementStatuses[0]?.id ?? null
+          );
+          setContactId(initialValues?.contactId ?? nextContacts[0]?.ID ?? null);
+        }
       } catch (error) {
         message.error("Error cargando datos de gestión");
       }
     };
 
     loadData();
-  }, [isOpen, clientId, projectId]);
+  }, [
+    isOpen,
+    clientId,
+    projectId,
+    initialValues?.managementTypeId,
+    initialValues?.managementStatusId,
+    initialValues?.contactId,
+    lockSelects
+  ]);
 
   /* -------------------- Helpers -------------------- */
   const hasContent = () => editorState.getCurrentContent().getPlainText().trim().length > 0;
@@ -118,18 +154,26 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
 
     setLoading(true);
     try {
-      await addCommentHistoricAction(
+      const response = await addCommentHistoricAction(
         clientId,
         projectId,
         editorState.getCurrentContent().getPlainText(),
         managementType,
         managementStatus,
         contactId ?? undefined,
-        attachments[0] ?? undefined
+        attachments[0] ?? undefined,
+        extraFields
       );
 
-      message.success("Gestión registrada correctamente");
-      onClose();
+      const isSuccess = response.success ?? response.data === true;
+      if (isSuccess) {
+        message.success("Gestión registrada correctamente");
+        onSuccess?.(response);
+        onClose();
+        return;
+      }
+
+      message.error("Error al registrar la gestión");
     } catch (error) {
       message.error("Error al registrar la gestión");
     } finally {
@@ -177,6 +221,7 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
               placeholder="Tipo de gestión"
               value={managementType}
               onChange={setManagementType}
+              disabled={lockSelects}
               style={{ width: "100%" }}
               options={managementTypes.map((t) => ({
                 value: t.id, // <- usar id en minúscula
@@ -200,6 +245,7 @@ const ModalEnterProcess: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
               value={contactId}
               onChange={setContactId}
               allowClear
+              disabled={lockSelects}
               style={{ width: "100%" }}
               options={contacts.map((c) => {
                 const mainText = `${c.CONTACT_NAME} ${c.CONTACT_LASTNAME} - ${c.CONTACT_PHONE}`;

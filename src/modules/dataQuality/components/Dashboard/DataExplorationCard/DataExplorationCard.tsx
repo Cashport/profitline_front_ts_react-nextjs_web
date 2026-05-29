@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Search, AlertTriangle } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
@@ -22,10 +23,13 @@ import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
+import { formatNumber } from "@/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 35;
+
+type DayCell = IDataExplorationTotals & { novedades_percent: number };
 
 export function DataExplorationCard() {
   const { selectedCountry } = useDataQualityDashboardContext();
@@ -40,17 +44,16 @@ export function DataExplorationCard() {
     search: debouncedSearch || undefined
   });
 
-  const dayNumbers = useMemo(
-    () => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1),
-    []
-  );
+  const dayNumbers = useMemo(() => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1), []);
 
   const { rows, lastDataDayIdx } = useMemo(() => {
     const computedRows = (data?.clients ?? []).map((client) => {
-      const dayMap = new Map<number, IDataExplorationTotals>();
+      const dayMap = new Map<number, DayCell>();
       for (const d of client.dates) {
         const dayNum = Number(d.date.slice(-2));
-        if (!Number.isNaN(dayNum)) dayMap.set(dayNum, d.totals);
+        if (!Number.isNaN(dayNum)) {
+          dayMap.set(dayNum, { ...d.totals, novedades_percent: d.novedades_percent ?? 0 });
+        }
       }
       const days = dayNumbers.map((n) => dayMap.get(n) ?? null);
 
@@ -259,9 +262,16 @@ export function DataExplorationCard() {
                       style={{ color: "#111827" }}
                     >
                       <div className="leading-tight">
-                        <span className="block truncate" style={{ maxWidth: "85px" }}>
+                        <Link
+                          href={`/data-quality/client/${row.id_client}`}
+                          className="block truncate hover:underline"
+                          style={{ maxWidth: "85px" }}
+                          title={row.client_name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           {row.client_name}
-                        </span>
+                        </Link>
                         <span className="block" style={{ color: "#9CA3AF", fontSize: "9px" }}>
                           {row.country}
                         </span>
@@ -299,18 +309,13 @@ export function DataExplorationCard() {
                       }
 
                       if (dayTotals.novedades > 0) {
-                        const novedadesDayPct =
-                          dayTotals.total_registros > 0
-                            ? Math.round((dayTotals.novedades / dayTotals.total_registros) * 100)
-                            : 0;
-
                         const cellContent = (
                           <td
                             key={dayIdx}
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {dayTotals.total_registros}
+                            {formatNumber(dayTotals.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -333,7 +338,8 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {dayTotals.novedades} novedades ({novedadesDayPct}%)
+                                    {formatNumber(dayTotals.novedades)} novedades (
+                                    {dayTotals.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -342,7 +348,7 @@ export function DataExplorationCard() {
                         );
                       }
 
-                      if (dayTotals.total_registros === 0) {
+                      if (dayTotals.units_haleon === 0) {
                         if (isFutureDay) {
                           return (
                             <td
@@ -375,7 +381,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {dayTotals.total_registros}
+                          {formatNumber(dayTotals.units_haleon)}
                         </td>
                       );
                     })}
@@ -383,13 +389,13 @@ export function DataExplorationCard() {
                       className="text-right px-2 py-1 font-semibold tabular-nums"
                       style={{ color: "#111827" }}
                     >
-                      {row.total.toLocaleString()}
+                      {formatNumber(row.total)}
                     </td>
                     <td className="text-right px-2 py-1 tabular-nums">
                       {row.totalNovedades > 0 ? (
                         <div className="flex items-center justify-end gap-1">
                           <span className="font-semibold" style={{ color: "#F59E0B" }}>
-                            {row.totalNovedades.toLocaleString()}
+                            {formatNumber(row.totalNovedades)}
                           </span>
                           <span
                             className="text-[9px] px-1 py-0.5 rounded"
@@ -433,7 +439,7 @@ export function DataExplorationCard() {
                             className="text-right px-2 py-1 font-semibold tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {lastMonth.units_haleon.toLocaleString()}
+                            {formatNumber(lastMonth.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -456,7 +462,8 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {lastMonth.novedades} novedades ({lastMonth.novedades_percent}%)
+                                    {formatNumber(lastMonth.novedades)} novedades (
+                                    {lastMonth.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -470,7 +477,7 @@ export function DataExplorationCard() {
                           className="text-right px-2 py-1 font-semibold tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {lastMonth.units_haleon.toLocaleString()}
+                          {formatNumber(lastMonth.units_haleon)}
                         </td>
                       );
                     })()}
