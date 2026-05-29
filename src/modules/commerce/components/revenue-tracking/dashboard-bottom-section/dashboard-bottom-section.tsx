@@ -4,33 +4,19 @@ import { useState } from "react";
 import { ChevronDown, Layers } from "lucide-react";
 
 import { useIsMobile } from "@/modules/chat/hooks/use-mobile";
-import { ClientsTable } from "./clients-table";
-import { ClientDetailTable } from "./client-detail-table";
-import { RevenueInsights, Insight } from "./revenue-insights";
+import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 
-type TabType =
-  | "order-details"
-  | "client-details"
-  | "revenue-insights"
-  | "gross-to-net"
-  | "regional-vendedor";
+type TabType = "gross-to-net" | "regional-vendedor";
 
 const tabs = [
-  { id: "order-details", label: "Detalles de orden" },
-  { id: "client-details", label: "Detalle por cliente" },
-  { id: "revenue-insights", label: "Insights de ingresos" },
   { id: "gross-to-net", label: "Bruto a neto" },
   { id: "regional-vendedor", label: "Regional/Vendedor" }
 ];
 
 export function DashboardBottomSection() {
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<TabType>("order-details");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const insights: Insight[] = [];
-  const isLoadingInsights = false;
-  const insightsError: string | null = null;
+  const [activeTab, setActiveTab] = useState<TabType>("regional-vendedor");
+  const [isMenuMobileOpen, setIsMenuMobileOpen] = useState(false);
 
   const activeTabLabel = tabs.find((t) => t.id === activeTab)?.label;
 
@@ -40,7 +26,7 @@ export function DashboardBottomSection() {
         {isMobile ? (
           <div className="relative w-full">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsMenuMobileOpen(!isMenuMobileOpen)}
               className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-sm"
             >
               <div className="flex items-center gap-3">
@@ -48,20 +34,20 @@ export function DashboardBottomSection() {
                 <span className="font-bold text-foreground">{activeTabLabel}</span>
               </div>
               <ChevronDown
-                className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${isMenuOpen ? "rotate-180" : ""}`}
+                className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${isMenuMobileOpen ? "rotate-180" : ""}`}
               />
             </button>
 
-            {isMenuOpen && (
+            {isMenuMobileOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                <div className="fixed inset-0 z-40" onClick={() => setIsMenuMobileOpen(false)} />
                 <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => {
                         setActiveTab(tab.id as TabType);
-                        setIsMenuOpen(false);
+                        setIsMenuMobileOpen(false);
                       }}
                       className={`w-full text-left px-5 py-4 text-sm font-bold transition-colors ${
                         activeTab === tab.id
@@ -99,16 +85,6 @@ export function DashboardBottomSection() {
       </div>
 
       <div key={activeTab} className="animate-in fade-in duration-200">
-        {activeTab === "order-details" && <ClientsTable />}
-        {activeTab === "client-details" && <ClientDetailTable />}
-        {activeTab === "revenue-insights" && (
-          <RevenueInsights
-            insights={insights}
-            isLoading={isLoadingInsights}
-            error={insightsError}
-            onRetry={() => {}}
-          />
-        )}
         {activeTab === "gross-to-net" && (
           <div className="bg-card border border-border rounded-2xl p-8 min-h-[400px] flex items-center justify-center text-muted-foreground">
             <div className="text-center">
@@ -119,16 +95,7 @@ export function DashboardBottomSection() {
             </div>
           </div>
         )}
-        {activeTab === "regional-vendedor" && (
-          <div className="bg-card border border-border rounded-2xl p-8 min-h-[400px] flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <p className="text-xl font-medium mb-2">Regional / Vendedor</p>
-              <p className="text-sm">
-                Análisis comparativo por región y vendedor — próximamente.
-              </p>
-            </div>
-          </div>
-        )}
+        {activeTab === "regional-vendedor" && <SalesTable />}
       </div>
     </div>
   );

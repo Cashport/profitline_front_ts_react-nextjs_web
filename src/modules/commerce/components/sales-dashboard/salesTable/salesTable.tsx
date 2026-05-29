@@ -2,22 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { Button } from "antd";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
 import { CaretLeft } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
+import { getSalesDashboard } from "@/services/commerce/commerce";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/modules/chat/ui/tooltip";
-import {
-  ISalesDashboardSellerLeader,
-  ISalesDashboardTotal
-} from "@/types/commerce/ICommerce";
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/modules/chat/ui/tooltip";
+import { ISalesDashboardSellerLeader } from "@/types/commerce/ICommerce";
 
 type SortColumn =
   | "total_sales_in_process"
@@ -30,19 +25,38 @@ type SortColumn =
 
 type SortDirection = "asc" | "desc";
 
-interface SalesTableProps {
-  seller_leaders: ISalesDashboardSellerLeader[];
-  iaTotal: ISalesDashboardTotal;
-}
-
-export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps) {
+export default function SalesTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
+
+  const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
 
   const [expandedSellerLeaders, setExpandedSellerLeaders] = useState<Set<string>>(
     new Set(["regional 1", "regional 2", "regional 3"])
   );
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  if (isLoading) {
+    return (
+      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p>Cargando datos...</p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!salesData) {
+    return (
+      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p>No hay datos disponibles</p>
+        </div>
+      </Card>
+    );
+  }
+
+  const { total: iaTotal, seller_leaders } = salesData;
 
   const toggleSellerLeader = (sellerLeaderName: string) => {
     setExpandedSellerLeaders((prev) => {
@@ -171,15 +185,6 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
 
   return (
     <Card className="bg-background border-0 shadow-sm py-0 gap-0">
-      <Link href="/comercio" className="...">
-        <Button
-          type="text"
-          className="!text-base !font-semibold !w-fit m-[24px] mb-0 !h-fit !p-[4px_6px] "
-        >
-          <CaretLeft size={20} /> Volver a mis ordenes
-        </Button>
-      </Link>
-
       <CardHeader className="sm:p-6 !pb-0">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor

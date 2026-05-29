@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import useSWR from "swr";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
-import { getSalesDashboard } from "@/services/commerce/commerce";
-import { ISalesDashboardSellerLeader, ISalesDashboardTotal } from "@/types/commerce/ICommerce";
-
-import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 import FiltersBar from "@/modules/commerce/components/revenue-tracking/filters-bar/filters-bar";
 import StatCards from "@/modules/commerce/components/revenue-tracking/stat-cards/stat-cards";
 import RevenueChart from "@/modules/commerce/components/revenue-tracking/revenue-chart/revenue-chart";
@@ -19,12 +14,7 @@ import {
   useRevenueTracking
 } from "@/modules/commerce/contexts/revenue-tracking-context";
 
-interface RevenueTrackingInnerProps {
-  seller_leaders: ISalesDashboardSellerLeader[];
-  iaTotal: ISalesDashboardTotal;
-}
-
-function RevenueTrackingInner({ seller_leaders, iaTotal }: RevenueTrackingInnerProps) {
+function RevenueTrackingInner() {
   const { resolvedTheme } = useRevenueTracking();
   const isDark = resolvedTheme === "dark";
 
@@ -47,46 +37,20 @@ function RevenueTrackingInner({ seller_leaders, iaTotal }: RevenueTrackingInnerP
           </div>
         </div>
 
-        {/* Secondary Info */}
         <div className="w-full">
           <ProductTreemap />
         </div>
 
-        {/* Bottom Section with tabs */}
         <DashboardBottomSection />
-
-        <SalesTable seller_leaders={seller_leaders} iaTotal={iaTotal} />
       </main>
     </ConfigProvider>
   );
 }
 
 export default function RevenueTracking() {
-  const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
-
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p>Cargando datos...</p>
-      </main>
-    );
-  }
-
-  // Handle error or no data state
-  if (!salesData) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p>No hay datos disponibles</p>
-      </main>
-    );
-  }
-
-  const { total: iaTotal, seller_leaders } = salesData;
-
   return (
     <RevenueTrackingProvider>
-      <RevenueTrackingInner seller_leaders={seller_leaders} iaTotal={iaTotal} />
+      <RevenueTrackingInner />
     </RevenueTrackingProvider>
   );
 }

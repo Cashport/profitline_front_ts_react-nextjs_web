@@ -45,6 +45,42 @@ const isLightColor = (hex: string) => {
   return 0.299 * r + 0.587 * g + 0.114 * b > 150;
 };
 
+// Measure label widths accurately so SVG labels can be truncated to fit their
+// cell instead of relying on a per-character heuristic (which over/underestimates
+// proportional fonts and lets long names overflow into neighboring cells).
+let measureCtx: CanvasRenderingContext2D | null = null;
+let measureFontFamily: string | null = null;
+
+function measureTextWidth(text: string, fontWeight: number) {
+  if (typeof document === "undefined") return text.length * 6.5;
+  if (!measureCtx) {
+    measureCtx = document.createElement("canvas").getContext("2d");
+    measureFontFamily = getComputedStyle(document.body).fontFamily || "sans-serif";
+  }
+  if (!measureCtx) return text.length * 6.5;
+  measureCtx.font = `${fontWeight} 12px ${measureFontFamily}`;
+  return measureCtx.measureText(text).width;
+}
+
+// Returns the longest prefix of `text` that fits within `maxWidth` (appending an
+// ellipsis when truncated), or "" when not even one character fits.
+function truncateToWidth(text: string, maxWidth: number, fontWeight: number) {
+  if (maxWidth <= 0) return "";
+  if (measureTextWidth(text, fontWeight) <= maxWidth) return text;
+  const ellipsis = "…";
+  let lo = 0;
+  let hi = text.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (measureTextWidth(text.slice(0, mid) + ellipsis, fontWeight) <= maxWidth) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return lo > 0 ? text.slice(0, lo) + ellipsis : "";
+}
+
 const HEADER_H = 22;
 
 type ParentRect = {
@@ -118,6 +154,8 @@ const CustomizedContent = (props: CustomizedContentProps) => {
     const inHeaderStrip = parent ? y < parent.y + HEADER_H - 1 : false;
     const labelY = inHeaderStrip ? Math.max(y + HEADER_H + 12, y + 12) : y + 12;
     const labelVisible = width > 30 && height > 16 && (!inHeaderStrip || height > HEADER_H + 14);
+    // x + 4 left inset plus a small right margin.
+    const labelText = labelVisible ? truncateToWidth(name, width - 8, 400) : "";
 
     // Derive the cell's background color from its own data (recharts passes the
     // leaf's `group` through), independent of the geometric parent lookup which
@@ -139,7 +177,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           height={height}
           style={{ fill: "transparent", stroke: "#ffffffe3", strokeWidth: 0.5 }}
         />
-        {labelVisible ? (
+        {labelText ? (
           <text
             x={x + 4}
             y={labelY}
@@ -150,9 +188,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
               ...(itemTextFill === "#fff" ? { textShadow: "0px 1px 1px rgba(0,0,0,0.25)" } : {})
             }}
           >
-            {name.length * 5 > width
-              ? `${name.substring(0, Math.max(1, Math.floor(width / 5)))}…`
-              : name}
+            {labelText}
           </text>
         ) : null}
         {parent ? (
@@ -171,7 +207,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
               fontWeight={500}
               style={{ fill: headerTextFill }}
             >
-              {parent.name}
+              {truncateToWidth(parent.name, parent.width - 16, 500)}
             </text>
           </g>
         ) : null}
@@ -279,8 +315,8 @@ export default function ProductTreemap() {
 
   return (
     <Dialog.Root open={isFullscreen} onOpenChange={setIsFullscreen}>
-      <div className="bg-card border border-border rounded-2xl flex flex-col overflow-hidden">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 shrink-0 bg-card z-10">
+      <div className="bg-card border-none rounded-2xl flex flex-col overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 shrink-0 bg-card z-10 border-t border-l border-r border-border rounded-t-2xl">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Análisis cruzado (Treemap 2D)</h3>
             <p className="text-sm text-muted-foreground mt-1">

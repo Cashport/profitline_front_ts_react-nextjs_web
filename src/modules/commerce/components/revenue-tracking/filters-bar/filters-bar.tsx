@@ -134,9 +134,7 @@ export default function FiltersBar() {
   const currentOptions: FilterOption[] = currentCategory.entity
     ? optionsByEntity[currentCategory.entity] ?? []
     : currentCategory.options ?? [];
-  const currentStatus = currentCategory.entity
-    ? statusByEntity[currentCategory.entity]
-    : undefined;
+  const currentStatus = currentCategory.entity ? statusByEntity[currentCategory.entity] : undefined;
   const isLoadingOptions = currentStatus === "loading";
   const isErrorOptions = currentStatus === "error";
   const filteredOptions = currentOptions.filter((opt) =>
@@ -171,8 +169,7 @@ export default function FiltersBar() {
       if (!values || values.length === 0) return;
 
       const categoryLabel = FILTER_CATEGORIES.find((c) => c.key === key)?.label || key;
-      const displayValue =
-        values.length === 1 ? values[0].name : `${values.length} seleccionados`;
+      const displayValue = values.length === 1 ? values[0].name : `${values.length} seleccionados`;
 
       tags.push(
         <div
@@ -367,7 +364,9 @@ export default function FiltersBar() {
                       <X className="w-8 h-8 opacity-20 mb-3" />
                       <p className="text-sm mb-3">No se pudieron cargar las opciones</p>
                       <button
-                        onClick={() => currentCategory.entity && retryEntity(currentCategory.entity)}
+                        onClick={() =>
+                          currentCategory.entity && retryEntity(currentCategory.entity)
+                        }
                         className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
                       >
                         Reintentar

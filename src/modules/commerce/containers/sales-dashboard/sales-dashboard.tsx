@@ -10,7 +10,6 @@ import { getSalesDashboard } from "@/services/commerce/commerce";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 
-
 export default function SalesDashboard() {
   const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -211,7 +210,7 @@ export default function SalesDashboard() {
         </Card>
       </div> */}
 
-      <SalesTable seller_leaders={seller_leaders} iaTotal={iaTotal} />
+      <SalesTable />
     </main>
   );
 }
