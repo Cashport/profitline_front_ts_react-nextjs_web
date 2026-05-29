@@ -7,7 +7,6 @@ import {
 } from "@/types/global/IGlobal";
 import { IChatData, ITemplateRequest, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
 import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
-import { AxiosError } from "axios";
 
 // Toggle para usar mock data mientras el backend no está disponible
 const USE_MOCK = false;
@@ -154,6 +153,19 @@ export const markTicketAsRead = async (ticketId: string): Promise<void> => {
     );
   } catch (error) {
     console.error("Error marking ticket as read:", error);
+    throw error;
+  }
+};
+
+export const closeWhatsAppTicket = async (ticketId: string): Promise<void> => {
+  try {
+    await API.put(
+      `/whatsapp-tickets/${ticketId}/close`,
+      {},
+      { baseURL: config.API_CHAT }
+    );
+  } catch (error) {
+    console.error("Error closing WhatsApp ticket:", error);
     throw error;
   }
 };

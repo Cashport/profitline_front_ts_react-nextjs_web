@@ -1,7 +1,7 @@
-import SalesDashboard from "@/modules/commerce/containers/sales-dashboard";
+import RevenueTracking from "@/modules/commerce/containers/revenue-tracking/revenue-tracking";
 
 function Page() {
-  return <SalesDashboard />;
+  return <RevenueTracking />;
 }
 
 export default Page;

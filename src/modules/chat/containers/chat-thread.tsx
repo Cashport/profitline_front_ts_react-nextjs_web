@@ -58,6 +58,29 @@ export default function ChatThread({
     return map;
   }, [ticketMessages]);
 
+  const ticketSeparatorByMessageId = useMemo(() => {
+    const map = new Map<string, string>();
+    let lastTicketId: string | null = null;
+
+    for (const m of ticketMessages) {
+      const ticketId = m.ticket?.id || conversation.id;
+      if (!ticketId || ticketId === lastTicketId) continue;
+
+      const closedBy = m.ticket?.closedBy?.name;
+      const closedAt = m.ticket?.closedAt ? dayjs(m.ticket.closedAt).format("DD/MM/YYYY") : null;
+      const isClosed = m.ticket?.status === "CLOSED";
+
+      const label = isClosed
+        ? `Ticket "${m.ticket?.subject || ""}" - Cerrado${closedBy ? ` por ${closedBy}` : ""}${closedAt ? ` ${closedAt}` : ""}`
+        : `Ticket "${m.ticket?.subject || ""}" - Abierto`;
+
+      map.set(m.id, label);
+      lastTicketId = ticketId;
+    }
+
+    return map;
+  }, [ticketMessages, conversation.id]);
+
   const messagesByWaId = useMemo(() => {
     const map = new Map<string, IMessage>();
     for (const m of ticketMessages) {
@@ -257,15 +280,23 @@ export default function ChatThread({
             <div key={`group-${day}`} className="space-y-6">
               <DateSeparator date={messages[0].timestamp} />
               {messages.map((m) => (
-                <BubbleMessage
-                  key={m.id}
-                  message={m}
-                  customerName={conversation.customer}
-                  templateMap={templateMap}
-                  messagesByWaId={messagesByWaId}
-                  onPreviewImage={setPreviewImage}
-                  onScrollToBottom={scrollToBottom}
-                />
+                <div key={m.id} className="space-y-3">
+                  {ticketSeparatorByMessageId.has(m.id) ? (
+                    <div className="my-2 flex items-center gap-3 text-[13px] text-[#62687A]">
+                      <div className="h-px flex-1 bg-[#D6D8DE]" />
+                      <span className="whitespace-nowrap">{ticketSeparatorByMessageId.get(m.id)}</span>
+                      <div className="h-px flex-1 bg-[#D6D8DE]" />
+                    </div>
+                  ) : null}
+                  <BubbleMessage
+                    message={m}
+                    customerName={conversation.customer}
+                    templateMap={templateMap}
+                    messagesByWaId={messagesByWaId}
+                    onPreviewImage={setPreviewImage}
+                    onScrollToBottom={scrollToBottom}
+                  />
+                </div>
               ))}
             </div>
           ))}

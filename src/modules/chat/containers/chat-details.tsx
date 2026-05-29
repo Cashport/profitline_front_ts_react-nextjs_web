@@ -7,7 +7,7 @@ import { Flex, message, Spin } from "antd";
 import { CaretDoubleRight, Copy } from "@phosphor-icons/react";
 
 import { deleteContact } from "@/services/contacts/contacts";
-import { sendTemplate } from "@/services/chat/chat";
+import { closeWhatsAppTicket, sendTemplate } from "@/services/chat/chat";
 
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 import { cn } from "@/utils/utils";
@@ -84,6 +84,10 @@ export default function ChatDetails({
     setIsModalOpen({ isOpen: true, selected: 2 });
   };
 
+  const handleOpenCloseChat = () => {
+    setIsModalOpen({ isOpen: true, selected: 3 });
+  };
+
   const handleDeactivateContact = async () => {
     setIsActionLoading(true);
     try {
@@ -97,6 +101,20 @@ export default function ChatDetails({
       mutateTickets();
     } catch (error) {
       message.error("Error al inactivar el contacto");
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleCloseChat = async () => {
+    setIsActionLoading(true);
+    try {
+      await closeWhatsAppTicket(conversation.id);
+      message.success("Chat cerrado exitosamente");
+      handleCloseModals();
+      mutateTickets();
+    } catch {
+      message.error("Error al cerrar el chat");
     } finally {
       setIsActionLoading(false);
     }
@@ -142,6 +160,11 @@ export default function ChatDetails({
                     key: "deactivate-contact",
                     label: "Inactivar contacto",
                     onClick: handleOpenDeactivateContact
+                  },
+                  {
+                    key: "close-chat",
+                    label: "Cerrar chat",
+                    onClick: handleOpenCloseChat
                   }
                 ]}
               />
@@ -294,6 +317,15 @@ export default function ChatDetails({
           onOk={handleDeactivateContact}
           title="¿Está seguro de inactivar este contacto?"
           okText="Inactivar"
+          okLoading={isActionLoading}
+        />
+
+        <ModalConfirmAction
+          isOpen={isModalOpen.selected === 3}
+          onClose={() => handleCloseModals()}
+          onOk={handleCloseChat}
+          title="¿Está seguro de cerrar este chat?"
+          okText="Cerrar chat"
           okLoading={isActionLoading}
         />
       </div>
