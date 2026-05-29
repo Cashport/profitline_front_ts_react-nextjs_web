@@ -225,9 +225,9 @@ export default function FiltersBar() {
         </div>
 
         {/* theme toggle off for now */}
-        {/* <div className="shrink-0 sm:ml-auto">
+        <div className="shrink-0 sm:ml-auto">
           <ThemeToggle />
-        </div> */}
+        </div>
       </div>
 
       {isOpen && (
