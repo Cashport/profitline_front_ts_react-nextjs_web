@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Search, AlertTriangle } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
@@ -43,10 +44,7 @@ export function DataExplorationCard() {
     search: debouncedSearch || undefined
   });
 
-  const dayNumbers = useMemo(
-    () => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1),
-    []
-  );
+  const dayNumbers = useMemo(() => Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1), []);
 
   const { rows, lastDataDayIdx } = useMemo(() => {
     const computedRows = (data?.clients ?? []).map((client) => {
@@ -264,9 +262,16 @@ export function DataExplorationCard() {
                       style={{ color: "#111827" }}
                     >
                       <div className="leading-tight">
-                        <span className="block truncate" style={{ maxWidth: "85px" }}>
+                        <Link
+                          href={`/data-quality/client/${row.id_client}`}
+                          className="block truncate hover:underline"
+                          style={{ maxWidth: "85px" }}
+                          title={row.client_name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           {row.client_name}
-                        </span>
+                        </Link>
                         <span className="block" style={{ color: "#9CA3AF", fontSize: "9px" }}>
                           {row.country}
                         </span>
@@ -333,7 +338,8 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {formatNumber(dayTotals.novedades)} novedades ({dayTotals.novedades_percent}%)
+                                    {formatNumber(dayTotals.novedades)} novedades (
+                                    {dayTotals.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
@@ -456,7 +462,8 @@ export function DataExplorationCard() {
                                 <div className="flex items-center gap-1.5">
                                   <AlertTriangle className="w-3 h-3" style={{ color: "#FBBF24" }} />
                                   <span>
-                                    {formatNumber(lastMonth.novedades)} novedades ({lastMonth.novedades_percent}%)
+                                    {formatNumber(lastMonth.novedades)} novedades (
+                                    {lastMonth.novedades_percent}%)
                                   </span>
                                 </div>
                               </TooltipContent>
