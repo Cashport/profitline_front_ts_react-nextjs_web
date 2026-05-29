@@ -14,7 +14,7 @@ export const useDashboardSalesRanking = (
   const params = new URLSearchParams();
 
   if (dimension) params.append("dimension", dimension);
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, ["channelIds"]);
   params.append("limit", String(limit));
 
   const pathKey = `/dashboard/sales/ranking?${params.toString()}`;
