@@ -65,6 +65,7 @@ interface CustomizedContentProps {
   height?: number;
   index?: number;
   name?: string;
+  group?: string;
   colorMapping: Record<string, string>;
   parentRectsRef: React.MutableRefObject<ParentRect[]>;
 }
@@ -78,6 +79,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
     height = 0,
     index = 0,
     name = "",
+    group = "",
     colorMapping,
     parentRectsRef
   } = props;
@@ -98,7 +100,7 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           y={y}
           width={width}
           height={height}
-          style={{ fill: baseColor, stroke: "#fff", strokeWidth: 1 }}
+          style={{ fill: baseColor, stroke: "#ffffffe3", strokeWidth: 0.5 }}
         />
       </g>
     );
@@ -117,8 +119,16 @@ const CustomizedContent = (props: CustomizedContentProps) => {
     const labelY = inHeaderStrip ? Math.max(y + HEADER_H + 12, y + 12) : y + 12;
     const labelVisible = width > 30 && height > 16 && (!inHeaderStrip || height > HEADER_H + 14);
 
-    const headerTextFill = parent && isLightColor(parent.color) ? "#0a0a0a" : "#fff";
-    const itemTextFill = parent && isLightColor(parent.color) ? "#0a0a0a" : "#fff";
+    // Derive the cell's background color from its own data (recharts passes the
+    // leaf's `group` through), independent of the geometric parent lookup which
+    // can return undefined and force every label to white.
+    const groupColor = (group && colorMapping[group]) || parent?.color || "#8884d8";
+    const textFill = isLightColor(groupColor) ? "#0a0a0a" : "#fff";
+    // The header bar is filled with `parent.color`, so its label must contrast with that
+    // color — not with the leaf's `groupColor`, which can diverge when a neighboring
+    // group's leaf is geometrically matched onto this parent and repaints the header.
+    const headerTextFill = isLightColor(parent?.color ?? groupColor) ? "#0a0a0a" : "#fff";
+    const itemTextFill = textFill;
 
     return (
       <g>
@@ -127,19 +137,17 @@ const CustomizedContent = (props: CustomizedContentProps) => {
           y={y}
           width={width}
           height={height}
-          style={{ fill: "transparent", stroke: "#fff", strokeWidth: 0.5 }}
+          style={{ fill: "transparent", stroke: "#ffffffe3", strokeWidth: 0.5 }}
         />
         {labelVisible ? (
           <text
             x={x + 4}
             y={labelY}
-            fontSize={8}
-            fontWeight={300}
+            fontSize={12}
+            fontWeight={400}
             style={{
               fill: itemTextFill,
-              ...(itemTextFill === "#fff"
-                ? { textShadow: "0px 1px 1px rgba(0,0,0,0.25)" }
-                : {})
+              ...(itemTextFill === "#fff" ? { textShadow: "0px 1px 1px rgba(0,0,0,0.25)" } : {})
             }}
           >
             {name.length * 5 > width
@@ -154,13 +162,13 @@ const CustomizedContent = (props: CustomizedContentProps) => {
               y={parent.y}
               width={parent.width}
               height={HEADER_H}
-              style={{ fill: parent.color, stroke: "#fff", strokeWidth: 0.5 }}
+              style={{ fill: parent.color, stroke: "#ffffffe3", strokeWidth: 0.5 }}
             />
             <text
               x={parent.x + 8}
               y={parent.y + 15}
-              fontSize={10}
-              fontWeight={400}
+              fontSize={12}
+              fontWeight={500}
               style={{ fill: headerTextFill }}
             >
               {parent.name}
@@ -190,15 +198,9 @@ function TreemapRender({
         data={data.children}
         dataKey="value"
         aspectRatio={4 / 3}
-        stroke="#fff"
         fill="#8884d8"
         isAnimationActive={false}
-        content={
-          <CustomizedContent
-            colorMapping={colorMapping}
-            parentRectsRef={parentRectsRef}
-          />
-        }
+        content={<CustomizedContent colorMapping={colorMapping} parentRectsRef={parentRectsRef} />}
       >
         <Tooltip
           content={({ active, payload }) => {
@@ -280,9 +282,7 @@ export default function ProductTreemap() {
       <div className="bg-card border border-border rounded-2xl flex flex-col overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 shrink-0 bg-card z-10">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              Análisis cruzado (Treemap 2D)
-            </h3>
+            <h3 className="text-lg font-semibold text-foreground">Análisis cruzado (Treemap 2D)</h3>
             <p className="text-sm text-muted-foreground mt-1">
               Explora dos dimensiones combinadas en simultáneo
             </p>
