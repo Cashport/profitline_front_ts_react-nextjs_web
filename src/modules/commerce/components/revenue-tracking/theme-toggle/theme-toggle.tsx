@@ -4,7 +4,7 @@ import React from "react";
 import { Sun, Moon, Laptop } from "lucide-react";
 
 import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown/dropdown";
-import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { useTheme } from "@/modules/commerce/contexts/theme-context";
 
 const THEME_OPTIONS: { key: "light" | "dark" | "system"; label: string; Icon: typeof Sun }[] = [
   { key: "light", label: "Claro", Icon: Sun },
@@ -13,7 +13,7 @@ const THEME_OPTIONS: { key: "light" | "dark" | "system"; label: string; Icon: ty
 ];
 
 export default function ThemeToggle() {
-  const { theme, setTheme } = useRevenueTracking();
+  const { theme, setTheme } = useTheme();
 
   const TriggerIcon = THEME_OPTIONS.find((o) => o.key === theme)?.Icon ?? Sun;
 

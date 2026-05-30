@@ -16,6 +16,12 @@
         padding-right: 2rem;
         overflow-y: auto;
     }
+
+    &:global(.dark) {
+        .rightContent {
+            background-color: rgb(var(--background));
+        }
+    }
 }
 
 // media queries

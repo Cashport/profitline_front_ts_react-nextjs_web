@@ -33,6 +33,10 @@
             background-color: $secondary !important;
             color: black;
         }
+
+        :global(.dark) & {
+            color: rgb(var(--sidebar-foreground));
+        }
     }
 }
 
