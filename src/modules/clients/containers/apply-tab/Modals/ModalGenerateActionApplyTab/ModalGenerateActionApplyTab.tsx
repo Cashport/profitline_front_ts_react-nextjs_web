@@ -13,6 +13,7 @@ interface Props {
   handleOpenModal: (modalNumber: number) => void;
   selectedRows?: IApplyTabRecord[];
   downloadLog?: () => void;
+  downloadExcelLog?: () => void;
 }
 
 export const ModalGenerateActionApplyTab = ({
@@ -20,7 +21,8 @@ export const ModalGenerateActionApplyTab = ({
   onClose,
   handleOpenModal,
   selectedRows,
-  downloadLog
+  downloadLog,
+  downloadExcelLog
 }: Props) => {
   return (
     <Modal
@@ -55,6 +57,11 @@ export const ModalGenerateActionApplyTab = ({
           onClick={downloadLog}
           icon={<DownloadSimple size={20} />}
           title="Descargar Log"
+        />
+        <ButtonGenerateAction
+          onClick={downloadExcelLog}
+          icon={<DownloadSimple size={20} />}
+          title="Descargar excel log"
         />
         <ButtonGenerateAction
           onClick={() => {
