@@ -394,3 +394,16 @@ export const updatePrompt = async (id: number, prompt: string, updatedBy: string
     throw error;
   }
 };
+
+export const getApplicationsExcelLog = async (project_id: number, clientUUID: string) => {
+  try {
+    const response: GenericResponse<{ excel_url: string; file_name: string }> = await API.get(
+      `${config.API_HOST}/paymentApplication/applications/excel?project_id=${project_id}&clientUUID=${clientUUID}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("error getApplicationsExcelLog", error);
+    throw error;
+  }
+};
