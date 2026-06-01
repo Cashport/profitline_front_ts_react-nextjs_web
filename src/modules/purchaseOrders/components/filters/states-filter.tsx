@@ -9,12 +9,14 @@ interface StatesFilterProps {
   selectedStatusId: number | null;
   statuses: IPurchaseOrderStatus[];
   onFilterChange: (statusId: number | null) => void;
+  iconOnly?: boolean;
 }
 
 export function StatesFilter({
   selectedStatusId,
   statuses,
-  onFilterChange
+  onFilterChange,
+  iconOnly = false
 }: StatesFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,9 +45,13 @@ export function StatesFilter({
         className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-base"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Filter className="h-4 w-4 mr-2" />
-        Estados
-        <ChevronDown className="h-4 w-4 ml-2" />
+        <Filter className={iconOnly ? "h-4 w-4" : "h-4 w-4 mr-2"} />
+        {!iconOnly && (
+          <>
+            Estados
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </>
+        )}
       </Button>
 
       {isOpen && (

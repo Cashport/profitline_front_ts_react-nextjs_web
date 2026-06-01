@@ -70,7 +70,7 @@ export function PurchaseOrdersView() {
 
   const width = useScreenWidth();
   const isMobile = width < 768;
-  const isTablet = width >= 768 && width < 900;
+  const isTablet = width >= 768 && width < 1100;
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -156,9 +156,14 @@ export function PurchaseOrdersView() {
       <main>
         <Card className="bg-cashport-white border-0 shadow-sm p-6">
           <CardContent className="p-0 ">
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-y-3">
+              <div
+                className={`flex flex-wrap items-center gap-y-2 ${isMobile ? "gap-x-1" : "gap-x-4"}`}
+              >
                 <UiSearchInput
+                  className={
+                    isMobile ? "!w-[130px] !flex-none" : isTablet ? "!w-[200px] !flex-none" : ""
+                  }
                   placeholder="Buscar"
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -166,13 +171,17 @@ export function PurchaseOrdersView() {
                   }}
                 />
 
-                <GenerateActionButton label="Generar acción" onClick={handleOpenActionsModal} />
+                <GenerateActionButton
+                  label={isMobile || isTablet ? "" : "Generar acción"}
+                  onClick={handleOpenActionsModal}
+                />
 
                 {/* Estado Filter Dropdown */}
                 <StatesFilter
                   selectedStatusId={selectedFilters.statusId ?? null}
                   statuses={filterOptions.statuses || []}
                   onFilterChange={handleStatusChange}
+                  iconOnly={isMobile}
                 />
 
                 <Link href="/purchase-orders/dashboard">
@@ -198,13 +207,19 @@ export function PurchaseOrdersView() {
                   filterDateRange={selectedFilters.dateRange}
                   onDateRangeChange={handleDateRangeChange}
                   onClearDateRange={handleClearDateRange}
+                  iconOnly={isMobile}
                 />
               </div>
 
-              <PrincipalButton onClick={() => setWhichModalIsOpen({ selected: 2 })}>
-                <Upload className="h-4 w-4 mr-2" />
-                Cargar Orden de compra
-              </PrincipalButton>
+              <div className="h-12">
+                <PrincipalButton
+                  onClick={() => setWhichModalIsOpen({ selected: 2 })}
+                  customStyles={{ padding: isMobile || isTablet ? "7px 12px" : undefined }}
+                >
+                  <Upload className={isMobile || isTablet ? "h-4 w-4" : "h-4 w-4 mr-2"} />
+                  {isMobile || isTablet ? null : "Cargar Orden de compra"}
+                </PrincipalButton>
+              </div>
             </div>
 
             {/* Table content */}
