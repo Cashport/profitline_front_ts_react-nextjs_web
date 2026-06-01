@@ -21,7 +21,6 @@ import {
   IOrder,
   IPurchaseOrderFilters
 } from "@/types/purchaseOrders/purchaseOrders";
-import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
 import { ApiError } from "@/utils/api/api";
@@ -176,14 +175,6 @@ export function PurchaseOrdersView() {
                   onClick={handleOpenActionsModal}
                 />
 
-                {/* Estado Filter Dropdown */}
-                <StatesFilter
-                  selectedStatusId={selectedFilters.statusId ?? null}
-                  statuses={filterOptions.statuses || []}
-                  onFilterChange={handleStatusChange}
-                  iconOnly={isMobile}
-                />
-
                 <Link href="/purchase-orders/dashboard">
                   <Button
                     className="!flex !h-12 !items-center !border !border-solid !border-transparent !bg-[#f7f7f7] !px-4 !py-3 !font-semibold"
@@ -195,6 +186,10 @@ export function PurchaseOrdersView() {
 
                 {/* General Filters Dropdown */}
                 <GeneralFilter
+                  showStatusFilter={true}
+                  selectedStatusId={selectedFilters.statusId ?? null}
+                  statuses={filterOptions.statuses || []}
+                  onStatusChange={handleStatusChange}
                   showCompradorFilter={true}
                   clienteFilterLabel="Cliente"
                   selectedClientId={selectedFilters.clientId ?? null}
