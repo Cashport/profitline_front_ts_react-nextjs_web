@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flex, Spin, message } from "antd";
+import { Button, Flex, Spin, message } from "antd";
 import { useRouter } from "next/navigation";
 
 import { Upload, FileText } from "lucide-react";
@@ -25,6 +25,9 @@ import { StatesFilter } from "../../components/filters/states-filter";
 import { GeneralFilter } from "../../components/filters/general-filter";
 import { getFilters, downloadPurchaseOrdersCSV } from "@/services/purchaseOrders/purchaseOrders";
 import { ApiError } from "@/utils/api/api";
+import Link from "next/link";
+import { PresentationChart } from "phosphor-react";
+import useScreenWidth from "@/components/hooks/useScreenWidth";
 
 export function PurchaseOrdersView() {
   const router = useRouter();
@@ -64,6 +67,10 @@ export function PurchaseOrdersView() {
     createdFrom: selectedFilters.createdFrom,
     createdTo: selectedFilters.createdTo
   });
+
+  const width = useScreenWidth();
+  const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 900;
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -167,6 +174,15 @@ export function PurchaseOrdersView() {
                   statuses={filterOptions.statuses || []}
                   onFilterChange={handleStatusChange}
                 />
+
+                <Link href="/purchase-orders/dashboard">
+                  <Button
+                    className="!flex !h-12 !items-center !border !border-solid !border-transparent !bg-[#f7f7f7] !px-4 !py-3 !font-semibold"
+                    size="large"
+                  >
+                    {isMobile || isTablet ? <PresentationChart size={24} /> : "Dashboard"}
+                  </Button>
+                </Link>
 
                 {/* General Filters Dropdown */}
                 <GeneralFilter
