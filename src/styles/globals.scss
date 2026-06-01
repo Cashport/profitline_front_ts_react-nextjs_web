@@ -18,10 +18,12 @@ body {
     margin: 0;
 }
 
-// Comercio dashboard dark theme: match the page background to the dark token.
-// (.dark is set on a descendant <main>, so <body> can't read it via CSS alone — the
-// class is toggled by ComercioLayout only on /comercio/dashboard.)
-body.comercio-dark {
+// Dashboard dark theme: match the page background to the dark token.
+// (.dark is set on a descendant <main>, so <body> can't read it via CSS alone — the class is
+// toggled by ComercioLayout on /comercio/dashboard and PurchaseOrdersLayout on
+// /purchase-orders/dashboard.)
+body.comercio-dark,
+body.dashboard-dark {
     background-color: rgb(9 9 11); // matches .dark --background in tailwind.css
 }
 

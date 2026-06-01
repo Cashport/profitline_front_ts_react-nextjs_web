@@ -19,6 +19,7 @@ interface GeneralFilterProps {
   filterDateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
+  iconOnly?: boolean;
 }
 
 export function GeneralFilter({
@@ -33,7 +34,8 @@ export function GeneralFilter({
   onVendedorChange,
   filterDateRange,
   onDateRangeChange,
-  onClearDateRange
+  onClearDateRange,
+  iconOnly = false
 }: GeneralFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,9 +59,13 @@ export function GeneralFilter({
         className="h-12 border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-cashport-white font-semibold text-base"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Filter className="h-4 w-4 mr-2" />
-        Filtros
-        <ChevronDown className="h-4 w-4 ml-2" />
+        <Filter className={iconOnly ? "h-4 w-4" : "h-4 w-4 mr-2"} />
+        {!iconOnly && (
+          <>
+            Filtros
+            <ChevronDown className="h-4 w-4 ml-2" />
+          </>
+        )}
       </Button>
 
       {isOpen && (
