@@ -11,6 +11,7 @@ import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
 import {
   addItemsToTable,
+  getApplicationsExcelLog,
   markPaymentsAsUnidentified,
   removeItemsFromTable,
   removeMultipleRows,
@@ -358,6 +359,21 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     }
   };
 
+  const handleDownloadExcelLog = async () => {
+    try {
+      const data = await getApplicationsExcelLog(projectId, clientId);
+
+      if (data?.excel_url) {
+        window.open(data.excel_url, "_blank");
+        setIsModalOpen({ selected: 0 });
+      } else {
+        showMessage("error", "No se pudo obtener el excel log");
+      }
+    } catch (error) {
+      showMessage("error", "Error al descargar el excel log");
+    }
+  };
+
   const deselectAllRows = () => {
     setSelectedRowKeys({
       invoices: [],
@@ -652,6 +668,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         handleOpenModal={handleOpenModal}
         selectedRows={selectedRows}
         downloadLog={handleDownloadLog}
+        downloadExcelLog={handleDownloadExcelLog}
       />
 
       <ModalConfirmAction

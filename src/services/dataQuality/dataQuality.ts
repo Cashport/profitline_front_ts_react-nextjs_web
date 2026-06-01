@@ -21,7 +21,8 @@ import {
   IPOS,
   IPOSPayload,
   IClientDetailArchiveClient,
-  IPostCatalogMaterialEquivalence
+  IPostCatalogMaterialEquivalence,
+  IFileType
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -227,6 +228,18 @@ export const getMaterialProductType = async (): Promise<ICatalogSelectOption[]> 
     return response.data;
   } catch (error) {
     console.error("Error fetching material product type:", error);
+    throw error;
+  }
+};
+
+export const getFileTypes = async () => {
+  try {
+    const response: GenericResponse<IFileType[]> = await API.get(
+      "/data/catalog/client-data-type-archives"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching file types:", error);
     throw error;
   }
 };

@@ -2,6 +2,7 @@
 
 import { Card } from "@/modules/chat/ui/card";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
+import { useFileTypes } from "@/modules/dataQuality/hooks/useFileTypes";
 import { IDashboardSummaryPeriodicity } from "@/types/dataQuality/IDataQuality";
 
 interface PeriodicityChartProps {
@@ -17,7 +18,13 @@ const COLORS = {
 
 export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
   const { selectedFileType } = useDataQualityDashboardContext();
+  const { data: fileTypesData } = useFileTypes();
   const data = periodicity ?? [];
+
+  const selectedFileTypeLabel =
+    selectedFileType && selectedFileType !== "all"
+      ? fileTypesData?.find((t) => String(t.id) === selectedFileType)?.description
+      : undefined;
 
   const totals = {
     processado: data.reduce((sum, d) => sum + d.procesados, 0),
@@ -33,12 +40,12 @@ export function PeriodicityChart({ periodicity }: PeriodicityChartProps) {
           <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>
             Archivos por periodicidad
           </h3>
-          {selectedFileType && selectedFileType !== "all" && (
+          {selectedFileTypeLabel && (
             <span
               className="text-xs px-2 py-0.5 rounded-md font-medium"
               style={{ backgroundColor: "#F3F4F6", color: "#374151" }}
             >
-              {selectedFileType}
+              {selectedFileTypeLabel}
             </span>
           )}
         </div>

@@ -34,9 +34,9 @@ interface IError {
   message: string;
 }
 
-export const fetcher = async (url: string) => {
+export const fetcher = async (url: string, overrideTimeout?: number) => {
   return instance
-    .get(url)
+    .get(url, { timeout: overrideTimeout })
     .then((res) => {
       if (!res.data) {
         throw Error(res.data.message);
