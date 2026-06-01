@@ -107,3 +107,29 @@
         }
     }
 }
+
+// Dark theme overrides — active only when a .dark ancestor is present
+// (ComercioLayout sets it on the ViewWrapper root). Light mode is unchanged.
+.dark {
+    .sidebar.main {
+        background-color: rgb(var(--sidebar));
+        box-shadow: 7px 1px 12px 2px rgba(0, 0, 0, 0.45);
+
+        .logoContainer:hover {
+            border-color: rgb(var(--sidebar-border));
+        }
+    }
+
+    .mobileMenuWrapper {
+        background-color: rgb(var(--sidebar));
+        border-top-color: rgb(var(--sidebar-border));
+        box-shadow: 1px 25px 58px -29px rgba(0, 0, 0, 0.7);
+    }
+
+    .buttonExit,
+    .buttonMenu {
+        // AntD text-buttons keep a dark color; force light so the logout arrow and the
+        // mobile hamburger-menu icon stay visible on the dark sidebar
+        color: rgb(var(--sidebar-foreground)) !important;
+    }
+}

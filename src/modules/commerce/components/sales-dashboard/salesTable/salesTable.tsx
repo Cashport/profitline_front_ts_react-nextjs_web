@@ -2,22 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { Button } from "antd";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
 import { CaretLeft } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
+import { getSalesDashboard } from "@/services/commerce/commerce";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/modules/chat/ui/tooltip";
-import {
-  ISalesDashboardSellerLeader,
-  ISalesDashboardTotal
-} from "@/types/commerce/ICommerce";
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/modules/chat/ui/tooltip";
+import { ISalesDashboardSellerLeader } from "@/types/commerce/ICommerce";
 
 type SortColumn =
   | "total_sales_in_process"
@@ -30,19 +25,38 @@ type SortColumn =
 
 type SortDirection = "asc" | "desc";
 
-interface SalesTableProps {
-  seller_leaders: ISalesDashboardSellerLeader[];
-  iaTotal: ISalesDashboardTotal;
-}
-
-export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps) {
+export default function SalesTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
+
+  const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
 
   const [expandedSellerLeaders, setExpandedSellerLeaders] = useState<Set<string>>(
     new Set(["regional 1", "regional 2", "regional 3"])
   );
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  if (isLoading) {
+    return (
+      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p>Cargando datos...</p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!salesData) {
+    return (
+      <Card className="bg-background border-0 shadow-sm py-0 gap-0">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p>No hay datos disponibles</p>
+        </div>
+      </Card>
+    );
+  }
+
+  const { total: iaTotal, seller_leaders } = salesData;
 
   const toggleSellerLeader = (sellerLeaderName: string) => {
     setExpandedSellerLeaders((prev) => {
@@ -77,10 +91,11 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
   };
 
   const getAvanceBgColor = (avance: number) => {
-    if (avance >= 100) return "bg-green-50";
-    if (avance >= 70) return "bg-blue-50";
-    if (avance >= 40) return "bg-yellow-50";
-    return "bg-red-50";
+    if (avance >= 100) return "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400";
+    if (avance >= 70) return "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400";
+    if (avance >= 40)
+      return "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-400";
+    return "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400";
   };
 
   const sortedSellerLeaders = [...seller_leaders].sort((a, b) => {
@@ -171,15 +186,6 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
 
   return (
     <Card className="bg-background border-0 shadow-sm py-0 gap-0">
-      <Link href="/comercio" className="...">
-        <Button
-          type="text"
-          className="!text-base !font-semibold !w-fit m-[24px] mb-0 !h-fit !p-[4px_6px] "
-        >
-          <CaretLeft size={20} /> Volver a mis ordenes
-        </Button>
-      </Link>
-
       <CardHeader className="sm:p-6 !pb-0">
         <CardTitle className="text-base sm:text-lg font-semibold">
           Resumen de ventas por regional y vendedor
@@ -193,42 +199,42 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
           <TooltipProvider>
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-cashport-black bg-gray-50">
-                  <th className="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
+                <tr className="border-b-2 border-cashport-black dark:border-border bg-gray-50 dark:bg-secondary">
+                  <th className="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
                     Regional / Vendedor
                   </th>
-                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
+                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
                     Borrador
                   </th>
-                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider">
+                  <th className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
                     Cartera
                   </th>
                   <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
                     onClick={() => handleSort("total_sales_in_process")}
                   >
                     En proceso {renderSortIcon("total_sales_in_process")}
                   </th>
                   <th
-                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                    className="hidden md:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
                     onClick={() => handleSort("total_sales_invoiced")}
                   >
                     Facturado {renderSortIcon("total_sales_invoiced")}
                   </th>
                   <th
-                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
                     onClick={() => handleSort("total_sales")}
                   >
                     Total {renderSortIcon("total_sales")}
                   </th>
                   <th
-                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                    className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
                     onClick={() => handleSort("total_cuota")}
                   >
                     Meta {renderSortIcon("total_cuota")}
                   </th>
                   <th
-                    className="hidden lg:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-cashport-black tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                    className="hidden lg:table-cell text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary/70 select-none"
                     onClick={() => handleSort("pending_cuota")}
                   >
                     Monto faltante {renderSortIcon("pending_cuota")}
@@ -242,7 +248,7 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <tr
-                            className="bg-blue-50 border-b border-gray-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                            className="bg-blue-50 dark:bg-secondary border-b border-gray-200 dark:border-border cursor-pointer hover:bg-blue-100 dark:hover:bg-secondary/80 transition-colors"
                             onClick={() => toggleSellerLeader(sellerLeader.seller_leader)}
                           >
                             <td className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm flex items-center">
@@ -325,8 +331,8 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
                         <TooltipProvider key={seller.seller}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer">
-                                <td className="py-2 sm:py-3 px-2 sm:px-4 pl-6 sm:pl-12 text-xs sm:text-sm text-gray-700 truncate">
+                              <tr className="border-b border-gray-100 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary/50 transition-colors cursor-pointer">
+                                <td className="py-2 sm:py-3 px-2 sm:px-4 pl-6 sm:pl-12 text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate">
                                   {seller.seller}
                                 </td>
                                 <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
@@ -401,7 +407,7 @@ export default function SalesTable({ seller_leaders, iaTotal }: SalesTableProps)
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <tr className="border-t-2 border-cashport-black bg-gray-100 font-bold cursor-pointer">
+                      <tr className="border-t-2 border-cashport-black dark:border-border bg-gray-100 dark:bg-secondary font-bold cursor-pointer">
                         <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">Total</td>
                         <td className="hidden md:table-cell py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                           {formatMoney(iaTotal.total_sales_pending, {
