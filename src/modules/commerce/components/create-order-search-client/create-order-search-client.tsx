@@ -1,23 +1,30 @@
-import { FC, useContext, useState } from "react";
-import { Flex, message } from "antd";
-import Link from "next/link";
-import { Controller, useForm } from "react-hook-form";
+"use client";
 
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
-import SelectClient from "../create-order-select-client";
+import { FC, useContext, useEffect, useState } from "react";
+import { message } from "antd";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+
+import { OrderViewContext } from "../../contexts/orderViewContext";
 import {
   RegistrationDialog,
   type RegistrationFormData
 } from "@/modules/cetaphil/components/registration-dialog";
-import { OrderViewContext } from "../../contexts/orderViewContext";
-import { registerNewClient } from "@/services/commerce/commerce";
+import { getAdresses, getClients, registerNewClient } from "@/services/commerce/commerce";
 import { getDocumentTypeId } from "@/constants/documentTypes";
-
-import styles from "./create-order-search-client.module.scss";
+import { ICommerceAdresses, IShippingInformation } from "@/types/commerce/ICommerce";
 import { useAppStore } from "@/lib/store/store";
 
-export interface selectClientForm {
+import { IClientOption, ISelectedAddress } from "./types";
+import ClienteDropdown from "./cliente-dropdown";
+import CanalSelect from "./canal-select";
+import DireccionDropdown from "./direccion-dropdown";
+import SelectedClientCard from "./selected-client-card";
+import CarteraCard from "./cartera-card";
+import NewAddressModal from "./new-address-modal";
+
+// Kept so create-order-select-client.tsx (which imports it) keeps compiling.
+export interface ISelectClientForm {
   client: {
     value: string;
     label: string;
@@ -26,37 +33,89 @@ export interface selectClientForm {
   };
 }
 
-const CreateOrderSearchClient: FC = ({}) => {
-  const { setClient } = useContext(OrderViewContext);
+const CreateOrderSearchClient: FC = () => {
+  const { setClient, setShippingInfo } = useContext(OrderViewContext);
+  const { config, projectId } = useAppStore((state) => ({
+    config: state.config,
+    projectId: state.selectedProject?.ID
+  }));
+
+  const [clientsLoading, setClientsLoading] = useState(false);
+  const [clientOptions, setClientOptions] = useState<IClientOption[]>([]);
+
+  const [selectedClient, setSelectedClient] = useState<IClientOption | null>(null);
+  const [canal, setCanal] = useState("");
+  const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<ISelectedAddress | null>(null);
+
+  // New-address AntD modal
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+
+  // New-client registration dialog
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const { config } = useAppStore((state) => ({ config: state.config }));
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid }
-  } = useForm<selectClientForm>({});
+  // Fetch real clients
+  useEffect(() => {
+    if (!projectId) return;
+    const fetchClients = async () => {
+      setClientsLoading(true);
+      try {
+        const response = await getClients(projectId);
+        setClientOptions(
+          (response?.data || []).map((c) => ({
+            value: c.client_id,
+            label: c.client_name,
+            email: c.client_email,
+            payment_type: c.payment_type
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+        setClientOptions([]);
+      } finally {
+        setClientsLoading(false);
+      }
+    };
+    fetchClients();
+  }, [projectId]);
 
-  const handleCreateOrder = (data: selectClientForm) => {
-    setClient({
-      name: data.client.label,
-      id: data.client.value,
-      email: data.client.email,
-      payment_type: data.client.payment_type
-    });
+  // Fetch the selected client's addresses
+  useEffect(() => {
+    if (!selectedClient?.value) {
+      setAddresses([]);
+      return;
+    }
+    const fetchAddresses = async () => {
+      try {
+        const resp = await getAdresses(selectedClient.value);
+        setAddresses(resp.otherAddresses ?? []);
+      } catch (error) {
+        console.error(error);
+        setAddresses([]);
+      }
+    };
+    fetchAddresses();
+  }, [selectedClient?.value]);
+
+  const handleSelectClient = (c: IClientOption) => {
+    setSelectedClient(c);
+    setCanal("");
+    setSelectedAddress(null);
   };
 
-  const handleClickNewClient = () => {
-    setShowNewClientDialog(true);
+  const handleSaveNewAddress = (city: string, dispatchAddress: string) => {
+    setSelectedAddress({ city, dispatch_address: dispatchAddress });
+    setAddressModalOpen(false);
   };
+
+  const handleClickNewClient = () => setShowNewClientDialog(true);
 
   const handleSaveClient = async (data: RegistrationFormData) => {
     try {
       setIsRegistering(true);
 
       const documentTypeId = getDocumentTypeId(data.documentType);
-
       if (!documentTypeId) {
         message.error("Tipo de documento inválido");
         return;
@@ -71,9 +130,10 @@ const CreateOrderSearchClient: FC = ({}) => {
       };
 
       const responseNewClient = await registerNewClient(guestData);
-      setClient({
-        name: responseNewClient.name,
-        id: responseNewClient.document,
+      // Set as the locally selected client so canal/address can still be collected.
+      handleSelectClient({
+        label: responseNewClient.name,
+        value: responseNewClient.document,
         email: responseNewClient.email,
         payment_type: 1
       });
@@ -87,30 +147,124 @@ const CreateOrderSearchClient: FC = ({}) => {
     }
   };
 
+  const isValid = !!(selectedClient && canal && selectedAddress);
+
+  const handleCrearOrden = () => {
+    if (!isValid || !selectedClient || !selectedAddress) return;
+
+    const shipping: IShippingInformation = {
+      // Only include id when it's an existing (saved) address.
+      ...(selectedAddress.id !== undefined ? { id: selectedAddress.id } : {}),
+      address: selectedAddress.dispatch_address,
+      city: selectedAddress.city,
+      dispatch_address: selectedAddress.dispatch_address,
+      email: selectedClient.email || selectedAddress.email || "",
+      phone_number: "",
+      comments: ""
+    };
+
+    setShippingInfo(shipping);
+    setClient({
+      name: selectedClient.label,
+      id: selectedClient.value,
+      email: selectedClient.email,
+      payment_type: selectedClient.payment_type
+    });
+  };
+
   return (
-    <>
-      <Flex className={styles.FlexContainer} vertical gap={"1.5rem"}>
-        <Flex justify="space-between" align="center" className={styles.FlexContainer__header}>
-          <h3 className={styles.FlexContainer__title}>Buscar cliente</h3>
+    <div className="h-full flex gap-4">
+      {/* ── Izquierda: card "Nueva orden" ─────────────────────────────── */}
+      <div className="flex flex-col w-full max-w-[340px] flex-shrink-0 bg-white rounded-xl border border-[#DDDDDD] overflow-hidden h-full">
+        <div className="px-6 pt-6 pb-5 border-b border-[#EEEEEE] flex-shrink-0 flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-base font-bold text-[#141414] leading-tight">Nueva orden</h1>
+            <p className="text-sm text-[#999999] mt-0.5">Completa los datos para comenzar</p>
+          </div>
           {config.create_client_btn && (
-            <PrincipalButton onClick={handleClickNewClient}>Nuevo cliente</PrincipalButton>
+            <button
+              type="button"
+              onClick={handleClickNewClient}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#141414] border border-[#DDDDDD] rounded-lg hover:border-[#141414] hover:bg-[#F7F7F7] transition-colors flex-shrink-0"
+            >
+              <Plus size={12} />
+              Nuevo cliente
+            </button>
           )}
-        </Flex>
-        <Controller
-          name="client"
-          control={control}
-          rules={{ required: true, minLength: 1 }}
-          render={({ field }) => <SelectClient errors={errors.client} field={field} />}
-        />
-      </Flex>
-      <Flex gap={"0.5rem"} justify="flex-end">
-        <Link href="/comercio">
-          <SecondaryButton>Cancelar</SecondaryButton>
-        </Link>
-        <PrincipalButton disabled={!isValid} onClick={handleSubmit(handleCreateOrder)}>
-          Crear orden
-        </PrincipalButton>
-      </Flex>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          {/* Cliente */}
+          <div>
+            <p className="text-sm font-medium text-[#141414] mb-2">Cliente</p>
+            <ClienteDropdown
+              options={clientOptions}
+              loading={clientsLoading}
+              selected={selectedClient}
+              onSelect={handleSelectClient}
+            />
+          </div>
+
+          {/* Canal */}
+          <div>
+            <p className="text-sm font-medium text-[#141414] mb-2">Canal</p>
+            <CanalSelect value={canal} onChange={setCanal} />
+          </div>
+
+          {/* Dirección */}
+          <div>
+            <p className="text-sm font-medium text-[#141414] mb-2">Dirección de despacho</p>
+            <DireccionDropdown
+              addresses={addresses}
+              selected={selectedAddress}
+              onSelect={setSelectedAddress}
+              onCreateNew={() => setAddressModalOpen(true)}
+            />
+          </div>
+
+          <p className="text-sm text-[#999999] text-right">Bodega MEDELLIN</p>
+        </div>
+
+        <div className="px-6 py-4 border-t border-[#EEEEEE] flex items-center gap-3 flex-shrink-0">
+          <Link href="/comercio" className="flex-1">
+            <button
+              type="button"
+              className="w-full py-2.5 text-sm font-medium text-[#141414] bg-white border border-[#DDDDDD] rounded-xl hover:bg-[#F7F7F7] transition-colors"
+            >
+              Cancelar
+            </button>
+          </Link>
+          <button
+            type="button"
+            disabled={!isValid}
+            onClick={handleCrearOrden}
+            className="flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors disabled:opacity-35 disabled:cursor-not-allowed bg-[#CBE71E] text-[#141414] hover:bg-[#b8d11a]"
+          >
+            Crear orden
+          </button>
+        </div>
+      </div>
+
+      {/* ── Derecha: cards (display) ──────────────────────────────────── */}
+      <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-y-auto">
+        {selectedClient ? (
+          <>
+            <SelectedClientCard client={selectedClient} address={selectedAddress} />
+            <CarteraCard />
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+          </div>
+        )}
+      </div>
+
+      <NewAddressModal
+        open={addressModalOpen}
+        onSave={handleSaveNewAddress}
+        onCancel={() => setAddressModalOpen(false)}
+      />
+
       <RegistrationDialog
         open={showNewClientDialog}
         onOpenChange={setShowNewClientDialog}
@@ -121,7 +275,7 @@ const CreateOrderSearchClient: FC = ({}) => {
         showReferralEmail={false}
         isSubmitting={isRegistering}
       />
-    </>
+    </div>
   );
 };
 
