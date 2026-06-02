@@ -4,6 +4,10 @@
     justify-content: space-between;
     padding-bottom: 1rem;
 
+    :global(.dark) & {
+        color: rgb(var(--foreground));
+    }
+
     .title {
         font-size: 24px;
         font-weight: 600;

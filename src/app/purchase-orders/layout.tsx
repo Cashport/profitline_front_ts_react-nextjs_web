@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 import { SocketProvider } from "@/context/ChatContext";
+import PurchaseOrdersLayout from "@/modules/purchaseOrders/containers/purchase-orders-layout/PurchaseOrdersLayout";
 
 export const metadata: Metadata = {
   title: "Ordenes de compra",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SocketProvider>
-      <ViewWrapper headerTitle="Ordenes de compra">{children}</ViewWrapper>
+      <PurchaseOrdersLayout>{children}</PurchaseOrdersLayout>
     </SocketProvider>
   );
 }
