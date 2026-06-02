@@ -76,7 +76,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     selectedOrders.length > 0 &&
     selectedOrders.every((o) => allowedStatesForSeparate.includes(o.status));
 
-  const allowedStatesForDownload = ["En facturación", "En despacho"];
+  const allowedStatesForDownload = ["En facturación", "En despacho", "Facturado"];
   const canDownload =
     selectedPackageRows.length > 0 &&
     selectedPackageRows.every((p) =>
