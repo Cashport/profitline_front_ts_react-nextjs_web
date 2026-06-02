@@ -1,16 +1,15 @@
-// ── Mock data (display only) ─────────────────────────────────────────────
-const CARTERA = {
-  total: 12652106,
-  vencida: 5711609,
-  cupoTotal: 20000000,
-  cupoDisponible: 14300000
-};
+import { useAppStore } from "@/lib/store/store";
+import { IClientSummary } from "@/types/commerce/ICommerce";
 
-function CarteraCard() {
-  const cupoUsado = CARTERA.cupoTotal - CARTERA.cupoDisponible;
-  const cupoUsadoPct = Math.round((cupoUsado / CARTERA.cupoTotal) * 100);
-  const cupoDisponiblePct = 100 - cupoUsadoPct;
-  const fmt = (n: number) => "$ " + n.toLocaleString("es-CO");
+interface ICarteraCardProps {
+  cartera: IClientSummary["cartera"];
+  cupo: IClientSummary["cupo"];
+}
+
+function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
+  const formatMoney = useAppStore((state) => state.formatMoney);
+  const cupoUsadoPct = Math.round(cupo.percentageUsed);
+  const cupoDisponiblePct = Math.round(cupo.availablePercentage);
 
   return (
     <div className="bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
@@ -20,22 +19,30 @@ function CarteraCard() {
       <div className="grid grid-cols-2 divide-x divide-[#F0F0F0] border-b border-[#F0F0F0]">
         <div className="px-5 py-4">
           <p className="text-[11px] text-[#999999] mb-1">Cartera total</p>
-          <p className="text-sm font-bold text-[#141414]">{fmt(CARTERA.total)}</p>
+          <p className="text-sm font-bold text-[#141414]">
+            {formatMoney(cartera.totalPortfolio, { hideDecimals: true })}
+          </p>
         </div>
         <div className="px-5 py-4">
           <p className="text-[11px] text-[#999999] mb-1">Cartera vencida</p>
-          <p className="text-sm font-bold text-red-500">{fmt(CARTERA.vencida)}</p>
+          <p className="text-sm font-bold text-red-500">
+            {formatMoney(cartera.pastDueAmount, { hideDecimals: true })}
+          </p>
         </div>
       </div>
       <div className="px-5 py-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] text-[#999999] mb-0.5">Cupo total</p>
-            <p className="text-sm font-bold text-[#141414]">{fmt(CARTERA.cupoTotal)}</p>
+            <p className="text-sm font-bold text-[#141414]">
+              {formatMoney(cupo.totalQuota, { hideDecimals: true })}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-[11px] text-[#999999] mb-0.5">Cupo disponible</p>
-            <p className="text-sm font-bold text-[#141414]">{fmt(CARTERA.cupoDisponible)}</p>
+            <p className="text-sm font-bold text-[#141414]">
+              {formatMoney(cupo.availableQuota, { hideDecimals: true })}
+            </p>
           </div>
         </div>
         <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useContext, useEffect, useState } from "react";
-import { message } from "antd";
+import { message, Spin } from "antd";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -12,10 +12,11 @@ import {
 } from "@/modules/cetaphil/components/registration-dialog";
 import { getAdresses, getClients, registerNewClient } from "@/services/commerce/commerce";
 import { getDocumentTypeId } from "@/constants/documentTypes";
-import { ICommerceAdresses, IShippingInformation } from "@/types/commerce/ICommerce";
+import { ICommerceAdresses, IEcommerceClient, IShippingInformation } from "@/types/commerce/ICommerce";
 import { useAppStore } from "@/lib/store/store";
+import { useClientSummary } from "@/modules/commerce/hooks/create-order/useClientSummary";
 
-import { IClientOption, ISelectedAddress } from "./types";
+import { ISelectedAddress } from "./types";
 import ClienteDropdown from "./cliente-dropdown";
 import CanalSelect from "./canal-select";
 import DireccionDropdown from "./direccion-dropdown";
@@ -41,9 +42,14 @@ const CreateOrderSearchClient: FC = () => {
   }));
 
   const [clientsLoading, setClientsLoading] = useState(false);
-  const [clientOptions, setClientOptions] = useState<IClientOption[]>([]);
+  const [clientOptions, setClientOptions] = useState<IEcommerceClient[]>([]);
 
-  const [selectedClient, setSelectedClient] = useState<IClientOption | null>(null);
+  const [selectedClient, setSelectedClient] = useState<IEcommerceClient | null>(null);
+
+  const { data: clientSummary, isLoading: summaryLoading } = useClientSummary(
+    selectedClient?.client_id
+  );
+
   const [canal, setCanal] = useState("");
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<ISelectedAddress | null>(null);
@@ -62,14 +68,7 @@ const CreateOrderSearchClient: FC = () => {
       setClientsLoading(true);
       try {
         const response = await getClients(projectId);
-        setClientOptions(
-          (response?.data || []).map((c) => ({
-            value: c.client_id,
-            label: c.client_name,
-            email: c.client_email,
-            payment_type: c.payment_type
-          }))
-        );
+        setClientOptions(response?.data || []);
       } catch (error) {
         console.error("Error fetching clients:", error);
         setClientOptions([]);
@@ -82,13 +81,13 @@ const CreateOrderSearchClient: FC = () => {
 
   // Fetch the selected client's addresses
   useEffect(() => {
-    if (!selectedClient?.value) {
+    if (!selectedClient?.client_id) {
       setAddresses([]);
       return;
     }
     const fetchAddresses = async () => {
       try {
-        const resp = await getAdresses(selectedClient.value);
+        const resp = await getAdresses(selectedClient.client_id);
         setAddresses(resp.otherAddresses ?? []);
       } catch (error) {
         console.error(error);
@@ -96,9 +95,9 @@ const CreateOrderSearchClient: FC = () => {
       }
     };
     fetchAddresses();
-  }, [selectedClient?.value]);
+  }, [selectedClient?.client_id]);
 
-  const handleSelectClient = (c: IClientOption) => {
+  const handleSelectClient = (c: IEcommerceClient) => {
     setSelectedClient(c);
     setCanal("");
     setSelectedAddress(null);
@@ -132,10 +131,11 @@ const CreateOrderSearchClient: FC = () => {
       const responseNewClient = await registerNewClient(guestData);
       // Set as the locally selected client so canal/address can still be collected.
       handleSelectClient({
-        label: responseNewClient.name,
-        value: responseNewClient.document,
-        email: responseNewClient.email,
-        payment_type: 1
+        client_id: responseNewClient.document,
+        client_name: responseNewClient.name,
+        client_email: responseNewClient.email,
+        payment_type: 1,
+        client_bu: []
       });
 
       message.success("Cliente registrado exitosamente");
@@ -158,16 +158,16 @@ const CreateOrderSearchClient: FC = () => {
       address: selectedAddress.dispatch_address,
       city: selectedAddress.city,
       dispatch_address: selectedAddress.dispatch_address,
-      email: selectedClient.email || selectedAddress.email || "",
+      email: selectedClient.client_email || selectedAddress.email || "",
       phone_number: "",
       comments: ""
     };
 
     setShippingInfo(shipping);
     setClient({
-      name: selectedClient.label,
-      id: selectedClient.value,
-      email: selectedClient.email,
+      name: selectedClient.client_name,
+      id: selectedClient.client_id,
+      email: selectedClient.client_email,
       payment_type: selectedClient.payment_type
     });
   };
@@ -247,14 +247,26 @@ const CreateOrderSearchClient: FC = () => {
 
       {/* ── Derecha: cards (display) ──────────────────────────────────── */}
       <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-y-auto">
-        {selectedClient ? (
+        {!selectedClient ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+          </div>
+        ) : summaryLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Spin size="large" />
+          </div>
+        ) : clientSummary ? (
           <>
-            <SelectedClientCard client={selectedClient} address={selectedAddress} />
-            <CarteraCard />
+            <SelectedClientCard
+              client={selectedClient}
+              address={selectedAddress}
+              nit={clientSummary.client.nit}
+            />
+            <CarteraCard cartera={clientSummary.cartera} cupo={clientSummary.cupo} />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+            <p className="text-sm text-[#999999]">No hay información del cliente</p>
           </div>
         )}
       </div>
