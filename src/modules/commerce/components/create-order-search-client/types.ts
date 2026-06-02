@@ -3,4 +3,5 @@ export interface ISelectedAddress {
   city: string;
   dispatch_address: string;
   email?: string;
+  warehouse?: string;
 }

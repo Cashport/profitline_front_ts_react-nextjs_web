@@ -242,7 +242,11 @@ const CreateOrderSearchClient: FC = () => {
             />
           </div>
 
-          <p className="text-sm text-[#999999] text-right">Bodega MEDELLIN</p>
+          {selectedAddress?.warehouse && (
+            <p className="text-sm text-[#999999] text-right">
+              Bodega {selectedAddress.warehouse}
+            </p>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-[#EEEEEE] flex items-center gap-3 flex-shrink-0">
