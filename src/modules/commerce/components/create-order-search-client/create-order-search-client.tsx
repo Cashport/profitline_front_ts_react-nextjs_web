@@ -35,7 +35,7 @@ export interface ISelectClientForm {
 }
 
 const CreateOrderSearchClient: FC = () => {
-  const { setClient, setShippingInfo } = useContext(OrderViewContext);
+  const { setClient, setShippingInfo, setChannelCode } = useContext(OrderViewContext);
   const { config, projectId } = useAppStore((state) => ({
     config: state.config,
     projectId: state.selectedProject?.ID
@@ -172,6 +172,7 @@ const CreateOrderSearchClient: FC = () => {
       comments: ""
     };
 
+    setChannelCode(canal);
     setShippingInfo(shipping);
     setClient({
       name: selectedClient.client_name,
