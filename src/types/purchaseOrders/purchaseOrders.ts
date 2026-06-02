@@ -121,6 +121,7 @@ export interface IPurchaseOrderDetail {
   novelties: IPurchaseOrderNovelty[];
   invoices: IPurchaseOrderInvoice[];
   warehouseId: number | null;
+  warehouseName: string | null;
 }
 
 export interface IPackageInfoPurchaseOrder {
