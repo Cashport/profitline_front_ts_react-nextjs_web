@@ -373,6 +373,7 @@ export interface IOrder {
   last_datestamp: string | null;
   files: string | null;
   notification_id: number | null;
+  incident_id: number | null;
 }
 export interface IDraftOrder {
   id: number;
