@@ -65,9 +65,8 @@ export default function useDiscount({ messageApi, tabActive }: Props) {
   );
 
   useEffect(() => {
-    if (res?.data) {
-      setData(res.data.map((item) => ({ ...item, checked: false })));
-    }
+    const items = res?.data;
+    setData(Array.isArray(items) ? items.map((item) => ({ ...item, checked: false })) : []);
   }, [res, tabActive]);
 
   const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
