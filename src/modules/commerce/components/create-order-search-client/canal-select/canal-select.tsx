@@ -1,29 +1,28 @@
 import { ChevronDown } from "lucide-react";
 
-// Canal: UI-only, 2 mock options (order payload has no channel field).
-const CANAL_OPTIONS = [
-  { value: "mostrador", label: "Mostrador" },
-  { value: "domicilio", label: "Domicilio" }
-];
+import { IClientBU } from "@/types/commerce/ICommerce";
 
 interface ICanalSelectProps {
   value: string;
   onChange: (value: string) => void;
+  options: IClientBU[];
+  disabled?: boolean;
 }
 
-function CanalSelect({ value, onChange }: ICanalSelectProps) {
+function CanalSelect({ value, onChange, options, disabled = false }: ICanalSelectProps) {
   return (
     <div className="relative">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none px-4 py-3 pr-10 border border-[#DDDDDD] rounded-lg text-sm bg-[#F7F7F7] focus:outline-none hover:border-[#141414] cursor-pointer transition-colors"
+        disabled={disabled}
+        className="w-full appearance-none px-4 py-3 pr-10 border border-[#DDDDDD] rounded-lg text-sm bg-[#F7F7F7] focus:outline-none hover:border-[#141414] cursor-pointer transition-colors disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:border-[#DDDDDD]"
         style={{ color: value ? "#141414" : "#999999" }}
       >
         <option value="">Seleccionar canal</option>
-        {CANAL_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value} className="text-[#141414]">
-            {o.label}
+        {options.map((o) => (
+          <option key={o.internal_code} value={o.internal_code} className="text-[#141414]">
+            {o.bu_name}
           </option>
         ))}
       </select>

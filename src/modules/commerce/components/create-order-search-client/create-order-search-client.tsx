@@ -79,27 +79,36 @@ const CreateOrderSearchClient: FC = () => {
     fetchClients();
   }, [projectId]);
 
-  // Fetch the selected client's addresses
+  // Fetch addresses for the selected channel (canal = client_bu.internal_code).
   useEffect(() => {
-    if (!selectedClient?.client_id) {
+    if (!canal) {
       setAddresses([]);
       return;
     }
+    let cancelled = false;
     const fetchAddresses = async () => {
       try {
-        const resp = await getAdresses(selectedClient.client_id);
-        setAddresses(resp.otherAddresses ?? []);
+        const resp = await getAdresses(canal);
+        if (!cancelled) setAddresses(resp.otherAddresses ?? []);
       } catch (error) {
         console.error(error);
-        setAddresses([]);
+        if (!cancelled) setAddresses([]);
       }
     };
     fetchAddresses();
-  }, [selectedClient?.client_id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [canal]);
 
   const handleSelectClient = (c: IEcommerceClient) => {
     setSelectedClient(c);
     setCanal("");
+    setSelectedAddress(null);
+  };
+
+  const handleSelectCanal = (value: string) => {
+    setCanal(value);
     setSelectedAddress(null);
   };
 
@@ -208,7 +217,17 @@ const CreateOrderSearchClient: FC = () => {
           {/* Canal */}
           <div>
             <p className="text-sm font-medium text-[#141414] mb-2">Canal</p>
-            <CanalSelect value={canal} onChange={setCanal} />
+            <CanalSelect
+              value={canal}
+              onChange={handleSelectCanal}
+              options={selectedClient?.client_bu ?? []}
+              disabled={!selectedClient || (selectedClient.client_bu?.length ?? 0) === 0}
+            />
+            {selectedClient && (selectedClient.client_bu?.length ?? 0) === 0 && (
+              <p className="text-xs text-[#999999] mt-1.5">
+                Este cliente no tiene canales disponibles
+              </p>
+            )}
           </div>
 
           {/* Dirección */}
@@ -219,6 +238,7 @@ const CreateOrderSearchClient: FC = () => {
               selected={selectedAddress}
               onSelect={setSelectedAddress}
               onCreateNew={() => setAddressModalOpen(true)}
+              disabled={!canal}
             />
           </div>
 
