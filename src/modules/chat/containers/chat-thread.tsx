@@ -202,7 +202,7 @@ export default function ChatThread({
   }, [channel]);
 
   const handleSendTemplate = async (templateId: string) => {
-    if (!conversation.customerCashportUUID || !conversation.phoneNumber) {
+    if (!conversation.customerCashportUUID && !conversation.phoneNumber) {
       toast({
         title: "Datos insuficientes",
         description: "No se pudo enviar la plantilla porque faltan datos del cliente.",
