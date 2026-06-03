@@ -62,7 +62,8 @@ export function DataExplorationCard() {
         client_name: client.client_name,
         country: client.dates[0]?.rows[0]?.country ?? "",
         days,
-        total: client.totals.total_registros,
+        total: client.totals.units_haleon,
+        totalRegistros: client.totals.total_registros,
         totalNovedades: client.totals.novedades,
         lastMonth: client.last_month
       };
@@ -250,7 +251,9 @@ export function DataExplorationCard() {
             ) : (
               rows.map((row, idx) => {
                 const novedadesPct =
-                  row.total > 0 ? Math.round((row.totalNovedades / row.total) * 100) : 0;
+                  row.totalRegistros > 0
+                    ? Math.round((row.totalNovedades / row.totalRegistros) * 100)
+                    : 0;
                 return (
                   <tr
                     key={`${row.id_client}-${idx}`}

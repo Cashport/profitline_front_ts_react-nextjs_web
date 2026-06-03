@@ -210,6 +210,6 @@ export interface IDigitalRecordFile {
 
 export interface ITemplateRequest {
   templateId: string;
-  clientUuid: string;
+  clientUuid?: string;
   destinationNumber: [string];
 }
