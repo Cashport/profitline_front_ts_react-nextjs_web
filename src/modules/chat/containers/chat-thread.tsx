@@ -213,7 +213,7 @@ export default function ChatThread({
     try {
       await sendTemplate({
         templateId,
-        clientUuid: conversation.customerCashportUUID,
+        clientUuid: conversation.customerCashportUUID || undefined,
         destinationNumber: [conversation.phoneNumber]
       });
       setTemplateOpen(false);
