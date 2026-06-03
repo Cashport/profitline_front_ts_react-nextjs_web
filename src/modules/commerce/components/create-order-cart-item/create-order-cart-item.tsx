@@ -42,7 +42,6 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
           productDiscountItem.price_taxes ||
           productDiscountItem.price
         : discountSource?.new_price || productDiscountItem.price;
-      console.log("discountSource", discountSource);
       const productDiscountData = productDiscount
         ? {
             discountPercentage: discountSource?.discount_applied?.discount,
