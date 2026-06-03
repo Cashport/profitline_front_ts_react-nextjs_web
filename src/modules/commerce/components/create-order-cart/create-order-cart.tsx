@@ -31,7 +31,7 @@ import { computeComplementRequirements } from "../../utils/complementCalculation
 import { ISelectedCategories } from "../../containers/create-order/create-order";
 
 import { ISelectType } from "@/types/clients/IClients";
-import { ISelectedProduct } from "@/types/commerce/ICommerce";
+import { Discount, DiscountItem, ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-cart.module.scss";
 export interface selectClientForm {
@@ -489,27 +489,15 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 <p>SKUs: {category.products.length}</p>
               </Flex>
               {category.products.map((product) => {
-                const productDiscount = appliedDiscounts?.find(
+                const productsDiscount: DiscountItem[] = appliedDiscounts?.filter(
                   (discount: any) => discount.product_sku === product.SKU
-                )?.discount;
-                const discountSource = productDiscount?.primary ?? productDiscount?.secondary;
-                const subtotal = config?.include_iva
-                  ? discountSource?.new_price_taxes || discountSource?.new_price
-                  : discountSource?.new_price;
-
-                const productDiscountData =
-                  productDiscount && productDiscount.subtotalDiscount > 0
-                    ? {
-                        discountPercentage: discountSource?.discount_applied?.discount,
-                        subtotal
-                      }
-                    : undefined;
+                );
                 return (
                   <CreateOrderItem
                     key={`${product.id}-${product.SKU}`}
                     product={product}
                     categoryName={category.category}
-                    productDiscount={productDiscountData}
+                    productsDiscount={productsDiscount}
                   />
                 );
               })}
