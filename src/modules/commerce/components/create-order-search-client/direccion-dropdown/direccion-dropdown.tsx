@@ -9,6 +9,7 @@ interface IDireccionDropdownProps {
   selected: ISelectedAddress | null;
   onSelect: (a: ISelectedAddress) => void;
   onCreateNew: () => void;
+  disabled?: boolean;
 }
 
 // ── Dirección dropdown (real addresses + "Nueva dirección" -> AntD modal) ──
@@ -16,16 +17,21 @@ function DireccionDropdown({
   addresses,
   selected,
   onSelect,
-  onCreateNew
+  onCreateNew,
+  disabled = false
 }: IDireccionDropdownProps) {
   const [open, setOpen] = useState(false);
+
+  // Collapse the menu if it was open before becoming disabled (e.g. canal cleared).
+  const isOpen = open && !disabled;
 
   return (
     <div className="relative">
       <button
         type="button"
+        disabled={disabled}
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg text-sm text-left transition-colors hover:border-[#141414] focus:outline-none"
+        className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg text-sm text-left transition-colors hover:border-[#141414] focus:outline-none disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:border-[#DDDDDD]"
       >
         <div className="flex items-center gap-2 min-w-0">
           <MapPin size={14} className="text-[#999999] flex-shrink-0" />
@@ -40,11 +46,11 @@ function DireccionDropdown({
         </div>
         <ChevronDown
           size={16}
-          className={`text-[#666666] transition-transform flex-shrink-0 ml-2 ${open ? "rotate-180" : ""}`}
+          className={`text-[#666666] transition-transform flex-shrink-0 ml-2 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
-      {open && (
+      {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#DDDDDD] rounded-lg shadow-lg z-20 overflow-hidden">
@@ -66,7 +72,8 @@ function DireccionDropdown({
                             id: d.id,
                             city: d.city,
                             dispatch_address: d.address,
-                            email: d.email
+                            email: d.email,
+                            warehouse: d.warehouse
                           });
                           setOpen(false);
                         }}

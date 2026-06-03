@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useContext, useEffect, useState } from "react";
-import { message } from "antd";
+import { message, Spin } from "antd";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -12,10 +12,11 @@ import {
 } from "@/modules/cetaphil/components/registration-dialog";
 import { getAdresses, getClients, registerNewClient } from "@/services/commerce/commerce";
 import { getDocumentTypeId } from "@/constants/documentTypes";
-import { ICommerceAdresses, IShippingInformation } from "@/types/commerce/ICommerce";
+import { ICommerceAdresses, IEcommerceClient, IShippingInformation } from "@/types/commerce/ICommerce";
 import { useAppStore } from "@/lib/store/store";
+import { useClientSummary } from "@/modules/commerce/hooks/create-order/useClientSummary";
 
-import { IClientOption, ISelectedAddress } from "./types";
+import { ISelectedAddress } from "./types";
 import ClienteDropdown from "./cliente-dropdown";
 import CanalSelect from "./canal-select";
 import DireccionDropdown from "./direccion-dropdown";
@@ -34,16 +35,21 @@ export interface ISelectClientForm {
 }
 
 const CreateOrderSearchClient: FC = () => {
-  const { setClient, setShippingInfo } = useContext(OrderViewContext);
+  const { setClient, setShippingInfo, setChannelCode } = useContext(OrderViewContext);
   const { config, projectId } = useAppStore((state) => ({
     config: state.config,
     projectId: state.selectedProject?.ID
   }));
 
   const [clientsLoading, setClientsLoading] = useState(false);
-  const [clientOptions, setClientOptions] = useState<IClientOption[]>([]);
+  const [clientOptions, setClientOptions] = useState<IEcommerceClient[]>([]);
 
-  const [selectedClient, setSelectedClient] = useState<IClientOption | null>(null);
+  const [selectedClient, setSelectedClient] = useState<IEcommerceClient | null>(null);
+
+  const { data: clientSummary, isLoading: summaryLoading } = useClientSummary(
+    selectedClient?.client_id
+  );
+
   const [canal, setCanal] = useState("");
   const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<ISelectedAddress | null>(null);
@@ -62,14 +68,7 @@ const CreateOrderSearchClient: FC = () => {
       setClientsLoading(true);
       try {
         const response = await getClients(projectId);
-        setClientOptions(
-          (response?.data || []).map((c) => ({
-            value: c.client_id,
-            label: c.client_name,
-            email: c.client_email,
-            payment_type: c.payment_type
-          }))
-        );
+        setClientOptions(response?.data || []);
       } catch (error) {
         console.error("Error fetching clients:", error);
         setClientOptions([]);
@@ -80,27 +79,36 @@ const CreateOrderSearchClient: FC = () => {
     fetchClients();
   }, [projectId]);
 
-  // Fetch the selected client's addresses
+  // Fetch addresses for the selected channel (canal = client_bu.internal_code).
   useEffect(() => {
-    if (!selectedClient?.value) {
+    if (!canal) {
       setAddresses([]);
       return;
     }
+    let cancelled = false;
     const fetchAddresses = async () => {
       try {
-        const resp = await getAdresses(selectedClient.value);
-        setAddresses(resp.otherAddresses ?? []);
+        const resp = await getAdresses(canal);
+        if (!cancelled) setAddresses(resp.otherAddresses ?? []);
       } catch (error) {
         console.error(error);
-        setAddresses([]);
+        if (!cancelled) setAddresses([]);
       }
     };
     fetchAddresses();
-  }, [selectedClient?.value]);
+    return () => {
+      cancelled = true;
+    };
+  }, [canal]);
 
-  const handleSelectClient = (c: IClientOption) => {
+  const handleSelectClient = (c: IEcommerceClient) => {
     setSelectedClient(c);
     setCanal("");
+    setSelectedAddress(null);
+  };
+
+  const handleSelectCanal = (value: string) => {
+    setCanal(value);
     setSelectedAddress(null);
   };
 
@@ -132,10 +140,11 @@ const CreateOrderSearchClient: FC = () => {
       const responseNewClient = await registerNewClient(guestData);
       // Set as the locally selected client so canal/address can still be collected.
       handleSelectClient({
-        label: responseNewClient.name,
-        value: responseNewClient.document,
-        email: responseNewClient.email,
-        payment_type: 1
+        client_id: responseNewClient.document,
+        client_name: responseNewClient.name,
+        client_email: responseNewClient.email,
+        payment_type: 1,
+        client_bu: []
       });
 
       message.success("Cliente registrado exitosamente");
@@ -158,16 +167,17 @@ const CreateOrderSearchClient: FC = () => {
       address: selectedAddress.dispatch_address,
       city: selectedAddress.city,
       dispatch_address: selectedAddress.dispatch_address,
-      email: selectedClient.email || selectedAddress.email || "",
+      email: selectedClient.client_email || selectedAddress.email || "",
       phone_number: "",
       comments: ""
     };
 
+    setChannelCode(canal);
     setShippingInfo(shipping);
     setClient({
-      name: selectedClient.label,
-      id: selectedClient.value,
-      email: selectedClient.email,
+      name: selectedClient.client_name,
+      id: selectedClient.client_id,
+      email: selectedClient.client_email,
       payment_type: selectedClient.payment_type
     });
   };
@@ -208,7 +218,17 @@ const CreateOrderSearchClient: FC = () => {
           {/* Canal */}
           <div>
             <p className="text-sm font-medium text-[#141414] mb-2">Canal</p>
-            <CanalSelect value={canal} onChange={setCanal} />
+            <CanalSelect
+              value={canal}
+              onChange={handleSelectCanal}
+              options={selectedClient?.client_bu ?? []}
+              disabled={!selectedClient || (selectedClient.client_bu?.length ?? 0) === 0}
+            />
+            {selectedClient && (selectedClient.client_bu?.length ?? 0) === 0 && (
+              <p className="text-xs text-[#999999] mt-1.5">
+                Este cliente no tiene canales disponibles
+              </p>
+            )}
           </div>
 
           {/* Dirección */}
@@ -219,10 +239,15 @@ const CreateOrderSearchClient: FC = () => {
               selected={selectedAddress}
               onSelect={setSelectedAddress}
               onCreateNew={() => setAddressModalOpen(true)}
+              disabled={!canal}
             />
           </div>
 
-          <p className="text-sm text-[#999999] text-right">Bodega MEDELLIN</p>
+          {selectedAddress?.warehouse && (
+            <p className="text-sm text-[#999999] text-right">
+              Bodega {selectedAddress.warehouse}
+            </p>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-[#EEEEEE] flex items-center gap-3 flex-shrink-0">
@@ -247,14 +272,26 @@ const CreateOrderSearchClient: FC = () => {
 
       {/* ── Derecha: cards (display) ──────────────────────────────────── */}
       <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-y-auto">
-        {selectedClient ? (
+        {!selectedClient ? (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+          </div>
+        ) : summaryLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Spin size="large" />
+          </div>
+        ) : clientSummary ? (
           <>
-            <SelectedClientCard client={selectedClient} address={selectedAddress} />
-            <CarteraCard />
+            <SelectedClientCard
+              client={selectedClient}
+              address={selectedAddress}
+              nit={clientSummary.client.nit}
+            />
+            <CarteraCard cartera={clientSummary.cartera} cupo={clientSummary.cupo} />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-[#999999]">Selecciona un cliente para ver su información</p>
+            <p className="text-sm text-[#999999]">No hay información del cliente</p>
           </div>
         )}
       </div>

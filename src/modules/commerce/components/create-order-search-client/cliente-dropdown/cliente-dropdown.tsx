@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
 
-import { IClientOption } from "../types";
+import { IEcommerceClient } from "@/types/commerce/ICommerce";
 
 interface IClienteDropdownProps {
-  options: IClientOption[];
+  options: IEcommerceClient[];
   loading: boolean;
-  selected: IClientOption | null;
-  onSelect: (c: IClientOption) => void;
+  selected: IEcommerceClient | null;
+  onSelect: (c: IEcommerceClient) => void;
 }
 
 // ── Cliente dropdown (real clients via getClients) ─────────────────────────
 function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropdownProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const filtered = options.filter((c) => c.label.toLowerCase().includes(search.toLowerCase()));
+  const filtered = options.filter((c) =>
+    c.client_name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="relative">
@@ -24,7 +26,7 @@ function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropd
         className="w-full flex items-center justify-between px-4 py-3 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg text-sm text-left transition-colors hover:border-[#141414] focus:outline-none"
       >
         <span className={selected ? "text-[#141414] truncate" : "text-[#999999]"}>
-          {selected ? selected.label : "Seleccione un cliente"}
+          {selected ? selected.client_name : "Seleccione un cliente"}
         </span>
         <ChevronDown
           size={16}
@@ -60,17 +62,17 @@ function ClienteDropdown({ options, loading, selected, onSelect }: IClienteDropd
                 <li className="px-4 py-3 text-sm text-[#999999] text-center">Sin resultados</li>
               ) : (
                 filtered.map((c) => (
-                  <li key={c.value}>
+                  <li key={c.client_id}>
                     <button
                       type="button"
-                      className={`w-full text-left px-4 py-3 hover:bg-[#F7F7F7] transition-colors ${selected?.value === c.value ? "bg-[#F7F7F7]" : ""}`}
+                      className={`w-full text-left px-4 py-3 hover:bg-[#F7F7F7] transition-colors ${selected?.client_id === c.client_id ? "bg-[#F7F7F7]" : ""}`}
                       onClick={() => {
                         onSelect(c);
                         setOpen(false);
                         setSearch("");
                       }}
                     >
-                      <p className="text-sm font-medium text-[#141414]">{c.label}</p>
+                      <p className="text-sm font-medium text-[#141414]">{c.client_name}</p>
                     </button>
                   </li>
                 ))

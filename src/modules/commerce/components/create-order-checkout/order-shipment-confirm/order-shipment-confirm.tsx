@@ -70,8 +70,15 @@ export default function OrderShipmentConfirm({
   loadingFinish,
   loadingDraft
 }: OrderShipmentConfirmProps) {
-  const { client, confirmOrderData, setOrderSplitDetails, shippingInfo, selectedDiscount, bonus } =
-    useContext(OrderViewContext);
+  const {
+    client,
+    confirmOrderData,
+    setOrderSplitDetails,
+    shippingInfo,
+    selectedDiscount,
+    bonus,
+    channelCode
+  } = useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
 
@@ -134,12 +141,14 @@ export default function OrderShipmentConfirm({
     otherBonusCantidades: {}
   });
 
-  // Fetch client addresses + saved phone
+  // Fetch addresses + saved phone by channel internal_code; fall back to client id
+  // for draft/guest flows that never selected a channel.
   useEffect(() => {
-    if (!client?.id) return;
+    const addressCode = channelCode || client?.id;
+    if (!addressCode) return;
     (async () => {
       try {
-        const resp = await getAdressesAndNumber(client.id);
+        const resp = await getAdressesAndNumber(addressCode);
         setAddresses(resp.otherAddresses ?? []);
         if (resp.phone) {
           setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone }));
@@ -150,7 +159,7 @@ export default function OrderShipmentConfirm({
         setAddressesFetched(true);
       }
     })();
-  }, [client?.id]);
+  }, [channelCode, client?.id]);
 
   // Default email from client
   useEffect(() => {
