@@ -7,6 +7,7 @@ import { Textarea } from "@/modules/chat/ui/textarea";
 import { Input } from "@/modules/chat/ui/input";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Modal, Spin } from "antd";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { getWhatsAppTemplates } from "@/services/chat/chat";
 import { IWhatsAppTemplate } from "@/types/chat/IChat";
 
@@ -45,6 +46,7 @@ export default function TemplateDialog({
   loading = false
 }: Props) {
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
+  const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
@@ -62,22 +64,58 @@ export default function TemplateDialog({
     }
   }, [channel]);
 
+  // Limpiar búsqueda al cerrar el diálogo o cambiar de canal
+  useEffect(() => {
+    if (!open) setSearch("");
+  }, [open, channel]);
+
+  const q = search.trim().toLowerCase();
+
+  const getBodyText = (tpl: IWhatsAppTemplate) =>
+    tpl.components.find((c: any) => c.type === "BODY")?.text ?? "";
+
+  const filteredWaTemplates = waTemplates.filter(
+    (tpl) =>
+      q === "" ||
+      tpl.id.toLowerCase().includes(q) ||
+      getBodyText(tpl).toLowerCase().includes(q)
+  );
+
+  const filteredEmailTemplates = emailTemplates.filter(
+    (tpl) =>
+      q === "" ||
+      tpl.name.toLowerCase().includes(q) ||
+      tpl.subject.toLowerCase().includes(q) ||
+      tpl.body.toLowerCase().includes(q)
+  );
+
   return (
     <Modal
       open={open}
       onCancel={() => onOpenChange(false)}
       footer={null}
       width="60%"
+      centered
       title={`Plantillas de ${channel === "whatsapp" ? "WhatsApp" : "Correo"}`}
+      styles={{
+        content: { display: "flex", flexDirection: "column", maxHeight: "85vh" },
+        body: {
+          flex: "1 1 auto",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden"
+        }
+      }}
     >
-      <div className="relative">
+      <div className="relative flex flex-1 flex-col min-h-0">
         {loading && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 rounded-lg">
             <Spin size="large" />
           </div>
         )}
 
-        <Tabs defaultValue="usar" className="w-full">
+        <Tabs defaultValue="usar" className="w-full flex-1 min-h-0">
           <TabsList className="grid w-full grid-cols-2 bg-[#F7F7F7]">
             <TabsTrigger value="usar">Usar</TabsTrigger>
             <TabsTrigger disabled value="crear">
@@ -85,10 +123,24 @@ export default function TemplateDialog({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="usar" className="space-y-4 pt-4">
+          <TabsContent value="usar" className="space-y-4 pt-4 flex flex-col min-h-0">
+            <div className="relative">
+              <MagnifyingGlass className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar plantilla por id o contenido..."
+                className="w-full bg-[#F7F7F7] pl-8"
+                style={{ borderColor: "#DDDDDD" }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
             {channel === "whatsapp" ? (
-              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-                {waTemplates.map((tpl) => {
+              <div className="space-y-3 flex-1 min-h-0 overflow-y-auto">
+                {filteredWaTemplates.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-[#606060]">Sin resultados</div>
+                ) : null}
+                {filteredWaTemplates.map((tpl) => {
                   // Tomamos solo el componente BODY para mostrar en preview
                   const components = tpl.components;
                   const bodyComponent = components.find((c: any) => c.type === "BODY");
@@ -128,8 +180,11 @@ export default function TemplateDialog({
                 })}
               </div>
             ) : (
-              <div className="space-y-3 max-h-[70vh] overflow-y-auto">
-                {emailTemplates.map((tpl) => (
+              <div className="space-y-3 flex-1 min-h-0 overflow-y-auto">
+                {filteredEmailTemplates.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-[#606060]">Sin resultados</div>
+                ) : null}
+                {filteredEmailTemplates.map((tpl) => (
                   <div
                     key={tpl.id}
                     className="w-full rounded-lg border p-4"
@@ -164,7 +219,7 @@ export default function TemplateDialog({
             )}
           </TabsContent>
 
-          <TabsContent value="crear" className="space-y-3 pt-4">
+          <TabsContent value="crear" className="space-y-3 pt-4 min-h-0 overflow-y-auto">
             <Input
               placeholder="Nombre de la plantilla"
               value={name}
