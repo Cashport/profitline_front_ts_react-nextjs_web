@@ -15,7 +15,7 @@ import { Input } from "@/modules/chat/ui/input";
 import type { Conversation } from "@/modules/chat/lib/mock-data";
 import { IMessage } from "@/types/chat/IChat";
 import { useToast } from "@/modules/chat/hooks/use-toast";
-import { message as messageApi } from "antd";
+import { Image as AntImage, message as messageApi } from "antd";
 
 type FileItem = { url: string; name: string; size: number };
 
@@ -50,7 +50,18 @@ export default function ChatFooter({
   // WhatsApp state
   const [message, setMessage] = useState("");
   const [isSendingWA, setIsSendingWA] = useState(false);
+  const [pastedImage, setPastedImage] = useState<{
+    url: string;
+    name: string;
+    size: number;
+    file: File;
+  } | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const waFileInputRef = useRef<HTMLInputElement | null>(null);
+  // Object URLs created for WhatsApp previews; revoked on unmount. We keep URLs
+  // alive after sending so the optimistic IMAGE bubble can use them until the
+  // refetch swaps in the real media URL.
+  const objectUrlsRef = useRef<string[]>([]);
 
   // Email state
   const [subject, setSubject] = useState("");
@@ -76,6 +87,7 @@ export default function ChatFooter({
     return () => {
       emailImages.forEach((i) => URL.revokeObjectURL(i.url));
       emailFiles.forEach((f) => URL.revokeObjectURL(f.url));
+      objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,7 +95,7 @@ export default function ChatFooter({
   // --- WhatsApp handlers ---
   async function sendWhatsapp() {
     const text = message.trim();
-    if (!text) return;
+    if (!text && !pastedImage) return;
     const to = normalizePhoneForWA(conversation.phone || "");
     if (!to) {
       toast({
@@ -95,19 +107,35 @@ export default function ChatFooter({
     }
     try {
       setIsSendingWA(true);
-      await sendMessage(conversation.customerId, text);
-      setMessage("");
+
+      // A pasted image is sent as a WhatsApp image-with-caption message (the
+      // typed text becomes the caption); text-only goes through sendMessage.
+      if (pastedImage) {
+        await sendAttahcment({
+          customerId: conversation.customerId,
+          caption: text,
+          file: pastedImage.file
+        });
+      } else {
+        await sendMessage(conversation.customerId, text);
+      }
 
       const tempMessage: IMessage = {
         id: `temp_${Date.now()}_${Math.random()}`,
         content: text,
-        type: "TEXT",
+        type: pastedImage ? "IMAGE" : "TEXT",
         direction: "OUTBOUND",
         status: "SENT",
         timestamp: new Date().toISOString(),
-        mediaUrl: null,
+        mediaUrl: pastedImage ? pastedImage.url : null,
         metadata: {}
       };
+
+      // Clear inputs; the pasted URL stays in objectUrlsRef so the optimistic
+      // bubble keeps rendering until the refetch replaces it with the real URL.
+      setMessage("");
+      setPastedImage(null);
+      setPreviewOpen(false);
 
       mutate((currentData) => {
         if (!currentData) return currentData;
@@ -145,6 +173,50 @@ export default function ChatFooter({
     } catch {
       messageApi.error("Error al enviar el archivo");
     }
+  }
+
+  // Capture an image pasted from the clipboard (e.g. a screenshot) and show a preview
+  function onPasteWA(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const imageItem = items.find((it) => it.type.startsWith("image/"));
+    if (!imageItem) return;
+
+    e.preventDefault();
+    const file = imageItem.getAsFile();
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      messageApi.error("La imagen supera el límite de 5 MB de WhatsApp");
+      return;
+    }
+
+    const ext = file.type.split("/")[1] || "png";
+    const named =
+      file.name && file.name.trim()
+        ? file
+        : new globalThis.File([file], `pasted-${Date.now()}.${ext}`, { type: file.type });
+
+    const url = URL.createObjectURL(named);
+    objectUrlsRef.current.push(url);
+
+    setPastedImage((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev.url);
+        objectUrlsRef.current = objectUrlsRef.current.filter((u) => u !== prev.url);
+      }
+      return { url, name: named.name, size: named.size, file: named };
+    });
+  }
+
+  function removePastedImage() {
+    setPreviewOpen(false);
+    setPastedImage((prev) => {
+      if (prev) {
+        URL.revokeObjectURL(prev.url);
+        objectUrlsRef.current = objectUrlsRef.current.filter((u) => u !== prev.url);
+      }
+      return null;
+    });
   }
 
   // --- Email handlers ---
@@ -215,53 +287,101 @@ export default function ChatFooter({
 
   if (channel === "whatsapp") {
     return (
-      <div className="flex items-end gap-2 p-3">
-        <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
+      <div className="p-3">
+        {pastedImage && (
+          <div className="mb-2 flex">
+            <div
+              className="relative h-20 w-20 overflow-hidden rounded-md border"
+              style={{ borderColor: "#DDDDDD" }}
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(true)}
+                className="relative block h-full w-full cursor-pointer"
+                aria-label="Ver imagen pegada"
+              >
+                <Image
+                  src={pastedImage.url || "/placeholder.svg"}
+                  alt={"Imagen pegada " + pastedImage.name}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              </button>
+              <button
+                onClick={removePastedImage}
+                className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white z-10"
+                aria-label="Quitar imagen pegada"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 shrink-0 text-muted-foreground"
-          aria-label="Plantillas"
-          onClick={() => setTemplateOpen(true)}
-        >
-          <File className="h-5 w-5" />
-        </Button>
+        <div className="flex items-end gap-2">
+          <input ref={waFileInputRef} type="file" className="hidden" onChange={onPickWAFile} />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 shrink-0 text-muted-foreground"
-          aria-label="Adjuntar archivo"
-          onClick={() => waFileInputRef.current?.click()}
-        >
-          <Paperclip className="h-5 w-5" />
-        </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 shrink-0 text-muted-foreground"
+            aria-label="Plantillas"
+            onClick={() => setTemplateOpen(true)}
+          >
+            <File className="h-5 w-5" />
+          </Button>
 
-        <textarea
-          ref={messageTextareaRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          rows={1}
-          className="flex-1 resize-none rounded-[20px] border border-[#DDDDDD] bg-white px-4 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-0"
-          style={{ overflowY: "hidden" }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              sendWhatsapp();
-            }
-          }}
-        />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 shrink-0 text-muted-foreground"
+            aria-label="Adjuntar archivo"
+            onClick={() => waFileInputRef.current?.click()}
+          >
+            <Paperclip className="h-5 w-5" />
+          </Button>
 
-        <button
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#909090] text-white disabled:opacity-50"
-          onClick={sendWhatsapp}
-          disabled={isSendingWA || !message.trim()}
-          aria-label="Enviar mensaje"
-        >
-          <PaperPlaneTilt className="h-4 w-4" />
-        </button>
+          <textarea
+            ref={messageTextareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onPaste={onPasteWA}
+            placeholder="Escribe un mensaje..."
+            rows={1}
+            className="flex-1 resize-none rounded-[20px] border border-[#DDDDDD] bg-white px-4 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-0"
+            style={{ overflowY: "hidden" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendWhatsapp();
+              }
+            }}
+          />
+
+          <button
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#909090] text-white disabled:opacity-50"
+            onClick={sendWhatsapp}
+            disabled={isSendingWA || (!message.trim() && !pastedImage)}
+            aria-label="Enviar mensaje"
+          >
+            <PaperPlaneTilt className="h-4 w-4" />
+          </button>
+        </div>
+
+        {pastedImage && previewOpen && (
+          <AntImage
+            style={{ display: "none" }}
+            src={pastedImage.url}
+            preview={{
+              visible: true,
+              src: pastedImage.url,
+              onVisibleChange: (v) => {
+                if (!v) setPreviewOpen(false);
+              }
+            }}
+          />
+        )}
       </div>
     );
   }
