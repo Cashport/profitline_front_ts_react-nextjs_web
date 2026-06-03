@@ -108,16 +108,23 @@ const ClientDetailsLayout: FC<ClientDetailsLayoutProps> = ({ children }) => {
             <Flex vertical className={styles.containerDetailClient}>
               <Flex className={styles.stickyHeader} align="center" justify="space-between">
                 <Flex className={styles.infoHeader} align="center" justify="space-between">
-                  <Link href={`/clientes/all`}>
-                    <Button
-                      type="text"
-                      size="large"
-                      className={styles.buttonGoBack}
-                      icon={<CaretLeft size={"1.6rem"} />}
-                    >
-                      {portfolioData ? portfolioData?.data_wallet?.client_name : "Loading..."}
-                    </Button>
-                  </Link>
+                  <Flex align="center" gap={4}>
+                    <Link href={`/clientes/all`}>
+                      <Button
+                        type="text"
+                        size="large"
+                        className={styles.buttonGoBack}
+                        icon={<CaretLeft size={"1.6rem"} />}
+                      >
+                        {portfolioData ? portfolioData?.data_wallet?.client_name : "Loading..."}
+                      </Button>
+                    </Link>
+                    {portfolioData && (
+                      <span className={styles.clientId}>
+                        {portfolioData?.data_wallet?.client_id}
+                      </span>
+                    )}
+                  </Flex>
                   <FilterClientPortfolio setSelectedFilters={setFilters} />
                 </Flex>
               </Flex>
