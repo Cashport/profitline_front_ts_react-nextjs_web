@@ -358,6 +358,7 @@ export interface IOrderData {
 
 export interface IOrder {
   order_status: string;
+  order_status_id: number;
   rgb: string;
   id: number;
   operation_number: number;
@@ -374,6 +375,7 @@ export interface IOrder {
   files: string | null;
   notification_id: number | null;
   incident_id: number | null;
+  has_stock: number;
 }
 export interface IDraftOrder {
   id: number;

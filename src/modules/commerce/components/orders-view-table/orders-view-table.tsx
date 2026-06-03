@@ -292,7 +292,7 @@ const OrdersViewTable = ({
           }
         ];
 
-        if (row.incident_id !== null) {
+        if (row.incident_id !== null && row.order_status_id == 5) {
           items.push({
             key: "verNovedad",
             label: (
