@@ -12,7 +12,11 @@ import {
 } from "@/modules/cetaphil/components/registration-dialog";
 import { getAdresses, getClients, registerNewClient } from "@/services/commerce/commerce";
 import { getDocumentTypeId } from "@/constants/documentTypes";
-import { ICommerceAdresses, IEcommerceClient, IShippingInformation } from "@/types/commerce/ICommerce";
+import {
+  ICommerceAdresses,
+  IEcommerceClient,
+  IShippingInformation
+} from "@/types/commerce/ICommerce";
 import { useAppStore } from "@/lib/store/store";
 import { useClientSummary } from "@/modules/commerce/hooks/create-order/useClientSummary";
 
@@ -103,7 +107,9 @@ const CreateOrderSearchClient: FC = () => {
 
   const handleSelectClient = (c: IEcommerceClient) => {
     setSelectedClient(c);
-    setCanal("");
+    const channelOptions = c.client_bu ?? [];
+    // Auto-select the channel when the client has exactly one available.
+    setCanal(channelOptions.length === 1 ? channelOptions[0].internal_code : "");
     setSelectedAddress(null);
   };
 
@@ -244,9 +250,7 @@ const CreateOrderSearchClient: FC = () => {
           </div>
 
           {selectedAddress?.warehouse && (
-            <p className="text-sm text-[#999999] text-right">
-              Bodega {selectedAddress.warehouse}
-            </p>
+            <p className="text-sm text-[#999999] text-right">Bodega {selectedAddress.warehouse}</p>
           )}
         </div>
 
