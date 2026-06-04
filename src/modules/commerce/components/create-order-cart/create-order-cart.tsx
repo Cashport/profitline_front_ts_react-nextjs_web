@@ -183,9 +183,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     };
   }, [selectedCategories]);
 
-  const handleContinuePurchase = () => {
+  const handleContinuePurchase = (options?: { skipOddSBVital?: boolean }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
-      if (hasOddSBVital) {
+      if (!options?.skipOddSBVital && hasOddSBVital) {
         setShowOddSBVitalModal(true);
         return;
       }
@@ -231,6 +231,11 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     }
     setCheckingOut(true);
     onClose && onClose();
+  };
+
+  const handleConfirmOddSBVital = () => {
+    setShowOddSBVitalModal(false);
+    handleContinuePurchase({ skipOddSBVital: true });
   };
 
   const handleCloseModal = () => {
@@ -594,7 +599,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           </Flex>
 
           {!checkingOut && (
-            <PrincipalButton onClick={handleContinuePurchase}>Continuar compra</PrincipalButton>
+            <PrincipalButton onClick={() => handleContinuePurchase()}>
+              Continuar compra
+            </PrincipalButton>
           )}
         </div>
       )}
@@ -657,16 +664,17 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showOddSBVitalModal}
         onClose={handleCloseOddSBVitalModal}
-        title="No puedes continuar con la compra"
+        onOk={handleConfirmOddSBVital}
+        title="¿Está seguro que desea continuar?"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Skinboosters
+              Se va a cobrar la unidad impar de Skinboosters a precio full
             </p>
           </Flex>
         }
-        cancelText="Entendido"
-        hideOkButton
+        okText="Continuar"
+        cancelText="Cancelar"
       />
 
       <ModalConfirmAction
