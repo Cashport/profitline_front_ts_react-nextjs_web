@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 import { Flex, message, Modal } from "antd";
-import { FileArrowDown } from "@phosphor-icons/react";
+import { CheckCircle, FileArrowDown } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ModalActionsConfirmCompensation from "../modal-actions-confirm-compensation";
+import { useAppStore } from "@/lib/store/store";
 import {
+  approvePayment,
   changeStatusUploadERP,
   downloadPaymentsPlane
 } from "@/services/banksPayments/banksPayments";
@@ -28,6 +30,10 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isCompensationOpen, setIsCompensationOpen] = useState(false);
+  const [isApproveOpen, setIsApproveOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+
+  const { ID } = useAppStore((state) => state.selectedProject);
 
   const handleDowloadPlane = async () => {
     if (!selectedRows?.length) {
@@ -50,6 +56,45 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
       message.error(error instanceof Error ? error.message : "Error al descargar el plano");
     } finally {
       hideLoading();
+    }
+  };
+
+  const handleApproveAssignmentOpen = () => {
+    if (!selectedRows?.length) {
+      message.warning("Selecciona al menos un pago");
+      return;
+    }
+
+    if (selectedRows.length > 1) {
+      const clientId = selectedRows[0].id_client;
+      if (!selectedRows.every((row) => row.id_client === clientId)) {
+        message.info("Solo puedes seleccionar pagos del mismo cliente para esta acción");
+        return;
+      }
+    }
+
+    onClose();
+    setIsApproveOpen(true);
+  };
+
+  const handleApproveAssignment = async () => {
+    if (!selectedRows?.length) return;
+
+    setIsApproving(true);
+    try {
+      await approvePayment({
+        payments: selectedRows.map((row) => row.id),
+        project_id: ID,
+        client_id: selectedRows[0].id_client || ""
+      });
+
+      message.success("Asignación aprobada correctamente");
+      setIsApproveOpen(false);
+      onSuccess?.();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al aprobar la asignación");
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -129,8 +174,21 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
             icon={<FileArrowDown size={16} />}
             title="Confirmar compensación"
           />
+          <ButtonGenerateAction
+            onClick={handleApproveAssignmentOpen}
+            icon={<CheckCircle size={16} />}
+            title="Aprobar asignación"
+          />
         </Flex>
       </Modal>
+      <ModalConfirmAction
+        isOpen={isApproveOpen}
+        onClose={() => setIsApproveOpen(false)}
+        onOk={handleApproveAssignment}
+        title="¿Está seguro de aprobar la asignación?"
+        okText="Aprobar"
+        okLoading={isApproving}
+      />
       <ModalConfirmAction
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
