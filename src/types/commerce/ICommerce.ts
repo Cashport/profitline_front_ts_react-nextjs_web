@@ -298,6 +298,7 @@ export interface ICommerceAdresses {
   id: number;
   warehouse_id: number;
   warehouse: string;
+  warehouse_description: string;
 }
 export interface ICommerceAddressesData {
   otherAddresses: ICommerceAdresses[];
