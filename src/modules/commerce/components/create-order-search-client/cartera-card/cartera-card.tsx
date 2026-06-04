@@ -8,8 +8,9 @@ interface ICarteraCardProps {
 
 function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
-  const cupoUsadoPct = Math.round(cupo.percentageUsed);
-  const cupoDisponiblePct = Math.round(cupo.availablePercentage);
+  const noQuota = cupo.availableQuota < 0;
+  const cupoUsadoPct = noQuota ? 0 : Math.round(cupo.percentageUsed);
+  const cupoDisponiblePct = noQuota ? 0 : Math.round(cupo.availablePercentage);
 
   return (
     <div className="bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
@@ -35,22 +36,24 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
           <div>
             <p className="text-[11px] text-[#999999] mb-0.5">Cupo total</p>
             <p className="text-sm font-bold text-[#141414]">
-              {formatMoney(cupo.totalQuota, { hideDecimals: true })}
+              {formatMoney(noQuota ? 0 : cupo.totalQuota, { hideDecimals: true })}
             </p>
           </div>
           <div className="text-right">
             <p className="text-[11px] text-[#999999] mb-0.5">Cupo disponible</p>
             <p className="text-sm font-bold text-[#141414]">
-              {formatMoney(cupo.availableQuota, { hideDecimals: true })}
+              {formatMoney(noQuota ? 0 : cupo.availableQuota, { hideDecimals: true })}
             </p>
           </div>
         </div>
         <div>
           <div className="h-2 bg-[#F0F0F0] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#CBE71E] rounded-full transition-all duration-500"
-              style={{ width: `${cupoDisponiblePct}%` }}
-            />
+            {!noQuota && (
+              <div
+                className="h-full bg-[#CBE71E] rounded-full transition-all duration-500"
+                style={{ width: `${cupoDisponiblePct}%` }}
+              />
+            )}
           </div>
           <div className="flex items-center justify-between mt-1.5">
             <p className="text-[10px] text-[#999999]">Usado: {cupoUsadoPct}%</p>
