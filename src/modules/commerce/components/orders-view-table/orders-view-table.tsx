@@ -260,52 +260,56 @@ const OrdersViewTable = ({
       width: 64,
       dataIndex: "",
       render: (_, row) => {
-        const items = [
-          {
-            key: "verBodega",
-            label: (
-              <Button
-                disabled={row.order_status === "Pedidos en proceso"}
-                icon={<WarningDiamond size={20} />}
-                className="buttonNoBorder"
-                onClick={() => {
-                  setSelectedOrder(row.id);
-                  setCurrentWarehouseId(row.warehouseid);
-                  setIsModalOpen(true);
-                }}
-              >
-                Ver bodega
-              </Button>
-            )
-          },
-          {
-            key: "detalle",
-            label: (
-              <Button
-                icon={<Eye size={20} />}
-                className="buttonNoBorder"
-                onClick={() => handleSeeDetail(row)}
-              >
-                Detalle
-              </Button>
-            )
-          }
-        ];
+        const isBlockedByWallet = row.order_status_id == 5;
 
-        if (row.incident_id !== null && row.order_status_id == 5) {
-          items.push({
-            key: "verNovedad",
-            label: (
-              <Button
-                icon={<WarningCircle size={20} />}
-                className="buttonNoBorder"
-                onClick={() => openModal("novelty", { noveltyId: row.incident_id as number })}
-              >
-                Ver novedad
-              </Button>
-            )
-          });
-        }
+        const items = isBlockedByWallet
+          ? row.incident_id !== null
+            ? [
+                {
+                  key: "verNovedad",
+                  label: (
+                    <Button
+                      icon={<WarningCircle size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => openModal("novelty", { noveltyId: row.incident_id as number })}
+                    >
+                      Ver novedad
+                    </Button>
+                  )
+                }
+              ]
+            : []
+          : [
+              {
+                key: "verBodega",
+                label: (
+                  <Button
+                    disabled={row.order_status === "Pedidos en proceso"}
+                    icon={<WarningDiamond size={20} />}
+                    className="buttonNoBorder"
+                    onClick={() => {
+                      setSelectedOrder(row.id);
+                      setCurrentWarehouseId(row.warehouseid);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    Ver bodega
+                  </Button>
+                )
+              },
+              {
+                key: "detalle",
+                label: (
+                  <Button
+                    icon={<Eye size={20} />}
+                    className="buttonNoBorder"
+                    onClick={() => handleSeeDetail(row)}
+                  >
+                    Detalle
+                  </Button>
+                )
+              }
+            ];
 
         const customDropdown = (menu: ReactNode) => (
           <div className="dropdownApplicationTable">{menu}</div>
