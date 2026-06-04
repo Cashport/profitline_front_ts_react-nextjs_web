@@ -37,18 +37,20 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       const productDiscount = productDiscountItem.discount;
       const discountSource = productDiscount?.primary;
       const subtotal = config?.include_iva
-        ? discountSource?.new_price_taxes ||
-          discountSource?.new_price ||
-          productDiscountItem.price_taxes ||
+        ? discountSource?.new_price_taxes ??
+          discountSource?.new_price ??
+          productDiscountItem.price_taxes ??
           productDiscountItem.price
-        : discountSource?.new_price || productDiscountItem.price;
-      const productDiscountData = productDiscount
-        ? {
-            discountPercentage: discountSource?.discount_applied?.discount,
-            subtotal,
-            qty: productDiscountItem.quantity
-          }
-        : undefined;
+        : discountSource?.new_price ?? productDiscountItem.price;
+      const discountPercentage = discountSource?.discount_applied?.discount;
+      const productDiscountData =
+        (discountPercentage ?? 0) > 0
+          ? {
+              discountPercentage,
+              subtotal,
+              qty: productDiscountItem.quantity
+            }
+          : undefined;
       if (productDiscountData) {
         discountData.push(productDiscountData);
       }
