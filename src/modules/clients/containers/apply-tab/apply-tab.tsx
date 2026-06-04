@@ -246,7 +246,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   const filteredData = useMemo(() => {
-    if (!applicationData) return { invoices: [], payments: [], discounts: [] };
+    if (!applicationData) return { invoices: [], payments: [], discounts: [], balances: [] };
 
     const filteredInvoices = applicationData.invoices.filter((invoice) =>
       invoice?.id_erp?.toString().toLowerCase().includes(searchQuery)
@@ -260,10 +260,16 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       discount?.financial_discount_id?.toString().toLowerCase().includes(searchQuery)
     );
 
+    const filteredBalances = applicationData.balances.filter((balance) =>
+      balance?.balance_id?.toString().toLowerCase().includes(searchQuery)
+    );
+
+
     return {
       invoices: filteredInvoices,
       payments: filteredPayments,
-      discounts: filteredDiscounts
+      discounts: filteredDiscounts,
+      balances: filteredBalances
     };
   }, [applicationData, searchQuery]);
 
@@ -286,20 +292,23 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       count: filteredData?.payments.length
     };
 
+    const concDiscountsAndBalances = (filteredData?.discounts || []).concat(filteredData?.balances || []);
+
     const discounts = {
       statusName: "ajustes",
       color: "#E53261",
       statusId: 3,
-      itemsList: filteredData?.discounts,
-      total: filteredData?.discounts.length && applicationData?.summary.total_discounts,
-      count: filteredData?.discounts.length
+      itemsList: concDiscountsAndBalances, // Concatenamos los descuentos con los balances para mostrarlos juntos en la sección de ajustes
+      total: concDiscountsAndBalances.length && applicationData?.summary.total_discounts,
+      count: concDiscountsAndBalances.length
     };
+
 
     return [invoices, payments, discounts];
   }, [filteredData]);
 
   const allRows = useMemo(
-    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts],
+    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts, ...filteredData.balances],
     [filteredData]
   );
 
@@ -388,7 +397,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     const allRowsIds = [
       ...(applicationData?.payments?.map((payment) => payment.id) ?? []),
       ...(applicationData?.invoices?.map((invoice) => invoice.id) ?? []),
-      ...(applicationData?.discounts?.map((discount) => discount.id) ?? [])
+      ...(applicationData?.discounts?.map((discount) => discount.id) ?? []),
+      ...(applicationData?.balances?.map((balance) => balance.id) ?? [])
     ];
 
     try {

@@ -73,6 +73,7 @@ export const CreateOrderView: FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
+  const [channelCode, setChannelCode] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
@@ -167,6 +168,8 @@ export const CreateOrderView: FC = () => {
       payment_type: 1
     });
     setShippingInfo(shipping_info);
+    // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
+    setChannelCode("");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
@@ -227,6 +230,8 @@ export const CreateOrderView: FC = () => {
         setConfirmOrderData,
         shippingInfo,
         setShippingInfo,
+        channelCode,
+        setChannelCode,
         selectedDiscount,
         setSelectedDiscount,
         categories,

@@ -1,9 +1,9 @@
-import { Dispatch, Key, SetStateAction, useState } from "react";
-import { Button, Flex, Table, TableProps, Typography } from "antd";
-import { Eye } from "phosphor-react";
-import { WarningDiamond } from "@phosphor-icons/react";
+import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
+import { Button, Dropdown, Table, TableProps, Typography } from "antd";
+import { DotsThreeVertical, Eye, WarningCircle, WarningDiamond } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
@@ -44,6 +44,7 @@ const OrdersViewTable = ({
 }: PropsOrdersViewTable) => {
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const { openModal } = useModalDetail();
 
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
   const [currentWarehouseId, setCurrentWarehouseId] = useState<number | null>(null);
@@ -258,25 +259,71 @@ const OrdersViewTable = ({
       key: "buttonOpenModal",
       width: 64,
       dataIndex: "",
-      render: (_, row) => (
-        <Flex gap={8}>
-          <Button
-            disabled={row.order_status === "Pedidos en proceso"}
-            onClick={() => {
-              setSelectedOrder(row.id);
-              setCurrentWarehouseId(row.warehouseid);
-              setIsModalOpen(true);
-            }}
-            className="buttonSeeProject"
-            icon={<WarningDiamond size={"1.3rem"} />}
-          />
-          <Button
-            onClick={() => handleSeeDetail(row)}
-            className="buttonSeeProject"
-            icon={<Eye size={"1.3rem"} />}
-          />
-        </Flex>
-      )
+      render: (_, row) => {
+        const items = [
+          {
+            key: "verBodega",
+            label: (
+              <Button
+                disabled={row.order_status === "Pedidos en proceso"}
+                icon={<WarningDiamond size={20} />}
+                className="buttonNoBorder"
+                onClick={() => {
+                  setSelectedOrder(row.id);
+                  setCurrentWarehouseId(row.warehouseid);
+                  setIsModalOpen(true);
+                }}
+              >
+                Ver bodega
+              </Button>
+            )
+          },
+          {
+            key: "detalle",
+            label: (
+              <Button
+                icon={<Eye size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleSeeDetail(row)}
+              >
+                Detalle
+              </Button>
+            )
+          }
+        ];
+
+        if (row.incident_id !== null && row.order_status_id == 5) {
+          items.push({
+            key: "verNovedad",
+            label: (
+              <Button
+                icon={<WarningCircle size={20} />}
+                className="buttonNoBorder"
+                onClick={() => openModal("novelty", { noveltyId: row.incident_id as number })}
+              >
+                Ver novedad
+              </Button>
+            )
+          });
+        }
+
+        const customDropdown = (menu: ReactNode) => (
+          <div className="dropdownApplicationTable">{menu}</div>
+        );
+
+        return (
+          <Dropdown
+            dropdownRender={customDropdown}
+            menu={{ items }}
+            placement="bottomLeft"
+            trigger={["click"]}
+          >
+            <Button className="dotsBtn">
+              <DotsThreeVertical size={16} />
+            </Button>
+          </Dropdown>
+        );
+      }
     }
   ];
 

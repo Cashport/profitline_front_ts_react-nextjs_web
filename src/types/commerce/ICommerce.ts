@@ -3,8 +3,13 @@ export interface IEcommerceClient {
   client_name: string;
   client_email: string;
   payment_type: number;
+  client_bu: IClientBU[];
 }
 
+export interface IClientBU {
+  internal_code: string;
+  bu_name: string;
+}
 export interface IProductData {
   category_id: number;
   category: string;
@@ -291,10 +296,36 @@ export interface ICommerceAdresses {
   city: string;
   email: string;
   id: number;
+  warehouse_id: number;
+  warehouse: string;
 }
 export interface ICommerceAddressesData {
   otherAddresses: ICommerceAdresses[];
   phone: string;
+}
+
+export interface IClientSummary {
+  client: {
+    nit: string;
+    uuid: string;
+    name: string;
+    payment_type: number;
+  };
+  main_address: {
+    label: string;
+    address: string;
+    city: string;
+  };
+  cartera: {
+    totalPortfolio: number;
+    pastDueAmount: number;
+  };
+  cupo: {
+    totalQuota: number;
+    availableQuota: number;
+    percentageUsed: number;
+    availablePercentage: number;
+  };
 }
 
 export interface ISingleOrder {
@@ -358,6 +389,7 @@ export interface IOrderData {
 
 export interface IOrder {
   order_status: string;
+  order_status_id: number;
   rgb: string;
   id: number;
   operation_number: number;
@@ -373,6 +405,8 @@ export interface IOrder {
   last_datestamp: string | null;
   files: string | null;
   notification_id: number | null;
+  incident_id: number | null;
+  has_stock: number;
 }
 export interface IDraftOrder {
   id: number;

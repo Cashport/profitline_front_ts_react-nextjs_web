@@ -51,6 +51,8 @@ export interface IOrderViewContext {
   setConfirmOrderData: Dispatch<IOrderConfirmedResponse>;
   shippingInfo: IShippingInformation | undefined;
   setShippingInfo: Dispatch<IShippingInformation>;
+  channelCode: string;
+  setChannelCode: Dispatch<SetStateAction<string>>;
   selectedDiscount: IDiscountPackageAvailable | undefined;
   setSelectedDiscount: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];
@@ -81,6 +83,7 @@ const CreateOrderView: FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
+  const [channelCode, setChannelCode] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
@@ -150,6 +153,8 @@ const CreateOrderView: FC = () => {
         setConfirmOrderData,
         shippingInfo,
         setShippingInfo,
+        channelCode,
+        setChannelCode,
         selectedDiscount,
         setSelectedDiscount,
         categories,

@@ -5,7 +5,7 @@ import {
   Merge,
   FieldError as OriginalFieldError
 } from "react-hook-form";
-import { selectClientForm } from "../create-order-search-client/create-order-search-client";
+import { ISelectClientForm } from "../create-order-search-client/create-order-search-client";
 import { useAppStore } from "@/lib/store/store";
 import { useEffect, useState, useMemo } from "react";
 import { getClients } from "@/services/commerce/commerce";
@@ -18,7 +18,7 @@ type ExtendedFieldError =
 
 interface Props {
   errors: ExtendedFieldError | undefined;
-  field: ControllerRenderProps<selectClientForm, "client">;
+  field: ControllerRenderProps<ISelectClientForm, "client">;
 }
 
 const SelectClientSimplified = ({ errors, field }: Props) => {
