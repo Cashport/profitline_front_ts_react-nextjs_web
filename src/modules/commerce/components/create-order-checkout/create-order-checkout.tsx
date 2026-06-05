@@ -57,7 +57,8 @@ export default function CheckoutPage() {
     confirmOrderData,
     order_split_details,
     deactivateCrossSelling,
-    bonus
+    bonus,
+    channelCode
   } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
 
@@ -135,7 +136,8 @@ export default function CheckoutPage() {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
       order_split_details,
-      promotion_id: bonus?.id || 0
+      promotion_id: bonus?.id || 0,
+      nit_id: channelCode
     };
   };
 
