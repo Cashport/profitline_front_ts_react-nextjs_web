@@ -6,7 +6,6 @@ export interface IApplyTabRecord {
   client_id: string;
   financial_record_id: number | null;
   financial_discount_id: number | null;
-  balance_id: number | null;
   payment_id: number;
   amount: number;
   status: string;
@@ -38,7 +37,6 @@ export interface IApplyTabClients {
   payments: IApplyTabRecord[];
   invoices: IApplyTabRecord[];
   discounts: IApplyTabRecord[];
-  balances: IApplyTabRecord[];
   summary: {
     total_invoices: number;
     total_payments: number;
