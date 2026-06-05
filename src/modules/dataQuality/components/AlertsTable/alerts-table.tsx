@@ -20,6 +20,15 @@ interface AlertsTableProps {
   onPageChange: (page: number) => void;
 }
 
+const NO_EQUIVALENCE_ERROR_TYPE = "NO_EQUIVALENCE";
+
+const getAlertActionHref = (record: IAlert) =>
+  record.error_type === NO_EQUIVALENCE_ERROR_TYPE
+    ? `/data-quality/catalogs/${record.id_client}/${record.id_country}?clientName=${encodeURIComponent(
+        record.client_name
+      )}&countryName=${encodeURIComponent(record.country_name)}`
+    : `/data-quality/client/${record.id_client}`;
+
 const columns: TableProps<IAlert>["columns"] = [
   {
     title: "Cliente",
@@ -85,21 +94,24 @@ const columns: TableProps<IAlert>["columns"] = [
   {
     title: "Acciones",
     width: 90,
-    render: (_: unknown, record: IAlert) => (
-      <div className="flex items-center space-x-2">
-        <Link href={`/data-quality/client/${record.id_client}`}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs bg-transparent"
-            title="Ir al catálogo del cliente"
-          >
-            <ExternalLink className="w-3 h-3 mr-1" />
-            Ir
-          </Button>
-        </Link>
-      </div>
-    )
+    render: (_, record: IAlert) => {
+      const isCatalog = record.error_type === NO_EQUIVALENCE_ERROR_TYPE;
+      return (
+        <div className="flex items-center space-x-2">
+          <Link href={getAlertActionHref(record)}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs bg-transparent"
+              title={isCatalog ? "Ir al catálogo del cliente" : "Ir al detalle del cliente"}
+            >
+              <ExternalLink className="w-3 h-3 mr-1" />
+              Ir
+            </Button>
+          </Link>
+        </div>
+      );
+    }
   }
 ];
 
