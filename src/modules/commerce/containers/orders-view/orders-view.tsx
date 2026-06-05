@@ -165,7 +165,7 @@ export const OrdersView: FC = () => {
                 label: (
                   <LabelCollapse
                     status={order.status}
-                    quantity={order.count}
+                    quantity={order.pagination.total_count}
                     total={order.total}
                     color={order.color}
                   />
