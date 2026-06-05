@@ -183,13 +183,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     };
   }, [selectedCategories]);
 
-  const handleContinuePurchase = (options?: { skipOddSBVital?: boolean }) => {
+  const handleContinuePurchase = (options?: {
+    skipOddSBVital?: boolean;
+    skipOddGroup?: boolean;
+  }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
       if (!options?.skipOddSBVital && hasOddSBVital) {
         setShowOddSBVitalModal(true);
         return;
       }
-      if (hasOddRestylaneGroupSum) {
+      if (!options?.skipOddGroup && hasOddRestylaneGroupSum) {
         setShowOddGroupModal(true);
         return;
       }
@@ -236,6 +239,11 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const handleConfirmOddSBVital = () => {
     setShowOddSBVitalModal(false);
     handleContinuePurchase({ skipOddSBVital: true });
+  };
+
+  const handleConfirmOddGroup = () => {
+    setShowOddGroupModal(false);
+    handleContinuePurchase({ skipOddSBVital: true, skipOddGroup: true });
   };
 
   const handleCloseModal = () => {
@@ -680,17 +688,18 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showOddGroupModal}
         onClose={handleCloseOddGroupModal}
-        title="No puedes continuar con la compra"
+        onOk={handleConfirmOddGroup}
+        title="¿Está seguro que desea continuar?"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
               La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO,
-              LIDOCAINA, KYSSE, DEFYNE) debe ser un número par.
+              LIDOCAINA, KYSSE, DEFYNE) es impar. Se va a cobrar la unidad impar a precio full
             </p>
           </Flex>
         }
-        cancelText="Entendido"
-        hideOkButton
+        okText="Continuar"
+        cancelText="Cancelar"
       />
 
       <ModalConfirmAction
