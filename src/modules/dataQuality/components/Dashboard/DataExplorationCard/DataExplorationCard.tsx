@@ -24,6 +24,7 @@ import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExplorati
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
 import { formatNumber } from "@/utils/utils";
+import { formatThousandNum } from "@/modules/dataQuality/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const DAYS_IN_MONTH = 31;
@@ -318,7 +319,7 @@ export function DataExplorationCard() {
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatNumber(dayTotals.units_haleon)}
+                            {formatThousandNum(dayTotals.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -384,7 +385,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatNumber(dayTotals.units_haleon)}
+                          {formatThousandNum(dayTotals.units_haleon)}
                         </td>
                       );
                     })}
@@ -442,7 +443,7 @@ export function DataExplorationCard() {
                             className="text-right px-2 py-1 font-semibold tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatNumber(lastMonth.units_haleon)}
+                            {formatThousandNum(lastMonth.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -480,7 +481,7 @@ export function DataExplorationCard() {
                           className="text-right px-2 py-1 font-semibold tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatNumber(lastMonth.units_haleon)}
+                          {formatThousandNum(lastMonth.units_haleon)}
                         </td>
                       );
                     })()}
