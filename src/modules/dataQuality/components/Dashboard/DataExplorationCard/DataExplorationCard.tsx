@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, AlertTriangle } from "lucide-react";
+import { Search, AlertTriangle, ArrowUpRight } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
 import { Input } from "@/modules/chat/ui/input";
@@ -62,6 +62,7 @@ export function DataExplorationCard() {
         id_client: client.id_client,
         client_name: client.client_name,
         country: client.dates[0]?.rows[0]?.country ?? "",
+        country_client_id: client.country_client_id,
         days,
         total: client.totals.units_haleon,
         totalRegistros: client.totals.total_registros,
@@ -313,6 +314,11 @@ export function DataExplorationCard() {
                       }
 
                       if (dayTotals.novedades > 0) {
+                        const catalogHref = row.country_client_id
+                          ? `/data-quality/catalogs/${row.id_client}/${row.country_client_id}` +
+                            `?clientName=${encodeURIComponent(row.client_name)}` +
+                            `&countryName=${encodeURIComponent(row.country)}`
+                          : null;
                         const cellContent = (
                           <td
                             key={dayIdx}
@@ -345,6 +351,20 @@ export function DataExplorationCard() {
                                     {formatNumber(dayTotals.novedades)} novedades (
                                     {dayTotals.novedades_percent}%)
                                   </span>
+                                  {catalogHref && (
+                                    <Link
+                                      href={catalogHref}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title="Ir al catálogo del cliente"
+                                      className="ml-1 inline-flex hover:opacity-80"
+                                    >
+                                      <ArrowUpRight
+                                        className="w-3.5 h-3.5"
+                                        style={{ color: "#FBBF24" }}
+                                      />
+                                    </Link>
+                                  )}
                                 </div>
                               </TooltipContent>
                             </Tooltip>
