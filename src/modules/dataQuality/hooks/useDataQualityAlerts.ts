@@ -9,7 +9,7 @@ export const useDataQualityAlerts = (
   search?: string,
   id_country?: number,
   id_client?: number,
-  id_alert_status?: number
+  types?: string[]
 ) => {
   const queryParams = [];
   if (page) queryParams.push(`page=${page}`);
@@ -17,7 +17,7 @@ export const useDataQualityAlerts = (
   if (search) queryParams.push(`search=${encodeURIComponent(search)}`);
   if (id_country) queryParams.push(`id_country=${id_country}`);
   if (id_client) queryParams.push(`id_client=${id_client}`);
-  if (id_alert_status) queryParams.push(`id_alert_status=${id_alert_status}`);
+  if (types?.length) queryParams.push(`type=${encodeURIComponent(types.join(","))}`);
 
   const pathKey = `/data/alerts${queryParams.length ? `?${queryParams.join("&")}` : ""}`;
 

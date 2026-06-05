@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, AlertTriangle } from "lucide-react";
+import { Search, AlertTriangle, ArrowUpRight } from "lucide-react";
 
 import { Card } from "@/modules/chat/ui/card";
 import { Input } from "@/modules/chat/ui/input";
@@ -24,6 +24,7 @@ import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExplorati
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
 import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
 import { formatNumber } from "@/utils/utils";
+import { formatThousandNum } from "@/modules/dataQuality/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 
 const DAYS_IN_MONTH = 31;
@@ -61,6 +62,7 @@ export function DataExplorationCard() {
         id_client: client.id_client,
         client_name: client.client_name,
         country: client.dates[0]?.rows[0]?.country ?? "",
+        country_client_id: client.country_client_id,
         days,
         total: client.totals.units_haleon,
         totalRegistros: client.totals.total_registros,
@@ -312,13 +314,18 @@ export function DataExplorationCard() {
                       }
 
                       if (dayTotals.novedades > 0) {
+                        const catalogHref = row.country_client_id
+                          ? `/data-quality/catalogs/${row.id_client}/${row.country_client_id}` +
+                            `?clientName=${encodeURIComponent(row.client_name)}` +
+                            `&countryName=${encodeURIComponent(row.country)}`
+                          : null;
                         const cellContent = (
                           <td
                             key={dayIdx}
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatNumber(dayTotals.units_haleon)}
+                            {formatThousandNum(dayTotals.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -344,6 +351,20 @@ export function DataExplorationCard() {
                                     {formatNumber(dayTotals.novedades)} novedades (
                                     {dayTotals.novedades_percent}%)
                                   </span>
+                                  {catalogHref && (
+                                    <Link
+                                      href={catalogHref}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title="Ir al catálogo del cliente"
+                                      className="ml-1 inline-flex hover:opacity-80"
+                                    >
+                                      <ArrowUpRight
+                                        className="w-3.5 h-3.5"
+                                        style={{ color: "#FBBF24" }}
+                                      />
+                                    </Link>
+                                  )}
                                 </div>
                               </TooltipContent>
                             </Tooltip>
@@ -384,7 +405,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatNumber(dayTotals.units_haleon)}
+                          {formatThousandNum(dayTotals.units_haleon)}
                         </td>
                       );
                     })}
@@ -442,7 +463,7 @@ export function DataExplorationCard() {
                             className="text-right px-2 py-1 font-semibold tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatNumber(lastMonth.units_haleon)}
+                            {formatThousandNum(lastMonth.units_haleon)}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -480,7 +501,7 @@ export function DataExplorationCard() {
                           className="text-right px-2 py-1 font-semibold tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatNumber(lastMonth.units_haleon)}
+                          {formatThousandNum(lastMonth.units_haleon)}
                         </td>
                       );
                     })()}
