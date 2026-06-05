@@ -31,7 +31,7 @@ import { computeComplementRequirements } from "../../utils/complementCalculation
 import { ISelectedCategories } from "../../containers/create-order/create-order";
 
 import { ISelectType } from "@/types/clients/IClients";
-import { ISelectedProduct } from "@/types/commerce/ICommerce";
+import { Discount, DiscountItem, ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-cart.module.scss";
 export interface selectClientForm {
@@ -183,13 +183,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     };
   }, [selectedCategories]);
 
-  const handleContinuePurchase = () => {
+  const handleContinuePurchase = (options?: {
+    skipOddSBVital?: boolean;
+    skipOddGroup?: boolean;
+  }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
-      if (hasOddSBVital) {
+      if (!options?.skipOddSBVital && hasOddSBVital) {
         setShowOddSBVitalModal(true);
         return;
       }
-      if (hasOddRestylaneGroupSum) {
+      if (!options?.skipOddGroup && hasOddRestylaneGroupSum) {
         setShowOddGroupModal(true);
         return;
       }
@@ -231,6 +234,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     }
     setCheckingOut(true);
     onClose && onClose();
+  };
+
+  const handleConfirmOddSBVital = () => {
+    setShowOddSBVitalModal(false);
+    handleContinuePurchase({ skipOddSBVital: true });
+  };
+
+  const handleConfirmOddGroup = () => {
+    setShowOddGroupModal(false);
+    handleContinuePurchase({ skipOddSBVital: true, skipOddGroup: true });
   };
 
   const handleCloseModal = () => {
@@ -489,27 +502,15 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 <p>SKUs: {category.products.length}</p>
               </Flex>
               {category.products.map((product) => {
-                const productDiscount = appliedDiscounts?.find(
+                const productsDiscount: DiscountItem[] = appliedDiscounts?.filter(
                   (discount: any) => discount.product_sku === product.SKU
-                )?.discount;
-                const discountSource = productDiscount?.primary ?? productDiscount?.secondary;
-                const subtotal = config?.include_iva
-                  ? discountSource?.new_price_taxes || discountSource?.new_price
-                  : discountSource?.new_price;
-
-                const productDiscountData =
-                  productDiscount && productDiscount.subtotalDiscount > 0
-                    ? {
-                        discountPercentage: discountSource?.discount_applied?.discount,
-                        subtotal
-                      }
-                    : undefined;
+                );
                 return (
                   <CreateOrderItem
                     key={`${product.id}-${product.SKU}`}
                     product={product}
                     categoryName={category.category}
-                    productDiscount={productDiscountData}
+                    productsDiscount={productsDiscount}
                   />
                 );
               })}
@@ -606,7 +607,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           </Flex>
 
           {!checkingOut && (
-            <PrincipalButton onClick={handleContinuePurchase}>Continuar compra</PrincipalButton>
+            <PrincipalButton onClick={() => handleContinuePurchase()}>
+              Continuar compra
+            </PrincipalButton>
           )}
         </div>
       )}
@@ -669,32 +672,34 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <ModalConfirmAction
         isOpen={showOddSBVitalModal}
         onClose={handleCloseOddSBVitalModal}
-        title="No puedes continuar con la compra"
+        onOk={handleConfirmOddSBVital}
+        title="¿Está seguro que desea continuar?"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              Solo se pueden pedir unidades pares para Skinboosters
+              Se va a cobrar la unidad impar de Skinboosters a precio full
             </p>
           </Flex>
         }
-        cancelText="Entendido"
-        hideOkButton
+        okText="Continuar"
+        cancelText="Cancelar"
       />
 
       <ModalConfirmAction
         isOpen={showOddGroupModal}
         onClose={handleCloseOddGroupModal}
-        title="No puedes continuar con la compra"
+        onOk={handleConfirmOddGroup}
+        title="¿Está seguro que desea continuar?"
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
               La suma total de unidades entre las referencias Restylane (VOLYME, REFYNE, LYFT LIDO,
-              LIDOCAINA, KYSSE, DEFYNE) debe ser un número par.
+              LIDOCAINA, KYSSE, DEFYNE) es impar. Se va a cobrar la unidad impar a precio full
             </p>
           </Flex>
         }
-        cancelText="Entendido"
-        hideOkButton
+        okText="Continuar"
+        cancelText="Cancelar"
       />
 
       <ModalConfirmAction

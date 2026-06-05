@@ -158,31 +158,33 @@ export const OrdersView: FC = () => {
           <Spin style={{ margin: "2rem 0" }} />
         ) : (
           <Collapse
-            items={ordersData?.map((order) => ({
-              key: order.status,
-              label: (
-                <LabelCollapse
-                  status={order.status}
-                  quantity={order.count}
-                  total={order.total}
-                  color={order.color}
-                />
-              ),
-              children: (
-                <OrdersViewTable
-                  dataSingleOrder={order}
-                  setSelectedRows={setSelectedRows}
-                  selectedRowKeys={selectedRowKeys}
-                  setSelectedRowKeys={setSelectedRowKeys}
-                  orderStatus={order.status}
-                  setFetchMutate={mutate}
-                  onlyKeyInfo={width < 900}
-                  onChangePage={handlePageChange}
-                  currentPage={statusPages[order.status_id] || 1}
-                  isLoadingPagination={isLoadingPagination}
-                />
-              )
-            }))}
+            items={ordersData
+              ?.filter((order) => order.orders.length > 0)
+              .map((order) => ({
+                key: order.status,
+                label: (
+                  <LabelCollapse
+                    status={order.status}
+                    quantity={order.pagination.total_count}
+                    total={order.total}
+                    color={order.color}
+                  />
+                ),
+                children: (
+                  <OrdersViewTable
+                    dataSingleOrder={order}
+                    setSelectedRows={setSelectedRows}
+                    selectedRowKeys={selectedRowKeys}
+                    setSelectedRowKeys={setSelectedRowKeys}
+                    orderStatus={order.status}
+                    setFetchMutate={mutate}
+                    onlyKeyInfo={width < 900}
+                    onChangePage={handlePageChange}
+                    currentPage={statusPages[order.status_id] || 1}
+                    isLoadingPagination={isLoadingPagination}
+                  />
+                )
+              }))}
             defaultActiveKey="Pedidos creados"
           />
         )}

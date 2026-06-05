@@ -301,7 +301,17 @@ export function PurchaseOrderProducts({
     >
       <div className="flex flex-col">
         <div className="mb-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-cashport-black">Detalle de Productos</h3>
+          <span className="flex justify-start items-end gap-2">
+            <h3 className="text-lg font-semibold text-cashport-black leading-tight">
+              Detalle de Productos
+            </h3>
+            {data?.warehouseName && (
+              <p className="text-sm font-medium text-cashport-gray">
+                {" "}
+                Almacén: {data.warehouseName}
+              </p>
+            )}
+          </span>
           {!isCreating && canEdit && (
             <div className="flex items-center gap-2">
               {isEditMode && (
