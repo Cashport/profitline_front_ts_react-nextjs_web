@@ -2,20 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Filter, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Select as AntSelect } from "antd";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
 import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
 
 import Header from "@/components/organisms/header";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 
@@ -24,7 +18,6 @@ import { AlertsTable } from "../../components/AlertsTable";
 import {
   IAlertFilterCountry,
   IAlertFilterClient,
-  IAlertFilterStatus,
   IGetAlerts
 } from "@/types/dataQuality/IDataQuality";
 
@@ -43,7 +36,7 @@ export default function NoveltyAlertsView() {
   };
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [countryFilter, setCountryFilter] = useState(countryIdParam ?? "all");
   const [clientFilter, setClientFilter] = useState(clientIdParam ?? "all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,11 +44,13 @@ export default function NoveltyAlertsView() {
   const [filtersData, setFiltersData] = useState<{
     countries: IAlertFilterCountry[];
     clients: IAlertFilterClient[];
-    alertStatus: IAlertFilterStatus[];
-  }>({ countries: [], clients: [], alertStatus: [] });
+    types: string[];
+  }>({ countries: [], clients: [], types: [] });
 
   useEffect(() => {
-    getAlertsFilters().then((data) => setFiltersData(data));
+    getAlertsFilters().then((data) =>
+      setFiltersData({ countries: data.countries, clients: data.clients, types: data.types })
+    );
   }, []);
 
   const { data: alertsResponse, isLoading } = useDataQualityAlerts(
@@ -64,7 +59,7 @@ export default function NoveltyAlertsView() {
     searchTerm || undefined,
     countryFilter !== "all" ? Number(countryFilter) : undefined,
     clientFilter !== "all" ? Number(clientFilter) : undefined,
-    statusFilter !== "all" ? Number(statusFilter) : undefined
+    typeFilter.length ? typeFilter : undefined
   );
 
   const alertsData = alertsResponse as unknown as IGetAlerts | undefined;
@@ -72,7 +67,7 @@ export default function NoveltyAlertsView() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, countryFilter, clientFilter]);
+  }, [searchTerm, typeFilter, countryFilter, clientFilter]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -100,68 +95,59 @@ export default function NoveltyAlertsView() {
               </div>
 
               {/* Country Filter */}
-              <Select value={countryFilter} onValueChange={setCountryFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <Filter className="w-4 h-4 shrink-0" />
-                    <SelectValue placeholder="Todos los países" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los países</SelectItem>
-                  {filtersData.countries.map((country) => (
-                    <SelectItem key={country.id} value={String(country.id)}>
-                      {country.country_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AntSelect
+                showSearch
+                optionFilterProp="label"
+                value={countryFilter}
+                onChange={setCountryFilter}
+                placeholder="Todos los países"
+                className="w-48"
+                style={{ minWidth: "12rem", height: "48px" }}
+                options={[
+                  { label: "Todos los países", value: "all" },
+                  ...filtersData.countries.map((country) => ({
+                    label: country.country_name,
+                    value: String(country.id)
+                  }))
+                ]}
+              />
 
               {/* Client Filter */}
-              <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <SelectValue placeholder="Todos los clientes" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los clientes</SelectItem>
-                  {filtersData.clients.map((client) => (
-                    <SelectItem key={client.client_id} value={String(client.client_id)}>
-                      {client.client_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AntSelect
+                showSearch
+                optionFilterProp="label"
+                value={clientFilter}
+                onChange={setClientFilter}
+                placeholder="Todos los clientes"
+                className="w-48"
+                style={{ minWidth: "12rem", height: "48px" }}
+                options={[
+                  { label: "Todos los clientes", value: "all" },
+                  ...filtersData.clients.map((client) => ({
+                    label: client.client_name,
+                    value: String(client.client_id)
+                  }))
+                ]}
+              />
 
-              {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <SelectValue placeholder="Todos los estados" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  {filtersData.alertStatus.map((status) => (
-                    <SelectItem key={status.id} value={String(status.id)}>
-                      <div className="flex items-center">
-                        <div
-                          className="w-2 h-2 rounded-full mr-2"
-                          style={{ backgroundColor: status.budget_color }}
-                        />
-                        <span>{status.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Type Filter */}
+              <AntSelect
+                mode="multiple"
+                allowClear
+                value={typeFilter}
+                onChange={setTypeFilter}
+                placeholder="Todos los tipos"
+                className="w-48"
+                style={{ minWidth: "12rem", height: "48px" }}
+                options={filtersData.types.map((type) => ({ label: type, value: type }))}
+                maxTagCount="responsive"
+              />
 
               {/* Clear Filters Button */}
               <Button
                 variant="outline"
                 onClick={() => {
-                  setStatusFilter("all");
+                  setTypeFilter([]);
                   setCountryFilter("all");
                   setClientFilter("all");
                   setSearchTerm("");

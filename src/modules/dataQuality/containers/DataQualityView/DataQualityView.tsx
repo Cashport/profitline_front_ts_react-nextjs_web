@@ -129,12 +129,11 @@ export default function DataQualityView() {
                   <h3 className="text-lg text-[#141414]">{country.country_name}</h3>
                 </div>
                 {country.active_alerts > 0 && (
-                  <BadgeUI
-                    variant={country.active_alerts > 10 ? "destructive" : "secondary"}
-                    className="text-xs"
-                  >
-                    {country.active_alerts} alertas
-                  </BadgeUI>
+                  <Link href={`/data-quality/alerts?countryId=${country.id_country}`}>
+                    <BadgeUI className="text-xs bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] cursor-pointer transition-colors">
+                      {country.active_alerts} alertas
+                    </BadgeUI>
+                  </Link>
                 )}
               </div>
             </div>

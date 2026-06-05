@@ -326,6 +326,7 @@ export interface IGetFiltersAlerts {
   countries: IAlertFilterCountry[];
   clients: IAlertFilterClient[];
   alertStatus: IAlertFilterStatus[];
+  types: string[];
 }
 
 export interface IAlert {
@@ -488,6 +489,7 @@ export interface ILastMonthDataExploration {
 export interface IDataExplorationClient {
   id_client: number;
   client_name: string;
+  country_client_id: number;
   dates: IDataExplorationDate[];
   totals: IDataExplorationTotals;
   last_month: ILastMonthDataExploration | null;
