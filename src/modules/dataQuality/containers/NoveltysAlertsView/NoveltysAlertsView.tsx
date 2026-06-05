@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Filter, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Select as AntSelect } from "antd";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
@@ -10,13 +10,6 @@ import { useDataQualityAlerts } from "../../hooks/useDataQualityAlerts";
 
 import Header from "@/components/organisms/header";
 import { Card, CardContent } from "@/modules/chat/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/modules/chat/ui/select";
 import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 
@@ -102,39 +95,40 @@ export default function NoveltyAlertsView() {
               </div>
 
               {/* Country Filter */}
-              <Select value={countryFilter} onValueChange={setCountryFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
-                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <Filter className="w-4 h-4 shrink-0" />
-                    <SelectValue placeholder="Todos los países" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los países</SelectItem>
-                  {filtersData.countries.map((country) => (
-                    <SelectItem key={country.id} value={String(country.id)}>
-                      {country.country_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AntSelect
+                showSearch
+                optionFilterProp="label"
+                value={countryFilter}
+                onChange={setCountryFilter}
+                placeholder="Todos los países"
+                className="w-48"
+                style={{ minWidth: "12rem", height: "48px" }}
+                options={[
+                  { label: "Todos los países", value: "all" },
+                  ...filtersData.countries.map((country) => ({
+                    label: country.country_name,
+                    value: String(country.id)
+                  }))
+                ]}
+              />
 
               {/* Client Filter */}
-              <Select value={clientFilter} onValueChange={setClientFilter}>
-                <SelectTrigger className="w-48" style={{ borderColor: "#DDDDDD", height: "48px" }}>
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <SelectValue placeholder="Todos los clientes" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los clientes</SelectItem>
-                  {filtersData.clients.map((client) => (
-                    <SelectItem key={client.client_id} value={String(client.client_id)}>
-                      {client.client_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AntSelect
+                showSearch
+                optionFilterProp="label"
+                value={clientFilter}
+                onChange={setClientFilter}
+                placeholder="Todos los clientes"
+                className="w-48"
+                style={{ minWidth: "12rem", height: "48px" }}
+                options={[
+                  { label: "Todos los clientes", value: "all" },
+                  ...filtersData.clients.map((client) => ({
+                    label: client.client_name,
+                    value: String(client.client_id)
+                  }))
+                ]}
+              />
 
               {/* Type Filter */}
               <AntSelect
