@@ -326,6 +326,7 @@ export interface IGetFiltersAlerts {
   countries: IAlertFilterCountry[];
   clients: IAlertFilterClient[];
   alertStatus: IAlertFilterStatus[];
+  types: string[];
 }
 
 export interface IAlert {
