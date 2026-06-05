@@ -36,15 +36,16 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
     for (const productDiscountItem of discount ?? []) {
       const productDiscount = productDiscountItem.discount;
       const discountSource = productDiscount?.primary;
+      const productQuantity = alreadySelectedProduct?.quantity ?? 0;
       const subtotal = config?.include_iva
         ? discountSource?.new_price_taxes ??
           discountSource?.new_price ??
           productDiscountItem.price_taxes ??
           productDiscountItem.price
         : discountSource?.new_price ?? productDiscountItem.price;
-      const discountPercentage = discountSource?.discount_applied?.discount;
+      const discountPercentage = discountSource?.discount_applied?.discount ?? 0;
       const productDiscountData =
-        (discountPercentage ?? 0) > 0
+        discountPercentage > 0 || productDiscountItem.quantity !== productQuantity
           ? {
               discountPercentage,
               subtotal,
@@ -108,7 +109,9 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
                   {discounts.length > 1 && <span className={styles.price__qty}>{d.qty} x </span>}$
                   {formatNumber(d.subtotal ?? 0)}
                 </h5>
-                <p className={styles.discountPercentage}>-{String(d.discountPercentage || 0)}%</p>
+                {d.discountPercentage > 0 && (
+                  <p className={styles.discountPercentage}>-{String(d.discountPercentage || 0)}%</p>
+                )}
               </Flex>
             ))}
           </Flex>
