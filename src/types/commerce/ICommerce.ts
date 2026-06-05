@@ -275,6 +275,7 @@ export interface ICreateOrderData {
   is_electronic_invoicing: number;
   order_split_details: IOrderSplitDetail[];
   promotion_id: number;
+  nit_id: string;
 }
 
 export interface ISucessCreateOrder {
