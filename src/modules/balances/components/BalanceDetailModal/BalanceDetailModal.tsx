@@ -2,10 +2,10 @@
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { CaretDoubleRight } from "phosphor-react";
-import { IBalance } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 interface BalanceDetailModalProps {
-  saldoData: IBalance;
+  saldoData: IBalanceRow;
   onBack: () => void;
   isModal?: boolean;
 }
@@ -82,7 +82,7 @@ export function BalanceDetailModal({
             <div>
               <p className="text-xs text-gray-400">Fecha registro</p>
               <p className="text-sm font-semibold text-cashport-black">
-                {formatDate(saldoData.balance_date)}
+                {formatDate(saldoData.created_at)}
               </p>
             </div>
             <div>

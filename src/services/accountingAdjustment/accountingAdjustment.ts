@@ -2,6 +2,7 @@ import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRe
 import config from "@/config";
 import { IFinancialDiscountForm } from "@/modules/clients/containers/accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
+import { IBalancesFilters } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentDetail } from "@/types/paymentAgreement/IPaymentAgreement";
 import instance, { API } from "@/utils/api/api";
@@ -331,6 +332,18 @@ export const getAvailableAdjustmentsForSelect = async (
     return response.data;
   } catch (error) {
     console.error("Error getting available adjustments to legalize", error);
+    throw error;
+  }
+};
+
+export const getBalancesFilter = async (): Promise<IBalancesFilters> => {
+  try {
+    const response: GenericResponse<IBalancesFilters> = await API.get(
+      `${config.API_HOST}/financial-discount/balances/filters`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting balances filters", error);
     throw error;
   }
 };
