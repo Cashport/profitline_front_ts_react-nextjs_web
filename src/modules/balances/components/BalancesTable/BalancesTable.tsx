@@ -77,10 +77,6 @@ export function BalancesTable({
       showSorterTooltip: false,
       render: (value: string) => (
         <div className="flex items-center gap-2" style={{ maxWidth: 260 }}>
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
-            style={{ backgroundColor: "#000" }}
-          />
           <span className="text-sm text-cashport-black truncate" title={value}>
             {value}
           </span>
@@ -101,9 +97,7 @@ export function BalancesTable({
       key: "tipo",
       sorter: (a, b) => (a.motive_name ?? "").localeCompare(b.motive_name ?? ""),
       showSorterTooltip: false,
-      render: (value: string) => (
-        <span className="text-sm text-cashport-black">{value ?? "-"}</span>
-      )
+      render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
     },
     {
       title: "Estado",

@@ -97,3 +97,24 @@ export interface IGetBalances {
   pending_total: number; // Σ pending_amount within the state
   balances: IBalanceRow[];
 }
+
+export interface IBalancesFilterUser {
+  id: number;
+  name: string;
+}
+export interface IBalancesFilterClient {
+  id: string;
+  name: string;
+}
+export interface IBalancesFilters {
+  users: IBalancesFilterUser[];
+  clients: IBalancesFilterClient[];
+}
+
+// Selections collected in the UI and handed to useBalances
+export interface IBalancesFilter {
+  users: number[]; // selected kam_ids
+  clients: string[]; // selected client_ids
+  from_date: string | null;
+  to_date: string | null;
+}
