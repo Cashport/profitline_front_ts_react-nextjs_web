@@ -1,14 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
-import { useApplicationTable } from "@/hooks/useApplicationTable";
-import Collapse from "@/components/ui/collapse";
-import LabelCollapse from "@/components/ui/label-collapse";
-import { useParams } from "next/navigation";
-
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
 import {
   addItemsToTable,
   getApplicationsExcelLog,
@@ -20,6 +17,8 @@ import {
 import { useMessageApi } from "@/context/MessageContext";
 // import { useSelectedPayments } from "@/context/SelectedPaymentsContext";
 
+import LabelCollapse from "@/components/ui/label-collapse";
+import Collapse from "@/components/ui/collapse";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import InvoiceTable from "./tables/InvoiceTable";
 import PaymentsTable from "./tables/PaymentsTable";
@@ -264,7 +263,6 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       balance?.balance_id?.toString().toLowerCase().includes(searchQuery)
     );
 
-
     return {
       invoices: filteredInvoices,
       payments: filteredPayments,
@@ -292,10 +290,12 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       count: filteredData?.payments.length
     };
 
-    const concDiscountsAndBalances = (filteredData?.discounts || []).concat(filteredData?.balances || []);
+    const concDiscountsAndBalances = (filteredData?.discounts || []).concat(
+      filteredData?.balances || []
+    );
 
     const discounts = {
-      statusName: "ajustes",
+      statusName: "notas crédito",
       color: "#E53261",
       statusId: 3,
       itemsList: concDiscountsAndBalances, // Concatenamos los descuentos con los balances para mostrarlos juntos en la sección de ajustes
@@ -303,12 +303,25 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       count: concDiscountsAndBalances.length
     };
 
+    const balances = {
+      statusName: "saldos",
+      color: "#000000",
+      statusId: 4,
+      itemsList: filteredData?.balances,
+      total: filteredData?.balances.length && applicationData?.summary.total_balance,
+      count: filteredData?.balances.length
+    };
 
-    return [invoices, payments, discounts];
+    return [invoices, payments, discounts, balances];
   }, [filteredData]);
 
   const allRows = useMemo(
-    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts, ...filteredData.balances],
+    () => [
+      ...filteredData.invoices,
+      ...filteredData.payments,
+      ...filteredData.discounts,
+      ...filteredData.balances
+    ],
     [filteredData]
   );
 
@@ -499,7 +512,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                         if (section.statusName === "pagos") {
                           showModal("payments");
                         }
-                        if (section.statusName === "ajustes") {
+                        if (section.statusName === "saldos") {
                           setModalAdjustmentsState(
                             modalAdjustmentsState.isOpen
                               ? { isOpen: false, modal: 1 }
