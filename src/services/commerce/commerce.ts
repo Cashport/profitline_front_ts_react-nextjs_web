@@ -431,7 +431,7 @@ export const getSalesDashboard = async () => {
 export const generatePaymentLink = async (clientId: string, modelData: IPaymentLinkData) => {
   try {
     const response: GenericResponse<IGeneratePaymentLinkResponse> = await API.post(
-      `/marketplace/clients/${clientId}/payment-links`,
+      `/marketplace/clients/${clientId}/payment-links/invoices`,
       modelData
     );
     return response.data;

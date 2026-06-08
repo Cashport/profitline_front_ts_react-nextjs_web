@@ -544,6 +544,7 @@ export interface IPaymentLinkData {
   amount: number;
   descripcion: string;
   email: string;
+  invoice_ids: number[];
 }
 
 export interface IGeneratePaymentLinkResponse {
