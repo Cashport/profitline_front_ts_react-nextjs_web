@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 
+import { Spin } from "antd";
 import { CheckCircle, Clock, XCircle, CircleDot } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import Collapse from "@/components/ui/collapse";
+import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
@@ -14,7 +17,7 @@ import { KamFilter } from "../../components/KamFilter/KamFilter";
 import { StatusFilter } from "../../components/StatusFilter/StatusFilter";
 import { useSaldos } from "../../context/saldos-context";
 import { useBalances } from "@/hooks/useBalances";
-import { IBalance } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 const estadoConfig: Record<string, { color: string; icon: typeof CheckCircle; textColor: string }> =
   {
@@ -26,6 +29,17 @@ const estadoConfig: Record<string, { color: string; icon: typeof CheckCircle; te
     Rechazado: { color: "#E53935", icon: XCircle, textColor: "text-white" },
     "Aplicado parcial": { color: "#9C27B0", icon: CircleDot, textColor: "text-white" }
   };
+
+const matchesSearch = (balance: IBalanceRow, term: string) => {
+  if (!term) return true;
+  const lowerTerm = term.toLowerCase();
+  return (
+    String(balance.id).toLowerCase().includes(lowerTerm) ||
+    (balance.client_name ?? "").toLowerCase().includes(lowerTerm) ||
+    (balance.kam_name ?? "").toLowerCase().includes(lowerTerm) ||
+    (balance.motive_name ?? "").toLowerCase().includes(lowerTerm)
+  );
+};
 
 export function BalancesView() {
   const { data: balancesData, isLoading: balancesLoading } = useBalances();
@@ -41,14 +55,14 @@ export function BalancesView() {
     getUniqueKams,
     toggleSaldoSelection,
     selectAllSaldos,
-    clearSelection
+    deselectSaldos
   } = useSaldos();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalance | null>(null);
+  const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
-  const openDetailSheet = (balance: IBalance) => {
+  const openDetailSheet = (balance: IBalanceRow) => {
     setSelectedSaldoForDetail(balance);
     setIsDetailSheetOpen(true);
   };
@@ -60,6 +74,13 @@ export function BalancesView() {
   const saldoCounts = getSaldoCounts();
   const uniqueClientes = getUniqueClientes();
   const uniqueKams = getUniqueKams();
+
+  const filteredGroups = (balancesData ?? [])
+    .map((group) => ({
+      ...group,
+      balances: group.balances.filter((balance) => matchesSearch(balance, searchTerm))
+    }))
+    .filter((group) => group.balances.length > 0);
 
   const handleStateFilter = (stateName: string) => {
     if (state.filterState === stateName) {
@@ -127,25 +148,36 @@ export function BalancesView() {
               </div>
             </div>
 
-            {/* Table */}
-            <BalancesTable
-              data={(balancesData ?? []).filter((b) => {
-                if (!searchTerm) return true;
-                const term = searchTerm.toLowerCase();
-                return (
-                  String(b.id).toLowerCase().includes(term) ||
-                  b.client_name?.toLowerCase().includes(term) ||
-                  b.kam_name?.toLowerCase().includes(term) ||
-                  (b.motive_name ?? "").toLowerCase().includes(term)
-                );
-              })}
-              loading={balancesLoading}
-              selectedSaldoIds={state.selectedSaldoIds}
-              onToggleSelection={toggleSaldoSelection}
-              onSelectAll={selectAllSaldos}
-              onClearSelection={clearSelection}
-              onOpenDetail={openDetailSheet}
-            />
+            {/* Grouped tables by state */}
+            {balancesLoading ? (
+              <Spin style={{ margin: "2rem 0" }} />
+            ) : (
+              <Collapse
+                defaultActiveKey={filteredGroups[0]?.balance_status_id}
+                items={filteredGroups.map((group) => ({
+                  key: group.balance_status_id,
+                  label: (
+                    <LabelCollapse
+                      status={group.balance_status}
+                      color={group.color}
+                      quantity={group.balances_count}
+                      total={group.pending_total}
+                    />
+                  ),
+                  children: (
+                    <BalancesTable
+                      data={group.balances}
+                      loading={balancesLoading}
+                      selectedSaldoIds={state.selectedSaldoIds}
+                      onToggleSelection={toggleSaldoSelection}
+                      onSelectAll={selectAllSaldos}
+                      onDeselectAll={deselectSaldos}
+                      onOpenDetail={openDetailSheet}
+                    />
+                  )
+                }))}
+              />
+            )}
           </CardContent>
         </Card>
       </main>

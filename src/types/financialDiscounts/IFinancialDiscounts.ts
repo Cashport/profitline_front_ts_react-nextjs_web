@@ -69,3 +69,31 @@ export interface IBalance {
   balance_date: string;
   created_at: string;
 }
+
+// One balance row as returned by getBalancesByProject (keys are the SQL aliases)
+export interface IBalanceRow {
+  id: number;
+  project_id: number;
+  client_id: string;
+  client_name: string;
+  kam_id: number | null; // LEFT JOIN user → can be null
+  kam_name: string | null;
+  initial_amount: number; // b.INITIAL_VALUE (decimal — may arrive as string)
+  pending_amount: number; // b.CURRENT_VALUE (decimal — may arrive as string)
+  status_id: number;
+  status_code: string;
+  status_name: string;
+  status_color: string;
+  motive_name: string;
+  created_at: string; // b.CREATE_AT timestamp
+}
+
+// One state group
+export interface IGetBalances {
+  balance_status_id: number; // = status_id
+  balance_status: string; // = status_name
+  color: string; // = status_color
+  balances_count: number; // balances.length
+  pending_total: number; // Σ pending_amount within the state
+  balances: IBalanceRow[];
+}

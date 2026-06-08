@@ -5,16 +5,16 @@ import { Eye } from "@phosphor-icons/react";
 import "./BalancesTable.scss";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
-import { IBalance } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 interface BalancesTableProps {
-  data: IBalance[];
+  data: IBalanceRow[];
   loading?: boolean;
   selectedSaldoIds: string[];
   onToggleSelection: (id: string) => void;
   onSelectAll: (ids: string[]) => void;
-  onClearSelection: () => void;
-  onOpenDetail: (balance: IBalance) => void;
+  onDeselectAll: (ids: string[]) => void;
+  onOpenDetail: (balance: IBalanceRow) => void;
 }
 
 const formatCurrency = (amount: number) =>
@@ -39,12 +39,12 @@ export function BalancesTable({
   selectedSaldoIds,
   onToggleSelection,
   onSelectAll,
-  onClearSelection,
+  onDeselectAll,
   onOpenDetail
 }: BalancesTableProps) {
   const height = useScreenHeight();
   const width = useScreenWidth();
-  const columns: TableProps<IBalance>["columns"] = [
+  const columns: TableProps<IBalanceRow>["columns"] = [
     {
       title: "Id",
       dataIndex: "id",
@@ -55,9 +55,9 @@ export function BalancesTable({
     },
     {
       title: "Fecha saldo",
-      dataIndex: "balance_date",
+      dataIndex: "created_at",
       key: "fecha",
-      sorter: (a, b) => new Date(a.balance_date).getTime() - new Date(b.balance_date).getTime(),
+      sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       showSorterTooltip: false,
       render: (value: string) => (
         <span className="text-sm text-cashport-black">{formatDate(value)}</span>
@@ -73,7 +73,7 @@ export function BalancesTable({
       title: "Cliente",
       dataIndex: "client_name",
       key: "cliente",
-      sorter: (a, b) => a.client_name.localeCompare(b.client_name),
+      sorter: (a, b) => (a.client_name ?? "").localeCompare(b.client_name ?? ""),
       showSorterTooltip: false,
       render: (value: string) => (
         <div className="flex items-center gap-2" style={{ maxWidth: 260 }}>
@@ -91,9 +91,9 @@ export function BalancesTable({
       title: "KAM",
       dataIndex: "kam_name",
       key: "kam",
-      sorter: (a, b) => a.kam_name.localeCompare(b.kam_name),
+      sorter: (a, b) => (a.kam_name ?? "").localeCompare(b.kam_name ?? ""),
       showSorterTooltip: false,
-      render: (value: string) => <span className="text-sm text-cashport-black">{value}</span>
+      render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
     },
     {
       title: "Tipo",
@@ -155,7 +155,7 @@ export function BalancesTable({
       title: "",
       key: "acciones",
       width: 48,
-      render: (_: unknown, record: IBalance) => (
+      render: (_: unknown, record: IBalanceRow) => (
         <Button
           onClick={() => onOpenDetail(record)}
           className="buttonSeeProject"
@@ -165,24 +165,26 @@ export function BalancesTable({
     }
   ];
 
-  const rowSelection: TableProps<IBalance>["rowSelection"] = {
+  const groupIds = data.map((s) => String(s.id));
+
+  const rowSelection: TableProps<IBalanceRow>["rowSelection"] = {
     selectedRowKeys: selectedSaldoIds,
     onSelect: (record) => {
       onToggleSelection(String(record.id));
     },
-    onSelectAll: (selected, selectedRows) => {
+    onSelectAll: (selected) => {
       if (selected) {
-        onSelectAll(selectedRows.map((r) => String(r.id)));
+        onSelectAll(groupIds);
       } else {
-        onClearSelection();
+        onDeselectAll(groupIds);
       }
     }
   };
 
   return (
-    <Table<IBalance>
+    <Table<IBalanceRow>
       columns={columns}
-      dataSource={data.map((s) => ({ ...s, key: s.id }))}
+      dataSource={data.map((s) => ({ ...s, key: String(s.id) }))}
       loading={loading}
       rowSelection={rowSelection}
       pagination={{ pageSize: 10, showSizeChanger: false, position: ["bottomRight"] }}
