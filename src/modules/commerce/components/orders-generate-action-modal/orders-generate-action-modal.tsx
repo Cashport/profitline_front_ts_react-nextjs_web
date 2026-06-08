@@ -14,6 +14,8 @@ import { createAndDownloadTxt } from "@/utils/utils";
 import {
   changeOrderState,
   changeStatusOrder,
+  downloadBillingReportExcel,
+  downloadSalesDetailExcel,
   dowloadOrderCSV,
   downloadPartialOrderCSV
 } from "@/services/commerce/commerce";
@@ -50,6 +52,8 @@ export const OrdersGenerateActionModal = ({
 
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
+  const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
 
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
@@ -94,6 +98,57 @@ export const OrdersGenerateActionModal = ({
       onClose();
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const downloadFileFromUrl = (url: string, filename: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleDownloadBillingReport = async () => {
+    setIsBillingReportLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando informe de facturación...",
+      duration: 0
+    });
+    try {
+      const res = await downloadBillingReportExcel(projectId);
+      downloadFileFromUrl(res.url, res.filename);
+      showMessage("success", "Descarga exitosa");
+      onClose();
+    } catch (error) {
+      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      console.error(error);
+    } finally {
+      hide();
+      setIsBillingReportLoading(false);
+    }
+  };
+
+  const handleDownloadSalesDetail = async () => {
+    setIsSalesDetailLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando informe de ventas...",
+      duration: 0
+    });
+    try {
+      const res = await downloadSalesDetailExcel(projectId);
+      downloadFileFromUrl(res.url, res.filename);
+      showMessage("success", "Descarga exitosa");
+      onClose();
+    } catch (error) {
+      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      console.error(error);
+    } finally {
+      hide();
+      setIsSalesDetailLoading(false);
     }
   };
 
@@ -177,6 +232,18 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadCSV}
             icon={<DownloadSimple size={16} />}
             title="Descargar CSV"
+          />
+          <ButtonGenerateAction
+            onClick={handleDownloadBillingReport}
+            icon={<DownloadSimple size={16} />}
+            title="Descargar informe de facturación"
+            disabled={isBillingReportLoading}
+          />
+          <ButtonGenerateAction
+            onClick={handleDownloadSalesDetail}
+            icon={<DownloadSimple size={16} />}
+            title="Descargar informe de ventas"
+            disabled={isSalesDetailLoading}
           />
           <ButtonGenerateAction
             onClick={handleDownloadPartialCsvShowQuestion}

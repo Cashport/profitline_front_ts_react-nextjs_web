@@ -278,6 +278,34 @@ export const downloadPartialOrderCSV = async (orderId: number, sendToBackorder: 
     throw new Error("Error desconocido al descargar el CSV parcial");
   }
 };
+
+export const downloadBillingReportExcel = async (
+  projectId: number
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/billing-report/excel`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching billing report excel:", error);
+    throw error;
+  }
+};
+
+export const downloadSalesDetailExcel = async (
+  projectId: number
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/sales-detail/excel`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales detail excel:", error);
+    throw error;
+  }
+};
 export const getInventoriesWarehouse = async (projectId: number, orderIds: number[]) => {
   try {
     const form = {
