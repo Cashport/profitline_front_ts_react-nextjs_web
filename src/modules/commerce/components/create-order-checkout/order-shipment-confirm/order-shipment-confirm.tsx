@@ -241,7 +241,7 @@ export default function OrderShipmentConfirm({
     indicativo: "+57",
     telefono: "",
     observaciones: "",
-    cantidades: Object.fromEntries(discountItems.map((i) => [i.product_sku, 0])),
+    cantidades: Object.fromEntries(discountItems.map((i) => [i.item_uuid || i.product_sku, 0])),
     bonusCantidades: Object.fromEntries(bonusItems.map((i) => [i.product_sku, 0])),
     otherBonusCantidades: Object.fromEntries(otherBonusItems.map((i) => [i.product_sku, 0]))
   });
@@ -328,7 +328,7 @@ export default function OrderShipmentConfirm({
   const otherBonusAsignadas = (sku: string) =>
     entregas.reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
   const hayDesbalance =
-    discountItems.some((i) => cantidadesAsignadas(i.product_sku) !== i.quantity) ||
+    discountItems.some((i) => cantidadesAsignadas(i.item_uuid || i.product_sku) !== i.quantity) ||
     bonusItems.some((i) => bonusAsignadas(i.product_sku) !== i.quantity) ||
     otherBonusItems.some((i) => otherBonusAsignadas(i.product_sku) !== i.quantity);
 
@@ -339,12 +339,10 @@ export default function OrderShipmentConfirm({
     isValidEmail(singleForm.email) &&
     isValidPhone(singleForm.telefono, singleForm.indicativo);
 
-  const isSingleEmailInvalid =
-    singleForm.email.trim() !== "" && !isValidEmail(singleForm.email);
+  const isSingleEmailInvalid = singleForm.email.trim() !== "" && !isValidEmail(singleForm.email);
 
   const isSinglePhoneInvalid =
-    singleForm.telefono.trim() !== "" &&
-    !isValidPhone(singleForm.telefono, singleForm.indicativo);
+    singleForm.telefono.trim() !== "" && !isValidPhone(singleForm.telefono, singleForm.indicativo);
 
   // Sync order_split_details on context
   useEffect(() => {
@@ -372,7 +370,10 @@ export default function OrderShipmentConfirm({
 
     const buildProductsForSplit = (cantidades: Record<string, number>): DiscountItem[] =>
       discountItems
-        .map((item) => ({ ...item, quantity: cantidades[item.product_sku] ?? 0 }))
+        .map((item) => ({
+          ...item,
+          quantity: cantidades[item?.item_uuid || item.product_sku] ?? 0
+        }))
         .filter((item) => item.quantity > 0);
 
     const buildBonusForSplit = (
@@ -630,10 +631,13 @@ export default function OrderShipmentConfirm({
                     </button>
                   </div>
                   <div className="divide-y divide-[#F7F7F7]">
-                    {discountItems.map((item) => {
-                      const asignado = entrega.cantidades[item.product_sku] ?? 0;
+                    {discountItems.map((item, idx) => {
+                      const asignado = entrega.cantidades[item.item_uuid || item.product_sku] ?? 0;
                       return (
-                        <div key={item.product_sku} className="flex items-center gap-2 px-3 py-2">
+                        <div
+                          key={`${item.product_sku}::${idx}`}
+                          className="flex items-center gap-2 px-3 py-2"
+                        >
                           <p className="flex-1 text-[11px] text-[#666666] line-clamp-1">
                             {item.description}
                           </p>

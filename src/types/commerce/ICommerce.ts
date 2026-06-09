@@ -85,6 +85,7 @@ export interface IConfirmOrderData {
 export interface IProductInDetail {
   id: number;
   product_sku: string;
+  item_uuid?: string;
   product_name: string;
   quantity: number;
   price: number;
@@ -134,6 +135,12 @@ export interface DiscountItem {
   product_id: number;
   description: string;
   discount: Discount;
+  /**
+   * UUID corto generado en el front que correlaciona este producto
+   * con su línea origen en `order_summary.products`. Permite al backend
+   * mapear de dónde viene cada producto en cada split.
+   */
+  item_uuid?: string;
 }
 export interface DiscountOrder {
   discountId: number;

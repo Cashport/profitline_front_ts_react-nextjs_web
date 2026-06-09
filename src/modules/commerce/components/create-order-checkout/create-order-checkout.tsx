@@ -25,6 +25,7 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 import { GenericResponse } from "@/types/global/IGlobal";
+import { generateShortUuid } from "@/utils/utils";
 
 import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
 import OrderShipmentConfirm from "./order-shipment-confirm/order-shipment-confirm";
@@ -90,6 +91,11 @@ export default function CheckoutPage() {
       try {
         const response = await confirmOrder(projectId, client?.id || "", payload);
         if (response.status === 200) {
+          response?.data?.discounts?.discountItems?.forEach((item) => {
+            if (!item.item_uuid) {
+              item.item_uuid = generateShortUuid();
+            }
+          });
           setConfirmOrderData(response.data);
         }
       } catch (error) {
@@ -126,8 +132,45 @@ export default function CheckoutPage() {
       .reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
 
   const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
+    // 1) Genera un uuid corto por cada línea de order_summary.products.
+    const summaryProducts = (confirmOrderData?.products ?? []).map((p) => ({
+      ...p,
+      item_uuid: generateShortUuid()
+    }));
+
+    // 2) Mapa de lookup por (sku + product_id + quantity) para mapear el mismo
+    //    uuid a los productos correspondientes en cada split.
+    const uuidByKey = new Map<string, string>();
+    summaryProducts.forEach((p) => {
+      const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
+      if (p.item_uuid) uuidByKey.set(key, p.item_uuid);
+    });
+
+    // 3) Inyecta el mismo uuid en order_summary.discounts.discountItems
+    //    (mismo source que order_split_details[*].products).
+    const summaryDiscountItems = (confirmOrderData?.discounts?.discountItems ?? []).map((p) => {
+      const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
+      const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
+      return { ...p, item_uuid };
+    });
+
+    // 4) Clona order_split_details inyectando item_uuid en cada producto del split.
+    const splitDetails = order_split_details.map((split) => ({
+      ...split,
+      products: split.products.map((p) => {
+        const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
+        const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
+        return { ...p, item_uuid };
+      })
+    }));
+
     const orderSummary: IOrderSummaryPayload = {
       ...confirmOrderData,
+      products: summaryProducts,
+      discounts: {
+        ...confirmOrderData.discounts,
+        discountItems: summaryDiscountItems
+      },
       discount_package: selectedDiscount as IDiscountPackageAvailable,
       executive_discounts: executiveDiscounts,
       deactivate_cross_selling: !deactivateCrossSelling
@@ -135,7 +178,7 @@ export default function CheckoutPage() {
     return {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
-      order_split_details,
+      order_split_details: splitDetails,
       promotion_id: bonus?.id || 0,
       nit_id: channelCode
     };
