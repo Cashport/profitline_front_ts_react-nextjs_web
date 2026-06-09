@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 
@@ -73,6 +73,11 @@ export default function CheckoutPage() {
   const [showWompiModal, setShowWompiModal] = useState(false);
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
 
+  // Conserva los uuids generados previamente para reutilizarlos cuando
+  // se revalida el descuento (mismo sku + misma quantity => mismo uuid),
+  // de modo que el backend pueda correlacionar el producto entre revalidaciones.
+  const previousItemUuidsRef = useRef<Map<string, string>>(new Map());
+
   useEffect(() => {
     const fetchTotalValues = async () => {
       if (selectedCategories.length === 0) return;
@@ -92,9 +97,11 @@ export default function CheckoutPage() {
         const response = await confirmOrder(projectId, client?.id || "", payload);
         if (response.status === 200) {
           response?.data?.discounts?.discountItems?.forEach((item) => {
-            if (!item.item_uuid) {
-              item.item_uuid = generateShortUuid();
-            }
+              const key = `${item.product_sku}::${item.quantity}`;
+              const existing = previousItemUuidsRef.current.get(key);
+              const item_uuid = existing ?? generateShortUuid();
+              previousItemUuidsRef.current.set(key, item_uuid);
+              item.item_uuid = item_uuid;
           });
           setConfirmOrderData(response.data);
         }
@@ -132,24 +139,29 @@ export default function CheckoutPage() {
       .reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
 
   const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
-    // 1) Genera un uuid corto por cada línea de order_summary.products.
-    const summaryProducts = (confirmOrderData?.products ?? []).map((p) => ({
-      ...p,
-      item_uuid: generateShortUuid()
-    }));
+    // 1) Para cada línea de order_summary.products, reutiliza el uuid previo
+    //    si existe (mismo sku + quantity) o genera uno nuevo. Esto preserva
+    //    la correlación cuando se revalida el descuento (override o
+    //    desactivación de cross-selling).
+    const summaryProducts = (confirmOrderData?.products ?? []).map((p) => {
+      const key = `${p.product_sku}::${p.quantity}`;
+      const existing = previousItemUuidsRef.current.get(key);
+      const item_uuid = existing ?? generateShortUuid();
+      previousItemUuidsRef.current.set(key, item_uuid);
+      return { ...p, item_uuid };
+    });
 
-    // 2) Mapa de lookup por (sku + product_id + quantity) para mapear el mismo
-    //    uuid a los productos correspondientes en cada split.
+    // 2) Mapa de lookup por (sku + quantity) para inyectar el mismo uuid
+    //    en discounts.discountItems y en order_split_details[*].products.
     const uuidByKey = new Map<string, string>();
     summaryProducts.forEach((p) => {
-      const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
-      if (p.item_uuid) uuidByKey.set(key, p.item_uuid);
+      if (p.item_uuid) uuidByKey.set(`${p.product_sku}::${p.quantity}`, p.item_uuid);
     });
 
     // 3) Inyecta el mismo uuid en order_summary.discounts.discountItems
     //    (mismo source que order_split_details[*].products).
     const summaryDiscountItems = (confirmOrderData?.discounts?.discountItems ?? []).map((p) => {
-      const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
+      const key = `${p.product_sku}::${p.quantity}`;
       const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
       return { ...p, item_uuid };
     });
@@ -158,7 +170,7 @@ export default function CheckoutPage() {
     const splitDetails = order_split_details.map((split) => ({
       ...split,
       products: split.products.map((p) => {
-        const key = `${p.product_sku}::${p.product_id}::${p.quantity}`;
+        const key = `${p.product_sku}::${p.quantity}`;
         const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
         return { ...p, item_uuid };
       })
