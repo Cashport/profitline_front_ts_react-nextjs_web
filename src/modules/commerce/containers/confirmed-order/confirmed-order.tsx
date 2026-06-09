@@ -134,7 +134,9 @@ export const ConfirmedOrderView: FC = () => {
                                 : discount.product_sku === product.product_sku
                             )?.discount;
                             const productDiscountData =
-                              productDiscount && productDiscount.subtotalDiscount > 0
+                              productDiscount &&
+                              productDiscount.subtotalDiscount > 0 &&
+                              productDiscount.primary
                                 ? {
                                     discountPercentage:
                                       productDiscount.primary?.discount_applied?.discount,
