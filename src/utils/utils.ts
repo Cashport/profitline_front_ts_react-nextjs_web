@@ -506,3 +506,15 @@ export const formatEmailBodyHtml = (body: string): string => {
     .replace(/>/g, "&gt;")
     .replace(/\n/g, "<br/>");
 };
+
+/**
+ * Genera un UUID corto (8 caracteres hex) a partir de `crypto.randomUUID()`.
+ * Suficiente para correlacionar items dentro de un mismo request de orden.
+ */
+export function generateShortUuid(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  }
+  // Fallback para entornos sin crypto.randomUUID
+  return Math.random().toString(16).slice(2, 10).padEnd(8, "0");
+}

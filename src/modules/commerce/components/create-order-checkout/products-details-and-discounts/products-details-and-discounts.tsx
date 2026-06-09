@@ -256,7 +256,7 @@ export default function ProductsDetailsAndDiscounts({
               {discountItems.map((item, idx) => {
                 const precioFinal = item.discount?.primary?.new_price ?? item.price;
                 const totalLinea = precioFinal * item.quantity;
-                const restante = item.quantity - cantidadesAsignadas(item.product_sku);
+                const restante = item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku);
                 const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
                 const executiveEntry = executiveDiscounts.find(
                   (e) => e.product_sku === item.product_sku
@@ -265,7 +265,7 @@ export default function ProductsDetailsAndDiscounts({
 
                 return (
                   <div
-                    key={item.product_sku}
+                    key={`${item.product_sku}-${idx}`}
                     className={`grid ${cols} items-center px-4 py-4 ${
                       idx < discountItems.length - 1 ? "border-b border-[#F4F4F4]" : ""
                     }`}
@@ -334,7 +334,7 @@ export default function ProductsDetailsAndDiscounts({
 
                   {bonificados.map((b, idx) => (
                     <div
-                      key={b.key}
+                      key={`${b.key}-${idx}`}
                       className={`grid ${cols} items-center px-4 py-3.5 bg-[#FDFFF5] ${
                         idx < bonificados.length - 1 ? "border-b border-[#F0F9D8]" : ""
                       }`}
