@@ -3,7 +3,7 @@ import { Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "phosphor-react";
 
-import { extractSingleParam, formatNumber } from "@/utils/utils";
+import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/utils";
 import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 
@@ -40,7 +40,12 @@ export const ConfirmedOrderView: FC = () => {
       const response = await getSingleOrder(projectId, parseInt(orderIdParam));
       setOrder(response?.data[0]);
       if (response.data[0].detail?.discounts?.discountItems?.length > 0)
-        setAppliedDiscounts(response.data[0].detail?.discounts?.discountItems);
+        setAppliedDiscounts(
+          response.data[0].detail?.discounts?.discountItems?.map((item) => ({
+            ...item,
+            item_uuid: item.item_uuid ?? generateShortUuid()
+          }))
+        );
       setLoading(false);
     };
     fetchOrder();
@@ -123,8 +128,10 @@ export const ConfirmedOrderView: FC = () => {
                         </Flex>
                         <div className={styles.products}>
                           {category.products.map((product) => {
-                            const productDiscount = appliedDiscounts?.find(
-                              (discount: any) => discount.product_sku === product.product_sku
+                            const productDiscount = appliedDiscounts?.find((discount: any) =>
+                              product.item_uuid
+                                ? discount.item_uuid === product.item_uuid
+                                : discount.product_sku === product.product_sku
                             )?.discount;
                             const productDiscountData =
                               productDiscount && productDiscount.subtotalDiscount > 0

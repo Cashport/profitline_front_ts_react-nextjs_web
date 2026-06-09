@@ -78,7 +78,7 @@ export default function ModalShippingInfo({
 
   const splitTotal = useMemo(() => {
     return discountItems.reduce((sum, item) => {
-      const qty = draft.cantidades[item.product_sku] ?? 0;
+      const qty = draft.cantidades[item.item_uuid || item.product_sku] ?? 0;
       const unitPrice = item.discount?.primary?.new_price ?? item.price;
       return sum + unitPrice * qty;
     }, 0);
@@ -89,7 +89,7 @@ export default function ModalShippingInfo({
   const splitProductDescriptions = useMemo(() => {
     const descs: string[] = [];
     for (const i of discountItems) {
-      if ((draft.cantidades[i.product_sku] ?? 0) > 0) descs.push(i.description ?? "");
+      if ((draft.cantidades[i.item_uuid || i.product_sku] ?? 0) > 0) descs.push(i.description ?? "");
     }
     for (const b of bonusItems) {
       if ((draft.bonusCantidades[b.product_sku] ?? 0) > 0) descs.push(b.description ?? "");
@@ -326,9 +326,9 @@ export default function ModalShippingInfo({
                 <span className="text-[10px] text-[#999999] font-semibold text-center">Cant.</span>
               </div>
               {discountItems.map((item, iIdx) => {
-                const asignado = draft.cantidades[item.product_sku] ?? 0;
+                const asignado = draft.cantidades[item.item_uuid || item.product_sku] ?? 0;
                 const asignadoOtros = cantidadesAsignadasExcluyendo(
-                  item.product_sku,
+                  item.item_uuid || item.product_sku,
                   mode === "new" ? null : mode
                 );
                 const disponible = item.quantity - asignadoOtros;
@@ -336,7 +336,7 @@ export default function ModalShippingInfo({
                 const isLastRow = iIdx === discountItems.length - 1 && !hasBonus;
                 return (
                   <div
-                    key={item.product_sku}
+                    key={`${item.product_sku}::${iIdx}`}
                     className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${!isLastRow ? "border-b border-[#EEEEEE]" : ""}`}
                   >
                     <p className="text-xs text-[#141414] leading-tight pr-2">{item.description}</p>
@@ -358,7 +358,7 @@ export default function ModalShippingInfo({
                         );
                         setDraft((d) => ({
                           ...d,
-                          cantidades: { ...d.cantidades, [item.product_sku]: v }
+                          cantidades: { ...d.cantidades, [item.item_uuid || item.product_sku]: v }
                         }));
                       }}
                       className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
