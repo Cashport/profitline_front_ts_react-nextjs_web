@@ -39,7 +39,6 @@ export const computeComplementRequirements = (
   });
 
   const canulasFromSculptra = sculptraQty * 2;
-  console.log("Client id:", clientId);
   const isFullCanulaClient = !!clientId && FULL_CANULA_CLIENT_IDS.includes(clientId);
   const canulasFromRestylane = isFullCanulaClient
     ? restylaneTotalQty // 1 cánula per Restylane unit
