@@ -65,22 +65,30 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
   const [isApplyingSpecificAdjustment, setIsApplyingSpecificAdjustment] = useState(false);
 
   useEffect(() => {
+    if (!visible) return;
+    let ignore = false;
+
     const fetchData = async () => {
       setLoadingData(true);
-      if (modalAdjustmentsState.adjustmentType === "global") {
-        const response = await getApplicationBalances(projectId, clientId);
-        setAdjustments(response?.flatMap((group) => group.balances) ?? []);
-      } else {
-        const response = await getApplicationAdjustments(projectId, clientId);
-        setAdjustments(response.map((item) => item.financial_discounts).flat());
+      try {
+        if (modalAdjustmentsState.adjustmentType === "global") {
+          const response = await getApplicationBalances(projectId, clientId);
+          if (!ignore) setAdjustments(response?.flatMap((group) => group.balances) ?? []);
+        } else {
+          const response = await getApplicationAdjustments(projectId, clientId);
+          if (!ignore) setAdjustments(response.map((item) => item.financial_discounts).flat());
+        }
+      } catch (error) {
+        console.error("error fetchData", error);
+      } finally {
+        if (!ignore) setLoadingData(false);
       }
-      setLoadingData(false);
     };
-    try {
-      fetchData();
-    } catch (error) {
-      console.error("error fetchData", error);
-    }
+
+    fetchData();
+    return () => {
+      ignore = true;
+    };
   }, [projectId, clientId, visible, modalAdjustmentsState.adjustmentType]);
 
   useEffect(() => {
