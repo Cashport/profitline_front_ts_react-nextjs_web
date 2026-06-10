@@ -7,6 +7,7 @@ import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam, formatDate } from "@/utils/utils";
 import {
   getApplicationAdjustments,
+  getApplicationBalances,
   getApplicationInvoices,
   getApplicationPayments
 } from "@/services/applyTabClients/applyTabClients";
@@ -20,14 +21,17 @@ import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/check
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IApplicationInvoice } from "@/types/invoices/IInvoices";
 import { IFinancialDiscount } from "@/hooks/useAcountingAdjustment";
+import { IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalAddToTables.scss";
+
+type AddableRow = IApplicationInvoice | IClientPayment | IFinancialDiscount | IApplicationBalance;
 
 interface ModalAddToTablesProps {
   onCancel: () => void;
   // eslint-disable-next-line no-unused-vars
   onAdd: (
-    adding_type: "invoices" | "payments" | "credit_notes",
+    adding_type: "invoices" | "payments" | "credit_notes" | "balances",
     selectedIds: number[]
   ) => Promise<void>;
   isModalAddToTableOpen: IModalAddToTableOpen;
@@ -45,13 +49,10 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   const [allInvoices, setAllInvoices] = useState<IApplicationInvoice[]>();
   const [allPayments, setAllPayments] = useState<IClientPayment[]>();
   const [allCreditNotes, setAllCreditNotes] = useState<IFinancialDiscount[]>();
+  const [allBalances, setAllBalances] = useState<IApplicationBalance[]>();
 
-  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment | IFinancialDiscount)[]>(
-    []
-  );
-  const [selectedRows, setSelectedRows] = useState<
-    (IApplicationInvoice | IClientPayment | IFinancialDiscount)[]
-  >([]);
+  const [rows, setRows] = useState<AddableRow[]>([]);
+  const [selectedRows, setSelectedRows] = useState<AddableRow[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingData, setLoadingData] = useState(true);
@@ -77,6 +78,12 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         const fetchedAdjustments = res?.flatMap((group) => group.financial_discounts) ?? [];
         setAllCreditNotes(fetchedAdjustments);
         setLoadingData(false);
+      } else if (isModalAddToTableOpen.adding === "balances") {
+        setLoadingData(true);
+        const res = await getApplicationBalances(projectId, clientId);
+        const fetchedBalances = res?.flatMap((group) => group.balances) ?? [];
+        setAllBalances(fetchedBalances);
+        setLoadingData(false);
       }
     };
 
@@ -90,8 +97,10 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       setRows(allPayments);
     } else if (isModalAddToTableOpen.adding === "credit_notes" && allCreditNotes) {
       setRows(allCreditNotes);
+    } else if (isModalAddToTableOpen.adding === "balances" && allBalances) {
+      setRows(allBalances);
     }
-  }, [isModalAddToTableOpen.adding, allInvoices, allPayments, allCreditNotes]);
+  }, [isModalAddToTableOpen.adding, allInvoices, allPayments, allCreditNotes, allBalances]);
 
   useEffect(() => {
     return () => {
@@ -113,7 +122,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     setCurrentPage(page);
   };
 
-  const getRowSearchKey = (row: IApplicationInvoice | IClientPayment | IFinancialDiscount) =>
+  const getRowSearchKey = (row: AddableRow) =>
     isModalAddToTableOpen.adding === "invoices"
       ? (row as IApplicationInvoice).id_erp
       : isModalAddToTableOpen.adding === "credit_notes"
@@ -200,10 +209,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     }
   };
 
-  const handleSelectOne = (
-    checked: boolean,
-    row: IClientPayment | IApplicationInvoice | IFinancialDiscount
-  ) => {
+  const handleSelectOne = (checked: boolean, row: AddableRow) => {
     setSelectedRows((prevSelectedRows) =>
       checked
         ? [...prevSelectedRows, row]
@@ -224,7 +230,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       ? "facturas"
       : isModalAddToTableOpen.adding === "credit_notes"
         ? "notas créditos"
-        : "pagos";
+        : isModalAddToTableOpen.adding === "balances"
+          ? "saldos"
+          : "pagos";
 
   const isAllChecked =
     paginatedRows.length > 0 &&
@@ -276,7 +284,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                 ? "Facturas no encontradas"
                 : isModalAddToTableOpen.adding === "credit_notes"
                   ? "Notas crédito no encontradas"
-                  : "Pagos no encontrados"}
+                  : isModalAddToTableOpen.adding === "balances"
+                    ? "Saldos no encontrados"
+                    : "Pagos no encontrados"}
             </div>
             <div
               className="excel-button-container"
@@ -337,14 +347,18 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                           ? `Factura ${(row as IApplicationInvoice).id_erp}`
                           : isModalAddToTableOpen.adding === "credit_notes"
                             ? `Nota crédito ${(row as IFinancialDiscount).erp_id}`
-                            : `Pago ${(row as IClientPayment).id}`}
+                            : isModalAddToTableOpen.adding === "balances"
+                              ? `Saldo ${(row as IApplicationBalance).id}`
+                              : `Pago ${(row as IClientPayment).id}`}
                       </h4>
                       <p className="invoices-list__date">
                         {isModalAddToTableOpen.adding === "invoices"
                           ? formatDate((row as IApplicationInvoice).financial_record_date)
                           : isModalAddToTableOpen.adding === "credit_notes"
                             ? formatDate((row as IFinancialDiscount).date_of_issue)
-                            : formatDate((row as IClientPayment).payment_date)}
+                            : isModalAddToTableOpen.adding === "balances"
+                              ? formatDate((row as IApplicationBalance).created_at)
+                              : formatDate((row as IClientPayment).payment_date)}
                       </p>
                     </div>
                     <h3 className="invoices-list__amount">{formatMoney(row.current_value)}</h3>

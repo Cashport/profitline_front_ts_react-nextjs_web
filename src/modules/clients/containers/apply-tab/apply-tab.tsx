@@ -41,7 +41,9 @@ import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./apply-tab.scss";
 import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
+import { type } from "node:os";
 
+export type IAddingType = "invoices" | "payments" | "credit_notes" | "balances";
 interface ISelectedRowKeys {
   invoices: React.Key[];
   payments: React.Key[];
@@ -51,7 +53,7 @@ interface ISelectedRowKeys {
 
 export interface IModalAddToTableOpen {
   isOpen: boolean;
-  adding?: "invoices" | "payments" | "credit_notes";
+  adding?: "invoices" | "payments" | "credit_notes" | "balances";
 }
 
 export interface IModalAdjustmentsState {
@@ -118,7 +120,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     isValidating,
     setPreventRevalidation
   } = useApplicationTable();
-  const showModal = (adding_type: "invoices" | "payments" | "credit_notes") => {
+  const showModal = (adding_type: "invoices" | "payments" | "credit_notes" | "balances") => {
     setIsModalAddToTableOpen({
       isOpen: true,
       adding: adding_type
@@ -137,26 +139,23 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     });
   };
 
-  const handleAdd = async (
-    adding_type: "invoices" | "payments" | "discounts" | "credit_notes",
-    selectedIds: number[]
-  ) => {
+  const handleAdd = async (adding_type: IAddingType, selectedIds: number[]) => {
+    console.log("handleAdd called with:", { adding_type, selectedIds });
     // Handle adding selected
     try {
       await addItemsToTable(projectId, clientId, adding_type, selectedIds);
 
       showMessage("success", "Se han agregado los elementos correctamente");
-      if (adding_type !== "discounts") {
-        setIsModalAddToTableOpen({
-          isOpen: false
-        });
-      } else {
-        setModalAdjustmentsState({
-          isOpen: false,
-          modal: 0,
-          adjustmentType: undefined
-        });
-      }
+      // handleAdd is shared by ModalAddToTables and ModalListAdjustments; only one is open
+      // at a time, so close both regardless of adding_type.
+      setIsModalAddToTableOpen({
+        isOpen: false
+      });
+      setModalAdjustmentsState({
+        isOpen: false,
+        modal: 0,
+        adjustmentType: undefined
+      });
 
       mutate();
     } catch (error) {
