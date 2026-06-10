@@ -184,7 +184,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
     <>
       <Table
         columns={columns}
-        dataSource={data?.map((data) => ({ ...data, key: data.financial_discount_id }))}
+        dataSource={data?.map((data) => ({ ...data, key: data.id }))}
         className="sectionContainerTable customSticky"
         pagination={false}
         rowSelection={rowSelection}

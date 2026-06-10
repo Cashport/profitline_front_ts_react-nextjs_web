@@ -46,6 +46,7 @@ interface ISelectedRowKeys {
   invoices: React.Key[];
   payments: React.Key[];
   discounts: React.Key[];
+  balances: React.Key[];
 }
 
 export interface IModalAddToTableOpen {
@@ -101,7 +102,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<ISelectedRowKeys>({
     invoices: [],
     payments: [],
-    discounts: []
+    discounts: [],
+    balances: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
   const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
@@ -200,7 +202,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         const updatedSelectedRowKeys: ISelectedRowKeys = {
           payments: [],
           invoices: [],
-          discounts: []
+          discounts: [],
+          balances: []
         };
         updatedSelectedRowKeys[tableKey] = newSelectedRowKeys;
         return updatedSelectedRowKeys;
@@ -290,17 +293,13 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       count: filteredData?.payments.length
     };
 
-    const concDiscountsAndBalances = (filteredData?.discounts || []).concat(
-      filteredData?.balances || []
-    );
-
     const discounts = {
       statusName: "notas crédito",
       color: "#E53261",
       statusId: 3,
-      itemsList: concDiscountsAndBalances, // Concatenamos los descuentos con los balances para mostrarlos juntos en la sección de ajustes
-      total: concDiscountsAndBalances.length && applicationData?.summary.total_discounts,
-      count: concDiscountsAndBalances.length
+      itemsList: filteredData?.discounts,
+      total: applicationData?.summary.total_discounts,
+      count: filteredData?.discounts.length
     };
 
     const balances = {
@@ -308,7 +307,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       color: "#000000",
       statusId: 4,
       itemsList: filteredData?.balances,
-      total: filteredData?.balances.length && applicationData?.summary.total_balance,
+      total: applicationData?.summary.total_balance,
       count: filteredData?.balances.length
     };
 
@@ -400,7 +399,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     setSelectedRowKeys({
       invoices: [],
       payments: [],
-      discounts: []
+      discounts: [],
+      balances: []
     });
     setSelectedRows([]);
   };
@@ -551,11 +551,21 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       markPaymentAsUnidentified={handlePaymentUnidentified}
                     />
                   )}
-                  {section.statusName === "ajustes" && (
+                  {section.statusName === "notas crédito" && (
                     <DiscountTable
                       data={section.itemsList}
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
+                      handleEditRow={(row) => handleEditRow(row, "discount")}
+                      clientId={clientId}
+                      projectId={projectId}
+                    />
+                  )}
+                  {section.statusName === "saldos" && (
+                    <DiscountTable
+                      data={section.itemsList}
+                      handleDeleteRow={handleRemoveRow}
+                      rowSelection={rowSelection("balances")}
                       handleEditRow={(row) => handleEditRow(row, "discount")}
                       clientId={clientId}
                       projectId={projectId}

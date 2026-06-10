@@ -6,7 +6,7 @@ import { CaretLeft, CopySimple, X } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam, formatDate } from "@/utils/utils";
 import {
-  getApplicationBalances,
+  getApplicationAdjustments,
   getApplicationInvoices,
   getApplicationPayments
 } from "@/services/applyTabClients/applyTabClients";
@@ -19,7 +19,7 @@ import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/check
 
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IApplicationInvoice } from "@/types/invoices/IInvoices";
-import { IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
+import { IFinancialDiscount } from "@/hooks/useAcountingAdjustment";
 
 import "./modalAddToTables.scss";
 
@@ -44,13 +44,13 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   const clientId = extractSingleParam(params.clientId) || "";
   const [allInvoices, setAllInvoices] = useState<IApplicationInvoice[]>();
   const [allPayments, setAllPayments] = useState<IClientPayment[]>();
-  const [allCreditNotes, setAllCreditNotes] = useState<IApplicationBalance[]>();
+  const [allCreditNotes, setAllCreditNotes] = useState<IFinancialDiscount[]>();
 
-  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment | IApplicationBalance)[]>(
+  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment | IFinancialDiscount)[]>(
     []
   );
   const [selectedRows, setSelectedRows] = useState<
-    (IApplicationInvoice | IClientPayment | IApplicationBalance)[]
+    (IApplicationInvoice | IClientPayment | IFinancialDiscount)[]
   >([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,9 +73,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         setLoadingData(false);
       } else if (isModalAddToTableOpen.adding === "credit_notes") {
         setLoadingData(true);
-        const res = await getApplicationBalances(projectId, clientId);
-        const fetchedBalances = res?.flatMap((group) => group.balances) ?? [];
-        setAllCreditNotes(fetchedBalances);
+        const res = await getApplicationAdjustments(projectId, clientId);
+        const fetchedAdjustments = res?.flatMap((group) => group.financial_discounts) ?? [];
+        setAllCreditNotes(fetchedAdjustments);
         setLoadingData(false);
       }
     };
@@ -113,6 +113,13 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     setCurrentPage(page);
   };
 
+  const getRowSearchKey = (row: IApplicationInvoice | IClientPayment | IFinancialDiscount) =>
+    isModalAddToTableOpen.adding === "invoices"
+      ? (row as IApplicationInvoice).id_erp
+      : isModalAddToTableOpen.adding === "credit_notes"
+        ? (row as IFinancialDiscount).erp_id
+        : row.id.toString();
+
   useEffect(() => {
     if (searchQuery === "") {
       setNotFoundSearch([]);
@@ -124,13 +131,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       .map((query) => query.trim());
 
     const notFoundSearch = searchQueryArray.filter(
-      (query) =>
-        !rows.some(
-          (row) =>
-            (isModalAddToTableOpen.adding === "invoices"
-              ? (row as IApplicationInvoice).id_erp.toLowerCase()
-              : row.id.toString()) === query
-        )
+      (query) => !rows.some((row) => getRowSearchKey(row).toLowerCase() === query)
     );
     setNotFoundSearch(notFoundSearch.map(String));
   }, [rows, searchQuery]);
@@ -141,19 +142,12 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       .split(",")
       .map((query) => query.trim());
     const filtered = rows.filter((row) =>
-      searchQueryArray.some((query) =>
-        (isModalAddToTableOpen.adding === "invoices"
-          ? (row as IApplicationInvoice).id_erp
-          : row.id.toString()
-        )
-          .toLowerCase()
-          .includes(query)
-      )
+      searchQueryArray.some((query) => getRowSearchKey(row).toLowerCase().includes(query))
     );
 
     const sorted = filtered.sort((a, b) => {
-      const aMatches = searchQueryArray.some((query) => a.id.toString().toLowerCase() === query);
-      const bMatches = searchQueryArray.some((query) => b.id.toString().toLowerCase() === query);
+      const aMatches = searchQueryArray.some((query) => getRowSearchKey(a).toLowerCase() === query);
+      const bMatches = searchQueryArray.some((query) => getRowSearchKey(b).toLowerCase() === query);
 
       if (aMatches && !bMatches) return -1; // Exact match comes first
       if (!aMatches && bMatches) return 1; // Partial match comes after
@@ -208,7 +202,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
 
   const handleSelectOne = (
     checked: boolean,
-    row: IClientPayment | IApplicationInvoice | IApplicationBalance
+    row: IClientPayment | IApplicationInvoice | IFinancialDiscount
   ) => {
     setSelectedRows((prevSelectedRows) =>
       checked
@@ -342,14 +336,14 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                         {isModalAddToTableOpen.adding === "invoices"
                           ? `Factura ${(row as IApplicationInvoice).id_erp}`
                           : isModalAddToTableOpen.adding === "credit_notes"
-                            ? `Nota crédito ${(row as IApplicationBalance).id}`
+                            ? `Nota crédito ${(row as IFinancialDiscount).erp_id}`
                             : `Pago ${(row as IClientPayment).id}`}
                       </h4>
                       <p className="invoices-list__date">
                         {isModalAddToTableOpen.adding === "invoices"
                           ? formatDate((row as IApplicationInvoice).financial_record_date)
                           : isModalAddToTableOpen.adding === "credit_notes"
-                            ? formatDate((row as IApplicationBalance).created_at)
+                            ? formatDate((row as IFinancialDiscount).date_of_issue)
                             : formatDate((row as IClientPayment).payment_date)}
                       </p>
                     </div>
