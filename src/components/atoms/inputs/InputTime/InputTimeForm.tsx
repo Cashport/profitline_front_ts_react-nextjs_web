@@ -1,5 +1,5 @@
 import React from "react";
-import { TimePicker, Flex, Typography } from "antd";
+import { TimePicker, Flex, Typography, TimePickerProps } from "antd";
 import dayjs from "dayjs";
 import {
   Control,
@@ -29,6 +29,7 @@ interface InputTimeFormProps {
   customStyleContainer?: React.CSSProperties;
   hiddenIcon?: boolean;
   format?: string;
+  minuteStep?: TimePickerProps["minuteStep"];
 }
 
 export const InputTimeForm = ({
@@ -43,7 +44,8 @@ export const InputTimeForm = ({
   className,
   customStyleContainer,
   hiddenIcon,
-  format = "HH:mm:ss"
+  format = "HH:mm:ss",
+  minuteStep
 }: InputTimeFormProps) => {
   return (
     <Flex vertical className={`timePickerContainer ${className}`} style={customStyleContainer}>
@@ -65,6 +67,7 @@ export const InputTimeForm = ({
             }
             className={!error ? "timeInputForm" : "timeInputFormError"}
             format={format}
+            minuteStep={minuteStep}
           />
         )}
       />
