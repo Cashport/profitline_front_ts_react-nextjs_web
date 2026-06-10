@@ -51,7 +51,7 @@ interface ISelectedRowKeys {
 
 export interface IModalAddToTableOpen {
   isOpen: boolean;
-  adding?: "invoices" | "payments" | "credit_notes";
+  adding?: "invoices" | "payments" | "credit_notes" | "balances";
 }
 
 export interface IModalAdjustmentsState {
@@ -118,7 +118,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     isValidating,
     setPreventRevalidation
   } = useApplicationTable();
-  const showModal = (adding_type: "invoices" | "payments" | "credit_notes") => {
+  const showModal = (adding_type: "invoices" | "payments" | "credit_notes" | "balances") => {
     setIsModalAddToTableOpen({
       isOpen: true,
       adding: adding_type
@@ -138,7 +138,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   const handleAdd = async (
-    adding_type: "invoices" | "payments" | "discounts" | "credit_notes",
+    adding_type: "invoices" | "payments" | "credit_notes" | "balances",
     selectedIds: number[]
   ) => {
     // Handle adding selected
@@ -146,17 +146,16 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       await addItemsToTable(projectId, clientId, adding_type, selectedIds);
 
       showMessage("success", "Se han agregado los elementos correctamente");
-      if (adding_type !== "discounts") {
-        setIsModalAddToTableOpen({
-          isOpen: false
-        });
-      } else {
-        setModalAdjustmentsState({
-          isOpen: false,
-          modal: 0,
-          adjustmentType: undefined
-        });
-      }
+      // handleAdd is shared by ModalAddToTables and ModalListAdjustments; only one is open
+      // at a time, so close both regardless of adding_type.
+      setIsModalAddToTableOpen({
+        isOpen: false
+      });
+      setModalAdjustmentsState({
+        isOpen: false,
+        modal: 0,
+        adjustmentType: undefined
+      });
 
       mutate();
     } catch (error) {
@@ -516,11 +515,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                           showModal("credit_notes");
                         }
                         if (section.statusName === "saldos") {
-                          setModalAdjustmentsState(
-                            modalAdjustmentsState.isOpen
-                              ? { isOpen: false, modal: 1 }
-                              : { isOpen: true, modal: 1 }
-                          );
+                          showModal("balances");
                         }
                       }}
                     >

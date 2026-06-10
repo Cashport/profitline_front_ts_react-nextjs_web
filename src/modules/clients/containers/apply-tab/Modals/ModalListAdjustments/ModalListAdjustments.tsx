@@ -31,7 +31,7 @@ interface ModalListAdjustmentsProps {
   setModalAction: (modalAction: number) => void;
   addGlobalAdjustment: (
     // eslint-disable-next-line no-unused-vars
-    adding_type: "invoices" | "payments" | "discounts",
+    adding_type: "invoices" | "payments" | "credit_notes",
     // eslint-disable-next-line no-unused-vars
     selectedIds: number[]
   ) => Promise<void>;
@@ -115,7 +115,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     setLoading(true);
     if (modalAdjustmentsState.adjustmentType === "global") {
       await addGlobalAdjustment(
-        "discounts",
+        "credit_notes",
         selectedRows.map((row) => row.id)
       );
     } else if (modalAdjustmentsState.adjustmentType === "byInvoice") {

@@ -112,7 +112,7 @@ const AccountingAdjustmentsTab = () => {
       await addItemsToTable(
         Number(projectId) || 0,
         clientId,
-        "discounts",
+        "credit_notes",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
       setIsModalOpen({ selected: 0 });
