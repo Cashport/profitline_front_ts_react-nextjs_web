@@ -73,6 +73,7 @@ export interface IClientData {
   country_name: string;
   periodicity: string | null;
   status: string;
+  alerts: number;
 }
 
 // Client List Response

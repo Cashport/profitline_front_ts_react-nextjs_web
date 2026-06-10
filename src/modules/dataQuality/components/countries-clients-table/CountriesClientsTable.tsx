@@ -96,6 +96,28 @@ export default function CountriesClientsTable({
       showSorterTooltip: false
     },
     {
+      title: "Alertas",
+      dataIndex: "alerts",
+      key: "alerts",
+      align: "center",
+      render: (alerts: number) => {
+        const count = alerts ?? 0;
+        return (
+          <span
+            className={
+              count > 0
+                ? "inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-semibold bg-red-100 text-red-600"
+                : "text-xs text-gray-400"
+            }
+          >
+            {count > 0 ? count : "-"}
+          </span>
+        );
+      },
+      sorter: (a, b) => (a.alerts ?? 0) - (b.alerts ?? 0),
+      showSorterTooltip: false
+    },
+    {
       title: "Estado",
       key: "status",
       dataIndex: "status",
