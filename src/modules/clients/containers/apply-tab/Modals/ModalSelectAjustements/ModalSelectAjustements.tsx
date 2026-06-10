@@ -38,7 +38,7 @@ export const ModalSelectAjustements: React.FC<ModalSelectAjustementsProps> = ({
           icon={<NewspaperClipping size={20} />}
           title="Por factura"
           onClick={() => {
-            setModalAction(2, "byInvoice");
+            setModalAction(4, "byInvoice");
           }}
         />
       </div>
