@@ -188,11 +188,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     skipOddGroup?: boolean;
   }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
-      if (!options?.skipOddSBVital && hasOddSBVital) {
+      const hasAnnualDiscount = !!selectedDiscount?.idAnnualDiscount;
+
+      if (!hasAnnualDiscount && !options?.skipOddSBVital && hasOddSBVital) {
         setShowOddSBVitalModal(true);
         return;
       }
-      if (!options?.skipOddGroup && hasOddRestylaneGroupSum) {
+      if (!hasAnnualDiscount && !options?.skipOddGroup && hasOddRestylaneGroupSum) {
         setShowOddGroupModal(true);
         return;
       }
