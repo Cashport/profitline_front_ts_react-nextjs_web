@@ -306,7 +306,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       color: "#000000",
       statusId: 4,
       itemsList: filteredData?.balances,
-      total: applicationData?.summary.total_balance,
+      total: applicationData?.summary.total_application_balance,
       count: filteredData?.balances.length
     };
 
@@ -437,6 +437,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       <ModalResultAppy
         invoices={applicationData?.summary.total_invoices}
         desconts={applicationData?.summary.total_discounts}
+        balances={applicationData?.summary.total_application_balance}
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
         defaultPosition={defaultPositionDragModal}
