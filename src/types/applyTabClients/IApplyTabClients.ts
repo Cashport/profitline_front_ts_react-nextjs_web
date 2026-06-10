@@ -97,6 +97,7 @@ export interface IApplicationBalance {
   is_deleted: number;
   financial_record_id: number | null;
   created_at: string;
+  comments: string | null;
 }
 
 export interface IApplicationBalanceStatusGroup {

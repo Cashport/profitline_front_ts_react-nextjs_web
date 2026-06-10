@@ -192,7 +192,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
                 {paginatedRows?.map((row) => {
                   const isGlobal = modalAdjustmentsState.adjustmentType === "global";
                   const title = isGlobal
-                    ? `Nota crédito ${(row as IApplicationBalance).id}`
+                    ? row.comments
                     : `Nota crédito ${(row as IFinancialDiscount).erp_id}`;
                   const subtitle = isGlobal
                     ? formatDate((row as IApplicationBalance).created_at)
