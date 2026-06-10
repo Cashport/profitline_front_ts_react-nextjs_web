@@ -1,14 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
-import { useApplicationTable } from "@/hooks/useApplicationTable";
-import Collapse from "@/components/ui/collapse";
-import LabelCollapse from "@/components/ui/label-collapse";
-import { useParams } from "next/navigation";
-
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
 import {
   addItemsToTable,
   getApplicationsExcelLog,
@@ -20,6 +17,8 @@ import {
 import { useMessageApi } from "@/context/MessageContext";
 // import { useSelectedPayments } from "@/context/SelectedPaymentsContext";
 
+import LabelCollapse from "@/components/ui/label-collapse";
+import Collapse from "@/components/ui/collapse";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import InvoiceTable from "./tables/InvoiceTable";
 import PaymentsTable from "./tables/PaymentsTable";
@@ -47,11 +46,12 @@ interface ISelectedRowKeys {
   invoices: React.Key[];
   payments: React.Key[];
   discounts: React.Key[];
+  balances: React.Key[];
 }
 
 export interface IModalAddToTableOpen {
   isOpen: boolean;
-  adding?: "invoices" | "payments";
+  adding?: "invoices" | "payments" | "credit_notes";
 }
 
 export interface IModalAdjustmentsState {
@@ -102,7 +102,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<ISelectedRowKeys>({
     invoices: [],
     payments: [],
-    discounts: []
+    discounts: [],
+    balances: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
   const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
@@ -117,7 +118,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     isValidating,
     setPreventRevalidation
   } = useApplicationTable();
-  const showModal = (adding_type: "invoices" | "payments") => {
+  const showModal = (adding_type: "invoices" | "payments" | "credit_notes") => {
     setIsModalAddToTableOpen({
       isOpen: true,
       adding: adding_type
@@ -137,7 +138,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   const handleAdd = async (
-    adding_type: "invoices" | "payments" | "discounts",
+    adding_type: "invoices" | "payments" | "discounts" | "credit_notes",
     selectedIds: number[]
   ) => {
     // Handle adding selected
@@ -201,7 +202,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         const updatedSelectedRowKeys: ISelectedRowKeys = {
           payments: [],
           invoices: [],
-          discounts: []
+          discounts: [],
+          balances: []
         };
         updatedSelectedRowKeys[tableKey] = newSelectedRowKeys;
         return updatedSelectedRowKeys;
@@ -264,7 +266,6 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       balance?.balance_id?.toString().toLowerCase().includes(searchQuery)
     );
 
-
     return {
       invoices: filteredInvoices,
       payments: filteredPayments,
@@ -292,23 +293,34 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       count: filteredData?.payments.length
     };
 
-    const concDiscountsAndBalances = (filteredData?.discounts || []).concat(filteredData?.balances || []);
-
     const discounts = {
-      statusName: "ajustes",
+      statusName: "notas crédito",
       color: "#E53261",
       statusId: 3,
-      itemsList: concDiscountsAndBalances, // Concatenamos los descuentos con los balances para mostrarlos juntos en la sección de ajustes
-      total: concDiscountsAndBalances.length && applicationData?.summary.total_discounts,
-      count: concDiscountsAndBalances.length
+      itemsList: filteredData?.discounts,
+      total: applicationData?.summary.total_discounts,
+      count: filteredData?.discounts.length
     };
 
+    const balances = {
+      statusName: "saldos",
+      color: "#000000",
+      statusId: 4,
+      itemsList: filteredData?.balances,
+      total: applicationData?.summary.total_balance,
+      count: filteredData?.balances.length
+    };
 
-    return [invoices, payments, discounts];
+    return [invoices, payments, discounts, balances];
   }, [filteredData]);
 
   const allRows = useMemo(
-    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts, ...filteredData.balances],
+    () => [
+      ...filteredData.invoices,
+      ...filteredData.payments,
+      ...filteredData.discounts,
+      ...filteredData.balances
+    ],
     [filteredData]
   );
 
@@ -387,7 +399,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     setSelectedRowKeys({
       invoices: [],
       payments: [],
-      discounts: []
+      discounts: [],
+      balances: []
     });
     setSelectedRows([]);
   };
@@ -499,7 +512,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                         if (section.statusName === "pagos") {
                           showModal("payments");
                         }
-                        if (section.statusName === "ajustes") {
+                        if (section.statusName === "notas crédito") {
+                          showModal("credit_notes");
+                        }
+                        if (section.statusName === "saldos") {
                           setModalAdjustmentsState(
                             modalAdjustmentsState.isOpen
                               ? { isOpen: false, modal: 1 }
@@ -535,11 +551,21 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       markPaymentAsUnidentified={handlePaymentUnidentified}
                     />
                   )}
-                  {section.statusName === "ajustes" && (
+                  {section.statusName === "notas crédito" && (
                     <DiscountTable
                       data={section.itemsList}
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
+                      handleEditRow={(row) => handleEditRow(row, "discount")}
+                      clientId={clientId}
+                      projectId={projectId}
+                    />
+                  )}
+                  {section.statusName === "saldos" && (
+                    <DiscountTable
+                      data={section.itemsList}
+                      handleDeleteRow={handleRemoveRow}
+                      rowSelection={rowSelection("balances")}
                       handleEditRow={(row) => handleEditRow(row, "discount")}
                       clientId={clientId}
                       projectId={projectId}
