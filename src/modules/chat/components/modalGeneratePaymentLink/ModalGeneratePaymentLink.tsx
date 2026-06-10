@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import dayjs from "dayjs";
 import { message, Modal, Spin } from "antd";
@@ -7,6 +7,8 @@ import { CaretLeft, PiggyBank, X, Copy, ArrowUpRight } from "@phosphor-icons/rea
 
 import { generatePaymentLink } from "@/services/commerce/commerce";
 import { sendWhatsAppTemplate } from "@/services/chat/chat";
+import { getApplicationInvoices } from "@/services/applyTabClients/applyTabClients";
+import { useAppStore } from "@/lib/store/store";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { formatCurrency } from "@/modules/new_dashboard/components/Formatters";
@@ -16,8 +18,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
+import SelectInvoices from "./SelectInvoices/SelectInvoices";
 
 import { IGeneratePaymentLinkResponse, IPaymentLinkData } from "@/types/commerce/ICommerce";
+import { IApplicationInvoice } from "@/types/invoices/IInvoices";
 
 import "./modalGeneratePaymentLink.scss";
 
@@ -36,6 +40,7 @@ interface ModalGeneratePaymentLinkProps {
 interface IFormGenerateLink {
   expirationDate: Date;
   expirationTime: Date;
+  invoices_id: number[];
   amount: number;
   description: string;
 }
@@ -49,6 +54,11 @@ const schema = yup.object().shape({
     .date()
     .typeError("Debe ser una hora válida")
     .required("La hora de expiración es requerida"),
+  invoices_id: yup
+    .array()
+    .of(yup.number().required())
+    .min(1, "Selecciona al menos una factura")
+    .required("Selecciona al menos una factura"),
   amount: yup
     .number()
     .typeError("Debe ser un número válido")
@@ -66,12 +76,14 @@ const ModalGeneratePaymentLink = ({
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    setValue
   } = useForm<IFormGenerateLink>({
     resolver: yupResolver(schema),
     defaultValues: {
       expirationDate: undefined,
       expirationTime: undefined,
+      invoices_id: [],
       amount: undefined,
       description: ""
     }
@@ -82,13 +94,38 @@ const ModalGeneratePaymentLink = ({
   const [formDescription, setFormDescription] = useState("Pago mensualidad enero 2026");
   const [createdAt, setCreatedAt] = useState(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const [isSendingTemplate, setIsSendingTemplate] = useState(false);
+  const [invoices, setInvoices] = useState<IApplicationInvoice[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
 
-  // Limpiar estados al cerrar modal
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+
+  // Limpiar estados al cerrar modal / fijar vencimiento por defecto (hoy 23:59) al abrir
   useEffect(() => {
     if (!isOpen) {
       reset();
+      return;
     }
-  }, [isOpen, reset]);
+    setValue("expirationDate", dayjs() as unknown as Date);
+    setValue("expirationTime", dayjs().hour(23).minute(59).second(0) as unknown as Date);
+  }, [isOpen, reset, setValue]);
+
+  // Cargar facturas del cliente al abrir el modal
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (!isOpen || !ticketInfo.clientId || !projectId) return;
+      setLoadingInvoices(true);
+      try {
+        const res = await getApplicationInvoices(projectId, ticketInfo.clientId);
+        setInvoices(res || []);
+      } catch (error) {
+        setInvoices([]);
+      } finally {
+        setLoadingInvoices(false);
+      }
+    };
+
+    fetchInvoices();
+  }, [isOpen, ticketInfo.clientId, projectId]);
 
   const onSubmit = async (data: IFormGenerateLink) => {
     setIsSubmitting(true);
@@ -99,7 +136,8 @@ const ModalGeneratePaymentLink = ({
         amount: data.amount,
         descripcion: data.description,
         ticket_id: ticketInfo.ticketId,
-        email: ticketInfo.email
+        email: ticketInfo.email,
+        invoice_ids: data.invoices_id
       };
 
       const res = await generatePaymentLink(ticketInfo.clientId, modelData);
@@ -211,13 +249,38 @@ const ModalGeneratePaymentLink = ({
               control={control}
               error={errors.expirationTime}
               placeholder="HH:MM"
+              format="HH:mm"
+              minuteStep={15}
             />
+            <div>
+              <Controller
+                name="invoices_id"
+                control={control}
+                render={({ field }) => (
+                  <SelectInvoices
+                    invoices={invoices}
+                    loading={loadingInvoices}
+                    value={field.value || []}
+                    onChange={(ids) => {
+                      field.onChange(ids);
+                      const total = invoices
+                        .filter((invoice) => ids.includes(invoice.id))
+                        .reduce((sum, invoice) => sum + invoice.current_value, 0);
+                      setValue("amount", total, { shouldValidate: true });
+                    }}
+                    error={!!errors.invoices_id}
+                  />
+                )}
+              />
+              {errors.invoices_id && <p className="error">{errors.invoices_id.message}</p>}
+            </div>
             <InputFormMoney
+              readOnly
               titleInput="Monto a pagar"
               nameInput="amount"
               control={control}
               error={errors.amount}
-              placeholder="Ingresa monto a pagar"
+              placeholder="Selecciona facturas"
               typeInput="number"
             />
 
