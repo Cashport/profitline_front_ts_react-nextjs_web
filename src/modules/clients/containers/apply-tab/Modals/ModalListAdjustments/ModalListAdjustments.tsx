@@ -18,7 +18,7 @@ import SecondaryButton from "@/components/atoms/buttons/secondaryButton/Secondar
 import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/checkbox-colored-values";
 import ModalApplySpecificAdjustment from "../ModalApplySpecificAdjustment/ModalApplySpecificAdjustment";
 
-import { IModalAdjustmentsState } from "../../apply-tab";
+import { IAddingType, IModalAdjustmentsState } from "../../apply-tab";
 import { IApplyTabRecord, IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalListAdjustments.scss";
@@ -31,7 +31,7 @@ interface ModalListAdjustmentsProps {
   setModalAction: (modalAction: number) => void;
   addGlobalAdjustment: (
     // eslint-disable-next-line no-unused-vars
-    adding_type: "invoices" | "payments" | "credit_notes",
+    adding_type: IAddingType,
     // eslint-disable-next-line no-unused-vars
     selectedIds: number[]
   ) => Promise<void>;
@@ -115,7 +115,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     setLoading(true);
     if (modalAdjustmentsState.adjustmentType === "global") {
       await addGlobalAdjustment(
-        "credit_notes",
+        "balances",
         selectedRows.map((row) => row.id)
       );
     } else if (modalAdjustmentsState.adjustmentType === "byInvoice") {

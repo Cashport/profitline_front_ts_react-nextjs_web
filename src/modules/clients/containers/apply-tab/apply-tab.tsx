@@ -41,7 +41,9 @@ import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./apply-tab.scss";
 import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
+import { type } from "node:os";
 
+export type IAddingType = "invoices" | "payments" | "credit_notes" | "balances";
 interface ISelectedRowKeys {
   invoices: React.Key[];
   payments: React.Key[];
@@ -137,10 +139,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     });
   };
 
-  const handleAdd = async (
-    adding_type: "invoices" | "payments" | "credit_notes" | "balances",
-    selectedIds: number[]
-  ) => {
+  const handleAdd = async (adding_type: IAddingType, selectedIds: number[]) => {
+    console.log("handleAdd called with:", { adding_type, selectedIds });
     // Handle adding selected
     try {
       await addItemsToTable(projectId, clientId, adding_type, selectedIds);
@@ -515,7 +515,11 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                           showModal("credit_notes");
                         }
                         if (section.statusName === "saldos") {
-                          showModal("balances");
+                          setModalAdjustmentsState(
+                            modalAdjustmentsState.isOpen
+                              ? { isOpen: false, modal: 1 }
+                              : { isOpen: true, modal: 1 }
+                          );
                         }
                       }}
                     >
