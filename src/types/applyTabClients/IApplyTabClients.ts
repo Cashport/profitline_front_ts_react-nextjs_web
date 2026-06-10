@@ -77,3 +77,35 @@ interface IAdjustmentBreakdown {
     debit_notes: number;
   };
 }
+
+export interface IApplicationBalance {
+  id: number;
+  project_id: number;
+  client_id: string;
+  client_uuid: string;
+  client_name: string;
+  financial_discount_motive_id: number;
+  motive_name: string;
+  balance_status_id: number;
+  balance_status_code: string;
+  balance_status_name: string;
+  balance_status_color: string;
+  initial_value: number;
+  current_value: number;
+  is_legalized: number;
+  is_deleted: number;
+  financial_record_id: number | null;
+  created_at: string;
+}
+
+export interface IApplicationBalanceStatusGroup {
+  status_id: string; // e.g. "2-not_legalized"
+  balance_status_id: number;
+  status_name: string;
+  status_code: string;
+  color: string;
+  balances: IApplicationBalance[];
+  total: number;
+  count: number;
+  legalized: boolean;
+}

@@ -6,8 +6,11 @@ import { CaretLeft, Plus } from "phosphor-react";
 import { IFinancialDiscount } from "@/hooks/useAcountingAdjustment";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
-import { extractSingleParam } from "@/utils/utils";
-import { getApplicationAdjustments } from "@/services/applyTabClients/applyTabClients";
+import { extractSingleParam, formatDate } from "@/utils/utils";
+import {
+  getApplicationAdjustments,
+  getApplicationBalances
+} from "@/services/applyTabClients/applyTabClients";
 
 import UiSearchInputLong from "@/components/ui/search-input-long";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -15,8 +18,8 @@ import SecondaryButton from "@/components/atoms/buttons/secondaryButton/Secondar
 import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/checkbox-colored-values";
 import ModalApplySpecificAdjustment from "../ModalApplySpecificAdjustment/ModalApplySpecificAdjustment";
 
-import { IModalAdjustmentsState } from "../../apply-tab";
-import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
+import { IAddingType, IModalAdjustmentsState } from "../../apply-tab";
+import { IApplyTabRecord, IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalListAdjustments.scss";
 
@@ -28,7 +31,7 @@ interface ModalListAdjustmentsProps {
   setModalAction: (modalAction: number) => void;
   addGlobalAdjustment: (
     // eslint-disable-next-line no-unused-vars
-    adding_type: "invoices" | "payments" | "discounts",
+    adding_type: IAddingType,
     // eslint-disable-next-line no-unused-vars
     selectedIds: number[]
   ) => Promise<void>;
@@ -49,8 +52,10 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { showMessage } = useMessageApi();
-  const [adjustments, setAdjustments] = useState<IFinancialDiscount[]>();
-  const [selectedRows, setSelectedRows] = useState<IFinancialDiscount[]>([]);
+  const [adjustments, setAdjustments] = useState<(IFinancialDiscount | IApplicationBalance)[]>();
+  const [selectedRows, setSelectedRows] = useState<(IFinancialDiscount | IApplicationBalance)[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -60,18 +65,23 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
   const [isApplyingSpecificAdjustment, setIsApplyingSpecificAdjustment] = useState(false);
 
   useEffect(() => {
-    const fetchDiscounts = async () => {
+    const fetchData = async () => {
       setLoadingData(true);
-      const response = await getApplicationAdjustments(projectId, clientId);
-      setAdjustments(response.map((item) => item.financial_discounts).flat());
+      if (modalAdjustmentsState.adjustmentType === "global") {
+        const response = await getApplicationBalances(projectId, clientId);
+        setAdjustments(response?.flatMap((group) => group.balances) ?? []);
+      } else {
+        const response = await getApplicationAdjustments(projectId, clientId);
+        setAdjustments(response.map((item) => item.financial_discounts).flat());
+      }
       setLoadingData(false);
     };
     try {
-      fetchDiscounts();
+      fetchData();
     } catch (error) {
-      console.error("error fetchDiscounts", error);
+      console.error("error fetchData", error);
     }
-  }, [projectId, clientId, visible]);
+  }, [projectId, clientId, visible, modalAdjustmentsState.adjustmentType]);
 
   useEffect(() => {
     return () => {
@@ -93,7 +103,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     }
   };
 
-  const handleSelectOne = (checked: boolean, row: IFinancialDiscount) => {
+  const handleSelectOne = (checked: boolean, row: IFinancialDiscount | IApplicationBalance) => {
     setSelectedRows((prevSelectedRows) =>
       checked
         ? [...prevSelectedRows, row]
@@ -105,7 +115,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     setLoading(true);
     if (modalAdjustmentsState.adjustmentType === "global") {
       await addGlobalAdjustment(
-        "discounts",
+        "balances",
         selectedRows.map((row) => row.id)
       );
     } else if (modalAdjustmentsState.adjustmentType === "byInvoice") {
@@ -126,13 +136,17 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
     return adjustments.filter((row) => {
       const query = searchQuery.toLowerCase();
 
-      const matchesErpId = row.erp_id?.toString().toLowerCase().includes(query);
+      if (modalAdjustmentsState.adjustmentType === "global") {
+        return (row as IApplicationBalance).id.toString().toLowerCase().includes(query);
+      }
 
-      const matchesComment = row.comments?.toLowerCase().includes(query);
+      const discountRow = row as IFinancialDiscount;
+      const matchesErpId = discountRow.erp_id?.toString().toLowerCase().includes(query);
+      const matchesComment = discountRow.comments?.toLowerCase().includes(query);
 
       return matchesErpId || matchesComment;
     });
-  }, [adjustments, searchQuery]);
+  }, [adjustments, searchQuery, modalAdjustmentsState.adjustmentType]);
 
   const paginatedRows = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -175,36 +189,43 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
           ) : (
             <>
               <div className="adjustments-list">
-                {paginatedRows?.map((row) => (
-                  <CheckboxColoredValues
-                    customStyles={{ height: "76px" }}
-                    customStyleDivider={{ width: "6px", height: "44px", alignSelf: "center" }}
-                    key={row.id}
-                    onChangeCheckbox={(e) => {
-                      handleSelectOne(e.target.checked, row);
-                    }}
-                    checked={selectedRows.some((selected) => selected.id === row.id)}
-                    content={
-                      <Flex style={{ width: "100%" }} justify="space-between" align="center">
-                        <Flex vertical>
-                          <h4 className="adjustments-list__title">Nota crédito {row.erp_id}</h4>
-                          {row.comments && (
-                            <p className="adjustments-list__subtitle">{row.comments}</p>
-                          )}
-                        </Flex>
+                {paginatedRows?.map((row) => {
+                  const isGlobal = modalAdjustmentsState.adjustmentType === "global";
+                  const title = isGlobal
+                    ? `Nota crédito ${(row as IApplicationBalance).id}`
+                    : `Nota crédito ${(row as IFinancialDiscount).erp_id}`;
+                  const subtitle = isGlobal
+                    ? formatDate((row as IApplicationBalance).created_at)
+                    : (row as IFinancialDiscount).comments;
+                  return (
+                    <CheckboxColoredValues
+                      customStyles={{ height: "76px" }}
+                      customStyleDivider={{ width: "6px", height: "44px", alignSelf: "center" }}
+                      key={row.id}
+                      onChangeCheckbox={(e) => {
+                        handleSelectOne(e.target.checked, row);
+                      }}
+                      checked={selectedRows.some((selected) => selected.id === row.id)}
+                      content={
+                        <Flex style={{ width: "100%" }} justify="space-between" align="center">
+                          <Flex vertical>
+                            <h4 className="adjustments-list__title">{title}</h4>
+                            {subtitle && <p className="adjustments-list__subtitle">{subtitle}</p>}
+                          </Flex>
 
-                        <Flex vertical>
-                          <h3 className="adjustments-list__amount">
-                            {formatMoney(row.current_value)}
-                          </h3>
-                          <p className="adjustments-list__subvalue">
-                            {formatMoney(row.initial_value)}
-                          </p>
+                          <Flex vertical>
+                            <h3 className="adjustments-list__amount">
+                              {formatMoney(row.current_value)}
+                            </h3>
+                            <p className="adjustments-list__subvalue">
+                              {formatMoney(row.initial_value)}
+                            </p>
+                          </Flex>
                         </Flex>
-                      </Flex>
-                    }
-                  />
-                ))}
+                      }
+                    />
+                  );
+                })}
               </div>
               <Pagination
                 pageSize={ITEMS_PER_PAGE}
@@ -246,7 +267,7 @@ const ModalListAdjustments: React.FC<ModalListAdjustmentsProps> = ({
               onCancel(true);
             }
           }}
-          selectedAdjustments={selectedRows}
+          selectedAdjustments={selectedRows as IFinancialDiscount[]}
           selectedInvoices={selectedInvoices}
         />
       )}

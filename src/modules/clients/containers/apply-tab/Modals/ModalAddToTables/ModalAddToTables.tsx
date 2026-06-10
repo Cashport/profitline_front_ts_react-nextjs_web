@@ -6,6 +6,8 @@ import { CaretLeft, CopySimple, X } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam, formatDate } from "@/utils/utils";
 import {
+  getApplicationAdjustments,
+  getApplicationBalances,
   getApplicationInvoices,
   getApplicationPayments
 } from "@/services/applyTabClients/applyTabClients";
@@ -18,13 +20,20 @@ import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/check
 
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IApplicationInvoice } from "@/types/invoices/IInvoices";
+import { IFinancialDiscount } from "@/hooks/useAcountingAdjustment";
+import { IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalAddToTables.scss";
+
+type AddableRow = IApplicationInvoice | IClientPayment | IFinancialDiscount | IApplicationBalance;
 
 interface ModalAddToTablesProps {
   onCancel: () => void;
   // eslint-disable-next-line no-unused-vars
-  onAdd: (adding_type: "invoices" | "payments", selectedIds: number[]) => Promise<void>;
+  onAdd: (
+    adding_type: "invoices" | "payments" | "credit_notes" | "balances",
+    selectedIds: number[]
+  ) => Promise<void>;
   isModalAddToTableOpen: IModalAddToTableOpen;
 }
 
@@ -39,9 +48,11 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   const clientId = extractSingleParam(params.clientId) || "";
   const [allInvoices, setAllInvoices] = useState<IApplicationInvoice[]>();
   const [allPayments, setAllPayments] = useState<IClientPayment[]>();
+  const [allCreditNotes, setAllCreditNotes] = useState<IFinancialDiscount[]>();
+  const [allBalances, setAllBalances] = useState<IApplicationBalance[]>();
 
-  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment)[]>([]);
-  const [selectedRows, setSelectedRows] = useState<(IApplicationInvoice | IClientPayment)[]>([]);
+  const [rows, setRows] = useState<AddableRow[]>([]);
+  const [selectedRows, setSelectedRows] = useState<AddableRow[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingData, setLoadingData] = useState(true);
@@ -61,6 +72,18 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         const fetchedPayments = res?.map((data) => data.payments).flat();
         setAllPayments(fetchedPayments);
         setLoadingData(false);
+      } else if (isModalAddToTableOpen.adding === "credit_notes") {
+        setLoadingData(true);
+        const res = await getApplicationAdjustments(projectId, clientId);
+        const fetchedAdjustments = res?.flatMap((group) => group.financial_discounts) ?? [];
+        setAllCreditNotes(fetchedAdjustments);
+        setLoadingData(false);
+      } else if (isModalAddToTableOpen.adding === "balances") {
+        setLoadingData(true);
+        const res = await getApplicationBalances(projectId, clientId);
+        const fetchedBalances = res?.flatMap((group) => group.balances) ?? [];
+        setAllBalances(fetchedBalances);
+        setLoadingData(false);
       }
     };
 
@@ -72,8 +95,12 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       setRows(allInvoices);
     } else if (isModalAddToTableOpen.adding === "payments" && allPayments) {
       setRows(allPayments);
+    } else if (isModalAddToTableOpen.adding === "credit_notes" && allCreditNotes) {
+      setRows(allCreditNotes);
+    } else if (isModalAddToTableOpen.adding === "balances" && allBalances) {
+      setRows(allBalances);
     }
-  }, [isModalAddToTableOpen.adding, allInvoices, allPayments]);
+  }, [isModalAddToTableOpen.adding, allInvoices, allPayments, allCreditNotes, allBalances]);
 
   useEffect(() => {
     return () => {
@@ -95,6 +122,13 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     setCurrentPage(page);
   };
 
+  const getRowSearchKey = (row: AddableRow) =>
+    isModalAddToTableOpen.adding === "invoices"
+      ? (row as IApplicationInvoice).id_erp
+      : isModalAddToTableOpen.adding === "credit_notes"
+        ? (row as IFinancialDiscount).erp_id
+        : row.id.toString();
+
   useEffect(() => {
     if (searchQuery === "") {
       setNotFoundSearch([]);
@@ -106,13 +140,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       .map((query) => query.trim());
 
     const notFoundSearch = searchQueryArray.filter(
-      (query) =>
-        !rows.some(
-          (row) =>
-            (isModalAddToTableOpen.adding === "payments"
-              ? row.id.toString()
-              : (row as IApplicationInvoice).id_erp.toLowerCase()) === query
-        )
+      (query) => !rows.some((row) => getRowSearchKey(row).toLowerCase() === query)
     );
     setNotFoundSearch(notFoundSearch.map(String));
   }, [rows, searchQuery]);
@@ -123,19 +151,12 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       .split(",")
       .map((query) => query.trim());
     const filtered = rows.filter((row) =>
-      searchQueryArray.some((query) =>
-        (isModalAddToTableOpen.adding === "payments"
-          ? row.id.toString()
-          : (row as IApplicationInvoice).id_erp
-        )
-          .toLowerCase()
-          .includes(query)
-      )
+      searchQueryArray.some((query) => getRowSearchKey(row).toLowerCase().includes(query))
     );
 
     const sorted = filtered.sort((a, b) => {
-      const aMatches = searchQueryArray.some((query) => a.id.toString().toLowerCase() === query);
-      const bMatches = searchQueryArray.some((query) => b.id.toString().toLowerCase() === query);
+      const aMatches = searchQueryArray.some((query) => getRowSearchKey(a).toLowerCase() === query);
+      const bMatches = searchQueryArray.some((query) => getRowSearchKey(b).toLowerCase() === query);
 
       if (aMatches && !bMatches) return -1; // Exact match comes first
       if (!aMatches && bMatches) return 1; // Partial match comes after
@@ -188,13 +209,11 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     }
   };
 
-  const handleSelectOne = (checked: boolean, row: IClientPayment | IApplicationInvoice) => {
+  const handleSelectOne = (checked: boolean, row: AddableRow) => {
     setSelectedRows((prevSelectedRows) =>
       checked
-        ? [...(prevSelectedRows as (IApplicationInvoice | IClientPayment)[]), row]
-        : (prevSelectedRows as (IApplicationInvoice | IClientPayment)[]).filter(
-            (selected) => selected.id !== row.id
-          )
+        ? [...prevSelectedRows, row]
+        : prevSelectedRows.filter((selected) => selected.id !== row.id)
     );
   };
 
@@ -205,6 +224,15 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     await onAdd(isModalAddToTableOpen.adding, uniqueSelectedIds);
     setLoadingAddToTable(false);
   };
+
+  const addingLabel =
+    isModalAddToTableOpen.adding === "invoices"
+      ? "facturas"
+      : isModalAddToTableOpen.adding === "credit_notes"
+        ? "notas créditos"
+        : isModalAddToTableOpen.adding === "balances"
+          ? "saldos"
+          : "pagos";
 
   const isAllChecked =
     paginatedRows.length > 0 &&
@@ -221,7 +249,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     >
       <div onClick={onCancel} className="header">
         <CaretLeft size={24} onClick={onCancel} />
-        <h2>{`Agregar ${isModalAddToTableOpen.adding === "invoices" ? "facturas" : "pagos"}`}</h2>
+        <h2>{`Agregar ${addingLabel}`}</h2>
       </div>
       {summary.count > 0 && isModalAddToTableOpen.adding === "invoices" && (
         <div className="summary-section">
@@ -254,7 +282,11 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
             <div>
               {isModalAddToTableOpen.adding === "invoices"
                 ? "Facturas no encontradas"
-                : "Pagos no encontrados"}
+                : isModalAddToTableOpen.adding === "credit_notes"
+                  ? "Notas crédito no encontradas"
+                  : isModalAddToTableOpen.adding === "balances"
+                    ? "Saldos no encontrados"
+                    : "Pagos no encontrados"}
             </div>
             <div
               className="excel-button-container"
@@ -313,11 +345,19 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                       <h4 className="invoices-list__title">
                         {isModalAddToTableOpen.adding === "invoices"
                           ? `Factura ${(row as IApplicationInvoice).id_erp}`
-                          : `Pago ${(row as IClientPayment).id}`}
+                          : isModalAddToTableOpen.adding === "credit_notes"
+                            ? `Nota crédito ${(row as IFinancialDiscount).erp_id}`
+                            : isModalAddToTableOpen.adding === "balances"
+                              ? `Saldo ${(row as IApplicationBalance).id}`
+                              : `Pago ${(row as IClientPayment).id}`}
                       </h4>
                       <p className="invoices-list__date">
-                          {isModalAddToTableOpen.adding === "invoices" 
-                              ? formatDate((row as IApplicationInvoice).financial_record_date) 
+                        {isModalAddToTableOpen.adding === "invoices"
+                          ? formatDate((row as IApplicationInvoice).financial_record_date)
+                          : isModalAddToTableOpen.adding === "credit_notes"
+                            ? formatDate((row as IFinancialDiscount).date_of_issue)
+                            : isModalAddToTableOpen.adding === "balances"
+                              ? formatDate((row as IApplicationBalance).created_at)
                               : formatDate((row as IClientPayment).payment_date)}
                       </p>
                     </div>
@@ -350,7 +390,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
           onClick={handleAddToTable}
           disabled={!selectedRows.length}
         >
-          {`Agregar ${isModalAddToTableOpen.adding === "invoices" ? "facturas" : "pagos"}`}
+          {`Agregar ${addingLabel}`}
         </PrincipalButton>
       </div>
     </Modal>

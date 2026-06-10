@@ -4,13 +4,15 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IApplicationInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import { IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { StatusGroup } from "@/hooks/useAcountingAdjustment";
+import { IApplicationBalanceStatusGroup } from "@/types/applyTabClients/IApplyTabClients";
 import { CLIENTUUID_DEMO, PROJECTID_DEMO } from "@/utils/constants/globalConstants";
 import { getCorrectMimeType } from "@/utils/files/getCorrectMimeType";
+import { balanceLegalization } from "../accountingAdjustment/accountingAdjustment";
 
 export const addItemsToTable = async (
   project_id: number,
   client_id: string,
-  adding_type: "invoices" | "payments" | "discounts",
+  adding_type: "invoices" | "payments" | "credit_notes" | "balances",
   selected_items_ids: number[]
 ) => {
   const modelData = {
@@ -18,7 +20,8 @@ export const addItemsToTable = async (
     clientUUID: client_id,
     ...(adding_type === "invoices" && { invoice_ids: selected_items_ids }),
     ...(adding_type === "payments" && { payment_ids: selected_items_ids }),
-    ...(adding_type === "discounts" && { discount_ids: selected_items_ids })
+    ...(adding_type === "credit_notes" && { discount_ids: selected_items_ids }),
+    ...(adding_type === "balances" && { balance_ids: selected_items_ids })
   };
   try {
     const response: GenericResponse<{ applications: number[] }> = await instance.post(
@@ -198,6 +201,18 @@ export const getApplicationPayments = async (project_id: number, client_id: stri
     return response.data;
   } catch (error) {
     console.error("error getApplicationPayments", error);
+    throw error;
+  }
+};
+
+export const getApplicationBalances = async (project_id: number, client_id: string) => {
+  try {
+    const response: GenericResponse<IApplicationBalanceStatusGroup[]> = await API.get(
+      `${config.API_HOST}/financial-discount/balances/project/${project_id}/client/${client_id}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error getApplicationBalances", error);
     throw error;
   }
 };
