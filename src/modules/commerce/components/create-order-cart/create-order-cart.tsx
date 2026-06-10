@@ -162,7 +162,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   }, [selectedCategories]);
 
   const complementMismatch = useMemo(() => {
-    const req = computeComplementRequirements(selectedCategories);
+    const req = computeComplementRequirements(selectedCategories, client?.id);
     if (!req.hasMainProduct) return null;
 
     const allProducts = selectedCategories.flatMap((c) => c.products);
@@ -333,7 +333,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     if (projectId !== GALDERMA_PROJECT_ID) return;
     if (categories.length === 0) return;
 
-    const req = computeComplementRequirements(selectedCategories);
+    const req = computeComplementRequirements(selectedCategories, client?.id);
 
     const currentSKUs = new Set<string>();
     for (const cat of selectedCategories) {
@@ -468,7 +468,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     prevAutoAssignedSKUsRef.current = newSnapshot;
 
     if (mutated) setSelectedCategories(next);
-  }, [selectedCategories, categories, projectId]);
+  }, [selectedCategories, categories, projectId, client?.id]);
 
   return (
     <div className={styles.cartContainer}>

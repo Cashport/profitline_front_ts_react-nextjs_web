@@ -2,6 +2,7 @@ import { ISelectedCategories } from "../containers/create-order/create-order";
 import {
   EVEN_QUANTITY_GROUP_PRODUCTS,
   EVEN_QUANTITY_PRODUCT,
+  FULL_CANULA_CLIENT_IDS,
   SCULPTRA_MAIN_PRODUCT,
   matchesProductIdentifier
 } from "./constants/evenQuantityProducts";
@@ -15,7 +16,8 @@ export interface ComplementRequirements {
 }
 
 export const computeComplementRequirements = (
-  selectedCategories: ISelectedCategories[]
+  selectedCategories: ISelectedCategories[],
+  clientId?: string
 ): ComplementRequirements => {
   let sculptraQty = 0;
   let restylaneTotalQty = 0;
@@ -37,7 +39,10 @@ export const computeComplementRequirements = (
   });
 
   const canulasFromSculptra = sculptraQty * 2;
-  const canulasFromRestylane = Math.floor(restylaneTotalQty / 2);
+  const isFullCanulaClient = !!clientId && FULL_CANULA_CLIENT_IDS.includes(clientId);
+  const canulasFromRestylane = isFullCanulaClient
+    ? restylaneTotalQty // 1 cánula per Restylane unit
+    : Math.floor(restylaneTotalQty / 2); // default: 1 cánula per 2 units
 
   return {
     requiredCanulas: canulasFromSculptra + canulasFromRestylane,

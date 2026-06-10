@@ -83,6 +83,11 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
     return <div></div>;
   }
 
+  const hasInvoiceValues =
+    !!incidentData.invoice_cashport_value ||
+    !!incidentData.invoice_client_value ||
+    !!incidentData.invoice_amount_difference;
+
   return (
     <aside className={`wrapper__new  wrapper__new_hide`}>
       {contextHolder}
@@ -115,7 +120,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         cliente={incidentData.client}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}
       />
-      <InfoInvoice incidentData={incidentData} />
+      {hasInvoiceValues && <InfoInvoice incidentData={incidentData} />}
       <EvidenceSection
         evidenceComments={incidentData.evidence_comments}
         evidenceFiles={incidentData.evidence_files}

@@ -49,3 +49,17 @@ export const AGUA_COMPLEMENT: ProductIdentifier = {
   EAN: null,
   description: "AGUA ESTERIL"
 };
+
+// Clients that require 1 cánula per Restylane unit (1:1) instead of the default 1-per-2 ratio.
+// Keyed by client name so it's clear which ID belongs to which client.
+export const FULL_CANULA_CLIENTS = {
+  FLOREZ_GRAJALES_DAVID_STEVEN: "1088021041",
+  CTRO_DERMA_LASER_PIEL_Y_BELLEZA_SAS: "816006442",
+  RADA_CASSAB_MEDICINA_ESTETICA: "830509599",
+  DOCTOR_ESCALANTE_SAS: "901352842",
+  CAROLINA_MARTINEZ_SAS: "901115633",
+  CANTIK_COLOMBIA_SAS: "901578018",
+  INNOVA_LASER_CENTER_SAS: "900523237"
+} as const;
+
+export const FULL_CANULA_CLIENT_IDS: string[] = Object.values(FULL_CANULA_CLIENTS);
