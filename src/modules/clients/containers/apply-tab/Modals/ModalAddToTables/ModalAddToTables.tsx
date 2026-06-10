@@ -6,6 +6,7 @@ import { CaretLeft, CopySimple, X } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam, formatDate } from "@/utils/utils";
 import {
+  getApplicationBalances,
   getApplicationInvoices,
   getApplicationPayments
 } from "@/services/applyTabClients/applyTabClients";
@@ -18,13 +19,17 @@ import CheckboxColoredValues from "@/components/ui/checkbox-colored-values/check
 
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
 import { IApplicationInvoice } from "@/types/invoices/IInvoices";
+import { IApplicationBalance } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./modalAddToTables.scss";
 
 interface ModalAddToTablesProps {
   onCancel: () => void;
   // eslint-disable-next-line no-unused-vars
-  onAdd: (adding_type: "invoices" | "payments", selectedIds: number[]) => Promise<void>;
+  onAdd: (
+    adding_type: "invoices" | "payments" | "credit_notes",
+    selectedIds: number[]
+  ) => Promise<void>;
   isModalAddToTableOpen: IModalAddToTableOpen;
 }
 
@@ -39,9 +44,14 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
   const clientId = extractSingleParam(params.clientId) || "";
   const [allInvoices, setAllInvoices] = useState<IApplicationInvoice[]>();
   const [allPayments, setAllPayments] = useState<IClientPayment[]>();
+  const [allCreditNotes, setAllCreditNotes] = useState<IApplicationBalance[]>();
 
-  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment)[]>([]);
-  const [selectedRows, setSelectedRows] = useState<(IApplicationInvoice | IClientPayment)[]>([]);
+  const [rows, setRows] = useState<(IApplicationInvoice | IClientPayment | IApplicationBalance)[]>(
+    []
+  );
+  const [selectedRows, setSelectedRows] = useState<
+    (IApplicationInvoice | IClientPayment | IApplicationBalance)[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingData, setLoadingData] = useState(true);
@@ -61,6 +71,12 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
         const fetchedPayments = res?.map((data) => data.payments).flat();
         setAllPayments(fetchedPayments);
         setLoadingData(false);
+      } else if (isModalAddToTableOpen.adding === "credit_notes") {
+        setLoadingData(true);
+        const res = await getApplicationBalances(projectId, clientId);
+        const fetchedBalances = res?.flatMap((group) => group.balances) ?? [];
+        setAllCreditNotes(fetchedBalances);
+        setLoadingData(false);
       }
     };
 
@@ -72,8 +88,10 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       setRows(allInvoices);
     } else if (isModalAddToTableOpen.adding === "payments" && allPayments) {
       setRows(allPayments);
+    } else if (isModalAddToTableOpen.adding === "credit_notes" && allCreditNotes) {
+      setRows(allCreditNotes);
     }
-  }, [isModalAddToTableOpen.adding, allInvoices, allPayments]);
+  }, [isModalAddToTableOpen.adding, allInvoices, allPayments, allCreditNotes]);
 
   useEffect(() => {
     return () => {
@@ -109,9 +127,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       (query) =>
         !rows.some(
           (row) =>
-            (isModalAddToTableOpen.adding === "payments"
-              ? row.id.toString()
-              : (row as IApplicationInvoice).id_erp.toLowerCase()) === query
+            (isModalAddToTableOpen.adding === "invoices"
+              ? (row as IApplicationInvoice).id_erp.toLowerCase()
+              : row.id.toString()) === query
         )
     );
     setNotFoundSearch(notFoundSearch.map(String));
@@ -124,9 +142,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
       .map((query) => query.trim());
     const filtered = rows.filter((row) =>
       searchQueryArray.some((query) =>
-        (isModalAddToTableOpen.adding === "payments"
-          ? row.id.toString()
-          : (row as IApplicationInvoice).id_erp
+        (isModalAddToTableOpen.adding === "invoices"
+          ? (row as IApplicationInvoice).id_erp
+          : row.id.toString()
         )
           .toLowerCase()
           .includes(query)
@@ -188,13 +206,14 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     }
   };
 
-  const handleSelectOne = (checked: boolean, row: IClientPayment | IApplicationInvoice) => {
+  const handleSelectOne = (
+    checked: boolean,
+    row: IClientPayment | IApplicationInvoice | IApplicationBalance
+  ) => {
     setSelectedRows((prevSelectedRows) =>
       checked
-        ? [...(prevSelectedRows as (IApplicationInvoice | IClientPayment)[]), row]
-        : (prevSelectedRows as (IApplicationInvoice | IClientPayment)[]).filter(
-            (selected) => selected.id !== row.id
-          )
+        ? [...prevSelectedRows, row]
+        : prevSelectedRows.filter((selected) => selected.id !== row.id)
     );
   };
 
@@ -205,6 +224,13 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     await onAdd(isModalAddToTableOpen.adding, uniqueSelectedIds);
     setLoadingAddToTable(false);
   };
+
+  const addingLabel =
+    isModalAddToTableOpen.adding === "invoices"
+      ? "facturas"
+      : isModalAddToTableOpen.adding === "credit_notes"
+        ? "notas créditos"
+        : "pagos";
 
   const isAllChecked =
     paginatedRows.length > 0 &&
@@ -221,7 +247,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     >
       <div onClick={onCancel} className="header">
         <CaretLeft size={24} onClick={onCancel} />
-        <h2>{`Agregar ${isModalAddToTableOpen.adding === "invoices" ? "facturas" : "pagos"}`}</h2>
+        <h2>{`Agregar ${addingLabel}`}</h2>
       </div>
       {summary.count > 0 && isModalAddToTableOpen.adding === "invoices" && (
         <div className="summary-section">
@@ -254,7 +280,9 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
             <div>
               {isModalAddToTableOpen.adding === "invoices"
                 ? "Facturas no encontradas"
-                : "Pagos no encontrados"}
+                : isModalAddToTableOpen.adding === "credit_notes"
+                  ? "Notas crédito no encontradas"
+                  : "Pagos no encontrados"}
             </div>
             <div
               className="excel-button-container"
@@ -313,12 +341,16 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
                       <h4 className="invoices-list__title">
                         {isModalAddToTableOpen.adding === "invoices"
                           ? `Factura ${(row as IApplicationInvoice).id_erp}`
-                          : `Pago ${(row as IClientPayment).id}`}
+                          : isModalAddToTableOpen.adding === "credit_notes"
+                            ? `Nota crédito ${(row as IApplicationBalance).id}`
+                            : `Pago ${(row as IClientPayment).id}`}
                       </h4>
                       <p className="invoices-list__date">
-                          {isModalAddToTableOpen.adding === "invoices" 
-                              ? formatDate((row as IApplicationInvoice).financial_record_date) 
-                              : formatDate((row as IClientPayment).payment_date)}
+                        {isModalAddToTableOpen.adding === "invoices"
+                          ? formatDate((row as IApplicationInvoice).financial_record_date)
+                          : isModalAddToTableOpen.adding === "credit_notes"
+                            ? formatDate((row as IApplicationBalance).created_at)
+                            : formatDate((row as IClientPayment).payment_date)}
                       </p>
                     </div>
                     <h3 className="invoices-list__amount">{formatMoney(row.current_value)}</h3>
@@ -350,7 +382,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
           onClick={handleAddToTable}
           disabled={!selectedRows.length}
         >
-          {`Agregar ${isModalAddToTableOpen.adding === "invoices" ? "facturas" : "pagos"}`}
+          {`Agregar ${addingLabel}`}
         </PrincipalButton>
       </div>
     </Modal>

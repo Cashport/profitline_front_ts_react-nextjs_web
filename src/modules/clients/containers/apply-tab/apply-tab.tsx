@@ -50,7 +50,7 @@ interface ISelectedRowKeys {
 
 export interface IModalAddToTableOpen {
   isOpen: boolean;
-  adding?: "invoices" | "payments";
+  adding?: "invoices" | "payments" | "credit_notes";
 }
 
 export interface IModalAdjustmentsState {
@@ -116,7 +116,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     isValidating,
     setPreventRevalidation
   } = useApplicationTable();
-  const showModal = (adding_type: "invoices" | "payments") => {
+  const showModal = (adding_type: "invoices" | "payments" | "credit_notes") => {
     setIsModalAddToTableOpen({
       isOpen: true,
       adding: adding_type
@@ -136,7 +136,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   const handleAdd = async (
-    adding_type: "invoices" | "payments" | "discounts",
+    adding_type: "invoices" | "payments" | "discounts" | "credit_notes",
     selectedIds: number[]
   ) => {
     // Handle adding selected
@@ -511,6 +511,9 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                         }
                         if (section.statusName === "pagos") {
                           showModal("payments");
+                        }
+                        if (section.statusName === "notas crédito") {
+                          showModal("credit_notes");
                         }
                         if (section.statusName === "saldos") {
                           setModalAdjustmentsState(
