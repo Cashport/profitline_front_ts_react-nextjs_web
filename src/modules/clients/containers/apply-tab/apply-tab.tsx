@@ -652,7 +652,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
             mutate();
           } else {
             setModalAdjustmentsState((prev) => {
-              return { ...prev, isOpen: true, modal: 2 };
+              return { ...prev, isOpen: true, modal: 1 };
             });
           }
         }}
