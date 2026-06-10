@@ -62,7 +62,7 @@ const ConfirmedOrderModalBlocked: FC<IConfirmedOrderModalBlocked> = ({
               handleOk={handleSendToApproval}
               onClose={handleClientPaid}
               titleConfirm="Enviar a aprobación"
-              titleCancel="Es un cliente de contado"
+              titleCancel="Es un pedido de contado"
             />
           </Flex>
         );
