@@ -87,6 +87,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     (acc, category) => acc + category.products.length,
     0
   );
+  const totalProductsQuantity = selectedCategories.reduce(
+    (acc, category) => acc + category.products.reduce((sum, product) => sum + product.quantity, 0),
+    0
+  );
 
   useEffect(() => {
     const fetchPromotions = async () => {
@@ -188,11 +192,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     skipOddGroup?: boolean;
   }) => {
     if (projectId === GALDERMA_PROJECT_ID) {
-      if (!options?.skipOddSBVital && hasOddSBVital) {
+      const hasAnnualDiscount = !!selectedDiscount?.idAnnualDiscount;
+
+      if (!hasAnnualDiscount && !options?.skipOddSBVital && hasOddSBVital) {
         setShowOddSBVitalModal(true);
         return;
       }
-      if (!options?.skipOddGroup && hasOddRestylaneGroupSum) {
+      if (!hasAnnualDiscount && !options?.skipOddGroup && hasOddRestylaneGroupSum) {
         setShowOddGroupModal(true);
         return;
       }
@@ -475,7 +481,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       <div className={styles.cartContainer__top}>
         <Flex className={styles.header} justify="space-between">
           <h3>Resumen de la orden</h3>
-          <p>SKUs: {numberOfSelectedProducts}</p>
+          <p>
+            SKUs: {numberOfSelectedProducts} - Productos: {totalProductsQuantity}
+          </p>
         </Flex>
         {width <= 768 && onClose && (
           <button onClick={onClose} className={styles.closeButton} aria-label="Cerrar carrito">
@@ -499,7 +507,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             <div key={category.category_id}>
               <Flex className={styles.products__header} justify="space-between">
                 <p>{category.products[0].category_name}</p>
-                <p>SKUs: {category.products.length}</p>
+                <p>
+                  SKUs: {category.products.length} - Productos:{" "}
+                  {category.products.reduce((sum, product) => sum + product.quantity, 0)}
+                </p>
               </Flex>
               {category.products.map((product) => {
                 const productsDiscount: DiscountItem[] = appliedDiscounts?.filter(
@@ -558,11 +569,15 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </Flex>
             <Flex justify="space-between" gap={"0.25rem"}>
-              <p>Descuentos ({selectedDiscount?.name})</p>
+              <p className={styles.cartContainer__footer__discountExplanation}>
+                Descuentos ({selectedDiscount?.name})
+              </p>
               {confirmOrderData.discounts ? (
-                <p>-${formatNumber(confirmOrderData.discounts?.totalDiscount)}</p>
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
+                </Text>
               ) : (
-                <p>-$0</p>
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
               )}
             </Flex>
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>

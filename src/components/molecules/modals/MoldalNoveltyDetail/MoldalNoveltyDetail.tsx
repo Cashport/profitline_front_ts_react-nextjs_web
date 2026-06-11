@@ -5,6 +5,7 @@ import { Button, message, Typography } from "antd";
 import { approveIncident, rejectIncident } from "@/services/resolveNovelty/resolveNovelty";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useGeneralPortfolio } from "@/hooks/useGeneralPortfolio";
+import { useAppStore } from "@/lib/store/store";
 
 import { InfoSection } from "./components/infoSection/InfoSection";
 import { InfoInvoice } from "./components/infoInvoice/InfoInvoice";
@@ -29,6 +30,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
   deselectInvoices
 }) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
+  const projectId = useAppStore((state) => state.selectedProject.ID);
   const { mutate: mutateWallet } = useInvoices({});
   const { mutate: mutateGeneralDashboardData } = useGeneralPortfolio();
   const [incidentData, setIncidentData] = useState<IIncidentDetail | null>(null);
@@ -108,7 +110,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
               </Button>
               <Button type="primary" onClick={() => handleOpenResolveModal(true)}>
                 <Check />
-                Resolver
+                Aprobar
               </Button>
             </div>
           )}
@@ -118,6 +120,8 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         responsable={incidentData.responsible_user}
         fecha={incidentData.date}
         cliente={incidentData.client}
+        clienteId={incidentData.client_uuid ?? undefined}
+        projectId={projectId}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}
       />
       {hasInvoiceValues && <InfoInvoice incidentData={incidentData} />}

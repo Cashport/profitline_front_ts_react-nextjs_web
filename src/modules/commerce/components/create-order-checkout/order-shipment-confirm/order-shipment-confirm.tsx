@@ -753,7 +753,7 @@ export default function OrderShipmentConfirm({
               <p>Subtotal</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </div>
-            <div className="flex justify-between font-medium">
+            <div className="flex justify-between text-xs text-[#999999]">
               <p>Descuentos ({selectedDiscount?.name})</p>
               {confirmOrderData?.discounts ? (
                 <p>-${formatNumber(descuentoDeProductos)}</p>
@@ -762,18 +762,18 @@ export default function OrderShipmentConfirm({
               )}
             </div>
 
-            <div className="flex justify-between font-medium">
+            <div className="flex justify-between text-xs text-[#999999]">
               <p>Descuento de orden</p>
               <p>-${formatNumber(descuentoDeOrden)}</p>
             </div>
 
             {totalDescuento > 0 && (
-              <div className="flex justify-between text-xs text-red-500">
+              <div className="flex justify-between text-xs text-[#999999]">
                 <span>Descuentos aplicados</span>
                 <span>-{formatNumber(totalDescuento)}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
+            <div className="flex justify-between text-xl font-bold text-[#141414] pt-1.5 border-t border-[#DDDDDD] mt-0.5">
               <span>Total</span>
               <span>{formatNumber(total)}</span>
             </div>

@@ -160,7 +160,7 @@ const CreateOrderMarket: FC = () => {
 
   return (
     <div className={styles.marketContainer}>
-      <Flex justify="space-between" align="center">
+      <Flex justify="space-between" align="center" gap={"0.75rem"}>
         <Button
           type="text"
           size="large"
@@ -173,13 +173,13 @@ const CreateOrderMarket: FC = () => {
         >
           {client?.name}
         </Button>
+        <div className={styles.searchWrapper}>
+          <UiSearchInput
+            placeholder="Buscar"
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
         <CartButton onClick={toggleCart} numberOfItems={numberOfItems} />
-      </Flex>
-      <Flex gap={"0.5rem"}>
-        <UiSearchInput
-          placeholder="Buscar"
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
       </Flex>
 
       <UiTab tabs={categoryTabs} activeKey={activeTab} onChangeTab={setActiveTab} />
