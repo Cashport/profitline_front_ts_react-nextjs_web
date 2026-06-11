@@ -186,8 +186,11 @@ export interface IClientSegmentationDetail {
     business_name: string;
     phone: string;
     email: string;
-    segment: string;
-    contact_id: number;
+    segment: string | null;
+    contact_id: number | null;
+    shipto_codes: string[];
+    related_user: { user_name: string; id: number } | null;
+    channel: string[];
   };
   portfolio: {
     total_portfolio: number;

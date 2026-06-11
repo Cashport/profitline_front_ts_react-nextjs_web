@@ -66,6 +66,8 @@ export default function ChatDetails({
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
+  const shiptoCodes = clientDetails?.client.shipto_codes ?? [];
+
   const handleAddClientSuccess = (data: IAddClientForm) => {
     const clientUuid = String(data.client.value);
     const callingCode = data.indicative.label.split(" ")[0];
@@ -221,6 +223,43 @@ export default function ChatDetails({
                         </Button>
                       ) : null}
                     </div>
+                    {shiptoCodes.length > 0 ? (
+                      <>
+                        <div className="text-muted-foreground">Código(s)</div>
+                        <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
+                          <span className="truncate">
+                            {shiptoCodes[0]}
+                            {shiptoCodes.length > 1 ? `, +${shiptoCodes.length - 1}` : ""}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 text-muted-foreground"
+                            aria-label="Copiar código"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(shiptoCodes[0]);
+                                toast({
+                                  title: "Código copiado",
+                                  description: shiptoCodes[0]
+                                });
+                              } catch {
+                                toast({ title: "No se pudo copiar", variant: "destructive" });
+                              }
+                            }}
+                          >
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copiar código</span>
+                          </Button>
+                        </div>
+                      </>
+                    ) : null}
+                    <div className="text-muted-foreground">Ejecutivo</div>
+                    <div className="font-medium">
+                      {clientDetails?.client.related_user?.user_name}
+                    </div>
+                    <div className="text-muted-foreground">Canal</div>
+                    <div className="font-medium">{clientDetails?.client.channel?.join(", ")}</div>
                     <div className="text-muted-foreground">Correo</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
                       <span className="truncate">{clientDetails?.client.email}</span>
@@ -312,7 +351,7 @@ export default function ChatDetails({
           onClose={handleCloseModals}
           clientId={clientDetails?.client.uuid || ""}
           initialValues={{
-            contactId: clientDetails?.client.contact_id,
+            contactId: clientDetails?.client.contact_id ?? undefined,
             managementTypeId: 4, // Gestión de cierre de chat
           }}
           lockSelects
