@@ -189,7 +189,10 @@ export default function ModalShippingInfo({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl border border-[#DDDDDD] w-[480px] max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
+      <div
+        className="bg-white rounded-2xl border border-[#DDDDDD] w-[820px] max-w-[95vw] flex flex-col shadow-xl overflow-hidden"
+        style={{ height: "min(85vh, 660px)" }}
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EEEEEE]">
           <h3 className="text-sm font-bold text-[#141414]">
             {mode === "new" ? "Nuevo destino" : "Editar destino"}
@@ -202,129 +205,15 @@ export default function ModalShippingInfo({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">Dirección de entrega</label>
-            <select
-              value={draft.addressSelectValue}
-              onChange={(e) => setDraft((d) => ({ ...d, addressSelectValue: e.target.value }))}
-              className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
-            >
-              <option value="" disabled>
-                Seleccione una dirección
-              </option>
-              {addressOptions.map((o) => (
-                <option key={String(o.value)} value={String(o.value)}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">Ciudad</label>
-            <input
-              type="text"
-              placeholder="Bogotá"
-              value={draft.city}
-              disabled={!isNewAddress}
-              onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value }))}
-              className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">
-              Dirección de despacho
-            </label>
-            <input
-              type="text"
-              placeholder="Cl. 76 9-88"
-              value={draft.dispatch_address}
-              readOnly={!isNewAddress}
-              onChange={(e) => setDraft((d) => ({ ...d, dispatch_address: e.target.value }))}
-              className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">Correo electrónico</label>
-            <input
-              type="email"
-              placeholder="correo@ejemplo.com"
-              value={draft.email}
-              onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
-              className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
-                isEmailInvalid
-                  ? "border-red-400 focus:border-red-500"
-                  : "border-[#DDDDDD] focus:border-[#141414]"
-              }`}
-            />
-            {isEmailInvalid && (
-              <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">Teléfono de contacto</label>
-            <div className="flex gap-2">
-              <select
-                value={draft.indicativo}
-                disabled={isLoadingOptions}
-                onChange={(e) => setDraft((d) => ({ ...d, indicativo: e.target.value }))}
-                className="w-20 px-2 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] text-center"
-              >
-                {callingCodeOptions.length === 0 && <option value="+57">+57</option>}
-                {callingCodeOptions.map((o) => {
-                  const code = o.label.split(" ")[0];
-                  return (
-                    <option key={o.value} value={code}>
-                      {code}
-                    </option>
-                  );
-                })}
-              </select>
-              <input
-                type="tel"
-                placeholder="3001234567"
-                value={draft.telefono}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, telefono: e.target.value.replace(/\D/g, "") }))
-                }
-                className={`flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
-                  isPhoneInvalid
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-[#DDDDDD] focus:border-[#141414]"
-                }`}
-              />
+        <div className="flex flex-1 min-h-0">
+          {/* Left: productos */}
+          <div className="flex-1 flex flex-col min-h-0 border-r border-[#EEEEEE]">
+            <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2.5 bg-[#FAFAFA] border-b border-[#EEEEEE] flex-shrink-0">
+              <span className="text-[10px] text-[#999999] font-semibold">Producto</span>
+              <span className="text-[10px] text-[#999999] font-semibold text-center">Disp.</span>
+              <span className="text-[10px] text-[#999999] font-semibold text-center">Cant.</span>
             </div>
-            {isPhoneInvalid && (
-              <p className="text-[10px] text-red-500">{phoneErrorMessage(draft.indicativo)}</p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">Observaciones</label>
-            <textarea
-              placeholder="Instrucciones especiales para esta entrega"
-              maxLength={128}
-              value={draft.observaciones}
-              onChange={(e) => setDraft((d) => ({ ...d, observaciones: e.target.value }))}
-              rows={2}
-              className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-semibold text-[#666666]">
-              Unidades por producto
-            </label>
-            <div className="border border-[#EEEEEE] rounded-lg overflow-hidden">
-              <div className="grid grid-cols-[1fr_56px_72px] px-3 py-2 bg-[#F7F7F7] border-b border-[#EEEEEE]">
-                <span className="text-[10px] text-[#999999] font-semibold">Producto</span>
-                <span className="text-[10px] text-[#999999] font-semibold text-center">Disp.</span>
-                <span className="text-[10px] text-[#999999] font-semibold text-center">Cant.</span>
-              </div>
+            <div className="overflow-y-auto flex-1">
               {discountItems.map((item, iIdx) => {
                 const asignado = draft.cantidades[item.item_uuid || item.product_sku] ?? 0;
                 const asignadoOtros = cantidadesAsignadasExcluyendo(
@@ -337,7 +226,7 @@ export default function ModalShippingInfo({
                 return (
                   <div
                     key={`${item.product_sku}::${iIdx}`}
-                    className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 ${!isLastRow ? "border-b border-[#EEEEEE]" : ""}`}
+                    className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 ${!isLastRow ? "border-b border-[#F4F4F4]" : ""}`}
                   >
                     <p className="text-xs text-[#141414] leading-tight pr-2">{item.description}</p>
                     <p
@@ -361,14 +250,14 @@ export default function ModalShippingInfo({
                           cantidades: { ...d.cantidades, [item.item_uuid || item.product_sku]: v }
                         }));
                       }}
-                      className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                      className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                     />
                   </div>
                 );
               })}
               {hasBonus && (
                 <>
-                  <div className="grid grid-cols-[1fr_56px_72px] px-3 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
+                  <div className="grid grid-cols-[1fr_48px_64px] px-4 py-2 bg-[#F7FDE8] border-y border-[#F0F9D8] items-center">
                     <span className="text-[10px] text-[#6AB000] font-semibold uppercase tracking-wide flex items-center gap-1.5">
                       <Gift size={10} />
                       Bonificados
@@ -388,7 +277,7 @@ export default function ModalShippingInfo({
                     return (
                       <div
                         key={`promo-${item.product_sku}`}
-                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastBonus ? "border-b border-[#F0F9D8]" : ""}`}
+                        className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 bg-[#FDFFF5] ${!isLastBonus ? "border-b border-[#F0F9D8]" : ""}`}
                       >
                         <p className="text-xs text-[#141414] leading-tight pr-2">
                           {item.description}
@@ -414,7 +303,7 @@ export default function ModalShippingInfo({
                               bonusCantidades: { ...d.bonusCantidades, [item.product_sku]: v }
                             }));
                           }}
-                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                          className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                         />
                       </div>
                     );
@@ -430,7 +319,7 @@ export default function ModalShippingInfo({
                     return (
                       <div
                         key={`other-${item.product_sku}`}
-                        className={`grid grid-cols-[1fr_56px_72px] items-center px-3 py-2.5 bg-[#FDFFF5] ${!isLastOther ? "border-b border-[#F0F9D8]" : ""}`}
+                        className={`grid grid-cols-[1fr_48px_64px] items-center px-4 py-3 bg-[#FDFFF5] ${!isLastOther ? "border-b border-[#F0F9D8]" : ""}`}
                       >
                         <p className="text-xs text-[#141414] leading-tight pr-2">
                           {item.description}
@@ -459,13 +348,144 @@ export default function ModalShippingInfo({
                               }
                             }));
                           }}
-                          className="w-full text-center text-sm font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
+                          className="w-full text-center text-xs font-semibold border border-[#DDDDDD] rounded-lg px-2 py-1.5 outline-none focus:border-[#141414] transition-colors bg-white text-[#141414]"
                         />
                       </div>
                     );
                   })}
                 </>
               )}
+            </div>
+
+            {splitTotal > 0 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[#EEEEEE] bg-[#FAFAFA] flex-shrink-0">
+                <span className="text-xs text-[#666666]">
+                  Total{" "}
+                  <span className="text-[#999999]">
+                    ({Object.values(draft.cantidades).reduce((s, v) => s + v, 0)} und.)
+                  </span>
+                </span>
+                <span className="text-sm font-bold text-[#141414]">{formatMoney(splitTotal)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right: formulario */}
+          <div className="w-[40%] flex-shrink-0 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">
+                Dirección de entrega
+              </label>
+              <select
+                value={draft.addressSelectValue}
+                onChange={(e) => setDraft((d) => ({ ...d, addressSelectValue: e.target.value }))}
+                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
+              >
+                <option value="" disabled>
+                  Seleccione una dirección
+                </option>
+                {addressOptions.map((o) => (
+                  <option key={String(o.value)} value={String(o.value)}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">Ciudad</label>
+              <input
+                type="text"
+                placeholder="Bogotá"
+                value={draft.city}
+                disabled={!isNewAddress}
+                onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value }))}
+                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">
+                Dirección de despacho
+              </label>
+              <input
+                type="text"
+                placeholder="Cl. 76 9-88"
+                value={draft.dispatch_address}
+                readOnly={!isNewAddress}
+                onChange={(e) => setDraft((d) => ({ ...d, dispatch_address: e.target.value }))}
+                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">Correo electrónico</label>
+              <input
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={draft.email}
+                onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
+                className={`w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                  isEmailInvalid
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-[#DDDDDD] focus:border-[#141414]"
+                }`}
+              />
+              {isEmailInvalid && (
+                <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">
+                Teléfono de contacto
+              </label>
+              <div className="flex gap-1.5">
+                <select
+                  value={draft.indicativo}
+                  disabled={isLoadingOptions}
+                  onChange={(e) => setDraft((d) => ({ ...d, indicativo: e.target.value }))}
+                  className="w-16 px-1.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] text-center"
+                >
+                  {callingCodeOptions.length === 0 && <option value="+57">+57</option>}
+                  {callingCodeOptions.map((o) => {
+                    const code = o.label.split(" ")[0];
+                    return (
+                      <option key={o.value} value={code}>
+                        {code}
+                      </option>
+                    );
+                  })}
+                </select>
+                <input
+                  type="tel"
+                  placeholder="3001234567"
+                  value={draft.telefono}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, telefono: e.target.value.replace(/\D/g, "") }))
+                  }
+                  className={`flex-1 px-2.5 py-2 text-xs bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
+                    isPhoneInvalid
+                      ? "border-red-400 focus:border-red-500"
+                      : "border-[#DDDDDD] focus:border-[#141414]"
+                  }`}
+                />
+              </div>
+              {isPhoneInvalid && (
+                <p className="text-[10px] text-red-500">{phoneErrorMessage(draft.indicativo)}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-[#666666]">Observaciones</label>
+              <textarea
+                placeholder="Instrucciones especiales para esta entrega"
+                maxLength={128}
+                value={draft.observaciones}
+                onChange={(e) => setDraft((d) => ({ ...d, observaciones: e.target.value }))}
+                rows={3}
+                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
+              />
             </div>
           </div>
         </div>

@@ -28,6 +28,14 @@
         }
     }
 
+    .searchWrapper {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+        max-width: 32rem;
+        margin: 0 auto;
+    }
+
     :global {
         .tabsContainer {
             flex: 1 1 auto;

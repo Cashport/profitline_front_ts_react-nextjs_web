@@ -11,6 +11,17 @@
         p {
             margin: 0;
         }
+
+        .client-link {
+            margin: 0;
+            color: #1677ff;
+            text-decoration: underline;
+            cursor: pointer;
+
+            &:hover {
+                color: #0958d9;
+            }
+        }
     }
 
     .approved {

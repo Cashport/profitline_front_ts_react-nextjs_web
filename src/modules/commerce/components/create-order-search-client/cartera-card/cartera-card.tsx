@@ -56,10 +56,10 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
             )}
           </div>
           <div className="flex items-center justify-between mt-1.5">
-            <p className="text-[10px] text-[#999999]">Usado: {cupoUsadoPct}%</p>
             <p className="text-[10px] font-semibold text-[#141414]">
-              {cupoDisponiblePct}% disponible
+              Disponible: {cupoDisponiblePct}%
             </p>
+            <p className="text-[10px] text-[#999999]">Saldo: {cupoUsadoPct}%</p>
           </div>
         </div>
       </div>
