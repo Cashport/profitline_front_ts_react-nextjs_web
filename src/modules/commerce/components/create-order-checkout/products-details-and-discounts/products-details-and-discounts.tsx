@@ -173,6 +173,8 @@ export default function ProductsDetailsAndDiscounts({
 
   const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
 
+  const discountBySku = new Map(discountItems.map((d) => [d.product_sku, d]));
+
   const secondaryDiscount = confirmOrderData?.discounts?.secondaryDiscount;
 
   const [orderTotalDiscount, setOrderTotalDiscount] = useState(0);
@@ -253,75 +255,91 @@ export default function ProductsDetailsAndDiscounts({
 
             {/* Rows */}
             <div className="flex-1 min-h-0 overflow-y-auto">
-              {discountItems.map((item, idx) => {
-                const precioFinal = item.discount?.primary?.new_price ?? item.price;
-                const totalLinea = precioFinal * item.quantity;
-                const restante = item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku);
-                const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
-                const executiveEntry = executiveDiscounts.find(
-                  (e) => e.product_sku === item.product_sku
-                );
-                const cellValue = executiveEntry?.primary_discount_pct ?? maxPercentage;
-
-                return (
-                  <div
-                    key={`${item.product_sku}-${idx}`}
-                    className={`grid ${cols} items-center px-4 py-4 ${
-                      idx < discountItems.length - 1 ? "border-b border-[#F4F4F4]" : ""
-                    }`}
-                  >
-                    <p
-                      className="text-sm font-medium text-[#141414] leading-tight pr-4 truncate"
-                      title={item.description}
-                    >
-                      {item.description}
-                    </p>
-                    <p className="text-xs text-[#CCCCCC] text-right">{item.product_sku}</p>
-                    <p className="text-xs text-[#CCCCCC] line-through text-right">
-                      {formatPrice(item.price)}
-                    </p>
-                    <div className="flex justify-center">
-                      <DescuentoCell
-                        value={cellValue}
-                        max={maxPercentage}
-                        onChange={(v) => updatePrimaryDiscount(item, v)}
-                      />
-                    </div>
-                    <p className="text-sm font-semibold text-[#141414] text-right">
-                      {formatPrice(precioFinal)}
-                    </p>
-                    <p className="text-sm text-[#141414] text-right">{item.quantity}</p>
-                    <p className="text-sm font-semibold text-[#141414] text-right">
-                      {formatPrice(totalLinea)}
-                    </p>
-                    {multiEntrega && (
-                      <p
-                        className={`text-sm font-bold text-right ${
-                          restante === 0
-                            ? "text-green-600"
-                            : restante < 0
-                              ? "text-red-500"
-                              : "text-amber-500"
-                        }`}
-                        title={String(restante)}
-                      >
-                        {restante}
-                      </p>
-                    )}
-                    {precioFinal === 0 ? (
-                      <button
-                        onClick={() => handleRemoveProduct(item.product_sku)}
-                        title="Eliminar producto"
-                        className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    ) : (
-                      <span />
-                    )}
+              {selectedCategories.map((category, gIdx) => (
+                <div
+                  key={category.category_id}
+                  className={gIdx > 0 ? "border-t border-[#EEEEEE]" : ""}
+                >
+                  {/* Category label — same source as the cart header */}
+                  <div className="px-4 pt-3 pb-1">
+                    <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
+                      {category.products[0]?.category_name}
+                    </span>
                   </div>
-                );
-              })}
+
+                  {category.products.map((product) => {
+                    const item = discountBySku.get(product.SKU);
+                    if (!item) return null;
+                    const precioFinal = item.discount?.primary?.new_price ?? item.price;
+                    const totalLinea = precioFinal * item.quantity;
+                    const restante =
+                      item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku);
+                    const maxPercentage =
+                      item.discount?.primary?.discount_applied?.max_discount ?? 0;
+                    const executiveEntry = executiveDiscounts.find(
+                      (e) => e.product_sku === item.product_sku
+                    );
+                    const cellValue = executiveEntry?.primary_discount_pct ?? maxPercentage;
+
+                    return (
+                      <div
+                        key={`${product.id}-${product.SKU}`}
+                        className={`grid ${cols} items-center px-4 py-2.5`}
+                      >
+                        <p
+                          className="text-sm font-medium text-[#141414] leading-tight pr-4 truncate"
+                          title={item.description}
+                        >
+                          {item.description}
+                        </p>
+                        <p className="text-xs text-[#CCCCCC] text-right">{item.product_sku}</p>
+                        <p className="text-xs text-[#CCCCCC] line-through text-right">
+                          {formatPrice(item.price)}
+                        </p>
+                        <div className="flex justify-center">
+                          <DescuentoCell
+                            value={cellValue}
+                            max={maxPercentage}
+                            onChange={(v) => updatePrimaryDiscount(item, v)}
+                          />
+                        </div>
+                        <p className="text-sm font-semibold text-[#141414] text-right">
+                          {formatPrice(precioFinal)}
+                        </p>
+                        <p className="text-sm text-[#141414] text-right">{item.quantity}</p>
+                        <p className="text-sm font-semibold text-[#141414] text-right">
+                          {formatPrice(totalLinea)}
+                        </p>
+                        {multiEntrega && (
+                          <p
+                            className={`text-sm font-bold text-right ${
+                              restante === 0
+                                ? "text-green-600"
+                                : restante < 0
+                                  ? "text-red-500"
+                                  : "text-amber-500"
+                            }`}
+                            title={String(restante)}
+                          >
+                            {restante}
+                          </p>
+                        )}
+                        {precioFinal === 0 ? (
+                          <button
+                            onClick={() => handleRemoveProduct(item.product_sku)}
+                            title="Eliminar producto"
+                            className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        ) : (
+                          <span />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
               {/* Sección bonificados */}
               {bonus && bonificados.length > 0 && (
                 <>
