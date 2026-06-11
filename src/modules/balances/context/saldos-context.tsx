@@ -112,6 +112,7 @@ type SaldosAction =
   | { type: "DELETE_SALDO"; payload: string }
   | { type: "TOGGLE_SALDO_SELECTION"; payload: string }
   | { type: "SELECT_ALL_SALDOS"; payload: string[] }
+  | { type: "DESELECT_SALDOS"; payload: string[] }
   | { type: "CLEAR_SELECTION" };
 
 const initialState: SaldosState = {
@@ -714,7 +715,12 @@ function saldosReducer(state: SaldosState, action: SaldosAction): SaldosState {
     case "SELECT_ALL_SALDOS":
       return {
         ...state,
-        selectedSaldoIds: action.payload
+        selectedSaldoIds: Array.from(new Set([...state.selectedSaldoIds, ...action.payload]))
+      };
+    case "DESELECT_SALDOS":
+      return {
+        ...state,
+        selectedSaldoIds: state.selectedSaldoIds.filter((id) => !action.payload.includes(id))
       };
     case "CLEAR_SELECTION":
       return {
@@ -747,6 +753,7 @@ interface SaldosContextType {
   getUniqueKams: () => string[];
   toggleSaldoSelection: (id: string) => void;
   selectAllSaldos: (saldoIds: string[]) => void;
+  deselectSaldos: (saldoIds: string[]) => void;
   clearSelection: () => void;
   downloadSelectedSaldos: () => void;
 }
@@ -808,6 +815,10 @@ export function SaldosProvider({ children }: { children: ReactNode }) {
 
   const selectAllSaldos = (saldoIds: string[]) => {
     dispatch({ type: "SELECT_ALL_SALDOS", payload: saldoIds });
+  };
+
+  const deselectSaldos = (saldoIds: string[]) => {
+    dispatch({ type: "DESELECT_SALDOS", payload: saldoIds });
   };
 
   const clearSelection = () => {
@@ -974,6 +985,7 @@ export function SaldosProvider({ children }: { children: ReactNode }) {
         getUniqueKams,
         toggleSaldoSelection,
         selectAllSaldos,
+        deselectSaldos,
         clearSelection,
         downloadSelectedSaldos
       }}
