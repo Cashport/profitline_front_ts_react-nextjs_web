@@ -120,7 +120,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         responsable={incidentData.responsible_user}
         fecha={incidentData.date}
         cliente={incidentData.client}
-        clienteId={incidentData.client_id}
+        clienteId={incidentData.client_uuid ?? undefined}
         projectId={projectId}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}
       />
