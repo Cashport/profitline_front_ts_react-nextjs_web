@@ -521,9 +521,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
-          {((promotions.length > 0 &&
-            (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 0) ||
-            (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0) && (
+          {
             <button
               onClick={() => {
                 setIsBonusModalOpen(true);
@@ -542,7 +540,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               </span>
               <Eye size={14} className="text-[#999999]" />
             </button>
-          )}
+          }
           {!checkingOut && (
             <>
               <button
@@ -618,7 +616,13 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         <CreateOrderDiscountsModal setOpenDiscountsModal={setOpenDiscountsModal} />
       )}
 
-      <ModalBonus isOpen={isBonusModalOpen} onClose={() => setIsBonusModalOpen(false)} />
+      <ModalBonus
+        isOpen={isBonusModalOpen}
+        onClose={() => setIsBonusModalOpen(false)}
+        promotions={promotions}
+        selectedPromotionId={promotionId ?? null}
+        onSelectPromotion={setPromotionId}
+      />
 
       <ModalConfirmAction
         isOpen={showConfirmModal}

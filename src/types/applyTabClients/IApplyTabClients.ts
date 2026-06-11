@@ -44,6 +44,7 @@ export interface IApplyTabClients {
     total_payments: number;
     total_discounts: number;
     total_balance: number;
+    total_application_balance: number;
     url_log: string;
     url_attachment: string | null;
     attachment_name: string | null;
@@ -96,6 +97,7 @@ export interface IApplicationBalance {
   is_deleted: number;
   financial_record_id: number | null;
   created_at: string;
+  comments: string | null;
 }
 
 export interface IApplicationBalanceStatusGroup {

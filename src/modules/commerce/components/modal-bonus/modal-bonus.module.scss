@@ -5,6 +5,92 @@
     padding-bottom: 0.25rem;
 }
 
+/* Title row with optional back button */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #141414;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover {
+        background: #f5f5f5;
+    }
+}
+
+/* Select screen */
+.selectContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.25rem 0 0.5rem;
+}
+
+.selectLabel {
+    font-size: 12px;
+    color: #666666;
+    margin: 0;
+}
+
+.promotionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.promotionCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 500;
+    color: #141414;
+
+    &:hover {
+        background: #fafafa;
+        border-color: #cccccc;
+    }
+}
+
+.promotionCardActive {
+    @extend .promotionCard;
+    background: #f5f5f5;
+    border-color: #141414;
+}
+
+.promotionCardLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.promotionCheck {
+    color: #141414;
+    font-size: 14px;
+    font-weight: 700;
+}
+
 .section {
     display: flex;
     flex-direction: column;
