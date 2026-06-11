@@ -126,7 +126,7 @@ const ModalAddToTables: React.FC<ModalAddToTablesProps> = ({
     isModalAddToTableOpen.adding === "invoices"
       ? (row as IApplicationInvoice).id_erp
       : isModalAddToTableOpen.adding === "credit_notes"
-        ? (row as IFinancialDiscount).erp_id
+        ? (row as IFinancialDiscount)?.erp_id || ""
         : row.id.toString();
 
   useEffect(() => {
