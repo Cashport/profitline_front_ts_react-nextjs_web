@@ -295,7 +295,6 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             setInsufficientStockProducts(response.data.insufficientStockProducts);
             if (response.data.discounts?.discountItems?.length > 0)
               setAppliedDiscounts(response.data.discounts?.discountItems);
-            if (response.data.promotion) setPromotionId(response.data.promotion.promotion_id);
           }
         } catch (error) {
           if (error instanceof AxiosError) {
