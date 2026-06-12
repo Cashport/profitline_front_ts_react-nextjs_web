@@ -589,13 +589,13 @@ export default function OrderShipmentConfirm({
                 <label className="text-xs font-semibold text-[#666666]">Observaciones</label>
                 <textarea
                   placeholder="Ingresar un comentario"
-                  maxLength={64}
+                  maxLength={35}
                   value={singleForm.observaciones}
                   onChange={(e) => setSingleForm((f) => ({ ...f, observaciones: e.target.value }))}
                   rows={3}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
-                <p className="text-[10px] text-[#999999]">Máximo 64 caracteres</p>
+                <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
               </div>
             </div>
           )}
