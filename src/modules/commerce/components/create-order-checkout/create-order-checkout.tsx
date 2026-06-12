@@ -187,12 +187,27 @@ export default function CheckoutPage() {
       executive_discounts: executiveDiscounts,
       deactivate_cross_selling: !deactivateCrossSelling
     };
+
+    // El range_promotion_id es el id del rango activo
+    // (promotion.active_range.range_id) del que provienen los
+    // bonificados comunes (bonusOptions). Los "other bonified"
+    // (otherBonificated) no pertenecen a un rango, así que nunca
+    // son fuente de este id; solo usamos bonusOptions para detectar
+    // si aplica enviarlo.
+    const hasCommonBonusProducts = (bonus?.bonusOptions ?? []).some((opt) =>
+      opt.cards.some((card) => card.items.length > 0)
+    );
+    const activeRangeId = confirmOrderData?.promotion?.active_range?.range_id;
+
     return {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
       order_split_details: splitDetails,
       promotion_id: bonus?.id || 0,
-      nit_id: channelCode
+      nit_id: channelCode,
+      ...(hasCommonBonusProducts && activeRangeId
+        ? { range_promotion_id: activeRangeId }
+        : {})
     };
   };
 

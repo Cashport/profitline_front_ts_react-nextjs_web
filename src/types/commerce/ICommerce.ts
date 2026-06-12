@@ -283,6 +283,13 @@ export interface ICreateOrderData {
   order_split_details: IOrderSplitDetail[];
   promotion_id: number;
   nit_id: string;
+  /**
+   * ID del rango activo (`promotion.active_range.range_id`) del que
+   * provienen los productos bonificados comunes (bonusOptions).
+   * No aplica a los "other bonified" (otherBonificated), que no
+   * pertenecen a un rango de la promoción.
+   */
+  range_promotion_id?: number;
 }
 
 export interface ISucessCreateOrder {
