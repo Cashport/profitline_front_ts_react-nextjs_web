@@ -9,6 +9,7 @@ import SearchClient from "../../components/create-order-search-client/create-ord
 import CreateOrderMarket from "../../components/create-order-market";
 import CreateOrderCart from "../../components/create-order-cart";
 import CreateOrderCheckout from "../../components/create-order-checkout";
+import CreateOrderDiscountsModal from "../../components/create-order-discounts-modal/create-order-discounts-modal";
 
 import {
   IBonus,
@@ -79,6 +80,7 @@ export const CreateOrderView: FC = () => {
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
+  const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
   const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
   const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(true);
   const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
@@ -106,6 +108,10 @@ export const CreateOrderView: FC = () => {
           setDiscounts(response.data);
           // Seleccionar el primer descuento por defecto
           setSelectedDiscount(response.data[0]);
+          // Si hay mas de un descuento, abrir el modal para que el usuario elija
+          if (response.data.length > 1) {
+            setOpenDiscountsModal(true);
+          }
         }
       } catch (error) {
         console.error("Error fetching discounts:", error);
@@ -262,6 +268,11 @@ export const CreateOrderView: FC = () => {
           </div>
         )}
       </div>
+      <CreateOrderDiscountsModal
+        floating
+        open={openDiscountsModal}
+        setOpenDiscountsModal={setOpenDiscountsModal}
+      />
     </OrderViewContext.Provider>
   );
 };
