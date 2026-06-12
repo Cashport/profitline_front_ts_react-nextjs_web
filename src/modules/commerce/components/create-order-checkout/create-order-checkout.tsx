@@ -91,7 +91,8 @@ export default function CheckoutPage() {
         discount_package: selectedDiscount,
         order_summary: products,
         executive_discounts: executiveDiscounts,
-        deactivate_cross_selling: !deactivateCrossSelling
+        deactivate_cross_selling: !deactivateCrossSelling,
+        ...(bonus?.id !== undefined && { promotion_id: bonus.id })
       };
       try {
         const response = await confirmOrder(projectId, client?.id || "", payload);
