@@ -34,15 +34,15 @@ function CarteraCard({ cartera, cupo }: ICarteraCardProps) {
       <div className="px-5 py-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] text-[#999999] mb-0.5">Cupo total</p>
-            <p className="text-sm font-bold text-[#141414]">
-              {formatMoney(noQuota ? 0 : cupo.totalQuota, { hideDecimals: true })}
-            </p>
-          </div>
-          <div className="text-right">
             <p className="text-[11px] text-[#999999] mb-0.5">Cupo disponible</p>
             <p className="text-sm font-bold text-[#141414]">
               {formatMoney(noQuota ? 0 : cupo.availableQuota, { hideDecimals: true })}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[11px] text-[#999999] mb-0.5">Cupo total</p>
+            <p className="text-sm font-bold text-[#141414]">
+              {formatMoney(noQuota ? 0 : cupo.totalQuota, { hideDecimals: true })}
             </p>
           </div>
         </div>
