@@ -85,7 +85,8 @@ const ClientDetailsLayout: FC<ClientDetailsLayoutProps> = ({ children }) => {
     { key: "pagos", label: "Pagos" },
     { key: "aplicacion", label: "Aplicación" },
     { key: "contactos", label: "Contactos" },
-    { key: "historial", label: "Historial" }
+    { key: "historial", label: "Historial" },
+    { key: "saldos", label: "Saldos" }
   ];
 
   const ClientDetailObject: ClientDetailsContextType = useMemo(

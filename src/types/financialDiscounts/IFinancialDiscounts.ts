@@ -117,4 +117,5 @@ export interface IBalancesFilter {
   clients: string[]; // selected client_ids
   from_date: string | null;
   to_date: string | null;
+  client_uuid?: string;
 }
