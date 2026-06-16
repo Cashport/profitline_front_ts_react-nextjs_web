@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Flex, Typography } from "antd";
-import { Eye, Gift } from "@phosphor-icons/react";
+import { Eye, Gift, Sparkle } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
 import { BagSimple, X } from "phosphor-react";
 
@@ -10,7 +10,6 @@ import { useAppStore } from "@/lib/store/store";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { confirmOrder } from "@/services/commerce/commerce";
 import { getPromotions, IPromotion } from "@/services/promotion/promotion";
-import { useMessageApi } from "@/context/MessageContext";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
 import CreateOrderItem from "../create-order-cart-item";
@@ -51,8 +50,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     projectId: state.selectedProject.ID
   }));
   const width = useScreenWidth();
-  const { showMessage } = useMessageApi();
   const [openDiscountsModal, setOpenDiscountsModal] = useState(false);
+  const [promotionMessage, setPromotionMessage] = useState<string | null>(null);
   const [insufficientStockProducts, setInsufficientStockProducts] = useState<string[]>([]);
   const [promotions, setPromotions] = useState<IPromotion[]>([]);
   const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
@@ -108,9 +107,10 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
   useEffect(() => {
     const activeRange = confirmOrderData?.promotion?.active_range;
-    if (activeRange?.progress_message) {
-      showMessage("info", activeRange.progress_message);
-    }
+    if (!activeRange?.progress_message) return;
+    setPromotionMessage(activeRange.progress_message);
+    const timer = setTimeout(() => setPromotionMessage(null), 5000);
+    return () => clearTimeout(timer);
   }, [confirmOrderData?.promotion?.active_range?.range_id]);
 
   const handleOpenDiscountsModal = () => {
@@ -531,6 +531,14 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
       {selectedCategories.length > 0 && (
         <div className={styles.cartContainer__footer}>
+          {promotionMessage && (
+            <div
+              className={`${styles.promotionMessage} w-full flex items-center gap-2 px-4 py-3 bg-black text-white text-sm font-semibold rounded-xl `}
+            >
+              <Sparkle size={16} weight="fill" className="text-cashport-green flex-shrink-0" />
+              <span className="flex-1">{promotionMessage}</span>
+            </div>
+          )}
           {
             <button
               onClick={() => {
