@@ -52,7 +52,14 @@ const ModalBonus = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    if (flexPromotion) {
+    const selected = promotions.find((p) => p.id === selectedPromotionId);
+    setActiveTab(0);
+    if (selected?.isFlex) {
+      setActiveSegment("flex");
+    } else if (selected && !selected.isFlex) {
+      setActiveSegment("promos");
+      setPromosScreen("detail");
+    } else if (flexPromotion) {
       setActiveSegment("flex");
       onSelectPromotion(flexPromotion.id);
     } else if (nonFlexPromotions.length > 0) {
@@ -62,7 +69,7 @@ const ModalBonus = ({
       setActiveSegment("otros");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, selectedPromotionId]);
 
   const getPoolGroupTotal = (groupId: number) => {
     const group = poolQty[groupId] ?? {};
