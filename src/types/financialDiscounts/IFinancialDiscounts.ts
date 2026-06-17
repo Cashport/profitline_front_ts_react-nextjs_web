@@ -118,4 +118,5 @@ export interface IBalancesFilter {
   from_date: string | null;
   to_date: string | null;
   client_uuid?: string;
+  motive_ids?: number[]; // selected motive ids
 }

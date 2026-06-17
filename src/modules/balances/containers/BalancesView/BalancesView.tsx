@@ -41,7 +41,11 @@ export function BalancesView() {
     to_date: null
   });
 
-  const { data: balancesData, isLoading: balancesLoading } = useBalances(balancesFilter);
+  const {
+    data: balancesData,
+    isLoading: balancesLoading,
+    mutate: mutateBalances
+  } = useBalances(balancesFilter);
 
   const { data: balancesFilters, isLoading: filtersLoading } = useSWR(
     ID ? ["balances-filters", ID] : null,
@@ -125,11 +129,13 @@ export function BalancesView() {
                     <BalancesTable
                       data={group.balances}
                       loading={balancesLoading}
+                      context="balances"
                       selectedSaldoIds={state.selectedSaldoIds}
                       onToggleSelection={toggleSaldoSelection}
                       onSelectAll={selectAllSaldos}
                       onDeselectAll={deselectSaldos}
                       onOpenDetail={openDetailSheet}
+                      onUploaded={mutateBalances}
                     />
                   )
                 }))}
