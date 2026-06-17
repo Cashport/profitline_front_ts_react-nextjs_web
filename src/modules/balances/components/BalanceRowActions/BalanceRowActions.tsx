@@ -33,21 +33,6 @@ export function BalanceRowActions({
             key: "cargar-soporte",
             label: "Cargar soporte",
             onClick: () => onCargarSoporte(record)
-          },
-          {
-            key: "aprobar",
-            label: "Aprobar",
-            onClick: () => onDecision(record, "approve")
-          },
-          {
-            key: "rechazar",
-            label: "Rechazar",
-            onClick: () => onDecision(record, "reject")
-          },
-          {
-            key: "enviar-aprobacion",
-            label: "Enviar a aprobación",
-            onClick: () => onEnviarAprobacion(record)
           }
         ];
       case "audit":

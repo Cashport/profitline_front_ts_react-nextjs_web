@@ -23,6 +23,7 @@ interface BalancesTableProps {
   onSelectAll: (ids: string[]) => void;
   onDeselectAll: (ids: string[]) => void;
   onOpenDetail: (balance: IBalanceRow) => void;
+  onUploaded?: () => void;
 }
 
 const formatCurrency = (amount: number) =>
@@ -48,7 +49,8 @@ export function BalancesTable({
   onToggleSelection,
   onSelectAll,
   onDeselectAll,
-  onOpenDetail
+  onOpenDetail,
+  onUploaded
 }: BalancesTableProps) {
   const height = useScreenHeight();
   const width = useScreenWidth();
@@ -215,6 +217,7 @@ export function BalancesTable({
             isOpen={openModal === "upload"}
             onClose={closeModal}
             record={activeRecord}
+            onUploaded={onUploaded}
           />
           <ModalSendBalanceToApproval
             isOpen={openModal === "approval"}

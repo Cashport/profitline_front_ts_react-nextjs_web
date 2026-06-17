@@ -4,27 +4,34 @@ import { Flex, Modal, Select, Typography } from "antd";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { uploadBalanceFile } from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
 
 import styles from "./modalUploadBalanceFile.module.scss";
+import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 
 const { Title } = Typography;
-
-// TODO: replace with real "tipo de novedad" options from API
-const MOCK_TIPO_NOVEDAD_OPTIONS = [
-  { value: 1, label: "Novedad A" },
-  { value: 2, label: "Novedad B" }
-];
 
 interface ModalUploadBalanceFileProps {
   isOpen: boolean;
   onClose: () => void;
   record: IBalanceRow;
+  onUploaded?: () => void;
 }
 
-export function ModalUploadBalanceFile({ isOpen, onClose, record }: ModalUploadBalanceFileProps) {
+export function ModalUploadBalanceFile({
+  isOpen,
+  onClose,
+  record,
+  onUploaded
+}: ModalUploadBalanceFileProps) {
+  const { showMessage } = useMessageApi();
   const [tipoNovedadId, setTipoNovedadId] = useState<number | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [observation, setObservation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
   // Reset local state whenever the modal closes
   useEffect(() => {
@@ -45,10 +52,24 @@ export function ModalUploadBalanceFile({ isOpen, onClose, record }: ModalUploadB
     setFile(uploaded);
   };
 
-  const handleOk = () => {
-    // eslint-disable-next-line no-console
-    console.log("Cargar soporte", { file, observation, tipoNovedadId, record });
-    onClose();
+  const handleOk = async () => {
+    if (!file || !tipoNovedadId || !observation.trim()) return;
+
+    setIsLoading(true);
+    try {
+      await uploadBalanceFile(record.id, {
+        financialDiscountMotiveId: tipoNovedadId,
+        observation: observation.trim(),
+        file
+      });
+      showMessage("success", "Soporte cargado correctamente");
+      onUploaded?.();
+      onClose();
+    } catch (error) {
+      showMessage("error", "Ocurrió un error al cargar el soporte");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,6 +85,7 @@ export function ModalUploadBalanceFile({ isOpen, onClose, record }: ModalUploadB
           onClose={onClose}
           handleOk={handleOk}
           isConfirmDisabled={!file || !tipoNovedadId || !observation.trim()}
+          isConfirmLoading={isLoading}
         />
       }
       destroyOnClose
@@ -74,7 +96,8 @@ export function ModalUploadBalanceFile({ isOpen, onClose, record }: ModalUploadB
           <Select
             placeholder="Selecciona el tipo de novedad"
             style={{ width: "100%", height: 38 }}
-            options={MOCK_TIPO_NOVEDAD_OPTIONS}
+            options={motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []}
+            loading={motivesLoading}
             value={tipoNovedadId}
             onChange={(value) => setTipoNovedadId(value)}
           />
