@@ -5,7 +5,7 @@ import { Button } from "@/modules/chat/ui/button";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 
 export interface ISaldosFilterValue {
-  motives: string[]; // selected motive names
+  motive_ids: number[]; // selected motive ids
   from_date: string | null;
   to_date: string | null;
 }
@@ -39,11 +39,11 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
             <button
               type="button"
               className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors ${
-                value.motives.length === 0
+                value.motive_ids.length === 0
                   ? "bg-cashport-green text-cashport-black font-medium"
                   : "text-cashport-black"
               }`}
-              onClick={() => onChange({ ...value, motives: [] })}
+              onClick={() => onChange({ ...value, motive_ids: [] })}
             >
               Todos los tipos
             </button>
@@ -53,11 +53,11 @@ export function FilterBalances({ motives, value, onChange, isLoading }: IFilterB
                 type="button"
                 key={motive.id}
                 className={`w-full text-left px-3 py-2 text-sm hover:bg-cashport-gray-lighter transition-colors border-t border-gray-100 ${
-                  value.motives.includes(motive.name)
+                  value.motive_ids.includes(motive.id)
                     ? "bg-cashport-green text-cashport-black font-medium"
                     : "text-cashport-black"
                 }`}
-                onClick={() => onChange({ ...value, motives: toggle(value.motives, motive.name) })}
+                onClick={() => onChange({ ...value, motive_ids: toggle(value.motive_ids, motive.id) })}
               >
                 <div className="truncate" title={motive.name}>
                   {motive.name}
