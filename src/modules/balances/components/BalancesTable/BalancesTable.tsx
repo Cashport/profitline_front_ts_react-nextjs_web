@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Flex, Table, TableProps } from "antd";
+import { Button, Flex, message, Table, TableProps } from "antd";
 import { Eye } from "@phosphor-icons/react";
 import "./BalancesTable.scss";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { sendToOtherBalances } from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
 import { BalanceRowActions, BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 import { ModalUploadBalanceFile } from "../ModalUploadBalanceFile/ModalUploadBalanceFile";
 import { ModalSendBalanceToApproval } from "../ModalSendBalanceToApproval/ModalSendBalanceToApproval";
@@ -56,6 +58,7 @@ export function BalancesTable({
 }: BalancesTableProps) {
   const height = useScreenHeight();
   const width = useScreenWidth();
+  const { showMessage } = useMessageApi();
 
   const [activeRecord, setActiveRecord] = useState<IBalanceRow | null>(null);
   const [openModal, setOpenModal] = useState<"upload" | "approval" | "decision" | null>(null);
@@ -73,6 +76,21 @@ export function BalancesTable({
   const handleEnviarAprobacion = (record: IBalanceRow) => {
     setActiveRecord(record);
     setOpenModal("approval");
+  };
+
+  const handleSendOtherBalances = async (record: IBalanceRow) => {
+    const hideLoading = message.loading("Enviando a otros saldos...", 0);
+    try {
+      await sendToOtherBalances(record.id);
+      showMessage("success", "Saldo enviado a otros saldos correctamente");
+      onUploaded?.();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocurrió un error al enviar a otros saldos";
+      showMessage("error", errorMessage);
+    } finally {
+      hideLoading();
+    }
   };
 
   const handleDecision = (record: IBalanceRow, action: BalanceDecisionAction) => {
@@ -178,6 +196,7 @@ export function BalancesTable({
             context={context}
             onCargarSoporte={handleCargarSoporte}
             onEnviarAprobacion={handleEnviarAprobacion}
+            onSendOtherBalances={handleSendOtherBalances}
             onDecision={handleDecision}
           />
           <Button
