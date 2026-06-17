@@ -194,9 +194,10 @@ const ModalBonus = ({
       );
     }
     if (!promotion || tabOptions.length === 0) {
+      const progressMessage = promotion?.ranges?.[0]?.progress_message;
       return (
         <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
-          No hay bonificados disponibles
+          {progressMessage || "No hay bonificados disponibles"}
         </p>
       );
     }
