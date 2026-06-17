@@ -204,7 +204,7 @@ export default function CheckoutPage() {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
       order_split_details: splitDetails,
-      promotion_id: bonus?.id || 0,
+      promotion_id: bonus?.id || undefined,
       nit_id: channelCode,
       ...(hasCommonBonusProducts && activeRangeId
         ? { range_promotion_id: activeRangeId }

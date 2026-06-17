@@ -281,7 +281,7 @@ export interface ICreateOrderData {
   order_summary: IOrderSummaryPayload;
   is_electronic_invoicing: number;
   order_split_details: IOrderSplitDetail[];
-  promotion_id: number;
+  promotion_id?: number;
   nit_id: string;
   /**
    * ID del rango activo (`promotion.active_range.range_id`) del que
