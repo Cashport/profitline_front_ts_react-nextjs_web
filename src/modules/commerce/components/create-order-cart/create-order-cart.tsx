@@ -56,6 +56,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
   const [promotions, setPromotions] = useState<IPromotion[]>([]);
   const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
   const [promotionId, setPromotionId] = useState<number | undefined>(undefined);
+  const [isPromotionDetailLoading, setIsPromotionDetailLoading] = useState(false);
   const [appliedDiscounts, setAppliedDiscounts] = useState<any>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCanulasModal, setShowCanulasModal] = useState(false);
@@ -115,6 +116,11 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
 
   const handleOpenDiscountsModal = () => {
     setOpenDiscountsModal(true);
+  };
+
+  const handleSelectPromotionId = (id: number) => {
+    if (id !== promotionId) setIsPromotionDetailLoading(true);
+    setPromotionId(id);
   };
 
   const MINIMUM_ORDER_AMOUNT = 1600000;
@@ -302,6 +308,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           } else {
             console.error("Unexpected error", error);
           }
+        } finally {
+          setIsPromotionDetailLoading(false);
         }
       }
     };
@@ -643,7 +651,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         onClose={() => setIsBonusModalOpen(false)}
         promotions={promotions}
         selectedPromotionId={promotionId ?? null}
-        onSelectPromotion={setPromotionId}
+        onSelectPromotion={handleSelectPromotionId}
+        loading={isPromotionDetailLoading}
       />
 
       <ModalConfirmAction

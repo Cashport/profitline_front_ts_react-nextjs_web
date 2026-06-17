@@ -91,6 +91,82 @@
     font-weight: 700;
 }
 
+/* Persistent segmented header */
+.segmentHeader {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.segmentGroup {
+    display: flex;
+    flex: 1;
+    padding: 4px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    gap: 4px;
+}
+
+.segment {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #666666;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+        color: #141414;
+    }
+}
+
+.segmentActive {
+    @extend .segment;
+    background: #ffffff;
+    color: #141414;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+        color: #141414;
+    }
+}
+
+.segmentDivider {
+    width: 1px;
+    align-self: stretch;
+    background: #eeeeee;
+}
+
+.otrosBtn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #666666;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+    &:hover {
+        border-color: #cccccc;
+        color: #141414;
+    }
+}
+
+.otrosBtnActive {
+    @extend .otrosBtn;
+    background: #f5f5f5;
+    border-color: #141414;
+    color: #141414;
+    font-weight: 600;
+}
+
 .section {
     display: flex;
     flex-direction: column;

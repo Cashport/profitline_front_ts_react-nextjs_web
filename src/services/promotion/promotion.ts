@@ -4,6 +4,7 @@ import { API } from "@/utils/api/api";
 export interface IPromotion {
   id: number;
   name: string;
+  isFlex: boolean;
 }
 
 export const getPromotions = async (client_id: string) => {
