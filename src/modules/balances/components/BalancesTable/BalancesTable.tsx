@@ -63,6 +63,8 @@ export function BalancesTable({
 
   const closeModal = () => setOpenModal(null);
 
+  const colWidth = (px: number) => (width > 1400 ? px : undefined);
+
   const handleCargarSoporte = (record: IBalanceRow) => {
     setActiveRecord(record);
     setOpenModal("upload");
@@ -84,6 +86,7 @@ export function BalancesTable({
       title: "Id",
       dataIndex: "id",
       key: "id",
+      width: colWidth(120),
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false,
       render: (value: number) => <span className="text-sm text-cashport-black">{value}</span>
@@ -93,6 +96,7 @@ export function BalancesTable({
       dataIndex: "created_at",
       key: "fecha",
       fixed: "left",
+      width: colWidth(120),
       sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       showSorterTooltip: false,
       render: (value: string) => (
@@ -124,6 +128,7 @@ export function BalancesTable({
       title: "Tipo",
       dataIndex: "motive_name",
       key: "tipo",
+      width: colWidth(140),
       sorter: (a, b) => (a.motive_name ?? "").localeCompare(b.motive_name ?? ""),
       showSorterTooltip: false,
       render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
@@ -138,6 +143,7 @@ export function BalancesTable({
       title: "Saldo inicial",
       dataIndex: "initial_amount",
       key: "initial_amount",
+      width: colWidth(200),
       align: "right",
       sorter: (a, b) => a.initial_amount - b.initial_amount,
       showSorterTooltip: false,
@@ -151,6 +157,7 @@ export function BalancesTable({
       title: "Pendiente",
       dataIndex: "pending_amount",
       key: "pending_amount",
+      width: colWidth(200),
       align: "right",
       sorter: (a, b) => a.pending_amount - b.pending_amount,
       showSorterTooltip: false,

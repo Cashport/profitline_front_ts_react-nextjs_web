@@ -66,7 +66,9 @@ export function ModalUploadBalanceFile({
       onUploaded?.();
       onClose();
     } catch (error) {
-      showMessage("error", "Ocurrió un error al cargar el soporte");
+      const message =
+        error instanceof Error ? error.message : "Ocurrió un error al cargar el soporte";
+      showMessage("error", message);
     } finally {
       setIsLoading(false);
     }
