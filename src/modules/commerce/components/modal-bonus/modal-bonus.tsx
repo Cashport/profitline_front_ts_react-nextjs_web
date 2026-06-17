@@ -34,7 +34,14 @@ const ModalBonus = ({
 
   const tabOptions = giftOptions;
 
-  const [currentScreen, setCurrentScreen] = useState<"select" | "detail">("select");
+  const flexPromotion = promotions.find((p) => p.isFlex);
+  const nonFlexPromotions = promotions.filter((p) => !p.isFlex);
+
+  type Segment = "flex" | "promos" | "otros";
+
+  const [activeSegment, setActiveSegment] = useState<Segment>("flex");
+  // sub-view of the Promos Junio tab: the non-flex list vs. a selected promo's detail
+  const [promosScreen, setPromosScreen] = useState<"list" | "detail">("list");
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
   const [otherQty, setOtherQty] = useState<Record<number, number>>(() =>
@@ -42,10 +49,18 @@ const ModalBonus = ({
   );
 
   useEffect(() => {
-    if (isOpen) {
-      setCurrentScreen(promotions.length > 0 ? "select" : "detail");
+    if (!isOpen) return;
+    if (flexPromotion) {
+      setActiveSegment("flex");
+      onSelectPromotion(flexPromotion.id);
+    } else if (nonFlexPromotions.length > 0) {
+      setActiveSegment("promos");
+      setPromosScreen("list");
+    } else {
+      setActiveSegment("otros");
     }
-  }, [isOpen, promotions.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const getPoolGroupTotal = (groupId: number) => {
     const group = poolQty[groupId] ?? {};
@@ -129,14 +144,15 @@ const ModalBonus = ({
 
   const handleSelectPromotion = (id: number) => {
     onSelectPromotion(id);
-    setCurrentScreen("detail");
+    setActiveTab(0);
+    setPromosScreen("detail");
   };
 
-  const renderSelectScreen = () => (
+  const renderPromosList = () => (
     <div className={styles.selectContent}>
       <p className={styles.selectLabel}>Elige la promoción a aplicar</p>
       <div className={styles.promotionsList}>
-        {promotions.map((promo) => {
+        {nonFlexPromotions.map((promo) => {
           const isActive = selectedPromotionId === promo.id;
           return (
             <button
@@ -156,15 +172,15 @@ const ModalBonus = ({
     </div>
   );
 
-  const renderDetailScreen = () => (
-    <>
-      {!promotion && otherBonificated.length === 0 ? (
+  const renderPromotionGifts = () => {
+    if (!promotion || tabOptions.length === 0) {
+      return (
         <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
           No hay bonificados disponibles
         </p>
-      ) : (
-        <>
-          {promotion && tabOptions.length > 0 && (
+      );
+    }
+    return (
             <div className={styles.section}>
               <p className={styles.sectionLabel}>Bonificados promoción</p>
 
@@ -276,9 +292,10 @@ const ModalBonus = ({
                   ))}
               </div>
             </div>
-          )}
+    );
+  };
 
-          {otherBonificated.length > 0 && (
+  const renderOtros = () => (
             <div className={styles.section}>
               <p className={styles.sectionLabel}>Otros bonificados</p>
               <div className={styles.genericTable}>
@@ -327,20 +344,13 @@ const ModalBonus = ({
                 </table>
               </div>
             </div>
-          )}
-        </>
-      )}
-
-      <div className={styles.footer}>
-        <p className={styles.footerTotal}>
-          Total: <strong>{totalBonificados()}</strong>
-        </p>
-        <button onClick={handleConfirm} className={styles.confirmBtn}>
-          Confirmar
-        </button>
-      </div>
-    </>
   );
+
+  const renderBody = () => {
+    if (activeSegment === "otros") return renderOtros();
+    if (activeSegment === "promos" && promosScreen === "list") return renderPromosList();
+    return renderPromotionGifts();
+  };
 
   return (
     <Modal
@@ -351,9 +361,9 @@ const ModalBonus = ({
       footer={null}
       title={
         <div className={styles.titleRow}>
-          {currentScreen === "detail" && promotions.length > 0 && (
+          {activeSegment === "promos" && promosScreen === "detail" && (
             <button
-              onClick={() => setCurrentScreen("select")}
+              onClick={() => setPromosScreen("list")}
               className={styles.backButton}
               aria-label="Volver a la lista de promociones"
             >
@@ -368,7 +378,54 @@ const ModalBonus = ({
       destroyOnClose
     >
       <div className={styles.content}>
-        {currentScreen === "select" ? renderSelectScreen() : renderDetailScreen()}
+        <div className={styles.segmentHeader}>
+          <div className={styles.segmentGroup}>
+            {flexPromotion && (
+              <button
+                onClick={() => {
+                  setActiveSegment("flex");
+                  onSelectPromotion(flexPromotion.id);
+                }}
+                className={activeSegment === "flex" ? styles.segmentActive : styles.segment}
+              >
+                Flex
+              </button>
+            )}
+            {nonFlexPromotions.length > 0 && (
+              <button
+                onClick={() => {
+                  setActiveSegment("promos");
+                  setPromosScreen("list");
+                }}
+                className={activeSegment === "promos" ? styles.segmentActive : styles.segment}
+              >
+                Promos Junio
+              </button>
+            )}
+          </div>
+          {otherBonificated.length > 0 && (
+            <>
+              <span className={styles.segmentDivider} />
+              <button
+                onClick={() => setActiveSegment("otros")}
+                className={activeSegment === "otros" ? styles.otrosBtnActive : styles.otrosBtn}
+              >
+                Otros
+              </button>
+            </>
+          )}
+        </div>
+
+        {renderBody()}
+
+        <div className={styles.footer}>
+          <p className={styles.footerTotal}>
+            Total: <strong>{totalBonificados()}</strong>
+          </p>
+          <button onClick={handleConfirm} className={styles.confirmBtn}>
+            Confirmar
+          </button>
+        </div>
       </div>
     </Modal>
   );
