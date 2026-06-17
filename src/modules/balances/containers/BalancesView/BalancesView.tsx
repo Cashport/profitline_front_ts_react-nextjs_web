@@ -129,6 +129,7 @@ export function BalancesView() {
                     <BalancesTable
                       data={group.balances}
                       loading={balancesLoading}
+                      context="balances"
                       selectedSaldoIds={state.selectedSaldoIds}
                       onToggleSelection={toggleSaldoSelection}
                       onSelectAll={selectAllSaldos}

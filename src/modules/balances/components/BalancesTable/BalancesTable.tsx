@@ -7,7 +7,7 @@ import "./BalancesTable.scss";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
-import { BalanceRowActions } from "../BalanceRowActions/BalanceRowActions";
+import { BalanceRowActions, BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 import { ModalUploadBalanceFile } from "../ModalUploadBalanceFile/ModalUploadBalanceFile";
 import { ModalSendBalanceToApproval } from "../ModalSendBalanceToApproval/ModalSendBalanceToApproval";
 import {
@@ -18,6 +18,7 @@ import {
 interface BalancesTableProps {
   data: IBalanceRow[];
   loading?: boolean;
+  context?: BalanceTableContext;
   selectedSaldoIds: string[];
   onToggleSelection: (id: string) => void;
   onSelectAll: (ids: string[]) => void;
@@ -45,6 +46,7 @@ const formatDate = (dateString: string) => {
 export function BalancesTable({
   data,
   loading,
+  context = "balances",
   selectedSaldoIds,
   onToggleSelection,
   onSelectAll,
@@ -100,7 +102,7 @@ export function BalancesTable({
     {
       title: "Días",
       key: "diasSaldo",
-      width: 70,
+      width: 50,
       showSorterTooltip: false,
       render: () => <span className="text-sm text-cashport-black" />
     },
@@ -166,6 +168,7 @@ export function BalancesTable({
         <Flex gap={4} align="center">
           <BalanceRowActions
             record={record}
+            context={context}
             onCargarSoporte={handleCargarSoporte}
             onEnviarAprobacion={handleEnviarAprobacion}
             onDecision={handleDecision}

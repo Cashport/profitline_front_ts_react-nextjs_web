@@ -4,8 +4,11 @@ import { DotsThreeVertical } from "@phosphor-icons/react";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { BalanceDecisionAction } from "../ModalApproveRejectBalance/ModalApproveRejectBalance";
 
+export type BalanceTableContext = "balances" | "clientBalances";
+
 interface BalanceRowActionsProps {
   record: IBalanceRow;
+  context?: BalanceTableContext;
   onCargarSoporte: (record: IBalanceRow) => void;
   onEnviarAprobacion: (record: IBalanceRow) => void;
   onDecision: (record: IBalanceRow, action: BalanceDecisionAction) => void;
@@ -13,6 +16,7 @@ interface BalanceRowActionsProps {
 
 export function BalanceRowActions({
   record,
+  context = "balances",
   onCargarSoporte,
   onEnviarAprobacion,
   onDecision
@@ -20,6 +24,21 @@ export function BalanceRowActions({
   const statusCode = (record.status_code ?? "").toLowerCase();
 
   const buildItems = (): MenuProps["items"] => {
+    if (context === "clientBalances") {
+      switch (statusCode) {
+        case "pending":
+          return [
+            {
+              key: "cargar-soporte",
+              label: "Cargar soporte",
+              onClick: () => onCargarSoporte(record)
+            }
+          ];
+        default:
+          return [];
+      }
+    }
+
     switch (statusCode) {
       case "pending":
         return [
