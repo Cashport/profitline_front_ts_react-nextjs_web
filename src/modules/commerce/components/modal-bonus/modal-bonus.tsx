@@ -1,6 +1,6 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import { Modal, Typography } from "antd";
+import { Modal, Typography, Spin } from "antd";
 import { ArrowLeft, Gift } from "@phosphor-icons/react";
 
 import { IBonus, IGiftOption } from "@/types/commerce/ICommerce";
@@ -17,6 +17,7 @@ interface Props {
   promotions: IPromotion[];
   selectedPromotionId: number | null;
   onSelectPromotion: (id: number) => void;
+  loading: boolean;
 }
 
 const ModalBonus = ({
@@ -24,7 +25,8 @@ const ModalBonus = ({
   onClose,
   promotions,
   selectedPromotionId,
-  onSelectPromotion
+  onSelectPromotion,
+  loading
 }: Props) => {
   const { confirmOrderData, setBonus } = useContext(OrderViewContext);
 
@@ -88,16 +90,20 @@ const ModalBonus = ({
   };
 
   const totalBonificados = () => {
-    const poolTotal = Object.values(poolQty)
-      .flatMap(Object.values)
-      .reduce((s, v) => s + v, 0);
-    const otherTotal = Object.values(otherQty).reduce((s, v) => s + v, 0);
-    const fixedTotal = giftOptions
-      .flatMap((opt) => opt.items)
+    const activeItems = tabOptions[activeTab]?.items ?? [];
+
+    const poolTotal = activeItems
+      .filter((g) => !g.fixed)
+      .reduce((s, g) => s + getPoolGroupTotal(g.gift_item_group_id), 0);
+
+    const fixedTotal = activeItems
       .filter((g) => g.fixed)
       .flatMap((g) => g.items)
       .reduce((s, it) => s + (it.qty ?? 0), 0);
-    return poolTotal + otherTotal + fixedTotal;
+
+    const otherTotal = Object.values(otherQty).reduce((s, v) => s + v, 0);
+
+    return poolTotal + fixedTotal + otherTotal;
   };
 
   const handleConfirm = () => {
@@ -173,6 +179,13 @@ const ModalBonus = ({
   );
 
   const renderPromotionGifts = () => {
+    if (loading) {
+      return (
+        <div style={{ display: "flex", justifyContent: "center", padding: "2rem 0" }}>
+          <Spin />
+        </div>
+      );
+    }
     if (!promotion || tabOptions.length === 0) {
       return (
         <p style={{ color: "#999", fontSize: 13, textAlign: "center", padding: "1rem 0" }}>
@@ -420,7 +433,7 @@ const ModalBonus = ({
 
         <div className={styles.footer}>
           <p className={styles.footerTotal}>
-            Total: <strong>{totalBonificados()}</strong>
+            Total: <strong>{loading ? "—" : totalBonificados()}</strong>
           </p>
           <button onClick={handleConfirm} className={styles.confirmBtn}>
             Confirmar
