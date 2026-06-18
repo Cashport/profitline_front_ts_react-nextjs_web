@@ -33,6 +33,8 @@ export function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<stri
       (ticket.lastViewedAt === null && ticket.lastMessage?.direction === "INBOUND") ||
       unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt,
-    countMessages: ticket._count?.messages || 0
+    countMessages: ticket._count?.messages || 0,
+    escalated: ticket.escalated,
+    agent: ticket.agent
   };
 }

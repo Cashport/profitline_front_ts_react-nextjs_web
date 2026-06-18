@@ -27,6 +27,7 @@ export interface ITicket {
   subject: string;
   tags: string | null;
   metadata: any | null;
+  escalated: boolean;
   closedAt: string | null;
   lastMessageAt: string;
   lastViewedAt: string | null;

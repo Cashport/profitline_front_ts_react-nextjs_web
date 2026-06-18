@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react";
+import { Bell, CaretDown, MagnifyingGlass, Robot } from "@phosphor-icons/react";
 import { Dropdown, MenuProps, Pagination } from "antd";
 import { cn, formatChatDate } from "@/utils/utils";
 import { Input } from "@/modules/chat/ui/input";
@@ -281,14 +281,35 @@ export default function AllChats({
                     aria-label={"Seleccionar chat de " + c.customer}
                   />
                   <div className="ml-6 min-w-0 flex-1">
-                    <div className="flex w-full items-baseline gap-2">
-                      <p
-                        className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.status === "CLOSED" ? "text-[#72737f]" : ""}`}
-                      >
-                        {c.status === "CLOSED"
-                          ? `${c.client_name || ""} - Cerrado ⚠️ `
-                          : `${c.client_name || ""}`}
-                      </p>
+                    <div className="flex w-full items-baseline justify-between gap-2">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <p
+                          className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.status === "CLOSED" ? "text-[#72737f]" : ""}`}
+                        >
+                          {c.status === "CLOSED"
+                            ? `${c.client_name || ""} - Cerrado ⚠️ `
+                            : `${c.client_name || ""}`}
+                        </p>
+
+                        {c.escalated && (
+                          <span
+                            title="Escalado"
+                            className="inline-flex items-center justify-center rounded-full bg-black p-1 shrink-0"
+                          >
+                            <Bell size={14} weight="fill" className="text-cashport-orange" />
+                          </span>
+                        )}
+
+                        {c.agent && (
+                          <span
+                            title="Agente asignado"
+                            className="inline-flex items-center justify-center rounded-full p-1 shrink-0"
+                          >
+                            <Robot size={19} weight="fill" color="#8a8a8a" />
+                          </span>
+                        )}
+                      </div>
+
                       <span className="shrink-0 w-12 md:w-14 text-right text-xs text-muted-foreground tabular-nums whitespace-nowrap">
                         {formatChatDate(c.lastMessageAt)}
                       </span>
