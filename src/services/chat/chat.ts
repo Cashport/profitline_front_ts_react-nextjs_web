@@ -6,10 +6,8 @@ import {
   PaginationSimple
 } from "@/types/global/IGlobal";
 import { IChatData, ITemplateRequest, ITicket, IWhatsAppTemplate } from "@/types/chat/IChat";
-import { mockTickets, mockWhatsAppTemplates } from "@/modules/chat/lib/mock-data";
 
 // Toggle para usar mock data mientras el backend no está disponible
-const USE_MOCK = false;
 
 export interface GetTicketsResponse {
   data: ITicket[];
@@ -21,40 +19,6 @@ export const getTickets = async (
   page?: number,
   search?: string
 ): Promise<GetTicketsResponse> => {
-  if (USE_MOCK) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Filter by search if provided
-    let filteredTickets = mockTickets;
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredTickets = mockTickets.filter(
-        (ticket) =>
-          ticket.clientName?.toLowerCase().includes(searchLower) ||
-          ticket.customer?.name?.toLowerCase().includes(searchLower) ||
-          ticket.customer?.phoneNumber?.includes(search) ||
-          ticket.subject?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Calculate pagination
-    const currentPage = page ?? 1;
-    const total = filteredTickets.length;
-    const pages = Math.ceil(total / limit);
-    const startIndex = (currentPage - 1) * limit;
-    const paginatedData = filteredTickets.slice(startIndex, startIndex + limit);
-
-    return {
-      data: paginatedData,
-      pagination: {
-        page: currentPage,
-        limit,
-        total,
-        pages
-      }
-    };
-  }
-
   try {
     const params = new URLSearchParams();
     params.append("limit", limit.toString());
@@ -128,11 +92,6 @@ export const sendMessage = async (customerId: string, message: string): Promise<
 };
 
 export const getWhatsAppTemplates = async (): Promise<IWhatsAppTemplate[]> => {
-  if (USE_MOCK) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockWhatsAppTemplates;
-  }
-
   try {
     const response: GenericResponse<IWhatsAppTemplate[]> = await API.get("/whatsapp-templates", {
       baseURL: config.API_CHAT
@@ -159,11 +118,7 @@ export const markTicketAsRead = async (ticketId: string): Promise<void> => {
 
 export const closeWhatsAppTicket = async (ticketId: string): Promise<void> => {
   try {
-    await API.put(
-      `/whatsapp-tickets/${ticketId}/close`,
-      {},
-      { baseURL: config.API_CHAT }
-    );
+    await API.put(`/whatsapp-tickets/${ticketId}/close`, {}, { baseURL: config.API_CHAT });
   } catch (error) {
     console.error("Error closing WhatsApp ticket:", error);
     throw error;

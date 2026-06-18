@@ -1,8 +1,10 @@
 import { ITicket } from "@/types/chat/IChat";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 
-function getInitials(name: string): string {
-  return name
+function getInitials(name: string | number | null | undefined): string {
+  const str = String(name ?? "").trim();
+  if (!str) return "";
+  return str
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -31,6 +33,8 @@ export function ticketToConversation(ticket: ITicket, unreadTicketsSet: Set<stri
       (ticket.lastViewedAt === null && ticket.lastMessage?.direction === "INBOUND") ||
       unreadTicketsSet.has(ticket.id),
     lastMessageAt: ticket.lastMessageAt,
-    countMessages: ticket._count?.messages || 0
+    countMessages: ticket._count?.messages || 0,
+    escalated: ticket.escalated,
+    agent: ticket.agent
   };
 }

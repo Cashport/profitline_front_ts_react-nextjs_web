@@ -101,7 +101,7 @@ function BubbleWrapper({
 
   return (
     <div className={"flex " + (mine ? "justify-end" : "justify-start")}>
-      <div className="max-w-[80%] md:max-w-[70%]">
+      <div className="min-w-0 max-w-[80%] md:max-w-[70%]">
         {!mine && customerName && (
           <div className="text-xs font-semibold text-[#141414] mb-2">{customerName}</div>
         )}
