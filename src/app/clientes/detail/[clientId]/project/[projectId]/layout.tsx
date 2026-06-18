@@ -81,7 +81,8 @@ const ClientDetailsLayout: FC<ClientDetailsLayoutProps> = ({ children }) => {
   const items = [
     { key: "dashboard", label: "Dashboard" },
     { key: "cartera", label: "Cartera" },
-    { key: "ajustes", label: "Ajustes contables" },
+    { key: "saldos", label: "Saldos" },
+    { key: "notas", label: "Notas" },
     { key: "pagos", label: "Pagos" },
     { key: "aplicacion", label: "Aplicación" },
     { key: "contactos", label: "Contactos" },

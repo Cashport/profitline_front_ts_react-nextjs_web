@@ -1,20 +1,32 @@
 "use client";
 
-import { Button, Table, TableProps, Tag } from "antd";
+import { useState } from "react";
+import { Button, Flex, message, Table, TableProps } from "antd";
 import { Eye } from "@phosphor-icons/react";
 import "./BalancesTable.scss";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { sendToOtherBalances } from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
+import { BalanceRowActions, BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
+import { ModalUploadBalanceFile } from "../ModalUploadBalanceFile/ModalUploadBalanceFile";
+import { ModalSendBalanceToApproval } from "../ModalSendBalanceToApproval/ModalSendBalanceToApproval";
+import {
+  BalanceDecisionAction,
+  ModalApproveRejectBalance
+} from "../ModalApproveRejectBalance/ModalApproveRejectBalance";
 
 interface BalancesTableProps {
   data: IBalanceRow[];
   loading?: boolean;
+  context?: BalanceTableContext;
   selectedSaldoIds: string[];
   onToggleSelection: (id: string) => void;
   onSelectAll: (ids: string[]) => void;
   onDeselectAll: (ids: string[]) => void;
   onOpenDetail: (balance: IBalanceRow) => void;
+  onUploaded?: () => void;
 }
 
 const formatCurrency = (amount: number) =>
@@ -36,19 +48,63 @@ const formatDate = (dateString: string) => {
 export function BalancesTable({
   data,
   loading,
+  context = "balances",
   selectedSaldoIds,
   onToggleSelection,
   onSelectAll,
   onDeselectAll,
-  onOpenDetail
+  onOpenDetail,
+  onUploaded
 }: BalancesTableProps) {
   const height = useScreenHeight();
   const width = useScreenWidth();
+  const { showMessage } = useMessageApi();
+
+  const [activeRecord, setActiveRecord] = useState<IBalanceRow | null>(null);
+  const [openModal, setOpenModal] = useState<"upload" | "approval" | "decision" | null>(null);
+  const [decisionAction, setDecisionAction] = useState<BalanceDecisionAction>("approve");
+
+  const closeModal = () => setOpenModal(null);
+
+  const colWidth = (px: number) => (width > 1400 ? px : undefined);
+
+  const handleCargarSoporte = (record: IBalanceRow) => {
+    setActiveRecord(record);
+    setOpenModal("upload");
+  };
+
+  const handleEnviarAprobacion = (record: IBalanceRow) => {
+    setActiveRecord(record);
+    setOpenModal("approval");
+  };
+
+  const handleSendOtherBalances = async (record: IBalanceRow) => {
+    const hideLoading = message.loading("Enviando a otros saldos...", 0);
+    try {
+      await sendToOtherBalances(record.id);
+      showMessage("success", "Saldo enviado a otros saldos correctamente");
+      onUploaded?.();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocurrió un error al enviar a otros saldos";
+      showMessage("error", errorMessage);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const handleDecision = (record: IBalanceRow, action: BalanceDecisionAction) => {
+    setActiveRecord(record);
+    setDecisionAction(action);
+    setOpenModal("decision");
+  };
+
   const columns: TableProps<IBalanceRow>["columns"] = [
     {
       title: "Id",
       dataIndex: "id",
       key: "id",
+      width: colWidth(120),
       sorter: (a, b) => a.id - b.id,
       showSorterTooltip: false,
       render: (value: number) => <span className="text-sm text-cashport-black">{value}</span>
@@ -57,6 +113,8 @@ export function BalancesTable({
       title: "Fecha saldo",
       dataIndex: "created_at",
       key: "fecha",
+      fixed: "left",
+      width: colWidth(120),
       sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       showSorterTooltip: false,
       render: (value: string) => (
@@ -66,6 +124,7 @@ export function BalancesTable({
     {
       title: "Días",
       key: "diasSaldo",
+      width: 50,
       showSorterTooltip: false,
       render: () => <span className="text-sm text-cashport-black" />
     },
@@ -84,45 +143,25 @@ export function BalancesTable({
       )
     },
     {
-      title: "KAM",
-      dataIndex: "kam_name",
-      key: "kam",
-      sorter: (a, b) => (a.kam_name ?? "").localeCompare(b.kam_name ?? ""),
-      showSorterTooltip: false,
-      render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
-    },
-    {
       title: "Tipo",
       dataIndex: "motive_name",
       key: "tipo",
+      width: colWidth(140),
       sorter: (a, b) => (a.motive_name ?? "").localeCompare(b.motive_name ?? ""),
       showSorterTooltip: false,
       render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
     },
     {
-      title: "Estado",
-      dataIndex: "status_name",
-      key: "estado",
-      width: 140,
+      title: "Descripción",
+      key: "descripcion",
       showSorterTooltip: false,
-      render: (value: string) => (
-        <Tag
-          style={{
-            backgroundColor: "transparent",
-            color: "#000",
-            border: "1px solid #d9d9d9",
-            fontWeight: 500,
-            whiteSpace: "nowrap"
-          }}
-        >
-          {value}
-        </Tag>
-      )
+      render: () => <span className="text-sm text-cashport-black" />
     },
     {
       title: "Saldo inicial",
       dataIndex: "initial_amount",
       key: "initial_amount",
+      width: colWidth(200),
       align: "right",
       sorter: (a, b) => a.initial_amount - b.initial_amount,
       showSorterTooltip: false,
@@ -136,6 +175,7 @@ export function BalancesTable({
       title: "Pendiente",
       dataIndex: "pending_amount",
       key: "pending_amount",
+      width: colWidth(200),
       align: "right",
       sorter: (a, b) => a.pending_amount - b.pending_amount,
       showSorterTooltip: false,
@@ -148,13 +188,23 @@ export function BalancesTable({
     {
       title: "",
       key: "acciones",
-      width: 48,
+      width: 88,
       render: (_: unknown, record: IBalanceRow) => (
-        <Button
-          onClick={() => onOpenDetail(record)}
-          className="buttonSeeProject"
-          icon={<Eye size={"1.3rem"} />}
-        />
+        <Flex gap={4} align="center">
+          <BalanceRowActions
+            record={record}
+            context={context}
+            onCargarSoporte={handleCargarSoporte}
+            onEnviarAprobacion={handleEnviarAprobacion}
+            onSendOtherBalances={handleSendOtherBalances}
+            onDecision={handleDecision}
+          />
+          <Button
+            onClick={() => onOpenDetail(record)}
+            className="buttonSeeProject"
+            icon={<Eye size={"1.3rem"} />}
+          />
+        </Flex>
       )
     }
   ];
@@ -176,17 +226,41 @@ export function BalancesTable({
   };
 
   return (
-    <Table<IBalanceRow>
-      columns={columns}
-      dataSource={data.map((s) => ({ ...s, key: String(s.id) }))}
-      loading={loading}
-      rowSelection={rowSelection}
-      pagination={{ pageSize: 10, showSizeChanger: false, position: ["bottomRight"] }}
-      scroll={{ y: width > 1280 ? height - 345 : height - 370, x: undefined }}
-      rowClassName={(record) =>
-        selectedSaldoIds.includes(String(record.id)) ? "ant-table-row-selected" : ""
-      }
-      size="small"
-    />
+    <>
+      <Table<IBalanceRow>
+        columns={columns}
+        dataSource={data.map((s) => ({ ...s, key: String(s.id) }))}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{ pageSize: 10, showSizeChanger: false, position: ["bottomRight"] }}
+        scroll={{ y: width > 1280 ? height - 345 : height - 370, x: undefined }}
+        rowClassName={(record) =>
+          selectedSaldoIds.includes(String(record.id)) ? "ant-table-row-selected" : ""
+        }
+        size="small"
+      />
+
+      {activeRecord && (
+        <>
+          <ModalUploadBalanceFile
+            isOpen={openModal === "upload"}
+            onClose={closeModal}
+            record={activeRecord}
+            onUploaded={onUploaded}
+          />
+          <ModalSendBalanceToApproval
+            isOpen={openModal === "approval"}
+            onClose={closeModal}
+            record={activeRecord}
+          />
+          <ModalApproveRejectBalance
+            isOpen={openModal === "decision"}
+            onClose={closeModal}
+            record={activeRecord}
+            action={decisionAction}
+          />
+        </>
+      )}
+    </>
   );
 }

@@ -1,0 +1,132 @@
+import { useEffect, useState } from "react";
+import { Flex, Modal, Select, Typography } from "antd";
+
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { DocumentButton } from "@/components/atoms/DocumentButton/DocumentButton";
+import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { uploadBalanceFile } from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
+
+import styles from "./modalUploadBalanceFile.module.scss";
+import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
+
+const { Title } = Typography;
+
+interface ModalUploadBalanceFileProps {
+  isOpen: boolean;
+  onClose: () => void;
+  record: IBalanceRow;
+  onUploaded?: () => void;
+}
+
+export function ModalUploadBalanceFile({
+  isOpen,
+  onClose,
+  record,
+  onUploaded
+}: ModalUploadBalanceFileProps) {
+  const { showMessage } = useMessageApi();
+  const [tipoNovedadId, setTipoNovedadId] = useState<number | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [observation, setObservation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
+
+  // Reset local state whenever the modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setTipoNovedadId(null);
+      setFile(null);
+      setObservation("");
+    }
+  }, [isOpen]);
+
+  const handleOnChangeDocument = (info: any) => {
+    const uploaded = info?.file as File | undefined;
+    if (!uploaded) return;
+    if (uploaded.size / (1024 * 1024) > 30) {
+      alert("El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB.");
+      return;
+    }
+    setFile(uploaded);
+  };
+
+  const handleOk = async () => {
+    if (!file || !tipoNovedadId || !observation.trim()) return;
+
+    setIsLoading(true);
+    try {
+      await uploadBalanceFile(record.id, {
+        financialDiscountMotiveId: tipoNovedadId,
+        observation: observation.trim(),
+        file
+      });
+      showMessage("success", "Soporte cargado correctamente");
+      onUploaded?.();
+      onClose();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Ocurrió un error al cargar el soporte";
+      showMessage("error", message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      centered
+      open={isOpen}
+      width={600}
+      onCancel={onClose}
+      title={<Title level={4}>Cargar soporte</Title>}
+      footer={
+        <FooterButtons
+          titleConfirm="Cargar soporte"
+          onClose={onClose}
+          handleOk={handleOk}
+          isConfirmDisabled={!file || !tipoNovedadId || !observation.trim()}
+          isConfirmLoading={isLoading}
+        />
+      }
+      destroyOnClose
+    >
+      <Flex vertical gap="1rem" style={{ marginBottom: "1rem" }}>
+        <Flex vertical gap="0.25rem">
+          <h4 className="inputTitle">Tipo de novedad</h4>
+          <Select
+            placeholder="Selecciona el tipo de novedad"
+            style={{ width: "100%", height: 38 }}
+            options={motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []}
+            loading={motivesLoading}
+            value={tipoNovedadId}
+            onChange={(value) => setTipoNovedadId(value)}
+          />
+        </Flex>
+
+        <Flex vertical gap="0.25rem">
+          <h4 className="inputTitle">Soporte</h4>
+          <DocumentButton
+            title={file?.name}
+            fileName={file?.name}
+            fileSize={file?.size}
+            handleOnChange={handleOnChangeDocument}
+            handleOnDelete={() => setFile(null)}
+          />
+        </Flex>
+
+        <Flex vertical gap="0.25rem">
+          <h4 className="inputTitle">Observación</h4>
+          <textarea
+            className={styles.textarea}
+            value={observation}
+            onChange={(e) => setObservation(e.target.value)}
+            placeholder="Ingresar una observación"
+            rows={2}
+          />
+        </Flex>
+      </Flex>
+    </Modal>
+  );
+}
