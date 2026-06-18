@@ -103,7 +103,9 @@ export default function AllChats({
   }, [isConnected, subscribeToTicketUpdates, activeConversation?.id, mutateTickets]);
 
   const conversations = useMemo(() => {
-    return ticketsData.map((ticket) => ticketToConversation(ticket, unreadTickets));
+    return ticketsData
+      .map((ticket) => ticketToConversation(ticket, unreadTickets))
+      .sort((a, b) => Number(b.escalated) - Number(a.escalated));
   }, [ticketsData, unreadTickets]);
 
   // Auto-select first conversation when data loads and none is selected
