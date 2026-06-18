@@ -359,6 +359,29 @@
     color: #141414;
 }
 
+.counterInput {
+    width: 36px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #141414;
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 4px;
+    padding: 2px 0;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: #cbe71e;
+    }
+}
+
 /* Footer */
 .footer {
     display: flex;
