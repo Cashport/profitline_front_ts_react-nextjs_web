@@ -33,7 +33,7 @@ export function ClientBalancesView() {
   const clientId = extractSingleParam(params.clientId) || "";
 
   const [filter, setFilter] = useState<ISaldosFilterValue>({
-    motives: [],
+    motive_ids: [],
     from_date: null,
     to_date: null
   });
@@ -43,7 +43,8 @@ export function ClientBalancesView() {
     clients: [],
     from_date: filter.from_date,
     to_date: filter.to_date,
-    client_uuid: clientId
+    client_uuid: clientId,
+    motive_ids: filter.motive_ids
   });
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
@@ -66,11 +67,7 @@ export function ClientBalancesView() {
   const filteredGroups = (balancesData ?? [])
     .map((group) => ({
       ...group,
-      balances: group.balances.filter(
-        (balance) =>
-          matchesSearch(balance, searchTerm) &&
-          (filter.motives.length === 0 || filter.motives.includes(balance.motive_name))
-      )
+      balances: group.balances.filter((balance) => matchesSearch(balance, searchTerm))
     }))
     .filter((group) => group.balances.length > 0);
 
