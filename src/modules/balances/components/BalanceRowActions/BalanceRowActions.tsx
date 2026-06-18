@@ -11,6 +11,7 @@ interface BalanceRowActionsProps {
   context?: BalanceTableContext;
   onCargarSoporte: (record: IBalanceRow) => void;
   onEnviarAprobacion: (record: IBalanceRow) => void;
+  onSendOtherBalances: (record: IBalanceRow) => void;
   onDecision: (record: IBalanceRow, action: BalanceDecisionAction) => void;
 }
 
@@ -19,6 +20,7 @@ export function BalanceRowActions({
   context = "balances",
   onCargarSoporte,
   onEnviarAprobacion,
+  onSendOtherBalances,
   onDecision
 }: BalanceRowActionsProps) {
   const statusCode = (record.status_code ?? "").toLowerCase();
@@ -45,8 +47,7 @@ export function BalanceRowActions({
           {
             key: "enviar-otros-saldos",
             label: "Enviar a otros saldos",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("Enviar a otros saldos", { record })
+            onClick: () => onSendOtherBalances(record)
           },
           {
             key: "cargar-soporte",
