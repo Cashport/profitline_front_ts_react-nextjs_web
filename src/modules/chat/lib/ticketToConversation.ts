@@ -1,8 +1,10 @@
 import { ITicket } from "@/types/chat/IChat";
 import { type Conversation } from "@/modules/chat/lib/mock-data";
 
-function getInitials(name: string): string {
-  return name
+function getInitials(name: string | number | null | undefined): string {
+  const str = String(name ?? "").trim();
+  if (!str) return "";
+  return str
     .split(" ")
     .map((n) => n[0])
     .join("")
