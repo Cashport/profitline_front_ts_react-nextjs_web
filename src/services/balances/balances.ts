@@ -42,3 +42,15 @@ export const sendToOtherBalances = async (balanceId: number) => {
     throw error;
   }
 };
+
+export const sendBalanceToApproval = async (balanceId: number, approverUserId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/financial-discount/balance/${balanceId}/send-to-approval`,
+      { approverUserId }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
