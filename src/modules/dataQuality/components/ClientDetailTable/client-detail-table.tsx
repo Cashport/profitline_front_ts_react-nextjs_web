@@ -27,6 +27,7 @@ import {
 } from "@/modules/chat/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
+import { Plus } from "phosphor-react";
 
 interface IClientDetailTableProps {
   clientId: string;
@@ -244,9 +245,20 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-          Archivos
-        </h2>
+        <div className="flex items-center justify-start mb-4 gap-3">
+          <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
+            Archivos
+          </h2>
+          <Button
+            onClick={() => console.log("create")}
+            variant="ghost"
+            className="bg-transparent"
+            style={{ color: "#141414" }}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Crear nuevo archivo
+          </Button>
+        </div>
         <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
           <Button
             variant="outline"
@@ -335,44 +347,70 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                     menu={{
                       items: [
                         {
-                          key: "upload",
-                          label: "Subir ingesta",
-                          onClick: () => handleUploadIntake(file.id)
+                          key: "group-cargar",
+                          type: "group",
+                          label: <span className="font-semibold text-black">Cargar</span>,
+                          children: [
+                            {
+                              key: "upload",
+                              label: "Archivo cliente",
+                              onClick: () => handleUploadIntake(file.id)
+                            },
+                            {
+                              key: "upload-generic",
+                              label: "Universal",
+                              onClick: () => handleUploadGenericIntake(file.id)
+                            },
+                            {
+                              key: "load-evidence",
+                              label: "Soporte auditoria",
+                              onClick: () => handleUploadEvidence(file.id),
+                              disabled: isUploadingEvidenceLoading
+                            }
+                          ]
                         },
                         {
-                          key: "upload-generic",
-                          label: "Cargar Universal",
-                          onClick: () => handleUploadGenericIntake(file.id)
+                          key: "group-descargas",
+                          type: "group",
+                          label: <span className="font-semibold text-black">Descargas</span>,
+                          children: [
+                            {
+                              key: "download-original",
+                              label: "Archivo cliente",
+                              onClick: () => handleDownloadOriginal(file)
+                            },
+                            {
+                              key: "download-universal",
+                              label: "Universal .csv",
+                              onClick: () => handleProcessedFile(file, "csv")
+                            },
+                            {
+                              key: "download-universal-excel",
+                              label: "Universal .xls",
+                              onClick: () => handleProcessedFile(file, "excel")
+                            }
+                          ]
                         },
                         {
-                          key: "load-evidence",
-                          label: "Cargar prueba",
-                          onClick: () => handleUploadEvidence(file.id),
-                          disabled: isUploadingEvidenceLoading
-                        },
-                        {
-                          key: "download-original",
-                          label: "Descarga original",
-                          onClick: () => handleDownloadOriginal(file)
-                        },
-                        {
-                          key: "download-universal",
-                          label: "Descarga universal",
-                          onClick: () => handleProcessedFile(file, "csv")
-                        },
-                        {
-                          key: "download-universal-excel",
-                          label: "Descarga universal excel",
-                          onClick: () => handleProcessedFile(file, "excel")
-                        },
-                        {
-                          key: "delete",
-                          label: "Eliminar archivo",
-                          onClick: () => {
-                            setActiveFileId(file.id);
-                            setIsDeleteModalOpen(true);
-                          },
-                          disabled: isDeleteLoading
+                          key: "group-eliminar",
+                          type: "group",
+                          label: <span className="font-semibold text-black">Eliminar</span>,
+                          children: [
+                            {
+                              key: "delete",
+                              label: "Archivo cliente",
+                              onClick: () => {
+                                setActiveFileId(file.id);
+                                setIsDeleteModalOpen(true);
+                              },
+                              disabled: isDeleteLoading
+                            },
+                            {
+                              key: "delete-date",
+                              label: "Fecha ingesta",
+                              onClick: () => console.log(file.id)
+                            }
+                          ]
                         }
                       ]
                     }}
