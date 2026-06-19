@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/modules/chat/ui/badge";
-import { CaretDoubleRight } from "phosphor-react";
+import { CaretDoubleRight, Paperclip } from "phosphor-react";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 
 interface BalanceDetailModalProps {
@@ -113,44 +113,22 @@ export function BalanceDetailModal({
 
           <div className="h-px bg-gray-100" />
 
-          {/* Mock info hardcoded */}
-          <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-              Notas de crédito
-            </p>
-            <div className="border border-gray-100 rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left text-xs font-medium text-gray-400 py-2 px-3">
-                      ID Nota
-                    </th>
-                    <th className="text-left text-xs font-medium text-gray-400 py-2 px-3">
-                      ID Documento
-                    </th>
-                    <th className="text-right text-xs font-medium text-gray-400 py-2 px-3">
-                      Monto
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="py-2.5 px-3">
-                      <span className="text-sm text-cashport-black">NC-001</span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span className="text-sm text-gray-500">DOC-12345</span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <span className="text-sm font-medium text-cashport-black">
-                        {formatCurrency(500000)}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          {/* Soportes */}
+          {saldoData.audit_file_url && (
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
+                Soportes
+              </p>
+              <button
+                type="button"
+                onClick={() => window.open(saldoData.audit_file_url!, "_blank")}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white cursor-pointer text-sm text-cashport-black hover:bg-[#f7f7f7] transition-colors"
+              >
+                <Paperclip size={20} />
+                <span>Auditoría</span>
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
