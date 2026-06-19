@@ -89,7 +89,7 @@ export interface IBalanceRow {
   financial_record_date: string;
   audit_file_url: string | null;
   audit_file_name: string | null;
-  client_documents: IClientDocument[] | null;\
+  client_documents: IClientDocument[] | null;
   COMMENTS: string | null;
 }
 
