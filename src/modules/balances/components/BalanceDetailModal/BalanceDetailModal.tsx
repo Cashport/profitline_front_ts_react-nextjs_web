@@ -82,7 +82,9 @@ export function BalanceDetailModal({
             <div>
               <p className="text-xs text-gray-400">Documento cliente</p>
               <p className="text-sm font-semibold text-cashport-black">
-                {saldoData.client_documents && saldoData.client_documents[0].document}
+                {saldoData.client_documents &&
+                  saldoData.client_documents?.length > 0 &&
+                  saldoData.client_documents[0].document}
               </p>
             </div>
             <div>
@@ -125,7 +127,7 @@ export function BalanceDetailModal({
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white cursor-pointer text-sm text-cashport-black hover:bg-[#f7f7f7] transition-colors"
               >
                 <Paperclip size={20} />
-                <span>Auditoría</span>
+                <span>{saldoData.audit_file_name}</span>
               </button>
             </div>
           )}
