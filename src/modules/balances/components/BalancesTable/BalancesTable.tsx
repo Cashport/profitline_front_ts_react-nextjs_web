@@ -7,6 +7,7 @@ import "./BalancesTable.scss";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { sendToOtherBalances } from "@/services/balances/balances";
+import { formatTimeAgo } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
 import { BalanceRowActions, BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 import { ModalUploadBalanceFile } from "../ModalUploadBalanceFile/ModalUploadBalanceFile";
@@ -109,11 +110,12 @@ export function BalancesTable({
     },
     {
       title: "Fecha saldo",
-      dataIndex: "created_at",
+      dataIndex: "financial_record_date",
       key: "fecha",
       fixed: "left",
       width: colWidth(120),
-      sorter: (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      sorter: (a, b) =>
+        new Date(a.financial_record_date).getTime() - new Date(b.financial_record_date).getTime(),
       showSorterTooltip: false,
       render: (value: string) => (
         <span className="text-sm text-cashport-black">{formatDate(value)}</span>
@@ -122,9 +124,13 @@ export function BalancesTable({
     {
       title: "Días",
       key: "diasSaldo",
-      width: 50,
+      width: colWidth(90),
       showSorterTooltip: false,
-      render: () => <span className="text-sm text-cashport-black" />
+      render: (_: unknown, record: IBalanceRow) => (
+        <span className="text-sm text-cashport-black">
+          {record.financial_record_date ? formatTimeAgo(record.financial_record_date) : "-"}
+        </span>
+      )
     },
     ...(context === "balances"
       ? [
