@@ -90,6 +90,7 @@ export interface IBalanceRow {
   audit_file_url: string | null;
   audit_file_name: string | null;
   client_documents: IClientDocument[] | null;
+  COMMENTS: string | null;
 }
 
 export interface IClientDocument {

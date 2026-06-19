@@ -157,8 +157,9 @@ export function BalancesTable({
     {
       title: "Descripción",
       key: "descripcion",
+      dataIndex: "COMMENTS",
       showSorterTooltip: false,
-      render: () => <span className="text-sm text-cashport-black" />
+      render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
     },
     {
       title: "Saldo inicial",
