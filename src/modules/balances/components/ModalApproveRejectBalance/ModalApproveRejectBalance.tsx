@@ -3,6 +3,11 @@ import { Flex, Modal, Typography } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import {
+  BalanceApprovalDecision,
+  submitBalanceApprovalDecision
+} from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
 
 import styles from "./modalApproveRejectBalance.module.scss";
 
@@ -15,15 +20,19 @@ interface ModalApproveRejectBalanceProps {
   onClose: () => void;
   record: IBalanceRow;
   action: BalanceDecisionAction;
+  onUploaded?: () => void;
 }
 
 export function ModalApproveRejectBalance({
   isOpen,
   onClose,
   record,
-  action
+  action,
+  onUploaded
 }: ModalApproveRejectBalanceProps) {
+  const { showMessage } = useMessageApi();
   const [observations, setObservations] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) setObservations("");
@@ -31,10 +40,25 @@ export function ModalApproveRejectBalance({
 
   const title = action === "approve" ? "Aprobar" : "Rechazar";
 
-  const handleOk = () => {
-    // eslint-disable-next-line no-console
-    console.log(title, { record, observations, action });
-    onClose();
+  const handleOk = async () => {
+    if (!observations) return;
+    const decision: BalanceApprovalDecision = action === "approve" ? "APPROVED" : "REJECTED";
+    setIsLoading(true);
+    try {
+      await submitBalanceApprovalDecision(record.id, decision, observations);
+      showMessage(
+        "success",
+        action === "approve" ? "Saldo aprobado correctamente" : "Saldo rechazado correctamente"
+      );
+      onUploaded?.();
+      onClose();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Ocurrió un error al procesar la decisión";
+      showMessage("error", message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,6 +74,7 @@ export function ModalApproveRejectBalance({
           onClose={onClose}
           handleOk={handleOk}
           isConfirmDisabled={!observations}
+          isConfirmLoading={isLoading}
         />
       }
       destroyOnClose

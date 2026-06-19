@@ -259,6 +259,7 @@ export function BalancesTable({
             onClose={closeModal}
             record={activeRecord}
             action={decisionAction}
+            onUploaded={onUploaded}
           />
         </>
       )}

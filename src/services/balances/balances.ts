@@ -54,3 +54,21 @@ export const sendBalanceToApproval = async (balanceId: number, approverUserId: n
     throw error;
   }
 };
+
+export type BalanceApprovalDecision = "APPROVED" | "REJECTED";
+
+export const submitBalanceApprovalDecision = async (
+  balanceId: number,
+  decision: BalanceApprovalDecision,
+  observation: string
+) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/financial-discount/balance/${balanceId}/approval-decision`,
+      { decision, observation }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
