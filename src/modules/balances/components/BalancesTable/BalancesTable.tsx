@@ -252,12 +252,14 @@ export function BalancesTable({
             isOpen={openModal === "approval"}
             onClose={closeModal}
             record={activeRecord}
+            onUploaded={onUploaded}
           />
           <ModalApproveRejectBalance
             isOpen={openModal === "decision"}
             onClose={closeModal}
             record={activeRecord}
             action={decisionAction}
+            onUploaded={onUploaded}
           />
         </>
       )}
