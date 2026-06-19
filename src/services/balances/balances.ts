@@ -8,15 +8,15 @@ export const uploadBalanceFile = async (
   modelData: {
     financialDiscountMotiveId: number;
     observation: string;
-    file: File[];
+    file: File;
+    clientDocuments?: string;
   }
 ) => {
   const formData = new FormData();
   formData.append("financialDiscountMotiveId", String(modelData.financialDiscountMotiveId));
   formData.append("observation", modelData.observation);
-  modelData.file.forEach((file, index) => {
-    formData.append(`clientDocuments`, getCorrectMimeType(file));
-  });
+  formData.append("file", getCorrectMimeType(modelData.file));
+  modelData.clientDocuments && formData.append("clientDocuments", modelData.clientDocuments);
 
   try {
     const response: GenericResponse<any> = await API.patch(

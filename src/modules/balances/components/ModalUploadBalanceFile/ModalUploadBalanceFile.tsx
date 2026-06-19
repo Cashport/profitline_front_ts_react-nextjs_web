@@ -33,6 +33,7 @@ export function ModalUploadBalanceFile({
   const [tipoNovedadId, setTipoNovedadId] = useState<number | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [observation, setObservation] = useState("");
+  const [clientDocuments, setClientDocuments] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
@@ -43,6 +44,7 @@ export function ModalUploadBalanceFile({
       setTipoNovedadId(null);
       setFiles([]);
       setObservation("");
+      setClientDocuments("");
     }
   }, [isOpen]);
 
@@ -89,7 +91,8 @@ export function ModalUploadBalanceFile({
       await uploadBalanceFile(record.id, {
         financialDiscountMotiveId: tipoNovedadId,
         observation: observation.trim(),
-        file: files
+        file: files[0],
+        clientDocuments: clientDocuments.trim() || undefined
       });
       showMessage("success", "Soporte cargado correctamente");
       onUploaded?.();
@@ -146,7 +149,7 @@ export function ModalUploadBalanceFile({
               handleOnChange={handleOnChangeDocument}
               handleOnDelete={() => handleRemoveFile(files[0]?.name)}
             />
-            {files.slice(1).map((file) => (
+            {/* {files.slice(1).map((file) => (
               <DocumentButton
                 key={file.name}
                 title={file.name}
@@ -155,9 +158,9 @@ export function ModalUploadBalanceFile({
                 handleOnChange={handleOnChangeDocument}
                 handleOnDelete={() => handleRemoveFile(file.name)}
               />
-            ))}
+            ))} */}
           </div>
-
+          {/* 
           {files.length > 0 && (
             <>
               <Button
@@ -177,7 +180,7 @@ export function ModalUploadBalanceFile({
                 accept={FILE_EXTENSIONS.join(", ")}
               />
             </>
-          )}
+          )} */}
         </Flex>
 
         <Flex vertical gap="0.25rem">
@@ -188,6 +191,15 @@ export function ModalUploadBalanceFile({
             onChange={(e) => setObservation(e.target.value)}
             placeholder="Ingresar una observación"
             rows={2}
+          />
+        </Flex>
+        <Flex vertical gap="0.25rem">
+          <h4 className="inputTitle">Documento del cliente</h4>
+          <textarea
+            className={styles.textarea}
+            value={clientDocuments}
+            onChange={(e) => setClientDocuments(e.target.value)}
+            rows={1}
           />
         </Flex>
       </Flex>
