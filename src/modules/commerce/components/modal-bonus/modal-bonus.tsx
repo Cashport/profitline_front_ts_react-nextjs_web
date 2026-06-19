@@ -33,6 +33,7 @@ const ModalBonus = ({
   const promotion = confirmOrderData?.promotion;
   const giftOptions: IGiftOption[] = promotion?.active_range?.gift_options ?? [];
   const otherBonificated = confirmOrderData?.other_bonificated_products ?? [];
+  const otherKey = otherBonificated.map((p) => p.product_id).join(",");
 
   const tabOptions = giftOptions;
 
@@ -71,6 +72,15 @@ const ModalBonus = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedPromotionId]);
 
+  // re-seed Otros quantities only when the set of Otros products actually changes
+  // (client/promotion switch) — keyed on otherKey, not the array reference, so the
+  // frequent cart refetch (which hands back a new array each time) doesn't wipe
+  // the user's in-progress input back to the seed value
+  useEffect(() => {
+    setOtherQty(Object.fromEntries(otherBonificated.map((p) => [p.product_id, p.qty])));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otherKey]);
+
   const getPoolGroupTotal = (groupId: number) => {
     const group = poolQty[groupId] ?? {};
     return Object.values(group).reduce((s, v) => s + v, 0);
@@ -87,6 +97,17 @@ const ModalBonus = ({
     });
   };
 
+  // pool: set an absolute value, clamping so the group total never exceeds max
+  const setPoolValue = (groupId: number, productId: number, value: number, max: number) => {
+    setPoolQty((prev) => {
+      const group = prev[groupId] ?? {};
+      const current = group[productId] ?? 0;
+      const othersTotal = Object.values(group).reduce((s, v) => s + v, 0) - current;
+      const clamped = Math.max(0, Math.min(value, max - othersTotal));
+      return { ...prev, [groupId]: { ...group, [productId]: clamped } };
+    });
+  };
+
   const updateOther = (productId: number, delta: number, max: number) => {
     setOtherQty((prev) => {
       const current = prev[productId] ?? 0;
@@ -94,6 +115,20 @@ const ModalBonus = ({
       if (delta > 0 && next > max) return prev;
       return { ...prev, [productId]: next };
     });
+  };
+
+  // otros: set an absolute value, clamping per-product to [0, max]
+  const setOtherValue = (productId: number, value: number, max: number) => {
+    setOtherQty((prev) => ({
+      ...prev,
+      [productId]: Math.max(0, Math.min(value, max))
+    }));
+  };
+
+  // turn raw input text into a non-negative integer
+  const parseQtyInput = (raw: string) => {
+    const n = parseInt(raw, 10);
+    return Number.isNaN(n) ? 0 : Math.max(0, n);
   };
 
   const totalBonificados = () => {
@@ -108,7 +143,8 @@ const ModalBonus = ({
       .flatMap((g) => g.items)
       .reduce((s, it) => s + (it.qty ?? 0), 0);
 
-    const otherTotal = Object.values(otherQty).reduce((s, v) => s + v, 0);
+    // only count Otros that belong to the CURRENT order, never orphaned entries
+    const otherTotal = otherBonificated.reduce((s, p) => s + (otherQty[p.product_id] ?? 0), 0);
 
     return poolTotal + fixedTotal + otherTotal;
   };
@@ -202,169 +238,193 @@ const ModalBonus = ({
       );
     }
     return (
-            <div className={styles.section}>
-              <p className={styles.sectionLabel}>Bonificados promoción</p>
+      <div className={styles.section}>
+        <p className={styles.sectionLabel}>Bonificados promoción</p>
 
-              {tabOptions.length > 1 && (
-                <div className={styles.tabRow}>
-                  {tabOptions.map((opt, idx) => (
-                    <button
-                      key={opt.gift_group_id}
-                      onClick={() => setActiveTab(idx)}
-                      className={activeTab === idx ? styles.tabActive : styles.tab}
-                    >
-                      Opción {opt.option_number}
-                    </button>
-                  ))}
-                </div>
-              )}
+        {tabOptions.length > 1 && (
+          <div className={styles.tabRow}>
+            {tabOptions.map((opt, idx) => (
+              <button
+                key={opt.gift_group_id}
+                onClick={() => setActiveTab(idx)}
+                className={activeTab === idx ? styles.tabActive : styles.tab}
+              >
+                Opción {opt.option_number}
+              </button>
+            ))}
+          </div>
+        )}
 
-              <div className={styles.grupos}>
-                {tabOptions[activeTab]?.items
-                  .filter((g) => !g.fixed)
-                  .map((group) => {
-                    const groupTotal = getPoolGroupTotal(group.gift_item_group_id);
-                    return (
-                      <div key={group.gift_item_group_id} className={styles.poolTable}>
-                        <div className={styles.poolHeader}>
-                          <span>Elige {group.max_selection_qty} und.</span>
-                          <span className={styles.poolCount}>
-                            {groupTotal}/{group.max_selection_qty}
-                          </span>
-                        </div>
-                        <table className={styles.table}>
-                          <tbody>
-                            {group.items.map((item, idx) => {
-                              const qty =
-                                poolQty[group.gift_item_group_id]?.[item.product_id] ?? 0;
-                              return (
-                                <tr
-                                  key={item.product_id}
-                                  className={idx < group.items.length - 1 ? styles.rowBorder : ""}
+        <div className={styles.grupos}>
+          {tabOptions[activeTab]?.items
+            .filter((g) => !g.fixed)
+            .map((group) => {
+              const groupTotal = getPoolGroupTotal(group.gift_item_group_id);
+              return (
+                <div key={group.gift_item_group_id} className={styles.poolTable}>
+                  <div className={styles.poolHeader}>
+                    <span>Elige {group.max_selection_qty} und.</span>
+                    <span className={styles.poolCount}>
+                      {groupTotal}/{group.max_selection_qty}
+                    </span>
+                  </div>
+                  <table className={styles.table}>
+                    <tbody>
+                      {group.items.map((item, idx) => {
+                        const qty = poolQty[group.gift_item_group_id]?.[item.product_id] ?? 0;
+                        return (
+                          <tr
+                            key={item.product_id}
+                            className={idx < group.items.length - 1 ? styles.rowBorder : ""}
+                          >
+                            <td className={styles.cellName}>{item.description}</td>
+                            <td className={styles.cellControl}>
+                              <div className={styles.counter}>
+                                <button
+                                  onClick={() =>
+                                    updatePool(
+                                      group.gift_item_group_id,
+                                      item.product_id,
+                                      -1,
+                                      group.max_selection_qty
+                                    )
+                                  }
+                                  disabled={qty <= 0}
+                                  className={styles.counterBtn}
                                 >
-                                  <td className={styles.cellName}>{item.description}</td>
-                                  <td className={styles.cellControl}>
-                                    <div className={styles.counter}>
-                                      <button
-                                        onClick={() =>
-                                          updatePool(
-                                            group.gift_item_group_id,
-                                            item.product_id,
-                                            -1,
-                                            group.max_selection_qty
-                                          )
-                                        }
-                                        disabled={qty <= 0}
-                                        className={styles.counterBtn}
-                                      >
-                                        -
-                                      </button>
-                                      <span className={styles.counterVal}>{qty}</span>
-                                      <button
-                                        onClick={() =>
-                                          updatePool(
-                                            group.gift_item_group_id,
-                                            item.product_id,
-                                            1,
-                                            group.max_selection_qty
-                                          )
-                                        }
-                                        disabled={groupTotal >= group.max_selection_qty}
-                                        className={styles.counterBtn}
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  })}
+                                  -
+                                </button>
+                                <input
+                                  type="number"
+                                  inputMode="numeric"
+                                  min={0}
+                                  value={qty}
+                                  className={styles.counterInput}
+                                  onChange={(e) =>
+                                    setPoolValue(
+                                      group.gift_item_group_id,
+                                      item.product_id,
+                                      parseQtyInput(e.target.value),
+                                      group.max_selection_qty
+                                    )
+                                  }
+                                  onKeyDown={(e) => {
+                                    if (["e", "E", "+", "-", ".", ","].includes(e.key))
+                                      e.preventDefault();
+                                  }}
+                                />
+                                <button
+                                  onClick={() =>
+                                    updatePool(
+                                      group.gift_item_group_id,
+                                      item.product_id,
+                                      1,
+                                      group.max_selection_qty
+                                    )
+                                  }
+                                  disabled={groupTotal >= group.max_selection_qty}
+                                  className={styles.counterBtn}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
 
-                {tabOptions[activeTab]?.items
-                  .filter((g) => g.fixed)
-                  .map((group) => (
-                    <div key={group.gift_item_group_id} className={styles.fixedTable}>
-                      <div className={styles.fixedHeader}>
-                        <span>Incluido</span>
-                      </div>
-                      <table className={styles.table}>
-                        <tbody>
-                          {group.items.map((item, idx) => (
-                            <tr
-                              key={item.product_id}
-                              className={
-                                idx < group.items.length - 1 ? styles.rowBorderGreen : ""
-                              }
-                            >
-                              <td className={styles.cellName}>{item.description}</td>
-                              <td className={styles.cellBadge}>
-                                <span className={styles.fixedBadge}>{item.qty}</span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
+          {tabOptions[activeTab]?.items
+            .filter((g) => g.fixed)
+            .map((group) => (
+              <div key={group.gift_item_group_id} className={styles.fixedTable}>
+                <div className={styles.fixedHeader}>
+                  <span>Incluido</span>
+                </div>
+                <table className={styles.table}>
+                  <tbody>
+                    {group.items.map((item, idx) => (
+                      <tr
+                        key={item.product_id}
+                        className={idx < group.items.length - 1 ? styles.rowBorderGreen : ""}
+                      >
+                        <td className={styles.cellName}>{item.description}</td>
+                        <td className={styles.cellBadge}>
+                          <span className={styles.fixedBadge}>{item.qty}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
+            ))}
+        </div>
+      </div>
     );
   };
 
   const renderOtros = () => (
-            <div className={styles.section}>
-              <p className={styles.sectionLabel}>Otros bonificados</p>
-              <div className={styles.genericTable}>
-                <table className={styles.table}>
-                  <tbody>
-                    {otherBonificated.map((item, idx, arr) => {
-                      const qty = otherQty[item.product_id] ?? 0;
-                      return (
-                        <tr
-                          key={item.product_id}
-                          className={idx < arr.length - 1 ? styles.rowBorder : ""}
-                        >
-                          <td className={styles.cellName}>
-                            {item.description}
-                            <span className={styles.saldoHint}>
-                              ({qty}/{item.max_selection_qty})
-                            </span>
-                          </td>
-                          <td className={styles.cellControl}>
-                            <div className={styles.counter}>
-                              <button
-                                onClick={() =>
-                                  updateOther(item.product_id, -1, item.max_selection_qty)
-                                }
-                                disabled={qty <= 0}
-                                className={styles.counterBtn}
-                              >
-                                -
-                              </button>
-                              <span className={styles.counterVal}>{qty}</span>
-                              <button
-                                onClick={() =>
-                                  updateOther(item.product_id, 1, item.max_selection_qty)
-                                }
-                                disabled={qty >= item.max_selection_qty}
-                                className={styles.counterBtn}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+    <div className={styles.section}>
+      <p className={styles.sectionLabel}>Otros bonificados</p>
+      <div className={styles.genericTable}>
+        <table className={styles.table}>
+          <tbody>
+            {otherBonificated.map((item, idx, arr) => {
+              const qty = otherQty[item.product_id] ?? 0;
+              return (
+                <tr key={item.product_id} className={idx < arr.length - 1 ? styles.rowBorder : ""}>
+                  <td className={styles.cellName}>
+                    {item.description}
+                    <span className={styles.saldoHint}>
+                      ({qty}/{item.max_selection_qty})
+                    </span>
+                  </td>
+                  <td className={styles.cellControl}>
+                    <div className={styles.counter}>
+                      <button
+                        onClick={() => updateOther(item.product_id, -1, item.max_selection_qty)}
+                        disabled={qty <= 0}
+                        className={styles.counterBtn}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        value={qty}
+                        className={styles.counterInput}
+                        onChange={(e) =>
+                          setOtherValue(
+                            item.product_id,
+                            parseQtyInput(e.target.value),
+                            item.max_selection_qty
+                          )
+                        }
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", ".", ","].includes(e.key)) e.preventDefault();
+                        }}
+                      />
+                      <button
+                        onClick={() => updateOther(item.product_id, 1, item.max_selection_qty)}
+                        disabled={qty >= item.max_selection_qty}
+                        className={styles.counterBtn}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 
   const renderBody = () => {

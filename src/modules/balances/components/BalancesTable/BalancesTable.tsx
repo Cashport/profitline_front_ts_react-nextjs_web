@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button, Flex, message, Table, TableProps } from "antd";
 import { Eye } from "@phosphor-icons/react";
 import "./BalancesTable.scss";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { sendToOtherBalances } from "@/services/balances/balances";
@@ -56,7 +55,6 @@ export function BalancesTable({
   onOpenDetail,
   onUploaded
 }: BalancesTableProps) {
-  const height = useScreenHeight();
   const width = useScreenWidth();
   const { showMessage } = useMessageApi();
 
@@ -128,25 +126,30 @@ export function BalancesTable({
       showSorterTooltip: false,
       render: () => <span className="text-sm text-cashport-black" />
     },
-    {
-      title: "Cliente",
-      dataIndex: "client_name",
-      key: "cliente",
-      sorter: (a, b) => (a.client_name ?? "").localeCompare(b.client_name ?? ""),
-      showSorterTooltip: false,
-      render: (value: string) => (
-        <div className="flex items-center gap-2" style={{ maxWidth: 260 }}>
-          <span className="text-sm text-cashport-black truncate" title={value}>
-            {value}
-          </span>
-        </div>
-      )
-    },
+    ...(context === "balances"
+      ? [
+          {
+            title: "Cliente",
+            dataIndex: "client_name",
+            key: "cliente",
+            sorter: (a: IBalanceRow, b: IBalanceRow) =>
+              (a.client_name ?? "").localeCompare(b.client_name ?? ""),
+            showSorterTooltip: false,
+            render: (value: string) => (
+              <div className="flex items-center gap-2" style={{ maxWidth: 260 }}>
+                <span className="text-sm text-cashport-black truncate" title={value}>
+                  {value}
+                </span>
+              </div>
+            )
+          }
+        ]
+      : []),
     {
       title: "Tipo",
       dataIndex: "motive_name",
       key: "tipo",
-      width: colWidth(140),
+      width: colWidth(195),
       sorter: (a, b) => (a.motive_name ?? "").localeCompare(b.motive_name ?? ""),
       showSorterTooltip: false,
       render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
@@ -233,7 +236,6 @@ export function BalancesTable({
         loading={loading}
         rowSelection={rowSelection}
         pagination={{ pageSize: 10, showSizeChanger: false, position: ["bottomRight"] }}
-        scroll={{ y: width > 1280 ? height - 345 : height - 370, x: undefined }}
         rowClassName={(record) =>
           selectedSaldoIds.includes(String(record.id)) ? "ant-table-row-selected" : ""
         }
@@ -252,12 +254,14 @@ export function BalancesTable({
             isOpen={openModal === "approval"}
             onClose={closeModal}
             record={activeRecord}
+            onUploaded={onUploaded}
           />
           <ModalApproveRejectBalance
             isOpen={openModal === "decision"}
             onClose={closeModal}
             record={activeRecord}
             action={decisionAction}
+            onUploaded={onUploaded}
           />
         </>
       )}

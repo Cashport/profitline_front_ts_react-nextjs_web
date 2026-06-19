@@ -85,7 +85,19 @@ export interface IBalanceRow {
   status_name: string;
   status_color: string;
   motive_name: string;
-  created_at: string; // b.CREATE_AT timestamp
+  created_at: string;
+  financial_record_date: string;
+  audit_file_url: string | null;
+  audit_file_name: string | null;
+  client_documents: IClientDocument[] | null;
+}
+
+export interface IClientDocument {
+  id: number;
+  balance_id: number;
+  document: string;
+  created_by: number;
+  created_at: string;
 }
 
 // One state group

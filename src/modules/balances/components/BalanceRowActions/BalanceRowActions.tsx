@@ -26,21 +26,6 @@ export function BalanceRowActions({
   const statusCode = (record.status_code ?? "").toLowerCase();
 
   const buildItems = (): MenuProps["items"] => {
-    if (context === "clientBalances") {
-      switch (statusCode) {
-        case "pending":
-          return [
-            {
-              key: "cargar-soporte",
-              label: "Cargar soporte",
-              onClick: () => onCargarSoporte(record)
-            }
-          ];
-        default:
-          return [];
-      }
-    }
-
     switch (statusCode) {
       case "pending":
         return [
