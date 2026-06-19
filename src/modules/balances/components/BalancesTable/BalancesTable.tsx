@@ -132,7 +132,8 @@ export function BalancesTable({
             title: "Cliente",
             dataIndex: "client_name",
             key: "cliente",
-            sorter: (a, b) => (a.client_name ?? "").localeCompare(b.client_name ?? ""),
+            sorter: (a: IBalanceRow, b: IBalanceRow) =>
+              (a.client_name ?? "").localeCompare(b.client_name ?? ""),
             showSorterTooltip: false,
             render: (value: string) => (
               <div className="flex items-center gap-2" style={{ maxWidth: 260 }}>
