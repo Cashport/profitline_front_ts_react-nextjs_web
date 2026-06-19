@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button, Flex, message, Table, TableProps } from "antd";
 import { Eye } from "@phosphor-icons/react";
 import "./BalancesTable.scss";
-import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { sendToOtherBalances } from "@/services/balances/balances";
@@ -56,7 +55,6 @@ export function BalancesTable({
   onOpenDetail,
   onUploaded
 }: BalancesTableProps) {
-  const height = useScreenHeight();
   const width = useScreenWidth();
   const { showMessage } = useMessageApi();
 

@@ -38,7 +38,11 @@ export function ClientBalancesView() {
     to_date: null
   });
 
-  const { data: balancesData, isLoading: balancesLoading } = useBalances({
+  const {
+    data: balancesData,
+    isLoading: balancesLoading,
+    mutate
+  } = useBalances({
     users: [],
     clients: [],
     from_date: filter.from_date,
@@ -120,6 +124,7 @@ export function ClientBalancesView() {
                   onSelectAll={selectAllSaldos}
                   onDeselectAll={deselectSaldos}
                   onOpenDetail={openDetailSheet}
+                  onUploaded={() => mutate()}
                 />
               )
             }))}
