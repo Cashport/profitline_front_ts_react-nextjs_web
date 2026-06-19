@@ -4,6 +4,7 @@ import { Calendar, ChevronDown, Filter, MoreHorizontal } from "lucide-react";
 import { Dropdown, message } from "antd";
 
 import {
+  deleteFileDateIntake,
   deleteIntakeFile,
   downloadCSV,
   downloadExcel,
@@ -14,6 +15,7 @@ import { useArchivesClientData } from "../../hooks/useArchivesClientData";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
+import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -31,6 +33,7 @@ import { Plus } from "phosphor-react";
 
 interface IClientDetailTableProps {
   clientId: string;
+  clientNIT?: string | null;
   clientName?: string | null;
   mutateDetail?: () => void;
 }
@@ -44,12 +47,20 @@ const formatDate = (isoDateString: string): string => {
   return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
-export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClientDetailTableProps) {
+export function ClientDetailTable({
+  clientId,
+  clientNIT,
+  clientName,
+  mutateDetail
+}: IClientDetailTableProps) {
   const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteDateModalOpen, setIsDeleteDateModalOpen] = useState(false);
+  const [isDeleteDateLoading, setIsDeleteDateLoading] = useState(false);
   const [isUploadIntakeModalOpen, setIsUploadIntakeModalOpen] = useState(false);
   const [isGenericIntakeModalOpen, setIsGenericIntakeModalOpen] = useState(false);
+  const [isCreateFileModalOpen, setIsCreateFileModalOpen] = useState(false);
   const [activeFileId, setActiveFileId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
@@ -164,6 +175,36 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
     setIsDeleteModalOpen(false);
   };
 
+  const handleDeleteFileDate = async (fileId: number) => {
+    setIsDeleteDateLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Eliminando fecha de ingesta...",
+      duration: 0
+    });
+    try {
+      await deleteFileDateIntake(fileId);
+      message.success("Fecha de ingesta eliminada exitosamente.");
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al eliminar la fecha de ingesta. Por favor, inténtalo de nuevo."
+      );
+    } finally {
+      hide();
+      setIsDeleteDateLoading(false);
+    }
+  };
+
+  const handleConfirmDeleteDate = () => {
+    if (activeFileId !== null) {
+      handleDeleteFileDate(activeFileId);
+    }
+    setIsDeleteDateModalOpen(false);
+  };
+
   const handleUploadEvidence = async (id: number) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -250,7 +291,7 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
             Archivos
           </h2>
           <Button
-            onClick={() => console.log("create")}
+            onClick={() => setIsCreateFileModalOpen(true)}
             variant="ghost"
             className="bg-transparent"
             style={{ color: "#141414" }}
@@ -408,7 +449,11 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
                             {
                               key: "delete-date",
                               label: "Fecha ingesta",
-                              onClick: () => console.log(file.id)
+                              onClick: () => {
+                                setActiveFileId(file.id);
+                                setIsDeleteDateModalOpen(true);
+                              },
+                              disabled: isDeleteDateLoading
                             }
                           ]
                         }
@@ -466,6 +511,28 @@ export function ClientDetailTable({ clientId, clientName, mutateDetail }: IClien
           mutateDetail?.();
           mutate();
         }}
+      />
+      <ModalCreateNewFile
+        isOpen={isCreateFileModalOpen}
+        onClose={() => setIsCreateFileModalOpen(false)}
+        clientId={clientId}
+        clientNIT={clientNIT}
+        onSuccess={() => {
+          mutateDetail?.();
+          mutate();
+        }}
+      />
+      <ModalConfirmAction
+        isOpen={isDeleteDateModalOpen}
+        onClose={() => {
+          setIsDeleteDateModalOpen(false);
+          setActiveFileId(null);
+        }}
+        onOk={handleConfirmDeleteDate}
+        title="¿Está seguro de eliminar la fecha de ingesta?"
+        okText="Eliminar"
+        cancelText="Cancelar"
+        okLoading={isDeleteDateLoading}
       />
     </div>
   );
