@@ -80,9 +80,9 @@ export function BalanceDetailModal({
               <p className="text-sm font-semibold text-cashport-black">{saldoData.kam_name}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Fecha registro</p>
+              <p className="text-xs text-gray-400">Documento cliente</p>
               <p className="text-sm font-semibold text-cashport-black">
-                {formatDate(saldoData.created_at)}
+                {saldoData.client_documents && saldoData.client_documents[0].document}
               </p>
             </div>
             <div>
