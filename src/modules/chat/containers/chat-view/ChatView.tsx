@@ -65,7 +65,10 @@ export default function ChatInbox() {
         />
 
         <section
-          className={cn(detailsOpen ? "md:col-span-6" : "md:col-span-9", "min-h-0 flex flex-col")}
+          className={cn(
+            detailsOpen ? "md:col-span-6" : "md:col-span-9",
+            "min-w-0 min-h-0 flex flex-col"
+          )}
         >
           {activeConversation ? (
             <ChatThread

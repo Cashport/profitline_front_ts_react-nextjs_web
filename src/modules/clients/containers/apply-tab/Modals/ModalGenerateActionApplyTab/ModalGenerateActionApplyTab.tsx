@@ -66,21 +66,21 @@ export const ModalGenerateActionApplyTab = ({
         <ButtonGenerateAction
           onClick={() => {
             if (!selectedRows || selectedRows.length === 0) {
-              message.error("Debes seleccionar al menos un ajuste contable para editar");
+              message.error("Debes seleccionar al menos un saldo para editar");
               return;
             }
-            // comprobar que de las selecteded rows tienen un financial_discount_id
+            // comprobar que de las selecteded rows tienen un balance_id
             if (selectedRows[0]) {
-              const hasFinancialDiscountId = selectedRows.some((row) => row.financial_discount_id);
-              if (!hasFinancialDiscountId) {
-                message.error("Debes seleccionar al menos un ajuste contable para editar");
+              const hasBalanceId = selectedRows.some((row) => row.balance_id);
+              if (!hasBalanceId) {
+                message.error("Debes seleccionar al menos un saldo para editar");
                 return;
               }
             }
             handleOpenModal(5);
           }}
           icon={<Pencil size={20} />}
-          title="Editar ajustes"
+          title="Editar saldos"
         />
         <ButtonGenerateAction
           onClick={() => {

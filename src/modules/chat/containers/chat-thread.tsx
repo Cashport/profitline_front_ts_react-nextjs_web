@@ -8,7 +8,6 @@ import { getWhatsAppTemplates, markTicketAsRead, sendTemplate } from "@/services
 import { useSocket } from "@/context/ChatContext";
 import useTicketMessages from "@/hooks/useTicketMessages";
 
-import { ScrollArea } from "@/modules/chat/ui/scroll-area";
 import { Separator } from "@/modules/chat/ui/separator";
 import { Avatar, AvatarFallback } from "@/modules/chat/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/modules/chat/ui/tabs";
@@ -274,8 +273,11 @@ export default function ChatThread({
       </div>
 
       {/* History */}
-      <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
-        <div className="px-4 py-6">
+      <div
+        ref={viewportRef}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin"
+      >
+        <div className="pl-4 py-6">
           {Array.from(messagesByDay.entries()).map(([day, messages]) => (
             <div key={`group-${day}`} className="space-y-6">
               <DateSeparator date={messages[0].timestamp} />
@@ -284,7 +286,9 @@ export default function ChatThread({
                   {ticketSeparatorByMessageId.has(m.id) ? (
                     <div className="my-2 flex items-center gap-3 text-[13px] text-[#62687A]">
                       <div className="h-px flex-1 bg-[#D6D8DE]" />
-                      <span className="whitespace-nowrap">{ticketSeparatorByMessageId.get(m.id)}</span>
+                      <span className="whitespace-nowrap">
+                        {ticketSeparatorByMessageId.get(m.id)}
+                      </span>
                       <div className="h-px flex-1 bg-[#D6D8DE]" />
                     </div>
                   ) : null}
@@ -301,7 +305,7 @@ export default function ChatThread({
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
       <Separator style={{ backgroundColor: "#DDDDDD" }} />
 

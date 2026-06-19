@@ -11,6 +11,7 @@ module.exports = {
     extend: {
       colors: {
         "cashport-green": "rgb(var(--cashport-green) / <alpha-value>)",
+        "cashport-orange": "rgb(var(--cashport-orange) / <alpha-value>)",
         "cashport-black": "rgb(var(--cashport-black) / <alpha-value>)",
         "cashport-gray-light": "rgb(var(--cashport-gray-light) / <alpha-value>)",
         "cashport-gray-lighter": "rgb(var(--cashport-gray-lighter) / <alpha-value>)",
