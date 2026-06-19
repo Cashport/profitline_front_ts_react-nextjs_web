@@ -159,7 +159,11 @@ export function BalancesTable({
       key: "descripcion",
       dataIndex: "COMMENTS",
       showSorterTooltip: false,
-      render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
+      render: (_: unknown, record: IBalanceRow) => (
+        <span className="text-sm text-cashport-black">
+          {record.COMMENTS ?? record.comments ?? "-"}
+        </span>
+      )
     },
     {
       title: "Saldo inicial",
