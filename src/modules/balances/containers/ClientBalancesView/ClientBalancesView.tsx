@@ -13,20 +13,10 @@ import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { FilterBalances, ISaldosFilterValue } from "../../components/FilterBalances/FilterBalances";
 import { useSaldos } from "../../context/saldos-context";
 import { useBalances } from "@/hooks/useBalances";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { extractSingleParam } from "@/utils/utils";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
-
-const matchesSearch = (balance: IBalanceRow, term: string) => {
-  if (!term) return true;
-  const lowerTerm = term.toLowerCase();
-  return (
-    String(balance.id).toLowerCase().includes(lowerTerm) ||
-    (balance.client_name ?? "").toLowerCase().includes(lowerTerm) ||
-    (balance.kam_name ?? "").toLowerCase().includes(lowerTerm) ||
-    (balance.motive_name ?? "").toLowerCase().includes(lowerTerm)
-  );
-};
 
 export function ClientBalancesView() {
   const params = useParams();
@@ -38,6 +28,9 @@ export function ClientBalancesView() {
     to_date: null
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   const {
     data: balancesData,
     isLoading: balancesLoading,
@@ -48,14 +41,14 @@ export function ClientBalancesView() {
     from_date: filter.from_date,
     to_date: filter.to_date,
     client_uuid: clientId,
-    motive_ids: filter.motive_ids
+    motive_ids: filter.motive_ids,
+    search: debouncedSearch
   });
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
   const { state, toggleSaldoSelection, selectAllSaldos, deselectSaldos } = useSaldos();
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
@@ -68,12 +61,7 @@ export function ClientBalancesView() {
     setIsDetailSheetOpen(false);
   };
 
-  const filteredGroups = (balancesData ?? [])
-    .map((group) => ({
-      ...group,
-      balances: group.balances.filter((balance) => matchesSearch(balance, searchTerm))
-    }))
-    .filter((group) => group.balances.length > 0);
+  const filteredGroups = balancesData ?? [];
 
   return (
     <>

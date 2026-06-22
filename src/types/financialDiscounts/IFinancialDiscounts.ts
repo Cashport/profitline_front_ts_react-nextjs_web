@@ -133,4 +133,5 @@ export interface IBalancesFilter {
   to_date: string | null;
   client_uuid?: string;
   motive_ids?: number[]; // selected motive ids
+  search?: string; // free-text search term
 }

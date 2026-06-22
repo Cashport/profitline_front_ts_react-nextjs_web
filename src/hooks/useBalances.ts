@@ -14,6 +14,7 @@ export const useBalances = (filters?: IBalancesFilter) => {
   if (filters?.from_date) queries.push(`from_date=${filters.from_date}`);
   if (filters?.to_date) queries.push(`to_date=${filters.to_date}`);
   if (filters?.client_uuid) queries.push(`client_uuid=${filters.client_uuid}`);
+  if (filters?.search) queries.push(`search=${encodeURIComponent(filters.search)}`);
 
   const queryString = queries.length > 0 ? `?${queries.join("&")}` : "";
 
