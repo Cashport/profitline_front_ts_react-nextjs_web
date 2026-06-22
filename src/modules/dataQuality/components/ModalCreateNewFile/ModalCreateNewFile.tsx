@@ -65,7 +65,7 @@ const ModalCreateNewFile = ({
   const handleCreateFile = async (data: IFormCreateNewFile) => {
     setIsSubmitting(true);
     try {
-      await createNewFileDate(Number(clientNIT), {
+      await createNewFileDate(Number(clientId), {
         id_type_archive: data.fileTypeId!,
         date_archive: data.date!.format("YYYY-MM-DD"),
         id_client_data_archives: Number(clientId)
