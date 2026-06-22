@@ -16,20 +16,10 @@ import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { GroupedFilters } from "../../components/GroupedFilters/GroupedFilters";
 import { useSaldos } from "../../context/saldos-context";
 import { useBalances } from "@/hooks/useBalances";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useAppStore } from "@/lib/store/store";
 import { IBalanceRow, IBalancesFilter } from "@/types/financialDiscounts/IFinancialDiscounts";
-
-const matchesSearch = (balance: IBalanceRow, term: string) => {
-  if (!term) return true;
-  const lowerTerm = term.toLowerCase();
-  return (
-    String(balance.id).toLowerCase().includes(lowerTerm) ||
-    (balance.client_name ?? "").toLowerCase().includes(lowerTerm) ||
-    (balance.kam_name ?? "").toLowerCase().includes(lowerTerm) ||
-    (balance.motive_name ?? "").toLowerCase().includes(lowerTerm)
-  );
-};
 
 export function BalancesView() {
   const { ID } = useAppStore((projects) => projects.selectedProject);
@@ -41,11 +31,14 @@ export function BalancesView() {
     to_date: null
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   const {
     data: balancesData,
     isLoading: balancesLoading,
     mutate: mutateBalances
-  } = useBalances(balancesFilter);
+  } = useBalances({ ...balancesFilter, search: debouncedSearch });
 
   const { data: balancesFilters, isLoading: filtersLoading } = useSWR(
     ID ? ["balances-filters", ID] : null,
@@ -54,7 +47,6 @@ export function BalancesView() {
 
   const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos } = useSaldos();
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
@@ -67,12 +59,7 @@ export function BalancesView() {
     setIsDetailSheetOpen(false);
   };
 
-  const filteredGroups = (balancesData ?? [])
-    .map((group) => ({
-      ...group,
-      balances: group.balances.filter((balance) => matchesSearch(balance, searchTerm))
-    }))
-    .filter((group) => group.balances.length > 0);
+  const filteredGroups = balancesData ?? [];
 
   const handleStateFilter = (stateName: string) => {
     if (state.filterState === stateName) {
