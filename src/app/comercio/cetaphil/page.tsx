@@ -53,6 +53,8 @@ export interface IOrderViewContext {
   setShippingInfo: Dispatch<IShippingInformation>;
   channelCode: string;
   setChannelCode: Dispatch<SetStateAction<string>>;
+  channelName?: string;
+  setChannelName?: Dispatch<SetStateAction<string>>;
   selectedDiscount: IDiscountPackageAvailable | undefined;
   setSelectedDiscount: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];

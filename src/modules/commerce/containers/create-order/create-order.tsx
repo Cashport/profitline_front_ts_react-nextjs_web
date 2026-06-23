@@ -75,6 +75,7 @@ export const CreateOrderView: FC = () => {
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
   const [channelCode, setChannelCode] = useState("");
+  const [channelName, setChannelName] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
@@ -238,6 +239,8 @@ export const CreateOrderView: FC = () => {
         setShippingInfo,
         channelCode,
         setChannelCode,
+        channelName,
+        setChannelName,
         selectedDiscount,
         setSelectedDiscount,
         categories,
