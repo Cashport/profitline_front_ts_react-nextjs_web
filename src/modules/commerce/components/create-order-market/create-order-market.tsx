@@ -39,7 +39,8 @@ const CreateOrderMarket: FC = () => {
     setCategories,
     setSelectedCategories,
     toggleCart,
-    numberOfItems
+    numberOfItems,
+    businessUnit
   } = useContext(OrderViewContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("");
@@ -52,7 +53,7 @@ const CreateOrderMarket: FC = () => {
     const fetchProducts = async () => {
       if (!client?.id) return;
 
-      const response = await getProductsByClient(ID, client.id);
+      const response = await getProductsByClient(ID, client.id, businessUnit);
       if (!response.data) return;
 
       const newProductsMap = new Map<number, ISelectedProduct>();
