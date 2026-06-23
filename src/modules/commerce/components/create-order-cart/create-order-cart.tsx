@@ -602,18 +602,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               <p>Subtotal</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </Flex>
-            <Flex justify="space-between" gap={"0.25rem"}>
-              <p className={styles.cartContainer__footer__discountExplanation}>
-                Descuentos ({selectedDiscount?.name})
-              </p>
-              {confirmOrderData.discounts ? (
-                <Text className={styles.cartContainer__footer__discountExplanation}>
-                  -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
-                </Text>
-              ) : (
-                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
-              )}
-            </Flex>
+
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
               <p className={styles.cartContainer__footer__discountExplanation}>
                 Descuentos de productos
@@ -634,6 +623,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
                   -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
+                </Text>
+              ) : (
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
+              )}
+            </Flex>
+            <Flex justify="space-between" gap={"0.25rem"}>
+              <p className={styles.cartContainer__footer__discountExplanation}>Descuento Total</p>
+              {confirmOrderData.discounts ? (
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
                 </Text>
               ) : (
                 <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
