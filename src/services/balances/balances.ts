@@ -74,3 +74,34 @@ export const submitBalanceApprovalDecision = async (
     throw error;
   }
 };
+
+export interface UpdateBalancePayload {
+  client_id?: string;
+  comments?: string;
+  motive_id?: number;
+  file?: File;
+}
+
+export const updateBalance = async (balanceId: number, payload: UpdateBalancePayload) => {
+  const formData = new FormData();
+  if (payload.client_id !== undefined) formData.append("client_id", payload.client_id);
+  if (payload.comments !== undefined) formData.append("comments", payload.comments);
+  if (payload.motive_id !== undefined) formData.append("motive_id", String(payload.motive_id));
+  if (payload.file) formData.append("files", getCorrectMimeType(payload.file));
+
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/financial-discount/balance/${balanceId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error updating balance", error);
+    throw error;
+  }
+};

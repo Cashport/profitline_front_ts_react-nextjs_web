@@ -10,11 +10,14 @@ import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { useAppStore } from "@/lib/store/store";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
+import { updateBalance, UpdateBalancePayload } from "@/services/balances/balances";
+import { useMessageApi } from "@/context/MessageContext";
 
 interface BalanceDetailModalProps {
   saldoData: IBalanceRow;
   onBack: () => void;
   isModal?: boolean;
+  onUpdated?: () => void | Promise<unknown>;
 }
 
 interface BalanceEditForm {
@@ -50,14 +53,24 @@ const formatDate = (dateString: string) => {
 export function BalanceDetailModal({
   saldoData,
   onBack,
-  isModal = false
+  isModal = false,
+  onUpdated
 }: BalanceDetailModalProps) {
   const { ID } = useAppStore((projects) => projects.selectedProject);
+  const { showMessage } = useMessageApi();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm<BalanceEditForm>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { dirtyFields }
+  } = useForm<BalanceEditForm>({
     defaultValues: getDefaultValues(saldoData)
   });
 
@@ -81,36 +94,32 @@ export function BalanceDetailModal({
     setIsEditing((prev) => !prev);
   };
 
-  const onSubmit = (data: BalanceEditForm) => {
-    const originalComments = saldoData.COMMENTS ?? saldoData.comments ?? "";
-    const changes: Record<string, unknown> = {};
+  const onSubmit = async (data: BalanceEditForm) => {
+    const payload: UpdateBalancePayload = {};
 
-    if (data.client_id !== saldoData.client_id) {
-      const selectedClient = balancesFilters?.clients?.find((c) => c.id === data.client_id);
-      changes.client_id = data.client_id;
-      changes.client_name = selectedClient?.name;
+    if (dirtyFields.client_id) payload.client_id = data.client_id;
+    if (dirtyFields.comments) payload.comments = data.comments;
+    if (dirtyFields.file && data.file) payload.file = data.file;
+    if (dirtyFields.motive_id && typeof data.motive_id === "number" && data.motive_id > 0) {
+      payload.motive_id = data.motive_id;
     }
 
-    if (data.motive_id !== saldoData.motive_id) {
-      const selectedMotive = motives?.find((m) => m.id === data.motive_id);
-      changes.motive_id = data.motive_id;
-      changes.motive_name = selectedMotive?.name;
+    if (Object.keys(payload).length === 0) {
+      setIsEditing(false);
+      return;
     }
 
-    if (data.comments !== originalComments) {
-      changes.comments = data.comments;
+    setIsSaving(true);
+    try {
+      await updateBalance(saldoData.id, payload);
+      showMessage("success", "Saldo actualizado correctamente");
+      await onUpdated?.();
+      setIsEditing(false);
+    } catch (error) {
+      showMessage("error", error instanceof Error ? error.message : "Error al actualizar el saldo");
+    } finally {
+      setIsSaving(false);
     }
-
-    if (data.file) {
-      changes.file = data.file;
-    }
-
-    if (Object.keys(changes).length > 0) {
-      console.log("Balance ID:", saldoData.id, "Changes:", changes);
-    }
-
-    setIsEditing(false);
-    reset(getDefaultValues(saldoData));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,9 +151,10 @@ export function BalanceDetailModal({
               <button
                 type="button"
                 onClick={handleSubmit(onSubmit)}
-                className="px-3 py-1 text-sm font-medium text-primary-foreground bg-primary rounded hover:bg-primary/90 transition-colors"
+                disabled={isSaving}
+                className="px-3 py-1 text-sm font-medium text-primary-foreground bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Guardar
+                {isSaving ? "Guardando…" : "Guardar"}
               </button>
             ) : (
               <button
