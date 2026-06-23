@@ -81,7 +81,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     categories,
     setCategories,
     executiveDiscounts,
-    deactivateCrossSelling
+    deactivateCrossSelling,
+    channelName
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -123,10 +124,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     setPromotionId(id);
   };
 
-  const MINIMUM_ORDER_AMOUNT = 1600000;
+  const ESTETICA_MINIMUM = 1600000;
+  const ALASTIN_MINIMUM = 1000000;
+  const normalizedChannel = channelName?.trim().toLowerCase();
+  const isAlastin = normalizedChannel === "alastin";
+  const isEstetica = normalizedChannel === "estetica";
+
+  const minimumOrderAmount = isAlastin ? ALASTIN_MINIMUM : ESTETICA_MINIMUM;
   const isTotalLessThanMinimum = useMemo(
-    () => confirmOrderData?.total < MINIMUM_ORDER_AMOUNT,
-    [confirmOrderData?.total]
+    () => confirmOrderData?.total < minimumOrderAmount,
+    [confirmOrderData?.total, minimumOrderAmount]
   );
 
   const hasNoCanulasOrAgua = useMemo(() => {
@@ -197,7 +204,17 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     skipOddSBVital?: boolean;
     skipOddGroup?: boolean;
   }) => {
-    if (projectId === GALDERMA_PROJECT_ID) {
+    if (projectId === GALDERMA_PROJECT_ID && isAlastin) {
+      if (isTotalLessThanMinimum) {
+        setShowConfirmModal(true);
+        return;
+      }
+      setCheckingOut(true);
+      onClose && onClose();
+      return;
+    }
+
+    if (projectId === GALDERMA_PROJECT_ID && isEstetica) {
       const hasAnnualDiscount = !!selectedDiscount?.idAnnualDiscount;
 
       if (!hasAnnualDiscount && !options?.skipOddSBVital && hasOddSBVital) {
@@ -229,7 +246,9 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
       return;
     }
 
+    // GALDERMA with any other channel, or non-GALDERMA projects: proceed directly.
     setCheckingOut(true);
+    if (projectId === GALDERMA_PROJECT_ID) onClose && onClose();
   };
 
   const handleConfirmCanulas = () => {
@@ -583,18 +602,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               <p>Subtotal</p>
               <p>${formatNumber(confirmOrderData?.subtotal)}</p>
             </Flex>
-            <Flex justify="space-between" gap={"0.25rem"}>
-              <p className={styles.cartContainer__footer__discountExplanation}>
-                Descuentos ({selectedDiscount?.name})
-              </p>
-              {confirmOrderData.discounts ? (
-                <Text className={styles.cartContainer__footer__discountExplanation}>
-                  -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
-                </Text>
-              ) : (
-                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
-              )}
-            </Flex>
+
             <Flex justify="space-between" style={{ marginTop: "0.2rem" }}>
               <p className={styles.cartContainer__footer__discountExplanation}>
                 Descuentos de productos
@@ -615,6 +623,16 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
               {confirmOrderData.discounts ? (
                 <Text className={styles.cartContainer__footer__discountExplanation}>
                   -${formatNumber(confirmOrderData.discounts?.totalOrderDiscount)}
+                </Text>
+              ) : (
+                <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
+              )}
+            </Flex>
+            <Flex justify="space-between" gap={"0.25rem"}>
+              <p className={styles.cartContainer__footer__discountExplanation}>Descuento Total</p>
+              {confirmOrderData.discounts ? (
+                <Text className={styles.cartContainer__footer__discountExplanation}>
+                  -${formatNumber(confirmOrderData.discounts?.totalDiscount)}
                 </Text>
               ) : (
                 <Text className={styles.cartContainer__footer__discountExplanation}>-$0</Text>
@@ -662,7 +680,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         content={
           <Flex vertical className={styles.confirmationModalContent} gap="0.5rem">
             <p className={styles.confirmationModalContent__totalLabel}>
-              El pedido debe ser mínimo de {formatMoney(MINIMUM_ORDER_AMOUNT)} (IVA incluido)
+              El pedido debe ser mínimo de {formatMoney(minimumOrderAmount)} (IVA incluido)
             </p>
             <p>Agrega más productos al carrito para continuar.</p>
           </Flex>
