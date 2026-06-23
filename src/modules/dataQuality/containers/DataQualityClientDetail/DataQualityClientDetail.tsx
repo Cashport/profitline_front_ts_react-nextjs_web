@@ -283,6 +283,7 @@ export default function DataQualityClientDetails() {
 
             <ClientDetailTable
               clientId={clientId}
+              clientNIT={clientDetail.id_client}
               mutateDetail={() => mutate()}
               clientName={clientName}
             />

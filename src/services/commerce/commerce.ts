@@ -42,9 +42,14 @@ export const getClients = async (projectId: number) => {
   return response;
 };
 
-export const getProductsByClient = async (projectId: number, clientId: string) => {
+export const getProductsByClient = async (projectId: number, clientId: string, businessUnit?: string) => {
+  const queryParams = new URLSearchParams();
+  if (businessUnit) {
+    queryParams.append("business_unit", businessUnit);
+  }
   const response: GenericResponse<IProductData[]> = await API.get(
-    `/marketplace/projects/${projectId}/clients/${clientId}/products`
+    `/marketplace/projects/${projectId}/clients/${clientId}/products`,
+    { params: queryParams }
   );
   return response;
 };

@@ -43,9 +43,20 @@ export function ClientDetailIntakesTable({
   };
   return (
     <>
-      <h2 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
-        Detalle de ingestas
-      </h2>
+      <div className="flex items-center justify-start mb-4 gap-3">
+        <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
+          Detalle de ingestas
+        </h2>
+        <Button
+          onClick={() => handleOpenIntakeModal("create")}
+          variant="ghost"
+          className="bg-transparent"
+          style={{ color: "#141414" }}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Crear nueva ingesta
+        </Button>
+      </div>
 
       <Table className="mb-4">
         <TableHeader>
@@ -117,15 +128,6 @@ export function ClientDetailIntakesTable({
           )}
         </TableBody>
       </Table>
-      <Button
-        onClick={() => handleOpenIntakeModal("create")}
-        variant="outline"
-        className="mb-8 bg-transparent"
-        style={{ borderColor: "#DDDDDD", color: "#141414" }}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Crear nueva ingesta
-      </Button>
 
       <ModalDataIntake
         clientId={clientId || ""}

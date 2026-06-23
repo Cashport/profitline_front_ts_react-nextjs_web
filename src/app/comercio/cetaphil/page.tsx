@@ -55,6 +55,13 @@ export interface IOrderViewContext {
   setChannelCode: Dispatch<SetStateAction<string>>;
   channelName?: string;
   setChannelName?: Dispatch<SetStateAction<string>>;
+  /**
+   * Nombre de la unidad de negocio (`client_bu[n].bu_name`) elegida en el
+   * dropdown "Canal". Se envía como `business_unit` en la orden de
+   * marketplace. Vacío cuando no se ha seleccionado un canal.
+   */
+  businessUnit: string;
+  setBusinessUnit: Dispatch<SetStateAction<string>>;
   selectedDiscount: IDiscountPackageAvailable | undefined;
   setSelectedDiscount: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];
@@ -86,6 +93,7 @@ const CreateOrderView: FC = () => {
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
   const [channelCode, setChannelCode] = useState("");
+  const [businessUnit, setBusinessUnit] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
@@ -157,6 +165,8 @@ const CreateOrderView: FC = () => {
         setShippingInfo,
         channelCode,
         setChannelCode,
+        businessUnit,
+        setBusinessUnit,
         selectedDiscount,
         setSelectedDiscount,
         categories,

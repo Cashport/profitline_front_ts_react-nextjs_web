@@ -284,6 +284,15 @@ export interface ICreateOrderData {
   promotion_id?: number;
   nit_id: string;
   /**
+   * Unidad de negocio seleccionada por el usuario en el dropdown "Canal"
+   * durante la creación de la orden. Se obtiene de `client_bu[n].bu_name`
+   * del endpoint `/marketplace/projects/:project/clients`.
+   *
+   * Opcional: solo aplica al flujo de marketplace (esta interfaz no se usa
+   * en órdenes de compra / purchase orders).
+   */
+  business_unit?: string;
+  /**
    * ID del rango activo (`promotion.active_range.range_id`) del que
    * provienen los productos bonificados comunes (bonusOptions).
    * No aplica a los "other bonified" (otherBonificated), que no

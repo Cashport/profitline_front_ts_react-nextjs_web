@@ -664,3 +664,31 @@ export const createCatalogMaterialEquivalence = async (
     throw error;
   }
 };
+
+export const createNewFileDate = async (
+  clientNIT: number,
+  modelData: { date_archive: string; id_type_archive: number; id_client_data_archives: number }
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/client-detail/${clientNIT}/archive-date`,
+      modelData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating new file date:", error);
+    throw error;
+  }
+};
+
+export const deleteFileDateIntake = async (fileId: number): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/data/archive-date/${fileId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting file date intake:", error);
+    throw error;
+  }
+};
