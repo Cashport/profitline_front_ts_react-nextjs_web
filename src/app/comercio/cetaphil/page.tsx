@@ -53,6 +53,8 @@ export interface IOrderViewContext {
   setShippingInfo: Dispatch<IShippingInformation>;
   channelCode: string;
   setChannelCode: Dispatch<SetStateAction<string>>;
+  channelName?: string;
+  setChannelName?: Dispatch<SetStateAction<string>>;
   /**
    * Nombre de la unidad de negocio (`client_bu[n].bu_name`) elegida en el
    * dropdown "Canal". Se envía como `business_unit` en la orden de
