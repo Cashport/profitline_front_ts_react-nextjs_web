@@ -12,11 +12,13 @@ import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives
 import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
 import { updateBalance, UpdateBalancePayload } from "@/services/balances/balances";
 import { useMessageApi } from "@/context/MessageContext";
+import { BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 
 interface BalanceDetailModalProps {
   saldoData: IBalanceRow;
   onBack: () => void;
   isModal?: boolean;
+  context?: BalanceTableContext;
   onUpdated?: () => void | Promise<unknown>;
 }
 
@@ -54,6 +56,7 @@ export function BalanceDetailModal({
   saldoData,
   onBack,
   isModal = false,
+  context = "balances",
   onUpdated
 }: BalanceDetailModalProps) {
   const { ID } = useAppStore((projects) => projects.selectedProject);
@@ -186,7 +189,7 @@ export function BalanceDetailModal({
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             <div>
               <p className="text-xs text-gray-400">Cliente</p>
-              {isEditing ? (
+              {isEditing && context !== "clientBalances" ? (
                 <Controller
                   control={control}
                   name="client_id"

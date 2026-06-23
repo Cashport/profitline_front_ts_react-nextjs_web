@@ -146,6 +146,7 @@ export function BalancesView() {
               saldoData={selectedSaldoForDetail}
               onBack={closeDetailSheet}
               isModal
+              context="balances"
               onUpdated={async () => {
                 const res = await mutateBalances();
                 const fresh = res?.data

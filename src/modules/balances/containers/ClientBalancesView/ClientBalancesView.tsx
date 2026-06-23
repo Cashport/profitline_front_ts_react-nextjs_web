@@ -134,6 +134,7 @@ export function ClientBalancesView() {
               saldoData={selectedSaldoForDetail}
               onBack={closeDetailSheet}
               isModal
+              context="clientBalances"
               onUpdated={async () => {
                 const res = await mutate();
                 const fresh = res?.data
