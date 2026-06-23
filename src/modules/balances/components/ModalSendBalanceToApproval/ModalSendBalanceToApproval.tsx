@@ -110,6 +110,8 @@ export function ModalSendBalanceToApproval({
       <Flex vertical gap="0.25rem" style={{ marginBottom: "1rem" }}>
         <h4 className="inputTitle">Usuario aprobación</h4>
         <Select
+          showSearch
+          optionFilterProp="label"
           placeholder="Selecciona el usuario de aprobación"
           style={{ width: "100%", height: 38 }}
           options={users.map((u) => ({ value: u.id, label: u.user_name }))}
