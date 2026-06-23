@@ -84,6 +84,8 @@ export interface IBalanceRow {
   status_code: string;
   status_name: string;
   status_color: string;
+  order_number: string | null;
+  motive_id: number | null;
   motive_name: string;
   created_at: string;
   financial_record_date: string;
