@@ -83,6 +83,7 @@ export default function ChatFooter({
   // --- WhatsApp handlers ---
   async function sendWhatsapp() {
     const text = message.trim();
+    if (isSendingWA) return;
     if (!text) return;
     const to = normalizePhoneForWA(conversation.phone || "");
     if (!to) {
