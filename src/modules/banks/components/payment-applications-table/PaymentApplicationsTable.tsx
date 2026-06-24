@@ -30,6 +30,7 @@ import {
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import "./payment-applications-table.scss";
+import { ApiError } from "@/utils/api/api";
 
 const { Text } = Typography;
 
@@ -211,28 +212,14 @@ export const PaymentApplicationsTable = ({
       setApplicationToReverse(null);
       mutate();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "";
+      let errorMessage = error instanceof Error ? error.message : "";
+      if (error instanceof ApiError && error.message) {
+        errorMessage = error.message;
+      }
       const normalizedMessage = errorMessage.toLowerCase();
 
-      if (
-        normalizedMessage.includes("permiso") ||
-        normalizedMessage.includes("unauthorized") ||
-        normalizedMessage.includes("forbidden")
-      ) {
-        message.error("No tienes permisos para reversar aplicaciones");
-      } else if (
-        normalizedMessage.includes("sesión") ||
-        normalizedMessage.includes("session") ||
-        normalizedMessage.includes("token") ||
-        normalizedMessage.includes("401")
-      ) {
-        message.error("Tu sesión expiró, inicia sesión nuevamente");
-      } else if (
-        normalizedMessage.includes("procesada") ||
-        normalizedMessage.includes("processed") ||
-        normalizedMessage.includes("cierre")
-      ) {
-        message.error("Esta aplicación ya fue procesada y no puede reversarse");
+      if (normalizedMessage) {
+        message.error(normalizedMessage);
       } else {
         message.error("No se pudo reversar, intenta de nuevo");
       }
