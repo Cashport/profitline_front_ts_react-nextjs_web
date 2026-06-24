@@ -41,16 +41,3 @@ export const uploadFinalFile = async (applicationId: string, file: File): Promis
     throw error;
   }
 };
-
-export const reversePaymentApplication = async (applicationId: number): Promise<{ success: boolean; message: string }> => {
-  try {
-    const response: GenericResponse<{ success: boolean; message: string }> = await API.post(
-      `/paymentApplication/reverse-payment-applications`,
-      { identification_id: applicationId }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error reversing payment application:", error);
-    throw error;
-  }
-};
