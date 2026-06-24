@@ -76,18 +76,20 @@ export const submitBalanceApprovalDecision = async (
 };
 
 export interface UpdateBalancePayload {
-  client_id?: string;
-  comments?: string;
   motive_id?: number;
   file?: File;
+  audit_observation?: string;
+  client_documents?: { id: number; document: string }[];
 }
 
 export const updateBalance = async (balanceId: number, payload: UpdateBalancePayload) => {
   const formData = new FormData();
-  if (payload.client_id !== undefined) formData.append("client_id", payload.client_id);
-  if (payload.comments !== undefined) formData.append("comments", payload.comments);
   if (payload.motive_id !== undefined) formData.append("motive_id", String(payload.motive_id));
   if (payload.file) formData.append("files", getCorrectMimeType(payload.file));
+  if (payload.audit_observation !== undefined)
+    formData.append("audit_observation", payload.audit_observation);
+  if (payload.client_documents?.length)
+    formData.append("client_documents", JSON.stringify(payload.client_documents));
 
   try {
     const response: GenericResponse<any> = await API.put(
