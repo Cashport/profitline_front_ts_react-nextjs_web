@@ -39,7 +39,8 @@ export interface ISelectClientForm {
 }
 
 const CreateOrderSearchClient: FC = () => {
-  const { setClient, setShippingInfo, setChannelCode } = useContext(OrderViewContext);
+  const { setClient, setShippingInfo, setChannelCode, setBusinessUnit, setChannelName } =
+    useContext(OrderViewContext);
   const { config, projectId } = useAppStore((state) => ({
     config: state.config,
     projectId: state.selectedProject?.ID
@@ -109,12 +110,21 @@ const CreateOrderSearchClient: FC = () => {
     setSelectedClient(c);
     const channelOptions = c.client_bu ?? [];
     // Auto-select the channel when the client has exactly one available.
-    setCanal(channelOptions.length === 1 ? channelOptions[0].internal_code : "");
+    if (channelOptions.length === 1) {
+      setCanal(channelOptions[0].internal_code);
+      setBusinessUnit(channelOptions[0].bu_name);
+    } else {
+      setCanal("");
+      setBusinessUnit("");
+    }
     setSelectedAddress(null);
   };
 
   const handleSelectCanal = (value: string) => {
     setCanal(value);
+    // Sincronizar business_unit con el bu_name del canal seleccionado
+    const matched = selectedClient?.client_bu?.find((bu) => bu.internal_code === value);
+    setBusinessUnit(matched?.bu_name ?? "");
     setSelectedAddress(null);
   };
 
@@ -178,7 +188,9 @@ const CreateOrderSearchClient: FC = () => {
       comments: ""
     };
 
+    const selectedBu = selectedClient.client_bu?.find((b) => b.internal_code === canal);
     setChannelCode(canal);
+    setChannelName?.(selectedBu?.bu_name ?? "");
     setShippingInfo(shipping);
     setClient({
       name: selectedClient.client_name,

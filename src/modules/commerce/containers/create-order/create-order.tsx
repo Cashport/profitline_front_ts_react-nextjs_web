@@ -62,6 +62,13 @@ interface IOrderViewContext {
   setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
   deactivateCrossSelling: boolean;
   setDeactivateCrossSelling: Dispatch<SetStateAction<boolean>>;
+  /**
+   * Nombre de la unidad de negocio (`client_bu[n].bu_name`) elegida en el
+   * dropdown "Canal". Se envía como `business_unit` en la orden de
+   * marketplace. Vacío cuando no se ha seleccionado un canal.
+   */
+  businessUnit: string;
+  setBusinessUnit: Dispatch<string>;
   toggleCart?: () => void;
   isCartVisible?: boolean;
   numberOfItems?: number;
@@ -75,6 +82,8 @@ export const CreateOrderView: FC = () => {
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
   const [channelCode, setChannelCode] = useState("");
+  const [channelName, setChannelName] = useState("");
+  const [businessUnit, setBusinessUnit] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
@@ -176,6 +185,7 @@ export const CreateOrderView: FC = () => {
     setShippingInfo(shipping_info);
     // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
     setChannelCode("");
+    setBusinessUnit("");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
@@ -238,6 +248,8 @@ export const CreateOrderView: FC = () => {
         setShippingInfo,
         channelCode,
         setChannelCode,
+        channelName,
+        setChannelName,
         selectedDiscount,
         setSelectedDiscount,
         categories,
@@ -249,6 +261,8 @@ export const CreateOrderView: FC = () => {
         setExecutiveDiscounts,
         deactivateCrossSelling,
         setDeactivateCrossSelling,
+        businessUnit,
+        setBusinessUnit,
         order_split_details: orderSplitDetails,
         setOrderSplitDetails,
         toggleCart,
