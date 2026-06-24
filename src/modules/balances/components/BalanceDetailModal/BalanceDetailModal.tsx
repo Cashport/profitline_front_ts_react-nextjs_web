@@ -2,14 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import useSWR from "swr";
 import { Select } from "antd";
 import { Badge } from "@/modules/chat/ui/badge";
 import { CaretDoubleRight, Paperclip, Pencil } from "phosphor-react";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
-import { useAppStore } from "@/lib/store/store";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
-import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
 import { updateBalance, UpdateBalancePayload } from "@/services/balances/balances";
 import { useMessageApi } from "@/context/MessageContext";
 import { BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
@@ -23,17 +20,18 @@ interface BalanceDetailModalProps {
 }
 
 interface BalanceEditForm {
-  client_id: string;
   motive_id: number | null;
-  comments: string;
   file: File | null;
+  audit_observation: string;
+  client_documents: { id: number; document: string }[];
 }
 
 const getDefaultValues = (saldoData: IBalanceRow): BalanceEditForm => ({
-  client_id: saldoData.client_id,
   motive_id: saldoData.motive_id,
-  comments: saldoData.COMMENTS ?? saldoData.comments ?? "",
-  file: null
+  file: null,
+  audit_observation: saldoData.audit_observation ?? "",
+  client_documents:
+    saldoData.client_documents?.map((doc) => ({ id: doc.id, document: doc.document })) ?? []
 });
 
 const formatCurrency = (amount: number) =>
@@ -56,10 +54,8 @@ export function BalanceDetailModal({
   saldoData,
   onBack,
   isModal = false,
-  context = "balances",
   onUpdated
 }: BalanceDetailModalProps) {
-  const { ID } = useAppStore((projects) => projects.selectedProject);
   const { showMessage } = useMessageApi();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -79,10 +75,6 @@ export function BalanceDetailModal({
 
   const editFile = watch("file");
 
-  const { data: balancesFilters } = useSWR(ID ? ["balances-filters", ID] : null, () =>
-    getBalancesFilter()
-  );
-
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
   useEffect(() => {
@@ -100,12 +92,16 @@ export function BalanceDetailModal({
   const onSubmit = async (data: BalanceEditForm) => {
     const payload: UpdateBalancePayload = {};
 
-    if (dirtyFields.client_id) payload.client_id = data.client_id;
-    if (dirtyFields.comments) payload.comments = data.comments;
     if (dirtyFields.file && data.file) payload.file = data.file;
     if (dirtyFields.motive_id && typeof data.motive_id === "number" && data.motive_id > 0) {
       payload.motive_id = data.motive_id;
     }
+    if (dirtyFields.audit_observation) payload.audit_observation = data.audit_observation;
+
+    const editedDocuments = data.client_documents
+      .filter((_, index) => dirtyFields.client_documents?.[index]?.document)
+      .map((doc) => ({ id: doc.id, document: doc.document }));
+    if (editedDocuments.length) payload.client_documents = editedDocuments;
 
     if (Object.keys(payload).length === 0) {
       setIsEditing(false);
@@ -189,26 +185,7 @@ export function BalanceDetailModal({
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             <div>
               <p className="text-xs text-gray-400">Cliente</p>
-              {isEditing && context !== "clientBalances" ? (
-                <Controller
-                  control={control}
-                  name="client_id"
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      style={{ width: "100%" }}
-                      options={
-                        balancesFilters?.clients?.map((c) => ({ value: c.id, label: c.name })) ?? []
-                      }
-                      showSearch
-                      optionFilterProp="label"
-                      getPopupContainer={(trigger) => trigger.parentElement!}
-                    />
-                  )}
-                />
-              ) : (
-                <p className="text-sm font-semibold text-cashport-black">{saldoData.client_name}</p>
-              )}
+              <p className="text-sm font-semibold text-cashport-black">{saldoData.client_name}</p>
             </div>
             <div>
               <p className="text-xs text-gray-400">Tipo</p>
@@ -240,14 +217,6 @@ export function BalanceDetailModal({
                 <p className="text-sm font-semibold text-cashport-black">{saldoData.kam_name}</p>
               </div>
             )}
-            {saldoData.client_documents?.[0]?.document && (
-              <div>
-                <p className="text-xs text-gray-400">Documento cliente</p>
-                <p className="text-sm font-semibold text-cashport-black">
-                  {saldoData.client_documents[0].document}
-                </p>
-              </div>
-            )}
             <div>
               <p className="text-xs text-gray-400">Fecha creación</p>
               <p className="text-sm font-semibold text-cashport-black">
@@ -260,25 +229,69 @@ export function BalanceDetailModal({
 
           <div>
             <p className="text-xs text-gray-400">Descripción</p>
-            {isEditing ? (
-              <Controller
-                control={control}
-                name="comments"
-                render={({ field }) => (
-                  <textarea
-                    {...field}
-                    placeholder="Ingresar una descripción"
-                    rows={3}
-                    className="w-full mt-1 px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
-                  />
-                )}
-              />
-            ) : (
-              <p className="text-sm font-semibold text-cashport-black">
-                {saldoData.COMMENTS ?? saldoData.comments ?? "-"}
-              </p>
-            )}
+            <p className="text-sm font-semibold text-cashport-black">
+              {saldoData.COMMENTS ?? saldoData.comments ?? "-"}
+            </p>
           </div>
+
+          {saldoData.audit_observation != null && (
+            <>
+              <div className="h-px bg-gray-100" />
+              <div>
+                <p className="text-xs text-gray-400">Observación auditoría</p>
+                {isEditing ? (
+                  <Controller
+                    control={control}
+                    name="audit_observation"
+                    render={({ field }) => (
+                      <textarea
+                        {...field}
+                        placeholder="Ingresar una observación de auditoría"
+                        rows={3}
+                        className="w-full mt-1 px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
+                      />
+                    )}
+                  />
+                ) : (
+                  <p className="text-sm font-semibold text-cashport-black">
+                    {saldoData.audit_observation || "-"}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          {!!saldoData.client_documents?.length && (
+            <>
+              <div className="h-px bg-gray-100" />
+              <div>
+                <p className="text-xs text-gray-400">Documento cliente</p>
+                <div className="space-y-2 mt-1">
+                  {saldoData.client_documents.map((doc, index) =>
+                    isEditing ? (
+                      <Controller
+                        key={doc.id}
+                        control={control}
+                        name={`client_documents.${index}.document`}
+                        render={({ field }) => (
+                          <input
+                            {...field}
+                            type="text"
+                            placeholder="Ingresar documento"
+                            className="w-full px-3 py-2 text-sm border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                          />
+                        )}
+                      />
+                    ) : (
+                      <p key={doc.id} className="text-sm font-semibold text-cashport-black">
+                        {doc.document}
+                      </p>
+                    )
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="h-px bg-gray-100" />
 
