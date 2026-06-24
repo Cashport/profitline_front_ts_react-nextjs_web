@@ -9,9 +9,12 @@ import TopSales from "@/modules/commerce/components/revenue-tracking/top-sales/t
 import ProductTreemap from "@/modules/commerce/components/revenue-tracking/product-treemap/product-treemap";
 import { DashboardBottomSection } from "@/modules/commerce/components/revenue-tracking/dashboard-bottom-section/dashboard-bottom-section";
 import { RevenueTrackingProvider } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { useAppStore } from "@/lib/store/store";
+import { GILEAD_PROJECT_ID } from "@/utils/constants/globalConstants";
 
 function RevenueTrackingInner() {
   // Theme (.dark class + AntD dark algorithm) is applied by ComercioLayout, an ancestor.
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
   return (
     <main className="space-y-6">
       <FiltersBar />
@@ -29,7 +32,11 @@ function RevenueTrackingInner() {
         <ProductTreemap />
       </div>
 
-      <DashboardBottomSection />
+      {projectId === GILEAD_PROJECT_ID ? null : (
+        <div className="w-full">
+          <DashboardBottomSection />
+        </div>
+      )}
     </main>
   );
 }
