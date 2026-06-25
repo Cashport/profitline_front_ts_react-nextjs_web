@@ -84,11 +84,14 @@ export interface IBalanceRow {
   status_code: string;
   status_name: string;
   status_color: string;
+  order_number: string | null;
+  motive_id: number | null;
   motive_name: string;
   created_at: string;
   financial_record_date: string;
   audit_file_url: string | null;
   audit_file_name: string | null;
+  audit_observation: string | null;
   client_documents: IClientDocument[] | null;
   COMMENTS?: string | null;
   comments?: string | null;

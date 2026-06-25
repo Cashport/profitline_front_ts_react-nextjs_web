@@ -146,6 +146,14 @@ export function BalancesView() {
               saldoData={selectedSaldoForDetail}
               onBack={closeDetailSheet}
               isModal
+              context="balances"
+              onUpdated={async () => {
+                const res = await mutateBalances();
+                const fresh = res?.data
+                  ?.flatMap((g) => g.balances)
+                  .find((b) => b.id === selectedSaldoForDetail?.id);
+                if (fresh) setSelectedSaldoForDetail(fresh);
+              }}
             />
           )}
         </SheetContent>
