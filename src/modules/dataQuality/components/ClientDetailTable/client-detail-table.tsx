@@ -16,6 +16,7 @@ import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFil
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
+import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -29,7 +30,7 @@ import {
 } from "@/modules/chat/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
-import { Plus } from "phosphor-react";
+import { Plus, Receipt } from "phosphor-react";
 
 interface IClientDetailTableProps {
   clientId: string;
@@ -66,6 +67,8 @@ export function ClientDetailTable({
     start: null,
     end: null
   });
+  const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState(false);
+  const [fileURL, setFileURL] = useState("");
 
   const { archives: files, mutate } = useArchivesClientData(
     clientId,
@@ -76,6 +79,16 @@ export function ClientDetailTable({
   const handleUploadIntake = (id: number) => {
     setActiveFileId(id);
     setIsUploadIntakeModalOpen(true);
+  };
+
+  const handleDocumentClick = (documentUrl: string) => {
+    const fileExtension = documentUrl?.split(".").pop()?.toLowerCase() ?? "";
+    if (["png", "jpg", "jpeg"].includes(fileExtension)) {
+      setFileURL(documentUrl);
+      if (!isModalFileDetailOpen) setIsModalFileDetailOpen(true);
+    } else {
+      window.open(documentUrl, "_blank");
+    }
   };
 
   const handleProcessedFile = async (file: IClientDetailArchiveClient, type: "excel" | "csv") => {
@@ -383,7 +396,17 @@ export function ClientDetailTable({
                 )}
               </TableCell>
               <TableCell className="w-0">
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-end gap-1">
+                  {file.evidence_url && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => file.evidence_url && handleDocumentClick(file.evidence_url)}
+                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                    >
+                      <Receipt className="w-4 h-4" />
+                    </Button>
+                  )}
                   <Dropdown
                     menu={{
                       items: [
@@ -461,7 +484,11 @@ export function ClientDetailTable({
                     }}
                     trigger={["click"]}
                   >
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                    >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </Dropdown>
@@ -533,6 +560,12 @@ export function ClientDetailTable({
         okText="Eliminar"
         cancelText="Cancelar"
         okLoading={isDeleteDateLoading}
+      />
+      <InvoiceDownloadModal
+        isModalOpen={isModalFileDetailOpen}
+        handleCloseModal={setIsModalFileDetailOpen}
+        title="Soporte auditoría"
+        url={fileURL}
       />
     </div>
   );
