@@ -15,7 +15,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string> = {
   Aprobaciones: "/aprobaciones",
   GestorTareas: "/task-manager",
   PurchaseOrders: "/purchase-orders",
-  DataQuality: "/data-quality"
+  DataQuality: "/data-quality",
+  MedicalAccounts: "/cuentas-medicas"
 };
 
 const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
@@ -32,7 +33,8 @@ const ROUTE_PREFIX_TO_PERMISSION: Record<string, string> = {
   "/aprobaciones": "Aprobaciones",
   "/task-manager": "GestorTareas",
   "/purchase-orders": "PurchaseOrders",
-  "/data-quality": "DataQuality"
+  "/data-quality": "DataQuality",
+  "/cuentas-medicas": "MedicalAccounts"
 };
 
 export const getFirstPermittedRoute = (selectedProject: ISelectedProject | undefined): string => {

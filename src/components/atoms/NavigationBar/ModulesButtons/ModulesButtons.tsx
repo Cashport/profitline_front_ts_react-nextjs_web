@@ -23,6 +23,7 @@ import {
   CurrencyCircleDollar,
   Chats
 } from "@phosphor-icons/react";
+import { FileHeart } from "lucide-react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -299,6 +300,21 @@ export const ModulesButtons = ({
               path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
             }
             onClick={(e) => handleNavClick(e, "/mass-communications")}
+          />
+        </Link>
+      )}
+
+      {/* Cuentas Médicas */}
+      {checkUserViewPermissions(project, "MedicalAccounts") && (
+        <Link href="/cuentas-medicas" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<FileHeart size={iconSize} />}
+            className={
+              path.startsWith("/cuentas-medicas") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/cuentas-medicas")}
           />
         </Link>
       )}
