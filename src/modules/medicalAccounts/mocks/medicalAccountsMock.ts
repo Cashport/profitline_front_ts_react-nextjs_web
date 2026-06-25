@@ -17,16 +17,15 @@ export const medicalAccountsMock: IMedicalAccount[] = [
     numeroPaginas: 24,
     novedades: [],
     documents: [
-      { id: "d1", type: "invoice", name: "Factura 001", startPage: 1, endPage: 3 },
-      {
-        id: "d2",
-        type: "authorization",
-        name: "Autorización 32626478277",
-        startPage: 4,
-        endPage: 6
-      },
-      { id: "d3", type: "receipt", name: "Acta de entrega", startPage: 7, endPage: 9 },
-      { id: "d4", type: "medical", name: "Historia clínica", startPage: 10, endPage: 24 }
+      { id: "d1", type: "invoice", name: "Factura 001", startPage: 1, endPage: 4 },
+      { id: "d2", type: "invoice", name: "Factura 002", startPage: 5, endPage: 8 },
+      { id: "d3", type: "receipt", name: "Correo Confirmación", startPage: 9, endPage: 10 },
+      { id: "d4", type: "receipt", name: "Acta de Recibido", startPage: 11, endPage: 12, novedadesCount: 2 },
+      { id: "d5", type: "authorization", name: "Autorización EPS", startPage: 13, endPage: 15 },
+      { id: "d6", type: "authorization", name: "Preautorización", startPage: 16, endPage: 18 },
+      { id: "d7", type: "medical", name: "Historia Clínica", startPage: 19, endPage: 24 },
+      { id: "d8", type: "medical", name: "Fórmula Médica", startPage: 25, endPage: 26 },
+      { id: "d9", type: "medical", name: "Resultados de Exámenes", startPage: 27, endPage: 38 }
     ]
   },
   {
@@ -84,7 +83,7 @@ export const medicalAccountsMock: IMedicalAccount[] = [
       }
     ],
     documents: [
-      { id: "d1", type: "invoice", name: "Factura 102", startPage: 1, endPage: 2 },
+      { id: "d1", type: "invoice", name: "Factura 102", startPage: 1, endPage: 2, novedadesCount: 1 },
       { id: "d2", type: "medical", name: "Soporte médico", startPage: 3, endPage: 8 }
     ]
   }

@@ -1,15 +1,37 @@
-import { IMedicalAccount } from "../../types/IMedicalAccount";
-import { SERVICE_TYPE_LABELS, TIPO_DOCUMENTO_LABELS } from "../../constants";
+import { IMedicalAccount, IMedicalAccountEditForm } from "../../types/IMedicalAccount";
+import {
+  SERVICE_TYPES,
+  SERVICE_TYPE_LABELS,
+  TIPO_DOCUMENTO_LABELS,
+  TIPO_DOCUMENTO_OPTIONS
+} from "../../constants";
 import { formatDate } from "../../utils/format";
 
 interface MedicalAccountInfoPanelProps {
   account: IMedicalAccount;
+  editing: boolean;
+  form: IMedicalAccountEditForm;
+  onChange: (patch: Partial<IMedicalAccountEditForm>) => void;
 }
 
-const Field = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className="text-sm font-semibold text-cashport-black">{value}</p>
+const inputCls =
+  "w-full text-sm text-gray-800 bg-white border border-gray-200 rounded-md px-2.5 py-1.5 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200 transition-colors";
+
+const Field = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => (
+  <div className="min-w-0">
+    <p className="mb-1 text-xs font-medium text-gray-400">{label}</p>
+    <p
+      className={`text-sm font-medium leading-tight text-gray-800 ${mono ? "font-mono font-normal" : ""}`}
+    >
+      {value}
+    </p>
+  </div>
+);
+
+const EditField = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="min-w-0">
+    <p className="mb-1 text-xs font-medium text-gray-400">{label}</p>
+    {children}
   </div>
 );
 
@@ -18,32 +40,137 @@ const withLabel = (code: string | null | undefined, labels: Record<string, strin
   return labels[code] ? `${code} — ${labels[code]}` : code;
 };
 
-export function MedicalAccountInfoPanel({ account }: MedicalAccountInfoPanelProps) {
+export function MedicalAccountInfoPanel({
+  account,
+  editing,
+  form,
+  onChange
+}: MedicalAccountInfoPanelProps) {
+  const serviceLabel = withLabel(account.tipoServicio, SERVICE_TYPE_LABELS);
+
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div className="rounded-xl border border-gray-100 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-gray-600">Información del paciente</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Nombre" value={account.nombrePaciente ?? "-"} />
-          <Field
-            label="Tipo de documento"
-            value={withLabel(account.tipoDocumento, TIPO_DOCUMENTO_LABELS)}
-          />
-          <Field label="No. Documento" value={account.documentoPaciente ?? "-"} />
+    <div className="flex items-stretch gap-6 px-6 py-5">
+      {/* Patient info — fixed ~35% */}
+      <div className="flex w-[35%] shrink-0 flex-col justify-between gap-4">
+        <div className="flex items-start gap-6">
+          <div className="min-w-0 flex-1">
+            {editing ? (
+              <EditField label="Nombre">
+                <input
+                  value={form.nombrePaciente}
+                  onChange={(e) => onChange({ nombrePaciente: e.target.value })}
+                  className={inputCls}
+                  placeholder="Nombre del paciente"
+                />
+              </EditField>
+            ) : (
+              <Field label="Nombre" value={account.nombrePaciente ?? "-"} />
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            {editing ? (
+              <EditField label="Tipo de documento">
+                <select
+                  value={form.tipoDocumento}
+                  onChange={(e) => onChange({ tipoDocumento: e.target.value })}
+                  className={inputCls}
+                >
+                  <option value="">Seleccionar</option>
+                  {TIPO_DOCUMENTO_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </EditField>
+            ) : (
+              <Field
+                label="Tipo de documento"
+                value={withLabel(account.tipoDocumento, TIPO_DOCUMENTO_LABELS)}
+              />
+            )}
+          </div>
+        </div>
+
+        <div>
+          {editing ? (
+            <EditField label="No. Documento">
+              <input
+                value={form.documentoPaciente}
+                onChange={(e) => onChange({ documentoPaciente: e.target.value })}
+                className={inputCls}
+                placeholder="-"
+              />
+            </EditField>
+          ) : (
+            <Field label="No. Documento" value={account.documentoPaciente ?? "-"} mono />
+          )}
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-100 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-gray-600">Información del servicio</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="No. Autorización" value={account.idAutorizacion ?? "-"} />
-          <Field label="Régimen" value={account.regimen ?? "-"} />
-          <Field label="Fecha de servicio" value={formatDate(account.fechaServicio)} />
-          <Field
-            label="Tipo de servicio"
-            value={withLabel(account.tipoServicio, SERVICE_TYPE_LABELS)}
-          />
-          <Field label="Fecha de cargue" value={formatDate(account.fechaCarga)} />
+      {/* Divider */}
+      <div className="w-px shrink-0 self-stretch bg-gray-100" />
+
+      {/* Authorization / service info — remaining space */}
+      <div className="flex-1 rounded-xl border border-gray-100 bg-gray-50/50 p-5">
+        <div className="grid grid-cols-5 gap-x-6 gap-y-4">
+          {editing ? (
+            <>
+              <EditField label="No. Autorización">
+                <input
+                  value={form.idAutorizacion}
+                  onChange={(e) => onChange({ idAutorizacion: e.target.value })}
+                  className={inputCls}
+                  placeholder="-"
+                />
+              </EditField>
+              <EditField label="Régimen">
+                <select
+                  value={form.regimen}
+                  onChange={(e) =>
+                    onChange({ regimen: e.target.value as IMedicalAccountEditForm["regimen"] })
+                  }
+                  className={inputCls}
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="Contributivo">Contributivo</option>
+                  <option value="Subsidiado">Subsidiado</option>
+                </select>
+              </EditField>
+              <EditField label="Fecha de servicio">
+                <input
+                  type="date"
+                  value={form.fechaServicio}
+                  onChange={(e) => onChange({ fechaServicio: e.target.value })}
+                  className={inputCls}
+                />
+              </EditField>
+              <EditField label="Tipo de servicio">
+                <select
+                  value={form.tipoServicio}
+                  onChange={(e) => onChange({ tipoServicio: e.target.value })}
+                  className={inputCls}
+                >
+                  <option value="">Seleccionar</option>
+                  {SERVICE_TYPES.map(({ code, label }) => (
+                    <option key={code} value={code}>
+                      {code} — {label}
+                    </option>
+                  ))}
+                </select>
+              </EditField>
+              <Field label="Fecha de cargue" value={formatDate(account.fechaCarga)} />
+            </>
+          ) : (
+            <>
+              <Field label="No. Autorización" value={account.idAutorizacion ?? "-"} mono />
+              <Field label="Régimen" value={account.regimen ?? "-"} />
+              <Field label="Fecha de servicio" value={formatDate(account.fechaServicio)} />
+              <Field label="Tipo de servicio" value={serviceLabel} />
+              <Field label="Fecha de cargue" value={formatDate(account.fechaCarga)} />
+            </>
+          )}
         </div>
       </div>
     </div>

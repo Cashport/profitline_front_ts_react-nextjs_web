@@ -22,6 +22,18 @@ export interface IMedicalAccountDocument {
   name: string;
   startPage: number;
   endPage: number;
+  novedadesCount?: number; // 0/undefined → "Completo"; >0 → "Novedad" + count (estado is derived)
+}
+
+// Editable fields on the detail view (read/edit-mode form state).
+export interface IMedicalAccountEditForm {
+  idAutorizacion: string;
+  tipoDocumento: string;
+  documentoPaciente: string;
+  nombrePaciente: string;
+  regimen: MedicalAccountRegimen | "";
+  tipoServicio: string;
+  fechaServicio: string;
 }
 
 export interface IMedicalAccount {
