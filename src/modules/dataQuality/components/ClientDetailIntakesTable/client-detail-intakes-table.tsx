@@ -106,13 +106,14 @@ export function ClientDetailIntakesTable({
                 </TableCell>
                 <TableCell>
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="outline"
+                    size="icon"
                     title="Ver detalles"
                     onClick={() => {
                       handleOpenIntakeModal("view", intake);
                       onDetailClicked?.(intake);
                     }}
+                    className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
