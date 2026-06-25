@@ -6,6 +6,7 @@ import { Maximize2, Minimize2, ChevronDown } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { useDashboardSalesTreemap } from "@/modules/commerce/hooks/revenue-tracking/useDashboardSalesTreemap";
+import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 
 type DimensionKey = "linea" | "producto" | "cliente" | "ciudad" | "vendedor" | "canal";
 
@@ -264,11 +265,12 @@ function TreemapRender({
 }
 
 export default function ProductTreemap() {
+  const { filters } = useRevenueTracking();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
   const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
 
-  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2);
+  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2, filters);
 
   const chartData = useMemo(
     () => ({

@@ -38,15 +38,12 @@ const ID_PARAM_BY_KEY: Record<string, string> = {
 
 export const appendSalesFilterParams = (
   params: URLSearchParams,
-  filters: Record<string, FilterOption[]>,
-  allowedEntityKeys?: string[]
+  filters: Record<string, FilterOption[]>
 ) => {
-  Object.entries(ID_PARAM_BY_KEY)
-    .filter(([key]) => !allowedEntityKeys || allowedEntityKeys.includes(key))
-    .forEach(([key, param]) => {
-      const ids = (filters[key] ?? []).map((o) => o.id);
-      if (ids.length > 0) params.append(param, ids.join(","));
-    });
+  Object.entries(ID_PARAM_BY_KEY).forEach(([key, param]) => {
+    const ids = (filters[key] ?? []).map((o) => o.id);
+    if (ids.length > 0) params.append(param, ids.join(","));
+  });
 
   const preset = filters.fecha?.[0]?.id;
   if (preset) {
