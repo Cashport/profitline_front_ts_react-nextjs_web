@@ -13,13 +13,14 @@ import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
 import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
-import { GroupedFilters } from "../../components/GroupedFilters/GroupedFilters";
 import { useSaldos } from "../../context/saldos-context";
 import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useAppStore } from "@/lib/store/store";
 import { IBalanceRow, IBalancesFilter } from "@/types/financialDiscounts/IFinancialDiscounts";
+import { FilterBalancesView } from "../../components/FilterBalancesView/FilterBalancesView";
 
 export function BalancesView() {
   const { ID } = useAppStore((projects) => projects.selectedProject);
@@ -44,6 +45,8 @@ export function BalancesView() {
     ID ? ["balances-filters", ID] : null,
     () => getBalancesFilter()
   );
+
+  const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
   const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos } = useSaldos();
 
@@ -83,13 +86,13 @@ export function BalancesView() {
 
                 <GenerateActionButton />
 
-                {/* Grouped Filters Dropdown (KAM + Cliente + Fechas) */}
-                <GroupedFilters
+                <FilterBalancesView
                   users={balancesFilters?.users ?? []}
                   clients={balancesFilters?.clients ?? []}
+                  motives={motives ?? []}
                   value={balancesFilter}
                   onChange={setBalancesFilter}
-                  isLoading={filtersLoading}
+                  isLoading={filtersLoading || motivesLoading}
                 />
               </div>
             </div>
