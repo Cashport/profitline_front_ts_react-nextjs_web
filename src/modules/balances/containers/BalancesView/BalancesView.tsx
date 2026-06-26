@@ -3,10 +3,11 @@
 import { useState } from "react";
 import useSWR from "swr";
 
-import { Spin } from "antd";
+import { message, Spin } from "antd";
 import { CheckCircle, Clock, XCircle, CircleDot } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { ModalBalancesActions } from "../../components/ModalBalancesActions/ModalBalancesActions";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
@@ -48,10 +49,12 @@ export function BalancesView() {
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
-  const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos } = useSaldos();
+  const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
+    useSaldos();
 
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const openDetailSheet = (balance: IBalanceRow) => {
     setSelectedSaldoForDetail(balance);
@@ -84,7 +87,15 @@ export function BalancesView() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
 
-                <GenerateActionButton />
+                <GenerateActionButton
+                  onClick={() => {
+                    if (state.selectedSaldoIds.length === 0) {
+                      message.info("Selecciona al menos un saldo para generar una acción");
+                      return;
+                    }
+                    setIsActionsOpen(true);
+                  }}
+                />
 
                 <FilterBalancesView
                   users={balancesFilters?.users ?? []}
@@ -161,6 +172,16 @@ export function BalancesView() {
           )}
         </SheetContent>
       </Sheet>
+
+      <ModalBalancesActions
+        isOpen={isActionsOpen}
+        onClose={() => setIsActionsOpen(false)}
+        balanceIds={state.selectedSaldoIds.map(Number)}
+        onSuccess={() => {
+          mutateBalances();
+          clearSelection();
+        }}
+      />
     </>
   );
 }
