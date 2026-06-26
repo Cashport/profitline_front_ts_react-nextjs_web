@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { MedicalAccountsToolbar } from "../../components/MedicalAccountsToolbar/MedicalAccountsToolbar";
 import { MedicalAccountsTable } from "../../components/MedicalAccountsTable/MedicalAccountsTable";
 import { ModalAddMedicalAccount } from "../../components/ModalAddMedicalAccount/ModalAddMedicalAccount";
-import { medicalAccountsMock } from "../../mocks/medicalAccountsMock";
-import { IMedicalAccount, MedicalAccountStatus } from "../../types/IMedicalAccount";
+import { useMedicalAccounts } from "../../hooks/useMedicalAccounts";
+import { IMedicalAccountListItem, MedicalAccountStatus } from "../../types/IMedicalAccount";
 
 export function MedicalAccountsView() {
   const router = useRouter();
@@ -19,24 +19,28 @@ export function MedicalAccountsView() {
     end: null
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
 
-  const filteredData = useMemo<IMedicalAccount[]>(() => {
+  const { data, pagination, isLoading } = useMedicalAccounts({ page, limit });
+
+  const filteredData = useMemo<IMedicalAccountListItem[]>(() => {
     const term = searchTerm.trim().toLowerCase();
-    return medicalAccountsMock.filter((account) => {
-      const matchesStatus = !statusFilter || account.estado === statusFilter;
+    return data.filter((account) => {
+      const matchesStatus = !statusFilter || account.status_name === statusFilter;
       const matchesSearch =
         !term ||
-        [account.id, account.nombrePaciente, account.documentoPaciente, account.idAutorizacion]
+        [String(account.id), account.patient_name, account.document_number, account.authorization_id]
           .filter(Boolean)
           .some((field) => field!.toLowerCase().includes(term));
-      const day = account.fechaCarga.slice(0, 10);
+      const day = account.created_at.slice(0, 10);
       const matchesDate =
         (!dateRange.start || day >= dateRange.start) && (!dateRange.end || day <= dateRange.end);
       return matchesStatus && matchesSearch && matchesDate;
     });
-  }, [searchTerm, statusFilter, dateRange]);
+  }, [data, searchTerm, statusFilter, dateRange]);
 
-  const handleOpenDetail = (record: IMedicalAccount) => {
+  const handleOpenDetail = (record: IMedicalAccountListItem) => {
     router.push(`/cuentas-medicas/${record.id}`);
   };
 
@@ -57,7 +61,18 @@ export function MedicalAccountsView() {
               onAdd={() => setIsAddModalOpen(true)}
             />
 
-            <MedicalAccountsTable data={filteredData} onOpenDetail={handleOpenDetail} />
+            <MedicalAccountsTable
+              data={filteredData}
+              loading={isLoading}
+              onOpenDetail={handleOpenDetail}
+              currentPage={page}
+              pageSize={limit}
+              total={pagination.totalRows}
+              onPageChange={(p, ps) => {
+                setPage(p);
+                setLimit(ps);
+              }}
+            />
           </CardContent>
         </Card>
       </main>
