@@ -8,15 +8,19 @@ import UiSearchInput from "@/components/ui/search-input/search-input";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
-import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
-import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
-import { FilterBalances, ISaldosFilterValue } from "../../components/FilterBalances/FilterBalances";
-import { useSaldos } from "../../context/saldos-context";
+
 import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { extractSingleParam } from "@/utils/utils";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
+import {
+  FilterBalances,
+  ISaldosFilterValue
+} from "@/modules/clients/components/balances-tab/FilterBalances/FilterBalances";
+import { BalancesTable } from "@/modules/balances/components/BalancesTable/BalancesTable";
+import { BalanceDetailModal } from "@/modules/balances/components/BalanceDetailModal/BalanceDetailModal";
+import { useSaldos } from "@/modules/balances/context/saldos-context";
 
 export function ClientBalancesView() {
   const params = useParams();
