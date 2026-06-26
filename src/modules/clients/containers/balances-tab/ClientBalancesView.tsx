@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 
-import { Flex, Spin } from "antd";
+import { Flex, message, Spin } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
+import { ModalBalancesActions } from "@/modules/balances/components/ModalBalancesActions/ModalBalancesActions";
 
 import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -51,10 +53,12 @@ export function ClientBalancesView() {
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
-  const { state, toggleSaldoSelection, selectAllSaldos, deselectSaldos } = useSaldos();
+  const { state, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
+    useSaldos();
 
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const openDetailSheet = (balance: IBalanceRow) => {
     setSelectedSaldoForDetail(balance);
@@ -76,6 +80,16 @@ export function ClientBalancesView() {
               className="standardSearch"
               placeholder="Buscar"
               onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            <GenerateActionButton
+              onClick={() => {
+                if (state.selectedSaldoIds.length === 0) {
+                  message.info("Selecciona al menos un saldo para generar una acción");
+                  return;
+                }
+                setIsActionsOpen(true);
+              }}
             />
 
             {/* Saldos Filters Dropdown (Tipo + Fechas) */}
@@ -150,6 +164,16 @@ export function ClientBalancesView() {
           )}
         </SheetContent>
       </Sheet>
+
+      <ModalBalancesActions
+        isOpen={isActionsOpen}
+        onClose={() => setIsActionsOpen(false)}
+        balanceIds={state.selectedSaldoIds.map(Number)}
+        onSuccess={() => {
+          mutate();
+          clearSelection();
+        }}
+      />
     </>
   );
 }

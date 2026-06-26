@@ -34,6 +34,18 @@ export const uploadBalanceFile = async (
   }
 };
 
+export const changeBalancesStatus = async (balanceIds: number[], balanceStatusId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/financial-discount/balances/status`,
+      { balanceIds, balanceStatusId }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const sendToOtherBalances = async (balanceId: number) => {
   try {
     const response: GenericResponse<any> = await API.patch(
