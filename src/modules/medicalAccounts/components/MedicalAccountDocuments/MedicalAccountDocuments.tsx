@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -13,59 +13,113 @@ import {
   X
 } from "lucide-react";
 import { ItemType } from "antd/es/menu/interface";
+import { LoadError, Viewer, Worker } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import { cn } from "@/utils/utils";
-import { IMedicalAccountDocument } from "../../types/IMedicalAccount";
-import { DOC_GROUPS } from "../../constants";
+import {
+  IMedicalAccountDocumentApi,
+  IMedicalAccountNoveltyApi,
+  MedicalAccountDocumentStatusCode
+} from "@/types/medicalAccounts/IMedicalAccounts";
+import { formatDocumentType } from "../../utils/format";
 
 interface MedicalAccountDocumentsProps {
-  documents: IMedicalAccountDocument[];
+  documents: IMedicalAccountDocumentApi[];
+  novedades: IMedicalAccountNoveltyApi[];
 }
 
+// Best-available human label for a document row (the API has no display name).
+const docLabel = (doc: IMedicalAccountDocumentApi): string =>
+  doc.service_description ?? doc.invoice_number ?? `Documento ${doc.sequence}`;
+
+// Opens a document's PDF in a new tab (mirrors the purchase-order viewer's download).
+const handleDownloadFile = (url: string | null | undefined) => {
+  if (url) window.open(url, "_blank");
+};
+
 // ── Per-document status badge ──────────────────────────────────────────────────
-function DocStatus({ novedades }: { novedades: number }) {
-  if (novedades > 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600">
-        <AlertCircle className="h-3 w-3" />
-        Novedad
-        <span className="ml-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-amber-600">
-          {novedades}
-        </span>
-      </span>
-    );
-  }
+const DOC_STATUS_STYLES: Record<MedicalAccountDocumentStatusCode, string> = {
+  COMPLETE: "text-emerald-600",
+  NOVELTY: "text-amber-600",
+  ILLEGIBLE: "text-red-600",
+  PENDING_REVIEW: "text-gray-500",
+  ERROR: "text-red-600"
+};
+
+function DocStatus({
+  statusCode,
+  statusName
+}: {
+  statusCode: MedicalAccountDocumentStatusCode;
+  statusName: string;
+}) {
+  const Icon = statusCode === "COMPLETE" ? CheckCircle2 : AlertCircle;
   return (
-    <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-      <CheckCircle2 className="h-3 w-3" />
-      Completo
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-xs font-medium",
+        DOC_STATUS_STYLES[statusCode] ?? "text-gray-500"
+      )}
+    >
+      <Icon className="h-3 w-3" />
+      {statusName}
     </span>
   );
 }
 
-// ── PDF preview panel (placeholder — no real rendering yet) ─────────────────────
-function PdfPanel({ doc }: { doc: IMedicalAccountDocument }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const totalPages = doc.endPage - doc.startPage + 1;
+// ── PDF preview panel (renders the document's generated PDF) ────────────────────
+const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentApi }) {
+  const label = docLabel(doc);
+  const fileUrl = doc.generated_file_url;
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [doc.id]);
+  const renderError = (error: LoadError) => {
+    const message =
+      error.name === "InvalidPDFException"
+        ? "El documento es inválido o está corrupto."
+        : error.name === "MissingPDFException"
+          ? "No se encontró el documento."
+          : error.name === "UnexpectedResponseException"
+            ? "Respuesta inesperada del servidor."
+            : "No se pudo cargar el documento.";
+
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+        <FileText className="h-12 w-12 text-gray-200" />
+        <div>
+          <p className="text-sm font-medium text-gray-500">Vista previa no disponible</p>
+          <p className="mt-1 text-xs text-gray-400">{message}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleDownloadFile(fileUrl)}
+          disabled={!fileUrl}
+          className="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Descargar
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white">
       <div className="flex shrink-0 items-center justify-between border-b border-gray-100 bg-gray-50/80 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <FileText className="h-4 w-4 shrink-0 text-amber-400" />
-          <span className="truncate text-sm font-semibold text-gray-700">{doc.name}</span>
+          <span className="truncate text-sm font-semibold text-gray-700">{label}</span>
           <span className="shrink-0 text-[11px] text-gray-400">
-            — pág. {doc.startPage}–{doc.endPage}
+            — pág. {doc.page_start}–{doc.page_end}
           </span>
         </div>
         <button
           type="button"
-          className="ml-3 flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+          onClick={() => handleDownloadFile(fileUrl)}
+          disabled={!fileUrl}
+          className="ml-3 flex shrink-0 items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           title="Descargar"
         >
           <Download className="h-3.5 w-3.5" />
@@ -73,30 +127,41 @@ function PdfPanel({ doc }: { doc: IMedicalAccountDocument }) {
         </button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto bg-gray-100 px-4 py-4">
-        <div className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-          <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-2">
-            <span className="truncate text-xs font-medium text-gray-500">{doc.name}</span>
-            <span className="ml-2 shrink-0 font-mono text-[11px] text-gray-400">
-              {totalPages} {totalPages === 1 ? "página" : "páginas"}
-            </span>
-          </div>
-          <div className="flex flex-1 select-none flex-col items-center justify-center gap-2">
+      <div className="flex-1 overflow-hidden bg-gray-100">
+        {fileUrl ? (
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.js">
+            <div style={{ height: 520 }}>
+              <Viewer
+                fileUrl={fileUrl}
+                plugins={[defaultLayoutPluginInstance]}
+                renderError={renderError}
+              />
+            </div>
+          </Worker>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
             <FileText className="h-12 w-12 text-gray-200" />
-            <p className="text-sm font-medium text-gray-400">{doc.name}</p>
+            <p className="text-sm font-medium text-gray-400">Documento no disponible</p>
             <p className="text-xs text-gray-300">
-              Páginas {doc.startPage}–{doc.endPage} del archivo original
+              El PDF de este documento aún no está disponible.
             </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
-}
+});
 
-// ── Row action menu (mock items) ───────────────────────────────────────────────
-const rowMenuItems: ItemType[] = [
-  { key: "download", label: "Descargar", icon: <Download className="h-3.5 w-3.5" /> },
+// ── Row action menu ─────────────────────────────────────────────────────────────
+// "Descargar" opens the document's PDF in a new tab; the rest are placeholders.
+const buildRowMenuItems = (doc: IMedicalAccountDocumentApi): ItemType[] => [
+  {
+    key: "download",
+    label: "Descargar",
+    icon: <Download className="h-3.5 w-3.5" />,
+    disabled: !doc.generated_file_url,
+    onClick: () => handleDownloadFile(doc.generated_file_url)
+  },
   { key: "fix", label: "Solucionar novedades", icon: <Wrench className="h-3.5 w-3.5" /> },
   { key: "reupload", label: "Cargar nuevamente", icon: <RefreshCw className="h-3.5 w-3.5" /> }
 ];
@@ -111,21 +176,28 @@ const dotsButtonStyle: React.CSSProperties = {
   background: "transparent"
 };
 
-export function MedicalAccountDocuments({ documents }: MedicalAccountDocumentsProps) {
-  const [viewingDoc, setViewingDoc] = useState<IMedicalAccountDocument | null>(
-    documents.length > 0 ? documents[0] : null
-  );
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+export function MedicalAccountDocuments({ documents, novedades }: MedicalAccountDocumentsProps) {
+  const sortedDocs = [...documents].sort((a, b) => a.sequence - b.sequence);
 
-  const orderedRows = DOC_GROUPS.flatMap((group) =>
-    documents.filter((doc) => doc.type === group.type).map((doc) => ({ doc, group }))
+  const [viewingDoc, setViewingDoc] = useState<IMedicalAccountDocumentApi | null>(
+    () => sortedDocs[0] ?? null
   );
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  // Per-document novelty count, from novedades linked via medical_account_document_id.
+  const noveltyCountByDoc = novedades.reduce<Record<number, number>>((acc, novedad) => {
+    if (novedad.medical_account_document_id != null) {
+      acc[novedad.medical_account_document_id] =
+        (acc[novedad.medical_account_document_id] ?? 0) + 1;
+    }
+    return acc;
+  }, {});
 
   const allIds = documents.map((doc) => doc.id);
   const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
   const someSelected = allIds.some((id) => selectedIds.has(id));
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: number) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -211,10 +283,10 @@ export function MedicalAccountDocuments({ documents }: MedicalAccountDocumentsPr
               </tr>
             </thead>
             <tbody>
-              {orderedRows.map(({ doc, group }) => {
+              {sortedDocs.map((doc) => {
                 const isViewing = viewingDoc?.id === doc.id;
                 const isSelected = selectedIds.has(doc.id);
-                const novedadesCount = doc.novedadesCount ?? 0;
+                const novedadesCount = noveltyCountByDoc[doc.id] ?? 0;
                 return (
                   <tr
                     key={doc.id}
@@ -235,20 +307,19 @@ export function MedicalAccountDocuments({ documents }: MedicalAccountDocumentsPr
                         className="h-3.5 w-3.5 cursor-pointer rounded border-gray-300 accent-cashport-black"
                       />
                     </td>
-                    <td className="px-0 py-3">
-                      <div className="flex items-center">
-                        <div className={cn("mr-4 h-8 w-0.5 shrink-0 rounded-r-full", group.accent)} />
-                        <span className="text-sm text-gray-700">{group.label}</span>
-                      </div>
+                    <td className="px-2 py-3">
+                      <span className="text-sm text-gray-700">
+                        {formatDocumentType(doc.document_type)}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-sm font-medium text-gray-700">{doc.name}</span>
+                      <span className="text-sm font-medium text-gray-700">{docLabel(doc)}</span>
                       <p className="mt-0.5 font-mono text-[11px] text-gray-400">
-                        pág. {doc.startPage}–{doc.endPage}
+                        pág. {doc.page_start}–{doc.page_end}
                       </p>
                     </td>
                     <td className="px-4 py-3">
-                      <DocStatus novedades={novedadesCount} />
+                      <DocStatus statusCode={doc.status_code} statusName={doc.status_name} />
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -263,7 +334,7 @@ export function MedicalAccountDocuments({ documents }: MedicalAccountDocumentsPr
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <DotsDropdown
-                          items={rowMenuItems}
+                          items={buildRowMenuItems(doc)}
                           customButtonStyle={dotsButtonStyle}
                           customIcon={<MoreHorizontal className="h-4 w-4 text-gray-400" />}
                         />

@@ -1,4 +1,5 @@
-import { IMedicalAccount, IMedicalAccountEditForm } from "../../types/IMedicalAccount";
+import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
+import { IMedicalAccountEditForm } from "../../types/IMedicalAccount";
 import {
   SERVICE_TYPES,
   SERVICE_TYPE_LABELS,
@@ -8,10 +9,12 @@ import {
 import { formatDate } from "../../utils/format";
 
 interface MedicalAccountInfoPanelProps {
-  account: IMedicalAccount;
-  editing: boolean;
-  form: IMedicalAccountEditForm;
-  onChange: (patch: Partial<IMedicalAccountEditForm>) => void;
+  account: IMedicalAccountUploadData;
+  // Dormant edit mode — see the TODO in MedicalAccountDetailView. Optional so the
+  // panel renders read-only by default; re-enable by passing all three again.
+  editing?: boolean;
+  form?: IMedicalAccountEditForm;
+  onChange?: (patch: Partial<IMedicalAccountEditForm>) => void;
 }
 
 const inputCls =
@@ -46,7 +49,7 @@ export function MedicalAccountInfoPanel({
   form,
   onChange
 }: MedicalAccountInfoPanelProps) {
-  const serviceLabel = withLabel(account.tipoServicio, SERVICE_TYPE_LABELS);
+  const serviceLabel = withLabel(account.service_type, SERVICE_TYPE_LABELS);
 
   return (
     <div className="flex items-stretch gap-6 px-6 py-5">
@@ -54,7 +57,7 @@ export function MedicalAccountInfoPanel({
       <div className="flex w-[35%] shrink-0 flex-col justify-between gap-4">
         <div className="flex items-start gap-6">
           <div className="min-w-0 flex-1">
-            {editing ? (
+            {editing && form && onChange ? (
               <EditField label="Nombre">
                 <input
                   value={form.nombrePaciente}
@@ -64,12 +67,12 @@ export function MedicalAccountInfoPanel({
                 />
               </EditField>
             ) : (
-              <Field label="Nombre" value={account.nombrePaciente ?? "-"} />
+              <Field label="Nombre" value={account.patient_name ?? "-"} />
             )}
           </div>
 
           <div className="min-w-0 flex-1">
-            {editing ? (
+            {editing && form && onChange ? (
               <EditField label="Tipo de documento">
                 <select
                   value={form.tipoDocumento}
@@ -87,14 +90,14 @@ export function MedicalAccountInfoPanel({
             ) : (
               <Field
                 label="Tipo de documento"
-                value={withLabel(account.tipoDocumento, TIPO_DOCUMENTO_LABELS)}
+                value={withLabel(account.document_type, TIPO_DOCUMENTO_LABELS)}
               />
             )}
           </div>
         </div>
 
         <div>
-          {editing ? (
+          {editing && form && onChange ? (
             <EditField label="No. Documento">
               <input
                 value={form.documentoPaciente}
@@ -104,7 +107,7 @@ export function MedicalAccountInfoPanel({
               />
             </EditField>
           ) : (
-            <Field label="No. Documento" value={account.documentoPaciente ?? "-"} mono />
+            <Field label="No. Documento" value={account.document_number ?? "-"} mono />
           )}
         </div>
       </div>
@@ -115,7 +118,7 @@ export function MedicalAccountInfoPanel({
       {/* Authorization / service info — remaining space */}
       <div className="flex-1 rounded-xl border border-gray-100 bg-gray-50/50 p-5">
         <div className="grid grid-cols-5 gap-x-6 gap-y-4">
-          {editing ? (
+          {editing && form && onChange ? (
             <>
               <EditField label="No. Autorización">
                 <input
@@ -160,15 +163,16 @@ export function MedicalAccountInfoPanel({
                   ))}
                 </select>
               </EditField>
-              <Field label="Fecha de cargue" value={formatDate(account.fechaCarga)} />
+              <Field label="Fecha de cargue" value={formatDate(account.created_at)} />
             </>
           ) : (
             <>
-              <Field label="No. Autorización" value={account.idAutorizacion ?? "-"} mono />
-              <Field label="Régimen" value={account.regimen ?? "-"} />
-              <Field label="Fecha de servicio" value={formatDate(account.fechaServicio)} />
+              <Field label="No. Autorización" value={account.authorization_number ?? "-"} mono />
+              {/* Régimen has no source in the API response — shown as "-" for now. */}
+              <Field label="Régimen" value="-" />
+              <Field label="Fecha de servicio" value={formatDate(account.service_date)} />
               <Field label="Tipo de servicio" value={serviceLabel} />
-              <Field label="Fecha de cargue" value={formatDate(account.fechaCarga)} />
+              <Field label="Fecha de cargue" value={formatDate(account.created_at)} />
             </>
           )}
         </div>

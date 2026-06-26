@@ -6,3 +6,13 @@ export const formatDate = (dateString: string | null | undefined): string => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
+// Humanizes a free-form backend `document_type` code (e.g. "soporte_medico" → "Soporte Medico").
+export const formatDocumentType = (type: string | null | undefined): string => {
+  if (!type) return "-";
+  return type
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};

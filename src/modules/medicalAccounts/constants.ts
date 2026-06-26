@@ -1,5 +1,3 @@
-import { MedicalAccountDocumentType } from "./types/IMedicalAccount";
-
 export const SERVICE_TYPES = [
   { code: "ACC", label: "Accesorios" },
   { code: "PRO", label: "Monitoreos o Programación" },
@@ -12,21 +10,6 @@ export const SERVICE_TYPE_LABELS: Record<string, string> = SERVICE_TYPES.reduce(
   (acc, { code, label }) => ({ ...acc, [code]: label }),
   {} as Record<string, string>
 );
-
-export const DOCUMENT_TYPE_LABELS: Record<MedicalAccountDocumentType, string> = {
-  invoice: "Factura",
-  receipt: "Confirmaciones",
-  authorization: "Autorizaciones",
-  medical: "Soportes Médicos"
-};
-
-// Ordered groups for the classified-documents table: drives row order + accent bar color.
-export const DOC_GROUPS: { type: MedicalAccountDocumentType; label: string; accent: string }[] = [
-  { type: "invoice", label: "Factura", accent: "bg-blue-500" },
-  { type: "receipt", label: "Confirmaciones", accent: "bg-emerald-500" },
-  { type: "authorization", label: "Autorizaciones", accent: "bg-violet-500" },
-  { type: "medical", label: "Soportes Médicos", accent: "bg-orange-400" }
-];
 
 export const TIPO_DOCUMENTO_LABELS: Record<string, string> = {
   CC: "Cédula de Ciudadanía",
