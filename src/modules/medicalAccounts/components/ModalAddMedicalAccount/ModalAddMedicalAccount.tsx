@@ -16,11 +16,16 @@ const { Title } = Typography;
 interface ModalAddMedicalAccountProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
-export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccountProps) {
+export function ModalAddMedicalAccount({
+  isOpen,
+  onClose,
+  onSuccess
+}: ModalAddMedicalAccountProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +64,7 @@ export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccou
     try {
       await uploadMedicalAccount(selectedFile, projectId);
       showMessage("success", "Cuenta médica cargada y procesada correctamente.");
+      onSuccess?.();
       onClose();
     } catch (err) {
       showMessage(

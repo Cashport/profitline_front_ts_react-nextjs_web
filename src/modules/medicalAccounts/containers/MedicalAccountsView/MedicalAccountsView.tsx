@@ -22,7 +22,7 @@ export function MedicalAccountsView() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
 
-  const { data, pagination, isLoading } = useMedicalAccounts({ page, limit });
+  const { data, pagination, isLoading, mutate } = useMedicalAccounts({ page, limit });
 
   const filteredData = useMemo<IMedicalAccountListItem[]>(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -77,7 +77,11 @@ export function MedicalAccountsView() {
         </Card>
       </main>
 
-      <ModalAddMedicalAccount isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+      <ModalAddMedicalAccount
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => mutate()}
+      />
     </>
   );
 }
