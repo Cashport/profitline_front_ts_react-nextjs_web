@@ -6,6 +6,9 @@ import { FileText, X } from "lucide-react";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
+import { useAppStore } from "@/lib/store/store";
+import { useMessageApi } from "@/context/MessageContext";
+import { uploadMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
 import { SERVICE_TYPES } from "../../constants";
 
 const { Title } = Typography;
@@ -21,6 +24,10 @@ export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccou
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const { showMessage } = useMessageApi();
 
   // Reset local state whenever the modal closes.
   useEffect(() => {
@@ -41,9 +48,26 @@ export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccou
     setSelectedFile(file);
   };
 
-  const handleOk = () => {
-    // TODO: wire up creation/upload once the backend service is available.
-    onClose();
+  const handleOk = async () => {
+    if (!selectedFile) return;
+    if (!projectId) {
+      showMessage("error", "Selecciona un proyecto antes de cargar la cuenta.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await uploadMedicalAccount(selectedFile, projectId);
+      showMessage("success", "Cuenta médica cargada y procesada correctamente.");
+      onClose();
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al cargar la cuenta médica."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -51,13 +75,14 @@ export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccou
       centered
       open={isOpen}
       width={600}
-      onCancel={onClose}
+      onCancel={isLoading ? undefined : onClose}
       title={<Title level={4}>Nueva Cuenta Médica</Title>}
       footer={
         <FooterButtons
           titleConfirm="Cargar cuenta médica"
           showLeftButton={false}
           isConfirmDisabled={!selectedFile || !selectedServiceType}
+          isConfirmLoading={isLoading}
           onClose={onClose}
           handleOk={handleOk}
         />
@@ -143,6 +168,12 @@ export function ModalAddMedicalAccount({ isOpen, onClose }: ModalAddMedicalAccou
 
           {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
         </div>
+
+        {isLoading && (
+          <p className="text-center text-xs text-gray-500">
+            Procesando la cuenta médica, esto puede tardar hasta 90 segundos…
+          </p>
+        )}
       </Flex>
     </Modal>
   );
