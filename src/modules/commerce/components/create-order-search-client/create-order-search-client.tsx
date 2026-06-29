@@ -196,7 +196,8 @@ const CreateOrderSearchClient: FC = () => {
       name: selectedClient.client_name,
       id: selectedClient.client_id,
       email: selectedClient.client_email,
-      payment_type: selectedClient.payment_type
+      payment_type: selectedClient.payment_type,
+      nit_id: selectedBu?.internal_code || selectedClient.client_id
     });
   };
 
