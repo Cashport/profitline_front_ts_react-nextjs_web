@@ -97,7 +97,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     const fetchPromotions = async () => {
       if (!client?.id) return;
       try {
-        const promotions = await getPromotions(client.id);
+        const promotions = await getPromotions(client.nit_id || client.id);
         setPromotions(promotions.promotions);
         if (promotions.promotions[0]) setPromotionId(promotions.promotions[0].id);
       } catch (error) {

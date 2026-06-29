@@ -456,6 +456,7 @@ export interface IDraftOrderDetail {
   mongo_id: string;
   project_id: number;
   client_id: string;
+  nit_id?: string;
   created_by: number;
   total: number;
   subtotal: number;
