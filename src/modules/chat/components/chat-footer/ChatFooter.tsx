@@ -45,7 +45,7 @@ export default function ChatFooter({
   setTemplateOpen
 }: ChatFooterProps) {
   const { toast } = useToast();
-  const { mutate } = useTicketMessages({ ticketId: conversation.id, page: 1 });
+  const { mutate } = useTicketMessages({ ticketId: conversation.id });
 
   // WhatsApp state
   const [message, setMessage] = useState("");
