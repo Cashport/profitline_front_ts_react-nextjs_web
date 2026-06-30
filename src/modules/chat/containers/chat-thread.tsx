@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, useLayoutEffect } from "react";
 import { Image as AntImage } from "antd";
 import { CaretDoubleLeft } from "@phosphor-icons/react";
 
@@ -42,8 +42,11 @@ export default function ChatThread({
   const {
     data: ticketData,
     mutate,
-    isLoading
-  } = useTicketMessages({ ticketId: conversation.id, page: 1 });
+    isLoading,
+    loadMore,
+    hasMore,
+    isLoadingMore
+  } = useTicketMessages({ ticketId: conversation.id });
   const ticketMessages = useMemo(() => ticketData?.messages?.slice().reverse() || [], [ticketData]);
 
   const messagesByDay = useMemo(() => {
@@ -90,6 +93,10 @@ export default function ChatThread({
   }, [ticketMessages]);
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  // Snapshot taken right before prepending older messages; non-null also flags a prepend in progress.
+  const prevScrollRef = useRef<{ height: number; top: number } | null>(null);
+  // Signals the auto-scroll-to-bottom effect to skip the length change caused by a prepend.
+  const skipBottomScrollRef = useRef(false);
   const [waTemplates, setWaTemplates] = useState<IWhatsAppTemplate[]>([]);
 
   // Memoized template lookup map for O(1) access
@@ -184,7 +191,45 @@ export default function ChatThread({
     });
   }, []);
 
+  // When media (images) finish loading, only stick to the bottom if the user is
+  // already near it. Prevents older images loaded via pagination from yanking the
+  // viewport down while the user is reading history.
+  const handleMediaLoad = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanceFromBottom < 700) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, []);
+
+  // Load older messages when the user scrolls near the top of the history.
+  const handleScroll = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    if (el.scrollTop <= 80 && hasMore && !isLoadingMore && !prevScrollRef.current) {
+      prevScrollRef.current = { height: el.scrollHeight, top: el.scrollTop };
+      loadMore();
+    }
+  }, [hasMore, isLoadingMore, loadMore]);
+
+  // After older messages prepend, keep the previously visible message anchored
+  // instead of letting the viewport jump. Runs before paint to avoid flicker.
+  useLayoutEffect(() => {
+    const el = viewportRef.current;
+    if (el && prevScrollRef.current) {
+      el.scrollTop = el.scrollHeight - prevScrollRef.current.height + prevScrollRef.current.top;
+      prevScrollRef.current = null;
+      skipBottomScrollRef.current = true;
+    }
+  }, [ticketMessages.length]);
+
   useEffect(() => {
+    // Skip the length change produced by prepending older messages.
+    if (skipBottomScrollRef.current) {
+      skipBottomScrollRef.current = false;
+      return;
+    }
     if (!isLoading && ticketMessages.length > 0) {
       scrollToBottom();
     }
@@ -275,9 +320,15 @@ export default function ChatThread({
       {/* History */}
       <div
         ref={viewportRef}
+        onScroll={handleScroll}
         className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin"
       >
         <div className="pl-4 py-6">
+          {isLoadingMore ? (
+            <div className="py-2 text-center text-[13px] text-[#62687A]">
+              Cargando mensajes anteriores...
+            </div>
+          ) : null}
           {Array.from(messagesByDay.entries()).map(([day, messages]) => (
             <div key={`group-${day}`} className="space-y-6">
               <DateSeparator date={messages[0].timestamp} />
@@ -298,7 +349,7 @@ export default function ChatThread({
                     templateMap={templateMap}
                     messagesByWaId={messagesByWaId}
                     onPreviewImage={setPreviewImage}
-                    onScrollToBottom={scrollToBottom}
+                    onMediaLoad={handleMediaLoad}
                   />
                 </div>
               ))}
