@@ -18,7 +18,7 @@ interface BubbleMessageProps {
   templateMap: Map<string, IWhatsAppTemplate>;
   messagesByWaId: Map<string, IMessage>;
   onPreviewImage: (url: string) => void;
-  onScrollToBottom: () => void;
+  onMediaLoad: () => void;
 }
 
 function quotedPreviewFor(referenced: IMessage | undefined): string {
@@ -119,7 +119,7 @@ export default function BubbleMessage({
   templateMap,
   messagesByWaId,
   onPreviewImage,
-  onScrollToBottom
+  onMediaLoad
 }: BubbleMessageProps) {
   const mine = m.direction === "OUTBOUND";
   const footer = <Footer timestamp={m.timestamp} mine={mine} status={m.status} />;
@@ -186,7 +186,7 @@ export default function BubbleMessage({
             src={m.mediaUrl ?? "/placeholder.svg"}
             alt="Imagen enviada"
             className="rounded-lg object-cover max-h-72 w-full"
-            onLoad={onScrollToBottom}
+            onLoad={onMediaLoad}
           />
           <div className="absolute bottom-1 right-1 hidden rounded bg-black/40 p-1 text-white group-hover:block">
             <ArrowsOut className="h-4 w-4" />
