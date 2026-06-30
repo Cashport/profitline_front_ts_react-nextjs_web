@@ -137,7 +137,7 @@ export const ConfirmedOrderView: FC = () => {
                     justify="space-between"
                   >
                     <h2>Resumen</h2>
-                    <Flex align="end" gap="0.5rem" vertical>
+                    <Flex className={styles.quantities}>
                       <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
                       <p className={styles.quantity}>
                         Total Productos:{" "}
