@@ -7,7 +7,7 @@ import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/uti
 import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 
-import ConfirmedOrderItem from "../../components/confirmed-order-item";
+import ProductsTable, { ProductsTableCategory } from "@/modules/commerce/components/products-table";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
@@ -54,6 +54,41 @@ export const ConfirmedOrderView: FC = () => {
   const handleGoBack = () => {
     router.push("/comercio/");
   };
+
+  const tableCategories: ProductsTableCategory[] = (order?.detail?.products ?? []).map(
+    (category) => ({
+      key: category.id_category,
+      name: category.category,
+      rows: category.products.map((product) => {
+        const discountData = appliedDiscounts.find((d) =>
+          product.item_uuid
+            ? d.item_uuid === product.item_uuid
+            : d.product_sku === product.product_sku
+        )?.discount;
+        const primary =
+          discountData && discountData.subtotalDiscount > 0 ? discountData.primary : undefined;
+        return {
+          key: `${product.id}-${product.product_sku}`,
+          description: product.product_name,
+          sku: product.product_sku,
+          originalPrice: product.price,
+          finalPrice: primary?.new_price ?? product.price,
+          quantity: product.quantity,
+          discountPct: primary?.discount_applied?.discount ?? 0
+        };
+      })
+    })
+  );
+
+  const totalCantidad = tableCategories.reduce(
+    (sum, category) => sum + category.rows.reduce((s, r) => s + r.quantity, 0),
+    0
+  );
+  const totalMonto = tableCategories.reduce(
+    (sum, category) => sum + category.rows.reduce((s, r) => s + r.finalPrice * r.quantity, 0),
+    0
+  );
+
   return (
     <>
       {loading ? (
@@ -117,44 +152,11 @@ export const ConfirmedOrderView: FC = () => {
                     </Flex>
                   </Flex>
 
-                  <div className={styles.categories}>
-                    {order?.detail?.products?.map((category) => (
-                      <div className={styles.category} key={category.id_category}>
-                        <Flex justify="space-between" align="center">
-                          <p className={styles.category__header}>{category.category}</p>
-                          <p className={styles.category__header}>
-                            Skus: {category.products.length}
-                          </p>
-                        </Flex>
-                        <div className={styles.products}>
-                          {category.products.map((product) => {
-                            const productDiscount = appliedDiscounts?.find((discount: any) =>
-                              product.item_uuid
-                                ? discount.item_uuid === product.item_uuid
-                                : discount.product_sku === product.product_sku
-                            )?.discount;
-                            const productDiscountData =
-                              productDiscount &&
-                              productDiscount.subtotalDiscount > 0 &&
-                              productDiscount.primary
-                                ? {
-                                    discountPercentage:
-                                      productDiscount.primary?.discount_applied?.discount,
-                                    subtotal: productDiscount.primary?.new_price
-                                  }
-                                : undefined;
-                            return (
-                              <ConfirmedOrderItem
-                                key={product.product_sku}
-                                product={product}
-                                productDiscount={productDiscountData}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <ProductsTable
+                    categories={tableCategories}
+                    totalCantidad={totalCantidad}
+                    totalMonto={totalMonto}
+                  />
 
                   {order?.detail.discount_package_id ? (
                     <div className={styles.discountsContainer}>
