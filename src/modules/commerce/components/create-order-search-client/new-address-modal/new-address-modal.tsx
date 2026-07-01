@@ -58,12 +58,14 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
             type="text"
             placeholder="Cl. 76 9-88"
             value={newDireccion}
+            maxLength={35}
             onChange={(e) => setNewDireccion(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSave();
             }}
             className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
           />
+          <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
         </div>
       </div>
     </Modal>

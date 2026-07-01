@@ -519,12 +519,16 @@ export default function OrderShipmentConfirm({
                   type="text"
                   placeholder="Cl. 76 9-88"
                   value={singleForm.dispatch_address}
+                  maxLength={35}
                   readOnly={!isNewAddressSingle}
                   onChange={(e) =>
                     setSingleForm((f) => ({ ...f, dispatch_address: e.target.value }))
                   }
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
                 />
+                {isNewAddressSingle && (
+                  <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
