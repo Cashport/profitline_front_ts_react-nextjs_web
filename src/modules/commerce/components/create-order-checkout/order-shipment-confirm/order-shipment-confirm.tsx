@@ -181,7 +181,7 @@ export default function OrderShipmentConfirm({
     const matchedAddress =
       draftAddressId !== undefined ? addresses.find((a) => a.id === draftAddressId) : undefined;
 
-    const phoneRaw = shippingInfo.phone_number ?? "";
+    const phoneRaw = shippingInfo.phone_number || singleForm.telefono || "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
     const indicativo = phoneMatch ? phoneMatch[1] : "+57";
     const telefono = phoneMatch ? phoneMatch[2] : phoneRaw;
