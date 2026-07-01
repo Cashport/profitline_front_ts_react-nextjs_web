@@ -36,12 +36,14 @@ export interface IOrderViewContext {
     id: string;
     email: string;
     payment_type: number;
+    nit_id: string;
   };
   setClient: Dispatch<{
     name: string;
     id: string;
     email: string;
     payment_type: number;
+    nit_id: string;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;
@@ -114,7 +116,7 @@ const CreateOrderView: FC = () => {
 
       setDiscountsLoading(true);
       try {
-        const response = await getDiscounts(selectedProject.ID, client.id);
+        const response = await getDiscounts(selectedProject.ID, client.nit_id || client.id);
 
         if (response.data && response.data.length > 0) {
           setDiscounts(response.data);
@@ -144,7 +146,8 @@ const CreateOrderView: FC = () => {
         name: decodedToken?.claims?.guestName || "",
         id: decodedToken?.claims?.guestDocument || "",
         email: decodedToken?.claims?.guestEmail || "",
-        payment_type: client?.payment_type || 3
+        payment_type: client?.payment_type || 3,
+        nit_id: decodedToken?.claims?.guestDocument || ""
       });
       setIsLoadingLocalClient(false);
     }

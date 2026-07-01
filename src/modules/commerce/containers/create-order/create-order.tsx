@@ -37,11 +37,14 @@ interface IOrderViewContext {
     id: string;
     email: string;
     payment_type: number;
+    nit_id: string;
   };
   setClient: Dispatch<{
     name: string;
     id: string;
     email: string;
+    payment_type: number;
+    nit_id: string;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;
@@ -111,7 +114,7 @@ export const CreateOrderView: FC = () => {
 
       setDiscountsLoading(true);
       try {
-        const response = await getDiscounts(selectedProject.ID, client.id);
+        const response = await getDiscounts(selectedProject.ID, client.nit_id || client.id);
 
         if (response.data && response.data.length > 0) {
           setDiscounts(response.data);
@@ -173,14 +176,15 @@ export const CreateOrderView: FC = () => {
   useEffect(() => {
     if (!draftDetail || categories.length === 0) return;
 
-    const { client_name, client_id, shipping_info, order_summary, executive_discounts } =
+    const { nit_id, client_name, client_id, shipping_info, order_summary, executive_discounts } =
       draftDetail;
 
     setClient({
       name: client_name,
       id: client_id,
       email: shipping_info?.email ?? "",
-      payment_type: 1
+      payment_type: 1,
+      nit_id: nit_id || client_id
     });
     setShippingInfo(shipping_info);
     // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
