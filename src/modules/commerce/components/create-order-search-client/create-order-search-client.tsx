@@ -296,19 +296,25 @@ const CreateOrderSearchClient: FC = () => {
           <div className="flex-1 flex items-center justify-center">
             <Spin size="large" />
           </div>
-        ) : clientSummary ? (
+        ) : (
           <>
             <SelectedClientCard
               client={selectedClient}
               address={selectedAddress}
-              nit={clientSummary.client.nit}
+              nit={clientSummary?.client.nit || selectedClient.client_id || "-"}
             />
-            <CarteraCard cartera={clientSummary.cartera} cupo={clientSummary.cupo} />
+            <CarteraCard
+              cartera={clientSummary?.cartera ?? { totalPortfolio: 0, pastDueAmount: 0 }}
+              cupo={
+                clientSummary?.cupo ?? {
+                  totalQuota: 0,
+                  availableQuota: 0,
+                  percentageUsed: 0,
+                  availablePercentage: 0
+                }
+              }
+            />
           </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-[#999999]">No hay información del cliente</p>
-          </div>
         )}
       </div>
 
