@@ -94,6 +94,19 @@ export interface UpdateBalancePayload {
   client_documents?: { id: number; document: string }[];
 }
 
+export const downloadBalanceAuditExcel = async (): Promise<{ url: string; filename: string }> => {
+  try {
+    const response: GenericResponse<{ url: string }> = await API.get(
+      `/financial-discount/balance-audit/export`
+    );
+    const filename = response.data.url.split("/").pop() || "balance_audit.xlsx";
+    return { url: response.data.url, filename };
+  } catch (error) {
+    console.error("Error downloading balance audit excel:", error);
+    throw error;
+  }
+};
+
 export const updateBalance = async (balanceId: number, payload: UpdateBalancePayload) => {
   const formData = new FormData();
   if (payload.motive_id !== undefined) formData.append("motive_id", String(payload.motive_id));
