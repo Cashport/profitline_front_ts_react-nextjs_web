@@ -110,7 +110,9 @@ export const ConfirmedOrderView: FC = () => {
 
               <div className={styles.summaryContainer}>
                 <div className={styles.summaryContainer__top}>
-                  <h2>Datos de envío</h2>
+                  <h2>
+                    <strong>Datos de envío</strong>
+                  </h2>
                   <div className={styles.shippingData}>
                     <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
                     <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
@@ -119,6 +121,7 @@ export const ConfirmedOrderView: FC = () => {
                       data={order?.shipping_info?.dispatch_address}
                     />
                     <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo title="Bodega" data={order?.warehouse_name} />
                     <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
                     <ConfirmedOrderShippingInfo
                       title="Contacto"
@@ -136,9 +139,15 @@ export const ConfirmedOrderView: FC = () => {
                     align="center"
                     justify="space-between"
                   >
-                    <h2>Resumen</h2>
+                    <strong>Resumen</strong>
                     <Flex className={styles.quantities}>
-                      <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
+                      <p className={styles.quantity}>
+                        SKUs:{" "}
+                        {order?.detail?.products?.reduce(
+                          (acc, category) => acc + category.products.length,
+                          0
+                        )}
+                      </p>
                       <p className={styles.quantity}>
                         Total Productos:{" "}
                         {order?.detail?.products?.length &&

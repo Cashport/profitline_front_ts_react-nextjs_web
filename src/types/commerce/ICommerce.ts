@@ -375,6 +375,8 @@ export interface ISingleOrder {
   client_name: string;
   block_flag: boolean;
   vendor_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
 }
 
 interface IDetailOrder {

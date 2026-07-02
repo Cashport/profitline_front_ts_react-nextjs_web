@@ -332,7 +332,9 @@ const OrdersViewTable = ({
   ];
 
   const columns = onlyKeyInfo
-    ? allColumns.filter((col) => ["id", "client_name", "total"].includes(col.key as string))
+    ? allColumns.filter((col) =>
+        ["id", "client_name", "total", "buttonOpenModal"].includes(col.key as string)
+      )
     : allColumns;
 
   return (
