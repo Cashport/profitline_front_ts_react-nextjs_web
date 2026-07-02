@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 
-import { Flex, message, Spin } from "antd";
+import { Flex, Spin } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import Collapse from "@/components/ui/collapse";
@@ -82,15 +82,11 @@ export function ClientBalancesView() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            <GenerateActionButton
-              onClick={() => {
-                if (state.selectedSaldoIds.length === 0) {
-                  message.info("Selecciona al menos un saldo para generar una acción");
-                  return;
-                }
-                setIsActionsOpen(true);
-              }}
-            />
+                <GenerateActionButton
+                  onClick={() => {
+                    setIsActionsOpen(true);
+                  }}
+                />
 
             {/* Saldos Filters Dropdown (Tipo + Fechas) */}
             <FilterBalances

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 
-import { message, Spin } from "antd";
+import { Spin } from "antd";
 import { CheckCircle, Clock, XCircle, CircleDot } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -89,10 +89,6 @@ export function BalancesView() {
 
                 <GenerateActionButton
                   onClick={() => {
-                    if (state.selectedSaldoIds.length === 0) {
-                      message.info("Selecciona al menos un saldo para generar una acción");
-                      return;
-                    }
                     setIsActionsOpen(true);
                   }}
                 />
