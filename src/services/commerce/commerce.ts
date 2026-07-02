@@ -42,7 +42,11 @@ export const getClients = async (projectId: number) => {
   return response;
 };
 
-export const getProductsByClient = async (projectId: number, clientId: string, businessUnit?: string) => {
+export const getProductsByClient = async (
+  projectId: number,
+  clientId: string,
+  businessUnit?: string
+) => {
   const queryParams = new URLSearchParams();
   if (businessUnit) {
     queryParams.append("business_unit", businessUnit);
@@ -233,7 +237,9 @@ export const changeOrderState = async (
     showMessage("success", "Estado cambiado correctamente");
     return response;
   } catch (error) {
-    showMessage("error", "Error al cambiar el estado de la orden");
+    const messageError =
+      error instanceof Error ? error.message : "Error al cambiar el estado de la orden";
+    showMessage("error", messageError);
     throw error;
   }
 };
