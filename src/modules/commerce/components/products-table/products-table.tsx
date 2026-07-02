@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Gift, Pencil, Trash2 } from "lucide-react";
 
 export function formatPrice(n: number) {
@@ -111,6 +111,8 @@ export interface ProductsTableProps {
   bonusItems?: ProductsTableBonusItem[];
   /** Adds the trailing action column (trash buttons). */
   showActionsColumn?: boolean;
+  /** When true, collapses to only Producto / Cant. / Total on viewports < 800px. */
+  responsive?: boolean;
   /** Sizing/positioning classes merged onto the outer container. */
   className?: string;
 }
@@ -122,21 +124,38 @@ export default function ProductsTable({
   multiEntrega = false,
   bonusItems = [],
   showActionsColumn = false,
+  responsive = false,
   className = ""
 }: ProductsTableProps) {
+  // Narrow-viewport detection for `responsive`. Follows the SSR-safe `matchMedia`-in-effect
+  // pattern (starts `false` so server + first client render match, then resolves on mount).
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    if (!responsive) return;
+    const mql = window.matchMedia("(max-width: 799px)"); // max-width is inclusive → < 800
+    const onChange = () => setIsNarrow(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, [responsive]);
+  const compact = responsive && isNarrow;
+
   // Built as an inline style (not a Tailwind `grid-cols-[…]` class) because the column
   // count is dynamic and Tailwind can't JIT a runtime-concatenated arbitrary value.
-  const gridTemplateColumns = [
-    "2fr",
-    "90px",
-    "100px",
-    "120px",
-    "100px",
-    "70px",
-    "110px",
-    ...(multiEntrega ? ["56px"] : []),
-    ...(showActionsColumn ? ["32px"] : [])
-  ].join(" ");
+  // When `compact`, only Producto / Cant. / Total are rendered.
+  const gridTemplateColumns = compact
+    ? "2fr 70px 110px"
+    : [
+        "2fr",
+        "90px",
+        "100px",
+        "120px",
+        "100px",
+        "70px",
+        "110px",
+        ...(multiEntrega ? ["56px"] : []),
+        ...(showActionsColumn ? ["32px"] : [])
+      ].join(" ");
 
   const showBonus = bonusItems.length > 0;
 
@@ -144,23 +163,27 @@ export default function ProductsTable({
     <div
       className={`rounded-xl border border-[#EEEEEE] overflow-x-auto overflow-y-hidden ${className}`}
     >
-      <div className="min-w-max h-full flex flex-col">
+      <div className={`${compact ? "w-full" : "min-w-max"} h-full flex flex-col`}>
         {/* Table header */}
         <div
           className="grid px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE] rounded-t-xl flex-shrink-0"
           style={{ gridTemplateColumns }}
         >
           <span className="text-xs font-medium text-[#AAAAAA]">Producto</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">SKU</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Original</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-center">Descuento</span>
-          <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Final</span>
+          {!compact && (
+            <>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">SKU</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Original</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-center">Descuento</span>
+              <span className="text-xs font-medium text-[#AAAAAA] text-right">P. Final</span>
+            </>
+          )}
           <span className="text-xs font-medium text-[#AAAAAA] text-right">Cant.</span>
           <span className="text-xs font-medium text-[#AAAAAA] text-right">Total</span>
-          {multiEntrega && (
+          {multiEntrega && !compact && (
             <span className="text-xs font-medium text-[#AAAAAA] text-right">Rest.</span>
           )}
-          {showActionsColumn && <span />}
+          {showActionsColumn && !compact && <span />}
         </div>
 
         {/* Rows */}
@@ -183,38 +206,44 @@ export default function ProductsTable({
                     style={{ gridTemplateColumns }}
                   >
                     <p
-                      className="text-sm font-medium text-[#141414] leading-tight pr-4 truncate"
+                      className={`text-sm font-medium text-[#141414] leading-tight pr-4 truncate ${
+                        compact ? "min-w-0" : ""
+                      }`}
                       title={row.description}
                     >
                       {row.description}
                     </p>
-                    <p className="text-xs text-[#CCCCCC] text-right">{row.sku}</p>
-                    <p className="text-xs text-[#CCCCCC] line-through text-right">
-                      {formatPrice(row.originalPrice)}
-                    </p>
-                    <div className="flex justify-center">
-                      {row.onDiscountChange ? (
-                        <DescuentoCell
-                          value={row.discountPct}
-                          max={row.maxDiscountPct ?? 0}
-                          onChange={row.onDiscountChange}
-                        />
-                      ) : row.discountPct > 0 ? (
-                        <span className="text-xs font-semibold text-red-500">
-                          -{row.discountPct}%
-                        </span>
-                      ) : (
-                        <span className="text-xs text-[#999999] italic">Sin desc.</span>
-                      )}
-                    </div>
-                    <p className="text-sm font-semibold text-[#141414] text-right">
-                      {formatPrice(row.finalPrice)}
-                    </p>
+                    {!compact && (
+                      <>
+                        <p className="text-xs text-[#CCCCCC] text-right">{row.sku}</p>
+                        <p className="text-xs text-[#CCCCCC] line-through text-right">
+                          {formatPrice(row.originalPrice)}
+                        </p>
+                        <div className="flex justify-center">
+                          {row.onDiscountChange ? (
+                            <DescuentoCell
+                              value={row.discountPct}
+                              max={row.maxDiscountPct ?? 0}
+                              onChange={row.onDiscountChange}
+                            />
+                          ) : row.discountPct > 0 ? (
+                            <span className="text-xs font-semibold text-red-500">
+                              -{row.discountPct}%
+                            </span>
+                          ) : (
+                            <span className="text-xs text-[#999999] italic">Sin desc.</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold text-[#141414] text-right">
+                          {formatPrice(row.finalPrice)}
+                        </p>
+                      </>
+                    )}
                     <p className="text-sm text-[#141414] text-right">{row.quantity}</p>
                     <p className="text-sm font-semibold text-[#141414] text-right">
                       {formatPrice(totalLinea)}
                     </p>
-                    {multiEntrega && (
+                    {multiEntrega && !compact && (
                       <p
                         className={`text-sm font-bold text-right ${
                           row.restante === 0
@@ -228,7 +257,7 @@ export default function ProductsTable({
                         {row.restante}
                       </p>
                     )}
-                    {showActionsColumn ? (
+                    {showActionsColumn && !compact ? (
                       row.onRemove && row.finalPrice === 0 ? (
                         <button
                           onClick={row.onRemove}
@@ -275,20 +304,25 @@ export default function ProductsTable({
                       {b.fixed ? "Promo auto" : "Manual"}
                     </span>
                   </div>
-                  <span />
-                  <span />
-                  <div className="flex justify-center">
-                    <span className="text-xs font-semibold text-[#6AB000]">100% desc.</span>
-                  </div>
-                  <p className="text-sm font-semibold text-[#6AB000] text-right">
-                    {formatPrice(0)}
-                  </p>
+                  {!compact && (
+                    <>
+                      <span />
+                      <span />
+                      <div className="flex justify-center">
+                        <span className="text-xs font-semibold text-[#6AB000]">100% desc.</span>
+                      </div>
+                      <p className="text-sm font-semibold text-[#6AB000] text-right">
+                        {formatPrice(0)}
+                      </p>
+                    </>
+                  )}
                   <p className="text-sm text-[#141414] text-right">{b.qty}</p>
                   <p className="text-sm font-semibold text-[#6AB000] text-right">
                     {formatPrice(0)}
                   </p>
-                  {multiEntrega && <span />}
+                  {multiEntrega && !compact && <span />}
                   {showActionsColumn &&
+                    !compact &&
                     (b.onRemove ? (
                       <button
                         onClick={b.onRemove}
@@ -312,16 +346,20 @@ export default function ProductsTable({
           style={{ gridTemplateColumns }}
         >
           <span className="text-xs font-semibold text-[#141414]">Totales</span>
-          <span />
-          <span />
-          <span />
-          <span />
+          {!compact && (
+            <>
+              <span />
+              <span />
+              <span />
+              <span />
+            </>
+          )}
           <span className="text-sm font-bold text-[#141414] text-right">{totalCantidad}</span>
           <span className="text-sm font-bold text-[#141414] text-right">
             {formatPrice(totalMonto)}
           </span>
-          {multiEntrega && <span />}
-          {showActionsColumn && <span />}
+          {multiEntrega && !compact && <span />}
+          {showActionsColumn && !compact && <span />}
         </div>
       </div>
     </div>

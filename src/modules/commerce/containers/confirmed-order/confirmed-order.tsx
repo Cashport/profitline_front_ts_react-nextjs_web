@@ -165,6 +165,7 @@ export const ConfirmedOrderView: FC = () => {
                     categories={tableCategories}
                     totalCantidad={totalCantidad}
                     totalMonto={totalMonto}
+                    responsive
                   />
 
                   {order?.detail.discount_package_id ? (
