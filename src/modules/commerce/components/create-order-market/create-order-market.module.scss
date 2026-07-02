@@ -68,6 +68,9 @@
     }
 
     .categoryDivider {
+        position: sticky;
+        top: 0;
+        z-index: 10;
         margin: 0.25rem 0 1rem;
         background-color: $background;
         padding: 0.5rem;
