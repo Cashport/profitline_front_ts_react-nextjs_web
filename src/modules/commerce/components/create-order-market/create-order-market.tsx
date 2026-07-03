@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useState, useMemo } from "react";
-import { Button, Flex } from "antd";
+import { Button, Divider, Flex } from "antd";
 import { CaretLeft } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -26,6 +26,7 @@ interface IFetchedCategory {
 }
 
 interface CategoryMap {
+  id: number;
   name: string;
   productIds: number[];
 }
@@ -47,7 +48,7 @@ const CreateOrderMarket: FC = () => {
   const debouncedSearch = useDebounce(searchTerm, 800);
 
   const [productsMap, setProductsMap] = useState<Map<number, ISelectedProduct>>(new Map());
-  const [categoriesMap, setCategoriesMap] = useState<Map<string, CategoryMap>>(new Map());
+  const [categoriesMap, setCategoriesMap] = useState<Map<number, CategoryMap>>(new Map());
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -57,11 +58,12 @@ const CreateOrderMarket: FC = () => {
       if (!response.data) return;
 
       const newProductsMap = new Map<number, ISelectedProduct>();
-      const newCategoriesMap = new Map<string, CategoryMap>();
+      const newCategoriesMap = new Map<number, CategoryMap>();
       const categoriesList: IFetchedCategory[] = [];
 
       response.data.forEach((category) => {
         const categoryName = category.category;
+        const categoryId = category.category_id;
         const categoryProducts: ISelectedProduct[] = [];
         const productIds: number[] = [];
 
@@ -88,7 +90,8 @@ const CreateOrderMarket: FC = () => {
           categoryProducts.push(formattedProduct);
         });
 
-        newCategoriesMap.set(categoryName, {
+        newCategoriesMap.set(categoryId, {
+          id: categoryId,
           name: categoryName,
           productIds
         });
@@ -103,8 +106,9 @@ const CreateOrderMarket: FC = () => {
       setCategoriesMap(newCategoriesMap);
       setCategories(categoriesList);
 
-      if (categoriesList.length > 0 && !activeTab) {
-        setActiveTab(categoriesList[0].category);
+      const firstCategoryId = newCategoriesMap.keys().next().value;
+      if (firstCategoryId !== undefined && !activeTab) {
+        setActiveTab(String(firstCategoryId));
       }
     };
 
@@ -116,7 +120,7 @@ const CreateOrderMarket: FC = () => {
 
     const searchUpper = debouncedSearch.toUpperCase();
 
-    return Array.from(categoriesMap.entries()).map(([categoryName, category]) => {
+    return Array.from(categoriesMap.values()).map((category) => {
       const filteredProducts = category.productIds
         .map((id) => productsMap.get(id))
         .filter((product): product is ISelectedProduct => {
@@ -129,34 +133,65 @@ const CreateOrderMarket: FC = () => {
           );
         });
 
+      // Sub-group by the item-specific category_id
+      const subGroupsMap = new Map<
+        number,
+        { categoryId: number; categoryName: string; products: ISelectedProduct[] }
+      >();
+      filteredProducts.forEach((product) => {
+        const existing = subGroupsMap.get(product.category_id);
+        if (existing) {
+          existing.products.push(product);
+        } else {
+          subGroupsMap.set(product.category_id, {
+            categoryId: product.category_id,
+            categoryName: product.category_name,
+            products: [product]
+          });
+        }
+      });
+
       return {
-        category: categoryName,
-        products: filteredProducts
+        tabId: category.id,
+        tabName: category.name,
+        productCount: filteredProducts.length,
+        subGroups: Array.from(subGroupsMap.values())
       };
     });
   }, [categories, debouncedSearch, productsMap, categoriesMap]);
 
   const categoryTabs = useMemo(() => {
-    return filteredCategories
-      .map((category) => ({
-        key: category.category,
-        label: `${category.category} (${category.products.length})`,
-        children: (
-          <div className={styles.productsGrid} key={`grid-${category.category}-${debouncedSearch}`}>
-            {category.products.map((product) => (
-              <CreateOrderProduct
-                key={`product-${product.id}-${debouncedSearch}`}
-                product={product}
-                categoryName={category.category}
-              />
-            ))}
-          </div>
-        )
-      }))
-      .map((tab) => ({
-        ...tab,
-        children: <div key={`tab-content-${tab.key}-${debouncedSearch}`}>{tab.children}</div>
-      }));
+    return filteredCategories.map((tab) => ({
+      key: String(tab.tabId),
+      label: `${tab.tabName} (${tab.productCount})`,
+      children: (
+        <div key={`tab-content-${tab.tabId}-${debouncedSearch}`}>
+          {tab.subGroups.map((group) => (
+            <div
+              className={styles.categorySection}
+              key={`subgroup-${group.categoryId}-${debouncedSearch}`}
+            >
+              <Divider
+                orientation="left"
+                orientationMargin={0}
+                className={styles.categoryDivider}
+              >
+                {group.categoryName}
+              </Divider>
+              <div className={styles.productsGrid}>
+                {group.products.map((product) => (
+                  <CreateOrderProduct
+                    key={`product-${product.id}-${debouncedSearch}`}
+                    product={product}
+                    categoryName={group.categoryName}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }));
   }, [filteredCategories, debouncedSearch]);
 
   return (

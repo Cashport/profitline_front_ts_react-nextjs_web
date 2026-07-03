@@ -82,7 +82,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     setCategories,
     executiveDiscounts,
     deactivateCrossSelling,
-    channelName
+    channelName,
+    bonus
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -306,12 +307,19 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
             product_sku: product.SKU,
             quantity: product.quantity
           }));
+        // promotion_applyed se calcula SOLO con los bonificados comunes
+        // (bonusOptions). Los "other bonified" (otherBonificated) NO cuentan,
+        // porque no pertenecen al rango activo de la promoción.
+        const promotionApplyed = (bonus?.bonusOptions ?? []).some((opt) =>
+          opt.cards.some((card) => card.items.length > 0)
+        );
         const confirmOrderData = {
           discount_package: selectedDiscount,
           order_summary: products,
           executive_discounts: executiveDiscounts,
           deactivate_cross_selling: !deactivateCrossSelling,
-          ...(promotionId !== undefined && { promotion_id: promotionId })
+          ...(promotionId !== undefined && { promotion_id: promotionId }),
+          promotion_applyed: promotionApplyed
         };
         try {
           const response = await confirmOrder(projectId, client?.id || "", confirmOrderData);
@@ -339,7 +347,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [selectedCategories, selectedDiscount, executiveDiscounts, promotionId]);
+  }, [selectedCategories, selectedDiscount, executiveDiscounts, promotionId, bonus]);
 
   useEffect(() => {
     const newState = selectedCategories.map((category) => ({

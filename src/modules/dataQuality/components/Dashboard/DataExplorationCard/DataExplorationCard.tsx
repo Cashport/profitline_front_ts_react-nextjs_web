@@ -22,7 +22,7 @@ import {
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useDataExploration } from "@/modules/dataQuality/hooks/useDataExploration";
 import { useDataQualityDashboardContext } from "@/modules/dataQuality/context/DataQualityDashboardContext";
-import { buildLastSixMonths, getCurrentMonthId } from "@/modules/dataQuality/utils/months";
+import { buildLastSixMonths } from "@/modules/dataQuality/utils/months";
 import { formatNumber } from "@/utils/utils";
 import { formatThousandNum } from "@/modules/dataQuality/utils/utils";
 import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
@@ -33,15 +33,16 @@ const TOTAL_COLUMNS = 35;
 type DayCell = IDataExplorationTotals & { novedades_percent: number };
 
 export function DataExplorationCard() {
-  const { selectedCountry } = useDataQualityDashboardContext();
+  const { selectedCountry, selectedPeriod, setSelectedPeriod, selectedFileType } =
+    useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthId);
   const months = useMemo(buildLastSixMonths, []);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
     id_country: selectedCountry || undefined,
-    month: selectedMonth,
+    month: selectedPeriod,
+    id_type_archive: selectedFileType && selectedFileType !== "all" ? selectedFileType : undefined,
     search: debouncedSearch || undefined
   });
 
@@ -85,7 +86,7 @@ export function DataExplorationCard() {
   }, [data, dayNumbers]);
 
   const todayDayCutoff = useMemo(() => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    const [year, month] = selectedPeriod.split("-").map(Number);
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth() + 1;
@@ -96,7 +97,7 @@ export function DataExplorationCard() {
       return 0;
     }
     return today.getDate();
-  }, [selectedMonth]);
+  }, [selectedPeriod]);
 
   return (
     <Card
@@ -116,7 +117,7 @@ export function DataExplorationCard() {
               Unidades recibidas por día del mes
             </p>
           </div>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger className="w-[150px] h-8 text-xs" style={{ borderColor: "#E5E7EB" }}>
               <SelectValue />
             </SelectTrigger>

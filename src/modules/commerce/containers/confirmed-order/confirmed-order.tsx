@@ -1,7 +1,8 @@
-import { FC, useEffect, useState } from "react";
-import { Flex, Spin, Typography } from "antd";
+import { FC, useCallback, useEffect, useState } from "react";
+import { Button, Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "phosphor-react";
+import { DotsThree } from "@phosphor-icons/react";
 
 import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/utils";
 import { getSingleOrder } from "@/services/commerce/commerce";
@@ -11,6 +12,7 @@ import ProductsTable, { ProductsTableCategory } from "@/modules/commerce/compone
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
+import { ModalOrderActions } from "../../components/modal-order-actions/modal-order-actions";
 
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { DiscountItem, ISingleOrder } from "@/types/commerce/ICommerce";
@@ -28,26 +30,28 @@ export const ConfirmedOrderView: FC = () => {
   const [order, setOrder] = useState<ISingleOrder>();
   const [loading, setLoading] = useState(false);
   const [appliedDiscounts, setAppliedDiscounts] = useState<DiscountItem[]>([]);
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
 
   // TO DO: Refactor to use a more robust state management solution if needed
   // notificationIdIsNeeded for sendingNovelty with evidence
   const notificationId = searchParams.get("notification");
 
-  useEffect(() => {
+  const fetchOrder = useCallback(async () => {
     if (!orderIdParam || !projectId) return;
-    const fetchOrder = async () => {
-      setLoading(true);
-      const response = await getSingleOrder(projectId, parseInt(orderIdParam));
-      setOrder(response?.data[0]);
-      if (response.data[0].detail?.discounts?.discountItems?.length > 0)
-        setAppliedDiscounts(
-          response.data[0].detail?.discounts?.discountItems?.map((item) => ({
-            ...item,
-            item_uuid: item.item_uuid ?? generateShortUuid()
-          }))
-        );
-      setLoading(false);
-    };
+    setLoading(true);
+    const response = await getSingleOrder(projectId, parseInt(orderIdParam));
+    setOrder(response?.data[0]);
+    if (response.data[0].detail?.discounts?.discountItems?.length > 0)
+      setAppliedDiscounts(
+        response.data[0].detail?.discounts?.discountItems?.map((item) => ({
+          ...item,
+          item_uuid: item.item_uuid ?? generateShortUuid()
+        }))
+      );
+    setLoading(false);
+  }, [orderIdParam, projectId]);
+
+  useEffect(() => {
     fetchOrder();
   }, [params, projectId]);
 
@@ -110,7 +114,19 @@ export const ConfirmedOrderView: FC = () => {
 
               <div className={styles.summaryContainer}>
                 <div className={styles.summaryContainer__top}>
-                  <h2>Datos de envío</h2>
+                  <Flex justify="space-between" align="center">
+                    <h2>
+                      <strong>Datos de envío</strong>
+                    </h2>
+                    <Button
+                      className={styles.generateActionButton}
+                      size="large"
+                      icon={<DotsThree size={"1.5rem"} />}
+                      onClick={() => setIsActionsModalOpen(true)}
+                    >
+                      Generar acción
+                    </Button>
+                  </Flex>
                   <div className={styles.shippingData}>
                     <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
                     <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
@@ -119,6 +135,7 @@ export const ConfirmedOrderView: FC = () => {
                       data={order?.shipping_info?.dispatch_address}
                     />
                     <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo title="Bodega" data={order?.warehouse_name} />
                     <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
                     <ConfirmedOrderShippingInfo
                       title="Contacto"
@@ -136,9 +153,15 @@ export const ConfirmedOrderView: FC = () => {
                     align="center"
                     justify="space-between"
                   >
-                    <h2>Resumen</h2>
+                    <strong>Resumen</strong>
                     <Flex className={styles.quantities}>
-                      <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
+                      <p className={styles.quantity}>
+                        SKUs:{" "}
+                        {order?.detail?.products?.reduce(
+                          (acc, category) => acc + category.products.length,
+                          0
+                        )}
+                      </p>
                       <p className={styles.quantity}>
                         Total Productos:{" "}
                         {order?.detail?.products?.length &&
@@ -156,6 +179,7 @@ export const ConfirmedOrderView: FC = () => {
                     categories={tableCategories}
                     totalCantidad={totalCantidad}
                     totalMonto={totalMonto}
+                    responsive
                   />
 
                   {order?.detail.discount_package_id ? (
@@ -219,6 +243,12 @@ export const ConfirmedOrderView: FC = () => {
               </div>
             </div>
           </div>
+          <ModalOrderActions
+            isOpen={isActionsModalOpen}
+            onClose={() => setIsActionsModalOpen(false)}
+            orderId={parseInt(orderIdParam ?? "")}
+            onActionSuccess={fetchOrder}
+          />
         </>
       )}
     </>
