@@ -80,6 +80,13 @@ export interface IConfirmOrderData {
   executive_discounts: IExecutiveDiscount[];
   deactivate_cross_selling: boolean;
   promotion_id?: number;
+  /**
+   * Indica si la promoción aplica al carrito actual. Se calcula en base a
+   * los bonificados comunes (`bonusOptions`), NO a los "other bonified"
+   * (`otherBonificated`). Es `true` cuando al menos una tarjeta de
+   * `bonusOptions` tiene productos, y `false` en caso contrario.
+   */
+  promotion_applyed: boolean;
 }
 
 export interface IProductInDetail {
