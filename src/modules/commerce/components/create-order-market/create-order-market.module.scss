@@ -1,18 +1,25 @@
 @import "@/styles/variables.scss";
 
 .marketLayout {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 1.5rem;
     height: 100%;
     min-height: 0;
-    transition: grid-template-columns 0.3s ease;
+
+    // Productos: ocupan el espacio restante
+    > :first-child {
+        flex: 5;
+        min-width: 0;
+    }
 
     &.marketLayoutWithCart {
-        grid-template-columns: 5fr 3fr;
+        // Carrito: conserva la proporción responsive (3fr) con un tope de 420px
+        > :last-child {
+            flex: 3;
+            min-width: 0;
+            max-width: 420px;
 
-        // Animación slide-in para el carrito en desktop
-        > *:last-child {
+            // Animación slide-in para el carrito en desktop
             animation: slideInRight 0.3s ease;
         }
     }
@@ -33,11 +40,8 @@
 @media (max-width: 768px) {
     .marketLayout {
         position: relative;
-        grid-template-columns: 1fr;
 
         &.marketLayoutWithCart {
-            grid-template-columns: 1fr;
-
             // Overlay backdrop
             &::before {
                 content: "";

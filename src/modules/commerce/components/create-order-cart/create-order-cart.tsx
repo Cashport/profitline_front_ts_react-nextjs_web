@@ -532,7 +532,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
           {selectedCategories.map((category) => (
             <div key={category.category_id}>
               <Flex className={styles.products__header} justify="space-between">
-                <p>{category.products[0].category_name}</p>
+                <h3>{category.products[0].category_name}</h3>
                 <p>
                   SKUs: {category.products.length} - Productos:{" "}
                   {category.products.reduce((sum, product) => sum + product.quantity, 0)}
