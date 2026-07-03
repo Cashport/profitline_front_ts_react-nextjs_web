@@ -6,6 +6,7 @@ import { ArrowLeft, Gift } from "@phosphor-icons/react";
 import { IBonus, IGiftOption } from "@/types/commerce/ICommerce";
 import { IPromotion } from "@/services/promotion/promotion";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
+import { SPANISH_MONTHS } from "@/modules/dataQuality/utils/months";
 
 import styles from "./modal-bonus.module.scss";
 
@@ -40,10 +41,12 @@ const ModalBonus = ({
   const flexPromotion = promotions.find((p) => p.isFlex);
   const nonFlexPromotions = promotions.filter((p) => !p.isFlex);
 
+  const currentMonthName = SPANISH_MONTHS[new Date().getMonth()];
+
   type Segment = "flex" | "promos" | "otros";
 
   const [activeSegment, setActiveSegment] = useState<Segment>("flex");
-  // sub-view of the Promos Junio tab: the non-flex list vs. a selected promo's detail
+  // sub-view of the Promos tab: the non-flex list vs. a selected promo's detail
   const [promosScreen, setPromosScreen] = useState<"list" | "detail">("list");
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
@@ -480,7 +483,7 @@ const ModalBonus = ({
                 }}
                 className={activeSegment === "promos" ? styles.segmentActive : styles.segment}
               >
-                Promos Junio
+                Promos {currentMonthName}
               </button>
             )}
           </div>
