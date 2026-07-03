@@ -84,7 +84,8 @@ export function ModalUploadBalanceFile({
     setFiles((prev) => prev.filter((file) => file.name !== fileName));
 
   const handleOk = async () => {
-    if (files.length === 0 || !tipoNovedadId || !observation.trim()) return;
+    if (files.length === 0 || !tipoNovedadId || !observation.trim() || !clientDocuments.trim())
+      return;
 
     setIsLoading(true);
     try {
@@ -118,7 +119,9 @@ export function ModalUploadBalanceFile({
           titleConfirm="Cargar soporte"
           onClose={onClose}
           handleOk={handleOk}
-          isConfirmDisabled={files.length === 0 || !tipoNovedadId || !observation.trim()}
+          isConfirmDisabled={
+            files.length === 0 || !tipoNovedadId || !observation.trim() || !clientDocuments.trim()
+          }
           isConfirmLoading={isLoading}
         />
       }
@@ -194,7 +197,7 @@ export function ModalUploadBalanceFile({
           />
         </Flex>
         <Flex vertical gap="0.25rem">
-          <h4 className="inputTitle">Documento del cliente</h4>
+          <h4 className="inputTitle">Documento del cliente *</h4>
           <textarea
             className={styles.textarea}
             value={clientDocuments}
