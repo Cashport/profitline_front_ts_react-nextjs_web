@@ -26,6 +26,7 @@ import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTa
 import { ClientDetailTable } from "../../components/ClientDetailTable";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+import { ModalDataRegisteredEmails } from "../../components/ModalDataRegisteredEmails/ModalDataRegisteredEmails";
 
 import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 
@@ -320,6 +321,13 @@ export default function DataQualityClientDetails() {
         isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadFile={handleOpenMassiveUpload}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+        onAddEmails={() => setWhichModalIsOpen(4)}
+      />
+
+      <ModalDataRegisteredEmails
+        isOpen={whichModalIsOpen === 4}
+        onClose={() => setWhichModalIsOpen(0)}
+        clientId={Number(clientId)}
       />
 
       <ModalUploadFile
