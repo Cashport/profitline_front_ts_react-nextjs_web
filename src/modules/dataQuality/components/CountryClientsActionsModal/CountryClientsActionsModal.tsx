@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { DownloadSimple, UploadSimple } from "@phosphor-icons/react";
+import { DownloadSimple, UploadSimple, EnvelopeSimple } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 
@@ -15,6 +15,7 @@ type CountryClientsActionsModalProps = {
   onUploadFile?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
+  onAddEmails?: () => void;
   isDownloadCatalogLoading: boolean;
   isInDetailView?: boolean;
 };
@@ -28,6 +29,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onUploadFile,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
+  onAddEmails,
   isDownloadCatalogLoading,
   isInDetailView = false
 }) => {
@@ -72,6 +74,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           onClick={onUploadPointsOfSale}
           disabled={isDownloadPointsOfSaleLoading}
         />
+        {onAddEmails && (
+          <ButtonGenerateAction
+            icon={<EnvelopeSimple size={20} />}
+            title="Agregar correos"
+            onClick={onAddEmails}
+          />
+        )}
       </div>
     </Modal>
   );

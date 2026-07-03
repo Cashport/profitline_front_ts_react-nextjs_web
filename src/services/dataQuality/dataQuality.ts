@@ -22,7 +22,8 @@ import {
   IPOSPayload,
   IClientDetailArchiveClient,
   IPostCatalogMaterialEquivalence,
-  IFileType
+  IFileType,
+  IDataEmail
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -689,6 +690,49 @@ export const deleteFileDateIntake = async (fileId: number): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error deleting file date intake:", error);
+    throw error;
+  }
+};
+
+// Email routing rules ENDPOINTS
+
+export const getClientDataEmails = async (clientId?: number | string): Promise<IDataEmail[]> => {
+  try {
+    const query = clientId ? `?client_id=${clientId}` : "";
+    const response: GenericResponse<{ rules: IDataEmail[] }> = await API.get(
+      `${config.API_HOST}/data/email-routing/rules${query}`
+    );
+    return response.data.rules;
+  } catch (error) {
+    console.error("Error fetching client data emails:", error);
+    throw error;
+  }
+};
+
+export const addClientDataEmail = async (
+  rules: { client_id?: number; sender: string }[]
+): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/data/email-routing/rules`,
+      { rules }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding client data email:", error);
+    throw error;
+  }
+};
+
+export const deleteClientDataEmail = async (ids: number[]): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/data/email-routing/rules`,
+      { data: { ids } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting client data email:", error);
     throw error;
   }
 };

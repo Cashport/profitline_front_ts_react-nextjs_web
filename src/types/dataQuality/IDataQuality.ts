@@ -4,6 +4,18 @@ export interface GenericResponseWithFilters<T = any, F = any> extends GenericRes
   filters: F;
 }
 
+export interface IDataEmail {
+  id: number;
+  project_id: number;
+  client_id: number | null;
+  client_name: string | null;
+  sender: string;
+  subject: string | null;
+  destination_folder: string | null;
+  outlook_folder_id: string | null;
+  outlook_subfolder: string | null;
+}
+
 export interface ICountryClientsFilters {
   status: string[];
   periodicity: string[];
