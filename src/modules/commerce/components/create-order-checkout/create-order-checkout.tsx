@@ -88,12 +88,19 @@ export default function CheckoutPage() {
           product_sku: product.SKU,
           quantity: product.quantity
         }));
+      // promotion_applyed se calcula SOLO con los bonificados comunes
+      // (bonusOptions). Los "other bonified" (otherBonificated) NO cuentan,
+      // porque no pertenecen al rango activo de la promoción.
+      const promotionApplyed = (bonus?.bonusOptions ?? []).some((opt) =>
+        opt.cards.some((card) => card.items.length > 0)
+      );
       const payload: IConfirmOrderData = {
         discount_package: selectedDiscount,
         order_summary: products,
         executive_discounts: executiveDiscounts,
         deactivate_cross_selling: !deactivateCrossSelling,
-        ...(bonus?.id !== undefined && { promotion_id: bonus.id })
+        ...(bonus?.id !== undefined && { promotion_id: bonus.id }),
+        promotion_applyed: promotionApplyed
       };
       try {
         const response = await confirmOrder(projectId, client?.id || "", payload);
