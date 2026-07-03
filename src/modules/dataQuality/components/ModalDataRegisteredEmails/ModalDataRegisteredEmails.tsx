@@ -105,7 +105,7 @@ export const ModalDataRegisteredEmails: React.FC<Props> = ({ isOpen, onClose, cl
       open={isOpen}
       onCancel={onClose}
       onClose={onClose}
-      title="Correos"
+      title="Remitentes"
       footer={null}
       centered
       destroyOnClose

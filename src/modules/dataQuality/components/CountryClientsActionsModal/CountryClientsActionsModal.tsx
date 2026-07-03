@@ -77,7 +77,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         {onAddEmails && (
           <ButtonGenerateAction
             icon={<EnvelopeSimple size={20} />}
-            title="Agregar correos"
+            title="Agregar remitentes"
             onClick={onAddEmails}
           />
         )}
