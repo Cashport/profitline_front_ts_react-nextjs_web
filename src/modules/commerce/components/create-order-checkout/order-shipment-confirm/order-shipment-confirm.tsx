@@ -82,7 +82,13 @@ export default function OrderShipmentConfirm({
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
 
-  const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
+  // Sin descuentos el backend no devuelve `discounts`; los productos llegan en
+  // `products` (mismo shape sin `discount`, que solo se lee de forma opcional).
+  const confirmedDiscountItems = confirmOrderData?.discounts?.discountItems ?? [];
+  const discountItems: DiscountItem[] =
+    confirmedDiscountItems.length > 0
+      ? confirmedDiscountItems
+      : ((confirmOrderData?.products ?? []) as DiscountItem[]);
 
   const bonusItems = useMemo<BonusRow[]>(
     () =>

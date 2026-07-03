@@ -11,7 +11,9 @@ import ProductsTable, {
   ProductsTableCategory
 } from "@/modules/commerce/components/products-table";
 
-const getSecondaryMaxPct = (item: DiscountItem) =>
+type CheckoutItem = Omit<DiscountItem, "discount"> & { discount?: DiscountItem["discount"] };
+
+const getSecondaryMaxPct = (item: CheckoutItem) =>
   item.discount?.secondary?.discount_applied?.max_discount ??
   item.discount?.secondary?.discount_applied?.discount ??
   0;
@@ -115,6 +117,11 @@ export default function ProductsDetailsAndDiscounts({
 
   const discountBySku = new Map(discountItems.map((d) => [d.product_sku, d]));
 
+  // Sin descuentos el backend no devuelve `discounts`; los productos llegan en `products`.
+  const productsBySku = new Map(
+    (confirmOrderData?.products ?? []).map((p) => [p.product_sku, p])
+  );
+
   const secondaryDiscount = confirmOrderData?.discounts?.secondaryDiscount;
 
   const [orderTotalDiscount, setOrderTotalDiscount] = useState(0);
@@ -126,7 +133,7 @@ export default function ProductsDetailsAndDiscounts({
     }
   }, [confirmOrderData?.discounts?.totalOrderDiscount]);
 
-  const updatePrimaryDiscount = (item: DiscountItem, newValue: number) => {
+  const updatePrimaryDiscount = (item: CheckoutItem, newValue: number) => {
     setExecutiveDiscounts((prev) => {
       const idx = prev.findIndex((e) => e.product_sku === item.product_sku);
       const nextEntry: IExecutiveDiscount = {
@@ -139,38 +146,46 @@ export default function ProductsDetailsAndDiscounts({
     });
   };
 
-  const totalCantidad = discountItems.reduce((s, i) => s + i.quantity, 0);
-  const totalMonto = discountItems.reduce((s, i) => {
-    const pf = i.discount?.primary?.new_price ?? i.price;
-    return s + pf * i.quantity;
-  }, 0);
-
   const tableCategories: ProductsTableCategory[] = selectedCategories.map((category) => ({
     key: category.category_id,
     name: category.products[0]?.category_name ?? "",
-    rows: category.products.flatMap((product) => {
-      const item = discountBySku.get(product.SKU);
-      if (!item) return [];
+    rows: category.products.map((product) => {
+      const item: CheckoutItem = discountBySku.get(product.SKU) ??
+        productsBySku.get(product.SKU) ?? {
+          product_sku: product.SKU,
+          quantity: product.quantity,
+          shipment_unit: product.shipment_unit,
+          price: product.price,
+          price_taxes: product.price_taxes,
+          taxes: 0,
+          image: product.image,
+          category_id: product.category_id,
+          line_id: 0,
+          product_id: product.id,
+          description: product.name
+        };
       const finalPrice = item.discount?.primary?.new_price ?? item.price;
       const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
       const executiveEntry = executiveDiscounts.find((e) => e.product_sku === item.product_sku);
-      return [
-        {
-          key: `${product.id}-${product.SKU}`,
-          description: item.description,
-          sku: item.product_sku,
-          originalPrice: item.price,
-          finalPrice,
-          quantity: item.quantity,
-          discountPct: executiveEntry?.primary_discount_pct ?? maxPercentage,
-          maxDiscountPct: maxPercentage,
-          restante: item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku),
-          onDiscountChange: (v: number) => updatePrimaryDiscount(item, v),
-          onRemove: () => handleRemoveProduct(item.product_sku)
-        }
-      ];
+      return {
+        key: `${product.id}-${product.SKU}`,
+        description: item.description,
+        sku: item.product_sku,
+        originalPrice: item.price,
+        finalPrice,
+        quantity: item.quantity,
+        discountPct: executiveEntry?.primary_discount_pct ?? maxPercentage,
+        maxDiscountPct: maxPercentage,
+        restante: item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku),
+        onDiscountChange: (v: number) => updatePrimaryDiscount(item, v),
+        onRemove: () => handleRemoveProduct(item.product_sku)
+      };
     })
   }));
+
+  const allRows = tableCategories.flatMap((c) => c.rows);
+  const totalCantidad = allRows.reduce((s, r) => s + r.quantity, 0);
+  const totalMonto = allRows.reduce((s, r) => s + r.finalPrice * r.quantity, 0);
 
   const tableBonus: ProductsTableBonusItem[] = bonificados.map((b, idx) => ({
     key: `${b.key}-${idx}`,

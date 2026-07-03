@@ -24,10 +24,11 @@
 
         .header {
             h3 {
-                font-size: 1.125rem;
+                font-size: 1rem;
+                font-weight: 600;
             }
             p {
-                font-size: 1.125rem;
+                font-size: 0.875rem;
                 font-weight: 500;
             }
         }
@@ -99,8 +100,12 @@
                 align-items: center;
 
                 color: $gray;
-                font-size: 1rem;
+                font-size: 0.875rem;
                 font-weight: 500;
+
+                h3 {
+                    font-size: 1rem;
+                }
             }
         }
     }
