@@ -10,7 +10,8 @@ import {
   NEW_ADDRESS_OPTION,
   isValidEmail,
   isValidPhone,
-  phoneErrorMessage
+  phoneErrorMessage,
+  sanitizeComment
 } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
@@ -484,7 +485,9 @@ export default function ModalShippingInfo({
                 placeholder="Instrucciones especiales para esta entrega"
                 maxLength={35}
                 value={draft.observaciones}
-                onChange={(e) => setDraft((d) => ({ ...d, observaciones: e.target.value }))}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, observaciones: sanitizeComment(e.target.value) }))
+                }
                 rows={3}
                 className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
               />
