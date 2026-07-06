@@ -21,7 +21,8 @@ import {
   NEW_ADDRESS_OPTION,
   isValidEmail,
   isValidPhone,
-  phoneErrorMessage
+  phoneErrorMessage,
+  sanitizeComment
 } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 
@@ -601,7 +602,9 @@ export default function OrderShipmentConfirm({
                   placeholder="Ingresar un comentario"
                   maxLength={35}
                   value={singleForm.observaciones}
-                  onChange={(e) => setSingleForm((f) => ({ ...f, observaciones: e.target.value }))}
+                  onChange={(e) =>
+                    setSingleForm((f) => ({ ...f, observaciones: sanitizeComment(e.target.value) }))
+                  }
                   rows={3}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
