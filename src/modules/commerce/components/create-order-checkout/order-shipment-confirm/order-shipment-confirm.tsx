@@ -157,7 +157,7 @@ export default function OrderShipmentConfirm({
         const resp = await getAdressesAndNumber(addressCode);
         setAddresses(resp.otherAddresses ?? []);
         if (resp.phone) {
-          setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone }));
+          setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone.replace(/\D/g, "") }));
         }
       } catch (err) {
         console.error(err);
@@ -190,7 +190,7 @@ export default function OrderShipmentConfirm({
     const phoneRaw = shippingInfo.phone_number || singleForm.telefono || "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
     const indicativo = phoneMatch ? phoneMatch[1] : "+57";
-    const telefono = phoneMatch ? phoneMatch[2] : phoneRaw;
+    const telefono = (phoneMatch ? phoneMatch[2] : phoneRaw).replace(/\D/g, "");
 
     setSingleForm({
       addressSelectValue: matchedAddress ? String(matchedAddress.id) : NEW_ADDRESS_OPTION.value,
