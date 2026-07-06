@@ -82,7 +82,13 @@ export default function OrderShipmentConfirm({
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
 
-  const discountItems: DiscountItem[] = confirmOrderData?.discounts?.discountItems ?? [];
+  // Sin descuentos el backend no devuelve `discounts`; los productos llegan en
+  // `products` (mismo shape sin `discount`, que solo se lee de forma opcional).
+  const confirmedDiscountItems = confirmOrderData?.discounts?.discountItems ?? [];
+  const discountItems: DiscountItem[] =
+    confirmedDiscountItems.length > 0
+      ? confirmedDiscountItems
+      : ((confirmOrderData?.products ?? []) as DiscountItem[]);
 
   const bonusItems = useMemo<BonusRow[]>(
     () =>
@@ -151,7 +157,7 @@ export default function OrderShipmentConfirm({
         const resp = await getAdressesAndNumber(addressCode);
         setAddresses(resp.otherAddresses ?? []);
         if (resp.phone) {
-          setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone }));
+          setSingleForm((f) => ({ ...f, telefono: f.telefono || resp.phone.replace(/\D/g, "") }));
         }
       } catch (err) {
         console.error(err);
@@ -184,7 +190,7 @@ export default function OrderShipmentConfirm({
     const phoneRaw = shippingInfo.phone_number || singleForm.telefono || "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
     const indicativo = phoneMatch ? phoneMatch[1] : "+57";
-    const telefono = phoneMatch ? phoneMatch[2] : phoneRaw;
+    const telefono = (phoneMatch ? phoneMatch[2] : phoneRaw).replace(/\D/g, "");
 
     setSingleForm({
       addressSelectValue: matchedAddress ? String(matchedAddress.id) : NEW_ADDRESS_OPTION.value,
@@ -793,13 +799,13 @@ export default function OrderShipmentConfirm({
 
           {/* Actions */}
           <div className="flex gap-3 pt-2 pb-1 flex-shrink-0">
-            <button
+            {/* <button
               onClick={onDraft}
               disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
               className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingDraft ? "Guardando…" : "Guardar borrador"}
-            </button>
+            </button> */}
             <button
               onClick={onConfirm}
               disabled={

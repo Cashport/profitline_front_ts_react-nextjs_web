@@ -106,11 +106,11 @@ export default function CheckoutPage() {
         const response = await confirmOrder(projectId, client?.id || "", payload);
         if (response.status === 200) {
           response?.data?.discounts?.discountItems?.forEach((item) => {
-              const key = `${item.product_sku}::${item.quantity}`;
-              const existing = previousItemUuidsRef.current.get(key);
-              const item_uuid = existing ?? generateShortUuid();
-              previousItemUuidsRef.current.set(key, item_uuid);
-              item.item_uuid = item_uuid;
+            const key = `${item.product_sku}::${item.quantity}`;
+            const existing = previousItemUuidsRef.current.get(key);
+            const item_uuid = existing ?? generateShortUuid();
+            previousItemUuidsRef.current.set(key, item_uuid);
+            item.item_uuid = item_uuid;
           });
           setConfirmOrderData(response.data);
         }
@@ -217,9 +217,7 @@ export default function CheckoutPage() {
       // business_unit solo se envía cuando el usuario eligió un canal
       // (client_bu[n].bu_name). Es opcional y solo aplica a marketplace.
       ...(businessUnit ? { business_unit: businessUnit } : {}),
-      ...(hasCommonBonusProducts && activeRangeId
-        ? { range_promotion_id: activeRangeId }
-        : {})
+      ...(hasCommonBonusProducts && activeRangeId ? { range_promotion_id: activeRangeId } : {})
     };
   };
 
@@ -465,6 +463,7 @@ export default function CheckoutPage() {
         noComment={true}
         noDescription={true}
         isMandatory={{ evidence: true }}
+        confirmDisabled={selectedPaymentSupport.length === 0}
         loading={loadingFinish}
       />
     </div>

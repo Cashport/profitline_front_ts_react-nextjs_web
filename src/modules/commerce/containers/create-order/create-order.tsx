@@ -7,7 +7,6 @@ import { OrderViewContext } from "../../contexts/orderViewContext";
 
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
-import CreateOrderCart from "../../components/create-order-cart";
 import CreateOrderCheckout from "../../components/create-order-checkout";
 import CreateOrderDiscountsModal from "../../components/create-order-discounts-modal/create-order-discounts-modal";
 
@@ -110,6 +109,7 @@ export const CreateOrderView: FC = () => {
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
     const fetchDiscounts = async () => {
+      setSelectedDiscount(undefined);
       if (!client?.id || !selectedProject?.ID) return;
 
       setDiscountsLoading(true);
@@ -280,9 +280,8 @@ export const CreateOrderView: FC = () => {
         {!client?.name ? (
           <SearchClient />
         ) : (
-          <div className={`${styles.marketView} ${isCartVisible ? styles.marketViewWithCart : ""}`}>
+          <div className={styles.marketView}>
             {checkingOut ? <CreateOrderCheckout /> : <CreateOrderMarket />}
-            {isCartVisible && <CreateOrderCart onClose={toggleCart} />}
           </div>
         )}
       </div>

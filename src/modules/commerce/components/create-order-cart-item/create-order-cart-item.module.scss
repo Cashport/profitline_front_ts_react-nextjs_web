@@ -35,13 +35,13 @@
     }
 
     .price {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 800;
         grid-column: 2/4;
         grid-row: 2;
 
         &__amount {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 800;
         }
 
@@ -59,7 +59,7 @@
         }
 
         .discountPercentage {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 500;
             color: #e53261;
         }
@@ -103,7 +103,7 @@
         .quantityInput {
             border: none;
             text-align: center;
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 800;
             background-color: $background;
             border-radius: 0.5rem;
@@ -126,7 +126,7 @@
     }
 
     .finalQuantity {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 600;
         grid-column: 5/6;
         grid-row: 2;
