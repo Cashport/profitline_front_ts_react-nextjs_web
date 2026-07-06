@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { Modal, Select as AntSelect, Typography } from "antd";
+import { Modal, Select as AntSelect, Spin, Typography } from "antd";
 import { Calendar } from "lucide-react";
 import { FileArrowUp } from "@phosphor-icons/react";
 
@@ -36,61 +36,83 @@ const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeFileId, setActiveFileId] = useState<number | null>(null);
 
-  const { archives: files, mutate } = useArchivesClientData(clientId);
+  const { archives: files, isLoading, mutate } = useArchivesClientData(clientId);
 
   const handleUploadIntake = (id: number) => {
     setActiveFileId(id);
     setIsUploadModalOpen(true);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Spin />
+      </div>
+    );
+  }
+
+  if (!files || files.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-12 text-gray-500">
+        No hay archivos disponibles para este cliente
+      </div>
+    );
+  }
+
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
-            <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
-              Acciones
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {files?.map((file) => (
-            <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
-              <TableCell>
-                <Badge
-                  variant="secondary"
-                  className="text-xs text-white"
-                  style={{ backgroundColor: file.data_type.color }}
-                >
-                  {file.data_type.description}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                  <span style={{ color: "#141414" }}>
-                    {file.date_archive ? formatDate(file.date_archive) : "-"}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="w-0">
-                <div className="flex items-center justify-end gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleUploadIntake(file.id)}
-                    className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
-                  >
-                    <FileArrowUp className="w-4 h-4" />
-                  </Button>
-                </div>
-              </TableCell>
+      <div className="max-h-[60vh] overflow-y-auto">
+        <Table>
+          <TableHeader className="sticky top-0 z-10 bg-white">
+            <TableRow style={{ borderColor: "#DDDDDD" }}>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+              <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
+                Acciones
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {files.map((file) => (
+              <TableRow
+                key={file.id}
+                className="hover:bg-gray-50"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs text-white"
+                    style={{ backgroundColor: file.data_type.color }}
+                  >
+                    {file.data_type.description}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                    <span style={{ color: "#141414" }}>
+                      {file.date_archive ? formatDate(file.date_archive) : "-"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="w-0">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleUploadIntake(file.id)}
+                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                    >
+                      <FileArrowUp className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       <ModalUploadIntakeFiles
         isOpen={isUploadModalOpen}
         archiveId={activeFileId}
@@ -157,7 +179,8 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
       open={isOpen}
       onCancel={handleClose}
       title={<Title level={4}>Procesar ingesta</Title>}
-      width={700}
+      width={480}
+      centered
       footer={
         view === "client" ? (
           <FooterButtons
@@ -184,7 +207,7 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
               placeholder={countriesLoading ? "Cargando países..." : "Seleccionar país"}
               notFoundContent="No hay países disponibles"
               filterOption={filterByLabel}
-              className="mt-1 w-full"
+              className="mt-1 w-full [&_.ant-select-selector]:!h-[38px]"
             />
           </div>
           <div>
@@ -199,7 +222,7 @@ export const ModalProcessIntake = ({ isOpen, onClose }: IModalProcessIntakeProps
               placeholder={clientsLoading ? "Cargando clientes..." : "Seleccionar cliente"}
               notFoundContent="No hay clientes disponibles"
               filterOption={filterByLabel}
-              className="mt-1 w-full"
+              className="mt-1 w-full [&_.ant-select-selector]:!h-[38px]"
             />
           </div>
         </div>
