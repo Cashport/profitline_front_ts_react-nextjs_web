@@ -16,6 +16,12 @@ export interface IDataEmail {
   outlook_subfolder: string | null;
 }
 
+export interface IDataClient {
+  id: string;
+  client_name: string;
+  id_client: number;
+}
+
 export interface ICountryClientsFilters {
   status: string[];
   periodicity: string[];
