@@ -111,6 +111,7 @@ const CreateOrderView: FC = () => {
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
+    setSelectedDiscount(undefined);
     const fetchDiscounts = async () => {
       if (!client?.id || !selectedProject?.ID) return;
 
