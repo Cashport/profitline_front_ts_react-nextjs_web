@@ -16,6 +16,13 @@ export const isValidPhone = (telefono: string, _indicativo: string) => {
   return true;
 };
 
+// Comentarios de envío: sin saltos de línea y sin caracteres de 4 bytes (emojis)
+// que la columna utf8mb3 del backend no admite. Se conservan tildes y ñ.
+export const sanitizeComment = (value: string) =>
+  value
+    .replace(/[\r\n]+/g, " ") // enters -> espacio
+    .replace(/[\u{10000}-\u{10FFFF}]/gu, ""); // emojis / 4-byte chars -> fuera
+
 export const phoneErrorMessage = (indicativo: string) =>
   indicativo === "+57"
     ? "Teléfono debe tener 10 dígitos"
