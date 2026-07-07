@@ -1,7 +1,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import { Calendar, ChevronDown, Filter, MoreHorizontal } from "lucide-react";
-import { Dropdown, message } from "antd";
+import { Calendar, MoreHorizontal } from "lucide-react";
+import { Dropdown, Spin, message } from "antd";
 
 import {
   deleteFileDateIntake,
@@ -11,11 +11,8 @@ import {
   uploadEvidence,
   uploadGenericIntakeFile
 } from "@/services/dataQuality/dataQuality";
-import { useArchivesClientData } from "../../hooks/useArchivesClientData";
-import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
-import ModalCreateNewFile from "../ModalCreateNewFile/ModalCreateNewFile";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 
 import { Badge } from "@/modules/chat/ui/badge";
@@ -30,13 +27,14 @@ import {
 } from "@/modules/chat/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
-import { Plus, Receipt } from "phosphor-react";
+import { Receipt } from "phosphor-react";
 
 interface IClientDetailTableProps {
-  clientId: string;
-  clientNIT?: string | null;
+  archives: IClientDetailArchiveClient[];
   clientName?: string | null;
   mutateDetail?: () => void;
+  onMutate?: () => void;
+  loading?: boolean;
 }
 
 const bytesToMB = (bytes: number): string => {
@@ -49,10 +47,11 @@ const formatDate = (isoDateString: string): string => {
 };
 
 export function ClientDetailTable({
-  clientId,
-  clientNIT,
+  archives: files,
   clientName,
-  mutateDetail
+  mutateDetail,
+  onMutate,
+  loading
 }: IClientDetailTableProps) {
   const [isUploadingEvidenceLoading, setIsUploadingEvidenceLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
@@ -61,20 +60,9 @@ export function ClientDetailTable({
   const [isDeleteDateLoading, setIsDeleteDateLoading] = useState(false);
   const [isUploadIntakeModalOpen, setIsUploadIntakeModalOpen] = useState(false);
   const [isGenericIntakeModalOpen, setIsGenericIntakeModalOpen] = useState(false);
-  const [isCreateFileModalOpen, setIsCreateFileModalOpen] = useState(false);
   const [activeFileId, setActiveFileId] = useState<number | null>(null);
-  const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
-    start: null,
-    end: null
-  });
   const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState(false);
   const [fileURL, setFileURL] = useState("");
-
-  const { archives: files, mutate } = useArchivesClientData(
-    clientId,
-    dateRange.start,
-    dateRange.end
-  );
 
   const handleUploadIntake = (id: number) => {
     setActiveFileId(id);
@@ -168,7 +156,7 @@ export function ClientDetailTable({
     try {
       await deleteIntakeFile(fileId);
       message.success("Archivo eliminado exitosamente.");
-      mutate();
+      onMutate?.();
     } catch (error) {
       message.error(
         error instanceof Error
@@ -198,7 +186,7 @@ export function ClientDetailTable({
     try {
       await deleteFileDateIntake(fileId);
       message.success("Fecha de ingesta eliminada exitosamente.");
-      mutate();
+      onMutate?.();
     } catch (error) {
       message.error(
         error instanceof Error
@@ -233,7 +221,7 @@ export function ClientDetailTable({
         try {
           await uploadEvidence(id, file);
           message.success("Evidencia cargada exitosamente.");
-          mutate();
+          onMutate?.();
         } catch (error) {
           message.error(
             error instanceof Error
@@ -274,7 +262,7 @@ export function ClientDetailTable({
           await uploadGenericIntakeFile(id, file);
           message.success("Carga exitosa.");
           mutateDetail?.();
-          mutate();
+          onMutate?.();
         } catch (error) {
           message.error(error instanceof Error ? error.message : "Error al cargar.");
         } finally {
@@ -286,234 +274,203 @@ export function ClientDetailTable({
     input.click();
   };
 
-  const filterMenu = (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 p-4">
-      <DateRangeFilter
-        dateRange={dateRange}
-        onDateRangeChange={(start, end) => setDateRange({ start, end })}
-        onClear={() => setDateRange({ start: null, end: null })}
-      />
-    </div>
-  );
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center justify-start mb-4 gap-3">
-          <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
-            Archivos
-          </h2>
-          <Button
-            onClick={() => setIsCreateFileModalOpen(true)}
-            variant="ghost"
-            className="bg-transparent"
-            style={{ color: "#141414" }}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Crear nuevo archivo
-          </Button>
-        </div>
-        <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-            <ChevronDown className="h-4 w-4 ml-2" />
-          </Button>
-        </Dropdown>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow style={{ borderColor: "#DDDDDD" }}>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
-            <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
-              Acciones
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {files?.map((file) => (
-            <TableRow key={file.id} className="hover:bg-gray-50" style={{ borderColor: "#DDDDDD" }}>
-              <TableCell>
-                <Badge
-                  variant="secondary"
-                  className="text-xs text-white"
-                  style={{ backgroundColor: file.data_type.color }}
-                >
-                  {file.data_type.description}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                  <span style={{ color: "#141414" }}>
-                    {file.date_archive ? formatDate(file.date_archive) : "-"}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <span className="font-normal" style={{ color: "#141414" }}>
-                    {file.description}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                  <span style={{ color: "#141414" }}>
-                    {file.date_upload ? formatDate(file.date_upload) : "-"}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <span style={{ color: "#141414" }}>{bytesToMB(file.size)}</span>
-              </TableCell>
-              <TableCell>
-                {file.last_novelty ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant="outline"
-                        className="text-xs cursor-help"
-                        style={{
-                          color: file.status_color,
-                          backgroundColor: file.status_bg_color,
-                          borderColor: "transparent"
-                        }}
-                      >
-                        {file.status_description}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-cashport-black text-white">
-                      <p className="text-xs">{file.last_novelty}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="text-xs"
-                    style={{
-                      color: file.status_color,
-                      backgroundColor: file.status_bg_color,
-                      borderColor: "transparent"
-                    }}
-                  >
-                    {file.status_description}
-                  </Badge>
-                )}
-              </TableCell>
-              <TableCell className="w-0">
-                <div className="flex items-center justify-end gap-1">
-                  {file.evidence_url && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => file.evidence_url && handleDocumentClick(file.evidence_url)}
-                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
-                    >
-                      <Receipt className="w-4 h-4" />
-                    </Button>
-                  )}
-                  <Dropdown
-                    menu={{
-                      items: [
-                        {
-                          key: "group-cargar",
-                          type: "group",
-                          label: <span className="font-semibold text-black">Cargar</span>,
-                          children: [
-                            {
-                              key: "upload",
-                              label: "Archivo cliente",
-                              onClick: () => handleUploadIntake(file.id)
-                            },
-                            {
-                              key: "upload-generic",
-                              label: "Universal",
-                              onClick: () => handleUploadGenericIntake(file.id)
-                            },
-                            {
-                              key: "load-evidence",
-                              label: "Soporte auditoria",
-                              onClick: () => handleUploadEvidence(file.id),
-                              disabled: isUploadingEvidenceLoading
-                            }
-                          ]
-                        },
-                        {
-                          key: "group-descargas",
-                          type: "group",
-                          label: <span className="font-semibold text-black">Descargas</span>,
-                          children: [
-                            {
-                              key: "download-original",
-                              label: "Archivo cliente",
-                              onClick: () => handleDownloadOriginal(file)
-                            },
-                            {
-                              key: "download-universal",
-                              label: "Universal .csv",
-                              onClick: () => handleProcessedFile(file, "csv")
-                            },
-                            {
-                              key: "download-universal-excel",
-                              label: "Universal .xls",
-                              onClick: () => handleProcessedFile(file, "excel")
-                            }
-                          ]
-                        },
-                        {
-                          key: "group-eliminar",
-                          type: "group",
-                          label: <span className="font-semibold text-black">Eliminar</span>,
-                          children: [
-                            {
-                              key: "delete",
-                              label: "Archivo cliente",
-                              onClick: () => {
-                                setActiveFileId(file.id);
-                                setIsDeleteModalOpen(true);
-                              },
-                              disabled: isDeleteLoading
-                            },
-                            {
-                              key: "delete-date",
-                              label: "Fecha ingesta",
-                              onClick: () => {
-                                setActiveFileId(file.id);
-                                setIsDeleteDateModalOpen(true);
-                              },
-                              disabled: isDeleteDateLoading
-                            }
-                          ]
-                        }
-                      ]
-                    }}
-                    trigger={["click"]}
-                  >
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </Dropdown>
-                </div>
-              </TableCell>
+      <Spin spinning={!!loading}>
+        <Table>
+          <TableHeader>
+            <TableRow style={{ borderColor: "#DDDDDD" }}>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
+              <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
+                Acciones
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {files?.map((file) => (
+              <TableRow
+                key={file.id}
+                className="hover:bg-gray-50"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs text-white"
+                    style={{ backgroundColor: file.data_type.color }}
+                  >
+                    {file.data_type.description}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                    <span style={{ color: "#141414" }}>
+                      {file.date_archive ? formatDate(file.date_archive) : "-"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <span className="font-normal" style={{ color: "#141414" }}>
+                      {file.description}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
+                    <span style={{ color: "#141414" }}>
+                      {file.date_upload ? formatDate(file.date_upload) : "-"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{bytesToMB(file.size)}</span>
+                </TableCell>
+                <TableCell>
+                  {file.last_novelty ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="text-xs cursor-help"
+                          style={{
+                            color: file.status_color,
+                            backgroundColor: file.status_bg_color,
+                            borderColor: "transparent"
+                          }}
+                        >
+                          {file.status_description}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-cashport-black text-white">
+                        <p className="text-xs">{file.last_novelty}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="text-xs"
+                      style={{
+                        color: file.status_color,
+                        backgroundColor: file.status_bg_color,
+                        borderColor: "transparent"
+                      }}
+                    >
+                      {file.status_description}
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="w-0">
+                  <div className="flex items-center justify-end gap-1">
+                    {file.evidence_url && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => file.evidence_url && handleDocumentClick(file.evidence_url)}
+                        className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                      >
+                        <Receipt className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "group-cargar",
+                            type: "group",
+                            label: <span className="font-semibold text-black">Cargar</span>,
+                            children: [
+                              {
+                                key: "upload",
+                                label: "Archivo cliente",
+                                onClick: () => handleUploadIntake(file.id)
+                              },
+                              {
+                                key: "upload-generic",
+                                label: "Universal",
+                                onClick: () => handleUploadGenericIntake(file.id)
+                              },
+                              {
+                                key: "load-evidence",
+                                label: "Soporte auditoria",
+                                onClick: () => handleUploadEvidence(file.id),
+                                disabled: isUploadingEvidenceLoading
+                              }
+                            ]
+                          },
+                          {
+                            key: "group-descargas",
+                            type: "group",
+                            label: <span className="font-semibold text-black">Descargas</span>,
+                            children: [
+                              {
+                                key: "download-original",
+                                label: "Archivo cliente",
+                                onClick: () => handleDownloadOriginal(file)
+                              },
+                              {
+                                key: "download-universal",
+                                label: "Universal .csv",
+                                onClick: () => handleProcessedFile(file, "csv")
+                              },
+                              {
+                                key: "download-universal-excel",
+                                label: "Universal .xls",
+                                onClick: () => handleProcessedFile(file, "excel")
+                              }
+                            ]
+                          },
+                          {
+                            key: "group-eliminar",
+                            type: "group",
+                            label: <span className="font-semibold text-black">Eliminar</span>,
+                            children: [
+                              {
+                                key: "delete",
+                                label: "Archivo cliente",
+                                onClick: () => {
+                                  setActiveFileId(file.id);
+                                  setIsDeleteModalOpen(true);
+                                },
+                                disabled: isDeleteLoading
+                              },
+                              {
+                                key: "delete-date",
+                                label: "Fecha ingesta",
+                                onClick: () => {
+                                  setActiveFileId(file.id);
+                                  setIsDeleteDateModalOpen(true);
+                                },
+                                disabled: isDeleteDateLoading
+                              }
+                            ]
+                          }
+                        ]
+                      }}
+                      trigger={["click"]}
+                    >
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </Dropdown>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Spin>
       <ModalConfirmAction
         isOpen={isDeleteModalOpen}
         onClose={() => {
@@ -552,17 +509,7 @@ export function ClientDetailTable({
         }}
         onSuccess={() => {
           mutateDetail?.();
-          mutate();
-        }}
-      />
-      <ModalCreateNewFile
-        isOpen={isCreateFileModalOpen}
-        onClose={() => setIsCreateFileModalOpen(false)}
-        clientId={clientId}
-        clientNIT={clientNIT}
-        onSuccess={() => {
-          mutateDetail?.();
-          mutate();
+          onMutate?.();
         }}
       />
       <ModalConfirmAction
