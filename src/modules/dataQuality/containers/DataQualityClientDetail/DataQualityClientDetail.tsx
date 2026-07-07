@@ -23,7 +23,7 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
-import { ClientDetailTable } from "../../components/ClientDetailTable";
+import { ClientDetailArchives } from "../../components/ClientDetailArchives";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
 import { ModalDataRegisteredEmails } from "../../components/ModalDataRegisteredEmails/ModalDataRegisteredEmails";
@@ -105,7 +105,9 @@ export default function DataQualityClientDetails() {
       setWhichModalIsOpen(0);
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message || error?.message || "Error al descargar los puntos de venta.";
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al descargar los puntos de venta.";
 
       message.error(errorMessage);
     } finally {
@@ -282,11 +284,11 @@ export default function DataQualityClientDetails() {
               onSuccess={() => mutate()}
             />
 
-            <ClientDetailTable
+            <ClientDetailArchives
               clientId={clientId}
-              clientNIT={clientDetail.id_client}
-              mutateDetail={() => mutate()}
               clientName={clientName}
+              clientNIT={clientDetail.id_client}
+              onMutateDetail={() => mutate()}
             />
           </CardContent>
         </Card>

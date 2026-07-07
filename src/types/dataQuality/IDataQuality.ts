@@ -195,6 +195,15 @@ export interface IClientDetailArchiveClient {
   data_type: IDataType;
 }
 
+export interface IClientDetailArchivesByType {
+  id_type_archive: number;
+  tipo_archivo: string;
+  data_type?: IDataType; // optional: absent in groups with no archives
+  total_archives: number;
+  pending_archives: number;
+  archives: IClientDetailArchiveClient[];
+}
+
 // Client Detail
 export interface IClientDetail {
   id: number | null;
