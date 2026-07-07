@@ -381,7 +381,15 @@ export function ClientDetailTable({
                 {file.last_novelty ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Badge variant="outline" className="text-xs cursor-help">
+                      <Badge
+                        variant="outline"
+                        className="text-xs cursor-help"
+                        style={{
+                          color: file.status_color,
+                          backgroundColor: file.status_bg_color,
+                          borderColor: "transparent"
+                        }}
+                      >
                         {file.status_description}
                       </Badge>
                     </TooltipTrigger>
@@ -390,7 +398,15 @@ export function ClientDetailTable({
                     </TooltipContent>
                   </Tooltip>
                 ) : (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge
+                    variant="outline"
+                    className="text-xs"
+                    style={{
+                      color: file.status_color,
+                      backgroundColor: file.status_bg_color,
+                      borderColor: "transparent"
+                    }}
+                  >
                     {file.status_description}
                   </Badge>
                 )}

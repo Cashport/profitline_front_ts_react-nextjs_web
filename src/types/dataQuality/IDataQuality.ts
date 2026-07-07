@@ -176,6 +176,8 @@ export interface IClientDetailArchiveClient {
   id_status: number;
   last_novelty: string | null;
   status_description: string;
+  status_color: string;
+  status_bg_color: string;
   date_upload: string | null;
   user_upload: string | null;
   size: number;
