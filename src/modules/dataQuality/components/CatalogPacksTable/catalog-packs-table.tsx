@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 import { usePacksDataQuality } from "../../hooks/usePacksDataQuality";
+import { useDebounce } from "@/hooks/useDeabouce";
 import {
   createMaterialPack,
   deleteMaterialPackRow,
@@ -34,9 +35,11 @@ export function CatalogPacksTable() {
   const countryId = params.countryId as string;
   const clientId = params.clientId as string;
 
-  const { data: packs, mutate } = usePacksDataQuality(clientId, countryId);
-
   const [packSearch, setPackSearch] = useState("");
+  const debouncedSearch = useDebounce(packSearch, 400);
+
+  const { data: packs, mutate } = usePacksDataQuality(clientId, countryId, debouncedSearch);
+
   const [expandedPacks, setExpandedPacks] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -52,14 +55,7 @@ export function CatalogPacksTable() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
-  const filteredPacks = (packs ?? []).filter((pack) => {
-    const term = packSearch.toLowerCase();
-    return (
-      pack.customerProductCod.toLowerCase().includes(term) ||
-      pack.clientName.toLowerCase().includes(term) ||
-      pack.materials.some((m) => m.materialCode.toLowerCase().includes(term))
-    );
-  });
+  const packsData = packs ?? [];
 
   const togglePackExpand = (packId: number) => {
     setExpandedPacks((prev) => {
@@ -168,14 +164,14 @@ export function CatalogPacksTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredPacks.length === 0 && (
+          {packsData.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                 No hay packs configurados.
               </TableCell>
             </TableRow>
           )}
-          {filteredPacks.map((pack) => {
+          {packsData.map((pack) => {
             const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
             const firstMaterial = pack.materials[0];
             const remainingMaterials = pack.materials.slice(1);
@@ -298,8 +294,8 @@ export function CatalogPacksTable() {
       </Table>
 
       <div className="mt-4 pt-4 border-t text-sm text-gray-600" style={{ borderColor: "#DDDDDD" }}>
-        Mostrando {filteredPacks.length} packs con{" "}
-        {filteredPacks.reduce((acc, p) => acc + p.materials.length, 0)} productos
+        Mostrando {packsData.length} packs con{" "}
+        {packsData.reduce((acc, p) => acc + p.materials.length, 0)} productos
       </div>
 
       <ModalAddEditPackMaterial

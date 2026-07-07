@@ -8,6 +8,7 @@ import type { ColumnsType } from "antd/es/table";
 import { message } from "antd";
 
 import { usePointsOfSale } from "../../hooks/usePointsOfSale";
+import { useDebounce } from "@/hooks/useDeabouce";
 import { IPOS } from "@/types/dataQuality/IDataQuality";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
@@ -29,9 +30,11 @@ export function PointsOfSaleTable() {
   const clientId = params.clientId as string;
   const countryId = params.countryId as string;
 
-  const { data, isLoading, mutate } = usePointsOfSale(clientId, countryId);
-
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+
+  const { data, isLoading, mutate } = usePointsOfSale(clientId, countryId, debouncedSearch);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedPOS, setSelectedPOS] = useState<IPOS | null>(null);
@@ -171,17 +174,6 @@ export function PointsOfSaleTable() {
     }
   ];
 
-  const filteredPOS = data?.filter((pos) => {
-    const term = search.toLowerCase();
-    return (
-      pos.pos_id?.toLowerCase().includes(term) ||
-      pos.pos_name?.toLowerCase().includes(term) ||
-      pos.channel?.toLowerCase().includes(term) ||
-      pos.sub_channel?.toLowerCase().includes(term) ||
-      pos.pos_internal_sales_representative?.toLowerCase().includes(term)
-    );
-  });
-
   return (
     <div>
       <div className="flex items-center justify-between pb-4">
@@ -209,7 +201,7 @@ export function PointsOfSaleTable() {
       </div>
       <Table
         columns={columns}
-        dataSource={filteredPOS}
+        dataSource={data}
         rowKey="id"
         loading={isLoading}
         pagination={{ pageSize: 7 }}
