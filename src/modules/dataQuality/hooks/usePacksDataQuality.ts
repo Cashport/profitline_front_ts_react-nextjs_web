@@ -3,8 +3,10 @@ import { fetcher } from "@/utils/api/api";
 import { IMaterialPack } from "@/types/dataQuality/IDataQuality";
 import { GenericResponse } from "@/types/global/IGlobal";
 
-export const usePacksDataQuality = (clientId: string, countryId: string) => {
-  const pathKey = `/data/catalog/material-packs?id_client=${clientId}&id_country=${countryId}`;
+export const usePacksDataQuality = (clientId: string, countryId: string, search?: string) => {
+  const pathKey = `/data/catalog/material-packs?id_client=${clientId}&id_country=${countryId}${
+    search ? `&search=${encodeURIComponent(search)}` : ""
+  }`;
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IMaterialPack[]>>(
     clientId && countryId ? pathKey : null,

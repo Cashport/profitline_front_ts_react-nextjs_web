@@ -32,6 +32,7 @@ import {
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/CatalogMaterialsActionsModal";
 import { useCatalogsDataQuality } from "../../hooks/useCatalogsDataQuality";
+import { useDebounce } from "@/hooks/useDeabouce";
 import "./catalogs-table.scss";
 
 const getStatusBadge = (status: string) => {
@@ -62,14 +63,15 @@ export function CatalogsTable() {
   const countryId = Number(params.countryId) || 0;
   const clientId = Number(params.clientId) || 0;
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 400);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     data: equivalencies = [],
     isLoading,
     mutate
-  } = useCatalogsDataQuality(String(params.clientId), String(params.countryId));
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  } = useCatalogsDataQuality(String(params.clientId), String(params.countryId), debouncedSearch);
 
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [selectedCatalog, setSelectedCatalog] = useState<IGetCatalogs | null>(null);
@@ -81,17 +83,8 @@ export function CatalogsTable() {
 
   const itemsPerPage = 25;
 
-  const filteredEquivalencies = equivalencies.filter((item) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      item.customer_product_cod?.toLowerCase().includes(term) ||
-      item.customer_product_description?.toLowerCase().includes(term) ||
-      item.material_name?.toLowerCase().includes(term)
-    );
-  });
-
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEquivalencies = filteredEquivalencies.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedEquivalencies = equivalencies.slice(startIndex, startIndex + itemsPerPage);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -228,7 +221,7 @@ export function CatalogsTable() {
         <div className="flex items-center justify-between pb-4 gap-2 ">
           <div className="flex items-center gap-3">
             <UiSearchInput
-              placeholder="Buscar por ID"
+              placeholder="Buscar"
               onChange={(e) => handleSearchChange(e.target.value)}
             />
             <GenerateActionButton onClick={() => setWhichModalOpen({ selected: 3 })} />
@@ -376,12 +369,12 @@ export function CatalogsTable() {
           style={{ borderColor: "#DDDDDD" }}
         >
           <div className="text-sm" style={{ color: "#141414" }}>
-            Mostrando {paginatedEquivalencies.length} de {filteredEquivalencies.length} productos
+            Mostrando {paginatedEquivalencies.length} de {equivalencies.length} productos
           </div>
           <Pagination
             current={currentPage}
             onChange={(page) => setCurrentPage(page)}
-            total={filteredEquivalencies.length}
+            total={equivalencies.length}
             pageSize={itemsPerPage}
             showSizeChanger={false}
           />
