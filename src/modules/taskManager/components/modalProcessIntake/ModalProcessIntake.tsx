@@ -1,132 +1,14 @@
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import { Modal, Select as AntSelect, Spin, Typography } from "antd";
-import { Calendar } from "lucide-react";
-import { FileArrowUp } from "@phosphor-icons/react";
+import { Modal, Select as AntSelect, Typography } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
-import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 import { getAllCountries } from "@/services/countries/countries";
 import { useDataClients } from "@/modules/dataQuality/hooks/useDataClients";
-import { useArchivesClientData } from "@/modules/dataQuality/hooks/useArchivesClientData";
 
-import { Badge } from "@/modules/chat/ui/badge";
-import { Button } from "@/modules/chat/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/modules/chat/ui/table";
 import { Datum as ICountryOption } from "@/types/countries/IListCountries";
+import { IntakeFilesTable } from "./IntakeFilesTable";
 
 const { Title } = Typography;
-
-const formatDate = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD");
-};
-
-interface IIntakeFilesTableProps {
-  clientId: string;
-}
-
-const IntakeFilesTable = ({ clientId }: IIntakeFilesTableProps) => {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [activeFileId, setActiveFileId] = useState<number | null>(null);
-
-  const { archives: files, isLoading, mutate } = useArchivesClientData(clientId);
-
-  const handleUploadIntake = (id: number) => {
-    setActiveFileId(id);
-    setIsUploadModalOpen(true);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Spin />
-      </div>
-    );
-  }
-
-  if (!files || files.length === 0) {
-    return (
-      <div className="flex justify-center items-center py-12 text-gray-500">
-        No hay archivos disponibles para este cliente
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="max-h-[60vh] overflow-y-auto">
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-white">
-            <TableRow style={{ borderColor: "#DDDDDD" }}>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
-              <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {files.map((file) => (
-              <TableRow
-                key={file.id}
-                className="hover:bg-gray-50"
-                style={{ borderColor: "#DDDDDD" }}
-              >
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs text-white"
-                    style={{ backgroundColor: file.data_type.color }}
-                  >
-                    {file.data_type.description}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
-                    <span style={{ color: "#141414" }}>
-                      {file.date_archive ? formatDate(file.date_archive) : "-"}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="w-0">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleUploadIntake(file.id)}
-                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
-                    >
-                      <FileArrowUp className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <ModalUploadIntakeFiles
-        isOpen={isUploadModalOpen}
-        archiveId={activeFileId}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setActiveFileId(null);
-        }}
-        onSuccess={() => {
-          mutate();
-        }}
-      />
-    </>
-  );
-};
 
 interface IModalProcessIntakeProps {
   isOpen: boolean;
