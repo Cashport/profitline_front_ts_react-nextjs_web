@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 
 import { Mail, Sparkles, User, Building, FileText, Paperclip, Download } from "lucide-react";
 import { Button as AntButton, Dropdown, Select as AntSelect, message } from "antd";
-import { DotsThreeVertical, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { DotsThreeVertical, ArrowCounterClockwise, Upload } from "@phosphor-icons/react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 
 import "./modalContent.scss";
@@ -26,6 +26,7 @@ import { IUser } from "@/types/users/IUser";
 import { reprocessAttachmentTask } from "@/services/tasks/tasks";
 import { getClients } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
+import { ModalProcessIntake } from "../modalProcessIntake/ModalProcessIntake";
 
 export type TaskFormValues = {
   client_id: string;
@@ -78,6 +79,7 @@ export function ModalContent({
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
   const [clientsLoading, setClientsLoading] = useState(false);
+  const [isProcessIntakeOpen, setIsProcessIntakeOpen] = useState(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -218,6 +220,18 @@ export function ModalContent({
                                 onClick={() => window.open(attachment.s3_url, "_blank")}
                               >
                                 Descargar
+                              </AntButton>
+                            )
+                          },
+                          {
+                            key: "process-intake",
+                            label: (
+                              <AntButton
+                                icon={<Upload className="h-3 w-3" />}
+                                className="buttonNoBorder"
+                                onClick={() => setIsProcessIntakeOpen(true)}
+                              >
+                                Procesar ingesta
                               </AntButton>
                             )
                           }
@@ -442,6 +456,11 @@ export function ModalContent({
           )}
         </div>
       </div>
+
+      <ModalProcessIntake
+        isOpen={isProcessIntakeOpen}
+        onClose={() => setIsProcessIntakeOpen(false)}
+      />
     </div>
   );
 }

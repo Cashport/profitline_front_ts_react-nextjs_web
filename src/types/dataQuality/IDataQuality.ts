@@ -16,6 +16,12 @@ export interface IDataEmail {
   outlook_subfolder: string | null;
 }
 
+export interface IDataClient {
+  id: string;
+  client_name: string;
+  id_client: number;
+}
+
 export interface ICountryClientsFilters {
   status: string[];
   periodicity: string[];
@@ -176,6 +182,8 @@ export interface IClientDetailArchiveClient {
   id_status: number;
   last_novelty: string | null;
   status_description: string;
+  status_color: string;
+  status_bg_color: string;
   date_upload: string | null;
   user_upload: string | null;
   size: number;
@@ -185,6 +193,15 @@ export interface IClientDetailArchiveClient {
   created_at: string;
   updated_at: string | null;
   data_type: IDataType;
+}
+
+export interface IClientDetailArchivesByType {
+  id_type_archive: number;
+  tipo_archivo: string;
+  data_type?: IDataType; // optional: absent in groups with no archives
+  total_archives: number;
+  pending_archives: number;
+  archives: IClientDetailArchiveClient[];
 }
 
 // Client Detail

@@ -4,10 +4,12 @@ import { IGetCatalogs } from "@/types/dataQuality/IDataQuality";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { useAppStore } from "@/lib/store/store";
 
-export const useCatalogsDataQuality = (clientId: string, countryId: string) => {
+export const useCatalogsDataQuality = (clientId: string, countryId: string, search?: string) => {
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
-  const pathKey = `/data/catalog/materials?id_client=${clientId}&id_country=${countryId}&id_project=${ID}`;
+  const pathKey = `/data/catalog/materials?id_client=${clientId}&id_country=${countryId}&id_project=${ID}${
+    search ? `&search=${encodeURIComponent(search)}` : ""
+  }`;
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IGetCatalogs[]>>(
     pathKey,

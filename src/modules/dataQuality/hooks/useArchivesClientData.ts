@@ -6,11 +6,13 @@ import { GenericResponse } from "@/types/global/IGlobal";
 export const useArchivesClientData = (
   clientId: string,
   dateFrom?: string | null,
-  dateTo?: string | null
+  dateTo?: string | null,
+  fileType?: number | null
 ) => {
   const params = new URLSearchParams();
   if (dateFrom) params.append("date_from", dateFrom);
   if (dateTo) params.append("date_to", dateTo);
+  if (fileType) params.append("file_type", String(fileType));
   const queryString = params.toString();
   const pathKey = `/data/client-detail/${clientId}/archives${queryString ? `?${queryString}` : ""}`;
 
