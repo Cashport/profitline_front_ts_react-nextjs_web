@@ -22,7 +22,6 @@ import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
-import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
@@ -276,18 +275,12 @@ export default function DataQualityClientDetails() {
               stakeholder={clientDetail?.stakeholder?.toString()}
               setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
             />
-            <ClientDetailIntakesTable
-              clientId={clientId}
-              clientName={clientDetail.client_name}
-              idCountry={clientDetail.id_country}
-              intakes={clientDetail.client_data_archives}
-              onSuccess={() => mutate()}
-            />
-
             <ClientDetailArchives
               clientId={clientId}
               clientName={clientName}
               clientNIT={clientDetail.id_client}
+              idCountry={clientDetail.id_country}
+              intakes={clientDetail.client_data_archives}
               onMutateDetail={() => mutate()}
             />
           </CardContent>
