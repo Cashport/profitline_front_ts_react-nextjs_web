@@ -21,6 +21,7 @@ interface IClientDetailArchivesProps {
   idCountry?: number | null;
   intakes?: IClientDetailDataArchive[];
   onMutateDetail: () => void;
+  onCountsChange?: (counts: { shown: number; total: number }) => void;
 }
 
 export function ClientDetailArchives({
@@ -29,7 +30,8 @@ export function ClientDetailArchives({
   clientNIT,
   idCountry,
   intakes = [],
-  onMutateDetail
+  onMutateDetail,
+  onCountsChange
 }: IClientDetailArchivesProps) {
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
@@ -49,6 +51,21 @@ export function ClientDetailArchives({
     isValidating: isArchivesValidating,
     mutate: mutateArchives
   } = useArchivesClientDataByType(clientId, dateRange.start, dateRange.end, showProcessed);
+
+  // Aggregate per-type counts so the parent can render the "Mostrando X de Y" footer.
+  // `shown` counts the rows actually returned/displayed (grows when "show processed" is
+  // toggled), so the footer tracks what's on screen rather than a fixed pending count.
+  const shownCount = useMemo(
+    () => archivesByType?.reduce((sum, group) => sum + group.archives.length, 0) ?? 0,
+    [archivesByType]
+  );
+  const totalCount = useMemo(
+    () => archivesByType?.reduce((sum, group) => sum + group.total_archives, 0) ?? 0,
+    [archivesByType]
+  );
+  useEffect(() => {
+    onCountsChange?.({ shown: shownCount, total: totalCount });
+  }, [shownCount, totalCount, onCountsChange]);
 
   const intakeByType = useMemo(() => {
     const map = new Map<number, IClientDetailDataArchive>();

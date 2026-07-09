@@ -40,6 +40,7 @@ export default function DataQualityClientDetails() {
   const [isUploadLoading, setIsUploadLoading] = useState(false);
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
+  const [archiveCounts, setArchiveCounts] = useState({ shown: 0, total: 0 });
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
@@ -282,13 +283,13 @@ export default function DataQualityClientDetails() {
               idCountry={clientDetail.id_country}
               intakes={clientDetail.client_data_archives}
               onMutateDetail={() => mutate()}
+              onCountsChange={setArchiveCounts}
             />
           </CardContent>
         </Card>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
-          Mostrando {clientDetail.archives_client_data.length} de{" "}
-          {clientDetail.archives_client_data.length} archivos
+          Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos
         </div>
       </main>
 
