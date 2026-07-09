@@ -97,6 +97,11 @@ export default function DataQualityView() {
         </div>
 
         <div className="flex gap-2">
+          <Link href="/data-quality/auxiliary-catalogs">
+            <Button variant="outline" className="text-[#141414]">
+              Auxiliares
+            </Button>
+          </Link>
           <Link href="/data-quality/alerts">
             <Badge count={totalAlerts} color="#E53935">
               <Button variant="outline">
