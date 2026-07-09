@@ -694,6 +694,21 @@ export const deleteFileDateIntake = async (fileId: number): Promise<any> => {
   }
 };
 
+export const uploadAuxiliaryFile = async (id: number, file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/data/auxiliary-files/${id}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading auxiliary file:", error);
+    throw error;
+  }
+};
+
 // Email routing rules ENDPOINTS
 
 export const getClientDataEmails = async (clientId?: number | string): Promise<IDataEmail[]> => {

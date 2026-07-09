@@ -4,6 +4,7 @@ import {
   EVEN_QUANTITY_PRODUCT,
   FULL_CANULA_CLIENT_IDS,
   SCULPTRA_MAIN_PRODUCT,
+  SCULPTRA_PACK_PRODUCT,
   matchesProductIdentifier
 } from "./constants/evenQuantityProducts";
 
@@ -24,6 +25,11 @@ export const computeComplementRequirements = (
 
   selectedCategories.forEach((category) => {
     category.products.forEach((p) => {
+      if (matchesProductIdentifier(p, SCULPTRA_PACK_PRODUCT)) {
+        // El pack requiere 4 cánulas + 8 aguas por unidad = 2× el ratio de Sculptra
+        sculptraQty += p.quantity * 2;
+        return;
+      }
       if (matchesProductIdentifier(p, SCULPTRA_MAIN_PRODUCT)) {
         sculptraQty += p.quantity;
         return;

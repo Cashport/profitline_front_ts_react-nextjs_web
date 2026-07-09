@@ -17,7 +17,8 @@ interface Props {
 
 const BALANCE_STATUS_OPTIONS = [
   { id: 5, code: "rejected", label: "Novedad" },
-  { id: 2, code: "pending_nc", label: "Pendiente NC" }
+  { id: 2, code: "pending_nc", label: "NC Aprobada - Pendiente creación" },
+  { id: 10, code: "nc_created", label: "NC Creada - Pendiente cruce" }
 ];
 
 export const ModalChangeBalanceStatus: React.FC<Props> = ({

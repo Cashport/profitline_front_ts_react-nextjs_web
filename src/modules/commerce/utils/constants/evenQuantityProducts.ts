@@ -33,6 +33,12 @@ export const SCULPTRA_MAIN_PRODUCT: ProductIdentifier = {
   description: "SCULPTRA INJPRO 2 VIAL"
 };
 
+export const SCULPTRA_PACK_PRODUCT: ProductIdentifier = {
+  SKU: "033920",
+  EAN: null,
+  description: "Pack Sculptra + Alastin B"
+};
+
 export const CANULA_COMPLEMENT: ProductIdentifier = {
   SKU: "011022",
   EAN: null,
