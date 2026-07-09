@@ -99,7 +99,7 @@ export default function DataQualityView() {
         <div className="flex gap-2">
           <Link href="/data-quality/auxiliary-catalogs">
             <Button variant="outline" className="text-[#141414]">
-              Catálogos
+              Auxiliares
             </Button>
           </Link>
           <Link href="/data-quality/alerts">
