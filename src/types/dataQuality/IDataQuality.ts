@@ -633,3 +633,14 @@ export interface IFileType {
   id: number;
   description: string;
 }
+
+export interface IAuxiliaryFile {
+  id: number;
+  file_type: string;
+  file_type_color: string;
+  description: string | null;
+  file_url: string | null;
+  file_size: number | null; // bytes
+  created_at: string;
+  uploaded_at: string | null;
+}
