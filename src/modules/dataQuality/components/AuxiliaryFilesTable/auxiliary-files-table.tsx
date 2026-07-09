@@ -89,15 +89,21 @@ export function AuxiliaryFilesTable() {
 
   return (
     <Spin spinning={isLoading || isValidating}>
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tipo de archivo</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
+            <TableHead className="w-[124px]" style={{ color: "#141414", fontWeight: 600 }}>
+              Fecha archivo
+            </TableHead>
             <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
-            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
-            <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
+            <TableHead className="w-[124px]" style={{ color: "#141414", fontWeight: 600 }}>
+              Fecha cargue
+            </TableHead>
+            <TableHead className="w-24" style={{ color: "#141414", fontWeight: 600 }}>
+              Tamaño
+            </TableHead>
+            <TableHead className="w-20" style={{ color: "#141414", fontWeight: 600 }}>
               Acciones
             </TableHead>
           </TableRow>
@@ -131,7 +137,10 @@ export function AuxiliaryFilesTable() {
                     <span style={{ color: "#141414" }}>{formatDate(file.created_at)}</span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell
+                  className="overflow-hidden text-ellipsis"
+                  title={file.description || undefined}
+                >
                   <span className="font-normal" style={{ color: "#141414" }}>
                     {file.description || "-"}
                   </span>
