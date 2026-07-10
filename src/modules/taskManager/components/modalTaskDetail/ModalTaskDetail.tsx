@@ -176,7 +176,7 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
       onCancel={onClose}
       footer={null}
       closable={false}
-      width="min(80vw, 1100px)"
+      width="min(85vw, 1300px)"
       centered
       destroyOnClose
       styles={{ body: { padding: 0 } }}

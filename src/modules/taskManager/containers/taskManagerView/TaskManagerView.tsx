@@ -247,6 +247,13 @@ export const TaskManagerView: React.FC = () => {
             : (b.id ?? 0) - (a.id ?? 0);
         }
 
+        // Handle created_at (date) sorting
+        if (sortConfig.key === "created_at") {
+          const aTime = new Date(a.created_at).getTime();
+          const bTime = new Date(b.created_at).getTime();
+          return sortConfig.direction === "asc" ? aTime - bTime : bTime - aTime;
+        }
+
         // Handle amount sorting
         if (sortConfig.key === "amount") {
           return sortConfig.direction === "asc"
