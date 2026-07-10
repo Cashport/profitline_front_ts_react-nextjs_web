@@ -22,7 +22,6 @@ import { Button } from "@/modules/chat/ui/button";
 import { Card, CardContent } from "@/modules/chat/ui/card";
 import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
 import { ClientDetailInfo } from "../../components/ClientDetailInfo";
-import { ClientDetailIntakesTable } from "../../components/ClientDetailIntakesTable";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
@@ -41,6 +40,7 @@ export default function DataQualityClientDetails() {
   const [isUploadLoading, setIsUploadLoading] = useState(false);
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
+  const [archiveCounts, setArchiveCounts] = useState({ shown: 0, total: 0 });
 
   // Fetch client detail data using SWR hook
   const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
@@ -276,26 +276,20 @@ export default function DataQualityClientDetails() {
               stakeholder={clientDetail?.stakeholder?.toString()}
               setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
             />
-            <ClientDetailIntakesTable
-              clientId={clientId}
-              clientName={clientDetail.client_name}
-              idCountry={clientDetail.id_country}
-              intakes={clientDetail.client_data_archives}
-              onSuccess={() => mutate()}
-            />
-
             <ClientDetailArchives
               clientId={clientId}
               clientName={clientName}
               clientNIT={clientDetail.id_client}
+              idCountry={clientDetail.id_country}
+              intakes={clientDetail.client_data_archives}
               onMutateDetail={() => mutate()}
+              onCountsChange={setArchiveCounts}
             />
           </CardContent>
         </Card>
 
         <div className="mt-4 text-sm" style={{ color: "#141414" }}>
-          Mostrando {clientDetail.archives_client_data.length} de{" "}
-          {clientDetail.archives_client_data.length} archivos
+          Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos
         </div>
       </main>
 

@@ -3,15 +3,19 @@
 import { FC } from "react";
 import { ArrowUpDown, Eye, Sparkles } from "lucide-react";
 import { Spin } from "antd";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 import { Button } from "@/modules/chat/ui/button";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Checkbox } from "@/modules/chat/ui/checkbox";
+import { formatTime } from "@/modules/chat/utils/format";
 import { TaskActionsDropdown } from "../taskActionsDropdown/TaskActionsDropdown";
 import { ITask } from "@/types/tasks/ITasks";
 
 // Types
 export type SortKey =
   | "id"
+  | "created_at"
   | "client_name"
   | "task_type"
   | "description"
@@ -28,6 +32,29 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(amount);
+};
+
+// Context-aware date formatting for the "Fecha" column:
+// - today            -> time only            ("8:47 a. m.")
+// - 1-6 days ago     -> day abbrev + time    ("mar 8:31 p. m.")
+// - >=7 days, same yr -> day abbrev + DD/MM  ("lun 29/06")
+// - different year   -> full date            ("26/06/2026")
+const formatTaskDate = (isoDate: string): string => {
+  if (!isoDate) return "-";
+  const date = dayjs(isoDate);
+  if (!date.isValid()) return "-";
+
+  const now = dayjs();
+  const ddd = date.locale("es").format("ddd").replace(".", "");
+
+  if (date.isSame(now, "day")) return formatTime(isoDate);
+
+  const daysAgo = now.startOf("day").diff(date.startOf("day"), "day");
+  if (daysAgo >= 1 && daysAgo <= 6) return `${ddd} ${formatTime(isoDate)}`;
+
+  if (date.year() === now.year()) return `${ddd} ${date.format("DD/MM")}`;
+
+  return date.format("DD/MM/YYYY");
 };
 
 interface ITasksTableProps {
@@ -87,6 +114,15 @@ const TasksTable: FC<ITasksTableProps> = ({
                   className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
                 >
                   ID
+                  <ArrowUpDown className="h-3 w-3" />
+                </button>
+              </th>
+              <th className="text-left p-2 md:p-4 font-bold text-black whitespace-nowrap">
+                <button
+                  onClick={() => onSort("created_at")}
+                  className="flex items-center gap-1 hover:text-gray-600 transition-colors text-xs md:text-sm"
+                >
+                  Fecha
                   <ArrowUpDown className="h-3 w-3" />
                 </button>
               </th>
@@ -171,6 +207,10 @@ const TasksTable: FC<ITasksTableProps> = ({
                   {/* ID */}
                   <td className="p-2 md:p-4 text-gray-900 font-medium text-xs md:text-sm">
                     {task.purchase_order_package_id ? task.purchase_order_package_id : task.id}
+                  </td>
+                  {/* Fecha */}
+                  <td className="p-2 md:p-4 text-gray-600 text-xs md:text-sm whitespace-nowrap">
+                    {formatTaskDate(task.created_at)}
                   </td>
                   {/* Cliente - always visible */}
                   <td className="p-2 md:p-4 text-gray-900 font-medium">

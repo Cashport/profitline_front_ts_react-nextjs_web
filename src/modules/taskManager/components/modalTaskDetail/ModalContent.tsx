@@ -256,7 +256,7 @@ export function ModalContent({
   };
 
   return (
-    <div className="h-full grid grid-cols-2">
+    <div className="h-full grid grid-cols-[40fr_60fr]">
       {/* Left Column - Task Details */}
       <div className="overflow-y-auto px-10 py-8">
         <div className="space-y-8 max-w-[700px]">
@@ -269,13 +269,15 @@ export function ModalContent({
             <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
               {/* Cliente */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${!clientId ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors ${!clientId ? "bg-rose-50" : ""}`}
               >
-                <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                  Cliente
-                  {!clientId && <span className="text-rose-600 ml-1">*</span>}
-                </Label>
+                <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
+                  <Building className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <Label className="text-sm text-gray-700">
+                    Cliente
+                    {!clientId && <span className="text-rose-600 ml-1">*</span>}
+                  </Label>
+                </div>
                 <Controller
                   control={control}
                   name="client_id"
@@ -305,13 +307,15 @@ export function ModalContent({
 
               {/* Tipo de tarea */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${taskType === null ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors ${taskType === null ? "bg-rose-50" : ""}`}
               >
-                <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                  Tipo de tarea
-                  {taskType === null && <span className="text-rose-600 ml-1">*</span>}
-                </Label>
+                <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
+                  <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <Label className="text-sm text-gray-700">
+                    Tipo de tarea
+                    {taskType === null && <span className="text-rose-600 ml-1">*</span>}
+                  </Label>
+                </div>
                 <Controller
                   control={control}
                   name="task_type"
@@ -338,13 +342,15 @@ export function ModalContent({
 
               {/* Responsable */}
               <div
-                className={`flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors ${assignedTo === null ? "bg-rose-50" : ""}`}
+                className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors ${assignedTo === null ? "bg-rose-50" : ""}`}
               >
-                <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">
-                  Responsable
-                  {assignedTo === null && <span className="text-rose-600 ml-1">*</span>}
-                </Label>
+                <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
+                  <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <Label className="text-sm text-gray-700">
+                    Responsable
+                    {assignedTo === null && <span className="text-rose-600 ml-1">*</span>}
+                  </Label>
+                </div>
                 <Controller
                   control={control}
                   name="assigned_to"
@@ -391,11 +397,13 @@ export function ModalContent({
               </div>
 
               {/* Monto */}
-              <div className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
-                <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
-                  $
+              <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-2 w-[140px] flex-shrink-0">
+                  <div className="h-4 w-4 flex-shrink-0 flex items-center justify-center text-gray-500 font-semibold text-xs">
+                    $
+                  </div>
+                  <Label className="text-sm text-gray-700">Monto</Label>
                 </div>
-                <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0">Monto</Label>
                 <Input
                   type="number"
                   value={taskDetail.amount || ""}
@@ -407,11 +415,11 @@ export function ModalContent({
               </div>
 
               {/* Descripción */}
-              <div className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 transition-colors">
-                <FileText className="h-4 w-4 text-gray-500 flex-shrink-0 mt-1.5" />
-                <Label className="text-sm text-gray-700 w-[120px] flex-shrink-0 mt-1.5">
-                  Descripción
-                </Label>
+              <div className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-2 w-[140px] flex-shrink-0 mt-1.5">
+                  <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <Label className="text-sm text-gray-700">Descripción</Label>
+                </div>
                 <Textarea
                   value={taskDetail.description || ""}
                   readOnly

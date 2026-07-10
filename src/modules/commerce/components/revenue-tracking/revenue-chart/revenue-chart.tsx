@@ -26,7 +26,20 @@ import { useDashboardSalesEvolucion } from "@/modules/commerce/hooks/revenue-tra
 
 type ChartDatum = { label: string; revenue: number; cumulative: number };
 
-const MONTHS_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const MONTHS_ES = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic"
+];
 
 // The evolución endpoint encodes `date` differently per frequency, so a single dayjs parse fails
 // for the non-daily forms (semanal "2026-W19", mensual "2026-05", trimestral "2026-Q2", anual "2026").
@@ -57,13 +70,7 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-        <XAxis
-          dataKey="label"
-          stroke="#a1a1aa"
-          fontSize={10}
-          tickLine={false}
-          axisLine={false}
-        />
+        <XAxis dataKey="label" stroke="#a1a1aa" fontSize={10} tickLine={false} axisLine={false} />
         <YAxis
           stroke="#a1a1aa"
           fontSize={10}
@@ -83,7 +90,7 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
           }}
           itemStyle={{ fontSize: "12px", fontWeight: "600" }}
           labelStyle={{
-            color: "var(--muted-foreground)",
+            color: "#a1a1aa",
             marginBottom: "8px",
             fontSize: "10px",
             textTransform: "uppercase",
@@ -116,6 +123,7 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
         <Bar
           dataKey="revenue"
           name="revenue"
+          fill="#3b82f6"
           barSize={20}
           radius={[4, 4, 0, 0]}
           animationDuration={1000}
@@ -135,6 +143,7 @@ const ChartContent = ({ data, targetGoal }: { data: ChartDatum[]; targetGoal?: n
           name="cumulative"
           stroke="none"
           fill="url(#colorCumulative)"
+          tooltipType="none"
           animationDuration={1500}
         />
 
