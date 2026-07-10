@@ -66,6 +66,7 @@ interface ITasksTableProps {
   sortConfig: { key: SortKey; direction: SortDirection } | null;
   onSort: (key: SortKey) => void;
   isLoading?: boolean;
+  onTaskStatusChanged?: () => void;
 }
 
 const TasksTable: FC<ITasksTableProps> = ({
@@ -75,7 +76,8 @@ const TasksTable: FC<ITasksTableProps> = ({
   onSelectAll,
   onViewTask,
   onSort,
-  isLoading = false
+  isLoading = false,
+  onTaskStatusChanged
 }) => {
   const isAllSelected =
     tasks.length > 0 && tasks.every((task) => task.id !== null && selectedIds.includes(task.id));
@@ -301,7 +303,7 @@ const TasksTable: FC<ITasksTableProps> = ({
                   </td>
                   <td className="p-2 md:p-4 text-center">
                     <div className="flex items-center justify-center gap-1">
-                      <TaskActionsDropdown task={task} />
+                      <TaskActionsDropdown task={task} onStatusChanged={onTaskStatusChanged} />
                       <Button
                         variant="ghost"
                         size="icon"

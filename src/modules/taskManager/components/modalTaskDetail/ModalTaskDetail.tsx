@@ -23,11 +23,18 @@ interface IModalTaskDetail {
   isOpen: boolean;
   onClose: () => void;
   taskTypes: ITaskTypes[];
+  onTaskUpdated?: () => void;
 }
 
 const DEFAULT_STATUS: ITaskStatus = { id: "", name: "", color: "", backgroundColor: "" };
 
-export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTaskDetail) {
+export function ModalTaskDetail({
+  task,
+  isOpen,
+  onClose,
+  taskTypes,
+  onTaskUpdated
+}: IModalTaskDetail) {
   const [taskDetail, setTaskDetail] = useState<ITaskDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -208,7 +215,13 @@ export function ModalTaskDetail({ task, isOpen, onClose, taskTypes }: IModalTask
             </div>
 
             <div className="flex items-center gap-3">
-              <TaskActionsDropdown task={task} />
+              <TaskActionsDropdown
+                task={task}
+                onStatusChanged={() => {
+                  fetchTaskDetail();
+                  onTaskUpdated?.();
+                }}
+              />
               {taskDetail && getEstadoBadge(watchedStatus)}
               <Button
                 variant="ghost"
