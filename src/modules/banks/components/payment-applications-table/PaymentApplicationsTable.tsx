@@ -12,6 +12,7 @@ import {
 } from "antd";
 import {
   ArrowCounterClockwise,
+  CheckCircle,
   DotsThreeVertical,
   DownloadSimple,
   FileArrowUp
@@ -21,6 +22,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
 import {
+  changeStatusToApplied,
   reprocessExcel,
   reprocessPDF,
   uploadFinalFile
@@ -182,6 +184,23 @@ export const PaymentApplicationsTable = ({
     }
   };
 
+  const handleChangeStatusToApplied = async (applicationId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Legalizando...",
+      duration: 0
+    });
+    try {
+      await changeStatusToApplied(applicationId);
+      message.success("Estado actualizado a Aplicado");
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al legalizar");
+    } finally {
+      hide();
+    }
+  };
+
   const columns: TableProps<applicationByStatus>["columns"] = [
     {
       title: "Id. Aplicación",
@@ -340,6 +359,22 @@ export const PaymentApplicationsTable = ({
                       onClick={() => handleUploadFile(record.id)}
                     >
                       Cargar Template
+                    </Button>
+                  )
+                }
+              ]
+            : []),
+          ...(statusName === "Legalización"
+            ? [
+                {
+                  key: "change-to-applied",
+                  label: (
+                    <Button
+                      icon={<CheckCircle size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleChangeStatusToApplied(record.id)}
+                    >
+                      Legalizar
                     </Button>
                   )
                 }

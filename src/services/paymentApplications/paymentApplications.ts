@@ -1,5 +1,6 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
+import { useAppStore } from "@/lib/store/store";
 
 export const reprocessExcel = async (applicationId: number): Promise<{ excel_url: string }> => {
   try {
@@ -38,6 +39,20 @@ export const uploadFinalFile = async (applicationId: string, file: File): Promis
     return response.data;
   } catch (error) {
     console.error("Error uploading final file:", error);
+    throw error;
+  }
+};
+
+export const changeStatusToApplied = async (identificationId: number): Promise<any> => {
+  const userId = useAppStore.getState().userId;
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/paymentApplication/change-status-to-applied/${identificationId}`,
+      { user: { user_id: userId.toString() } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error changing status to applied:", error);
     throw error;
   }
 };
