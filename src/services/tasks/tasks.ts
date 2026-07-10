@@ -99,6 +99,18 @@ export const patchTask = async (
   }
 };
 
+export const changeTaskStatus = async (taskId: number, statusId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/task/${taskId}/status`,
+      { status_id: statusId }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const reprocessAttachmentTask = async (attachmentId: number) => {
   try {
     const response: GenericResponse<any> = await API.post(
