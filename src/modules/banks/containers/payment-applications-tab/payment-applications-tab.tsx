@@ -16,6 +16,7 @@ import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import PaymentApplicationsTable from "../../components/payment-applications-table/PaymentApplicationsTable";
+import ModalActionsPaymentApplications from "../../components/modal-actions-payment-applications";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
@@ -156,6 +157,12 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
             isOpen={isSelectOpen.selected === 7}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             selectDates={handleFilterDates}
+          />
+
+          <ModalActionsPaymentApplications
+            isOpen={isGenerateActionOpen}
+            onClose={() => setisGenerateActionOpen(false)}
+            selectedRows={selectedRows}
           />
         </Flex>
       )}
