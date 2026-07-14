@@ -10,7 +10,7 @@ import CreateOrderProduct from "../create-order-product";
 import { getProductsByClient } from "@/services/commerce/commerce";
 
 import { ISelectType } from "@/types/clients/IClients";
-import { ISelectedProduct } from "@/types/commerce/ICommerce";
+import { IOrderConfirmedResponse, ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-products.module.scss";
 import { useDebounce } from "@/hooks/useSearch";
@@ -39,6 +39,10 @@ const CreateOrderProducts: FC = () => {
     categories,
     setCategories,
     setSelectedCategories,
+    setExecutiveDiscounts,
+    setBonus,
+    setConfirmOrderData,
+    setDeactivateCrossSelling,
     toggleCart,
     numberOfItems,
     businessUnit
@@ -204,6 +208,10 @@ const CreateOrderProducts: FC = () => {
           icon={<CaretLeft size={"1.3rem"} />}
           onClick={() => {
             setSelectedCategories([]);
+            setExecutiveDiscounts([]);
+            setBonus(undefined);
+            setConfirmOrderData({} as IOrderConfirmedResponse);
+            setDeactivateCrossSelling(true);
             setClient(undefined as any);
           }}
         >
