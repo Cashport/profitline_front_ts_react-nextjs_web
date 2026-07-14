@@ -1,5 +1,6 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API } from "@/utils/api/api";
+import { useAppStore } from "@/lib/store/store";
 
 export const reprocessExcel = async (applicationId: number): Promise<{ excel_url: string }> => {
   try {
@@ -42,7 +43,9 @@ export const uploadFinalFile = async (applicationId: string, file: File): Promis
   }
 };
 
-export const reversePaymentApplication = async (applicationId: number): Promise<{ success: boolean; message: string }> => {
+export const reversePaymentApplication = async (
+  applicationId: number
+): Promise<{ success: boolean; message: string }> => {
   try {
     const response: GenericResponse<{ success: boolean; message: string }> = await API.post(
       `/paymentApplication/reverse-payment-applications`,
@@ -51,6 +54,20 @@ export const reversePaymentApplication = async (applicationId: number): Promise<
     return response.data;
   } catch (error) {
     console.error("Error reversing payment application:", error);
+    throw error;
+  }
+};
+
+export const changeStatusToApplied = async (identificationId: number): Promise<any> => {
+  const userId = useAppStore.getState().userId;
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `/paymentApplication/change-status-to-applied/${identificationId}`,
+      { user: { user_id: userId.toString() } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error changing status to applied:", error);
     throw error;
   }
 };

@@ -13,6 +13,7 @@ import {
 import {
   ArrowCounterClockwise,
   ArrowUUpLeft,
+  CheckCircle,
   DotsThreeVertical,
   DownloadSimple,
   FileArrowUp
@@ -22,6 +23,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatDate } from "@/utils/utils";
 import { IPaymentApplication } from "@/types/paymentApplications/IPaymentApplication";
 import {
+  changeStatusToApplied,
   reprocessExcel,
   reprocessPDF,
   reversePaymentApplication,
@@ -228,6 +230,23 @@ export const PaymentApplicationsTable = ({
     }
   };
 
+  const handleChangeStatusToApplied = async (applicationId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Legalizando...",
+      duration: 0
+    });
+    try {
+      await changeStatusToApplied(applicationId);
+      message.success("Estado actualizado a Aplicado");
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al legalizar");
+    } finally {
+      hide();
+    }
+  };
+
   const columns: TableProps<applicationByStatus>["columns"] = [
     {
       title: "Id. Aplicación",
@@ -402,6 +421,39 @@ export const PaymentApplicationsTable = ({
                       onClick={() => handleOpenReverseModal(record)}
                     >
                       Reversar aplicación
+                    </Button>
+                  )
+                }
+              ]
+            : []),
+          ...(statusName === "Legalización"
+            ? [
+                {
+                  key: "change-to-applied",
+                  label: (
+                    <Button
+                      icon={<CheckCircle size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleChangeStatusToApplied(record.id)}
+                    >
+                      Legalizar
+                    </Button>
+                  )
+                }
+              ]
+            : []),
+          ...(["Enviado al ERP", "Aplicado ERP", "Anulado"].includes(statusName) &&
+          record.final_file_url
+            ? [
+                {
+                  key: "download-final-file",
+                  label: (
+                    <Button
+                      icon={<DownloadSimple size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleDownload(record.final_file_url)}
+                    >
+                      Descargar archivo final
                     </Button>
                   )
                 }

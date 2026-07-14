@@ -10,6 +10,7 @@ export interface IPaymentApplication {
   id: number;
   pdf_url: string | null;
   excel_url: string | null;
+  final_file_url: string | null;
   client_name: string;
   created_at: string;
   payment_ids: number[];

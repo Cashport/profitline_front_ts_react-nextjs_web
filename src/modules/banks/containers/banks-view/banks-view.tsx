@@ -7,10 +7,13 @@ import styles from "./banks-view.module.scss";
 import ActivePaymentsTab from "../active-payments-tab";
 import PaymentApplicationsTab from "../payment-applications-tab";
 import WalletPaymentsTab from "../wallet-payments-tab";
+import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
 
 const TAB_KEYS = {
   activePayments: "active-payments",
   paymentApplications: "payment-applications",
+  paymentApplicationsInformal: "payment-applications-informal",
+  legalizaciones: "legalizaciones",
   walletPayments: "wallet-payments"
 };
 
@@ -47,7 +50,32 @@ export const BanksView: FC = () => {
     {
       key: TAB_KEYS.paymentApplications,
       label: "Aplicaciones de pago",
-      children: <PaymentApplicationsTab isActive={activeKey === TAB_KEYS.paymentApplications} />
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.paymentApplications}
+          transactionType={[PaymentTransactionType.Formal, PaymentTransactionType.Homemarket]}
+        />
+      )
+    },
+    {
+      key: TAB_KEYS.paymentApplicationsInformal,
+      label: "Aplicación de pago Informal",
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.paymentApplicationsInformal}
+          transactionType={[PaymentTransactionType.Informal, PaymentTransactionType.Wallet]}
+        />
+      )
+    },
+    {
+      key: TAB_KEYS.legalizaciones,
+      label: "Legalizaciones",
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.legalizaciones}
+          transactionType={[PaymentTransactionType.Legalizacion]}
+        />
+      )
     }
   ];
 
