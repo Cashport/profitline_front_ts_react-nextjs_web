@@ -379,6 +379,22 @@ export const PaymentApplicationsTable = ({
                   )
                 }
               ]
+            : []),
+          ...(["Enviado al ERP", "Aplicado ERP", "Anulado"].includes(statusName)
+            ? [
+                {
+                  key: "download-final-file",
+                  label: (
+                    <Button
+                      icon={<DownloadSimple size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleDownload(record.final_file_url)}
+                    >
+                      Descargar archivo final
+                    </Button>
+                  )
+                }
+              ]
             : [])
         ];
 
