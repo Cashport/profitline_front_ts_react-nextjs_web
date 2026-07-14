@@ -380,7 +380,8 @@ export const PaymentApplicationsTable = ({
                 }
               ]
             : []),
-          ...(["Enviado al ERP", "Aplicado ERP", "Anulado"].includes(statusName)
+          ...(["Enviado al ERP", "Aplicado ERP", "Anulado"].includes(statusName) &&
+          record.final_file_url
             ? [
                 {
                   key: "download-final-file",
