@@ -38,6 +38,8 @@ export interface IClientPaymentStatus {
   payments_status_id: number;
   color: string; // Hex color code
   payments: IClientPayment[];
+  total_account: number;
+  payments_count: number;
 }
 
 export interface IIdentifiedPayment {
