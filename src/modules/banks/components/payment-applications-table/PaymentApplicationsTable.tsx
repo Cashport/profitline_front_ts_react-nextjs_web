@@ -12,11 +12,8 @@ import {
 } from "antd";
 import {
   ArrowCounterClockwise,
-<<<<<<< HEAD
-  CheckCircle,
-=======
   ArrowUUpLeft,
->>>>>>> staging
+  CheckCircle,
   DotsThreeVertical,
   DownloadSimple,
   FileArrowUp
@@ -196,22 +193,6 @@ export const PaymentApplicationsTable = ({
     }
   };
 
-<<<<<<< HEAD
-  const handleChangeStatusToApplied = async (applicationId: number) => {
-    const hide = message.open({
-      type: "loading",
-      content: "Legalizando...",
-      duration: 0
-    });
-    try {
-      await changeStatusToApplied(applicationId);
-      message.success("Estado actualizado a Aplicado");
-      mutate();
-    } catch (error) {
-      message.error(error instanceof Error ? error.message : "Error al legalizar");
-    } finally {
-      hide();
-=======
   const handleOpenReverseModal = (record: IPaymentApplication) => {
     setApplicationToReverse(record);
     setReverseModalOpen(true);
@@ -246,7 +227,23 @@ export const PaymentApplicationsTable = ({
       }
     } finally {
       setIsReversing(false);
->>>>>>> staging
+    }
+  };
+
+  const handleChangeStatusToApplied = async (applicationId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Legalizando...",
+      duration: 0
+    });
+    try {
+      await changeStatusToApplied(applicationId);
+      message.success("Estado actualizado a Aplicado");
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al legalizar");
+    } finally {
+      hide();
     }
   };
 
@@ -413,7 +410,22 @@ export const PaymentApplicationsTable = ({
                 }
               ]
             : []),
-<<<<<<< HEAD
+          ...(statusName !== "Reversada"
+            ? [
+                {
+                  key: "reverse-application",
+                  label: (
+                    <Button
+                      icon={<ArrowUUpLeft size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleOpenReverseModal(record)}
+                    >
+                      Reversar aplicación
+                    </Button>
+                  )
+                }
+              ]
+            : []),
           ...(statusName === "Legalización"
             ? [
                 {
@@ -442,19 +454,6 @@ export const PaymentApplicationsTable = ({
                       onClick={() => handleDownload(record.final_file_url)}
                     >
                       Descargar archivo final
-=======
-          ...(statusName !== "Reversada"
-            ? [
-                {
-                  key: "reverse-application",
-                  label: (
-                    <Button
-                      icon={<ArrowUUpLeft size={20} />}
-                      className="buttonNoBorder"
-                      onClick={() => handleOpenReverseModal(record)}
-                    >
-                      Reversar aplicación
->>>>>>> staging
                     </Button>
                   )
                 }
