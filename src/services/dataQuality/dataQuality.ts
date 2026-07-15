@@ -751,3 +751,32 @@ export const deleteClientDataEmail = async (ids: number[]): Promise<any> => {
     throw error;
   }
 };
+
+// Client AI context (prompt) ENDPOINTS
+
+export const getClientAiContext = async (
+  clientId: number | string
+): Promise<{ id: number; ai_context: string }> => {
+  try {
+    const response: GenericResponse<{ id: number; ai_context: string }> = await API.get(
+      `${config.API_HOST}/data/client/ai-context?client_id=${clientId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching client AI context:", error);
+    throw error;
+  }
+};
+
+export const editClientPrompt = async (clientId: number, ai_context: string): Promise<any> => {
+  try {
+    const response: GenericResponse<any> = await API.put(
+      `${config.API_HOST}/data/client/ai-context`,
+      { client_id: clientId, ai_context }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating client AI context:", error);
+    throw error;
+  }
+};

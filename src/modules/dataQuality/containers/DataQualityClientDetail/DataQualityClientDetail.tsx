@@ -25,9 +25,9 @@ import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
-import { ModalDataRegisteredEmails } from "../../components/ModalDataRegisteredEmails/ModalDataRegisteredEmails";
 
 import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
+import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
 
 export default function DataQualityClientDetails() {
   const params = useParams();
@@ -320,7 +320,7 @@ export default function DataQualityClientDetails() {
         onAddEmails={() => setWhichModalIsOpen(4)}
       />
 
-      <ModalDataRegisteredEmails
+      <ModalDataEmailRules
         isOpen={whichModalIsOpen === 4}
         onClose={() => setWhichModalIsOpen(0)}
         clientId={Number(clientId)}
