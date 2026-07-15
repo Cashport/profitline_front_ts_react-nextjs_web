@@ -250,19 +250,23 @@ export function BalanceDetailModal({
                 <Controller
                   control={control}
                   name="eligibility_status"
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      style={{ width: "100%" }}
-                      options={eligibilityStatuses.map((e) => ({
-                        value: e.id,
-                        label: e.description
-                      }))}
-                      allowClear
-                      placeholder="Selecciona una procedencia"
-                      getPopupContainer={(trigger) => trigger.parentElement!}
-                    />
-                  )}
+                  render={({ field }) => {
+                    const hasMatch = eligibilityStatuses.some((e) => String(e.id) === field.value);
+                    return (
+                      <Select
+                        {...field}
+                        value={hasMatch ? field.value : undefined}
+                        style={{ width: "100%" }}
+                        options={eligibilityStatuses.map((e) => ({
+                          value: String(e.id),
+                          label: e.description
+                        }))}
+                        allowClear
+                        placeholder="Selecciona una opción"
+                        getPopupContainer={(trigger) => trigger.parentElement!}
+                      />
+                    );
+                  }}
                 />
               ) : saldoData.eligibility_status ? (
                 <Badge
