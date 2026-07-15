@@ -64,6 +64,7 @@ export function DataExplorationCard() {
         client_name: client.client_name,
         country: client.dates[0]?.rows[0]?.country ?? "",
         country_client_id: client.country_client_id,
+        periodicity: client.periodicity,
         days,
         total: client.totals.units_haleon,
         totalRegistros: client.totals.total_registros,
@@ -280,6 +281,7 @@ export function DataExplorationCard() {
                         </Link>
                         <span className="block" style={{ color: "#9CA3AF", fontSize: "9px" }}>
                           {row.country}
+                          {row.periodicity ? ` (${row.periodicity})` : ""}
                         </span>
                       </div>
                     </td>
