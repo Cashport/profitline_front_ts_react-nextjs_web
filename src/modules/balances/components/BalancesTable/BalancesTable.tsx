@@ -9,6 +9,7 @@ import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { sendToOtherBalances } from "@/services/balances/balances";
 import { formatTimeAgo } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
+import { Badge } from "@/modules/chat/ui/badge";
 import { BalanceRowActions, BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 import { ModalUploadBalanceFile } from "../ModalUploadBalanceFile/ModalUploadBalanceFile";
 import { ModalSendBalanceToApproval } from "../ModalSendBalanceToApproval/ModalSendBalanceToApproval";
@@ -159,6 +160,28 @@ export function BalancesTable({
       sorter: (a, b) => (a.motive_name ?? "").localeCompare(b.motive_name ?? ""),
       showSorterTooltip: false,
       render: (value: string) => <span className="text-sm text-cashport-black">{value ?? "-"}</span>
+    },
+    {
+      title: "Procedencia",
+      dataIndex: "origin_name",
+      key: "procedencia",
+      render: (_: unknown, record: IBalanceRow) => {
+        const eligibility = record.eligibility_status;
+        if (!eligibility) return <span className="text-sm text-cashport-black">-</span>;
+        return (
+          <Badge
+            variant="outline"
+            className="text-xs"
+            style={{
+              color: eligibility.status_color,
+              backgroundColor: eligibility.background_color,
+              borderColor: "transparent"
+            }}
+          >
+            {eligibility.description}
+          </Badge>
+        );
+      }
     },
     {
       title: "Descripción",

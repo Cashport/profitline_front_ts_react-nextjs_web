@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 
 import { Spin } from "antd";
@@ -19,6 +19,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
 import { getBalancesFilter } from "@/services/accountingAdjustment/accountingAdjustment";
+import { getEligibilityStatuses, EligibilityStatusOption } from "@/services/balances/balances";
 import { useAppStore } from "@/lib/store/store";
 import { IBalanceRow, IBalancesFilter } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { FilterBalancesView } from "../../components/FilterBalancesView/FilterBalancesView";
@@ -48,6 +49,18 @@ export function BalancesView() {
   );
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
+
+  const [eligibilityStatuses, setEligibilityStatuses] = useState<EligibilityStatusOption[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setEligibilityStatuses(await getEligibilityStatuses());
+      } catch (error) {
+        console.error("Error fetching eligibility statuses", error);
+      }
+    })();
+  }, []);
 
   const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
     useSaldos();
@@ -97,6 +110,7 @@ export function BalancesView() {
                   users={balancesFilters?.users ?? []}
                   clients={balancesFilters?.clients ?? []}
                   motives={motives ?? []}
+                  eligibilityStatuses={eligibilityStatuses}
                   value={balancesFilter}
                   onChange={setBalancesFilter}
                   isLoading={filtersLoading || motivesLoading}
