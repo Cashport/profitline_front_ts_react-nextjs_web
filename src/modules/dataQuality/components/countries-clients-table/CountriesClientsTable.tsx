@@ -97,8 +97,8 @@ export default function CountriesClientsTable({
     },
     {
       title: "Pendientes",
-      dataIndex: "pending_alerts",
-      key: "pending_alerts",
+      dataIndex: "alerts",
+      key: "alerts",
       align: "center",
       render: (alerts: number) => {
         const count = alerts ?? 0;
