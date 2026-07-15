@@ -7,7 +7,12 @@ import { Badge } from "@/modules/chat/ui/badge";
 import { CaretDoubleRight, Paperclip, Pencil } from "phosphor-react";
 import { IBalanceRow } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
-import { updateBalance, UpdateBalancePayload } from "@/services/balances/balances";
+import {
+  getEligibilityStatuses,
+  updateBalance,
+  UpdateBalancePayload,
+  EligibilityStatusOption
+} from "@/services/balances/balances";
 import { useMessageApi } from "@/context/MessageContext";
 import { BalanceTableContext } from "../BalanceRowActions/BalanceRowActions";
 
@@ -24,6 +29,7 @@ interface BalanceEditForm {
   file: File | null;
   audit_observation: string;
   client_documents: { id: number; document: string }[];
+  eligibility_status: string | null;
 }
 
 const getDefaultValues = (saldoData: IBalanceRow): BalanceEditForm => ({
@@ -31,7 +37,8 @@ const getDefaultValues = (saldoData: IBalanceRow): BalanceEditForm => ({
   file: null,
   audit_observation: saldoData.audit_observation ?? "",
   client_documents:
-    saldoData.client_documents?.map((doc) => ({ id: doc.id, document: doc.document })) ?? []
+    saldoData.client_documents?.map((doc) => ({ id: doc.id, document: doc.document })) ?? [],
+  eligibility_status: saldoData.eligibility_status ? String(saldoData.eligibility_status.id) : null
 });
 
 const formatCurrency = (amount: number) =>
@@ -77,6 +84,18 @@ export function BalanceDetailModal({
 
   const { data: motives, isLoading: motivesLoading } = useFinancialDiscountMotives();
 
+  const [eligibilityStatuses, setEligibilityStatuses] = useState<EligibilityStatusOption[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setEligibilityStatuses(await getEligibilityStatuses());
+      } catch (error) {
+        console.error("Error fetching eligibility statuses", error);
+      }
+    })();
+  }, []);
+
   useEffect(() => {
     reset(getDefaultValues(saldoData));
     setIsEditing(false);
@@ -97,6 +116,8 @@ export function BalanceDetailModal({
       payload.motive_id = data.motive_id;
     }
     if (dirtyFields.audit_observation) payload.audit_observation = data.audit_observation;
+    if (dirtyFields.eligibility_status && data.eligibility_status)
+      payload.eligibility_status = data.eligibility_status;
 
     const editedDocuments = data.client_documents
       .filter((_, index) => dirtyFields.client_documents?.[index]?.document)
@@ -222,6 +243,42 @@ export function BalanceDetailModal({
               <p className="text-sm font-semibold text-cashport-black">
                 {formatDate(saldoData.created_at)}
               </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Procedencia</p>
+              {isEditing ? (
+                <Controller
+                  control={control}
+                  name="eligibility_status"
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      style={{ width: "100%" }}
+                      options={eligibilityStatuses.map((e) => ({
+                        value: e.id,
+                        label: e.description
+                      }))}
+                      allowClear
+                      placeholder="Selecciona una procedencia"
+                      getPopupContainer={(trigger) => trigger.parentElement!}
+                    />
+                  )}
+                />
+              ) : saldoData.eligibility_status ? (
+                <Badge
+                  variant="outline"
+                  className="text-xs"
+                  style={{
+                    color: saldoData.eligibility_status.status_color,
+                    backgroundColor: saldoData.eligibility_status.background_color,
+                    borderColor: "transparent"
+                  }}
+                >
+                  {saldoData.eligibility_status.description}
+                </Badge>
+              ) : (
+                <p className="text-sm font-semibold text-cashport-black">-</p>
+              )}
             </div>
           </div>
 

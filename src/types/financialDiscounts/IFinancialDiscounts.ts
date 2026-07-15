@@ -71,6 +71,7 @@ export interface IBalance {
 }
 
 export interface IEligibilityStatus {
+  id: number;
   description: string;
   status_color: string;
   background_color: string;
@@ -143,5 +144,6 @@ export interface IBalancesFilter {
   to_date: string | null;
   client_uuid?: string;
   motive_ids?: number[]; // selected motive ids
+  eligibility_status?: string[]; // selected eligibility status ids
   search?: string; // free-text search term
 }

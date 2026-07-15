@@ -20,6 +20,7 @@ interface FiltersBarProps {
   users: IBalancesFilterUser[];
   clients: IBalancesFilterClient[];
   motives: { id: number; name: string }[];
+  eligibilityStatuses: { id: string; description: string }[];
   value: IBalancesFilter;
   onChange: (next: IBalancesFilter) => void;
   isLoading?: boolean;
@@ -28,13 +29,15 @@ interface FiltersBarProps {
 const TAG_PLURALS: Record<string, string> = {
   kam: "KAMs",
   cliente: "Clientes",
-  motivo: "Motivos"
+  motivo: "Motivos",
+  procedencia: "Procedencias"
 };
 
 export function FilterBalancesView({
   users,
   clients,
   motives,
+  eligibilityStatuses,
   value,
   onChange,
   isLoading
@@ -58,13 +61,18 @@ export function FilterBalancesView({
     motivo: toItems(value.motive_ids || [], (id) => ({
       id: String(id),
       name: motives.find((m) => m.id === id)?.name ?? String(id)
+    })),
+    procedencia: toItems(value.eligibility_status || [], (id) => ({
+      id,
+      name: eligibilityStatuses.find((e) => e.id === id)?.description ?? id
     }))
   };
 
   const selectionToDomain = (sel: FilterSelection): Partial<IBalancesFilter> => ({
     users: (sel.kam || []).map((o) => Number(o.id)),
     clients: (sel.cliente || []).map((o) => o.id),
-    motive_ids: (sel.motivo || []).map((o) => Number(o.id))
+    motive_ids: (sel.motivo || []).map((o) => Number(o.id)),
+    eligibility_status: (sel.procedencia || []).map((o) => o.id)
   });
 
   const hasCommittedDate = Boolean(value.from_date || value.to_date);
@@ -84,6 +92,11 @@ export function FilterBalancesView({
       key: "motivo",
       label: "Motivo",
       options: motives.map((m) => ({ id: String(m.id), name: m.name }))
+    },
+    {
+      key: "procedencia",
+      label: "Procedencia",
+      options: eligibilityStatuses.map((e) => ({ id: e.id, name: e.description }))
     },
     {
       key: "fecha",
@@ -137,6 +150,7 @@ export function FilterBalancesView({
           users: [],
           clients: [],
           motive_ids: [],
+          eligibility_status: [],
           from_date: null,
           to_date: null
         })
