@@ -38,6 +38,37 @@
         scrollbar-width: thin;
     }
 
+    &__promptField {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .ant-input {
+            background-color: #f7f7f7;
+            border-radius: 8px;
+            padding: 1rem;
+            resize: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 300;
+            scrollbar-width: thin;
+
+            &:hover,
+            &:focus,
+            &:focus-within,
+            &.ant-input-focused {
+                background-color: #f7f7f7;
+            }
+        }
+    }
+
+    &__label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #909090;
+        margin: 0;
+    }
+
     &__empty {
         color: #8c8c8c;
         margin: 0;
