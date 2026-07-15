@@ -16,17 +16,12 @@ import TasksTable, {
 import UiSearchInput from "@/components/ui/search-input";
 import { Pagination as AntPagination } from "antd";
 import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
-import FiltersTasks, {
-  ISelectFilterTasks
-} from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
+import { ISelectFilterTasks } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
-import ModalFilterSelectDates, {
-  IFormFilterDates
-} from "@/modules/banks/components/modal-filter-select-dates/modal-filter-select-dates";
-import dayjs from "dayjs";
 import { mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import { ModalTaskDetail } from "../../components/modalTaskDetail/ModalTaskDetail";
+import FilterTasksModal from "../../components/FilterTasksModal/FilterTasksModal";
 
 interface FilterState {
   filterState: string | null;
@@ -58,13 +53,9 @@ export const TaskManagerView: React.FC = () => {
     taskTypes: [],
     dates: []
   });
-  const [customDate, setCustomDate] = useState<string>("");
-
   // Derive the ISO date bounds from the selected range ("from|to")
-  const fromDate = selectedFilters.dates?.length
-    ? selectedFilters.dates[0].split("|")[0]
-    : undefined;
-  const toDate = selectedFilters.dates?.length ? selectedFilters.dates[0].split("|")[1] : undefined;
+  const fromDate = selectedFilters.dates[0]?.split("|")[0] || undefined;
+  const toDate = selectedFilters.dates[0]?.split("|")[1] || undefined;
 
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
@@ -165,13 +156,6 @@ export const TaskManagerView: React.FC = () => {
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
-  };
-
-  const handleFilterDates = (data: IFormFilterDates) => {
-    const { start_date, end_date } = data;
-    const range = `${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`;
-    setSelectedFilters((prev) => ({ ...prev, dates: [range] }));
-    setCustomDate(range);
   };
 
   // Selection handlers
@@ -381,11 +365,10 @@ export const TaskManagerView: React.FC = () => {
                 placeholder="Buscar tarea"
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
-              <FiltersTasks
-                setSelectedFilters={setSelectedFilters}
-                handleOpenCustomDate={() => setIsModalOpen({ selected: 3 })}
-                customDate={customDate}
-                setCustomDate={setCustomDate}
+              <FilterTasksModal
+                taskTypes={taskTypes}
+                value={selectedFilters}
+                onChange={setSelectedFilters}
               />
               <GenerateActionButton
                 onClick={() => {
@@ -423,12 +406,6 @@ export const TaskManagerView: React.FC = () => {
         }}
         taskTypes={taskTypes}
         onTaskUpdated={handleTaskStatusChanged}
-      />
-
-      <ModalFilterSelectDates
-        isOpen={isModalOpen.selected === 3}
-        onClose={() => setIsModalOpen({ selected: 0 })}
-        selectDates={handleFilterDates}
       />
     </main>
   );
