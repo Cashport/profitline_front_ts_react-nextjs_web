@@ -4,6 +4,7 @@ import { ArrowsClockwise, DownloadSimple } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalChangeBalanceStatus } from "../ModalChangeBalanceStatus/ModalChangeBalanceStatus";
+import { ModalChangeBalanceEligibility } from "../ModalChangeBalanceEligibility/ModalChangeBalanceEligibility";
 import { downloadBalanceAuditExcel } from "@/services/balances/balances";
 
 import "@/components/molecules/modals/ModalActionAccountingAdjustments/modalActionAccountingAdjustments.scss";
@@ -22,6 +23,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
   onSuccess
 }) => {
   const [isChangeStatusOpen, setIsChangeStatusOpen] = useState(false);
+  const [isChangeEligibilityOpen, setIsChangeEligibilityOpen] = useState(false);
   const [isDownloadLoading, setIsDownloadLoading] = useState(false);
 
   const downloadFileFromUrl = (url: string, filename: string) => {
@@ -46,9 +48,7 @@ export const ModalBalancesActions: React.FC<Props> = ({
       message.success("Descarga exitosa");
       onClose();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar el archivo"
-      );
+      message.error(error instanceof Error ? error.message : "Error al descargar el archivo");
       console.error(error);
     } finally {
       hide();
@@ -84,6 +84,16 @@ export const ModalBalancesActions: React.FC<Props> = ({
               }}
             />
           )}
+          {balanceIds.length > 0 && (
+            <ButtonGenerateAction
+              icon={<ArrowsClockwise size={20} />}
+              title="Cambiar procedencia"
+              onClick={() => {
+                setIsChangeEligibilityOpen(true);
+                onClose();
+              }}
+            />
+          )}
         </div>
       </Modal>
 
@@ -94,6 +104,17 @@ export const ModalBalancesActions: React.FC<Props> = ({
         onSuccess={() => {
           onSuccess();
           setIsChangeStatusOpen(false);
+          onClose();
+        }}
+      />
+
+      <ModalChangeBalanceEligibility
+        isOpen={isChangeEligibilityOpen}
+        onClose={() => setIsChangeEligibilityOpen(false)}
+        balanceIds={balanceIds}
+        onSuccess={() => {
+          onSuccess();
+          setIsChangeEligibilityOpen(false);
           onClose();
         }}
       />

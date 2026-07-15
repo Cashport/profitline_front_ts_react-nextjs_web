@@ -147,3 +147,18 @@ export const getEligibilityStatuses = async (): Promise<EligibilityStatusOption[
   );
   return response.data;
 };
+
+export const changeBalanceEligibility = async (
+  balanceIds: number[],
+  eligibilityStatusId: number
+) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/financial-discount/balances/eligibility-status`,
+      { balanceIds, eligibilityStatusId }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
