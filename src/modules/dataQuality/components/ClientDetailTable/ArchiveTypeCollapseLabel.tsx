@@ -41,7 +41,7 @@ export function ArchiveTypeCollapseLabel({
             {group.tipo_archivo}
           </Badge>
           <span className="text-xs pr-3 font-medium" style={{ color: "#141414", opacity: 0.5 }}>
-            {group.pending_archives} / {group.total_archives} Pendientes
+            {group.pending_archives} Pendientes
           </span>
         </div>
         {intake && (
