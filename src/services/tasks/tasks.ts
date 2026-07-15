@@ -31,10 +31,18 @@ export const getTaskTypes = async (): Promise<ITaskTypes[]> => {
   }
 };
 
-export const getTaskTabs = async (): Promise<ITaskTabState[]> => {
+export const getTaskTabs = async (dates?: {
+  from_date?: string;
+  to_date?: string;
+}): Promise<ITaskTabState[]> => {
+  const params = new URLSearchParams();
+  if (dates?.from_date) params.append("from_date", dates.from_date);
+  if (dates?.to_date) params.append("to_date", dates.to_date);
+  const query = params.toString() ? `?${params.toString()}` : "";
+
   try {
     const response: GenericResponse<ITaskTabState[]> = await API.get(
-      `${config.API_HOST}/task/counts-by-status`
+      `${config.API_HOST}/task/counts-by-status${query}`
     );
     return response.data;
   } catch (error) {
@@ -44,9 +52,15 @@ export const getTaskTabs = async (): Promise<ITaskTabState[]> => {
 
 export const getTasksByStatus = async (
   statusId: string,
-  page: number = 1
+  page: number = 1,
+  dates?: { from_date?: string; to_date?: string }
 ): Promise<ITaskByStatus> => {
-  const body = { page, limit: 25 };
+  const body = {
+    page,
+    limit: 25,
+    ...(dates?.from_date && { from_date: dates.from_date }),
+    ...(dates?.to_date && { to_date: dates.to_date })
+  };
 
   try {
     const response: GenericResponse<ITaskByStatus> = await API.post(

@@ -20,6 +20,10 @@ import FiltersTasks, {
   ISelectFilterTasks
 } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import ModalFilterSelectDates, {
+  IFormFilterDates
+} from "@/modules/banks/components/modal-filter-select-dates/modal-filter-select-dates";
+import dayjs from "dayjs";
 import { mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import { ModalTaskDetail } from "../../components/modalTaskDetail/ModalTaskDetail";
@@ -51,8 +55,16 @@ export const TaskManagerView: React.FC = () => {
 
   const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
     statuses: [],
-    taskTypes: []
+    taskTypes: [],
+    dates: []
   });
+  const [customDate, setCustomDate] = useState<string>("");
+
+  // Derive the ISO date bounds from the selected range ("from|to")
+  const fromDate = selectedFilters.dates?.length
+    ? selectedFilters.dates[0].split("|")[0]
+    : undefined;
+  const toDate = selectedFilters.dates?.length ? selectedFilters.dates[0].split("|")[1] : undefined;
 
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
@@ -87,10 +99,14 @@ export const TaskManagerView: React.FC = () => {
     data: tabsData,
     isLoading: isLoadingTabs,
     mutate: mutateTasksCount
-  } = useSWR("taskTabs", getTaskTabs, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true
-  });
+  } = useSWR(
+    ["taskTabs", fromDate, toDate],
+    () => getTaskTabs({ from_date: fromDate, to_date: toDate }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true
+    }
+  );
 
   useEffect(() => {
     if (tabsData && !isLoadingTabs) {
@@ -106,7 +122,10 @@ export const TaskManagerView: React.FC = () => {
     if (activeTabKey) {
       setIsLoadingPagination(true);
       try {
-        const response = await getTasksByStatus(activeTabKey, 1);
+        const response = await getTasksByStatus(activeTabKey, 1, {
+          from_date: fromDate,
+          to_date: toDate
+        });
         const tasksArray = response?.tasks ?? [];
         setTasksByStatus((prev) => ({
           ...prev,
@@ -126,7 +145,7 @@ export const TaskManagerView: React.FC = () => {
         setIsLoadingPagination(false);
       }
     }
-  }, [activeTabKey]);
+  }, [activeTabKey, fromDate, toDate]);
 
   // After a task status change: refresh the active tab's list AND revalidate the tab counts
   const handleTaskStatusChanged = useCallback(() => {
@@ -146,6 +165,13 @@ export const TaskManagerView: React.FC = () => {
 
   const handleOpenModal = (selected: number) => {
     setIsModalOpen({ selected });
+  };
+
+  const handleFilterDates = (data: IFormFilterDates) => {
+    const { start_date, end_date } = data;
+    const range = `${dayjs(start_date).format("YYYY-MM-DD")}|${dayjs(end_date).format("YYYY-MM-DD")}`;
+    setSelectedFilters((prev) => ({ ...prev, dates: [range] }));
+    setCustomDate(range);
   };
 
   // Selection handlers
@@ -194,7 +220,10 @@ export const TaskManagerView: React.FC = () => {
   const handlePageChange = async (statusId: string, page: number) => {
     setIsLoadingPagination(true);
     try {
-      const response = await getTasksByStatus(statusId, page);
+      const response = await getTasksByStatus(statusId, page, {
+        from_date: fromDate,
+        to_date: toDate
+      });
       setTasksByStatus((prev) => ({
         ...prev,
         [statusId]: response?.tasks ?? []
@@ -352,7 +381,12 @@ export const TaskManagerView: React.FC = () => {
                 placeholder="Buscar tarea"
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
-              <FiltersTasks setSelectedFilters={setSelectedFilters} />
+              <FiltersTasks
+                setSelectedFilters={setSelectedFilters}
+                handleOpenCustomDate={() => setIsModalOpen({ selected: 3 })}
+                customDate={customDate}
+                setCustomDate={setCustomDate}
+              />
               <GenerateActionButton
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });
@@ -389,6 +423,12 @@ export const TaskManagerView: React.FC = () => {
         }}
         taskTypes={taskTypes}
         onTaskUpdated={handleTaskStatusChanged}
+      />
+
+      <ModalFilterSelectDates
+        isOpen={isModalOpen.selected === 3}
+        onClose={() => setIsModalOpen({ selected: 0 })}
+        selectDates={handleFilterDates}
       />
     </main>
   );
