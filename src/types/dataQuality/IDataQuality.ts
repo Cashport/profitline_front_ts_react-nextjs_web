@@ -523,6 +523,7 @@ export interface IDataExplorationClient {
   dates: IDataExplorationDate[];
   totals: IDataExplorationTotals;
   last_month: ILastMonthDataExploration | null;
+  periodicity: string | null;
 }
 
 export interface IGetDataExploration {
