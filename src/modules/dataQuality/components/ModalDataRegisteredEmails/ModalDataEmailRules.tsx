@@ -13,7 +13,7 @@ import { isValidEmail } from "@/modules/commerce/utils/constants/checkout";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { IDataEmail } from "@/types/dataQuality/IDataQuality";
 
-import "./modalDataRegisteredEmails.scss";
+import "./modalDataEmailRules.scss";
 
 interface Props {
   isOpen: boolean;
@@ -21,7 +21,7 @@ interface Props {
   clientId: number;
 }
 
-export const ModalDataRegisteredEmails: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
+export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId }) => {
   const [existingEmails, setExistingEmails] = useState<IDataEmail[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newEmails, setNewEmails] = useState<string[]>([]);
@@ -154,35 +154,34 @@ export const ModalDataRegisteredEmails: React.FC<Props> = ({ isOpen, onClose, cl
       footer={null}
       centered
       destroyOnClose
-      className="modalDataRegisteredEmails"
+      className="modalDataEmailRules"
     >
-      <div className="modalDataRegisteredEmails__content">
+      <div className="modalDataEmailRules__content">
         {isLoading ? (
-          <div className="modalDataRegisteredEmails__loader">
+          <div className="modalDataEmailRules__loader">
             <Spin />
           </div>
         ) : (
-          <div className="modalDataRegisteredEmails__list">
-            <div className="modalDataRegisteredEmails__promptField">
-              <p className="modalDataRegisteredEmails__label">Prompt</p>
+          <div className="modalDataEmailRules__list">
+            <div className="modalDataEmailRules__promptField">
+              <p className="modalDataEmailRules__label">Prompt</p>
               <Input.TextArea
                 value={aiContext}
-                placeholder="Reglas específicas para este cliente..."
                 autoSize={{ minRows: 3, maxRows: 8 }}
                 onChange={(e) => setAiContext(e.target.value)}
               />
             </div>
 
             {existingEmails.length === 0 && newEmails.length === 0 && (
-              <p className="modalDataRegisteredEmails__empty">No hay correos registrados.</p>
+              <p className="modalDataEmailRules__empty">No hay correos registrados.</p>
             )}
 
             {existingEmails.map((rule) => (
-              <div key={rule.id} className="modalDataRegisteredEmails__row">
-                <span className="modalDataRegisteredEmails__email">{rule.sender}</span>
+              <div key={rule.id} className="modalDataEmailRules__row">
+                <span className="modalDataEmailRules__email">{rule.sender}</span>
                 <button
                   type="button"
-                  className="modalDataRegisteredEmails__iconButton"
+                  className="modalDataEmailRules__iconButton"
                   onClick={() => handleDelete(rule)}
                   aria-label="Eliminar correo"
                 >
@@ -194,9 +193,9 @@ export const ModalDataRegisteredEmails: React.FC<Props> = ({ isOpen, onClose, cl
             {newEmails.map((email, index) => {
               const isInvalid = email.trim().length > 0 && !isValidEmail(email);
               return (
-                <div key={`new-${index}`} className="modalDataRegisteredEmails__newItem">
-                  <div className="modalDataRegisteredEmails__row">
-                    <div className="modalDataRegisteredEmails__field">
+                <div key={`new-${index}`} className="modalDataEmailRules__newItem">
+                  <div className="modalDataEmailRules__row">
+                    <div className="modalDataEmailRules__field">
                       <Input
                         value={email}
                         placeholder="correo@ejemplo.com"
@@ -206,32 +205,26 @@ export const ModalDataRegisteredEmails: React.FC<Props> = ({ isOpen, onClose, cl
                     </div>
                     <button
                       type="button"
-                      className="modalDataRegisteredEmails__iconButton"
+                      className="modalDataEmailRules__iconButton"
                       onClick={() => handleRemoveNewRow(index)}
                       aria-label="Quitar correo"
                     >
                       <X size={14} />
                     </button>
                   </div>
-                  {isInvalid && (
-                    <p className="modalDataRegisteredEmails__error">Correo no válido</p>
-                  )}
+                  {isInvalid && <p className="modalDataEmailRules__error">Correo no válido</p>}
                 </div>
               );
             })}
 
-            <button
-              type="button"
-              className="modalDataRegisteredEmails__addButton"
-              onClick={handleAddRow}
-            >
+            <button type="button" className="modalDataEmailRules__addButton" onClick={handleAddRow}>
               <Plus size={18} />
               Agregar correo
             </button>
           </div>
         )}
 
-        <div className="modalDataRegisteredEmails__footer">
+        <div className="modalDataEmailRules__footer">
           <PrincipalButton
             onClick={handleSave}
             loading={isSaving}
