@@ -1,18 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import useSWR from "swr";
-import { Button } from "antd";
 import { ChevronDown, ChevronRight, TrendingUp } from "lucide-react";
-import { CaretLeft } from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { getSalesDashboard } from "@/services/commerce/commerce";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/modules/chat/ui/card";
 import { Tooltip, TooltipProvider, TooltipTrigger } from "@/modules/chat/ui/tooltip";
-import { ISalesDashboardSellerLeader } from "@/types/commerce/ICommerce";
+import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { appendSalesFilterParams } from "@/modules/commerce/hooks/revenue-tracking/salesFilterParams";
 
 type SortColumn =
   | "total_sales_in_process"
@@ -28,7 +26,15 @@ type SortDirection = "asc" | "desc";
 export default function SalesTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
-  const { data: salesData, isLoading } = useSWR("/sales/dashboard", getSalesDashboard);
+  const { filters } = useRevenueTracking();
+  const { data: salesData, isLoading } = useSWR(
+    () => {
+      const params = new URLSearchParams();
+      appendSalesFilterParams(params, filters);
+      return `/galderma-dashboard/sellers?${params.toString()}`;
+    },
+    (_key: string) => getSalesDashboard(filters)
+  );
 
   const [expandedSellerLeaders, setExpandedSellerLeaders] = useState<Set<string>>(
     new Set(["regional 1", "regional 2", "regional 3"])

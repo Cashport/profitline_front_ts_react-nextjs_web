@@ -183,7 +183,7 @@ const CreateOrderSearchClient: FC = () => {
       address: selectedAddress.dispatch_address,
       city: selectedAddress.city,
       dispatch_address: selectedAddress.dispatch_address,
-      email: selectedAddress.email || "",
+      email: selectedAddress.email || selectedClient.client_email || "",
       phone_number: "",
       comments: ""
     };
