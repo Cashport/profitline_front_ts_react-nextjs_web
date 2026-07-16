@@ -20,6 +20,8 @@ import {
   IWarehouseProductsStock
 } from "@/types/commerce/ICommerce";
 import { MessageType } from "@/context/MessageContext";
+import { FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { appendSalesFilterParams } from "@/modules/commerce/hooks/revenue-tracking/salesFilterParams";
 
 export const getAllOrders = async (projectId: number) => {
   const response: GenericResponse<IOrderData[]> = await API.get(
@@ -457,9 +459,14 @@ export const changeStatusOrder = async (orderId: number) => {
 
 // For dashboard sales data
 
-export const getSalesDashboard = async () => {
+export const getSalesDashboard = async (filters: Record<string, FilterOption[]> = {}) => {
   try {
-    const response: GenericResponse<ISalesDashboard> = await API.get(`/galderma-dashboard/sellers`);
+    const params = new URLSearchParams();
+    appendSalesFilterParams(params, filters);
+    const queryString = params.toString();
+    const response: GenericResponse<ISalesDashboard> = await API.get(
+      `/galderma-dashboard/sellers?${queryString}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching sales dashboard data:", error);
