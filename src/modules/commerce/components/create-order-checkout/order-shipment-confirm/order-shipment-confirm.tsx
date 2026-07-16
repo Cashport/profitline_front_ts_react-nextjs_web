@@ -233,7 +233,7 @@ export default function OrderShipmentConfirm({
           addressId: sel.id,
           city: sel.city,
           dispatch_address: sel.address,
-          email: f.email || sel.email
+          email: f.email || sel.email || client?.email || ""
         }));
       }
     }
@@ -752,6 +752,7 @@ export default function OrderShipmentConfirm({
               bonusAsignadasExcluyendo={bonusAsignadasExcluyendo}
               otherBonusAsignadasExcluyendo={otherBonusAsignadasExcluyendo}
               addresses={addresses}
+              clientEmail={client?.email}
               callingCodeOptions={callingCodeOptions}
               isLoadingOptions={isLoadingOptions}
             />
