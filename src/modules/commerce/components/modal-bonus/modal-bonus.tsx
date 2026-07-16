@@ -51,7 +51,7 @@ const ModalBonus = ({
   const [activeTab, setActiveTab] = useState(0);
   const [poolQty, setPoolQty] = useState<Record<number, Record<number, number>>>({});
   const [otherQty, setOtherQty] = useState<Record<number, number>>(() =>
-    Object.fromEntries(otherBonificated.map((p) => [p.product_id, p.qty]))
+    Object.fromEntries(otherBonificated.map((p) => [p.product_id, 0]))
   );
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const ModalBonus = ({
   // frequent cart refetch (which hands back a new array each time) doesn't wipe
   // the user's in-progress input back to the seed value
   useEffect(() => {
-    setOtherQty(Object.fromEntries(otherBonificated.map((p) => [p.product_id, p.qty])));
+    setOtherQty(Object.fromEntries(otherBonificated.map((p) => [p.product_id, 0])));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otherKey]);
 
