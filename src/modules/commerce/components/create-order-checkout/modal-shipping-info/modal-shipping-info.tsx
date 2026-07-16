@@ -36,6 +36,7 @@ interface ModalShippingInfoProps {
   addresses: ICommerceAdresses[];
   callingCodeOptions: { value: number; label: string; className: string }[];
   isLoadingOptions: boolean;
+  clientEmail?: string;
 }
 
 export default function ModalShippingInfo({
@@ -52,7 +53,8 @@ export default function ModalShippingInfo({
   otherBonusAsignadasExcluyendo,
   addresses,
   callingCodeOptions,
-  isLoadingOptions
+  isLoadingOptions,
+  clientEmail
 }: ModalShippingInfoProps) {
   const { projectId, formatMoney } = useAppStore((s) => ({
     projectId: s.selectedProject.ID,
@@ -156,7 +158,7 @@ export default function ModalShippingInfo({
           addressId: sel.id,
           city: sel.city,
           dispatch_address: sel.address,
-          email: d.email || sel.email
+          email: d.email || sel.email || clientEmail || ""
         }));
       }
     }
