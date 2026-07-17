@@ -319,6 +319,26 @@ export const downloadSalesDetailExcel = async (
     throw error;
   }
 };
+export const downloadBillingDetailExcel = async (
+  projectId: number,
+  startDate?: string,
+  endDate?: string
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const params: Record<string, string> = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/billing-detail/excel`,
+      { params }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching billing detail excel:", error);
+    throw error;
+  }
+};
+
 export const getInventoriesWarehouse = async (projectId: number, orderIds: number[]) => {
   try {
     const form = {
