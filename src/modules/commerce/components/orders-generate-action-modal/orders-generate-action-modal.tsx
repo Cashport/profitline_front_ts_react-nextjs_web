@@ -14,6 +14,7 @@ import { createAndDownloadTxt } from "@/utils/utils";
 import {
   changeOrderState,
   changeStatusOrder,
+  downloadBillingDetailExcel,
   downloadBillingReportExcel,
   downloadSalesDetailExcel,
   dowloadOrderCSV,
@@ -53,6 +54,7 @@ export const OrdersGenerateActionModal = ({
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
+  const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
 
   const validateOrdersSelected = (): boolean => {
@@ -128,6 +130,27 @@ export const OrdersGenerateActionModal = ({
     } finally {
       hide();
       setIsBillingReportLoading(false);
+    }
+  };
+
+  const handleDownloadBillingDetail = async () => {
+    setIsBillingDetailLoading(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando informe de facturación detallado...",
+      duration: 0
+    });
+    try {
+      const res = await downloadBillingDetailExcel(projectId);
+      downloadFileFromUrl(res.url, res.filename);
+      showMessage("success", "Descarga exitosa");
+      onClose();
+    } catch (error) {
+      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      console.error(error);
+    } finally {
+      hide();
+      setIsBillingDetailLoading(false);
     }
   };
 
@@ -238,6 +261,12 @@ export const OrdersGenerateActionModal = ({
             icon={<DownloadSimple size={16} />}
             title="Descargar informe de facturación"
             disabled={isBillingReportLoading}
+          />
+          <ButtonGenerateAction
+            onClick={handleDownloadBillingDetail}
+            icon={<DownloadSimple size={16} />}
+            title="Descargar informe de facturación detallado"
+            disabled={isBillingDetailLoading}
           />
           <ButtonGenerateAction
             onClick={handleDownloadSalesDetail}
