@@ -38,6 +38,7 @@ export function ClientDetailArchives({
     end: null
   });
   const [showProcessed, setShowProcessed] = useState<number[]>([]);
+  const [showFuture, setShowFuture] = useState<number[]>([]);
   const [isCreateFileModalOpen, setIsCreateFileModalOpen] = useState(false);
   const [intakeModal, setIntakeModal] = useState({
     isOpen: false,
@@ -50,7 +51,7 @@ export function ClientDetailArchives({
     archivesByType,
     isValidating: isArchivesValidating,
     mutate: mutateArchives
-  } = useArchivesClientDataByType(clientId, dateRange.start, dateRange.end, showProcessed);
+  } = useArchivesClientDataByType(clientId, dateRange.start, dateRange.end, showProcessed, showFuture);
 
   // Aggregate per-type counts so the parent can render the "Mostrando X de Y" footer.
   // `shown` counts the rows actually returned/displayed (grows when "show processed" is
@@ -123,6 +124,14 @@ export function ClientDetailArchives({
     );
   };
 
+  const toggleShowFuture = (idTypeArchive: number) => {
+    setShowFuture((prev) =>
+      prev.includes(idTypeArchive)
+        ? prev.filter((id) => id !== idTypeArchive)
+        : [...prev, idTypeArchive]
+    );
+  };
+
   const filterMenu = (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 p-4">
       <DateRangeFilter
@@ -188,6 +197,8 @@ export function ClientDetailArchives({
                   intake={intake}
                   active={showProcessed.includes(group.id_type_archive)}
                   onToggle={() => toggleShowProcessed(group.id_type_archive)}
+                  futureActive={showFuture.includes(group.id_type_archive)}
+                  onToggleFuture={() => toggleShowFuture(group.id_type_archive)}
                   onViewIntake={() => handleOpenIntakeModal("view", intake)}
                 />
               ),

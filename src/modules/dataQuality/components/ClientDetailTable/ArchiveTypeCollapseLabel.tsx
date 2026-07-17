@@ -1,4 +1,4 @@
-import { CheckCircle, X } from "phosphor-react";
+import { ArrowCircleRight, CheckCircle, X } from "phosphor-react";
 import { Eye } from "lucide-react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -16,6 +16,8 @@ interface IArchiveTypeCollapseLabelProps {
   intake?: IClientDetailDataArchive | null;
   active: boolean;
   onToggle: () => void;
+  futureActive: boolean;
+  onToggleFuture: () => void;
   onViewIntake?: () => void;
 }
 
@@ -24,6 +26,8 @@ export function ArchiveTypeCollapseLabel({
   intake,
   active,
   onToggle,
+  futureActive,
+  onToggleFuture,
   onViewIntake
 }: IArchiveTypeCollapseLabelProps) {
   return (
@@ -84,6 +88,27 @@ export function ArchiveTypeCollapseLabel({
             color={active ? CASHPORT_GREEN : GRAY}
           />
           {active && <X size={14} color={GRAY} />}
+        </button>
+        <button
+          type="button"
+          aria-pressed={futureActive}
+          title={futureActive ? "Ocultar futuros" : "Mostrar futuros"}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFuture();
+          }}
+          className="flex items-center gap-1 rounded-full transition-colors"
+          style={{
+            backgroundColor: futureActive ? CASHPORT_GREEN_SOFT : "transparent",
+            padding: futureActive ? "2px 6px" : "2px"
+          }}
+        >
+          <ArrowCircleRight
+            size={20}
+            weight={futureActive ? "fill" : "regular"}
+            color={futureActive ? CASHPORT_GREEN : GRAY}
+          />
+          {futureActive && <X size={14} color={GRAY} />}
         </button>
         {intake && (
           <Button
