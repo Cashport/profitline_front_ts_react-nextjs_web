@@ -46,6 +46,10 @@ const formatDate = (isoDateString: string): string => {
   return dayjs(isoDateString).format("YYYY-MM-DD");
 };
 
+const formatDateTime = (isoDateString: string): string => {
+  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
+};
+
 export function ClientDetailTable({
   archives: files,
   clientName,
@@ -327,7 +331,7 @@ export function ClientDetailTable({
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4" style={{ color: "#141414" }} />
                     <span style={{ color: "#141414" }}>
-                      {file.date_upload ? formatDate(file.date_upload) : "-"}
+                      {file.date_upload ? formatDateTime(file.date_upload) : "-"}
                     </span>
                   </div>
                 </TableCell>
