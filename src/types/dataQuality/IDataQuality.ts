@@ -186,6 +186,7 @@ export interface IClientDetailArchiveClient {
   status_bg_color: string;
   date_upload: string | null;
   user_upload: string | null;
+  uploader_user: string | null;
   size: number;
   procesed_url: string | null;
   evidence_url: string | null;

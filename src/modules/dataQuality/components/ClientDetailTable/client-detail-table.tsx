@@ -284,6 +284,7 @@ export function ClientDetailTable({
               <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha archivo</TableHead>
               <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre</TableHead>
               <TableHead style={{ color: "#141414", fontWeight: 600 }}>Fecha cargue</TableHead>
+              <TableHead style={{ color: "#141414", fontWeight: 600 }}>Usuario</TableHead>
               <TableHead style={{ color: "#141414", fontWeight: 600 }}>Tamaño</TableHead>
               <TableHead style={{ color: "#141414", fontWeight: 600 }}>Estado</TableHead>
               <TableHead className="w-0" style={{ color: "#141414", fontWeight: 600 }}>
@@ -329,6 +330,9 @@ export function ClientDetailTable({
                       {file.date_upload ? formatDate(file.date_upload) : "-"}
                     </span>
                   </div>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{file.uploader_user || "-"}</span>
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{bytesToMB(file.size)}</span>
