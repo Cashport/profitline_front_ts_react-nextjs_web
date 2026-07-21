@@ -107,7 +107,8 @@ export default function ChatFooter({
         status: "SENT",
         timestamp: new Date().toISOString(),
         mediaUrl: null,
-        metadata: {}
+        metadata: {},
+        authorType: null
       };
 
       mutate((currentData) => {
