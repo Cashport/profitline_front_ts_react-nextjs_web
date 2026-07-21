@@ -284,7 +284,6 @@ const OrdersViewTable = ({
                 key: "verBodega",
                 label: (
                   <Button
-                    disabled={row.order_status === "Pedidos en proceso"}
                     icon={<WarningDiamond size={20} />}
                     className="buttonNoBorder"
                     onClick={() => {
