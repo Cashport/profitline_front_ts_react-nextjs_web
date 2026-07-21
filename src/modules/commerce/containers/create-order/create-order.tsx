@@ -111,6 +111,7 @@ export const CreateOrderView: FC = () => {
     const fetchDiscounts = async () => {
       setSelectedDiscount(undefined);
       if (!client?.id || !selectedProject?.ID) return;
+      console.log(client);
 
       setDiscountsLoading(true);
       try {
@@ -141,7 +142,11 @@ export const CreateOrderView: FC = () => {
     if (!draftInfo.client_name || !draftId || !projectId) return;
     const fetchDraft = async () => {
       const draftResponse = await getOrderDraft(projectId, draftId);
-      const productsResponse = await getProductsByClient(projectId, draftResponse.client_id);
+      const productsResponse = await getProductsByClient(
+        projectId,
+        draftResponse.order_summary?.client?.id,
+        draftResponse.order_summary.bussines_untit
+      );
       if (productsResponse.data) {
         const categoriesList: IFetchedCategories[] = productsResponse.data.map((category) => ({
           category: category.category,
@@ -176,16 +181,9 @@ export const CreateOrderView: FC = () => {
   useEffect(() => {
     if (!draftDetail || categories.length === 0) return;
 
-    const { nit_id, client_name, client_id, shipping_info, order_summary, executive_discounts } =
-      draftDetail;
+    const { shipping_info, order_summary, executive_discounts } = draftDetail;
 
-    setClient({
-      name: client_name,
-      id: client_id,
-      email: shipping_info?.email ?? "",
-      payment_type: 1,
-      nit_id: nit_id || client_id
-    });
+    if (order_summary.client) setClient({ ...order_summary.client });
     setShippingInfo(shipping_info);
     // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
     setChannelCode("");

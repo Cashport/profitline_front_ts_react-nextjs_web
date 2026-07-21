@@ -803,13 +803,13 @@ export default function OrderShipmentConfirm({
 
           {/* Actions */}
           <div className="flex gap-3 pt-2 pb-1 flex-shrink-0">
-            {/* <button
+            <button
               onClick={onDraft}
               disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
               className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingDraft ? "Guardando…" : "Guardar borrador"}
-            </button> */}
+            </button>
             <button
               onClick={onConfirm}
               disabled={

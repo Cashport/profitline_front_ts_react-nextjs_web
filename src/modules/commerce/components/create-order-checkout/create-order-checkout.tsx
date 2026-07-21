@@ -194,7 +194,9 @@ export default function CheckoutPage() {
       },
       discount_package: selectedDiscount as IDiscountPackageAvailable,
       executive_discounts: executiveDiscounts,
-      deactivate_cross_selling: !deactivateCrossSelling
+      deactivate_cross_selling: !deactivateCrossSelling,
+      client: client,
+      bussines_untit: businessUnit
     };
 
     // El range_promotion_id es el id del rango activo
@@ -214,6 +216,7 @@ export default function CheckoutPage() {
       order_split_details: splitDetails,
       promotion_id: bonus?.id || undefined,
       nit_id: channelCode,
+      draft_id: draftInfo?.id,
       // business_unit solo se envía cuando el usuario eligió un canal
       // (client_bu[n].bu_name). Es opcional y solo aplica a marketplace.
       ...(businessUnit ? { business_unit: businessUnit } : {}),
@@ -230,24 +233,6 @@ export default function CheckoutPage() {
       }
       const payload = buildOrderPayload(isElectronic);
       const paymentSupportFile = selectedPaymentSupport[0];
-
-      if (draftInfo?.id) {
-        const response = (await createOrderFromDraft(
-          projectId,
-          client.id,
-          draftInfo.id,
-          payload,
-          showMessage,
-          paymentSupportFile
-        )) as GenericResponse<{ id_order: number }>;
-
-        if (response.status === 200) {
-          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
-          router.prefetch(url);
-          router.push(url);
-        }
-        return;
-      }
 
       const response = await createOrder(
         projectId,
