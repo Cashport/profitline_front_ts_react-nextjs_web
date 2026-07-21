@@ -70,6 +70,13 @@ export interface IBalance {
   created_at: string;
 }
 
+export interface IEligibilityStatus {
+  id: number;
+  description: string;
+  status_color: string;
+  background_color: string;
+}
+
 // One balance row as returned by getBalancesByProject (keys are the SQL aliases)
 export interface IBalanceRow {
   id: number;
@@ -95,6 +102,7 @@ export interface IBalanceRow {
   client_documents: IClientDocument[] | null;
   COMMENTS?: string | null;
   comments?: string | null;
+  eligibility_status: IEligibilityStatus | null;
 }
 
 export interface IClientDocument {
@@ -136,5 +144,6 @@ export interface IBalancesFilter {
   to_date: string | null;
   client_uuid?: string;
   motive_ids?: number[]; // selected motive ids
+  eligibility_status?: string[]; // selected eligibility status ids
   search?: string; // free-text search term
 }
