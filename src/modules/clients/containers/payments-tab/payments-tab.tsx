@@ -202,7 +202,12 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
             items={filteredData?.map((PaymentStatus) => ({
               key: PaymentStatus.payments_status_id,
               label: (
-                <LabelCollapse status={PaymentStatus.payments_status} color={PaymentStatus.color} />
+                <LabelCollapse
+                  status={PaymentStatus.payments_status}
+                  color={PaymentStatus.color}
+                  total={PaymentStatus.total_account}
+                  quantity={PaymentStatus.payments_count}
+                />
               ),
               children: (
                 <PaymentsTable

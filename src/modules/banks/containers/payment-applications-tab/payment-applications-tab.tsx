@@ -16,6 +16,7 @@ import ModalFilterSelectDates from "../../components/modal-filter-select-dates";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import PaymentApplicationsTable from "../../components/payment-applications-table/PaymentApplicationsTable";
+import ModalActionsPaymentApplications from "../../components/modal-actions-payment-applications";
 
 import { ISingleBank } from "@/types/banks/IBanks";
 import { IClientPayment } from "@/types/clientPayments/IClientPayments";
@@ -24,12 +25,17 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 
 import styles from "./payment-applications-tab.module.scss";
 import { usePaymentApplications } from "@/hooks/usePaymentApplications";
+import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
 
 interface PaymentApplicationsTabProps {
   isActive: boolean;
+  transactionType: PaymentTransactionType[];
 }
 
-export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActive }) => {
+export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({
+  isActive,
+  transactionType
+}) => {
   const [selectedRows, setSelectedRows] = useState<IPaymentApplication[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -44,7 +50,12 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActi
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = usePaymentApplications({ selectedFilters, searchQuery, enabled: isActive });
+  const { data, isLoading, mutate } = usePaymentApplications({
+    selectedFilters,
+    searchQuery,
+    enabled: isActive,
+    transaction_type: transactionType
+  });
 
   const handleActionInDetail = (selectedPayment: ISingleBank | IClientPayment): void => {
     setisGenerateActionOpen(!isGenerateActionOpen);
@@ -146,6 +157,12 @@ export const PaymentApplicationsTab: FC<PaymentApplicationsTabProps> = ({ isActi
             isOpen={isSelectOpen.selected === 7}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             selectDates={handleFilterDates}
+          />
+
+          <ModalActionsPaymentApplications
+            isOpen={isGenerateActionOpen}
+            onClose={() => setisGenerateActionOpen(false)}
+            selectedRows={selectedRows}
           />
         </Flex>
       )}
