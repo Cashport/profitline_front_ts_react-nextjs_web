@@ -4,6 +4,8 @@ import {
   Checks,
   Clock,
   FileArrowDown,
+  Robot,
+  User,
   WarningCircle
 } from "@phosphor-icons/react";
 
@@ -75,9 +77,26 @@ function ReadStatus({ mine, status }: { mine: boolean; status: string }) {
   return iconMap[status] ?? null;
 }
 
-function Footer({ timestamp, mine, status }: { timestamp: string; mine: boolean; status: string }) {
+function AuthorIcon({ authorType }: { authorType: IMessage["authorType"] }) {
+  if (!authorType) return null;
+  const Icon = authorType === "BOT" ? Robot : User;
+  return <Icon size={15} color="#CBE71E" />;
+}
+
+function Footer({
+  timestamp,
+  mine,
+  status,
+  authorType
+}: {
+  timestamp: string;
+  mine: boolean;
+  status: string;
+  authorType: IMessage["authorType"];
+}) {
   return (
     <div className="flex items-center justify-end gap-1 mt-1">
+      {mine && <AuthorIcon authorType={authorType} />}
       <div className="text-[11px] text-[#9c9c9c]">{formatTime(timestamp)}</div>
       <ReadStatus mine={mine} status={status} />
     </div>
@@ -122,7 +141,9 @@ export default function BubbleMessage({
   onMediaLoad
 }: BubbleMessageProps) {
   const mine = m.direction === "OUTBOUND";
-  const footer = <Footer timestamp={m.timestamp} mine={mine} status={m.status} />;
+  const footer = (
+    <Footer timestamp={m.timestamp} mine={mine} status={m.status} authorType={m.authorType} />
+  );
 
   const aditionals = m.metadata?.aditionals;
   if (aditionals?.type === "reaction" && aditionals?.reaction?.emoji) {

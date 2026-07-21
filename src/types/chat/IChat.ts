@@ -62,6 +62,7 @@ export interface IMessage {
       email: string;
     };
   };
+  authorType: "BOT" | "HUMAN_AGENT" | "CUSTOMER" | null;
 }
 
 interface IPagination {
@@ -124,11 +125,24 @@ export interface IMessageSocket {
   updatedAt: string;
   customer: ICustomerSocket;
   ticket: ITicketSocket;
+  authorType: "BOT" | "HUMAN_AGENT" | "CUSTOMER" | null;
+}
+
+export interface ITicketEvent {
+  id: string;
+  ticketId: string;
+  type: string;
+  actor: string;
+  reason: string;
+  summary: string;
+  metadata: any;
+  createdAt: string;
 }
 
 export interface IChatData {
   messages: IMessage[];
   pagination: IPagination;
+  events?: ITicketEvent[];
 }
 
 export interface IWhatsAppTemplate {
