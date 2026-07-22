@@ -1,15 +1,20 @@
 "use client";
 
-// import { useState } from "react"; // TODO: edit mode — restore with the block below.
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
-// import { Check, Pencil, X } from "lucide-react"; // TODO: edit mode — restore with the block below.
+import { ArrowLeft, FileUp, MoreHorizontal, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { useMedicalAccountDetail } from "../../hooks/useMedicalAccountDetail";
 import { MedicalAccountStatusTag } from "../../components/MedicalAccountStatusTag/MedicalAccountStatusTag";
 import { MedicalAccountInfoPanel } from "../../components/MedicalAccountInfoPanel/MedicalAccountInfoPanel";
 import { MedicalAccountNovedades } from "../../components/MedicalAccountNovedades/MedicalAccountNovedades";
 import { MedicalAccountDocuments } from "../../components/MedicalAccountDocuments/MedicalAccountDocuments";
+import { MedicalAccountFacturas } from "../../components/MedicalAccountFacturas/MedicalAccountFacturas";
+import { ModalChangeStatus } from "../../components/ModalChangeStatus/ModalChangeStatus";
+import { ModalUploadInvoice } from "../../components/ModalUploadInvoice/ModalUploadInvoice";
+import { auditMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
+import { useMessageApi } from "@/context/MessageContext";
+import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
 
 interface MedicalAccountDetailViewProps {
   accountId: string;
@@ -37,21 +42,47 @@ const barButton =
 
 export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailViewProps) {
   const router = useRouter();
-  const { account, isLoading, error } = useMedicalAccountDetail(accountId);
+  const { account, isLoading, error, mutate } = useMedicalAccountDetail(accountId);
+  const { showMessage } = useMessageApi();
 
-  // TODO: re-enable edit mode when a PUT /medical-accounts/:id endpoint exists.
-  // const [editing, setEditing] = useState(false);
-  // const [form, setForm] = useState<IMedicalAccountEditForm>(EMPTY_FORM);
-  // const startEdit = () => { setForm(buildForm(account)); setEditing(true); };
-  // const cancelEdit = () => setEditing(false);
-  // const saveEdit = () => setEditing(false); // no persistence yet
-  // const handleFormChange = (patch: Partial<IMedicalAccountEditForm>) =>
-  //   setForm((prev) => ({ ...prev, ...patch }));
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [showChangeStatus, setShowChangeStatus] = useState(false);
+  const [showUploadInvoice, setShowUploadInvoice] = useState(false);
 
   const handleGoBack = () => {
     if (window.history.length > 1) router.back();
     else router.push("/cuentas-medicas");
   };
+
+  const handleAudit = useCallback(async () => {
+    if (!account) return;
+    setIsAuditing(true);
+    try {
+      const response = await auditMedicalAccount(account.id);
+      showMessage("success", "Cuenta médica auditada correctamente.");
+      mutate({ ...response, success: true } as any);
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al auditar la cuenta."
+      );
+    } finally {
+      setIsAuditing(false);
+    }
+  }, [account, mutate, showMessage]);
+
+  const handleDetailUpdate = useCallback(
+    (updated: IMedicalAccountUploadData) => {
+      mutate(
+        (prev) =>
+          prev
+            ? { ...prev, data: updated }
+            : { status: 200, message: "", data: updated },
+        false
+      );
+    },
+    [mutate]
+  );
 
   const renderMessage = (message: string) => (
     <main>
@@ -79,36 +110,43 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
               <ArrowLeft className="h-3.5 w-3.5" />
               Volver
             </button>
+
+            {account.status_code === "PENDIENTE_AUDITORIA" && (
+              <button
+                type="button"
+                onClick={handleAudit}
+                disabled={isAuditing}
+                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                {isAuditing ? "Auditando…" : "Auditar"}
+              </button>
+            )}
+
+            {account.status_code === "AUDITADO" && (
+              <button
+                type="button"
+                onClick={() => setShowUploadInvoice(true)}
+                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700"
+              >
+                <FileUp className="h-3.5 w-3.5" />
+                Subir factura
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowChangeStatus(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Cambiar estado
+            </button>
+
             <button type="button" className={barButton}>
               <MoreHorizontal className="h-3.5 w-3.5" />
               Generar acción
             </button>
-            {/* TODO: re-enable edit mode when a PUT /medical-accounts/:id endpoint exists.
-            {!editing ? (
-              <button
-                type="button"
-                onClick={startEdit}
-                className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Editar
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={saveEdit}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  Guardar
-                </button>
-                <button type="button" onClick={cancelEdit} className={barButton}>
-                  <X className="h-3.5 w-3.5" />
-                  Cancelar
-                </button>
-              </>
-            )} */}
           </div>
           <MedicalAccountStatusTag status={account.status_name} />
         </div>
@@ -121,9 +159,28 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         {/* Novedades (only when present) */}
         {account.novedades.length > 0 && <MedicalAccountNovedades novedades={account.novedades} />}
 
+        {/* Facturas */}
+        {account.facturas && account.facturas.length > 0 && (
+          <MedicalAccountFacturas facturas={account.facturas} />
+        )}
+
         {/* Classified documents + PDF preview */}
         <MedicalAccountDocuments documents={account.documentos} novedades={account.novedades} />
       </div>
+
+      <ModalChangeStatus
+        isOpen={showChangeStatus}
+        accountId={account.id}
+        onClose={() => setShowChangeStatus(false)}
+        onSuccess={handleDetailUpdate}
+      />
+
+      <ModalUploadInvoice
+        isOpen={showUploadInvoice}
+        accountId={account.id}
+        onClose={() => setShowUploadInvoice(false)}
+        onSuccess={handleDetailUpdate}
+      />
     </main>
   );
 }

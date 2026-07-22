@@ -1,9 +1,9 @@
-export type MedicalAccountStatus =
-  | "Por Radicar"
-  | "Pre Radicado"
-  | "Radicado"
-  | "Novedad"
-  | "Anulado";
+export type MedicalAccountStatusCode =
+  | "PENDIENTE_AUDITORIA"
+  | "AUDITADO"
+  | "FACTURADO"
+  | "RADICADO"
+  | "NOVEDAD";
 
 // Retained for the (currently disabled) detail edit mode — see the TODO in
 // MedicalAccountDetailView. The API response has no `regimen`, so it lives here.
@@ -29,11 +29,10 @@ export interface IMedicalAccountListItem {
   service_type: string | null;
   original_pdf_url?: string | null;
   total_novelties?: number;
-  status_code: string;
+  status_code: MedicalAccountStatusCode;
   status_name: string;
-  created_at: string; // ISO timestamp
-  // Optional placeholders — not in the current list response; render "-" until the backend adds them.
-  authorization_id?: string | null;
+  created_at: string;
+  authorization_number?: string | null;
   service_date?: string | null;
   regimen?: string | null;
 }

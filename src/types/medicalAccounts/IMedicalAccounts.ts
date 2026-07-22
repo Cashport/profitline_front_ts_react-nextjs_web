@@ -1,9 +1,9 @@
 export type MedicalAccountStatusCode =
-  | "PENDING"
-  | "PROCESSING"
-  | "COMPLETED"
-  | "WITH_NOVELTIES"
-  | "ERROR";
+  | "PENDIENTE_AUDITORIA"
+  | "AUDITADO"
+  | "FACTURADO"
+  | "RADICADO"
+  | "NOVEDAD";
 
 export type MedicalAccountDocumentStatusCode =
   | "COMPLETE"
@@ -65,6 +65,15 @@ export interface IMedicalAccountNoveltyApi {
   created_at: string;
 }
 
+export interface IMedicalAccountFacturaApi {
+  id: number;
+  medical_account_id: number;
+  invoice_number: string;
+  pdf_url: string;
+  xml_url: string;
+  created_at: string;
+}
+
 export interface IMedicalAccountUploadData {
   id: number;
   project_id: number;
@@ -90,6 +99,7 @@ export interface IMedicalAccountUploadData {
   documentos: IMedicalAccountDocumentApi[];
   validaciones: IMedicalAccountValidationApi[];
   novedades: IMedicalAccountNoveltyApi[];
+  facturas: IMedicalAccountFacturaApi[];
 }
 
 // ---------------------------------------------------------------------------
