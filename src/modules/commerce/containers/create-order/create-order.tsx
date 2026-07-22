@@ -4,6 +4,7 @@ import { useAppStore } from "@/lib/store/store";
 import { getDiscounts, getOrderDraft, getProductsByClient } from "@/services/commerce/commerce";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
+import { buildBonusFromPromotion } from "../../utils/buildBonusFromPromotion";
 
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
@@ -191,6 +192,10 @@ export const CreateOrderView: FC = () => {
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
+    // Restore the promotion/bonificados from the draft. order_summary.promotion +
+    // other_bonificated_products are the only record of the picks (the draft
+    // response has no order_split_details), so rebuild `bonus` straight from them.
+    setBonus(buildBonusFromPromotion(order_summary.promotion, order_summary.other_bonificated_products));
 
     const grouped =
       order_summary.products?.reduce<ISelectedCategories[]>((acc, p) => {
