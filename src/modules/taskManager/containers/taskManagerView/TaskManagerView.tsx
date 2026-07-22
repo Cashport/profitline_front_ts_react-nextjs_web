@@ -16,13 +16,12 @@ import TasksTable, {
 import UiSearchInput from "@/components/ui/search-input";
 import { Pagination as AntPagination } from "antd";
 import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
-import FiltersTasks, {
-  ISelectFilterTasks
-} from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
+import { ISelectFilterTasks } from "@/components/atoms/Filters/FiltersTasks/FiltersTasks";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { mockTasks } from "../../lib/mockData";
 import { ModalGenerateActionTaskManager } from "../../components/modalGenerateActionTaskManager/ModalGenerateActionTaskManager";
 import { ModalTaskDetail } from "../../components/modalTaskDetail/ModalTaskDetail";
+import FilterTasksModal from "../../components/FilterTasksModal/FilterTasksModal";
 
 interface FilterState {
   filterState: string | null;
@@ -51,8 +50,12 @@ export const TaskManagerView: React.FC = () => {
 
   const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
     statuses: [],
-    taskTypes: []
+    taskTypes: [],
+    dates: []
   });
+  // Derive the ISO date bounds from the selected range ("from|to")
+  const fromDate = selectedFilters.dates[0]?.split("|")[0] || undefined;
+  const toDate = selectedFilters.dates[0]?.split("|")[1] || undefined;
 
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const [taskTypes, setTaskTypes] = useState<ITaskTypes[]>([]);
@@ -87,10 +90,14 @@ export const TaskManagerView: React.FC = () => {
     data: tabsData,
     isLoading: isLoadingTabs,
     mutate: mutateTasksCount
-  } = useSWR("taskTabs", getTaskTabs, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true
-  });
+  } = useSWR(
+    ["taskTabs", fromDate, toDate],
+    () => getTaskTabs({ from_date: fromDate, to_date: toDate }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true
+    }
+  );
 
   useEffect(() => {
     if (tabsData && !isLoadingTabs) {
@@ -106,7 +113,10 @@ export const TaskManagerView: React.FC = () => {
     if (activeTabKey) {
       setIsLoadingPagination(true);
       try {
-        const response = await getTasksByStatus(activeTabKey, 1);
+        const response = await getTasksByStatus(activeTabKey, 1, {
+          from_date: fromDate,
+          to_date: toDate
+        });
         const tasksArray = response?.tasks ?? [];
         setTasksByStatus((prev) => ({
           ...prev,
@@ -126,7 +136,7 @@ export const TaskManagerView: React.FC = () => {
         setIsLoadingPagination(false);
       }
     }
-  }, [activeTabKey]);
+  }, [activeTabKey, fromDate, toDate]);
 
   // After a task status change: refresh the active tab's list AND revalidate the tab counts
   const handleTaskStatusChanged = useCallback(() => {
@@ -194,7 +204,10 @@ export const TaskManagerView: React.FC = () => {
   const handlePageChange = async (statusId: string, page: number) => {
     setIsLoadingPagination(true);
     try {
-      const response = await getTasksByStatus(statusId, page);
+      const response = await getTasksByStatus(statusId, page, {
+        from_date: fromDate,
+        to_date: toDate
+      });
       setTasksByStatus((prev) => ({
         ...prev,
         [statusId]: response?.tasks ?? []
@@ -352,7 +365,11 @@ export const TaskManagerView: React.FC = () => {
                 placeholder="Buscar tarea"
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
-              <FiltersTasks setSelectedFilters={setSelectedFilters} />
+              <FilterTasksModal
+                taskTypes={taskTypes}
+                value={selectedFilters}
+                onChange={setSelectedFilters}
+              />
               <GenerateActionButton
                 onClick={() => {
                   setIsModalOpen({ selected: 1 });

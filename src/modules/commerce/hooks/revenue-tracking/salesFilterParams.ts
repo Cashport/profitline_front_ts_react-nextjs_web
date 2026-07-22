@@ -9,6 +9,11 @@ export const dateRangeFromPreset = (
 ): { start_date: string; end_date: string } | null => {
   const today = dayjs();
 
+  if (preset.startsWith("custom:")) {
+    const [, start_date, end_date] = preset.split(":");
+    return start_date && end_date ? { start_date, end_date } : null;
+  }
+
   switch (preset) {
     case "mes_actual":
       return { start_date: fmt(today.startOf("month")), end_date: fmt(today) };
