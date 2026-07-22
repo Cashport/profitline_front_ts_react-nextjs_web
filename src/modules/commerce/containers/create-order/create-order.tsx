@@ -185,17 +185,16 @@ export const CreateOrderView: FC = () => {
 
     if (order_summary.client) setClient({ ...order_summary.client });
     setShippingInfo(shipping_info);
-    // The channel internal_code is not persisted on drafts, but the business unit is —
-    // restore it so the market re-fetch and the final order stay filtered by business unit.
-    setChannelCode("");
+    setChannelCode(order_summary.client?.nit_id || draftDetail.nit_id || "");
+    setChannelName(order_summary.bussines_untit ?? "");
     setBusinessUnit(order_summary.bussines_untit ?? "");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
-    // Restore the promotion/bonificados from the draft. order_summary.promotion +
-    // other_bonificated_products are the only record of the picks (the draft
-    // response has no order_split_details), so rebuild `bonus` straight from them.
-    setBonus(buildBonusFromPromotion(order_summary.promotion, order_summary.other_bonificated_products));
+
+    setBonus(
+      buildBonusFromPromotion(order_summary.promotion, order_summary.other_bonificated_products)
+    );
 
     const grouped =
       order_summary.products?.reduce<ISelectedCategories[]>((acc, p) => {
