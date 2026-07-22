@@ -25,8 +25,10 @@ const TaskManagerView = () => {
   const [modalMakeCallVisible, setModalMakeCallVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<ISelectFilterTasks>({
     statuses: [],
-    taskTypes: []
+    taskTypes: [],
+    dates: []
   });
+  const [customDate, setCustomDate] = useState<string>("");
 
   const { data, isLoading } = useTasks(selectedFilters, debouncedSearch);
 
@@ -47,7 +49,11 @@ const TaskManagerView = () => {
               placeholder="Buscar tarea"
               onChange={(event) => setSearch(event.target.value)}
             />
-            <FiltersTasks setSelectedFilters={setSelectedFilters} />
+            <FiltersTasks
+              setSelectedFilters={setSelectedFilters}
+              customDate={customDate}
+              setCustomDate={setCustomDate}
+            />
             <GenerateActionButton
               onClick={() => {}}
               disabled={!selectedRows || selectedRows.length === 0}
