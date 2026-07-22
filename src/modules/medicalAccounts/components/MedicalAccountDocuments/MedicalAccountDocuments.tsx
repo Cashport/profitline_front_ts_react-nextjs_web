@@ -7,6 +7,7 @@ import {
   Download,
   Eye,
   FileText,
+  FileUp,
   MoreHorizontal,
   RefreshCw,
   Wrench,
@@ -163,7 +164,8 @@ const buildRowMenuItems = (doc: IMedicalAccountDocumentApi): ItemType[] => [
     onClick: () => handleDownloadFile(doc.generated_file_url)
   },
   { key: "fix", label: "Solucionar novedades", icon: <Wrench className="h-3.5 w-3.5" /> },
-  { key: "reupload", label: "Cargar nuevamente", icon: <RefreshCw className="h-3.5 w-3.5" /> }
+  { key: "reupload", label: "Cargar nuevamente", icon: <RefreshCw className="h-3.5 w-3.5" /> },
+  { key: "replace", label: "Reemplazar soporte", icon: <FileUp className="h-3.5 w-3.5" /> }
 ];
 
 const dotsButtonStyle: React.CSSProperties = {
@@ -358,6 +360,18 @@ export function MedicalAccountDocuments({ documents, novedades }: MedicalAccount
               })}
             </tbody>
           </table>
+        )}
+
+        {documents.length > 0 && (
+          <div className="border-t border-gray-100 px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            >
+              <FileUp className="h-3.5 w-3.5" />
+              Cargar soporte
+            </button>
+          </div>
         )}
       </div>
 
