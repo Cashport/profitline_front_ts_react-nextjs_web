@@ -128,7 +128,8 @@ export default function ChatThread({
         mediaUrl: msg.mediaUrl,
         templateName: msg.templateName ?? undefined,
         templateData: msg.templateData ?? undefined,
-        metadata: msg.metadata
+        metadata: msg.metadata,
+        authorType: msg.authorType ?? null
       };
 
       // Update the SWR cache by adding the new message only if it doesn't exist
