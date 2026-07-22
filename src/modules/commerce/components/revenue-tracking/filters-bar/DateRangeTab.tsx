@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import type { FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
 
 const FECHA_PRESETS: FilterOption[] = [
+  { id: "hoy", name: "Hoy" },
+  { id: "esta_semana", name: "Esta semana" },
   { id: "mes_actual", name: "Mes actual" },
   { id: "ultimo_mes", name: "Último mes" },
   { id: "ultimo_trimestre", name: "Último trimestre" },
