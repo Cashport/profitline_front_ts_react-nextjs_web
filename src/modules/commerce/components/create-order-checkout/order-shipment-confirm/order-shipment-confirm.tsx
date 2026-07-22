@@ -185,8 +185,27 @@ export default function OrderShipmentConfirm({
 
     const draftAddressId =
       typeof shippingInfo.id === "string" ? Number(shippingInfo.id) : shippingInfo.id;
-    const matchedAddress =
+    let matchedAddress =
       draftAddressId !== undefined ? addresses.find((a) => a.id === draftAddressId) : undefined;
+
+    // Draft carries a real (existing) address id. If it isn't among the client's
+    // fetched addresses, inject it as the first option and select it rather than
+    // treating it as a brand-new address (which would drop its id from the payload).
+    if (!matchedAddress && draftAddressId !== undefined && !Number.isNaN(draftAddressId)) {
+      const draftAddress: ICommerceAdresses = {
+        id: draftAddressId,
+        address: shippingInfo.dispatch_address || shippingInfo.address || "",
+        city: shippingInfo.city ?? "",
+        email: shippingInfo.email ?? "",
+        warehouse_id: 0,
+        warehouse: "",
+        warehouse_description: ""
+      };
+      setAddresses((prev) =>
+        prev.some((a) => a.id === draftAddressId) ? prev : [draftAddress, ...prev]
+      );
+      matchedAddress = draftAddress;
+    }
 
     const phoneRaw = shippingInfo.phone_number || singleForm.telefono || "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);

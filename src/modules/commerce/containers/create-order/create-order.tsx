@@ -111,7 +111,6 @@ export const CreateOrderView: FC = () => {
     const fetchDiscounts = async () => {
       setSelectedDiscount(undefined);
       if (!client?.id || !selectedProject?.ID) return;
-      console.log(client);
 
       setDiscountsLoading(true);
       try {
@@ -185,9 +184,10 @@ export const CreateOrderView: FC = () => {
 
     if (order_summary.client) setClient({ ...order_summary.client });
     setShippingInfo(shipping_info);
-    // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
+    // The channel internal_code is not persisted on drafts, but the business unit is —
+    // restore it so the market re-fetch and the final order stay filtered by business unit.
     setChannelCode("");
-    setBusinessUnit("");
+    setBusinessUnit(order_summary.bussines_untit ?? "");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
