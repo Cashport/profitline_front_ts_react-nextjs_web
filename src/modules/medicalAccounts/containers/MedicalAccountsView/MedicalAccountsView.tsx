@@ -8,12 +8,12 @@ import { MedicalAccountsToolbar } from "../../components/MedicalAccountsToolbar/
 import { MedicalAccountsTable } from "../../components/MedicalAccountsTable/MedicalAccountsTable";
 import { ModalAddMedicalAccount } from "../../components/ModalAddMedicalAccount/ModalAddMedicalAccount";
 import { useMedicalAccounts } from "../../hooks/useMedicalAccounts";
-import { IMedicalAccountListItem, MedicalAccountStatus } from "../../types/IMedicalAccount";
+import { IMedicalAccountListItem, MedicalAccountStatusCode } from "../../types/IMedicalAccount";
 
 export function MedicalAccountsView() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<MedicalAccountStatus | null>(null);
+  const [statusFilter, setStatusFilter] = useState<MedicalAccountStatusCode | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string | null; end: string | null }>({
     start: null,
     end: null
@@ -27,10 +27,10 @@ export function MedicalAccountsView() {
   const filteredData = useMemo<IMedicalAccountListItem[]>(() => {
     const term = searchTerm.trim().toLowerCase();
     return data.filter((account) => {
-      const matchesStatus = !statusFilter || account.status_name === statusFilter;
+      const matchesStatus = !statusFilter || account.status_code === statusFilter;
       const matchesSearch =
         !term ||
-        [String(account.id), account.patient_name, account.document_number, account.authorization_id]
+        [String(account.id), account.patient_name, account.document_number, account.authorization_number]
           .filter(Boolean)
           .some((field) => field!.toLowerCase().includes(term));
       const day = account.created_at.slice(0, 10);
