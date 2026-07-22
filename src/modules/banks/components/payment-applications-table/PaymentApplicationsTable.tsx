@@ -12,6 +12,7 @@ import {
 } from "antd";
 import {
   ArrowCounterClockwise,
+  ArrowUUpLeft,
   CheckCircle,
   DotsThreeVertical,
   DownloadSimple,
@@ -25,10 +26,13 @@ import {
   changeStatusToApplied,
   reprocessExcel,
   reprocessPDF,
+  reversePaymentApplication,
   uploadFinalFile
 } from "@/services/paymentApplications/paymentApplications";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import "./payment-applications-table.scss";
+import { ApiError } from "@/utils/api/api";
 
 const { Text } = Typography;
 
@@ -64,6 +68,11 @@ export const PaymentApplicationsTable = ({
   const isXXL = !!screens.xxl;
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [reverseModalOpen, setReverseModalOpen] = useState(false);
+  const [applicationToReverse, setApplicationToReverse] = useState<IPaymentApplication | null>(
+    null
+  );
+  const [isReversing, setIsReversing] = useState(false);
 
   useEffect(() => {
     setSelectedRowKeys([]);
@@ -181,6 +190,43 @@ export const PaymentApplicationsTable = ({
     } catch (error) {
       hide();
       message.error(error instanceof Error ? error.message : "Error al regenerar el archivo");
+    }
+  };
+
+  const handleOpenReverseModal = (record: IPaymentApplication) => {
+    setApplicationToReverse(record);
+    setReverseModalOpen(true);
+  };
+
+  const handleCloseReverseModal = () => {
+    if (isReversing) return;
+    setReverseModalOpen(false);
+    setApplicationToReverse(null);
+  };
+
+  const handleConfirmReverse = async () => {
+    if (!applicationToReverse || isReversing) return;
+    setIsReversing(true);
+    try {
+      await reversePaymentApplication(applicationToReverse.id);
+      message.success("Aplicación reversada correctamente");
+      setReverseModalOpen(false);
+      setApplicationToReverse(null);
+      mutate();
+    } catch (error) {
+      let errorMessage = error instanceof Error ? error.message : "";
+      if (error instanceof ApiError && error.message) {
+        errorMessage = error.message;
+      }
+      const normalizedMessage = errorMessage.toLowerCase();
+
+      if (normalizedMessage) {
+        message.error(normalizedMessage);
+      } else {
+        message.error("No se pudo reversar, intenta de nuevo");
+      }
+    } finally {
+      setIsReversing(false);
     }
   };
 
@@ -364,6 +410,22 @@ export const PaymentApplicationsTable = ({
                 }
               ]
             : []),
+          ...(statusName !== "Reversada"
+            ? [
+                {
+                  key: "reverse-application",
+                  label: (
+                    <Button
+                      icon={<ArrowUUpLeft size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleOpenReverseModal(record)}
+                    >
+                      Reversar aplicación
+                    </Button>
+                  )
+                }
+              ]
+            : []),
           ...(statusName === "Legalización"
             ? [
                 {
@@ -375,6 +437,23 @@ export const PaymentApplicationsTable = ({
                       onClick={() => handleChangeStatusToApplied(record.id)}
                     >
                       Legalizar
+                    </Button>
+                  )
+                }
+              ]
+            : []),
+          ...(["Enviado al ERP", "Aplicado ERP", "Anulado"].includes(statusName) &&
+          record.final_file_url
+            ? [
+                {
+                  key: "download-final-file",
+                  label: (
+                    <Button
+                      icon={<DownloadSimple size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleDownload(record.final_file_url)}
+                    >
+                      Descargar archivo final
                     </Button>
                   )
                 }
@@ -403,26 +482,64 @@ export const PaymentApplicationsTable = ({
   ];
 
   return (
-    <Table
-      className="paymentApplicationsTable customSticky"
-      loading={false}
-      columns={columns}
-      rowSelection={rowSelection}
-      dataSource={applicationsByStatus.map((data) => ({
-        ...data,
-        key: data.id
-      }))}
-      pagination={{
-        pageSize: 15,
-        showSizeChanger: false
-      }}
-      sticky={
-        {
-          offsetHeader: 120,
-          offsetScroll: 0
-        } as TableProps<applicationByStatus>["sticky"]
-      }
-    />
+    <>
+      <Table
+        className="paymentApplicationsTable customSticky"
+        loading={false}
+        columns={columns}
+        rowSelection={rowSelection}
+        dataSource={applicationsByStatus.map((data) => ({
+          ...data,
+          key: data.id
+        }))}
+        pagination={{
+          pageSize: 15,
+          showSizeChanger: false
+        }}
+        sticky={
+          {
+            offsetHeader: 120,
+            offsetScroll: 0
+          } as TableProps<applicationByStatus>["sticky"]
+        }
+      />
+      <ModalConfirmAction
+        isOpen={reverseModalOpen}
+        onClose={handleCloseReverseModal}
+        onOk={handleConfirmReverse}
+        title="Reversar aplicación de pago"
+        okText="Confirmar reversión"
+        cancelText="Cancelar"
+        okLoading={isReversing}
+        content={
+          applicationToReverse ? (
+            <div>
+              <p>¿Estás seguro de que deseas reversar esta aplicación de pago?</p>
+              <p style={{ marginTop: "0.5rem" }}>
+                <strong>Id. Aplicación:</strong> {applicationToReverse.id}
+              </p>
+              <p>
+                <strong>Cliente:</strong> {applicationToReverse.client_name}
+              </p>
+              <p>
+                <strong>Recaudo:</strong>{" "}
+                {formatMoney(applicationToReverse.amount, { hideDecimals: true })}
+              </p>
+              <p>
+                <strong>Id. Pago Cashport:</strong>{" "}
+                {applicationToReverse.payment_ids?.length
+                  ? applicationToReverse.payment_ids.join(", ")
+                  : "-"}
+              </p>
+              <p style={{ marginTop: "0.5rem", color: "#888" }}>
+                Esta acción no se puede deshacer. Las facturas vinculadas volverán a estar
+                disponibles y los pagos quedarán sin aplicar.
+              </p>
+            </div>
+          ) : null
+        }
+      />
+    </>
   );
 };
 

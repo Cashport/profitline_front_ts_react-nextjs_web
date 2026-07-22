@@ -92,6 +92,7 @@ export interface UpdateBalancePayload {
   file?: File;
   audit_observation?: string;
   client_documents?: { id: number; document: string }[];
+  eligibility_status?: string;
 }
 
 export const downloadBalanceAuditExcel = async (): Promise<{ url: string; filename: string }> => {
@@ -115,6 +116,8 @@ export const updateBalance = async (balanceId: number, payload: UpdateBalancePay
     formData.append("audit_observation", payload.audit_observation);
   if (payload.client_documents?.length)
     formData.append("client_documents", JSON.stringify(payload.client_documents));
+  if (payload.eligibility_status !== undefined)
+    formData.append("eligibility_status", payload.eligibility_status);
 
   try {
     const response: GenericResponse<any> = await API.put(
@@ -129,6 +132,33 @@ export const updateBalance = async (balanceId: number, payload: UpdateBalancePay
     return response;
   } catch (error) {
     console.error("Error updating balance", error);
+    throw error;
+  }
+};
+
+export interface EligibilityStatusOption {
+  id: string;
+  description: string;
+}
+
+export const getEligibilityStatuses = async (): Promise<EligibilityStatusOption[]> => {
+  const response: GenericResponse<EligibilityStatusOption[]> = await API.get(
+    `${config.API_HOST}/financial-discount/balances/eligibility-statuses`
+  );
+  return response.data;
+};
+
+export const changeBalanceEligibility = async (
+  balanceIds: number[],
+  eligibilityStatusId: number
+) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/financial-discount/balances/eligibility-status`,
+      { balanceIds, eligibilityStatusId }
+    );
+    return response;
+  } catch (error) {
     throw error;
   }
 };
