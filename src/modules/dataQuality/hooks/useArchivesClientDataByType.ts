@@ -7,12 +7,14 @@ export const useArchivesClientDataByType = (
   clientId: string,
   dateFrom?: string | null,
   dateTo?: string | null,
-  showProcessed?: number[]
+  showProcessed?: number[],
+  showFuture?: number[]
 ) => {
   const params = new URLSearchParams();
   if (dateFrom) params.append("date_from", dateFrom);
   if (dateTo) params.append("date_to", dateTo);
   if (showProcessed?.length) params.append("showProcessed", showProcessed.join(","));
+  if (showFuture?.length) params.append("showFuture", showFuture.join(","));
   const queryString = params.toString();
   const pathKey = `/data/client-detail/${clientId}/archives/by-type${queryString ? `?${queryString}` : ""}`;
 
