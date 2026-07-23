@@ -4,6 +4,7 @@ import { useAppStore } from "@/lib/store/store";
 import { getDiscounts, getOrderDraft, getProductsByClient } from "@/services/commerce/commerce";
 
 import { OrderViewContext } from "../../contexts/orderViewContext";
+import { buildBonusFromPromotion } from "../../utils/buildBonusFromPromotion";
 
 import SearchClient from "../../components/create-order-search-client/create-order-search-client";
 import CreateOrderMarket from "../../components/create-order-market";
@@ -141,7 +142,11 @@ export const CreateOrderView: FC = () => {
     if (!draftInfo.client_name || !draftId || !projectId) return;
     const fetchDraft = async () => {
       const draftResponse = await getOrderDraft(projectId, draftId);
-      const productsResponse = await getProductsByClient(projectId, draftResponse.client_id);
+      const productsResponse = await getProductsByClient(
+        projectId,
+        draftResponse.order_summary?.client?.id,
+        draftResponse.order_summary.bussines_untit
+      );
       if (productsResponse.data) {
         const categoriesList: IFetchedCategories[] = productsResponse.data.map((category) => ({
           category: category.category,
@@ -176,23 +181,20 @@ export const CreateOrderView: FC = () => {
   useEffect(() => {
     if (!draftDetail || categories.length === 0) return;
 
-    const { nit_id, client_name, client_id, shipping_info, order_summary, executive_discounts } =
-      draftDetail;
+    const { shipping_info, order_summary, executive_discounts } = draftDetail;
 
-    setClient({
-      name: client_name,
-      id: client_id,
-      email: shipping_info?.email ?? "",
-      payment_type: 1,
-      nit_id: nit_id || client_id
-    });
+    if (order_summary.client) setClient({ ...order_summary.client });
     setShippingInfo(shipping_info);
-    // Drafts carry no channel internal_code; clear it so the checkout falls back to client id.
-    setChannelCode("");
-    setBusinessUnit("");
+    setChannelCode(order_summary.client?.nit_id || draftDetail.nit_id || "");
+    setChannelName(order_summary.bussines_untit ?? "");
+    setBusinessUnit(order_summary.bussines_untit ?? "");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);
+
+    setBonus(
+      buildBonusFromPromotion(order_summary.promotion, order_summary.other_bonificated_products)
+    );
 
     const grouped =
       order_summary.products?.reduce<ISelectedCategories[]>((acc, p) => {

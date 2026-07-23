@@ -1,3 +1,5 @@
+import { IOrderViewContext } from "@/app/comercio/cetaphil/page";
+
 export interface IEcommerceClient {
   client_id: string;
   client_name: string;
@@ -247,6 +249,8 @@ export interface IOrderConfirmedResponse {
   insufficientStockProducts: string[];
   promotion?: IPromotion;
   other_bonificated_products?: IOtherBonificatedProduct[];
+  client: IOrderViewContext["client"];
+  bussines_untit: string;
 }
 
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
@@ -307,6 +311,7 @@ export interface ICreateOrderData {
    * pertenecen a un rango de la promoción.
    */
   range_promotion_id?: number;
+  draft_id: number | undefined;
 }
 
 export interface ISucessCreateOrder {

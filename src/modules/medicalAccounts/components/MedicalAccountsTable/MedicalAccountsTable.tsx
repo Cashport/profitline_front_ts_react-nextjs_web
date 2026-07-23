@@ -48,8 +48,8 @@ export function MedicalAccountsTable({
     },
     {
       title: "No. Autorización",
-      dataIndex: "authorization_id",
-      key: "authorization_id",
+      dataIndex: "authorization_number",
+      key: "authorization_number",
       width: colWidth(160),
       render: (value: string | null) => (
         <span className="text-sm text-cashport-black">{value ?? "-"}</span>

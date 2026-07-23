@@ -49,7 +49,7 @@ export const reversePaymentApplication = async (
   try {
     const response: GenericResponse<{ success: boolean; message: string }> = await API.post(
       `/paymentApplication/reverse-payment-applications`,
-      { identification_id: applicationId }
+      { identification_ids: [applicationId] }
     );
     return response.data;
   } catch (error) {
