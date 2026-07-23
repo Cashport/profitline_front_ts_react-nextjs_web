@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Gift, GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
+import { FileText, Gift, GitBranch, Paperclip, Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import {
@@ -45,6 +45,10 @@ interface OrderShipmentConfirmProps {
   onDraft: () => void;
   loadingFinish?: boolean;
   loadingDraft?: boolean;
+  purchaseOrderNumber?: string;
+  purchaseOrderFile?: File;
+  onOpenPurchaseOrder: () => void;
+  onClearPurchaseOrder: () => void;
 }
 
 type SingleForm = {
@@ -69,7 +73,11 @@ export default function OrderShipmentConfirm({
   onConfirm,
   onDraft,
   loadingFinish,
-  loadingDraft
+  loadingDraft,
+  purchaseOrderNumber,
+  purchaseOrderFile,
+  onOpenPurchaseOrder,
+  onClearPurchaseOrder
 }: OrderShipmentConfirmProps) {
   const {
     client,
@@ -471,6 +479,8 @@ export default function OrderShipmentConfirm({
     ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
   ];
 
+  const hasPurchaseOrder = Boolean(purchaseOrderNumber || purchaseOrderFile);
+
   return (
     <div className="flex flex-col w-[420px] flex-shrink-0 bg-[#F7F7F7]">
       <div className="flex-1 flex flex-col bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
@@ -756,6 +766,40 @@ export default function OrderShipmentConfirm({
               </button>
             </div>
           )}
+
+          {/* Orden de compra (opcional, aplica a toda la orden) */}
+          <div className="px-5 pb-5">
+            {hasPurchaseOrder ? (
+              <div className="flex items-center gap-2 px-3 py-2.5 border border-[#DDDDDD] rounded-xl">
+                <FileText size={12} className="text-[#141414] flex-shrink-0" />
+                <button
+                  onClick={onOpenPurchaseOrder}
+                  disabled={loadingFinish || loadingDraft}
+                  className="flex-1 text-left text-xs text-[#141414] truncate hover:underline disabled:cursor-not-allowed"
+                  title="Editar orden de compra"
+                >
+                  {purchaseOrderNumber || purchaseOrderFile?.name}
+                </button>
+                <button
+                  onClick={onClearPurchaseOrder}
+                  disabled={loadingFinish || loadingDraft}
+                  className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 disabled:cursor-not-allowed"
+                  title="Quitar orden de compra"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenPurchaseOrder}
+                disabled={loadingFinish || loadingDraft}
+                className="flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-xs text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Paperclip size={12} />
+                Adjuntar orden de compra
+              </button>
+            )}
+          </div>
 
           {modalEntrega !== null && (
             <ModalShippingInfo

@@ -286,6 +286,7 @@ export interface IOrderSplitDetail {
   products: DiscountItem[];
   bonificated_products?: IBonificatedProductsPost[];
   other_bonificated_products?: IBonificatedProductsPost[];
+  marketplace_number?: string;
 }
 
 export interface ICreateOrderData {

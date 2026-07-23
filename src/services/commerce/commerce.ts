@@ -110,14 +110,16 @@ export const createOrder = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ): Promise<GenericResponse<ISucessCreateOrder>> => {
   let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-  if (paymentSupport) {
+  if (paymentSupport || purchaseOrderFile) {
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
-    formData.append("file", paymentSupport);
+    if (paymentSupport) formData.append("file", paymentSupport);
+    if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
     response = await API.post(url, formData, {
       headers: {
@@ -188,17 +190,20 @@ export const createOrderFromDraft = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ) => {
   try {
     let response: GenericResponse<{ id_order: number }>;
 
     // si el cliente adjunta soporte de pago al crear la orden desde el borrador
     const url = `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`;
-    if (paymentSupport) {
+    if (paymentSupport || purchaseOrderFile) {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("file", paymentSupport);
+      if (paymentSupport) formData.append("file", paymentSupport);
+      // El PDF de orden de compra es uno solo, así la orden tenga varios splits.
+      if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
       response = await API.put(url, formData, {
         headers: {
