@@ -104,13 +104,6 @@ export const confirmOrder = async (
   }
 };
 
-// El PDF de orden de compra se adjunta una vez por cada split de la orden,
-// usando el mismo `index` que ya viaja en order_split_details.
-const appendPurchaseOrderFile = (formData: FormData, data: ICreateOrderData, file?: File) => {
-  if (!file) return;
-  data.order_split_details.forEach((split) => formData.append(`OC-${split.index}`, file));
-};
-
 export const createOrder = async (
   projectId: number,
   clientId: string,
@@ -126,7 +119,7 @@ export const createOrder = async (
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
     if (paymentSupport) formData.append("file", paymentSupport);
-    appendPurchaseOrderFile(formData, data, purchaseOrderFile);
+    if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
     response = await API.post(url, formData, {
       headers: {
@@ -209,7 +202,8 @@ export const createOrderFromDraft = async (
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
       if (paymentSupport) formData.append("file", paymentSupport);
-      appendPurchaseOrderFile(formData, data, purchaseOrderFile);
+      // El PDF de orden de compra es uno solo, así la orden tenga varios splits.
+      if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
       response = await API.put(url, formData, {
         headers: {

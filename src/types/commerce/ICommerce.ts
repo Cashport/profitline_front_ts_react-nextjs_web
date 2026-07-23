@@ -282,10 +282,6 @@ export interface IOrderSplitDetail {
   products: DiscountItem[];
   bonificated_products?: IBonificatedProductsPost[];
   other_bonificated_products?: IBonificatedProductsPost[];
-  /**
-   * # de orden de compra capturado en el checkout. Solo se envía si el
-   * usuario lo diligencia; el PDF asociado viaja aparte como `OC-{index}`.
-   */
   marketplace_number?: string;
 }
 

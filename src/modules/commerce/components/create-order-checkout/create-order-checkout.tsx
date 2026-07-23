@@ -74,8 +74,7 @@ export default function CheckoutPage() {
   const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
   const [showWompiModal, setShowWompiModal] = useState(false);
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
-  // Orden de compra (opcional): se adjunta desde el panel de envío y viaja en
-  // cada split como marketplace_number + su archivo OC-{index}.
+
   const [isPurchaseOrderModalOpen, setIsPurchaseOrderModalOpen] = useState(false);
   const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
   const [purchaseOrderFile, setPurchaseOrderFile] = useState<File | undefined>();
