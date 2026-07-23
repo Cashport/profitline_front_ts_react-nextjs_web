@@ -39,3 +39,11 @@ export const NOVEDAD_TYPE_LABELS: Record<string, string> = {
   falta_autorizacion: "Falta autorización",
   falta_preautorizacion: "Falta preautorización"
 };
+
+export const STATUS_CODE_OPTIONS = [
+  { value: "PENDIENTE_AUDITORIA", label: "Pendiente auditoría" },
+  { value: "AUDITADO", label: "Auditado" },
+  { value: "FACTURADO", label: "Facturado" },
+  { value: "RADICADO", label: "Radicado" },
+  { value: "NOVEDAD", label: "Novedad" }
+];

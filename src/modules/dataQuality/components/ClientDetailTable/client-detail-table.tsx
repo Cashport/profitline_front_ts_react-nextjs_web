@@ -1,5 +1,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin, message } from "antd";
 
@@ -29,6 +31,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/toolt
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 import { Receipt } from "phosphor-react";
 
+dayjs.extend(timezone);
+dayjs.extend(utc);
+
 interface IClientDetailTableProps {
   archives: IClientDetailArchiveClient[];
   clientName?: string | null;
@@ -43,11 +48,11 @@ const bytesToMB = (bytes: number): string => {
 };
 
 const formatDate = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD");
+  return dayjs(isoDateString).tz('America/Bogota').format("YYYY-MM-DD");
 };
 
 const formatDateTime = (isoDateString: string): string => {
-  return dayjs(isoDateString).format("YYYY-MM-DD HH:mm");
+  return dayjs(isoDateString).tz('America/Bogota').format("YYYY-MM-DD HH:mm");
 };
 
 export function ClientDetailTable({

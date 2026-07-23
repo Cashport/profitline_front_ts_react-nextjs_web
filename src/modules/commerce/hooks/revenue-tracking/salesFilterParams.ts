@@ -15,6 +15,15 @@ export const dateRangeFromPreset = (
   }
 
   switch (preset) {
+    case "hoy":
+      return { start_date: fmt(today), end_date: fmt(today) };
+    case "esta_semana":
+      // .day() is 0=Sun..6=Sat regardless of locale, so this always lands on Monday —
+      // unlike startOf("week"), which follows whatever locale dayjs was last set to.
+      return {
+        start_date: fmt(today.subtract((today.day() + 6) % 7, "day")),
+        end_date: fmt(today)
+      };
     case "mes_actual":
       return { start_date: fmt(today.startOf("month")), end_date: fmt(today) };
     case "ultimo_mes": {

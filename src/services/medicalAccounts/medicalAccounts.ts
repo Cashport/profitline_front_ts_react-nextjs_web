@@ -33,3 +33,61 @@ export const uploadMedicalAccount = async (
     throw error;
   }
 };
+
+export const auditMedicalAccount = async (
+  id: number
+): Promise<GenericResponse<IMedicalAccountUploadData>> => {
+  try {
+    const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
+      `${config.API_HOST}/medical-accounts/${id}/audit`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error auditing medical account:", error);
+    throw error;
+  }
+};
+
+export const changeMedicalAccountStatus = async (
+  id: number,
+  statusCode: string
+): Promise<GenericResponse<IMedicalAccountUploadData>> => {
+  try {
+    const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
+      `${config.API_HOST}/medical-accounts/${id}/change-status`,
+      { status_code: statusCode }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error changing medical account status:", error);
+    throw error;
+  }
+};
+
+export const uploadMedicalAccountInvoice = async (
+  id: number,
+  invoiceNumber: string,
+  pdfFile: File,
+  xmlFile: File
+): Promise<GenericResponse<IMedicalAccountUploadData>> => {
+  const formData = new FormData();
+  formData.append("invoice_number", invoiceNumber);
+  formData.append("pdf", pdfFile);
+  formData.append("xml", xmlFile);
+
+  try {
+    const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
+      `${config.API_HOST}/medical-accounts/${id}/invoice`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error uploading invoice:", error);
+    throw error;
+  }
+};

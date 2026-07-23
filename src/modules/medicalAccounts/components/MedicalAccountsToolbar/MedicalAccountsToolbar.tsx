@@ -5,21 +5,14 @@ import { Plus } from "@phosphor-icons/react";
 
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { MedicalAccountStatus } from "../../types/IMedicalAccount";
+import { MedicalAccountStatusCode } from "../../types/IMedicalAccount";
 import { MedicalAccountsDateFilter } from "../MedicalAccountsDateFilter/MedicalAccountsDateFilter";
-
-const STATUS_OPTIONS: { value: MedicalAccountStatus; label: MedicalAccountStatus }[] = [
-  { value: "Por Radicar", label: "Por Radicar" },
-  { value: "Pre Radicado", label: "Pre Radicado" },
-  { value: "Radicado", label: "Radicado" },
-  { value: "Novedad", label: "Novedad" },
-  { value: "Anulado", label: "Anulado" }
-];
+import { STATUS_CODE_OPTIONS } from "../../constants";
 
 interface MedicalAccountsToolbarProps {
   onSearch: (value: string) => void;
-  statusFilter: MedicalAccountStatus | null;
-  onStatusChange: (value: MedicalAccountStatus | null) => void;
+  statusFilter: MedicalAccountStatusCode | null;
+  onStatusChange: (value: MedicalAccountStatusCode | null) => void;
   dateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
@@ -47,7 +40,7 @@ export function MedicalAccountsToolbar({
           allowClear
           placeholder="Estado"
           style={{ width: 180, height: 38 }}
-          options={STATUS_OPTIONS}
+          options={STATUS_CODE_OPTIONS}
           value={statusFilter}
           onChange={(value) => onStatusChange(value ?? null)}
         />
