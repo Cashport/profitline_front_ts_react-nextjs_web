@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState, useMemo } from "react";
-import { Button, Divider, Flex } from "antd";
-import { CaretLeft } from "phosphor-react";
+import { Button, Collapse, Divider, Flex } from "antd";
+import { CaretLeft, CaretRight } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import UiSearchInput from "@/components/ui/search-input";
@@ -29,6 +29,12 @@ interface CategoryMap {
   id: number;
   name: string;
   productIds: number[];
+}
+
+interface SubGroup {
+  categoryId: number;
+  categoryName: string;
+  products: ISelectedProduct[];
 }
 
 const CreateOrderProducts: FC = () => {
@@ -138,10 +144,7 @@ const CreateOrderProducts: FC = () => {
         });
 
       // Sub-group by the item-specific category_id
-      const subGroupsMap = new Map<
-        number,
-        { categoryId: number; categoryName: string; products: ISelectedProduct[] }
-      >();
+      const subGroupsMap = new Map<number, SubGroup>();
       filteredProducts.forEach((product) => {
         const existing = subGroupsMap.get(product.category_id);
         if (existing) {
@@ -170,29 +173,7 @@ const CreateOrderProducts: FC = () => {
       label: `${tab.tabName} (${tab.productCount})`,
       children: (
         <div key={`tab-content-${tab.tabId}-${debouncedSearch}`}>
-          {tab.subGroups.map((group) => (
-            <div
-              className={styles.categorySection}
-              key={`subgroup-${group.categoryId}-${debouncedSearch}`}
-            >
-              <Divider
-                orientation="left"
-                orientationMargin={0}
-                className={styles.categoryDivider}
-              >
-                {group.categoryName}
-              </Divider>
-              <div className={styles.productsGrid}>
-                {group.products.map((product) => (
-                  <CreateOrderProduct
-                    key={`product-${product.id}-${debouncedSearch}`}
-                    product={product}
-                    categoryName={group.categoryName}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+          <CategorySubGroups subGroups={tab.subGroups} searchKey={debouncedSearch} />
         </div>
       )
     }));
@@ -228,6 +209,54 @@ const CreateOrderProducts: FC = () => {
 
       <UiTab tabs={categoryTabs} activeKey={activeTab} onChangeTab={setActiveTab} />
     </div>
+  );
+};
+
+interface CategorySubGroupsProps {
+  subGroups: SubGroup[];
+  searchKey: string;
+}
+
+const CategorySubGroups: FC<CategorySubGroupsProps> = ({ subGroups, searchKey }) => {
+  // Los sub-grupos ya están resueltos cuando este componente monta (los tabs se derivan de ellos),
+  // así que basta con inicializar perezosamente: solo el primero abierto.
+  const [activeKeys, setActiveKeys] = useState<string[]>(() =>
+    subGroups.length ? [String(subGroups[0].categoryId)] : []
+  );
+
+  return (
+    <Collapse
+      ghost
+      className={styles.categoryCollapse}
+      activeKey={activeKeys}
+      onChange={(keys) => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
+      expandIcon={({ isActive }) => (
+        <CaretRight
+          size={"0.85rem"}
+          className={`${styles.categoryChevron} ${isActive ? styles.isOpen : ""}`}
+        />
+      )}
+      items={subGroups.map((group) => ({
+        key: String(group.categoryId),
+        className: styles.categorySection,
+        label: (
+          <Divider orientation="left" orientationMargin={0} className={styles.categoryDivider}>
+            {group.categoryName}
+          </Divider>
+        ),
+        children: (
+          <div className={styles.productsGrid}>
+            {group.products.map((product) => (
+              <CreateOrderProduct
+                key={`product-${product.id}-${searchKey}`}
+                product={product}
+                categoryName={group.categoryName}
+              />
+            ))}
+          </div>
+        )
+      }))}
+    />
   );
 };
 
