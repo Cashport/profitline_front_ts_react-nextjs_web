@@ -50,6 +50,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
       <hr className={styles.separator} />
       <h4 className={styles.name}>
         {product.name}
+        {product.EAN && <span className={styles.sku}>SKU: {product.EAN}</span>}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"
