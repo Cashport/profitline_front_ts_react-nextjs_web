@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input, Modal, Typography } from "antd";
 import type { UploadFile } from "antd";
 import { UploadChangeParam } from "antd/es/upload";
@@ -15,30 +15,29 @@ interface ModalPurchaseOrderInfoProps {
   isOpen: boolean;
   onCancel: () => void;
   // eslint-disable-next-line no-unused-vars
-  onOk: (purchaseOrderNumber: string, file: File) => void;
-  loading?: boolean;
+  onOk: (purchaseOrderNumber: string, file?: File) => void;
+  initialPurchaseOrderNumber?: string;
+  initialFile?: File;
 }
 
 export default function ModalPurchaseOrderInfo({
   isOpen,
   onCancel,
   onOk,
-  loading = false
+  initialPurchaseOrderNumber,
+  initialFile
 }: ModalPurchaseOrderInfoProps) {
   const { showMessage } = useMessageApi();
   const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
   const [poFile, setPoFile] = useState<File | undefined>();
 
-  const resetState = () => {
-    setPurchaseOrderNumber("");
-    setPoFile(undefined);
-  };
-
-  const handleCancel = () => {
-    if (loading) return;
-    resetState();
-    onCancel();
-  };
+  // Al abrir, parte de lo ya guardado en el checkout: así cancelar
+  // descarta los cambios y volver a abrir muestra lo adjuntado.
+  useEffect(() => {
+    if (!isOpen) return;
+    setPurchaseOrderNumber(initialPurchaseOrderNumber ?? "");
+    setPoFile(initialFile);
+  }, [isOpen]);
 
   const handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
     const raw = info.file as unknown as File & { originFileObj?: File };
@@ -60,27 +59,21 @@ export default function ModalPurchaseOrderInfo({
     setPoFile(undefined);
   };
 
-  const handleOk = () => {
-    const cleanedNumber = purchaseOrderNumber.trim();
-    if (!cleanedNumber || !poFile) return;
-    onOk(cleanedNumber, poFile);
-    resetState();
-  };
+  // Ambos campos son opcionales: guardar en blanco limpia la orden de compra.
+  const handleOk = () => onOk(purchaseOrderNumber.trim(), poFile);
 
   return (
     <Modal
       open={isOpen}
-      onCancel={handleCancel}
+      onCancel={onCancel}
       title={<Title level={4}>Orden de compra</Title>}
       width={520}
       footer={
         <FooterButtons
           titleConfirm="Guardar"
           titleCancel="Cancelar"
-          onClose={handleCancel}
+          onClose={onCancel}
           handleOk={handleOk}
-          isConfirmDisabled={!purchaseOrderNumber.trim() || !poFile}
-          isConfirmLoading={loading}
         />
       }
       destroyOnClose
@@ -93,7 +86,6 @@ export default function ModalPurchaseOrderInfo({
             onChange={(e) => setPurchaseOrderNumber(e.target.value)}
             placeholder="Ingresa el # de orden de compra"
             maxLength={50}
-            disabled={loading}
             className="h-10"
           />
         </div>
@@ -107,7 +99,6 @@ export default function ModalPurchaseOrderInfo({
               fileSize={poFile?.size}
               handleOnChange={handleChange}
               handleOnDelete={handleDelete}
-              disabled={loading}
             />
           </div>
         </div>

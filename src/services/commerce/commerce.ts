@@ -104,20 +104,29 @@ export const confirmOrder = async (
   }
 };
 
+// El PDF de orden de compra se adjunta una vez por cada split de la orden,
+// usando el mismo `index` que ya viaja en order_split_details.
+const appendPurchaseOrderFile = (formData: FormData, data: ICreateOrderData, file?: File) => {
+  if (!file) return;
+  data.order_split_details.forEach((split) => formData.append(`OC-${split.index}`, file));
+};
+
 export const createOrder = async (
   projectId: number,
   clientId: string,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ): Promise<GenericResponse<ISucessCreateOrder>> => {
   let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-  if (paymentSupport) {
+  if (paymentSupport || purchaseOrderFile) {
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
-    formData.append("file", paymentSupport);
+    if (paymentSupport) formData.append("file", paymentSupport);
+    appendPurchaseOrderFile(formData, data, purchaseOrderFile);
 
     response = await API.post(url, formData, {
       headers: {
@@ -188,17 +197,19 @@ export const createOrderFromDraft = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ) => {
   try {
     let response: GenericResponse<{ id_order: number }>;
 
     // si el cliente adjunta soporte de pago al crear la orden desde el borrador
     const url = `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`;
-    if (paymentSupport) {
+    if (paymentSupport || purchaseOrderFile) {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("file", paymentSupport);
+      if (paymentSupport) formData.append("file", paymentSupport);
+      appendPurchaseOrderFile(formData, data, purchaseOrderFile);
 
       response = await API.put(url, formData, {
         headers: {

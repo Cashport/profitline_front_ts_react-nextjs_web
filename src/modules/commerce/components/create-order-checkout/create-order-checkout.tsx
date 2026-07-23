@@ -74,8 +74,11 @@ export default function CheckoutPage() {
   const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
   const [showWompiModal, setShowWompiModal] = useState(false);
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
-  // TODO: abrir desde el flujo real cuando el backend de orden de compra esté listo
+  // Orden de compra (opcional): se adjunta desde el panel de envío y viaja en
+  // cada split como marketplace_number + su archivo OC-{index}.
   const [isPurchaseOrderModalOpen, setIsPurchaseOrderModalOpen] = useState(false);
+  const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
+  const [purchaseOrderFile, setPurchaseOrderFile] = useState<File | undefined>();
 
   // Conserva los uuids generados previamente para reutilizarlos cuando
   // se revalida el descuento (mismo sku + misma quantity => mismo uuid),
@@ -178,14 +181,17 @@ export default function CheckoutPage() {
       return { ...p, item_uuid };
     });
 
-    // 4) Clona order_split_details inyectando item_uuid en cada producto del split.
+    // 4) Clona order_split_details inyectando item_uuid en cada producto del
+    //    split y el # de orden de compra, que aplica a todos los splits.
+    const cleanedPurchaseOrderNumber = purchaseOrderNumber.trim();
     const splitDetails = order_split_details.map((split) => ({
       ...split,
       products: split.products.map((p) => {
         const key = `${p.product_sku}::${p.quantity}`;
         const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
         return { ...p, item_uuid };
-      })
+      }),
+      ...(cleanedPurchaseOrderNumber ? { marketplace_number: cleanedPurchaseOrderNumber } : {})
     }));
 
     const orderSummary: IOrderSummaryPayload = {
@@ -241,7 +247,8 @@ export default function CheckoutPage() {
           draftInfo.id,
           payload,
           showMessage,
-          paymentSupportFile
+          paymentSupportFile,
+          purchaseOrderFile
         )) as GenericResponse<{ id_order: number }>;
 
         if (response.status === 200) {
@@ -257,7 +264,8 @@ export default function CheckoutPage() {
         client.id,
         payload,
         showMessage,
-        paymentSupportFile
+        paymentSupportFile,
+        purchaseOrderFile
       );
       if (response.status === 200) {
         const queryParams = [];
@@ -419,16 +427,25 @@ export default function CheckoutPage() {
         onDraft={handleDraftOrder}
         loadingFinish={loadingFinish}
         loadingDraft={loadingDraft}
+        purchaseOrderNumber={purchaseOrderNumber}
+        purchaseOrderFile={purchaseOrderFile}
+        onOpenPurchaseOrder={() => setIsPurchaseOrderModalOpen(true)}
+        onClearPurchaseOrder={() => {
+          setPurchaseOrderNumber("");
+          setPurchaseOrderFile(undefined);
+        }}
       />
 
       <ModalPurchaseOrderInfo
         isOpen={isPurchaseOrderModalOpen}
         onCancel={() => setIsPurchaseOrderModalOpen(false)}
-        onOk={(purchaseOrderNumber, file) => {
-          console.log("purchaseOrderNumber:", purchaseOrderNumber);
-          console.log("purchaseOrderFile:", file);
+        onOk={(number, file) => {
+          setPurchaseOrderNumber(number);
+          setPurchaseOrderFile(file);
           setIsPurchaseOrderModalOpen(false);
         }}
+        initialPurchaseOrderNumber={purchaseOrderNumber}
+        initialFile={purchaseOrderFile}
       />
 
       <ModalConfirmAction
