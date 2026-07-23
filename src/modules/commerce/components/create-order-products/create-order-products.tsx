@@ -139,7 +139,9 @@ const CreateOrderProducts: FC = () => {
 
           return (
             product.name.toUpperCase().includes(searchUpper) ||
-            product.SKU.toUpperCase().includes(searchUpper)
+            product.SKU.toUpperCase().includes(searchUpper) ||
+            product.EAN?.toUpperCase().includes(searchUpper) ||
+            false
           );
         });
 
