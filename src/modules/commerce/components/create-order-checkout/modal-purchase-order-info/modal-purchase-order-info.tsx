@@ -78,7 +78,7 @@ export default function ModalPurchaseOrderInfo({
       }
       destroyOnClose
     >
-      <div className="flex flex-col gap-4 my-6">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Text className="font-medium text-[#141414]"># de orden de compra</Text>
           <Input
