@@ -3,6 +3,7 @@ import { Hourglass } from "phosphor-react";
 import { Typography, Avatar, Steps, Button } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import rehypeRaw from "rehype-raw";
 import "./eventsection.scss";
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
 import { addIncidentComment } from "@/services/resolveNovelty/resolveNovelty";
@@ -87,7 +88,10 @@ export const EventSection: React.FC<EventSectionProps> = ({
                 <Text strong>{getEventUser(event)}</Text>
                 {event.comments ? (
                   <div className="event-comment-markdown">
-                    <ReactMarkdown remarkPlugins={[remarkBreaks]}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkBreaks]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
                       {event.comments}
                     </ReactMarkdown>
                   </div>
