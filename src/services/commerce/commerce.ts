@@ -463,6 +463,19 @@ export const getMarketplaceConfig = async () => {
   }
 };
 
+export const reprocessOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/reprocess-wallet`
+    );
+    if (response.status !== 200) throw response;
+    return response;
+  } catch (error) {
+    console.error("Error al reprocesar la orden:", error);
+    throw error;
+  }
+};
+
 export const changeStatusOrder = async (orderId: number) => {
   try {
     const response: GenericResponse<any> = await API.post(
