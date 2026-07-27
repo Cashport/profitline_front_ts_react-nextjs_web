@@ -302,7 +302,12 @@ const OrdersViewTable = ({
                     <Button
                       icon={<WarningCircle size={20} />}
                       className="buttonNoBorder"
-                      onClick={() => openModal("novelty", { noveltyId: row.incident_id as number })}
+                      onClick={() =>
+                      openModal("novelty", {
+                        noveltyId: row.incident_id as number,
+                        onResolved: setFetchMutate
+                      })
+                    }
                     >
                       Ver novedad
                     </Button>
