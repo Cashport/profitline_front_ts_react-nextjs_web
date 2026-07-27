@@ -110,14 +110,16 @@ export const createOrder = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupports?: File[]
 ): Promise<GenericResponse<ISucessCreateOrder>> => {
   let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-  if (paymentSupport) {
+  if (paymentSupports && paymentSupports.length > 0) {
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
-    formData.append("file", paymentSupport);
+    paymentSupports.forEach((file, index) => {
+      formData.append(`evidence${index + 1}`, file);
+    });
 
     response = await API.post(url, formData, {
       headers: {
