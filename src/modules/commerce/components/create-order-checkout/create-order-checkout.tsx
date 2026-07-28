@@ -235,7 +235,6 @@ export default function CheckoutPage() {
         return;
       }
       const payload = buildOrderPayload(isElectronic);
-      const paymentSupportFile = selectedPaymentSupport[0];
 
       const response = await createOrder(
         projectId,
