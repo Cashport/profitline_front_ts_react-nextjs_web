@@ -30,6 +30,7 @@ export type IShippingInfo = {
   id: string;
   addressSelectValue: string;
   addressId?: number;
+  warehouse_id?: number;
   city: string;
   dispatch_address: string;
   email: string;

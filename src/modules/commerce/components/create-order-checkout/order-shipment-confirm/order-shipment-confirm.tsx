@@ -17,6 +17,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import {
   NEW_ADDRESS_OPTION,
   isValidEmail,
@@ -54,6 +55,7 @@ interface OrderShipmentConfirmProps {
 type SingleForm = {
   addressSelectValue: string;
   addressId?: number;
+  warehouse_id?: number;
   city: string;
   dispatch_address: string;
   email: string;
@@ -131,6 +133,7 @@ export default function OrderShipmentConfirm({
   const [singleForm, setSingleForm] = useState<SingleForm>({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: "",
@@ -145,6 +148,7 @@ export default function OrderShipmentConfirm({
   const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: "",
@@ -223,6 +227,7 @@ export default function OrderShipmentConfirm({
     setSingleForm({
       addressSelectValue: matchedAddress ? String(matchedAddress.id) : NEW_ADDRESS_OPTION.value,
       addressId: matchedAddress?.id,
+      warehouse_id: shippingInfo.warehouse_id ?? matchedAddress?.warehouse_id,
       city: shippingInfo.city ?? "",
       dispatch_address: shippingInfo.dispatch_address ?? "",
       email: shippingInfo.email ?? "",
@@ -242,6 +247,7 @@ export default function OrderShipmentConfirm({
         setSingleForm((f) => ({
           ...f,
           addressId: undefined,
+          warehouse_id: undefined,
           city: "",
           dispatch_address: ""
         }));
@@ -252,12 +258,14 @@ export default function OrderShipmentConfirm({
     if (sel) {
       const same =
         singleForm.addressId === sel.id &&
+        singleForm.warehouse_id === sel.warehouse_id &&
         singleForm.city === sel.city &&
         singleForm.dispatch_address === sel.address;
       if (!same) {
         setSingleForm((f) => ({
           ...f,
           addressId: sel.id,
+          warehouse_id: sel.warehouse_id,
           city: sel.city,
           dispatch_address: sel.address,
           email: f.email || sel.email || client?.email || ""
@@ -269,6 +277,7 @@ export default function OrderShipmentConfirm({
   const makeBlankEntrega = (): Omit<IShippingInfo, "id"> => ({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: client?.email ?? "",
@@ -289,6 +298,7 @@ export default function OrderShipmentConfirm({
     setModalDraft({
       addressSelectValue: entrega.addressSelectValue,
       addressId: entrega.addressId,
+      warehouse_id: entrega.warehouse_id,
       city: entrega.city,
       dispatch_address: entrega.dispatch_address,
       email: entrega.email,
@@ -329,12 +339,14 @@ export default function OrderShipmentConfirm({
     if (addresses[0]) {
       e1.addressSelectValue = String(addresses[0].id);
       e1.addressId = addresses[0].id;
+      e1.warehouse_id = addresses[0].warehouse_id;
       e1.city = addresses[0].city;
       e1.dispatch_address = addresses[0].address;
     }
     if (addresses[1]) {
       e2.addressSelectValue = String(addresses[1].id);
       e2.addressId = addresses[1].id;
+      e2.warehouse_id = addresses[1].warehouse_id;
       e2.city = addresses[1].city;
       e2.dispatch_address = addresses[1].address;
     }
@@ -368,6 +380,7 @@ export default function OrderShipmentConfirm({
 
   const isSingleFormValid =
     singleForm.addressSelectValue !== "" &&
+    singleForm.warehouse_id != null &&
     singleForm.city.trim() !== "" &&
     singleForm.dispatch_address.trim() !== "" &&
     isValidEmail(singleForm.email) &&
@@ -383,6 +396,7 @@ export default function OrderShipmentConfirm({
     const buildShipping = (e: {
       addressSelectValue: string;
       addressId?: number;
+      warehouse_id?: number;
       city: string;
       dispatch_address: string;
       email: string;
@@ -399,7 +413,8 @@ export default function OrderShipmentConfirm({
       dispatch_address: e.dispatch_address,
       email: e.email,
       phone_number: `${e.indicativo}${e.telefono}`,
-      comments: e.observaciones
+      comments: e.observaciones,
+      warehouse_id: e.warehouse_id ?? 0
     });
 
     const buildProductsForSplit = (cantidades: Record<string, number>): DiscountItem[] =>
@@ -566,6 +581,18 @@ export default function OrderShipmentConfirm({
                   <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
                 )}
               </div>
+
+              {isNewAddressSingle && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
+                  <WarehouseSelect
+                    value={singleForm.warehouse_id}
+                    onChange={(warehouseId) =>
+                      setSingleForm((f) => ({ ...f, warehouse_id: warehouseId }))
+                    }
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Correo electrónico</label>

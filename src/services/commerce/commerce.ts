@@ -1,6 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
+  ICityWarehouse,
   ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
@@ -70,6 +71,13 @@ export const getAdresses = async (clientId: string) => {
     console.error("Error al obtener las direcciones del cliente:", error);
     throw Error("Error al obtener las direcciones del cliente");
   }
+};
+
+export const getCityWarehouses = async () => {
+  const response: GenericResponse<ICityWarehouse[]> = await API.get(
+    `/marketplace/city-warehouses`
+  );
+  return response;
 };
 
 export const getDiscounts = async (
