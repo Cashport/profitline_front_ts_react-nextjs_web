@@ -22,12 +22,14 @@ interface MoldalNoveltyDetailProps {
   onClose: () => void;
   noveltyId: number;
   deselectInvoices?: () => void;
+  onResolved?: () => void;
 }
 
 const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
   onClose,
   noveltyId,
-  deselectInvoices
+  deselectInvoices,
+  onResolved
 }) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
   const projectId = useAppStore((state) => state.selectedProject.ID);
@@ -70,6 +72,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       mutateGeneralDashboardData();
       deselectInvoices && deselectInvoices();
       mutateIncident();
+      onResolved?.();
       onClose(); // Cierra el modal principal después de resolver/rechazar
     } catch (error) {
       console.error("Error al procesar el incidente:", error);

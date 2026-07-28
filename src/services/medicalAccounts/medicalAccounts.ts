@@ -68,12 +68,12 @@ export const uploadMedicalAccountInvoice = async (
   id: number,
   invoiceNumber: string,
   pdfFile: File,
-  xmlFile: File
+  zipFile: File
 ): Promise<GenericResponse<IMedicalAccountUploadData>> => {
   const formData = new FormData();
   formData.append("invoice_number", invoiceNumber);
   formData.append("pdf", pdfFile);
-  formData.append("xml", xmlFile);
+  formData.append("zip", zipFile);
 
   try {
     const response: GenericResponse<IMedicalAccountUploadData> = await API.post(

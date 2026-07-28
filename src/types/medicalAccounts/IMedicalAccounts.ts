@@ -69,8 +69,9 @@ export interface IMedicalAccountFacturaApi {
   id: number;
   medical_account_id: number;
   invoice_number: string;
-  pdf_url: string;
-  xml_url: string;
+  invoice_date: string | null;
+  pdf_url: string | null;
+  zip_url: string | null;
   created_at: string;
 }
 
@@ -83,6 +84,7 @@ export interface IMedicalAccountUploadData {
   authorization_number: string | null;
   service_type: string | null;
   service_date: string | null;
+  eps: string | null;
   original_file_name: string;
   original_pdf_url: string;
   total_pages: number;

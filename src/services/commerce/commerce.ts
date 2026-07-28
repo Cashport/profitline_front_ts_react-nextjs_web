@@ -1,6 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
+  ICityWarehouse,
   ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
@@ -72,6 +73,13 @@ export const getAdresses = async (clientId: string) => {
   }
 };
 
+export const getCityWarehouses = async () => {
+  const response: GenericResponse<ICityWarehouse[]> = await API.get(
+    `/marketplace/city-warehouses`
+  );
+  return response;
+};
+
 export const getDiscounts = async (
   projectId: number,
   clientId: string
@@ -110,15 +118,17 @@ export const createOrder = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File,
+  paymentSupports?: File[],
   purchaseOrderFile?: File
 ): Promise<GenericResponse<ISucessCreateOrder>> => {
   let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-  if (paymentSupport || purchaseOrderFile) {
+  if ((paymentSupports && paymentSupports.length > 0) || purchaseOrderFile) {
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
-    if (paymentSupport) formData.append("file", paymentSupport);
+    paymentSupports?.forEach((file, index) => {
+      if (file) formData.append(`evidence${index + 1}`, file);
+    });
     if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
     response = await API.post(url, formData, {
@@ -465,6 +475,19 @@ export const getMarketplaceConfig = async () => {
   } catch (error) {
     console.error("Error al obtener la configuración del marketplace:", error);
     throw new Error("Error al obtener la configuración del marketplace");
+  }
+};
+
+export const reprocessOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/reprocess-wallet`
+    );
+    if (response.status !== 200) throw response;
+    return response;
+  } catch (error) {
+    console.error("Error al reprocesar la orden:", error);
+    throw error;
   }
 };
 

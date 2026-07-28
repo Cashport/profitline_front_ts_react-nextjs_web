@@ -9,8 +9,8 @@ interface MedicalAccountFacturasProps {
   facturas: IMedicalAccountFacturaApi[];
 }
 
-const handleDownload = (url: string) => {
-  window.open(url, "_blank");
+const handleDownload = (url: string | null) => {
+  if (url) window.open(url, "_blank");
 };
 
 export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps) {
@@ -31,6 +31,9 @@ export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps
                 No. Factura
               </th>
               <th className="px-6 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Fecha Factura
+              </th>
+              <th className="px-6 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
                 Fecha de carga
               </th>
               <th className="px-6 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">
@@ -48,6 +51,9 @@ export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps
                   </div>
                 </td>
                 <td className="px-6 py-3">
+                  <span className="text-gray-500">{formatDate(factura.invoice_date)}</span>
+                </td>
+                <td className="px-6 py-3">
                   <span className="text-gray-500">{formatDate(factura.created_at)}</span>
                 </td>
                 <td className="px-6 py-3">
@@ -55,18 +61,20 @@ export function MedicalAccountFacturas({ facturas }: MedicalAccountFacturasProps
                     <button
                       type="button"
                       onClick={() => handleDownload(factura.pdf_url)}
-                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
+                      disabled={!factura.pdf_url}
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Download className="h-3 w-3" />
                       PDF
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDownload(factura.xml_url)}
-                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
+                      onClick={() => handleDownload(factura.zip_url)}
+                      disabled={!factura.zip_url}
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Download className="h-3 w-3" />
-                      XML
+                      ZIP
                     </button>
                   </div>
                 </td>

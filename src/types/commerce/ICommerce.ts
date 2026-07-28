@@ -268,6 +268,15 @@ export interface IShippingInformation {
   comments: string;
   // selected id address
   id?: number | string;
+  warehouse_id?: number;
+}
+
+export interface ICityWarehouse {
+  id: number;
+  city_name: string;
+  sort_order: number;
+  warehouse_id: number;
+  warehouse_name: string;
 }
 
 export interface IOrderSplitShippingInfo {
@@ -278,6 +287,7 @@ export interface IOrderSplitShippingInfo {
   phone_number: string;
   comments: string;
   id?: number;
+  warehouse_id: number;
 }
 
 export interface IOrderSplitDetail {

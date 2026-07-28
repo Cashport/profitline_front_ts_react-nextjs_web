@@ -35,4 +35,5 @@ export interface IMedicalAccountListItem {
   authorization_number?: string | null;
   service_date?: string | null;
   regimen?: string | null;
+  eps?: string | null;
 }

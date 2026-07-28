@@ -30,6 +30,7 @@ export type IShippingInfo = {
   id: string;
   addressSelectValue: string;
   addressId?: number;
+  warehouse_id?: number;
   city: string;
   dispatch_address: string;
   email: string;
@@ -235,14 +236,13 @@ export default function CheckoutPage() {
         return;
       }
       const payload = buildOrderPayload(isElectronic);
-      const paymentSupportFile = selectedPaymentSupport[0];
 
       const response = await createOrder(
         projectId,
         client.id,
         payload,
         showMessage,
-        paymentSupportFile,
+        selectedPaymentSupport,
         purchaseOrderFile
       );
       if (response.status === 200) {
@@ -467,7 +467,7 @@ export default function CheckoutPage() {
           acceptButtonText: "Enviar soporte",
           cancelButtonText: "Cancelar"
         }}
-        multipleFiles={false}
+        multipleFiles={true}
         noComment={true}
         noDescription={true}
         isMandatory={{ evidence: true }}
