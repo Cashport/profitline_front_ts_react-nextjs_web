@@ -61,6 +61,32 @@ export interface IDashboardSalesRanking {
 }
 export type IDashboardSalesRankingResponse = GenericResponse<IDashboardSalesRanking>;
 
+export interface IDashboardSalesClientDetailItem {
+  client_id: string;
+  client_name: string;
+  ventas_mes: number;
+  meta: number;
+  meta_pct: number | null;
+  prom_mensual: number;
+  prom_mensual_pct: number | null;
+  mes_anterior: number;
+  mes_anterior_pct: number | null;
+  ytd_anterior: number;
+  ytd_actual: number;
+  roi_ytd_pct: number | null;
+}
+export interface IDashboardSalesClientDetail {
+  items: IDashboardSalesClientDetailItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  periods: Record<
+    "mes_actual" | "mes_anterior" | "ytd_actual" | "ytd_anterior",
+    { start: string; end: string }
+  >;
+}
+export type IDashboardSalesClientDetailResponse = GenericResponse<IDashboardSalesClientDetail>;
+
 export interface IDashboardSalesTreemapChild {
   key: string;
   value: number;

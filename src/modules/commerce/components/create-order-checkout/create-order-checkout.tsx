@@ -242,7 +242,7 @@ export default function CheckoutPage() {
         client.id,
         payload,
         showMessage,
-        paymentSupportFile,
+        selectedPaymentSupport,
         purchaseOrderFile
       );
       if (response.status === 200) {
@@ -467,7 +467,7 @@ export default function CheckoutPage() {
           acceptButtonText: "Enviar soporte",
           cancelButtonText: "Cancelar"
         }}
-        multipleFiles={false}
+        multipleFiles={true}
         noComment={true}
         noDescription={true}
         isMandatory={{ evidence: true }}

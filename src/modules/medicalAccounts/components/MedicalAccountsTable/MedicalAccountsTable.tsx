@@ -93,6 +93,15 @@ export function MedicalAccountsTable({
       )
     },
     {
+      title: "EPS",
+      dataIndex: "eps",
+      key: "eps",
+      width: colWidth(130),
+      render: (value: string | null) => (
+        <span className="text-sm text-cashport-black">{value ?? "-"}</span>
+      )
+    },
+    {
       title: "Tipo Servicio",
       dataIndex: "service_type",
       key: "service_type",

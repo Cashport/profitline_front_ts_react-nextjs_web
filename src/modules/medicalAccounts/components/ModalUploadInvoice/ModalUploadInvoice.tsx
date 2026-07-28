@@ -59,7 +59,7 @@ export function ModalUploadInvoice({
 }: ModalUploadInvoiceProps) {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [xmlFile, setXmlFile] = useState<File | null>(null);
+  const [zipFile, setZipFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
 
@@ -72,20 +72,20 @@ export function ModalUploadInvoice({
     setPdfFile(file);
   };
 
-  const handleXmlUpload = (file: File) => {
-    const isXml =
-      file.type === "text/xml" ||
-      file.type === "application/xml" ||
-      file.name.toLowerCase().endsWith(".xml");
-    if (!isXml) {
-      showMessage("error", "Solo se permiten archivos XML.");
+  const handleZipUpload = (file: File) => {
+    const isZip =
+      file.type === "application/zip" ||
+      file.type === "application/x-zip-compressed" ||
+      file.name.toLowerCase().endsWith(".zip");
+    if (!isZip) {
+      showMessage("error", "Solo se permiten archivos ZIP.");
       return;
     }
-    setXmlFile(file);
+    setZipFile(file);
   };
 
   const handleOk = async () => {
-    if (!invoiceNumber.trim() || !pdfFile || !xmlFile) return;
+    if (!invoiceNumber.trim() || !pdfFile || !zipFile) return;
 
     setIsLoading(true);
     try {
@@ -93,7 +93,7 @@ export function ModalUploadInvoice({
         accountId,
         invoiceNumber.trim(),
         pdfFile,
-        xmlFile
+        zipFile
       );
       showMessage("success", "Factura cargada correctamente.");
       onSuccess(response.data);
@@ -112,7 +112,7 @@ export function ModalUploadInvoice({
     if (!isLoading) {
       setInvoiceNumber("");
       setPdfFile(null);
-      setXmlFile(null);
+      setZipFile(null);
       onClose();
     }
   };
@@ -128,7 +128,7 @@ export function ModalUploadInvoice({
         <FooterButtons
           titleConfirm="Subir factura"
           showLeftButton={false}
-          isConfirmDisabled={!invoiceNumber.trim() || !pdfFile || !xmlFile}
+          isConfirmDisabled={!invoiceNumber.trim() || !pdfFile || !zipFile}
           isConfirmLoading={isLoading}
           onClose={handleClose}
           handleOk={handleOk}
@@ -138,7 +138,7 @@ export function ModalUploadInvoice({
     >
       <Flex vertical gap="1.25rem">
         <p className="-mt-2 text-sm text-gray-500">
-          Ingresa el número de factura y adjunta los archivos PDF y XML.
+          Ingresa el número de factura y adjunta los archivos PDF y ZIP.
         </p>
 
         <div>
@@ -170,15 +170,15 @@ export function ModalUploadInvoice({
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            XML de la factura <span className="text-red-500">*</span>
+            ZIP de la factura <span className="text-red-500">*</span>
           </p>
-          {xmlFile ? (
-            <FileChip file={xmlFile} label="XML" onRemove={() => setXmlFile(null)} />
+          {zipFile ? (
+            <FileChip file={zipFile} label="ZIP" onRemove={() => setZipFile(null)} />
           ) : (
             <UploadDropZone
-              onFileUpload={handleXmlUpload}
-              allowedExtensions={[".xml"]}
-              title="Arrastra el XML aquí"
+              onFileUpload={handleZipUpload}
+              allowedExtensions={[".zip"]}
+              title="Arrastra el ZIP aquí"
               subtitle="o haz clic para seleccionarlo"
             />
           )}

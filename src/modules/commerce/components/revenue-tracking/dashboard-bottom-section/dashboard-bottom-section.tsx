@@ -5,12 +5,14 @@ import { ChevronDown, Layers } from "lucide-react";
 
 import { useIsMobile } from "@/modules/chat/hooks/use-mobile";
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
+import DashboardClientsDetailsTable from "@/modules/commerce/components/revenue-tracking/dashboard-clients-details-table/dashboard-clients-details-table";
 
-type TabType = "gross-to-net" | "regional-vendedor";
+type TabType = "gross-to-net" | "regional-vendedor" | "detalles-cliente";
 
 const tabs = [
   { id: "gross-to-net", label: "Bruto a neto" },
-  { id: "regional-vendedor", label: "Regional/Vendedor" }
+  { id: "regional-vendedor", label: "Regional/Vendedor" },
+  { id: "detalles-cliente", label: "Detalles cliente" }
 ];
 
 export function DashboardBottomSection() {
@@ -96,6 +98,7 @@ export function DashboardBottomSection() {
           </div>
         )}
         {activeTab === "regional-vendedor" && <SalesTable />}
+        {activeTab === "detalles-cliente" && <DashboardClientsDetailsTable />}
       </div>
     </div>
   );
