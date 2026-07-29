@@ -441,6 +441,7 @@ export interface IOrder {
   notification_id: number | null;
   incident_id: number | null;
   has_stock: number;
+  is_draft?: boolean;
 }
 export interface IDraftOrder {
   id: number;
