@@ -48,9 +48,9 @@ export default function MarketAdminBonusAndPromotions() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
-      <div className="px-6 py-5 bg-white border-b border-[#DDDDDD] flex-shrink-0">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-[#EEEEEE]">
           <Link
             href="/market-admin/bonificados"
             className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
@@ -65,33 +65,35 @@ export default function MarketAdminBonusAndPromotions() {
             <p className="text-xs text-[#999999]">Gestión de productos bonificados y promociones</p>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="grid grid-cols-2 gap-4 max-w-3xl">
-          {MODULES.map(({ view: v, icon: Icon, title, description, badge, badgeColor }) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className="group text-left bg-white rounded-xl border border-[#DDDDDD] p-5 flex flex-col gap-4 hover:border-[#141414] hover:shadow-sm transition-all"
-            >
-              <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-xl bg-[#F7F7F7] flex items-center justify-center group-hover:bg-[#CBE71E] transition-colors">
-                  <Icon size={18} className="text-[#141414]" />
+        <div className="p-6">
+          <div className="grid grid-cols-2 gap-4">
+            {MODULES.map(({ view: v, icon: Icon, title, description, badge, badgeColor }) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className="group text-left bg-white rounded-xl border border-[#DDDDDD] p-5 flex flex-col gap-4 hover:border-[#141414] hover:shadow-sm transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-[#F7F7F7] flex items-center justify-center group-hover:bg-[#CBE71E] transition-colors">
+                    <Icon size={18} className="text-[#141414]" />
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 text-[11px] font-semibold rounded-lg ${badgeColor}`}
+                  >
+                    {badge}
+                  </span>
                 </div>
-                <span className={`px-2 py-0.5 text-[11px] font-semibold rounded-lg ${badgeColor}`}>
-                  {badge}
-                </span>
-              </div>
-              <div>
-                <h2 className="text-sm font-bold text-[#141414] mb-1">{title}</h2>
-                <p className="text-xs text-[#999999] leading-relaxed">{description}</p>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-semibold text-[#0067B1] mt-auto">
-                Ir al módulo <ArrowRight size={12} />
-              </div>
-            </button>
-          ))}
+                <div>
+                  <h2 className="text-sm font-bold text-[#141414] mb-1">{title}</h2>
+                  <p className="text-xs text-[#999999] leading-relaxed">{description}</p>
+                </div>
+                <div className="flex items-center gap-1 text-xs font-semibold text-[#0067B1] mt-auto">
+                  Ir al módulo <ArrowRight size={12} />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

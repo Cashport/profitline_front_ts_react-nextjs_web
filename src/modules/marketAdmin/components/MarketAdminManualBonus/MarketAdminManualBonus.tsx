@@ -83,7 +83,10 @@ const ASIGNACIONES_INICIALES: AsignacionManual[] = [
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const ESTADO_CONFIG: Record<EstadoAprobacion, { label: string; className: string }> = {
-  pendiente: { label: "Pendiente", className: "bg-amber-50 text-amber-600 border border-amber-200" },
+  pendiente: {
+    label: "Pendiente",
+    className: "bg-amber-50 text-amber-600 border border-amber-200"
+  },
   aprobado: { label: "Aprobado", className: "bg-green-50 text-green-700 border border-green-200" },
   rechazado: { label: "Rechazado", className: "bg-red-50 text-red-600 border border-red-200" }
 };
@@ -94,9 +97,7 @@ function NuevaAsignacionModal({
   onSave
 }: {
   onClose: () => void;
-  onSave: (
-    a: Omit<AsignacionManual, "id" | "estado" | "creadoEn" | "unidadesDisponibles">
-  ) => void;
+  onSave: (a: Omit<AsignacionManual, "id" | "estado" | "creadoEn" | "unidadesDisponibles">) => void;
 }) {
   const [clienteId, setClienteId] = useState("");
   const [productoId, setProductoId] = useState(PRODUCTOS_BONIFICADOS[0].id);
@@ -275,141 +276,147 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
   const pendientes = asignaciones.filter((a) => a.estado === "pendiente").length;
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
-      {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-[#DDDDDD] flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="text-[#999999] hover:text-[#141414] transition-colors">
-            <ArrowLeft size={16} />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-[#141414]">Bonificados manuales</h1>
-              {pendientes > 0 && (
-                <span className="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">
-                  {pendientes} pendiente{pendientes > 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-[#999999]">
-              Asignaciones por cliente con flujo de aprobación
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
-        >
-          <Plus size={14} /> Nueva asignación
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="flex items-center gap-3 px-6 py-3 bg-white border-b border-[#EEEEEE] flex-shrink-0">
-        <div className="flex items-center gap-2 px-3 py-2 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
-          <Search size={13} className="text-[#999999]" />
-          <input
-            type="text"
-            placeholder="Buscar cliente o producto..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="text-sm outline-none bg-transparent text-[#141414] placeholder:text-[#999999] w-56"
-          />
-        </div>
-        <div className="flex items-center gap-1">
-          {(["todos", "pendiente", "aprobado", "rechazado"] as const).map((e) => (
+    <div className="min-h-screen">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+        {/* Page header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
+          <div className="flex items-center gap-3">
             <button
-              key={e}
-              onClick={() => setFiltroEstado(e)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors capitalize ${
-                filtroEstado === e ? "bg-[#141414] text-white" : "text-[#666666] hover:bg-[#F7F7F7]"
-              }`}
+              onClick={onBack}
+              className="text-[#999999] hover:text-[#141414] transition-colors"
             >
-              {e === "todos" ? "Todos" : ESTADO_CONFIG[e].label}
+              <ArrowLeft size={16} />
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
-          {/* Table header */}
-          <div className="grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] px-5 py-3 border-b border-[#EEEEEE] bg-[#FAFAFA]">
-            <span className="text-xs font-medium text-[#AAAAAA]">Cliente</span>
-            <span className="text-xs font-medium text-[#AAAAAA]">Producto bonificado</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-center">Asignadas</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-center">Disponibles</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-center">Estado</span>
-            <span className="text-xs font-medium text-[#AAAAAA] text-right">Acciones</span>
-          </div>
-
-          {filtradas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <Gift size={28} className="text-[#DDDDDD]" />
-              <p className="text-sm text-[#999999]">No hay asignaciones</p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold text-[#141414]">Bonificados manuales</h1>
+                {pendientes > 0 && (
+                  <span className="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full">
+                    {pendientes} pendiente{pendientes > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[#999999]">
+                Asignaciones por cliente con flujo de aprobación
+              </p>
             </div>
-          ) : (
-            filtradas.map((a, idx) => {
-              const cfg = ESTADO_CONFIG[a.estado];
-              return (
-                <div
-                  key={a.id}
-                  className={`grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] items-center px-5 py-4 ${idx < filtradas.length - 1 ? "border-b border-[#F4F4F4]" : ""}`}
-                >
-                  <div>
-                    <p className="text-sm font-medium text-[#141414] truncate" title={a.clienteNombre}>
-                      {a.clienteNombre}
-                    </p>
-                    <p className="text-xs text-[#999999]">NIT: {a.clienteNit}</p>
-                  </div>
-                  <p
-                    className="text-sm text-[#141414] truncate pr-2"
-                    title={a.productoBonificadoNombre}
-                  >
-                    {a.productoBonificadoNombre}
-                  </p>
-                  <p className="text-sm font-semibold text-[#141414] text-center">
-                    {a.unidadesAsignadas}
-                  </p>
-                  <p
-                    className={`text-sm font-semibold text-center ${a.unidadesDisponibles === 0 ? "text-red-400" : "text-green-600"}`}
-                  >
-                    {a.unidadesDisponibles}
-                  </p>
-                  <div className="flex justify-center">
-                    <span className={`px-2 py-1 text-[11px] font-semibold rounded-lg ${cfg.className}`}>
-                      {cfg.label}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-end gap-1.5">
-                    {a.estado === "pendiente" && (
-                      <>
-                        <button
-                          onClick={() => aprobar(a.id)}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
-                        >
-                          <Check size={11} /> Aprobar
-                        </button>
-                        <button
-                          onClick={() => rechazar(a.id)}
-                          className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
-                        >
-                          <X size={11} /> Rechazar
-                        </button>
-                      </>
-                    )}
-                    {a.estado !== "pendiente" && (
-                      <span className="text-xs text-[#CCCCCC]">{a.creadoEn}</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
+          >
+            <Plus size={14} /> Nueva asignación
+          </button>
         </div>
-      </div>
 
+        {/* Filters */}
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-[#EEEEEE]">
+          <div className="flex items-center gap-2 px-3 py-2 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
+            <Search size={13} className="text-[#999999]" />
+            <input
+              type="text"
+              placeholder="Buscar cliente o producto..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="text-sm outline-none bg-transparent text-[#141414] placeholder:text-[#999999] w-56"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            {(["todos", "pendiente", "aprobado", "rechazado"] as const).map((e) => (
+              <button
+                key={e}
+                onClick={() => setFiltroEstado(e)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors capitalize ${
+                  filtroEstado === e
+                    ? "bg-[#141414] text-white"
+                    : "text-[#666666] hover:bg-[#F7F7F7]"
+                }`}
+              >
+                {e === "todos" ? "Todos" : ESTADO_CONFIG[e].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table header */}
+        <div className="grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] px-6 py-3 border-b border-[#EEEEEE] bg-[#FAFAFA]">
+          <span className="text-xs font-medium text-[#AAAAAA]">Cliente</span>
+          <span className="text-xs font-medium text-[#AAAAAA]">Producto bonificado</span>
+          <span className="text-xs font-medium text-[#AAAAAA] text-center">Asignadas</span>
+          <span className="text-xs font-medium text-[#AAAAAA] text-center">Disponibles</span>
+          <span className="text-xs font-medium text-[#AAAAAA] text-center">Estado</span>
+          <span className="text-xs font-medium text-[#AAAAAA] text-right">Acciones</span>
+        </div>
+
+        {filtradas.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <Gift size={28} className="text-[#DDDDDD]" />
+            <p className="text-sm text-[#999999]">No hay asignaciones</p>
+          </div>
+        ) : (
+          filtradas.map((a, idx) => {
+            const cfg = ESTADO_CONFIG[a.estado];
+            return (
+              <div
+                key={a.id}
+                className={`grid grid-cols-[2fr_1.5fr_80px_80px_100px_120px] items-center px-6 py-4 ${idx < filtradas.length - 1 ? "border-b border-[#F4F4F4]" : ""}`}
+              >
+                <div>
+                  <p
+                    className="text-sm font-medium text-[#141414] truncate"
+                    title={a.clienteNombre}
+                  >
+                    {a.clienteNombre}
+                  </p>
+                  <p className="text-xs text-[#999999]">NIT: {a.clienteNit}</p>
+                </div>
+                <p
+                  className="text-sm text-[#141414] truncate pr-2"
+                  title={a.productoBonificadoNombre}
+                >
+                  {a.productoBonificadoNombre}
+                </p>
+                <p className="text-sm font-semibold text-[#141414] text-center">
+                  {a.unidadesAsignadas}
+                </p>
+                <p
+                  className={`text-sm font-semibold text-center ${a.unidadesDisponibles === 0 ? "text-red-400" : "text-green-600"}`}
+                >
+                  {a.unidadesDisponibles}
+                </p>
+                <div className="flex justify-center">
+                  <span
+                    className={`px-2 py-1 text-[11px] font-semibold rounded-lg ${cfg.className}`}
+                  >
+                    {cfg.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-end gap-1.5">
+                  {a.estado === "pendiente" && (
+                    <>
+                      <button
+                        onClick={() => aprobar(a.id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                      >
+                        <Check size={11} /> Aprobar
+                      </button>
+                      <button
+                        onClick={() => rechazar(a.id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        <X size={11} /> Rechazar
+                      </button>
+                    </>
+                  )}
+                  {a.estado !== "pendiente" && (
+                    <span className="text-xs text-[#CCCCCC]">{a.creadoEn}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
       {showModal && (
         <NuevaAsignacionModal onClose={() => setShowModal(false)} onSave={handleNueva} />
       )}

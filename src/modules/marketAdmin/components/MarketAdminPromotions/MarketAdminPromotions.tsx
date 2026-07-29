@@ -603,7 +603,11 @@ function NivelRow({
                           min={1}
                           value={pc.cantidad}
                           onChange={(e) =>
-                            updateProductoCondicion(pc.id, "cantidad", parseInt(e.target.value) || 1)
+                            updateProductoCondicion(
+                              pc.id,
+                              "cantidad",
+                              parseInt(e.target.value) || 1
+                            )
                           }
                           className="w-10 px-2 py-2 text-sm text-[#141414] outline-none bg-white text-center"
                         />
@@ -645,7 +649,11 @@ function NivelRow({
                           min={1}
                           value={pak.unidades}
                           onChange={(e) =>
-                            updatePaqueteCondicion(pak.id, "unidades", parseInt(e.target.value) || 1)
+                            updatePaqueteCondicion(
+                              pak.id,
+                              "unidades",
+                              parseInt(e.target.value) || 1
+                            )
                           }
                           className="w-14 px-2 py-1.5 text-sm text-center font-semibold text-[#141414] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] bg-white"
                         />
@@ -748,7 +756,10 @@ function NivelRow({
 
           <div className="flex flex-col gap-3">
             {nivel.premios.map((pr, prIdx) => (
-              <div key={pr.id} className="bg-white border border-[#E8F5C0] rounded-lg overflow-hidden">
+              <div
+                key={pr.id}
+                className="bg-white border border-[#E8F5C0] rounded-lg overflow-hidden"
+              >
                 {/* Header de la opción */}
                 <div className="flex items-center justify-between px-3 py-2 bg-[#F7FDE8] border-b border-[#E8F5C0]">
                   <div className="flex items-center gap-2">
@@ -1114,53 +1125,58 @@ export default function MarketAdminPromotions({ onBack }: { onBack: () => void }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
-      {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-5 bg-white border-b border-[#DDDDDD] flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="text-[#999999] hover:text-[#141414] transition-colors">
-            <ArrowLeft size={16} />
-          </button>
-          <div>
-            <h1 className="text-base font-bold text-[#141414]">Promociones automáticas</h1>
-            <p className="text-xs text-[#999999]">
-              Define condiciones y productos bonificados por escalones
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={addPromocion}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
-        >
-          <Plus size={14} /> Nueva promoción
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {promociones.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <Gift size={32} className="text-[#DDDDDD]" />
-            <p className="text-sm text-[#999999]">No hay promociones creadas</p>
+    <div className="min-h-screen">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+        {/* Page header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
+          <div className="flex items-center gap-3">
             <button
-              onClick={addPromocion}
-              className="px-4 py-2 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
+              onClick={onBack}
+              className="text-[#999999] hover:text-[#141414] transition-colors"
             >
-              Crear primera promoción
+              <ArrowLeft size={16} />
             </button>
+            <div>
+              <h1 className="text-base font-bold text-[#141414]">Promociones automáticas</h1>
+              <p className="text-xs text-[#999999]">
+                Define condiciones y productos bonificados por escalones
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {promociones.map((promo) => (
-              <PromocionCard
-                key={promo.id}
-                promo={promo}
-                onChange={(p) => updatePromocion(promo.id, p)}
-                onDelete={() => deletePromocion(promo.id)}
-              />
-            ))}
-          </div>
-        )}
+          <button
+            onClick={addPromocion}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
+          >
+            <Plus size={14} /> Nueva promoción
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {promociones.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-3">
+              <Gift size={32} className="text-[#DDDDDD]" />
+              <p className="text-sm text-[#999999]">No hay promociones creadas</p>
+              <button
+                onClick={addPromocion}
+                className="px-4 py-2 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
+              >
+                Crear primera promoción
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {promociones.map((promo) => (
+                <PromocionCard
+                  key={promo.id}
+                  promo={promo}
+                  onChange={(p) => updatePromocion(promo.id, p)}
+                  onDelete={() => deletePromocion(promo.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
