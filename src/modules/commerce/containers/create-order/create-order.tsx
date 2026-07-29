@@ -145,7 +145,7 @@ export const CreateOrderView: FC = () => {
       const productsResponse = await getProductsByClient(
         projectId,
         draftResponse.order_summary?.client?.id,
-        draftResponse.order_summary.bussines_untit
+        draftResponse.order_summary.business_unit
       );
       if (productsResponse.data) {
         const categoriesList: IFetchedCategories[] = productsResponse.data.map((category) => ({
@@ -186,8 +186,8 @@ export const CreateOrderView: FC = () => {
     if (order_summary.client) setClient({ ...order_summary.client });
     setShippingInfo(shipping_info);
     setChannelCode(order_summary.client?.nit_id || draftDetail.nit_id || "");
-    setChannelName(order_summary.bussines_untit ?? "");
-    setBusinessUnit(order_summary.bussines_untit ?? "");
+    setChannelName(order_summary.business_unit ?? "");
+    setBusinessUnit(order_summary.business_unit ?? "");
     setSelectedDiscount(order_summary.discount_package);
     setConfirmOrderData(order_summary);
     setExecutiveDiscounts(executive_discounts ?? []);

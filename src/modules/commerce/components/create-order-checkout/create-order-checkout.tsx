@@ -99,6 +99,7 @@ export default function CheckoutPage() {
         discount_package: selectedDiscount,
         order_summary: products,
         executive_discounts: executiveDiscounts,
+        business_unit: businessUnit,
         deactivate_cross_selling: !deactivateCrossSelling,
         ...(bonus?.id !== undefined && { promotion_id: bonus.id }),
         promotion_applyed: promotionApplyed
@@ -200,7 +201,7 @@ export default function CheckoutPage() {
       executive_discounts: executiveDiscounts,
       deactivate_cross_selling: !deactivateCrossSelling,
       client: client,
-      bussines_untit: businessUnit
+      business_unit: businessUnit
     };
 
     // El range_promotion_id es el id del rango activo
