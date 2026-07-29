@@ -533,3 +533,47 @@ export const getOrderDraft = async (projectId: number, draftId: number) => {
     throw error;
   }
 };
+
+export interface IUploadedPurchaseOrder {
+  orderId: number;
+  codigoIscala: string;
+  direccion: string;
+  ciudad: string;
+  total: number;
+}
+
+export interface IUploadPurchaseOrdersSummary {
+  ordersCreated: number;
+  skusProcessed: number;
+  totalAmount: number;
+}
+
+export interface IUploadPurchaseOrdersData {
+  packageId: number;
+  draftId: number;
+  orders: IUploadedPurchaseOrder[];
+  summary: IUploadPurchaseOrdersSummary;
+}
+
+export const uploadPurchaseOrders = async (
+  file: File
+): Promise<GenericResponse<IUploadPurchaseOrdersData>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response: GenericResponse<IUploadPurchaseOrdersData> = await API.post(
+      `/marketplace/upload-purchase-orders`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al subir las órdenes de compra:", error);
+    throw error;
+  }
+};
