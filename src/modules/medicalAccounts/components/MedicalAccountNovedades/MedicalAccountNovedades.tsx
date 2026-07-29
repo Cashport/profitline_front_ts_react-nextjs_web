@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 import {
@@ -6,11 +7,14 @@ import {
 } from "@/types/medicalAccounts/IMedicalAccounts";
 import { NOVEDAD_TYPE_LABELS } from "../../constants";
 import { cn } from "@/utils/utils";
+import { useMessageApi } from "@/context/MessageContext";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import { ItemType } from "antd/es/menu/interface";
 
 interface MedicalAccountNovedadesProps {
   novedades: IMedicalAccountNoveltyApi[];
+  accountId: number;
+  onResolved: () => void;
 }
 
 const SEVERITY_STYLES: Record<MedicalAccountSeverity, string> = {
@@ -27,7 +31,30 @@ const SEVERITY_LABELS: Record<MedicalAccountSeverity, string> = {
   BAJA: "Baja"
 };
 
-export function MedicalAccountNovedades({ novedades }: MedicalAccountNovedadesProps) {
+export function MedicalAccountNovedades({
+  novedades,
+  accountId,
+  onResolved
+}: MedicalAccountNovedadesProps) {
+  const [resolvingId, setResolvingId] = useState<number | null>(null);
+  const { showMessage } = useMessageApi();
+
+  const handleResolve = async (noveltyId: number) => {
+    setResolvingId(noveltyId);
+    try {
+      const { resolveMedicalAccountNovelty } = await import(
+        "@/services/medicalAccounts/medicalAccounts"
+      );
+      await resolveMedicalAccountNovelty(accountId, noveltyId);
+      showMessage("success", "Novedad resuelta correctamente.");
+      onResolved();
+    } catch {
+      showMessage("error", "No se pudo resolver la novedad.");
+    } finally {
+      setResolvingId(null);
+    }
+  };
+
   return (
     <div className="border-b border-gray-100">
       <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
@@ -41,11 +68,14 @@ export function MedicalAccountNovedades({ novedades }: MedicalAccountNovedadesPr
 
       <div className="divide-y divide-gray-50">
         {novedades.map((novedad) => {
+          const isResolving = resolvingId === novedad.id;
           const menuItems: ItemType[] = [
             {
               key: "confirm",
-              label: "Confirmar novedad",
-              icon: <CheckCircle className="h-3.5 w-3.5" />
+              label: isResolving ? "Confirmando…" : "Confirmar novedad",
+              icon: <CheckCircle className="h-3.5 w-3.5" />,
+              disabled: isResolving,
+              onClick: () => handleResolve(novedad.id)
             }
           ];
 
