@@ -64,6 +64,21 @@ export const changeMedicalAccountStatus = async (
   }
 };
 
+export const resolveMedicalAccountNovelty = async (
+  accountId: number,
+  noveltyId: number
+): Promise<GenericResponse<IMedicalAccountUploadData>> => {
+  try {
+    const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
+      `${config.API_HOST}/medical-accounts/${accountId}/novelties/${noveltyId}/resolve`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error resolving novelty:", error);
+    throw error;
+  }
+};
+
 export const uploadMedicalAccountInvoice = async (
   id: number,
   invoiceNumber: string,
