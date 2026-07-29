@@ -1,9 +1,10 @@
-import { Dispatch, Key, SetStateAction, useState } from "react";
+import { Dispatch, Key, SetStateAction, useEffect, useRef, useState } from "react";
 import { Flex, message, Modal, Typography } from "antd";
 import {
   ArrowULeftDown,
   DownloadSimple,
   EnvelopeSimple,
+  FileArrowUp,
   NewspaperClipping,
   Trash
 } from "@phosphor-icons/react";
@@ -18,9 +19,13 @@ import {
   downloadBillingReportExcel,
   downloadSalesDetailExcel,
   dowloadOrderCSV,
-  downloadPartialOrderCSV
+  downloadPartialOrderCSV,
+  IUploadPurchaseOrdersData,
+  uploadPurchaseOrders
 } from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
+import { UploadPurchaseOrdersSummaryModal } from "./upload-purchase-orders-summary-modal";
 
 import { IOrder } from "@/types/commerce/ICommerce";
 
@@ -56,6 +61,16 @@ export const OrdersGenerateActionModal = ({
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
   const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
+
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isUploadProgressOpen, setIsUploadProgressOpen] = useState(false);
+  const [isUploadSummaryOpen, setIsUploadSummaryOpen] = useState(false);
+  const [uploadSummaryData, setUploadSummaryData] =
+    useState<IUploadPurchaseOrdersData | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const FIVE_MINUTES_MS = 180_000;
+  const fakeUploadDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
@@ -229,6 +244,75 @@ export const OrdersGenerateActionModal = ({
     }
   };
 
+  const handleOpenUploadPurchaseOrders = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Resetea el input para permitir seleccionar el mismo archivo dos veces
+    event.target.value = "";
+
+    if (!file) return;
+
+    const isXlsx =
+      file.name.toLowerCase().endsWith(".xlsx") ||
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    if (!isXlsx) {
+      showMessage("error", "Solo se permiten archivos Excel (.xlsx)");
+      return;
+    }
+
+    setUploadFile(file);
+    setIsUploadProgressOpen(true);
+  };
+
+  const handleCancelUploadProgress = () => {
+    setIsUploadProgressOpen(false);
+    setUploadFile(null);
+  };
+
+  const handleCloseUploadSummary = () => {
+    setIsUploadSummaryOpen(false);
+    setUploadSummaryData(null);
+    setUploadFile(null);
+  };
+
+  useEffect(() => {
+    if (!isUploadProgressOpen) return;
+
+    let cancelled = false;
+
+    (async () => {
+      // Simula la barra de carga durante ~3 minutos para dar feedback al usuario
+      await fakeUploadDelay(FIVE_MINUTES_MS);
+      if (cancelled) return;
+
+      try {
+        if (!uploadFile) return;
+        const response = await uploadPurchaseOrders(uploadFile);
+        setIsUploadProgressOpen(false);
+        setUploadSummaryData(response.data);
+        setIsUploadSummaryOpen(true);
+      } catch (error) {
+        setIsUploadProgressOpen(false);
+        setUploadFile(null);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Error al procesar las órdenes de compra";
+        showMessage("error", errorMessage);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isUploadProgressOpen, uploadFile]);
+
   return (
     <>
       <Modal
@@ -296,7 +380,20 @@ export const OrdersGenerateActionModal = ({
             title="Retornar al vendedor"
             disabled={ordersId.length !== 1}
           />
+          <ButtonGenerateAction
+            onClick={handleOpenUploadPurchaseOrders}
+            icon={<FileArrowUp size={16} />}
+            title="Subir orden de compra"
+          />
         </Flex>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          onChange={handleUploadFileChange}
+          style={{ display: "none" }}
+        />
       </Modal>
 
       <Modal
@@ -311,6 +408,18 @@ export const OrdersGenerateActionModal = ({
           <Text strong>{errorMessage}</Text>
         </Flex>
       </Modal>
+
+      <UploadPurchaseOrdersProgressModal
+        isOpen={isUploadProgressOpen}
+        file={uploadFile}
+        onCancel={handleCancelUploadProgress}
+      />
+
+      <UploadPurchaseOrdersSummaryModal
+        isOpen={isUploadSummaryOpen}
+        data={uploadSummaryData}
+        onClose={handleCloseUploadSummary}
+      />
     </>
   );
 };

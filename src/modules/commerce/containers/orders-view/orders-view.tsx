@@ -47,6 +47,7 @@ export const OrdersView: FC = () => {
   const [isLoadingPagination, setIsLoadingPagination] = useState(false);
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const setDraftInfo = useAppStore((state) => state.setDraftInfo);
 
   // Usar el nuevo hook useOrders
   const { ordersByCategory, isLoading, mutate } = useOrders({
@@ -145,7 +146,13 @@ export const OrdersView: FC = () => {
               {isMobile || isTablet ? <PresentationChart size={24} /> : "Dashboard"}
             </Button>
           </Link>
-          <Link href="/comercio/pedido" className={styles.ctaButton}>
+          <Link
+            href="/comercio/pedido"
+            className={styles.ctaButton}
+            // Empezar una orden nueva: limpiar el borrador previo (persistido) para
+            // que CreateOrderView no cargue el último draft abierto.
+            onClick={() => setDraftInfo({ id: 0, client_name: undefined })}
+          >
             <PrincipalButton
               className={styles.ctaButton}
               customStyles={{ padding: isMobile ? "7px 12px" : undefined }}

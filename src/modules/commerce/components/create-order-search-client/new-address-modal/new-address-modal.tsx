@@ -1,26 +1,33 @@
 import { useState } from "react";
 import { Modal } from "antd";
 
-// New-address modal (Ant Design). Owns its own ciudad/dirección local state and
-// reports the result through onSave; resets on save/cancel.
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
+
+// New-address modal (Ant Design). Owns its own ciudad/dirección/bodega local state
+// and reports the result through onSave; resets on save/cancel.
 interface INewAddressModalProps {
   open: boolean;
-  onSave: (city: string, dispatchAddress: string) => void;
+  // eslint-disable-next-line no-unused-vars
+  onSave: (city: string, dispatchAddress: string, warehouseId: number) => void;
   onCancel: () => void;
 }
 
 function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
   const [newCiudad, setNewCiudad] = useState("");
   const [newDireccion, setNewDireccion] = useState("");
+  const [newWarehouseId, setNewWarehouseId] = useState<number | undefined>();
 
   const reset = () => {
     setNewCiudad("");
     setNewDireccion("");
+    setNewWarehouseId(undefined);
   };
 
+  const isSaveDisabled = !newCiudad.trim() || !newDireccion.trim() || newWarehouseId === undefined;
+
   const handleSave = () => {
-    if (!newCiudad.trim() || !newDireccion.trim()) return;
-    onSave(newCiudad.trim(), newDireccion.trim());
+    if (isSaveDisabled) return;
+    onSave(newCiudad.trim(), newDireccion.trim(), newWarehouseId);
     reset();
   };
 
@@ -36,7 +43,7 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
       okText="Guardar"
       cancelText="Cancelar"
       onOk={handleSave}
-      okButtonProps={{ disabled: !newCiudad.trim() || !newDireccion.trim() }}
+      okButtonProps={{ disabled: isSaveDisabled }}
       onCancel={handleCancel}
       destroyOnClose
     >
@@ -66,6 +73,10 @@ function NewAddressModal({ open, onSave, onCancel }: INewAddressModalProps) {
             className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999]"
           />
           <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
+          <WarehouseSelect value={newWarehouseId} onChange={setNewWarehouseId} />
         </div>
       </div>
     </Modal>

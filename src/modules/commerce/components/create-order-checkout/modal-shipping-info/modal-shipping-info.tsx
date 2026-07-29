@@ -15,6 +15,7 @@ import {
 } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
@@ -65,6 +66,7 @@ export default function ModalShippingInfo({
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const isSaveDisabled =
     !draft.addressSelectValue.trim() ||
+    draft.warehouse_id == null ||
     !draft.city.trim() ||
     !draft.dispatch_address.trim() ||
     !isValidEmail(draft.email) ||
@@ -140,6 +142,7 @@ export default function ModalShippingInfo({
         setDraft((d) => ({
           ...d,
           addressId: undefined,
+          warehouse_id: undefined,
           city: "",
           dispatch_address: ""
         }));
@@ -150,12 +153,14 @@ export default function ModalShippingInfo({
     if (sel) {
       const same =
         draft.addressId === sel.id &&
+        draft.warehouse_id === sel.warehouse_id &&
         draft.city === sel.city &&
         draft.dispatch_address === sel.address;
       if (!same) {
         setDraft((d) => ({
           ...d,
           addressId: sel.id,
+          warehouse_id: sel.warehouse_id,
           city: sel.city,
           dispatch_address: sel.address,
           email: d.email || sel.email || clientEmail || ""
@@ -422,6 +427,19 @@ export default function ModalShippingInfo({
               />
               {isNewAddress && <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>}
             </div>
+
+            {isNewAddress && (
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-semibold text-[#666666]">
+                  Bodega de despacho
+                </label>
+                <WarehouseSelect
+                  value={draft.warehouse_id}
+                  onChange={(warehouseId) => setDraft((d) => ({ ...d, warehouse_id: warehouseId }))}
+                  size="small"
+                />
+              </div>
+            )}
 
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-semibold text-[#666666]">Correo electrónico</label>

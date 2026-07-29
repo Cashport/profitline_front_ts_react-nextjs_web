@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Gift, Pencil, Trash2 } from "lucide-react";
+import { Collapse } from "antd";
+import { ChevronRight, Gift, Pencil, Trash2 } from "lucide-react";
+
+import "./products-table.scss";
 
 export function formatPrice(n: number) {
   return "$" + (n ?? 0).toLocaleString("es-CO");
@@ -140,6 +143,16 @@ export default function ProductsTable({
   }, [responsive]);
   const compact = responsive && isNarrow;
 
+  // Only the first category starts open. Seeded in an effect (not `defaultActiveKey`) because
+  // the categories arrive async, so on mount the list is still empty. Re-seeds when the first
+  // category itself changes (e.g. its last product was removed), not on every render, so the
+  // user's manual toggles stick.
+  const firstCategoryKey = categories.length ? String(categories[0].key) : undefined;
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
+  useEffect(() => {
+    if (firstCategoryKey) setActiveKeys([firstCategoryKey]);
+  }, [firstCategoryKey]);
+
   // Built as an inline style (not a Tailwind `grid-cols-[…]` class) because the column
   // count is dynamic and Tailwind can't JIT a runtime-concatenated arbitrary value.
   // When `compact`, only Producto / Cant. / Total are rendered.
@@ -158,6 +171,75 @@ export default function ProductsTable({
       ].join(" ");
 
   const showBonus = bonusItems.length > 0;
+
+  const renderRow = (row: ProductsTableRow) => {
+    const totalLinea = row.finalPrice * row.quantity;
+    return (
+      <div key={row.key} className="grid items-center px-4 py-2.5" style={{ gridTemplateColumns }}>
+        <p
+          className={`text-sm font-medium text-[#141414] leading-tight pr-4 truncate ${
+            compact ? "min-w-0" : ""
+          }`}
+          title={row.description}
+        >
+          {row.description}
+        </p>
+        {!compact && (
+          <>
+            <p className="text-xs text-[#CCCCCC] text-right">{row.sku}</p>
+            <p className="text-xs text-[#CCCCCC] line-through text-right">
+              {formatPrice(row.originalPrice)}
+            </p>
+            <div className="flex justify-center">
+              {row.onDiscountChange ? (
+                <DescuentoCell
+                  value={row.discountPct}
+                  max={row.maxDiscountPct ?? 0}
+                  onChange={row.onDiscountChange}
+                />
+              ) : row.discountPct > 0 ? (
+                <span className="text-xs font-semibold text-red-500">-{row.discountPct}%</span>
+              ) : (
+                <span className="text-xs text-[#999999] italic">Sin desc.</span>
+              )}
+            </div>
+            <p className="text-sm font-semibold text-[#141414] text-right">
+              {formatPrice(row.finalPrice)}
+            </p>
+          </>
+        )}
+        <p className="text-sm text-[#141414] text-right">{row.quantity}</p>
+        <p className="text-sm font-semibold text-[#141414] text-right">{formatPrice(totalLinea)}</p>
+        {multiEntrega && !compact && (
+          <p
+            className={`text-sm font-bold text-right ${
+              row.restante === 0
+                ? "text-green-600"
+                : (row.restante ?? 0) < 0
+                  ? "text-red-500"
+                  : "text-amber-500"
+            }`}
+            title={String(row.restante ?? 0)}
+          >
+            {row.restante}
+          </p>
+        )}
+        {showActionsColumn && !compact ? (
+          row.onRemove && row.finalPrice === 0 ? (
+            <button
+              onClick={row.onRemove}
+              title="Eliminar producto"
+              className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
+            >
+              <Trash2 size={12} />
+            </button>
+          ) : (
+            <span />
+          )
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -188,93 +270,28 @@ export default function ProductsTable({
 
         {/* Rows */}
         <div className="flex-1 min-h-0 overflow-y-auto">
-          {categories.map((category, gIdx) => (
-            <div key={category.key} className={gIdx > 0 ? "border-t border-[#EEEEEE]" : ""}>
-              {/* Category label */}
-              <div className="px-4 pt-3 pb-1">
+          <Collapse
+            ghost
+            className="productsTableCollapse"
+            activeKey={activeKeys}
+            onChange={(keys) => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
+            expandIcon={({ isActive }) => (
+              <ChevronRight
+                size={12}
+                className={`text-[#AAAAAA] transition-transform ${isActive ? "rotate-90" : ""}`}
+              />
+            )}
+            items={categories.map((category, gIdx) => ({
+              key: String(category.key),
+              className: gIdx > 0 ? "border-t border-[#EEEEEE]" : "",
+              label: (
                 <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
                   {category.name}
                 </span>
-              </div>
-
-              {category.rows.map((row) => {
-                const totalLinea = row.finalPrice * row.quantity;
-                return (
-                  <div
-                    key={row.key}
-                    className="grid items-center px-4 py-2.5"
-                    style={{ gridTemplateColumns }}
-                  >
-                    <p
-                      className={`text-sm font-medium text-[#141414] leading-tight pr-4 truncate ${
-                        compact ? "min-w-0" : ""
-                      }`}
-                      title={row.description}
-                    >
-                      {row.description}
-                    </p>
-                    {!compact && (
-                      <>
-                        <p className="text-xs text-[#CCCCCC] text-right">{row.sku}</p>
-                        <p className="text-xs text-[#CCCCCC] line-through text-right">
-                          {formatPrice(row.originalPrice)}
-                        </p>
-                        <div className="flex justify-center">
-                          {row.onDiscountChange ? (
-                            <DescuentoCell
-                              value={row.discountPct}
-                              max={row.maxDiscountPct ?? 0}
-                              onChange={row.onDiscountChange}
-                            />
-                          ) : row.discountPct > 0 ? (
-                            <span className="text-xs font-semibold text-red-500">
-                              -{row.discountPct}%
-                            </span>
-                          ) : (
-                            <span className="text-xs text-[#999999] italic">Sin desc.</span>
-                          )}
-                        </div>
-                        <p className="text-sm font-semibold text-[#141414] text-right">
-                          {formatPrice(row.finalPrice)}
-                        </p>
-                      </>
-                    )}
-                    <p className="text-sm text-[#141414] text-right">{row.quantity}</p>
-                    <p className="text-sm font-semibold text-[#141414] text-right">
-                      {formatPrice(totalLinea)}
-                    </p>
-                    {multiEntrega && !compact && (
-                      <p
-                        className={`text-sm font-bold text-right ${
-                          row.restante === 0
-                            ? "text-green-600"
-                            : (row.restante ?? 0) < 0
-                              ? "text-red-500"
-                              : "text-amber-500"
-                        }`}
-                        title={String(row.restante ?? 0)}
-                      >
-                        {row.restante}
-                      </p>
-                    )}
-                    {showActionsColumn && !compact ? (
-                      row.onRemove && row.finalPrice === 0 ? (
-                        <button
-                          onClick={row.onRemove}
-                          title="Eliminar producto"
-                          className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      ) : (
-                        <span />
-                      )
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+              ),
+              children: category.rows.map(renderRow)
+            }))}
+          />
 
           {/* Sección bonificados */}
           {showBonus && (

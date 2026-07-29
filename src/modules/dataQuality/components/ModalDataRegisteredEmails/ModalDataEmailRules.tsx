@@ -172,6 +172,8 @@ export const ModalDataEmailRules: React.FC<Props> = ({ isOpen, onClose, clientId
               />
             </div>
 
+            <p className="modalDataEmailRules__title">Remitentes</p>
+
             {existingEmails.length === 0 && newEmails.length === 0 && (
               <p className="modalDataEmailRules__empty">No hay correos registrados.</p>
             )}

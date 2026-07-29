@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 
 import { useAppStore } from "@/lib/store/store";
-import {
-  confirmOrder,
-  createDraft,
-  createOrder,
-  createOrderFromDraft
-} from "@/services/commerce/commerce";
+import { confirmOrder, createDraft, createOrder } from "@/services/commerce/commerce";
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import {
   IConfirmOrderData,
@@ -29,11 +24,13 @@ import { generateShortUuid } from "@/utils/utils";
 
 import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
 import OrderShipmentConfirm from "./order-shipment-confirm/order-shipment-confirm";
+import ModalPurchaseOrderInfo from "./modal-purchase-order-info";
 
 export type IShippingInfo = {
   id: string;
   addressSelectValue: string;
   addressId?: number;
+  warehouse_id?: number;
   city: string;
   dispatch_address: string;
   email: string;
@@ -74,6 +71,10 @@ export default function CheckoutPage() {
   const [showWompiModal, setShowWompiModal] = useState(false);
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
 
+  const [isPurchaseOrderModalOpen, setIsPurchaseOrderModalOpen] = useState(false);
+  const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
+  const [purchaseOrderFile, setPurchaseOrderFile] = useState<File | undefined>();
+
   // Conserva los uuids generados previamente para reutilizarlos cuando
   // se revalida el descuento (mismo sku + misma quantity => mismo uuid),
   // de modo que el backend pueda correlacionar el producto entre revalidaciones.
@@ -98,6 +99,7 @@ export default function CheckoutPage() {
         discount_package: selectedDiscount,
         order_summary: products,
         executive_discounts: executiveDiscounts,
+        business_unit: businessUnit,
         deactivate_cross_selling: !deactivateCrossSelling,
         ...(bonus?.id !== undefined && { promotion_id: bonus.id }),
         promotion_applyed: promotionApplyed
@@ -175,14 +177,17 @@ export default function CheckoutPage() {
       return { ...p, item_uuid };
     });
 
-    // 4) Clona order_split_details inyectando item_uuid en cada producto del split.
+    // 4) Clona order_split_details inyectando item_uuid en cada producto del
+    //    split y el # de orden de compra, que aplica a todos los splits.
+    const cleanedPurchaseOrderNumber = purchaseOrderNumber.trim();
     const splitDetails = order_split_details.map((split) => ({
       ...split,
       products: split.products.map((p) => {
         const key = `${p.product_sku}::${p.quantity}`;
         const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
         return { ...p, item_uuid };
-      })
+      }),
+      ...(cleanedPurchaseOrderNumber ? { marketplace_number: cleanedPurchaseOrderNumber } : {})
     }));
 
     const orderSummary: IOrderSummaryPayload = {
@@ -194,7 +199,9 @@ export default function CheckoutPage() {
       },
       discount_package: selectedDiscount as IDiscountPackageAvailable,
       executive_discounts: executiveDiscounts,
-      deactivate_cross_selling: !deactivateCrossSelling
+      deactivate_cross_selling: !deactivateCrossSelling,
+      client: client,
+      business_unit: businessUnit
     };
 
     // El range_promotion_id es el id del rango activo
@@ -214,6 +221,7 @@ export default function CheckoutPage() {
       order_split_details: splitDetails,
       promotion_id: bonus?.id || undefined,
       nit_id: channelCode,
+      draft_id: draftInfo?.id,
       // business_unit solo se envía cuando el usuario eligió un canal
       // (client_bu[n].bu_name). Es opcional y solo aplica a marketplace.
       ...(businessUnit ? { business_unit: businessUnit } : {}),
@@ -229,32 +237,14 @@ export default function CheckoutPage() {
         return;
       }
       const payload = buildOrderPayload(isElectronic);
-      const paymentSupportFile = selectedPaymentSupport[0];
-
-      if (draftInfo?.id) {
-        const response = (await createOrderFromDraft(
-          projectId,
-          client.id,
-          draftInfo.id,
-          payload,
-          showMessage,
-          paymentSupportFile
-        )) as GenericResponse<{ id_order: number }>;
-
-        if (response.status === 200) {
-          const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
-          router.prefetch(url);
-          router.push(url);
-        }
-        return;
-      }
 
       const response = await createOrder(
         projectId,
         client.id,
         payload,
         showMessage,
-        selectedPaymentSupport
+        selectedPaymentSupport,
+        purchaseOrderFile
       );
       if (response.status === 200) {
         const queryParams = [];
@@ -416,6 +406,25 @@ export default function CheckoutPage() {
         onDraft={handleDraftOrder}
         loadingFinish={loadingFinish}
         loadingDraft={loadingDraft}
+        purchaseOrderNumber={purchaseOrderNumber}
+        purchaseOrderFile={purchaseOrderFile}
+        onOpenPurchaseOrder={() => setIsPurchaseOrderModalOpen(true)}
+        onClearPurchaseOrder={() => {
+          setPurchaseOrderNumber("");
+          setPurchaseOrderFile(undefined);
+        }}
+      />
+
+      <ModalPurchaseOrderInfo
+        isOpen={isPurchaseOrderModalOpen}
+        onCancel={() => setIsPurchaseOrderModalOpen(false)}
+        onOk={(number, file) => {
+          setPurchaseOrderNumber(number);
+          setPurchaseOrderFile(file);
+          setIsPurchaseOrderModalOpen(false);
+        }}
+        initialPurchaseOrderNumber={purchaseOrderNumber}
+        initialFile={purchaseOrderFile}
       />
 
       <ModalConfirmAction

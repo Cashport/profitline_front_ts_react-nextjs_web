@@ -1,6 +1,7 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
+  ICityWarehouse,
   ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
@@ -72,6 +73,13 @@ export const getAdresses = async (clientId: string) => {
   }
 };
 
+export const getCityWarehouses = async () => {
+  const response: GenericResponse<ICityWarehouse[]> = await API.get(
+    `/marketplace/city-warehouses`
+  );
+  return response;
+};
+
 export const getDiscounts = async (
   projectId: number,
   clientId: string
@@ -110,16 +118,18 @@ export const createOrder = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupports?: File[]
+  paymentSupports?: File[],
+  purchaseOrderFile?: File
 ): Promise<GenericResponse<ISucessCreateOrder>> => {
   let response: GenericResponse<ISucessCreateOrder>;
   const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
-  if (paymentSupports && paymentSupports.length > 0) {
+  if ((paymentSupports && paymentSupports.length > 0) || purchaseOrderFile) {
     const formData = new FormData();
     formData.append("request", JSON.stringify(data));
-    paymentSupports.forEach((file, index) => {
-      formData.append(`evidence${index + 1}`, file);
+    paymentSupports?.forEach((file, index) => {
+      if (file) formData.append(`evidence${index + 1}`, file);
     });
+    if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
     response = await API.post(url, formData, {
       headers: {
@@ -190,17 +200,20 @@ export const createOrderFromDraft = async (
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void,
-  paymentSupport?: File
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ) => {
   try {
     let response: GenericResponse<{ id_order: number }>;
 
     // si el cliente adjunta soporte de pago al crear la orden desde el borrador
     const url = `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`;
-    if (paymentSupport) {
+    if (paymentSupport || purchaseOrderFile) {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("file", paymentSupport);
+      if (paymentSupport) formData.append("file", paymentSupport);
+      // El PDF de orden de compra es uno solo, así la orden tenga varios splits.
+      if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
 
       response = await API.put(url, formData, {
         headers: {
@@ -530,6 +543,50 @@ export const getOrderDraft = async (projectId: number, draftId: number) => {
     return response.data;
   } catch (error) {
     console.error("Error al obtener el borrador de la orden:", error);
+    throw error;
+  }
+};
+
+export interface IUploadedPurchaseOrder {
+  orderId: number;
+  codigoIscala: string;
+  direccion: string;
+  ciudad: string;
+  total: number;
+}
+
+export interface IUploadPurchaseOrdersSummary {
+  ordersCreated: number;
+  skusProcessed: number;
+  totalAmount: number;
+}
+
+export interface IUploadPurchaseOrdersData {
+  packageId: number;
+  draftId: number;
+  orders: IUploadedPurchaseOrder[];
+  summary: IUploadPurchaseOrdersSummary;
+}
+
+export const uploadPurchaseOrders = async (
+  file: File
+): Promise<GenericResponse<IUploadPurchaseOrdersData>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response: GenericResponse<IUploadPurchaseOrdersData> = await API.post(
+      `/marketplace/upload-purchase-orders`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al subir las órdenes de compra:", error);
     throw error;
   }
 };

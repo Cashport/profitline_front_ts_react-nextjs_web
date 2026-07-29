@@ -35,7 +35,6 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
 
   const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
-
   return (
     <div className={styles.productCard}>
       <div className={styles.imageContainer}>
@@ -50,6 +49,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
       <hr className={styles.separator} />
       <h4 className={styles.name}>
         {product.name}
+        {product.EAN?.trim() && <span className={styles.sku}>SKU: {product.EAN}</span>}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"

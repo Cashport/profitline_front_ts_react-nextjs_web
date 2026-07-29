@@ -1,3 +1,5 @@
+import { IOrderViewContext } from "@/app/comercio/cetaphil/page";
+
 export interface IEcommerceClient {
   client_id: string;
   client_name: string;
@@ -77,6 +79,7 @@ export interface IConfirmOrderData {
     product_sku: string;
     quantity: number;
   }[];
+  business_unit: string;
   executive_discounts: IExecutiveDiscount[];
   deactivate_cross_selling: boolean;
   promotion_id?: number;
@@ -247,6 +250,8 @@ export interface IOrderConfirmedResponse {
   insufficientStockProducts: string[];
   promotion?: IPromotion;
   other_bonificated_products?: IOtherBonificatedProduct[];
+  client: IOrderViewContext["client"];
+  business_unit: string;
 }
 
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
@@ -264,6 +269,15 @@ export interface IShippingInformation {
   comments: string;
   // selected id address
   id?: number | string;
+  warehouse_id?: number;
+}
+
+export interface ICityWarehouse {
+  id: number;
+  city_name: string;
+  sort_order: number;
+  warehouse_id: number;
+  warehouse_name: string;
 }
 
 export interface IOrderSplitShippingInfo {
@@ -274,6 +288,7 @@ export interface IOrderSplitShippingInfo {
   phone_number: string;
   comments: string;
   id?: number;
+  warehouse_id: number;
 }
 
 export interface IOrderSplitDetail {
@@ -282,6 +297,7 @@ export interface IOrderSplitDetail {
   products: DiscountItem[];
   bonificated_products?: IBonificatedProductsPost[];
   other_bonificated_products?: IBonificatedProductsPost[];
+  marketplace_number?: string;
 }
 
 export interface ICreateOrderData {
@@ -306,6 +322,7 @@ export interface ICreateOrderData {
    * pertenecen a un rango de la promoción.
    */
   range_promotion_id?: number;
+  draft_id: number | undefined;
 }
 
 export interface ISucessCreateOrder {
@@ -441,6 +458,7 @@ export interface IOrder {
   notification_id: number | null;
   incident_id: number | null;
   has_stock: number;
+  is_draft?: boolean;
 }
 export interface IDraftOrder {
   id: number;
