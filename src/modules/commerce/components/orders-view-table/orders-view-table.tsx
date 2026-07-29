@@ -3,6 +3,7 @@ import { Button, Dropdown, MenuProps, message, Table, TableProps, Typography } f
 import {
   DotsThreeVertical,
   Eye,
+  NewspaperClipping,
   Receipt,
   WarningCircle,
   WarningDiamond
@@ -336,11 +337,11 @@ const OrdersViewTable = ({
                 key: "detalle",
                 label: (
                   <Button
-                    icon={<Eye size={20} />}
+                    icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
                     className="buttonNoBorder"
                     onClick={() => handleSeeDetail(row)}
                   >
-                    Detalle
+                    {row.is_draft ? "Continuar pedido" : "Detalle"}
                   </Button>
                 )
               }
