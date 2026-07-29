@@ -79,6 +79,7 @@ export interface IConfirmOrderData {
     product_sku: string;
     quantity: number;
   }[];
+  business_unit: string;
   executive_discounts: IExecutiveDiscount[];
   deactivate_cross_selling: boolean;
   promotion_id?: number;
@@ -250,7 +251,7 @@ export interface IOrderConfirmedResponse {
   promotion?: IPromotion;
   other_bonificated_products?: IOtherBonificatedProduct[];
   client: IOrderViewContext["client"];
-  bussines_untit: string;
+  business_unit: string;
 }
 
 export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
