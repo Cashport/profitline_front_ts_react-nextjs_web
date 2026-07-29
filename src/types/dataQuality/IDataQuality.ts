@@ -515,6 +515,7 @@ export interface ILastMonthDataExploration {
   novedades: number;
   novedades_percent: number;
   units_haleon: number;
+  vol_reported: number;
 }
 
 export interface IDataExplorationClient {
