@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, User, Package, Gift, SlidersHorizontal, ChevronRight } from "lucide-react";
+import { Users, User, Package, Tag, ChevronRight } from "lucide-react";
 
 const sections = [
   {
@@ -18,24 +18,16 @@ const sections = [
     disabled: true
   },
   {
-    href: "#",
+    href: "/market-admin/productos",
     icon: Package,
     label: "Productos",
-    description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes.",
-    disabled: true
+    description: "Revisa el catálogo: líneas, canales, SKUs, lotes, precios e imágenes."
   },
   {
-    href: "/market-admin/bonificados",
-    icon: Gift,
-    label: "Sistema de bonificados",
-    description: "Lista de promociones con fechas, estado y creación de nuevos bonificados."
-  },
-  {
-    href: "#",
-    icon: SlidersHorizontal,
-    label: "Configurar descuentos",
-    description: "Reglas y configuración de descuentos por cliente, canal o producto.",
-    disabled: true
+    href: "/market-admin/bonusAndDiscounts",
+    icon: Tag,
+    label: "Descuentos y bonificados",
+    description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
   }
 ];
 

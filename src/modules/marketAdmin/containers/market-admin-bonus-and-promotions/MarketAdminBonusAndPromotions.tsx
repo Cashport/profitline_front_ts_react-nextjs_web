@@ -52,7 +52,7 @@ export default function MarketAdminBonusAndPromotions() {
       <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-[#EEEEEE]">
           <Link
-            href="/market-admin/bonificados"
+            href="/market-admin/bonusAndDiscounts"
             className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
           >
             <ChevronLeft size={18} />

@@ -9,6 +9,8 @@ import {
   AdminCheckbox,
   type SortDir
 } from "@/modules/marketAdmin/components/admin-table/AdminTable";
+import MarketAdminPromotions from "@/modules/marketAdmin/components/MarketAdminPromotions/MarketAdminPromotions";
+import CrearNuevoModal from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/CrearNuevoModal";
 
 const BONIFICADOS_MOCK = [
   {
@@ -63,7 +65,7 @@ const formatDate = (iso: string) => {
 
 const PAGE_SIZE = 10;
 
-export default function MarketAdminBonus() {
+export default function MarketAdminBonusAndDiscounts() {
   const [search, setSearch] = useState("");
   const [tipoFilter, setTipoFilter] = useState("Todos");
   const [estadoFilter, setEstadoFilter] = useState("Todos");
@@ -72,6 +74,8 @@ export default function MarketAdminBonus() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showAcciones, setShowAcciones] = useState(false);
+  const [crearOpen, setCrearOpen] = useState(false);
+  const [showPromotions, setShowPromotions] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -142,9 +146,13 @@ export default function MarketAdminBonus() {
 
   const cols = "grid-cols-[24px_2fr_110px_1fr_1fr_60px_90px_44px]";
 
+  if (showPromotions) {
+    return <MarketAdminPromotions onBack={() => setShowPromotions(false)} />;
+  }
+
   return (
     <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Sistema de bonificados</h1>
+      <h1 className="text-2xl font-bold text-[#141414] mb-5">Descuentos y bonificados</h1>
 
       <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
@@ -234,12 +242,12 @@ export default function MarketAdminBonus() {
             <option value="Borrador">Borrador</option>
           </select>
           <div className="flex-1" />
-          <Link
-            href="/market-admin/bonificados/gestion"
+          <button
+            onClick={() => setCrearOpen(true)}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#CBE71E] text-[#141414] rounded-lg text-sm font-semibold hover:bg-[#b8d11a] transition-colors"
           >
-            <Plus size={14} /> Crear bonificado
-          </Link>
+            <Plus size={14} /> Crear nuevo
+          </button>
         </div>
 
         <div className={`grid ${cols} gap-4 px-6 py-3.5 border-b border-[#E8E8E8] items-center`}>
@@ -341,6 +349,15 @@ export default function MarketAdminBonus() {
           extra={`${activos} activos`}
         />
       </div>
+
+      <CrearNuevoModal
+        open={crearOpen}
+        onClose={() => setCrearOpen(false)}
+        onSelectBonificado={() => {
+          setCrearOpen(false);
+          setShowPromotions(true);
+        }}
+      />
     </div>
   );
 }
