@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Modal } from "antd";
 import { ChevronLeft, Tag, Gift, Layers, Sliders } from "lucide-react";
 
@@ -46,11 +47,17 @@ function OptionCard({ icon: Icon, iconColor, bg, bgHover, title, description, on
 
 export default function CrearNuevoModal({ open, onClose, onSelectBonificado }: Props) {
   const [step, setStep] = useState<Step>("tipo");
+  const router = useRouter();
 
   // Always start from the first step whenever the modal is (re)opened.
   useEffect(() => {
     if (open) setStep("tipo");
   }, [open]);
+
+  const goTo = (path: string) => {
+    onClose();
+    router.push(path);
+  };
 
   const title = (
     <div className="flex items-center gap-2">
@@ -104,7 +111,7 @@ export default function CrearNuevoModal({ open, onClose, onSelectBonificado }: P
             bgHover="#D8F5D8"
             title="Grupo de descuentos"
             description="Agrupa múltiples reglas de descuento bajo un mismo conjunto."
-            onClick={() => console.log("Grupo de descuentos clicked")}
+            onClick={() => goTo("/descuentos/paquete/create")}
           />
           <OptionCard
             icon={Sliders}
@@ -113,7 +120,7 @@ export default function CrearNuevoModal({ open, onClose, onSelectBonificado }: P
             bgHover="#E8DDFF"
             title="Regla de descuento"
             description="Define una condición específica de descuento por producto, canal o volumen."
-            onClick={() => console.log("Regla de descuento clicked")}
+            onClick={() => goTo("/descuentos/regla/create")}
           />
         </div>
       )}
