@@ -115,3 +115,47 @@ export interface ICreatePromotionBody {
   max_global_usage?: number;
   ranges: IPromotionRange[];
 }
+
+// ── Bonificados manuales por cliente ────────────────────────────────────────
+export type EstadoAprobacion = "pendiente" | "aprobado" | "rechazado";
+
+// Fila del listado (estado local / flujo de aprobación en memoria)
+export interface AsignacionManual {
+  id: string;
+  clienteId: string; // NIT del cliente
+  clienteNombre: string;
+  clienteNit: string;
+  productoBonificadoId: string; // Product.id como string
+  productoBonificadoNombre: string;
+  unidadesAsignadas: number;
+  unidadesDisponibles: number;
+  estado: EstadoAprobacion;
+  creadoEn: string; // YYYY-MM-DD
+  nota: string;
+}
+
+// Cliente normalizado para el selector (independiente del servicio que lo provee)
+export interface ClienteOption {
+  nit: string;
+  nombre: string;
+}
+
+// Datos recolectados por el modal → entregados al contenedor
+export interface NuevaAsignacionData {
+  cliente: ClienteOption;
+  producto: { id: number; nombre: string };
+  unidades: number;
+  fechaInicio: string; // YYYY-MM-DD
+  fechaFin: string; // YYYY-MM-DD
+  nota: string;
+}
+
+// ── Request body de la API (POST /manager-botification) ─────────────────────
+export interface ICreateManualBonusBody {
+  customer_id: string; // NIT del cliente
+  product_id: number;
+  assigned_qty: number;
+  start_date: string; // YYYY-MM-DD
+  end_date: string; // YYYY-MM-DD
+  comments: string;
+}
