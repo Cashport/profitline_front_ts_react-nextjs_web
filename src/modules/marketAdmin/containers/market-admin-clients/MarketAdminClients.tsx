@@ -161,7 +161,7 @@ export default function MarketAdminClients() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Clientes</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
           <Link

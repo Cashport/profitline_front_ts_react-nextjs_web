@@ -159,3 +159,35 @@ export interface ICreateManualBonusBody {
   end_date: string; // YYYY-MM-DD
   comments: string;
 }
+
+// ── Productos del marketplace (GET/PUT /product) ────────────────────────────
+
+export interface IUseMarketAdminProductsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface IMarketAdminProduct {
+  id: number;
+  sku: string;
+  description: string; // nombre comercial
+  image: string; // URL de la imagen (puede venir como ".")
+  id_line: number;
+  id_category: number;
+  line_name: string;
+  category_name: string;
+  is_available: 1 | 0; // 1 → Activo, 0 → Inactivo
+  project_id: number;
+  product_units: number;
+  order_marketplace: number;
+  created_by: string;
+  updated_at: string; // ISO date
+}
+
+// PUT /product/:id — multipart/form-data, se envía solo lo que cambia
+export interface IUpdateMarketAdminProductBody {
+  description?: string; // nombre comercial
+  is_available?: 1 | 0; // activo/inactivo
+  image?: File; // archivo de imagen
+}

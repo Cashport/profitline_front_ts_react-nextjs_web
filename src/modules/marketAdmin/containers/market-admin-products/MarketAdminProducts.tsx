@@ -10,6 +10,7 @@ import {
   formatPrice,
   type ProductoAdminMock
 } from "@/modules/marketAdmin/mocks/products";
+import { useMarketAdminProducts } from "@/modules/marketAdmin/hooks/useMarketAdminProducts";
 
 const PAGE_SIZE = 10;
 
@@ -41,6 +42,17 @@ export default function MarketAdminProducts() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
+
+  // Listado real desde el backend — por ahora solo se loguea para tipar la respuesta.
+  const { data: productsData, pagination } = useMarketAdminProducts({
+    page,
+    limit: PAGE_SIZE,
+    search
+  });
+
+  useEffect(() => {
+    console.log("[MarketAdminProducts] GET /product →", { data: productsData, pagination });
+  }, [productsData, pagination]);
 
   const lineas = useMemo(
     () => Array.from(new Set(PRODUCTOS_ADMIN_MOCK.map((p) => p.linea))),
@@ -162,7 +174,7 @@ export default function MarketAdminProducts() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Productos</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
           <Link
