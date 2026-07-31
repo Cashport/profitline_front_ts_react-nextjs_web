@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { PRODUCTOS_ADMIN_MOCK } from "@/modules/marketAdmin/mocks/products";
+import { useMarketAdminProductDetail } from "@/modules/marketAdmin/hooks/useMarketAdminProductDetail";
 import ProductInfoSection from "@/modules/marketAdmin/components/market-admin-product-detail/ProductInfoSection";
 import ProductImageUpload from "@/modules/marketAdmin/components/market-admin-product-detail/ProductImageUpload";
 import ProductSkusTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductSkusTable";
@@ -12,6 +13,18 @@ import ProductLotes from "@/modules/marketAdmin/components/market-admin-product-
 export default function MarketAdminProductDetail({ params }: { params: { id: string } }) {
   const { id } = params;
   const base = PRODUCTOS_ADMIN_MOCK.find((p) => p.id === id) ?? PRODUCTOS_ADMIN_MOCK[0];
+
+  // Detalle real desde el backend — por ahora solo se loguea para tipar la respuesta.
+  const { data: productDetail, isLoading, error } = useMarketAdminProductDetail(id);
+
+  useEffect(() => {
+    console.log("[MarketAdminProductDetail] GET /product/:id →", {
+      id,
+      productDetail,
+      isLoading,
+      error
+    });
+  }, [id, productDetail, isLoading, error]);
 
   const [nombreVisible, setNombreVisible] = useState(base.nombreVisible);
   const [activo, setActivo] = useState(base.activo);
