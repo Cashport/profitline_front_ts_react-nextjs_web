@@ -23,7 +23,7 @@ export const sanitizeComment = (value: string) =>
     .replace(/[\r\n]+/g, " ") // enters -> espacio
     .replace(/[\u{10000}-\u{10FFFF}]/gu, ""); // emojis / 4-byte chars -> fuera
 
-export const INSTITUCIONAL_DEFAULT_COMMENT = "PEDIDO INSTITUCIONAL";
+export const INSTITUCIONAL_DEFAULT_COMMENT = "USO INSTITUCIONAL";
 
 // Comentario de envío por defecto según la unidad de negocio (bu_name del canal).
 // Para el canal "Institucional" se prellena con "PEDIDO INSTITUCIONAL".
