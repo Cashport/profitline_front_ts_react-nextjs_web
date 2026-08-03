@@ -73,7 +73,8 @@ function DireccionDropdown({
                             city: d.city,
                             dispatch_address: d.address,
                             email: d.email,
-                            warehouse: d.warehouse_description
+                            warehouse: d.warehouse_description,
+                            warehouse_id: d.warehouse_id
                           });
                           setOpen(false);
                         }}

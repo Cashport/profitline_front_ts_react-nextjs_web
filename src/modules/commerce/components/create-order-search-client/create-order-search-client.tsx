@@ -128,8 +128,8 @@ const CreateOrderSearchClient: FC = () => {
     setSelectedAddress(null);
   };
 
-  const handleSaveNewAddress = (city: string, dispatchAddress: string) => {
-    setSelectedAddress({ city, dispatch_address: dispatchAddress });
+  const handleSaveNewAddress = (city: string, dispatchAddress: string, warehouseId: number) => {
+    setSelectedAddress({ city, dispatch_address: dispatchAddress, warehouse_id: warehouseId });
     setAddressModalOpen(false);
   };
 
@@ -185,7 +185,8 @@ const CreateOrderSearchClient: FC = () => {
       dispatch_address: selectedAddress.dispatch_address,
       email: selectedAddress.email || selectedClient.client_email || "",
       phone_number: "",
-      comments: ""
+      comments: "",
+      warehouse_id: selectedAddress.warehouse_id
     };
 
     const selectedBu = selectedClient.client_bu?.find((b) => b.internal_code === canal);

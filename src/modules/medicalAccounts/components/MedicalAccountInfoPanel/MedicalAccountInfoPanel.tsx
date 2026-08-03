@@ -168,7 +168,7 @@ export function MedicalAccountInfoPanel({
           ) : (
             <>
               <Field label="No. Autorización" value={account.authorization_number ?? "-"} mono />
-              <Field label="Régimen" value="-" />
+              <Field label="Régimen" value={account.regimen ?? "-"} />
               <Field label="Fecha de servicio" value={formatDate(account.service_date)} />
               <Field label="Tipo de servicio" value={serviceLabel} />
               <Field label="EPS" value={account.eps ?? "-"} />

@@ -85,6 +85,7 @@ export interface IMedicalAccountUploadData {
   service_type: string | null;
   service_date: string | null;
   eps: string | null;
+  regimen: string | null;
   original_file_name: string;
   original_pdf_url: string;
   total_pages: number;

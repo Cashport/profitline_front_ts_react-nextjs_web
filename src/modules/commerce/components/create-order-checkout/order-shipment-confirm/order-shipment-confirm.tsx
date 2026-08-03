@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Gift, GitBranch, Pencil, Plus, Trash2, X } from "lucide-react";
+import { FileText, Gift, GitBranch, Paperclip, Pencil, Plus, Trash2, X } from "lucide-react";
 
 import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import {
@@ -17,6 +17,7 @@ import { useAppStore } from "@/lib/store/store";
 import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import {
   NEW_ADDRESS_OPTION,
   getDefaultCommentForBusinessUnit,
@@ -46,11 +47,16 @@ interface OrderShipmentConfirmProps {
   onDraft: () => void;
   loadingFinish?: boolean;
   loadingDraft?: boolean;
+  purchaseOrderNumber?: string;
+  purchaseOrderFile?: File;
+  onOpenPurchaseOrder: () => void;
+  onClearPurchaseOrder: () => void;
 }
 
 type SingleForm = {
   addressSelectValue: string;
   addressId?: number;
+  warehouse_id?: number;
   city: string;
   dispatch_address: string;
   email: string;
@@ -70,7 +76,11 @@ export default function OrderShipmentConfirm({
   onConfirm,
   onDraft,
   loadingFinish,
-  loadingDraft
+  loadingDraft,
+  purchaseOrderNumber,
+  purchaseOrderFile,
+  onOpenPurchaseOrder,
+  onClearPurchaseOrder
 }: OrderShipmentConfirmProps) {
   const {
     client,
@@ -125,6 +135,7 @@ export default function OrderShipmentConfirm({
   const [singleForm, setSingleForm] = useState<SingleForm>({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: "",
@@ -139,6 +150,7 @@ export default function OrderShipmentConfirm({
   const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: "",
@@ -187,8 +199,27 @@ export default function OrderShipmentConfirm({
 
     const draftAddressId =
       typeof shippingInfo.id === "string" ? Number(shippingInfo.id) : shippingInfo.id;
-    const matchedAddress =
+    let matchedAddress =
       draftAddressId !== undefined ? addresses.find((a) => a.id === draftAddressId) : undefined;
+
+    // Draft carries a real (existing) address id. If it isn't among the client's
+    // fetched addresses, inject it as the first option and select it rather than
+    // treating it as a brand-new address (which would drop its id from the payload).
+    if (!matchedAddress && draftAddressId !== undefined && !Number.isNaN(draftAddressId)) {
+      const draftAddress: ICommerceAdresses = {
+        id: draftAddressId,
+        address: shippingInfo.dispatch_address || shippingInfo.address || "",
+        city: shippingInfo.city ?? "",
+        email: shippingInfo.email ?? "",
+        warehouse_id: 0,
+        warehouse: "",
+        warehouse_description: ""
+      };
+      setAddresses((prev) =>
+        prev.some((a) => a.id === draftAddressId) ? prev : [draftAddress, ...prev]
+      );
+      matchedAddress = draftAddress;
+    }
 
     const phoneRaw = shippingInfo.phone_number || singleForm.telefono || "";
     const phoneMatch = phoneRaw.match(/^(\+\d{1,3})(\d+)$/);
@@ -198,6 +229,7 @@ export default function OrderShipmentConfirm({
     setSingleForm({
       addressSelectValue: matchedAddress ? String(matchedAddress.id) : NEW_ADDRESS_OPTION.value,
       addressId: matchedAddress?.id,
+      warehouse_id: shippingInfo.warehouse_id ?? matchedAddress?.warehouse_id,
       city: shippingInfo.city ?? "",
       dispatch_address: shippingInfo.dispatch_address ?? "",
       email: shippingInfo.email ?? "",
@@ -217,6 +249,7 @@ export default function OrderShipmentConfirm({
         setSingleForm((f) => ({
           ...f,
           addressId: undefined,
+          warehouse_id: undefined,
           city: "",
           dispatch_address: ""
         }));
@@ -227,12 +260,14 @@ export default function OrderShipmentConfirm({
     if (sel) {
       const same =
         singleForm.addressId === sel.id &&
+        singleForm.warehouse_id === sel.warehouse_id &&
         singleForm.city === sel.city &&
         singleForm.dispatch_address === sel.address;
       if (!same) {
         setSingleForm((f) => ({
           ...f,
           addressId: sel.id,
+          warehouse_id: sel.warehouse_id,
           city: sel.city,
           dispatch_address: sel.address,
           email: f.email || sel.email || client?.email || ""
@@ -244,6 +279,7 @@ export default function OrderShipmentConfirm({
   const makeBlankEntrega = (): Omit<IShippingInfo, "id"> => ({
     addressSelectValue: "",
     addressId: undefined,
+    warehouse_id: undefined,
     city: "",
     dispatch_address: "",
     email: client?.email ?? "",
@@ -264,6 +300,7 @@ export default function OrderShipmentConfirm({
     setModalDraft({
       addressSelectValue: entrega.addressSelectValue,
       addressId: entrega.addressId,
+      warehouse_id: entrega.warehouse_id,
       city: entrega.city,
       dispatch_address: entrega.dispatch_address,
       email: entrega.email,
@@ -304,12 +341,14 @@ export default function OrderShipmentConfirm({
     if (addresses[0]) {
       e1.addressSelectValue = String(addresses[0].id);
       e1.addressId = addresses[0].id;
+      e1.warehouse_id = addresses[0].warehouse_id;
       e1.city = addresses[0].city;
       e1.dispatch_address = addresses[0].address;
     }
     if (addresses[1]) {
       e2.addressSelectValue = String(addresses[1].id);
       e2.addressId = addresses[1].id;
+      e2.warehouse_id = addresses[1].warehouse_id;
       e2.city = addresses[1].city;
       e2.dispatch_address = addresses[1].address;
     }
@@ -343,6 +382,7 @@ export default function OrderShipmentConfirm({
 
   const isSingleFormValid =
     singleForm.addressSelectValue !== "" &&
+    singleForm.warehouse_id != null &&
     singleForm.city.trim() !== "" &&
     singleForm.dispatch_address.trim() !== "" &&
     isValidEmail(singleForm.email) &&
@@ -358,6 +398,7 @@ export default function OrderShipmentConfirm({
     const buildShipping = (e: {
       addressSelectValue: string;
       addressId?: number;
+      warehouse_id?: number;
       city: string;
       dispatch_address: string;
       email: string;
@@ -374,7 +415,8 @@ export default function OrderShipmentConfirm({
       dispatch_address: e.dispatch_address,
       email: e.email,
       phone_number: `${e.indicativo}${e.telefono}`,
-      comments: e.observaciones
+      comments: e.observaciones,
+      warehouse_id: e.warehouse_id ?? 0
     });
 
     const buildProductsForSplit = (cantidades: Record<string, number>): DiscountItem[] =>
@@ -453,6 +495,8 @@ export default function OrderShipmentConfirm({
     NEW_ADDRESS_OPTION,
     ...addresses.map((a) => ({ value: String(a.id), label: a.address }))
   ];
+
+  const hasPurchaseOrder = Boolean(purchaseOrderNumber || purchaseOrderFile);
 
   return (
     <div className="flex flex-col w-[420px] flex-shrink-0 bg-[#F7F7F7]">
@@ -539,6 +583,18 @@ export default function OrderShipmentConfirm({
                   <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
                 )}
               </div>
+
+              {isNewAddressSingle && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
+                  <WarehouseSelect
+                    value={singleForm.warehouse_id}
+                    onChange={(warehouseId) =>
+                      setSingleForm((f) => ({ ...f, warehouse_id: warehouseId }))
+                    }
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Correo electrónico</label>
@@ -740,6 +796,40 @@ export default function OrderShipmentConfirm({
             </div>
           )}
 
+          {/* Orden de compra (opcional, aplica a toda la orden) */}
+          <div className="px-5 pb-5">
+            {hasPurchaseOrder ? (
+              <div className="flex items-center gap-2 px-3 py-2.5 border border-[#DDDDDD] rounded-xl">
+                <FileText size={12} className="text-[#141414] flex-shrink-0" />
+                <button
+                  onClick={onOpenPurchaseOrder}
+                  disabled={loadingFinish || loadingDraft}
+                  className="flex-1 text-left text-xs text-[#141414] truncate hover:underline disabled:cursor-not-allowed"
+                  title="Editar orden de compra"
+                >
+                  {purchaseOrderNumber || purchaseOrderFile?.name}
+                </button>
+                <button
+                  onClick={onClearPurchaseOrder}
+                  disabled={loadingFinish || loadingDraft}
+                  className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 disabled:cursor-not-allowed"
+                  title="Quitar orden de compra"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenPurchaseOrder}
+                disabled={loadingFinish || loadingDraft}
+                className="flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-xs text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Paperclip size={12} />
+                Adjuntar orden de compra
+              </button>
+            )}
+          </div>
+
           {modalEntrega !== null && (
             <ModalShippingInfo
               mode={modalEntrega}
@@ -805,13 +895,13 @@ export default function OrderShipmentConfirm({
 
           {/* Actions */}
           <div className="flex gap-3 pt-2 pb-1 flex-shrink-0">
-            {/* <button
+            <button
               onClick={onDraft}
               disabled={loadingDraft || loadingFinish || !!draftInfo?.id}
               className="flex-1 py-3 text-sm font-semibold bg-[#141414] text-white rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingDraft ? "Guardando…" : "Guardar borrador"}
-            </button> */}
+            </button>
             <button
               onClick={onConfirm}
               disabled={
