@@ -5,24 +5,21 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Search, Eye, ChevronLeft, MoreHorizontal, Package } from "lucide-react";
-import {
-  PRODUCTOS_ADMIN_MOCK,
-  formatPrice,
-  type ProductoAdminMock
-} from "@/modules/marketAdmin/mocks/products";
 import { useMarketAdminProducts } from "@/modules/marketAdmin/hooks/useMarketAdminProducts";
+import { IMarketAdminProduct } from "@/types/marketAdmin/IMarketAdmin";
 
 const PAGE_SIZE = 10;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-function ProductImageCell({ producto }: { producto: ProductoAdminMock }) {
+function ProductImageCell({ producto }: { producto: IMarketAdminProduct }) {
+  const hasImage = producto.image && producto.image !== ".";
   return (
     <div className="w-9 h-9 rounded-lg bg-[#F5F5F5] overflow-hidden flex items-center justify-center flex-shrink-0">
-      {producto.imagen ? (
+      {hasImage ? (
         <img
-          src={producto.imagen}
-          alt={producto.nombreVisible}
+          src={producto.image}
+          alt={producto.description}
           width={36}
           height={36}
           className="object-contain"
@@ -43,20 +40,19 @@ export default function MarketAdminProducts() {
   const [showAcciones, setShowAcciones] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
 
-  // Listado real desde el backend — por ahora solo se loguea para tipar la respuesta.
-  const { data: productsData, pagination } = useMarketAdminProducts({
+  const {
+    data: productsData,
+    pagination,
+    isLoading
+  } = useMarketAdminProducts({
     page,
     limit: PAGE_SIZE,
     search
   });
 
-  useEffect(() => {
-    console.log("[MarketAdminProducts] GET /product →", { data: productsData, pagination });
-  }, [productsData, pagination]);
-
   const lineas = useMemo(
-    () => Array.from(new Set(PRODUCTOS_ADMIN_MOCK.map((p) => p.linea))),
-    []
+    () => Array.from(new Set(productsData.map((p) => p.line_name))),
+    [productsData]
   );
 
   useEffect(() => {
@@ -68,21 +64,20 @@ export default function MarketAdminProducts() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // La búsqueda se resuelve en el servidor (parámetro `search` del hook).
   const filtered = useMemo(
     () =>
-      PRODUCTOS_ADMIN_MOCK.filter((p) => {
-        const matchSearch =
-          p.nombre.toLowerCase().includes(search.toLowerCase()) ||
-          p.nombreVisible.toLowerCase().includes(search.toLowerCase());
-        const matchLinea = lineaFilter === "Todas" || p.linea === lineaFilter;
+      productsData.filter((p) => {
+        const matchLinea = lineaFilter === "Todas" || p.line_name === lineaFilter;
         const matchEstado =
-          estadoFilter === "Todos" || (estadoFilter === "Activo" ? p.activo : !p.activo);
-        return matchSearch && matchLinea && matchEstado;
+          estadoFilter === "Todos" ||
+          (estadoFilter === "Activo" ? p.is_available === 1 : p.is_available === 0);
+        return matchLinea && matchEstado;
       }),
-    [search, lineaFilter, estadoFilter]
+    [productsData, lineaFilter, estadoFilter]
   );
 
-  const activos = filtered.filter((p) => p.activo).length;
+  const activos = filtered.filter((p) => p.is_available === 1).length;
 
   function runAccion(accion: string) {
     setShowAcciones(false);
@@ -90,7 +85,7 @@ export default function MarketAdminProducts() {
     alert(`Acción "${accion}" aplicada a ${selectedRowKeys.length} producto(s).`);
   }
 
-  const columns: ColumnsType<ProductoAdminMock> = [
+  const columns: ColumnsType<IMarketAdminProduct> = [
     {
       title: "",
       key: "imagen",
@@ -100,56 +95,56 @@ export default function MarketAdminProducts() {
     },
     {
       title: "Producto",
-      dataIndex: "nombreVisible",
-      key: "nombreVisible",
-      sorter: (a, b) => a.nombreVisible.localeCompare(b.nombreVisible),
+      dataIndex: "description",
+      key: "description",
+      sorter: (a, b) => a.description.localeCompare(b.description),
       onHeaderCell: headerCell,
       render: (_, p) => (
         <div>
-          <p className="text-sm text-[#141414] leading-snug">{p.nombreVisible}</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">{formatPrice(p.precioBase)}</p>
+          <p className="text-sm text-[#141414] leading-snug">{p.description}</p>
+          {p.price ? (
+            <p className="text-xs text-[#999999]">$ {p.price.toLocaleString("es-CO")}</p>
+          ) : null}
         </div>
       )
     },
     {
       title: "Línea",
-      dataIndex: "linea",
-      key: "linea",
-      sorter: (a, b) => a.linea.localeCompare(b.linea),
+      dataIndex: "line_name",
+      key: "line_name",
+      sorter: (a, b) => a.line_name.localeCompare(b.line_name),
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "Canal",
-      dataIndex: "canal",
       key: "canal",
-      sorter: (a, b) => a.canal.localeCompare(b.canal),
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+      render: () => <span className="text-sm text-[#141414]">-</span>
     },
     {
       title: "SKUs",
-      dataIndex: "skus",
-      key: "skus",
+      dataIndex: "product_units",
+      key: "product_units",
       width: 80,
-      sorter: (a, b) => a.skus - b.skus,
+      sorter: (a, b) => a.product_units - b.product_units,
       onHeaderCell: headerCell,
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "Estado",
-      dataIndex: "activo",
-      key: "activo",
+      dataIndex: "is_available",
+      key: "is_available",
       width: 100,
-      sorter: (a, b) => Number(a.activo) - Number(b.activo),
+      sorter: (a, b) => Number(a.is_available) - Number(b.is_available),
       onHeaderCell: headerCell,
-      render: (activo: boolean) => (
+      render: (isAvailable: 1 | 0) => (
         <span
           className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
-            activo ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
+            isAvailable === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
-          {activo ? "Activo" : "Inactivo"}
+          {isAvailable === 1 ? "Activo" : "Inactivo"}
         </span>
       )
     },
@@ -271,6 +266,7 @@ export default function MarketAdminProducts() {
           columns={columns}
           dataSource={filtered}
           rowKey="id"
+          loading={isLoading}
           showSorterTooltip={false}
           locale={{ emptyText: "No se encontraron productos." }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
@@ -289,14 +285,15 @@ export default function MarketAdminProducts() {
           pagination={{
             current: page,
             pageSize: PAGE_SIZE,
+            total: pagination.totalRows,
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
               `Mostrando ${range[0]}–${range[1]} de ${total} productos · ${activos} activos`
           }}
-          onChange={(pag, _filters, _sorter, extra) =>
-            setPage(extra.action === "paginate" ? pag.current ?? 1 : 1)
-          }
+          onChange={(pag, _filters, _sorter, extra) => {
+            if (extra.action === "paginate") setPage(pag.current ?? 1);
+          }}
         />
       </div>
     </div>

@@ -183,6 +183,7 @@ export interface IMarketAdminProduct {
   order_marketplace: number;
   created_by: string;
   updated_at: string; // ISO date
+  price?: number; // precio unitario
 }
 
 // PUT /product/:id — multipart/form-data, se envía solo lo que cambia
