@@ -20,6 +20,7 @@ import ModalShippingInfo from "../modal-shipping-info";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
 import {
   NEW_ADDRESS_OPTION,
+  getDefaultCommentForBusinessUnit,
   isValidEmail,
   isValidPhone,
   phoneErrorMessage,
@@ -88,7 +89,8 @@ export default function OrderShipmentConfirm({
     shippingInfo,
     selectedDiscount,
     bonus,
-    channelCode
+    channelCode,
+    businessUnit
   } = useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
@@ -233,11 +235,11 @@ export default function OrderShipmentConfirm({
       email: shippingInfo.email ?? "",
       indicativo,
       telefono,
-      observaciones: shippingInfo.comments ?? ""
+      observaciones: shippingInfo.comments || getDefaultCommentForBusinessUnit(businessUnit)
     });
 
     didHydrateFromDraftRef.current = true;
-  }, [shippingInfo, addresses, addressesFetched]);
+  }, [shippingInfo, addresses, addressesFetched, businessUnit]);
 
   // Auto-fill city/dispatch_address from selected address (single mode)
   useEffect(() => {
@@ -283,7 +285,7 @@ export default function OrderShipmentConfirm({
     email: client?.email ?? "",
     indicativo: "+57",
     telefono: "",
-    observaciones: "",
+    observaciones: getDefaultCommentForBusinessUnit(businessUnit),
     cantidades: Object.fromEntries(discountItems.map((i) => [i.item_uuid || i.product_sku, 0])),
     bonusCantidades: Object.fromEntries(bonusItems.map((i) => [i.product_sku, 0])),
     otherBonusCantidades: Object.fromEntries(otherBonusItems.map((i) => [i.product_sku, 0]))
