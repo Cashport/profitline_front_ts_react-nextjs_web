@@ -30,18 +30,25 @@ export default function StatCards() {
     badge?: string;
   }> = [
     {
-      title: "Total Revenue",
+      title: "Total invoiced",
       value: data ? formatCurrencyMoney(data.total_revenue.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
       icon: DollarSign,
       ...metricTrend(data?.total_revenue)
     },
     {
-      title: "Avg Ticket",
-      value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
-      subtitle: "vs Goal to date",
-      icon: Tag,
-      ...metricTrend(data?.avg_ticket)
+      title: "Orders in process",
+      value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
+      subtitle: "En proceso de fact.",
+      badge: data ? `${data.orders_in_process.count} orders` : undefined
+    },
+    {
+      title: "Total expected",
+      value: data
+        ? formatCurrencyMoney(data.orders_in_process.value + data.total_revenue.value)
+        : PLACEHOLDER,
+      subtitle: "",
+      icon: DollarSign
     },
     {
       title: "Total Sales",
@@ -51,17 +58,11 @@ export default function StatCards() {
       ...metricTrend(data?.total_orders)
     },
     {
-      title: "Unique Customers",
-      value: data ? formatNumber(data.unique_customers.value) : PLACEHOLDER,
+      title: "Avg Ticket",
+      value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
       subtitle: "vs Goal to date",
-      icon: Package,
-      ...metricTrend(data?.unique_customers)
-    },
-    {
-      title: "Orders in process",
-      value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
-      subtitle: "En proceso de fact.",
-      badge: data ? `${data.orders_in_process.count} Unid` : undefined
+      icon: Tag,
+      ...metricTrend(data?.avg_ticket)
     }
   ];
 
@@ -98,8 +99,8 @@ export default function StatCards() {
                     stat.isAlert
                       ? "bg-[#FF6B00]/20 text-[#FF6B00] dark:text-[#FF6B00]"
                       : stat.isPositive
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                   }`}
                 >
                   {stat.isAlert ? null : stat.isPositive ? (
@@ -110,7 +111,7 @@ export default function StatCards() {
                   {stat.trend}
                 </div>
               )}
-              <span className="text-sm text-muted-foreground font-medium opacity-80 whitespace-nowrap">
+              <span className="text-sm text-muted-foreground font-medium opacity-80 whitespace-nowrap h-5">
                 {stat.subtitle}
               </span>
             </div>

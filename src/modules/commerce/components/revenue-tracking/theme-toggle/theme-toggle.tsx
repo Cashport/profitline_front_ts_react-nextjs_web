@@ -13,7 +13,7 @@ const THEME_OPTIONS: { key: "light" | "dark" | "system"; label: string; Icon: ty
 ];
 
 export default function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   const TriggerIcon = THEME_OPTIONS.find((o) => o.key === theme)?.Icon ?? Sun;
 
@@ -21,7 +21,15 @@ export default function ThemeToggle() {
     key,
     icon: <Icon className="w-4 h-4" />,
     label: (
-      <span className={theme === key ? "text-primary font-semibold" : "text-foreground"}>
+      <span
+        className={
+          theme === key
+            ? "text-primary font-semibold"
+            : resolvedTheme === "dark"
+              ? "text-white"
+              : "text-foreground"
+        }
+      >
         {label}
       </span>
     ),

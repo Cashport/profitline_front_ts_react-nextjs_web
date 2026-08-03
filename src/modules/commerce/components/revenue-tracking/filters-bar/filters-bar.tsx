@@ -32,8 +32,8 @@ const ENTITY_CATEGORIES: { key: string; label: string; entity: string }[] = [
   { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
   { key: "clientIds", label: "Cliente", entity: "cliente" },
   { key: "cityIds", label: "Ciudad", entity: "ciudad" },
-  { key: "lineIds", label: "Línea de negocio", entity: "linea" },
-  { key: "channelIds", label: "Canal de venta", entity: "canal" }
+  { key: "lineIds", label: "Categoría", entity: "linea" },
+  { key: "channelIds", label: "Unidad de negocio", entity: "canal" }
 ];
 
 const ENTITY_BY_KEY: Record<string, string> = Object.fromEntries(
