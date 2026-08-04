@@ -2,10 +2,10 @@ import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IMarketAdminProduct } from "@/types/marketAdmin/IMarketAdmin";
+import { IMarketAdminProductDetail } from "@/types/marketAdmin/IMarketAdmin";
 
 export const useMarketAdminProductDetail = (id?: number | string) => {
-  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IMarketAdminProduct>>(
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IMarketAdminProductDetail>>(
     id ? `/product/${id}` : null,
     fetcher
   );

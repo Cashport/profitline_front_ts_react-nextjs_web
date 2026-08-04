@@ -1,4 +1,3 @@
-import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ICreateManualBonusBody,
@@ -40,10 +39,9 @@ export const updateMarketAdminProduct = async (
       }
     });
 
-    const response: GenericResponse<unknown> = await API.put(
-      `${config.API_HOST}/product/${id}`,
-      formData
-    );
+    const response: GenericResponse<unknown> = await API.put(`/product/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
     return response.data;
   } catch (error) {
     console.error("Error al actualizar el producto:", error);

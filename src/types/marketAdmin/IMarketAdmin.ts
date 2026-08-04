@@ -186,6 +186,19 @@ export interface IMarketAdminProduct {
   price?: number; // precio unitario
 }
 
+// GET /product/:id — detalle (superset del item de la lista)
+export interface IMarketAdminProductDetail extends IMarketAdminProduct {
+  taxes: number;
+  kit: number | null;
+  locked: number | null;
+  ean: string | null;
+  is_deleted: 1 | 0;
+  discount_code_product_matrix: string | null; // TODO: confirmar forma real con backend
+  shipment_unit: number;
+  disable_discount_when_is_even: 1 | 0;
+  transfer_price: number | null;
+}
+
 // PUT /product/:id — multipart/form-data, se envía solo lo que cambia
 export interface IUpdateMarketAdminProductBody {
   description?: string; // nombre comercial

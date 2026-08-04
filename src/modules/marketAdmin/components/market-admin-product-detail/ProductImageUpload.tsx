@@ -6,7 +6,7 @@ import { Upload, Package } from "lucide-react";
 type Props = {
   imagen: string;
   alt: string;
-  onChange: (url: string) => void;
+  onChange: (file: File, previewUrl: string) => void;
 };
 
 export default function ProductImageUpload({ imagen, alt, onChange }: Props) {
@@ -14,7 +14,7 @@ export default function ProductImageUpload({ imagen, alt, onChange }: Props) {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onChange(URL.createObjectURL(file));
+    if (file) onChange(file, URL.createObjectURL(file));
   };
 
   return (

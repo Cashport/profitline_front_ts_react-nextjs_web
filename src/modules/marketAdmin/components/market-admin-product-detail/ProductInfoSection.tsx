@@ -1,7 +1,5 @@
 "use client";
 
-import { formatPrice, type ProductoAdminMock } from "@/modules/marketAdmin/mocks/products";
-
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
@@ -12,27 +10,39 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 type Props = {
-  producto: ProductoAdminMock;
+  linea: string;
+  canal: string;
+  skus: number | string;
+  precioBase: string;
+  lotesCount: number | string;
   activo: boolean;
   onToggleActivo: () => void;
 };
 
-export default function ProductInfoSection({ producto, activo, onToggleActivo }: Props) {
+export default function ProductInfoSection({
+  linea,
+  canal,
+  skus,
+  precioBase,
+  lotesCount,
+  activo,
+  onToggleActivo
+}: Props) {
   return (
     <div className="grid grid-cols-2 divide-x divide-[#EEEEEE] border-b border-[#EEEEEE]">
       <div className="px-6 py-5 flex flex-col gap-5">
         <p className="text-sm font-bold text-[#141414]">Información del producto</p>
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Línea" value={producto.linea} />
-          <Field label="Canal" value={producto.canal} />
-          <Field label="SKUs" value={String(producto.skus)} />
+          <Field label="Línea" value={linea} />
+          <Field label="Canal" value={canal} />
+          <Field label="SKUs" value={String(skus)} />
         </div>
       </div>
       <div className="px-6 py-5 flex flex-col gap-5">
         <p className="text-sm font-bold text-[#141414]">Precio y estado</p>
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Precio base" value={formatPrice(producto.precioBase)} />
-          <Field label="Lotes" value={String(producto.lotes.length)} />
+          <Field label="Precio base" value={precioBase} />
+          <Field label="Lotes" value={String(lotesCount)} />
           <div className="flex flex-col gap-1">
             <span className="text-xs text-[#999999]">Visible en Marketplace</span>
             <button

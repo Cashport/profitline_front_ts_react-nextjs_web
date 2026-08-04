@@ -3,38 +3,82 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
-import { PRODUCTOS_ADMIN_MOCK } from "@/modules/marketAdmin/mocks/products";
+import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminProductDetail } from "@/modules/marketAdmin/hooks/useMarketAdminProductDetail";
+import { updateMarketAdminProduct } from "@/services/marketAdmin/marketAdmin";
+import { IUpdateMarketAdminProductBody } from "@/types/marketAdmin/IMarketAdmin";
+import ProfitLoader from "@/components/ui/profit-loader";
 import ProductInfoSection from "@/modules/marketAdmin/components/market-admin-product-detail/ProductInfoSection";
 import ProductImageUpload from "@/modules/marketAdmin/components/market-admin-product-detail/ProductImageUpload";
 import ProductSkusTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductSkusTable";
 import ProductLotes from "@/modules/marketAdmin/components/market-admin-product-detail/ProductLotes";
 
+// Campos que el endpoint aún no devuelve → marcados como pendientes de backend.
+const MISSING = "XXXX";
+
 export default function MarketAdminProductDetail({ params }: { params: { id: string } }) {
   const { id } = params;
-  const base = PRODUCTOS_ADMIN_MOCK.find((p) => p.id === id) ?? PRODUCTOS_ADMIN_MOCK[0];
+  const { showMessage } = useMessageApi();
 
-  // Detalle real desde el backend — por ahora solo se loguea para tipar la respuesta.
-  const { data: productDetail, isLoading, error } = useMarketAdminProductDetail(id);
+  const { data: product, isLoading, error, mutate } = useMarketAdminProductDetail(id);
 
-  useEffect(() => {
-    console.log("[MarketAdminProductDetail] GET /product/:id →", {
-      id,
-      productDetail,
-      isLoading,
-      error
-    });
-  }, [id, productDetail, isLoading, error]);
-
-  const [nombreVisible, setNombreVisible] = useState(base.nombreVisible);
-  const [activo, setActivo] = useState(base.activo);
-  const [imagen, setImagen] = useState(base.imagen);
+  const [nombreVisible, setNombreVisible] = useState("");
+  const [activo, setActivo] = useState(false);
+  const [imagen, setImagen] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  // Sincroniza el estado editable cuando llega/cambia el detalle del backend.
+  useEffect(() => {
+    if (!product) return;
+    setNombreVisible(product.description ?? "");
+    setActivo(product.is_available === 1);
+    setImagen(product.image && product.image !== "." ? product.image : "");
+    setImageFile(null);
+  }, [product]);
+
+  const handleSave = async () => {
+    if (!product) return;
+
+    const body: IUpdateMarketAdminProductBody = {};
+    if (nombreVisible !== product.description) body.description = nombreVisible;
+    const nextAvailable = activo ? 1 : 0;
+    if (nextAvailable !== product.is_available) body.is_available = nextAvailable;
+    if (imageFile) body.image = imageFile;
+
+    if (Object.keys(body).length === 0) return;
+
+    try {
+      setSaving(true);
+      await updateMarketAdminProduct(id, body);
+      await mutate();
+      setImageFile(null);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      showMessage("success", "Producto actualizado correctamente.");
+    } catch {
+      showMessage("error", "Ocurrió un error al actualizar el producto.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <ProfitLoader />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-[#999999]">No se pudo cargar el producto.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -51,7 +95,8 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
           </Link>
           <button
             onClick={handleSave}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            disabled={saving}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
               saved ? "bg-[#E6F9E6] text-[#1A7A1A]" : "bg-[#CBE71E] text-[#141414] hover:bg-[#b8d11a]"
             }`}
           >
@@ -59,6 +104,8 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
               <>
                 <Check size={14} /> Guardado
               </>
+            ) : saving ? (
+              "Guardando..."
             ) : (
               "Guardar cambios"
             )}
@@ -66,14 +113,25 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
         </div>
 
         <ProductInfoSection
-          producto={base}
+          linea={product.line_name}
+          canal={MISSING}
+          skus={product.product_units}
+          precioBase={MISSING}
+          lotesCount="XX"
           activo={activo}
           onToggleActivo={() => setActivo((v) => !v)}
         />
 
         <div className="p-6 grid grid-cols-[180px_1fr] gap-8">
           {/* Left: image */}
-          <ProductImageUpload imagen={imagen} alt={nombreVisible} onChange={setImagen} />
+          <ProductImageUpload
+            imagen={imagen}
+            alt={nombreVisible}
+            onChange={(file, url) => {
+              setImageFile(file);
+              setImagen(url);
+            }}
+          />
 
           {/* Right: editable fields + tables */}
           <div className="flex flex-col gap-5">
@@ -86,16 +144,18 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
                 onChange={(e) => setNombreVisible(e.target.value)}
                 className="w-full text-sm text-[#141414] border border-[#DDDDDD] rounded-lg px-3 py-2.5 outline-none focus:border-[#141414] transition-colors font-bold"
               />
-              <p className="text-[11px] text-[#AAAAAA]">Nombre interno: {base.nombre}</p>
+              <p className="text-[11px] text-[#AAAAAA]">Nombre interno: {product.sku}</p>
             </div>
 
             <div className="border-t border-[#EEEEEE]" />
 
-            <ProductSkusTable skuList={base.skuList} />
+            <ProductSkusTable
+              skuList={[{ sku: product.sku, descripcion: product.description, precio: MISSING }]}
+            />
 
             <div className="border-t border-[#EEEEEE]" />
 
-            <ProductLotes lotes={base.lotes} />
+            <ProductLotes lotes={[MISSING]} />
           </div>
         </div>
       </div>
