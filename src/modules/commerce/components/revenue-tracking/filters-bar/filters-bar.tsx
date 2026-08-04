@@ -28,12 +28,12 @@ const FRECUENCIA_OPTIONS: FilterOptionItem[] = [
 ];
 
 const ENTITY_CATEGORIES: { key: string; label: string; entity: string }[] = [
+  { key: "channelIds", label: "Unidad de negocio", entity: "canal" },
   { key: "productIds", label: "Producto", entity: "producto" },
   { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
   { key: "clientIds", label: "Cliente", entity: "cliente" },
   { key: "cityIds", label: "Ciudad", entity: "ciudad" },
-  { key: "lineIds", label: "Categoría", entity: "linea" },
-  { key: "channelIds", label: "Unidad de negocio", entity: "canal" }
+  { key: "lineIds", label: "Categoría", entity: "linea" }
 ];
 
 const ENTITY_BY_KEY: Record<string, string> = Object.fromEntries(
@@ -67,6 +67,13 @@ export default function FiltersBar() {
       .catch(() => setStatusByEntity((prev) => ({ ...prev, [entity]: "error" })));
   };
 
+  const toEntityCategory = ({ key, label, entity }: (typeof ENTITY_CATEGORIES)[number]) => ({
+    key,
+    label,
+    options: optionsByEntity[entity] ?? [],
+    status: statusByEntity[entity]
+  });
+
   const categories: FilterCategoryConfig[] = [
     {
       key: "fecha",
@@ -90,13 +97,9 @@ export default function FiltersBar() {
           </div>
         ) : null
     },
+    toEntityCategory(ENTITY_CATEGORIES[0]),
     { key: "frecuencia", label: "Frecuencia", selectMode: "single", options: FRECUENCIA_OPTIONS },
-    ...ENTITY_CATEGORIES.map(({ key, label, entity }) => ({
-      key,
-      label,
-      options: optionsByEntity[entity] ?? [],
-      status: statusByEntity[entity]
-    }))
+    ...ENTITY_CATEGORIES.slice(1).map(toEntityCategory)
   ];
 
   return (
