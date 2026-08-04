@@ -22,7 +22,7 @@ export default function StatCards() {
   const stats: Array<{
     title: string;
     value: string;
-    subtitle: string;
+    subtitle?: string;
     trend?: string;
     isPositive?: boolean;
     isAlert?: boolean;
@@ -32,35 +32,30 @@ export default function StatCards() {
     {
       title: "Total invoiced",
       value: data ? formatCurrencyMoney(data.total_revenue.value) : PLACEHOLDER,
-      subtitle: "vs Goal to date",
       icon: DollarSign,
       ...metricTrend(data?.total_revenue)
     },
     {
       title: "Orders in process",
       value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
-      subtitle: "En proceso de fact.",
       badge: data ? `${data.orders_in_process.count} orders` : undefined
     },
     {
-      title: "Total expected",
+      title: "Revenue expected",
       value: data
         ? formatCurrencyMoney(data.orders_in_process.value + data.total_revenue.value)
         : PLACEHOLDER,
-      subtitle: "",
       icon: DollarSign
     },
     {
-      title: "Total Sales",
+      title: "Total Orders",
       value: data ? formatNumber(data.total_orders.value) : PLACEHOLDER,
-      subtitle: "vs Goal to date",
       icon: Package,
       ...metricTrend(data?.total_orders)
     },
     {
-      title: "Avg Ticket",
+      title: "Avg. Order Value",
       value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
-      subtitle: "vs Goal to date",
       icon: Tag,
       ...metricTrend(data?.avg_ticket)
     }
@@ -111,9 +106,6 @@ export default function StatCards() {
                   {stat.trend}
                 </div>
               )}
-              <span className="text-sm text-muted-foreground font-medium opacity-80 whitespace-nowrap h-5">
-                {stat.subtitle}
-              </span>
             </div>
           </div>
         </div>
