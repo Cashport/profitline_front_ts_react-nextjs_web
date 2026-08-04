@@ -30,31 +30,31 @@ export default function StatCards() {
     badge?: string;
   }> = [
     {
-      title: "Total invoiced",
+      title: "Total facturado",
       value: data ? formatCurrencyMoney(data.total_revenue.value) : PLACEHOLDER,
       icon: DollarSign,
       ...metricTrend(data?.total_revenue)
     },
     {
-      title: "Orders in process",
+      title: "Pedidos en proceso",
       value: data ? formatCurrencyMoney(data.orders_in_process.value) : PLACEHOLDER,
-      badge: data ? `${data.orders_in_process.count} orders` : undefined
+      badge: data ? `${data.orders_in_process.count} pedidos` : undefined
     },
     {
-      title: "Revenue expected",
+      title: "Facturación esperada",
       value: data
         ? formatCurrencyMoney(data.orders_in_process.value + data.total_revenue.value)
         : PLACEHOLDER,
       icon: DollarSign
     },
     {
-      title: "Total Orders",
+      title: "Cantidad de pedidos",
       value: data ? formatNumber(data.total_orders.value) : PLACEHOLDER,
       icon: Package,
       ...metricTrend(data?.total_orders)
     },
     {
-      title: "Avg. Order Value",
+      title: "Valor promedio por pedido",
       value: data ? formatCurrencyMoney(data.avg_ticket.value) : PLACEHOLDER,
       icon: Tag,
       ...metricTrend(data?.avg_ticket)
