@@ -52,7 +52,9 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
   };
 
   return (
-    <div className={`${styles.containerButtons} ${isMobileMenu ? styles.mobile : ""}`}>
+    <div
+      className={`${styles.containerButtons} scrollbar-thin ${isMobileMenu ? styles.mobile : ""}`}
+    >
       {/* Dashboard */}
       {checkUserViewPermissions(project, "Dashboard") && (
         <Link href="/dashboard" passHref legacyBehavior>

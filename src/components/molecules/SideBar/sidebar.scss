@@ -14,11 +14,23 @@
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
 
+    // logo + module-buttons group: allow it to shrink below its content height so the
+    // buttons list can scroll instead of clipping / pushing the logout button off-screen
+    .modulesGroup {
+        min-height: 0;
+    }
+
+    // keep the logout button anchored/visible when the module list overflows
+    .exit {
+        flex-shrink: 0;
+    }
+
     .logoContainer {
         display: flex;
         border: none;
         cursor: pointer;
         margin-bottom: 2rem;
+        flex-shrink: 0; // keep the logo full size; only the button list absorbs the shrink
         border: 1px solid transparent;
         transition: all 0.3s ease;
         border-radius: 8px;

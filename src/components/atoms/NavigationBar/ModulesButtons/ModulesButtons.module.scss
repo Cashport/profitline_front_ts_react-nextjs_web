@@ -6,9 +6,15 @@
     padding: 10px 14px;
     align-items: center;
     row-gap: 6px;
+    flex: 1 1 auto; // take the max height available within the group
+    min-height: 0; // allow shrinking below content so overflow can scroll
+    overflow-y: auto; // scroll the buttons when the viewport is too short
+    overflow-x: hidden;
     &.mobile {
         flex-direction: row;
         justify-content: center;
+        flex: 0 0 auto; // reset: mobile dropdown must not grow/scroll vertically
+        overflow: visible;
     }
 
     .buttonIcon {
