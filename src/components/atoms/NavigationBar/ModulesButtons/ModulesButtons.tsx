@@ -22,7 +22,8 @@ import {
   ShoppingCartSimple,
   Database,
   CurrencyCircleDollar,
-  Chats
+  Chats,
+  FadersHorizontal
 } from "@phosphor-icons/react";
 import { FileHeart } from "lucide-react";
 
@@ -41,11 +42,7 @@ interface ModulesButtonsProps {
   isMobileMenu?: boolean;
 }
 
-export const ModulesButtons = ({
-  path,
-  project,
-  isMobileMenu = false
-}: ModulesButtonsProps) => {
+export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesButtonsProps) => {
   const height = useScreenHeight();
   const width = useScreenWidth();
   const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
@@ -56,7 +53,9 @@ export const ModulesButtons = ({
   };
 
   return (
-    <div className={`${styles.containerButtons} ${isMobileMenu ? styles.mobile : ""}`}>
+    <div
+      className={`${styles.containerButtons} scrollbar-thin ${isMobileMenu ? styles.mobile : ""}`}
+    >
       {/* Dashboard */}
       {checkUserViewPermissions(project, "Dashboard") && (
         <Link href="/dashboard" passHref legacyBehavior>
@@ -331,6 +330,21 @@ export const ModulesButtons = ({
               path.startsWith("/logistica-inversa") ? styles.buttonIcon : styles.buttonIconActive
             }
             onClick={(e) => handleNavClick(e, "/logistica-inversa")}
+          />
+        </Link>
+      )}
+
+      {/* Market Admin */}
+      {checkUserViewPermissions(project, "MarketAdmin") && (
+        <Link href="/market-admin" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<FadersHorizontal size={iconSize} />}
+            className={
+              path.startsWith("/market-admin") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/market-admin")}
           />
         </Link>
       )}
