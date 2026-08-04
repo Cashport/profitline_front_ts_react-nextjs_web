@@ -44,9 +44,9 @@ export const ModalUploadIntakeFiles = ({ isOpen, archiveId, onClose, onSuccess }
       const file = extractFile(info);
       if (!file) return;
       const fileSizeInMB = file.size / (1024 * 1024);
-      if (fileSizeInMB > 30) {
+      if (fileSizeInMB > 100) {
         message.error(
-          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 30 MB."
+          "El archivo es demasiado grande. Por favor, sube un archivo de menos de 100 MB."
         );
         return;
       }
