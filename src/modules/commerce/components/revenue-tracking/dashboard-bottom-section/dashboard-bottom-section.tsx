@@ -10,14 +10,13 @@ import DashboardClientsDetailsTable from "@/modules/commerce/components/revenue-
 type TabType = "gross-to-net" | "regional-vendedor" | "detalles-cliente";
 
 const tabs = [
-  { id: "gross-to-net", label: "Bruto a neto" },
-  { id: "regional-vendedor", label: "Regional/Vendedor" },
-  { id: "detalles-cliente", label: "Detalles cliente" }
+  { id: "detalles-cliente", label: "Detalles cliente" },
+  { id: "regional-vendedor", label: "Regional/Vendedor" }
 ];
 
 export function DashboardBottomSection() {
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<TabType>("regional-vendedor");
+  const [activeTab, setActiveTab] = useState<TabType>("detalles-cliente");
   const [isMenuMobileOpen, setIsMenuMobileOpen] = useState(false);
 
   const activeTabLabel = tabs.find((t) => t.id === activeTab)?.label;
