@@ -5,8 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminProductDetail } from "@/modules/marketAdmin/hooks/useMarketAdminProductDetail";
-import { updateMarketAdminProduct } from "@/services/marketAdmin/marketAdmin";
-import { IUpdateMarketAdminProductBody } from "@/types/marketAdmin/IMarketAdmin";
+import { useMarketAdminRelatedSkus } from "@/modules/marketAdmin/hooks/useMarketAdminRelatedSkus";
+import { getProductInventory, updateMarketAdminProduct } from "@/services/marketAdmin/marketAdmin";
+import {
+  IProductInventoryItem,
+  IUpdateMarketAdminProductBody
+} from "@/types/marketAdmin/IMarketAdmin";
 import ProfitLoader from "@/components/ui/profit-loader";
 import ProductInfoSection from "@/modules/marketAdmin/components/market-admin-product-detail/ProductInfoSection";
 import ProductImageUpload from "@/modules/marketAdmin/components/market-admin-product-detail/ProductImageUpload";
@@ -21,6 +25,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
   const { showMessage } = useMessageApi();
 
   const { data: product, isLoading, error, mutate } = useMarketAdminProductDetail(id);
+  const { data: relatedSkus } = useMarketAdminRelatedSkus(id);
 
   const [nombreVisible, setNombreVisible] = useState("");
   const [activo, setActivo] = useState(false);
@@ -28,6 +33,8 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [inventory, setInventory] = useState<IProductInventoryItem[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState(true);
 
   // Sincroniza el estado editable cuando llega/cambia el detalle del backend.
   useEffect(() => {
@@ -37,6 +44,34 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
     setImagen(product.image && product.image !== "." ? product.image : "");
     setImageFile(null);
   }, [product]);
+
+  // TODO: temporal — inspeccionar la respuesta para tipar el hook de SKUs relacionados.
+  useEffect(() => {
+    if (relatedSkus) console.log("related-skus", relatedSkus);
+  }, [relatedSkus]);
+
+  // Inventario por lote y bodega (endpoint aparte del detalle).
+  useEffect(() => {
+    let active = true;
+
+    const loadInventory = async () => {
+      setInventoryLoading(true);
+      try {
+        const data = await getProductInventory(id);
+        if (active) setInventory(data ?? []);
+      } catch {
+        if (active) setInventory([]);
+      } finally {
+        if (active) setInventoryLoading(false);
+      }
+    };
+
+    loadInventory();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const handleSave = async () => {
     if (!product) return;
@@ -80,6 +115,12 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
     );
   }
 
+  // Hay algo por guardar: nombre, estado o una imagen nueva.
+  const isDirty =
+    nombreVisible !== product.description ||
+    (activo ? 1 : 0) !== product.is_available ||
+    imageFile !== null;
+
   return (
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{nombreVisible}</h1>
@@ -93,31 +134,35 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
           >
             <ArrowLeft size={14} /> Volver
           </Link>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
-              saved ? "bg-[#E6F9E6] text-[#1A7A1A]" : "bg-[#CBE71E] text-[#141414] hover:bg-[#b8d11a]"
-            }`}
-          >
-            {saved ? (
-              <>
-                <Check size={14} /> Guardado
-              </>
-            ) : saving ? (
-              "Guardando..."
-            ) : (
-              "Guardar cambios"
-            )}
-          </button>
+          {(isDirty || saving || saved) && (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                saved
+                  ? "bg-[#E6F9E6] text-[#1A7A1A]"
+                  : "bg-[#CBE71E] text-[#141414] hover:bg-[#b8d11a]"
+              }`}
+            >
+              {saved ? (
+                <>
+                  <Check size={14} /> Guardado
+                </>
+              ) : saving ? (
+                "Guardando..."
+              ) : (
+                "Guardar cambios"
+              )}
+            </button>
+          )}
         </div>
 
         <ProductInfoSection
           linea={product.line_name}
-          canal={MISSING}
+          canal={product.line_name}
           skus={product.product_units}
-          precioBase={MISSING}
-          lotesCount="XX"
+          precioBase={product.transfer_price}
+          lotesCount={inventory.length}
           activo={activo}
           onToggleActivo={() => setActivo((v) => !v)}
         />
@@ -155,7 +200,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
 
             <div className="border-t border-[#EEEEEE]" />
 
-            <ProductLotes lotes={[MISSING]} />
+            <ProductLotes lotes={inventory} loading={inventoryLoading} />
           </div>
         </div>
       </div>

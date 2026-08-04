@@ -2,6 +2,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ICreateManualBonusBody,
   ICreatePromotionBody,
+  IProductInventoryItem,
   IUpdateMarketAdminProductBody
 } from "@/types/marketAdmin/IMarketAdmin";
 import { API } from "@/utils/api/api";
@@ -45,6 +46,19 @@ export const updateMarketAdminProduct = async (
     return response.data;
   } catch (error) {
     console.error("Error al actualizar el producto:", error);
+    throw error;
+  }
+};
+
+// GET /product/:id/inventory — inventario por lote y bodega
+export const getProductInventory = async (id: number | string) => {
+  try {
+    const response: GenericResponse<IProductInventoryItem[]> = await API.get(
+      `/product/${id}/inventory`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el inventario del producto:", error);
     throw error;
   }
 };

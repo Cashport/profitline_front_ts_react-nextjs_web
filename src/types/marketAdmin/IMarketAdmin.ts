@@ -205,3 +205,25 @@ export interface IUpdateMarketAdminProductBody {
   is_available?: 1 | 0; // activo/inactivo
   image?: File; // archivo de imagen
 }
+
+// GET /product/:id/related-skus — SKUs ERP relacionados (is_principal === 1 → SKU principal)
+export interface IRelatedSku {
+  id: number;
+  product_id: number;
+  sku: string;
+  is_principal: 1 | 0;
+}
+
+// GET /product/:id/inventory — inventario por lote y bodega
+// (ordenado FIFO por vencimiento; solo lotes con stock > 0 y activos en el ERP)
+export interface IProductInventoryItem {
+  id_product: number;
+  product_sku: string;
+  id_warehouse: number;
+  warehouse_code: string; // ej. "BOG-01"
+  warehouse_description: string; // nombre de bodega
+  batch: string; // lote visible (ERP)
+  batch_provider: string; // lote del proveedor
+  batch_expiration_date: string; // YYYY-MM-DD
+  units: number; // disponibles (ya descontadas las usadas en órdenes)
+}

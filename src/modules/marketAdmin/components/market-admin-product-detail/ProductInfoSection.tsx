@@ -13,7 +13,7 @@ type Props = {
   linea: string;
   canal: string;
   skus: number | string;
-  precioBase: string;
+  precioBase: number | null;
   lotesCount: number | string;
   activo: boolean;
   onToggleActivo: () => void;
