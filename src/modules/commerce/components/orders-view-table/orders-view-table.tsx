@@ -1,9 +1,18 @@
 import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
-import { Button, Dropdown, Table, TableProps, Typography } from "antd";
-import { DotsThreeVertical, Eye, WarningCircle, WarningDiamond } from "@phosphor-icons/react";
+import { Button, Dropdown, MenuProps, message, Table, TableProps, Typography } from "antd";
+import {
+  DotsThreeVertical,
+  Eye,
+  NewspaperClipping,
+  Receipt,
+  WarningCircle,
+  WarningDiamond
+} from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useModalDetail } from "@/context/ModalContext";
+import { useMessageApi } from "@/context/MessageContext";
+import { reprocessOrder } from "@/services/commerce/commerce";
 import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
@@ -45,12 +54,35 @@ const OrdersViewTable = ({
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
   const formatMoney = useAppStore((state) => state.formatMoney);
   const { openModal } = useModalDetail();
+  const { showMessage } = useMessageApi();
 
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
   const [currentWarehouseId, setCurrentWarehouseId] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
+
+  const REJECTED_STATUS_ID = 6;
+
+  const handleResendToBilling = async (orderId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Reenviando a facturación...",
+      duration: 0
+    });
+    try {
+      await reprocessOrder(orderId);
+      showMessage("success", "Orden reenviada a facturación correctamente");
+      setFetchMutate();
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Error al reenviar a facturación"
+      );
+    } finally {
+      hide();
+    }
+  };
 
   const handleSeeDetail = (order: IOrder | IDraftOrder) => {
     if ("is_draft" in order) {
@@ -262,7 +294,7 @@ const OrdersViewTable = ({
       render: (_, row) => {
         const isBlockedByWallet = row.order_status_id == 5;
 
-        const items = isBlockedByWallet
+        const items = (isBlockedByWallet
           ? row.incident_id !== null
             ? [
                 {
@@ -271,7 +303,12 @@ const OrdersViewTable = ({
                     <Button
                       icon={<WarningCircle size={20} />}
                       className="buttonNoBorder"
-                      onClick={() => openModal("novelty", { noveltyId: row.incident_id as number })}
+                      onClick={() =>
+                      openModal("novelty", {
+                        noveltyId: row.incident_id as number,
+                        onResolved: setFetchMutate
+                      })
+                    }
                     >
                       Ver novedad
                     </Button>
@@ -300,15 +337,30 @@ const OrdersViewTable = ({
                 key: "detalle",
                 label: (
                   <Button
-                    icon={<Eye size={20} />}
+                    icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
                     className="buttonNoBorder"
                     onClick={() => handleSeeDetail(row)}
                   >
-                    Detalle
+                    {row.is_draft ? "Continuar pedido" : "Detalle"}
                   </Button>
                 )
               }
-            ];
+            ]) as NonNullable<MenuProps["items"]>;
+
+        if (row.order_status_id === REJECTED_STATUS_ID) {
+          items.push({
+            key: "resendToBilling",
+            label: (
+              <Button
+                icon={<Receipt size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleResendToBilling(row.id)}
+              >
+                Reenviar a facturación
+              </Button>
+            )
+          });
+        }
 
         const customDropdown = (menu: ReactNode) => (
           <div className="dropdownApplicationTable">{menu}</div>

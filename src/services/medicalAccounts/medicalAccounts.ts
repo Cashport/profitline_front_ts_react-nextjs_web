@@ -64,16 +64,31 @@ export const changeMedicalAccountStatus = async (
   }
 };
 
+export const resolveMedicalAccountNovelty = async (
+  accountId: number,
+  noveltyId: number
+): Promise<GenericResponse<IMedicalAccountUploadData>> => {
+  try {
+    const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
+      `${config.API_HOST}/medical-accounts/${accountId}/novelties/${noveltyId}/resolve`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error resolving novelty:", error);
+    throw error;
+  }
+};
+
 export const uploadMedicalAccountInvoice = async (
   id: number,
   invoiceNumber: string,
   pdfFile: File,
-  xmlFile: File
+  zipFile: File
 ): Promise<GenericResponse<IMedicalAccountUploadData>> => {
   const formData = new FormData();
   formData.append("invoice_number", invoiceNumber);
   formData.append("pdf", pdfFile);
-  formData.append("xml", xmlFile);
+  formData.append("zip", zipFile);
 
   try {
     const response: GenericResponse<IMedicalAccountUploadData> = await API.post(

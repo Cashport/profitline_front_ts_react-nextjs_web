@@ -30,7 +30,7 @@ export function MedicalAccountsView() {
       const matchesStatus = !statusFilter || account.status_code === statusFilter;
       const matchesSearch =
         !term ||
-        [String(account.id), account.patient_name, account.document_number, account.authorization_number]
+        [String(account.id), account.patient_name, account.document_number, account.authorization_number, account.eps]
           .filter(Boolean)
           .some((field) => field!.toLowerCase().includes(term));
       const day = account.created_at.slice(0, 10);

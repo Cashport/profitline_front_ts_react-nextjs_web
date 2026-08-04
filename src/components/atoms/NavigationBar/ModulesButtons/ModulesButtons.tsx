@@ -11,7 +11,8 @@ import {
   UsersFour,
   Stack,
   ClipboardText,
-  ListChecks
+  ListChecks,
+  ArrowCounterClockwise
 } from "phosphor-react";
 import {
   ChatCircleDots,
@@ -314,6 +315,21 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
               path.startsWith("/cuentas-medicas") ? styles.buttonIcon : styles.buttonIconActive
             }
             onClick={(e) => handleNavClick(e, "/cuentas-medicas")}
+          />
+        </Link>
+      )}
+
+      {/* Logística Inversa */}
+      {checkUserViewPermissions(project, "ReverseLogistics") && (
+        <Link href="/logistica-inversa" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ArrowCounterClockwise size={iconSize} />}
+            className={
+              path.startsWith("/logistica-inversa") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/logistica-inversa")}
           />
         </Link>
       )}

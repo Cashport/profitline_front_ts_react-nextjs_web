@@ -37,7 +37,17 @@ function ComercioChrome({ children }: ComercioLayoutClientProps) {
     <ConfigProvider
       theme={{
         algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-        token: { colorPrimary: "#CBE71E", fontFamily: "inherit" }
+        token: {
+          colorPrimary: "#CBE71E",
+          fontFamily: "inherit",
+          ...(isDark && {
+            colorText: "rgba(255, 255, 255, 0.85)",
+            colorTextSecondary: "rgba(255, 255, 255, 0.65)",
+            colorTextPlaceholder: "rgba(255, 255, 255, 0.25)",
+            colorSplit: "rgba(253, 253, 253, 0.12)",
+            colorBgElevated: "#1f1f1f"
+          })
+        }
       }}
     >
       <ViewWrapper

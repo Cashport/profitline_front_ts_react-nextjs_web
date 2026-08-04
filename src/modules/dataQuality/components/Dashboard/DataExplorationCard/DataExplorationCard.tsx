@@ -30,12 +30,15 @@ import { IDataExplorationTotals } from "@/types/dataQuality/IDataQuality";
 const DAYS_IN_MONTH = 31;
 const TOTAL_COLUMNS = 35;
 
+type UnitType = "units_haleon" | "vol_reported";
+
 type DayCell = IDataExplorationTotals & { novedades_percent: number };
 
 export function DataExplorationCard() {
   const { selectedCountry, selectedPeriod, setSelectedPeriod, selectedFileType } =
     useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
+  const [unitType, setUnitType] = useState<UnitType>("units_haleon");
   const months = useMemo(buildLastSixMonths, []);
   const debouncedSearch = useDebounce(search, 400);
 
@@ -66,7 +69,7 @@ export function DataExplorationCard() {
         country_client_id: client.country_client_id,
         periodicity: client.periodicity,
         days,
-        total: client.totals.units_haleon,
+        total: client.totals[unitType],
         totalRegistros: client.totals.total_registros,
         totalNovedades: client.totals.novedades,
         lastMonth: client.last_month
@@ -84,7 +87,7 @@ export function DataExplorationCard() {
     }
 
     return { rows: computedRows, lastDataDayIdx };
-  }, [data, dayNumbers]);
+  }, [data, dayNumbers, unitType]);
 
   const todayDayCutoff = useMemo(() => {
     const [year, month] = selectedPeriod.split("-").map(Number);
@@ -115,7 +118,9 @@ export function DataExplorationCard() {
               Exploración de Datos
             </h3>
             <p className="text-xs mt-0.5" style={{ color: "#6B7280" }}>
-              Unidades recibidas por día del mes
+              {unitType === "units_haleon"
+                ? "Unidades recibidas por día del mes"
+                : "Volumen reportado por día del mes"}
             </p>
           </div>
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -128,6 +133,19 @@ export function DataExplorationCard() {
                   {m.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={unitType} onValueChange={(v: UnitType) => setUnitType(v)}>
+            <SelectTrigger className="w-[160px] h-8 text-xs" style={{ borderColor: "#E5E7EB" }}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="units_haleon" className="text-xs">
+                Unidades (Haleon)
+              </SelectItem>
+              <SelectItem value="vol_reported" className="text-xs">
+                Volumen reportado
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -328,7 +346,7 @@ export function DataExplorationCard() {
                             className="text-center py-1 font-medium tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatThousandNum(dayTotals.units_haleon)}
+                            {formatThousandNum(dayTotals[unitType])}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -375,7 +393,7 @@ export function DataExplorationCard() {
                         );
                       }
 
-                      if (dayTotals.units_haleon === 0) {
+                      if (dayTotals[unitType] === 0) {
                         if (isFutureDay) {
                           return (
                             <td
@@ -408,7 +426,7 @@ export function DataExplorationCard() {
                           className="text-center py-1 font-medium tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatThousandNum(dayTotals.units_haleon)}
+                          {formatThousandNum(dayTotals[unitType])}
                         </td>
                       );
                     })}
@@ -449,7 +467,7 @@ export function DataExplorationCard() {
                         );
                       }
 
-                      if (lastMonth.units_haleon === 0 && lastMonth.novedades === 0) {
+                      if (lastMonth[unitType] === 0 && lastMonth.novedades === 0) {
                         return (
                           <td
                             className="text-center px-2 py-1 font-semibold tabular-nums"
@@ -466,7 +484,7 @@ export function DataExplorationCard() {
                             className="text-right px-2 py-1 font-semibold tabular-nums relative"
                             style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
                           >
-                            {formatThousandNum(lastMonth.units_haleon)}
+                            {formatThousandNum(lastMonth[unitType])}
                             <div
                               className="absolute top-0 right-0 w-0 h-0"
                               style={{
@@ -504,7 +522,7 @@ export function DataExplorationCard() {
                           className="text-right px-2 py-1 font-semibold tabular-nums"
                           style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}
                         >
-                          {formatThousandNum(lastMonth.units_haleon)}
+                          {formatThousandNum(lastMonth[unitType])}
                         </td>
                       );
                     })()}

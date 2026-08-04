@@ -44,7 +44,7 @@ export default function TopSales() {
 
     return items.map((item) => {
       const name = item.name;
-      const unitValue = category === "producto" ? item.units : item.orders;
+      const unitValue = item.units;
       const percentage = item.participation_pct;
 
       return (

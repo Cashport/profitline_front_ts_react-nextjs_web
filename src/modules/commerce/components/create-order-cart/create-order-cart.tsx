@@ -30,7 +30,12 @@ import { computeComplementRequirements } from "../../utils/complementCalculation
 import { ISelectedCategories } from "../../containers/create-order/create-order";
 
 import { ISelectType } from "@/types/clients/IClients";
-import { Discount, DiscountItem, ISelectedProduct } from "@/types/commerce/ICommerce";
+import {
+  Discount,
+  DiscountItem,
+  IConfirmOrderData,
+  ISelectedProduct
+} from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-cart.module.scss";
 export interface selectClientForm {
@@ -83,7 +88,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     executiveDiscounts,
     deactivateCrossSelling,
     channelName,
-    bonus
+    bonus,
+    businessUnit
   } = useContext(OrderViewContext);
   const numberOfSelectedProducts = selectedCategories.reduce(
     (acc, category) => acc + category.products.length,
@@ -313,11 +319,12 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
         const promotionApplyed = (bonus?.bonusOptions ?? []).some((opt) =>
           opt.cards.some((card) => card.items.length > 0)
         );
-        const confirmOrderData = {
+        const confirmOrderData: IConfirmOrderData = {
           discount_package: selectedDiscount,
           order_summary: products,
           executive_discounts: executiveDiscounts,
           deactivate_cross_selling: !deactivateCrossSelling,
+          business_unit: businessUnit,
           ...(promotionId !== undefined && { promotion_id: promotionId }),
           promotion_applyed: promotionApplyed
         };
