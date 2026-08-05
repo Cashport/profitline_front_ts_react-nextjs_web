@@ -282,17 +282,19 @@ export const OrdersGenerateActionModal = ({
 
     let cancelled = false;
 
-    (async () => {
-      try {
-        if (!uploadFile) return;
-        // Se sube la orden de compra primero; la barra de carga del modal
-        // muestra el progreso mientras el servidor procesa y devuelve la respuesta
-        const response = await uploadPurchaseOrders(uploadFile);
+    if (!uploadFile) return;
+
+    // Se dispara la subida inmediatamente. La barra de carga del modal
+    // avanza de forma independiente durante aprox. 3 minutos para dar
+    // feedback visual al usuario mientras el servidor procesa.
+    uploadPurchaseOrders(uploadFile)
+      .then((response) => {
         if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadSummaryData(response.data);
         setIsUploadSummaryOpen(true);
-      } catch (error) {
+      })
+      .catch((error) => {
         if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadFile(null);
@@ -301,8 +303,7 @@ export const OrdersGenerateActionModal = ({
             ? error.message
             : "Error al procesar las órdenes de compra";
         showMessage("error", errorMessage);
-      }
-    })();
+      });
 
     return () => {
       cancelled = true;
