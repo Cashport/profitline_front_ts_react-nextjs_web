@@ -171,7 +171,7 @@ export default function DashboardClientsDetailsTable() {
                       YTD
                     </th>
                     <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-foreground tracking-wider">
-                      ROI (YTD)
+                      % YTD
                     </th>
                   </tr>
                 </thead>
