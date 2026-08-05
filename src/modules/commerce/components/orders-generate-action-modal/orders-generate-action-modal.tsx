@@ -69,9 +69,6 @@ export const OrdersGenerateActionModal = ({
     useState<IUploadPurchaseOrdersData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const FIVE_MINUTES_MS = 180_000;
-  const fakeUploadDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
       message.error("No hay órdenes seleccionadas");
@@ -285,18 +282,20 @@ export const OrdersGenerateActionModal = ({
 
     let cancelled = false;
 
-    (async () => {
-      // Simula la barra de carga durante ~3 minutos para dar feedback al usuario
-      await fakeUploadDelay(FIVE_MINUTES_MS);
-      if (cancelled) return;
+    if (!uploadFile) return;
 
-      try {
-        if (!uploadFile) return;
-        const response = await uploadPurchaseOrders(uploadFile);
+    // Se dispara la subida inmediatamente. La barra de carga del modal
+    // avanza de forma independiente durante aprox. 3 minutos para dar
+    // feedback visual al usuario mientras el servidor procesa.
+    uploadPurchaseOrders(uploadFile)
+      .then((response) => {
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadSummaryData(response.data);
         setIsUploadSummaryOpen(true);
-      } catch (error) {
+      })
+      .catch((error) => {
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadFile(null);
         const errorMessage =
@@ -304,8 +303,7 @@ export const OrdersGenerateActionModal = ({
             ? error.message
             : "Error al procesar las órdenes de compra";
         showMessage("error", errorMessage);
-      }
-    })();
+      });
 
     return () => {
       cancelled = true;
