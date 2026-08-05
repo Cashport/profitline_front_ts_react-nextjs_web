@@ -69,9 +69,6 @@ export const OrdersGenerateActionModal = ({
     useState<IUploadPurchaseOrdersData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const FIVE_MINUTES_MS = 180_000;
-  const fakeUploadDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
       message.error("No hay órdenes seleccionadas");
@@ -286,17 +283,17 @@ export const OrdersGenerateActionModal = ({
     let cancelled = false;
 
     (async () => {
-      // Simula la barra de carga durante ~3 minutos para dar feedback al usuario
-      await fakeUploadDelay(FIVE_MINUTES_MS);
-      if (cancelled) return;
-
       try {
         if (!uploadFile) return;
+        // Se sube la orden de compra primero; la barra de carga del modal
+        // muestra el progreso mientras el servidor procesa y devuelve la respuesta
         const response = await uploadPurchaseOrders(uploadFile);
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadSummaryData(response.data);
         setIsUploadSummaryOpen(true);
       } catch (error) {
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadFile(null);
         const errorMessage =
