@@ -20,7 +20,7 @@ export interface MonthOption {
 
 export const buildLastSixMonths = (): MonthOption[] => {
   const now = new Date();
-  return Array.from({ length: 6 }, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const id = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const name = `${SPANISH_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
