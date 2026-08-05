@@ -75,7 +75,7 @@ export const ConfirmedOrderView: FC = () => {
           key: `${product.id}-${product.product_sku}`,
           description: product.product_name,
           sku: product.product_sku,
-          originalPrice: product.price,
+          originalPrice: product.original_price ?? product.price,
           finalPrice: primary?.new_price ?? product.price,
           quantity: product.quantity,
           discountPct: primary?.discount_applied?.discount ?? 0
