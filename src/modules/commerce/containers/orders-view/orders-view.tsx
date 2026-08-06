@@ -206,7 +206,7 @@ export const OrdersView: FC = () => {
       <OrdersGenerateActionModal
         isOpen={isGenerateActionModalOpen}
         onClose={() => setIsGenerateActionModalOpen((prev) => !prev)}
-        ordersId={selectedRows?.map((order) => order.id) || []}
+        selectedOrders={selectedRows || []}
         setFetchMutate={mutate}
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}

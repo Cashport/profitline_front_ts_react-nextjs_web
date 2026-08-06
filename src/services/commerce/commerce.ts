@@ -289,16 +289,20 @@ export const dowloadOrderCSV = async (
   }
 };
 
-export const downloadPartialOrderCSV = async (orderId: number, sendToBackorder: boolean) => {
+export const downloadPartialOrderCSV = async (
+  orderIds: number[],
+  sendToBackorder: boolean
+) => {
   try {
-    const payload = { sendToBackorder };
+    const payload = { order_ids: orderIds, sendToBackorder };
     const formData = new FormData();
     formData.append("request", JSON.stringify(payload));
     const response: GenericResponse<{
       txtContent: string;
-      createdBackorderId: number | undefined;
-    }> = await API.post(`/marketplace/orders/${orderId}/download-csv`, formData);
-    return response.data;
+      createdBackorderIds: number[];
+      failedOrders: number[];
+    }> = await API.post(`/marketplace/orders/download-csv`, formData);
+    return response;
   } catch (error) {
     if (error instanceof ApiError) {
       throw new Error(error.message || "Error al descargar el CSV parcial");
