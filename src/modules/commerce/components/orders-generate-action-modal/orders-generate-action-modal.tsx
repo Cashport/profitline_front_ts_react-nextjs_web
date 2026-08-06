@@ -35,7 +35,7 @@ const { Title, Text } = Typography;
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  ordersId: number[];
+  selectedOrders: IOrder[];
   setFetchMutate: () => void;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
@@ -46,13 +46,18 @@ interface Props {
 export const OrdersGenerateActionModal = ({
   isOpen,
   onClose,
-  ordersId,
+  selectedOrders,
   setFetchMutate,
   setSelectedRows,
   setSelectedRowKeys,
   handleDeleteRows,
   handleSendInvite
 }: Props) => {
+  const ordersId = selectedOrders.map((order) => order.id);
+  const selectedCount = selectedOrders.length;
+  const operationNumbersText = selectedOrders
+    .map((order) => order.operation_number)
+    .join(", ");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -190,15 +195,27 @@ export const OrdersGenerateActionModal = ({
   const handleDownloadCsvPartial = async (createBackorder: boolean) => {
     if (!validateOrdersSelected()) return;
     try {
-      const res = await downloadPartialOrderCSV(ordersId[0], createBackorder);
-      createAndDownloadTxt(res.txtContent);
-      if (res.createdBackorderId) {
+      const res = await downloadPartialOrderCSV(ordersId, createBackorder);
+      if (!res?.data) {
+        return showMessage("error", res?.message || "Error al descargar el CSV parcial");
+      }
+      const { txtContent, createdBackorderIds, failedOrders } = res.data;
+      if (txtContent) {
+        createAndDownloadTxt(txtContent);
+      }
+      if (createdBackorderIds?.length) {
         showMessage(
           "success",
-          `Se ha creado una orden de backorder con ID: ${res.createdBackorderId}`
+          `Se ${createdBackorderIds.length === 1 ? "ha" : "han"} creado ${
+            createdBackorderIds.length
+          } orden${createdBackorderIds.length === 1 ? "" : "es"} de backorder: ${createdBackorderIds.join(", ")}`
         );
       } else {
-        showMessage("success", "Descarga exitosa");
+        showMessage("success", res.message || "Descarga exitosa");
+      }
+      if (failedOrders?.length) {
+        setErrorMessage(`Órdenes con error: ${failedOrders.join(", ")}`);
+        setIsErrorModalOpen(true);
       }
       setFetchMutate();
       setSelectedRows([]);
@@ -327,6 +344,12 @@ export const OrdersGenerateActionModal = ({
         <p className="ordersGenerateActionModal__description">
           Selecciona la acción que vas a realizar
         </p>
+        <div className="ordersGenerateActionModal__selectedOrders">
+          <Text strong>
+            {selectedCount} {selectedCount === 1 ? "seleccionada" : "seleccionadas"}:{" "}
+          </Text>
+          <Text>{operationNumbersText}</Text>
+        </div>
         <Flex vertical gap="0.75rem">
           <ButtonGenerateAction
             onClick={handleChangeOrderState}
@@ -360,7 +383,6 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadPartialCsvShowQuestion}
             icon={<DownloadSimple size={16} />}
             title="Descarga parcial CSV"
-            disabled={ordersId.length !== 1}
           />
           <ButtonGenerateAction
             onClick={handleDeleteRows}
