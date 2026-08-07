@@ -77,7 +77,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
       centered
       title={
         <Title className="uploadPurchaseOrdersProgressModal__title" level={4}>
-          Subiendo orden de compra
+          Procesando orden de compra
         </Title>
       }
     >
@@ -105,7 +105,7 @@ export const UploadPurchaseOrdersProgressModal = ({ isOpen, file, onCancel }: Pr
         <Flex justify="space-between" className="uploadPurchaseOrdersProgressModal__footer">
           <Text type="secondary">
             <FileArrowUp size={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-            Procesando archivo, por favor espere...
+            Esperando respuesta del servidor, por favor espere...
           </Text>
           <Text strong>{formatTime(secondsElapsed)}</Text>
         </Flex>

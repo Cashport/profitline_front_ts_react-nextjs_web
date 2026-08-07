@@ -35,7 +35,7 @@ const { Title, Text } = Typography;
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  ordersId: number[];
+  selectedOrders: IOrder[];
   setFetchMutate: () => void;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
@@ -46,13 +46,18 @@ interface Props {
 export const OrdersGenerateActionModal = ({
   isOpen,
   onClose,
-  ordersId,
+  selectedOrders,
   setFetchMutate,
   setSelectedRows,
   setSelectedRowKeys,
   handleDeleteRows,
   handleSendInvite
 }: Props) => {
+  const ordersId = selectedOrders.map((order) => order.id);
+  const selectedCount = selectedOrders.length;
+  const operationNumbersText = selectedOrders
+    .map((order) => order.operation_number)
+    .join(", ");
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -68,9 +73,6 @@ export const OrdersGenerateActionModal = ({
   const [uploadSummaryData, setUploadSummaryData] =
     useState<IUploadPurchaseOrdersData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const FIVE_MINUTES_MS = 180_000;
-  const fakeUploadDelay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
@@ -193,15 +195,27 @@ export const OrdersGenerateActionModal = ({
   const handleDownloadCsvPartial = async (createBackorder: boolean) => {
     if (!validateOrdersSelected()) return;
     try {
-      const res = await downloadPartialOrderCSV(ordersId[0], createBackorder);
-      createAndDownloadTxt(res.txtContent);
-      if (res.createdBackorderId) {
+      const res = await downloadPartialOrderCSV(ordersId, createBackorder);
+      if (!res?.data) {
+        return showMessage("error", res?.message || "Error al descargar el CSV parcial");
+      }
+      const { txtContent, createdBackorderIds, failedOrders } = res.data;
+      if (txtContent) {
+        createAndDownloadTxt(txtContent);
+      }
+      if (createdBackorderIds?.length) {
         showMessage(
           "success",
-          `Se ha creado una orden de backorder con ID: ${res.createdBackorderId}`
+          `Se ${createdBackorderIds.length === 1 ? "ha" : "han"} creado ${
+            createdBackorderIds.length
+          } orden${createdBackorderIds.length === 1 ? "" : "es"} de backorder: ${createdBackorderIds.join(", ")}`
         );
       } else {
-        showMessage("success", "Descarga exitosa");
+        showMessage("success", res.message || "Descarga exitosa");
+      }
+      if (failedOrders?.length) {
+        setErrorMessage(`Órdenes con error: ${failedOrders.join(", ")}`);
+        setIsErrorModalOpen(true);
       }
       setFetchMutate();
       setSelectedRows([]);
@@ -285,18 +299,20 @@ export const OrdersGenerateActionModal = ({
 
     let cancelled = false;
 
-    (async () => {
-      // Simula la barra de carga durante ~3 minutos para dar feedback al usuario
-      await fakeUploadDelay(FIVE_MINUTES_MS);
-      if (cancelled) return;
+    if (!uploadFile) return;
 
-      try {
-        if (!uploadFile) return;
-        const response = await uploadPurchaseOrders(uploadFile);
+    // Se dispara la subida inmediatamente. La barra de carga del modal
+    // avanza de forma independiente durante aprox. 3 minutos para dar
+    // feedback visual al usuario mientras el servidor procesa.
+    uploadPurchaseOrders(uploadFile)
+      .then((response) => {
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadSummaryData(response.data);
         setIsUploadSummaryOpen(true);
-      } catch (error) {
+      })
+      .catch((error) => {
+        if (cancelled) return;
         setIsUploadProgressOpen(false);
         setUploadFile(null);
         const errorMessage =
@@ -304,8 +320,7 @@ export const OrdersGenerateActionModal = ({
             ? error.message
             : "Error al procesar las órdenes de compra";
         showMessage("error", errorMessage);
-      }
-    })();
+      });
 
     return () => {
       cancelled = true;
@@ -329,6 +344,12 @@ export const OrdersGenerateActionModal = ({
         <p className="ordersGenerateActionModal__description">
           Selecciona la acción que vas a realizar
         </p>
+        <div className="ordersGenerateActionModal__selectedOrders">
+          <Text strong>
+            {selectedCount} {selectedCount === 1 ? "seleccionada" : "seleccionadas"}:{" "}
+          </Text>
+          <Text>{operationNumbersText}</Text>
+        </div>
         <Flex vertical gap="0.75rem">
           <ButtonGenerateAction
             onClick={handleChangeOrderState}
@@ -362,7 +383,6 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadPartialCsvShowQuestion}
             icon={<DownloadSimple size={16} />}
             title="Descarga parcial CSV"
-            disabled={ordersId.length !== 1}
           />
           <ButtonGenerateAction
             onClick={handleDeleteRows}

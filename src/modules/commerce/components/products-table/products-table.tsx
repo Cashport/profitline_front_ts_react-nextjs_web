@@ -116,6 +116,8 @@ export interface ProductsTableProps {
   showActionsColumn?: boolean;
   /** When true, collapses to only Producto / Cant. / Total on viewports < 800px. */
   responsive?: boolean;
+  /** When true, categories render as AntD collapse panels (first one open). Default: static. */
+  collapsible?: boolean;
   /** Sizing/positioning classes merged onto the outer container. */
   className?: string;
 }
@@ -128,6 +130,7 @@ export default function ProductsTable({
   bonusItems = [],
   showActionsColumn = false,
   responsive = false,
+  collapsible = false,
   className = ""
 }: ProductsTableProps) {
   // Narrow-viewport detection for `responsive`. Follows the SSR-safe `matchMedia`-in-effect
@@ -270,28 +273,44 @@ export default function ProductsTable({
 
         {/* Rows */}
         <div className="flex-1 min-h-0 overflow-y-auto">
-          <Collapse
-            ghost
-            className="productsTableCollapse"
-            activeKey={activeKeys}
-            onChange={(keys) => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
-            expandIcon={({ isActive }) => (
-              <ChevronRight
-                size={12}
-                className={`text-[#AAAAAA] transition-transform ${isActive ? "rotate-90" : ""}`}
-              />
-            )}
-            items={categories.map((category, gIdx) => ({
-              key: String(category.key),
-              className: gIdx > 0 ? "border-t border-[#EEEEEE]" : "",
-              label: (
-                <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
-                  {category.name}
-                </span>
-              ),
-              children: category.rows.map(renderRow)
-            }))}
-          />
+          {collapsible ? (
+            <Collapse
+              ghost
+              className="productsTableCollapse"
+              activeKey={activeKeys}
+              onChange={(keys) => setActiveKeys(Array.isArray(keys) ? keys : [keys])}
+              expandIcon={({ isActive }) => (
+                <ChevronRight
+                  size={12}
+                  className={`text-[#AAAAAA] transition-transform ${isActive ? "rotate-90" : ""}`}
+                />
+              )}
+              items={categories.map((category, gIdx) => ({
+                key: String(category.key),
+                className: gIdx > 0 ? "border-t border-[#EEEEEE]" : "",
+                label: (
+                  <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
+                    {category.name}
+                  </span>
+                ),
+                children: category.rows.map(renderRow)
+              }))}
+            />
+          ) : (
+            categories.map((category, gIdx) => (
+              <div
+                key={String(category.key)}
+                className={gIdx > 0 ? "border-t border-[#EEEEEE]" : ""}
+              >
+                <div className="px-4 pt-3 pb-1">
+                  <span className="text-[10px] font-semibold text-[#AAAAAA] uppercase tracking-widest">
+                    {category.name}
+                  </span>
+                </div>
+                {category.rows.map(renderRow)}
+              </div>
+            ))
+          )}
 
           {/* Sección bonificados */}
           {showBonus && (
