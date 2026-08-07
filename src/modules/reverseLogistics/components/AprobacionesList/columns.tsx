@@ -4,10 +4,17 @@ import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogi
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { fmtCop, fmtNumber, parseFechaApproval } from "../../utils/format";
 
-// AntD columns for the Aprobaciones list. `onSelect` opens the detail view.
+// AntD columns for the Aprobaciones list. `onSelect` receives the row's real
+// Profit360 GUID so the caller can navigate to /logistica-inversa/aprobaciones/:id.
+// The `guid` field is attached by AprobacionesList when mapping the Profit360
+// payload — it lives alongside the legacy numeric `id` that AntD needs as rowKey.
+export interface IApprovalRow extends IApproval {
+  guid: string;
+}
+
 export const getApprovalsColumns = (
-  onSelect: (approval: IApproval) => void
-): ColumnsType<IApproval> => [
+  onSelect: (guid: string, approval: IApprovalRow) => void
+): ColumnsType<IApprovalRow> => [
   {
     title: "Fecha",
     dataIndex: "fecha",
@@ -101,7 +108,7 @@ export const getApprovalsColumns = (
         type="primary"
         size="small"
         style={{ backgroundColor: "#1a3a6b" }}
-        onClick={() => onSelect(record)}
+        onClick={() => onSelect(record.guid, record)}
       >
         Ir a Aprobar
       </Button>
