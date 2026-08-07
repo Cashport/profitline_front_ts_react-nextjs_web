@@ -82,14 +82,20 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     title: "Estado",
     dataIndex: "estado",
     width: 150,
-    render: (estado: EstadoDevolucion) => (
-      <span
-        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs whitespace-nowrap"
-        style={{ backgroundColor: estadoConfig[estado].bg, color: estadoConfig[estado].text }}
-      >
-        {estado}
-      </span>
-    )
+    render: (estado: EstadoDevolucion) => {
+      // The new Profit360 endpoint returns free-text estados (e.g.
+      // "Aprobacion Realizada") that aren't keys in `estadoConfig`. Fall back
+      // to neutral gray styling when the lookup misses instead of crashing.
+      const palette = estadoConfig[estado] ?? { bg: "#F3F4F6", text: "#374151" };
+      return (
+        <span
+          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs whitespace-nowrap"
+          style={{ backgroundColor: palette.bg, color: palette.text }}
+        >
+          {estado}
+        </span>
+      );
+    }
   },
   {
     title: "Unid.",

@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const unpkgForPDF = "https://unpkg.com";
   const amazonFiles = "https://*.amazonaws.com";
+  const azureBlob = "https://*.blob.core.windows.net";
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co ${unpkgForPDF};
@@ -20,7 +21,7 @@ export async function middleware(request: NextRequest) {
     font-src 'self' https://fonts.gstatic.com;
     connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
-    media-src 'self' blob: ${amazonFiles};
+    media-src 'self' blob: ${amazonFiles} ${azureBlob};
     object-src 'none';
     frame-ancestors 'self';
     base-uri 'self';
