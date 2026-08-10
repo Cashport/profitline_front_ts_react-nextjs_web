@@ -8,14 +8,13 @@
 
     &__header {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        padding: 1.25rem 1.5rem 1rem;
-        border-bottom: 1px solid $dark-gray;
+        padding: 0.875rem 1.25rem 0.5rem;
 
         h4.ant-typography {
             margin: 0;
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             color: $black;
         }
@@ -23,19 +22,6 @@
 
     &__invoiceId {
         font-family: $font-mono-space;
-    }
-
-    &__count {
-        margin-left: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 400;
-        color: $gray;
-    }
-
-    &__subtitle {
-        margin: 0.25rem 0 0;
-        font-size: 0.75rem;
-        color: $gray;
     }
 
     &__closeBtn {
@@ -57,8 +43,7 @@
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 0.75rem 1.5rem;
-        border-bottom: 1px solid $dark-gray;
+        padding: 0.5rem 1.25rem 0.75rem;
 
         label {
             max-width: 20rem;
@@ -73,9 +58,10 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 1rem;
-        padding: 0.625rem 1.5rem;
-        border-bottom: 1px solid $dark-gray;
+        gap: 0.75rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 4px;
+        background-color: $background;
     }
 
     &__chip {
@@ -97,7 +83,24 @@
     }
 
     &__table {
-        padding: 0 1.5rem;
+        padding: 0 1.25rem;
+
+        .ant-table-thead > tr > th {
+            background-color: transparent !important;
+            border-bottom: 1px solid $dark-gray !important;
+            font-size: 0.75rem;
+            color: $darker-gray;
+
+            // AntD draws a vertical separator between headers with this pseudo element
+            &::before {
+                display: none !important;
+            }
+        }
+
+        .ant-table-tbody > tr > td {
+            padding-block: 0.5rem;
+            border-bottom: none !important;
+        }
 
         .cell {
             margin: 0;
@@ -191,33 +194,13 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-top: 1rem;
-        padding: 0.875rem 1.5rem;
-        border-top: 1px solid $dark-gray;
+        margin-top: 0.75rem;
+        padding: 0.75rem 1.25rem;
         background-color: $background-light;
     }
 
-    &__balance {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.25rem 0.625rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
-
-        &.-balanced {
-            color: #16a34a;
-            background-color: rgba(22, 163, 74, 0.12);
-        }
-
-        &.-unbalanced {
-            color: $error;
-            background-color: rgba(255, 40, 40, 0.12);
-        }
-    }
-
     &__totals {
+        margin-left: auto;
         font-size: 0.875rem;
 
         p {
