@@ -1,4 +1,4 @@
-import { CausalDevolucion, EstadoDevolucion, IReturn } from "@/types/reverseLogistics/IReverseLogistics";
+import { EstadoDevolucion, IReturn, ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 
 // Lower index = worse (shown on the group row when a client mixes estados).
 export const ESTADO_PRIORITY: EstadoDevolucion[] = [
@@ -24,26 +24,6 @@ export function worstEstado(estados: EstadoDevolucion[]): EstadoDevolucion {
   });
 }
 
-// A single AntD table row: either a leaf devolución or an aggregated client group
-// (which carries its individual devoluciones as `children` for the expandable tree).
-export interface ReturnRow {
-  key: string;
-  isGroup: boolean;
-  devCount: number;
-  id: number;
-  idBoleto: string;
-  fecha: string;
-  cliente: string;
-  direccionCliente: string;
-  canal: string;
-  lineaNegocio?: string;
-  unidades: number;
-  causal?: CausalDevolucion;
-  monto: number;
-  estado: EstadoDevolucion;
-  pdfUrl?: string;
-  children?: ReturnRow[];
-}
 
 const toLeaf = (dev: IReturn): ReturnRow => ({
   key: `dev-${dev.id}`,

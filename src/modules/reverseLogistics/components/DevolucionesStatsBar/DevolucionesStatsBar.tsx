@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Clock, TrendingUp, Package, FileText, CalendarDays } from "lucide-react";
-import { IReturn } from "@/types/reverseLogistics/IReverseLogistics";
+import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 
 /**
  * Maps estados to the 4 processing-stage groups. Días are mocked as average
@@ -36,7 +36,7 @@ interface StatCard {
 }
 
 interface DevolucionesStatsBarProps {
-  returns: IReturn[];
+  returns: ReturnRow[];
 }
 
 export function DevolucionesStatsBar({ returns }: DevolucionesStatsBarProps) {
