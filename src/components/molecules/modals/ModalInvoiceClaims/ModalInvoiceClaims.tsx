@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Flex, Modal, Select, Table, Typography } from "antd";
-import { CheckCircle, Plus, WarningCircle, X } from "phosphor-react";
+import { Plus, X } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useInvoiceClaims } from "@/hooks/useInvoiceClaims";
@@ -223,17 +223,9 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
       onCancel={onClose}
     >
       <div className="modalInvoiceClaims__header">
-        <div>
-          <Title level={4}>
-            Glosas de <span className="modalInvoiceClaims__invoiceId">{invoice?.id_erp}</span>
-            <span className="modalInvoiceClaims__count">
-              ({rows.length} {rows.length === 1 ? "registro" : "registros"})
-            </span>
-          </Title>
-          <p className="modalInvoiceClaims__subtitle">
-            Cada glosa compone una parte del valor total de la factura.
-          </p>
-        </div>
+        <Title level={4}>
+          Glosas de <span className="modalInvoiceClaims__invoiceId">{invoice?.id_erp}</span>
+        </Title>
         <button className="modalInvoiceClaims__closeBtn" onClick={onClose} aria-label="Cerrar">
           <X size={20} />
         </button>
@@ -251,21 +243,6 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
           options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...CLAIM_STATUS_OPTIONS]}
         />
       </div>
-
-      {!!Object.keys(counts).length && (
-        <div className="modalInvoiceClaims__chips">
-          {(Object.keys(counts) as ClaimStatus[]).map((estado) => (
-            <span key={estado} className="modalInvoiceClaims__chip">
-              <span
-                className="modalInvoiceClaims__chipDot"
-                style={{ backgroundColor: CLAIM_STATUS_META[estado]?.dot }}
-              />
-              {CLAIM_STATUS_LABELS[estado] ?? estado}
-              <strong>{counts[estado]}</strong>
-            </span>
-          ))}
-        </div>
-      )}
 
       <Table
         className="modalInvoiceClaims__table"
@@ -296,12 +273,20 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
       />
 
       <div className="modalInvoiceClaims__footer">
-        <div className={`modalInvoiceClaims__balance ${isBalanced ? "-balanced" : "-unbalanced"}`}>
-          {isBalanced ? <CheckCircle size={16} /> : <WarningCircle size={16} />}
-          {isBalanced
-            ? "La suma de glosas cuadra con el valor de la factura"
-            : "La suma de glosas no coincide con la factura"}
-        </div>
+        {!!Object.keys(counts).length && (
+          <div className="modalInvoiceClaims__chips">
+            {(Object.keys(counts) as ClaimStatus[]).map((estado) => (
+              <span key={estado} className="modalInvoiceClaims__chip">
+                <span
+                  className="modalInvoiceClaims__chipDot"
+                  style={{ backgroundColor: CLAIM_STATUS_META[estado]?.dot }}
+                />
+                {CLAIM_STATUS_LABELS[estado] ?? estado}
+                <strong>{counts[estado]}</strong>
+              </span>
+            ))}
+          </div>
+        )}
 
         <Flex gap={"1.5rem"} className="modalInvoiceClaims__totals">
           <p>
