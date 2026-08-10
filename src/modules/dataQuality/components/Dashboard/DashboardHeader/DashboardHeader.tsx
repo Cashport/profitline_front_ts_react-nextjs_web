@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/modules/chat/ui/select";
-import { getAllCountries } from "@/services/countries/countries";
+import { getRegions } from "@/services/dataQuality/dataQuality";
 import { useFileTypes } from "@/modules/dataQuality/hooks/useFileTypes";
 import {
   TabType,
@@ -22,24 +22,24 @@ export function DashboardHeader() {
   const {
     activeTab,
     setActiveTab,
-    selectedCountry,
-    setSelectedCountry,
+    selectedRegion,
+    setSelectedRegion,
     selectedPeriod,
     setSelectedPeriod,
     selectedFileType,
     setSelectedFileType
   } = useDataQualityDashboardContext();
 
-  const { data: countriesData } = useSWR("dashboard-header-countries", getAllCountries);
+  const { data: regionsData } = useSWR("dashboard-header-regions", getRegions);
   const { data: fileTypesData } = useFileTypes();
 
-  const countries = useMemo(
+  const regions = useMemo(
     () =>
-      (countriesData ?? []).map((c) => ({
-        id: String(c.id),
-        name: c.country_name
+      (regionsData ?? []).map((r) => ({
+        id: String(-r.id),
+        name: r.abbreviation
       })),
-    [countriesData]
+    [regionsData]
   );
 
   const fileTypes = useMemo(
@@ -86,8 +86,8 @@ export function DashboardHeader() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">País</span>
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <span className="text-sm text-gray-500">Región</span>
+            <Select value={selectedRegion} onValueChange={setSelectedRegion}>
               <SelectTrigger
                 className="w-[180px]"
                 style={{ borderColor: "#DDDDDD", color: "#141414" }}
@@ -95,9 +95,9 @@ export function DashboardHeader() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {countries.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
+                {regions.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name}
                   </SelectItem>
                 ))}
               </SelectContent>

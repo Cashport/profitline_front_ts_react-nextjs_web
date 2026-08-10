@@ -7,8 +7,8 @@ export type TabType = "resumen" | "detalle";
 interface DataQualityDashboardContextValue {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
-  selectedCountry: string;
-  setSelectedCountry: (id: string) => void;
+  selectedRegion: string;
+  setSelectedRegion: (id: string) => void;
   selectedPeriod: string;
   setSelectedPeriod: (period: string) => void;
   selectedFileType: string;
@@ -26,7 +26,7 @@ const getCurrentPeriodId = () => {
 
 export function DataQualityDashboardProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTab] = useState<TabType>("resumen");
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState(getCurrentPeriodId);
   const [selectedFileType, setSelectedFileType] = useState("all");
 
@@ -34,14 +34,14 @@ export function DataQualityDashboardProvider({ children }: { children: ReactNode
     () => ({
       activeTab,
       setActiveTab,
-      selectedCountry,
-      setSelectedCountry,
+      selectedRegion,
+      setSelectedRegion,
       selectedPeriod,
       setSelectedPeriod,
       selectedFileType,
       setSelectedFileType
     }),
-    [activeTab, selectedCountry, selectedPeriod, selectedFileType]
+    [activeTab, selectedRegion, selectedPeriod, selectedFileType]
   );
 
   return (
