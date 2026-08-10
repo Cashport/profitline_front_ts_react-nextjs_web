@@ -21,8 +21,8 @@ import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsB
 import { returnsColumns } from "./columns";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
-// so the table pagination now mirrors `hasNext`/`hasPrev` instead of slicing
-// the result client-side.
+// so the table pagination mirrors `hasNext`/`hasPrev` instead of slicing the
+// result client-side.
 const PAGE_SIZE = 10;
 
 // Flatten a visit's devoluciones into leaf ReturnRows. Each devolucion from the
@@ -43,7 +43,7 @@ const mapDevolucionToRow = (
   const estado = dev.Estado as unknown as EstadoDevolucion;
 
   return {
-    key: `dev-${dev.IdDevolucion}`,
+    key: `dev-${dev.IdDevolucion}-visit-${visit.visitProjectId}`,
     isGroup: false,
     devCount: 1,
     id: 0,
@@ -57,7 +57,10 @@ const mapDevolucionToRow = (
     causal,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
-    pdfUrl: dev.PdfBoleto ?? undefined
+    pdfUrl: dev.PdfBoleto ?? undefined,
+    // Stash the original dev so the actions column can navigate to the
+    // approval detail using `IdDevolucion` as the approval id.
+    originalDev: dev
   };
 };
 
@@ -69,9 +72,27 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     ? dayjs(visit.scheduledDate).format("YYYY-MM-DD") +
       (visit.scheduledTime ? ` ${visit.scheduledTime}` : "")
     : "";
+  const resumen = visit.devoluciones?.reduce(
+    (acc, dev) => {
+      const { canal, lineaNegocio, unidades, monto } = acc;
+
+      return {
+        canal: [...canal.filter((c) => c != ""), dev.Canal],
+        lineaNegocio: [...lineaNegocio.filter((c) => c != ""), dev.LineaNegocio],
+        unidades: unidades + dev.Unidades,
+        monto: monto + dev.MontoDocumento
+      };
+    },
+    {
+      unidades: 0,
+      monto: 0,
+      canal: [""],
+      lineaNegocio: [""]
+    }
+  );
   const estado = visit.status as unknown as EstadoDevolucion;
   return {
-    key: `visit-${visit.visitId}`,
+    key: `visit-${visit.visitProjectId}`,
     isGroup: false,
     devCount: 0,
     id: 0,
@@ -79,13 +100,14 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     fecha,
     cliente: visit.clientName,
     direccionCliente: "",
-    canal: "",
-    lineaNegocio: "",
-    unidades: 0,
+    canal: resumen.canal.join(),
+    lineaNegocio: resumen.lineaNegocio.join(),
+    unidades: resumen.unidades,
     causal: undefined,
-    monto: 0,
+    monto: resumen.monto,
     estado,
-    pdfUrl: undefined
+    pdfUrl: undefined,
+    calculatedStatus: visit.calculatedStatus
   };
 };
 
@@ -113,11 +135,17 @@ export function DevolucionesTab() {
   // remains visible in the table.
   const allRows = useMemo<ReturnRow[]>(
     () =>
-      visits.flatMap<ReturnRow>((visit) =>
-        visit.devoluciones.length > 0
-          ? visit.devoluciones.map((d) => mapDevolucionToRow(visit, d))
-          : [mapVisitToFallbackRow(visit)]
-      ),
+      visits.map<ReturnRow>((visit) => {
+        return {
+          ...mapVisitToFallbackRow(visit),
+          isGroup: visit.devoluciones.length > 1,
+          devCount: visit.devoluciones.length,
+          children:
+            visit.devoluciones.length > 0
+              ? visit.devoluciones.map((d) => mapDevolucionToRow(visit, d))
+              : undefined
+        };
+      }),
     [visits]
   );
 
@@ -142,10 +170,7 @@ export function DevolucionesTab() {
     <>
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-cashport-gray-light">
-        <UiSearchInput
-          placeholder="Buscar"
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <UiSearchInput placeholder="Buscar" onChange={(e) => setSearchTerm(e.target.value)} />
 
         <GenerateActionButton onClick={() => {}} />
 

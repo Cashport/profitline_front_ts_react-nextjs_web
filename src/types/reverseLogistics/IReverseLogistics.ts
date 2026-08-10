@@ -21,6 +21,14 @@ export type EstadoDevolucion =
   | "Movimiento Odoo"
   | "Contabilización de NC";
 
+export interface ICalculatedStatus {
+  id: string;
+  label: string;
+  textColor: string;
+  backgroundColor: string;
+  badgeColor: string;
+}
+
 export interface IReturn {
   id: number;
   idBoleto: string;
@@ -55,7 +63,12 @@ export interface ReturnRow {
   monto: number;
   estado: EstadoDevolucion;
   pdfUrl?: string;
-  children?: ReturnRow[];
+  calculatedStatus?: ICalculatedStatus;
+  // Reference to the original API devolucion so the actions column can
+  // navigate to the approval detail (`IdDevolucion` doubles as the approval
+  // id used in /aprobaciones/:id and /returns/:returnId/approve).
+  originalDev?: IProfit360VisitDevolucion;
+  children?: Omit<ReturnRow, "children">[];
 }
 
 export type TipoAprobacion =
@@ -144,6 +157,7 @@ export interface IProfit360Approval {
 export interface IProfit360Documento {
   id: string;
   idProducto: string;
+  idProductoxDocumento: string;
   sku: string;
   descripcionProducto: string;
   ean: string;
@@ -162,6 +176,7 @@ export interface IProfit360Documento {
   descripcionEstadoProductoxDocumento: string;
   observacionProductoxDocumento: string;
   observacionAprobacion: string;
+  idCausalDocumento: string;
 }
 
 // Block / rule summary (the 5% devoluciones / venta mensual rule).
@@ -284,6 +299,7 @@ export interface IProfit360VisitDevolucion {
 // Each visit carries its own `returns` / `devoluciones` arrays.
 export interface IProfit360Visit {
   visitId: string;
+  visitProjectId: string;
   scheduledDate: string;
   scheduledTime: string;
   endTime: string;
@@ -296,6 +312,7 @@ export interface IProfit360Visit {
   IdProyectoLogistica: string;
   returns: unknown[];
   devoluciones: IProfit360VisitDevolucion[];
+  calculatedStatus: ICalculatedStatus;
 }
 
 // Paginated response wrapper for the visits endpoint.
@@ -307,4 +324,32 @@ export interface IProfit360VisitsResponse {
   totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
+}
+
+// Single picklist item returned by /integration/profit360/filtros-devolucion — `codigo`
+// is a stable identifier (GUID) and `nombre` is the human-readable label.
+export interface IProfit360FilterItem {
+  codigo: string;
+  nombre: string;
+}
+
+// Shape returned by GET /integration/profit360/filtros-devolucion — dropdown options for
+// cliente / estado / causal across the devoluciones + aprobaciones tabs.
+export interface IProfit360Filters {
+  clientes: IProfit360FilterItem[];
+  estados: IProfit360FilterItem[];
+  causales: IProfit360FilterItem[];
+}
+
+// Body shape for POST /integration/profit360/returns/:returnId/approve.
+// All GUIDs come from the filters endpoint; `idDevolucion` and
+// `idProductoxDocumentos` come from the devolucion payload, and
+// `causalOriginal` is the causal GUID the devolucion already carried.
+export interface IApproveReturnRequest {
+  idDevolucion: string;
+  idProductoxDocumentos: string[];
+  estado: string;
+  observaciones: string;
+  causal: string;
+  causalOriginal: string;
 }
