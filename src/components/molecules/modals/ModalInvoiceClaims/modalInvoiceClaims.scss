@@ -123,8 +123,6 @@
     }
 
     &__idCell {
-        font-family: $font-mono-space;
-        font-size: 0.75rem;
         white-space: nowrap;
 
         em {
@@ -139,8 +137,7 @@
     }
 
     &__cellControl {
-        width: 100%;
-        padding-inline: 0;
+        // padding-inline: 0;
 
         &.-alignRight input {
             text-align: right;

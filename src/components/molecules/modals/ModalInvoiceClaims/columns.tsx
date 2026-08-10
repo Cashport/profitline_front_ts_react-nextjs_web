@@ -62,6 +62,7 @@ export const getClaimsColumns = ({
       title: "Concepto",
       dataIndex: "concepto",
       key: "concepto",
+      ellipsis: true,
       render: (concepto: string, record) =>
         isEditing(record) ? (
           <Controller
@@ -85,7 +86,7 @@ export const getClaimsColumns = ({
       title: "Estado",
       dataIndex: "estado",
       key: "estado",
-      width: 170,
+      width: 150,
       render: (estado: ClaimTableRow["estado"], record) =>
         isEditing(record) ? (
           <Controller
@@ -115,7 +116,7 @@ export const getClaimsColumns = ({
       title: "Fecha glosa",
       dataIndex: "fechaGlosa",
       key: "fechaGlosa",
-      width: 110,
+      width: 130,
       render: (fechaGlosa: ClaimTableRow["fechaGlosa"], record) =>
         isEditing(record) ? (
           <Controller
@@ -140,7 +141,7 @@ export const getClaimsColumns = ({
       title: "Fecha contestación",
       dataIndex: "fechaContestacion",
       key: "fechaContestacion",
-      width: 170,
+      width: 150,
       render: (fechaContestacion: ClaimTableRow["fechaContestacion"], record) =>
         isEditing(record) ? (
           <Controller
@@ -164,6 +165,7 @@ export const getClaimsColumns = ({
       title: "Observación",
       dataIndex: "observacion",
       key: "observacion",
+      ellipsis: true,
       render: (observacion: string, record) =>
         isEditing(record) ? (
           <Controller
@@ -186,8 +188,8 @@ export const getClaimsColumns = ({
       title: "Monto",
       dataIndex: "monto",
       key: "monto",
+      width: 150,
       align: "right",
-      width: 160,
       render: (monto: number, record) =>
         isEditing(record) ? (
           <Controller
@@ -214,8 +216,8 @@ export const getClaimsColumns = ({
     {
       title: "",
       key: "actions",
-      fixed: "right",
       width: 140,
+      // fixed: "right",
       render: (_, record) =>
         isEditing(record) ? (
           <div className="modalInvoiceClaims__rowActions">
