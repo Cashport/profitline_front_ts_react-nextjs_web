@@ -23,7 +23,8 @@ import {
   IClientDetailArchiveClient,
   IPostCatalogMaterialEquivalence,
   IFileType,
-  IDataEmail
+  IDataEmail,
+  IRegion
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -628,6 +629,16 @@ export const getAllRegions = async (countryId: number) => {
   try {
     const response: GenericResponse<{ id: number; region_name: string; country_id: number }[]> =
       await API.get(`/location/regions/country/${countryId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching regions:", error);
+    throw error;
+  }
+};
+
+export const getRegions = async (): Promise<IRegion[]> => {
+  try {
+    const response: GenericResponse<IRegion[]> = await API.get(`${config.API_HOST}/data/regions`);
     return response.data;
   } catch (error) {
     console.error("Error fetching regions:", error);
