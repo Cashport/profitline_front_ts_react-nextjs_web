@@ -4,14 +4,21 @@ import { Check, Copy, DotsThreeVertical, PencilSimple, Trash, X } from "phosphor
 
 import SimpleTag from "@/components/atoms/SimpleTag/SimpleTag";
 
-import { CLAIM_ESTADOS, CONCEPTOS, DATE_FORMAT, ESTADO_CLAIM_META } from "./constants";
-import { ClaimsForm, ClaimTableRow } from "./types";
+import {
+  CLAIM_STATUS_LABELS,
+  CLAIM_STATUS_META,
+  CLAIM_STATUS_OPTIONS,
+  DATE_FORMAT,
+  FALLBACK_STATUS_META
+} from "./constants";
 
+import { ClaimsForm, ClaimTableRow } from "./types";
 import { IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 
 interface GetClaimsColumnsProps {
   control: Control<ClaimsForm>;
   editingId: string | null;
+  isSaving: boolean;
   formatMoney: IFormatMoneyStore["formatMoney"];
   // eslint-disable-next-line no-unused-vars
   onStartEdit: (row: ClaimTableRow) => void;
@@ -26,6 +33,7 @@ interface GetClaimsColumnsProps {
 export const getClaimsColumns = ({
   control,
   editingId,
+  isSaving,
   formatMoney,
   onStartEdit,
   onSave,
@@ -38,11 +46,12 @@ export const getClaimsColumns = ({
   return [
     {
       title: "ID glosa",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "claimNumber",
+      key: "claimNumber",
+      width: 140,
       render: (_, record) => (
         <span className="modalInvoiceClaims__idCell">
-          {record.id}
+          {record.claimNumber || "—"}
           {record._new && <em>nuevo</em>}
         </span>
       )
@@ -58,12 +67,11 @@ export const getClaimsColumns = ({
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <Select
+              <Input
                 {...field}
                 variant="borderless"
                 className="modalInvoiceClaims__cellControl"
-                options={CONCEPTOS.map((c) => ({ value: c.label, label: c.label }))}
-                popupMatchSelectWidth={false}
+                placeholder="Concepto de la glosa"
               />
             )}
           />
@@ -87,16 +95,16 @@ export const getClaimsColumns = ({
                 {...field}
                 variant="borderless"
                 className="modalInvoiceClaims__cellControl"
-                options={CLAIM_ESTADOS.map((e) => ({ value: e, label: e }))}
+                options={CLAIM_STATUS_OPTIONS}
                 popupMatchSelectWidth={false}
               />
             )}
           />
         ) : (
           <SimpleTag
-            text={estado}
-            colorTag={ESTADO_CLAIM_META[estado].bg}
-            colorText={ESTADO_CLAIM_META[estado].text}
+            text={CLAIM_STATUS_LABELS[estado] ?? estado}
+            colorTag={(CLAIM_STATUS_META[estado] ?? FALLBACK_STATUS_META).bg}
+            colorText={(CLAIM_STATUS_META[estado] ?? FALLBACK_STATUS_META).text}
             fontSize="0.75rem"
           />
         )
@@ -211,11 +219,12 @@ export const getClaimsColumns = ({
             <Button
               className="modalInvoiceClaims__saveBtn"
               icon={<Check size={16} />}
+              loading={isSaving}
               onClick={onSave}
             >
               Guardar
             </Button>
-            <Button type="text" icon={<X size={16} />} onClick={onCancel} />
+            <Button type="text" icon={<X size={16} />} disabled={isSaving} onClick={onCancel} />
           </div>
         ) : (
           <Dropdown

@@ -1,18 +1,15 @@
 import { Dayjs } from "dayjs";
 
-export type ClaimEstado =
-  | "Lista para pago"
-  | "En disputa"
-  | "Con novedad"
-  | "Contestada"
-  | "Aceptada";
+import { ClaimStatus } from "@/types/claims/IClaims";
 
 export interface IInvoiceClaimRow {
-  id: string;
+  /** null while the row has never been sent to the server */
+  claimId: number | null;
+  /** Server generated claim_number, empty on rows that are not created yet */
+  claimNumber: string;
   concepto: string;
-  codigo: string;
   monto: number;
-  estado: ClaimEstado;
+  estado: ClaimStatus;
   fechaGlosa: Dayjs | null;
   fechaContestacion: Dayjs | null;
   observacion: string;
