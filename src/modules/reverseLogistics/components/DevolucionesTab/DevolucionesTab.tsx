@@ -13,10 +13,10 @@ import {
   CausalDevolucion,
   EstadoDevolucion,
   IProfit360Visit,
-  IProfit360VisitDevolucion
+  IProfit360VisitDevolucion,
+  ReturnRow
 } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
-import { ReturnRow } from "../../utils/grouping";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
 import { returnsColumns } from "./columns";
 
@@ -105,7 +105,6 @@ export function DevolucionesTab() {
     getProfit360Visits({ page, fromDate, toDate, limit: PAGE_SIZE })
   );
 
-  console.log(data)
   const visits = data?.data ?? [];
   const total = data?.total ?? 0;
 

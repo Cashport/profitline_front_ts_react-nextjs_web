@@ -1,5 +1,5 @@
 import { ReverseLogisticsView } from "@/modules/reverseLogistics/containers/ReverseLogisticsView/ReverseLogisticsView";
-import { AprobacionResumenView } from "@/modules/reverseLogistics/containers/AprobacionResumenView/AprobacionResumenView";
+import { AprobacionDetalle } from "@/modules/reverseLogistics/components/AprobacionDetalle/AprobacionDetalle";
 
 interface PageProps {
   params: { id: string };
@@ -8,7 +8,7 @@ interface PageProps {
 export default function AprobacionResumenPage({ params }: PageProps) {
   return (
     <ReverseLogisticsView activeTab="aprobaciones">
-      <AprobacionResumenView id={params.id} />
+      <AprobacionDetalle id={params.id} />
     </ReverseLogisticsView>
   );
 }

@@ -1,10 +1,9 @@
 import type { ColumnsType } from "antd/es/table";
 import { Eye, FileText } from "lucide-react";
-import { EstadoDevolucion } from "@/types/reverseLogistics/IReverseLogistics";
+import { EstadoDevolucion, ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { estadoConfig } from "../../constants";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
-import { ReturnRow } from "../../utils/grouping";
 
 // AntD columns for the Devoluciones table. The table is fed tree data (client groups
 // with `children`), so each render handles both the group (aggregated) and leaf rows.

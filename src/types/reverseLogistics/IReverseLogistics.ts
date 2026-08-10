@@ -39,6 +39,25 @@ export interface IReturn {
   pdfUrl?: string;
 }
 
+export interface ReturnRow {
+  key: string;
+  isGroup: boolean;
+  devCount: number;
+  id: number;
+  idBoleto: string;
+  fecha: string;
+  cliente: string;
+  direccionCliente: string;
+  canal: string;
+  lineaNegocio?: string;
+  unidades: number;
+  causal?: CausalDevolucion;
+  monto: number;
+  estado: EstadoDevolucion;
+  pdfUrl?: string;
+  children?: ReturnRow[];
+}
+
 export type TipoAprobacion =
   | "Fuera de politicas por fecha (01-vencimiento)"
   | "Causal con aprobación (04-Calidad)"

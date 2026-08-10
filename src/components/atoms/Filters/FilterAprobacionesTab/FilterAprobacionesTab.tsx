@@ -39,7 +39,7 @@ export const FilterAprobacionesTab = ({ selectedFilters, setSelectedFilters }: P
     label: preset.label
   }));
 
-  const value = selectedFilters.from ? [["Fecha", selectedFilters.from]] : [];
+  const value = selectedFilters.from ? ["Fecha", selectedFilters.from] : [];
 
   return (
     <>
@@ -50,7 +50,7 @@ export const FilterAprobacionesTab = ({ selectedFilters, setSelectedFilters }: P
         placeholder="Filtrar por fecha"
         placement="bottomLeft"
         expandTrigger="hover"
-        value={value as unknown as string[][]}
+        value={value}
         options={[{ value: "Fecha", label: "Fecha", isLeaf: false, children: options }]}
         dropdownRender={(menu) => (
           <div>
