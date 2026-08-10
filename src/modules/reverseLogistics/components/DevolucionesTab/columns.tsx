@@ -1,9 +1,56 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import type { ColumnsType } from "antd/es/table";
-import { Eye, FileText } from "lucide-react";
-import { EstadoDevolucion, ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
+import { Check, Eye, FileText } from "lucide-react";
+import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { estadoConfig } from "../../constants";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
+
+// Per-row action buttons. Lives in its own component so it can use the
+// `useRouter` hook for client-side navigation into the approval detail.
+// `record.originalDev.IdDevolucion` doubles as the approval id — both
+// endpoints surface the same GUID under different names.
+function ActionsCell({ record }: { record: ReturnRow }) {
+  const router = useRouter();
+
+  const abrirDetalle = () => {
+    const id = record.originalDev?.IdDevolucion;
+    if (!id) return;
+    router.push(`/logistica-inversa/aprobaciones/${id}`);
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
+        aria-label="Ver PDF"
+        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
+      >
+        <FileText className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        aria-label="Ver detalle"
+        onClick={abrirDetalle}
+        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
+      >
+        <Eye className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        aria-label="Aprobar devolución"
+        onClick={abrirDetalle}
+        disabled={!record.originalDev}
+        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-green-600 hover:border-green-600 hover:bg-green-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <Check className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
 
 // AntD columns for the Devoluciones table. The table is fed tree data (client groups
 // with `children`), so each render handles both the group (aggregated) and leaf rows.
@@ -81,18 +128,19 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     title: "Estado",
     dataIndex: "estado",
     width: 150,
-    render: (estado: EstadoDevolucion) => {
-      // The new Profit360 endpoint returns free-text estados (e.g.
-      // "Aprobacion Realizada") that aren't keys in `estadoConfig`. Fall back
-      // to neutral gray styling when the lookup misses instead of crashing.
-      const palette = estadoConfig[estado] ?? { bg: "#F3F4F6", text: "#374151" };
-      return (
+    render: (_: unknown, record) => {
+      const cs = record.calculatedStatus;
+      const palette = cs ? { bg: cs.backgroundColor, text: cs.textColor } : undefined;
+      const label = cs?.label;
+      return cs ? (
         <span
           className="inline-flex items-center px-2 py-0.5 rounded-full text-xs whitespace-nowrap"
-          style={{ backgroundColor: palette.bg, color: palette.text }}
+          style={{ backgroundColor: palette!.bg, color: palette!.text }}
         >
-          {estado}
+          {label}
         </span>
+      ) : (
+        <></>
       );
     }
   },
@@ -102,7 +150,9 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     width: 90,
     align: "right",
     sorter: (a, b) => a.unidades - b.unidades,
-    render: (unidades: number) => <span className="text-gray-900 text-sm">{fmtNumber(unidades)}</span>
+    render: (unidades: number) => (
+      <span className="text-gray-900 text-sm">{fmtNumber(unidades)}</span>
+    )
   },
   {
     title: "Monto",
@@ -115,26 +165,9 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
   {
     title: "",
     dataIndex: "actions",
-    width: 80,
-    render: (_: unknown, record) =>
-      record.isGroup ? null : (
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
-            aria-label="Ver PDF"
-            className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Ver detalle"
-            className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )
+    width: 110,
+    // Group rows have no actions — only leaf devoluciones expose the
+    // pdf / detail / approve buttons.
+    render: (_: unknown, record) => (record.isGroup ? null : <ActionsCell record={record} />)
   }
 ];

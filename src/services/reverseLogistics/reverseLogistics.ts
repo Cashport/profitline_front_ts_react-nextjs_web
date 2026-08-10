@@ -1,7 +1,9 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
+  IApproveReturnRequest,
   IProfit360Approval,
   IProfit360ApprovalResumen,
+  IProfit360Filters,
   IProfit360VisitsResponse,
 } from "@/types/reverseLogistics/IReverseLogistics";
 import { API } from "@/utils/api/api";
@@ -65,6 +67,41 @@ export const getProfit360Visits = async (
     return response;
   } catch (error) {
     console.error("Error fetching profit360 visits:", error);
+    throw error;
+  }
+};
+
+// GET /integration/profit360/filtros-devolucion — picklists for cliente / estado / causal
+// used by the dropdowns across the reverse-logistics module. The endpoint is
+// stable enough that we cache the response at the context layer instead of
+// refetching per tab.
+export const getProfit360Filters = async (): Promise<IProfit360Filters> => {
+  try {
+    const response: GenericResponse<IProfit360Filters> = await API.get(
+      `/integration/profit360/filtros-devolucion`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching profit360 filters:", error);
+    throw error;
+  }
+};
+
+// POST /integration/profit360/returns/:returnId/approve — approves a single
+// devolucion. The body's GUIDs all come from the filters endpoint; only
+// `idDevolucion` / `idProductoxDocumentos` come from the devolucion itself.
+export const approveReturn = async (
+  returnId: string,
+  body: IApproveReturnRequest
+): Promise<unknown> => {
+  try {
+    const response = await API.post(
+      `/integration/profit360/returns/${encodeURIComponent(returnId)}/approve`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error approving profit360 return:", error);
     throw error;
   }
 };

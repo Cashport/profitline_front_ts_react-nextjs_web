@@ -13,13 +13,23 @@ import {
   IProfit360ApprovalResumen,
   IProfit360Documento
 } from "@/types/reverseLogistics/IReverseLogistics";
-import { getProfit360ApprovalResumen } from "@/services/reverseLogistics/reverseLogistics";
+import {
+  approveReturn,
+  getProfit360ApprovalResumen
+} from "@/services/reverseLogistics/reverseLogistics";
+import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
+import { AprobacionDevolucionModal } from "../AprobacionDevolucionModal/AprobacionDevolucionModal";
 import { fmtCop, fmtPct } from "../../utils/format";
 import { productsColumns } from "./columns";
 
 interface AprobacionDetalleProps {
   id: string;
 }
+
+// Backend name for the estado we set when approving. Resolved at runtime from
+// the filters context so the modal keeps working if the backend ever rotates
+// the GUID behind that name.
+const APROBADO_ESTADO_NOMBRE = "Aprobado";
 
 // Maps the Profit360 hex color (e.g. "#7ED961") to one of the three badge
 // palettes used by the products table.
@@ -76,7 +86,7 @@ function shortCausal(causal: string): string {
 export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
   const router = useRouter();
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     ["reverse-logistics/profit360-approval-resumen", id],
     () => getProfit360ApprovalResumen(id),
     { revalidateOnFocus: false }
@@ -85,8 +95,35 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
-  const [approved, setApproved] = useState(false);
   const [soportesOpen, setSoportesOpen] = useState(false);
+
+  // Approval modal — opens from the footer "Aprobar" button.
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [approving, setApproving] = useState(false);
+
+  // Picklists shared with the devoluciones tab via the layout-level provider.
+  const { estados, causales } = useProfit360Filters();
+  console.log(
+    estados,
+    estados.find((e) => e.nombre === APROBADO_ESTADO_NOMBRE)
+  );
+  const aprobadoEstadoCodigo = useMemo(
+    () => estados.find((e) => e.nombre === APROBADO_ESTADO_NOMBRE)?.codigo ?? "",
+    [estados]
+  );
+
+  // Default the dropdown to the approval's existing causal. The approval
+  // endpoint only exposes a causal *name* via the JSON blob, so we cross-check
+  // it against the filters picklist (which carries both `codigo` GUIDs and
+  // `nombre` labels) and resolve to the matching `codigo`. The dropdown values
+  // already come from filters (each `{codigo, nombre}` pair), so the new
+  // `causal` value the user picks is always a GUID. If the name from the blob
+  // doesn't match any picklist entry we fall back to the literal name — the
+  // backend can usually handle both shapes.
+  const defaultCausalCodigo = useMemo(
+    () => causales.find((c) => c.codigo === resumen?.documentos[0].idCausalDocumento)?.codigo ?? "",
+    [causales, resumen]
+  );
 
   const products = useMemo<IApprovalProduct[]>(
     () => (resumen?.documentos ?? []).map(mapDocumentoToProduct),
@@ -118,6 +155,36 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
   const pctTotal = regla ? regla.conEstaAprobacion.porcentaje / 100 : 0;
 
   const causalLabel = shortCausal(firstCausal(resumen?.causales));
+
+  // Called by the modal with the resolved dropdown + textarea values. Builds
+  // the dynamic POST body and refreshes the detail on success.
+  const handleApprove = async ({
+    estadoCodigo,
+    causalCodigo,
+    observaciones
+  }: {
+    estadoCodigo: string;
+    causalCodigo: string;
+    observaciones: string;
+  }) => {
+    if (!resumen) return;
+    setApproving(true);
+    try {
+      await approveReturn(resumen.id, {
+        idDevolucion: resumen.documentos[0].id,
+        idProductoxDocumentos: resumen.documentos.map((d) => d.idProductoxDocumento),
+        estado: estadoCodigo,
+        observaciones,
+        causal: causalCodigo,
+        causalOriginal: defaultCausalCodigo
+      });
+      await mutate();
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  console.log(resumen, approving, aprobadoEstadoCodigo);
 
   return (
     <div className="px-5 py-4 space-y-4">
@@ -269,26 +336,20 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
         />
       </div>
 
-      {/* Footer: Aprobar */}
+      {/* Footer: Aprobar — opens the modal which does the real POST */}
       <div className="flex items-center justify-between pt-1">
         <span className="text-sm text-gray-500">
           Mostrando 1 a {filtered.length} de {filtered.length} registros
         </span>
-        <div className="flex items-center gap-3">
-          {approved ? (
-            <span className="text-sm font-semibold text-green-600">Aprobado correctamente</span>
-          ) : (
-            <Button
-              onClick={() => setApproved(true)}
-              disabled={selectedRowKeys.length === 0}
-              type="primary"
-              size="large"
-              style={{ backgroundColor: selectedRowKeys.length === 0 ? undefined : "#f97316" }}
-            >
-              Aprobar
-            </Button>
-          )}
-        </div>
+        <Button
+          onClick={() => setApproveModalOpen(true)}
+          disabled={!resumen || approving || !aprobadoEstadoCodigo}
+          type="primary"
+          size="large"
+          style={{ backgroundColor: "#f97316" }}
+        >
+          Aprobar
+        </Button>
       </div>
 
       {/* Soportes preview — opens the approval photo from `fotosAprobacion`. */}
@@ -324,6 +385,16 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
           <p className="text-sm text-gray-500 m-0">No hay soportes adjuntos.</p>
         )}
       </Modal>
+
+      {/* Approval modal — collects causal + observación, fires the POST. */}
+      <AprobacionDevolucionModal
+        open={approveModalOpen}
+        aprobadoEstadoCodigo={aprobadoEstadoCodigo}
+        causales={causales}
+        defaultCausalCodigo={defaultCausalCodigo}
+        onClose={() => setApproveModalOpen(false)}
+        onApprove={handleApprove}
+      />
     </div>
   );
 }
