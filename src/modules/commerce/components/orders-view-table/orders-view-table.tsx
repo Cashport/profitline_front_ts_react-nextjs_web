@@ -146,7 +146,7 @@ const OrdersViewTable = ({
 
   const allColumns: TableProps<IOrder>["columns"] = [
     {
-      title: "TR",
+      title: "ID",
       dataIndex: "id",
       key: "id",
       render: (invoiceId, row) => (
