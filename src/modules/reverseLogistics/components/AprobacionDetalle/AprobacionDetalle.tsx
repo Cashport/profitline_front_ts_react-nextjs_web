@@ -121,7 +121,7 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
   // doesn't match any picklist entry we fall back to the literal name — the
   // backend can usually handle both shapes.
   const defaultCausalCodigo = useMemo(
-    () => causales.find((c) => c.codigo === resumen?.documentos[0].idCausalDocumento)?.codigo ?? "",
+    () => causales.find((c) => c.codigo === resumen?.documentos[0]?.idCausalDocumento)?.codigo ?? "",
     [causales, resumen]
   );
 
