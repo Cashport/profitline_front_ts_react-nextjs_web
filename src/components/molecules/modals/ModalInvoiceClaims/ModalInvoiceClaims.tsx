@@ -13,7 +13,7 @@ import { getClaimsColumns } from "./columns";
 import { CLAIM_STATUS_LABELS, CLAIM_STATUS_META, CLAIM_STATUS_OPTIONS } from "./constants";
 import { createEmptyRow, mapClaimToRow, rowToCreatePayload, rowToPayload } from "./utils";
 
-import { ClaimsForm, ClaimTableRow } from "./types";
+import { ClaimsForm, ClaimTableRow, IInvoiceClaimRow } from "./types";
 import { ClaimStatus } from "@/types/claims/IClaims";
 import { IInvoice } from "@/types/invoices/IInvoices";
 
@@ -35,14 +35,15 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
 
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState<ClaimStatus | typeof ALL_ESTADOS>(ALL_ESTADOS);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  // Several rows can be open at once, so each is tracked by its fieldId — stable when
+  // removing a row shifts the indexes of the ones after it
+  const [editingIds, setEditingIds] = useState<string[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
-  // Values of the row being edited, kept to restore them when the edit is cancelled
-  const editSnapshot = useRef<ClaimsForm["claims"][number] | null>(null);
-  // Index of a row just added or duplicated, so it opens in edit mode once RHF registers it
-  const pendingEditIndex = useRef<number | null>(null);
+  // Values of each row being edited, kept to restore them when the edit is cancelled
+  const editSnapshots = useRef(new Map<string, IInvoiceClaimRow>());
 
-  const { claims, loading, isActionLoading, addClaim, editClaim, removeClaim } = useInvoiceClaims({
+  const { claims, loading, addClaim, editClaim, removeClaim } = useInvoiceClaims({
     invoiceId: invoice?.id,
     status: estadoFilter === ALL_ESTADOS ? undefined : estadoFilter,
     enabled: isOpen
@@ -61,7 +62,8 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
 
   useEffect(() => {
     if (!isOpen) return;
-    setEditingId(null);
+    setEditingIds([]);
+    editSnapshots.current.clear();
     setEstadoFilter(ALL_ESTADOS);
     setSearch("");
   }, [isOpen, invoice?.id]);
@@ -71,16 +73,9 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
   useEffect(() => {
     if (!isOpen) return;
     const hasUnsavedRows = getValues("claims")?.some((claim) => claim._new);
-    if (editingId || pendingEditIndex.current !== null || hasUnsavedRows) return;
+    if (editingIds.length || hasUnsavedRows) return;
     reset({ claims: claims.map(mapClaimToRow) });
   }, [claims, isOpen]);
-
-  useEffect(() => {
-    const target = pendingEditIndex.current;
-    if (target === null || !fields[target]) return;
-    pendingEditIndex.current = null;
-    setEditingId(fields[target].fieldId);
-  }, [fields.length]);
 
   const formClaims = watch("claims");
 
@@ -96,20 +91,23 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
     [fields, formClaims]
   );
 
+  // A row that was never saved is unsaved by definition, so it is always open for editing
+  const isRowEditing = (row: ClaimTableRow) => !!row._new || editingIds.includes(row.fieldId);
+
   // The estado filter is resolved server side, only the search is applied here
   const filteredRows = useMemo(() => {
     const query = search.toLowerCase().trim();
     if (!query) return rows;
     return rows.filter((row) => {
-      // the row being edited stays visible even if its new values no longer match the search
-      if (row.fieldId === editingId) return true;
+      // rows being edited stay visible even if their new values no longer match the search
+      if (isRowEditing(row)) return true;
       return (
         row.claimNumber?.toLowerCase().includes(query) ||
         row.concepto?.toLowerCase().includes(query) ||
         row.observacion?.toLowerCase().includes(query)
       );
     });
-  }, [rows, search, editingId]);
+  }, [rows, search, editingIds]);
 
   const counts = useMemo(
     () =>
@@ -124,46 +122,67 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
   const invoiceTotal = invoice?.current_value || 0;
   const isBalanced = claimsTotal === invoiceTotal;
 
-  const editingIndex = fields.findIndex((field) => field.fieldId === editingId);
+  const closeEdit = (fieldId: string) => {
+    editSnapshots.current.delete(fieldId);
+    setEditingIds((prev) => prev.filter((id) => id !== fieldId));
+  };
 
   const handleStartEdit = (row: ClaimTableRow) => {
-    editSnapshot.current = getValues(`claims.${row.index}`);
-    setEditingId(row.fieldId);
+    // cloned: getValues hands back the live row object, which the inputs mutate in place
+    editSnapshots.current.set(row.fieldId, { ...getValues(`claims.${row.index}`) });
+    setEditingIds((prev) => [...prev, row.fieldId]);
   };
 
-  const handleSave = async () => {
-    if (editingIndex < 0 || !invoice) return;
-    const isValid = await trigger(`claims.${editingIndex}`);
+  const handleSave = async (row: ClaimTableRow) => {
+    if (!invoice) return;
+    const isValid = await trigger(`claims.${row.index}`);
     if (!isValid) return;
 
-    const row = getValues(`claims.${editingIndex}`);
-    if (!row.concepto.trim()) return showMessage("error", "El concepto es obligatorio");
-    if (!row.monto || row.monto <= 0) return showMessage("error", "El monto debe ser mayor a cero");
+    const values = getValues(`claims.${row.index}`);
+    if (!values.concepto.trim()) return showMessage("error", "El concepto es obligatorio");
+    if (!values.monto || values.monto <= 0)
+      return showMessage("error", "El monto debe ser mayor a cero");
 
-    const success = row.claimId
-      ? await editClaim(row.claimId, rowToPayload(row), showMessage)
-      : await addClaim(rowToCreatePayload(row, invoice.id), showMessage);
-    if (!success) return;
-
-    // a created row is dropped from the form: it comes back from the refetch with its server id
-    if (!row.claimId) remove(editingIndex);
-    editSnapshot.current = null;
-    setEditingId(null);
+    setSavingId(row.fieldId);
+    try {
+      if (values.claimId) {
+        const updated = await editClaim(values.claimId, rowToPayload(values), showMessage);
+        if (!updated) return;
+      } else {
+        const created = await addClaim(rowToCreatePayload(values, invoice.id), showMessage);
+        if (!created) return;
+        if (created.id) {
+          // stamped in place so the row keeps its position while its siblings are still unsaved
+          setValue(`claims.${row.index}`, {
+            ...values,
+            claimId: created.id,
+            claimNumber: created.claim_number,
+            _new: false
+          });
+        } else {
+          // the API did not echo the claim, drop the row and let the refetch be the source of
+          // truth — saving it again would create a duplicate
+          remove(row.index);
+        }
+      }
+      closeEdit(row.fieldId);
+    } finally {
+      setSavingId(null);
+    }
   };
 
-  const handleCancel = () => {
-    if (editingIndex < 0) return;
-    if (getValues(`claims.${editingIndex}._new`)) {
-      remove(editingIndex);
-    } else if (editSnapshot.current) {
-      setValue(`claims.${editingIndex}`, editSnapshot.current);
+  const handleCancel = (row: ClaimTableRow) => {
+    const snapshot = editSnapshots.current.get(row.fieldId);
+    if (getValues(`claims.${row.index}._new`)) {
+      remove(row.index);
+    } else if (snapshot) {
+      setValue(`claims.${row.index}`, snapshot);
     }
-    editSnapshot.current = null;
-    setEditingId(null);
+    closeEdit(row.fieldId);
   };
 
   const handleDelete = (row: ClaimTableRow) => {
-    if (row.fieldId === editingId) setEditingId(null);
+    closeEdit(row.fieldId);
     // never saved rows only exist in the form, nothing to delete server side
     if (!row.claimId) return remove(row.index);
 
@@ -173,20 +192,22 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
       okText: "Eliminar",
       cancelText: "Cancelar",
       okButtonProps: { danger: true },
-      onOk: () => removeClaim(row.claimId as number, showMessage)
+      onOk: async () => {
+        const success = await removeClaim(row.claimId as number, showMessage);
+        // dropped locally too: the refetch cannot reseed the table while other rows are unsaved
+        if (success) remove(row.index);
+      }
     });
   };
 
   // A duplicate is inserted unsaved so nothing hits the API until the user confirms it
   const handleDuplicate = (row: ClaimTableRow) => {
     const values = getValues(`claims.${row.index}`);
-    pendingEditIndex.current = row.index + 1;
     insert(row.index + 1, { ...values, claimId: null, claimNumber: "", _new: true });
   };
 
   const handleAddRow = () => {
     if (!invoice) return;
-    pendingEditIndex.current = fields.length;
     append(createEmptyRow());
   };
 
@@ -250,8 +271,8 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
         className="modalInvoiceClaims__table"
         columns={getClaimsColumns({
           control,
-          editingId,
-          isSaving: isActionLoading,
+          isEditing: isRowEditing,
+          savingId,
           formatMoney,
           onStartEdit: handleStartEdit,
           onSave: handleSave,
@@ -261,10 +282,10 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
         })}
         dataSource={filteredRows}
         loading={loading}
-        rowClassName={(record) => (record.fieldId === editingId ? "editingRow" : "")}
+        rowClassName={(record) => (isRowEditing(record) ? "editingRow" : "")}
         pagination={false}
         size="small"
-        scroll={{ y: "40vh", x: 1250 }}
+        scroll={{ y: "40vh", x: 1350 }}
         locale={{ emptyText: "Esta factura no tiene glosas registradas." }}
         footer={() => (
           <button className="modalInvoiceClaims__addRow" onClick={handleAddRow}>

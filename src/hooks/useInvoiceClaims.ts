@@ -48,19 +48,23 @@ export const useInvoiceClaims = ({
     fetcher
   );
 
-  const addClaim = async (payload: ICreateClaimPayload, showMessage: ShowMessage) => {
+  /** Resolves with the created claim so the caller can stamp its row with the server id */
+  const addClaim = async (
+    payload: ICreateClaimPayload,
+    showMessage: ShowMessage
+  ): Promise<IClaim | null> => {
     setIsActionLoading(true);
     try {
-      await createClaim(payload);
+      const response = await createClaim(payload);
       showMessage("success", "Glosa creada exitosamente");
+      return response.data ?? null;
     } catch (err) {
       showMessage("error", err instanceof ApiError ? err.message : "Error al crear la glosa");
-      return false;
+      return null;
     } finally {
       mutate();
       setIsActionLoading(false);
     }
-    return true;
   };
 
   const editClaim = async (

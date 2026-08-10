@@ -17,13 +17,17 @@ import { IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 
 interface GetClaimsColumnsProps {
   control: Control<ClaimsForm>;
-  editingId: string | null;
-  isSaving: boolean;
+  // eslint-disable-next-line no-unused-vars
+  isEditing: (row: ClaimTableRow) => boolean;
+  /** fieldId of the row currently hitting the API, so only that row shows a spinner */
+  savingId: string | null;
   formatMoney: IFormatMoneyStore["formatMoney"];
   // eslint-disable-next-line no-unused-vars
   onStartEdit: (row: ClaimTableRow) => void;
-  onSave: () => void;
-  onCancel: () => void;
+  // eslint-disable-next-line no-unused-vars
+  onSave: (row: ClaimTableRow) => void;
+  // eslint-disable-next-line no-unused-vars
+  onCancel: (row: ClaimTableRow) => void;
   // eslint-disable-next-line no-unused-vars
   onDelete: (row: ClaimTableRow) => void;
   // eslint-disable-next-line no-unused-vars
@@ -32,8 +36,8 @@ interface GetClaimsColumnsProps {
 
 export const getClaimsColumns = ({
   control,
-  editingId,
-  isSaving,
+  isEditing,
+  savingId,
   formatMoney,
   onStartEdit,
   onSave,
@@ -41,8 +45,6 @@ export const getClaimsColumns = ({
   onDelete,
   onDuplicate
 }: GetClaimsColumnsProps): TableProps<ClaimTableRow>["columns"] => {
-  const isEditing = (row: ClaimTableRow) => editingId === row.fieldId;
-
   return [
     {
       title: "ID glosa",
@@ -212,54 +214,62 @@ export const getClaimsColumns = ({
     {
       title: "",
       key: "actions",
-      width: 45,
+      fixed: "right",
+      width: 140,
       render: (_, record) =>
         isEditing(record) ? (
           <div className="modalInvoiceClaims__rowActions">
             <Button
               className="modalInvoiceClaims__saveBtn"
               icon={<Check size={16} />}
-              loading={isSaving}
-              onClick={onSave}
+              loading={savingId === record.fieldId}
+              onClick={() => onSave(record)}
             >
               Guardar
             </Button>
-            <Button type="text" icon={<X size={16} />} disabled={isSaving} onClick={onCancel} />
+            <Button
+              type="text"
+              icon={<X size={16} />}
+              disabled={!!savingId}
+              onClick={() => onCancel(record)}
+            />
           </div>
         ) : (
-          <Dropdown
-            trigger={["click"]}
-            placement="bottomRight"
-            menu={{
-              items: [
-                {
-                  key: "edit",
-                  label: "Editar",
-                  icon: <PencilSimple size={16} />,
-                  onClick: () => onStartEdit(record)
-                },
-                {
-                  key: "duplicate",
-                  label: "Duplicar",
-                  icon: <Copy size={16} />,
-                  onClick: () => onDuplicate(record)
-                },
-                { type: "divider", key: "divider" },
-                {
-                  key: "delete",
-                  label: "Eliminar",
-                  icon: <Trash size={16} />,
-                  danger: true,
-                  onClick: () => onDelete(record)
-                }
-              ]
-            }}
-          >
-            <Button
-              className="modalInvoiceClaims__dotsBtn"
-              icon={<DotsThreeVertical size={16} />}
-            />
-          </Dropdown>
+          <div className="modalInvoiceClaims__rowActions">
+            <Dropdown
+              trigger={["click"]}
+              placement="bottomRight"
+              menu={{
+                items: [
+                  {
+                    key: "edit",
+                    label: "Editar",
+                    icon: <PencilSimple size={16} />,
+                    onClick: () => onStartEdit(record)
+                  },
+                  {
+                    key: "duplicate",
+                    label: "Duplicar",
+                    icon: <Copy size={16} />,
+                    onClick: () => onDuplicate(record)
+                  },
+                  { type: "divider", key: "divider" },
+                  {
+                    key: "delete",
+                    label: "Eliminar",
+                    icon: <Trash size={16} />,
+                    danger: true,
+                    onClick: () => onDelete(record)
+                  }
+                ]
+              }}
+            >
+              <Button
+                className="modalInvoiceClaims__dotsBtn"
+                icon={<DotsThreeVertical size={16} />}
+              />
+            </Dropdown>
+          </div>
         )
     }
   ];
