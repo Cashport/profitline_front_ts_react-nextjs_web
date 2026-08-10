@@ -647,3 +647,10 @@ export interface IAuxiliaryFile {
   created_at: string;
   uploaded_at: string | null;
 }
+
+export interface IRegion {
+  id: number;
+  abbreviation: string;
+  region_code: string;
+  country_count: number;
+}

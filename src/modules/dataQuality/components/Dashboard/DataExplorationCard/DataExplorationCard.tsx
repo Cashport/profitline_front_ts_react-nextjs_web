@@ -35,7 +35,7 @@ type UnitType = "units_haleon" | "vol_reported";
 type DayCell = IDataExplorationTotals & { novedades_percent: number };
 
 export function DataExplorationCard() {
-  const { selectedCountry, selectedPeriod, setSelectedPeriod, selectedFileType } =
+  const { selectedRegion, selectedPeriod, setSelectedPeriod, selectedFileType } =
     useDataQualityDashboardContext();
   const [search, setSearch] = useState("");
   const [unitType, setUnitType] = useState<UnitType>("units_haleon");
@@ -43,7 +43,7 @@ export function DataExplorationCard() {
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, error, isLoading } = useDataExploration({
-    id_country: selectedCountry || undefined,
+    id_country: selectedRegion || undefined,
     month: selectedPeriod,
     id_type_archive: selectedFileType && selectedFileType !== "all" ? selectedFileType : undefined,
     search: debouncedSearch || undefined
