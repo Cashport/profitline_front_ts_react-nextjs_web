@@ -448,6 +448,8 @@ export interface IOrder {
   order_date: string;
   city: string;
   contacto: string;
+  business_unit: string;
+  address: string;
   total: number;
   total_pronto_pago: number;
   client_name: string;
