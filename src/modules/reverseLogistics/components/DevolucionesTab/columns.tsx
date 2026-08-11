@@ -5,7 +5,6 @@ import type { ColumnsType } from "antd/es/table";
 import { Check, Eye, FileText } from "lucide-react";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
-import { estadoConfig } from "../../constants";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 
 // Per-row action buttons. Lives in its own component so it can use the
@@ -13,41 +12,18 @@ import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 // `record.originalDev.IdDevolucion` doubles as the approval id — both
 // endpoints surface the same GUID under different names.
 function ActionsCell({ record }: { record: ReturnRow }) {
-  const router = useRouter();
-
-  const abrirDetalle = () => {
-    const id = record.originalDev?.IdDevolucion;
-    if (!id) return;
-    router.push(`/logistica-inversa/aprobaciones/${id}`);
-  };
-
   return (
     <div className="flex items-center gap-1">
-      <button
-        type="button"
-        onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
-        aria-label="Ver PDF"
-        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
-      >
-        <FileText className="h-3.5 w-3.5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Ver detalle"
-        onClick={abrirDetalle}
-        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
-      >
-        <Eye className="h-3.5 w-3.5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Aprobar devolución"
-        onClick={abrirDetalle}
-        disabled={!record.originalDev}
-        className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-green-600 hover:border-green-600 hover:bg-green-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        <Check className="h-3.5 w-3.5" />
-      </button>
+      {record.pdfUrl ? (
+        <button
+          type="button"
+          onClick={() => record.pdfUrl && window.open(record.pdfUrl, "_blank")}
+          aria-label="Ver PDF"
+          className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-red-400 hover:border-red-400 hover:text-red-600 transition-colors"
+        >
+          <FileText className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -168,6 +144,6 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     width: 110,
     // Group rows have no actions — only leaf devoluciones expose the
     // pdf / detail / approve buttons.
-    render: (_: unknown, record) => (record.isGroup ? null : <ActionsCell record={record} />)
+    render: (_: unknown, record) => (record.devCount > 0 ? <ActionsCell record={record} /> : null)
   }
 ];
