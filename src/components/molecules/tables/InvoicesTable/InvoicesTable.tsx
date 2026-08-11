@@ -1,10 +1,20 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Checkbox, Table, TableProps, Tooltip, Typography } from "antd";
-import { CheckCircle, Eye, Handshake, Warning, WarningCircle } from "phosphor-react";
+import { Button, Checkbox, Dropdown, Table, TableProps, Tooltip, Typography } from "antd";
+import {
+  CheckCircle,
+  DotsThreeVertical,
+  Eye,
+  Handshake,
+  Warning,
+  WarningCircle
+} from "phosphor-react";
+import { ArrowsSplit } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 
 import { useAppStore } from "@/lib/store/store";
 import { calculateDaysDifference, daysLeft, formatDate } from "@/utils/utils";
+
+import { ModalInvoiceClaims } from "@/components/molecules/modals/ModalInvoiceClaims/ModalInvoiceClaims";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
@@ -39,6 +49,7 @@ export const InvoicesTable = ({
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [claimsInvoice, setClaimsInvoice] = useState<IInvoice | null>(null);
 
   useEffect(() => {
     if (selectedRows) {
@@ -322,6 +333,26 @@ export const InvoicesTable = ({
           )}
 
           <Button onClick={() => handleOpenDetail(record)} icon={<Eye size={"1.2rem"} />} />
+
+          <Dropdown
+            trigger={["click"]}
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: "claims",
+                  label: "Ver glosas",
+                  icon: <ArrowsSplit size={16} />,
+                  onClick: () => setClaimsInvoice(record)
+                }
+              ]
+            }}
+          >
+            <Button
+              onClick={(e) => e.stopPropagation()}
+              icon={<DotsThreeVertical size={"1.2rem"} />}
+            />
+          </Dropdown>
         </div>
       ),
       width: 100,
@@ -360,6 +391,12 @@ export const InvoicesTable = ({
             offsetHeader: 160
           } as any
         }
+      />
+
+      <ModalInvoiceClaims
+        isOpen={!!claimsInvoice}
+        invoice={claimsInvoice}
+        onClose={() => setClaimsInvoice(null)}
       />
     </>
   );

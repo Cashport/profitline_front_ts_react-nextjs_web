@@ -62,6 +62,7 @@ export interface IMedicalAccountNoveltyApi {
   novelty_type: string;
   severity: MedicalAccountSeverity;
   description: string;
+  resolved_at: string | null;
   created_at: string;
 }
 

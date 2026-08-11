@@ -508,7 +508,7 @@ export default function ModalShippingInfo({
                 onChange={(e) =>
                   setDraft((d) => ({ ...d, observaciones: sanitizeComment(e.target.value) }))
                 }
-                rows={3}
+                rows={1}
                 className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
               />
               <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>

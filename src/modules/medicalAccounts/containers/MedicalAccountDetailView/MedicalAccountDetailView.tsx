@@ -157,7 +157,13 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         </div>
 
         {/* Novedades (only when present) */}
-        {account.novedades.length > 0 && <MedicalAccountNovedades novedades={account.novedades} />}
+        {account.novedades.length > 0 && (
+          <MedicalAccountNovedades
+            novedades={account.novedades}
+            accountId={account.id}
+            onResolved={() => mutate()}
+          />
+        )}
 
         {/* Facturas */}
         {account.facturas && account.facturas.length > 0 && (

@@ -1,5 +1,5 @@
 import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
-import { Button, Dropdown, MenuProps, message, Table, TableProps, Typography } from "antd";
+import { Button, Dropdown, MenuProps, message, Table, TableProps, Tooltip, Typography } from "antd";
 import {
   DotsThreeVertical,
   Eye,
@@ -146,7 +146,7 @@ const OrdersViewTable = ({
 
   const allColumns: TableProps<IOrder>["columns"] = [
     {
-      title: "TR",
+      title: "ID",
       dataIndex: "id",
       key: "id",
       render: (invoiceId, row) => (
@@ -166,34 +166,48 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
+      title: "Ciudad",
+      key: "city",
+      dataIndex: "city",
+      width: 260,
+      render: (_, row) => (
+        <Tooltip
+          placement="topLeft"
+          overlayClassName="locationTooltip"
+          title={
+            <>
+              {row.address && <span>{row.address}</span>}
+              {row.city && <span>{row.city}</span>}
+              {row.contacto && <span>{row.contacto}</span>}
+            </>
+          }
+        >
+          <div className="locationCell">
+            <Text className="locationCell__primary">
+              {[row.city, row.address].filter(Boolean).join(" - ")}
+            </Text>
+            <Text className="locationCell__secondary">{row.warehousename}</Text>
+          </div>
+        </Tooltip>
+      ),
+      sorter: (a, b) => a.city.localeCompare(b.city),
+      showSorterTooltip: false
+    },
+    {
+      title: "Unidad de negocio",
+      key: "business_unit",
+      dataIndex: "business_unit",
+      render: (text) => <Text className="cell">{text}</Text>,
+      sorter: (a, b) => (a.business_unit ?? "").localeCompare(b.business_unit ?? ""),
+      showSorterTooltip: false
+    },
+    {
       title: "Fecha de creación",
       key: "order_date",
       dataIndex: "order_date",
       render: (date) => <Text className="cell">{date ? formatDateDMY(date) : ""}</Text>,
       sorter: (a, b) => new Date(a.order_date)?.getTime() - new Date(b.order_date)?.getTime(),
       showSorterTooltip: false
-    },
-    {
-      title: "Ciudad",
-      key: "city",
-      dataIndex: "city",
-      render: (text) => <Text className="cell">{text}</Text>,
-      sorter: (a, b) => a.city.localeCompare(b.city),
-      showSorterTooltip: false
-    },
-    {
-      title: "Bodega",
-      key: "warehousename",
-      dataIndex: "warehousename",
-      render: (warehousename) => <Text className="cell">{warehousename}</Text>,
-      sorter: (a, b) => a.warehousename.localeCompare(b.warehousename),
-      showSorterTooltip: false
-    },
-    {
-      title: "Contacto",
-      key: "contacto",
-      dataIndex: "contacto",
-      render: (text) => <Text className="cell">{text}</Text>
     },
     {
       title: "Tiempo transcurrido",
@@ -265,22 +279,26 @@ const OrdersViewTable = ({
     //   }
     // },
     {
-      title: "Total pronto pago",
-      key: "total_pronto_pago",
-      dataIndex: "total_pronto_pago",
-      render: (amount) => (
-        <p className="cell fontMonoSpace">{formatMoney(amount, { hideDecimals: true })}</p>
-      ),
-      sorter: (a, b) => a.total_pronto_pago - b.total_pronto_pago,
-      showSorterTooltip: false,
-      align: "right"
-    },
-    {
       title: "Total",
       key: "total",
       dataIndex: "total",
-      render: (amount) => (
-        <p className="cell fontMonoSpace bold">{formatMoney(amount, { hideDecimals: true })}</p>
+      render: (amount, row) => (
+        <Tooltip
+          placement="topRight"
+          overlayClassName="prontoPagoTooltip"
+          title={
+            row.total_pronto_pago != null ? (
+              <>
+                <span>Pronto pago</span>
+                <span className="fontMonoSpace">
+                  {formatMoney(row.total_pronto_pago, { hideDecimals: true })}
+                </span>
+              </>
+            ) : null
+          }
+        >
+          <p className="cell fontMonoSpace bold">{formatMoney(amount, { hideDecimals: true })}</p>
+        </Tooltip>
       ),
       sorter: (a, b) => a.total - b.total,
       showSorterTooltip: false,
@@ -294,58 +312,60 @@ const OrdersViewTable = ({
       render: (_, row) => {
         const isBlockedByWallet = row.order_status_id == 5;
 
-        const items = (isBlockedByWallet
-          ? row.incident_id !== null
-            ? [
+        const items = (
+          isBlockedByWallet
+            ? row.incident_id !== null
+              ? [
+                  {
+                    key: "verNovedad",
+                    label: (
+                      <Button
+                        icon={<WarningCircle size={20} />}
+                        className="buttonNoBorder"
+                        onClick={() =>
+                          openModal("novelty", {
+                            noveltyId: row.incident_id as number,
+                            onResolved: setFetchMutate
+                          })
+                        }
+                      >
+                        Ver novedad
+                      </Button>
+                    )
+                  }
+                ]
+              : []
+            : [
                 {
-                  key: "verNovedad",
+                  key: "verBodega",
                   label: (
                     <Button
-                      icon={<WarningCircle size={20} />}
+                      icon={<WarningDiamond size={20} />}
                       className="buttonNoBorder"
-                      onClick={() =>
-                      openModal("novelty", {
-                        noveltyId: row.incident_id as number,
-                        onResolved: setFetchMutate
-                      })
-                    }
+                      onClick={() => {
+                        setSelectedOrder(row.id);
+                        setCurrentWarehouseId(row.warehouseid);
+                        setIsModalOpen(true);
+                      }}
                     >
-                      Ver novedad
+                      Ver bodega
+                    </Button>
+                  )
+                },
+                {
+                  key: "detalle",
+                  label: (
+                    <Button
+                      icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
+                      className="buttonNoBorder"
+                      onClick={() => handleSeeDetail(row)}
+                    >
+                      {row.is_draft ? "Continuar pedido" : "Detalle"}
                     </Button>
                   )
                 }
               ]
-            : []
-          : [
-              {
-                key: "verBodega",
-                label: (
-                  <Button
-                    icon={<WarningDiamond size={20} />}
-                    className="buttonNoBorder"
-                    onClick={() => {
-                      setSelectedOrder(row.id);
-                      setCurrentWarehouseId(row.warehouseid);
-                      setIsModalOpen(true);
-                    }}
-                  >
-                    Ver bodega
-                  </Button>
-                )
-              },
-              {
-                key: "detalle",
-                label: (
-                  <Button
-                    icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
-                    className="buttonNoBorder"
-                    onClick={() => handleSeeDetail(row)}
-                  >
-                    {row.is_draft ? "Continuar pedido" : "Detalle"}
-                  </Button>
-                )
-              }
-            ]) as NonNullable<MenuProps["items"]>;
+        ) as NonNullable<MenuProps["items"]>;
 
         if (row.order_status_id === REJECTED_STATUS_ID) {
           items.push({

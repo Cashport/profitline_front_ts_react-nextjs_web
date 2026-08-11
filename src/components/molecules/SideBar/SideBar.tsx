@@ -148,7 +148,7 @@ export const SideBar = () => {
           />
         </div>
       )}
-      <Flex vertical align="center">
+      <Flex vertical align="center" className="modulesGroup">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
           {LOGO ? (
             // eslint-disable-next-line @next/next/no-img-element

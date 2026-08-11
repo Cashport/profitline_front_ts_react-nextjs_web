@@ -21,6 +21,7 @@ import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
 import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { generateShortUuid } from "@/utils/utils";
+import { requiresPurchaseOrder } from "@/modules/commerce/utils/constants/checkout";
 
 import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
 import OrderShipmentConfirm from "./order-shipment-confirm/order-shipment-confirm";
@@ -425,6 +426,7 @@ export default function CheckoutPage() {
         }}
         initialPurchaseOrderNumber={purchaseOrderNumber}
         initialFile={purchaseOrderFile}
+        isNumberRequired={requiresPurchaseOrder(businessUnit)}
       />
 
       <ModalConfirmAction

@@ -1,0 +1,220 @@
+@import "@styles/variables.scss";
+
+.modalInvoiceClaims {
+    .ant-modal-content {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.875rem 1.25rem 0.5rem;
+
+        h4.ant-typography {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: $black;
+        }
+    }
+
+    &__invoiceId {
+        font-family: $font-mono-space;
+    }
+
+    &__closeBtn {
+        display: flex;
+        padding: 0.25rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: $darker-gray;
+        background-color: transparent;
+
+        &:hover {
+            color: $black;
+            background-color: $background;
+        }
+    }
+
+    &__toolbar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem 1.25rem 0.75rem;
+
+        label {
+            max-width: 20rem;
+        }
+    }
+
+    &__estadoFilter {
+        width: 12rem;
+    }
+
+    &__chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 4px;
+        background-color: $background;
+    }
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+        color: $darker-gray;
+
+        strong {
+            color: $black;
+        }
+    }
+
+    &__chipDot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+    }
+
+    &__table {
+        padding: 0 1.25rem;
+
+        .ant-table-thead > tr > th {
+            background-color: transparent !important;
+            border-bottom: 1px solid $dark-gray !important;
+            font-size: 0.75rem;
+            color: $darker-gray;
+
+            // AntD draws a vertical separator between headers with this pseudo element
+            &::before {
+                display: none !important;
+            }
+        }
+
+        .ant-table-tbody > tr > td {
+            padding-block: 0.5rem;
+            border-bottom: none !important;
+        }
+
+        .cell {
+            margin: 0;
+            font-size: 0.875rem;
+
+            &.-alignRight {
+                text-align: right;
+            }
+
+            &.-muted {
+                color: $darker-gray;
+            }
+        }
+
+        .editingRow > td {
+            background-color: rgba(203, 230, 30, 0.08);
+        }
+
+        .ant-table-footer {
+            padding: 0;
+            background-color: transparent;
+        }
+    }
+
+    &__idCell {
+        white-space: nowrap;
+
+        em {
+            margin-left: 0.375rem;
+            padding: 0 0.25rem;
+            font-size: 0.625rem;
+            font-style: normal;
+            border-radius: 4px;
+            color: $darker-gray;
+            background-color: $background;
+        }
+    }
+
+    &__cellControl {
+        // padding-inline: 0;
+
+        &.-alignRight input {
+            text-align: right;
+        }
+    }
+
+    &__rowActions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.25rem;
+    }
+
+    &__saveBtn.ant-btn {
+        height: 1.75rem;
+        padding-inline: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-color: $secondary;
+        background-color: rgba(203, 230, 30, 0.2);
+    }
+
+    &__dotsBtn.ant-btn {
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    &__addRow {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.625rem 0.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        color: $darker-gray;
+        background-color: transparent;
+
+        &:hover {
+            color: $black;
+            background-color: $background;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        background-color: $background-light;
+    }
+
+    &__totals {
+        margin-left: auto;
+        font-size: 0.875rem;
+
+        p {
+            margin: 0;
+            color: $darker-gray;
+        }
+
+        strong {
+            font-family: $font-mono-space;
+            color: $black;
+
+            &.-unbalanced {
+                color: $error;
+            }
+        }
+    }
+}

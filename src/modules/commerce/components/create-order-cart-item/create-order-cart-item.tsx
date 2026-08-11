@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import Image from "next/image";
 import { Button, Flex } from "antd";
 import { Minus, Plus, Trash } from "phosphor-react";
@@ -6,6 +6,7 @@ import { Minus, Plus, Trash } from "phosphor-react";
 import { formatNumber } from "@/utils/utils";
 
 import { useHandleProductsItems } from "../../hooks/create-order/handle-products-items.hook";
+import { getProductImageSrc, PRODUCT_IMAGE_FALLBACK } from "../../utils/get-product-image-src";
 import SimpleTag from "@/components/atoms/SimpleTag/SimpleTag";
 
 import { Discount, DiscountItem, ISelectedProduct } from "@/types/commerce/ICommerce";
@@ -26,6 +27,7 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
     handleChangeQuantity
   } = useHandleProductsItems(product, categoryName);
   const { config } = useAppStore((state) => ({ config: state.config }));
+  const [imgSrc, setImgSrc] = useState(() => getProductImageSrc(product.image));
 
   const calculateDiscount: (
     discount: DiscountItem[]
@@ -72,10 +74,11 @@ const CreateOrderItem: FC<CreateOrderItemProps> = ({ product, categoryName, prod
       <div className={styles.imageContainer}>
         <Image
           className={styles.imageContainer__img}
-          src={product.image || "/images/watermark.svg"}
-          alt="product image"
+          src={imgSrc}
+          alt={product.name}
           width={100}
           height={100}
+          onError={() => setImgSrc(PRODUCT_IMAGE_FALLBACK)}
         />
       </div>
 
