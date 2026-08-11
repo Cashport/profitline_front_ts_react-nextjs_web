@@ -14,6 +14,7 @@ import {
 import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 import { getAdresses as getAdressesAndNumber } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
+import { useMessageApi } from "@/context/MessageContext";
 import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
@@ -24,6 +25,7 @@ import {
   isValidEmail,
   isValidPhone,
   phoneErrorMessage,
+  requiresPurchaseOrder,
   sanitizeComment
 } from "@/modules/commerce/utils/constants/checkout";
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
@@ -94,6 +96,7 @@ export default function OrderShipmentConfirm({
   } = useContext(OrderViewContext);
   const { callingCodeOptions, isLoading: isLoadingOptions } = useContactModalOptions();
   const draftInfo = useAppStore((state) => state.draftInfo);
+  const { showMessage } = useMessageApi();
 
   // Sin descuentos el backend no devuelve `discounts`; los productos llegan en
   // `products` (mismo shape sin `discount`, que solo se lee de forma opcional).
@@ -145,6 +148,17 @@ export default function OrderShipmentConfirm({
   });
   const isNewAddressSingle = singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const didHydrateFromDraftRef = useRef(false);
+
+  // Se enciende en el primer intento de finalizar con datos faltantes y ya no se
+  // apaga: cada campo deja de estar en rojo por su cuenta al corregirse.
+  const [showErrors, setShowErrors] = useState(false);
+  const addressRef = useRef<HTMLDivElement>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+  const dispatchAddressRef = useRef<HTMLDivElement>(null);
+  const warehouseRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLDivElement>(null);
+  const phoneRef = useRef<HTMLDivElement>(null);
+  const purchaseOrderRef = useRef<HTMLDivElement>(null);
 
   const [modalEntrega, setModalEntrega] = useState<null | "new" | string>(null);
   const [modalDraft, setModalDraft] = useState<Omit<IShippingInfo, "id">>({
@@ -380,18 +394,63 @@ export default function OrderShipmentConfirm({
     bonusItems.some((i) => bonusAsignadas(i.product_sku) !== i.quantity) ||
     otherBonusItems.some((i) => otherBonusAsignadas(i.product_sku) !== i.quantity);
 
-  const isSingleFormValid =
-    singleForm.addressSelectValue !== "" &&
-    singleForm.warehouse_id != null &&
-    singleForm.city.trim() !== "" &&
-    singleForm.dispatch_address.trim() !== "" &&
-    isValidEmail(singleForm.email) &&
-    isValidPhone(singleForm.telefono, singleForm.indicativo);
+  const isPurchaseOrderRequired = requiresPurchaseOrder(businessUnit);
 
+  // La bodega solo tiene campo propio en direcciones nuevas; si falta en una
+  // dirección guardada el problema es la dirección, así que se ancla ahí.
+  const isWarehouseMissing = singleForm.warehouse_id == null;
+
+  const singleFieldErrors = {
+    address: singleForm.addressSelectValue === "" || (!isNewAddressSingle && isWarehouseMissing),
+    city: singleForm.city.trim() === "",
+    dispatch_address: singleForm.dispatch_address.trim() === "",
+    warehouse: isNewAddressSingle && isWarehouseMissing,
+    email: !isValidEmail(singleForm.email),
+    phone: !isValidPhone(singleForm.telefono, singleForm.indicativo),
+    purchaseOrder: isPurchaseOrderRequired && !purchaseOrderNumber?.trim()
+  };
+
+  const singleFieldRefs = [
+    { key: "address", ref: addressRef },
+    { key: "city", ref: cityRef },
+    { key: "dispatch_address", ref: dispatchAddressRef },
+    { key: "warehouse", ref: warehouseRef },
+    { key: "email", ref: emailRef },
+    { key: "phone", ref: phoneRef },
+    { key: "purchaseOrder", ref: purchaseOrderRef }
+  ] as const;
+
+  // Errores "en vivo": solo si el usuario escribió algo mal. Los campos vacíos se
+  // marcan aparte, recién al intentar finalizar (showErrors).
   const isSingleEmailInvalid = singleForm.email.trim() !== "" && !isValidEmail(singleForm.email);
 
   const isSinglePhoneInvalid =
     singleForm.telefono.trim() !== "" && !isValidPhone(singleForm.telefono, singleForm.indicativo);
+
+  const showFieldError = (key: (typeof singleFieldRefs)[number]["key"]) =>
+    showErrors && singleFieldErrors[key];
+
+  const fieldBorder = (hasError: boolean) =>
+    hasError ? "border-red-400 focus:border-red-500" : "border-[#DDDDDD] focus:border-[#141414]";
+
+  const handleConfirmClick = () => {
+    // La orden de compra aplica a toda la orden, así que se valida en ambos modos.
+    // Los demás campos solo existen en el modo de un solo envío; en multientrega
+    // el botón ya está bloqueado por hayDesbalance.
+    const fieldsToCheck = multiEntrega
+      ? singleFieldRefs.filter((f) => f.key === "purchaseOrder")
+      : singleFieldRefs;
+
+    const firstInvalid = fieldsToCheck.find((f) => singleFieldErrors[f.key]);
+    if (firstInvalid) {
+      setShowErrors(true);
+      firstInvalid.ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      showMessage("error", "Completa los datos faltantes para finalizar el pedido");
+      return;
+    }
+
+    onConfirm();
+  };
 
   // Sync order_split_details on context
   useEffect(() => {
@@ -532,14 +591,16 @@ export default function OrderShipmentConfirm({
           {/* SINGLE MODE */}
           {!multiEntrega && (
             <div className="px-5 py-5 flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
+              <div ref={addressRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Dirección de entrega</label>
                 <select
                   value={singleForm.addressSelectValue}
                   onChange={(e) =>
                     setSingleForm((f) => ({ ...f, addressSelectValue: e.target.value }))
                   }
-                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] appearance-none"
+                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] appearance-none ${fieldBorder(
+                    showFieldError("address")
+                  )}`}
                 >
                   <option value="" disabled>
                     Seleccione una dirección
@@ -550,9 +611,16 @@ export default function OrderShipmentConfirm({
                     </option>
                   ))}
                 </select>
+                {showFieldError("address") && (
+                  <p className="text-[10px] text-red-500">
+                    {singleForm.addressSelectValue === ""
+                      ? "Selecciona una dirección de entrega"
+                      : "La dirección seleccionada no tiene bodega asociada"}
+                  </p>
+                )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div ref={cityRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Ciudad</label>
                 <input
                   type="text"
@@ -560,11 +628,16 @@ export default function OrderShipmentConfirm({
                   value={singleForm.city}
                   disabled={!isNewAddressSingle}
                   onChange={(e) => setSingleForm((f) => ({ ...f, city: e.target.value }))}
-                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed ${fieldBorder(
+                    showFieldError("city")
+                  )}`}
                 />
+                {showFieldError("city") && (
+                  <p className="text-[10px] text-red-500">Ingresa la ciudad</p>
+                )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div ref={dispatchAddressRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">
                   Dirección de despacho
                 </label>
@@ -577,44 +650,56 @@ export default function OrderShipmentConfirm({
                   onChange={(e) =>
                     setSingleForm((f) => ({ ...f, dispatch_address: e.target.value }))
                   }
-                  className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed"
+                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] read-only:opacity-60 read-only:cursor-not-allowed ${fieldBorder(
+                    showFieldError("dispatch_address")
+                  )}`}
                 />
-                {isNewAddressSingle && (
-                  <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+                {showFieldError("dispatch_address") ? (
+                  <p className="text-[10px] text-red-500">Ingresa la dirección de despacho</p>
+                ) : (
+                  isNewAddressSingle && (
+                    <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
+                  )
                 )}
               </div>
 
               {isNewAddressSingle && (
-                <div className="flex flex-col gap-1.5">
+                <div ref={warehouseRef} className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
                   <WarehouseSelect
                     value={singleForm.warehouse_id}
                     onChange={(warehouseId) =>
                       setSingleForm((f) => ({ ...f, warehouse_id: warehouseId }))
                     }
+                    status={showFieldError("warehouse") ? "error" : undefined}
                   />
+                  {showFieldError("warehouse") && (
+                    <p className="text-[10px] text-red-500">Selecciona una bodega de despacho</p>
+                  )}
                 </div>
               )}
 
-              <div className="flex flex-col gap-1.5">
+              <div ref={emailRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Correo electrónico</label>
                 <input
                   type="email"
                   placeholder="correo@ejemplo.com"
                   value={singleForm.email}
                   onChange={(e) => setSingleForm((f) => ({ ...f, email: e.target.value }))}
-                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
-                    isSingleEmailInvalid
-                      ? "border-red-400 focus:border-red-500"
-                      : "border-[#DDDDDD] focus:border-[#141414]"
-                  }`}
+                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${fieldBorder(
+                    isSingleEmailInvalid || showFieldError("email")
+                  )}`}
                 />
-                {isSingleEmailInvalid && (
-                  <p className="text-[10px] text-red-500">Correo electrónico no válido</p>
+                {(isSingleEmailInvalid || showFieldError("email")) && (
+                  <p className="text-[10px] text-red-500">
+                    {singleForm.email.trim() === ""
+                      ? "Ingresa un correo electrónico"
+                      : "Correo electrónico no válido"}
+                  </p>
                 )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div ref={phoneRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Teléfono de contacto</label>
                 <div className="flex gap-2">
                   <select
@@ -640,16 +725,16 @@ export default function OrderShipmentConfirm({
                     onChange={(e) =>
                       setSingleForm((f) => ({ ...f, telefono: e.target.value.replace(/\D/g, "") }))
                     }
-                    className={`flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${
-                      isSinglePhoneInvalid
-                        ? "border-red-400 focus:border-red-500"
-                        : "border-[#DDDDDD] focus:border-[#141414]"
-                    }`}
+                    className={`flex-1 px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] ${fieldBorder(
+                      isSinglePhoneInvalid || showFieldError("phone")
+                    )}`}
                   />
                 </div>
-                {isSinglePhoneInvalid && (
+                {(isSinglePhoneInvalid || showFieldError("phone")) && (
                   <p className="text-[10px] text-red-500">
-                    {phoneErrorMessage(singleForm.indicativo)}
+                    {singleForm.telefono.trim() === ""
+                      ? "Ingresa un teléfono de contacto"
+                      : phoneErrorMessage(singleForm.indicativo)}
                   </p>
                 )}
               </div>
@@ -663,7 +748,7 @@ export default function OrderShipmentConfirm({
                   onChange={(e) =>
                     setSingleForm((f) => ({ ...f, observaciones: sanitizeComment(e.target.value) }))
                   }
-                  rows={3}
+                  rows={1}
                   className="w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] resize-none"
                 />
                 <p className="text-[10px] text-[#999999]">Máximo 35 caracteres</p>
@@ -796,8 +881,8 @@ export default function OrderShipmentConfirm({
             </div>
           )}
 
-          {/* Orden de compra (opcional, aplica a toda la orden) */}
-          <div className="px-5 pb-5">
+          {/* Orden de compra (aplica a toda la orden; obligatoria en ciertos canales) */}
+          <div ref={purchaseOrderRef} className="px-5 pb-5">
             {hasPurchaseOrder ? (
               <div className="flex items-center gap-2 px-3 py-2.5 border border-[#DDDDDD] rounded-xl">
                 <FileText size={12} className="text-[#141414] flex-shrink-0" />
@@ -822,11 +907,21 @@ export default function OrderShipmentConfirm({
               <button
                 onClick={onOpenPurchaseOrder}
                 disabled={loadingFinish || loadingDraft}
-                className="flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed border-[#DDDDDD] rounded-xl text-xs text-[#999999] hover:border-[#141414] hover:text-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`flex items-center justify-center gap-1.5 w-full py-2.5 border border-dashed rounded-xl text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  showFieldError("purchaseOrder")
+                    ? "border-red-400 text-red-500"
+                    : "border-[#DDDDDD] text-[#999999] hover:border-[#141414] hover:text-[#141414]"
+                }`}
               >
                 <Paperclip size={12} />
                 Adjuntar orden de compra
+                {isPurchaseOrderRequired && <span className="text-red-500">*</span>}
               </button>
+            )}
+            {showFieldError("purchaseOrder") && (
+              <p className="mt-1 text-[10px] text-red-500">
+                Obligatorio para el canal {businessUnit}
+              </p>
             )}
           </div>
 
@@ -903,10 +998,8 @@ export default function OrderShipmentConfirm({
               {loadingDraft ? "Guardando…" : "Guardar borrador"}
             </button>
             <button
-              onClick={onConfirm}
-              disabled={
-                loadingFinish || loadingDraft || (multiEntrega ? hayDesbalance : !isSingleFormValid)
-              }
+              onClick={handleConfirmClick}
+              disabled={loadingFinish || loadingDraft || (multiEntrega && hayDesbalance)}
               className="flex-1 py-3 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingFinish ? "Procesando…" : "Finalizar pedido"}

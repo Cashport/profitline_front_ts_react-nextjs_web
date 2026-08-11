@@ -18,6 +18,7 @@ interface ModalPurchaseOrderInfoProps {
   onOk: (purchaseOrderNumber: string, file?: File) => void;
   initialPurchaseOrderNumber?: string;
   initialFile?: File;
+  isNumberRequired?: boolean;
 }
 
 export default function ModalPurchaseOrderInfo({
@@ -25,11 +26,13 @@ export default function ModalPurchaseOrderInfo({
   onCancel,
   onOk,
   initialPurchaseOrderNumber,
-  initialFile
+  initialFile,
+  isNumberRequired
 }: ModalPurchaseOrderInfoProps) {
   const { showMessage } = useMessageApi();
   const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
   const [poFile, setPoFile] = useState<File | undefined>();
+  const [numberError, setNumberError] = useState(false);
 
   // Al abrir, parte de lo ya guardado en el checkout: así cancelar
   // descarta los cambios y volver a abrir muestra lo adjuntado.
@@ -37,6 +40,7 @@ export default function ModalPurchaseOrderInfo({
     if (!isOpen) return;
     setPurchaseOrderNumber(initialPurchaseOrderNumber ?? "");
     setPoFile(initialFile);
+    setNumberError(false);
   }, [isOpen]);
 
   const handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
@@ -59,8 +63,17 @@ export default function ModalPurchaseOrderInfo({
     setPoFile(undefined);
   };
 
-  // Ambos campos son opcionales: guardar en blanco limpia la orden de compra.
-  const handleOk = () => onOk(purchaseOrderNumber.trim(), poFile);
+  // El PDF siempre es opcional. El # solo es obligatorio en los canales que lo
+  // exigen (ver `requiresPurchaseOrder`); en el resto, guardar en blanco limpia
+  // la orden de compra.
+  const handleOk = () => {
+    const cleaned = purchaseOrderNumber.trim();
+    if (isNumberRequired && !cleaned) {
+      setNumberError(true);
+      return;
+    }
+    onOk(cleaned, poFile);
+  };
 
   return (
     <Modal
@@ -80,14 +93,26 @@ export default function ModalPurchaseOrderInfo({
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Text className="font-medium text-[#141414]"># de orden de compra</Text>
+          <Text className="font-medium text-[#141414]">
+            # de orden de compra
+            {isNumberRequired && <span className="text-red-500"> *</span>}
+          </Text>
           <Input
             value={purchaseOrderNumber}
-            onChange={(e) => setPurchaseOrderNumber(e.target.value)}
+            onChange={(e) => {
+              setPurchaseOrderNumber(e.target.value);
+              setNumberError(false);
+            }}
             placeholder="Ingresa el # de orden de compra"
             maxLength={50}
             className="h-10"
+            status={numberError ? "error" : undefined}
           />
+          {numberError && (
+            <Text type="danger" className="text-xs">
+              Ingresa el # de orden de compra
+            </Text>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">

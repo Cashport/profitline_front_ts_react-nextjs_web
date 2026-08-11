@@ -15,6 +15,7 @@ interface IWarehouseSelectProps {
   disabled?: boolean;
   size?: "small" | "middle" | "large";
   className?: string;
+  status?: "error" | "warning";
 }
 
 // Reusable dispatch-warehouse select. Fetches the city/warehouse catalog once on
@@ -26,7 +27,8 @@ export default function WarehouseSelect({
   onChange,
   disabled = false,
   size = "middle",
-  className
+  className,
+  status
 }: IWarehouseSelectProps) {
   const [cityWarehouses, setCityWarehouses] = useState<ICityWarehouse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +76,7 @@ export default function WarehouseSelect({
       loading={isLoading}
       options={options}
       size={size}
+      status={status}
       className={`warehouseSelect ${className ?? ""}`}
       popupClassName="warehouseSelectPopup"
       style={{ width: "100%" }}

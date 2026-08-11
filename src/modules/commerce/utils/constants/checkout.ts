@@ -30,6 +30,12 @@ export const INSTITUCIONAL_DEFAULT_COMMENT = "USO INSTITUCIONAL";
 export const getDefaultCommentForBusinessUnit = (businessUnit?: string): string =>
   businessUnit?.trim().toLowerCase() === "institucional" ? INSTITUCIONAL_DEFAULT_COMMENT : "";
 
+// Canales (bu_name) que exigen # de orden de compra para poder finalizar el pedido.
+const CHANNELS_REQUIRING_PURCHASE_ORDER = ["institucional", "trade"];
+
+export const requiresPurchaseOrder = (businessUnit?: string): boolean =>
+  CHANNELS_REQUIRING_PURCHASE_ORDER.includes(businessUnit?.trim().toLowerCase() ?? "");
+
 export const phoneErrorMessage = (indicativo: string) =>
   indicativo === "+57"
     ? "Teléfono debe tener 10 dígitos"
