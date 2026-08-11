@@ -22,7 +22,7 @@ export interface IProduct {
   id: number;
   SKU: string;
   description: string;
-  image: string;
+  image: string | null;
   id_line: number;
   id_category: number;
   taxes: number;
@@ -53,7 +53,7 @@ export interface ISelectedProduct {
   discount: number | undefined;
   discount_percentage: number | undefined;
   quantity: number;
-  image: string;
+  image: string | null;
   category_id: number;
   category_name: string;
   SKU: string;
@@ -140,7 +140,7 @@ export interface DiscountItem {
   price: number;
   price_taxes: number;
   taxes: number;
-  image: string;
+  image: string | null;
   category_id: number;
   line_id: number;
   product_id: number;

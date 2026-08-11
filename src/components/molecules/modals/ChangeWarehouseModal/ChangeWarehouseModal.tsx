@@ -88,7 +88,6 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       render: (warehouse, record) => (
         <Flex gap={12}>
           <Radio
-            disabled={record.availability === false}
             checked={warehouseSelected === record.id}
             onChange={() => setWarehouseSelected(record.id)}
           />
