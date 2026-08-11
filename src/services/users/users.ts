@@ -26,7 +26,7 @@ export const inviteUser = async (
   zones: any,
   ID: any
 ): Promise<any> => {
-  const modelData = {
+  const modelData: Record<string, any> = {
     email: data.info.email,
     user_name: data.info.name,
     channel: selectedBusinessRules.channels,
@@ -37,9 +37,11 @@ export const inviteUser = async (
     phone: data.info.phone,
     position: data.info.cargo,
     project_id: ID,
-    rol_id: data.info.rol?.value,
-    groups_id: selectedGroups
+    rol_id: data.info.rol?.value
   };
+  if (selectedGroups.length > 0) {
+    modelData.groups_id = selectedGroups;
+  }
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";
   try {
     const response = await API.post(`/user/invitation/${endpointRole}/email`, modelData);
