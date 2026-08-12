@@ -6,6 +6,16 @@ import {
 
 export const PAGE_SIZE = 25;
 
+// /integration/profit360/approvals requires page/limit but answers with a plain
+// array, so we pull one max-size page (the endpoint caps limit at 200) and let
+// the table paginate it client-side at PAGE_SIZE.
+export const APPROVALS_FETCH_LIMIT = 200;
+
+// Profit360 idEstado for "Pendiente aprobación". The approvals endpoint has no
+// estado query param, so the Aprobaciones tab narrows the returned array to this
+// estado client-side — the tab only ever shows approvals awaiting a decision.
+export const ESTADO_PENDIENTE_APROBACION_ID = "607455C8-5788-41F3-A323-BFFE2BDF025A";
+
 // Colored pill styling per estado (bg + text), ported from the reference.
 export const estadoConfig: Record<EstadoDevolucion, { bg: string; text: string }> = {
   "Visita programada": { bg: "#EFF6FF", text: "#1D4ED8" },

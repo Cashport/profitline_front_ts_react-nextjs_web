@@ -4,9 +4,7 @@ import { useMemo, useState } from "react";
 import type { Key } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
-import { Button, DatePicker, Table } from "antd";
-import type { Dayjs } from "dayjs";
-import { Filter, ChevronRight } from "lucide-react";
+import { Table } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
@@ -18,6 +16,8 @@ import {
 } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
+import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
+import { IDevolucionesFilter } from "../../types";
 import { returnsColumns } from "./columns";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
@@ -72,7 +72,7 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     ? dayjs(visit.scheduledDate).format("YYYY-MM-DD") +
       (visit.scheduledTime ? ` ${visit.scheduledTime}` : "")
     : "";
-  const resumen = visit.devoluciones?.reduce(
+  const resumen = (visit.devoluciones ?? []).reduce(
     (acc, dev) => {
       const { canal, lineaNegocio, unidades, monto } = acc;
 
@@ -115,16 +115,37 @@ export function DevolucionesTab() {
   // Default filter = today (fromDate = toDate = YYYY-MM-DD), matching the
   // endpoint contract and the user's spec for this tab.
   const today = dayjs().format("YYYY-MM-DD");
-  const [fromDate, setFromDate] = useState<string>(today);
-  const [toDate, setToDate] = useState<string>(today);
+  const [filter, setFilter] = useState<IDevolucionesFilter>({
+    clientId: null,
+    fromDate: today,
+    toDate: today
+  });
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
-  const swrKey = ["reverse-logistics/profit360-visits", page, fromDate, toDate] as const;
+  // Any filter change invalidates the current page — the backend re-paginates
+  // from scratch with the new query params.
+  const handleFilterChange = (next: IDevolucionesFilter) => {
+    setFilter(next);
+    setPage(1);
+  };
+
+  const swrKey = [
+    "reverse-logistics/profit360-visits",
+    page,
+    filter.fromDate,
+    filter.toDate,
+    filter.clientId
+  ] as const;
   const { data, isLoading } = useSWR(swrKey, () =>
-    getProfit360Visits({ page, fromDate, toDate, limit: PAGE_SIZE })
+    getProfit360Visits({
+      page,
+      limit: PAGE_SIZE,
+      fromDate: filter.fromDate,
+      toDate: filter.toDate,
+      clientId: filter.clientId
+    })
   );
 
   const visits = data?.data ?? [];
@@ -149,20 +170,19 @@ export function DevolucionesTab() {
     [visits]
   );
 
-  // Client-side search across the current page only — date range + pagination
-  // is backend-driven.
+  // Client-side search across the current page only — cliente, date range and
+  // pagination are backend-driven.
   const filtered = useMemo(
     () =>
-      searchTerm
-        ? allRows.filter((row) => {
-            const q = searchTerm.toLowerCase();
-            return (
-              row.idBoleto.toLowerCase().includes(q) ||
-              row.cliente.toLowerCase().includes(q) ||
-              (row.causal ?? "").toLowerCase().includes(q)
-            );
-          })
-        : allRows,
+      allRows.filter((row) => {
+        if (!searchTerm) return true;
+        const q = searchTerm.toLowerCase();
+        return (
+          row.idBoleto.toLowerCase().includes(q) ||
+          row.cliente.toLowerCase().includes(q) ||
+          (row.causal ?? "").toLowerCase().includes(q)
+        );
+      }),
     [allRows, searchTerm]
   );
 
@@ -174,61 +194,12 @@ export function DevolucionesTab() {
 
         <GenerateActionButton onClick={() => {}} />
 
-        <Button
-          icon={<Filter className="h-3.5 w-3.5" />}
-          onClick={() => setShowFilters((v) => !v)}
-          className="flex items-center gap-1.5"
-        >
-          Filtros
-          <ChevronRight
-            className={`h-3.5 w-3.5 transition-transform ${showFilters ? "rotate-90" : ""}`}
-          />
-        </Button>
+        <FilterDevolucionesTab value={filter} onChange={handleFilterChange} />
       </div>
-
-      {/* Expanded filter panel — fecha range bound to fromDate/toDate */}
-      {showFilters && (
-        <div className="px-4 py-3 border-b border-cashport-gray-light bg-gray-50/60">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Fecha inicial</label>
-              <DatePicker
-                format="YYYY-MM-DD"
-                value={fromDate ? (dayjs(fromDate) as Dayjs) : null}
-                onChange={(_d, dateString) => {
-                  setFromDate(Array.isArray(dateString) ? "" : dateString);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Fecha final</label>
-              <DatePicker
-                format="YYYY-MM-DD"
-                value={toDate ? (dayjs(toDate) as Dayjs) : null}
-                onChange={(_d, dateString) => {
-                  setToDate(Array.isArray(dateString) ? "" : dateString);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <Button
-              size="small"
-              onClick={() => {
-                setFromDate(today);
-                setToDate(today);
-                setPage(1);
-              }}
-            >
-              Hoy
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* KPI stats bar — fed the flattened rows so the existing per-estado
           averages keep working. */}
-      <DevolucionesStatsBar returns={allRows} />
+      <DevolucionesStatsBar returns={allRows} loading={isLoading} />
 
       {/* Table — backend pagination */}
       <div className="w-full overflow-x-auto px-4">

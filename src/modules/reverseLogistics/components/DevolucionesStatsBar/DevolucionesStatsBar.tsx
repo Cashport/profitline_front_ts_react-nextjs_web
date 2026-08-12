@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Clock, TrendingUp, Package, FileText, CalendarDays } from "lucide-react";
+import { Col, Row } from "antd";
+import { Clock, TrendUp, Package, FileText, CalendarBlank } from "phosphor-react";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
+import { DevolucionesStatCard } from "../DevolucionesStatCard/DevolucionesStatCard";
 
 /**
  * Maps estados to the 4 processing-stage groups. Días are mocked as average
@@ -28,7 +30,7 @@ const MOCK_DAYS_PER_STATUS: Record<string, number> = {
   "Contabilización de NC": 4.1
 };
 
-const CARD_ICONS = [Clock, TrendingUp, Package, FileText, CalendarDays];
+const CARD_ICONS = [Clock, TrendUp, Package, FileText, CalendarBlank];
 
 interface StatCard {
   label: string;
@@ -37,9 +39,10 @@ interface StatCard {
 
 interface DevolucionesStatsBarProps {
   returns: ReturnRow[];
+  loading?: boolean;
 }
 
-export function DevolucionesStatsBar({ returns }: DevolucionesStatsBarProps) {
+export function DevolucionesStatsBar({ returns, loading }: DevolucionesStatsBarProps) {
   const stats = useMemo((): StatCard[] => {
     const avgForGroup = (statuses: readonly string[]): number => {
       const relevant = returns.filter((d) => (statuses as string[]).includes(d.estado));
@@ -67,30 +70,23 @@ export function DevolucionesStatsBar({ returns }: DevolucionesStatsBarProps) {
   }, [returns]);
 
   return (
-    <div className="flex bg-white overflow-hidden border-b border-gray-200">
-      {stats.map((stat, idx) => {
-        const Icon = CARD_ICONS[idx];
-        return (
-          <div
-            key={stat.label}
-            className={`flex-1 flex flex-col gap-2 px-5 py-4 ${
-              idx < stats.length - 1 ? "border-r border-gray-100" : ""
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
-                {stat.label}
-              </span>
-              <span className="flex items-center justify-center w-6 h-6 rounded-md bg-cashport-green">
-                <Icon className="w-3.5 h-3.5 text-gray-800" strokeWidth={2.5} />
-              </span>
-            </div>
-            <span className="text-2xl font-bold tabular-nums text-gray-900 leading-none">
-              {stat.value}
-            </span>
-          </div>
-        );
-      })}
+    <div className="px-4 py-3">
+      <Row gutter={8}>
+        {stats.map((stat, idx) => {
+          const Icon = CARD_ICONS[idx];
+          return (
+            <Col flex="1" key={stat.label}>
+              <DevolucionesStatCard
+                title={stat.label}
+                value={stat.value}
+                suffix="días"
+                loading={loading}
+                icon={<Icon size={14} weight="bold" />}
+              />
+            </Col>
+          );
+        })}
+      </Row>
     </div>
   );
 }
