@@ -70,7 +70,7 @@ export function DevolucionesStatsBar({ returns, loading }: DevolucionesStatsBarP
   }, [returns]);
 
   return (
-    <div className="px-4 py-3">
+    <div className="py-3">
       <Row gutter={8}>
         {stats.map((stat, idx) => {
           const Icon = CARD_ICONS[idx];

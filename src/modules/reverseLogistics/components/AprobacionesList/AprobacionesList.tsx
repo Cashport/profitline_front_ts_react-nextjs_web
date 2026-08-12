@@ -10,11 +10,7 @@ import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Approvals } from "@/services/reverseLogistics/reverseLogistics";
-import {
-  APPROVALS_FETCH_LIMIT,
-  ESTADO_PENDIENTE_APROBACION_ID,
-  PAGE_SIZE
-} from "../../constants";
+import { APPROVALS_FETCH_LIMIT, ESTADO_PENDIENTE_APROBACION_ID, PAGE_SIZE } from "../../constants";
 import { IAprobacionesFilter } from "../../types";
 import { FilterAprobacionesTab } from "../FilterAprobacionesTab/FilterAprobacionesTab";
 import { getApprovalsColumns, IApprovalRow } from "./columns";
@@ -95,12 +91,7 @@ export function AprobacionesList() {
   });
 
   const { data, isLoading } = useSWR(
-    [
-      "reverse-logistics/profit360-approvals",
-      filter.fromDate,
-      filter.toDate,
-      filter.clientId
-    ],
+    ["reverse-logistics/profit360-approvals", filter.fromDate, filter.toDate, filter.clientId],
     () =>
       getProfit360Approvals({
         page: 1,
@@ -169,7 +160,7 @@ export function AprobacionesList() {
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-cashport-gray-light">
+      <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput
           placeholder="Buscar"
           onChange={(e) => {
@@ -188,7 +179,7 @@ export function AprobacionesList() {
       </div>
 
       {/* Table */}
-      <div className="w-full overflow-x-auto px-4">
+      <div className="w-full overflow-x-auto">
         <Table<IApprovalRow>
           rowKey="id"
           columns={columns}
@@ -204,7 +195,8 @@ export function AprobacionesList() {
             showSizeChanger: false,
             position: ["none", "bottomRight"],
             onChange: setCurrentPage,
-            showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
+            showTotal: (total, range) =>
+              `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
           }}
           scroll={{ x: 1000 }}
         />

@@ -121,7 +121,8 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
   // doesn't match any picklist entry we fall back to the literal name — the
   // backend can usually handle both shapes.
   const defaultCausalCodigo = useMemo(
-    () => causales.find((c) => c.codigo === resumen?.documentos[0]?.idCausalDocumento)?.codigo ?? "",
+    () =>
+      causales.find((c) => c.codigo === resumen?.documentos[0]?.idCausalDocumento)?.codigo ?? "",
     [causales, resumen]
   );
 
@@ -294,7 +295,7 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
       </div>
 
       {/* Observations banner — keeps the legacy purple styling */}
-      <div className="flex items-start justify-between gap-4 rounded-lg bg-[#e8e8f8] border border-[#c7c7ef] px-4 py-3">
+      <div className="flex items-start justify-between gap-4 rounded-lg bg-[#e8e8f8] border border-[#c7c7ef]">
         <div>
           <p className="text-sm font-semibold text-[#3a3a8c] mb-0.5">Observaciones:</p>
           <p className="text-sm text-[#5a5aaa]">

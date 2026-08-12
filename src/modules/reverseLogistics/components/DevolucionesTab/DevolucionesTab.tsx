@@ -27,10 +27,7 @@ const PAGE_SIZE = 10;
 
 // Flatten a visit's devoluciones into leaf ReturnRows. Each devolucion from the
 // new endpoint maps 1:1 to the legacy ReturnRow shape the columns consume.
-const mapDevolucionToRow = (
-  visit: IProfit360Visit,
-  dev: IProfit360VisitDevolucion
-): ReturnRow => {
+const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevolucion): ReturnRow => {
   // Parse the ISO timestamp into the "YYYY-MM-DD HH:mm" shape the legacy
   // `parseFechaReturn` helper expects.
   const fechaIso = dev.FechaInicioDevolucion ?? dev.FechaRegistro;
@@ -189,7 +186,7 @@ export function DevolucionesTab() {
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-cashport-gray-light">
+      <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput placeholder="Buscar" onChange={(e) => setSearchTerm(e.target.value)} />
 
         <GenerateActionButton onClick={() => {}} />
@@ -202,7 +199,7 @@ export function DevolucionesTab() {
       <DevolucionesStatsBar returns={allRows} loading={isLoading} />
 
       {/* Table — backend pagination */}
-      <div className="w-full overflow-x-auto px-4">
+      <div className="w-full overflow-x-auto">
         <Table<ReturnRow>
           rowKey="key"
           columns={returnsColumns}
