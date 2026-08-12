@@ -9,12 +9,13 @@ export interface IDevolucionesFilter {
   toDate: string | null;
 }
 
-// Aprobaciones tab filter. `clientId` / `fromDate` / `toDate` are query params of
-// GET /integration/profit360/approvals (same set as /visits); `tipos` and
-// `ciudades` have no backend equivalent and are applied client-side over the
-// list the endpoint returns.
+// Aprobaciones tab filter. `clientId` / `status` / `fromDate` / `toDate` are query
+// params of GET /integration/profit360/approvals; `tipos` and `ciudades` have no
+// backend equivalent and are applied client-side over the list the endpoint returns.
 export interface IAprobacionesFilter {
   clientId: string | null;
+  // Profit360 estado `codigo` (GUID) — sent as ?status=, single-valued.
+  status: string | null;
   fromDate: string | null;
   toDate: string | null;
   tipos: TipoAprobacion[];

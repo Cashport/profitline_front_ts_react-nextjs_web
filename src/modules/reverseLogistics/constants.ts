@@ -11,10 +11,14 @@ export const PAGE_SIZE = 25;
 // the table paginate it client-side at PAGE_SIZE.
 export const APPROVALS_FETCH_LIMIT = 200;
 
-// Profit360 idEstado for "Pendiente aprobación". The approvals endpoint has no
-// estado query param, so the Aprobaciones tab narrows the returned array to this
-// estado client-side — the tab only ever shows approvals awaiting a decision.
+// Profit360 idEstado for "Pendiente aprobación" — the estado the Aprobaciones tab
+// defaults to, sent to the endpoint as `?status=`. It's a plain default, not a
+// hard rule: the user can drop it or swap it from the filter modal.
 export const ESTADO_PENDIENTE_APROBACION_ID = "607455C8-5788-41F3-A323-BFFE2BDF025A";
+
+// Label for the estado above, used as the filter-tag fallback while the picklist
+// is still loading so the tag never renders a bare GUID.
+export const ESTADO_PENDIENTE_APROBACION_NOMBRE = "Pendiente aprobación";
 
 // Colored pill styling per estado (bg + text), ported from the reference.
 export const estadoConfig: Record<EstadoDevolucion, { bg: string; text: string }> = {

@@ -15,13 +15,15 @@ export interface GetProfit360ApprovalsParams {
   fromDate?: string | null;
   toDate?: string | null;
   clientId?: string | null;
+  // Profit360 estado `codigo` (GUID). Single-valued — the endpoint takes one.
+  status?: string | null;
 }
 
-// GET /integration/profit360/approvals?page=&limit=&fromDate=&toDate=&clientId=
-// — same query-param set as /visits, but the response is a plain array rather
-// than a paginated envelope. `page`/`limit` are sent only because the endpoint
-// requires them; the Aprobaciones table paginates the returned array
-// client-side, so don't mistake these for backend pagination.
+// GET /integration/profit360/approvals?page=&limit=&fromDate=&toDate=&clientId=&status=
+// — the response is a plain array rather than a paginated envelope. `page`/`limit`
+// are sent only because the endpoint requires them; the Aprobaciones table
+// paginates the returned array client-side, so don't mistake these for backend
+// pagination.
 export const getProfit360Approvals = async (
   params: GetProfit360ApprovalsParams
 ): Promise<GenericResponse<IProfit360Approval[]>> => {
@@ -33,6 +35,7 @@ export const getProfit360Approvals = async (
     if (params.fromDate) qs.append("fromDate", params.fromDate);
     if (params.toDate) qs.append("toDate", params.toDate);
     if (params.clientId) qs.append("clientId", params.clientId);
+    if (params.status) qs.append("status", params.status);
     const response: GenericResponse<IProfit360Approval[]> = await API.get(
       `/integration/profit360/approvals?${qs.toString()}`
     );
@@ -70,8 +73,8 @@ export interface GetProfit360VisitsParams {
 // GET /integration/profit360/visits?page=&limit=&fromDate=&toDate=&clientId=
 // — paginated visits list from Profit360. Each visit carries its own
 // returns/devoluciones. `page`/`limit` are required by the endpoint; the rest
-// are only sent when the user has actually picked a value. Estado is NOT a
-// query param — it's filtered client-side over the returned page.
+// are only sent when the user has actually picked a value. The endpoint also
+// accepts `status`, but the Devoluciones tab offers no estado filter yet.
 export const getProfit360Visits = async (
   params: GetProfit360VisitsParams
 ): Promise<IProfit360VisitsResponse>=> {

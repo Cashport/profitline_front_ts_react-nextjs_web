@@ -68,11 +68,14 @@ const mapProfit360ToApprovalRow = (raw: {
 export function AprobacionesList() {
   const router = useRouter();
 
-  // Default filter = today, same as the Devoluciones tab. clientId/fromDate/toDate
-  // reach the backend; tipos/ciudades are applied client-side.
+  // Default filter = today + pendientes de aprobación, the view the tab is meant to
+  // open on. clientId/status/fromDate/toDate reach the backend; tipos/ciudades are
+  // applied client-side. The estado default is seeded from the constant rather than
+  // from the picklist so the SWR key is stable on the first render.
   const today = dayjs().format("YYYY-MM-DD");
   const [filter, setFilter] = useState<IAprobacionesFilter>({
     clientId: null,
+    status: ESTADO_PENDIENTE_APROBACION_ID,
     fromDate: today,
     toDate: today,
     tipos: [],
@@ -80,26 +83,27 @@ export function AprobacionesList() {
   });
 
   const { data, isLoading } = useSWR(
-    ["reverse-logistics/profit360-approvals", filter.fromDate, filter.toDate, filter.clientId],
+    [
+      "reverse-logistics/profit360-approvals",
+      filter.fromDate,
+      filter.toDate,
+      filter.clientId,
+      filter.status
+    ],
     () =>
       getProfit360Approvals({
         page: 1,
         limit: APPROVALS_FETCH_LIMIT,
         fromDate: filter.fromDate,
         toDate: filter.toDate,
-        clientId: filter.clientId
+        clientId: filter.clientId,
+        status: filter.status
       }),
     { revalidateOnFocus: false }
   );
 
-  // Only approvals still awaiting a decision belong in this tab. Matching on the
-  // GUID rather than the `estado` label because the label is free text; casing of
-  // the GUID isn't guaranteed by Profit360.
   const approvals = useMemo<IApprovalRow[]>(
-    () =>
-      (data?.data ?? [])
-        .filter((a) => a.idEstado?.toUpperCase() === ESTADO_PENDIENTE_APROBACION_ID)
-        .map(mapProfit360ToApprovalRow),
+    () => (data?.data ?? []).map(mapProfit360ToApprovalRow),
     [data]
   );
 

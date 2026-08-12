@@ -10,7 +10,11 @@ import type {
   FilterSelection
 } from "@/components/ui/filter-modal";
 import { TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
-import { TIPO_APROBACION_OPTIONS } from "../../constants";
+import {
+  ESTADO_PENDIENTE_APROBACION_ID,
+  ESTADO_PENDIENTE_APROBACION_NOMBRE,
+  TIPO_APROBACION_OPTIONS
+} from "../../constants";
 import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
 import { IAprobacionesFilter } from "../../types";
 import { FilterDateTab, DateDraft } from "../FilterDateTab/FilterDateTab";
@@ -33,7 +37,7 @@ export function FilterAprobacionesTab({
   onChange,
   ciudadOptions
 }: FilterAprobacionesTabProps) {
-  const { clientes, isLoading } = useProfit360Filters();
+  const { clientes, estados, isLoading } = useProfit360Filters();
 
   // FilterModal's internal draft only holds option categories, so the date
   // range is drafted here and committed on apply.
@@ -52,6 +56,22 @@ export function FilterAprobacionesTab({
     name: t.label
   }));
 
+  const estadoOptions: FilterOptionItem[] = estados.map((e) => ({ id: e.codigo, name: e.nombre }));
+
+  // Resolve the committed estado back to its picklist entry. Matching is
+  // case-insensitive because Profit360 doesn't guarantee GUID casing — an exact
+  // match would leave the option unhighlighted in the list. Until the picklist
+  // resolves, the seeded default falls back to its known label so the tag never
+  // renders a bare GUID.
+  const estadoItem = (id: string): FilterOptionItem =>
+    estadoOptions.find((o) => o.id.toUpperCase() === id.toUpperCase()) ?? {
+      id,
+      name:
+        id.toUpperCase() === ESTADO_PENDIENTE_APROBACION_ID
+          ? ESTADO_PENDIENTE_APROBACION_NOMBRE
+          : id
+    };
+
   const selection: FilterSelection = {
     cliente: value.clientId
       ? [
@@ -61,6 +81,7 @@ export function FilterAprobacionesTab({
           }
         ]
       : [],
+    estado: value.status ? [estadoItem(value.status)] : [],
     tipo: value.tipos.map((t) => ({
       id: t,
       name: tipoOptions.find((o) => o.id === t)?.name ?? t
@@ -70,6 +91,7 @@ export function FilterAprobacionesTab({
 
   const selectionToDomain = (sel: FilterSelection): Partial<IAprobacionesFilter> => ({
     clientId: sel.cliente?.[0]?.id ?? null,
+    status: sel.estado?.[0]?.id ?? null,
     tipos: (sel.tipo || []).map((o) => o.id as TipoAprobacion),
     ciudades: (sel.ciudad || []).map((o) => o.id)
   });
@@ -82,6 +104,7 @@ export function FilterAprobacionesTab({
 
   const categories: FilterCategoryConfig[] = [
     { key: "cliente", label: "Cliente", selectMode: "single", options: clienteOptions },
+    { key: "estado", label: "Estado", selectMode: "single", options: estadoOptions },
     { key: "tipo", label: "Tipo de Aprobación", options: tipoOptions },
     {
       key: "ciudad",
@@ -135,7 +158,14 @@ export function FilterAprobacionesTab({
       }
       onValueChange={(sel) => onChange({ ...value, ...selectionToDomain(sel) })}
       onClearAll={() =>
-        onChange({ clientId: null, fromDate: null, toDate: null, tipos: [], ciudades: [] })
+        onChange({
+          clientId: null,
+          status: null,
+          fromDate: null,
+          toDate: null,
+          tipos: [],
+          ciudades: []
+        })
       }
       onOpen={() => setDateDraft({ from: value.fromDate, to: value.toDate })}
       onClearDraft={() => setDateDraft({ from: null, to: null })}
