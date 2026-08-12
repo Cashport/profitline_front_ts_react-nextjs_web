@@ -445,6 +445,7 @@ export interface IOrder {
   rgb: string;
   id: number;
   operation_number: number;
+  marketplace_number?: string | null;
   order_date: string;
   city: string;
   contacto: string;
