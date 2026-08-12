@@ -34,11 +34,11 @@ export const getApprovalsColumns = (
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => (
-      <div className="max-w-[200px]">
-        <div className="text-gray-900 text-sm leading-tight truncate" title={record.cliente}>
+      <div className="break-words">
+        <div className="text-gray-900 text-sm leading-tight" title={record.cliente}>
           {record.cliente}
         </div>
-        <div className="text-xs text-gray-400 mt-0.5 truncate" title={record.codigoCliente}>
+        <div className="text-xs text-gray-400 mt-0.5" title={record.codigoCliente}>
           {record.codigoCliente}
         </div>
       </div>

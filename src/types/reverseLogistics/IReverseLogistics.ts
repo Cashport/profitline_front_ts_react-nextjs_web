@@ -21,6 +21,14 @@ export type EstadoDevolucion =
   | "Movimiento Odoo"
   | "Contabilización de NC";
 
+// One entry from the Profit360 `Causales` JSON blob. `RGB` is a bare hex string
+// with no leading "#" (e.g. "32417A").
+export interface IProfit360Causal {
+  Id: string;
+  causal: string;
+  RGB: string;
+}
+
 export interface ICalculatedStatus {
   id: string;
   label: string;
@@ -59,7 +67,7 @@ export interface ReturnRow {
   canal: string;
   lineaNegocio?: string;
   unidades: number;
-  causal?: CausalDevolucion;
+  causales?: IProfit360Causal[];
   monto: number;
   estado: EstadoDevolucion;
   pdfUrl?: string;
@@ -289,6 +297,8 @@ export interface IProfit360VisitDevolucion {
   ColorCausal: string;
   IdCausalDevolucion: string;
   DescripcionCausalDev: string;
+  // JSON blob: {"Causales":[{"Id":"…","causal":"Vencimiento","RGB":"32417A"}]}
+  Causales: string | null;
   FotosAprobacion: string | null;
   ObservacionAprobacion: string;
   IdEstadoAprobacion: string;

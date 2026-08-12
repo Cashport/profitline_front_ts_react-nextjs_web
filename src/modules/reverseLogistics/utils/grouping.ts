@@ -37,7 +37,6 @@ const toLeaf = (dev: IReturn): ReturnRow => ({
   canal: dev.canal,
   lineaNegocio: dev.lineaNegocio,
   unidades: dev.unidades,
-  causal: dev.causal,
   monto: dev.monto,
   estado: dev.estado,
   pdfUrl: dev.pdfUrl
