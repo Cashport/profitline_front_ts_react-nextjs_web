@@ -19,6 +19,7 @@ import {
 } from "@/services/reverseLogistics/reverseLogistics";
 import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
 import { AprobacionDevolucionModal } from "../AprobacionDevolucionModal/AprobacionDevolucionModal";
+import { parseCausales } from "../../utils/causales";
 import { fmtCop, fmtPct } from "../../utils/format";
 import { productsColumns } from "./columns";
 
@@ -60,17 +61,9 @@ const mapDocumentoToProduct = (doc: IProfit360Documento): IApprovalProduct => ({
 });
 
 // Extracts the first causal name from the Profit360 `causales` JSON blob
-// (e.g. {"Causales":[{"causal":"Expirado","RGB":"E60096"}]}). Falls back to
-// the literal string when parsing fails.
+// (e.g. {"Causales":[{"causal":"Expirado","RGB":"E60096"}]}).
 function firstCausal(causales: string | null | undefined): string {
-  if (!causales) return "—";
-  try {
-    const parsed = JSON.parse(causales);
-    const list: { causal?: string }[] = parsed?.Causales ?? [];
-    return list[0]?.causal ?? "—";
-  } catch {
-    return "—";
-  }
+  return parseCausales(causales)[0]?.causal ?? "—";
 }
 
 // Strips the `(NN-foo)` qualifier from a causal label so the purple pill shows

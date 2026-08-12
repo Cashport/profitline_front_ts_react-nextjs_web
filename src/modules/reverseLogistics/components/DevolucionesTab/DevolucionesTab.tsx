@@ -8,8 +8,8 @@ import { Table } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
-  CausalDevolucion,
   EstadoDevolucion,
+  IProfit360Causal,
   IProfit360Visit,
   IProfit360VisitDevolucion,
   ReturnRow
@@ -18,12 +18,43 @@ import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
 import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
 import { IDevolucionesFilter } from "../../types";
+import { parseCausales } from "../../utils/causales";
 import { returnsColumns } from "./columns";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
 // so the table pagination mirrors `hasNext`/`hasPrev` instead of slicing the
 // result client-side.
 const PAGE_SIZE = 10;
+
+// Causales arrive as a JSON blob carrying label + backend color. Older payloads
+// only expose the flat `DescripcionCausalDev` / `ColorCausal` pair, so fall back
+// to those rather than rendering an empty cell.
+const devCausales = (dev: IProfit360VisitDevolucion): IProfit360Causal[] => {
+  const parsed = parseCausales(dev.Causales);
+  if (parsed.length > 0) return parsed;
+  if (!dev.DescripcionCausalDev) return [];
+  return [
+    {
+      Id: dev.IdCausalDevolucion ?? "",
+      causal: dev.DescripcionCausalDev,
+      RGB: dev.ColorCausal ?? ""
+    }
+  ];
+};
+
+// Distinct causales across a visit's devoluciones, so the parent row summarizes
+// what its children carry. Deduped by GUID, falling back to the label when the
+// backend leaves `Id` blank.
+const uniqueCausales = (devs: IProfit360VisitDevolucion[]): IProfit360Causal[] => {
+  const byKey = new Map<string, IProfit360Causal>();
+  devs.forEach((dev) =>
+    devCausales(dev).forEach((c) => {
+      const key = c.Id || c.causal;
+      if (!byKey.has(key)) byKey.set(key, c);
+    })
+  );
+  return Array.from(byKey.values());
+};
 
 // Flatten a visit's devoluciones into leaf ReturnRows. Each devolucion from the
 // new endpoint maps 1:1 to the legacy ReturnRow shape the columns consume.
@@ -33,11 +64,12 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
   const fechaIso = dev.FechaInicioDevolucion ?? dev.FechaRegistro;
   const fecha = fechaIso ? dayjs(fechaIso).format("YYYY-MM-DD HH:mm") : "";
 
-  // Causal / estado come as free-text strings on the new endpoint. Cast
-  // through `unknown` so we don't lie about exhaustive matching — the column
-  // renderer falls back gracefully for unknown values.
-  const causal = dev.DescripcionCausalDev as unknown as CausalDevolucion;
+  // Estado comes as a free-text string on the new endpoint. Cast through
+  // `unknown` so we don't lie about exhaustive matching — the column renderer
+  // falls back gracefully for unknown values.
   const estado = dev.Estado as unknown as EstadoDevolucion;
+
+  const causales = devCausales(dev);
 
   return {
     key: `dev-${dev.IdDevolucion}-visit-${visit.visitProjectId}`,
@@ -51,7 +83,7 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
     canal: dev.Canal,
     lineaNegocio: dev.LineaNegocio,
     unidades: dev.Unidades ?? dev.UnidadesRegistradas ?? dev.UnidadesDocumento ?? 0,
-    causal,
+    causales,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
     pdfUrl: dev.PdfBoleto ?? undefined,
@@ -100,7 +132,7 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     canal: resumen.canal.join(),
     lineaNegocio: resumen.lineaNegocio.join(),
     unidades: resumen.unidades,
-    causal: undefined,
+    causales: uniqueCausales(visit.devoluciones ?? []),
     monto: resumen.monto,
     estado,
     pdfUrl: undefined,
@@ -177,7 +209,7 @@ export function DevolucionesTab() {
         return (
           row.idBoleto.toLowerCase().includes(q) ||
           row.cliente.toLowerCase().includes(q) ||
-          (row.causal ?? "").toLowerCase().includes(q)
+          (row.causales ?? []).some((c) => c.causal.toLowerCase().includes(q))
         );
       }),
     [allRows, searchTerm]
@@ -218,7 +250,7 @@ export function DevolucionesTab() {
             onChange: setPage,
             showTotal: (t, range) => `Mostrando ${range[0]} a ${range[1]} de ${t} resultados`
           }}
-          scroll={{ x: 960 }}
+          scroll={{ x: 1000 }}
         />
       </div>
     </>

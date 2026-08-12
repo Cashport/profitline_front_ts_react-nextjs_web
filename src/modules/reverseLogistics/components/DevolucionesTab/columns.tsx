@@ -5,6 +5,7 @@ import type { ColumnsType } from "antd/es/table";
 import { Check, Eye, FileText } from "lucide-react";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
+import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 
 // Per-row action buttons. Lives in its own component so it can use the
@@ -63,15 +64,12 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => (
-      <div className="max-w-[220px]">
-        <div className="text-gray-900 text-sm leading-tight truncate" title={record.cliente}>
+      <div className="break-words">
+        <div className="text-gray-900 text-sm" title={record.cliente}>
           {record.cliente}
         </div>
         {!record.isGroup && record.direccionCliente && (
-          <div
-            className="text-xs text-gray-400 leading-tight mt-0.5 truncate"
-            title={record.direccionCliente}
-          >
+          <div className="text-xs text-gray-400 mt-0.5" title={record.direccionCliente}>
             {record.direccionCliente}
           </div>
         )}
@@ -91,14 +89,17 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
   },
   {
     title: "Causal",
-    dataIndex: "causal",
-    width: 140,
-    render: (_: unknown, record) =>
-      record.isGroup ? null : (
-        <span className="text-gray-700 text-sm" title={record.causal}>
-          {record.causal}
-        </span>
-      )
+    dataIndex: "causales",
+    width: 180,
+    // Group rows carry the distinct causales of their children, so both group
+    // and leaf rows render the same way.
+    render: (_: unknown, record) => (
+      <div className="flex flex-wrap gap-1">
+        {(record.causales ?? []).map((c) => (
+          <CausalBadge key={c.Id || c.causal} label={c.causal} rgb={c.RGB} />
+        ))}
+      </div>
+    )
   },
   {
     title: "Estado",

@@ -12,6 +12,7 @@ import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogi
 import { getProfit360Approvals } from "@/services/reverseLogistics/reverseLogistics";
 import { APPROVALS_FETCH_LIMIT, ESTADO_PENDIENTE_APROBACION_ID, PAGE_SIZE } from "../../constants";
 import { IAprobacionesFilter } from "../../types";
+import { parseCausales } from "../../utils/causales";
 import { FilterAprobacionesTab } from "../FilterAprobacionesTab/FilterAprobacionesTab";
 import { getApprovalsColumns, IApprovalRow } from "./columns";
 
@@ -43,19 +44,7 @@ const mapProfit360ToApprovalRow = (raw: {
   cantidad: number | null;
   valorTotalDocumento: number | null;
 }): IApprovalRow => {
-  let causales: TipoAprobacion[] = [];
-  if (raw.causales) {
-    try {
-      const parsed = JSON.parse(raw.causales);
-      const list: { causal?: string }[] = parsed?.Causales ?? [];
-      causales = list
-        .map((c) => c.causal)
-        .filter((c): c is string => typeof c === "string")
-        .map((c) => c as TipoAprobacion);
-    } catch {
-      causales = [];
-    }
-  }
+  const causales = parseCausales(raw.causales).map((c) => c.causal as TipoAprobacion);
 
   const fecha = raw.fechaRegistro ? dayjs(raw.fechaRegistro) : null;
   const fechaStr = fecha && fecha.isValid() ? fecha.format("DD/MM/YYYY HH:mm") : "";
