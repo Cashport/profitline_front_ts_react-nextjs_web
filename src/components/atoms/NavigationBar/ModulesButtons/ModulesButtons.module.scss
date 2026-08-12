@@ -10,11 +10,40 @@
     min-height: 0; // allow shrinking below content so overflow can scroll
     overflow-y: auto; // scroll the buttons when the viewport is too short
     overflow-x: hidden;
+
+    // no scrollbar: the edge fade below is the scroll affordance instead
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // Fade only the edge that has content hidden past it (classes driven by useScrollFade).
+    // mask-image rather than a gradient overlay, so it needs no colour and works unchanged
+    // over both the light and the dark (.dark) sidebar background.
+    --fade-top: 0px;
+    --fade-bottom: 0px;
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        black var(--fade-top),
+        black calc(100% - var(--fade-bottom)),
+        transparent 100%
+    );
+
+    &.fadeTop {
+        --fade-top: 56px;
+    }
+
+    &.fadeBottom {
+        --fade-bottom: 56px;
+    }
+
     &.mobile {
         flex-direction: row;
         justify-content: center;
         flex: 0 0 auto; // reset: mobile dropdown must not grow/scroll vertically
         overflow: visible;
+        mask-image: none; // a mask clips to the element box, which would cut off the overflowing dropdown
     }
 
     .buttonIcon {
