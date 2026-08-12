@@ -5,8 +5,10 @@ import type { Key } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
-import { Button, Modal, Table } from "antd";
-import { ChevronLeft, AlertTriangle, TrendingUp } from "lucide-react";
+import { Modal, Table } from "antd";
+import { ArrowLeft, AlertTriangle, TrendingUp } from "lucide-react";
+import { Button } from "@/modules/chat/ui/button";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import {
   IApprovalProduct,
@@ -18,12 +20,12 @@ import {
   getProfit360ApprovalResumen
 } from "@/services/reverseLogistics/reverseLogistics";
 import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
-import { AprobacionDevolucionModal } from "../AprobacionDevolucionModal/AprobacionDevolucionModal";
+import { AprobacionDevolucionModal } from "../../components/AprobacionDevolucionModal/AprobacionDevolucionModal";
 import { parseCausales } from "../../utils/causales";
 import { fmtCop, fmtPct } from "../../utils/format";
 import { productsColumns } from "./columns";
 
-interface AprobacionDetalleProps {
+interface AprobacionDetalleViewProps {
   id: string;
 }
 
@@ -76,7 +78,7 @@ function shortCausal(causal: string): string {
 // Full approval detail backed by GET /integration/profit360/approvals/{id}/resumen.
 // Layout mirrors the legacy AprobacionDetalle so the user doesn't notice the URL
 // change — only the data source moved from the mock to the real Profit360 endpoint.
-export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
+export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   const router = useRouter();
 
   const { data, isLoading, mutate } = useSWR(
@@ -96,10 +98,6 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
 
   // Picklists shared with the devoluciones tab via the layout-level provider.
   const { estados, causales } = useProfit360Filters();
-  console.log(
-    estados,
-    estados.find((e) => e.nombre === APROBADO_ESTADO_NOMBRE)
-  );
   const aprobadoEstadoCodigo = useMemo(
     () => estados.find((e) => e.nombre === APROBADO_ESTADO_NOMBRE)?.codigo ?? "",
     [estados]
@@ -178,39 +176,38 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
     }
   };
 
-  console.log(resumen, approving, aprobadoEstadoCodigo);
-
   return (
-    <div className="px-5 py-4 space-y-4">
+    <div className="space-y-4">
       {/* Top bar */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-bold text-gray-900">Aprobación de Lotes</h2>
+      <div className="flex flex-col gap-2">
         <Button
+          variant="ghost"
+          size="sm"
           onClick={() => router.push("/logistica-inversa/aprobaciones")}
-          type="primary"
-          icon={<ChevronLeft className="h-3.5 w-3.5" />}
-          style={{ backgroundColor: "#22a86a" }}
+          className="text-gray-700 hover:text-gray-900 w-fit"
         >
-          Regresar
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Volver
         </Button>
+        <h2 className="text-base font-bold text-gray-900">Aprobación de Lotes</h2>
       </div>
 
       {/* Client info grid — same labels as the original */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm text-gray-700">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm text-gray-700">
         <div>
-          <span className="font-medium">Cliente:</span> {resumen?.cliente ?? "—"}
+          <span className="font-semibold">Cliente:</span> {resumen?.cliente ?? "—"}
         </div>
         <div>
-          <span className="font-medium">Código Cliente:</span> {resumen?.codigoCliente ?? "—"}
+          <span className="font-semibold">Código Cliente:</span> {resumen?.codigoCliente ?? "—"}
         </div>
         <div>
-          <span className="font-medium">Línea de Negocio:</span> {resumen?.lineaNegocio ?? "—"}
+          <span className="font-semibold">Línea de Negocio:</span> {resumen?.lineaNegocio ?? "—"}
         </div>
         <div>
-          <span className="font-medium">Valor del Documento:</span> {fmtCop(totalValor)}
+          <span className="font-semibold">Valor del Documento:</span> {fmtCop(totalValor)}
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-medium">Causal Devolución:</span>
+          <span className="font-semibold">Causal Devolución:</span>
           <span
             className="inline-block px-2 py-0.5 rounded text-xs font-semibold text-white"
             style={{ backgroundColor: "#9333ea" }}
@@ -219,10 +216,10 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
           </span>
         </div>
         <div>
-          <span className="font-medium">Unidades Documentos:</span> {totalUnidades}
+          <span className="font-semibold">Unidades Documentos:</span> {totalUnidades}
         </div>
         <div>
-          <span className="font-medium">Unidades Registradas:</span> {totalUnidades}
+          <span className="font-semibold">Unidades Registradas:</span> {totalUnidades}
         </div>
       </div>
 
@@ -288,22 +285,20 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
       </div>
 
       {/* Observations banner — keeps the legacy purple styling */}
-      <div className="flex items-start justify-between gap-4 rounded-lg bg-[#e8e8f8] border border-[#c7c7ef]">
+      <div className="flex items-center justify-between gap-4 rounded-lg bg-[#e8e8f8] border border-[#c7c7ef] px-4 py-3">
         <div>
           <p className="text-sm font-semibold text-[#3a3a8c] mb-0.5">Observaciones:</p>
           <p className="text-sm text-[#5a5aaa]">
             {resumen?.observacionAprobacion || "autorizado por el lab via correo"}
           </p>
         </div>
-        <Button
-          type="primary"
-          style={{ backgroundColor: "#f97316" }}
+        <PrincipalButton
           className="flex-shrink-0"
           onClick={() => setSoportesOpen(true)}
           disabled={!resumen?.fotosAprobacion}
         >
           Ver soportes
-        </Button>
+        </PrincipalButton>
       </div>
 
       {/* Table toolbar */}
@@ -335,15 +330,12 @@ export function AprobacionDetalle({ id }: AprobacionDetalleProps) {
         <span className="text-sm text-gray-500">
           Mostrando 1 a {filtered.length} de {filtered.length} registros
         </span>
-        <Button
+        <PrincipalButton
           onClick={() => setApproveModalOpen(true)}
           disabled={!resumen || approving || !aprobadoEstadoCodigo}
-          type="primary"
-          size="large"
-          style={{ backgroundColor: "#f97316" }}
         >
           Aprobar
-        </Button>
+        </PrincipalButton>
       </div>
 
       {/* Soportes preview — opens the approval photo from `fotosAprobacion`. */}

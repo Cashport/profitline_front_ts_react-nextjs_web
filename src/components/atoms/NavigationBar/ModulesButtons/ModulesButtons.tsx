@@ -27,9 +27,10 @@ import {
 } from "@phosphor-icons/react";
 import { FileHeart } from "lucide-react";
 
-import { checkUserViewPermissions } from "@/utils/utils";
+import { checkUserViewPermissions, cn } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
+import useScrollFade from "@/components/hooks/useScrollFade";
 import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
@@ -47,6 +48,8 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
   const width = useScreenWidth();
   const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
   const { attemptNavigation } = useUnsavedChanges();
+  // the mobile dropdown lays out in a row and never scrolls, so it needs no fade
+  const { ref: containerRef, fade } = useScrollFade<HTMLDivElement>(!isMobileMenu);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     if (attemptNavigation(href)) e.preventDefault();
@@ -54,7 +57,13 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
 
   return (
     <div
-      className={`${styles.containerButtons} scrollbar-thin ${isMobileMenu ? styles.mobile : ""}`}
+      ref={containerRef}
+      className={cn(
+        styles.containerButtons,
+        isMobileMenu && styles.mobile,
+        fade.top && styles.fadeTop,
+        fade.bottom && styles.fadeBottom
+      )}
     >
       {/* Dashboard */}
       {checkUserViewPermissions(project, "Dashboard") && (
