@@ -150,9 +150,14 @@ const OrdersViewTable = ({
       dataIndex: "id",
       key: "id",
       render: (invoiceId, row) => (
-        <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
-          {row.operation_number}
-        </Text>
+        <div className="ordersViewTable__idCell">
+          <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
+            {row.operation_number}
+          </Text>
+          {row.marketplace_number && (
+            <Text className="ordersViewTable__marketplace">{row.marketplace_number}</Text>
+          )}
+        </div>
       ),
       sorter: (a, b) => a.operation_number - b.operation_number,
       showSorterTooltip: false

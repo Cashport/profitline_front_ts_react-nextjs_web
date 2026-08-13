@@ -596,7 +596,8 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
                 {confirmOrderData?.promotion?.active_range?.gift_options &&
                 (confirmOrderData.promotion?.active_range?.gift_options?.length ?? 0) > 1
                   ? `${confirmOrderData?.promotion?.active_range?.gift_options?.length} disp.`
-                  : (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0 && "1 disp."}
+                  : (confirmOrderData?.other_bonificated_products?.length ?? 0) > 0 &&
+                    `${confirmOrderData?.other_bonificated_products?.length} disp.`}
               </span>
               <Eye size={14} className="text-[#999999]" />
             </button>

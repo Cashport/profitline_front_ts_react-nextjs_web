@@ -5,17 +5,15 @@ import type { Key } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
-import { Button, Input, Select, Table } from "antd";
-import { Filter, ChevronRight } from "lucide-react";
+import { Table } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
-import {
-  FilterAprobacionesTab,
-  IProfit360ApprovalsFilters
-} from "@/components/atoms/Filters/FilterAprobacionesTab/FilterAprobacionesTab";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Approvals } from "@/services/reverseLogistics/reverseLogistics";
-import { PAGE_SIZE, TIPO_APROBACION_OPTIONS } from "../../constants";
+import { APPROVALS_FETCH_LIMIT, ESTADO_PENDIENTE_APROBACION_ID, PAGE_SIZE } from "../../constants";
+import { IAprobacionesFilter } from "../../types";
+import { parseCausales } from "../../utils/causales";
+import { FilterAprobacionesTab } from "../FilterAprobacionesTab/FilterAprobacionesTab";
 import { getApprovalsColumns, IApprovalRow } from "./columns";
 
 // Stable numeric id derived from a GUID string. The AntD table needs a numeric
@@ -46,19 +44,7 @@ const mapProfit360ToApprovalRow = (raw: {
   cantidad: number | null;
   valorTotalDocumento: number | null;
 }): IApprovalRow => {
-  let causales: TipoAprobacion[] = [];
-  if (raw.causales) {
-    try {
-      const parsed = JSON.parse(raw.causales);
-      const list: { causal?: string }[] = parsed?.Causales ?? [];
-      causales = list
-        .map((c) => c.causal)
-        .filter((c): c is string => typeof c === "string")
-        .map((c) => c as TipoAprobacion);
-    } catch {
-      causales = [];
-    }
-  }
+  const causales = parseCausales(raw.causales).map((c) => c.causal as TipoAprobacion);
 
   const fecha = raw.fechaRegistro ? dayjs(raw.fechaRegistro) : null;
   const fechaStr = fecha && fecha.isValid() ? fecha.format("DD/MM/YYYY HH:mm") : "";
@@ -82,16 +68,37 @@ const mapProfit360ToApprovalRow = (raw: {
 export function AprobacionesList() {
   const router = useRouter();
 
-  // Default filter = today's date, matching the endpoint contract `?from=YYYY-MM-DD`.
-  const [selectedFilters, setSelectedFilters] = useState<IProfit360ApprovalsFilters>({
-    from: dayjs().format("YYYY-MM-DD")
+  // Default filter = today + pendientes de aprobación, the view the tab is meant to
+  // open on. clientId/status/fromDate/toDate reach the backend; tipos/ciudades are
+  // applied client-side. The estado default is seeded from the constant rather than
+  // from the picklist so the SWR key is stable on the first render.
+  const today = dayjs().format("YYYY-MM-DD");
+  const [filter, setFilter] = useState<IAprobacionesFilter>({
+    clientId: null,
+    status: ESTADO_PENDIENTE_APROBACION_ID,
+    fromDate: today,
+    toDate: today,
+    tipos: [],
+    ciudades: []
   });
 
-  const from = selectedFilters.from ?? dayjs().format("YYYY-MM-DD");
-
   const { data, isLoading } = useSWR(
-    ["reverse-logistics/profit360-approvals", from],
-    () => getProfit360Approvals(from),
+    [
+      "reverse-logistics/profit360-approvals",
+      filter.fromDate,
+      filter.toDate,
+      filter.clientId,
+      filter.status
+    ],
+    () =>
+      getProfit360Approvals({
+        page: 1,
+        limit: APPROVALS_FETCH_LIMIT,
+        fromDate: filter.fromDate,
+        toDate: filter.toDate,
+        clientId: filter.clientId,
+        status: filter.status
+      }),
     { revalidateOnFocus: false }
   );
 
@@ -101,15 +108,19 @@ export function AprobacionesList() {
   );
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [tipoFilter, setTipoFilter] = useState<TipoAprobacion | null>(null);
-  const [ciudadFilter, setCiudadFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
   const columns = useMemo(
     () => getApprovalsColumns((guid) => router.push(`/logistica-inversa/aprobaciones/${guid}`)),
     [router]
+  );
+
+  // The endpoint exposes no ciudad picklist, so the options are the distinct
+  // ciudades present in the loaded approvals.
+  const ciudadOptions = useMemo(
+    () => Array.from(new Set(approvals.map((a) => a.ciudad).filter(Boolean))).sort(),
+    [approvals]
   );
 
   const filtered = useMemo(
@@ -124,20 +135,25 @@ export function AprobacionesList() {
             a.codigoCliente.toLowerCase().includes(q);
           if (!matches) return false;
         }
-        if (tipoFilter && !a.tiposAprobacion.includes(tipoFilter)) return false;
-        if (ciudadFilter && !a.ciudad.toLowerCase().includes(ciudadFilter.toLowerCase()))
+        if (filter.tipos.length && !filter.tipos.some((t) => a.tiposAprobacion.includes(t)))
           return false;
+        if (filter.ciudades.length && !filter.ciudades.includes(a.ciudad)) return false;
         return true;
       }),
-    [approvals, searchTerm, tipoFilter, ciudadFilter]
+    [approvals, searchTerm, filter.tipos, filter.ciudades]
   );
 
   const resetPage = () => setCurrentPage(1);
 
+  const handleFilterChange = (next: IAprobacionesFilter) => {
+    setFilter(next);
+    resetPage();
+  };
+
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-cashport-gray-light">
+      <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput
           placeholder="Buscar"
           onChange={(e) => {
@@ -148,59 +164,15 @@ export function AprobacionesList() {
 
         <GenerateActionButton onClick={() => {}} />
 
-        <Select
-          allowClear
-          placeholder="Tipo de Aprobación"
-          value={tipoFilter}
-          onChange={(value) => {
-            setTipoFilter(value ?? null);
-            resetPage();
-          }}
-          options={TIPO_APROBACION_OPTIONS}
-          style={{ minWidth: 200 }}
+        <FilterAprobacionesTab
+          value={filter}
+          onChange={handleFilterChange}
+          ciudadOptions={ciudadOptions}
         />
-
-        <Button
-          icon={<Filter className="h-3.5 w-3.5" />}
-          onClick={() => setShowFilters((v) => !v)}
-          className="flex items-center gap-1.5"
-        >
-          Filtros
-          <ChevronRight
-            className={`h-3.5 w-3.5 transition-transform ${showFilters ? "rotate-90" : ""}`}
-          />
-        </Button>
       </div>
 
-      {/* Expanded filter panel */}
-      {showFilters && (
-        <div className="px-4 py-3 border-b border-cashport-gray-light bg-gray-50/60">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Ciudad</label>
-              <Input
-                placeholder="Ciudad"
-                value={ciudadFilter}
-                onChange={(e) => {
-                  setCiudadFilter(e.target.value);
-                  resetPage();
-                }}
-                style={{ width: 200 }}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Fecha de registro</label>
-              <FilterAprobacionesTab
-                selectedFilters={selectedFilters}
-                setSelectedFilters={setSelectedFilters}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Table */}
-      <div className="w-full overflow-x-auto px-4">
+      <div className="w-full overflow-x-auto">
         <Table<IApprovalRow>
           rowKey="id"
           columns={columns}
@@ -216,7 +188,8 @@ export function AprobacionesList() {
             showSizeChanger: false,
             position: ["none", "bottomRight"],
             onChange: setCurrentPage,
-            showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
+            showTotal: (total, range) =>
+              `Mostrando ${range[0]} a ${range[1]} de ${total} resultados`
           }}
           scroll={{ x: 1000 }}
         />

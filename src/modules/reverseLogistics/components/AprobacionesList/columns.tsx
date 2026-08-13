@@ -1,5 +1,5 @@
 import type { ColumnsType } from "antd/es/table";
-import { Button } from "antd";
+import { ArrowUpRight } from "lucide-react";
 import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { fmtCop, fmtNumber, parseFechaApproval } from "../../utils/format";
@@ -34,11 +34,11 @@ export const getApprovalsColumns = (
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
     render: (_: unknown, record) => (
-      <div className="max-w-[200px]">
-        <div className="text-gray-900 text-sm leading-tight truncate" title={record.cliente}>
+      <div className="break-words">
+        <div className="text-gray-900 text-sm leading-tight" title={record.cliente}>
           {record.cliente}
         </div>
-        <div className="text-xs text-gray-400 mt-0.5 truncate" title={record.codigoCliente}>
+        <div className="text-xs text-gray-400 mt-0.5" title={record.codigoCliente}>
           {record.codigoCliente}
         </div>
       </div>
@@ -102,16 +102,16 @@ export const getApprovalsColumns = (
   {
     title: "",
     dataIndex: "actions",
-    width: 130,
+    width: 120,
     render: (_: unknown, record) => (
-      <Button
-        type="primary"
-        size="small"
-        style={{ backgroundColor: "#1a3a6b" }}
+      <button
+        type="button"
         onClick={() => onSelect(record.guid, record)}
+        className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline whitespace-nowrap"
       >
         Ir a Aprobar
-      </Button>
+        <ArrowUpRight className="h-3.5 w-3.5" />
+      </button>
     )
   }
 ];

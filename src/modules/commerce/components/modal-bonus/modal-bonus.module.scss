@@ -251,6 +251,9 @@
 }
 
 .fixedHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 6px 10px;
     background: #e8f5e9;
     border-bottom: 1px solid #d4edda;
@@ -273,6 +276,39 @@
     border: 1px solid #eeeeee;
     border-radius: 6px;
     overflow: hidden;
+}
+
+/* Otros bonificados: agrupa varios `IOtherBonusGroup` (Root del backend).
+   Cada grupo es un bloque independiente con su titulo y subgrupos (pool/fixed)
+   renderizados con el mismo estilo que los bonificados comunes. */
+.otrosGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.otrosGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.otrosGroupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0 0.25rem;
+}
+
+.otrosGroupTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #141414;
 }
 
 /* Shared table */

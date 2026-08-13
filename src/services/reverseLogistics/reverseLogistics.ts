@@ -9,15 +9,35 @@ import {
 import { API } from "@/utils/api/api";
 
 
-// GET /integration/profit360/approvals?from=YYYY-MM-DD — real Profit360
-// integration endpoint used by the Aprobaciones tab. Returns the list of
-// approvals registered on (or after) the given date.
+export interface GetProfit360ApprovalsParams {
+  page: number;
+  limit: number;
+  fromDate?: string | null;
+  toDate?: string | null;
+  clientId?: string | null;
+  // Profit360 estado `codigo` (GUID). Single-valued — the endpoint takes one.
+  status?: string | null;
+}
+
+// GET /integration/profit360/approvals?page=&limit=&fromDate=&toDate=&clientId=&status=
+// — the response is a plain array rather than a paginated envelope. `page`/`limit`
+// are sent only because the endpoint requires them; the Aprobaciones table
+// paginates the returned array client-side, so don't mistake these for backend
+// pagination.
 export const getProfit360Approvals = async (
-  from: string
+  params: GetProfit360ApprovalsParams
 ): Promise<GenericResponse<IProfit360Approval[]>> => {
   try {
+    const qs = new URLSearchParams({
+      page: String(params.page),
+      limit: String(params.limit)
+    });
+    if (params.fromDate) qs.append("fromDate", params.fromDate);
+    if (params.toDate) qs.append("toDate", params.toDate);
+    if (params.clientId) qs.append("clientId", params.clientId);
+    if (params.status) qs.append("status", params.status);
     const response: GenericResponse<IProfit360Approval[]> = await API.get(
-      `/integration/profit360/approvals?from=${encodeURIComponent(from)}`
+      `/integration/profit360/approvals?${qs.toString()}`
     );
     return response;
   } catch (error) {
@@ -44,23 +64,28 @@ export const getProfit360ApprovalResumen = async (
 
 export interface GetProfit360VisitsParams {
   page: number;
-  fromDate: string;
-  toDate: string;
   limit: number;
+  fromDate?: string | null;
+  toDate?: string | null;
+  clientId?: string | null;
 }
 
-// GET /integration/profit360/visits?page=&fromDate=&toDate=&limit= — paginated
-// visits list from Profit360. Each visit carries its own returns/devoluciones.
+// GET /integration/profit360/visits?page=&limit=&fromDate=&toDate=&clientId=
+// — paginated visits list from Profit360. Each visit carries its own
+// returns/devoluciones. `page`/`limit` are required by the endpoint; the rest
+// are only sent when the user has actually picked a value. The endpoint also
+// accepts `status`, but the Devoluciones tab offers no estado filter yet.
 export const getProfit360Visits = async (
   params: GetProfit360VisitsParams
 ): Promise<IProfit360VisitsResponse>=> {
   try {
     const qs = new URLSearchParams({
       page: String(params.page),
-      fromDate: params.fromDate,
-      toDate: params.toDate,
       limit: String(params.limit)
     });
+    if (params.fromDate) qs.append("fromDate", params.fromDate);
+    if (params.toDate) qs.append("toDate", params.toDate);
+    if (params.clientId) qs.append("clientId", params.clientId);
     const response: IProfit360VisitsResponse = await API.get(
       `/integration/profit360/visits?${qs.toString()}`
     );

@@ -4,20 +4,21 @@ import { useMemo, useState } from "react";
 import type { Key } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
-import { Button, DatePicker, Table } from "antd";
-import type { Dayjs } from "dayjs";
-import { Filter, ChevronRight } from "lucide-react";
+import { Table } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
-  CausalDevolucion,
   EstadoDevolucion,
+  IProfit360Causal,
   IProfit360Visit,
   IProfit360VisitDevolucion,
   ReturnRow
 } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
+import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
+import { IDevolucionesFilter } from "../../types";
+import { parseCausales } from "../../utils/causales";
 import { returnsColumns } from "./columns";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
@@ -25,22 +26,50 @@ import { returnsColumns } from "./columns";
 // result client-side.
 const PAGE_SIZE = 10;
 
+// Causales arrive as a JSON blob carrying label + backend color. Older payloads
+// only expose the flat `DescripcionCausalDev` / `ColorCausal` pair, so fall back
+// to those rather than rendering an empty cell.
+const devCausales = (dev: IProfit360VisitDevolucion): IProfit360Causal[] => {
+  const parsed = parseCausales(dev.Causales);
+  if (parsed.length > 0) return parsed;
+  if (!dev.DescripcionCausalDev) return [];
+  return [
+    {
+      Id: dev.IdCausalDevolucion ?? "",
+      causal: dev.DescripcionCausalDev,
+      RGB: dev.ColorCausal ?? ""
+    }
+  ];
+};
+
+// Distinct causales across a visit's devoluciones, so the parent row summarizes
+// what its children carry. Deduped by GUID, falling back to the label when the
+// backend leaves `Id` blank.
+const uniqueCausales = (devs: IProfit360VisitDevolucion[]): IProfit360Causal[] => {
+  const byKey = new Map<string, IProfit360Causal>();
+  devs.forEach((dev) =>
+    devCausales(dev).forEach((c) => {
+      const key = c.Id || c.causal;
+      if (!byKey.has(key)) byKey.set(key, c);
+    })
+  );
+  return Array.from(byKey.values());
+};
+
 // Flatten a visit's devoluciones into leaf ReturnRows. Each devolucion from the
 // new endpoint maps 1:1 to the legacy ReturnRow shape the columns consume.
-const mapDevolucionToRow = (
-  visit: IProfit360Visit,
-  dev: IProfit360VisitDevolucion
-): ReturnRow => {
+const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevolucion): ReturnRow => {
   // Parse the ISO timestamp into the "YYYY-MM-DD HH:mm" shape the legacy
   // `parseFechaReturn` helper expects.
   const fechaIso = dev.FechaInicioDevolucion ?? dev.FechaRegistro;
   const fecha = fechaIso ? dayjs(fechaIso).format("YYYY-MM-DD HH:mm") : "";
 
-  // Causal / estado come as free-text strings on the new endpoint. Cast
-  // through `unknown` so we don't lie about exhaustive matching — the column
-  // renderer falls back gracefully for unknown values.
-  const causal = dev.DescripcionCausalDev as unknown as CausalDevolucion;
+  // Estado comes as a free-text string on the new endpoint. Cast through
+  // `unknown` so we don't lie about exhaustive matching — the column renderer
+  // falls back gracefully for unknown values.
   const estado = dev.Estado as unknown as EstadoDevolucion;
+
+  const causales = devCausales(dev);
 
   return {
     key: `dev-${dev.IdDevolucion}-visit-${visit.visitProjectId}`,
@@ -54,7 +83,7 @@ const mapDevolucionToRow = (
     canal: dev.Canal,
     lineaNegocio: dev.LineaNegocio,
     unidades: dev.Unidades ?? dev.UnidadesRegistradas ?? dev.UnidadesDocumento ?? 0,
-    causal,
+    causales,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
     pdfUrl: dev.PdfBoleto ?? undefined,
@@ -72,7 +101,7 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     ? dayjs(visit.scheduledDate).format("YYYY-MM-DD") +
       (visit.scheduledTime ? ` ${visit.scheduledTime}` : "")
     : "";
-  const resumen = visit.devoluciones?.reduce(
+  const resumen = (visit.devoluciones ?? []).reduce(
     (acc, dev) => {
       const { canal, lineaNegocio, unidades, monto } = acc;
 
@@ -103,7 +132,7 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     canal: resumen.canal.join(),
     lineaNegocio: resumen.lineaNegocio.join(),
     unidades: resumen.unidades,
-    causal: undefined,
+    causales: uniqueCausales(visit.devoluciones ?? []),
     monto: resumen.monto,
     estado,
     pdfUrl: undefined,
@@ -115,16 +144,37 @@ export function DevolucionesTab() {
   // Default filter = today (fromDate = toDate = YYYY-MM-DD), matching the
   // endpoint contract and the user's spec for this tab.
   const today = dayjs().format("YYYY-MM-DD");
-  const [fromDate, setFromDate] = useState<string>(today);
-  const [toDate, setToDate] = useState<string>(today);
+  const [filter, setFilter] = useState<IDevolucionesFilter>({
+    clientId: null,
+    fromDate: today,
+    toDate: today
+  });
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
-  const swrKey = ["reverse-logistics/profit360-visits", page, fromDate, toDate] as const;
+  // Any filter change invalidates the current page — the backend re-paginates
+  // from scratch with the new query params.
+  const handleFilterChange = (next: IDevolucionesFilter) => {
+    setFilter(next);
+    setPage(1);
+  };
+
+  const swrKey = [
+    "reverse-logistics/profit360-visits",
+    page,
+    filter.fromDate,
+    filter.toDate,
+    filter.clientId
+  ] as const;
   const { data, isLoading } = useSWR(swrKey, () =>
-    getProfit360Visits({ page, fromDate, toDate, limit: PAGE_SIZE })
+    getProfit360Visits({
+      page,
+      limit: PAGE_SIZE,
+      fromDate: filter.fromDate,
+      toDate: filter.toDate,
+      clientId: filter.clientId
+    })
   );
 
   const visits = data?.data ?? [];
@@ -149,89 +199,39 @@ export function DevolucionesTab() {
     [visits]
   );
 
-  // Client-side search across the current page only — date range + pagination
-  // is backend-driven.
+  // Client-side search across the current page only — cliente, date range and
+  // pagination are backend-driven.
   const filtered = useMemo(
     () =>
-      searchTerm
-        ? allRows.filter((row) => {
-            const q = searchTerm.toLowerCase();
-            return (
-              row.idBoleto.toLowerCase().includes(q) ||
-              row.cliente.toLowerCase().includes(q) ||
-              (row.causal ?? "").toLowerCase().includes(q)
-            );
-          })
-        : allRows,
+      allRows.filter((row) => {
+        if (!searchTerm) return true;
+        const q = searchTerm.toLowerCase();
+        return (
+          row.idBoleto.toLowerCase().includes(q) ||
+          row.cliente.toLowerCase().includes(q) ||
+          (row.causales ?? []).some((c) => c.causal.toLowerCase().includes(q))
+        );
+      }),
     [allRows, searchTerm]
   );
 
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-cashport-gray-light">
+      <div className="flex flex-wrap items-center gap-2">
         <UiSearchInput placeholder="Buscar" onChange={(e) => setSearchTerm(e.target.value)} />
 
         <GenerateActionButton onClick={() => {}} />
 
-        <Button
-          icon={<Filter className="h-3.5 w-3.5" />}
-          onClick={() => setShowFilters((v) => !v)}
-          className="flex items-center gap-1.5"
-        >
-          Filtros
-          <ChevronRight
-            className={`h-3.5 w-3.5 transition-transform ${showFilters ? "rotate-90" : ""}`}
-          />
-        </Button>
+        <FilterDevolucionesTab value={filter} onChange={handleFilterChange} />
       </div>
-
-      {/* Expanded filter panel — fecha range bound to fromDate/toDate */}
-      {showFilters && (
-        <div className="px-4 py-3 border-b border-cashport-gray-light bg-gray-50/60">
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Fecha inicial</label>
-              <DatePicker
-                format="YYYY-MM-DD"
-                value={fromDate ? (dayjs(fromDate) as Dayjs) : null}
-                onChange={(_d, dateString) => {
-                  setFromDate(Array.isArray(dateString) ? "" : dateString);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Fecha final</label>
-              <DatePicker
-                format="YYYY-MM-DD"
-                value={toDate ? (dayjs(toDate) as Dayjs) : null}
-                onChange={(_d, dateString) => {
-                  setToDate(Array.isArray(dateString) ? "" : dateString);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <Button
-              size="small"
-              onClick={() => {
-                setFromDate(today);
-                setToDate(today);
-                setPage(1);
-              }}
-            >
-              Hoy
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* KPI stats bar — fed the flattened rows so the existing per-estado
           averages keep working. */}
-      <DevolucionesStatsBar returns={allRows} />
+      <DevolucionesStatsBar returns={allRows} loading={isLoading} />
 
       {/* Table — backend pagination */}
-      <div className="w-full overflow-x-auto px-4">
+      <div className="w-full overflow-x-auto">
         <Table<ReturnRow>
           rowKey="key"
           columns={returnsColumns}
@@ -250,7 +250,7 @@ export function DevolucionesTab() {
             onChange: setPage,
             showTotal: (t, range) => `Mostrando ${range[0]} a ${range[1]} de ${t} resultados`
           }}
-          scroll={{ x: 960 }}
+          scroll={{ x: 1000 }}
         />
       </div>
     </>

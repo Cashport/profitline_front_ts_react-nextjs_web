@@ -1,10 +1,21 @@
 @import "@styles/variables.scss";
 
 .ordersViewTable {
+    &__idCell {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+    }
+
     &__id {
         color: $link !important;
         text-decoration: underline;
         cursor: pointer;
+    }
+
+    &__marketplace {
+        color: $gray;
+        font-size: 0.75rem;
     }
 
     .selectedRow {

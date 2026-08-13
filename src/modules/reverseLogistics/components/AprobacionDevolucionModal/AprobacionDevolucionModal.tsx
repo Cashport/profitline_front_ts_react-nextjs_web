@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Modal, Select, Input, Button } from "antd";
+import { Modal, Select, Input } from "antd";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import { IProfit360FilterItem } from "@/types/reverseLogistics/IReverseLogistics";
 
 interface AprobacionDevolucionModalProps {
@@ -102,19 +104,15 @@ export function AprobacionDevolucionModal({
           />
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
-          <Button
-            type="primary"
+          <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
+          <SecondaryButton onClick={onClose}>No Aprobar</SecondaryButton>
+          <PrincipalButton
             onClick={handleAprobar}
             loading={submitting}
             disabled={!causal || !aprobadoEstadoCodigo}
-            style={{ backgroundColor: "#1d4ed8" }}
           >
             Aprobar
-          </Button>
-          <Button danger onClick={onClose}>
-            No Aprobar
-          </Button>
-          <Button onClick={onClose}>Cancelar</Button>
+          </PrincipalButton>
         </div>
       </div>
     </Modal>

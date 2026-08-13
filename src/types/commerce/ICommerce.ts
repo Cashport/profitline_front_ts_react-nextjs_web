@@ -169,15 +169,6 @@ export interface OrderDiscount {
   };
 }
 
-export interface IOtherBonificatedProduct {
-  product_id: number;
-  qty: number;
-  max_selection_qty: number;
-  sku: string;
-  description: string;
-  image: string;
-}
-
 export interface IBonificatedProductsPost {
   product_id: number;
   quantity: number;
@@ -193,6 +184,49 @@ export interface IGiftItem {
   image: string;
 }
 
+/**
+ * Producto individual dentro de un subgrupo de bonificado discrecional
+ * ("other bonified"). Equivale al `Item2` de la respuesta del backend y
+ * se acumula hasta el `max_selection_qty` del subgrupo que lo contiene.
+ */
+export interface IOtherBonusProduct {
+  product_id: number;
+  qty: number;
+  sku: string;
+  description: string;
+  image: string;
+}
+
+/**
+ * Subgrupo de un bonificado discrecional ("other bonified"). Equivale al
+ * `Item` de la respuesta del backend. Puede ser `fixed: true` (cantidad
+ * ya fijada, sin acumulacion) o `fixed: false` (pool donde el usuario
+ * acumula cualquier producto hasta `max_selection_qty`).
+ */
+export interface IOtherBonusSubgroup {
+  group_item_id: number;
+  group_id: number;
+  fixed: boolean;
+  subgroup_number: number;
+  max_selection_qty: number;
+  items: IOtherBonusProduct[];
+}
+
+/**
+ * Grupo de bonificados discrecionales ("other bonified"). Equivale al
+ * `Root` de la respuesta del backend. Contiene los subgrupos
+ * (fijos / pool) entre los que el usuario reparte `available_qty`
+ * unidades hasta la fecha de `expiration_date`.
+ */
+export interface IOtherBonusGroup {
+  group_id: number;
+  description: string;
+  assigned_qty: number;
+  available_qty: number;
+  expiration_date: string;
+  items: IOtherBonusSubgroup[];
+}
+
 export interface IBonus {
   id?: number;
   bonusOptions: {
@@ -201,7 +235,24 @@ export interface IBonus {
       items: Omit<IGiftItem, "image">[];
     }[];
   }[];
-  otherBonificated: Omit<IGiftItem, "image">[];
+  /**
+   * Bonificados discrecionales ("other bonified") seleccionados por el
+   * usuario. Se modelan igual que `bonusOptions` (cards fijos / pool)
+   * para poder reutilizar la misma UI y reglas de acumulacion.
+   */
+  otherBonificated: {
+    group_id: number;
+    description: string;
+    assigned_qty: number;
+    available_qty: number;
+    expiration_date: string;
+    cards: {
+      fixed: boolean;
+      subgroup_number: number;
+      max_selection_qty: number;
+      items: Omit<IOtherBonusProduct, "image">[];
+    }[];
+  }[];
 }
 
 export interface IGiftItemGroup {
@@ -250,7 +301,7 @@ export interface IOrderConfirmedResponse {
   total_pronto_pago: number;
   insufficientStockProducts: string[];
   promotion?: IPromotion;
-  other_bonificated_products?: IOtherBonificatedProduct[];
+  other_bonificated_products?: IOtherBonusGroup[];
   client: IOrderViewContext["client"];
   business_unit: string;
 }
@@ -445,6 +496,7 @@ export interface IOrder {
   rgb: string;
   id: number;
   operation_number: number;
+  marketplace_number?: string | null;
   order_date: string;
   city: string;
   contacto: string;
