@@ -57,14 +57,22 @@ export default function ProductsDetailsAndDiscounts({
     )
   );
 
-  const otherBonificados = (bonus?.otherBonificated ?? []).map((item) => ({
-    key: `other-${item.product_id}`,
-    kind: "other" as const,
-    product_id: item.product_id,
-    fixed: true,
-    description: item.description,
-    qty: item.qty
-  }));
+  // Otros bonificados: cada grupo puede tener varios subgrupos (cards) y
+  // cada card varios productos. Se aplana para la tabla conservando
+  // `fixed` real (antes se forzaba a `true`).
+  const otherBonificados = (bonus?.otherBonificated ?? []).flatMap((group) =>
+    group.cards.flatMap((card) =>
+      card.items.map((item) => ({
+        key: `other-${group.group_id}-${item.product_id}`,
+        kind: "other" as const,
+        groupId: group.group_id,
+        product_id: item.product_id,
+        fixed: card.fixed,
+        description: item.description,
+        qty: item.qty
+      }))
+    )
+  );
 
   const bonificados = [...promoBonificados, ...otherBonificados];
 
@@ -91,9 +99,22 @@ export default function ProductsDetailsAndDiscounts({
     setBonus(next);
   };
 
-  const handleRemoveOtherBonus = (productId: number) => {
+  const handleRemoveOtherBonus = (groupId: number, productId: number) => {
     if (!bonus) return;
-    const nextOther = bonus.otherBonificated.filter((it) => it.product_id !== productId);
+    const nextOther = bonus.otherBonificated
+      .map((group) => {
+        if (group.group_id !== groupId) return group;
+        return {
+          ...group,
+          cards: group.cards
+            .map((card) => ({
+              ...card,
+              items: card.items.filter((it) => it.product_id !== productId)
+            }))
+            .filter((card) => card.items.length > 0)
+        };
+      })
+      .filter((group) => group.cards.length > 0);
     if (bonus.bonusOptions.length === 0 && nextOther.length === 0) {
       setBonus(undefined);
       return;
@@ -195,7 +216,7 @@ export default function ProductsDetailsAndDiscounts({
     onRemove: () =>
       b.kind === "promo"
         ? handleRemovePromoBonus(b.optionIdx, b.cardIdx, b.product_id)
-        : handleRemoveOtherBonus(b.product_id)
+        : handleRemoveOtherBonus(b.groupId, b.product_id)
   }));
 
   const handleGoBack = () => {

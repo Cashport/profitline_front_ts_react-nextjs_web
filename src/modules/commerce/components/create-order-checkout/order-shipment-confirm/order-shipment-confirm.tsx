@@ -123,12 +123,16 @@ export default function OrderShipmentConfirm({
 
   const otherBonusItems = useMemo<BonusRow[]>(
     () =>
-      (bonus?.otherBonificated ?? []).map((item) => ({
-        product_id: item.product_id,
-        product_sku: item.sku,
-        description: item.description,
-        quantity: item.qty
-      })),
+      (bonus?.otherBonificated ?? []).flatMap((group) =>
+        group.cards.flatMap((card) =>
+          card.items.map((item) => ({
+            product_id: item.product_id,
+            product_sku: item.sku,
+            description: item.description,
+            quantity: item.qty
+          }))
+        )
+      ),
     [bonus]
   );
 
