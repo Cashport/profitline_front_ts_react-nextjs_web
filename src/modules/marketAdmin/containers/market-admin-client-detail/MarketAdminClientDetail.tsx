@@ -7,10 +7,12 @@ import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 import {
+  BONIFICADOS_MANUALES_INIT,
   DEFAULT_NEGOCIACIONES,
   LINEAS_CATALOGO,
   NEGOCIACIONES_INIT,
   PRODUCTOS_INIT,
+  type BonifManual,
   type Negociacion,
   type ProductoLinea
 } from "@/modules/marketAdmin/mocks/clientDetail";
@@ -28,7 +30,7 @@ import {
   ICreateMarketAdminClientAddressBody,
   IUpdateMarketAdminClientConfigBody
 } from "@/types/marketAdmin/IMarketAdmin";
-import DescuentosTab from "@/modules/marketAdmin/components/market-admin-client-detail/DescuentosTab";
+import PromocionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/PromocionesTab";
 import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/DireccionesTab";
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
 import ProductosTab from "@/modules/marketAdmin/components/market-admin-client-detail/ProductosTab";
@@ -53,10 +55,10 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   const { id } = params;
   const { showMessage } = useMessageApi();
 
-  // Tab — new order: descuentos, direcciones, usuarios, productos
+  // Tab — new order: promociones, direcciones, usuarios, productos
   const [activeTab, setActiveTab] = useState<
-    "descuentos" | "direcciones" | "usuarios" | "productos" | "configuraciones"
-  >("descuentos");
+    "promociones" | "direcciones" | "usuarios" | "productos" | "configuraciones"
+  >("promociones");
 
   const { data: cliente, isLoading, error } = useMarketAdminClientDetail(id);
   const {
@@ -71,11 +73,12 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     mutate: mutateConfig
   } = useMarketAdminClientConfig(id);
 
-  // Los tabs de descuentos y productos siguen sin endpoint: se mantienen en mocks.
+  // Los tabs de promociones y productos siguen sin endpoint: se mantienen en mocks.
   const [productos, setProductos] = useState<ProductoLinea[]>(PRODUCTOS_INIT[id] ?? []);
   const [negociaciones, setNegociaciones] = useState<Negociacion[]>(
     NEGOCIACIONES_INIT[id] ?? DEFAULT_NEGOCIACIONES
   );
+  const [bonificados, setBonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
 
   // ── Mutation handlers ─────────────────────────────────────────────────────
   // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
@@ -140,6 +143,17 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
   const createNegociacion = (nueva: Negociacion) => setNegociaciones((prev) => [nueva, ...prev]);
 
+  const createBonificado = (nuevo: Omit<BonifManual, "id" | "estado" | "creadoEn">) =>
+    setBonificados((prev) => [
+      {
+        ...nuevo,
+        id: `bm${Date.now()}`,
+        estado: "pendiente",
+        creadoEn: new Date().toISOString().slice(0, 10)
+      },
+      ...prev
+    ]);
+
   const toggleProducto = (pid: string) =>
     setProductos((prev) => prev.map((p) => (p.id === pid ? { ...p, activo: !p.activo } : p)));
 
@@ -171,7 +185,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   const usuariosCount = isLoadingUsuarios ? cliente.users_count : usuarios.length;
 
   const TABS = [
-    { id: "descuentos", label: "Descuentos", icon: Tag },
+    { id: "promociones", label: "Promociones", icon: Tag },
     { id: "direcciones", label: `Direcciones (${direccionesCount})`, icon: MapPin },
     { id: "usuarios", label: `Usuarios (${usuariosCount})`, icon: Users },
     { id: "productos", label: "Productos", icon: Package },
@@ -255,8 +269,13 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
         {/* Tab content */}
         <div className="p-6">
-          {activeTab === "descuentos" && (
-            <DescuentosTab negociaciones={negociaciones} onCreate={createNegociacion} />
+          {activeTab === "promociones" && (
+            <PromocionesTab
+              negociaciones={negociaciones}
+              onCreate={createNegociacion}
+              bonificados={bonificados}
+              onCreateBonificado={createBonificado}
+            />
           )}
           {activeTab === "direcciones" && (
             <DireccionesTab

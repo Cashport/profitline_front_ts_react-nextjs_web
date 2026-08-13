@@ -1,5 +1,6 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
+  IAssignClientToUserBody,
   ICreateManualBonusBody,
   ICreateMarketAdminClientAddressBody,
   ICreatePromotionBody,
@@ -143,6 +144,41 @@ export const updateMarketAdminClientConfig = async (
     return response.data;
   } catch (error) {
     console.error("Error al actualizar la configuración del cliente:", error);
+    throw error;
+  }
+};
+
+// ── Usuarios ────────────────────────────────────────────────────────────────
+
+// POST /marketplace-admin/users/:id/clients — crea el grupo personal si no existe
+export const assignClientToMarketAdminUser = async (
+  userId: string | number,
+  body: IAssignClientToUserBody
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.post(
+      `/marketplace-admin/users/${userId}/clients`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al asignar el cliente al usuario:", error);
+    throw error;
+  }
+};
+
+// DELETE /marketplace-admin/users/:id/clients/:client_nit
+export const removeClientFromMarketAdminUser = async (
+  userId: string | number,
+  clientNit: string
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.delete(
+      `/marketplace-admin/users/${userId}/clients/${clientNit}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al quitar el cliente del usuario:", error);
     throw error;
   }
 };

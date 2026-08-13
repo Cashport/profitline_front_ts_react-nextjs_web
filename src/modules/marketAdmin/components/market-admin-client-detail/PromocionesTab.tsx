@@ -5,11 +5,20 @@ import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip, Upload, Eye } from "lucide-react";
 import ModalNuevaNegociacion from "@/modules/marketAdmin/components/market-admin-client-detail/ModalNuevaNegociacion";
-import { type Negociacion } from "@/modules/marketAdmin/mocks/clientDetail";
+import ModalCrearDescuento from "@/modules/marketAdmin/components/market-admin-client-detail/ModalCrearDescuento";
+import { ESTADO_CONFIG } from "@/modules/marketAdmin/components/MarketAdminManualBonus/estadoConfig";
+import {
+  BLANK_BONIF,
+  PRODUCTOS_BONIFICADOS_LIST,
+  type BonifManual,
+  type Negociacion
+} from "@/modules/marketAdmin/mocks/clientDetail";
 
 type Props = {
   negociaciones: Negociacion[];
   onCreate: (nueva: Negociacion) => void;
+  bonificados: BonifManual[];
+  onCreateBonificado: (nuevo: Omit<BonifManual, "id" | "estado" | "creadoEn">) => void;
 };
 
 const estadoBadgeClass = (estado: Negociacion["estado"]) =>
@@ -21,9 +30,16 @@ const estadoBadgeClass = (estado: Negociacion["estado"]) =>
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function DescuentosTab({ negociaciones, onCreate }: Props) {
+export default function PromocionesTab({
+  negociaciones,
+  onCreate,
+  bonificados,
+  onCreateBonificado
+}: Props) {
   const [tooltipNeg, setTooltipNeg] = useState<string | null>(null);
+  const [showCrearModal, setShowCrearModal] = useState(false);
   const [showNegModal, setShowNegModal] = useState(false);
+  const [bonifForm, setBonifForm] = useState(BLANK_BONIF);
 
   useEffect(() => {
     if (!tooltipNeg) return;
@@ -31,6 +47,15 @@ export default function DescuentosTab({ negociaciones, onCreate }: Props) {
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, [tooltipNeg]);
+
+  const saveBonif = () => {
+    onCreateBonificado({
+      producto: bonifForm.producto,
+      unidades: bonifForm.unidades,
+      nota: bonifForm.nota
+    });
+    setBonifForm(BLANK_BONIF);
+  };
 
   const columns: ColumnsType<Negociacion> = [
     {
@@ -161,14 +186,61 @@ export default function DescuentosTab({ negociaciones, onCreate }: Props) {
     }
   ];
 
+  const bonifColumns: ColumnsType<BonifManual> = [
+    {
+      title: "Producto",
+      dataIndex: "producto",
+      key: "producto",
+      onHeaderCell: headerCell,
+      render: (v: string) => <span className="text-sm text-[#141414] truncate">{v}</span>
+    },
+    {
+      title: "Unidades",
+      dataIndex: "unidades",
+      key: "unidades",
+      width: 100,
+      onHeaderCell: headerCell,
+      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
+    },
+    {
+      title: "Estado",
+      dataIndex: "estado",
+      key: "estado",
+      width: 120,
+      onHeaderCell: headerCell,
+      render: (estado: BonifManual["estado"]) => (
+        <span
+          className={`px-2 py-1 text-[11px] font-semibold rounded-lg w-fit ${ESTADO_CONFIG[estado].className}`}
+        >
+          {ESTADO_CONFIG[estado].label}
+        </span>
+      )
+    },
+    {
+      title: "Fecha",
+      dataIndex: "creadoEn",
+      key: "creadoEn",
+      width: 120,
+      onHeaderCell: headerCell,
+      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+    },
+    {
+      title: "Nota",
+      dataIndex: "nota",
+      key: "nota",
+      onHeaderCell: headerCell,
+      render: (v: string) => <span className="text-sm text-[#999999] truncate">{v || "—"}</span>
+    }
+  ];
+
   return (
     <div>
       <div className="flex items-center justify-end mb-4">
         <button
-          onClick={() => setShowNegModal(true)}
+          onClick={() => setShowCrearModal(true)}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
         >
-          <Plus size={14} /> Crear negociación
+          <Plus size={14} /> Crear descuento
         </button>
       </div>
 
@@ -179,6 +251,78 @@ export default function DescuentosTab({ negociaciones, onCreate }: Props) {
         rowKey="id"
         pagination={false}
         locale={{ emptyText: "No hay negociaciones creadas aún." }}
+      />
+
+      {/* ── Bonificados manuales ── */}
+      <div className="mt-8">
+        <p className="text-sm font-bold text-[#141414] mb-4">Bonificados manuales</p>
+
+        <div className="border border-[#E8E8E8] rounded-xl overflow-hidden mb-4">
+          <div className="bg-[#FAFAFA] px-4 py-3 border-b border-[#EEEEEE]">
+            <p className="text-xs font-semibold text-[#141414]">Nueva asignación</p>
+          </div>
+          <div className="p-4 grid grid-cols-[2fr_80px_1fr_auto] gap-3 items-end">
+            <div>
+              <label className="text-xs font-medium text-[#666666] block mb-1">
+                Producto bonificado
+              </label>
+              <select
+                value={bonifForm.producto}
+                onChange={(e) => setBonifForm((f) => ({ ...f, producto: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
+              >
+                {PRODUCTOS_BONIFICADOS_LIST.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-[#666666] block mb-1">Unidades</label>
+              <input
+                type="number"
+                min={1}
+                value={bonifForm.unidades}
+                onChange={(e) =>
+                  setBonifForm((f) => ({ ...f, unidades: parseInt(e.target.value) || 1 }))
+                }
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-[#666666] block mb-1">
+                Nota interna (opcional)
+              </label>
+              <input
+                type="text"
+                placeholder="Motivo..."
+                value={bonifForm.nota}
+                onChange={(e) => setBonifForm((f) => ({ ...f, nota: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
+            <button
+              onClick={saveBonif}
+              className="text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors whitespace-nowrap"
+            >
+              Enviar a aprobación
+            </button>
+          </div>
+        </div>
+
+        {bonificados.length > 0 && (
+          <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
+            <Table columns={bonifColumns} dataSource={bonificados} rowKey="id" pagination={false} />
+          </div>
+        )}
+      </div>
+
+      <ModalCrearDescuento
+        open={showCrearModal}
+        onClose={() => setShowCrearModal(false)}
+        onSelectPromocion={() => {
+          setShowCrearModal(false);
+          setShowNegModal(true);
+        }}
       />
 
       {showNegModal && (

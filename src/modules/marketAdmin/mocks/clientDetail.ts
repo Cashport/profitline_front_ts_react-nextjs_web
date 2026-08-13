@@ -1,5 +1,7 @@
 // Mock data + tipos para la vista de detalle de cliente del Market Admin.
 
+import { EstadoAprobacion } from "@/types/marketAdmin/IMarketAdmin";
+
 export const LINEAS_CATALOGO: Record<string, { id: string; nombre: string }[]> = {
   Estética: [
     { id: "e1", nombre: "Restylane Volyme 1ml" },
@@ -132,4 +134,51 @@ export const BLANK_NEG: NegociacionForm = {
   adjunto: null,
   descuentoGlobal: "",
   items: []
+};
+
+// ── Bonificados manuales ────────────────────────────────────────────────────
+
+export const PRODUCTOS_BONIFICADOS_LIST = [
+  "SCULPTRA INJPRO 2 VIAL",
+  "RESTYLANE SB VITAL LIDO 1ml",
+  "RESTYLANE VOLYME 1ml",
+  "RESTYLANE REFYNE 1ml",
+  "REST LYFT LIDO 1ml",
+  "RESTYLANE LIDOCAINA 1ml",
+  "RESTYLANE KYSSE 1ml",
+  "RESTYLANE DEFYNE 1ml"
+];
+
+export type BonifManual = {
+  id: string;
+  producto: string;
+  unidades: number;
+  estado: EstadoAprobacion;
+  creadoEn: string;
+  nota: string;
+};
+
+export const BONIFICADOS_MANUALES_INIT: BonifManual[] = [
+  {
+    id: "bm1",
+    producto: "SCULPTRA INJPRO 2 VIAL",
+    unidades: 5,
+    estado: "aprobado",
+    creadoEn: "2026-04-10",
+    nota: "Premio Q1"
+  },
+  {
+    id: "bm2",
+    producto: "RESTYLANE KYSSE 1ml",
+    unidades: 3,
+    estado: "pendiente",
+    creadoEn: "2026-06-01",
+    nota: ""
+  }
+];
+
+export const BLANK_BONIF = {
+  producto: PRODUCTOS_BONIFICADOS_LIST[0],
+  unidades: 1,
+  nota: ""
 };

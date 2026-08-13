@@ -321,3 +321,45 @@ export interface IMarketAdminClientConfig {
 }
 
 export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
+
+// ── Usuarios del marketplace (/marketplace-admin/users) ─────────────────────
+
+export interface IUseMarketAdminUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string; // busca en name y email
+  role_id?: number;
+  status?: 1 | 0; // 1 → activo, 0 → inactivo (company_assigments.is_active)
+}
+
+// GET /users — item del listado
+export interface IMarketAdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role_id: number;
+  role_name: string;
+  clients_count: number; // clientes del grupo personal (special_type=4)
+  is_active: 1 | 0;
+}
+
+// GET /users/:id — el detalle solo devuelve nit y nombre por cliente
+export interface IMarketAdminUserClient {
+  nit: string;
+  client_name: string;
+}
+
+export interface IMarketAdminUserDetail {
+  id: number;
+  name: string;
+  email: string;
+  role_id: number;
+  role_name: string;
+  is_active: 1 | 0;
+  clients: IMarketAdminUserClient[];
+}
+
+// POST /users/:id/clients — el grupo personal lo crea el backend si no existe
+export interface IAssignClientToUserBody {
+  client_nit: string;
+}
