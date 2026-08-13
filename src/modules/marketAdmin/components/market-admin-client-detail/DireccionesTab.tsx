@@ -5,43 +5,77 @@ import { Table, Popconfirm } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import ModalDireccion from "@/modules/marketAdmin/components/market-admin-client-detail/ModalDireccion";
-import { type Direccion } from "@/modules/marketAdmin/mocks/clientDetail";
+import {
+  ICreateMarketAdminClientAddressBody,
+  IMarketAdminClientAddress
+} from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
-  direcciones: Direccion[];
-  onAdd: (values: Omit<Direccion, "id">) => void;
-  onUpdate: (id: string, values: Omit<Direccion, "id">) => void;
-  onDelete: (id: string) => void;
+  direcciones: IMarketAdminClientAddress[];
+  isLoading?: boolean;
+  onAdd: (values: ICreateMarketAdminClientAddressBody) => Promise<void>;
+  onUpdate: (id: number, values: ICreateMarketAdminClientAddressBody) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
 };
 
-type ModalState = { mode: "new" } | { mode: "edit"; direccion: Direccion } | null;
+type ModalState = { mode: "new" } | { mode: "edit"; direccion: IMarketAdminClientAddress } | null;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function DireccionesTab({ direcciones, onAdd, onUpdate, onDelete }: Props) {
+export default function DireccionesTab({
+  direcciones,
+  isLoading,
+  onAdd,
+  onUpdate,
+  onDelete
+}: Props) {
   const [modal, setModal] = useState<ModalState>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const columns: ColumnsType<Direccion> = [
+  const handleDelete = async (id: number) => {
+    setDeletingId(id);
+    try {
+      await onDelete(id);
+    } catch {
+      // El contenedor ya muestra el mensaje de error.
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const columns: ColumnsType<IMarketAdminClientAddress> = [
     {
       title: "Dirección",
-      dataIndex: "direccion",
-      key: "direccion",
+      dataIndex: "address",
+      key: "address",
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+      render: (v: string, d) => (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[#141414]">{v}</span>
+          {d.is_principal === 1 && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#F0F7E1] text-[#5A7A00]">
+              Principal
+            </span>
+          )}
+        </div>
+      )
     },
     {
       title: "Ciudad",
-      dataIndex: "ciudad",
-      key: "ciudad",
+      dataIndex: "city",
+      key: "city",
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+      render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
     },
     {
       title: "Bodega",
-      dataIndex: "bodega",
       key: "bodega",
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+      render: (_, d) => (
+        <span className="text-sm text-[#141414]">
+          {[d.warehouse_code, d.warehouse_description].filter(Boolean).join(" — ") || "—"}
+        </span>
+      )
     },
     {
       title: "",
@@ -58,12 +92,12 @@ export default function DireccionesTab({ direcciones, onAdd, onUpdate, onDelete 
           </button>
           <Popconfirm
             title="Eliminar dirección"
-            description={`¿Eliminar "${d.direccion}"?`}
+            description={`¿Eliminar "${d.address}"?`}
             okText="Eliminar"
             cancelText="Cancelar"
-            okButtonProps={{ danger: true }}
+            okButtonProps={{ danger: true, loading: deletingId === d.id }}
             placement="topRight"
-            onConfirm={() => onDelete(d.id)}
+            onConfirm={() => handleDelete(d.id)}
           >
             <button className="w-7 h-7 rounded-lg text-[#AAAAAA] hover:text-[#E53E3E] hover:bg-[#FFF5F5] flex items-center justify-center transition-colors">
               <Trash2 size={13} />
@@ -92,6 +126,7 @@ export default function DireccionesTab({ direcciones, onAdd, onUpdate, onDelete 
         columns={columns}
         dataSource={direcciones}
         rowKey="id"
+        loading={isLoading}
         pagination={false}
         locale={{ emptyText: "No hay direcciones registradas." }}
       />
@@ -101,9 +136,9 @@ export default function DireccionesTab({ direcciones, onAdd, onUpdate, onDelete 
           mode={modal.mode}
           initial={modal.mode === "edit" ? modal.direccion : undefined}
           onClose={() => setModal(null)}
-          onSave={(values) => {
-            if (modal.mode === "new") onAdd(values);
-            else onUpdate(modal.direccion.id, values);
+          onSave={async (values) => {
+            if (modal.mode === "new") await onAdd(values);
+            else await onUpdate(modal.direccion.id, values);
             setModal(null);
           }}
         />

@@ -47,21 +47,6 @@ export const PRODUCTOS_INIT: Record<string, ProductoLinea[]> = {
   ]
 };
 
-export type Direccion = { id: string; direccion: string; ciudad: string; bodega: string };
-
-export const DIRECCIONES_CLIENTE: Record<string, Direccion[]> = {
-  c1: [
-    { id: "dir1", direccion: "Calle 127 # 20-45", ciudad: "Bogotá", bodega: "Bodega Norte" },
-    { id: "dir2", direccion: "Carrera 7 # 32-18 Of 301", ciudad: "Bogotá", bodega: "Bodega Sur" },
-    { id: "dir3", direccion: "Av. El Dorado # 68A-51", ciudad: "Bogotá", bodega: "Bodega Centro" }
-  ],
-  c2: [
-    { id: "dir1", direccion: "Calle 10 # 40-20", ciudad: "Medellín", bodega: "Bodega Poblado" },
-    { id: "dir2", direccion: "Carrera 43A # 1-50", ciudad: "Medellín", bodega: "Bodega Centro" }
-  ]
-};
-export const DEFAULT_DIRECCIONES: Direccion[] = [];
-
 export type NegLineaItem = {
   productoId: string;
   productoNombre: string;
@@ -141,24 +126,6 @@ export const NEGOCIACIONES_INIT: Record<string, Negociacion[]> = {
 };
 export const DEFAULT_NEGOCIACIONES: Negociacion[] = [];
 
-export type UsuarioCliente = { id: string; nombre: string; email: string; rol: string };
-
-export const USUARIOS_CLIENTE: Record<string, UsuarioCliente[]> = {
-  c1: [
-    { id: "u1", nombre: "Andrea Torres", email: "andrea@pielsana.com", rol: "Comprador" },
-    { id: "u2", nombre: "Jorge Martínez", email: "jorge@pielsana.com", rol: "Admin" },
-    { id: "u3", nombre: "Laura Gómez", email: "laura@pielsana.com", rol: "Comprador" }
-  ],
-  c2: [
-    { id: "u1", nombre: "Camila Ríos", email: "camila@esteticavanzada.com", rol: "Admin" },
-    { id: "u2", nombre: "Sebastián Ruiz", email: "sebastian@esteticavanzada.com", rol: "Comprador" }
-  ]
-};
-export const DEFAULT_USUARIOS: UsuarioCliente[] = [
-  { id: "u1", nombre: "Usuario Demo", email: "demo@cliente.com", rol: "Comprador" }
-];
-
-export const BLANK_DIR: Omit<Direccion, "id"> = { direccion: "", ciudad: "", bodega: "" };
 export const BLANK_NEG: NegociacionForm = {
   nombre: "",
   vigencia: "",

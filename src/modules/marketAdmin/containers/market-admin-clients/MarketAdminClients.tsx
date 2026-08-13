@@ -5,12 +5,12 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Search, Eye, ChevronLeft, MoreHorizontal } from "lucide-react";
-import {
-  CLIENTES_MOCK,
-  LINEA_COLORS,
-  lineaAbrev,
-  type ClienteMock
-} from "@/modules/marketAdmin/mocks/clients";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useMessageApi } from "@/context/MessageContext";
+import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
+import { updateMarketAdminClientsBatch } from "@/services/marketAdmin/marketAdmin";
+import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
+import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 
 function LineasBadges({ lineas }: { lineas: string[] }) {
   return (
@@ -42,13 +42,43 @@ const PAGE_SIZE = 10;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
+const splitLineas = (lineas: string | null) =>
+  lineas
+    ?.split(",")
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+
 export default function MarketAdminClients() {
+  const { showMessage } = useMessageApi();
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState("Todos");
+  const [lineaFilter, setLineaFilter] = useState("Todas");
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
+  const [isRunningAccion, setIsRunningAccion] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
+
+  const debouncedSearch = useDebounce(search, 400);
+
+  const {
+    data: clientes,
+    pagination,
+    isLoading,
+    mutate
+  } = useMarketAdminClients({
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch,
+    status: estadoFilter === "Todos" ? undefined : estadoFilter === "Activo" ? 1 : 0,
+    linea: lineaFilter === "Todas" ? undefined : lineaFilter
+  });
+
+  // Opciones tomadas de la página actual (mismo criterio que el listado de productos).
+  const lineas = useMemo(
+    () => Array.from(new Set(clientes.flatMap((c) => splitLineas(c.lineas)))),
+    [clientes]
+  );
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -59,20 +89,31 @@ export default function MarketAdminClients() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      CLIENTES_MOCK.filter((c) => {
-        const matchSearch =
-          c.nombre.toLowerCase().includes(search.toLowerCase()) ||
-          c.nit.includes(search) ||
-          c.ciudad.toLowerCase().includes(search.toLowerCase());
-        const matchEstado = estadoFilter === "Todos" || c.estado === estadoFilter;
-        return matchSearch && matchEstado;
-      }),
-    [search, estadoFilter]
-  );
+  const activos = clientes.filter((c) => c.is_active === 1).length;
 
-  const activos = filtered.filter((c) => c.estado === "Activo").length;
+  async function runAccionEstado(action: "activate" | "inactivate") {
+    setShowAcciones(false);
+    try {
+      setIsRunningAccion(true);
+      await updateMarketAdminClientsBatch({
+        client_ids: selectedRowKeys.map(String),
+        action
+      });
+      await mutate();
+      setSelectedRowKeys([]);
+      showMessage(
+        "success",
+        `${selectedRowKeys.length} cliente(s) ${action === "activate" ? "activados" : "inactivados"} correctamente.`
+      );
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Ocurrió un error al actualizar los clientes."
+      );
+    } finally {
+      setIsRunningAccion(false);
+    }
+  }
 
   function runAccion(accion: string) {
     setShowAcciones(false);
@@ -80,38 +121,38 @@ export default function MarketAdminClients() {
     alert(`Acción "${accion}" aplicada a ${selectedRowKeys.length} cliente(s).`);
   }
 
-  const columns: ColumnsType<ClienteMock> = [
+  const columns: ColumnsType<IMarketAdminClient> = [
     {
       title: "Cliente",
-      dataIndex: "nombre",
-      key: "nombre",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      dataIndex: "client_name",
+      key: "client_name",
+      sorter: (a, b) => a.client_name.localeCompare(b.client_name),
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "Ciudad",
-      dataIndex: "ciudad",
-      key: "ciudad",
-      sorter: (a, b) => a.ciudad.localeCompare(b.ciudad),
+      dataIndex: "city",
+      key: "city",
+      sorter: (a, b) => (a.city ?? "").localeCompare(b.city ?? ""),
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
+      render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
     },
     {
       title: "Usuarios",
-      dataIndex: "usuarios",
-      key: "usuarios",
+      dataIndex: "usuarios_count",
+      key: "usuarios_count",
       width: 110,
-      sorter: (a, b) => a.usuarios - b.usuarios,
+      sorter: (a, b) => a.usuarios_count - b.usuarios_count,
       onHeaderCell: headerCell,
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "Productos",
-      dataIndex: "productos",
-      key: "productos",
+      dataIndex: "productos_count",
+      key: "productos_count",
       width: 110,
-      sorter: (a, b) => a.productos - b.productos,
+      sorter: (a, b) => a.productos_count - b.productos_count,
       onHeaderCell: headerCell,
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
@@ -121,22 +162,22 @@ export default function MarketAdminClients() {
       key: "lineas",
       width: 150,
       onHeaderCell: headerCell,
-      render: (lineas: string[]) => <LineasBadges lineas={lineas} />
+      render: (lineas: string | null) => <LineasBadges lineas={splitLineas(lineas)} />
     },
     {
       title: "Estado",
-      dataIndex: "estado",
-      key: "estado",
+      dataIndex: "is_active",
+      key: "is_active",
       width: 100,
-      sorter: (a, b) => a.estado.localeCompare(b.estado),
+      sorter: (a, b) => Number(a.is_active) - Number(b.is_active),
       onHeaderCell: headerCell,
-      render: (estado: ClienteMock["estado"]) => (
+      render: (isActive: 1 | 0) => (
         <span
           className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
-            estado === "Activo" ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
+            isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
           }`}
         >
-          {estado}
+          {isActive === 1 ? "Activo" : "Inactivo"}
         </span>
       )
     },
@@ -147,7 +188,7 @@ export default function MarketAdminClients() {
       onHeaderCell: headerCell,
       render: (_, c) => (
         <Link
-          href={`/market-admin/clientes/${c.id}`}
+          href={`/market-admin/clientes/${c.client_id}`}
           onClick={(e) => e.stopPropagation()}
           className="flex items-center justify-center w-8 h-8 rounded-lg text-[#BBBBBB] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors"
         >
@@ -187,6 +228,7 @@ export default function MarketAdminClients() {
           <div className="relative" ref={accionesRef}>
             <button
               onClick={() => selectedRowKeys.length > 0 && setShowAcciones((v) => !v)}
+              disabled={isRunningAccion}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
                 selectedRowKeys.length > 0
                   ? "border-[#CCCCCC] bg-white text-[#141414] hover:bg-[#F5F5F5]"
@@ -204,13 +246,13 @@ export default function MarketAdminClients() {
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
-                  onClick={() => runAccion("Activar")}
+                  onClick={() => runAccionEstado("activate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
                   Activar
                 </button>
                 <button
-                  onClick={() => runAccion("Inactivar")}
+                  onClick={() => runAccionEstado("inactivate")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
                   Inactivar
@@ -225,6 +267,21 @@ export default function MarketAdminClients() {
               </div>
             )}
           </div>
+          <select
+            value={lineaFilter}
+            onChange={(e) => {
+              setLineaFilter(e.target.value);
+              setPage(1);
+            }}
+            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
+          >
+            <option value="Todas">Línea</option>
+            {lineas.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
           <select
             value={estadoFilter}
             onChange={(e) => {
@@ -241,8 +298,9 @@ export default function MarketAdminClients() {
 
         <Table
           columns={columns}
-          dataSource={filtered}
-          rowKey="id"
+          dataSource={clientes}
+          rowKey="client_id"
+          loading={isLoading || isRunningAccion}
           showSorterTooltip={false}
           locale={{ emptyText: "No se encontraron clientes." }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
@@ -251,9 +309,9 @@ export default function MarketAdminClients() {
               // The selection checkbox handles its own toggle — don't double-toggle
               if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
               setSelectedRowKeys((prev) =>
-                prev.includes(record.id)
-                  ? prev.filter((k) => k !== record.id)
-                  : [...prev, record.id]
+                prev.includes(record.client_id)
+                  ? prev.filter((k) => k !== record.client_id)
+                  : [...prev, record.client_id]
               );
             },
             className: "cursor-pointer"
@@ -261,14 +319,15 @@ export default function MarketAdminClients() {
           pagination={{
             current: page,
             pageSize: PAGE_SIZE,
+            total: pagination.totalRows,
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
               `Mostrando ${range[0]}–${range[1]} de ${total} clientes · ${activos} activos`
           }}
-          onChange={(pag, _filters, _sorter, extra) =>
-            setPage(extra.action === "paginate" ? pag.current ?? 1 : 1)
-          }
+          onChange={(pag, _filters, _sorter, extra) => {
+            if (extra.action === "paginate") setPage(pag.current ?? 1);
+          }}
         />
       </div>
     </div>
