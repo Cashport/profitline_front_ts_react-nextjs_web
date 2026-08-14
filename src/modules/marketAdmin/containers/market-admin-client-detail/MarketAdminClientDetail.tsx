@@ -9,17 +9,15 @@ import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 import {
   BONIFICADOS_MANUALES_INIT,
   DEFAULT_NEGOCIACIONES,
-  LINEAS_CATALOGO,
   NEGOCIACIONES_INIT,
-  PRODUCTOS_INIT,
   type BonifManual,
-  type Negociacion,
-  type ProductoLinea
+  type Negociacion
 } from "@/modules/marketAdmin/mocks/clientDetail";
 import { useMarketAdminClientDetail } from "@/modules/marketAdmin/hooks/useMarketAdminClientDetail";
 import { useMarketAdminClientAddresses } from "@/modules/marketAdmin/hooks/useMarketAdminClientAddresses";
 import { useMarketAdminClientUsers } from "@/modules/marketAdmin/hooks/useMarketAdminClientUsers";
 import { useMarketAdminClientConfig } from "@/modules/marketAdmin/hooks/useMarketAdminClientConfig";
+import { useMarketAdminClientProducts } from "@/modules/marketAdmin/hooks/useMarketAdminClientProducts";
 import {
   createMarketAdminClientAddress,
   deleteMarketAdminClientAddress,
@@ -72,9 +70,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     isLoading: isLoadingConfig,
     mutate: mutateConfig
   } = useMarketAdminClientConfig(id);
+  const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(id);
 
-  // Los tabs de promociones y productos siguen sin endpoint: se mantienen en mocks.
-  const [productos, setProductos] = useState<ProductoLinea[]>(PRODUCTOS_INIT[id] ?? []);
+  // El tab de promociones sigue sin endpoint: se mantiene en mocks.
   const [negociaciones, setNegociaciones] = useState<Negociacion[]>(
     NEGOCIACIONES_INIT[id] ?? DEFAULT_NEGOCIACIONES
   );
@@ -154,17 +152,6 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       ...prev
     ]);
 
-  const toggleProducto = (pid: string) =>
-    setProductos((prev) => prev.map((p) => (p.id === pid ? { ...p, activo: !p.activo } : p)));
-
-  const agregarLinea = (linea: string) => {
-    if (productos.some((p) => p.linea === linea)) return;
-    setProductos((prev) => [
-      ...prev,
-      ...(LINEAS_CATALOGO[linea] ?? []).map((p) => ({ ...p, linea, activo: true }))
-    ]);
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -183,12 +170,15 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
   const direccionesCount = isLoadingDirecciones ? cliente.addresses_count : direcciones.length;
   const usuariosCount = isLoadingUsuarios ? cliente.users_count : usuarios.length;
+  const productosCount = isLoadingProductos
+    ? cliente.products_count
+    : productos.reduce((n, c) => n + c.products.length, 0);
 
   const TABS = [
     { id: "promociones", label: "Promociones", icon: Tag },
     { id: "direcciones", label: `Direcciones (${direccionesCount})`, icon: MapPin },
     { id: "usuarios", label: `Usuarios (${usuariosCount})`, icon: Users },
-    { id: "productos", label: "Productos", icon: Package },
+    { id: "productos", label: `Productos (${productosCount})`, icon: Package },
     { id: "configuraciones", label: "Configuraciones", icon: Settings }
   ];
 
@@ -290,11 +280,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
             <UsuariosTab usuarios={usuarios} isLoading={isLoadingUsuarios} />
           )}
           {activeTab === "productos" && (
-            <ProductosTab
-              productos={productos}
-              onToggle={toggleProducto}
-              onAgregarLinea={agregarLinea}
-            />
+            <ProductosTab categorias={productos} isLoading={isLoadingProductos} />
           )}
           {activeTab === "configuraciones" && (
             <ConfiguracionesTab config={config} isLoading={isLoadingConfig} onSave={saveConfig} />

@@ -311,6 +311,22 @@ export interface IMarketAdminClientUser {
   role_name: string;
 }
 
+// GET /clients/:client_id/products — productos del pricelist del cliente, agrupados por categoría
+export interface IMarketAdminClientProduct {
+  id: number;
+  SKU: string; // el backend lo envía en mayúsculas
+  description: string;
+  price: number;
+  price_taxes: number;
+  line_name: string;
+}
+
+export interface IMarketAdminClientProductCategory {
+  category_id: number;
+  category: string;
+  products: IMarketAdminClientProduct[];
+}
+
 // GET/PUT /clients/:client_id/config
 export interface IMarketAdminClientConfig {
   quota: number | null;

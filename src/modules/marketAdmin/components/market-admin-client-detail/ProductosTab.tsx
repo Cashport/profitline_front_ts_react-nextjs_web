@@ -2,13 +2,20 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import ProfitLoader from "@/components/ui/profit-loader";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
-import { LINEAS_CATALOGO, type ProductoLinea } from "@/modules/marketAdmin/mocks/clientDetail";
+import { LINEAS_CATALOGO } from "@/modules/marketAdmin/mocks/clientDetail";
+import { IMarketAdminClientProductCategory } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
-  productos: ProductoLinea[];
-  onToggle: (id: string) => void;
-  onAgregarLinea: (linea: string) => void;
+  categorias: IMarketAdminClientProductCategory[];
+  isLoading?: boolean;
+};
+
+type GrupoProductos = {
+  key: string;
+  nombre: string;
+  productos: { key: string; nombre: string }[];
 };
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
@@ -24,21 +31,53 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   );
 }
 
-export default function ProductosTab({ productos, onToggle, onAgregarLinea }: Props) {
+export default function ProductosTab({ categorias, isLoading }: Props) {
   const [showLineaPicker, setShowLineaPicker] = useState(false);
+  // Estado efímero: el endpoint no expone activación por producto ni alta de líneas.
+  const [inactivos, setInactivos] = useState<Set<string>>(new Set());
+  const [lineasLocales, setLineasLocales] = useState<string[]>([]);
 
-  const grupos = productos.reduce<Record<string, ProductoLinea[]>>((acc, p) => {
-    (acc[p.linea] = acc[p.linea] ?? []).push(p);
-    return acc;
-  }, {});
-  const lineasActuales = Object.keys(grupos);
-  const lineasDisponibles = Object.keys(LINEAS_CATALOGO).filter((l) => !lineasActuales.includes(l));
+  const grupos: GrupoProductos[] = [
+    ...categorias.map((c) => ({
+      key: `cat-${c.category_id}`,
+      nombre: c.category,
+      productos: c.products.map((p) => ({ key: `api-${p.id}`, nombre: p.description }))
+    })),
+    ...lineasLocales.map((l) => ({
+      key: `linea-${l}`,
+      nombre: l,
+      productos: (LINEAS_CATALOGO[l] ?? []).map((p) => ({ key: `local-${p.id}`, nombre: p.nombre }))
+    }))
+  ];
+
+  const totalProductos = grupos.reduce((n, g) => n + g.productos.length, 0);
+  const lineasDisponibles = Object.keys(LINEAS_CATALOGO).filter(
+    (l) => !grupos.some((g) => g.nombre === l)
+  );
+
+  const toggleProducto = (key: string) =>
+    setInactivos((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const agregarLinea = (linea: string) => setLineasLocales((prev) => [...prev, linea]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <ProfitLoader />
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-[#666666]">
-          {productos.length} productos en {lineasActuales.length} líneas
+          {totalProductos} productos en {grupos.length} categorías
         </p>
         <div className="relative">
           <button
@@ -58,7 +97,7 @@ export default function ProductosTab({ productos, onToggle, onAgregarLinea }: Pr
                     <button
                       key={l}
                       onClick={() => {
-                        onAgregarLinea(l);
+                        agregarLinea(l);
                         setShowLineaPicker(false);
                       }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-[#F5F5F5] text-left transition-colors"
@@ -79,45 +118,48 @@ export default function ProductosTab({ productos, onToggle, onAgregarLinea }: Pr
         </div>
       </div>
 
-      {lineasActuales.length === 0 && (
+      {grupos.length === 0 && (
         <p className="text-sm text-[#999999] py-8 text-center">
-          No hay líneas asignadas. Agrega una línea para ver sus productos.
+          Este cliente no tiene productos disponibles.
         </p>
       )}
 
-      {lineasActuales.map((linea) => {
-        const c = LINEA_COLORS[linea] ?? { bg: "#AAAAAA", text: "#fff" };
+      {grupos.map((grupo) => {
+        const c = LINEA_COLORS[grupo.nombre] ?? { bg: "#AAAAAA", text: "#fff" };
         return (
-          <div key={linea} className="mb-5 border border-[#EEEEEE] rounded-xl overflow-hidden">
+          <div key={grupo.key} className="mb-5 border border-[#EEEEEE] rounded-xl overflow-hidden">
             <div className="flex items-center gap-2.5 px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
               <span
                 className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0"
                 style={{ backgroundColor: c.bg, color: c.text }}
               >
-                {lineaAbrev(linea)}
+                {lineaAbrev(grupo.nombre)}
               </span>
-              <span className="text-sm font-bold text-[#141414]">{linea}</span>
+              <span className="text-sm font-bold text-[#141414]">{grupo.nombre}</span>
               <span className="text-xs text-[#999999] ml-auto">
-                {grupos[linea].length} productos
+                {grupo.productos.length} productos
               </span>
             </div>
             <div className="grid grid-cols-[1fr_80px] gap-4 px-4 py-2 border-b border-[#F5F5F5]">
               <span className="text-xs font-bold text-[#141414]">Producto</span>
               <span className="text-xs font-bold text-[#141414]">Activo</span>
             </div>
-            {grupos[linea].map((p) => (
-              <div
-                key={p.id}
-                className="grid grid-cols-[1fr_80px] gap-4 px-4 py-3 border-b border-[#F5F5F5] last:border-0 items-center"
-              >
-                <span
-                  className={`text-sm ${p.activo ? "text-[#141414]" : "text-[#AAAAAA] line-through"}`}
+            {grupo.productos.map((p) => {
+              const activo = !inactivos.has(p.key);
+              return (
+                <div
+                  key={p.key}
+                  className="grid grid-cols-[1fr_80px] gap-4 px-4 py-3 border-b border-[#F5F5F5] last:border-0 items-center"
                 >
-                  {p.nombre}
-                </span>
-                <Toggle checked={p.activo} onChange={() => onToggle(p.id)} />
-              </div>
-            ))}
+                  <span
+                    className={`text-sm ${activo ? "text-[#141414]" : "text-[#AAAAAA] line-through"}`}
+                  >
+                    {p.nombre}
+                  </span>
+                  <Toggle checked={activo} onChange={() => toggleProducto(p.key)} />
+                </div>
+              );
+            })}
           </div>
         );
       })}
