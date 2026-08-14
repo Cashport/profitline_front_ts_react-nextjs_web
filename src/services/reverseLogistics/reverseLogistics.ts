@@ -2,6 +2,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IApproveReturnRequest,
   IProfit360Approval,
+  IProfit360DevolucionKpis,
   IProfit360ApprovalResumen,
   IProfit360Filters,
   IProfit360VisitsResponse,
@@ -127,6 +128,35 @@ export const approveReturn = async (
     return response;
   } catch (error) {
     console.error("Error approving profit360 return:", error);
+    throw error;
+  }
+};
+
+export interface GetProfit360DevolucionKpisParams {
+  fromDate?: string | null;
+  toDate?: string | null;
+  clientId?: string | null;
+}
+
+// GET /integration/profit360/kpis-devolucion?clientId=&fromDate=&toDate=
+// — per-phase average days (F1 embalaje/ticket … F4 nota crédito) plus the
+// end-to-end total. All query params are optional; only send the ones the user
+// actually picked so the backend falls back to its own defaults.
+export const getProfit360DevolucionKpis = async (
+  params: GetProfit360DevolucionKpisParams = {}
+): Promise<IProfit360DevolucionKpis> => {
+  try {
+    const qs = new URLSearchParams();
+    if (params.clientId) qs.append("clientId", params.clientId);
+    if (params.fromDate) qs.append("fromDate", params.fromDate);
+    if (params.toDate) qs.append("toDate", params.toDate);
+    const query = qs.toString();
+    const response: GenericResponse<IProfit360DevolucionKpis> = await API.get(
+      `/integration/profit360/kpis-devolucion${query ? `?${query}` : ""}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching profit360 devolucion KPIs:", error);
     throw error;
   }
 };

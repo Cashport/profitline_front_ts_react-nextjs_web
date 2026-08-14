@@ -226,9 +226,13 @@ export function DevolucionesTab() {
         <FilterDevolucionesTab value={filter} onChange={handleFilterChange} />
       </div>
 
-      {/* KPI stats bar — fed the flattened rows so the existing per-estado
-          averages keep working. */}
-      <DevolucionesStatsBar returns={allRows} loading={isLoading} />
+      {/* KPI stats bar — fetches its own per-fase averages from
+          /kpis-devolucion using the same filters as the table. */}
+      <DevolucionesStatsBar
+        clientId={filter.clientId}
+        fromDate={filter.fromDate}
+        toDate={filter.toDate}
+      />
 
       {/* Table — backend pagination */}
       <div className="w-full overflow-x-auto">

@@ -363,3 +363,34 @@ export interface IApproveReturnRequest {
   causal: string;
   causalOriginal: string;
 }
+
+// ── KPIs de devolución ────────────────────────────────────────────────────────
+// GET /integration/profit360/kpis-devolucion — average days spent on each phase
+// of the devolución flow, plus the end-to-end total. `promedioDias` is what the
+// stats bar renders; min/max/muestras are available for tooltips later.
+export interface IProfit360DevolucionKpiFase {
+  codigo: string;
+  nombre: string;
+  orden: number;
+  pasoOrigen: number | null;
+  pasoDestino: number | null;
+  // Nullable: the backend omits a measure when it has no samples for it.
+  promedioDias: number | null;
+  minDias: number | null;
+  maxDias: number | null;
+  muestras: number | null;
+}
+
+export interface IProfit360DevolucionKpis {
+  fases: IProfit360DevolucionKpiFase[];
+  total: {
+    promedioDias: number | null;
+    muestras: number | null;
+  };
+  filtrosAplicados?: {
+    idProyectoProfitLine?: string;
+    clientId?: string | null;
+    fromDate?: string | null;
+    toDate?: string | null;
+  };
+}
