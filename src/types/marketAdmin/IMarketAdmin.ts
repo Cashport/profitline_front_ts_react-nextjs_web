@@ -227,3 +227,155 @@ export interface IProductInventoryItem {
   batch_expiration_date: string; // YYYY-MM-DD
   units: number; // disponibles (ya descontadas las usadas en órdenes)
 }
+
+// ── Clientes del marketplace (/marketplace-admin/clients) ───────────────────
+
+export interface IUseMarketAdminClientsParams {
+  page?: number;
+  limit?: number;
+  search?: string; // busca en client_name y client_id (NIT)
+  status?: 1 | 0; // 1 → activo, 0 → inactivo
+  linea?: string; // business unit, ej. "Institucional"
+}
+
+// GET /clients — item del listado
+export interface IMarketAdminClient {
+  client_id: string; // NIT — también es el id de ruta
+  client_name: string;
+  city: string;
+  is_active: 1 | 0;
+  usuarios_count: number;
+  productos_count: number;
+  lineas: string | null; // separadas por coma: "Institucional,Retail"
+}
+
+// GET /clients/:client_id — detalle + conteos de los tabs
+export interface IMarketAdminClientDetail {
+  nit: string;
+  client_name: string;
+  business_name: string | null;
+  phone: string | null;
+  email: string | null;
+  bu: string | null; // unidad de negocio (se muestra como "Canal")
+  nit_id: number;
+  pricelist_id: number | null;
+  warehouse_id: number | null;
+  warehouse_code: string | null;
+  warehouse_description: string | null;
+  is_active: 1 | 0;
+  quota: number | null;
+  payment_discount: number | null;
+  payment_condition_code: string | null;
+  negotiations_count: number;
+  addresses_count: number;
+  users_count: number;
+  products_count: number;
+  lineas: string | null;
+}
+
+// PUT /clients/batch — activar/inactivar en lote
+export interface IMarketAdminClientsBatchBody {
+  client_ids: string[];
+  action: "activate" | "inactivate";
+}
+
+// GET /clients/:client_id/addresses — la de code_address "00" es la principal
+export interface IMarketAdminClientAddress {
+  id: number;
+  address: string;
+  city: string;
+  warehouse_id: number | null;
+  warehouse_code: string | null;
+  warehouse_description: string | null;
+  code_address: string | null;
+  profit_center: string | null;
+  is_principal: 1 | 0;
+}
+
+// POST /clients/:client_id/addresses — nit_id y project_id los resuelve el backend
+export interface ICreateMarketAdminClientAddressBody {
+  address: string;
+  city: string;
+  warehouse_id: number | null;
+  code_address?: string; // "00" → principal
+  profit_center?: string;
+}
+
+export type IUpdateMarketAdminClientAddressBody = Partial<ICreateMarketAdminClientAddressBody>;
+
+// GET /clients/:client_id/users — usuarios con el cliente en su grupo personal
+export interface IMarketAdminClientUser {
+  id: number;
+  name: string;
+  email: string;
+  role_name: string;
+}
+
+// GET /clients/:client_id/products — productos del pricelist del cliente, agrupados por categoría
+export interface IMarketAdminClientProduct {
+  id: number;
+  SKU: string; // el backend lo envía en mayúsculas
+  description: string;
+  price: number;
+  price_taxes: number;
+  line_name: string;
+}
+
+export interface IMarketAdminClientProductCategory {
+  category_id: number;
+  category: string;
+  products: IMarketAdminClientProduct[];
+}
+
+// GET/PUT /clients/:client_id/config
+export interface IMarketAdminClientConfig {
+  quota: number | null;
+  payment_discount: number | null;
+  payment_condition_code: string | null;
+  warehouse_id: number | null;
+  pricelist_id: number | null;
+}
+
+export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
+
+// ── Usuarios del marketplace (/marketplace-admin/users) ─────────────────────
+
+export interface IUseMarketAdminUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string; // busca en name y email
+  role_id?: number;
+  status?: 1 | 0; // 1 → activo, 0 → inactivo (company_assigments.is_active)
+}
+
+// GET /users — item del listado
+export interface IMarketAdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role_id: number;
+  role_name: string;
+  clients_count: number; // clientes del grupo personal (special_type=4)
+  is_active: 1 | 0;
+}
+
+// GET /users/:id — el detalle solo devuelve nit y nombre por cliente
+export interface IMarketAdminUserClient {
+  nit: string;
+  client_name: string;
+}
+
+export interface IMarketAdminUserDetail {
+  id: number;
+  name: string;
+  email: string;
+  role_id: number;
+  role_name: string;
+  is_active: 1 | 0;
+  clients: IMarketAdminUserClient[];
+}
+
+// POST /users/:id/clients — el grupo personal lo crea el backend si no existe
+export interface IAssignClientToUserBody {
+  client_nit: string;
+}

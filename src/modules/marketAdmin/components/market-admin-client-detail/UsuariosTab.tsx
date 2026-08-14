@@ -2,22 +2,21 @@
 
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Plus, X } from "lucide-react";
-import { type UsuarioCliente } from "@/modules/marketAdmin/mocks/clientDetail";
+import { IMarketAdminClientUser } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
-  usuarios: UsuarioCliente[];
-  onRemove: (id: string) => void;
+  usuarios: IMarketAdminClientUser[];
+  isLoading?: boolean;
 };
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function UsuariosTab({ usuarios, onRemove }: Props) {
-  const columns: ColumnsType<UsuarioCliente> = [
+export default function UsuariosTab({ usuarios, isLoading }: Props) {
+  const columns: ColumnsType<IMarketAdminClientUser> = [
     {
       title: "Nombre",
-      dataIndex: "nombre",
-      key: "nombre",
+      dataIndex: "name",
+      key: "name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
@@ -30,46 +29,26 @@ export default function UsuariosTab({ usuarios, onRemove }: Props) {
     },
     {
       title: "Rol",
-      dataIndex: "rol",
-      key: "rol",
+      dataIndex: "role_name",
+      key: "role_name",
       width: 140,
       onHeaderCell: headerCell,
       render: (rol: string) => (
         <span className="text-xs bg-[#F5F5F5] text-[#666666] px-2 py-0.5 rounded font-medium w-fit">
-          {rol}
+          {rol || "—"}
         </span>
-      )
-    },
-    {
-      title: "",
-      key: "remove",
-      width: 48,
-      onHeaderCell: headerCell,
-      render: (_, u) => (
-        <button
-          onClick={() => onRemove(u.id)}
-          className="text-[#CCCCCC] hover:text-[#E53E3E] transition-colors flex items-center justify-center"
-        >
-          <X size={14} />
-        </button>
       )
     }
   ];
 
   return (
-    <>
-      <Table
-        columns={columns}
-        dataSource={usuarios}
-        rowKey="id"
-        pagination={false}
-        locale={{ emptyText: "No hay usuarios asociados." }}
-      />
-      <div className="border-t border-[#EEEEEE] mt-2 pt-3 px-4">
-        <button className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors">
-          <Plus size={14} /> Agregar usuario
-        </button>
-      </div>
-    </>
+    <Table
+      columns={columns}
+      dataSource={usuarios}
+      rowKey="id"
+      loading={isLoading}
+      pagination={false}
+      locale={{ emptyText: "No hay usuarios asociados." }}
+    />
   );
 }

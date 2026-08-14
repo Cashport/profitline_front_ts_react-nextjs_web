@@ -3,25 +3,59 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { ModalBase } from "@/modules/marketAdmin/components/modal-base/ModalBase";
-import { BLANK_DIR, type Direccion } from "@/modules/marketAdmin/mocks/clientDetail";
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
+import {
+  ICreateMarketAdminClientAddressBody,
+  IMarketAdminClientAddress
+} from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
   mode: "new" | "edit";
-  initial?: Direccion;
+  initial?: IMarketAdminClientAddress;
   onClose: () => void;
-  onSave: (values: Omit<Direccion, "id">) => void;
+  onSave: (values: ICreateMarketAdminClientAddressBody) => Promise<void>;
+};
+
+const BLANK_DIR: ICreateMarketAdminClientAddressBody = {
+  address: "",
+  city: "",
+  warehouse_id: null,
+  code_address: "",
+  profit_center: ""
 };
 
 export default function ModalDireccion({ mode, initial, onClose, onSave }: Props) {
-  const [form, setForm] = useState<Omit<Direccion, "id">>(
+  const [form, setForm] = useState<ICreateMarketAdminClientAddressBody>(
     initial
-      ? { direccion: initial.direccion, ciudad: initial.ciudad, bodega: initial.bodega }
+      ? {
+          address: initial.address,
+          city: initial.city,
+          warehouse_id: initial.warehouse_id,
+          code_address: initial.code_address ?? "",
+          profit_center: initial.profit_center ?? ""
+        }
       : BLANK_DIR
   );
+  const [isSaving, setIsSaving] = useState(false);
 
-  const save = () => {
-    if (!form.direccion.trim()) return;
-    onSave(form);
+  const isValid = form.address.trim() !== "" && form.city.trim() !== "";
+
+  const save = async () => {
+    if (!isValid) return;
+    try {
+      setIsSaving(true);
+      await onSave({
+        ...form,
+        address: form.address.trim(),
+        city: form.city.trim(),
+        code_address: form.code_address?.trim() || undefined,
+        profit_center: form.profit_center?.trim() || undefined
+      });
+    } catch {
+      // El contenedor ya muestra el mensaje de error; el modal solo se mantiene abierto.
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -39,28 +73,53 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           </button>
         </div>
         <div className="px-6 py-5 space-y-4">
-          {(["direccion", "ciudad", "bodega"] as const).map((field) => (
-            <div key={field}>
-              <label className="text-xs font-bold text-[#141414] block mb-1.5 capitalize">
-                {field === "direccion"
-                  ? "Dirección"
-                  : field.charAt(0).toUpperCase() + field.slice(1)}
-              </label>
-              <input
-                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-                placeholder={
-                  field === "direccion"
-                    ? "Ej. Calle 100 # 15-20"
-                    : field === "ciudad"
-                      ? "Ej. Bogotá"
-                      : "Ej. Bodega Norte"
-                }
-                value={form[field]}
-                onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
-                autoFocus={field === "direccion"}
-              />
-            </div>
-          ))}
+          <div>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">Dirección</label>
+            <input
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              placeholder="Ej. Calle 100 # 15-20"
+              value={form.address}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">Ciudad</label>
+            <input
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              placeholder="Ej. Bogotá"
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">Bodega</label>
+            <WarehouseSelect
+              value={form.warehouse_id ?? undefined}
+              onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
+              size="large"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">
+              Código de dirección
+            </label>
+            <input
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              placeholder='Ej. 01 — usa "00" para la dirección principal'
+              value={form.code_address ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, code_address: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">Centro de costo</label>
+            <input
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              placeholder="Opcional"
+              value={form.profit_center ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, profit_center: e.target.value }))}
+            />
+          </div>
         </div>
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#EEEEEE]">
           <button
@@ -71,10 +130,10 @@ export default function ModalDireccion({ mode, initial, onClose, onSave }: Props
           </button>
           <button
             onClick={save}
-            disabled={!form.direccion.trim()}
+            disabled={!isValid || isSaving}
             className="text-sm font-semibold bg-[#141414] text-white px-5 py-2 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {mode === "new" ? "Guardar dirección" : "Guardar cambios"}
+            {isSaving ? "Guardando..." : mode === "new" ? "Guardar dirección" : "Guardar cambios"}
           </button>
         </div>
       </div>
