@@ -21,7 +21,15 @@ interface Props {
   onCloseAllModals: () => void;
 }
 
-const invoiceStates = ["Conciliada", "Sin conciliar", "Glosado", "Devolucion", "Anulada"];
+const invoiceStates = [
+  "Conciliada",
+  "Sin conciliar",
+  "Glosado",
+  "Devolucion",
+  "Anulada",
+  "Recibida",
+  "Facturado mes actual"
+];
 
 const WalletTabChangeStatusModal: React.FC<Props> = ({
   isOpen,
