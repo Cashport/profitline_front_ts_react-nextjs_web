@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Search, Eye, ChevronLeft, MoreHorizontal } from "lucide-react";
+import { Eye, ChevronLeft } from "lucide-react";
+import UiSearchInput from "@/components/ui/search-input";
+import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
@@ -211,38 +213,21 @@ export default function MarketAdminClients() {
           >
             <ChevronLeft size={18} />
           </Link>
-          <div className="relative flex-1 max-w-xs">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AAAAAA]" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-[#E0E0E0] rounded-lg outline-none focus:border-[#141414] transition-colors placeholder:text-[#BBBBBB]"
-            />
-          </div>
+          <UiSearchInput
+            placeholder="Buscar..."
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
           {/* Generar acción */}
           <div className="relative" ref={accionesRef}>
-            <button
-              onClick={() => selectedRowKeys.length > 0 && setShowAcciones((v) => !v)}
-              disabled={isRunningAccion}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                selectedRowKeys.length > 0
-                  ? "border-[#CCCCCC] bg-white text-[#141414] hover:bg-[#F5F5F5]"
-                  : "border-[#E0E0E0] bg-white text-[#999999] cursor-not-allowed"
-              }`}
-            >
-              <MoreHorizontal size={15} />
-              Generar acción
-              {selectedRowKeys.length > 0 && (
-                <span className="bg-[#141414] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center ml-0.5">
-                  {selectedRowKeys.length}
-                </span>
-              )}
-            </button>
+            <GenerateActionButton
+              disabled={selectedRowKeys.length === 0 || isRunningAccion}
+              onClick={() =>
+                selectedRowKeys.length > 0 && !isRunningAccion && setShowAcciones((v) => !v)
+              }
+            />
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
