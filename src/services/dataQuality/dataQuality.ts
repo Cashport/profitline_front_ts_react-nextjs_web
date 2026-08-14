@@ -24,7 +24,8 @@ import {
   IPostCatalogMaterialEquivalence,
   IFileType,
   IDataEmail,
-  IRegion
+  IRegion,
+  IPacksUploadResult
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -449,6 +450,28 @@ export const downloadPointsOfSaleFile = async ({
   }
 };
 
+export const downloadUnifiedCatalogFile = async ({
+  countryId,
+  clientId
+}: {
+  countryId?: number | string;
+  clientId?: number | string;
+}) => {
+  const params = [];
+  if (clientId) params.push(`id_client=${clientId}`);
+  if (countryId) params.push(`id_country=${countryId}`);
+  const queryString = params.length > 0 ? `?${params.join("&")}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/catalog/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const convertMaterialToPack = async (materialId: number): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(
@@ -657,6 +680,21 @@ export const uploadPointsOfSaleFile = async (file: File): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error uploading points of sale file:", error);
+    throw error;
+  }
+};
+
+export const uploadPacksFile = async (file: File): Promise<IPacksUploadResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response: GenericResponse<IPacksUploadResult> = await API.post(
+      `${config.API_HOST}/data/catalog/material-packs/upload`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading packs file:", error);
     throw error;
   }
 };

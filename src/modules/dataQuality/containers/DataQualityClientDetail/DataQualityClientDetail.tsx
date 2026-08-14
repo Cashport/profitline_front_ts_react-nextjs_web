@@ -11,10 +11,11 @@ import { DotsThree } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import {
-  downloadCatalogFile,
-  downloadPointsOfSaleFile,
+  downloadUnifiedCatalogFile,
   uploadCatalogMaterial,
-  uploadMassiveOrHistoricalFile
+  uploadMassiveOrHistoricalFile,
+  uploadPointsOfSaleFile,
+  uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
 
 import Header from "@/components/organisms/header";
@@ -36,8 +37,8 @@ export default function DataQualityClientDetails() {
 
   const clientId = params.clientId as string;
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
-  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
+  const [isUploadPacksLoading, setIsUploadPacksLoading] = useState(false);
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
   const [archiveCounts, setArchiveCounts] = useState({ shown: 0, total: 0 });
@@ -58,15 +59,9 @@ export default function DataQualityClientDetails() {
     });
 
     try {
-      const res = await downloadCatalogFile({ clientId });
+      const res = await downloadUnifiedCatalogFile({ clientId });
 
-      const link = document.createElement("a");
-      link.href = res.url;
-      link.setAttribute("download", res.filename || "catalogo.xlsx");
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      window.open(res.url, "_blank");
 
       message.success("Catálogo descargado exitosamente.");
       setWhichModalIsOpen(0);
@@ -81,41 +76,6 @@ export default function DataQualityClientDetails() {
     }
   };
 
-  const handleDownloadPointsOfSale = async () => {
-    setIsDownloadPointsOfSaleLoading(true);
-
-    const hide = message.open({
-      type: "loading",
-      content: "Descargando puntos de venta...",
-      duration: 0
-    });
-
-    try {
-      const res = await downloadPointsOfSaleFile({ clientId });
-
-      const link = document.createElement("a");
-      link.href = res.url;
-      link.setAttribute("download", res.filename || "puntos_de_venta.xlsx");
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      message.success("Puntos de venta descargados exitosamente.");
-      setWhichModalIsOpen(0);
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al descargar los puntos de venta.";
-
-      message.error(errorMessage);
-    } finally {
-      hide();
-      setIsDownloadPointsOfSaleLoading(false);
-    }
-  };
-
   const handleOpenMassiveUpload = () => {
     setUploadType("massive");
     setWhichModalIsOpen(3);
@@ -124,6 +84,50 @@ export default function DataQualityClientDetails() {
   const handleOpenAuxiliaryUpload = () => {
     setUploadType("auxiliary");
     setWhichModalIsOpen(3);
+  };
+
+  const handleOpenPointsOfSaleUpload = () => {
+    setWhichModalIsOpen(5);
+  };
+
+  const handleUploadPointsOfSale = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      await uploadPointsOfSaleFile(file);
+      message.success("Archivo de puntos de venta cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleOpenPacksUpload = () => {
+    setWhichModalIsOpen(6);
+  };
+
+  const handleUploadPacks = async (file: File) => {
+    setIsUploadPacksLoading(true);
+    try {
+      const res = await uploadPacksFile(file);
+      const summary = `Packs procesados: ${res.total} (creados: ${res.created}, actualizados: ${res.updated}, errores: ${res.errors})`;
+      if (res.error_log?.url) {
+        message.warning(`${summary}. Se generó un log de errores.`);
+        window.open(res.error_log.url, "_blank");
+      } else {
+        message.success(summary);
+      }
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
+    } finally {
+      setIsUploadPacksLoading(false);
+    }
   };
 
   const handleUploadMassive = async (file: File) => {
@@ -313,10 +317,10 @@ export default function DataQualityClientDetails() {
         onClose={() => setWhichModalIsOpen(0)}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
-        onDownloadPointsOfSale={handleDownloadPointsOfSale}
-        isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadFile={handleOpenMassiveUpload}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+        onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
+        onUploadPacks={handleOpenPacksUpload}
         onAddEmails={() => setWhichModalIsOpen(4)}
       />
 
@@ -345,6 +349,22 @@ export default function DataQualityClientDetails() {
           ".eml",
           ".msg"
         ]}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 5}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={handleUploadPointsOfSale}
+        loading={isUploadLoading}
+        allowedExtensions={[".xls", ".xlsx", ".csv"]}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 6}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={handleUploadPacks}
+        loading={isUploadPacksLoading}
+        allowedExtensions={[".xls", ".xlsx"]}
       />
     </div>
   );

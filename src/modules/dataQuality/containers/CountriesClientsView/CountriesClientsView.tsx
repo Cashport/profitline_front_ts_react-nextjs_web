@@ -9,10 +9,10 @@ import { DotsThree } from "phosphor-react";
 import { Button as AntButton, message } from "antd";
 
 import {
-  downloadCatalogFile,
-  downloadPointsOfSaleFile,
+  downloadUnifiedCatalogFile,
   uploadCatalogMaterial,
-  uploadPointsOfSaleFile
+  uploadPointsOfSaleFile,
+  uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -56,8 +56,8 @@ export default function CountriesClientsView() {
   const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
   const closeAllModals = () => setWhichModalIsOpen(0);
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
-  const [isDownloadPointsOfSaleLoading, setIsDownloadPointsOfSaleLoading] = useState(false);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
+  const [isUploadPacksLoading, setIsUploadPacksLoading] = useState(false);
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -97,7 +97,7 @@ export default function CountriesClientsView() {
     });
 
     try {
-      const res = await downloadCatalogFile({
+      const res = await downloadUnifiedCatalogFile({
         countryId
       });
       window.open(res.url, "_blank");
@@ -109,33 +109,6 @@ export default function CountriesClientsView() {
     } finally {
       hide();
       setIsDownloadCatalogLoading(false);
-    }
-  };
-
-  const handleDownloadPointsOfSale = async () => {
-    setIsDownloadPointsOfSaleLoading(true);
-
-    const hide = message.open({
-      type: "loading",
-      content: "Descargando puntos de venta...",
-      duration: 0
-    });
-
-    try {
-      const res = await downloadPointsOfSaleFile({
-        countryId
-      });
-      window.open(res.url, "_blank");
-
-      message.success("Puntos de venta descargados exitosamente.");
-      closeAllModals();
-    } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al descargar los puntos de venta"
-      );
-    } finally {
-      hide();
-      setIsDownloadPointsOfSaleLoading(false);
     }
   };
 
@@ -178,6 +151,30 @@ export default function CountriesClientsView() {
       );
     } finally {
       setIsUploadLoading(false);
+    }
+  };
+
+  const handleOpenPacksUpload = () => {
+    setWhichModalIsOpen(5);
+  };
+
+  const handleUploadPacks = async (file: File) => {
+    setIsUploadPacksLoading(true);
+    try {
+      const res = await uploadPacksFile(file);
+      const summary = `Packs procesados: ${res.total} (creados: ${res.created}, actualizados: ${res.updated}, errores: ${res.errors})`;
+      if (res.error_log?.url) {
+        message.warning(`${summary}. Se generó un log de errores.`);
+        window.open(res.error_log.url, "_blank");
+      } else {
+        message.success(summary);
+      }
+      closeAllModals();
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
+    } finally {
+      setIsUploadPacksLoading(false);
     }
   };
 
@@ -269,10 +266,9 @@ export default function CountriesClientsView() {
         onClose={closeAllModals}
         onDownloadCatalog={handleDownloadCatalog}
         isDownloadCatalogLoading={isDownloadCatalogLoading}
-        onDownloadPointsOfSale={handleDownloadPointsOfSale}
-        isDownloadPointsOfSaleLoading={isDownloadPointsOfSaleLoading}
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
         onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
+        onUploadPacks={handleOpenPacksUpload}
       />
       <ModalUploadFile
         isOpen={whichModalIsOpen === 2}
@@ -306,6 +302,13 @@ export default function CountriesClientsView() {
         onFileUpload={handleUploadPointsOfSale}
         loading={isUploadLoading}
         allowedExtensions={[".xls", ".xlsx", ".csv"]}
+      />
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 5}
+        onClose={closeAllModals}
+        onFileUpload={handleUploadPacks}
+        loading={isUploadPacksLoading}
+        allowedExtensions={[".xls", ".xlsx"]}
       />
     </div>
   );

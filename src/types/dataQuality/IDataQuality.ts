@@ -422,6 +422,15 @@ export interface IUploadMassiveOrHistoricalRequest {
   data_type: string;
 }
 
+export interface IPacksUploadResult {
+  total: number;
+  success: number;
+  errors: number;
+  created: number;
+  updated: number;
+  error_log: { url: string; filename: string } | null;
+}
+
 export interface IPOS {
   id: number;
   id_country: number;

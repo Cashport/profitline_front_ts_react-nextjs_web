@@ -10,13 +10,12 @@ type CountryClientsActionsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onDownloadCatalog: () => void;
-  onDownloadPointsOfSale: () => void;
-  isDownloadPointsOfSaleLoading: boolean;
+  isDownloadCatalogLoading: boolean;
   onUploadFile?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
+  onUploadPacks?: () => void;
   onAddEmails?: () => void;
-  isDownloadCatalogLoading: boolean;
   isInDetailView?: boolean;
 };
 
@@ -24,13 +23,12 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   isOpen,
   onClose,
   onDownloadCatalog,
-  onDownloadPointsOfSale,
-  isDownloadPointsOfSaleLoading,
+  isDownloadCatalogLoading,
   onUploadFile,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
+  onUploadPacks,
   onAddEmails,
-  isDownloadCatalogLoading,
   isInDetailView = false
 }) => {
   return (
@@ -46,7 +44,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
       <div className="modal-content">
         <ButtonGenerateAction
           icon={<DownloadSimple size={20} />}
-          title="Descargar Auxiliar Materiales"
+          title="Descargar catálogo"
           onClick={onDownloadCatalog}
           disabled={isDownloadCatalogLoading}
         />
@@ -63,16 +61,14 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           />
         )}
         <ButtonGenerateAction
-          icon={<DownloadSimple size={20} />}
-          title="Descargar Puntos de venta"
-          onClick={onDownloadPointsOfSale}
-          disabled={isDownloadPointsOfSaleLoading}
-        />
-        <ButtonGenerateAction
           icon={<UploadSimple size={20} />}
           title="Cargar Puntos de venta"
           onClick={onUploadPointsOfSale}
-          disabled={isDownloadPointsOfSaleLoading}
+        />
+        <ButtonGenerateAction
+          icon={<UploadSimple size={20} />}
+          title="Cargar Packs"
+          onClick={onUploadPacks}
         />
         {onAddEmails && (
           <ButtonGenerateAction
