@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Layers, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
-import { useDebounce } from "@/hooks/useDeabouce";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
-import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
 import {
   assignClientToMarketAdminUser,
   removeClientFromMarketAdminUser
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
-import ClientesAsignadosTable from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesAsignadosTable";
-import AgregarClientesTable from "@/modules/marketAdmin/components/market-admin-user-detail/AgregarClientesTable";
-
-const PAGE_SIZE = 10;
+import {
+  DEFAULT_GRUPOS_USUARIO,
+  GRUPOS_POR_USUARIO_INIT
+} from "@/modules/marketAdmin/mocks/userGroups";
+import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
+import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -33,24 +33,18 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
 
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
 
-  const [search, setSearch] = useState("");
-  const [clientesPage, setClientesPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"clientes" | "grupos">("clientes");
   const [isSaving, setIsSaving] = useState(false);
-  const debouncedSearch = useDebounce(search, 400);
 
-  const {
-    data: clientes,
-    pagination,
-    isLoading: isLoadingClientes
-  } = useMarketAdminClients({
-    page: clientesPage,
-    limit: PAGE_SIZE,
-    search: debouncedSearch
-  });
+  // Los grupos de clientes aún no tienen endpoint de asignación: estado local sobre mocks.
+  const [grupos, setGrupos] = useState<string[]>(
+    GRUPOS_POR_USUARIO_INIT[id] ?? DEFAULT_GRUPOS_USUARIO
+  );
 
   const asignados = usuario?.clients ?? [];
-  const asignadosNits = new Set(asignados.map((c) => c.nit));
-  const disponibles = clientes.filter((c) => !asignadosNits.has(c.client_id));
+
+  const agregarGrupo = (grupoId: string) => setGrupos((prev) => [...prev, grupoId]);
+  const quitarGrupo = (grupoId: string) => setGrupos((prev) => prev.filter((g) => g !== grupoId));
 
   const agregar = async (nit: string) => {
     try {
@@ -100,6 +94,11 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     );
   }
 
+  const TABS = [
+    { id: "clientes", label: `Clientes (${asignados.length})`, icon: Users },
+    { id: "grupos", label: `Grupos de clientes (${grupos.length})`, icon: Layers }
+  ];
+
   return (
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{usuario.name}</h1>
@@ -121,7 +120,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Información general + Asignaciones */}
-        <div className="grid grid-cols-2 divide-x divide-[#EEEEEE] border-b border-[#EEEEEE]">
+        <div className="grid grid-cols-2 divide-x divide-[#EEEEEE]">
           <div className="px-6 py-5 flex flex-col gap-5">
             <p className="text-sm font-bold text-[#141414]">Información general</p>
             <div className="grid grid-cols-2 gap-4">
@@ -138,23 +137,37 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
           </div>
         </div>
 
-        <div className="p-6 flex flex-col gap-6">
-          <ClientesAsignadosTable clientes={asignados} onQuitar={quitar} disabled={isSaving} />
-          <div className="border-t border-[#EEEEEE]" />
-          <AgregarClientesTable
-            clientes={disponibles}
-            onAgregar={agregar}
-            onSearchChange={(value) => {
-              setSearch(value);
-              setClientesPage(1);
-            }}
-            page={clientesPage}
-            total={pagination.totalRows}
-            pageSize={PAGE_SIZE}
-            onPageChange={setClientesPage}
-            isLoading={isLoadingClientes}
-            disabled={isSaving}
-          />
+        {/* Tabs */}
+        <div className="flex items-center gap-0 px-6 border-t border-[#F0F0F0]">
+          {TABS.map(({ id: tid, label, icon: Icon }) => (
+            <button
+              key={tid}
+              onClick={() => setActiveTab(tid as typeof activeTab)}
+              className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                activeTab === tid
+                  ? "text-[#141414] border-[#141414]"
+                  : "text-[#999999] border-transparent hover:text-[#141414]"
+              }`}
+            >
+              <Icon size={14} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div className="p-6">
+          {activeTab === "clientes" && (
+            <ClientesTab
+              clientes={asignados}
+              onAgregar={agregar}
+              onQuitar={quitar}
+              disabled={isSaving}
+            />
+          )}
+          {activeTab === "grupos" && (
+            <GruposTab gruposIds={grupos} onAgregar={agregarGrupo} onQuitar={quitarGrupo} />
+          )}
         </div>
       </div>
     </div>
