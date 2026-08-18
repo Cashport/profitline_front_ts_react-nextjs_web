@@ -86,6 +86,8 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
     causales,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
+    haveApprove: !!dev.IdAprobacion,
+    idDevolucion: dev.Id,
     pdfUrl: dev.PdfBoleto ?? undefined,
     // Stash the original dev so the actions column can navigate to the
     // approval detail using `IdDevolucion` as the approval id.
@@ -136,7 +138,8 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     monto: resumen.monto,
     estado,
     pdfUrl: undefined,
-    calculatedStatus: visit.calculatedStatus
+    calculatedStatus: visit.calculatedStatus,
+    haveApprove: false
   };
 };
 
