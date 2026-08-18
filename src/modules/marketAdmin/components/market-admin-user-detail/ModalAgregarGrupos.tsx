@@ -5,61 +5,34 @@ import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
-import {
-  GRUPOS_MOCK,
-  TIPO_GRUPO_STYLES,
-  type GrupoCliente
-} from "@/modules/marketAdmin/mocks/userGroups";
+
+type GrupoItem = { id: number; group_name: string };
 
 type Props = {
-  asignadosIds: string[];
-  onAgregar: (grupoId: string) => void;
+  asignadosIds: number[];
+  allGrupos: GrupoItem[];
+  onAgregar: (grupoId: number) => void;
   onClose: () => void;
 };
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function ModalAgregarGrupos({ asignadosIds, onAgregar, onClose }: Props) {
+export default function ModalAgregarGrupos({ asignadosIds, allGrupos, onAgregar, onClose }: Props) {
   const [search, setSearch] = useState("");
 
   const disponibles = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return GRUPOS_MOCK.filter(
-      (g) => !asignadosIds.includes(g.id) && g.nombre.toLowerCase().includes(q)
-    );
-  }, [asignadosIds, search]);
+    const items = allGrupos.filter((g) => !asignadosIds.includes(g.id));
+    return q ? items.filter((g) => g.group_name.toLowerCase().includes(q)) : items;
+  }, [allGrupos, asignadosIds, search]);
 
-  const columns: ColumnsType<GrupoCliente> = [
+  const columns: ColumnsType<GrupoItem> = [
     {
       title: "Grupo",
-      dataIndex: "nombre",
-      key: "nombre",
+      dataIndex: "group_name",
+      key: "group_name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Tipo",
-      dataIndex: "tipo",
-      key: "tipo",
-      width: 140,
-      onHeaderCell: headerCell,
-      render: (v: string) => (
-        <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-            TIPO_GRUPO_STYLES[v] ?? "bg-[#F5F5F5] text-[#666666]"
-          }`}
-        >
-          {v}
-        </span>
-      )
-    },
-    {
-      title: "Clientes",
-      dataIndex: "clientes",
-      key: "clientes",
-      width: 100,
-      onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Layers, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -11,10 +11,9 @@ import {
   removeClientFromMarketAdminUser
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
-import {
-  DEFAULT_GRUPOS_USUARIO,
-  GRUPOS_POR_USUARIO_INIT
-} from "@/modules/marketAdmin/mocks/userGroups";
+import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
+import { getGroupsByUser, updateUser } from "@/services/users/users";
+import { useAppStore } from "@/lib/store/store";
 import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 
@@ -30,21 +29,61 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 export default function MarketAdminUserDetail({ params }: { params: { id: string } }) {
   const { id } = params;
   const { showMessage } = useMessageApi();
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
+  const { data: allGrupos } = useClientsGroupsSimplified();
 
   const [activeTab, setActiveTab] = useState<"clientes" | "grupos">("clientes");
   const [isSaving, setIsSaving] = useState(false);
+  const [grupos, setGrupos] = useState<number[]>([]);
+  const [gruposLoaded, setGruposLoaded] = useState(false);
 
-  // Los grupos de clientes aún no tienen endpoint de asignación: estado local sobre mocks.
-  const [grupos, setGrupos] = useState<string[]>(
-    GRUPOS_POR_USUARIO_INIT[id] ?? DEFAULT_GRUPOS_USUARIO
-  );
+  useEffect(() => {
+    if (!usuario?.id || !projectId) return;
+    (async () => {
+      const response = await getGroupsByUser(usuario.id, projectId);
+      if (response?.data) {
+        setGrupos(response.data.map((g: { group_id: number }) => g.group_id));
+      }
+      setGruposLoaded(true);
+    })();
+  }, [usuario?.id, projectId]);
 
   const asignados = usuario?.clients ?? [];
 
-  const agregarGrupo = (grupoId: string) => setGrupos((prev) => [...prev, grupoId]);
-  const quitarGrupo = (grupoId: string) => setGrupos((prev) => prev.filter((g) => g !== grupoId));
+  const agregarGrupo = async (grupoId: number) => {
+    const prev = grupos;
+    setGrupos((p) => [...p, grupoId]);
+    try {
+      const response = await updateUser(Number(id), projectId, {
+        selectedGroups: [...prev, grupoId]
+      });
+      if (response?.status !== 200 && response?.status !== 202) {
+        setGrupos(prev);
+        showMessage("error", "No se pudo actualizar el grupo.");
+      }
+    } catch {
+      setGrupos(prev);
+      showMessage("error", "Ocurrió un error al actualizar el grupo.");
+    }
+  };
+
+  const quitarGrupo = async (grupoId: number) => {
+    const prev = grupos;
+    setGrupos((p) => p.filter((g) => g !== grupoId));
+    try {
+      const next = prev.filter((g) => g !== grupoId);
+      const response = await updateUser(Number(id), projectId, { selectedGroups: next });
+      if (response?.status !== 200 && response?.status !== 202) {
+        setGrupos(prev);
+        showMessage("error", "No se pudo actualizar el grupo.");
+      }
+    } catch {
+      setGrupos(prev);
+      showMessage("error", "Ocurrió un error al actualizar el grupo.");
+    }
+  };
 
   const agregar = async (nit: string) => {
     try {
@@ -166,7 +205,13 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
             />
           )}
           {activeTab === "grupos" && (
-            <GruposTab gruposIds={grupos} onAgregar={agregarGrupo} onQuitar={quitarGrupo} />
+            <GruposTab
+              asignadosIds={grupos}
+              allGrupos={allGrupos ?? []}
+              loading={!gruposLoaded}
+              onAgregar={agregarGrupo}
+              onQuitar={quitarGrupo}
+            />
           )}
         </div>
       </div>

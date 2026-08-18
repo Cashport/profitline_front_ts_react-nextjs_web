@@ -1,83 +1,52 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Table } from "antd";
+import { Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Minus, Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
 import ModalAgregarGrupos from "@/modules/marketAdmin/components/market-admin-user-detail/ModalAgregarGrupos";
-import {
-  GRUPOS_MOCK,
-  TIPO_GRUPO_STYLES,
-  type GrupoCliente
-} from "@/modules/marketAdmin/mocks/userGroups";
+
+type GrupoItem = { id: number; group_name: string };
 
 type Props = {
-  gruposIds: string[];
-  onAgregar: (grupoId: string) => void;
-  onQuitar: (grupoId: string) => void;
+  asignadosIds: number[];
+  allGrupos: GrupoItem[];
+  loading?: boolean;
+  onAgregar: (grupoId: number) => void;
+  onQuitar: (grupoId: number) => void;
 };
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function GruposTab({ gruposIds, onAgregar, onQuitar }: Props) {
+export default function GruposTab({
+  asignadosIds,
+  allGrupos,
+  loading,
+  onAgregar,
+  onQuitar
+}: Props) {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
 
+  const asignadosMap = useMemo(
+    () => new Map(allGrupos.filter((g) => asignadosIds.includes(g.id)).map((g) => [g.id, g])),
+    [allGrupos, asignadosIds]
+  );
+
   const filtrados = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return GRUPOS_MOCK.filter(
-      (g) => gruposIds.includes(g.id) && g.nombre.toLowerCase().includes(q)
-    );
-  }, [gruposIds, search]);
+    const items = Array.from(asignadosMap.values());
+    return q ? items.filter((g) => g.group_name.toLowerCase().includes(q)) : items;
+  }, [asignadosMap, search]);
 
-  const columns: ColumnsType<GrupoCliente> = [
+  const columns: ColumnsType<GrupoItem> = [
     {
       title: "Grupo",
-      dataIndex: "nombre",
-      key: "nombre",
+      dataIndex: "group_name",
+      key: "group_name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Tipo",
-      dataIndex: "tipo",
-      key: "tipo",
-      width: 140,
-      onHeaderCell: headerCell,
-      render: (v: string) => (
-        <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-            TIPO_GRUPO_STYLES[v] ?? "bg-[#F5F5F5] text-[#666666]"
-          }`}
-        >
-          {v}
-        </span>
-      )
-    },
-    {
-      title: "Clientes",
-      dataIndex: "clientes",
-      key: "clientes",
-      width: 100,
-      onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Estado",
-      dataIndex: "activo",
-      key: "activo",
-      width: 120,
-      onHeaderCell: headerCell,
-      render: (activo: boolean) => (
-        <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-            activo ? "bg-[#E6F9E6] text-[#1A7A1A]" : "bg-[#EEEEEE] text-[#999999]"
-          }`}
-        >
-          {activo ? "Activo" : "Inactivo"}
-        </span>
-      )
     },
     {
       title: "",
@@ -95,6 +64,14 @@ export default function GruposTab({ gruposIds, onAgregar, onQuitar }: Props) {
       )
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spin />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -122,7 +99,8 @@ export default function GruposTab({ gruposIds, onAgregar, onQuitar }: Props) {
 
       {showModal && (
         <ModalAgregarGrupos
-          asignadosIds={gruposIds}
+          asignadosIds={asignadosIds}
+          allGrupos={allGrupos}
           onAgregar={onAgregar}
           onClose={() => setShowModal(false)}
         />

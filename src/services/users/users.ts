@@ -74,30 +74,51 @@ export const createPassword = async (token: string, password: string): Promise<a
   }
 };
 //update
+interface UpdateUserOptions {
+  data?: IUserForm;
+  selectedBusinessRules?: ISelectedBussinessRules;
+  selectedGroups?: number[];
+  zones?: number[];
+  isActive?: boolean;
+}
+
 export const updateUser = async (
-  data: IUserForm,
-  selectedBusinessRules: ISelectedBussinessRules,
-  selectedGroups: number[],
-  zones: any,
-  ID: any,
+  ID: number,
   project_id: number,
-  isActive: boolean
+  options: UpdateUserOptions = {}
 ): Promise<any> => {
-  const modelData = {
-    active: isActive ? 1 : 0,
-    channel: selectedBusinessRules.channels,
-    email: data.info.email,
+  const { data, selectedBusinessRules, selectedGroups, zones, isActive } = options;
+
+  const modelData: Record<string, any> = {
     id: ID,
-    line: selectedBusinessRules.lines,
-    phone: data.info.phone,
-    position: data.info.cargo,
-    project_id: `${project_id}`,
-    rol_id: data.info.rol?.value,
-    subline: selectedBusinessRules.sublines,
-    user_name: data.info.name,
-    zones: zones.map((zone: number) => ({ ZONE_ID: zone })),
-    groups_id: selectedGroups
+    project_id: `${project_id}`
   };
+
+  if (data) {
+    modelData.email = data.info.email;
+    modelData.user_name = data.info.name;
+    modelData.phone = data.info.phone;
+    modelData.position = data.info.cargo;
+    modelData.rol_id = data.info.rol?.value;
+  }
+
+  if (selectedBusinessRules) {
+    modelData.channel = selectedBusinessRules.channels;
+    modelData.line = selectedBusinessRules.lines;
+    modelData.subline = selectedBusinessRules.sublines;
+  }
+
+  if (zones?.length) {
+    modelData.zones = zones.map((zone: number) => ({ ZONE_ID: zone }));
+  }
+
+  if (selectedGroups) {
+    modelData.groups_id = selectedGroups;
+  }
+
+  if (isActive !== undefined) {
+    modelData.active = isActive ? 1 : 0;
+  }
 
   try {
     const response = await API.put(`/user`, modelData);
