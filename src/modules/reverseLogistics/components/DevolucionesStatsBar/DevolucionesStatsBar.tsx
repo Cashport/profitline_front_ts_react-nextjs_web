@@ -6,17 +6,8 @@ import { Col, Row } from "antd";
 import { Clock, TrendUp, Package, FileText, CalendarBlank } from "phosphor-react";
 import { getProfit360DevolucionKpis } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatCard } from "../DevolucionesStatCard/DevolucionesStatCard";
-import { IProfit360DevolucionKpiFase } from "@/types/reverseLogistics/IReverseLogistics";
-
-// Short labels for the known fase codigos — the backend `nombre`
-// ("Fase 2 – Logística") is too long for a KPI card. Unknown codigos fall back
-// to the backend name so new fases still render.
-const FASE_LABELS: Record<string, string> = {
-  F1_LOGISTICA: "Prom Logística",
-  F2_SOLISTICA: "Prom Solística",
-  F3_SUPPLA: "Prom Suppla",
-  F4_NOTA_CREDITO: "Prom NC"
-};
+import { IProfit360DevolucionKpiFase, TipoDevolucionCodigo } from "@/types/reverseLogistics/IReverseLogistics";
+import { FASE_LABELS } from "../../constants";
 
 const CARD_ICONS = [Clock, TrendUp, Package, FileText, CalendarBlank];
 
@@ -72,7 +63,10 @@ export function DevolucionesStatsBar({ clientId, fromDate, toDate }: Devolucione
     });
 
     const cards = fases.map((fase) =>
-      toCard(FASE_LABELS[fase.codigo] ?? fase.nombre, fase.promedioDias)
+      toCard(
+        `Prom ${FASE_LABELS[fase.codigo as TipoDevolucionCodigo] ?? fase.nombre}`,
+        fase.promedioDias
+      )
     );
     // The backend total is the real end-to-end average, not the sum of per-fase
     // averages — if it's missing we show N/A rather than faking it.
