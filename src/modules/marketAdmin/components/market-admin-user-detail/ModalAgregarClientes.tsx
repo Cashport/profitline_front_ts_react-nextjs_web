@@ -1,36 +1,47 @@
 "use client";
 
-import { Table } from "antd";
+import { useState } from "react";
+import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
 import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
-  clientes: IMarketAdminClient[];
+  asignadosNits: Set<string>;
   onAgregar: (nit: string) => void;
-  onSearchChange: (value: string) => void;
-  page: number;
-  total: number;
-  pageSize: number;
-  onPageChange: (page: number) => void;
-  isLoading?: boolean;
+  onClose: () => void;
   disabled?: boolean;
 };
 
+const PAGE_SIZE = 10;
+
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function AgregarClientesTable({
-  clientes,
+export default function ModalAgregarClientes({
+  asignadosNits,
   onAgregar,
-  onSearchChange,
-  page,
-  total,
-  pageSize,
-  onPageChange,
-  isLoading,
+  onClose,
   disabled
 }: Props) {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebounce(search, 400);
+
+  const {
+    data: clientes,
+    pagination,
+    isLoading
+  } = useMarketAdminClients({
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch
+  });
+
+  const disponibles = clientes.filter((c) => !asignadosNits.has(c.client_id));
+
   const columns: ColumnsType<IMarketAdminClient> = [
     {
       title: "Cliente",
@@ -74,32 +85,43 @@ export default function AgregarClientesTable({
   ];
 
   return (
-    <div>
-      <p className="text-sm font-bold text-[#141414] mb-4">Agregar clientes</p>
+    <Modal
+      open
+      onCancel={onClose}
+      centered
+      width={832}
+      title={<span className="text-base font-bold text-[#141414]">Agregar clientes</span>}
+      footer={null}
+    >
       <div className="mb-4">
         <UiSearchInput
           placeholder="Buscar cliente..."
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
       </div>
+
       <Table
         columns={columns}
-        dataSource={clientes}
+        dataSource={disponibles}
         rowKey="client_id"
         loading={isLoading}
+        scroll={{ y: 360 }}
         locale={{ emptyText: "No se encontraron clientes." }}
         pagination={{
           current: page,
-          pageSize,
-          total,
+          pageSize: PAGE_SIZE,
+          total: pagination.totalRows,
           showSizeChanger: false,
           position: ["bottomRight"],
           showTotal: (t, range) => `Mostrando ${range[0]}–${range[1]} de ${t} clientes`
         }}
         onChange={(pag, _filters, _sorter, extra) => {
-          if (extra.action === "paginate") onPageChange(pag.current ?? 1);
+          if (extra.action === "paginate") setPage(pag.current ?? 1);
         }}
       />
-    </div>
+    </Modal>
   );
 }
