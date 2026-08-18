@@ -19,27 +19,35 @@ export const getUserById = async (idUser: string): Promise<WelcomeData> => {
 };
 
 // create
+interface InviteUserOptions {
+  selectedBusinessRules?: ISelectedBussinessRules;
+  selectedGroups?: number[];
+  zones?: number[];
+}
+
 export const inviteUser = async (
   data: IUserForm,
-  selectedBusinessRules: ISelectedBussinessRules,
-  selectedGroups: number[],
-  zones: any,
-  ID: any
+  projectId: number,
+  { selectedBusinessRules, selectedGroups, zones }: InviteUserOptions = {}
 ): Promise<any> => {
   const modelData: Record<string, any> = {
     email: data.info.email,
     user_name: data.info.name,
-    channel: selectedBusinessRules.channels,
-    line: selectedBusinessRules.lines,
-    subline: selectedBusinessRules.sublines,
-    zone: zones,
     password: "123456",
     phone: data.info.phone,
     position: data.info.cargo,
-    project_id: ID,
+    project_id: projectId,
     rol_id: data.info.rol?.value
   };
-  if (selectedGroups.length > 0) {
+  if (selectedBusinessRules) {
+    modelData.channel = selectedBusinessRules.channels;
+    modelData.line = selectedBusinessRules.lines;
+    modelData.subline = selectedBusinessRules.sublines;
+  }
+  if (zones?.length) {
+    modelData.zone = zones;
+  }
+  if (selectedGroups?.length) {
     modelData.groups_id = selectedGroups;
   }
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";

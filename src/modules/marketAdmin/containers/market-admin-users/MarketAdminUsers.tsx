@@ -2,14 +2,22 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Eye, ChevronLeft } from "lucide-react";
+import { Eye, ChevronLeft, Plus } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import ModalCrearUsuario, {
+  CrearUsuarioFormValues
+} from "@/modules/marketAdmin/components/market-admin-users/ModalCrearUsuario";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMarketAdminUsers } from "@/modules/marketAdmin/hooks/useMarketAdminUsers";
 import { useMarketAdminRoles } from "@/modules/marketAdmin/hooks/useMarketAdminRoles";
+import { useAppStore } from "@/lib/store/store";
+import { useMessageApi } from "@/context/MessageContext";
+import { inviteUser } from "@/services/users/users";
+import { ApiError } from "@/utils/api/api";
 import { IMarketAdminUser } from "@/types/marketAdmin/IMarketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 
@@ -24,16 +32,22 @@ export default function MarketAdminUsers() {
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
 
   const debouncedSearch = useDebounce(search, 400);
+
+  const { ID } = useAppStore((state) => state.selectedProject);
+  const { showMessage } = useMessageApi();
 
   const { data: roles } = useMarketAdminRoles();
 
   const {
     data: usuarios,
     pagination,
-    isLoading
+    isLoading,
+    mutate
   } = useMarketAdminUsers({
     page,
     limit: PAGE_SIZE,
@@ -52,6 +66,37 @@ export default function MarketAdminUsers() {
   }, []);
 
   const activos = usuarios.filter((u) => u.is_active === 1).length;
+
+  const handleCreateUser = async (values: CrearUsuarioFormValues) => {
+    setIsCreatingUser(true);
+    try {
+      await inviteUser(
+        {
+          info: {
+            name: values.name,
+            cargo: values.position,
+            email: values.email,
+            phone: values.phone,
+            rol: values.role_id ? { value: values.role_id, label: values.role_name } : undefined
+          }
+        },
+        ID
+      );
+      showMessage("success", "El usuario fue creado exitosamente.");
+      setShowCreate(false);
+      mutate();
+    } catch (error) {
+      const message =
+        error instanceof ApiError ? error.message : "Oops ocurrió un error creando el usuario.";
+      if (error instanceof ApiError && error.status === 409) {
+        showMessage("error", "Este email ya está en uso, prueba otro.");
+      } else {
+        showMessage("error", message);
+      }
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
 
   function runAccion(accion: string) {
     setShowAcciones(false);
@@ -217,6 +262,13 @@ export default function MarketAdminUsers() {
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
+
+          {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
+          <div className="h-10 flex-shrink-0 ml-auto">
+            <PrincipalButton onClick={() => setShowCreate(true)} icon={<Plus size={15} />}>
+              Crear usuario
+            </PrincipalButton>
+          </div>
         </div>
 
         <Table
@@ -253,6 +305,13 @@ export default function MarketAdminUsers() {
           }}
         />
       </div>
+
+      <ModalCrearUsuario
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSend={handleCreateUser}
+        isLoading={isCreatingUser}
+      />
     </div>
   );
 }

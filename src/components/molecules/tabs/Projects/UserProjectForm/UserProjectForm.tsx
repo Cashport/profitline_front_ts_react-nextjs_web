@@ -123,7 +123,11 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
             ID,
             dataUser.data?.ACTIVE === 1
           )
-        : await inviteUser(data, selectedBusinessRules, assignedGroups, zones, ID);
+        : await inviteUser(data, ID, {
+            selectedBusinessRules,
+            selectedGroups: assignedGroups,
+            zones
+          });
 
       if (response.status === 200 || response.status === 202) {
         const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
