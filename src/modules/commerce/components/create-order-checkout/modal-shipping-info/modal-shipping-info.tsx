@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useMemo, useState } from "react";
 import { Flex } from "antd";
 import { Gift, X } from "lucide-react";
 
@@ -16,6 +16,9 @@ import {
 import { IShippingInfo } from "../../create-order-checkout/create-order-checkout";
 import { BonusRow } from "../order-shipment-confirm/order-shipment-confirm";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
+import CitiesSelect from "@/modules/commerce/components/cities-select";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
+import { useCityWarehouse } from "@/app/comercio/pedido/hooks/useCityWarehouses";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { useAppStore } from "@/lib/store/store";
@@ -61,6 +64,10 @@ export default function ModalShippingInfo({
     projectId: s.selectedProject.ID,
     formatMoney: s.formatMoney
   }));
+  const { businessUnit } = useContext(OrderViewContext);
+  const { warehouseCities, isCityLoading, warehouseBu } = useCityWarehouse();
+  // bloqueada en el WarehouseSelect. Se libera cuando businessUnit no matchea.
+  const [warehouseForced, setWarehouseForced] = useState<number | undefined>();
 
   const hasBonus = bonusItems.length + otherBonusItems.length > 0;
   const isNewAddress = draft.addressSelectValue === NEW_ADDRESS_OPTION.value;
@@ -168,6 +175,30 @@ export default function ModalShippingInfo({
       }
     }
   }, [draft.addressSelectValue, addresses]);
+
+  // Cuando el canal (businessUnit) del contexto coincide con una entrada de
+  // warehouseBu, preseleccionamos y forzamos la bodega correspondiente.
+  // Si el canal no matchea, liberamos la bodega para que el usuario la elija
+  // (o la autocomplete desde la ciudad seleccionada).
+  useEffect(() => {
+    const matchedWarehouseId = businessUnit
+    ? (warehouseBu as Record<string, number | undefined>)[businessUnit]
+      : undefined;
+      if (matchedWarehouseId !== undefined) {
+      console.log("rerender")
+      setWarehouseForced(matchedWarehouseId);
+      setDraft((d) => ({ ...d, warehouse_id: matchedWarehouseId }));
+    } else {
+      setWarehouseForced(undefined);
+    }
+  }, [businessUnit, setDraft]);
+
+  // Cuando el usuario elige/crea una ciudad en el CitiesSelect, sincronizamos
+  // la bodega siempre y cuando no haya una bodega forzada por businessUnit.
+  const handleSelectCityWarehouse = (warehouseId: number) => {
+    if (warehouseForced !== undefined) return;
+    setDraft((d) => ({ ...d, warehouse_id: warehouseId }));
+  };
 
   const handleSave = () => {
     if (isSaveDisabled) return;
@@ -402,13 +433,15 @@ export default function ModalShippingInfo({
 
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-semibold text-[#666666]">Ciudad</label>
-              <input
-                type="text"
-                placeholder="Bogotá"
+              <CitiesSelect
+                cities={warehouseCities}
+                isLoading={isCityLoading}
                 value={draft.city}
+                onChange={(city) => setDraft((d) => ({ ...d, city }))}
+                onChangeWarehouseId={handleSelectCityWarehouse}
+                placeholder="Bogotá"
                 disabled={!isNewAddress}
-                onChange={(e) => setDraft((d) => ({ ...d, city: e.target.value }))}
-                className="w-full px-2.5 py-2 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed"
+                size="small"
               />
             </div>
 
@@ -434,6 +467,7 @@ export default function ModalShippingInfo({
                   Bodega de despacho
                 </label>
                 <WarehouseSelect
+                  warehouseForced={warehouseForced}
                   value={draft.warehouse_id}
                   onChange={(warehouseId) => setDraft((d) => ({ ...d, warehouse_id: warehouseId }))}
                   size="small"

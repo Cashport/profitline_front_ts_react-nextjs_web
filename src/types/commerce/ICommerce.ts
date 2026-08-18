@@ -332,6 +332,12 @@ export interface ICityWarehouse {
   warehouse_name: string;
 }
 
+export interface IAllWarehouse {
+  id: number;
+  warehouse: string;
+  warehouse_description: string;
+}
+
 export interface IOrderSplitShippingInfo {
   address: string;
   city: string;

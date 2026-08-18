@@ -19,6 +19,8 @@ import { formatNumber } from "@/utils/utils";
 
 import ModalShippingInfo from "../modal-shipping-info";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select";
+import CitiesSelect from "@/modules/commerce/components/cities-select";
+import { useCityWarehouse } from "@/app/comercio/pedido/hooks/useCityWarehouses";
 import {
   NEW_ADDRESS_OPTION,
   getDefaultCommentForBusinessUnit,
@@ -152,6 +154,12 @@ export default function OrderShipmentConfirm({
   });
   const isNewAddressSingle = singleForm.addressSelectValue === NEW_ADDRESS_OPTION.value;
   const didHydrateFromDraftRef = useRef(false);
+
+  // Ciudades del backend + constante `warehouseBu` que mapea canal → bodega.
+  const { warehouseCities, isCityLoading, warehouseBu } = useCityWarehouse();
+  // Cuando businessUnit coincide con warehouseBu, la bodega queda forzada y
+  // bloqueada en el WarehouseSelect. Se libera cuando businessUnit no matchea.
+  const [warehouseForced, setWarehouseForced] = useState<number | undefined>();
 
   // Se enciende en el primer intento de finalizar con datos faltantes y ya no se
   // apaga: cada campo deja de estar en rojo por su cuenta al corregirse.
@@ -293,6 +301,29 @@ export default function OrderShipmentConfirm({
       }
     }
   }, [singleForm.addressSelectValue, addresses]);
+
+  // Cuando el canal (businessUnit) del contexto coincide con una entrada de
+  // warehouseBu, preseleccionamos y forzamos la bodega correspondiente.
+  // Si el canal no matchea, liberamos la bodega para que el usuario la elija
+  // (o la autocomplete desde la ciudad seleccionada).
+  useEffect(() => {
+    const matchedWarehouseId = businessUnit
+      ? (warehouseBu as Record<string, number | undefined>)[businessUnit]
+      : undefined;
+    if (matchedWarehouseId !== undefined) {
+      setWarehouseForced(matchedWarehouseId);
+      setSingleForm((f) => ({ ...f, warehouse_id: matchedWarehouseId }));
+    } else {
+      setWarehouseForced(undefined);
+    }
+  }, [businessUnit]);
+
+  // Cuando el usuario elige/crea una ciudad en el CitiesSelect, sincronizamos
+  // la bodega siempre y cuando no haya una bodega forzada por businessUnit.
+  const handleSelectCityWarehouse = (warehouseId: number) => {
+    if (warehouseForced !== undefined) return;
+    setSingleForm((f) => ({ ...f, warehouse_id: warehouseId }));
+  };
 
   const makeBlankEntrega = (): Omit<IShippingInfo, "id"> => ({
     addressSelectValue: "",
@@ -626,15 +657,14 @@ export default function OrderShipmentConfirm({
 
               <div ref={cityRef} className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-[#666666]">Ciudad</label>
-                <input
-                  type="text"
-                  placeholder="Bogotá"
+                <CitiesSelect
+                  cities={warehouseCities}
+                  isLoading={isCityLoading}
                   value={singleForm.city}
+                  onChange={(city) => setSingleForm((f) => ({ ...f, city }))}
+                  onChangeWarehouseId={handleSelectCityWarehouse}
                   disabled={!isNewAddressSingle}
-                  onChange={(e) => setSingleForm((f) => ({ ...f, city: e.target.value }))}
-                  className={`w-full px-3 py-2.5 text-sm bg-[#F7F7F7] border rounded-lg outline-none transition-colors text-[#141414] placeholder:text-[#999999] disabled:opacity-60 disabled:cursor-not-allowed ${fieldBorder(
-                    showFieldError("city")
-                  )}`}
+                  status={showFieldError("city") ? "error" : undefined}
                 />
                 {showFieldError("city") && (
                   <p className="text-[10px] text-red-500">Ingresa la ciudad</p>
@@ -671,6 +701,7 @@ export default function OrderShipmentConfirm({
                 <div ref={warehouseRef} className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-[#666666]">Bodega de despacho</label>
                   <WarehouseSelect
+                    warehouseForced={warehouseForced}
                     value={singleForm.warehouse_id}
                     onChange={(warehouseId) =>
                       setSingleForm((f) => ({ ...f, warehouse_id: warehouseId }))

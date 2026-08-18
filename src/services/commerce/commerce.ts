@@ -18,7 +18,8 @@ import {
   ISucessCreateOrder,
   ISalesDashboard,
   ISingleOrder,
-  IWarehouseProductsStock
+  IWarehouseProductsStock,
+  IAllWarehouse
 } from "@/types/commerce/ICommerce";
 import { MessageType } from "@/context/MessageContext";
 import { FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
@@ -74,9 +75,12 @@ export const getAdresses = async (clientId: string) => {
 };
 
 export const getCityWarehouses = async () => {
-  const response: GenericResponse<ICityWarehouse[]> = await API.get(
-    `/marketplace/city-warehouses`
-  );
+  const response: GenericResponse<ICityWarehouse[]> = await API.get(`/marketplace/city-warehouses`);
+  return response;
+};
+
+export const getAllWarehouses = async () => {
+  const response: GenericResponse<IAllWarehouse[]> = await API.get(`/warehouse/all`);
   return response;
 };
 
@@ -289,10 +293,7 @@ export const dowloadOrderCSV = async (
   }
 };
 
-export const downloadPartialOrderCSV = async (
-  orderIds: number[],
-  sendToBackorder: boolean
-) => {
+export const downloadPartialOrderCSV = async (orderIds: number[], sendToBackorder: boolean) => {
   try {
     const payload = { order_ids: orderIds, sendToBackorder };
     const formData = new FormData();
