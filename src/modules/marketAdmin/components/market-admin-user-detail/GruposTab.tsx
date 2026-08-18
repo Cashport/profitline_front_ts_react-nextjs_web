@@ -13,6 +13,7 @@ type Props = {
   asignadosIds: number[];
   allGrupos: GrupoItem[];
   loading?: boolean;
+  disabled?: boolean;
   onAgregar: (grupoId: number) => void;
   onQuitar: (grupoId: number) => void;
 };
@@ -23,6 +24,7 @@ export default function GruposTab({
   asignadosIds,
   allGrupos,
   loading,
+  disabled,
   onAgregar,
   onQuitar
 }: Props) {
@@ -56,8 +58,9 @@ export default function GruposTab({
       render: (_, g) => (
         <button
           title="Quitar grupo"
+          disabled={disabled}
           onClick={() => onQuitar(g.id)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#FEE2E2] hover:text-[#E53E3E] transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#FEE2E2] hover:text-[#E53E3E] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#CCCCCC]"
         >
           <Minus size={13} />
         </button>
@@ -89,6 +92,7 @@ export default function GruposTab({
         columns={columns}
         dataSource={filtrados}
         rowKey="id"
+        loading={disabled}
         pagination={false}
         locale={{
           emptyText: search.trim()
@@ -103,6 +107,7 @@ export default function GruposTab({
           allGrupos={allGrupos}
           onAgregar={onAgregar}
           onClose={() => setShowModal(false)}
+          disabled={disabled}
         />
       )}
     </div>

@@ -13,11 +13,18 @@ type Props = {
   allGrupos: GrupoItem[];
   onAgregar: (grupoId: number) => void;
   onClose: () => void;
+  disabled?: boolean;
 };
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-export default function ModalAgregarGrupos({ asignadosIds, allGrupos, onAgregar, onClose }: Props) {
+export default function ModalAgregarGrupos({
+  asignadosIds,
+  allGrupos,
+  onAgregar,
+  onClose,
+  disabled
+}: Props) {
   const [search, setSearch] = useState("");
 
   const disponibles = useMemo(() => {
@@ -42,8 +49,9 @@ export default function ModalAgregarGrupos({ asignadosIds, allGrupos, onAgregar,
       render: (_, g) => (
         <button
           title="Agregar grupo"
+          disabled={disabled}
           onClick={() => onAgregar(g.id)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#E6F9E6] hover:text-[#1A7A1A] transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#E6F9E6] hover:text-[#1A7A1A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#CCCCCC]"
         >
           <Plus size={13} />
         </button>
@@ -68,6 +76,7 @@ export default function ModalAgregarGrupos({ asignadosIds, allGrupos, onAgregar,
         columns={columns}
         dataSource={disponibles}
         rowKey="id"
+        loading={disabled}
         pagination={false}
         scroll={{ y: 320 }}
         locale={{ emptyText: "Todos los grupos ya están asignados." }}

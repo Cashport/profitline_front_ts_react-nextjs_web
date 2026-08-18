@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Layers, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
@@ -12,7 +12,11 @@ import {
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
-import { getGroupsByUser, updateUser } from "@/services/users/users";
+import { getGroupsByUser } from "@/services/users/users";
+import {
+  addUserToClientGroups,
+  removeUserFromClientGroups
+} from "@/services/groupClients/groupClients";
 import { useAppStore } from "@/lib/store/store";
 import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
@@ -36,52 +40,56 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
 
   const [activeTab, setActiveTab] = useState<"clientes" | "grupos">("clientes");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingGrupos, setIsSavingGrupos] = useState(false);
   const [grupos, setGrupos] = useState<number[]>([]);
   const [gruposLoaded, setGruposLoaded] = useState(false);
 
-  useEffect(() => {
+  const loadGrupos = useCallback(async () => {
     if (!usuario?.id || !projectId) return;
-    (async () => {
-      const response = await getGroupsByUser(usuario.id, projectId);
-      if (response?.data) {
-        setGrupos(response.data.map((g: { group_id: number }) => g.group_id));
-      }
-      setGruposLoaded(true);
-    })();
+    const response = await getGroupsByUser(usuario.id, projectId);
+    if (response?.data) {
+      setGrupos(response.data.map((g: { group_id: number }) => g.group_id));
+    }
+    setGruposLoaded(true);
   }, [usuario?.id, projectId]);
+
+  useEffect(() => {
+    loadGrupos();
+  }, [loadGrupos]);
 
   const asignados = usuario?.clients ?? [];
 
   const agregarGrupo = async (grupoId: number) => {
+    if (!usuario) return;
     const prev = grupos;
     setGrupos((p) => [...p, grupoId]);
     try {
-      const response = await updateUser(Number(id), projectId, {
-        selectedGroups: [...prev, grupoId]
-      });
-      if (response?.status !== 200 && response?.status !== 202) {
-        setGrupos(prev);
-        showMessage("error", "No se pudo actualizar el grupo.");
-      }
-    } catch {
+      setIsSavingGrupos(true);
+      await addUserToClientGroups([grupoId], projectId, usuario.id);
+      showMessage("success", "Grupo agregado correctamente.");
+      await loadGrupos();
+    } catch (err) {
       setGrupos(prev);
-      showMessage("error", "Ocurrió un error al actualizar el grupo.");
+      showMessage("error", err instanceof Error ? err.message : "No se pudo agregar el grupo.");
+    } finally {
+      setIsSavingGrupos(false);
     }
   };
 
   const quitarGrupo = async (grupoId: number) => {
+    if (!usuario) return;
     const prev = grupos;
     setGrupos((p) => p.filter((g) => g !== grupoId));
     try {
-      const next = prev.filter((g) => g !== grupoId);
-      const response = await updateUser(Number(id), projectId, { selectedGroups: next });
-      if (response?.status !== 200 && response?.status !== 202) {
-        setGrupos(prev);
-        showMessage("error", "No se pudo actualizar el grupo.");
-      }
-    } catch {
+      setIsSavingGrupos(true);
+      await removeUserFromClientGroups([grupoId], projectId, usuario.id);
+      showMessage("success", "Grupo removido correctamente.");
+      await loadGrupos();
+    } catch (err) {
       setGrupos(prev);
-      showMessage("error", "Ocurrió un error al actualizar el grupo.");
+      showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el grupo.");
+    } finally {
+      setIsSavingGrupos(false);
     }
   };
 
@@ -201,6 +209,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               clientes={asignados}
               onAgregar={agregar}
               onQuitar={quitar}
+              isLoading={isSaving}
               disabled={isSaving}
             />
           )}
@@ -209,6 +218,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               asignadosIds={grupos}
               allGrupos={allGrupos ?? []}
               loading={!gruposLoaded}
+              disabled={isSavingGrupos}
               onAgregar={agregarGrupo}
               onQuitar={quitarGrupo}
             />
