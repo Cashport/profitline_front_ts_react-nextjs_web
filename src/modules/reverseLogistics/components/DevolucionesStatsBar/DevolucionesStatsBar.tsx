@@ -12,9 +12,9 @@ import { IProfit360DevolucionKpiFase } from "@/types/reverseLogistics/IReverseLo
 // ("Fase 2 – Logística") is too long for a KPI card. Unknown codigos fall back
 // to the backend name so new fases still render.
 const FASE_LABELS: Record<string, string> = {
-  F1_EMBALAJE_TICKET: "Prom Embalaje",
-  F2_LOGISTICA: "Prom Logística",
-  F3_BODEGA_INVENTARIO: "Prom Bodega",
+  F1_LOGISTICA: "Prom Logística",
+  F2_SOLISTICA: "Prom Solística",
+  F3_SUPPLA: "Prom Suppla",
   F4_NOTA_CREDITO: "Prom NC"
 };
 
