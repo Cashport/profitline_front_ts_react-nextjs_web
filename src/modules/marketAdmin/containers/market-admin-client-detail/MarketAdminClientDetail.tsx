@@ -3,27 +3,36 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Package, Tag, Users, MapPin, Settings } from "lucide-react";
-import { CLIENTES_MOCK, LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
+import ProfitLoader from "@/components/ui/profit-loader";
+import { useMessageApi } from "@/context/MessageContext";
+import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 import {
-  DEFAULT_DIRECCIONES,
+  BONIFICADOS_MANUALES_INIT,
   DEFAULT_NEGOCIACIONES,
-  DEFAULT_USUARIOS,
-  DIRECCIONES_CLIENTE,
-  LINEAS_CATALOGO,
   NEGOCIACIONES_INIT,
-  PRODUCTOS_INIT,
-  USUARIOS_CLIENTE,
-  type Direccion,
-  type Negociacion,
-  type ProductoLinea
+  type BonifManual,
+  type Negociacion
 } from "@/modules/marketAdmin/mocks/clientDetail";
-import DescuentosTab from "@/modules/marketAdmin/components/market-admin-client-detail/DescuentosTab";
+import { useMarketAdminClientDetail } from "@/modules/marketAdmin/hooks/useMarketAdminClientDetail";
+import { useMarketAdminClientAddresses } from "@/modules/marketAdmin/hooks/useMarketAdminClientAddresses";
+import { useMarketAdminClientUsers } from "@/modules/marketAdmin/hooks/useMarketAdminClientUsers";
+import { useMarketAdminClientConfig } from "@/modules/marketAdmin/hooks/useMarketAdminClientConfig";
+import { useMarketAdminClientProducts } from "@/modules/marketAdmin/hooks/useMarketAdminClientProducts";
+import {
+  createMarketAdminClientAddress,
+  deleteMarketAdminClientAddress,
+  updateMarketAdminClientAddress,
+  updateMarketAdminClientConfig
+} from "@/services/marketAdmin/marketAdmin";
+import {
+  ICreateMarketAdminClientAddressBody,
+  IUpdateMarketAdminClientConfigBody
+} from "@/types/marketAdmin/IMarketAdmin";
+import PromocionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/PromocionesTab";
 import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/DireccionesTab";
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
 import ProductosTab from "@/modules/marketAdmin/components/market-admin-client-detail/ProductosTab";
-import ConfiguracionesTab, {
-  type ConfigForm
-} from "@/modules/marketAdmin/components/market-admin-client-detail/ConfiguracionesTab";
+import ConfiguracionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/ConfiguracionesTab";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -34,62 +43,148 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+const splitLineas = (lineas: string | null | undefined) =>
+  lineas
+    ?.split(",")
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+
 export default function MarketAdminClientDetail({ params }: { params: { id: string } }) {
   const { id } = params;
-  const cliente = CLIENTES_MOCK.find((c) => c.id === id) ?? CLIENTES_MOCK[0];
+  const { showMessage } = useMessageApi();
 
-  // Tab — new order: descuentos, direcciones, usuarios, productos
+  // Tab — new order: promociones, direcciones, usuarios, productos
   const [activeTab, setActiveTab] = useState<
-    "descuentos" | "direcciones" | "usuarios" | "productos" | "configuraciones"
-  >("descuentos");
+    "promociones" | "direcciones" | "usuarios" | "productos" | "configuraciones"
+  >("promociones");
 
-  // Persistent data (must survive tab switches — tabs unmount on switch)
-  const [configForm, setConfigForm] = useState<ConfigForm>({ cupoCredito: "", tipoPago: "" });
-  const [productos, setProductos] = useState<ProductoLinea[]>(PRODUCTOS_INIT[id] ?? []);
+  const { data: cliente, isLoading, error } = useMarketAdminClientDetail(id);
+  const {
+    data: direcciones,
+    isLoading: isLoadingDirecciones,
+    mutate: mutateDirecciones
+  } = useMarketAdminClientAddresses(id);
+  const { data: usuarios, isLoading: isLoadingUsuarios } = useMarketAdminClientUsers(id);
+  const {
+    data: config,
+    isLoading: isLoadingConfig,
+    mutate: mutateConfig
+  } = useMarketAdminClientConfig(id);
+  const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(id);
+
+  // El tab de promociones sigue sin endpoint: se mantiene en mocks.
   const [negociaciones, setNegociaciones] = useState<Negociacion[]>(
     NEGOCIACIONES_INIT[id] ?? DEFAULT_NEGOCIACIONES
   );
-  const [direcciones, setDirecciones] = useState<Direccion[]>(
-    DIRECCIONES_CLIENTE[id] ?? DEFAULT_DIRECCIONES
-  );
-  const [usuarios, setUsuarios] = useState(USUARIOS_CLIENTE[id] ?? DEFAULT_USUARIOS);
+  const [bonificados, setBonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
 
   // ── Mutation handlers ─────────────────────────────────────────────────────
-  const addDireccion = (values: Omit<Direccion, "id">) =>
-    setDirecciones((prev) => [...prev, { id: `dir${Date.now()}`, ...values }]);
+  // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
+  const addDireccion = async (values: ICreateMarketAdminClientAddressBody) => {
+    try {
+      await createMarketAdminClientAddress(id, values);
+      await mutateDirecciones();
+      showMessage("success", "Dirección creada correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al crear la dirección."
+      );
+      throw err;
+    }
+  };
 
-  const updateDireccion = (did: string, values: Omit<Direccion, "id">) =>
-    setDirecciones((prev) => prev.map((d) => (d.id === did ? { ...d, ...values } : d)));
+  const updateDireccion = async (
+    addressId: number,
+    values: ICreateMarketAdminClientAddressBody
+  ) => {
+    try {
+      await updateMarketAdminClientAddress(id, addressId, values);
+      await mutateDirecciones();
+      showMessage("success", "Dirección actualizada correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al actualizar la dirección."
+      );
+      throw err;
+    }
+  };
 
-  const deleteDireccion = (did: string) =>
-    setDirecciones((prev) => prev.filter((d) => d.id !== did));
+  const deleteDireccion = async (addressId: number) => {
+    try {
+      await deleteMarketAdminClientAddress(id, addressId);
+      await mutateDirecciones();
+      showMessage("success", "Dirección eliminada correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al eliminar la dirección."
+      );
+      throw err;
+    }
+  };
+
+  const saveConfig = async (body: IUpdateMarketAdminClientConfigBody) => {
+    try {
+      await updateMarketAdminClientConfig(id, body);
+      await mutateConfig();
+      showMessage("success", "Configuración actualizada correctamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al actualizar la configuración."
+      );
+      throw err;
+    }
+  };
 
   const createNegociacion = (nueva: Negociacion) => setNegociaciones((prev) => [nueva, ...prev]);
 
-  const removeUsuario = (uid: string) => setUsuarios((prev) => prev.filter((u) => u.id !== uid));
-
-  const toggleProducto = (pid: string) =>
-    setProductos((prev) => prev.map((p) => (p.id === pid ? { ...p, activo: !p.activo } : p)));
-
-  const agregarLinea = (linea: string) => {
-    if (productos.some((p) => p.linea === linea)) return;
-    setProductos((prev) => [
-      ...prev,
-      ...(LINEAS_CATALOGO[linea] ?? []).map((p) => ({ ...p, linea, activo: true }))
+  const createBonificado = (nuevo: Omit<BonifManual, "id" | "estado" | "creadoEn">) =>
+    setBonificados((prev) => [
+      {
+        ...nuevo,
+        id: `bm${Date.now()}`,
+        estado: "pendiente",
+        creadoEn: new Date().toISOString().slice(0, 10)
+      },
+      ...prev
     ]);
-  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <ProfitLoader />
+      </div>
+    );
+  }
+
+  if (error || !cliente) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-[#999999]">No se pudo cargar el cliente.</p>
+      </div>
+    );
+  }
+
+  const direccionesCount = isLoadingDirecciones ? cliente.addresses_count : direcciones.length;
+  const usuariosCount = isLoadingUsuarios ? cliente.users_count : usuarios.length;
+  const productosCount = isLoadingProductos
+    ? cliente.products_count
+    : productos.reduce((n, c) => n + c.products.length, 0);
 
   const TABS = [
-    { id: "descuentos", label: "Descuentos", icon: Tag },
-    { id: "direcciones", label: `Direcciones (${direcciones.length})`, icon: MapPin },
-    { id: "usuarios", label: `Usuarios (${usuarios.length})`, icon: Users },
-    { id: "productos", label: "Productos", icon: Package },
+    { id: "promociones", label: "Promociones", icon: Tag },
+    { id: "direcciones", label: `Direcciones (${direccionesCount})`, icon: MapPin },
+    { id: "usuarios", label: `Usuarios (${usuariosCount})`, icon: Users },
+    { id: "productos", label: `Productos (${productosCount})`, icon: Package },
     { id: "configuraciones", label: "Configuraciones", icon: Settings }
   ];
 
   return (
     <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">{cliente.nombre}</h1>
+      <h1 className="text-2xl font-bold text-[#141414] mb-5">{cliente.client_name}</h1>
 
       <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden">
         {/* Top bar */}
@@ -102,12 +197,12 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
           </Link>
           <span
             className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              cliente.estado === "Activo"
+              cliente.is_active === 1
                 ? "bg-[#E6F9E6] text-[#1A7A1A]"
                 : "bg-[#EEEEEE] text-[#999999]"
             }`}
           >
-            {cliente.estado}
+            {cliente.is_active === 1 ? "Activo" : "Inactivo"}
           </span>
         </div>
 
@@ -116,13 +211,14 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
           <p className="text-sm font-bold text-[#141414] mb-4">Información general</p>
           <div className="grid grid-cols-[1fr_1fr_1fr_2fr] gap-6">
             <Field label="NIT" value={cliente.nit} />
-            <Field label="Ciudad" value={cliente.ciudad} />
-            <Field label="Canal" value={cliente.canal} />
+            {/* TODO: el detalle aún no devuelve la ciudad — pendiente en backend */}
+            <Field label="Ciudad" value="—" />
+            <Field label="Canal" value={cliente.bu || "—"} />
             <Field
               label="Líneas de negocio"
               value={
                 <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                  {cliente.lineas.map((l) => {
+                  {splitLineas(cliente.lineas).map((l) => {
                     const c = LINEA_COLORS[l] ?? { bg: "#AAAAAA", text: "#fff" };
                     return (
                       <span
@@ -163,27 +259,31 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
         {/* Tab content */}
         <div className="p-6">
-          {activeTab === "descuentos" && (
-            <DescuentosTab negociaciones={negociaciones} onCreate={createNegociacion} />
+          {activeTab === "promociones" && (
+            <PromocionesTab
+              negociaciones={negociaciones}
+              onCreate={createNegociacion}
+              bonificados={bonificados}
+              onCreateBonificado={createBonificado}
+            />
           )}
           {activeTab === "direcciones" && (
             <DireccionesTab
               direcciones={direcciones}
+              isLoading={isLoadingDirecciones}
               onAdd={addDireccion}
               onUpdate={updateDireccion}
               onDelete={deleteDireccion}
             />
           )}
-          {activeTab === "usuarios" && <UsuariosTab usuarios={usuarios} onRemove={removeUsuario} />}
+          {activeTab === "usuarios" && (
+            <UsuariosTab usuarios={usuarios} isLoading={isLoadingUsuarios} />
+          )}
           {activeTab === "productos" && (
-            <ProductosTab
-              productos={productos}
-              onToggle={toggleProducto}
-              onAgregarLinea={agregarLinea}
-            />
+            <ProductosTab categorias={productos} isLoading={isLoadingProductos} />
           )}
           {activeTab === "configuraciones" && (
-            <ConfiguracionesTab form={configForm} onChange={setConfigForm} />
+            <ConfiguracionesTab config={config} isLoading={isLoadingConfig} onSave={saveConfig} />
           )}
         </div>
       </div>

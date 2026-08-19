@@ -5,38 +5,19 @@ import Link from "next/link";
 import { Plus, Eye, ChevronLeft } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import useSWR from "swr";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import MarketAdminPromotions from "@/modules/marketAdmin/components/MarketAdminPromotions/MarketAdminPromotions";
 import CrearNuevoModal from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/CrearNuevoModal";
-
-const BONIFICADOS_MOCK = [
-  {
-    id: "b1",
-    nombre: "Flex Q2 2025 — Rellenos",
-    tipo: "Flex",
-    inicio: "2025-04-01",
-    fin: "2025-06-30",
-    estado: "Activo",
-    reglas: 3
-  },
-  {
-    id: "b2",
-    nombre: "Face Renew 360",
-    tipo: "Promos Mes",
-    inicio: "2025-06-01",
-    fin: "2025-06-30",
-    estado: "Activo",
-    reglas: 2
-  }
-];
-
-type Bonificado = (typeof BONIFICADOS_MOCK)[number];
+import { getAllDiscountPackages } from "@/services/discount/discount.service";
+import { useAppStore } from "@/lib/store/store";
+import { DiscountPackage } from "@/types/discount/DiscountPackage";
+import ProfitLoader from "@/components/ui/profit-loader";
 
 const ESTADO_STYLES: Record<string, string> = {
   Activo: "bg-[#E8F9E8] text-[#1A7A1A]",
-  Vencido: "bg-[#F0F0F0] text-[#999999]",
-  Borrador: "bg-[#FFF8E1] text-[#B8860B]"
+  Inactivo: "bg-[#F0F0F0] text-[#999999]"
 };
 
 const TIPO_STYLES: Record<string, string> = {
@@ -44,23 +25,25 @@ const TIPO_STYLES: Record<string, string> = {
   "Promos Mes": "bg-[#F5F0FF] text-[#7C4DFF]"
 };
 
+const MONTHS = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic"
+];
+
 const formatDate = (iso: string) => {
-  const [y, m, d] = iso.split("-");
-  const months = [
-    "Ene",
-    "Feb",
-    "Mar",
-    "Abr",
-    "May",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dic"
-  ];
-  return `${d} ${months[parseInt(m) - 1]} ${y}`;
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return iso;
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 const PAGE_SIZE = 10;
@@ -78,6 +61,20 @@ export default function MarketAdminBonusAndDiscounts() {
   const [showPromotions, setShowPromotions] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
 
+  const { ID } = useAppStore((state) => state.selectedProject);
+  const { data: discountsData, isLoading } = useSWR(ID ? { id: ID } : null, ({ id }) =>
+    getAllDiscountPackages({ projectId: id })
+  );
+
+  const descuentos = discountsData?.data ?? [];
+
+  const getStatusLabel = (active: number) => (active === 1 ? "Activo" : "Inactivo");
+
+  const tipos = useMemo(
+    () => Array.from(new Set(descuentos.map((d) => d.discountType).filter(Boolean))),
+    [descuentos]
+  );
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (accionesRef.current && !accionesRef.current.contains(e.target as Node))
@@ -89,16 +86,16 @@ export default function MarketAdminBonusAndDiscounts() {
 
   const filtered = useMemo(
     () =>
-      BONIFICADOS_MOCK.filter((b) => {
-        const matchSearch = b.nombre.toLowerCase().includes(search.toLowerCase());
-        const matchTipo = tipoFilter === "Todos" || b.tipo === tipoFilter;
-        const matchEstado = estadoFilter === "Todos" || b.estado === estadoFilter;
+      descuentos.filter((d) => {
+        const matchSearch = (d.name ?? "").toLowerCase().includes(search.toLowerCase());
+        const matchTipo = tipoFilter === "Todos" || d.discountType === tipoFilter;
+        const matchEstado = estadoFilter === "Todos" || getStatusLabel(d.active) === estadoFilter;
         return matchSearch && matchTipo && matchEstado;
       }),
-    [search, tipoFilter, estadoFilter]
+    [search, tipoFilter, estadoFilter, descuentos]
   );
 
-  const activos = filtered.filter((b) => b.estado === "Activo").length;
+  const activos = filtered.filter((d) => d.active === 1).length;
 
   function runAccion(accion: string) {
     setShowAcciones(false);
@@ -107,21 +104,21 @@ export default function MarketAdminBonusAndDiscounts() {
     alert(`Acción "${accion}" aplicada a ${count} bonificado(s).`);
   }
 
-  const columns: ColumnsType<Bonificado> = [
+  const columns: ColumnsType<DiscountPackage> = [
     {
       title: "Nombre",
-      dataIndex: "nombre",
-      key: "nombre",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
       title: "Tipo",
-      dataIndex: "tipo",
-      key: "tipo",
+      dataIndex: "discountType",
+      key: "discountType",
       width: 130,
-      sorter: (a, b) => a.tipo.localeCompare(b.tipo),
+      sorter: (a, b) => a.discountType.localeCompare(b.discountType),
       onHeaderCell: headerCell,
       render: (tipo: string) => (
         <span
@@ -133,43 +130,50 @@ export default function MarketAdminBonusAndDiscounts() {
     },
     {
       title: "Inicio",
-      dataIndex: "inicio",
-      key: "inicio",
-      sorter: (a, b) => a.inicio.localeCompare(b.inicio),
+      dataIndex: "startDate",
+      key: "startDate",
+      sorter: (a, b) => a.startDate.localeCompare(b.startDate),
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{formatDate(v)}</span>
     },
     {
       title: "Fin",
-      dataIndex: "fin",
-      key: "fin",
-      sorter: (a, b) => a.fin.localeCompare(b.fin),
+      dataIndex: "endDate",
+      key: "endDate",
+      sorter: (a, b) => (a.endDate ?? "").localeCompare(b.endDate ?? ""),
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{formatDate(v)}</span>
+      render: (v: string | null) =>
+        v ? (
+          <span className="text-sm text-[#141414]">{formatDate(v)}</span>
+        ) : (
+          <span className="text-sm text-[#999999]">—</span>
+        )
     },
     {
       title: "Reglas",
       dataIndex: "reglas",
       key: "reglas",
       width: 90,
-      sorter: (a, b) => a.reglas - b.reglas,
       onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
+      render: () => <span className="text-sm text-[#141414]">-</span>
     },
     {
       title: "Estado",
-      dataIndex: "estado",
-      key: "estado",
+      dataIndex: "active",
+      key: "active",
       width: 110,
-      sorter: (a, b) => a.estado.localeCompare(b.estado),
+      sorter: (a, b) => a.active - b.active,
       onHeaderCell: headerCell,
-      render: (estado: string) => (
-        <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${ESTADO_STYLES[estado] ?? ""}`}
-        >
-          {estado}
-        </span>
-      )
+      render: (active: number) => {
+        const label = getStatusLabel(active);
+        return (
+          <span
+            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${ESTADO_STYLES[label] ?? ""}`}
+          >
+            {label}
+          </span>
+        );
+      }
     },
     {
       title: "",
@@ -189,6 +193,10 @@ export default function MarketAdminBonusAndDiscounts() {
 
   if (showPromotions) {
     return <MarketAdminPromotions onBack={() => setShowPromotions(false)} />;
+  }
+
+  if (isLoading) {
+    return <ProfitLoader />;
   }
 
   return (
@@ -248,8 +256,11 @@ export default function MarketAdminBonusAndDiscounts() {
             className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
           >
             <option value="Todos">Tipo</option>
-            <option value="Flex">Flex</option>
-            <option value="Promos Mes">Promos Mes</option>
+            {tipos.map((tipo) => (
+              <option key={tipo} value={tipo}>
+                {tipo}
+              </option>
+            ))}
           </select>
           <select
             value={estadoFilter}
@@ -261,8 +272,7 @@ export default function MarketAdminBonusAndDiscounts() {
           >
             <option value="Todos">Estado</option>
             <option value="Activo">Activo</option>
-            <option value="Vencido">Vencido</option>
-            <option value="Borrador">Borrador</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
           <div className="flex-1" />
           <button
@@ -285,7 +295,9 @@ export default function MarketAdminBonusAndDiscounts() {
               // The selection checkbox handles its own toggle — don't double-toggle
               if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
               setSelectedRowKeys((prev) =>
-                prev.includes(record.id) ? prev.filter((k) => k !== record.id) : [...prev, record.id]
+                prev.includes(record.id)
+                  ? prev.filter((k) => k !== record.id)
+                  : [...prev, record.id]
               );
             },
             className: "cursor-pointer"

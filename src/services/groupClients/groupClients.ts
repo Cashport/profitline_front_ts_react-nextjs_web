@@ -92,6 +92,53 @@ export const changeGroupState = async (
   }
 };
 
+export const addUserToClientGroups = async (
+  groupsId: number[],
+  projectId: number,
+  userId: number
+): Promise<GenericResponse<unknown>> => {
+  const modelData = {
+    groups_id: groupsId,
+    project_id: projectId,
+    user_id: userId
+  };
+
+  try {
+    const response: GenericResponse<unknown> = await API.post(
+      `${config.API_HOST}/group-client/add-user`,
+      modelData
+    );
+    return response;
+  } catch (error) {
+    console.error("error adding user to client groups: ", error);
+    throw error;
+  }
+};
+
+// PUT y no DELETE: el backend espera el body con los grupos a quitar
+export const removeUserFromClientGroups = async (
+  groupsId: number[],
+  projectId: number,
+  userId: number
+): Promise<GenericResponse<unknown>> => {
+  const modelData = {
+    groups_id: groupsId,
+    project_id: projectId,
+    user_id: userId
+  };
+
+  try {
+    const response: GenericResponse<unknown> = await API.put(
+      `${config.API_HOST}/group-client/delete-user`,
+      modelData
+    );
+    return response;
+  } catch (error) {
+    console.error("error removing user from client groups: ", error);
+    throw error;
+  }
+};
+
 export const getClientGroups = async (): Promise<IClientsGroupsFull> => {
   try {
     const url = `/group-client/filter`;

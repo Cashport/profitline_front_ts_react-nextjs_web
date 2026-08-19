@@ -11,6 +11,7 @@ import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
 import { API, getIdToken, idProject } from "@/utils/api/api";
 import {
   Discount,
+  DiscountPackage,
   DiscountPackageCreateResponse,
   DiscountPackageGetOne
 } from "@/types/discount/DiscountPackage";
@@ -48,8 +49,8 @@ export const getAllDiscountPackages = async ({
 }: {
   projectId: number;
   params?: Record<string, string | number>;
-}): Promise<GenericResponsePage<DiscountBasics[]>> => {
-  const response: GenericResponsePage<DiscountBasics[]> = await API.get(
+}): Promise<GenericResponsePage<DiscountPackage[]>> => {
+  const response: GenericResponsePage<DiscountPackage[]> = await API.get(
     `/discount/all/discount-packages/project/${projectId}`,
     {
       params

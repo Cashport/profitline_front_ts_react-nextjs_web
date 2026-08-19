@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { Users, User, Package, Tag, ChevronRight } from "lucide-react";
 
-const sections = [
+type Section = {
+  href: string;
+  icon: typeof Users;
+  label: string;
+  description: string;
+  disabled?: boolean;
+};
+
+const sections: Section[] = [
   {
     href: "/market-admin/clientes",
     icon: Users,
@@ -11,11 +19,10 @@ const sections = [
     description: "Gestiona clientes, sus productos, descuentos y usuarios asignados."
   },
   {
-    href: "#",
+    href: "/market-admin/usuarios",
     icon: User,
     label: "Usuarios",
-    description: "Administra los usuarios del Marketplace, roles y clientes asociados.",
-    disabled: true
+    description: "Administra los usuarios del Marketplace, roles y clientes asociados."
   },
   {
     href: "/market-admin/productos",

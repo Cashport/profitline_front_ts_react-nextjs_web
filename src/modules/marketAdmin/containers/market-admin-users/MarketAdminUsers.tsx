@@ -1,86 +1,60 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { Eye, ChevronLeft, Plus } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye, ChevronLeft } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import ModalCrearUsuario, {
+  CrearUsuarioFormValues
+} from "@/modules/marketAdmin/components/market-admin-users/ModalCrearUsuario";
 import { useDebounce } from "@/hooks/useDeabouce";
+import { useMarketAdminUsers } from "@/modules/marketAdmin/hooks/useMarketAdminUsers";
+import { useMarketAdminRoles } from "@/modules/marketAdmin/hooks/useMarketAdminRoles";
+import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
-import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
-import { updateMarketAdminClientsBatch } from "@/services/marketAdmin/marketAdmin";
-import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
-import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
-
-function LineasBadges({ lineas }: { lineas: string[] }) {
-  return (
-    <div className="flex items-center">
-      {lineas.map((l, i) => {
-        const c = LINEA_COLORS[l] ?? { bg: "#AAAAAA", text: "#fff" };
-        return (
-          <span
-            key={l}
-            title={l}
-            style={{
-              backgroundColor: c.bg,
-              color: c.text,
-              marginLeft: i === 0 ? 0 : -6,
-              zIndex: lineas.length - i,
-              position: "relative"
-            }}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold ring-2 ring-white flex-shrink-0"
-          >
-            {lineaAbrev(l)}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
+import { inviteUser } from "@/services/users/users";
+import { ApiError } from "@/utils/api/api";
+import { IMarketAdminUser } from "@/types/marketAdmin/IMarketAdmin";
+import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 
 const PAGE_SIZE = 10;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
-const splitLineas = (lineas: string | null) =>
-  lineas
-    ?.split(",")
-    .map((l) => l.trim())
-    .filter(Boolean) ?? [];
-
-export default function MarketAdminClients() {
-  const { showMessage } = useMessageApi();
+export default function MarketAdminUsers() {
   const [search, setSearch] = useState("");
+  const [rolFilter, setRolFilter] = useState("");
   const [estadoFilter, setEstadoFilter] = useState("Todos");
-  const [lineaFilter, setLineaFilter] = useState("Todas");
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
-  const [isRunningAccion, setIsRunningAccion] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
 
   const debouncedSearch = useDebounce(search, 400);
 
+  const { ID } = useAppStore((state) => state.selectedProject);
+  const { showMessage } = useMessageApi();
+
+  const { data: roles } = useMarketAdminRoles();
+
   const {
-    data: clientes,
+    data: usuarios,
     pagination,
     isLoading,
     mutate
-  } = useMarketAdminClients({
+  } = useMarketAdminUsers({
     page,
     limit: PAGE_SIZE,
     search: debouncedSearch,
-    status: estadoFilter === "Todos" ? undefined : estadoFilter === "Activo" ? 1 : 0,
-    linea: lineaFilter === "Todas" ? undefined : lineaFilter
+    role_id: rolFilter === "" ? undefined : Number(rolFilter),
+    status: estadoFilter === "Todos" ? undefined : estadoFilter === "Activo" ? 1 : 0
   });
-
-  // Opciones tomadas de la página actual (mismo criterio que el listado de productos).
-  const lineas = useMemo(
-    () => Array.from(new Set(clientes.flatMap((c) => splitLineas(c.lineas)))),
-    [clientes]
-  );
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -91,86 +65,92 @@ export default function MarketAdminClients() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const activos = clientes.filter((c) => c.is_active === 1).length;
+  const activos = usuarios.filter((u) => u.is_active === 1).length;
 
-  async function runAccionEstado(action: "activate" | "inactivate") {
-    setShowAcciones(false);
+  const handleCreateUser = async (values: CrearUsuarioFormValues) => {
+    setIsCreatingUser(true);
     try {
-      setIsRunningAccion(true);
-      await updateMarketAdminClientsBatch({
-        client_ids: selectedRowKeys.map(String),
-        action
-      });
-      await mutate();
-      setSelectedRowKeys([]);
-      showMessage(
-        "success",
-        `${selectedRowKeys.length} cliente(s) ${action === "activate" ? "activados" : "inactivados"} correctamente.`
+      await inviteUser(
+        {
+          info: {
+            name: values.name,
+            cargo: values.position,
+            email: values.email,
+            phone: values.phone,
+            rol: values.role_id ? { value: values.role_id, label: values.role_name } : undefined
+          }
+        },
+        ID
       );
+      showMessage("success", "El usuario fue creado exitosamente.");
+      setShowCreate(false);
+      mutate();
     } catch (error) {
-      showMessage(
-        "error",
-        error instanceof Error ? error.message : "Ocurrió un error al actualizar los clientes."
-      );
+      const message =
+        error instanceof ApiError ? error.message : "Oops ocurrió un error creando el usuario.";
+      if (error instanceof ApiError && error.status === 409) {
+        showMessage("error", "Este email ya está en uso, prueba otro.");
+      } else {
+        showMessage("error", message);
+      }
     } finally {
-      setIsRunningAccion(false);
+      setIsCreatingUser(false);
     }
-  }
+  };
 
   function runAccion(accion: string) {
     setShowAcciones(false);
+    const count = selectedRowKeys.length;
     setSelectedRowKeys([]);
-    alert(`Acción "${accion}" aplicada a ${selectedRowKeys.length} cliente(s).`);
+    alert(`Acción "${accion}" aplicada a ${count} usuario(s).`);
   }
 
-  const columns: ColumnsType<IMarketAdminClient> = [
+  const columns: ColumnsType<IMarketAdminUser> = [
     {
-      title: "Cliente",
-      dataIndex: "client_name",
-      key: "client_name",
-      sorter: (a, b) => a.client_name.localeCompare(b.client_name),
+      title: "Nombre",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Ciudad",
-      dataIndex: "city",
-      key: "city",
-      sorter: (a, b) => (a.city ?? "").localeCompare(b.city ?? ""),
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      sorter: (a, b) => a.email.localeCompare(b.email),
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
+      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Usuarios",
-      dataIndex: "usuarios_count",
-      key: "usuarios_count",
-      width: 110,
-      sorter: (a, b) => a.usuarios_count - b.usuarios_count,
+      title: "Rol",
+      dataIndex: "role_name",
+      key: "role_name",
+      width: 130,
+      sorter: (a, b) => (a.role_name ?? "").localeCompare(b.role_name ?? ""),
+      onHeaderCell: headerCell,
+      render: (rol: string) => (
+        <span
+          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${ROL_STYLES[rol] ?? "bg-[#F0F0F0] text-[#666666]"}`}
+        >
+          {rol || "—"}
+        </span>
+      )
+    },
+    {
+      title: "Clientes",
+      dataIndex: "clients_count",
+      key: "clients_count",
+      width: 100,
+      sorter: (a, b) => a.clients_count - b.clients_count,
       onHeaderCell: headerCell,
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Productos",
-      dataIndex: "productos_count",
-      key: "productos_count",
-      width: 110,
-      sorter: (a, b) => a.productos_count - b.productos_count,
-      onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Líneas",
-      dataIndex: "lineas",
-      key: "lineas",
-      width: 150,
-      onHeaderCell: headerCell,
-      render: (lineas: string | null) => <LineasBadges lineas={splitLineas(lineas)} />
     },
     {
       title: "Estado",
       dataIndex: "is_active",
       key: "is_active",
-      width: 100,
+      width: 110,
       sorter: (a, b) => Number(a.is_active) - Number(b.is_active),
       onHeaderCell: headerCell,
       render: (isActive: 1 | 0) => (
@@ -188,9 +168,9 @@ export default function MarketAdminClients() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, c) => (
+      render: (_, u) => (
         <Link
-          href={`/market-admin/clientes/${c.client_id}`}
+          href={`/market-admin/usuarios/${u.id}`}
           onClick={(e) => e.stopPropagation()}
           className="flex items-center justify-center w-8 h-8 rounded-lg text-[#BBBBBB] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors"
         >
@@ -202,7 +182,7 @@ export default function MarketAdminClients() {
 
   return (
     <div className="min-h-screen">
-      <h1 className="text-2xl font-bold text-[#141414] mb-5">Clientes</h1>
+      <h1 className="text-2xl font-bold text-[#141414] mb-5">Usuarios</h1>
 
       <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
         {/* Toolbar */}
@@ -220,27 +200,30 @@ export default function MarketAdminClients() {
               setPage(1);
             }}
           />
-          {/* Generar acción */}
           <div className="relative" ref={accionesRef}>
             <GenerateActionButton
-              disabled={selectedRowKeys.length === 0 || isRunningAccion}
-              onClick={() =>
-                selectedRowKeys.length > 0 && !isRunningAccion && setShowAcciones((v) => !v)
-              }
+              disabled={selectedRowKeys.length === 0}
+              onClick={() => selectedRowKeys.length > 0 && setShowAcciones((v) => !v)}
             />
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
-                  onClick={() => runAccionEstado("activate")}
+                  onClick={() => runAccion("Activar")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
                   Activar
                 </button>
                 <button
-                  onClick={() => runAccionEstado("inactivate")}
+                  onClick={() => runAccion("Inactivar")}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
                   Inactivar
+                </button>
+                <button
+                  onClick={() => runAccion("Cambiar rol")}
+                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
+                >
+                  Cambiar rol
                 </button>
                 <div className="h-px bg-[#EEEEEE] my-1" />
                 <button
@@ -253,17 +236,17 @@ export default function MarketAdminClients() {
             )}
           </div>
           <select
-            value={lineaFilter}
+            value={rolFilter}
             onChange={(e) => {
-              setLineaFilter(e.target.value);
+              setRolFilter(e.target.value);
               setPage(1);
             }}
             className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
           >
-            <option value="Todas">Línea</option>
-            {lineas.map((l) => (
-              <option key={l} value={l}>
-                {l}
+            <option value="">Rol</option>
+            {roles.map((r) => (
+              <option key={r.ID} value={r.ID}>
+                {r.ROL_NAME}
               </option>
             ))}
           </select>
@@ -279,24 +262,31 @@ export default function MarketAdminClients() {
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
+
+          {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
+          <div className="h-10 flex-shrink-0 ml-auto">
+            <PrincipalButton onClick={() => setShowCreate(true)} icon={<Plus size={15} />}>
+              Crear usuario
+            </PrincipalButton>
+          </div>
         </div>
 
         <Table
           columns={columns}
-          dataSource={clientes}
-          rowKey="client_id"
-          loading={isLoading || isRunningAccion}
+          dataSource={usuarios}
+          rowKey="id"
+          loading={isLoading}
           showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron clientes." }}
+          locale={{ emptyText: "No se encontraron usuarios." }}
           rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           onRow={(record) => ({
             onClick: (e) => {
               // The selection checkbox handles its own toggle — don't double-toggle
               if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
               setSelectedRowKeys((prev) =>
-                prev.includes(record.client_id)
-                  ? prev.filter((k) => k !== record.client_id)
-                  : [...prev, record.client_id]
+                prev.includes(record.id)
+                  ? prev.filter((k) => k !== record.id)
+                  : [...prev, record.id]
               );
             },
             className: "cursor-pointer"
@@ -308,13 +298,20 @@ export default function MarketAdminClients() {
             showSizeChanger: false,
             position: ["bottomRight"],
             showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} clientes · ${activos} activos`
+              `Mostrando ${range[0]}–${range[1]} de ${total} usuarios · ${activos} activos`
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);
           }}
         />
       </div>
+
+      <ModalCrearUsuario
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSend={handleCreateUser}
+        isLoading={isCreatingUser}
+      />
     </div>
   );
 }
