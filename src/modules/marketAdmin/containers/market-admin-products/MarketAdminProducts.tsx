@@ -162,9 +162,9 @@ export default function MarketAdminProducts() {
         <Link
           href={`/market-admin/productos/${p.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#BBBBBB] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors"
+          className="flex items-center justify-center w-8 h-8 ml-auto rounded-md bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors"
         >
-          <Eye size={15} />
+          <Eye size={19} />
         </Link>
       )
     }
@@ -174,12 +174,12 @@ export default function MarketAdminProducts() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Productos</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
+        <div className="flex items-center gap-2 px-8 py-4">
           <Link
             href="/market-admin"
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
+            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
           >
             <ChevronLeft size={18} />
           </Link>
@@ -249,39 +249,41 @@ export default function MarketAdminProducts() {
           </select>
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={filtered}
-          rowKey="id"
-          loading={isLoading}
-          showSorterTooltip={false}
-          locale={{ emptyText: "No se encontraron productos." }}
-          rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
-          onRow={(record) => ({
-            onClick: (e) => {
-              // The selection checkbox handles its own toggle — don't double-toggle
-              if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
-              setSelectedRowKeys((prev) =>
-                prev.includes(record.id)
-                  ? prev.filter((k) => k !== record.id)
-                  : [...prev, record.id]
-              );
-            },
-            className: "cursor-pointer"
-          })}
-          pagination={{
-            current: page,
-            pageSize: PAGE_SIZE,
-            total: pagination.totalRows,
-            showSizeChanger: false,
-            position: ["bottomRight"],
-            showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} productos · ${activos} activos`
-          }}
-          onChange={(pag, _filters, _sorter, extra) => {
-            if (extra.action === "paginate") setPage(pag.current ?? 1);
-          }}
-        />
+        <div className="px-8">
+          <Table
+            columns={columns}
+            dataSource={filtered}
+            rowKey="id"
+            loading={isLoading}
+            showSorterTooltip={false}
+            locale={{ emptyText: "No se encontraron productos." }}
+            rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+            onRow={(record) => ({
+              onClick: (e) => {
+                // The selection checkbox handles its own toggle — don't double-toggle
+                if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
+                setSelectedRowKeys((prev) =>
+                  prev.includes(record.id)
+                    ? prev.filter((k) => k !== record.id)
+                    : [...prev, record.id]
+                );
+              },
+              className: "cursor-pointer"
+            })}
+            pagination={{
+              current: page,
+              pageSize: PAGE_SIZE,
+              total: pagination.totalRows,
+              showSizeChanger: false,
+              position: ["bottomRight"],
+              showTotal: (total, range) =>
+                `Mostrando ${range[0]}–${range[1]} de ${total} productos · ${activos} activos`
+            }}
+            onChange={(pag, _filters, _sorter, extra) => {
+              if (extra.action === "paginate") setPage(pag.current ?? 1);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
