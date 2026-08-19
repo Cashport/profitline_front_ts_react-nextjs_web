@@ -63,6 +63,8 @@ const OrdersViewTable = ({
   const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
 
   const REJECTED_STATUS_ID = 6;
+  const WALLET_BLOCKED_STATUS_ID = 5;
+  const NOVELTY_STATUS_IDS = [WALLET_BLOCKED_STATUS_ID, REJECTED_STATUS_ID];
 
   const handleResendToBilling = async (orderId: number) => {
     const hide = message.open({
@@ -315,62 +317,64 @@ const OrdersViewTable = ({
       width: 64,
       dataIndex: "",
       render: (_, row) => {
-        const isBlockedByWallet = row.order_status_id == 5;
+        const isBlockedByWallet = row.order_status_id === WALLET_BLOCKED_STATUS_ID;
+        const hasNovelty =
+          NOVELTY_STATUS_IDS.includes(row.order_status_id) && row.incident_id !== null;
 
-        const items = (
-          isBlockedByWallet
-            ? row.incident_id !== null
-              ? [
-                  {
-                    key: "verNovedad",
-                    label: (
-                      <Button
-                        icon={<WarningCircle size={20} />}
-                        className="buttonNoBorder"
-                        onClick={() =>
-                          openModal("novelty", {
-                            noveltyId: row.incident_id as number,
-                            onResolved: setFetchMutate
-                          })
-                        }
-                      >
-                        Ver novedad
-                      </Button>
-                    )
-                  }
-                ]
-              : []
-            : [
-                {
-                  key: "verBodega",
-                  label: (
-                    <Button
-                      icon={<WarningDiamond size={20} />}
-                      className="buttonNoBorder"
-                      onClick={() => {
-                        setSelectedOrder(row.id);
-                        setCurrentWarehouseId(row.warehouseid);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      Ver bodega
-                    </Button>
-                  )
-                },
-                {
-                  key: "detalle",
-                  label: (
-                    <Button
-                      icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
-                      className="buttonNoBorder"
-                      onClick={() => handleSeeDetail(row)}
-                    >
-                      {row.is_draft ? "Continuar pedido" : "Detalle"}
-                    </Button>
-                  )
+        const items: NonNullable<MenuProps["items"]> = [];
+
+        if (hasNovelty) {
+          items.push({
+            key: "verNovedad",
+            label: (
+              <Button
+                icon={<WarningCircle size={20} />}
+                className="buttonNoBorder"
+                onClick={() =>
+                  openModal("novelty", {
+                    noveltyId: row.incident_id as number,
+                    onResolved: setFetchMutate
+                  })
                 }
-              ]
-        ) as NonNullable<MenuProps["items"]>;
+              >
+                Ver novedad
+              </Button>
+            )
+          });
+        }
+
+        if (!isBlockedByWallet) {
+          items.push(
+            {
+              key: "verBodega",
+              label: (
+                <Button
+                  icon={<WarningDiamond size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => {
+                    setSelectedOrder(row.id);
+                    setCurrentWarehouseId(row.warehouseid);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Ver bodega
+                </Button>
+              )
+            },
+            {
+              key: "detalle",
+              label: (
+                <Button
+                  icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => handleSeeDetail(row)}
+                >
+                  {row.is_draft ? "Continuar pedido" : "Detalle"}
+                </Button>
+              )
+            }
+          );
+        }
 
         if (row.order_status_id === REJECTED_STATUS_ID) {
           items.push({
