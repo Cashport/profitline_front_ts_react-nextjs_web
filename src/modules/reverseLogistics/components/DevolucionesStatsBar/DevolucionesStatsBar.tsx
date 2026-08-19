@@ -6,7 +6,10 @@ import { Col, Row } from "antd";
 import { Clock, TrendUp, Package, FileText, CalendarBlank } from "phosphor-react";
 import { getProfit360DevolucionKpis } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatCard } from "../DevolucionesStatCard/DevolucionesStatCard";
-import { IProfit360DevolucionKpiFase, TipoDevolucionCodigo } from "@/types/reverseLogistics/IReverseLogistics";
+import {
+  IProfit360DevolucionKpiFase,
+  TipoDevolucionCodigo
+} from "@/types/reverseLogistics/IReverseLogistics";
 import { FASE_LABELS } from "../../constants";
 
 const CARD_ICONS = [Clock, TrendUp, Package, FileText, CalendarBlank];
@@ -42,24 +45,25 @@ export function DevolucionesStatsBar({ clientId, fromDate, toDate }: Devolucione
   );
 
   const stats = useMemo((): StatCard[] => {
-    const fases: IProfit360DevolucionKpiFase[] = Object.keys(FASE_LABELS).map((f, i) => {
-      const fase = FASE_LABELS[f];
-      const dataFases = [...(data?.fases ?? [])].sort((a, b) => a.orden - b.orden);
-      console.log(dataFases);
-      const dataFase = dataFases.find((df) => df.codigo == f);
+    const dataFases = data?.fases ?? [];
+    // Always render one card per known fase, in FASE_LABELS order — a fase the
+    // backend didn't report falls back to an empty measure set.
+    const fases: IProfit360DevolucionKpiFase[] = (
+      Object.keys(FASE_LABELS) as TipoDevolucionCodigo[]
+    ).map((f, i) => {
+      const dataFase = dataFases.find((df) => df.codigo === f);
       if (dataFase) return dataFase;
-      else
-        return {
-          codigo: f,
-          nombre: fase,
-          orden: i + 1,
-          pasoOrigen: null,
-          pasoDestino: null,
-          promedioDias: null,
-          minDias: null,
-          maxDias: null,
-          muestras: null
-        };
+      return {
+        codigo: f,
+        nombre: FASE_LABELS[f],
+        orden: i + 1,
+        pasoOrigen: null,
+        pasoDestino: null,
+        promedioDias: null,
+        minDias: null,
+        maxDias: null,
+        muestras: null
+      };
     });
 
     const cards = fases.map((fase) =>
