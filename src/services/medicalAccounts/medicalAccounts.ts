@@ -3,6 +3,7 @@ import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { getCorrectMimeType } from "@/utils/files/getCorrectMimeType";
 import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
+import { MedicalAccountStatus } from "@/modules/medicalAccounts/types/IMedicalAccount";
 
 /**
  * Uploads a medical-account PDF and triggers backend AI processing.
@@ -11,11 +12,15 @@ import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccou
  */
 export const uploadMedicalAccount = async (
   file: File,
-  projectId: number
+  projectId: number,
+  orderNumber: string,
+  serviceType?: string
 ): Promise<GenericResponse<IMedicalAccountUploadData>> => {
   const formData = new FormData();
   formData.append("file", getCorrectMimeType(file));
   formData.append("project_id", String(projectId));
+  formData.append("order_number", orderNumber);
+  if (serviceType) formData.append("service_type", serviceType);
 
   try {
     const response: GenericResponse<IMedicalAccountUploadData> = await API.post(
@@ -30,6 +35,50 @@ export const uploadMedicalAccount = async (
     return response;
   } catch (error) {
     console.error("Error uploading medical account:", error);
+    throw error;
+  }
+};
+
+export const getMedicalAccountStatuses = async (): Promise<
+  GenericResponse<MedicalAccountStatus[]>
+> => {
+  try {
+    const response: GenericResponse<MedicalAccountStatus[]> = await API.get(
+      `${config.API_HOST}/medical-accounts/statuses`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching medical account statuses:", error);
+    throw error;
+  }
+};
+
+export const deleteMedicalAccount = async (
+  id: number
+): Promise<GenericResponse<{ id: number }>> => {
+  try {
+    const response: GenericResponse<{ id: number }> = await API.delete(
+      `${config.API_HOST}/medical-accounts/${id}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error deleting medical account:", error);
+    throw error;
+  }
+};
+
+export const mergeMedicalAccountDocuments = async (
+  id: number,
+  documentIds: number[]
+): Promise<GenericResponse<{ url: string }>> => {
+  try {
+    const response: GenericResponse<{ url: string }> = await API.post(
+      `${config.API_HOST}/medical-accounts/${id}/documents/merge`,
+      { document_ids: documentIds }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error merging medical account documents:", error);
     throw error;
   }
 };

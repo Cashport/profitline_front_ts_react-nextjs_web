@@ -19,6 +19,8 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import { cn } from "@/utils/utils";
+import { useMessageApi } from "@/context/MessageContext";
+import { mergeMedicalAccountDocuments } from "@/services/medicalAccounts/medicalAccounts";
 import {
   IMedicalAccountDocumentApi,
   IMedicalAccountNoveltyApi,
@@ -29,6 +31,7 @@ import { formatDocumentType } from "../../utils/format";
 interface MedicalAccountDocumentsProps {
   documents: IMedicalAccountDocumentApi[];
   novedades: IMedicalAccountNoveltyApi[];
+  accountId: number;
 }
 
 // Best-available human label for a document row (the API has no display name).
@@ -178,13 +181,15 @@ const dotsButtonStyle: React.CSSProperties = {
   background: "transparent"
 };
 
-export function MedicalAccountDocuments({ documents, novedades }: MedicalAccountDocumentsProps) {
+export function MedicalAccountDocuments({ documents, novedades, accountId }: MedicalAccountDocumentsProps) {
   const sortedDocs = [...documents].sort((a, b) => a.sequence - b.sequence);
 
   const [viewingDoc, setViewingDoc] = useState<IMedicalAccountDocumentApi | null>(
     () => sortedDocs[0] ?? null
   );
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isMerging, setIsMerging] = useState(false);
+  const { showMessage } = useMessageApi();
 
   // Per-document novelty count, from novedades linked via medical_account_document_id.
   const noveltyCountByDoc = novedades.reduce<Record<number, number>>((acc, novedad) => {
@@ -214,6 +219,29 @@ export function MedicalAccountDocuments({ documents, novedades }: MedicalAccount
 
   const clearSelection = () => setSelectedIds(new Set());
 
+  const handleBulkDownload = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setIsMerging(true);
+    try {
+      const response = await mergeMedicalAccountDocuments(accountId, ids);
+      const url = response.data?.url;
+      if (url) {
+        window.open(url, "_blank");
+      } else {
+        showMessage("error", "No se pudo generar el PDF unificado.");
+      }
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "No se pudo descargar los documentos."
+      );
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
   return (
     <div className="flex" style={{ minHeight: 520 }}>
       {/* Documents table — 50% */}
@@ -226,10 +254,12 @@ export function MedicalAccountDocuments({ documents, novedades }: MedicalAccount
               </span>
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700"
+                onClick={handleBulkDownload}
+                disabled={isMerging}
+                className="inline-flex items-center gap-1.5 rounded-md bg-cashport-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700 disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5" />
-                Descargar PDF{selectedIds.size > 1 ? "s" : ""}
+                {isMerging ? "Generando…" : `Descargar PDF${selectedIds.size > 1 ? "s" : ""}`}
               </button>
               <button
                 type="button"

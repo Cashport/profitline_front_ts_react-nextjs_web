@@ -2,7 +2,8 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileUp, MoreHorizontal, RefreshCw, ShieldCheck } from "lucide-react";
+import { Popconfirm } from "antd";
+import { ArrowLeft, FileUp, MoreHorizontal, RefreshCw, ShieldCheck, Trash } from "lucide-react";
 
 import { useMedicalAccountDetail } from "../../hooks/useMedicalAccountDetail";
 import { MedicalAccountStatusTag } from "../../components/MedicalAccountStatusTag/MedicalAccountStatusTag";
@@ -12,7 +13,7 @@ import { MedicalAccountDocuments } from "../../components/MedicalAccountDocument
 import { MedicalAccountFacturas } from "../../components/MedicalAccountFacturas/MedicalAccountFacturas";
 import { ModalChangeStatus } from "../../components/ModalChangeStatus/ModalChangeStatus";
 import { ModalUploadInvoice } from "../../components/ModalUploadInvoice/ModalUploadInvoice";
-import { auditMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
+import { auditMedicalAccount, deleteMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
 import { useMessageApi } from "@/context/MessageContext";
 import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
 
@@ -46,6 +47,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
   const { showMessage } = useMessageApi();
 
   const [isAuditing, setIsAuditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showChangeStatus, setShowChangeStatus] = useState(false);
   const [showUploadInvoice, setShowUploadInvoice] = useState(false);
 
@@ -53,6 +55,22 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
     if (window.history.length > 1) router.back();
     else router.push("/cuentas-medicas");
   };
+
+  const handleDelete = useCallback(async () => {
+    if (!account) return;
+    setIsDeleting(true);
+    try {
+      await deleteMedicalAccount(account.id);
+      showMessage("success", "Cuenta médica eliminada correctamente.");
+      router.push("/cuentas-medicas");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al eliminar la cuenta."
+      );
+      setIsDeleting(false);
+    }
+  }, [account, router, showMessage]);
 
   const handleAudit = useCallback(async () => {
     if (!account) return;
@@ -147,6 +165,24 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
               <MoreHorizontal className="h-3.5 w-3.5" />
               Generar acción
             </button>
+
+            <Popconfirm
+              title="Eliminar cuenta médica"
+              description="¿Seguro que deseas eliminar esta cuenta médica?"
+              okText="Eliminar"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true }}
+              onConfirm={handleDelete}
+            >
+              <button
+                type="button"
+                disabled={isDeleting}
+                className="inline-flex items-center gap-1.5 rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+              >
+                <Trash className="h-3.5 w-3.5" />
+                {isDeleting ? "Eliminando…" : "Eliminar"}
+              </button>
+            </Popconfirm>
           </div>
           <MedicalAccountStatusTag status={account.status_name} />
         </div>
@@ -171,7 +207,11 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         )}
 
         {/* Classified documents + PDF preview */}
-        <MedicalAccountDocuments documents={account.documentos} novedades={account.novedades} />
+        <MedicalAccountDocuments
+          documents={account.documentos}
+          novedades={account.novedades}
+          accountId={account.id}
+        />
       </div>
 
       <ModalChangeStatus
