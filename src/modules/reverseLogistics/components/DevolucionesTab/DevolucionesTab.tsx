@@ -17,6 +17,7 @@ import {
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
 import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
+import { resolveDatePreset } from "../FilterDateTab/FilterDateTab";
 import { IDevolucionesFilter } from "../../types";
 import { parseCausales } from "../../utils/causales";
 import { returnsColumns } from "./columns";
@@ -147,13 +148,13 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
 };
 
 export function DevolucionesTab() {
-  // Default filter = today (fromDate = toDate = YYYY-MM-DD), matching the
-  // endpoint contract and the user's spec for this tab.
-  const today = dayjs().format("YYYY-MM-DD");
+  // Default filter = the "Este mes" preset, resolved from the same definitions the
+  // date panel uses so the Fecha tag opens naming that period.
+  const defaultDates = resolveDatePreset("este_mes");
   const [filter, setFilter] = useState<IDevolucionesFilter>({
     clientId: null,
-    fromDate: today,
-    toDate: today
+    fromDate: defaultDates.from,
+    toDate: defaultDates.to
   });
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
