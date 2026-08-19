@@ -204,9 +204,9 @@ export default function MarketAdminClients() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Clientes</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0">
+      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-8 py-4">
+        <div className="flex items-center gap-2 mb-4">
           <Link
             href="/market-admin"
             className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
@@ -281,41 +281,39 @@ export default function MarketAdminClients() {
           </select>
         </div>
 
-        <div className="px-8">
-          <Table
-            columns={columns}
-            dataSource={clientes}
-            rowKey="client_id"
-            loading={isLoading || isRunningAccion}
-            showSorterTooltip={false}
-            locale={{ emptyText: "No se encontraron clientes." }}
-            rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
-            onRow={(record) => ({
-              onClick: (e) => {
-                // The selection checkbox handles its own toggle — don't double-toggle
-                if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
-                setSelectedRowKeys((prev) =>
-                  prev.includes(record.client_id)
-                    ? prev.filter((k) => k !== record.client_id)
-                    : [...prev, record.client_id]
-                );
-              },
-              className: "cursor-pointer"
-            })}
-            pagination={{
-              current: page,
-              pageSize: PAGE_SIZE,
-              total: pagination.totalRows,
-              showSizeChanger: false,
-              position: ["bottomRight"],
-              showTotal: (total, range) =>
-                `Mostrando ${range[0]}–${range[1]} de ${total} clientes · ${activos} activos`
-            }}
-            onChange={(pag, _filters, _sorter, extra) => {
-              if (extra.action === "paginate") setPage(pag.current ?? 1);
-            }}
-          />
-        </div>
+        <Table
+          columns={columns}
+          dataSource={clientes}
+          rowKey="client_id"
+          loading={isLoading || isRunningAccion}
+          showSorterTooltip={false}
+          locale={{ emptyText: "No se encontraron clientes." }}
+          rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+          onRow={(record) => ({
+            onClick: (e) => {
+              // The selection checkbox handles its own toggle — don't double-toggle
+              if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
+              setSelectedRowKeys((prev) =>
+                prev.includes(record.client_id)
+                  ? prev.filter((k) => k !== record.client_id)
+                  : [...prev, record.client_id]
+              );
+            },
+            className: "cursor-pointer"
+          })}
+          pagination={{
+            current: page,
+            pageSize: PAGE_SIZE,
+            total: pagination.totalRows,
+            showSizeChanger: false,
+            position: ["bottomRight"],
+            showTotal: (total, range) =>
+              `Mostrando ${range[0]}–${range[1]} de ${total} clientes · ${activos} activos`
+          }}
+          onChange={(pag, _filters, _sorter, extra) => {
+            if (extra.action === "paginate") setPage(pag.current ?? 1);
+          }}
+        />
       </div>
     </div>
   );
