@@ -5,6 +5,13 @@ export type MedicalAccountStatusCode =
   | "RADICADO"
   | "NOVEDAD";
 
+// Shape returned by GET /medical-accounts/statuses (backend-driven status catalog).
+export interface MedicalAccountStatus {
+  id: number;
+  code: string;
+  name: string;
+}
+
 // Retained for the (currently disabled) detail edit mode — see the TODO in
 // MedicalAccountDetailView. The API response has no `regimen`, so it lives here.
 export type MedicalAccountRegimen = "Contributivo" | "Subsidiado";
@@ -24,6 +31,7 @@ export interface IMedicalAccountEditForm {
 export interface IMedicalAccountListItem {
   id: number;
   project_id?: number;
+  order_number?: string | null;
   patient_name: string | null;
   document_number: string | null;
   service_type: string | null;

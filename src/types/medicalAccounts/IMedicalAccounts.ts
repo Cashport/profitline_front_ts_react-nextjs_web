@@ -79,6 +79,7 @@ export interface IMedicalAccountFacturaApi {
 export interface IMedicalAccountUploadData {
   id: number;
   project_id: number;
+  order_number: string | null;
   patient_name: string | null;
   document_type: string | null;
   document_number: string | null;

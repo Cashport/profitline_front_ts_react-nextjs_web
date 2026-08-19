@@ -7,7 +7,7 @@ import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useMessageApi } from "@/context/MessageContext";
 import { changeMedicalAccountStatus } from "@/services/medicalAccounts/medicalAccounts";
 import { IMedicalAccountUploadData } from "@/types/medicalAccounts/IMedicalAccounts";
-import { STATUS_CODE_OPTIONS } from "../../constants";
+import { useMedicalAccountStatuses } from "../../hooks/useMedicalAccountStatuses";
 
 const { Title } = Typography;
 
@@ -27,6 +27,7 @@ export function ModalChangeStatus({
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { showMessage } = useMessageApi();
+  const { statuses } = useMedicalAccountStatuses();
 
   const handleOk = async () => {
     if (!selectedStatus) return;
@@ -80,7 +81,7 @@ export function ModalChangeStatus({
       <Select
         placeholder="Seleccionar estado"
         style={{ width: "100%" }}
-        options={STATUS_CODE_OPTIONS}
+        options={statuses.map(({ code, name }) => ({ value: code, label: name }))}
         value={selectedStatus}
         onChange={(value) => setSelectedStatus(value)}
       />

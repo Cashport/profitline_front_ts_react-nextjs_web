@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, Flex, Table, TableProps } from "antd";
-import { Eye } from "@phosphor-icons/react";
+import { Button, Flex, Popconfirm, Table, TableProps } from "antd";
+import { Eye, Trash } from "@phosphor-icons/react";
 
 import useScreenWidth from "@/components/hooks/useScreenWidth";
+import { useMessageApi } from "@/context/MessageContext";
+import { deleteMedicalAccount } from "@/services/medicalAccounts/medicalAccounts";
 import { IMedicalAccountListItem } from "../../types/IMedicalAccount";
 import { MedicalAccountStatusTag } from "../MedicalAccountStatusTag/MedicalAccountStatusTag";
 
@@ -11,6 +13,7 @@ interface MedicalAccountsTableProps {
   data: IMedicalAccountListItem[];
   loading?: boolean;
   onOpenDetail?: (record: IMedicalAccountListItem) => void;
+  onDeleted?: () => void;
   currentPage?: number;
   pageSize?: number;
   total?: number;
@@ -30,6 +33,7 @@ export function MedicalAccountsTable({
   data,
   loading,
   onOpenDetail,
+  onDeleted,
   currentPage,
   pageSize,
   total,
@@ -37,6 +41,20 @@ export function MedicalAccountsTable({
 }: MedicalAccountsTableProps) {
   const width = useScreenWidth();
   const colWidth = (px: number) => (width > 1400 ? px : undefined);
+  const { showMessage } = useMessageApi();
+
+  const handleDelete = async (record: IMedicalAccountListItem) => {
+    try {
+      await deleteMedicalAccount(record.id);
+      showMessage("success", "Cuenta médica eliminada correctamente.");
+      onDeleted?.();
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "No se pudo eliminar la cuenta médica."
+      );
+    }
+  };
 
   const columns: TableProps<IMedicalAccountListItem>["columns"] = [
     {
@@ -45,6 +63,15 @@ export function MedicalAccountsTable({
       key: "id",
       width: colWidth(110),
       render: (value: number) => <span className="text-sm text-cashport-black">{value}</span>
+    },
+    {
+      title: "No. Pedido",
+      dataIndex: "order_number",
+      key: "order_number",
+      width: colWidth(130),
+      render: (value: string | null) => (
+        <span className="text-sm text-cashport-black">{value ?? "-"}</span>
+      )
     },
     {
       title: "No. Autorización",
@@ -122,10 +149,20 @@ export function MedicalAccountsTable({
     {
       title: "",
       key: "acciones",
-      width: 72,
+      width: 100,
       render: (_: unknown, record: IMedicalAccountListItem) => (
         <Flex gap={4} align="center">
           <Button type="text" onClick={() => onOpenDetail?.(record)} icon={<Eye size={"1.3rem"} />} />
+          <Popconfirm
+            title="Eliminar cuenta médica"
+            description="¿Seguro que deseas eliminar esta cuenta médica?"
+            okText="Eliminar"
+            cancelText="Cancelar"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleDelete(record)}
+          >
+            <Button type="text" danger icon={<Trash size={"1.3rem"} />} />
+          </Popconfirm>
         </Flex>
       )
     }
