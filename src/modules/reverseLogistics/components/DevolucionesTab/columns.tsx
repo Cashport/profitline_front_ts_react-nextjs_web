@@ -1,18 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { ColumnsType } from "antd/es/table";
-import { Check, Eye, FileText } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 import Link from "next/link";
 
-// Per-row action buttons. Lives in its own component so it can use the
-// `useRouter` hook for client-side navigation into the approval detail.
-// `record.originalDev.IdDevolucion` doubles as the approval id — both
-// endpoints surface the same GUID under different names.
+// Per-row action buttons. `record.idDevolucion` doubles as the approval id —
+// both endpoints surface the same GUID under different names.
 function ActionsCell({ record }: { record: ReturnRow }) {
   return (
     <div className="flex items-center gap-1">
@@ -26,7 +23,6 @@ function ActionsCell({ record }: { record: ReturnRow }) {
           <FileText className="h-3.5 w-3.5" />
         </button>
       ) : null}
-      {console.log(record.haveApprove, record.idDevolucion) || null}
       {record.haveApprove && record.idDevolucion ? (
         <Link
           href={`/logistica-inversa/aprobaciones/${record.idDevolucion}`}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
 
 import { FilterModal } from "@/components/ui/filter-modal";
 import type {
@@ -17,7 +16,8 @@ import {
 } from "../../constants";
 import { useProfit360Filters } from "../../contexts/Profit360FiltersContext";
 import { IAprobacionesFilter } from "../../types";
-import { FilterDateTab, DateDraft } from "../FilterDateTab/FilterDateTab";
+import { FilterDateTab, DateDraft, formatDateTagValue } from "../FilterDateTab/FilterDateTab";
+import { DateFilterTag } from "../FilterDateTab/DateFilterTag";
 
 interface FilterAprobacionesTabProps {
   value: IAprobacionesFilter;
@@ -96,11 +96,9 @@ export function FilterAprobacionesTab({
     ciudades: (sel.ciudad || []).map((o) => o.id)
   });
 
-  const hasCommittedDate = Boolean(value.fromDate || value.toDate);
-  const dateTagValue =
-    value.fromDate && value.toDate
-      ? `${value.fromDate} - ${value.toDate}`
-      : value.fromDate || value.toDate || "";
+  const committedDate: DateDraft = { from: value.fromDate, to: value.toDate };
+  const hasCommittedDate = Boolean(committedDate.from || committedDate.to);
+  const hasDraftDate = Boolean(dateDraft.from || dateDraft.to);
 
   const categories: FilterCategoryConfig[] = [
     { key: "cliente", label: "Cliente", selectMode: "single", options: clienteOptions },
@@ -115,22 +113,19 @@ export function FilterAprobacionesTab({
       key: "fecha",
       label: "Fecha de registro",
       kind: "custom",
-      metaLabel: "Selecciona un periodo",
-      draftCount: dateDraft.from || dateDraft.to ? 1 : 0,
+      metaLabel: hasDraftDate
+        ? `Periodo: ${formatDateTagValue(dateDraft)}`
+        : "Selecciona un periodo",
+      draftCount: hasDraftDate ? 1 : 0,
       renderPanel: () => <FilterDateTab value={dateDraft} onChange={setDateDraft} />,
+      // Must be null (not an element that renders nothing) so FilterModal's
+      // active-filter count stays accurate.
       renderTag: () =>
         hasCommittedDate ? (
-          <div className="flex items-center gap-1.5 bg-secondary/80 border border-border px-3 py-1.5 rounded-lg text-xs">
-            <span className="text-muted-foreground font-medium">Fecha:</span>
-            <span className="font-bold text-foreground">{dateTagValue}</span>
-            <button
-              type="button"
-              onClick={() => onChange({ ...value, fromDate: null, toDate: null })}
-              className="ml-1 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
+          <DateFilterTag
+            value={committedDate}
+            onClear={() => onChange({ ...value, fromDate: null, toDate: null })}
+          />
         ) : null
     }
   ];
