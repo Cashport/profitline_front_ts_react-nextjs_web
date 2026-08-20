@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye, ChevronLeft, Package } from "lucide-react";
@@ -9,6 +9,9 @@ import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMarketAdminProducts } from "@/modules/marketAdmin/hooks/useMarketAdminProducts";
+import FilterProductsModal, {
+  IMarketAdminProductsFilter
+} from "@/modules/marketAdmin/components/market-admin-products/FilterProductsModal";
 import { IMarketAdminProduct } from "@/types/marketAdmin/IMarketAdmin";
 
 const PAGE_SIZE = 10;
@@ -36,8 +39,11 @@ function ProductImageCell({ producto }: { producto: IMarketAdminProduct }) {
 
 export default function MarketAdminProducts() {
   const [search, setSearch] = useState("");
-  const [lineaFilter, setLineaFilter] = useState("Todas");
-  const [estadoFilter, setEstadoFilter] = useState("Todos");
+  const [filter, setFilter] = useState<IMarketAdminProductsFilter>({
+    lineId: null,
+    categoryId: null,
+    status: null
+  });
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
@@ -52,13 +58,16 @@ export default function MarketAdminProducts() {
   } = useMarketAdminProducts({
     page,
     limit: PAGE_SIZE,
-    search: debouncedSearch
+    search: debouncedSearch,
+    lineId: filter.lineId ?? undefined,
+    categoryId: filter.categoryId ?? undefined,
+    status: filter.status ?? undefined
   });
 
-  const lineas = useMemo(
-    () => Array.from(new Set(productsData.map((p) => p.line_name))),
-    [productsData]
-  );
+  function handleFilterChange(next: IMarketAdminProductsFilter) {
+    setFilter(next);
+    setPage(1);
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -68,21 +77,6 @@ export default function MarketAdminProducts() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
-
-  // La búsqueda se resuelve en el servidor (parámetro `search` del hook).
-  const filtered = useMemo(
-    () =>
-      productsData.filter((p) => {
-        const matchLinea = lineaFilter === "Todas" || p.line_name === lineaFilter;
-        const matchEstado =
-          estadoFilter === "Todos" ||
-          (estadoFilter === "Activo" ? p.is_available === 1 : p.is_available === 0);
-        return matchLinea && matchEstado;
-      }),
-    [productsData, lineaFilter, estadoFilter]
-  );
-
-  const activos = filtered.filter((p) => p.is_available === 1).length;
 
   function runAccion(accion: string) {
     setShowAcciones(false);
@@ -220,38 +214,12 @@ export default function MarketAdminProducts() {
               </div>
             )}
           </div>
-          <select
-            value={lineaFilter}
-            onChange={(e) => {
-              setLineaFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="Todas">Línea</option>
-            {lineas.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <select
-            value={estadoFilter}
-            onChange={(e) => {
-              setEstadoFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="Todos">Estado</option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+          <FilterProductsModal value={filter} onChange={handleFilterChange} />
         </div>
 
         <Table
           columns={columns}
-          dataSource={filtered}
+          dataSource={productsData}
           rowKey="id"
           loading={isLoading}
           showSorterTooltip={false}
@@ -275,8 +243,7 @@ export default function MarketAdminProducts() {
             total: pagination.totalRows,
             showSizeChanger: false,
             position: ["bottomRight"],
-            showTotal: (total, range) =>
-              `Mostrando ${range[0]}–${range[1]} de ${total} productos · ${activos} activos`
+            showTotal: (total, range) => `Mostrando ${range[0]}–${range[1]} de ${total} productos`
           }}
           onChange={(pag, _filters, _sorter, extra) => {
             if (extra.action === "paginate") setPage(pag.current ?? 1);
