@@ -1,16 +1,18 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Flex, Modal, Select, Table, Typography } from "antd";
+import useSWR from "swr";
+import { ConfigProvider, Flex, Modal, Select, Table, Typography } from "antd";
 import { Plus, X } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useInvoiceClaims } from "@/hooks/useInvoiceClaims";
 import { useMessageApi } from "@/context/MessageContext";
+import { getClaimStatuses } from "@/services/claims/claims";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { getClaimsColumns } from "./columns";
-import { CLAIM_STATUS_LABELS, CLAIM_STATUS_META, CLAIM_STATUS_OPTIONS } from "./constants";
+import { FALLBACK_STATUS_COLOR } from "./constants";
 import { createEmptyRow, mapClaimToRow, rowToCreatePayload, rowToPayload } from "./utils";
 
 import { ClaimsForm, ClaimTableRow, IInvoiceClaimRow } from "./types";
@@ -49,6 +51,32 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
     enabled: isOpen
   });
 
+  // The catalog is static and the modal remounts on every open (destroyOnClose), so it is cached
+  const {
+    data: statusesData,
+    isLoading: statusesLoading,
+    error: statusesError
+  } = useSWR("/claims/statuses", getClaimStatuses, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 300000
+  });
+
+  const statuses = useMemo(() => statusesData?.data ?? [], [statusesData]);
+
+  const statusOptions = useMemo(
+    () => statuses.map((status) => ({ value: status.description, label: status.status_name })),
+    [statuses]
+  );
+
+  const statusByCode = useMemo(
+    () => new Map(statuses.map((status) => [status.description, status])),
+    [statuses]
+  );
+
+  /** New rows are seeded with the first catalog entry, empty while it is still loading */
+  const defaultStatus = statuses[0]?.description ?? "";
+
   const { control, watch, reset, trigger, getValues, setValue } = useForm<ClaimsForm>({
     mode: "onChange",
     defaultValues: { claims: [] }
@@ -68,14 +96,19 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
     setSearch("");
   }, [isOpen, invoice?.id]);
 
+  // Without the catalog the Estado cell has nothing to offer, which would otherwise fail silently
+  useEffect(() => {
+    if (isOpen && statusesError) showMessage("error", "No se pudieron cargar los estados de glosa");
+  }, [isOpen, statusesError]);
+
   // Seeds the table from the server. Skipped while there is unsaved work on screen so a background
   // revalidation cannot wipe a row the user is in the middle of.
   useEffect(() => {
     if (!isOpen) return;
     const hasUnsavedRows = getValues("claims")?.some((claim) => claim._new);
     if (editingIds.length || hasUnsavedRows) return;
-    reset({ claims: claims.map(mapClaimToRow) });
-  }, [claims, isOpen]);
+    reset({ claims: claims.map((claim) => mapClaimToRow(claim, defaultStatus)) });
+  }, [claims, isOpen, defaultStatus]);
 
   const formClaims = watch("claims");
 
@@ -136,12 +169,9 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
   const handleSave = async (row: ClaimTableRow) => {
     if (!invoice) return;
     const isValid = await trigger(`claims.${row.index}`);
-    if (!isValid) return;
+    if (!isValid) return showMessage("error", "Completa los campos obligatorios");
 
     const values = getValues(`claims.${row.index}`);
-    if (!values.concepto.trim()) return showMessage("error", "El concepto es obligatorio");
-    if (!values.monto || values.monto <= 0)
-      return showMessage("error", "El monto debe ser mayor a cero");
 
     setSavingId(row.fieldId);
     try {
@@ -208,7 +238,9 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
 
   const handleAddRow = () => {
     if (!invoice) return;
-    append(createEmptyRow());
+    // defaultStatus is "" when the catalog is unavailable — the row is still added, and its Estado
+    // shows the required error instead of the button being silently dead
+    append(createEmptyRow(defaultStatus));
   };
 
   return (
@@ -240,51 +272,65 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
           className="modalInvoiceClaims__estadoFilter"
           value={estadoFilter}
           onChange={setEstadoFilter}
-          options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...CLAIM_STATUS_OPTIONS]}
+          loading={statusesLoading}
+          options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...statusOptions]}
         />
       </div>
 
-      <Table
-        className="modalInvoiceClaims__table"
-        columns={getClaimsColumns({
-          control,
-          isEditing: isRowEditing,
-          savingId,
-          formatMoney,
-          onStartEdit: handleStartEdit,
-          onSave: handleSave,
-          onCancel: handleCancel,
-          onDelete: handleDelete,
-          onDuplicate: handleDuplicate
-        })}
-        dataSource={filteredRows}
-        loading={loading}
-        rowClassName={(record) => (isRowEditing(record) ? "editingRow" : "")}
-        pagination={false}
-        size="small"
-        scroll={{ y: "40vh", x: 1050 }}
-        locale={{ emptyText: "Esta factura no tiene glosas registradas." }}
-        footer={() => (
-          <button className="modalInvoiceClaims__addRow" onClick={handleAddRow}>
-            <Plus size={16} />
-            Agregar glosa
-          </button>
-        )}
-      />
+      {/* The app theme makes every DatePicker 47px, which is 15px taller than the other controls
+          in the same row. Overridden here only, so no picker outside this modal changes. */}
+      <ConfigProvider theme={{ components: { DatePicker: { controlHeight: 32 } } }}>
+        <Table
+          className="modalInvoiceClaims__table"
+          columns={getClaimsColumns({
+            control,
+            statusOptions,
+            statusByCode,
+            isEditing: isRowEditing,
+            savingId,
+            formatMoney,
+            onStartEdit: handleStartEdit,
+            onSave: handleSave,
+            onCancel: handleCancel,
+            onDelete: handleDelete,
+            onDuplicate: handleDuplicate
+          })}
+          dataSource={filteredRows}
+          loading={loading}
+          rowClassName={(record) => (isRowEditing(record) ? "editingRow" : "")}
+          pagination={false}
+          size="small"
+          scroll={{ y: "40vh", x: 1050 }}
+          locale={{ emptyText: "Esta factura no tiene glosas registradas." }}
+          footer={() => (
+            <button
+              className="modalInvoiceClaims__addRow"
+              onClick={handleAddRow}
+              disabled={statusesLoading}
+            >
+              <Plus size={16} />
+              Agregar glosa
+            </button>
+          )}
+        />
+      </ConfigProvider>
 
       <div className="modalInvoiceClaims__footer">
         {!!Object.keys(counts).length && (
           <div className="modalInvoiceClaims__chips">
-            {(Object.keys(counts) as ClaimStatus[]).map((estado) => (
-              <span key={estado} className="modalInvoiceClaims__chip">
-                <span
-                  className="modalInvoiceClaims__chipDot"
-                  style={{ backgroundColor: CLAIM_STATUS_META[estado]?.dot }}
-                />
-                {CLAIM_STATUS_LABELS[estado] ?? estado}
-                <strong>{counts[estado]}</strong>
-              </span>
-            ))}
+            {(Object.keys(counts) as ClaimStatus[]).map((estado) => {
+              const status = statusByCode.get(estado);
+              return (
+                <span key={estado} className="modalInvoiceClaims__chip">
+                  <span
+                    className="modalInvoiceClaims__chipDot"
+                    style={{ backgroundColor: status?.color ?? FALLBACK_STATUS_COLOR }}
+                  />
+                  {status?.status_name ?? estado}
+                  <strong>{counts[estado]}</strong>
+                </span>
+              );
+            })}
           </div>
         )}
 

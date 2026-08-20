@@ -1,9 +1,16 @@
-export type ClaimStatus =
-  | "in_dispute"
-  | "ready_for_payment"
-  | "accepted"
-  | "responded"
-  | "with_observations";
+/** Catalog code from GET /claims/statuses (`description`), e.g. "in_dispute" */
+export type ClaimStatus = string;
+
+/** One entry of the backend owned status catalog */
+export interface IClaimStatus {
+  id: number;
+  /** Wire value sent as `status` on create/update */
+  description: ClaimStatus;
+  /** Spanish label for the UI */
+  status_name: string;
+  /** 6 digit hex, e.g. "#F44336" */
+  color: string;
+}
 
 export interface IClaim {
   id: number;
