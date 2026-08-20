@@ -19,7 +19,10 @@ import { useSocket } from "@/context/ChatContext";
 import { useToast } from "@/modules/chat/hooks/use-toast";
 import { IAddClientForm, ITicket } from "@/types/chat/IChat";
 import { ticketToConversation } from "@/modules/chat/lib/ticketToConversation";
-import { sendTemplate } from "@/services/chat/chat";
+import { sendTemplate, updateTicketEscalation } from "@/services/chat/chat";
+
+const ESCALATE_REASON = "El cliente pidió hablar con un humano";
+const DE_ESCALATE_REASON = "El cliente ya no necesita hablar con un humano";
 
 interface AllChatsProps {
   activeConversation: Conversation | null;
@@ -46,6 +49,7 @@ export default function AllChats({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
+  const [escalatingId, setEscalatingId] = useState<string | null>(null);
 
   const {
     data: ticketsData = [],
@@ -168,11 +172,39 @@ export default function AllChats({
     onConversationSelect(conversation);
   }
 
-  const items: MenuProps["items"] = [
+  const handleToggleEscalation = async (conversation: Conversation) => {
+    if (escalatingId) return;
+    const isEscalated = conversation.escalated;
+    setEscalatingId(conversation.id);
+    try {
+      await updateTicketEscalation(
+        conversation.id,
+        isEscalated ? "de-escalate" : "escalate",
+        isEscalated ? DE_ESCALATE_REASON : ESCALATE_REASON
+      );
+      await mutateTickets();
+      toast({ title: isEscalated ? "Bot activado" : "Bot inactivado" });
+    } catch {
+      toast({ title: "No se pudo actualizar el estado del chat", variant: "destructive" });
+    } finally {
+      setEscalatingId(null);
+    }
+  };
+
+  const buildMenuItems = (conversation: Conversation): MenuProps["items"] => [
     {
       label: <p>Marcar como no leido</p>,
-      key: "0"
-    }
+      key: "mark-unread"
+    },
+    ...(conversation.status === "OPEN"
+      ? [
+          {
+            label: <p>{conversation.escalated ? "Activar bot" : "Inactivar bot"}</p>,
+            key: "toggle-escalation",
+            disabled: escalatingId === conversation.id
+          }
+        ]
+      : [])
   ];
 
   const handleAddClient = () => {
@@ -266,7 +298,6 @@ export default function AllChats({
             conversations.map((c) => {
               const isActive = c.id === activeConversation?.id;
               const isSelected = selectedIds.includes(c.id);
-              console.log(c);
               return (
                 <li
                   key={c.id}
@@ -329,10 +360,20 @@ export default function AllChats({
                             {c.countMessages}
                           </p>
                         ) : null}
-                        <Dropdown menu={{ items }} trigger={["click"]}>
+                        <Dropdown
+                          menu={{
+                            items: buildMenuItems(c),
+                            onClick: ({ key, domEvent }) => {
+                              domEvent.stopPropagation();
+                              if (key === "toggle-escalation") handleToggleEscalation(c);
+                            }
+                          }}
+                          trigger={["click"]}
+                        >
                           <CaretDown
                             size={14}
                             className="hidden group-hover:inline transition-all"
+                            onClick={(e) => e.stopPropagation()}
                           />
                         </Dropdown>
                       </div>
