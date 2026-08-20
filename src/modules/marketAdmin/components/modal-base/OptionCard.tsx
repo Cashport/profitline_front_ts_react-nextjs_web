@@ -27,7 +27,7 @@ export default function OptionCard({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-4 w-full text-left border border-[#E0E0E0] rounded-xl px-4 py-4 transition-colors group ${
+      className={`flex items-center gap-4 w-full text-left border border-transparent rounded-lg px-4 py-4 transition-colors group ${
         disabled
           ? "opacity-40 cursor-not-allowed"
           : "hover:border-[#141414] hover:bg-[#FAFAFA] cursor-pointer"

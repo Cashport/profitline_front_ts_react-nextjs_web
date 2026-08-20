@@ -45,7 +45,7 @@ export default function MarketAdmin() {
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Administración</h1>
 
       {/* Single white card — full width, sized to its content */}
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden">
         <div className="grid grid-cols-2">
           {sections.map(({ href, icon: Icon, label, description, disabled }) => {
             const inner = (

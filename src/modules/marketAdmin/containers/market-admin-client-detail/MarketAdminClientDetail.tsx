@@ -186,7 +186,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{cliente.client_name}</h1>
 
-      <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden p-8 flex flex-col gap-8">
+      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
         {/* Top bar */}
         <div className="flex items-center justify-between">
           <Link

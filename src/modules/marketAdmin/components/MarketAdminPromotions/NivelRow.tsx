@@ -22,7 +22,7 @@ export default function NivelRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-[#EEEEEE] overflow-hidden bg-white">
+    <div className="rounded-lg overflow-hidden bg-white">
       {/* Nivel header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[#FAFAFA] border-b border-[#EEEEEE]">
         <span className="text-xs font-semibold text-[#141414]">Nivel {idx + 1}</span>

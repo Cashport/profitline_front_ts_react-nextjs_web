@@ -66,7 +66,7 @@ export default function PromocionCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#DDDDDD] overflow-hidden">
+    <div className="bg-white rounded-lg overflow-hidden">
       {/* Card header */}
       <div className="flex items-center gap-3 px-5 py-4">
         <div className="w-8 h-8 rounded-lg bg-[#CBE71E] flex items-center justify-center flex-shrink-0">

@@ -125,7 +125,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{nombreVisible}</h1>
 
-      <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden p-8 flex flex-col gap-8">
+      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
         {/* Card top bar: back + save */}
         <div className="flex items-center justify-between">
           <Link

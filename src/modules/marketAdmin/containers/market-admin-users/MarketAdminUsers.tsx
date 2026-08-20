@@ -184,7 +184,7 @@ export default function MarketAdminUsers() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Usuarios</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-4">
           <Link

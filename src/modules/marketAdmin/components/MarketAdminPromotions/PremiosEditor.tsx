@@ -203,7 +203,7 @@ export default function PremiosEditor({
 
       <div className="flex flex-col gap-3">
         {nivel.premios.map((pr, prIdx) => (
-          <div key={pr.id} className="bg-white border border-[#E8F5C0] rounded-lg overflow-hidden">
+          <div key={pr.id} className="bg-white rounded-lg overflow-hidden">
             {/* Header de la opción */}
             <div className="flex items-center justify-between px-3 py-2 bg-[#F7FDE8] border-b border-[#E8F5C0]">
               <div className="flex items-center gap-2">
