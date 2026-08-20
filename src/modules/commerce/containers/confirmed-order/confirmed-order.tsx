@@ -135,6 +135,10 @@ export const ConfirmedOrderView: FC = () => {
                       data={order?.shipping_info?.dispatch_address}
                     />
                     <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo
+                      title="Unidad de negocio"
+                      data={order?.business_unit}
+                    />
                     <ConfirmedOrderShippingInfo title="Bodega" data={order?.warehouse_name} />
                     <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
                     <ConfirmedOrderShippingInfo
