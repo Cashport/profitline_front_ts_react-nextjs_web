@@ -9,9 +9,17 @@ interface UseChatTicketsParams {
   search?: string;
   isRead?: boolean;
   justOpen?: boolean;
+  justBot?: boolean;
 }
 
-const useChatTickets = ({ limit = 200, page = 1, search, isRead, justOpen }: UseChatTicketsParams = {}) => {
+const useChatTickets = ({
+  limit = 200,
+  page = 1,
+  search,
+  isRead,
+  justOpen,
+  justBot
+}: UseChatTicketsParams = {}) => {
   const params = [`limit=${limit}`, `page=${page}`];
 
   if (search) {
@@ -30,6 +38,9 @@ const useChatTickets = ({ limit = 200, page = 1, search, isRead, justOpen }: Use
     } else {
       params.push(`is_read=0`);
     }
+  }
+  if (justBot) {
+    params.push(`just_bot=1`);
   }
 
   const patKey = `${config.API_CHAT}/whatsapp-tickets?${params.join("&")}`;
