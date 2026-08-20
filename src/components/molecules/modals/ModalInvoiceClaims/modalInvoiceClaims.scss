@@ -113,10 +113,20 @@
             &.-muted {
                 color: $darker-gray;
             }
+
+            // color comes from the catalog, inline. Smaller than a regular cell so the longest
+            // label still fits the 150px column on one line
+            &.-status {
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
         }
 
         .editingRow > td {
             background-color: rgba(203, 230, 30, 0.08);
+            // an error line makes one cell taller, and the default middle alignment would then
+            // push every error free control down to center against it
+            vertical-align: top;
         }
 
         .ant-table-footer {
@@ -126,6 +136,10 @@
     }
 
     &__idCell {
+        // matches the control height, so it stays centered against them in a top aligned row
+        display: inline-flex;
+        align-items: center;
+        min-height: 2rem;
         white-space: nowrap;
 
         em {
@@ -139,11 +153,55 @@
         }
     }
 
+    &__field {
+        display: flex;
+        flex-direction: column;
+        // the Concepto and Observación columns are `ellipsis`, which would clip the error text
+        white-space: normal;
+
+        // Monto is a right aligned column, its control and error have to follow the header
+        &.-alignRight {
+            .modalInvoiceClaims__cellControl {
+                // InputNumber is 90px wide by default, which leaves it short of the column edge
+                width: 100%;
+            }
+
+            .modalInvoiceClaims__fieldError {
+                text-align: right;
+            }
+        }
+    }
+
+    &__fieldError {
+        // matches AntD's 11px inner padding, so the error lines up with the control's own text
+        padding-inline: 0.6875rem;
+        font-size: 0.625rem;
+        line-height: 1.2;
+        color: $error;
+    }
+
     &__cellControl {
-        // padding-inline: 0;
+        // The controls are borderless so they read as table cells, but then nothing says they are
+        // editable — a faint outline is what makes an open row look like a form
+        &.ant-input,
+        &.ant-input-number,
+        &.ant-picker,
+        &.ant-select .ant-select-selector {
+            border: 1px solid $dark-gray;
+            border-radius: 4px;
+        }
 
         &.-alignRight input {
             text-align: right;
+        }
+
+        &.-error {
+            &.ant-input,
+            &.ant-input-number,
+            &.ant-picker,
+            &.ant-select .ant-select-selector {
+                border-color: $error;
+            }
         }
     }
 
@@ -152,6 +210,7 @@
         align-items: center;
         justify-content: flex-end;
         gap: 0.25rem;
+        min-height: 2rem;
     }
 
     &__saveBtn.ant-btn {
@@ -182,9 +241,14 @@
         color: $darker-gray;
         background-color: transparent;
 
-        &:hover {
+        &:hover:not(:disabled) {
             color: $black;
             background-color: $background;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     }
 

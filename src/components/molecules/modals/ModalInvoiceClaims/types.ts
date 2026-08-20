@@ -8,7 +8,8 @@ export interface IInvoiceClaimRow {
   /** Server generated claim_number, empty on rows that are not created yet */
   claimNumber: string;
   concepto: string;
-  monto: number;
+  /** null on a row that has not been given an amount yet, so `required` can catch it */
+  monto: number | null;
   estado: ClaimStatus;
   fechaGlosa: Dayjs | null;
   fechaContestacion: Dayjs | null;

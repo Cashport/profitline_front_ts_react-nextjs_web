@@ -2,21 +2,18 @@ import { Control, Controller } from "react-hook-form";
 import { Button, DatePicker, Dropdown, Input, InputNumber, Select, TableProps } from "antd";
 import { Check, Copy, DotsThreeVertical, PencilSimple, Trash, X } from "phosphor-react";
 
-import SimpleTag from "@/components/atoms/SimpleTag/SimpleTag";
-
-import {
-  CLAIM_STATUS_LABELS,
-  CLAIM_STATUS_META,
-  CLAIM_STATUS_OPTIONS,
-  DATE_FORMAT,
-  FALLBACK_STATUS_META
-} from "./constants";
+import { CellField } from "./CellField";
+import { DATE_FORMAT, FALLBACK_STATUS_COLOR, REQUIRED_MSG } from "./constants";
 
 import { ClaimsForm, ClaimTableRow } from "./types";
+import { ClaimStatus, IClaimStatus } from "@/types/claims/IClaims";
 import { IFormatMoneyStore } from "@/lib/slices/formatMoneySlice";
 
 interface GetClaimsColumnsProps {
   control: Control<ClaimsForm>;
+  statusOptions: { value: ClaimStatus; label: string }[];
+  /** Catalog indexed by its `description` code, to resolve a row's label and color */
+  statusByCode: Map<ClaimStatus, IClaimStatus>;
   // eslint-disable-next-line no-unused-vars
   isEditing: (row: ClaimTableRow) => boolean;
   /** fieldId of the row currently hitting the API, so only that row shows a spinner */
@@ -34,8 +31,14 @@ interface GetClaimsColumnsProps {
   onDuplicate: (row: ClaimTableRow) => void;
 }
 
+// The controls are borderless, so the invalid state has to draw its own border back in
+const cellControlClass = (hasError: boolean, modifier = "") =>
+  `modalInvoiceClaims__cellControl${modifier && ` ${modifier}`}${hasError ? " -error" : ""}`;
+
 export const getClaimsColumns = ({
   control,
+  statusOptions,
+  statusByCode,
   isEditing,
   savingId,
   formatMoney,
@@ -68,14 +71,16 @@ export const getClaimsColumns = ({
           <Controller
             name={`claims.${record.index}.concepto`}
             control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <Input
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl"
-                placeholder="Concepto de la glosa"
-              />
+            rules={{ required: REQUIRED_MSG, validate: (value) => !!value?.trim() || REQUIRED_MSG }}
+            render={({ field, fieldState }) => (
+              <CellField error={fieldState.error}>
+                <Input
+                  {...field}
+                  variant="borderless"
+                  className={cellControlClass(!!fieldState.error)}
+                  placeholder="Concepto de la glosa"
+                />
+              </CellField>
             )}
           />
         ) : (
@@ -87,50 +92,60 @@ export const getClaimsColumns = ({
       dataIndex: "estado",
       key: "estado",
       width: 150,
-      render: (estado: ClaimTableRow["estado"], record) =>
-        isEditing(record) ? (
-          <Controller
-            name={`claims.${record.index}.estado`}
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <Select
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl"
-                options={CLAIM_STATUS_OPTIONS}
-                popupMatchSelectWidth={false}
-              />
-            )}
-          />
-        ) : (
-          <SimpleTag
-            text={CLAIM_STATUS_LABELS[estado] ?? estado}
-            colorTag={(CLAIM_STATUS_META[estado] ?? FALLBACK_STATUS_META).bg}
-            colorText={(CLAIM_STATUS_META[estado] ?? FALLBACK_STATUS_META).text}
-            fontSize="0.75rem"
-          />
-        )
+      render: (estado: ClaimTableRow["estado"], record) => {
+        if (isEditing(record)) {
+          return (
+            <Controller
+              name={`claims.${record.index}.estado`}
+              control={control}
+              rules={{ required: REQUIRED_MSG }}
+              render={({ field, fieldState }) => (
+                <CellField error={fieldState.error}>
+                  <Select
+                    {...field}
+                    // a row seeded before the catalog resolved holds "", which would render blank
+                    value={field.value || undefined}
+                    variant="borderless"
+                    className={cellControlClass(!!fieldState.error)}
+                    options={statusOptions}
+                    placeholder="Seleccionar"
+                    popupMatchSelectWidth={false}
+                  />
+                </CellField>
+              )}
+            />
+          );
+        }
+
+        const status = statusByCode.get(estado);
+        return (
+          <p className="cell -status" style={{ color: status?.color ?? FALLBACK_STATUS_COLOR }}>
+            {status?.status_name ?? estado}
+          </p>
+        );
+      }
     },
     {
       title: "Fecha glosa",
       dataIndex: "fechaGlosa",
       key: "fechaGlosa",
-      width: 130,
+      width: 150,
       render: (fechaGlosa: ClaimTableRow["fechaGlosa"], record) =>
         isEditing(record) ? (
           <Controller
             name={`claims.${record.index}.fechaGlosa`}
             control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <DatePicker
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl"
-                format={DATE_FORMAT}
-                placeholder={DATE_FORMAT.toLowerCase()}
-              />
+            rules={{ required: REQUIRED_MSG }}
+            render={({ field, fieldState }) => (
+              <CellField error={fieldState.error}>
+                <DatePicker
+                  {...field}
+                  variant="borderless"
+                  className={cellControlClass(!!fieldState.error)}
+                  format={DATE_FORMAT}
+                  placeholder={DATE_FORMAT.toLowerCase()}
+                />
+              </CellField>
             )}
           />
         ) : (
@@ -147,14 +162,17 @@ export const getClaimsColumns = ({
           <Controller
             name={`claims.${record.index}.fechaContestacion`}
             control={control}
-            render={({ field }) => (
-              <DatePicker
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl"
-                format={DATE_FORMAT}
-                placeholder={DATE_FORMAT.toLowerCase()}
-              />
+            rules={{ required: REQUIRED_MSG }}
+            render={({ field, fieldState }) => (
+              <CellField error={fieldState.error}>
+                <DatePicker
+                  {...field}
+                  variant="borderless"
+                  className={cellControlClass(!!fieldState.error)}
+                  format={DATE_FORMAT}
+                  placeholder={DATE_FORMAT.toLowerCase()}
+                />
+              </CellField>
             )}
           />
         ) : (
@@ -171,13 +189,16 @@ export const getClaimsColumns = ({
           <Controller
             name={`claims.${record.index}.observacion`}
             control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl"
-                placeholder="Observación"
-              />
+            rules={{ required: REQUIRED_MSG, validate: (value) => !!value?.trim() || REQUIRED_MSG }}
+            render={({ field, fieldState }) => (
+              <CellField error={fieldState.error}>
+                <Input
+                  {...field}
+                  variant="borderless"
+                  className={cellControlClass(!!fieldState.error)}
+                  placeholder="Observación"
+                />
+              </CellField>
             )}
           />
         ) : (
@@ -188,29 +209,34 @@ export const getClaimsColumns = ({
       title: "Monto",
       dataIndex: "monto",
       key: "monto",
-      width: 150,
+      width: 120,
       align: "right",
-      render: (monto: number, record) =>
+      render: (monto: ClaimTableRow["monto"], record) =>
         isEditing(record) ? (
           <Controller
             name={`claims.${record.index}.monto`}
             control={control}
-            rules={{ min: 1 }}
-            render={({ field }) => (
-              <InputNumber
-                {...field}
-                variant="borderless"
-                className="modalInvoiceClaims__cellControl -alignRight"
-                min={0}
-                controls={false}
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                parser={(value) => parseFloat(value?.replace(/\./g, "") || "0")}
-                placeholder="0"
-              />
+            rules={{
+              required: REQUIRED_MSG,
+              min: { value: 1, message: "El monto debe ser mayor a cero" }
+            }}
+            render={({ field, fieldState }) => (
+              <CellField error={fieldState.error} alignRight>
+                <InputNumber
+                  {...field}
+                  variant="borderless"
+                  className={cellControlClass(!!fieldState.error, "-alignRight")}
+                  min={0}
+                  controls={false}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                  parser={(value) => parseFloat(value?.replace(/\./g, "") || "0")}
+                  placeholder="0"
+                />
+              </CellField>
             )}
           />
         ) : (
-          <p className="cell -alignRight fontMonoSpace">{formatMoney(monto)}</p>
+          <p className="cell -alignRight fontMonoSpace">{formatMoney(monto ?? 0)}</p>
         )
     },
     {
