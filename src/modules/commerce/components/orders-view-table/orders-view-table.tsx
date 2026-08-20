@@ -13,7 +13,7 @@ import { useAppStore } from "@/lib/store/store";
 import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
 import { reprocessOrder } from "@/services/commerce/commerce";
-import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
+import { formatDateDMY, formatTimeAgo, formatTimeHM } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
@@ -212,7 +212,15 @@ const OrdersViewTable = ({
       title: "Fecha de creación",
       key: "order_date",
       dataIndex: "order_date",
-      render: (date) => <Text className="cell">{date ? formatDateDMY(date) : ""}</Text>,
+      render: (date) =>
+        date ? (
+          <div className="dateCell">
+            <Text className="dateCell__primary">{formatDateDMY(date)}</Text>
+            <Text className="dateCell__secondary">{formatTimeHM(date)}</Text>
+          </div>
+        ) : (
+          <Text className="cell" />
+        ),
       sorter: (a, b) => new Date(a.order_date)?.getTime() - new Date(b.order_date)?.getTime(),
       showSorterTooltip: false
     },
