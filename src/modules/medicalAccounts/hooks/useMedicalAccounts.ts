@@ -10,6 +10,7 @@ interface UseMedicalAccountsParams {
   limit?: number;
   search?: string;
   status?: string | null;
+  eps?: string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
 }
@@ -19,6 +20,7 @@ export const useMedicalAccounts = ({
   limit = 20,
   search = "",
   status = null,
+  eps = null,
   dateFrom = null,
   dateTo = null
 }: UseMedicalAccountsParams = {}) => {
@@ -32,6 +34,7 @@ export const useMedicalAccounts = ({
   const term = search.trim();
   if (term) params.set("search", term);
   if (status) params.set("status_code", status);
+  if (eps) params.set("eps", eps.trim());
   if (dateFrom) params.set("date_from", dateFrom);
   if (dateTo) params.set("date_to", dateTo);
 

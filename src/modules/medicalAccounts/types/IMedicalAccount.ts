@@ -1,9 +1,10 @@
 export type MedicalAccountStatusCode =
+  | "CARGUE"
+  | "NOVEDAD"
   | "PENDIENTE_AUDITORIA"
   | "AUDITADO"
   | "FACTURADO"
-  | "RADICADO"
-  | "NOVEDAD";
+  | "RADICADO";
 
 // Shape returned by GET /medical-accounts/statuses (backend-driven status catalog).
 export interface MedicalAccountStatus {
@@ -25,6 +26,7 @@ export interface IMedicalAccountEditForm {
   regimen: MedicalAccountRegimen | "";
   tipoServicio: string;
   fechaServicio: string;
+  eps: string;
 }
 
 // Shape returned by GET /medical-accounts (backend list contract, consumed directly — no remap).

@@ -163,6 +163,14 @@ export function MedicalAccountInfoPanel({
                   ))}
                 </select>
               </EditField>
+              <EditField label="EPS">
+                <input
+                  value={form.eps}
+                  onChange={(e) => onChange({ eps: e.target.value })}
+                  className={inputCls}
+                  placeholder="-"
+                />
+              </EditField>
               <Field label="Fecha de cargue" value={formatDate(account.created_at)} />
             </>
           ) : (

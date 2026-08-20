@@ -40,10 +40,14 @@ export const NOVEDAD_TYPE_LABELS: Record<string, string> = {
   falta_preautorizacion: "Falta preautorización"
 };
 
-export const STATUS_CODE_OPTIONS = [
-  { value: "PENDIENTE_AUDITORIA", label: "Pendiente auditoría" },
-  { value: "AUDITADO", label: "Auditado" },
-  { value: "FACTURADO", label: "Facturado" },
-  { value: "RADICADO", label: "Radicado" },
-  { value: "NOVEDAD", label: "Novedad" }
-];
+// Status colors keyed by status_code (labels come dynamically from /statuses).
+export const STATUS_COLORS: Record<string, string> = {
+  CARGUE: "#64748B",
+  NOVEDAD: "#B91C1C",
+  PENDIENTE_AUDITORIA: "#B45309",
+  AUDITADO: "#1D4ED8",
+  FACTURADO: "#6D28D9",
+  RADICADO: "#15803D"
+};
+
+export const STATUS_COLOR_FALLBACK = "#6B7280";

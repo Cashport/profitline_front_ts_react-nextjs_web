@@ -9,7 +9,6 @@ import {
   FileText,
   FileUp,
   MoreHorizontal,
-  RefreshCw,
   Wrench,
   X
 } from "lucide-react";
@@ -20,18 +19,24 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import { DotsDropdown } from "@/components/atoms/DotsDropdown/DotsDropdown";
 import { cn } from "@/utils/utils";
 import { useMessageApi } from "@/context/MessageContext";
-import { mergeMedicalAccountDocuments } from "@/services/medicalAccounts/medicalAccounts";
+import {
+  mergeMedicalAccountDocuments,
+  resolveMedicalAccountNovelty
+} from "@/services/medicalAccounts/medicalAccounts";
 import {
   IMedicalAccountDocumentApi,
   IMedicalAccountNoveltyApi,
   MedicalAccountDocumentStatusCode
 } from "@/types/medicalAccounts/IMedicalAccounts";
+import { ModalReplaceSupport } from "../ModalReplaceSupport/ModalReplaceSupport";
+import { ModalUploadSupport } from "../ModalUploadSupport/ModalUploadSupport";
 import { formatDocumentType } from "../../utils/format";
 
 interface MedicalAccountDocumentsProps {
   documents: IMedicalAccountDocumentApi[];
   novedades: IMedicalAccountNoveltyApi[];
   accountId: number;
+  onChanged: () => void;
 }
 
 // Best-available human label for a document row (the API has no display name).
@@ -157,8 +162,12 @@ const PdfPanel = memo(function PdfPanel({ doc }: { doc: IMedicalAccountDocumentA
 });
 
 // ── Row action menu ─────────────────────────────────────────────────────────────
-// "Descargar" opens the document's PDF in a new tab; the rest are placeholders.
-const buildRowMenuItems = (doc: IMedicalAccountDocumentApi): ItemType[] => [
+const buildRowMenuItems = (
+  doc: IMedicalAccountDocumentApi,
+  hasNovelties: boolean,
+  onFix: (doc: IMedicalAccountDocumentApi) => void,
+  onReplace: (doc: IMedicalAccountDocumentApi) => void
+): ItemType[] => [
   {
     key: "download",
     label: "Descargar",
@@ -166,9 +175,19 @@ const buildRowMenuItems = (doc: IMedicalAccountDocumentApi): ItemType[] => [
     disabled: !doc.generated_file_url,
     onClick: () => handleDownloadFile(doc.generated_file_url)
   },
-  { key: "fix", label: "Solucionar novedades", icon: <Wrench className="h-3.5 w-3.5" /> },
-  { key: "reupload", label: "Cargar nuevamente", icon: <RefreshCw className="h-3.5 w-3.5" /> },
-  { key: "replace", label: "Reemplazar soporte", icon: <FileUp className="h-3.5 w-3.5" /> }
+  {
+    key: "fix",
+    label: "Solucionar novedades",
+    icon: <Wrench className="h-3.5 w-3.5" />,
+    disabled: !hasNovelties,
+    onClick: () => onFix(doc)
+  },
+  {
+    key: "replace",
+    label: "Reemplazar soporte",
+    icon: <FileUp className="h-3.5 w-3.5" />,
+    onClick: () => onReplace(doc)
+  }
 ];
 
 const dotsButtonStyle: React.CSSProperties = {
@@ -181,7 +200,12 @@ const dotsButtonStyle: React.CSSProperties = {
   background: "transparent"
 };
 
-export function MedicalAccountDocuments({ documents, novedades, accountId }: MedicalAccountDocumentsProps) {
+export function MedicalAccountDocuments({
+  documents,
+  novedades,
+  accountId,
+  onChanged
+}: MedicalAccountDocumentsProps) {
   const sortedDocs = [...documents].sort((a, b) => a.sequence - b.sequence);
 
   const [viewingDoc, setViewingDoc] = useState<IMedicalAccountDocumentApi | null>(
@@ -189,6 +213,8 @@ export function MedicalAccountDocuments({ documents, novedades, accountId }: Med
   );
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isMerging, setIsMerging] = useState(false);
+  const [replaceDocId, setReplaceDocId] = useState<number | null>(null);
+  const [showUploadSupport, setShowUploadSupport] = useState(false);
   const { showMessage } = useMessageApi();
 
   // Per-document novelty count, from novedades linked via medical_account_document_id.
@@ -240,6 +266,25 @@ export function MedicalAccountDocuments({ documents, novedades, accountId }: Med
     } finally {
       setIsMerging(false);
     }
+  };
+
+  const handleResolveNovelties = async (doc: IMedicalAccountDocumentApi) => {
+    const docNovelties = novedades.filter((n) => n.medical_account_document_id === doc.id);
+    if (docNovelties.length === 0) return;
+
+    try {
+      for (const novelty of docNovelties) {
+        await resolveMedicalAccountNovelty(accountId, novelty.id);
+      }
+      showMessage("success", `${docNovelties.length} novedad(es) resuelta(s).`);
+      onChanged();
+    } catch {
+      showMessage("error", "No se pudieron resolver las novedades.");
+    }
+  };
+
+  const handleReplaceSupport = (doc: IMedicalAccountDocumentApi) => {
+    setReplaceDocId(doc.id);
   };
 
   return (
@@ -366,7 +411,12 @@ export function MedicalAccountDocuments({ documents, novedades, accountId }: Med
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <DotsDropdown
-                          items={buildRowMenuItems(doc)}
+                          items={buildRowMenuItems(
+                            doc,
+                            novedadesCount > 0,
+                            handleResolveNovelties,
+                            handleReplaceSupport
+                          )}
                           customButtonStyle={dotsButtonStyle}
                           customIcon={<MoreHorizontal className="h-4 w-4 text-gray-400" />}
                         />
@@ -396,6 +446,7 @@ export function MedicalAccountDocuments({ documents, novedades, accountId }: Med
           <div className="border-t border-gray-100 px-5 py-3">
             <button
               type="button"
+              onClick={() => setShowUploadSupport(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <FileUp className="h-3.5 w-3.5" />
@@ -419,6 +470,27 @@ export function MedicalAccountDocuments({ documents, novedades, accountId }: Med
           </div>
         )}
       </div>
+
+      <ModalReplaceSupport
+        isOpen={replaceDocId != null}
+        accountId={accountId}
+        documentId={replaceDocId}
+        onClose={() => setReplaceDocId(null)}
+        onSuccess={() => {
+          setReplaceDocId(null);
+          onChanged();
+        }}
+      />
+
+      <ModalUploadSupport
+        isOpen={showUploadSupport}
+        accountId={accountId}
+        onClose={() => setShowUploadSupport(false)}
+        onSuccess={() => {
+          setShowUploadSupport(false);
+          onChanged();
+        }}
+      />
     </div>
   );
 }
