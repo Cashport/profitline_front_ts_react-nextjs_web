@@ -69,6 +69,22 @@
         }
     }
 
+    .dateCell {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+
+        &__primary,
+        &__secondary {
+            display: block;
+        }
+
+        &__secondary {
+            color: $gray;
+            font-size: 0.75rem;
+        }
+    }
+
     .buttonSeeProject {
         background-color: $dark-gray;
     }
