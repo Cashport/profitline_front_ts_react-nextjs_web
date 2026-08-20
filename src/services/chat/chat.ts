@@ -125,6 +125,25 @@ export const closeWhatsAppTicket = async (ticketId: string): Promise<void> => {
   }
 };
 
+export type TicketEscalationAction = "escalate" | "de-escalate";
+
+export const updateTicketEscalation = async (
+  ticketId: string,
+  action: TicketEscalationAction,
+  reason: string
+): Promise<void> => {
+  try {
+    await API.put(
+      `/whatsapp-tickets/${ticketId}/escalation`,
+      { action, reason },
+      { baseURL: config.API_CHAT }
+    );
+  } catch (error) {
+    console.error("Error updating ticket escalation:", error);
+    throw error;
+  }
+};
+
 export const sendAttahcment: (modelData: {
   customerId: string;
   caption: string;
