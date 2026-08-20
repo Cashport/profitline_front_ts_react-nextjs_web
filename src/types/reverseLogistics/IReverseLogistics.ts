@@ -241,6 +241,8 @@ export interface IProfit360ApprovalResumen {
   causales: string | null;
   documentos: IProfit360Documento[];
   reglaDevoluciones: IProfit360ReglaDevoluciones;
+  superaLimitePermitido: number; // 0 = no, 1 = yes
+  isLogisticAdmin: boolean;
 }
 
 // Single devolución (return) attached to a visit in the visits endpoint.
