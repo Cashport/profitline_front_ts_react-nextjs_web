@@ -1,9 +1,10 @@
 export type MedicalAccountStatusCode =
+  | "CARGUE"
+  | "NOVEDAD"
   | "PENDIENTE_AUDITORIA"
   | "AUDITADO"
   | "FACTURADO"
-  | "RADICADO"
-  | "NOVEDAD";
+  | "RADICADO";
 
 export type MedicalAccountDocumentStatusCode =
   | "COMPLETE"
@@ -74,6 +75,32 @@ export interface IMedicalAccountFacturaApi {
   pdf_url: string | null;
   zip_url: string | null;
   created_at: string;
+}
+
+export interface IMedicalAccountHistoryItem {
+  id: number;
+  medical_account_id: number;
+  from_status_id: number | null;
+  from_status_code: string | null;
+  from_status_name: string | null;
+  to_status_id: number;
+  to_status_code: string;
+  to_status_name: string;
+  evidence_url: string | null;
+  created_by: string | null;
+  created_by_name: string | null;
+  created_at: string;
+}
+
+export interface IMedicalAccountUpdatePayload {
+  patient_name?: string;
+  document_type?: string;
+  document_number?: string;
+  authorization_number?: string;
+  service_type?: string;
+  service_date?: string;
+  regimen?: string;
+  eps?: string;
 }
 
 export interface IMedicalAccountUploadData {

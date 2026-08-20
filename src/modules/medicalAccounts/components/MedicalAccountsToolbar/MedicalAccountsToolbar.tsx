@@ -1,6 +1,6 @@
 "use client";
 
-import { Select } from "antd";
+import { Input, Select } from "antd";
 import { Plus } from "@phosphor-icons/react";
 
 import UiSearchInput from "@/components/ui/search-input/search-input";
@@ -12,6 +12,8 @@ interface MedicalAccountsToolbarProps {
   onSearch: (value: string) => void;
   statusFilter: string | null;
   onStatusChange: (value: string | null) => void;
+  epsFilter: string;
+  onEpsChange: (value: string) => void;
   dateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
@@ -22,6 +24,8 @@ export function MedicalAccountsToolbar({
   onSearch,
   statusFilter,
   onStatusChange,
+  epsFilter,
+  onEpsChange,
   dateRange,
   onDateRangeChange,
   onClearDateRange,
@@ -44,6 +48,14 @@ export function MedicalAccountsToolbar({
           options={statuses.map(({ code, name }) => ({ value: code, label: name }))}
           value={statusFilter}
           onChange={(value) => onStatusChange(value ?? null)}
+        />
+
+        <Input
+          allowClear
+          placeholder="EPS"
+          style={{ width: 160, height: 38 }}
+          value={epsFilter}
+          onChange={(e) => onEpsChange(e.target.value)}
         />
 
         <MedicalAccountsDateFilter

@@ -123,10 +123,10 @@ export function ModalUploadInvoice({
       open={isOpen}
       width={560}
       onCancel={handleClose}
-      title={<Title level={4}>Subir factura</Title>}
+      title={<Title level={4}>Facturar</Title>}
       footer={
         <FooterButtons
-          titleConfirm="Subir factura"
+          titleConfirm="Facturar"
           showLeftButton={false}
           isConfirmDisabled={!invoiceNumber.trim() || !pdfFile || !zipFile}
           isConfirmLoading={isLoading}
