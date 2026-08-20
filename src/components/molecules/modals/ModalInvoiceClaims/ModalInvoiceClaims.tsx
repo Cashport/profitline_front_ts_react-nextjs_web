@@ -268,13 +268,17 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
           placeholder="Buscar glosa o concepto"
           onChange={(event) => setSearch(event.target.value)}
         />
-        <Select
-          className="modalInvoiceClaims__estadoFilter"
-          value={estadoFilter}
-          onChange={setEstadoFilter}
-          loading={statusesLoading}
-          options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...statusOptions]}
-        />
+        {/* Matches the 48px of the search input beside it. Scoped here so the Estado selects
+            inside the table rows keep the compact height of the other cell controls. */}
+        <ConfigProvider theme={{ components: { Select: { controlHeight: 48 } } }}>
+          <Select
+            className="modalInvoiceClaims__estadoFilter"
+            value={estadoFilter}
+            onChange={setEstadoFilter}
+            loading={statusesLoading}
+            options={[{ value: ALL_ESTADOS, label: ALL_ESTADOS }, ...statusOptions]}
+          />
+        </ConfigProvider>
       </div>
 
       {/* The app theme makes every DatePicker 47px, which is 15px taller than the other controls
