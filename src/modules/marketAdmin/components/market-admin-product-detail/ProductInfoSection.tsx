@@ -29,8 +29,8 @@ export default function ProductInfoSection({
   onToggleActivo
 }: Props) {
   return (
-    <div className="grid grid-cols-2 divide-x divide-[#EEEEEE] border-b border-[#EEEEEE]">
-      <div className="px-6 py-5 flex flex-col gap-5">
+    <div className="grid grid-cols-2 gap-8">
+      <div className="flex flex-col gap-5">
         <p className="text-sm font-bold text-[#141414]">Información del producto</p>
         <div className="grid grid-cols-3 gap-4">
           <Field label="Línea" value={linea} />
@@ -38,7 +38,7 @@ export default function ProductInfoSection({
           <Field label="SKUs" value={String(skus)} />
         </div>
       </div>
-      <div className="px-6 py-5 flex flex-col gap-5">
+      <div className="flex flex-col gap-5">
         <p className="text-sm font-bold text-[#141414]">Precio y estado</p>
         <div className="grid grid-cols-3 gap-4">
           <Field label="Precio base" value={precioBase} />

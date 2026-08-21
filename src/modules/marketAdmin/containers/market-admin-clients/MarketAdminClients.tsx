@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -40,7 +41,7 @@ function LineasBadges({ lineas }: { lineas: string[] }) {
   );
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
@@ -188,15 +189,7 @@ export default function MarketAdminClients() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, c) => (
-        <Link
-          href={`/market-admin/clientes/${c.client_id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#BBBBBB] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors"
-        >
-          <Eye size={15} />
-        </Link>
-      )
+      render: (_, c) => <GenericEyeButton href={`/market-admin/clientes/${c.client_id}`} />
     }
   ];
 
@@ -204,12 +197,12 @@ export default function MarketAdminClients() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Clientes</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
+      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
+        <div className="flex items-center gap-2 mb-4">
           <Link
             href="/market-admin"
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
+            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
           >
             <ChevronLeft size={18} />
           </Link>

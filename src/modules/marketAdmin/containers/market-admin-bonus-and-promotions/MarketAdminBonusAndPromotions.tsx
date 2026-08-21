@@ -49,7 +49,7 @@ export default function MarketAdminBonusAndPromotions() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-[#EEEEEE]">
           <Link
             href="/market-admin/bonusAndDiscounts"
@@ -72,7 +72,7 @@ export default function MarketAdminBonusAndPromotions() {
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className="group text-left bg-white rounded-xl border border-[#DDDDDD] p-5 flex flex-col gap-4 hover:border-[#141414] hover:shadow-sm transition-all"
+                className="group text-left bg-white rounded-lg border border-transparent p-5 flex flex-col gap-4 hover:border-[#141414] hover:shadow-sm transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="w-10 h-10 rounded-xl bg-[#F7F7F7] flex items-center justify-center group-hover:bg-[#CBE71E] transition-colors">

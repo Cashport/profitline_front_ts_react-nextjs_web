@@ -90,7 +90,7 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden">
         {/* Page header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
           <div className="flex items-center gap-3">
