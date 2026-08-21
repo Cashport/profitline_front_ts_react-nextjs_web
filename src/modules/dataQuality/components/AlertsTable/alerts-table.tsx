@@ -20,7 +20,8 @@ interface AlertsTableProps {
   onPageChange: (page: number) => void;
 }
 
-const NO_EQUIVALENCE_ERROR_TYPE = "NO_EQUIVALENCE";
+const NO_EQUIVALENCE_ERROR_TYPE = "SIN_EQUIVALENCIA";
+const VENTAS_ANOMALAS_ERROR_TYPE = "VENTAS_ANOMALAS";
 
 const getAlertActionHref = (record: IAlert) =>
   record.error_type === NO_EQUIVALENCE_ERROR_TYPE
@@ -78,7 +79,8 @@ const columns: TableProps<IAlert>["columns"] = [
   {
     title: "Prioridad",
     width: 90,
-    render: () => "-"
+    render: (_: string, record: IAlert) =>
+      record.error_type === VENTAS_ANOMALAS_ERROR_TYPE ? `${record.error_level}%` : "-"
   },
   {
     title: "Estado",
