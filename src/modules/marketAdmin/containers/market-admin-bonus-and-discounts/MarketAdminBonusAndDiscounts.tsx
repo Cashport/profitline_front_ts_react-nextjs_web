@@ -34,7 +34,7 @@ const formatDate = (iso: string) => {
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 

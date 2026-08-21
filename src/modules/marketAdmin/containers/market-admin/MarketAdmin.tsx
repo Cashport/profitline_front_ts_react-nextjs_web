@@ -34,7 +34,8 @@ const sections: Section[] = [
     href: "/market-admin/bonusAndDiscounts",
     icon: Tag,
     label: "Descuentos y bonificados",
-    description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
+    description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría.",
+    disabled: true
   }
 ];
 

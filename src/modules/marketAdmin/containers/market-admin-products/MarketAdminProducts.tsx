@@ -15,7 +15,7 @@ import FilterProductsModal, {
 } from "@/modules/marketAdmin/components/market-admin-products/FilterProductsModal";
 import { IMarketAdminProduct } from "@/types/marketAdmin/IMarketAdmin";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 

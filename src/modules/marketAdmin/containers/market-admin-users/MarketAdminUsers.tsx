@@ -22,7 +22,7 @@ import { ApiError } from "@/utils/api/api";
 import { IMarketAdminUser } from "@/types/marketAdmin/IMarketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
