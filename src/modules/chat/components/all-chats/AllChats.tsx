@@ -45,7 +45,9 @@ export default function AllChats({
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
-  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos" | "bot">("todos");
+  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos" | "bot">(
+    "abiertos"
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
@@ -277,9 +279,9 @@ export default function AllChats({
         className="w-full px-3 pt-2"
       >
         <TabsList className="grid w-full grid-cols-4 bg-[#F7F7F7] [&>button]:px-1 [&>button]:text-xs">
-          <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="abiertos">Abiertos</TabsTrigger>
           <TabsTrigger value="no-leidos">No leídos</TabsTrigger>
+          <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="bot">Bot</TabsTrigger>
         </TabsList>
       </Tabs>
