@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Eye, ChevronLeft } from "lucide-react";
+import { Plus, ChevronLeft } from "lucide-react";
+import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
@@ -167,14 +168,7 @@ export default function MarketAdminBonusAndDiscounts() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: () => (
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 ml-auto rounded-md bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors"
-        >
-          <Eye size={19} />
-        </button>
-      )
+      render: () => <GenericEyeButton />
     }
   ];
 

@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Eye, ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
+import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import UiSearchInput from "@/components/ui/search-input";
@@ -126,7 +127,6 @@ export default function MarketAdminUsers() {
       title: "Rol",
       dataIndex: "role_name",
       key: "role_name",
-      width: 130,
       sorter: (a, b) => (a.role_name ?? "").localeCompare(b.role_name ?? ""),
       onHeaderCell: headerCell,
       render: (rol: string) => (
@@ -168,15 +168,7 @@ export default function MarketAdminUsers() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, u) => (
-        <Link
-          href={`/market-admin/usuarios/${u.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 ml-auto rounded-md bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors"
-        >
-          <Eye size={19} />
-        </Link>
-      )
+      render: (_, u) => <GenericEyeButton href={`/market-admin/usuarios/${u.id}`} />
     }
   ];
 

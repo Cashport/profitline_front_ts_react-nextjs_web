@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import GenericEyeButton from "@/components/ui/generic-eye-button";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { useDebounce } from "@/hooks/useDeabouce";
@@ -188,15 +189,7 @@ export default function MarketAdminClients() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, c) => (
-        <Link
-          href={`/market-admin/clientes/${c.client_id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 ml-auto rounded-md bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors"
-        >
-          <Eye size={19} />
-        </Link>
-      )
+      render: (_, c) => <GenericEyeButton href={`/market-admin/clientes/${c.client_id}`} />
     }
   ];
 
