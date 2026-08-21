@@ -45,7 +45,7 @@ export default function AllChats({
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
-  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos">("todos");
+  const [activeTab, setActiveTab] = useState<"todos" | "abiertos" | "no-leidos" | "bot">("todos");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [unreadTickets, setUnreadTickets] = useState<Set<string>>(new Set());
@@ -60,7 +60,8 @@ export default function AllChats({
     page,
     search: debouncedQuery,
     isRead: activeTab === "abiertos" ? true : activeTab === "no-leidos" ? false : undefined,
-    justOpen: activeTab === "abiertos" ? true : undefined
+    justOpen: activeTab === "abiertos" ? true : undefined,
+    justBot: activeTab === "bot" ? true : undefined
   });
 
   const { isConnected, subscribeToTicketUpdates } = useSocket();
@@ -275,10 +276,11 @@ export default function AllChats({
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}
         className="w-full px-3 pt-2"
       >
-        <TabsList className="grid w-full grid-cols-3 bg-[#F7F7F7]">
+        <TabsList className="grid w-full grid-cols-4 bg-[#F7F7F7] [&>button]:px-1 [&>button]:text-xs">
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="abiertos">Abiertos</TabsTrigger>
           <TabsTrigger value="no-leidos">No leídos</TabsTrigger>
+          <TabsTrigger value="bot">Bot</TabsTrigger>
         </TabsList>
       </Tabs>
 
