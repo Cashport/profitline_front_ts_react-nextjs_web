@@ -7,7 +7,7 @@ import {
   signInWithCustomToken
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
-import { auth } from "./firebase";
+import { auth, customGetAuth } from "./firebase";
 import { COOKIE_NAME, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppStore } from "@/lib/store/store";
@@ -115,6 +115,13 @@ const mintSessionCookie = async (router: AppRouterInstance) => {
   if (response.status === 200) {
     const data = await response.json();
     localStorage.setItem(STORAGE_TOKEN, data.data.token);
+    // Exchange for the custom token now (SideBar.tsx otherwise only does
+    // this later, inside a useEffect via getUserPermissions/decodedClaims)
+    // so auth.currentUser already carries the `permissions` claim before
+    // the destination page's own data-fetching effects fire. Without this,
+    // those requests can race ahead using the claim-less ID token and get
+    // rejected server-side when validateRole tries to decode permissions.
+    await customGetAuth(data.data.token);
     router.push("/clientes/all");
   }
 };
