@@ -13,6 +13,13 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useAppStore } from "@/lib/store/store";
 import { NotificationInstance } from "antd/es/notification/interface";
 import axios from "axios";
+import { getLoginStatus } from "@/services/auth/authPolicy";
+
+export type LoginOutcome =
+  | { step: "success" }
+  | { step: "otp"; email: string }
+  | { step: "expiredPassword"; email: string }
+  | { step: "error" };
 
 const getAuth = async (
   email: string,
@@ -89,6 +96,89 @@ const getAuth = async (
         });
       });
   }
+};
+
+// Mints the Cashboard session cookie for the currently signed-in Firebase
+// user and redirects into the app. Only called once the periodic-OTP /
+// password-expiration policy has already been satisfied (or doesn't apply).
+const mintSessionCookie = async (router: AppRouterInstance) => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const token = await user.getIdToken();
+  const response = await fetch("/api/auth", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      tokenExm: `${JSON.stringify(user)}`
+    }
+  });
+  if (response.status === 200) {
+    const data = await response.json();
+    localStorage.setItem(STORAGE_TOKEN, data.data.token);
+    router.push("/clientes/all");
+  }
+};
+
+// Checks the periodic-OTP / password-expiration policy for the already
+// signed-in Firebase user and either completes the login (mints the cookie
+// and redirects) or reports which extra step the UI must show. Called right
+// after sign-in, and again after the OTP is verified or the password is
+// changed, so each remediation naturally re-evaluates whatever comes next.
+export const continueLoginAfterAuth = async (
+  router: AppRouterInstance
+): Promise<LoginOutcome> => {
+  const status = await getLoginStatus();
+  if (status.requiresPasswordChange) {
+    return { step: "expiredPassword", email: status.email };
+  }
+  if (status.requiresOtp) {
+    return { step: "otp", email: status.email };
+  }
+  await mintSessionCookie(router);
+  return { step: "success" };
+};
+
+// Password-only login path (as opposed to the marketplace ?token= flow
+// still handled by getAuth below), gated by the periodic-OTP /
+// password-expiration policy instead of redirecting unconditionally.
+export const signInWithPolicyCheck = async (
+  email: string,
+  password: string,
+  router: AppRouterInstance,
+  // eslint-disable-next-line no-unused-vars
+  openNotification: ({ api, title, message, placement }: IOpenNotificationProps) => void,
+  api: NotificationInstance
+): Promise<LoginOutcome> => {
+  localStorage.removeItem(STORAGE_TOKEN);
+  const { resetStore, setHydrated } = useAppStore.getState();
+  resetStore();
+  setHydrated();
+  try {
+    await signInWithEmailAndPassword(auth, email.trim(), password);
+    return await continueLoginAfterAuth(router);
+  } catch (error) {
+    console.error({ error });
+    openNotification({
+      api: api,
+      type: "error",
+      title: "Error",
+      message: "Usuario o contraseña incorrectos"
+    });
+    return { step: "error" };
+  }
+};
+
+// Re-authenticates with the just-set new password so the current session
+// holds a fresh, definitely-valid ID token (Firebase's admin-side password
+// update may or may not invalidate the previous one), then resumes the
+// login flow - which will naturally move on to OTP if that's also required.
+export const completeLoginAfterPasswordChange = async (
+  email: string,
+  newPassword: string,
+  router: AppRouterInstance
+): Promise<LoginOutcome> => {
+  await signInWithEmailAndPassword(auth, email.trim(), newPassword);
+  return await continueLoginAfterAuth(router);
 };
 
 export const getIdTokenWithToken = async (token: string) => {

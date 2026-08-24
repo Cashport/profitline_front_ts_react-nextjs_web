@@ -33,6 +33,9 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
     accept_date: data.general.accept_date === "Fecha de emisión" ? false : true,
     dso_days: data.general.DSO_days,
     dso_currenly_year: data.general.DSO_currenly_year === "Sí" ? true : undefined,
+    otp_required: data.general.otp_required === "Sí",
+    otp_revalidation_days: data.general.otp_revalidation_days,
+    password_expiration_days: data.general.password_expiration_days,
     name: data.general.name,
     position_contact: data.contact.position_contact,
     day_flag: billingPeriod.day_flag,
@@ -70,6 +73,13 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
   }
   if (finalData.day_of_week) {
     formData.append("day_of_week", finalData.day_of_week);
+  }
+  formData.append("otp_required", (!!finalData.otp_required).toString());
+  if (finalData.otp_revalidation_days) {
+    formData.append("otp_revalidation_days", finalData.otp_revalidation_days.toString());
+  }
+  if (finalData.password_expiration_days) {
+    formData.append("password_expiration_days", finalData.password_expiration_days.toString());
   }
 
   try {
@@ -112,6 +122,9 @@ export const updateProject = async (
     accept_date: data.general.accept_date !== "Fecha de emisión",
     dso_days: data.general.DSO_days,
     dso_currenly_year: data.general.DSO_currenly_year === "Sí" ? true : undefined,
+    otp_required: data.general.otp_required === "Sí",
+    otp_revalidation_days: data.general.otp_revalidation_days,
+    password_expiration_days: data.general.password_expiration_days,
     name: data.general.name.trim(),
     position_contact: data.contact.position_contact.trim(),
     day_flag: billingPeriod.day_flag === "true",
@@ -152,6 +165,13 @@ export const updateProject = async (
   }
   if (finalData.day_of_week) {
     formData.append("day_of_week", finalData.day_of_week);
+  }
+  formData.append("otp_required", (!!finalData.otp_required).toString());
+  if (finalData.otp_revalidation_days) {
+    formData.append("otp_revalidation_days", finalData.otp_revalidation_days.toString());
+  }
+  if (finalData.password_expiration_days) {
+    formData.append("password_expiration_days", finalData.password_expiration_days.toString());
   }
 
   try {

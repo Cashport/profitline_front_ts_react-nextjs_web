@@ -50,7 +50,10 @@ export const ProjectFormTab = ({
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<IBillingPeriodForm | undefined>();
-  const defaultValues = statusForm === "create" ? {} : dataToProjectFormData(data);
+  const defaultValues =
+    statusForm === "create"
+      ? { general: { otp_required: "No", otp_revalidation_days: 30, password_expiration_days: 90 } }
+      : dataToProjectFormData(data);
   const {
     watch,
     setValue,
@@ -64,6 +67,7 @@ export const ProjectFormTab = ({
   });
 
   const generalDSOCurrentlyYear = watch("general.DSO_currenly_year");
+  const otpRequired = watch("general.otp_required");
   useEffect(() => {
     if (data.BILLING_PERIOD_CONFIG) {
       setBillingPeriod(data.BILLING_PERIOD_CONFIG);
@@ -291,6 +295,74 @@ export const ProjectFormTab = ({
               }}
               control={control}
               error={errors.general?.DSO_days}
+            />
+          </Flex>
+
+          {/* -----------------------------------Seguridad----------------------------------- */}
+          <Title className="title" level={4}>
+            Seguridad
+          </Title>
+          <Flex component={"section"} className="generalProject" justify="flex-start">
+            <Flex vertical className="containerInput">
+              <Title className="title" level={5}>
+                Solicitar OTP periódicamente
+              </Title>
+              <Controller
+                name="general.otp_required"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => {
+                  return (
+                    <Select
+                      placeholder="Si | No"
+                      className={errors?.general?.otp_required ? "selectInputError" : "selectInput"}
+                      loading={false}
+                      variant="borderless"
+                      optionLabelProp="label"
+                      {...field}
+                    >
+                      <Option value={`Sí`} key={1}>
+                        {`Sí`}
+                      </Option>
+                      <Option value={`No`} key={2}>
+                        {`No`}
+                      </Option>
+                    </Select>
+                  );
+                }}
+              />
+              <Text className="textError">
+                {errors?.general?.otp_required && "Campo obligatorio *"}
+              </Text>
+            </Flex>
+            <InputForm
+              disabled={otpRequired !== "Sí"}
+              titleInput="Días para volver a solicitar OTP"
+              nameInput="general.otp_revalidation_days"
+              typeInput="number"
+              validationRules={{
+                required: otpRequired === "Sí" ? "Campo obligatorio *" : false,
+                min: {
+                  value: 1,
+                  message: "El valor debe ser mayor que 1"
+                }
+              }}
+              control={control}
+              error={errors.general?.otp_revalidation_days}
+            />
+            <InputForm
+              titleInput="Días de expiración de contraseña"
+              nameInput="general.password_expiration_days"
+              typeInput="number"
+              validationRules={{
+                required: "Campo obligatorio *",
+                min: {
+                  value: 1,
+                  message: "El valor debe ser mayor que 1"
+                }
+              }}
+              control={control}
+              error={errors.general?.password_expiration_days}
             />
           </Flex>
 

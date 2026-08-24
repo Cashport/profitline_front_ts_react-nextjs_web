@@ -22,6 +22,9 @@ export interface General {
   accept_date: string;
   DSO_currenly_year: string;
   DSO_days: number | undefined;
+  otp_required: string;
+  otp_revalidation_days: number | undefined;
+  password_expiration_days: number | undefined;
 }
 
 export interface Personalization {

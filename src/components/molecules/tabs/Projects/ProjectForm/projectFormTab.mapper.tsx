@@ -50,7 +50,10 @@ export const dataToProjectFormData = (data: IProject): IFormProject => {
       billing_period: newBillingPeriod(data.BILLING_PERIOD_CONFIG),
       DSO_currenly_year: data.DSO_CURRENLY_YEAR === 0 ? "No" : "Sí",
       DSO_days: data.DSO_DAYS,
-      accept_date: data?.ACCEPT_DATE === 0 ? "Fecha de emisión" : "Fecha de aceptación"
+      accept_date: data?.ACCEPT_DATE === 0 ? "Fecha de emisión" : "Fecha de aceptación",
+      otp_required: data.otp_required ? "Sí" : "No",
+      otp_revalidation_days: data.otp_revalidation_days ?? undefined,
+      password_expiration_days: data.password_expiration_days ?? undefined
     },
     contact: {
       name: data.CONTACT,

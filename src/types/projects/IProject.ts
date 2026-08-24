@@ -31,6 +31,9 @@ export interface IProject {
   RGB_CONFIG: string;
   UUID: string;
   is_deleted: number;
+  otp_required: number | boolean;
+  otp_revalidation_days: number | null;
+  password_expiration_days: number | null;
 }
 export interface Currency {
   id: number;
