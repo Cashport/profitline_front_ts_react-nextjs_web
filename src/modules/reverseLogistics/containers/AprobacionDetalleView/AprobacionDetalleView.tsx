@@ -5,7 +5,7 @@ import type { Key } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import dayjs from "dayjs";
-import { Modal, Table } from "antd";
+import { message, Modal, Table } from "antd";
 import { ArrowLeft, AlertTriangle, TrendingUp } from "lucide-react";
 import { Button } from "@/modules/chat/ui/button";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -147,6 +147,18 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   const pctTotal = regla ? regla.conEstaAprobacion.porcentaje / 100 : 0;
 
   const causalLabel = shortCausal(firstCausal(resumen?.causales));
+
+  // Only a logistics admin may approve a devolución that exceeds the returns
+  // limit. The backend sends `superaLimitePermitido` as 0/1, so coerce instead
+  // of comparing against `true`.
+  const handleAprobarClick = () => {
+    if (!resumen) return;
+    if (!resumen.isLogisticAdmin && Boolean(resumen.superaLimitePermitido)) {
+      message.error("No puede aprobar, supera el límite permitido");
+      return;
+    }
+    setApproveModalOpen(true);
+  };
 
   // Called by the modal with the resolved dropdown + textarea values. Builds
   // the dynamic POST body and refreshes the detail on success.
@@ -331,7 +343,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
           Mostrando 1 a {filtered.length} de {filtered.length} registros
         </span>
         <PrincipalButton
-          onClick={() => setApproveModalOpen(true)}
+          onClick={handleAprobarClick}
           disabled={!resumen || approving || !aprobadoEstadoCodigo}
         >
           Aprobar

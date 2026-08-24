@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Eye, ChevronLeft } from "lucide-react";
+import { Plus, ChevronLeft } from "lucide-react";
+import GenericEyeButton from "@/components/ui/generic-eye-button";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
@@ -25,20 +26,7 @@ const TIPO_STYLES: Record<string, string> = {
   "Promos Mes": "bg-[#F5F0FF] text-[#7C4DFF]"
 };
 
-const MONTHS = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic"
-];
+const MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 const formatDate = (iso: string) => {
   const date = new Date(iso);
@@ -46,7 +34,7 @@ const formatDate = (iso: string) => {
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
@@ -180,14 +168,7 @@ export default function MarketAdminBonusAndDiscounts() {
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: () => (
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#BBBBBB] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors"
-        >
-          <Eye size={15} />
-        </button>
-      )
+      render: () => <GenericEyeButton />
     }
   ];
 
@@ -203,11 +184,11 @@ export default function MarketAdminBonusAndDiscounts() {
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">Descuentos y bonificados</h1>
 
-      <div className="bg-white rounded-2xl border border-[#E8E8E8] overflow-hidden [&_.ant-table-pagination]:px-6 [&_.ant-table-cell:first-child]:pl-6">
-        <div className="flex items-center gap-2 px-6 py-4 border-b border-[#EEEEEE]">
+      <div className="bg-white rounded-lg overflow-hidden p-8 [&_.ant-table-cell:first-child]:pl-0 [&_.ant-table-cell:last-child]:pr-0 [&_.ant-table-pagination]:!mb-0">
+        <div className="flex items-center gap-2 mb-4">
           <Link
             href="/market-admin"
-            className="flex items-center justify-center w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
+            className="flex items-center justify-start w-8 h-8 rounded-lg text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
           >
             <ChevronLeft size={18} />
           </Link>

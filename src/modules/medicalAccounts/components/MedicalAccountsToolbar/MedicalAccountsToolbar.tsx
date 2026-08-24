@@ -1,18 +1,19 @@
 "use client";
 
-import { Select } from "antd";
+import { Input, Select } from "antd";
 import { Plus } from "@phosphor-icons/react";
 
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { MedicalAccountStatusCode } from "../../types/IMedicalAccount";
 import { MedicalAccountsDateFilter } from "../MedicalAccountsDateFilter/MedicalAccountsDateFilter";
-import { STATUS_CODE_OPTIONS } from "../../constants";
+import { useMedicalAccountStatuses } from "../../hooks/useMedicalAccountStatuses";
 
 interface MedicalAccountsToolbarProps {
   onSearch: (value: string) => void;
-  statusFilter: MedicalAccountStatusCode | null;
-  onStatusChange: (value: MedicalAccountStatusCode | null) => void;
+  statusFilter: string | null;
+  onStatusChange: (value: string | null) => void;
+  epsFilter: string;
+  onEpsChange: (value: string) => void;
   dateRange: { start: string | null; end: string | null };
   onDateRangeChange: (start: string, end: string) => void;
   onClearDateRange: () => void;
@@ -23,11 +24,15 @@ export function MedicalAccountsToolbar({
   onSearch,
   statusFilter,
   onStatusChange,
+  epsFilter,
+  onEpsChange,
   dateRange,
   onDateRangeChange,
   onClearDateRange,
   onAdd
 }: MedicalAccountsToolbarProps) {
+  const { statuses } = useMedicalAccountStatuses();
+
   return (
     <div className="mb-6 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
@@ -40,9 +45,17 @@ export function MedicalAccountsToolbar({
           allowClear
           placeholder="Estado"
           style={{ width: 180, height: 38 }}
-          options={STATUS_CODE_OPTIONS}
+          options={statuses.map(({ code, name }) => ({ value: code, label: name }))}
           value={statusFilter}
           onChange={(value) => onStatusChange(value ?? null)}
+        />
+
+        <Input
+          allowClear
+          placeholder="EPS"
+          style={{ width: 160, height: 38 }}
+          value={epsFilter}
+          onChange={(e) => onEpsChange(e.target.value)}
         />
 
         <MedicalAccountsDateFilter

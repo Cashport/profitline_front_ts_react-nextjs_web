@@ -1,7 +1,9 @@
 import {
   CausalDevolucion,
+  DevolucionesEstados,
   EstadoDevolucion,
-  TipoAprobacion
+  TipoAprobacion,
+  TipoDevolucionCodigo
 } from "@/types/reverseLogistics/IReverseLogistics";
 
 export const PAGE_SIZE = 25;
@@ -34,11 +36,11 @@ export const estadoConfig: Record<EstadoDevolucion, { bg: string; text: string }
   "Contabilización de NC": { bg: "#F1F5F9", text: "#334155" }
 };
 
-export const ESTADO_OPTIONS: { value: EstadoDevolucion; label: string }[] = (
+export const ESTADO_OPTIONS: { value: EstadoDevolucion; label: EstadoDevolucion }[] = (
   Object.keys(estadoConfig) as EstadoDevolucion[]
 ).map((estado) => ({ value: estado, label: estado }));
 
-export const CAUSAL_OPTIONS: { value: CausalDevolucion; label: string }[] = [
+export const CAUSAL_OPTIONS: { value: CausalDevolucion; label: CausalDevolucion }[] = [
   { value: "Vencimiento", label: "Vencimiento" },
   {
     value: "Vencimiento fuera política sin reconocimiento NC",
@@ -56,3 +58,36 @@ export const TIPO_APROBACION_OPTIONS: { value: TipoAprobacion; label: string }[]
   { value: "Supera el monto máximo", label: "Supera monto máximo" },
   { value: "Sin autorización de recogida", label: "Sin autorización recogida" }
 ];
+
+// Short labels for the devolucion fase codigos. Used by the stats bar KPI
+// cards and by the Devoluciones tab to render the highest fase as the estado.
+export const FASE_LABELS: Record<TipoDevolucionCodigo, string> = {
+  F1_LOGISTICA: "Logística",
+  F2_SOLISTICA: "Solística",
+  F3_SUPPLA: "Suppla",
+  F4_NOTA_CREDITO: "Nota Crédito"
+};
+
+// Orden de mayor a menor — F4 (Nota Crédito) es la fase más avanzada y siempre
+// debe ganar contra F3/F2/F1 cuando la devolución ya pasó por varias.
+export const FASE_PRIORITY: TipoDevolucionCodigo[] = [
+  TipoDevolucionCodigo.F4_NOTA_CREDITO,
+  TipoDevolucionCodigo.F3_SUPPLA,
+  TipoDevolucionCodigo.F2_SOLISTICA,
+  TipoDevolucionCodigo.F1_LOGISTICA
+];
+
+// Devuelve el código de la fase más alta registrada en `fases`. Devuelve
+// `undefined` si la lista está vacía o no trae ninguno de los F1..F4.
+export const highestFaseCode = (fases?: DevolucionesEstados[]): TipoDevolucionCodigo | undefined => {
+  if (!fases || fases.length === 0) return undefined;
+  const codes = new Set(fases.map((f) => f.Codigo));
+  return FASE_PRIORITY.find((code) => codes.has(code));
+};
+
+// Helper de UI: combina las dos anteriores. Devuelve el label legible (ej:
+// "Nota Crédito") o `null` si no hay fases válidas.
+export const highestFaseLabel = (fases?: DevolucionesEstados[]): string | null => {
+  const code = highestFaseCode(fases);
+  return code ? FASE_LABELS[code] : null;
+};

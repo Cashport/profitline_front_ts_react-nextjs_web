@@ -199,8 +199,8 @@ export default function ChatDetails({
                     </div>
                     <div className="text-muted-foreground">Teléfono</div>
                     <div className="font-medium min-w-0 overflow-hidden flex items-center gap-1">
-                      <span className="truncate">{clientDetails?.client.phone}</span>
-                      {clientDetails?.client.phone ? (
+                      <span className="truncate">{conversation.phoneNumber}</span>
+                      {conversation.phoneNumber ? (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -208,10 +208,10 @@ export default function ChatDetails({
                           aria-label="Copiar teléfono"
                           onClick={async () => {
                             try {
-                              await navigator.clipboard.writeText(clientDetails.client.phone);
+                              await navigator.clipboard.writeText(conversation.phoneNumber);
                               toast({
                                 title: "Teléfono copiado",
-                                description: clientDetails.client.phone
+                                description: conversation.phoneNumber
                               });
                             } catch {
                               toast({ title: "No se pudo copiar", variant: "destructive" });

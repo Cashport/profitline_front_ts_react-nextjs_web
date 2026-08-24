@@ -19,6 +19,13 @@ import "./addClientModal.scss";
 import { ApiError } from "@/utils/api/api";
 import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
+type ClientOption = {
+  label: string;
+  value: string;
+  clientId: string;
+  className: string;
+};
+
 interface PropsInvoicesTable {
   showAddClientModal: boolean;
   setShowAddClientModal: Dispatch<SetStateAction<boolean>>;
@@ -36,7 +43,7 @@ const AddClientModal = ({
   initialPhone,
   onSuccess
 }: PropsInvoicesTable) => {
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<{ uuid: string; id: string; name: string }[]>([]);
   const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
 
   const initialPhoneData = extractNationalNumber(initialPhone, callingCodeOptions);
@@ -60,7 +67,7 @@ const AddClientModal = ({
     const fetchClients = async () => {
       try {
         const res = await getWhatsappClients();
-        const formatted = res.map((c) => ({ id: c.uuid, name: c.client_name }));
+        const formatted = res.map((c) => ({ uuid: c.uuid, id: c.id, name: c.client_name }));
         setClients(formatted);
       } catch (error) {
         console.error("Error fetching WhatsApp clients:", error);
@@ -115,8 +122,14 @@ const AddClientModal = ({
     }
   };
 
-  const filterOption = (input: string, option?: { label: string; value: string }) => {
-    return option?.label.toLowerCase().includes(input.toLowerCase()) ?? false;
+  const filterOption = (input: string, option?: ClientOption) => {
+    const search = input.trim().toLowerCase();
+    if (!search) return true;
+
+    return (
+      (option?.label?.toLowerCase().includes(search) ?? false) ||
+      (option?.clientId?.toLowerCase().includes(search) ?? false)
+    );
   };
 
   return (
@@ -230,9 +243,10 @@ const AddClientModal = ({
                     optionLabelProp="label"
                     {...field}
                     popupClassName="selectDrop"
-                    options={clients.map((client) => ({
+                    options={clients.map<ClientOption>((client) => ({
                       label: client.name,
-                      value: client.id,
+                      value: client.uuid,
+                      clientId: String(client.id ?? ""),
                       className: "selectOptions"
                     }))}
                     labelInValue

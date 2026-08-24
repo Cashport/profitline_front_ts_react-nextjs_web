@@ -17,9 +17,11 @@ import {
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
 import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
+import { resolveDatePreset } from "../FilterDateTab/FilterDateTab";
 import { IDevolucionesFilter } from "../../types";
 import { parseCausales } from "../../utils/causales";
 import { returnsColumns } from "./columns";
+import { highestFaseLabel } from "../../constants";
 
 // Backend page size — the visits endpoint paginates with its own `page`/`limit`,
 // so the table pagination mirrors `hasNext`/`hasPrev` instead of slicing the
@@ -64,10 +66,12 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
   const fechaIso = dev.FechaInicioDevolucion ?? dev.FechaRegistro;
   const fecha = fechaIso ? dayjs(fechaIso).format("YYYY-MM-DD HH:mm") : "";
 
-  // Estado comes as a free-text string on the new endpoint. Cast through
-  // `unknown` so we don't lie about exhaustive matching — the column renderer
-  // falls back gracefully for unknown values.
-  const estado = dev.Estado as unknown as EstadoDevolucion;
+  // Si la devolución trae fases (F1..F4), gana la más alta (F4 sobre F3 sobre
+  // F2 sobre F1). Si no hay fases, caemos al `Estado` libre que devuelve el
+  // endpoint. Cast a `unknown` para no mentir sobre el match exhaustivo: el
+  // renderer de la columna se defiende si el valor no está en `estadoConfig`.
+  const faseLabel = highestFaseLabel(dev.fases);
+  const estado = (faseLabel ?? dev.Estado) as EstadoDevolucion;
 
   const causales = devCausales(dev);
 
@@ -86,6 +90,8 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
     causales,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
+    haveApprove: !!dev.IdAprobacion,
+    idDevolucion: dev.Id,
     pdfUrl: dev.PdfBoleto ?? undefined,
     // Stash the original dev so the actions column can navigate to the
     // approval detail using `IdDevolucion` as the approval id.
@@ -136,18 +142,19 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
     monto: resumen.monto,
     estado,
     pdfUrl: undefined,
-    calculatedStatus: visit.calculatedStatus
+    calculatedStatus: visit.calculatedStatus,
+    haveApprove: false
   };
 };
 
 export function DevolucionesTab() {
-  // Default filter = today (fromDate = toDate = YYYY-MM-DD), matching the
-  // endpoint contract and the user's spec for this tab.
-  const today = dayjs().format("YYYY-MM-DD");
+  // Default filter = the "Este mes" preset, resolved from the same definitions the
+  // date panel uses so the Fecha tag opens naming that period.
+  const defaultDates = resolveDatePreset("este_mes");
   const [filter, setFilter] = useState<IDevolucionesFilter>({
     clientId: null,
-    fromDate: today,
-    toDate: today
+    fromDate: defaultDates.from,
+    toDate: defaultDates.to
   });
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");

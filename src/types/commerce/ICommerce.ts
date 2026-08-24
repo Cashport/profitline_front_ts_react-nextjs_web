@@ -459,6 +459,7 @@ export interface ISingleOrder {
   vendor_name: string;
   warehouse_id: number;
   warehouse_name: string;
+  business_unit: string;
 }
 
 interface IDetailOrder {

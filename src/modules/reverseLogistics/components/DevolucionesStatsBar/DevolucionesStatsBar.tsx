@@ -6,17 +6,11 @@ import { Col, Row } from "antd";
 import { Clock, TrendUp, Package, FileText, CalendarBlank } from "phosphor-react";
 import { getProfit360DevolucionKpis } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatCard } from "../DevolucionesStatCard/DevolucionesStatCard";
-import { IProfit360DevolucionKpiFase } from "@/types/reverseLogistics/IReverseLogistics";
-
-// Short labels for the known fase codigos — the backend `nombre`
-// ("Fase 2 – Logística") is too long for a KPI card. Unknown codigos fall back
-// to the backend name so new fases still render.
-const FASE_LABELS: Record<string, string> = {
-  F1_EMBALAJE_TICKET: "Prom Embalaje",
-  F2_LOGISTICA: "Prom Logística",
-  F3_BODEGA_INVENTARIO: "Prom Bodega",
-  F4_NOTA_CREDITO: "Prom NC"
-};
+import {
+  IProfit360DevolucionKpiFase,
+  TipoDevolucionCodigo
+} from "@/types/reverseLogistics/IReverseLogistics";
+import { FASE_LABELS } from "../../constants";
 
 const CARD_ICONS = [Clock, TrendUp, Package, FileText, CalendarBlank];
 
@@ -51,28 +45,32 @@ export function DevolucionesStatsBar({ clientId, fromDate, toDate }: Devolucione
   );
 
   const stats = useMemo((): StatCard[] => {
-    const fases: IProfit360DevolucionKpiFase[] = Object.keys(FASE_LABELS).map((f, i) => {
-      const fase = FASE_LABELS[f];
-      const dataFases = [...(data?.fases ?? [])].sort((a, b) => a.orden - b.orden);
-      console.log(dataFases);
-      const dataFase = dataFases.find((df) => df.codigo == f);
+    const dataFases = data?.fases ?? [];
+    // Always render one card per known fase, in FASE_LABELS order — a fase the
+    // backend didn't report falls back to an empty measure set.
+    const fases: IProfit360DevolucionKpiFase[] = (
+      Object.keys(FASE_LABELS) as TipoDevolucionCodigo[]
+    ).map((f, i) => {
+      const dataFase = dataFases.find((df) => df.codigo === f);
       if (dataFase) return dataFase;
-      else
-        return {
-          codigo: f,
-          nombre: fase,
-          orden: i + 1,
-          pasoOrigen: null,
-          pasoDestino: null,
-          promedioDias: null,
-          minDias: null,
-          maxDias: null,
-          muestras: null
-        };
+      return {
+        codigo: f,
+        nombre: FASE_LABELS[f],
+        orden: i + 1,
+        pasoOrigen: null,
+        pasoDestino: null,
+        promedioDias: null,
+        minDias: null,
+        maxDias: null,
+        muestras: null
+      };
     });
 
     const cards = fases.map((fase) =>
-      toCard(FASE_LABELS[fase.codigo] ?? fase.nombre, fase.promedioDias)
+      toCard(
+        `Prom ${FASE_LABELS[fase.codigo as TipoDevolucionCodigo] ?? fase.nombre}`,
+        fase.promedioDias
+      )
     );
     // The backend total is the real end-to-end average, not the sum of per-fase
     // averages — if it's missing we show N/A rather than faking it.

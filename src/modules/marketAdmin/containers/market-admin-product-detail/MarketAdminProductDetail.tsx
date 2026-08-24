@@ -125,9 +125,9 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{nombreVisible}</h1>
 
-      <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
         {/* Card top bar: back + save */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
+        <div className="flex items-center justify-between">
           <Link
             href="/market-admin/productos"
             className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
@@ -167,7 +167,7 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
           onToggleActivo={() => setActivo((v) => !v)}
         />
 
-        <div className="p-6 grid grid-cols-[180px_1fr] gap-8">
+        <div className="grid grid-cols-[180px_1fr] gap-8">
           {/* Left: image */}
           <ProductImageUpload
             imagen={imagen}

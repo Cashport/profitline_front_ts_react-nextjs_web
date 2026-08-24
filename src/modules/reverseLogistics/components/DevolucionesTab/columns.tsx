@@ -1,17 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { ColumnsType } from "antd/es/table";
-import { Check, Eye, FileText } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { ReturnRow } from "@/types/reverseLogistics/IReverseLogistics";
 import { CanalBadge } from "../CanalBadge/CanalBadge";
 import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
+import Link from "next/link";
 
-// Per-row action buttons. Lives in its own component so it can use the
-// `useRouter` hook for client-side navigation into the approval detail.
-// `record.originalDev.IdDevolucion` doubles as the approval id — both
-// endpoints surface the same GUID under different names.
+// Per-row action buttons. `record.idDevolucion` doubles as the approval id —
+// both endpoints surface the same GUID under different names.
 function ActionsCell({ record }: { record: ReturnRow }) {
   return (
     <div className="flex items-center gap-1">
@@ -24,6 +22,16 @@ function ActionsCell({ record }: { record: ReturnRow }) {
         >
           <FileText className="h-3.5 w-3.5" />
         </button>
+      ) : null}
+      {record.haveApprove && record.idDevolucion ? (
+        <Link
+          href={`/logistica-inversa/aprobaciones/${record.idDevolucion}`}
+          type="button"
+          aria-label="Ver detalle"
+          className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"
+        >
+          <Eye className="h-3.5 w-3.5" />
+        </Link>
       ) : null}
     </div>
   );
@@ -107,6 +115,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     width: 150,
     render: (_: unknown, record) => {
       const cs = record.calculatedStatus;
+      const statusText = record.estado || "";
       const palette = cs ? { bg: cs.backgroundColor, text: cs.textColor } : undefined;
       const label = cs?.label;
       return cs ? (
@@ -117,7 +126,7 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
           {label}
         </span>
       ) : (
-        <></>
+        <span>{statusText}</span>
       );
     }
   },

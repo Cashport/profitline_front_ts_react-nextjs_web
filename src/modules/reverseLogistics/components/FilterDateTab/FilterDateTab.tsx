@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import { Calendar } from "lucide-react";
 
@@ -8,18 +9,47 @@ export type DateDraft = { from: string | null; to: string | null };
 const today = () => dayjs().format("YYYY-MM-DD");
 const daysAgo = (n: number) => dayjs().subtract(n, "day").format("YYYY-MM-DD");
 
-const PRESETS: { id: string; name: string; resolve: () => DateDraft }[] = [
+export type DatePresetId = "hoy" | "ayer" | "ultimos_7" | "ultimos_15" | "ultimos_30" | "este_mes";
+
+const PRESETS: { id: DatePresetId; name: string; resolve: () => DateDraft }[] = [
   { id: "hoy", name: "Hoy", resolve: () => ({ from: today(), to: today() }) },
   { id: "ayer", name: "Ayer", resolve: () => ({ from: daysAgo(1), to: daysAgo(1) }) },
   { id: "ultimos_7", name: "Últimos 7 días", resolve: () => ({ from: daysAgo(7), to: today() }) },
-  { id: "ultimos_15", name: "Últimos 15 días", resolve: () => ({ from: daysAgo(15), to: today() }) },
-  { id: "ultimos_30", name: "Últimos 30 días", resolve: () => ({ from: daysAgo(30), to: today() }) },
+  {
+    id: "ultimos_15",
+    name: "Últimos 15 días",
+    resolve: () => ({ from: daysAgo(15), to: today() })
+  },
+  {
+    id: "ultimos_30",
+    name: "Últimos 30 días",
+    resolve: () => ({ from: daysAgo(30), to: today() })
+  },
   {
     id: "este_mes",
     name: "Este mes",
     resolve: () => ({ from: dayjs().startOf("month").format("YYYY-MM-DD"), to: today() })
   }
 ];
+
+// Lets callers seed a default range from the same definitions the panel uses, so
+// the tag names the preset instead of falling back to raw dates.
+export const resolveDatePreset = (id: DatePresetId): DateDraft =>
+  PRESETS.find((preset) => preset.id === id)?.resolve() ?? { from: null, to: null };
+
+const matchPreset = (draft: DateDraft) =>
+  PRESETS.find((preset) => {
+    const range = preset.resolve();
+    return range.from === draft.from && range.to === draft.to;
+  }) ?? null;
+
+// A range that matches a preset is shown by name ("Últimos 30 días"); anything
+// else falls back to the raw dates.
+export const formatDateTagValue = (draft: DateDraft): string => {
+  const preset = matchPreset(draft);
+  if (preset) return preset.name;
+  return draft.from && draft.to ? `${draft.from} - ${draft.to}` : draft.from || draft.to || "";
+};
 
 interface FilterDateTabProps {
   value: DateDraft;
@@ -29,21 +59,38 @@ interface FilterDateTabProps {
 // Custom panel rendered inside FilterModal for the "Fecha" category of both
 // tabs — /visits and /approvals take the same fromDate/toDate range.
 export function FilterDateTab({ value, onChange }: FilterDateTabProps) {
+  // Resolve each preset's concrete range once so applying and highlighting compare
+  // the same values.
+  const presets = useMemo(
+    () => PRESETS.map((p) => ({ id: p.id, name: p.name, range: p.resolve() })),
+    []
+  );
+
+  const isSelected = (range: DateDraft) => value.from === range.from && value.to === range.to;
+
   return (
     <div className="space-y-4">
       <div className="mb-4">
         <p className="text-xs font-bold text-foreground mb-3">Periodos Predefinidos</p>
         <div className="grid grid-cols-2 gap-2">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => onChange(preset.resolve())}
-              className="px-3 py-2 text-sm bg-secondary/50 hover:bg-secondary border border-border rounded-lg transition-colors text-left"
-            >
-              {preset.name}
-            </button>
-          ))}
+          {presets.map((preset) => {
+            const selected = isSelected(preset.range);
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onChange(preset.range)}
+                aria-pressed={selected}
+                className={`px-3 py-2 text-sm border rounded-lg transition-colors text-left ${
+                  selected
+                    ? "border-primary bg-primary/10 text-foreground font-semibold"
+                    : "bg-secondary/50 hover:bg-secondary border-border"
+                }`}
+              >
+                {preset.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
