@@ -60,7 +60,12 @@ const uniqueCausales = (devs: IProfit360VisitDevolucion[]): IProfit360Causal[] =
 
 // Flatten a visit's devoluciones into leaf ReturnRows. Each devolucion from the
 // new endpoint maps 1:1 to the legacy ReturnRow shape the columns consume.
-const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevolucion): ReturnRow => {
+// `index` es la posición dentro de la visita y solo se usa para la key.
+const mapDevolucionToRow = (
+  visit: IProfit360Visit,
+  dev: IProfit360VisitDevolucion,
+  index: number
+): ReturnRow => {
   // Parse the ISO timestamp into the "YYYY-MM-DD HH:mm" shape the legacy
   // `parseFechaReturn` helper expects.
   const fechaIso = dev.FechaInicioDevolucion ?? dev.FechaRegistro;
@@ -76,7 +81,10 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
   const causales = devCausales(dev);
 
   return {
-    key: `dev-${dev.IdDevolucion}-visit-${visit.visitProjectId}`,
+    // `IdDevolucion` se repite cuando una devolución trae varios documentos, así
+    // que el índice dentro de la visita es lo único que garantiza unicidad. Con
+    // keys duplicadas React deja filas huérfanas al cerrar el desplegable.
+    key: `visit-${visit.visitProjectId}-dev-${index}-${dev.Id}`,
     isGroup: false,
     devCount: 1,
     id: 0,
@@ -102,7 +110,7 @@ const mapDevolucionToRow = (visit: IProfit360Visit, dev: IProfit360VisitDevoluci
 // Fallback row emitted when a visit has no devoluciones — the visit itself
 // still needs to be visible in the table so the user knows the scheduled
 // visit existed (just no returns attached yet).
-const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
+const mapVisitToFallbackRow = (visit: IProfit360Visit, visitIndex: number): ReturnRow => {
   const fecha = visit.scheduledDate
     ? dayjs(visit.scheduledDate).format("YYYY-MM-DD") +
       (visit.scheduledTime ? ` ${visit.scheduledTime}` : "")
@@ -127,7 +135,9 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit): ReturnRow => {
   );
   const estado = visit.status as unknown as EstadoDevolucion;
   return {
-    key: `visit-${visit.visitProjectId}`,
+    // Igual que en las hijas: el índice en la página garantiza que la key sea
+    // única aunque el backend repita `visitProjectId`.
+    key: `visit-${visitIndex}-${visit.visitProjectId}`,
     isGroup: false,
     devCount: 0,
     id: 0,
@@ -187,20 +197,23 @@ export function DevolucionesTab() {
   const visits = data?.data ?? [];
   const total = data?.total ?? 0;
 
-  // Flatten visits → rows. Each visit produces one row per devolución; if it
-  // has none, we still emit a single fallback row so the scheduled visit
-  // remains visible in the table.
+  // Flatten visits → rows. Una visita con 2+ devoluciones es un grupo con hijos
+  // desplegables; con una sola, la fila ES la devolución (sin desplegable) para
+  // que boleto, sucursal, hora y acciones se vean de una. Sin devoluciones,
+  // igual emitimos la fila de la visita para que la programada siga visible.
   const allRows = useMemo<ReturnRow[]>(
     () =>
-      visits.map<ReturnRow>((visit) => {
+      visits.map<ReturnRow>((visit, visitIndex) => {
+        const devs = visit.devoluciones ?? [];
+
+        if (devs.length === 1) return mapDevolucionToRow(visit, devs[0], 0);
+
         return {
-          ...mapVisitToFallbackRow(visit),
-          isGroup: visit.devoluciones.length > 1,
-          devCount: visit.devoluciones.length,
+          ...mapVisitToFallbackRow(visit, visitIndex),
+          isGroup: devs.length > 1,
+          devCount: devs.length,
           children:
-            visit.devoluciones.length > 0
-              ? visit.devoluciones.map((d) => mapDevolucionToRow(visit, d))
-              : undefined
+            devs.length > 0 ? devs.map((d, i) => mapDevolucionToRow(visit, d, i)) : undefined
         };
       }),
     [visits]
@@ -248,6 +261,14 @@ export function DevolucionesTab() {
           columns={returnsColumns}
           dataSource={filtered}
           loading={isLoading}
+          // `indent > 0` = fila hija desplegada de una visita con 2+ devoluciones:
+          // van sobre gris claro y se separan entre sí con una línea blanca. El
+          // `!` es necesario para ganarle a las reglas de AntD sobre `td`.
+          rowClassName={(_record, _index, indent) =>
+            indent > 0
+              ? "[&>td]:!bg-cashport-gray-lighter [&:hover>td]:!bg-[#F0F0F0] [&>td]:!border-b-white"
+              : ""
+          }
           rowSelection={{
             selectedRowKeys,
             onChange: setSelectedRowKeys
