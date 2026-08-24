@@ -2,7 +2,24 @@ import config from "@/config";
 import { API } from "@/utils/api/api";
 
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IClaim, ICreateClaimPayload, IUpdateClaimPayload } from "@/types/claims/IClaims";
+import {
+  IClaim,
+  IClaimStatus,
+  ICreateClaimPayload,
+  IUpdateClaimPayload
+} from "@/types/claims/IClaims";
+
+export const getClaimStatuses = async (): Promise<GenericResponse<IClaimStatus[]>> => {
+  try {
+    const response: GenericResponse<IClaimStatus[]> = await API.get(
+      `${config.API_HOST}/claims/statuses`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching claim statuses:", error);
+    throw error;
+  }
+};
 
 export const createClaim = async (
   payload: ICreateClaimPayload

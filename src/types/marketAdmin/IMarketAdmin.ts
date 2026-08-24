@@ -166,6 +166,22 @@ export interface IUseMarketAdminProductsParams {
   page?: number;
   limit?: number;
   search?: string;
+  lineId?: number;
+  categoryId?: number;
+  status?: 0 | 1;
+}
+
+// GET /product/lines — opciones del filtro de Línea
+export interface IMarketAdminProductLine {
+  id: number;
+  description: string;
+}
+
+// GET /product/categories — opciones del filtro de Categoría
+export interface IMarketAdminProductCategory {
+  id: number;
+  description: string;
+  line_id: number;
 }
 
 export interface IMarketAdminProduct {

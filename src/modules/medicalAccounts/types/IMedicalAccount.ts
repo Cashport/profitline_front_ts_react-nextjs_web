@@ -1,9 +1,17 @@
 export type MedicalAccountStatusCode =
+  | "CARGUE"
+  | "NOVEDAD"
   | "PENDIENTE_AUDITORIA"
   | "AUDITADO"
   | "FACTURADO"
-  | "RADICADO"
-  | "NOVEDAD";
+  | "RADICADO";
+
+// Shape returned by GET /medical-accounts/statuses (backend-driven status catalog).
+export interface MedicalAccountStatus {
+  id: number;
+  code: string;
+  name: string;
+}
 
 // Retained for the (currently disabled) detail edit mode — see the TODO in
 // MedicalAccountDetailView. The API response has no `regimen`, so it lives here.
@@ -18,12 +26,14 @@ export interface IMedicalAccountEditForm {
   regimen: MedicalAccountRegimen | "";
   tipoServicio: string;
   fechaServicio: string;
+  eps: string;
 }
 
 // Shape returned by GET /medical-accounts (backend list contract, consumed directly — no remap).
 export interface IMedicalAccountListItem {
   id: number;
   project_id?: number;
+  order_number?: string | null;
   patient_name: string | null;
   document_number: string | null;
   service_type: string | null;

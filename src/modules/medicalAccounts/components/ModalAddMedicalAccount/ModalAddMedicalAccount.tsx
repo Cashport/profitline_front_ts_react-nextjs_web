@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flex, Modal, Typography } from "antd";
+import { Flex, Input, Modal, Typography } from "antd";
 import { FileText, X } from "lucide-react";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -27,6 +27,7 @@ export function ModalAddMedicalAccount({
   onSuccess
 }: ModalAddMedicalAccountProps) {
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +39,7 @@ export function ModalAddMedicalAccount({
   useEffect(() => {
     if (!isOpen) {
       setSelectedServiceType(null);
+      setOrderNumber("");
       setSelectedFile(null);
       setError(null);
     }
@@ -54,7 +56,7 @@ export function ModalAddMedicalAccount({
   };
 
   const handleOk = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !orderNumber.trim()) return;
     if (!projectId) {
       showMessage("error", "Selecciona un proyecto antes de cargar la cuenta.");
       return;
@@ -62,7 +64,12 @@ export function ModalAddMedicalAccount({
 
     setIsLoading(true);
     try {
-      await uploadMedicalAccount(selectedFile, projectId);
+      await uploadMedicalAccount(
+        selectedFile,
+        projectId,
+        orderNumber.trim(),
+        selectedServiceType ?? undefined
+      );
       showMessage("success", "Cuenta médica cargada y procesada correctamente.");
       onSuccess?.();
       onClose();
@@ -87,7 +94,7 @@ export function ModalAddMedicalAccount({
         <FooterButtons
           titleConfirm="Cargar cuenta médica"
           showLeftButton={false}
-          isConfirmDisabled={!selectedFile || !selectedServiceType}
+          isConfirmDisabled={!selectedFile || !selectedServiceType || !orderNumber.trim()}
           isConfirmLoading={isLoading}
           onClose={onClose}
           handleOk={handleOk}
@@ -99,6 +106,18 @@ export function ModalAddMedicalAccount({
         <p className="-mt-2 text-sm text-gray-500">
           Selecciona el tipo de servicio y adjunta el PDF de la cuenta.
         </p>
+
+        {/* Número de pedido */}
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Número de pedido <span className="text-red-500">*</span>
+          </p>
+          <Input
+            placeholder="Ej: PED-001"
+            value={orderNumber}
+            onChange={(e) => setOrderNumber(e.target.value)}
+          />
+        </div>
 
         {/* Tipo de servicio */}
         <div>

@@ -8,7 +8,10 @@ import { IMarketAdminProduct, IUseMarketAdminProductsParams } from "@/types/mark
 export const useMarketAdminProducts = ({
   page = 1,
   limit = 10,
-  search
+  search,
+  lineId,
+  categoryId,
+  status
 }: IUseMarketAdminProductsParams = {}) => {
   const { ID } = useAppStore((state) => state.selectedProject);
 
@@ -18,11 +21,22 @@ export const useMarketAdminProducts = ({
   if (search) {
     queryParams.push(`search=${encodeURIComponent(search.trim())}`);
   }
+  if (lineId !== undefined) {
+    queryParams.push(`line_id=${lineId}`);
+  }
+  if (categoryId !== undefined) {
+    queryParams.push(`category_id=${categoryId}`);
+  }
+  // `status` puede ser 0 (inactivos), por eso la guarda es contra undefined
+  if (status !== undefined) {
+    queryParams.push(`status=${status}`);
+  }
   const queryString = `?${queryParams.join("&")}`;
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponsePage<IMarketAdminProduct[]>>(
     ID ? `/product${queryString}` : null,
-    fetcher
+    fetcher,
+    { keepPreviousData: true }
   );
 
   return {

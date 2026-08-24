@@ -150,9 +150,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     <div className="min-h-screen">
       <h1 className="text-2xl font-bold text-[#141414] mb-5">{usuario.name}</h1>
 
-      <div className="bg-white rounded-2xl border border-[#EEEEEE] overflow-hidden">
+      <div className="bg-white rounded-lg overflow-hidden p-8 flex flex-col gap-8">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EEEEEE]">
+        <div className="flex items-center justify-between">
           <Link
             href="/market-admin/usuarios"
             className="flex items-center gap-1.5 text-sm text-[#666666] hover:text-[#141414] transition-colors"
@@ -167,15 +167,15 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Información general + Asignaciones */}
-        <div className="grid grid-cols-2 divide-x divide-[#EEEEEE]">
-          <div className="px-6 py-5 flex flex-col gap-5">
+        <div className="grid grid-cols-2 gap-8">
+          <div className="flex flex-col gap-5">
             <p className="text-sm font-bold text-[#141414]">Información general</p>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Email" value={usuario.email} />
               <Field label="Estado" value={usuario.is_active === 1 ? "Activo" : "Inactivo"} />
             </div>
           </div>
-          <div className="px-6 py-5 flex flex-col gap-5">
+          <div className="flex flex-col gap-5">
             <p className="text-sm font-bold text-[#141414]">Asignaciones</p>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Clientes asignados" value={String(asignados.length)} />
@@ -185,7 +185,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-0 px-6 border-t border-[#F0F0F0]">
+        <div className="flex items-center gap-0 border-t border-[#F0F0F0]">
           {TABS.map(({ id: tid, label, icon: Icon }) => (
             <button
               key={tid}
@@ -203,7 +203,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         </div>
 
         {/* Tab content */}
-        <div className="p-6">
+        <div>
           {activeTab === "clientes" && (
             <ClientesTab
               clientes={asignados}

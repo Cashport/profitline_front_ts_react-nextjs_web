@@ -71,6 +71,8 @@ export interface ReturnRow {
   monto: number;
   estado: EstadoDevolucion;
   pdfUrl?: string;
+  haveApprove: boolean;
+  idDevolucion?: string;
   calculatedStatus?: ICalculatedStatus;
   // Reference to the original API devolucion so the actions column can
   // navigate to the approval detail (`IdDevolucion` doubles as the approval
@@ -239,10 +241,13 @@ export interface IProfit360ApprovalResumen {
   causales: string | null;
   documentos: IProfit360Documento[];
   reglaDevoluciones: IProfit360ReglaDevoluciones;
+  superaLimitePermitido: number; // 0 = no, 1 = yes
+  isLogisticAdmin: boolean;
 }
 
 // Single devolución (return) attached to a visit in the visits endpoint.
 export interface IProfit360VisitDevolucion {
+  Id: string;
   IdDevolucion: string;
   IdContacto: string;
   Nombre: string;
@@ -303,6 +308,29 @@ export interface IProfit360VisitDevolucion {
   ObservacionAprobacion: string;
   IdEstadoAprobacion: string;
   FechaRegistroAprobacion: string;
+  IdAprobacion: string | null;
+  /**
+   * Estados / fases por las que pasó la devolución (`DevolucionPaso` join
+   * `DevolucionFase`). Se rellenan en `VisitsService.fetchDevolucionesForVisits`
+   * haciendo match por `Id` contra el resultado de `getDevolucionesFase`.
+   */
+  fases?: DevolucionesEstados[];
+}
+
+export interface DevolucionesEstados {
+  Id: string;
+  IdPasoDestino: number;
+  FechaIngreso: Date;
+  FechaSalida: Date;
+  DuracionDias: number;
+  Codigo: TipoDevolucionCodigo;
+}
+
+export enum TipoDevolucionCodigo {
+  F1_LOGISTICA = "F1_LOGISTICA",
+  F2_SOLISTICA = "F2_SOLISTICA",
+  F3_SUPPLA = "F3_SUPPLA",
+  F4_NOTA_CREDITO = "F4_NOTA_CREDITO"
 }
 
 // Visit returned by GET /integration/profit360/visits?page=&fromDate=&toDate=&limit=

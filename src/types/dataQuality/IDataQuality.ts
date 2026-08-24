@@ -375,6 +375,9 @@ export interface IAlert {
   status_color: string;
   id_archives_client_data: number;
   file_name: string | null;
+  historical_avg_units?: number;
+  reported_units?: number;
+  variation_percent?: number;
 }
 
 export interface IGetAlerts {

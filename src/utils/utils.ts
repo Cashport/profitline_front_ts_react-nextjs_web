@@ -349,6 +349,12 @@ export const formatDateDMY = (dateString: string): string => {
   return date.utc().format("DD/MM/YYYY");
 };
 
+// UTC to stay consistent with formatDateDMY, so the hour always belongs to the date shown with it.
+export const formatTimeHM = (dateString: string): string => {
+  const date = dayjs(dateString);
+  return date.utc().format("HH:mm");
+};
+
 export const checkUserViewPermissions = (
   selectedProject: ISelectedProject | undefined,
   view?: string
