@@ -10,7 +10,7 @@ export const buildOrdersQueryParams = (params: {
     queryParams.push(`sellers=${params.sellers.join(",")}`);
   }
 
-  if (params.status_id) {
+  if (params.status_id !== undefined && params.status_id !== null) {
     queryParams.push(`status_id=${params.status_id}`);
   }
 
