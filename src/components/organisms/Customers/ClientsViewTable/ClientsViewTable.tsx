@@ -283,7 +283,8 @@ export const ClientsViewTable = () => {
           (client, index, self) => self.findIndex((other) => other.id === client.id) === index
         ) || []
     );
-    setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
+    if (data?.pages[0]?.data?.pagination?.page === 1)
+      setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
     setNoResults(data?.pages[0]?.message === "no rows");
   }, [data]);
 
