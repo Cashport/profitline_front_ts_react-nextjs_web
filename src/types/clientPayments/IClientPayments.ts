@@ -8,6 +8,7 @@ export interface IClientPayment {
   id_client: string;
   payment_date: string; // ISO Date string
   created_at: string; // ISO Date string
+  identification_date: string | null; // ISO Date string
   currency: string;
   initial_value: number;
   current_value: number;

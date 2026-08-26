@@ -96,10 +96,11 @@ const PaymentsTable = ({
     },
     {
       title: "Identificación",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (text) => <Text className="cell">{formatDate(text)}</Text>,
-      sorter: (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
+      dataIndex: "identification_date",
+      key: "identification_date",
+      render: (text) => <Text className="cell">{text ? formatDate(text) : "-"}</Text>,
+      sorter: (a, b) =>
+        Date.parse(a.identification_date || "") - Date.parse(b.identification_date || ""),
       showSorterTooltip: false
     },
     {
