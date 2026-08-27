@@ -5,7 +5,10 @@ import useSWR from "swr";
 import { Plus, Gift, ArrowLeft, Save } from "lucide-react";
 import { useAppStore } from "@/lib/store/store";
 import { getProductsByProject } from "@/services/products/products";
-import { createBonification } from "@/services/marketAdmin/marketAdmin";
+import {
+  createBonification,
+  getProjectBusinessUnits
+} from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IPromocion } from "@/types/marketAdmin/IMarketAdmin";
 import { buildPromotionPayload } from "./buildPromotionPayload";
@@ -23,6 +26,12 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
     getProductsByProject(ID)
   );
   const products = productsResponse?.data ?? [];
+
+  const { data: businessUnitsResponse } = useSWR(
+    ID ? ["ma-business-units", ID] : null,
+    () => getProjectBusinessUnits(ID)
+  );
+  const businessUnits = businessUnitsResponse?.data ?? [];
 
   const [promociones, setPromociones] = useState<IPromocion[]>([]);
   const [saving, setSaving] = useState(false);
@@ -125,6 +134,7 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
                   key={promo.id}
                   promo={promo}
                   products={products}
+                  businessUnits={businessUnits}
                   onChange={(p) => updatePromocion(promo.id, p)}
                   onDelete={() => deletePromocion(promo.id)}
                 />

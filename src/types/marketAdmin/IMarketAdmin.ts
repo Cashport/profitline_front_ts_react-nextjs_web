@@ -62,11 +62,21 @@ export interface IPromocion {
   fechaInicio?: string; // YYYY-MM-DD
   fechaFin?: string; // YYYY-MM-DD
   accumulable: number;
-  // Solo combinación
+  // Topes de uso. Aplican a AMOUNT y SKU. undefined / 0 = sin límite.
   maxUsagePerOrder?: number;
   maxUsagePerClient?: number;
   maxUsagePerClientPerMonth?: number;
   maxGlobalUsage?: number;
+  // Unidad de negocio a la que aplica la promoción.
+  // undefined = todas las unidades del proyecto (sin restricción).
+  businessUnit?: string;
+  // Promoción "flex": el cliente recibe el regalo automáticamente,
+  // sin tener que elegir entre opciones A/B/C.
+  isFlex?: boolean;
+  // Si true, se toma SOLO el primer rango elegible aunque supere el techo.
+  takeFirstEligibleRangeDiscount?: boolean;
+  // Si true, la promoción se acumula con precios negociados del cliente.
+  isPromotionCompatibleWithAllNegotiations?: boolean;
   niveles: INivel[];
 }
 
@@ -113,6 +123,14 @@ export interface ICreatePromotionBody {
   max_usage_per_client?: number;
   max_usage_per_client_per_month?: number;
   max_global_usage?: number;
+  // Unidad de negocio a la que aplica la promoción. Omitir/empty = todas.
+  business_unit?: string;
+  // true → el cliente recibe el regalo automáticamente sin elegir opción.
+  is_flex?: number; // 0 | 1
+  // true → se aplica SOLO el primer rango elegible (incluso si supera el techo).
+  take_first_eligible_range_discount?: number;
+  // true → la promoción se acumula con precios negociados del cliente.
+  is_promotion_compatible_with_all_negotiations?: number;
   ranges: IPromotionRange[];
 }
 
