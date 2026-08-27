@@ -13,7 +13,7 @@ import { ApiError } from "@/utils/api/api";
 import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 
 export default function useCreateDiscountView({ params }: Props) {
@@ -22,7 +22,10 @@ export default function useCreateDiscountView({ params }: Props) {
   const [selectedType, setSelectedType] = useState<number>(1);
   const { ID } = useAppStore((project) => project.selectedProject);
   const router = useRouter();
-  const basePath = useDiscountsBasePath();
+  // The page knows which shell it belongs to; the pathname hook is only a fallback.
+  const fallbackBasePath = useDiscountsBasePath();
+  const basePath = params?.basePath ?? fallbackBasePath;
+  const listPath = params?.listPath ?? basePath;
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<FileObject[]>([]);
   const [statusForm, setStatusForm] = useState<"create" | "edit" | "review">(
@@ -65,7 +68,7 @@ export default function useCreateDiscountView({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push(basePath);
+      router.push(listPath);
     }
     return defaultDiscount;
   };
@@ -73,7 +76,7 @@ export default function useCreateDiscountView({ params }: Props) {
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
       // if id is not a number and it is a string then the path is incorrect
-      router.push(basePath);
+      router.push(listPath);
     }
   }, [params?.id]);
 
@@ -161,6 +164,7 @@ export default function useCreateDiscountView({ params }: Props) {
 
   return {
     discountId,
+    listPath,
     selectedType,
     handleClick,
     form,

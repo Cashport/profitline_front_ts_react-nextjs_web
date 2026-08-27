@@ -13,10 +13,9 @@ import AddDiscountModal from "@/components/molecules/modals/AddDiscountModal/Add
 import { useMemo, useState } from "react";
 import { Discount } from "@/types/discount/DiscountPackage";
 import GroupClientsPackage from "./components/GroupClientsPackage";
-import { useDiscountsBasePath } from "../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 export type TypeDiscount = "principal" | "additional";
 const { Title, Text } = Typography;
@@ -48,10 +47,10 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     isFormDisabled,
     form,
     clients,
-    isLoadingClients
+    isLoadingClients,
+    listPath
   } = useCreateDiscountPackage({ params });
 
-  const basePath = useDiscountsBasePath();
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
 
   const handleConfirmModal = (id: number) => {
@@ -266,7 +265,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           </Flex>
         </Flex>
         <Flex gap={20} justify="space-between">
-          <Link href={basePath} passHref legacyBehavior>
+          <Link href={listPath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}

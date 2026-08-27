@@ -7,9 +7,23 @@ import CrearNuevoModal from "@/modules/marketAdmin/components/market-admin-bonus
 import DiscountPackagesTab from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/DiscountPackagesTab";
 import DiscountRulesTab from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/DiscountRulesTab";
 import BonificadosTab from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/BonificadosTab";
+import {
+  MARKET_ADMIN_DISCOUNTS_TABS,
+  MarketAdminDiscountsTab
+} from "@/components/organisms/discounts/constants/routes";
 
-export default function MarketAdminBonusAndDiscounts() {
-  const [activeTab, setActiveTab] = useState("paquetes");
+const isKnownTab = (tab?: string): tab is MarketAdminDiscountsTab =>
+  Object.values(MARKET_ADMIN_DISCOUNTS_TABS).some((key) => key === tab);
+
+interface Props {
+  // The detail views navigate back here with ?tab=, so the list opens on the right tab.
+  initialTab?: string;
+}
+
+export default function MarketAdminBonusAndDiscounts({ initialTab }: Props) {
+  const [activeTab, setActiveTab] = useState<string>(
+    isKnownTab(initialTab) ? initialTab : MARKET_ADMIN_DISCOUNTS_TABS.packages
+  );
   const [crearOpen, setCrearOpen] = useState(false);
   const [showPromotions, setShowPromotions] = useState(false);
 
@@ -17,17 +31,17 @@ export default function MarketAdminBonusAndDiscounts() {
 
   const tabs = [
     {
-      key: "paquetes",
+      key: MARKET_ADMIN_DISCOUNTS_TABS.packages,
       label: "Paquete de descuentos",
       children: <DiscountPackagesTab onCrearNuevo={openCrearNuevo} />
     },
     {
-      key: "reglas",
+      key: MARKET_ADMIN_DISCOUNTS_TABS.rules,
       label: "Reglas de descuentos",
       children: <DiscountRulesTab onCrearNuevo={openCrearNuevo} />
     },
     {
-      key: "bonificados",
+      key: MARKET_ADMIN_DISCOUNTS_TABS.bonuses,
       label: "Bonificados",
       children: <BonificadosTab onCrearNuevo={openCrearNuevo} />
     }
@@ -38,7 +52,7 @@ export default function MarketAdminBonusAndDiscounts() {
       <MarketAdminPromotions
         onBack={() => setShowPromotions(false)}
         onSaved={() => {
-          setActiveTab("bonificados");
+          setActiveTab(MARKET_ADMIN_DISCOUNTS_TABS.bonuses);
           setShowPromotions(false);
         }}
       />

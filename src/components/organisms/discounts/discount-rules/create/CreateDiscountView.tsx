@@ -7,14 +7,13 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import useCreateDiscountView from "./hooks/useCreateDiscountView";
 import AnnualDiscountDefinition from "./components/annualDiscountDefinition/AnnualDiscountDefinition";
 import discountCategories from "../../constants/discountTypes";
-import { useDiscountsBasePath } from "../../hooks/useDiscountsBasePath";
 import Link from "next/link";
 
 const commonDiscount = [discountCategories.byOrder.id, discountCategories.byClient.id];
 const annualDiscount = [discountCategories.annual.id];
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 
 export function CreateDiscountView({ params }: Props) {
@@ -29,10 +28,9 @@ export function CreateDiscountView({ params }: Props) {
     setFiles,
     handleChangeStatusForm,
     contextHolder,
-    handleUpdateContract
+    handleUpdateContract,
+    listPath
   } = useCreateDiscountView({ params });
-
-  const basePath = useDiscountsBasePath();
 
   return (
     <>
@@ -65,7 +63,7 @@ export function CreateDiscountView({ params }: Props) {
           />
         )}
         <Flex gap={20} justify="space-between">
-          <Link href={basePath} passHref legacyBehavior>
+          <Link href={listPath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}

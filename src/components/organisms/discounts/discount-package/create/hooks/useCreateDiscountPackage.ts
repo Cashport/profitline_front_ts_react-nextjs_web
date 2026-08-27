@@ -14,7 +14,7 @@ import { useClientsGroups } from "@/hooks/useClientsGroups";
 import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 export interface DiscountListData {
   status: number;
@@ -27,7 +27,10 @@ export default function useCreateDiscountPackage({ params }: Props) {
   const { ID: projectId } = useAppStore((project) => project.selectedProject);
 
   const router = useRouter();
-  const basePath = useDiscountsBasePath();
+  // The page knows which shell it belongs to; the pathname hook is only a fallback.
+  const fallbackBasePath = useDiscountsBasePath();
+  const basePath = params?.basePath ?? fallbackBasePath;
+  const listPath = params?.listPath ?? basePath;
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -61,7 +64,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push(basePath);
+      router.push(listPath);
     }
     return defaultDiscount;
   };
@@ -159,7 +162,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
 
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
-      router.push(basePath);
+      router.push(listPath);
     }
   }, [params?.id]);
 
@@ -194,6 +197,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
 
   return {
     form,
+    listPath,
     handleExecCallback,
     loading,
     statusForm,
