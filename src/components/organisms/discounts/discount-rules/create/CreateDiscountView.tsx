@@ -13,7 +13,7 @@ const commonDiscount = [discountCategories.byOrder.id, discountCategories.byClie
 const annualDiscount = [discountCategories.annual.id];
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 
 export function CreateDiscountView({ params }: Props) {
@@ -28,7 +28,8 @@ export function CreateDiscountView({ params }: Props) {
     setFiles,
     handleChangeStatusForm,
     contextHolder,
-    handleUpdateContract
+    handleUpdateContract,
+    listPath
   } = useCreateDiscountView({ params });
 
   return (
@@ -62,7 +63,7 @@ export function CreateDiscountView({ params }: Props) {
           />
         )}
         <Flex gap={20} justify="space-between">
-          <Link href="/descuentos" passHref legacyBehavior>
+          <Link href={listPath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}
