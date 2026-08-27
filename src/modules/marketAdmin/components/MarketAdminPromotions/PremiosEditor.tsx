@@ -3,6 +3,7 @@
 import { Plus, Trash2, Gift } from "lucide-react";
 import { Product } from "@/types/products/products";
 import { INivel } from "@/types/marketAdmin/IMarketAdmin";
+import ProductSelect from "./ProductSelect";
 
 const getLetra = (index: number): string => String.fromCharCode(65 + index);
 
@@ -16,6 +17,8 @@ export default function PremiosEditor({
   onChange: (n: INivel) => void;
 }) {
   const defaultProductId = products[0]?.id ?? 0;
+
+  const firstAvailableId = (used: number[]) => products.find((p) => !used.includes(p.id))?.id ?? 0;
 
   const addPremio = () => {
     const ppId = `pp${Date.now()}`;
@@ -106,7 +109,13 @@ export default function PremiosEditor({
                 g.id === gId
                   ? {
                       ...g,
-                      productos: [...g.productos, { id: ppId, productId: defaultProductId }],
+                      productos: [
+                        ...g.productos,
+                        {
+                          id: ppId,
+                          productId: firstAvailableId(g.productos.map((pp) => pp.productId))
+                        }
+                      ],
                       cantidadesFijas:
                         g.modo === "fijo"
                           ? { ...(g.cantidadesFijas ?? {}), [ppId]: 1 }
@@ -270,19 +279,17 @@ export default function PremiosEditor({
                   <div className="p-2 flex flex-col gap-1.5">
                     {g.productos.map((pp) => (
                       <div key={pp.id} className="flex items-center gap-2">
-                        <select
+                        <ProductSelect
+                          products={products}
                           value={pp.productId}
-                          onChange={(e) =>
-                            updateProductoInGrupo(pr.id, g.id, pp.id, Number(e.target.value))
+                          excludedIds={g.productos
+                            .filter((x) => x.id !== pp.id)
+                            .map((x) => x.productId)}
+                          onChange={(productId) =>
+                            updateProductoInGrupo(pr.id, g.id, pp.id, productId)
                           }
-                          className="flex-1 px-2 py-1.5 text-sm bg-white border border-[#EEEEEE] rounded outline-none focus:border-[#141414] transition-colors text-[#141414]"
-                        >
-                          {products.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.description}
-                            </option>
-                          ))}
-                        </select>
+                          className="[&_.ant-select-selector]:!bg-white [&_.ant-select-selector]:!border-[#EEEEEE]"
+                        />
                         {g.modo === "fijo" && (
                           <div className="flex items-center border border-[#EEEEEE] rounded overflow-hidden w-[72px] flex-shrink-0">
                             <span className="px-1.5 py-1 text-[10px] text-[#999999] bg-[#F7F7F7] border-r border-[#EEEEEE]">
@@ -316,7 +323,8 @@ export default function PremiosEditor({
                     ))}
                     <button
                       onClick={() => addProductoToGrupo(pr.id, g.id)}
-                      className="flex items-center gap-1 text-[10px] text-[#6AB000] hover:underline w-fit"
+                      disabled={g.productos.length >= products.length}
+                      className="flex items-center gap-1 text-[10px] text-[#6AB000] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                     >
                       <Plus size={9} /> Agregar producto
                     </button>

@@ -206,7 +206,13 @@ export function DevolucionesTab() {
       visits.map<ReturnRow>((visit, visitIndex) => {
         const devs = visit.devoluciones ?? [];
 
-        if (devs.length === 1) return mapDevolucionToRow(visit, devs[0], 0);
+        // Con una sola devolución la fila ES la devolución, pero el Estado debe
+        // seguir siendo el de la visita, igual que en las filas grupo.
+        if (devs.length === 1)
+          return {
+            ...mapDevolucionToRow(visit, devs[0], 0),
+            calculatedStatus: visit.calculatedStatus
+          };
 
         return {
           ...mapVisitToFallbackRow(visit, visitIndex),

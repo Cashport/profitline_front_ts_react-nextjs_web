@@ -3,6 +3,7 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Product } from "@/types/products/products";
 import { INivel, IProductoCondicion, TipoCondicion } from "@/types/marketAdmin/IMarketAdmin";
+import ProductSelect from "./ProductSelect";
 
 function formatNumber(n: number): string {
   return n.toLocaleString("es-CO", { maximumFractionDigits: 0 });
@@ -23,14 +24,21 @@ export default function CondicionObjetivo({
   products: Product[];
   onChange: (n: INivel) => void;
 }) {
-  const defaultProductId = products[0]?.id ?? 0;
+  const firstAvailableId = (used: number[]) => products.find((p) => !used.includes(p.id))?.id ?? 0;
+
+  const productosCondicion = nivel.productosCondicion ?? [];
+  const sinProductosDisponibles = productosCondicion.length >= products.length;
 
   const addProductoCondicion = () => {
     onChange({
       ...nivel,
       productosCondicion: [
-        ...(nivel.productosCondicion ?? []),
-        { id: `pc${Date.now()}`, productId: defaultProductId, cantidad: 1 }
+        ...productosCondicion,
+        {
+          id: `pc${Date.now()}`,
+          productId: firstAvailableId(productosCondicion.map((pc) => pc.productId)),
+          cantidad: 1
+        }
       ]
     });
   };
@@ -85,7 +93,13 @@ export default function CondicionObjetivo({
         pk.id === pakId
           ? {
               ...pk,
-              productos: [...pk.productos, { id: `pkp${Date.now()}`, productId: defaultProductId }]
+              productos: [
+                ...pk.productos,
+                {
+                  id: `pkp${Date.now()}`,
+                  productId: firstAvailableId(pk.productos.map((p) => p.productId))
+                }
+              ]
             }
           : pk
       )
@@ -166,26 +180,22 @@ export default function CondicionObjetivo({
       ) : (
         <div className="flex flex-col gap-3">
           {/* Productos individuales */}
-          {(nivel.productosCondicion ?? []).length > 0 && (
+          {productosCondicion.length > 0 && (
             <div className="flex flex-col gap-2">
               <p className="text-[11px] text-[#999999]">Productos individuales</p>
-              {(nivel.productosCondicion ?? []).map((pc) => (
+              {productosCondicion.map((pc) => (
                 <div key={pc.id} className="flex items-center gap-2">
-                  <select
+                  <ProductSelect
+                    products={products}
                     value={pc.productId}
-                    onChange={(e) =>
-                      updateProductoCondicion(pc.id, "productId", Number(e.target.value))
-                    }
-                    className="flex-1 px-3 py-2 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
-                  >
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.description}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex items-center border border-[#DDDDDD] rounded-lg overflow-hidden w-20 flex-shrink-0">
-                    <span className="px-2 py-2 text-xs text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
+                    excludedIds={productosCondicion
+                      .filter((x) => x.id !== pc.id)
+                      .map((x) => x.productId)}
+                    onChange={(productId) => updateProductoCondicion(pc.id, "productId", productId)}
+                    className="[&_.ant-select-selector]:!bg-[#F7F7F7]"
+                  />
+                  <div className="flex items-stretch h-8 border border-[#DDDDDD] rounded-lg overflow-hidden w-20 flex-shrink-0">
+                    <span className="flex items-center px-2 text-xs text-[#999999] bg-[#F7F7F7] border-r border-[#DDDDDD]">
                       x
                     </span>
                     <input
@@ -195,7 +205,7 @@ export default function CondicionObjetivo({
                       onChange={(e) =>
                         updateProductoCondicion(pc.id, "cantidad", parseInt(e.target.value) || 1)
                       }
-                      className="w-10 px-2 py-2 text-sm text-[#141414] outline-none bg-white text-center"
+                      className="w-10 px-2 text-sm text-[#141414] outline-none bg-white text-center"
                     />
                   </div>
                   <button
@@ -268,19 +278,18 @@ export default function CondicionObjetivo({
                     </p>
                     {pak.productos.map((pp) => (
                       <div key={pp.id} className="flex items-center gap-2">
-                        <select
+                        <ProductSelect
+                          products={products}
                           value={pp.productId}
-                          onChange={(e) =>
-                            updateProductoInPaquete(pak.id, pp.id, Number(e.target.value))
+                          size="small"
+                          excludedIds={pak.productos
+                            .filter((x) => x.id !== pp.id)
+                            .map((x) => x.productId)}
+                          onChange={(productId) =>
+                            updateProductoInPaquete(pak.id, pp.id, productId)
                           }
-                          className="flex-1 px-2.5 py-1.5 text-xs bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
-                        >
-                          {products.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.description}
-                            </option>
-                          ))}
-                        </select>
+                          className="[&_.ant-select-selector]:!bg-[#F7F7F7] [&_.ant-select-selector]:!text-xs"
+                        />
                         <button
                           onClick={() => removeProductoFromPaquete(pak.id, pp.id)}
                           className="w-6 h-6 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
@@ -294,7 +303,8 @@ export default function CondicionObjetivo({
 
                 <button
                   onClick={() => addProductoToPaquete(pak.id)}
-                  className="flex items-center gap-1 text-[11px] text-[#0067B1] hover:underline w-fit"
+                  disabled={pak.productos.length >= products.length}
+                  className="flex items-center gap-1 text-[11px] text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                 >
                   <Plus size={10} /> Agregar producto elegible
                 </button>
@@ -306,7 +316,8 @@ export default function CondicionObjetivo({
           <div className="flex items-center gap-4 pt-1">
             <button
               onClick={addProductoCondicion}
-              className="flex items-center gap-1.5 text-xs text-[#0067B1] hover:underline w-fit"
+              disabled={sinProductosDisponibles}
+              className="flex items-center gap-1.5 text-xs text-[#0067B1] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
             >
               <Plus size={11} /> Agregar producto
             </button>

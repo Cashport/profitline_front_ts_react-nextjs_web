@@ -15,7 +15,7 @@ import { Discount } from "@/types/discount/DiscountPackage";
 import GroupClientsPackage from "./components/GroupClientsPackage";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 export type TypeDiscount = "principal" | "additional";
 const { Title, Text } = Typography;
@@ -47,7 +47,8 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     isFormDisabled,
     form,
     clients,
-    isLoadingClients
+    isLoadingClients,
+    listPath
   } = useCreateDiscountPackage({ params });
 
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
@@ -83,7 +84,13 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
         primaryDiscountsFields,
         secondaryDiscountsFields
       ),
-    [typeDiscount, optionsPrimaryDiscounts, optionsSecondaryDiscounts, primaryDiscountsFields, secondaryDiscountsFields]
+    [
+      typeDiscount,
+      optionsPrimaryDiscounts,
+      optionsSecondaryDiscounts,
+      primaryDiscountsFields,
+      secondaryDiscountsFields
+    ]
   );
 
   return (
@@ -258,7 +265,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           </Flex>
         </Flex>
         <Flex gap={20} justify="space-between">
-          <Link href="/descuentos" passHref legacyBehavior>
+          <Link href={listPath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}
