@@ -13,6 +13,7 @@ import AddDiscountModal from "@/components/molecules/modals/AddDiscountModal/Add
 import { useMemo, useState } from "react";
 import { Discount } from "@/types/discount/DiscountPackage";
 import GroupClientsPackage from "./components/GroupClientsPackage";
+import { useDiscountsBasePath } from "../../hooks/useDiscountsBasePath";
 
 type Props = {
   params?: { id: string };
@@ -50,6 +51,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     isLoadingClients
   } = useCreateDiscountPackage({ params });
 
+  const basePath = useDiscountsBasePath();
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
 
   const handleConfirmModal = (id: number) => {
@@ -83,7 +85,13 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
         primaryDiscountsFields,
         secondaryDiscountsFields
       ),
-    [typeDiscount, optionsPrimaryDiscounts, optionsSecondaryDiscounts, primaryDiscountsFields, secondaryDiscountsFields]
+    [
+      typeDiscount,
+      optionsPrimaryDiscounts,
+      optionsSecondaryDiscounts,
+      primaryDiscountsFields,
+      secondaryDiscountsFields
+    ]
   );
 
   return (
@@ -258,7 +266,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           </Flex>
         </Flex>
         <Flex gap={20} justify="space-between">
-          <Link href="/descuentos" passHref legacyBehavior>
+          <Link href={basePath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}

@@ -11,6 +11,7 @@ import { createDiscountPackage, getOneDiscountPackage } from "@/services/discoun
 import { Discount } from "@/types/discount/DiscountPackage";
 import { mapGetOneToDiscountPackageSchema } from "../logic/createPackageLogic";
 import { useClientsGroups } from "@/hooks/useClientsGroups";
+import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
   params?: { id: string };
@@ -26,6 +27,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
   const { ID: projectId } = useAppStore((project) => project.selectedProject);
 
   const router = useRouter();
+  const basePath = useDiscountsBasePath();
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -59,7 +61,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push("/descuentos");
+      router.push(basePath);
     }
     return defaultDiscount;
   };
@@ -157,7 +159,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
 
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
-      router.push("/descuentos");
+      router.push(basePath);
     }
   }, [params?.id]);
 
@@ -172,7 +174,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
     try {
       const res = await createDiscountPackage({ ...e, project_id: projectId });
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/paquete/${res.id}`);
+      router.push(`${basePath}/paquete/${res.id}`);
     } catch (e: any) {
       if (e instanceof ApiError) {
         messageApi.error(e.message);

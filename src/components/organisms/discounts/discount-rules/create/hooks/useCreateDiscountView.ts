@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { mapDiscountGetOneToDiscountSchema } from "../logic/createDiscountLogic";
 import { message } from "antd";
 import { ApiError } from "@/utils/api/api";
+import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
   params?: { id: string };
@@ -21,6 +22,7 @@ export default function useCreateDiscountView({ params }: Props) {
   const [selectedType, setSelectedType] = useState<number>(1);
   const { ID } = useAppStore((project) => project.selectedProject);
   const router = useRouter();
+  const basePath = useDiscountsBasePath();
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<FileObject[]>([]);
   const [statusForm, setStatusForm] = useState<"create" | "edit" | "review">(
@@ -63,7 +65,7 @@ export default function useCreateDiscountView({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push("/descuentos");
+      router.push(basePath);
     }
     return defaultDiscount;
   };
@@ -71,7 +73,7 @@ export default function useCreateDiscountView({ params }: Props) {
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
       // if id is not a number and it is a string then the path is incorrect
-      router.push("/descuentos");
+      router.push(basePath);
     }
   }, [params?.id]);
 
@@ -111,7 +113,7 @@ export default function useCreateDiscountView({ params }: Props) {
     try {
       const res = await createDiscount({ ...e, project_id: ID }, files);
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/regla/${res.idDiscount}`);
+      router.push(`${basePath}/regla/${res.idDiscount}`);
     } catch (e: any) {
       if (e instanceof ApiError) {
         console.error(e);
