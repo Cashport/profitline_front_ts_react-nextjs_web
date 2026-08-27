@@ -11,7 +11,12 @@ import { IPromocion } from "@/types/marketAdmin/IMarketAdmin";
 import { buildPromotionPayload } from "./buildPromotionPayload";
 import PromocionCard from "./PromocionCard";
 
-export default function MarketAdminPromotions({ onBack }: { onBack: () => void }) {
+interface Props {
+  onBack: () => void;
+  onSaved?: () => void;
+}
+
+export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { data: productsResponse } = useSWR(ID ? ["ma-products", ID] : null, () =>
@@ -65,6 +70,7 @@ export default function MarketAdminPromotions({ onBack }: { onBack: () => void }
       setSaving(true);
       await Promise.all(promociones.map((p) => createBonification(buildPromotionPayload(p))));
       showMessage("success", "Promociones guardadas exitosamente.");
+      onSaved?.();
     } catch (error) {
       showMessage("error", "Ocurrió un error al guardar las promociones.");
     } finally {

@@ -34,7 +34,15 @@ export default function MarketAdminBonusAndDiscounts() {
   ];
 
   if (showPromotions) {
-    return <MarketAdminPromotions onBack={() => setShowPromotions(false)} />;
+    return (
+      <MarketAdminPromotions
+        onBack={() => setShowPromotions(false)}
+        onSaved={() => {
+          setActiveTab("bonificados");
+          setShowPromotions(false);
+        }}
+      />
+    );
   }
 
   return (
