@@ -35,9 +35,8 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { data: rulesData, isLoading } = useSWR(
-    ID ? { id: ID, key: "discount-rules" } : null,
-    ({ id }) => getAllDiscounts({ projectId: id })
+  const { data: rulesData, isLoading } = useSWR(ID ? ["discount-rules", ID] : null, () =>
+    getAllDiscounts({ projectId: ID })
   );
 
   const reglas = useMemo(() => rulesData?.data ?? [], [rulesData]);

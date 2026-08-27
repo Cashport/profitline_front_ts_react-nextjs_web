@@ -35,8 +35,8 @@ export default function DiscountPackagesTab({ onCrearNuevo }: DiscountPackagesTa
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { data: discountsData, isLoading } = useSWR(ID ? { id: ID } : null, ({ id }) =>
-    getAllDiscountPackages({ projectId: id })
+  const { data: discountsData, isLoading } = useSWR(ID ? ["discount-packages", ID] : null, () =>
+    getAllDiscountPackages({ projectId: ID })
   );
 
   const descuentos = useMemo(() => discountsData?.data ?? [], [discountsData]);

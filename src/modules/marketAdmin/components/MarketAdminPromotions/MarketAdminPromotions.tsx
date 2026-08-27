@@ -14,8 +14,8 @@ import PromocionCard from "./PromocionCard";
 export default function MarketAdminPromotions({ onBack }: { onBack: () => void }) {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
-  const { data: productsResponse } = useSWR(ID ? { id: ID } : null, ({ id }) =>
-    getProductsByProject(id)
+  const { data: productsResponse } = useSWR(ID ? ["ma-products", ID] : null, () =>
+    getProductsByProject(ID)
   );
   const products = productsResponse?.data ?? [];
 
