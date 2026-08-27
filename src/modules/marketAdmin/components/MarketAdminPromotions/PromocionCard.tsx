@@ -1,30 +1,121 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, ChevronDown, ChevronUp, Gift } from "lucide-react";
+import { Select } from "antd";
+import { Plus, Trash2, ChevronDown, ChevronUp, Gift, Info } from "lucide-react";
 import { Product } from "@/types/products/products";
 import { INivel, IPromocion } from "@/types/marketAdmin/IMarketAdmin";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import NivelRow from "./NivelRow";
 
 const MAX_USAGE_FIELDS = [
-  ["Máx. usos por pedido", "maxUsagePerOrder"],
-  ["Máx. usos por cliente", "maxUsagePerClient"],
-  ["Máx. usos por cliente/mes", "maxUsagePerClientPerMonth"],
-  ["Máx. usos global", "maxGlobalUsage"]
+  ["Máx. usos por pedido", "maxUsagePerOrder", "maxUsagePerOrder"],
+  ["Máx. usos por cliente", "maxUsagePerClient", "maxUsagePerClient"],
+  ["Máx. usos por cliente/mes", "maxUsagePerClientPerMonth", "maxUsagePerClientPerMonth"],
+  ["Máx. usos global", "maxGlobalUsage", "maxGlobalUsage"]
 ] as const;
+
+// ── Textos de tooltips (español, hardcoded según convención del proyecto) ──
+const TOOLTIPS = {
+  accumulable:
+    "Multiplicador del regalo. Cuando vale ≥ 2 y la promoción tiene un solo rango, el regalo se entrega hasta 'accumulable' veces según cuántas veces se cumpla la condición mínima (ej. si vale 3 y la condición mínima es 1, el cliente puede llevarse hasta 3 regalos si compra 3 unidades que cumplen el mínimo).",
+  maxUsagePerOrder:
+    "Número máximo de veces que el cliente puede aplicar esta promoción en un solo pedido. Déjalo vacío para sin límite.",
+  maxUsagePerClient:
+    "Número máximo de veces que el cliente puede usar esta promoción en total (histórico). Déjalo vacío para sin límite.",
+  maxUsagePerClientPerMonth:
+    "Máximo de redenciones por cliente en el mes en curso. Vacío o 0 = sin restricción mensual.",
+  maxGlobalUsage:
+    "Máximo de redenciones totales entre todos los clientes del proyecto. Déjalo vacío para sin límite global.",
+  businessUnit:
+    "Restringe la promoción a una sola unidad de negocio (ej. 'Institucional', 'Retail'). Si queda vacío, aplica a todas las unidades del proyecto. Solo se mostrará a clientes cuya BU en client_marketplace coincida.",
+  isFlex:
+    "Promoción 'flex': el cliente recibe el regalo automáticamente, sin tener que elegir entre las opciones A/B/C. Si está apagada, el cliente debe elegir una opción.",
+  takeFirstEligibleRangeDiscount:
+    "Si está activo, cuando el pedido cumple múltiples rangos, se aplica SOLO el primer rango elegible (incluso si supera el techo del rango). Por defecto (apagado), se aplica el mejor rango disponible.",
+  isPromotionCompatibleWithAllNegotiations:
+    "Permite que esta promoción se acumule con los precios negociados del cliente. Si está apagada, la promoción NO se aplica cuando el cliente tiene negociaciones activas."
+} as const;
+
+// Etiqueta con icono de info y tooltip Radix.
+function TooltipLabel({
+  htmlFor,
+  text,
+  tooltip
+}: {
+  htmlFor?: string;
+  text: string;
+  tooltip: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span>{text}</span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Info
+            size={12}
+            className="text-[#999999] cursor-help hover:text-[#666666] transition-colors"
+            aria-label={`Información sobre ${text}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent
+          side="right"
+          className="max-w-xs bg-[#141414] text-white text-xs leading-relaxed p-3"
+        >
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </span>
+  );
+}
+
+// Botón toggle estilo "switch" (idéntico al que ya usa `activa`).
+function Toggle({
+  value,
+  onChange,
+  label
+}: {
+  value: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      aria-label={label}
+      onClick={() => onChange(!value)}
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${
+        value ? "bg-[#141414]" : "bg-[#DDDDDD]"
+      }`}
+    >
+      <span
+        className={`inline-block w-3.5 h-3.5 bg-white rounded-full shadow transition-transform ${
+          value ? "translate-x-4" : "translate-x-0.5"
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function PromocionCard({
   promo,
   products,
+  businessUnits,
   onChange,
   onDelete
 }: {
   promo: IPromocion;
   products: Product[];
+  businessUnits: string[];
   onChange: (p: IPromocion) => void;
   onDelete: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
+  const [showBehavior, setShowBehavior] = useState(false);
+
+  const businessUnitEnabled = Boolean(promo.businessUnit);
 
   const addNivel = () => {
     const id = `n${Date.now()}`;
@@ -85,14 +176,11 @@ export default function PromocionCard({
         </div>
 
         {/* Activa toggle */}
-        <button
-          onClick={() => onChange({ ...promo, activa: !promo.activa })}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${promo.activa ? "bg-[#141414]" : "bg-[#DDDDDD]"}`}
-        >
-          <span
-            className={`inline-block w-3.5 h-3.5 bg-white rounded-full shadow transition-transform ${promo.activa ? "translate-x-4" : "translate-x-0.5"}`}
-          />
-        </button>
+        <Toggle
+          value={promo.activa}
+          onChange={(v) => onChange({ ...promo, activa: v })}
+          label="Promoción activa"
+        />
 
         <button
           onClick={onDelete}
@@ -194,7 +282,9 @@ export default function PromocionCard({
                 />
               </label>
               <label className="flex flex-col gap-1 w-28">
-                <span className="text-[11px] text-[#999999]">Acumulable</span>
+                <span className="text-[11px] text-[#999999]">
+                  <TooltipLabel text="Acumulable" tooltip={TOOLTIPS.accumulable} />
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -207,22 +297,125 @@ export default function PromocionCard({
               </label>
             </div>
 
-            {promo.tipoCondicion === "combinacion" && (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                {MAX_USAGE_FIELDS.map(([label, key]) => (
-                  <label key={key} className="flex flex-col gap-1">
-                    <span className="text-[11px] text-[#999999]">{label}</span>
-                    <input
-                      type="number"
-                      min={0}
-                      value={promo[key] ?? ""}
-                      onChange={(e) =>
-                        onChange({ ...promo, [key]: parseInt(e.target.value) || 0 })
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {MAX_USAGE_FIELDS.map(([label, key, tooltipKey]) => (
+                <label key={key} className="flex flex-col gap-1">
+                  <span className="text-[11px] text-[#999999]">
+                    <TooltipLabel text={label} tooltip={TOOLTIPS[tooltipKey]} />
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={promo[key] ?? ""}
+                    // Si el input queda vacío, persistimos undefined para que
+                    // el backend almacene NULL (= sin límite). Antes se
+                    // guardaba 0, lo que violaba la validación min: 1 del
+                    // backend para max_usage_per_order y max_global_usage.
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const next = raw === "" ? undefined : parseInt(raw, 10);
+                      onChange({ ...promo, [key]: Number.isNaN(next as number) ? undefined : next });
+                    }}
+                    placeholder="Sin límite"
+                    className="px-3 py-2 text-sm text-[#141414] bg-white border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors"
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Comportamiento (colapsable) ─────────────────────────────── */}
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => setShowBehavior((v) => !v)}
+              className="flex items-center gap-2 self-start text-xs font-medium text-[#666666] hover:text-[#141414] transition-colors"
+            >
+              {showBehavior ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              Comportamiento
+              <span className="text-[10px] text-[#AAAAAA] font-normal">
+                (configuración avanzada)
+              </span>
+            </button>
+
+            {showBehavior && (
+              <div className="flex flex-col gap-3 pl-1 border-l-2 border-[#EEEEEE]">
+                {/* Fila 1 — businessUnit (toggle + select) */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Toggle
+                    value={businessUnitEnabled}
+                    label="Restringir por unidad de negocio"
+                    onChange={(v) => {
+                      // Al desactivar, vaciamos businessUnit para que no se envíe al backend.
+                      if (!v) {
+                        onChange({ ...promo, businessUnit: undefined });
+                      } else if (!promo.businessUnit && businessUnits.length > 0) {
+                        onChange({ ...promo, businessUnit: businessUnits[0] });
                       }
-                      className="px-3 py-2 text-sm text-[#141414] bg-white border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors"
-                    />
-                  </label>
-                ))}
+                    }}
+                  />
+                  <TooltipLabel
+                    text="Unidad de negocio"
+                    tooltip={TOOLTIPS.businessUnit}
+                  />
+                  <Select
+                    disabled={!businessUnitEnabled}
+                    value={promo.businessUnit}
+                    placeholder={
+                      businessUnits.length === 0
+                        ? "Sin BUs configuradas en el proyecto"
+                        : "Selecciona una unidad de negocio"
+                    }
+                    options={businessUnits.map((bu) => ({ value: bu, label: bu }))}
+                    onChange={(value) => onChange({ ...promo, businessUnit: value })}
+                    style={{ minWidth: 220 }}
+                    size="middle"
+                    className="[&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD]"
+                  />
+                </div>
+
+                {/* Fila 2 — isFlex */}
+                <div className="flex items-center gap-3">
+                  <Toggle
+                    value={Boolean(promo.isFlex)}
+                    label="Es promoción flex"
+                    onChange={(v) => onChange({ ...promo, isFlex: v })}
+                  />
+                  <TooltipLabel text="Es promoción flex" tooltip={TOOLTIPS.isFlex} />
+                </div>
+
+                {/* Fila 3 — takeFirstEligibleRangeDiscount */}
+                <div className="flex items-center gap-3">
+                  <Toggle
+                    value={Boolean(promo.takeFirstEligibleRangeDiscount)}
+                    label="Tomar primer rango elegible"
+                    onChange={(v) =>
+                      onChange({ ...promo, takeFirstEligibleRangeDiscount: v })
+                    }
+                  />
+                  <TooltipLabel
+                    text="Tomar primer rango elegible"
+                    tooltip={TOOLTIPS.takeFirstEligibleRangeDiscount}
+                  />
+                </div>
+
+                {/* Fila 4 — isPromotionCompatibleWithAllNegotiations */}
+                <div className="flex items-center gap-3">
+                  <Toggle
+                    value={Boolean(promo.isPromotionCompatibleWithAllNegotiations)}
+                    label="Compatible con negociaciones"
+                    onChange={(v) =>
+                      onChange({
+                        ...promo,
+                        isPromotionCompatibleWithAllNegotiations: v
+                      })
+                    }
+                  />
+                  <TooltipLabel
+                    text="Compatible con negociaciones"
+                    tooltip={TOOLTIPS.isPromotionCompatibleWithAllNegotiations}
+                  />
+                </div>
               </div>
             )}
           </div>
