@@ -377,9 +377,19 @@ export interface IAlertFilterStatus {
   budget_color: string;
 }
 
+export interface IAlertCategoryItem {
+  client: string;
+  message: string;
+  error_type: string;
+}
+
 export interface IAlertFilterCategory {
+  key: string;
   name: string;
   count: number;
+  error_types: string[];
+  items: IAlertCategoryItem[];
+  remaining: number;
 }
 
 export interface IGetFiltersAlerts {
