@@ -48,12 +48,36 @@ const buildProductGroups = (nivel: INivel): IPromotionProductGroup[] => {
 };
 
 export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody => {
+  // Los topes de uso aplican a cualquier tipo de promoción (AMOUNT y SKU).
+  // Si el campo queda vacío en el formulario, persistimos undefined para
+  // que el body NO incluya la clave (axios la descarta), y el backend
+  // almacene NULL (= sin límite). Antes se enviaba 0, lo que violaba la
+  // validación min: 1 del backend para max_usage_per_order y
+  // max_global_usage.
+  const maxUsagePerOrder = promo.maxUsagePerOrder;
+  const maxUsagePerClient = promo.maxUsagePerClient;
+  const maxUsagePerClientPerMonth = promo.maxUsagePerClientPerMonth;
+  const maxGlobalUsage = promo.maxGlobalUsage;
+
   const base = {
     name: promo.nombre,
+    type: (promo.tipoCondicion === "monto" ? "AMOUNT" : "SKU") as
+      | "AMOUNT"
+      | "SKU",
     active: promo.activa ? 1 : 0,
     accumulable: promo.accumulable ?? 0,
     start_date: `${promo.fechaInicio ?? ""} 00:00:00`,
-    end_date: `${promo.fechaFin ?? ""} 23:59:59`
+    end_date: `${promo.fechaFin ?? ""} 23:59:59`,
+    // Unidad de negocio: si está vacía o es null, no se envía (null en BD =
+    // aplica a todas las unidades del proyecto).
+    business_unit: promo.businessUnit || undefined,
+    is_flex: promo.isFlex ? 1 : 0,
+    take_first_eligible_range_discount: promo.takeFirstEligibleRangeDiscount ? 1 : 0,
+    is_promotion_compatible_with_all_negotiations: promo.isPromotionCompatibleWithAllNegotiations ? 1 : 0,
+    max_usage_per_order: maxUsagePerOrder,
+    max_usage_per_client: maxUsagePerClient,
+    max_usage_per_client_per_month: maxUsagePerClientPerMonth,
+    max_global_usage: maxGlobalUsage,
   };
 
   if (promo.tipoCondicion === "monto") {
@@ -62,7 +86,7 @@ export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody =
       min_amount: nivel.montoMinimo ?? 0,
       gift_options: buildGiftOptions(nivel.premios, false)
     }));
-    return { ...base, type: "AMOUNT", ranges };
+    return { ...base, ranges };
   }
 
   // combinación → SKU
@@ -71,13 +95,5 @@ export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody =
     product_groups: buildProductGroups(nivel),
     gift_options: buildGiftOptions(nivel.premios, true)
   }));
-  return {
-    ...base,
-    type: "SKU",
-    max_usage_per_order: promo.maxUsagePerOrder ?? 0,
-    max_usage_per_client: promo.maxUsagePerClient ?? 0,
-    max_usage_per_client_per_month: promo.maxUsagePerClientPerMonth ?? 0,
-    max_global_usage: promo.maxGlobalUsage ?? 0,
-    ranges
-  };
+  return { ...base, ranges };
 };

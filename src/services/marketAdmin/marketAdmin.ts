@@ -182,3 +182,21 @@ export const removeClientFromMarketAdminUser = async (
     throw error;
   }
 };
+
+// ── Unidades de negocio ─────────────────────────────────────────────────────
+
+// GET /marketplace-admin/business-units/:project_id
+// Devuelve la lista de unidades de negocio (strings) configuradas en el
+// proyecto. Se usa para poblar el selector de business_unit al crear/editar
+// promociones.
+export const getProjectBusinessUnits = async (projectId: number) => {
+  try {
+    const response: GenericResponse<string[]> = await API.get(
+      `/marketplace-admin/business-units/${projectId}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al obtener las unidades de negocio del proyecto:", error);
+    throw error;
+  }
+};
