@@ -14,10 +14,12 @@ import UiSearchInput from "@/components/ui/search-input";
 import { Button } from "@/modules/chat/ui/button";
 
 import { AlertsTable } from "../../components/AlertsTable";
+import { AlertCategoryCards } from "../../components/alert-category-cards";
 
 import {
   IAlertFilterCountry,
   IAlertFilterClient,
+  IAlertFilterCategory,
   IGetAlerts
 } from "@/types/dataQuality/IDataQuality";
 
@@ -45,13 +47,43 @@ export default function NoveltyAlertsView() {
     countries: IAlertFilterCountry[];
     clients: IAlertFilterClient[];
     types: string[];
-  }>({ countries: [], clients: [], types: [] });
+    categories: IAlertFilterCategory[];
+  }>({ countries: [], clients: [], types: [], categories: [] });
 
   useEffect(() => {
     getAlertsFilters().then((data) =>
-      setFiltersData({ countries: data.countries, clients: data.clients, types: data.types })
+      setFiltersData({
+        countries: data.countries,
+        clients: data.clients,
+        types: data.types,
+        categories: data.categories ?? []
+      })
     );
   }, []);
+
+  // Las tarjetas espejan el select de tipos: una categoría está activa cuando todos sus
+  // error_types ya están aplicados, así que el filtro es la única fuente de verdad.
+  const activeKeys = filtersData.categories
+    .filter((c) => c.error_types.length > 0 && c.error_types.every((t) => typeFilter.includes(t)))
+    .map((c) => c.key);
+
+  const handleCategoryClick = (category: IAlertFilterCategory) => {
+    const isActive = activeKeys.includes(category.key);
+    setTypeFilter((prev) =>
+      isActive
+        ? prev.filter((t) => !category.error_types.includes(t))
+        : Array.from(new Set([...prev, ...category.error_types]))
+    );
+  };
+
+  const hasActiveFilters =
+    typeFilter.length > 0 || countryFilter !== "all" || clientFilter !== "all";
+
+  const handleClearFilters = () => {
+    setTypeFilter([]);
+    setCountryFilter("all");
+    setClientFilter("all");
+  };
 
   const { data: alertsResponse, isLoading } = useDataQualityAlerts(
     currentPage,
@@ -72,6 +104,13 @@ export default function NoveltyAlertsView() {
   return (
     <div className="flex flex-col gap-4">
       <Header title="Alertas y Novedades" />
+
+      <AlertCategoryCards
+        categories={filtersData.categories}
+        activeKeys={activeKeys}
+        onCategoryClick={handleCategoryClick}
+      />
+
       <Card className="p-0 border-none">
         <CardContent className="pt-6">
           {/* Compact Filters */}
@@ -144,18 +183,15 @@ export default function NoveltyAlertsView() {
               />
 
               {/* Clear Filters Button */}
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setTypeFilter([]);
-                  setCountryFilter("all");
-                  setClientFilter("all");
-                  setSearchTerm("");
-                }}
-                className="whitespace-nowrap h-12"
-              >
-                Limpiar filtros
-              </Button>
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  onClick={handleClearFilters}
+                  className="whitespace-nowrap h-12"
+                >
+                  Limpiar filtros
+                </Button>
+              )}
             </div>
           </div>
 
