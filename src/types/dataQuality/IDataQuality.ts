@@ -32,6 +32,25 @@ export interface ICountryClientsFilters {
   }[];
 }
 
+export interface ICountryAlertsByCategory {
+  automation: number;
+  missing: number;
+  processing: number;
+  quality: number;
+  catalog: number;
+}
+
+export interface ICountryAutomationFailure {
+  name: string;
+  reason: string;
+}
+
+export interface ICountryPendingClient {
+  client: string;
+  process_type: string;
+  count: number;
+}
+
 export interface ICountry {
   id_country: number;
   country_name: string;
@@ -40,6 +59,11 @@ export interface ICountry {
   monthly_ingestion_percentage: number;
   active_alerts: number;
   last_update_date: string;
+  alerts_by_category: ICountryAlertsByCategory;
+  automation_failures: ICountryAutomationFailure[];
+  pending_clients: ICountryPendingClient[];
+  total_files_expected: number;
+  status: string;
 }
 
 export interface ISummaryCountries {
@@ -353,11 +377,17 @@ export interface IAlertFilterStatus {
   budget_color: string;
 }
 
+export interface IAlertFilterCategory {
+  name: string;
+  count: number;
+}
+
 export interface IGetFiltersAlerts {
   countries: IAlertFilterCountry[];
   clients: IAlertFilterClient[];
   alertStatus: IAlertFilterStatus[];
   types: string[];
+  categories: IAlertFilterCategory[];
 }
 
 export interface IAlert {
