@@ -52,7 +52,15 @@ export const ProjectFormTab = ({
   const [billingPeriod, setBillingPeriod] = useState<IBillingPeriodForm | undefined>();
   const defaultValues =
     statusForm === "create"
-      ? { general: { otp_required: "No", otp_revalidation_days: 30, password_expiration_days: 90 } }
+      ? {
+          general: {
+            otp_required: "No",
+            otp_revalidation_days: 30,
+            password_expiration_days: 90,
+            trusted_devices_enabled: "No",
+            trusted_device_days: 30
+          }
+        }
       : dataToProjectFormData(data);
   const {
     watch,
@@ -68,6 +76,7 @@ export const ProjectFormTab = ({
 
   const generalDSOCurrentlyYear = watch("general.DSO_currenly_year");
   const otpRequired = watch("general.otp_required");
+  const trustedDevicesEnabled = watch("general.trusted_devices_enabled");
   useEffect(() => {
     if (data.BILLING_PERIOD_CONFIG) {
       setBillingPeriod(data.BILLING_PERIOD_CONFIG);
@@ -363,6 +372,63 @@ export const ProjectFormTab = ({
               }}
               control={control}
               error={errors.general?.password_expiration_days}
+            />
+          </Flex>
+          <Flex component={"section"} className="generalProject" justify="flex-start">
+            <Flex vertical className="containerInput">
+              <Title className="title" level={5}>
+                Permitir dispositivos de confianza
+              </Title>
+              <Controller
+                name="general.trusted_devices_enabled"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => {
+                  return (
+                    <Select
+                      placeholder="Si | No"
+                      className={
+                        errors?.general?.trusted_devices_enabled
+                          ? "selectInputError"
+                          : "selectInput"
+                      }
+                      loading={false}
+                      variant="borderless"
+                      optionLabelProp="label"
+                      disabled={otpRequired !== "Sí"}
+                      {...field}
+                    >
+                      <Option value={`Sí`} key={1}>
+                        {`Sí`}
+                      </Option>
+                      <Option value={`No`} key={2}>
+                        {`No`}
+                      </Option>
+                    </Select>
+                  );
+                }}
+              />
+              <Text className="textError">
+                {errors?.general?.trusted_devices_enabled && "Campo obligatorio *"}
+              </Text>
+            </Flex>
+            <InputForm
+              disabled={otpRequired !== "Sí" || trustedDevicesEnabled !== "Sí"}
+              titleInput="Días de vigencia del dispositivo"
+              nameInput="general.trusted_device_days"
+              typeInput="number"
+              validationRules={{
+                required:
+                  otpRequired === "Sí" && trustedDevicesEnabled === "Sí"
+                    ? "Campo obligatorio *"
+                    : false,
+                min: {
+                  value: 1,
+                  message: "El valor debe ser mayor que 1"
+                }
+              }}
+              control={control}
+              error={errors.general?.trusted_device_days}
             />
           </Flex>
 

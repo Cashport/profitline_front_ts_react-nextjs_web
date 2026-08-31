@@ -25,6 +25,8 @@ export interface General {
   otp_required: string;
   otp_revalidation_days: number | undefined;
   password_expiration_days: number | undefined;
+  trusted_devices_enabled: string;
+  trusted_device_days: number | undefined;
 }
 
 export interface Personalization {

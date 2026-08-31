@@ -53,7 +53,9 @@ export const dataToProjectFormData = (data: IProject): IFormProject => {
       accept_date: data?.ACCEPT_DATE === 0 ? "Fecha de emisión" : "Fecha de aceptación",
       otp_required: data.otp_required ? "Sí" : "No",
       otp_revalidation_days: data.otp_revalidation_days ?? undefined,
-      password_expiration_days: data.password_expiration_days ?? undefined
+      password_expiration_days: data.password_expiration_days ?? undefined,
+      trusted_devices_enabled: data.trusted_devices_enabled ? "Sí" : "No",
+      trusted_device_days: data.trusted_device_days ?? undefined
     },
     contact: {
       name: data.CONTACT,

@@ -116,7 +116,10 @@ export const LoginForm = ({
         api: api,
         type: "error",
         title: "Error",
-        message: "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
+        // El backend distingue entre cooldown de reenvío, bloqueo por intentos
+        // fallidos y fallo de envío; se muestra su mensaje cuando lo trae.
+        message:
+          result.message || "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
       });
       return;
     }
@@ -180,7 +183,9 @@ export const LoginForm = ({
           api: api,
           type: "error",
           title: "Error",
-          message: "El código OTP ingresado no es válido o ha expirado. Verifica e intenta nuevamente."
+          message:
+            result.message ||
+            "El código OTP ingresado no es válido o ha expirado. Verifica e intenta nuevamente."
         });
         return;
       }

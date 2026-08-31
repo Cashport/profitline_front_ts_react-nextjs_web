@@ -36,6 +36,8 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
     otp_required: data.general.otp_required === "Sí",
     otp_revalidation_days: data.general.otp_revalidation_days,
     password_expiration_days: data.general.password_expiration_days,
+    trusted_devices_enabled: data.general.trusted_devices_enabled === "Sí",
+    trusted_device_days: data.general.trusted_device_days,
     name: data.general.name,
     position_contact: data.contact.position_contact,
     day_flag: billingPeriod.day_flag,
@@ -81,6 +83,10 @@ export const addProject = async (data: IFormProject): Promise<ICreateProject> =>
   if (finalData.password_expiration_days) {
     formData.append("password_expiration_days", finalData.password_expiration_days.toString());
   }
+  formData.append("trusted_devices_enabled", (!!finalData.trusted_devices_enabled).toString());
+  if (finalData.trusted_device_days) {
+    formData.append("trusted_device_days", finalData.trusted_device_days.toString());
+  }
 
   try {
     const response: ICreateProject = await API.post(`${config.API_HOST}/project`, formData);
@@ -125,6 +131,8 @@ export const updateProject = async (
     otp_required: data.general.otp_required === "Sí",
     otp_revalidation_days: data.general.otp_revalidation_days,
     password_expiration_days: data.general.password_expiration_days,
+    trusted_devices_enabled: data.general.trusted_devices_enabled === "Sí",
+    trusted_device_days: data.general.trusted_device_days,
     name: data.general.name.trim(),
     position_contact: data.contact.position_contact.trim(),
     day_flag: billingPeriod.day_flag === "true",
@@ -172,6 +180,10 @@ export const updateProject = async (
   }
   if (finalData.password_expiration_days) {
     formData.append("password_expiration_days", finalData.password_expiration_days.toString());
+  }
+  formData.append("trusted_devices_enabled", (!!finalData.trusted_devices_enabled).toString());
+  if (finalData.trusted_device_days) {
+    formData.append("trusted_device_days", finalData.trusted_device_days.toString());
   }
 
   try {
