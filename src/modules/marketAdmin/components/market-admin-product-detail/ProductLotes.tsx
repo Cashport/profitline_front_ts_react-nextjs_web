@@ -25,7 +25,7 @@ export default function ProductLotes({ lotes, loading = false }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-bold text-[#141414]">Lotes</p>
+        <p className="text-base font-bold text-[#141414]">Lotes</p>
         {!loading && (
           <span className="text-xs text-[#999999]">
             {lotes.length} lote{lotes.length !== 1 ? "s" : ""}
