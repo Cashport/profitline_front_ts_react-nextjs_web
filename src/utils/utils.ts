@@ -349,10 +349,11 @@ export const formatDateDMY = (dateString: string): string => {
   return date.utc().format("DD/MM/YYYY");
 };
 
-// UTC to stay consistent with formatDateDMY, so the hour always belongs to the date shown with it.
-export const formatTimeHM = (dateString: string): string => {
-  const date = dayjs(dateString);
-  return date.utc().format("HH:mm");
+// Para instantes UTC reales. Devuelve fecha y hora juntas para que nunca se conviertan por
+// separado: una hora local al lado de una fecha en UTC muestra el día equivocado.
+export const formatLocalDateTimeParts = (dateString: string): { date: string; time: string } => {
+  const parsed = dayjs(dateString);
+  return { date: parsed.format("DD/MM/YYYY"), time: parsed.format("HH:mm") };
 };
 
 export const checkUserViewPermissions = (
