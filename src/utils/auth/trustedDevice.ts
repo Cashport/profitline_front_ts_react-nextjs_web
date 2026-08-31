@@ -1,4 +1,7 @@
-const DEVICE_TOKEN_KEY = "deviceToken";
+// La clave incluye la aplicación: Cashport y TMS pueden correr sobre el mismo
+// origen en local (mismo host y puerto), y ahí compartirían localStorage. Sin
+// namespace cada una pisaría el token de la otra y ambas pedirían OTP siempre.
+const DEVICE_TOKEN_KEY = "deviceToken:cashport";
 
 /**
  * Token opaco que identifica a este navegador como un dispositivo que ya

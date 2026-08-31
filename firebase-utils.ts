@@ -98,7 +98,7 @@ const getAuth = async (
   }
 };
 
-// Mints the Cashboard session cookie for the currently signed-in Firebase
+// Mints the Cashport session cookie for the currently signed-in Firebase
 // user and redirects into the app. Only called once the periodic-OTP /
 // password-expiration policy has already been satisfied (or doesn't apply).
 const mintSessionCookie = async (router: AppRouterInstance) => {
