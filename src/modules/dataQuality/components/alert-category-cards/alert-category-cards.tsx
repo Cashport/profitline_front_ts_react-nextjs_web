@@ -4,6 +4,8 @@ import { Fragment } from "react";
 import { AlertTriangle, Bell, Bot, FileText, FileX, Tag, LucideIcon } from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
+import { cn } from "@/utils/utils";
+import { DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 
 import { IAlertFilterCategory } from "@/types/dataQuality/IDataQuality";
 
@@ -80,7 +82,11 @@ export function AlertCategoryCards({
         return (
           <Tooltip key={category.key}>
             <TooltipTrigger asChild>{card}</TooltipTrigger>
-            <TooltipContent side="bottom" className="w-80 space-y-1 rounded-lg px-3 py-2.5">
+            <TooltipContent
+              side="bottom"
+              className={cn(DARK_TOOLTIP_CONTENT, "w-80 space-y-1 rounded-lg px-3 py-2.5")}
+              arrowClassName={DARK_TOOLTIP_ARROW}
+            >
               <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
                 {category.name}
               </p>
