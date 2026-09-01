@@ -12,6 +12,25 @@ const MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "
 
 export const PAGE_SIZE = 20;
 
+// El backend recibe `active` como 1/0; "todos" significa no enviar el parámetro.
+export const ESTADO_FILTER_ALL = "todos";
+
+export const ESTADO_FILTER_OPTIONS = [
+  { value: ESTADO_FILTER_ALL, label: "Todos" },
+  { value: "1", label: "Activo" },
+  { value: "0", label: "Inactivo" }
+];
+
+// 48px de alto para igualar el buscador; el line-height descuenta los 2px de borde.
+export const ESTADO_SELECT_CLASSNAME = [
+  "!h-12",
+  "[&_.ant-select-selector]:!h-12",
+  "[&_.ant-select-selector]:!rounded-lg",
+  "[&_.ant-select-selector]:!border-[#E0E0E0]",
+  "[&_.ant-select-selection-item]:!leading-[46px]",
+  "[&_.ant-select-selection-placeholder]:!leading-[46px]"
+].join(" ");
+
 export const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export const formatDate = (iso: string) => {
