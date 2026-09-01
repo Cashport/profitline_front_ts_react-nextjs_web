@@ -15,7 +15,7 @@ type Props = {
   allGrupos: GrupoItem[];
   loading?: boolean;
   disabled?: boolean;
-  onAgregar: (grupoId: number) => void;
+  onAgregar: (grupoIds: number[]) => Promise<boolean>;
   onQuitar: (grupoId: number) => void;
 };
 

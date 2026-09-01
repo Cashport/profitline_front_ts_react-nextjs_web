@@ -11,7 +11,7 @@ import { IMarketAdminUserClient } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
   clientes: IMarketAdminUserClient[];
-  onAgregar: (nit: string) => void;
+  onAgregar: (nits: string[]) => Promise<boolean>;
   onQuitar: (nit: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
