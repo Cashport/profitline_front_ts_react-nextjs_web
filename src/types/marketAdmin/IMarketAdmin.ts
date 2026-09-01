@@ -290,6 +290,7 @@ export interface IMarketAdminClientDetail {
   business_name: string | null;
   phone: string | null;
   email: string | null;
+  city: string | null;
   bu: string | null; // unidad de negocio (se muestra como "Canal")
   nit_id: number;
   pricelist_id: number | null;
