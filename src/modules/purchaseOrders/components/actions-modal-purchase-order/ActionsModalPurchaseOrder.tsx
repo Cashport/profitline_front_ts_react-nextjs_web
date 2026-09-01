@@ -11,7 +11,8 @@ import {
   sendPackageToBilling,
   removePurchaseOrdersFromPackage,
   deletePurchaseOrders,
-  getSalesPlane
+  getSalesPlane,
+  getInventoryExport
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -44,6 +45,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
   const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
   const [isDownloadPlaneOpen, setIsDownloadPlaneOpen] = useState(false);
+  const [isInventoryExportLoading, setIsInventoryExportLoading] = useState(false);
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -244,6 +246,22 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleDownloadInventory = async () => {
+    setIsInventoryExportLoading(true);
+    const hideLoading = message.loading("Descargando inventario...", 0);
+    try {
+      const res = await getInventoryExport();
+      window.open(res.url, "_blank");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al descargar el inventario"
+      );
+    } finally {
+      setIsInventoryExportLoading(false);
+      hideLoading();
+    }
+  };
+
   return (
     <>
       <Modal
@@ -309,6 +327,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             title="Exportar plano de ventas"
             onClick={handleDownloadSalesPlane}
             disabled={isDispatchLoading}
+          />
+          <ButtonGenerateAction
+            icon={<DownloadSimple className="h-4 w-4" />}
+            title="Exportar inventario"
+            onClick={handleDownloadInventory}
+            disabled={isInventoryExportLoading}
           />
         </div>
       </Modal>
