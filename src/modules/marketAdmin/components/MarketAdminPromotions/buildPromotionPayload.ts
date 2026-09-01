@@ -73,6 +73,10 @@ export const buildPromotionPayload = (promo: IPromocion): ICreatePromotionBody =
     business_unit: promo.businessUnit || undefined,
     is_flex: promo.isFlex ? 1 : 0,
     take_first_eligible_range_discount: promo.takeFirstEligibleRangeDiscount ? 1 : 0,
+    // cross-selling: default true. Si el flag llega false (explícito),
+    // enviamos 0 para que el backend deshabilite los descuentos
+    // secundarios en el cálculo del paquete.
+    apply_cross_selling: promo.applyCrossSelling === false ? 0 : 1,
     is_promotion_compatible_with_all_negotiations: promo.isPromotionCompatibleWithAllNegotiations ? 1 : 0,
     max_usage_per_order: maxUsagePerOrder,
     max_usage_per_client: maxUsagePerClient,
