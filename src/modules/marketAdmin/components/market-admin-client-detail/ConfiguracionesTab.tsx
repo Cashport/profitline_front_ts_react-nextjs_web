@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import {
   IMarketAdminClientConfig,
@@ -165,13 +166,13 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
 
         {/* Save button */}
         <div className="flex justify-end pt-2">
-          <button
+          <PrincipalButton
             onClick={handleSave}
             disabled={!isDirty || isSaving || isLoading}
-            className="text-sm font-semibold bg-[#141414] text-white px-5 py-2.5 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            loading={isSaving}
           >
-            {isSaving ? "Guardando..." : "Guardar cambios"}
-          </button>
+            Guardar cambios
+          </PrincipalButton>
         </div>
       </div>
     </div>
