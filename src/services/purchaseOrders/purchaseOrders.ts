@@ -480,3 +480,15 @@ export const getSalesPlane = async () => {
     throw error;
   }
 };
+
+export const getInventoryExport = async () => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `${config.API_HOST}/purchaseOrder/products/export-inventory`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching inventory export:", error);
+    throw error;
+  }
+};

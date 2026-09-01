@@ -32,7 +32,7 @@ const TOOLTIPS = {
   isFlex:
     "Promoción 'flex': el cliente recibe el regalo automáticamente, sin tener que elegir entre las opciones A/B/C. Si está apagada, el cliente debe elegir una opción.",
   takeFirstEligibleRangeDiscount:
-    "Si está activo, cuando el pedido cumple múltiples rangos, se aplica SOLO el primer rango elegible (incluso si supera el techo del rango). Por defecto (apagado), se aplica el mejor rango disponible.",
+    "Si está activo, se aplica SOLO el primer rango elegible del descuento que esté aplicando. Por defecto (apagado), se aplica el mejor rango disponible.",
   isPromotionCompatibleWithAllNegotiations:
     "Permite que esta promoción se acumule con los precios negociados del cliente. Si está apagada, la promoción NO se aplica cuando el cliente tiene negociaciones activas."
 } as const;
