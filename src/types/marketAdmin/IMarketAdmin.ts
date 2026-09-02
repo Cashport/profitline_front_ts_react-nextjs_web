@@ -413,3 +413,23 @@ export interface IMarketAdminUserDetail {
 export interface IAssignClientToUserBody {
   client_nit: string;
 }
+
+// ── Cargue de información (ETLs manuales) ───────────────────────────────────
+// Datos mockeados por ahora; las fechas viajan como YYYY-MM-DD.
+
+export interface IMarketAdminEtlHistory {
+  archivo: string;
+  fecha: string;
+  usuario: string;
+  estado: "Exitoso" | "Con errores";
+}
+
+export interface IMarketAdminEtl {
+  id: string;
+  nombre: string;
+  observacion: string;
+  detalle: string;
+  ultimoArchivo: string | null;
+  ultimoCargue: string | null;
+  historial: IMarketAdminEtlHistory[];
+}
