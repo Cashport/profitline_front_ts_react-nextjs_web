@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Spin, Table } from "antd";
+import { Dropdown, Spin, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Minus, Plus } from "lucide-react";
+import { DotsThreeVertical } from "@phosphor-icons/react";
+import { Plus, Trash2 } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
 import ModalAgregarGrupos from "@/modules/marketAdmin/components/market-admin-user-detail/ModalAgregarGrupos";
 
@@ -14,7 +15,7 @@ type Props = {
   allGrupos: GrupoItem[];
   loading?: boolean;
   disabled?: boolean;
-  onAgregar: (grupoId: number) => void;
+  onAgregar: (grupoIds: number[]) => Promise<boolean>;
   onQuitar: (grupoId: number) => void;
 };
 
@@ -52,18 +53,33 @@ export default function GruposTab({
     },
     {
       title: "",
-      key: "quitar",
+      key: "acciones",
       width: 48,
       onHeaderCell: headerCell,
       render: (_, g) => (
-        <button
-          title="Quitar grupo"
+        <Dropdown
+          trigger={["click"]}
+          placement="bottomRight"
           disabled={disabled}
-          onClick={() => onQuitar(g.id)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#FEE2E2] hover:text-[#E53E3E] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#CCCCCC]"
+          menu={{
+            items: [
+              {
+                key: "eliminar",
+                label: "Eliminar",
+                icon: <Trash2 size={14} />,
+                onClick: () => onQuitar(g.id)
+              }
+            ]
+          }}
         >
-          <Minus size={13} />
-        </button>
+          <button
+            title="Acciones"
+            disabled={disabled}
+            className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
+          >
+            <DotsThreeVertical size={"1.2rem"} />
+          </button>
+        </Dropdown>
       )
     }
   ];

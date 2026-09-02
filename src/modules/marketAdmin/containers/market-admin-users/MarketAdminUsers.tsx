@@ -14,7 +14,9 @@ import ModalCrearUsuario, {
 } from "@/modules/marketAdmin/components/market-admin-users/ModalCrearUsuario";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMarketAdminUsers } from "@/modules/marketAdmin/hooks/useMarketAdminUsers";
-import { useMarketAdminRoles } from "@/modules/marketAdmin/hooks/useMarketAdminRoles";
+import FilterUsersModal, {
+  IMarketAdminUsersFilter
+} from "@/modules/marketAdmin/components/market-admin-users/FilterUsersModal";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { inviteUser } from "@/services/users/users";
@@ -28,8 +30,10 @@ const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function MarketAdminUsers() {
   const [search, setSearch] = useState("");
-  const [rolFilter, setRolFilter] = useState("");
-  const [estadoFilter, setEstadoFilter] = useState("Todos");
+  const [filter, setFilter] = useState<IMarketAdminUsersFilter>({
+    roleId: null,
+    status: null
+  });
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
@@ -42,8 +46,6 @@ export default function MarketAdminUsers() {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
-  const { data: roles } = useMarketAdminRoles();
-
   const {
     data: usuarios,
     pagination,
@@ -53,9 +55,14 @@ export default function MarketAdminUsers() {
     page,
     limit: PAGE_SIZE,
     search: debouncedSearch,
-    role_id: rolFilter === "" ? undefined : Number(rolFilter),
-    status: estadoFilter === "Todos" ? undefined : estadoFilter === "Activo" ? 1 : 0
+    role_id: filter.roleId ?? undefined,
+    status: filter.status ?? undefined
   });
+
+  function handleFilterChange(next: IMarketAdminUsersFilter) {
+    setFilter(next);
+    setPage(1);
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -227,33 +234,7 @@ export default function MarketAdminUsers() {
               </div>
             )}
           </div>
-          <select
-            value={rolFilter}
-            onChange={(e) => {
-              setRolFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="">Rol</option>
-            {roles.map((r) => (
-              <option key={r.ID} value={r.ID}>
-                {r.ROL_NAME}
-              </option>
-            ))}
-          </select>
-          <select
-            value={estadoFilter}
-            onChange={(e) => {
-              setEstadoFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="Todos">Estado</option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+          <FilterUsersModal value={filter} onChange={handleFilterChange} />
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
           <div className="h-10 flex-shrink-0 ml-auto">
