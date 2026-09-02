@@ -21,7 +21,8 @@ import {
   dowloadOrderCSV,
   downloadPartialOrderCSV,
   IUploadPurchaseOrdersData,
-  uploadPurchaseOrders
+  uploadPurchaseOrders,
+  dowloadOrderCSVOCFormat
 } from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
@@ -99,6 +100,31 @@ export const OrdersGenerateActionModal = ({
     if (!validateOrdersSelected()) return;
     try {
       const res = await dowloadOrderCSV(ordersId, projectId);
+      if (!res || !res.data) {
+        if (res?.message) {
+          return showMessage("error", res.message);
+        } else return showMessage("error", "Error al descargar CSV");
+      }
+      createAndDownloadTxt(res.data);
+      if (res.message == "") {
+        showMessage("success", "Descarga exitosa");
+      } else {
+        setErrorMessage(res?.message);
+        setIsErrorModalOpen(true);
+      }
+      setFetchMutate();
+      setSelectedRows([]);
+      setSelectedRowKeys([]);
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDownloadCSVOCFormat = async () => {
+    if (!validateOrdersSelected()) return;
+    try {
+      const res = await dowloadOrderCSVOCFormat(ordersId);
       if (!res || !res.data) {
         if (res?.message) {
           return showMessage("error", res.message);
@@ -383,6 +409,11 @@ export const OrdersGenerateActionModal = ({
             onClick={handleDownloadPartialCsvShowQuestion}
             icon={<DownloadSimple size={16} />}
             title="Descarga parcial CSV"
+          />
+          <ButtonGenerateAction
+            onClick={handleDownloadCSVOCFormat}
+            icon={<DownloadSimple size={16} />}
+            title="Descargar csv Formato OC"
           />
           <ButtonGenerateAction
             onClick={handleDeleteRows}
