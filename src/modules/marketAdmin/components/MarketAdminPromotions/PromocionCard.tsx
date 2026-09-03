@@ -33,6 +33,8 @@ const TOOLTIPS = {
     "Promoción 'flex': el cliente recibe el regalo automáticamente, sin tener que elegir entre las opciones A/B/C. Si está apagada, el cliente debe elegir una opción.",
   takeFirstEligibleRangeDiscount:
     "Si está activo, se aplica SOLO el primer rango elegible del descuento que esté aplicando. Por defecto (apagado), se aplica el mejor rango disponible.",
+  applyCrossSelling:
+    "Si está activo (default), la promoción permite aplicar cross-selling (descuentos secundarios / descuentos de la orden). Si está apagado, se deshabilita el cross-selling y el array de descuentos secundarios llega vacío al calcular el descuento del paquete.",
   isPromotionCompatibleWithAllNegotiations:
     "Permite que esta promoción se acumule con los precios negociados del cliente. Si está apagada, la promoción NO se aplica cuando el cliente tiene negociaciones activas."
 } as const;
@@ -396,6 +398,22 @@ export default function PromocionCard({
                   <TooltipLabel
                     text="Tomar primer rango elegible"
                     tooltip={TOOLTIPS.takeFirstEligibleRangeDiscount}
+                  />
+                </div>
+
+                {/* Fila 3-bis — applyCrossSelling. Default true: si llega
+                    undefined del backend, mostramos el toggle encendido. */}
+                <div className="flex items-center gap-3">
+                  <Toggle
+                    value={promo.applyCrossSelling !== false}
+                    label="Permitir cross-selling"
+                    onChange={(v) =>
+                      onChange({ ...promo, applyCrossSelling: v })
+                    }
+                  />
+                  <TooltipLabel
+                    text="Permitir cross-selling"
+                    tooltip={TOOLTIPS.applyCrossSelling}
                   />
                 </div>
 

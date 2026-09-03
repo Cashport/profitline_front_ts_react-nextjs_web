@@ -75,6 +75,11 @@ export interface IPromocion {
   isFlex?: boolean;
   // Si true, se toma SOLO el primer rango elegible aunque supere el techo.
   takeFirstEligibleRangeDiscount?: boolean;
+  // Si false, se deshabilita el cross-selling (descuentos secundarios /
+  // descuentos de la orden) y se devuelve el array de descuentos
+  // secundarios vacío al calcular el descuento del paquete. Default true
+  // (se aplica cross-selling).
+  applyCrossSelling?: boolean;
   // Si true, la promoción se acumula con precios negociados del cliente.
   isPromotionCompatibleWithAllNegotiations?: boolean;
   niveles: INivel[];
@@ -129,6 +134,9 @@ export interface ICreatePromotionBody {
   is_flex?: number; // 0 | 1
   // true → se aplica SOLO el primer rango elegible (incluso si supera el techo).
   take_first_eligible_range_discount?: number;
+  // 1 → se aplica cross-selling (default). 0 → se deshabilita el
+  // cross-selling (el array de descuentos secundarios llega vacío).
+  apply_cross_selling?: number;
   // true → la promoción se acumula con precios negociados del cliente.
   is_promotion_compatible_with_all_negotiations?: number;
   ranges: IPromotionRange[];
