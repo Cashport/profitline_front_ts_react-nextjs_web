@@ -7,6 +7,8 @@ import {
   IMarketAdminClientAddress,
   IMarketAdminClientsBatchBody,
   IProductInventoryItem,
+  IProfitLoader,
+  IProfitLoaderTimelineResponse,
   IUpdateMarketAdminClientAddressBody,
   IUpdateMarketAdminClientConfigBody,
   IUpdateMarketAdminProductBody
@@ -179,6 +181,61 @@ export const removeClientFromMarketAdminUser = async (
     return response.data;
   } catch (error) {
     console.error("Error al quitar el cliente del usuario:", error);
+    throw error;
+  }
+};
+
+// ── Profit Loader (cargue de información) ───────────────────────────────────
+
+// GET /profit-loader/loaders
+export const getProfitLoaders = async () => {
+  try {
+    const response: GenericResponse<IProfitLoader[]> = await API.get("/profit-loader/loaders");
+    return response;
+  } catch (error) {
+    console.error("Error al obtener los loaders:", error);
+    throw error;
+  }
+};
+
+// GET /profit-loader/loaders/:id
+export const getProfitLoaderById = async (id: number) => {
+  try {
+    const response: GenericResponse<IProfitLoader> = await API.get(`/profit-loader/loaders/${id}`);
+    return response;
+  } catch (error) {
+    console.error("Error al obtener el detalle del loader:", error);
+    throw error;
+  }
+};
+
+// GET /profit-loader/etl/:loaderId/timeline
+export const getProfitLoaderTimeline = async (loaderId: number) => {
+  try {
+    const response: IProfitLoaderTimelineResponse = await API.get(
+      `/profit-loader/etl/${loaderId}/timeline`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al obtener el historial de cargues:", error);
+    throw error;
+  }
+};
+
+// POST /profit-loader/etl/:id/upload — multipart/form-data, el archivo viaja en la key "file"
+export const uploadProfitLoaderFile = async (id: number, file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response: GenericResponse<unknown> = await API.post(
+      `/profit-loader/etl/${id}/upload`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cargar el archivo del loader:", error);
     throw error;
   }
 };
