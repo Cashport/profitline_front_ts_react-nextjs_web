@@ -85,9 +85,14 @@ instance.interceptors.request.use(async (request) => {
   return request;
 });
 
+const UNAUTHENTICATED_ENDPOINTS = [
+  "/user/accept-invitation",
+  "/auth/reset-password/confirm"
+];
+
 API.interceptors.request.use(async (request) => {
   request.headers.set("Accept", "application/json, text/plain, */*");
-  if (!request?.url?.includes("/user/accept-invitation"))
+  if (!UNAUTHENTICATED_ENDPOINTS.some((endpoint) => request?.url?.includes(endpoint)))
     request.headers.set("Authorization", `Bearer ${await getIdToken()}`);
   return request;
 });
