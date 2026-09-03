@@ -293,6 +293,28 @@ export const dowloadOrderCSV = async (
   }
 };
 
+export const dowloadOrderCSVOCFormat = async (
+  ordersIds: number[],
+  downloadAllClient = false
+): Promise<DownloadResponse | null> => {
+  const ordersIdsObject = {
+    order_ids: ordersIds,
+    download_all_client: downloadAllClient
+  };
+  try {
+    const response: GenericResponse<string> = await API.post(
+      `/marketplace/downloadtxtformatoc`,
+      ordersIdsObject
+    );
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { message: error.message, data: "" };
+    }
+    return null;
+  }
+};
+
 export const downloadPartialOrderCSV = async (orderIds: number[], sendToBackorder: boolean) => {
   try {
     const payload = { order_ids: orderIds, sendToBackorder };
