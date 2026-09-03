@@ -2,57 +2,52 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Download, FileSpreadsheet, Plus, Upload } from "lucide-react";
+import { useSWRConfig } from "swr";
+import { ChevronLeft, Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import ModalDetalleCargue from "@/modules/marketAdmin/components/market-admin-load/ModalDetalleCargue";
+import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-load/PanelDetalleCargue";
 import ModalNuevoEtl, {
   NuevoEtlFormValues
 } from "@/modules/marketAdmin/components/market-admin-load/ModalNuevoEtl";
-import { formatDate } from "@/modules/marketAdmin/components/market-admin-load/dataLoadUtils";
-import { ETL_MOCK } from "@/modules/marketAdmin/mocks/dataLoad";
+import {
+  getProfitLoaderTimelineKey,
+  useProfitLoaders
+} from "@/modules/marketAdmin/hooks/useProfitLoaders";
+import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
-import { IMarketAdminEtl } from "@/types/marketAdmin/IMarketAdmin";
+import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
 
 const PAGE_SIZE = 20;
 
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 export default function MarketAdminLoad() {
-  const [etls, setEtls] = useState<IMarketAdminEtl[]>(ETL_MOCK);
+  const { loaders, isLoading, mutate } = useProfitLoaders();
+  const { mutate: globalMutate } = useSWRConfig();
   const [page, setPage] = useState(1);
-  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadTargetRef = useRef<string | null>(null);
+  const uploadTargetRef = useRef<number | null>(null);
 
   const { showMessage } = useMessageApi();
 
-  const detailEtl = etls.find((e) => e.id === detailId) ?? null;
-
-  const handleCreateEtl = (values: NuevoEtlFormValues) => {
-    const nuevo: IMarketAdminEtl = {
-      id: `etl${Date.now()}`,
-      nombre: values.nombre,
-      observacion: values.observacion || "Sin observación registrada.",
-      detalle: values.observacion || "Sin información adicional registrada para este ETL.",
-      ultimoArchivo: null,
-      ultimoCargue: null,
-      historial: []
-    };
-    setEtls((prev) => [nuevo, ...prev]);
+  // No existe endpoint para crear ETLs todavía: el modal queda pero sin efecto en la lista.
+  const handleCreateEtl = (_values: NuevoEtlFormValues) => {
     setShowCreate(false);
-    setPage(1);
+    showMessage("info", "La creación de ETLs aún no está disponible.");
   };
 
-  const triggerUpload = (id: string) => {
+  const triggerUpload = (id: number) => {
     uploadTargetRef.current = id;
     fileInputRef.current?.click();
   };
 
-  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     const targetId = uploadTargetRef.current;
     // El input se resetea siempre para poder volver a elegir el mismo archivo
@@ -60,87 +55,60 @@ export default function MarketAdminLoad() {
     uploadTargetRef.current = null;
     if (!file || !targetId) return;
 
-    const today = new Date().toISOString().slice(0, 10);
-    setEtls((prev) =>
-      prev.map((etl) =>
-        etl.id === targetId
-          ? {
-              ...etl,
-              ultimoArchivo: file.name,
-              ultimoCargue: today,
-              historial: [
-                {
-                  archivo: file.name,
-                  fecha: today,
-                  usuario: "tu.usuario@galderma.com",
-                  estado: "Exitoso" as const
-                },
-                ...etl.historial
-              ]
-            }
-          : etl
-      )
-    );
+    setUploadingId(targetId);
+    try {
+      await uploadProfitLoaderFile(targetId, file);
+      showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
+      await Promise.all([mutate(), globalMutate(getProfitLoaderTimelineKey(targetId))]);
+    } catch (error) {
+      showMessage("error", "No se pudo cargar el archivo. Intenta de nuevo.");
+    } finally {
+      setUploadingId(null);
+    }
   };
 
   const descargarTemplate = (nombre: string) => {
     showMessage("info", `Descargando plantilla para "${nombre}"...`);
   };
 
-  const descargarArchivo = (archivo: string) => {
-    showMessage("info", `Descargando "${archivo}"...`);
-  };
-
-  const columns: ColumnsType<IMarketAdminEtl> = [
+  const columns: ColumnsType<IProfitLoader> = [
     {
       title: "Nombre",
-      dataIndex: "nombre",
-      key: "nombre",
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
+      dataIndex: "display_name",
+      key: "display_name",
+      sorter: (a, b) => a.display_name.localeCompare(b.display_name),
       onHeaderCell: headerCell,
-      render: (_, etl) => (
+      render: (_, loader) => (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[#141414] truncate">{etl.nombre}</p>
-          <p className="text-xs text-[#999999] truncate mt-0.5">{etl.observacion}</p>
+          <p className="text-sm font-medium text-[#141414] truncate">{loader.display_name}</p>
+          <p className="text-xs text-[#999999] break-words mt-0.5">{loader.description}</p>
         </div>
       )
     },
     {
       title: "Último archivo cargado",
-      dataIndex: "ultimoArchivo",
       key: "ultimoArchivo",
       onHeaderCell: headerCell,
-      render: (archivo: string | null) =>
-        archivo ? (
-          <div className="flex items-center gap-2 min-w-0">
-            <FileSpreadsheet size={14} className="text-[#1A7A1A] flex-shrink-0" />
-            <span className="text-sm text-[#141414] truncate">{archivo}</span>
-          </div>
-        ) : (
-          <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>
-        )
+      // La lista de loaders no trae este dato; solo está disponible en el detalle (timeline).
+      render: () => <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>
     },
     {
       title: "Último cargue",
-      dataIndex: "ultimoCargue",
       key: "ultimoCargue",
       width: 140,
-      sorter: (a, b) => (a.ultimoCargue ?? "").localeCompare(b.ultimoCargue ?? ""),
       onHeaderCell: headerCell,
-      render: (fecha: string | null) => (
-        <span className="text-sm text-[#141414]">{formatDate(fecha)}</span>
-      )
+      render: () => <span className="text-sm text-[#BBBBBB]">—</span>
     },
     {
       title: "",
       key: "acciones",
       width: 210,
       onHeaderCell: headerCell,
-      render: (_, etl) => (
+      render: (_, loader) => (
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => descargarTemplate(etl.nombre)}
+            onClick={() => descargarTemplate(loader.display_name)}
             title="Descargar template"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
@@ -148,13 +116,14 @@ export default function MarketAdminLoad() {
           </button>
           <button
             type="button"
-            onClick={() => triggerUpload(etl.id)}
+            onClick={() => triggerUpload(loader.id)}
+            disabled={uploadingId === loader.id}
             title="Cargar archivo"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#141414] text-white hover:bg-[#2A2A2A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={13} /> Cargar
+            <Upload size={13} /> {uploadingId === loader.id ? "Cargando..." : "Cargar"}
           </button>
-          <GenericEyeButton onClick={() => setDetailId(etl.id)} />
+          <GenericEyeButton onClick={() => setDetailId(loader.id)} />
         </div>
       )
     }
@@ -195,8 +164,9 @@ export default function MarketAdminLoad() {
 
         <Table
           columns={columns}
-          dataSource={etls}
+          dataSource={loaders}
           rowKey="id"
+          loading={isLoading}
           showSorterTooltip={false}
           locale={{ emptyText: "No hay ETLs configurados." }}
           pagination={{
@@ -212,13 +182,13 @@ export default function MarketAdminLoad() {
         />
       </div>
 
-      <ModalDetalleCargue
-        open={!!detailEtl}
-        etl={detailEtl}
+      <PanelDetalleCargue
+        open={!!detailId}
+        loaderId={detailId}
+        isUploading={uploadingId !== null && uploadingId === detailId}
         onClose={() => setDetailId(null)}
         onUpload={triggerUpload}
         onDownloadTemplate={descargarTemplate}
-        onDownloadFile={descargarArchivo}
       />
 
       <ModalNuevoEtl

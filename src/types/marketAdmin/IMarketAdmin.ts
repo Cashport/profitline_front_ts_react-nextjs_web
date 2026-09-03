@@ -414,22 +414,54 @@ export interface IAssignClientToUserBody {
   client_nit: string;
 }
 
-// ── Cargue de información (ETLs manuales) ───────────────────────────────────
-// Datos mockeados por ahora; las fechas viajan como YYYY-MM-DD.
+// ── Profit Loader (cargue de información) ───────────────────────────────────
+// GET /profit-loader/loaders — `required_columns` viaja como JSON string.
 
-export interface IMarketAdminEtlHistory {
-  archivo: string;
-  fecha: string;
-  usuario: string;
-  estado: "Exitoso" | "Con errores";
+export interface IProfitLoader {
+  id: number;
+  name: string;
+  display_name: string;
+  table_target: string;
+  description: string;
+  required_columns: string;
+  config: unknown | null;
+  is_enabled: number;
+  class_path: string;
+  version: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface IMarketAdminEtl {
-  id: string;
-  nombre: string;
-  observacion: string;
-  detalle: string;
-  ultimoArchivo: string | null;
-  ultimoCargue: string | null;
-  historial: IMarketAdminEtlHistory[];
+export interface IProfitLoaderExecution {
+  id: number;
+  step: string;
+  level: string;
+  message: string;
+  execution_time_ms: number | null;
+  created_at: string;
+}
+
+export interface IProfitLoaderTimelineItem {
+  file_id: number;
+  batch_id: number;
+  file_name: string;
+  uploaded_at: string;
+  uploaded_by: string;
+  s3_url: string;
+  status: string;
+  label: string;
+  color: string;
+  executions: IProfitLoaderExecution[];
+}
+
+// GET /profit-loader/etl/:loaderId/timeline — paginación plana, no encaja en
+// GenericResponsePage (usa total/page/limit/totalPages en vez de `pagination`).
+export interface IProfitLoaderTimelineResponse {
+  status: number;
+  message: string;
+  data: IProfitLoaderTimelineItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
