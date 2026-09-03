@@ -294,10 +294,12 @@ export const dowloadOrderCSV = async (
 };
 
 export const dowloadOrderCSVOCFormat = async (
-  ordersIds: number[]
+  ordersIds: number[],
+  downloadAllClient = false
 ): Promise<DownloadResponse | null> => {
   const ordersIdsObject = {
-    order_ids: ordersIds
+    order_ids: ordersIds,
+    download_all_client: downloadAllClient
   };
   try {
     const response: GenericResponse<string> = await API.post(
