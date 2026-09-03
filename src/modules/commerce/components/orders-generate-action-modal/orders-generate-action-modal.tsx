@@ -121,10 +121,10 @@ export const OrdersGenerateActionModal = ({
     }
   };
 
-  const handleDownloadCSVOCFormat = async () => {
+  const handleDownloadCSVOCFormat = async (downloadAllClient = false) => {
     if (!validateOrdersSelected()) return;
     try {
-      const res = await dowloadOrderCSVOCFormat(ordersId);
+      const res = await dowloadOrderCSVOCFormat(ordersId, downloadAllClient);
       if (!res || !res.data) {
         if (res?.message) {
           return showMessage("error", res.message);
@@ -132,7 +132,12 @@ export const OrdersGenerateActionModal = ({
       }
       createAndDownloadTxt(res.data);
       if (res.message == "") {
-        showMessage("success", "Descarga exitosa");
+        showMessage(
+          "success",
+          downloadAllClient
+            ? "Descarga de todas las órdenes del cliente en el mismo estado exitosa"
+            : "Descarga exitosa"
+        );
       } else {
         setErrorMessage(res?.message);
         setIsErrorModalOpen(true);
@@ -144,6 +149,48 @@ export const OrdersGenerateActionModal = ({
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleDownloadCSVOCFormatShowQuestion = () => {
+    if (!validateOrdersSelected()) return;
+    const clientName = selectedOrders[0]?.client_name ?? "";
+    const statusName = selectedOrders[0]?.order_status ?? "";
+    Modal.confirm({
+      title: "Descargar CSV Formato OC",
+      content: (
+        <Flex vertical gap={8}>
+          <Text>¿Qué órdenes deseas descargar?</Text>
+          <Text type="secondary">
+            Cliente: <Text strong>{clientName}</Text>
+          </Text>
+          <Text type="secondary">
+            Estado: <Text strong>{statusName}</Text>
+          </Text>
+          <ul style={{ paddingLeft: 18, margin: 0 }}>
+            <li>
+              <b>Solo seleccionadas</b>: descarga únicamente las {selectedCount}{" "}
+              {selectedCount === 1 ? "orden" : "órdenes"} marcadas.
+            </li>
+            <li>
+              <b>Todas del cliente en este estado</b>: descarga todas las
+              órdenes del mismo cliente que estén en el mismo estado.
+            </li>
+          </ul>
+        </Flex>
+      ),
+      okText: "Solo seleccionadas",
+      cancelText: "Todas del cliente (mismo estado)",
+      okButtonProps: { type: "primary" },
+      cancelButtonProps: { type: "default", danger: false },
+      icon: <DownloadSimple size={20} />,
+      closable: true,
+      onOk() {
+        handleDownloadCSVOCFormat(false);
+      },
+      onCancel() {
+        handleDownloadCSVOCFormat(true);
+      }
+    });
   };
 
   const downloadFileFromUrl = (url: string, filename: string) => {
@@ -411,7 +458,7 @@ export const OrdersGenerateActionModal = ({
             title="Descarga parcial CSV"
           />
           <ButtonGenerateAction
-            onClick={handleDownloadCSVOCFormat}
+            onClick={handleDownloadCSVOCFormatShowQuestion}
             icon={<DownloadSimple size={16} />}
             title="Descargar csv Formato OC"
           />
