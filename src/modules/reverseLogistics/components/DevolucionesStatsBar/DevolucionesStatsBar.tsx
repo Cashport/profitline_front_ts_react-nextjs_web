@@ -48,10 +48,13 @@ export function DevolucionesStatsBar({ clientId, fromDate, toDate }: Devolucione
     const dataFases = data?.fases ?? [];
     // Always render one card per known fase, in FASE_LABELS order — a fase the
     // backend didn't report falls back to an empty measure set.
+    let totalDays = 0;
     const fases: IProfit360DevolucionKpiFase[] = (
       Object.keys(FASE_LABELS) as TipoDevolucionCodigo[]
     ).map((f, i) => {
       const dataFase = dataFases.find((df) => df.codigo === f);
+
+      totalDays += dataFase?.promedioDias || 0;
       if (dataFase) return dataFase;
       return {
         codigo: f,
@@ -74,7 +77,7 @@ export function DevolucionesStatsBar({ clientId, fromDate, toDate }: Devolucione
     );
     // The backend total is the real end-to-end average, not the sum of per-fase
     // averages — if it's missing we show N/A rather than faking it.
-    return [...cards, toCard("Total Días", data?.total?.promedioDias)];
+    return [...cards, toCard("Total Días", totalDays)];
   }, [data]);
 
   return (
