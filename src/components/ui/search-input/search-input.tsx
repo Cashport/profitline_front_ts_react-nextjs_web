@@ -7,6 +7,7 @@ interface UiSearchInputProps {
   name?: string;
   placeholder?: string;
   className?: string;
+  showBorder?: boolean;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -15,6 +16,7 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   name,
   placeholder,
   className,
+  showBorder = false,
   onChange
 }) => {
   const [inputValue, setInputValue] = useState("");
@@ -37,7 +39,12 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   };
 
   return (
-    <label htmlFor={id} className={`${styles.inputBox} ${className}`}>
+    <label
+      htmlFor={id}
+      className={[styles.inputBox, showBorder && styles.bordered, className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <MagnifyingGlass className={styles.icon} weight="bold" />
       <input
         type="text"

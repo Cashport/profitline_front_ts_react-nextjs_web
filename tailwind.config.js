@@ -54,6 +54,19 @@ module.exports = {
         "chart-3": "var(--chart-3)",
         "chart-4": "var(--chart-4)",
         "chart-5": "var(--chart-5)",
+        wallet: {
+          comp: "rgb(var(--wallet-comp) / <alpha-value>)",
+          pag: "rgb(var(--wallet-pag) / <alpha-value>)",
+          conc: "rgb(var(--wallet-conc) / <alpha-value>)",
+          nov: "rgb(var(--wallet-nov) / <alpha-value>)",
+          risk: "rgb(var(--wallet-risk) / <alpha-value>)",
+          t0: "rgb(var(--wallet-t0) / <alpha-value>)",
+          t1: "rgb(var(--wallet-t1) / <alpha-value>)",
+          t2: "rgb(var(--wallet-t2) / <alpha-value>)",
+          t3: "rgb(var(--wallet-t3) / <alpha-value>)",
+          t4: "rgb(var(--wallet-t4) / <alpha-value>)",
+          t5: "rgb(var(--wallet-t5) / <alpha-value>)"
+        },
         sidebar: {
           DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",
           foreground: "rgb(var(--sidebar-foreground) / <alpha-value>)",

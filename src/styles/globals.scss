@@ -23,6 +23,7 @@ body {
 // toggled by ComercioLayout on /comercio/dashboard and PurchaseOrdersLayout on
 // /purchase-orders/dashboard.)
 body.comercio-dark,
+body.wallet-dark,
 body.dashboard-dark {
     background-color: rgb(9 9 11); // matches .dark --background in tailwind.css
 }

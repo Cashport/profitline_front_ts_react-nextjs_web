@@ -78,6 +78,44 @@
   --sidebar-border: 39 39 42;
 }
 
+/* Wallet (cartera) scoped tokens — estado + tramo colors.
+   Surfaces/text/borders come from the tokens above; only these semantic
+   colors are specific to the module. Light values on .wallet-scope,
+   dark values when a .dark ancestor is present. */
+.wallet-scope {
+  --wallet-comp: 203 231 30;
+  --wallet-pag: 15 163 177;
+  --wallet-conc: 37 99 201;
+  --wallet-nov: 255 85 0;
+  --wallet-risk: 177 187 193;
+
+  --wallet-t0: 203 216 221;
+  --wallet-t1: 157 182 191;
+  --wallet-t2: 114 149 163;
+  --wallet-t3: 75 118 136;
+  --wallet-t4: 42 86 106;
+  --wallet-t5: 18 58 75;
+
+  --wallet-seg-edge: rgba(1, 24, 34, 0.14);
+}
+
+.dark .wallet-scope {
+  --wallet-comp: 203 230 30;
+  --wallet-pag: 34 184 198;
+  --wallet-conc: 90 147 240;
+  --wallet-nov: 255 106 34;
+  --wallet-risk: 138 160 169;
+
+  --wallet-t0: 42 74 87;
+  --wallet-t1: 58 101 119;
+  --wallet-t2: 76 130 152;
+  --wallet-t3: 107 162 182;
+  --wallet-t4: 147 193 209;
+  --wallet-t5: 196 225 235;
+
+  --wallet-seg-edge: rgba(255, 255, 255, 0.16);
+}
+
 /* Cashport utility classes */
 .text-cashport-black {
   color: rgb(var(--cashport-black));
