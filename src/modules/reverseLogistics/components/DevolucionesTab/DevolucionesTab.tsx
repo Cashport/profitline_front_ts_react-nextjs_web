@@ -163,6 +163,8 @@ export function DevolucionesTab() {
   const defaultDates = resolveDatePreset("este_mes");
   const [filter, setFilter] = useState<IDevolucionesFilter>({
     clientId: null,
+    estadoId: null,
+    causalId: null,
     fromDate: defaultDates.from,
     toDate: defaultDates.to
   });
@@ -182,7 +184,9 @@ export function DevolucionesTab() {
     page,
     filter.fromDate,
     filter.toDate,
-    filter.clientId
+    filter.clientId,
+    filter.estadoId,
+    filter.causalId
   ] as const;
   const { data, isLoading } = useSWR(swrKey, () =>
     getProfit360Visits({
@@ -190,7 +194,9 @@ export function DevolucionesTab() {
       limit: PAGE_SIZE,
       fromDate: filter.fromDate,
       toDate: filter.toDate,
-      clientId: filter.clientId
+      clientId: filter.clientId,
+      status: filter.estadoId,
+      causal: filter.causalId
     })
   );
 

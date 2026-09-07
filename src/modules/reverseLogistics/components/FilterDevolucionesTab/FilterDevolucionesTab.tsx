@@ -19,7 +19,7 @@ interface FilterDevolucionesTabProps {
 }
 
 export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTabProps) {
-  const { clientes, isLoading } = useProfit360Filters();
+  const { clientes, estados, causales, isLoading } = useProfit360Filters();
 
   // FilterModal's internal draft only holds option categories, so the date
   // range is drafted here and committed on apply.
@@ -32,6 +32,14 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
     id: c.codigo,
     name: c.nombre
   }));
+  const estadoOptions: FilterOptionItem[] = estados.map((e) => ({
+    id: e.codigo,
+    name: e.nombre
+  }));
+  const causalOptions: FilterOptionItem[] = causales.map((c) => ({
+    id: c.codigo,
+    name: c.nombre
+  }));
   const selection: FilterSelection = {
     cliente: value.clientId
       ? [
@@ -40,11 +48,31 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
             name: clienteOptions.find((c) => c.id === value.clientId)?.name ?? value.clientId
           }
         ]
+      : [],
+    estado: value.estadoId
+      ? [
+          {
+            id: value.estadoId,
+            name:
+              estadoOptions.find((o) => o.id === value.estadoId)?.name ?? value.estadoId
+          }
+        ]
+      : [],
+    causal: value.causalId
+      ? [
+          {
+            id: value.causalId,
+            name:
+              causalOptions.find((o) => o.id === value.causalId)?.name ?? value.causalId
+          }
+        ]
       : []
   };
 
   const selectionToDomain = (sel: FilterSelection): Partial<IDevolucionesFilter> => ({
-    clientId: sel.cliente?.[0]?.id ?? null
+    clientId: sel.cliente?.[0]?.id ?? null,
+    estadoId: sel.estado?.[0]?.id ?? null,
+    causalId: sel.causal?.[0]?.id ?? null
   });
 
   const committedDate: DateDraft = { from: value.fromDate, to: value.toDate };
@@ -57,6 +85,18 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
       label: "Cliente",
       selectMode: "single",
       options: clienteOptions
+    },
+    {
+      key: "estado",
+      label: "Estado",
+      selectMode: "single",
+      options: estadoOptions
+    },
+    {
+      key: "causal",
+      label: "Causal",
+      selectMode: "single",
+      options: causalOptions
     },
     {
       key: "fecha",
@@ -99,7 +139,15 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
         })
       }
       onValueChange={(sel) => onChange({ ...value, ...selectionToDomain(sel) })}
-      onClearAll={() => onChange({ clientId: null, fromDate: null, toDate: null })}
+      onClearAll={() =>
+        onChange({
+          clientId: null,
+          estadoId: null,
+          causalId: null,
+          fromDate: null,
+          toDate: null
+        })
+      }
       onOpen={() => setDateDraft({ from: value.fromDate, to: value.toDate })}
       onClearDraft={() => setDateDraft({ from: null, to: null })}
     />
