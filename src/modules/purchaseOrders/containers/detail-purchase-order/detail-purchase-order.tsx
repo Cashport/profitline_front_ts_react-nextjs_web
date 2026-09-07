@@ -324,7 +324,8 @@ export function DetailPurchaseOrder() {
       <TimelineHistoryModal
         isOpen={whichModalIsOpen.selected === 1}
         onClose={closeModals}
-        purchaseOrderData={data}
+        orderId={data.id}
+        orderLabel={`OC ${data.purchase_order_number}`}
       />
 
       <SendToBackorderModal

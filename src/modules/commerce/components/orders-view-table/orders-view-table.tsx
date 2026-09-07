@@ -1,6 +1,8 @@
 import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button, Dropdown, MenuProps, message, Table, TableProps, Tooltip, Typography } from "antd";
 import {
+  Clock,
   DotsThreeVertical,
   Eye,
   NewspaperClipping,
@@ -25,6 +27,16 @@ import { IDraftOrder, IOrder, IOrderData } from "@/types/commerce/ICommerce";
 
 import "./orders-view-table.scss";
 const { Text } = Typography;
+
+const TimelineHistoryModal = dynamic(
+  () =>
+    import(
+      "@/modules/purchaseOrders/components/timeline-history-modal/timeline-history-modal"
+    ).then((mod) => ({
+      default: mod.TimelineHistoryModal
+    })),
+  { ssr: false }
+);
 
 interface PropsOrdersViewTable {
   dataSingleOrder: IOrderData | undefined;
@@ -61,6 +73,7 @@ const OrdersViewTable = ({
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
+  const [historyOrder, setHistoryOrder] = useState<IOrder | null>(null);
 
   const REJECTED_STATUS_ID = 6;
   const WALLET_BLOCKED_STATUS_ID = 5;
@@ -383,6 +396,21 @@ const OrdersViewTable = ({
               )
             }
           );
+
+          if (!row.is_draft) {
+            items.push({
+              key: "historial",
+              label: (
+                <Button
+                  icon={<Clock size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => setHistoryOrder(row)}
+                >
+                  Historial
+                </Button>
+              )
+            });
+          }
         }
 
         if (row.order_status_id === REJECTED_STATUS_ID) {
@@ -455,6 +483,12 @@ const OrdersViewTable = ({
         isOpen={isOrderTrackingModalOpen}
         onClose={() => setIsOrderTrackingModalOpen(false)}
         idInvoice={1}
+      />
+      <TimelineHistoryModal
+        isOpen={!!historyOrder}
+        onClose={() => setHistoryOrder(null)}
+        orderId={historyOrder?.id}
+        orderLabel={historyOrder ? `Pedido #${historyOrder.operation_number}` : undefined}
       />
     </>
   );
