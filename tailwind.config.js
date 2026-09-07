@@ -65,7 +65,13 @@ module.exports = {
           t2: "rgb(var(--wallet-t2) / <alpha-value>)",
           t3: "rgb(var(--wallet-t3) / <alpha-value>)",
           t4: "rgb(var(--wallet-t4) / <alpha-value>)",
-          t5: "rgb(var(--wallet-t5) / <alpha-value>)"
+          t5: "rgb(var(--wallet-t5) / <alpha-value>)",
+          "t0-ink": "rgb(var(--wallet-t0-ink) / <alpha-value>)",
+          "t1-ink": "rgb(var(--wallet-t1-ink) / <alpha-value>)",
+          "t2-ink": "rgb(var(--wallet-t2-ink) / <alpha-value>)",
+          "t3-ink": "rgb(var(--wallet-t3-ink) / <alpha-value>)",
+          "t4-ink": "rgb(var(--wallet-t4-ink) / <alpha-value>)",
+          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)"
         },
         sidebar: {
           DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",

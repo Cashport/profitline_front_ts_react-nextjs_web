@@ -14,6 +14,7 @@ import type { IWalletGroupRow, SortState } from "../../types";
 
 interface InvoiceGroupsProps {
   rows: IWalletGroupRow[];
+  onOpenDetail: (clave: string) => void;
 }
 
 const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
@@ -29,7 +30,7 @@ const GestionChip = ({ dias }: { dias: number | null }) => {
 };
 
 /** Grupos de facturas: todo lo que se resuelve con una sola gestión. */
-export default function InvoiceGroups({ rows }: InvoiceGroupsProps) {
+export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps) {
   const [sort, setSort] = useState<SortState>({ col: "monto", dir: "desc" });
 
   const visibleRows = useMemo(
@@ -160,11 +161,11 @@ export default function InvoiceGroups({ rows }: InvoiceGroupsProps) {
                     <StatusChip sev={g.estado.sev}>{g.estado.nom}</StatusChip>
                   </td>
                   <td className="px-3 py-2.5 text-right">
-                    {/* TODO: abre el modal de gestión del grupo. */}
                     <button
                       type="button"
                       aria-label="Abrir gestión"
                       title="Abrir gestión"
+                      onClick={() => onOpenDetail(g.clave)}
                       className="inline-flex rounded-md border border-border bg-card p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       <ArrowRight className="h-3.5 w-3.5" />
