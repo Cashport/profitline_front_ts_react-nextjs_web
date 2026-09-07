@@ -18,6 +18,11 @@ import InvoiceGroups from "../../components/invoice-groups/invoice-groups";
 import WalletFilters from "../../components/wallet-filters/wallet-filters";
 import WalletHeader from "../../components/wallet-header/wallet-header";
 import WalletStatCards from "../../components/wallet-stat-cards/wallet-stat-cards";
+import {
+  GroupsSkeleton,
+  MatrixSkeleton,
+  StatCardsSkeleton
+} from "../../components/wallet-skeleton/wallet-skeleton";
 import { emptySummary, toClientRows, toGroupRows, toSummary } from "../../utils/api-adapter";
 
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
@@ -60,7 +65,7 @@ export default function WalletView() {
   );
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, 1, PAGE_SIZE);
-  const { data: groups } = useWalletMatrixGroups(filters, undefined, undefined, matrix?.snapshot?.runId);
+  const { data: groups, loading: groupsLoading } = useWalletMatrixGroups(filters, undefined, undefined, matrix?.snapshot?.runId);
 
   // El polling sólo corre mientras hay una actualización viva. Es el respaldo
   // del socket: si el evento no llega —el usuario puede estar conectado a otra
@@ -155,6 +160,11 @@ export default function WalletView() {
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
 
+  // Sólo la primera carga muestra skeleton. Con `keepPreviousData`, cambiar un
+  // filtro o buscar mantiene la tabla anterior en pantalla, que se lee mucho
+  // mejor que ver todo desaparecer y volver.
+  const primeraCarga = !matrix && !error;
+
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
       <WalletHeader
@@ -171,10 +181,11 @@ export default function WalletView() {
       <h2 className="text-lg font-semibold text-foreground">Cartera por cliente y tramo</h2>
 
       <WalletFilters summary={summary} />
-      <WalletStatCards summary={summary} />
 
-      {loading && !matrix ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">Cargando cartera…</p>
+      {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
+
+      {primeraCarga ? (
+        <MatrixSkeleton />
       ) : error ? (
         // Se muestra el motivo real y no un "no hay cartera": la causa más
         // común es no tener grupos de clientes asignados en el proyecto, que
@@ -182,23 +193,29 @@ export default function WalletView() {
         <p className="py-10 text-center text-sm text-rose-600 dark:text-rose-400">
           {(error as Error)?.message || "No se pudo cargar la cartera."}
         </p>
-      ) : !clientRows.length ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">
-          {debouncedSearch.trim()
-            ? `No se encontró nada para "${debouncedSearch.trim()}".`
-            : "No hay cartera para los filtros actuales."}
-        </p>
       ) : (
+        // La tabla se renderiza siempre, incluso sin resultados: su buscador
+        // vive dentro, y ocultarla dejaría al usuario sin forma de corregir o
+        // borrar lo que escribió.
         <ControlMatrix
           rows={clientRows}
           search={search}
           onSearchChange={setSearch}
           totalClients={matrix?.pagination.totalClients ?? 0}
           loading={loading}
+          emptyMessage={
+            debouncedSearch.trim()
+              ? `No se encontró nada para "${debouncedSearch.trim()}".`
+              : "No hay cartera para los filtros actuales."
+          }
         />
       )}
 
-      <InvoiceGroups rows={groupRows} onOpenDetail={setOpenGroup} />
+      {primeraCarga || (groupsLoading && !groups) ? (
+        <GroupsSkeleton />
+      ) : (
+        <InvoiceGroups rows={groupRows} onOpenDetail={setOpenGroup} />
+      )}
 
       <GroupDetailModal clave={openGroup} onClose={() => setOpenGroup(null)} />
     </div>

@@ -27,9 +27,14 @@ export const useWalletMatrix = (
   const query = buildMatrixQuery(filters);
   const pathKey = `/portfolio/matrix?page=${page}&limit=${limit}&${query}`;
 
+  // `keepPreviousData` evita que la tabla desaparezca al cambiar un filtro o
+  // al escribir en el buscador: se mantiene la matriz anterior mientras llega
+  // la nueva. El skeleton queda entonces sólo para la primera carga, que es
+  // cuando de verdad no hay nada que mostrar.
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IWalletMatrix>>(
     pathKey,
-    fetcher
+    fetcher,
+    { keepPreviousData: true }
   );
 
   return { data: data?.data, loading: isLoading, error, mutate };
@@ -89,7 +94,8 @@ export const useWalletMatrixGroups = (
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IWalletMatrixGroups>>(
     pathKey,
-    fetcher
+    fetcher,
+    { keepPreviousData: true }
   );
 
   return { data: data?.data, loading: isLoading, error, mutate };
