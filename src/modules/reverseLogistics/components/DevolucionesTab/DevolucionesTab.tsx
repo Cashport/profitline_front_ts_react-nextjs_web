@@ -81,17 +81,17 @@ const mapDevolucionToRow = (
   const causales = devCausales(dev);
 
   return {
+    // El spread va primero para que ningún campo crudo pise un derivado.
+    ...dev,
     // `IdDevolucion` se repite cuando una devolución trae varios documentos, así
     // que el índice dentro de la visita es lo único que garantiza unicidad. Con
     // keys duplicadas React deja filas huérfanas al cerrar el desplegable.
     key: `visit-${visit.visitProjectId}-dev-${index}-${dev.Id}`,
     isGroup: false,
     devCount: 1,
-    id: 0,
     idBoleto: dev.IdBoleto ?? "",
     fecha,
     cliente: dev.Cliente,
-    direccionCliente: dev.Sucursal,
     canal: dev.Canal,
     lineaNegocio: dev.LineaNegocio,
     unidades: dev.Unidades ?? dev.UnidadesRegistradas ?? dev.UnidadesDocumento ?? 0,
@@ -100,10 +100,7 @@ const mapDevolucionToRow = (
     estado,
     haveApprove: !!dev.IdAprobacion,
     idDevolucion: dev.Id,
-    pdfUrl: dev.PdfBoleto ?? undefined,
-    // Stash the original dev so the actions column can navigate to the
-    // approval detail using `IdDevolucion` as the approval id.
-    originalDev: dev
+    pdfUrl: dev.PdfBoleto ?? undefined
   };
 };
 
@@ -140,11 +137,9 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit, visitIndex: number): Retu
     key: `visit-${visitIndex}-${visit.visitProjectId}`,
     isGroup: false,
     devCount: 0,
-    id: 0,
     idBoleto: "",
     fecha,
     cliente: visit.clientName,
-    direccionCliente: "",
     canal: resumen.canal.join(),
     lineaNegocio: resumen.lineaNegocio.join(),
     unidades: resumen.unidades,
