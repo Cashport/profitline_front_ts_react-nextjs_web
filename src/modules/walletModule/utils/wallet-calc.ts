@@ -2,6 +2,8 @@ import { ORDEN_EST } from "../constants";
 import {
   EstadoKey,
   IWalletClientRow,
+  IWalletDrilldown,
+  IWalletGroupRow,
   IWalletMatrixCell,
   SortState,
   WalletSegments
@@ -50,6 +52,32 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
 /** Total de una columna de tramo, sumando todas las filas. */
 export const tramoTotal = (rows: IWalletClientRow[], ti: number): number =>
   rows.reduce((a, row) => a + (row.tramos[ti]?.total ?? 0), 0);
+
+/** Búsqueda de la matriz: nombre, NIT o ejecutivo. */
+export function filtrarClientes(rows: IWalletClientRow[], query: string): IWalletClientRow[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return rows;
+  return rows.filter((r) => `${r.nombre} ${r.nit} ${r.ejecutivo}`.toLowerCase().includes(q));
+}
+
+/**
+ * Grupos visibles: primero la búsqueda de la matriz, luego el drilldown. Con un
+ * tramo elegido sobrevive el grupo que tenga *algo* ahí, aunque el grueso de su
+ * saldo caiga en otro tramo: por eso "Total" y "Tramo" no coinciden.
+ */
+export function filtrarGrupos(
+  grupos: IWalletGroupRow[],
+  clientesVisibles: IWalletClientRow[],
+  drill: IWalletDrilldown | null
+): IWalletGroupRow[] {
+  const visibles = new Set(clientesVisibles.map((c) => c.id));
+  const enVista = grupos.filter((g) => visibles.has(g.clienteId));
+  if (!drill) return enVista;
+
+  const delCliente = enVista.filter((g) => g.clienteId === drill.clienteId);
+  const { tramo } = drill;
+  return tramo === null ? delCliente : delCliente.filter((g) => g.tramos[tramo] > 0);
+}
 
 /** Ordena una copia de la lista según el estado de orden y un extractor. */
 export function ordenar<T>(lista: T[], orden: SortState, valor: (item: T) => string | number): T[] {

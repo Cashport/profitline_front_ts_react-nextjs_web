@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { cn } from "@/utils/utils";
@@ -10,35 +10,50 @@ import { nextSort, ordenar, rowSegments, tramoTotal } from "../../utils/wallet-c
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
-import type { IWalletClientRow, SortState } from "../../types";
+import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
 
 interface ControlMatrixProps {
+  /** Ya filtradas por la búsqueda: la vista es la dueña del texto. */
   rows: IWalletClientRow[];
+  drilldown: IWalletDrilldown | null;
+  onQueryChange: (value: string) => void;
+  onSelect: (drilldown: IWalletDrilldown) => void;
 }
 
 const TEXTUAL_COLS = ["cliente"];
 
+/** Celda seleccionada: naranja por dentro, sin mover el layout de la tabla. */
+const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accent";
+
 /** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
-export default function ControlMatrix({ rows }: ControlMatrixProps) {
+export default function ControlMatrix({
+  rows,
+  drilldown,
+  onQueryChange,
+  onSelect
+}: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
-  const [query, setQuery] = useState("");
 
-  const visibleRows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? rows.filter((r) => `${r.nombre} ${r.nit} ${r.ejecutivo}`.toLowerCase().includes(q))
-      : rows;
-
-    return ordenar(filtered, sort, (row) => {
-      if (sort.col === "cliente") return row.nombre;
-      const g = rowSegments(row);
-      if (sort.col === "total") return g.total;
-      if (sort.col === "venc") return pct(g.vencido, g.total);
-      return row.tramos[Number(sort.col)]?.total ?? 0;
-    });
-  }, [rows, sort, query]);
+  const visibleRows = useMemo(
+    () =>
+      ordenar(rows, sort, (row) => {
+        if (sort.col === "cliente") return row.nombre;
+        const g = rowSegments(row);
+        if (sort.col === "total") return g.total;
+        if (sort.col === "venc") return pct(g.vencido, g.total);
+        return row.tramos[Number(sort.col)]?.total ?? 0;
+      }),
+    [rows, sort]
+  );
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
+
+  /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
+  const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onSelect(drill);
+  };
 
   return (
     <section className="rounded-xl bg-card shadow-sm">
@@ -55,7 +70,7 @@ export default function ControlMatrix({ rows }: ControlMatrixProps) {
           <UiSearchInput
             id="wallet-matrix-search"
             placeholder="Buscar cliente, factura o ejecutivo…"
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => onQueryChange(e.target.value)}
           />
         </div>
       </div>
@@ -91,12 +106,26 @@ export default function ControlMatrix({ rows }: ControlMatrixProps) {
               visibleRows.map((row) => {
                 const g = rowSegments(row);
                 const vencido = pct(g.vencido, g.total);
+                const delCliente = drilldown?.clienteId === row.id;
 
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
-                    {/* TODO: al conectar el drilldown, este td abre los grupos del cliente. */}
-                    <td className="min-w-[250px] px-3 py-2.5 align-middle">
+                    {/* Abre todos los grupos del cliente, sin importar el tramo. */}
+                    <td
+                      role="button"
+                      tabIndex={0}
+                      title="Ver todos los grupos del cliente"
+                      onClick={() => onSelect({ clienteId: row.id, tramo: null })}
+                      onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
+                      className={cn(
+                        "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
+                        delCliente && drilldown?.tramo === null && SELECTED_CELL
+                      )}
+                    >
                       <span className="font-semibold text-foreground">{row.nombre}</span>
+                      <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-wallet-accent opacity-0 transition-opacity group-hover/name:opacity-100">
+                        ver grupos
+                      </span>
                       <div className="text-[11.5px] text-muted-foreground">
                         <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
                       </div>
@@ -111,7 +140,20 @@ export default function ControlMatrix({ rows }: ControlMatrixProps) {
                           —
                         </td>
                       ) : (
-                        <td key={i} className="px-3 py-2.5 text-right align-middle tabular-nums">
+                        <td
+                          key={i}
+                          role="button"
+                          tabIndex={0}
+                          title={`Ver los grupos de ${TRAMOS[i].label.toLowerCase()}`}
+                          onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
+                          onKeyDown={(e) =>
+                            onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
+                          }
+                          className={cn(
+                            "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+                            delCliente && drilldown?.tramo === i && SELECTED_CELL
+                          )}
+                        >
                           <span>{fmtM(cell.total)}</span>
                           <SegBar segments={cell} />
                         </td>

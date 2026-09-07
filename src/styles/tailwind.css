@@ -104,6 +104,10 @@
   --wallet-t4-ink: 255 255 255;
   --wallet-t5-ink: 255 255 255;
 
+  /* Selección del drilldown: celda elegida en la matriz y fila abierta. */
+  --wallet-accent: 255 85 0;
+  --wallet-accent-soft: 255 239 231;
+
   --wallet-seg-edge: rgba(1, 24, 34, 0.14);
 }
 
@@ -127,6 +131,9 @@
   --wallet-t3-ink: 4 25 31;
   --wallet-t4-ink: 4 25 31;
   --wallet-t5-ink: 4 25 31;
+
+  --wallet-accent: 255 106 34;
+  --wallet-accent-soft: 58 27 12;
 
   --wallet-seg-edge: rgba(255, 255, 255, 0.16);
 }

@@ -3,10 +3,16 @@
    ------------------------------------------------------------
    Mantienen la forma que debe devolver el backend: al conectar el
    servicio sólo cambia el origen, no los componentes.
+
+   Los grupos y sus detalles se derivan de la matriz, igual que en
+   el backend saldrían de agrupar las mismas facturas: así el
+   drilldown cuadra: los grupos de un cliente suman su fila, y los
+   de un tramo suman esa celda.
    ============================================================ */
 import { EST_META, ORDEN_EST, TRAMO_DIAS } from "./constants";
-import { HOY, dias } from "./utils/format";
+import { HOY, dias, fmtDc } from "./utils/format";
 import {
+  EstadoKey,
   IWalletClientRow,
   IWalletGroupDetail,
   IWalletGroupRow,
@@ -14,6 +20,7 @@ import {
   IWalletMatrixCell,
   IWalletPerson,
   IWalletSummary,
+  Sev,
   TramoIndex
 } from "./types";
 
@@ -110,68 +117,7 @@ export const WALLET_SUMMARY: IWalletSummary = {
   }
 };
 
-export const WALLET_GROUP_ROWS: IWalletGroupRow[] = [
-  {
-    clave: "NOV-1041",
-    tipo: "novedad",
-    novedadId: "NOV-1041",
-    detalle: "Nota crédito comercial",
-    cliente: "OXXO COLOMBIA",
-    facturas: 7,
-    monto: 412 * M,
-    tramos: [0, 168 * M, 121 * M, 49 * M, 74 * M, 0],
-    responsable: "Cristina O.",
-    diasSinGestion: 2,
-    compromiso: "12/09/26",
-    limite: "26/09/26",
-    estado: { nom: "En gestión", sev: "idle" }
-  },
-  {
-    clave: "NOV-1042",
-    tipo: "novedad",
-    novedadId: "NOV-1042",
-    detalle: "Factura rechazada / sin radicar",
-    cliente: "KOBA COLOMBIA",
-    facturas: 4,
-    monto: 268 * M,
-    tramos: [0, 0, 94 * M, 71 * M, 61 * M, 42 * M],
-    responsable: "Back Office",
-    diasSinGestion: 9,
-    compromiso: "28/08/26",
-    limite: "05/09/26",
-    estado: { nom: "Esperando aprobación", sev: "warn" }
-  },
-  {
-    clave: "C003|sin_conciliar",
-    tipo: "sin_conciliar",
-    detalle: EST_META.sin_conciliar.corta,
-    cliente: "ALMACENES ÉXITO",
-    facturas: 12,
-    monto: 336 * M,
-    tramos: [98 * M, 84 * M, 61 * M, 39 * M, 28 * M, 26 * M],
-    responsable: null,
-    diasSinGestion: null,
-    compromiso: null,
-    limite: null,
-    estado: { nom: EST_META.sin_conciliar.chipTxt, sev: EST_META.sin_conciliar.chip }
-  },
-  {
-    clave: "C004|conciliado",
-    tipo: "conciliado",
-    detalle: EST_META.conciliado.corta,
-    cliente: "ARCOS DORADOS",
-    facturas: 21,
-    monto: 1.18 * MM,
-    tramos: [742 * M, 216 * M, 94 * M, 0, 78 * M, 50 * M],
-    responsable: "Germán T.",
-    diasSinGestion: 4,
-    compromiso: null,
-    limite: null,
-    estado: { nom: EST_META.conciliado.chipTxt, sev: EST_META.conciliado.chip }
-  }
-];
-
-/* ---------- Detalle de cada grupo (modal de gestión) ---------- */
+/* ---------- Personas ---------- */
 
 export const WALLET_PEOPLE: Record<string, IWalletPerson> = {
   cosorio: { id: "cosorio", nombre: "Cristina Osorio", iniciales: "CO" },
@@ -180,6 +126,245 @@ export const WALLET_PEOPLE: Record<string, IWalletPerson> = {
   backoffice: { id: "backoffice", nombre: "Back Office", iniciales: "BO" },
   comercial: { id: "comercial", nombre: "Comercial", iniciales: "CM" }
 };
+
+/** Áreas, no personas: su nombre no se acorta a "Nombre A.". */
+const AREAS = new Set(["backoffice", "comercial"]);
+
+/** "Cristina Osorio" → "Cristina O.", igual que PersonBadge en modo mini. */
+const mini = (p: IWalletPerson): string => {
+  if (AREAS.has(p.id)) return p.nombre;
+  const [nombre, apellido] = p.nombre.split(" ");
+  return apellido ? `${nombre} ${apellido[0]}.` : nombre;
+};
+
+const EJECUTIVO_POR_CLIENTE: Record<string, IWalletPerson> = {
+  C001: WALLET_PEOPLE.cosorio,
+  C002: WALLET_PEOPLE.cosorio,
+  C003: WALLET_PEOPLE.mbermudez,
+  C004: WALLET_PEOPLE.gtorres
+};
+
+/* ---------- Semillas de los grupos ---------- */
+
+/** Una novedad abierta. `peso` es su parte del bucket "novedad" del cliente. */
+interface NovedadSeed {
+  id: string;
+  peso: number;
+  detalle: string;
+  responsable: IWalletPerson;
+  diasSinGestion: number;
+  compromiso: Date;
+  limite: Date;
+  estado: { nom: string; sev: Sev };
+}
+
+/** Novedades por cliente. Los pesos de cada cliente deben sumar 1. */
+const NOVEDADES: Record<string, NovedadSeed[]> = {
+  C001: [
+    {
+      id: "NOV-1041",
+      peso: 0.6,
+      detalle: "Nota crédito comercial",
+      responsable: WALLET_PEOPLE.cosorio,
+      diasSinGestion: 2,
+      compromiso: new Date(2026, 8, 12),
+      limite: new Date(2026, 8, 26),
+      estado: { nom: "En gestión", sev: "idle" }
+    },
+    {
+      id: "NOV-1043",
+      peso: 0.4,
+      detalle: "Descuento no aplicado",
+      responsable: WALLET_PEOPLE.backoffice,
+      diasSinGestion: 7,
+      compromiso: new Date(2026, 8, 5),
+      limite: new Date(2026, 8, 19),
+      estado: { nom: "Esperando aprobación", sev: "warn" }
+    }
+  ],
+  C002: [
+    {
+      id: "NOV-1042",
+      peso: 0.55,
+      detalle: "Factura rechazada / sin radicar",
+      responsable: WALLET_PEOPLE.backoffice,
+      diasSinGestion: 9,
+      compromiso: new Date(2026, 7, 28),
+      limite: new Date(2026, 8, 5),
+      estado: { nom: "Esperando aprobación", sev: "warn" }
+    },
+    {
+      id: "NOV-1044",
+      peso: 0.45,
+      detalle: "Diferencia en precio",
+      responsable: WALLET_PEOPLE.cosorio,
+      diasSinGestion: 3,
+      compromiso: new Date(2026, 8, 18),
+      limite: new Date(2026, 9, 2),
+      estado: { nom: "En gestión", sev: "idle" }
+    }
+  ],
+  C003: [
+    {
+      id: "NOV-1045",
+      peso: 0.62,
+      detalle: "Faltante en la entrega",
+      responsable: WALLET_PEOPLE.mbermudez,
+      diasSinGestion: 1,
+      compromiso: new Date(2026, 8, 10),
+      limite: new Date(2026, 8, 24),
+      estado: { nom: "En gestión", sev: "idle" }
+    },
+    {
+      id: "NOV-1046",
+      peso: 0.38,
+      detalle: "Pago no identificado",
+      responsable: WALLET_PEOPLE.mbermudez,
+      diasSinGestion: 12,
+      compromiso: new Date(2026, 7, 22),
+      limite: new Date(2026, 8, 5),
+      estado: { nom: "Aprobada", sev: "ok" }
+    }
+  ],
+  C004: [
+    {
+      id: "NOV-1047",
+      peso: 1,
+      detalle: "Devolución pendiente de NC",
+      responsable: WALLET_PEOPLE.gtorres,
+      diasSinGestion: 5,
+      compromiso: new Date(2026, 8, 15),
+      limite: new Date(2026, 8, 29),
+      estado: { nom: "En gestión", sev: "idle" }
+    }
+  ]
+};
+
+const NOVEDAD_POR_ID: Record<string, NovedadSeed> = Object.fromEntries(
+  Object.values(NOVEDADES).flatMap((ns) => ns.map((n) => [n.id, n]))
+);
+
+/** Valor promedio de factura por estado, para derivar un conteo verosímil. */
+const FACTURA_PROM: Record<EstadoKey, number> = {
+  compensada: 38 * M,
+  pagada: 52 * M,
+  conciliado: 96 * M,
+  novedad: 44 * M,
+  sin_conciliar: 28 * M
+};
+
+/** Días sin gestión base de cada estado. null = nunca se ha gestionado. */
+const GESTION_EST: Record<EstadoKey, number | null> = {
+  compensada: 5,
+  pagada: 6,
+  conciliado: 4,
+  novedad: 0, // lo define cada novedad
+  sin_conciliar: null
+};
+
+/** Tope de facturas por grupo: la tabla del modal se vuelve inmanejable. */
+const MAX_FACTURAS = 60;
+
+/**
+ * Reparte un vector de tramos entre varias novedades según sus pesos. La última
+ * se lleva el sobrante, así las partes vuelven a sumar el original sin arrastrar
+ * el error de redondeo.
+ */
+function repartir(tramos: number[], pesos: number[]): number[][] {
+  const partes = pesos.map(() => tramos.map(() => 0));
+
+  tramos.forEach((monto, t) => {
+    let restante = monto;
+    pesos.forEach((peso, i) => {
+      const parte = i === pesos.length - 1 ? restante : Math.round(monto * peso);
+      partes[i][t] = parte;
+      restante -= parte;
+    });
+  });
+
+  return partes;
+}
+
+/**
+ * Conteo de facturas verosímil para un grupo. Nunca por debajo del número de
+ * tramos con saldo: buildInvoices necesita al menos un cupo por tramo.
+ */
+const contarFacturas = (tramos: number[], monto: number, estado: EstadoKey): number => {
+  const conSaldo = tramos.filter((t) => t > 0).length;
+  return Math.max(conSaldo, Math.min(MAX_FACTURAS, Math.round(monto / FACTURA_PROM[estado])));
+};
+
+/** Un grupo por cliente × estado; el bucket de novedad se abre en sus novedades. */
+function derivarGrupos(rows: IWalletClientRow[]): IWalletGroupRow[] {
+  const grupos: IWalletGroupRow[] = [];
+
+  rows.forEach((cliente, iCliente) => {
+    const ejecutivo = EJECUTIVO_POR_CLIENTE[cliente.id];
+
+    ORDEN_EST.forEach((estado) => {
+      const tramos = cliente.tramos.map((c) => c[estado]);
+      const monto = tramos.reduce((a, b) => a + b, 0);
+      if (monto === 0) return;
+
+      if (estado === "novedad") {
+        const seeds = NOVEDADES[cliente.id] ?? [];
+        const partes = repartir(
+          tramos,
+          seeds.map((n) => n.peso)
+        );
+
+        seeds.forEach((nov, i) => {
+          const suyos = partes[i];
+          const suMonto = suyos.reduce((a, b) => a + b, 0);
+          if (suMonto === 0) return;
+
+          grupos.push({
+            clave: nov.id,
+            clienteId: cliente.id,
+            tipo: "novedad",
+            novedadId: nov.id,
+            detalle: nov.detalle,
+            cliente: cliente.nombre,
+            facturas: contarFacturas(suyos, suMonto, "novedad"),
+            monto: suMonto,
+            tramos: suyos,
+            responsable: mini(nov.responsable),
+            diasSinGestion: nov.diasSinGestion,
+            compromiso: fmtDc(nov.compromiso),
+            limite: fmtDc(nov.limite),
+            estado: nov.estado
+          });
+        });
+        return;
+      }
+
+      const base = GESTION_EST[estado];
+
+      grupos.push({
+        clave: `${cliente.id}|${estado}`,
+        clienteId: cliente.id,
+        tipo: estado,
+        detalle: EST_META[estado].corta,
+        cliente: cliente.nombre,
+        facturas: contarFacturas(tramos, monto, estado),
+        monto,
+        tramos,
+        // Sin conciliar es justamente lo que nadie ha tomado.
+        responsable: estado === "sin_conciliar" ? null : mini(ejecutivo),
+        diasSinGestion: base === null ? null : base + (iCliente % 3),
+        compromiso: null,
+        limite: null,
+        estado: { nom: EST_META[estado].chipTxt, sev: EST_META[estado].chip }
+      });
+    });
+  });
+
+  return grupos;
+}
+
+export const WALLET_GROUP_ROWS: IWalletGroupRow[] = derivarGrupos(WALLET_CLIENT_ROWS);
+
+/* ---------- Detalle de cada grupo (modal de gestión) ---------- */
 
 /**
  * Deriva las facturas de un grupo a partir de su reparto por tramo, para que
@@ -233,24 +418,12 @@ function buildInvoices(
   return facturas;
 }
 
-export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = {
+/**
+ * Bitácora y tickets escritos a mano. Lo demás del detalle se deriva del grupo,
+ * así que un grupo sin narrativa igual abre el modal, sólo que sin historia.
+ */
+const NARRATIVA: Record<string, Pick<IWalletGroupDetail, "bitacora" | "tickets">> = {
   "NOV-1041": {
-    clave: "NOV-1041",
-    tipo: "novedad",
-    novedad: {
-      id: "NOV-1041",
-      tipoNom: "Nota crédito comercial",
-      estado: { nom: "En gestión", sev: "idle" },
-      compromiso: new Date(2026, 8, 12),
-      limite: new Date(2026, 8, 26),
-      responsable: WALLET_PEOPLE.cosorio,
-      cerrada: false
-    },
-    cliente: { nombre: "OXXO COLOMBIA S.A.S.", nit: "843326788" },
-    ejecutivo: WALLET_PEOPLE.cosorio,
-    monto: 412 * M,
-    tramos: [0, 168 * M, 121 * M, 49 * M, 74 * M, 0],
-    facturas: buildInvoices("NOV-1041", [0, 168 * M, 121 * M, 49 * M, 74 * M, 0], 7, 1040),
     bitacora: [
       {
         id: "b1",
@@ -295,27 +468,10 @@ export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = {
         estado: "resuelto",
         resueltoEl: dias(HOY, -12)
       }
-    ],
-    diasSinGestion: 2
+    ]
   },
 
   "NOV-1042": {
-    clave: "NOV-1042",
-    tipo: "novedad",
-    novedad: {
-      id: "NOV-1042",
-      tipoNom: "Factura rechazada / sin radicar",
-      estado: { nom: "Esperando aprobación", sev: "warn" },
-      compromiso: new Date(2026, 7, 28),
-      limite: new Date(2026, 8, 5),
-      responsable: WALLET_PEOPLE.backoffice,
-      cerrada: false
-    },
-    cliente: { nombre: "KOBA COLOMBIA S.A.S. (D1)", nit: "894204193" },
-    ejecutivo: WALLET_PEOPLE.cosorio,
-    monto: 268 * M,
-    tramos: [0, 0, 94 * M, 71 * M, 61 * M, 42 * M],
-    facturas: buildInvoices("NOV-1042", [0, 0, 94 * M, 71 * M, 61 * M, 42 * M], 4, 2070),
     bitacora: [
       {
         id: "b1",
@@ -336,7 +492,7 @@ export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = {
     tickets: [
       {
         id: "TK-4381",
-        titulo: "Reradicar las 4 facturas en el portal del cliente",
+        titulo: "Reradicar las facturas en el portal del cliente",
         comentario: "Adjuntar las remisiones firmadas junto con cada factura.",
         categoria: "Radicación o reradicación",
         responsable: WALLET_PEOPLE.backoffice,
@@ -344,41 +500,30 @@ export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = {
         estado: "abierto",
         adjuntos: [{ nombre: "remisiones-koba.zip", peso: "1,2 MB" }]
       }
-    ],
-    diasSinGestion: 9
+    ]
   },
 
-  "C003|sin_conciliar": {
-    clave: "C003|sin_conciliar",
-    tipo: "sin_conciliar",
-    cliente: { nombre: "ALMACENES ÉXITO S.A.", nit: "846874074" },
-    ejecutivo: WALLET_PEOPLE.mbermudez,
-    monto: 336 * M,
-    tramos: [98 * M, 84 * M, 61 * M, 39 * M, 28 * M, 26 * M],
-    facturas: buildInvoices(
-      "C003|sin_conciliar",
-      [98 * M, 84 * M, 61 * M, 39 * M, 28 * M, 26 * M],
-      12,
-      3110
-    ),
-    bitacora: [],
-    tickets: [],
-    diasSinGestion: null
+  "NOV-1046": {
+    bitacora: [
+      {
+        id: "b1",
+        fecha: new Date(2026, 7, 6),
+        autor: WALLET_PEOPLE.mbermudez,
+        tipo: "comentario",
+        texto: "Entra un pago sin referencia de factura; se pide el soporte a tesorería."
+      },
+      {
+        id: "b2",
+        fecha: dias(HOY, -12),
+        autor: null,
+        tipo: "evento",
+        texto: "La novedad quedó aprobada, pendiente de aplicar el cruce en SAP."
+      }
+    ],
+    tickets: []
   },
 
   "C004|conciliado": {
-    clave: "C004|conciliado",
-    tipo: "conciliado",
-    cliente: { nombre: "ARCOS DORADOS COLOMBIA S.A.S.", nit: "810162228" },
-    ejecutivo: WALLET_PEOPLE.gtorres,
-    monto: 1.18 * MM,
-    tramos: [742 * M, 216 * M, 94 * M, 0, 78 * M, 50 * M],
-    facturas: buildInvoices(
-      "C004|conciliado",
-      [742 * M, 216 * M, 94 * M, 0, 78 * M, 50 * M],
-      21,
-      4180
-    ),
     bitacora: [
       {
         id: "b1",
@@ -395,7 +540,54 @@ export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = {
         texto: "Se envía estado de cuenta al área de pagos del cliente."
       }
     ],
-    tickets: [],
-    diasSinGestion: 4
+    tickets: []
   }
 };
+
+const SIN_NARRATIVA: Pick<IWalletGroupDetail, "bitacora" | "tickets"> = {
+  bitacora: [],
+  tickets: []
+};
+
+/** Un detalle por grupo: sin él, el botón de abrir gestión no haría nada. */
+function derivarDetalles(
+  grupos: IWalletGroupRow[],
+  rows: IWalletClientRow[]
+): Record<string, IWalletGroupDetail> {
+  const clientePorId = new Map(rows.map((c) => [c.id, c]));
+
+  return Object.fromEntries(
+    grupos.map((g, i) => {
+      const cliente = clientePorId.get(g.clienteId)!;
+      const nov = g.tipo === "novedad" ? NOVEDAD_POR_ID[g.clave] : undefined;
+
+      const detalle: IWalletGroupDetail = {
+        clave: g.clave,
+        tipo: g.tipo,
+        novedad: nov && {
+          id: nov.id,
+          tipoNom: nov.detalle,
+          estado: nov.estado,
+          compromiso: nov.compromiso,
+          limite: nov.limite,
+          responsable: nov.responsable,
+          cerrada: false
+        },
+        cliente: { nombre: cliente.nombre, nit: cliente.nit },
+        ejecutivo: EJECUTIVO_POR_CLIENTE[g.clienteId],
+        monto: g.monto,
+        tramos: g.tramos,
+        facturas: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100),
+        diasSinGestion: g.diasSinGestion,
+        ...(NARRATIVA[g.clave] ?? SIN_NARRATIVA)
+      };
+
+      return [g.clave, detalle];
+    })
+  );
+}
+
+export const WALLET_GROUP_DETAILS: Record<string, IWalletGroupDetail> = derivarDetalles(
+  WALLET_GROUP_ROWS,
+  WALLET_CLIENT_ROWS
+);
