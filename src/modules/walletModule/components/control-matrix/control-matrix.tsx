@@ -21,6 +21,8 @@ interface ControlMatrixProps {
   /** Clientes que coinciden con la búsqueda, no sólo los de esta página. */
   totalClients: number;
   loading?: boolean;
+  /** Texto del estado vacío; depende de si hay búsqueda activa. */
+  emptyMessage?: string;
 }
 
 const TEXTUAL_COLS = ["cliente"];
@@ -31,7 +33,8 @@ export default function ControlMatrix({
   search,
   onSearchChange,
   totalClients,
-  loading
+  loading,
+  emptyMessage = "Ningún cliente coincide con los filtros."
 }: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
 
@@ -105,7 +108,7 @@ export default function ControlMatrix({
             {visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={9} className="p-9 text-center text-muted-foreground">
-                  Ningún cliente coincide con los filtros.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (
