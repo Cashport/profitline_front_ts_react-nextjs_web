@@ -155,11 +155,11 @@ export default function MarketAdminLoad() {
           </p>
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
-          <div className="h-10 flex-shrink-0">
+          {/* <div className="h-10 flex-shrink-0">
             <PrincipalButton onClick={() => setShowCreate(true)} icon={<Plus size={15} />}>
               Nuevo ETL
             </PrincipalButton>
-          </div>
+          </div> */}
         </div>
 
         <Table
