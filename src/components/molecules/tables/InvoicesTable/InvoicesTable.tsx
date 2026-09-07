@@ -43,7 +43,7 @@ export const InvoicesTable = ({
   fetchData: _fetchData,
   selectedRows,
   openInvoiceDetail,
-  isSearchActive = false,
+  isSearchActive: _isSearchActive = false,
   onOpenPaymentAgreement
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
@@ -115,9 +115,12 @@ export const InvoicesTable = ({
   };
 
   const allInvoiceIds = data.invoices.map((invoice) => invoice.id);
+  // selectedRowKeys can hold ids from other status tables, so scope the header state to this table
+  const selectedKeys = new Set(selectedRowKeys);
+  const selectedInTableCount = allInvoiceIds.filter((id) => selectedKeys.has(id)).length;
   const isAllInvoicesSelected =
-    allInvoiceIds.length > 0 && allInvoiceIds.every((id) => selectedRowKeys.includes(id));
-  const isAnyInvoiceSelected = selectedRowKeys.length > 0 && !isAllInvoicesSelected;
+    allInvoiceIds.length > 0 && selectedInTableCount === allInvoiceIds.length;
+  const isAnyInvoiceSelected = selectedInTableCount > 0 && !isAllInvoicesSelected;
 
   const handleSelectAllAcrossPages = (checked: boolean) => {
     if (checked) {
@@ -137,15 +140,13 @@ export const InvoicesTable = ({
   const rowSelection: TableProps<IInvoice>["rowSelection"] = {
     selectedRowKeys,
     onChange: onSelectChange,
-    ...(isSearchActive && {
-      columnTitle: (
-        <Checkbox
-          checked={isAllInvoicesSelected}
-          indeterminate={isAnyInvoiceSelected}
-          onChange={(e) => handleSelectAllAcrossPages(e.target.checked)}
-        />
-      )
-    })
+    columnTitle: (
+      <Checkbox
+        checked={isAllInvoicesSelected}
+        indeterminate={isAnyInvoiceSelected}
+        onChange={(e) => handleSelectAllAcrossPages(e.target.checked)}
+      />
+    )
   };
 
   const columns: TableProps<IInvoice>["columns"] = [
