@@ -22,3 +22,31 @@ export const corto = (n: string): string =>
   n.replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
 
 export const pct = (part: number, total: number): number => (total ? (part / total) * 100 : 0);
+
+/* ---------- Fechas ----------
+   Todo se mide contra la fecha de corte de la carga, no contra el reloj del
+   navegador: así la vista es la misma para todos hasta el siguiente corte. */
+
+/** Fecha de corte. En producción viene del backend, igual que FECHA_CORTE. */
+export const HOY = new Date(2026, 7, 31);
+
+/** Suma (o resta) días a una fecha, sin mutar la original. */
+export const dias = (d: Date, n: number): Date => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
+
+const pad = (n: number): string => String(n).padStart(2, "0");
+
+/** dd/mm/aaaa */
+export const fmtD = (d: Date): string =>
+  `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+/** dd/mm/aa */
+export const fmtDc = (d: Date): string =>
+  `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)}`;
+
+/** Días de `a` a `b`: positivo si `b` es posterior. */
+export const diasEntre = (a: Date, b: Date): number =>
+  Math.round((b.getTime() - a.getTime()) / 86400000);

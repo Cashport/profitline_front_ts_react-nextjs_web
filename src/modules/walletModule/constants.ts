@@ -78,6 +78,26 @@ export const TRAMO_BG = [
 /** Fecha de corte de la carga. En producción viene del backend. */
 export const FECHA_CORTE = "Corte 31/08/2026 · 06:40";
 
+/** Días de mora representativos de cada tramo, para derivar vencimientos. */
+export const TRAMO_DIAS = [-10, 15, 45, 75, 105, 150];
+
+/** Categorías de ticket. En producción vienen de un endpoint de configuración. */
+export const CATEGORIAS = [
+  { value: "llamada", label: "Llamada al cliente" },
+  { value: "correo", label: "Correo o seguimiento escrito" },
+  { value: "visita", label: "Visita o reunión" },
+  { value: "radicacion", label: "Radicación o reradicación" },
+  { value: "backoffice", label: "Solicitud a Back Office" },
+  { value: "aprobacion", label: "Aprobación comercial o RGM" },
+  { value: "nc", label: "Nota crédito" },
+  { value: "conciliacion", label: "Conciliación de saldos" },
+  { value: "aplicacion", label: "Aplicación o cruce en SAP" },
+  { value: "acuerdo", label: "Acuerdo de pago" },
+  { value: "escalamiento", label: "Escalamiento interno" },
+  { value: "soporte", label: "Documentación y soportes" },
+  { value: "logistica", label: "Reclamación a logística" }
+];
+
 /** Filtros de la barra superior. Sin opciones todavía: la data llega con el API. */
 export const WALLET_FILTERS = [
   { key: "coordinadores", label: "Todos los coordinadores" },

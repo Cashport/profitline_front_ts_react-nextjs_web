@@ -60,3 +60,80 @@ export interface SortState {
   col: string;
   dir: "asc" | "desc";
 }
+
+/* ---------- Detalle de un grupo (modal de gestión) ---------- */
+
+/** Ejecutivo, coordinador o área a la que se le asigna algo. */
+export interface IWalletPerson {
+  id: string;
+  nombre: string;
+  iniciales: string;
+}
+
+export interface IWalletAttachment {
+  nombre: string;
+  peso: string;
+}
+
+/** Una factura dentro de un grupo. `dias` > 0 significa vencida. */
+export interface IWalletInvoice {
+  id: string;
+  doc: string;
+  vence: Date;
+  dias: number;
+  tramo: TramoIndex;
+  saldo: number;
+}
+
+export interface IWalletTicket {
+  id: string;
+  titulo: string;
+  comentario?: string;
+  /** Etiqueta de la categoría, ya resuelta contra el catálogo. */
+  categoria?: string;
+  responsable: IWalletPerson;
+  deadline: Date;
+  estado: "abierto" | "resuelto";
+  resueltoEl?: Date;
+  adjuntos?: IWalletAttachment[];
+}
+
+export type TimelineKind = "comentario" | "adjunto" | "evento" | "ticket" | "ticket_ok";
+
+/** Entrada de la bitácora del grupo. `autor` null = el sistema. */
+export interface IWalletTimelineEntry {
+  id: string;
+  fecha: Date;
+  autor: IWalletPerson | null;
+  tipo: TimelineKind;
+  texto: string;
+  ticketId?: string;
+  adjuntos?: IWalletAttachment[];
+}
+
+/** Datos de la novedad cuando el grupo es de tipo "novedad". */
+export interface IWalletNovedad {
+  id: string;
+  /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
+  tipoNom: string;
+  estado: { nom: string; sev: Sev };
+  compromiso: Date;
+  limite: Date;
+  responsable: IWalletPerson | null;
+  cerrada: boolean;
+}
+
+/** Todo lo que necesita el modal de gestión de un grupo. */
+export interface IWalletGroupDetail {
+  clave: string;
+  tipo: EstadoKey;
+  novedad?: IWalletNovedad;
+  cliente: { nombre: string; nit: string };
+  ejecutivo: IWalletPerson;
+  monto: number;
+  tramos: number[];
+  facturas: IWalletInvoice[];
+  bitacora: IWalletTimelineEntry[];
+  tickets: IWalletTicket[];
+  diasSinGestion: number | null;
+}

@@ -96,6 +96,14 @@
   --wallet-t4: 42 86 106;
   --wallet-t5: 18 58 75;
 
+  /* Texto legible sobre cada fondo de tramo (chips de la tabla de facturas). */
+  --wallet-t0-ink: 59 85 96;
+  --wallet-t1-ink: 30 59 70;
+  --wallet-t2-ink: 255 255 255;
+  --wallet-t3-ink: 255 255 255;
+  --wallet-t4-ink: 255 255 255;
+  --wallet-t5-ink: 255 255 255;
+
   --wallet-seg-edge: rgba(1, 24, 34, 0.14);
 }
 
@@ -112,6 +120,13 @@
   --wallet-t3: 107 162 182;
   --wallet-t4: 147 193 209;
   --wallet-t5: 196 225 235;
+
+  --wallet-t0-ink: 220 234 239;
+  --wallet-t1-ink: 255 255 255;
+  --wallet-t2-ink: 4 25 31;
+  --wallet-t3-ink: 4 25 31;
+  --wallet-t4-ink: 4 25 31;
+  --wallet-t5-ink: 4 25 31;
 
   --wallet-seg-edge: rgba(255, 255, 255, 0.16);
 }
