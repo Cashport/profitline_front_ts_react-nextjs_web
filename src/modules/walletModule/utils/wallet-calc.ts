@@ -13,6 +13,10 @@ const emptySegments = (): WalletSegments => ({
   conciliado: 0,
   novedad: 0,
   sin_conciliar: 0,
+  saldo: 0,
+  glosado: 0,
+  devolucion: 0,
+  otros: 0,
   total: 0,
   vencido: 0,
   n: 0
@@ -24,6 +28,7 @@ export function sumCells(cells: IWalletMatrixCell[]): WalletSegments {
   cells.forEach((c) => {
     ORDEN_EST.forEach((e) => (r[e] += c[e]));
     r.total += c.total;
+    r.n += c.n ?? 0;
   });
   return r;
 }
@@ -43,6 +48,7 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
     ORDEN_EST.forEach((e) => (r[e] += s[e]));
     r.total += s.total;
     r.vencido += s.vencido;
+    r.n += s.n;
   });
   return r;
 }

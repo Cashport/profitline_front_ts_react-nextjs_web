@@ -14,29 +14,42 @@ import type { IWalletClientRow, SortState } from "../../types";
 
 interface ControlMatrixProps {
   rows: IWalletClientRow[];
+  /** Texto de búsqueda actual; la resuelve el servidor, no esta tabla. */
+  search: string;
+  // eslint-disable-next-line no-unused-vars
+  onSearchChange: (value: string) => void;
+  /** Clientes que coinciden con la búsqueda, no sólo los de esta página. */
+  totalClients: number;
+  loading?: boolean;
 }
 
 const TEXTUAL_COLS = ["cliente"];
 
 /** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
-export default function ControlMatrix({ rows }: ControlMatrixProps) {
+export default function ControlMatrix({
+  rows,
+  search,
+  onSearchChange,
+  totalClients,
+  loading
+}: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
-  const [query, setQuery] = useState("");
 
-  const visibleRows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? rows.filter((r) => `${r.nombre} ${r.nit} ${r.ejecutivo}`.toLowerCase().includes(q))
-      : rows;
-
-    return ordenar(filtered, sort, (row) => {
-      if (sort.col === "cliente") return row.nombre;
-      const g = rowSegments(row);
-      if (sort.col === "total") return g.total;
-      if (sort.col === "venc") return pct(g.vencido, g.total);
-      return row.tramos[Number(sort.col)]?.total ?? 0;
-    });
-  }, [rows, sort, query]);
+  // La búsqueda NO se filtra aquí a propósito: la tabla sólo tiene la página
+  // cargada (50 de miles de clientes), así que filtrar en el navegador daría
+  // "sin resultados" para clientes que sí existen. La resuelve el servidor
+  // sobre la foto completa.
+  const visibleRows = useMemo(
+    () =>
+      ordenar(rows, sort, (row) => {
+        if (sort.col === "cliente") return row.nombre;
+        const g = rowSegments(row);
+        if (sort.col === "total") return g.total;
+        if (sort.col === "venc") return pct(g.vencido, g.total);
+        return row.tramos[Number(sort.col)]?.total ?? 0;
+      }),
+    [rows, sort]
+  );
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
 
@@ -54,9 +67,17 @@ export default function ControlMatrix({ rows }: ControlMatrixProps) {
         <div className="ml-auto w-full max-w-[400px]">
           <UiSearchInput
             id="wallet-matrix-search"
-            placeholder="Buscar cliente, factura o ejecutivo…"
-            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
+          {search.trim() && (
+            <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+              {loading
+                ? "Buscando…"
+                : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"} coinciden`}
+            </p>
+          )}
         </div>
       </div>
 
