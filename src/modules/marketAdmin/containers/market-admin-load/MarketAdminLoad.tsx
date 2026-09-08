@@ -71,8 +71,12 @@ export default function MarketAdminLoad() {
     }
   };
 
-  const descargarTemplate = (nombre: string) => {
-    showMessage("info", `Descargando plantilla para "${nombre}"...`);
+  const descargarTemplate = (loader: IProfitLoader) => {
+    if (!loader.url_s3_template) {
+      showMessage("error", "No hay plantilla disponible para este ETL.");
+      return;
+    }
+    window.open(loader.url_s3_template, "_blank", "noopener,noreferrer");
   };
 
   const columns: ColumnsType<IProfitLoader> = [
@@ -135,7 +139,7 @@ export default function MarketAdminLoad() {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => descargarTemplate(loader.display_name)}
+            onClick={() => descargarTemplate(loader)}
             title="Descargar template"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >

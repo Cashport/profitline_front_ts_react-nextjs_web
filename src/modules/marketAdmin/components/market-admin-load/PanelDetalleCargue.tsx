@@ -8,6 +8,7 @@ import {
   useProfitLoader,
   useProfitLoaderTimeline
 } from "@/modules/marketAdmin/hooks/useProfitLoaders";
+import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
 import { EstadoPill, formatDateTime, statusColorClasses } from "./dataLoadUtils";
 
 type Props = {
@@ -16,7 +17,7 @@ type Props = {
   isUploading?: boolean;
   onClose: () => void;
   onUpload: (id: number) => void;
-  onDownloadTemplate: (nombre: string) => void;
+  onDownloadTemplate: (loader: IProfitLoader) => void;
 };
 
 const sectionLabelClass = "text-xs font-semibold text-[#999999] uppercase tracking-wide mb-1";
@@ -126,7 +127,7 @@ export default function PanelDetalleCargue({
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => onDownloadTemplate(loader.display_name)}
+                  onClick={() => onDownloadTemplate(loader)}
                   className="flex items-center justify-center gap-1.5 flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
                 >
                   <Download size={14} /> Template
