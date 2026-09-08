@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, User, Package, Tag, ChevronRight } from "lucide-react";
+import { Users, User, Package, Tag, UploadCloud, ChevronRight } from "lucide-react";
 
 type Section = {
   href: string;
@@ -35,6 +35,12 @@ const sections: Section[] = [
     icon: Tag,
     label: "Descuentos y bonificados",
     description: "Gestiona descuentos y bonificados: reglas, fechas, estado y categoría."
+  },
+  {
+    href: "/market-admin/load",
+    icon: UploadCloud,
+    label: "Cargue de información",
+    description: "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
   }
 ];
 
