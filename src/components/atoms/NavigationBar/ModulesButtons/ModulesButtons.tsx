@@ -13,7 +13,8 @@ import {
   ClipboardText,
   ListChecks,
   ArrowCounterClockwise,
-  TextIndent
+  TextIndent,
+  Ticket
 } from "phosphor-react";
 import {
   ChatCircleDots,
@@ -382,6 +383,19 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             icon={<TextIndent size={iconSize} />}
             className={path.startsWith("/novelties") ? styles.buttonIcon : styles.buttonIconActive}
             onClick={(e) => handleNavClick(e, "/novelties")}
+          />
+        </Link>
+      )}
+
+      {/* Tickets */}
+      {checkUserViewPermissions(project, "Tickets") && (
+        <Link href="/tickets" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Ticket size={iconSize} />}
+            className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/tickets")}
           />
         </Link>
       )}

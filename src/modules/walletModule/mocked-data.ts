@@ -20,6 +20,7 @@ import {
   IWalletMatrixCell,
   IWalletPerson,
   IWalletSummary,
+  IWalletTicket,
   Sev,
   TramoIndex
 } from "./types";
@@ -549,6 +550,86 @@ const SIN_NARRATIVA: Pick<IWalletGroupDetail, "bitacora" | "tickets"> = {
   tickets: []
 };
 
+/* ---------- Tickets derivados ----------
+   La bandeja de /tickets lista los tickets de todos los grupos, así que se
+   siembran aquí y no allá: el detalle del grupo es su único dueño y las dos
+   vistas no se pueden contradecir. Los escritos a mano en NARRATIVA se
+   conservan; estos se numeran TK-24xx para no chocar con ellos. */
+
+/** Acción y categoría de cada ticket derivado. */
+const ACCIONES: { titulo: string; categoria: string }[] = [
+  { titulo: "Enviar soporte a aprobación comercial", categoria: "Aprobación comercial o RGM" },
+  { titulo: "Confirmar la aprobación por correo", categoria: "Correo o seguimiento escrito" },
+  { titulo: "Radicar la novedad en el formulario de Back Office", categoria: "Solicitud a Back Office" },
+  { titulo: "Solicitar la anulación de la factura", categoria: "Radicación o reradicación" },
+  { titulo: "Confirmar la nueva radicación", categoria: "Radicación o reradicación" },
+  { titulo: "Aplicar el cruce en el módulo de aplicación", categoria: "Aplicación o cruce en SAP" },
+  { titulo: "Llamar antes del vencimiento", categoria: "Acuerdo de pago" },
+  { titulo: "Solicitar el detalle de pago al cliente", categoria: "Conciliación de saldos" },
+  { titulo: "Recibir el acta de la transportadora", categoria: "Reclamación a logística" },
+  { titulo: "Reprogramar con soporte", categoria: "Acuerdo de pago" },
+  { titulo: "Validar que el saldo quede en cero", categoria: "Aplicación o cruce en SAP" },
+  { titulo: "Enviar el estado de cuenta al área de pagos", categoria: "Correo o seguimiento escrito" },
+  { titulo: "Agendar cita de conciliación", categoria: "Visita o reunión" },
+  { titulo: "Escalar el caso al coordinador", categoria: "Escalamiento interno" },
+  { titulo: "Adjuntar los soportes al caso", categoria: "Documentación y soportes" }
+];
+
+/**
+ * Vencimientos de los tickets abiertos que no cuelgan de una novedad. Cubren a
+ * propósito los cinco carriles del tablero: vencido, hoy, esta semana y después.
+ */
+const DEADLINE_OFFSETS = [-14, -6, 0, 2, 5, 9, 24];
+
+/**
+ * Tickets de un grupo. Deriva de su índice, sin aleatoriedad, igual que el
+ * resto del archivo. Sólo abre uno nuevo si el grupo no traía ya uno abierto.
+ */
+function derivarTickets(
+  nov: NovedadSeed | undefined,
+  ejecutivo: IWalletPerson,
+  yaEscritos: IWalletTicket[],
+  i: number
+): IWalletTicket[] {
+  const base = 2400 + i * 7;
+  const responsable = nov?.responsable ?? ejecutivo;
+  const accion = (k: number) => ACCIONES[(i * 3 + k) % ACCIONES.length];
+  const tickets: IWalletTicket[] = [];
+
+  // Lo que queda por hacer: uno solo, el que marca el compromiso del grupo.
+  const abrir = nov ? true : i % 3 !== 0;
+  if (abrir && !yaEscritos.some((t) => t.estado === "abierto")) {
+    const a = accion(0);
+    tickets.push({
+      id: `TK-${base + 1}`,
+      titulo: a.titulo,
+      categoria: a.categoria,
+      responsable,
+      deadline: nov ? nov.compromiso : dias(HOY, DEADLINE_OFFSETS[i % DEADLINE_OFFSETS.length]),
+      estado: "abierto"
+    });
+  }
+
+  // Historial: uno siempre en las novedades, y en el resto uno de cada dos.
+  const resueltos = nov ? 1 + (i % 3 === 0 ? 1 : 0) : i % 2 === 0 ? 1 : 0;
+  for (let k = 0; k < resueltos; k++) {
+    const a = accion(k + 1);
+    const deadline = dias(HOY, -(8 + ((i * 5 + k * 11) % 22)));
+    tickets.push({
+      id: `TK-${base + 2 + k}`,
+      titulo: a.titulo,
+      categoria: a.categoria,
+      responsable,
+      deadline,
+      estado: "resuelto",
+      // Uno de cada tres se cerró después del compromiso: alimenta "fuera de fecha".
+      resueltoEl: dias(deadline, (i + k) % 3 === 0 ? 2 : -1)
+    });
+  }
+
+  return tickets;
+}
+
 /** Un detalle por grupo: sin él, el botón de abrir gestión no haría nada. */
 function derivarDetalles(
   grupos: IWalletGroupRow[],
@@ -560,6 +641,8 @@ function derivarDetalles(
     grupos.map((g, i) => {
       const cliente = clientePorId.get(g.clienteId)!;
       const nov = g.tipo === "novedad" ? NOVEDAD_POR_ID[g.clave] : undefined;
+      const ejecutivo = EJECUTIVO_POR_CLIENTE[g.clienteId];
+      const narrativa = NARRATIVA[g.clave] ?? SIN_NARRATIVA;
 
       const detalle: IWalletGroupDetail = {
         clave: g.clave,
@@ -574,12 +657,13 @@ function derivarDetalles(
           cerrada: false
         },
         cliente: { nombre: cliente.nombre, nit: cliente.nit },
-        ejecutivo: EJECUTIVO_POR_CLIENTE[g.clienteId],
+        ejecutivo,
         monto: g.monto,
         tramos: g.tramos,
         facturas: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100),
         diasSinGestion: g.diasSinGestion,
-        ...(NARRATIVA[g.clave] ?? SIN_NARRATIVA)
+        bitacora: narrativa.bitacora,
+        tickets: [...narrativa.tickets, ...derivarTickets(nov, ejecutivo, narrativa.tickets, i)]
       };
 
       return [g.clave, detalle];
