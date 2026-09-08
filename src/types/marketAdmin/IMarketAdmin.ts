@@ -438,6 +438,10 @@ export interface IProfitLoader {
   version: string;
   created_at: string;
   updated_at: string;
+  s3_url: string;
+  last_file_date: string;
+  url_s3_template?: string;
+  file_name?: string;
 }
 
 export interface IProfitLoaderExecution {

@@ -6,6 +6,8 @@ import { useSWRConfig } from "swr";
 import { ChevronLeft, Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-load/PanelDetalleCargue";
@@ -19,6 +21,8 @@ import {
 import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+
+dayjs.extend(utc);
 
 const PAGE_SIZE = 20;
 
@@ -89,15 +93,38 @@ export default function MarketAdminLoad() {
       title: "Último archivo cargado",
       key: "ultimoArchivo",
       onHeaderCell: headerCell,
-      // La lista de loaders no trae este dato; solo está disponible en el detalle (timeline).
-      render: () => <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>
+      render: (_, loader) => {
+        if (!loader.file_name) {
+          return <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>;
+        }
+        if (!loader.s3_url) {
+          return <span className="text-sm text-[#141414]">{loader.file_name}</span>;
+        }
+        return (
+          <a
+            href={loader.s3_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[#141414] underline hover:text-[#2A2A2A]"
+          >
+            {loader.file_name}
+          </a>
+        );
+      }
     },
     {
       title: "Último cargue",
       key: "ultimoCargue",
-      width: 140,
+      width: 170,
       onHeaderCell: headerCell,
-      render: () => <span className="text-sm text-[#BBBBBB]">—</span>
+      render: (_, loader) => {
+        if (!loader.last_file_date) {
+          return <span className="text-sm text-[#BBBBBB]">—</span>;
+        }
+        // Viene en UTC (timezone 0): se convierte a la hora local del navegador.
+        const formatted = dayjs.utc(loader.last_file_date).local().format("DD/MM/YYYY HH:mm:ss");
+        return <span className="text-sm text-[#141414]">{formatted}</span>;
+      }
     },
     {
       title: "",
