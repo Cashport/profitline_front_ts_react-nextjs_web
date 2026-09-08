@@ -104,9 +104,9 @@
   --wallet-t4-ink: 255 255 255;
   --wallet-t5-ink: 255 255 255;
 
-  /* Selección del drilldown: celda elegida en la matriz y fila abierta. */
-  --wallet-accent: 255 85 0;
-  --wallet-accent-soft: 255 239 231;
+  /* Selección del drilldown y estados activos. Verde de marca (--cashport-green). */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 246 251 215;
 
   --wallet-seg-edge: rgba(1, 24, 34, 0.14);
 }
@@ -132,8 +132,9 @@
   --wallet-t4-ink: 4 25 31;
   --wallet-t5-ink: 4 25 31;
 
-  --wallet-accent: 255 106 34;
-  --wallet-accent-soft: 58 27 12;
+  /* El verde no cambia entre temas; sólo se oscurece su fondo suave. */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 51 55 28;
 
   --wallet-seg-edge: rgba(255, 255, 255, 0.16);
 }

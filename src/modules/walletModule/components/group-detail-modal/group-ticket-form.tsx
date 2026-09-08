@@ -158,7 +158,7 @@ export default function GroupTicketForm({
           <button
             type="submit"
             disabled={!titulo.trim()}
-            className="rounded-md bg-wallet-nov px-2.5 py-[3px] text-[11.5px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-md bg-primary px-2.5 py-[3px] text-[11.5px] font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
           >
             Crear ticket
           </button>

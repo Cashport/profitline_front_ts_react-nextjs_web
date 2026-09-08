@@ -26,6 +26,8 @@ interface GroupDetailModalProps {
   /** Clave del grupo abierto; null cierra el modal. */
   clave: string | null;
   onClose: () => void;
+  /** Detalle ya resuelto. Sin él se busca la clave en los datos de cartera. */
+  detail?: IWalletGroupDetail | null;
 }
 
 type Tab = "gestion" | "facturas";
@@ -46,14 +48,15 @@ const TabButton = ({
     onClick={onClick}
     className={cn(
       "-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 pb-3 pt-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
-      active && "border-wallet-nov text-foreground"
+      active && "border-primary text-foreground"
     )}
   >
     {children}
     <span
       className={cn(
         "rounded-full px-1.5 text-[10.5px] font-bold leading-[17px] tabular-nums",
-        active ? "bg-wallet-nov/15 text-wallet-nov" : "bg-muted text-muted-foreground"
+        // El número va en color normal: el lima como texto no se lee.
+        active ? "bg-primary/20 text-foreground" : "bg-muted text-muted-foreground"
       )}
     >
       {count}
@@ -205,13 +208,13 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
 }
 
 /** Modal de gestión de un grupo de facturas. */
-export default function GroupDetailModal({ clave, onClose }: GroupDetailModalProps) {
+export default function GroupDetailModal({ clave, onClose, detail }: GroupDetailModalProps) {
   const { resolvedTheme } = useWalletTheme();
-  const detail = clave ? WALLET_GROUP_DETAILS[clave] : undefined;
+  const resolved = detail ?? (clave ? WALLET_GROUP_DETAILS[clave] : undefined);
 
   return (
     <Modal
-      open={!!detail}
+      open={!!resolved}
       onCancel={onClose}
       footer={null}
       closeIcon={null}
@@ -224,7 +227,7 @@ export default function GroupDetailModal({ clave, onClose }: GroupDetailModalPro
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: "hidden" } }}
     >
-      {detail && <GroupDetailBody key={detail.clave} detail={detail} onClose={onClose} />}
+      {resolved && <GroupDetailBody key={resolved.clave} detail={resolved} onClose={onClose} />}
     </Modal>
   );
 }

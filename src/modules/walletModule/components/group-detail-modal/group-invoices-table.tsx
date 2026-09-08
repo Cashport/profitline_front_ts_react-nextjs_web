@@ -55,7 +55,7 @@ export default function GroupInvoicesTable({
                 <input
                   type="checkbox"
                   aria-label="Seleccionar todo"
-                  className="accent-wallet-nov"
+                  className="accent-primary"
                   checked={todasVisiblesSel}
                   onChange={(e) => toggleAll(e.target.checked)}
                 />
@@ -89,14 +89,14 @@ export default function GroupInvoicesTable({
                   key={f.id}
                   className={cn(
                     "border-b border-border last:border-b-0",
-                    selected.includes(f.id) && "bg-wallet-nov/5"
+                    selected.includes(f.id) && "bg-wallet-accent-soft"
                   )}
                 >
                   <td className="px-3 py-2.5">
                     <input
                       type="checkbox"
                       aria-label={`Seleccionar ${f.doc}`}
-                      className="accent-wallet-nov"
+                      className="accent-primary"
                       checked={selected.includes(f.id)}
                       onChange={() => toggle(f.id)}
                     />

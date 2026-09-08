@@ -22,7 +22,7 @@ interface ControlMatrixProps {
 
 const TEXTUAL_COLS = ["cliente"];
 
-/** Celda seleccionada: naranja por dentro, sin mover el layout de la tabla. */
+/** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
 const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accent";
 
 /** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
@@ -123,7 +123,8 @@ export default function ControlMatrix({
                       )}
                     >
                       <span className="font-semibold text-foreground">{row.nombre}</span>
-                      <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-wallet-accent opacity-0 transition-opacity group-hover/name:opacity-100">
+                      {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
+                      <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
                         ver grupos
                       </span>
                       <div className="text-[11.5px] text-muted-foreground">
