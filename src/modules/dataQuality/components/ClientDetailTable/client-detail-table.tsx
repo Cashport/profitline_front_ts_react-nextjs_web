@@ -1,7 +1,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Dropdown, Spin, message } from "antd";
 
@@ -16,6 +16,7 @@ import {
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
+import { ModalFileHistory } from "../ModalFileHistory";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -30,6 +31,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IClientDetailArchiveClient } from "@/types/dataQuality/IDataQuality";
 import { Receipt } from "phosphor-react";
+import { Eye } from "@phosphor-icons/react";
 
 dayjs.extend(timezone);
 dayjs.extend(utc);
@@ -48,11 +50,11 @@ const bytesToMB = (bytes: number): string => {
 };
 
 const formatDate = (isoDateString: string): string => {
-  return dayjs(isoDateString).tz('America/Bogota').format("YYYY-MM-DD");
+  return dayjs(isoDateString).tz("America/Bogota").format("YYYY-MM-DD");
 };
 
 const formatDateTime = (isoDateString: string): string => {
-  return dayjs(isoDateString).tz('America/Bogota').format("YYYY-MM-DD HH:mm");
+  return dayjs(isoDateString).tz("America/Bogota").format("YYYY-MM-DD HH:mm");
 };
 
 export function ClientDetailTable({
@@ -72,6 +74,9 @@ export function ClientDetailTable({
   const [activeFileId, setActiveFileId] = useState<number | null>(null);
   const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState(false);
   const [fileURL, setFileURL] = useState("");
+  const [isFileHistoryModalOpen, setIsFileHistoryModalOpen] = useState(false);
+  // Estado propio: los otros modales resetean activeFileId a null al cerrarse.
+  const [historyFile, setHistoryFile] = useState<IClientDetailArchiveClient | null>(null);
 
   const handleUploadIntake = (id: number) => {
     setActiveFileId(id);
@@ -283,6 +288,11 @@ export function ClientDetailTable({
     input.click();
   };
 
+  const handleOpenFileHistoryModal = (file: IClientDetailArchiveClient) => {
+    setHistoryFile(file);
+    setIsFileHistoryModalOpen(true);
+  };
+
   return (
     <div>
       <Spin spinning={!!loading}>
@@ -392,6 +402,14 @@ export function ClientDetailTable({
                         <Receipt className="w-4 h-4" />
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleOpenFileHistoryModal(file)}
+                      className="bg-[#f7f7f7] border-[#DDDDDD] hover:bg-[#f7f7f7] hover:border-black p-1 !p-0 size-7"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                     <Dropdown
                       menu={{
                         items: [
@@ -542,6 +560,14 @@ export function ClientDetailTable({
         handleCloseModal={setIsModalFileDetailOpen}
         title="Soporte auditoría"
         url={fileURL}
+      />
+      <ModalFileHistory
+        isOpen={isFileHistoryModalOpen}
+        onClose={() => {
+          setIsFileHistoryModalOpen(false);
+          setHistoryFile(null);
+        }}
+        file={historyFile}
       />
     </div>
   );
