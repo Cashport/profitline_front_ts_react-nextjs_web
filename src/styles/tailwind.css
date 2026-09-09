@@ -87,7 +87,15 @@
   --wallet-pag: 15 163 177;
   --wallet-conc: 37 99 201;
   --wallet-nov: 255 85 0;
-  --wallet-risk: 177 187 193;
+  /* Violeta y bronce, no grises: Sin conciliar, Saldo y Otros eran tres
+     neutros indistinguibles dentro de la barra apilada. Otros se queda gris.
+     El bronce de Saldo va apagado a propósito: en ámbar saturado se confundía
+     con el lima de Compensada, que está a 25° de matiz. */
+  --wallet-risk: 124 58 237;
+  --wallet-saldo: 161 98 7;
+  --wallet-glosa: 0 168 220;
+  --wallet-devol: 214 6 93;
+  --wallet-otros: 120 130 140;
 
   --wallet-t0: 203 216 221;
   --wallet-t1: 157 182 191;
@@ -104,6 +112,10 @@
   --wallet-t4-ink: 255 255 255;
   --wallet-t5-ink: 255 255 255;
 
+  /* Selección del drilldown y estados activos. Verde de marca (--cashport-green). */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 246 251 215;
+
   --wallet-seg-edge: rgba(1, 24, 34, 0.14);
 }
 
@@ -112,7 +124,11 @@
   --wallet-pag: 34 184 198;
   --wallet-conc: 90 147 240;
   --wallet-nov: 255 106 34;
-  --wallet-risk: 138 160 169;
+  --wallet-risk: 167 139 250;
+  --wallet-saldo: 217 164 65;
+  --wallet-glosa: 56 205 255;
+  --wallet-devol: 255 90 140;
+  --wallet-otros: 150 160 170;
 
   --wallet-t0: 42 74 87;
   --wallet-t1: 58 101 119;
@@ -127,6 +143,10 @@
   --wallet-t3-ink: 4 25 31;
   --wallet-t4-ink: 4 25 31;
   --wallet-t5-ink: 4 25 31;
+
+  /* El verde no cambia entre temas; sólo se oscurece su fondo suave. */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 51 55 28;
 
   --wallet-seg-edge: rgba(255, 255, 255, 0.16);
 }

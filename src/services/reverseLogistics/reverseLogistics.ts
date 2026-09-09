@@ -69,13 +69,16 @@ export interface GetProfit360VisitsParams {
   fromDate?: string | null;
   toDate?: string | null;
   clientId?: string | null;
+  // Estado GUID — ?status= matches the approvals endpoint convention.
+  status?: string | null;
+  // Causal GUID — ?causal= filters by the devolucion causal picklist.
+  causal?: string | null;
 }
 
-// GET /integration/profit360/visits?page=&limit=&fromDate=&toDate=&clientId=
+// GET /integration/profit360/visits?page=&limit=&fromDate=&toDate=&clientId=&status=&causal=
 // — paginated visits list from Profit360. Each visit carries its own
 // returns/devoluciones. `page`/`limit` are required by the endpoint; the rest
-// are only sent when the user has actually picked a value. The endpoint also
-// accepts `status`, but the Devoluciones tab offers no estado filter yet.
+// are only sent when the user has actually picked a value.
 export const getProfit360Visits = async (
   params: GetProfit360VisitsParams
 ): Promise<IProfit360VisitsResponse>=> {
@@ -87,6 +90,8 @@ export const getProfit360Visits = async (
     if (params.fromDate) qs.append("fromDate", params.fromDate);
     if (params.toDate) qs.append("toDate", params.toDate);
     if (params.clientId) qs.append("clientId", params.clientId);
+    if (params.status) qs.append("estado", params.status);
+    if (params.causal) qs.append("causal", params.causal);
     const response: IProfit360VisitsResponse = await API.get(
       `/integration/profit360/visits?${qs.toString()}`
     );

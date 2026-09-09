@@ -15,7 +15,11 @@ export const ORDEN_EST: EstadoKey[] = [
   "pagada",
   "conciliado",
   "novedad",
-  "sin_conciliar"
+  "sin_conciliar",
+  "saldo",
+  "glosado",
+  "devolucion",
+  "otros"
 ];
 
 interface EstadoMeta {
@@ -62,6 +66,34 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     chip: "crit",
     chipTxt: "Sin gestión",
     corta: "Sin acuerdo ni novedad"
+  },
+  saldo: {
+    nom: "Saldo",
+    bg: "bg-wallet-saldo",
+    chip: "idle",
+    chipTxt: "Saldo",
+    corta: "Saldo a favor pendiente de cruce"
+  },
+  glosado: {
+    nom: "Glosado",
+    bg: "bg-wallet-glosa",
+    chip: "warn",
+    chipTxt: "Glosado",
+    corta: "Factura glosada por el cliente"
+  },
+  devolucion: {
+    nom: "Devolución",
+    bg: "bg-wallet-devol",
+    chip: "warn",
+    chipTxt: "Devolución",
+    corta: "Documento de devolución"
+  },
+  otros: {
+    nom: "Otros",
+    bg: "bg-wallet-otros",
+    chip: "idle",
+    chipTxt: "Otros",
+    corta: "Otros estados del catálogo"
   }
 };
 
@@ -75,7 +107,14 @@ export const TRAMO_BG = [
   "bg-wallet-t5"
 ];
 
-/** Fecha de corte de la carga. En producción viene del backend. */
+/** Texto que se muestra mientras aún no llegó el corte real del snapshot. */
+export const FECHA_CORTE_PLACEHOLDER = "Cargando corte…";
+
+/**
+ * Corte fijo de los datos simulados. La cartera ya lo toma del snapshot del
+ * API; esto lo siguen usando Torre de control y Novedades, que aún son
+ * mocks, y va emparejado con HOY en utils/format.
+ */
 export const FECHA_CORTE = "Corte 31/08/2026 · 06:40";
 
 /** Días de mora representativos de cada tramo, para derivar vencimientos. */

@@ -12,7 +12,8 @@ import { Button } from "@/modules/chat/ui/button";
 import { Alert, AlertDescription } from "@/modules/chat/ui/alert";
 import { AIProcessingInterface } from "../ai-processing-interface/ai-processing-interface";
 import {
-  uploadPurchaseOrder
+  uploadPurchaseOrder,
+  uploadPurchaseOrderToN8n
 } from "@/services/purchaseOrders/purchaseOrders";
 import { UploadDropZone } from "@/components/atoms/UploadDropZone/UploadDropZone";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -33,6 +34,9 @@ const formatFileSize = (bytes: number): string => {
 
 export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadPurchaseOrderProps) {
   const router = useRouter();
+  const selectedProject = useAppStore((state) => state.selectedProject);
+  const projectId = selectedProject?.ID;
+  const [lastN8nRequestId, setLastN8nRequestId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,10 +70,26 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
       setShowAIProcessing(true);
 
       try {
-        const response = await uploadPurchaseOrder(file);
+        if (projectId === 204) {
+          // Abbott México: flujo n8n ASÍNCRONO. Solo esperamos la respuesta HTTP
+          // del endpoint /upload-to-n8n (devuelve request_id). n8n continúa
+          // procesando el PDF en segundo plano; NO esperamos la creación de las OCs.
+          const response = await uploadPurchaseOrderToN8n(file);
+          setLastN8nRequestId(response?.request_id ?? null);
 
-        message.success("Orden cargada con éxito");
-        router.push(`/purchase-orders/${response.marketplace_order_id}`);
+          // Completar la animación visual y cerrar el modal tras un pequeño delay.
+          setTimeout(() => {
+            setShowAIProcessing(false);
+            if (onClose) onClose();
+            message.success("La orden fue enviada a procesamiento");
+          }, 1200);
+        } else {
+          // Flujo actual (Gilead y demás proyectos).
+          const response = await uploadPurchaseOrder(file);
+
+          message.success("Orden cargada con éxito");
+          router.push(`/purchase-orders/${response.marketplace_order_id}`);
+        }
       } catch (error) {
         setShowAIProcessing(false);
 
@@ -84,7 +104,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
         onFileUpload([file]);
       }
     },
-    [onFileUpload, router]
+    [onFileUpload, router, projectId]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {

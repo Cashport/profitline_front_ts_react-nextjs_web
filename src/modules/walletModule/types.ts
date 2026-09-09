@@ -1,5 +1,22 @@
-/** Estado de una factura dentro de la cartera. */
-export type EstadoKey = "compensada" | "pagada" | "conciliado" | "novedad" | "sin_conciliar";
+/**
+ * Estado de un documento dentro de la cartera.
+ *
+ * Los cinco primeros son los del diseño original. Los cuatro siguientes se
+ * agregaron al conectar el API: la cartera real trae saldos, glosas y
+ * devoluciones, y `otros` recoge cualquier estado del catálogo que no tenga
+ * un color propio. Sin ellos la barra apilada de una celda no sumaría el
+ * total de esa celda, que es justo lo que no puede pasar en este reporte.
+ */
+export type EstadoKey =
+  | "compensada"
+  | "pagada"
+  | "conciliado"
+  | "novedad"
+  | "sin_conciliar"
+  | "saldo"
+  | "glosado"
+  | "devolucion"
+  | "otros";
 
 /** Severidad visual compartida por chips y estados de novedad. */
 export type Sev = "ok" | "warn" | "crit" | "idle";
@@ -17,6 +34,8 @@ export interface WalletSegments extends Record<EstadoKey, number> {
 /** Una celda de la matriz: el cruce cliente × tramo. */
 export interface IWalletMatrixCell extends Record<EstadoKey, number> {
   total: number;
+  /** Documentos que componen la celda. */
+  n: number;
 }
 
 /** Fila de la "Matriz de control". */
@@ -32,6 +51,8 @@ export interface IWalletClientRow {
 /** Fila de "Grupos de facturas". */
 export interface IWalletGroupRow {
   clave: string;
+  /** Enlaza el grupo con IWalletClientRow.id: por aquí filtra el drilldown. */
+  clienteId: string;
   tipo: EstadoKey;
   /** Sólo para grupos de tipo "novedad". */
   novedadId?: string;
@@ -59,6 +80,12 @@ export interface IWalletSummary {
 export interface SortState {
   col: string;
   dir: "asc" | "desc";
+}
+
+/** Selección activa de la matriz. `tramo: null` = todos los tramos del cliente. */
+export interface IWalletDrilldown {
+  clienteId: string;
+  tramo: TramoIndex | null;
 }
 
 /* ---------- Detalle de un grupo (modal de gestión) ---------- */
@@ -117,8 +144,9 @@ export interface IWalletNovedad {
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
   estado: { nom: string; sev: Sev };
-  compromiso: Date;
-  limite: Date;
+  /** Null cuando la novedad viene del API: /portfolio/matrix/groups no manda fechas. */
+  compromiso: Date | null;
+  limite: Date | null;
   responsable: IWalletPerson | null;
   cerrada: boolean;
 }

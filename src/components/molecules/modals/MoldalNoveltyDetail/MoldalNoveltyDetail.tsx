@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { CaretDoubleRight, Check, X } from "phosphor-react";
-import { Button, message, Typography } from "antd";
+import { Button, message, Tag, Typography } from "antd";
 
 import { approveIncident, rejectIncident } from "@/services/resolveNovelty/resolveNovelty";
 import { useInvoices } from "@/hooks/useInvoices";
@@ -61,10 +61,10 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
 
     try {
       if (isResolving) {
-        await approveIncident(incidentData.invoice_id, noveltyId, actionData); // TODO CAMBIAR ESTO
+        await approveIncident(noveltyId, actionData);
         messageShow.success("Incidente aprobado exitosamente");
       } else {
-        await rejectIncident(incidentData.invoice_id, noveltyId, actionData); // TODO CAMBIAR ESTO
+        await rejectIncident(noveltyId, actionData);
         messageShow.success("Incidente rechazado exitosamente");
       }
       setOpenResolveModal(false);
@@ -88,10 +88,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
     return <div></div>;
   }
 
-  const hasInvoiceValues =
-    !!incidentData.invoice_cashport_value ||
-    !!incidentData.invoice_client_value ||
-    !!incidentData.invoice_amount_difference;
+  const hasDocuments = !!incidentData.documents && incidentData.documents.length > 0;
 
   return (
     <aside className={`wrapper__new  wrapper__new_hide`}>
@@ -104,7 +101,14 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         </div>
 
         <div className="header">
-          <Title level={4}>{incidentData.incident_name}</Title>
+          <Title level={4}>
+            {incidentData.incident_name}
+            {incidentData.is_closed && (
+              <Tag color="default" style={{ marginLeft: 8 }}>
+                Cerrada
+              </Tag>
+            )}
+          </Title>
           {(incidentData.status_name.toLowerCase() === "pendiente" || incidentData.status == 3) && (
             <div className="header-buttons">
               <Button onClick={() => handleOpenResolveModal(false)}>
@@ -127,7 +131,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         projectId={projectId}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}
       />
-      {hasInvoiceValues && <InfoInvoice incidentData={incidentData} />}
+      {hasDocuments && <InfoInvoice incidentData={incidentData} />}
       <EvidenceSection
         evidenceComments={incidentData.evidence_comments}
         evidenceFiles={incidentData.evidence_files}

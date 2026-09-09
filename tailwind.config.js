@@ -60,6 +60,10 @@ module.exports = {
           conc: "rgb(var(--wallet-conc) / <alpha-value>)",
           nov: "rgb(var(--wallet-nov) / <alpha-value>)",
           risk: "rgb(var(--wallet-risk) / <alpha-value>)",
+          saldo: "rgb(var(--wallet-saldo) / <alpha-value>)",
+          glosa: "rgb(var(--wallet-glosa) / <alpha-value>)",
+          devol: "rgb(var(--wallet-devol) / <alpha-value>)",
+          otros: "rgb(var(--wallet-otros) / <alpha-value>)",
           t0: "rgb(var(--wallet-t0) / <alpha-value>)",
           t1: "rgb(var(--wallet-t1) / <alpha-value>)",
           t2: "rgb(var(--wallet-t2) / <alpha-value>)",
@@ -71,7 +75,9 @@ module.exports = {
           "t2-ink": "rgb(var(--wallet-t2-ink) / <alpha-value>)",
           "t3-ink": "rgb(var(--wallet-t3-ink) / <alpha-value>)",
           "t4-ink": "rgb(var(--wallet-t4-ink) / <alpha-value>)",
-          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)"
+          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)",
+          accent: "rgb(var(--wallet-accent) / <alpha-value>)",
+          "accent-soft": "rgb(var(--wallet-accent-soft) / <alpha-value>)"
         },
         sidebar: {
           DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",

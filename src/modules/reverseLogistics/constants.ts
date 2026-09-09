@@ -62,9 +62,9 @@ export const TIPO_APROBACION_OPTIONS: { value: TipoAprobacion; label: string }[]
 // Short labels for the devolucion fase codigos. Used by the stats bar KPI
 // cards and by the Devoluciones tab to render the highest fase as the estado.
 export const FASE_LABELS: Record<TipoDevolucionCodigo, string> = {
-  F1_LOGISTICA: "Logística",
-  F2_SOLISTICA: "Solística",
-  F3_SUPPLA: "Suppla",
+  F1_LOGISTICA: "Profitline",
+  F2_SOLISTICA: "Transporte",
+  F3_SUPPLA: "Bodega",
   F4_NOTA_CREDITO: "Nota Crédito"
 };
 

@@ -6,6 +6,8 @@ import { useSWRConfig } from "swr";
 import { ChevronLeft, Download, Plus, Upload } from "lucide-react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import PanelDetalleCargue from "@/modules/marketAdmin/components/market-admin-load/PanelDetalleCargue";
@@ -19,6 +21,8 @@ import {
 import { uploadProfitLoaderFile } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IProfitLoader } from "@/types/marketAdmin/IMarketAdmin";
+
+dayjs.extend(utc);
 
 const PAGE_SIZE = 20;
 
@@ -67,8 +71,12 @@ export default function MarketAdminLoad() {
     }
   };
 
-  const descargarTemplate = (nombre: string) => {
-    showMessage("info", `Descargando plantilla para "${nombre}"...`);
+  const descargarTemplate = (loader: IProfitLoader) => {
+    if (!loader.url_s3_template) {
+      showMessage("error", "No hay plantilla disponible para este ETL.");
+      return;
+    }
+    window.open(loader.url_s3_template, "_blank", "noopener,noreferrer");
   };
 
   const columns: ColumnsType<IProfitLoader> = [
@@ -89,15 +97,38 @@ export default function MarketAdminLoad() {
       title: "Último archivo cargado",
       key: "ultimoArchivo",
       onHeaderCell: headerCell,
-      // La lista de loaders no trae este dato; solo está disponible en el detalle (timeline).
-      render: () => <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>
+      render: (_, loader) => {
+        if (!loader.file_name) {
+          return <span className="text-sm text-[#BBBBBB]">Sin cargues aún</span>;
+        }
+        if (!loader.s3_url) {
+          return <span className="text-sm text-[#141414]">{loader.file_name}</span>;
+        }
+        return (
+          <a
+            href={loader.s3_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[#141414] underline hover:text-[#2A2A2A]"
+          >
+            {loader.file_name}
+          </a>
+        );
+      }
     },
     {
       title: "Último cargue",
       key: "ultimoCargue",
-      width: 140,
+      width: 170,
       onHeaderCell: headerCell,
-      render: () => <span className="text-sm text-[#BBBBBB]">—</span>
+      render: (_, loader) => {
+        if (!loader.last_file_date) {
+          return <span className="text-sm text-[#BBBBBB]">—</span>;
+        }
+        // Viene en UTC (timezone 0): se convierte a la hora local del navegador.
+        const formatted = dayjs.utc(loader.last_file_date).local().format("DD/MM/YYYY HH:mm:ss");
+        return <span className="text-sm text-[#141414]">{formatted}</span>;
+      }
     },
     {
       title: "",
@@ -108,7 +139,7 @@ export default function MarketAdminLoad() {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => descargarTemplate(loader.display_name)}
+            onClick={() => descargarTemplate(loader)}
             title="Descargar template"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#E0E0E0] text-[#555555] hover:border-[#141414] hover:text-[#141414] transition-colors"
           >
@@ -155,11 +186,11 @@ export default function MarketAdminLoad() {
           </p>
 
           {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
-          <div className="h-10 flex-shrink-0">
+          {/* <div className="h-10 flex-shrink-0">
             <PrincipalButton onClick={() => setShowCreate(true)} icon={<Plus size={15} />}>
               Nuevo ETL
             </PrincipalButton>
-          </div>
+          </div> */}
         </div>
 
         <Table

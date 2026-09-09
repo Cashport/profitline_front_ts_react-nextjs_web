@@ -11,6 +11,7 @@ import type { IWalletInvoice } from "../../types";
 interface GroupInvoicesTableProps {
   invoices: IWalletInvoice[];
   query: string;
+  loading?: boolean;
   selected: string[];
   onSelectedChange: (ids: string[]) => void;
 }
@@ -23,6 +24,7 @@ const TH =
 export default function GroupInvoicesTable({
   invoices,
   query,
+  loading,
   selected,
   onSelectedChange
 }: GroupInvoicesTableProps) {
@@ -80,7 +82,7 @@ export default function GroupInvoicesTable({
             {visibles.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-9 text-center text-muted-foreground">
-                  Ninguna factura coincide con la búsqueda.
+                  {loading ? "Cargando facturas…" : "Ninguna factura coincide con la búsqueda."}
                 </td>
               </tr>
             ) : (

@@ -1,16 +1,9 @@
 .info-invoices {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
-    align-items: start;
     border-top: 1px solid #e8e8e8;
     padding: 16px;
-
-    .invoice-id {
-        color: #1890ff;
-        font-weight: bold;
-        cursor: pointer;
-    }
 
     .values-container {
         display: grid;
@@ -31,7 +24,51 @@
 
         .difference {
             span:last-child {
-                color: #ff4d4f;
+                color: #52c41a;
+            }
+        }
+    }
+
+    .documents-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .closed-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        color: #8c8c8c;
+    }
+
+    .documents-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .document-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: #fafafa;
+
+            &--inactive {
+                opacity: 0.6;
+            }
+        }
+
+        .document-id {
+            color: #1890ff;
+            font-weight: bold;
+
+            &.clickable {
+                cursor: pointer;
             }
         }
     }
