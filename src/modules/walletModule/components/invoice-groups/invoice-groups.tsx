@@ -7,6 +7,7 @@ import { cn } from "@/utils/utils";
 import { EST_META, TRAMOS } from "../../constants";
 import { fmtM, grp } from "../../utils/format";
 import { nextSort, ordenar } from "../../utils/wallet-calc";
+import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
 import DistBar from "../shared/dist-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusChip from "../shared/status-chip";
@@ -199,9 +200,15 @@ export default function InvoiceGroups({
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                     {fmtM(g.monto)}
                   </td>
-                  <td className="px-3 py-2.5">
-                    <DistBar tramos={g.tramos} monto={g.monto} resaltar={ti} />
-                  </td>
+                  <DetailTooltip
+                    title="Reparto por tramo"
+                    rows={tramoRows(g.tramos)}
+                    total={{ value: fmtM(g.monto) }}
+                  >
+                    <td className="px-3 py-2.5">
+                      <DistBar tramos={g.tramos} monto={g.monto} resaltar={ti} />
+                    </td>
+                  </DetailTooltip>
                   <td className="whitespace-nowrap px-3 py-2.5">
                     {g.responsable ? (
                       <span className="text-foreground">{g.responsable}</span>

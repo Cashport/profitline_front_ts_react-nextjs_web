@@ -5,8 +5,9 @@ import { useMemo, useState, type KeyboardEvent } from "react";
 import UiSearchInput from "@/components/ui/search-input";
 import { cn } from "@/utils/utils";
 import { TRAMOS } from "../../constants";
-import { fmtM, pct } from "../../utils/format";
+import { corto, fmtM, pct } from "../../utils/format";
 import { nextSort, ordenar, rowSegments, tramoTotal } from "../../utils/wallet-calc";
+import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
@@ -135,26 +136,31 @@ export default function ControlMatrix({
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
                     {/* Abre todos los grupos del cliente, sin importar el tramo. */}
-                    <td
-                      role="button"
-                      tabIndex={0}
-                      title="Ver todos los grupos del cliente"
-                      onClick={() => onSelect({ clienteId: row.id, tramo: null })}
-                      onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
-                      className={cn(
-                        "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
-                        delCliente && drilldown?.tramo === null && SELECTED_CELL
-                      )}
+                    <DetailTooltip
+                      title={`${corto(row.nombre)} · toda la cartera`}
+                      rows={estadoRows(g)}
+                      total={{ value: fmtM(g.total) }}
                     >
-                      <span className="font-semibold text-foreground">{row.nombre}</span>
-                      {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
-                      <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
-                        ver grupos
-                      </span>
-                      <div className="text-[11.5px] text-muted-foreground">
-                        <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
-                      </div>
-                    </td>
+                      <td
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onSelect({ clienteId: row.id, tramo: null })}
+                        onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
+                        className={cn(
+                          "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
+                          delCliente && drilldown?.tramo === null && SELECTED_CELL
+                        )}
+                      >
+                        <span className="font-semibold text-foreground">{row.nombre}</span>
+                        {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
+                        <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
+                          ver grupos
+                        </span>
+                        <div className="text-[11.5px] text-muted-foreground">
+                          <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
+                        </div>
+                      </td>
+                    </DetailTooltip>
 
                     {row.tramos.map((cell, i) =>
                       cell.total === 0 ? (
@@ -165,23 +171,30 @@ export default function ControlMatrix({
                           —
                         </td>
                       ) : (
-                        <td
+                        // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
+                        // el del navegador se pintaría encima.
+                        <DetailTooltip
                           key={i}
-                          role="button"
-                          tabIndex={0}
-                          title={`Ver los grupos de ${TRAMOS[i].label.toLowerCase()}`}
-                          onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
-                          onKeyDown={(e) =>
-                            onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
-                          }
-                          className={cn(
-                            "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
-                            delCliente && drilldown?.tramo === i && SELECTED_CELL
-                          )}
+                          title={`${row.nombre} · ${TRAMOS[i].label}`}
+                          rows={estadoRows(cell)}
+                          total={{ value: fmtM(cell.total) }}
                         >
-                          <span>{fmtM(cell.total)}</span>
-                          <SegBar segments={cell} />
-                        </td>
+                          <td
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
+                            onKeyDown={(e) =>
+                              onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
+                            }
+                            className={cn(
+                              "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+                              delCliente && drilldown?.tramo === i && SELECTED_CELL
+                            )}
+                          >
+                            <span>{fmtM(cell.total)}</span>
+                            <SegBar segments={cell} />
+                          </td>
+                        </DetailTooltip>
                       )
                     )}
 

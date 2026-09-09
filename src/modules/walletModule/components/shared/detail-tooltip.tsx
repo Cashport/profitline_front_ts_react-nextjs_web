@@ -3,10 +3,10 @@
 import { Tooltip } from "antd";
 
 import { cn } from "@/utils/utils";
-import { EST_META, ORDEN_EST } from "../../constants";
+import { EST_META, ORDEN_EST, TRAMOS, TRAMO_BG } from "../../constants";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import { fmtM } from "../../utils/format";
-import type { WalletSegments } from "../../types";
+import type { EstadoKey, WalletSegments } from "../../types";
 
 export interface DetailRow {
   key: string;
@@ -26,13 +26,23 @@ interface DetailTooltipProps {
   children: React.ReactElement;
 }
 
-/** Desglose por estado de un monto: es lo que piden dos de los tres tooltips. */
-export const estadoRows = (g: WalletSegments): DetailRow[] =>
+/** Desglose por estado de un monto. Pide sólo los estados y no un WalletSegments
+ *  entero para que una celda de la matriz (sin `vencido`) también encaje. */
+export const estadoRows = (g: Pick<WalletSegments, EstadoKey>): DetailRow[] =>
   ORDEN_EST.filter((e) => g[e] > 0).map((e) => ({
     key: e,
     swatch: EST_META[e].bg,
     label: EST_META[e].nom,
     value: fmtM(g[e])
+  }));
+
+/** Desglose por tramo de un monto: lo que piden las barras de reparto. */
+export const tramoRows = (tramos: number[]): DetailRow[] =>
+  TRAMOS.filter((t) => tramos[t.i] > 0).map((t) => ({
+    key: t.id,
+    swatch: TRAMO_BG[t.i],
+    label: t.label,
+    value: fmtM(tramos[t.i])
   }));
 
 /** Superficie del tooltip. Sale de los tokens y no del negro por defecto de AntD

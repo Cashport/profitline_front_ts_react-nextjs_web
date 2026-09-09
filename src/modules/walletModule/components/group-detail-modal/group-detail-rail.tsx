@@ -3,6 +3,7 @@
 import { EST_META } from "../../constants";
 import { fmtD, fmtFull, fmtM } from "../../utils/format";
 import { resumenFacturas, sevDias } from "../../utils/group-detail";
+import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
 import DistBar from "../shared/dist-bar";
 import PersonBadge from "../shared/person-badge";
 import StatusChip from "../shared/status-chip";
@@ -92,11 +93,22 @@ export default function GroupDetailRail({ detail, loading }: GroupDetailRailProp
         )}
       </dl>
 
-      <DistBar
-        tramos={detail.tramos}
-        monto={detail.monto}
-        className="mt-[11px] h-1 max-w-none rounded"
-      />
+      {/* El div envolvente es para AntD: DistBar no reenvía el ref del Tooltip. */}
+      {detail.monto > 0 && (
+        <DetailTooltip
+          title="Reparto por tramo"
+          rows={tramoRows(detail.tramos)}
+          total={{ value: fmtM(detail.monto) }}
+        >
+          <div className="mt-[11px]">
+            <DistBar
+              tramos={detail.tramos}
+              monto={detail.monto}
+              className="h-1 max-w-none rounded"
+            />
+          </div>
+        </DetailTooltip>
+      )}
 
       {!nov && (
         <p className="mt-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
