@@ -5,10 +5,13 @@ import { buildMatrixQuery } from "@/services/walletMatrix/walletMatrix";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
+  AGING_BUCKETS,
   AgingBucket,
   IWalletMatrix,
   IWalletMatrixDetail,
+  IWalletMatrixDetailRow,
   IWalletMatrixFilters,
+  IWalletMatrixGroup,
   IWalletMatrixGroups,
   IWalletMatrixStatus
 } from "@/types/portfolios/IWalletMatrix";
@@ -68,6 +71,72 @@ export const useWalletMatrixDetail = (
   );
 
   return { data: data?.data, loading: isLoading, error, mutate };
+};
+
+/** Tamaño de página del detalle. El backend pagina; un grupo grande no cabe. */
+const DETAIL_PAGE_SIZE = 200;
+
+/** Todas las filas del detalle de un cliente en un tramo, paginando hasta el final. */
+const fetchBucket = async (
+  clientId: string,
+  aging: AgingBucket,
+  runId: string | undefined,
+  query: string
+): Promise<IWalletMatrixDetailRow[]> => {
+  const url = (page: number) =>
+    `/portfolio/matrix/detail?clientId=${encodeURIComponent(clientId)}&aging=${encodeURIComponent(aging)}&runId=${runId ?? ""}&page=${page}&limit=${DETAIL_PAGE_SIZE}&${query}`;
+
+  const first: GenericResponse<IWalletMatrixDetail> = await fetcher(url(1));
+  const rows = first.data?.rows ?? [];
+  const total = first.data?.pagination?.total ?? rows.length;
+
+  const restantes = Math.ceil(total / DETAIL_PAGE_SIZE) - 1;
+  if (restantes <= 0) return rows;
+
+  const resto: GenericResponse<IWalletMatrixDetail>[] = await Promise.all(
+    Array.from({ length: restantes }, (_, i) => fetcher(url(i + 2)))
+  );
+  return rows.concat(...resto.map((r) => r.data?.rows ?? []));
+};
+
+/**
+ * Facturas de un grupo de la tabla inferior.
+ *
+ * El detalle se pide por tramo y un grupo puede repartirse en varios, así que
+ * se consultan sólo los tramos con monto y se concatenan. Se añade el estado
+ * del grupo a los filtros para que el acotado lo haga el servidor; lo que no
+ * se puede filtrar allá —la novedad concreta— se descarta aquí.
+ */
+export const useWalletGroupInvoices = (
+  group: IWalletMatrixGroup | null,
+  filters?: IWalletMatrixFilters,
+  runId?: string
+) => {
+  const buckets = group
+    ? AGING_BUCKETS.filter((_, i) => (group.byAging?.[i] ?? 0) > 0)
+    : [];
+
+  const query = buildMatrixQuery(
+    group ? { ...filters, status: [group.statusKey] } : filters
+  );
+
+  // Con el modal cerrado no se pide nada.
+  const key =
+    group && buckets.length
+      ? ["wallet-group-invoices", group.clientId, group.statusKey, group.noveltyId, runId, query]
+      : null;
+
+  const { data, error, isLoading } = useSWR(key, async () => {
+    const porTramo = await Promise.all(
+      buckets.map((aging) => fetchBucket(group!.clientId, aging, runId, query))
+    );
+
+    return porTramo
+      .flat()
+      .filter((row) => group!.noveltyId === null || row.noveltyId === group!.noveltyId);
+  });
+
+  return { rows: data ?? [], loading: isLoading, error };
 };
 
 /**

@@ -1,23 +1,33 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
-import { EST_META } from "../../constants";
-import { fmtM } from "../../utils/format";
+import { EST_META, TRAMOS } from "../../constants";
+import { fmtM, grp } from "../../utils/format";
 import { nextSort, ordenar } from "../../utils/wallet-calc";
+import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
 import DistBar from "../shared/dist-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusChip from "../shared/status-chip";
-import type { IWalletGroupRow, SortState } from "../../types";
+import type { IWalletDrilldown, IWalletGroupRow, SortState } from "../../types";
 
 interface InvoiceGroupsProps {
   rows: IWalletGroupRow[];
+  // eslint-disable-next-line no-unused-vars
   onOpenDetail: (clave: string) => void;
+  drilldown: IWalletDrilldown | null;
+  /** Nombre corto del cliente del drilldown; null sin selección. */
+  clienteNombre: string | null;
+  openGroup: string | null;
+  onClearDrilldown: () => void;
 }
 
 const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
+
+const TH_PLAIN =
+  "whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
@@ -30,19 +40,39 @@ const GestionChip = ({ dias }: { dias: number | null }) => {
 };
 
 /** Grupos de facturas: todo lo que se resuelve con una sola gestión. */
-export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps) {
+export default function InvoiceGroups({
+  rows,
+  onOpenDetail,
+  drilldown,
+  clienteNombre,
+  openGroup,
+  onClearDrilldown
+}: InvoiceGroupsProps) {
   const [sort, setSort] = useState<SortState>({ col: "monto", dir: "desc" });
+  const zona = useRef<HTMLElement>(null);
 
+  // null = todos los tramos del cliente, o ninguna selección.
+  const ti = drilldown?.tramo ?? null;
+  const enTramo = ti !== null;
+
+  // Sin columna de tramo no hay nada que ordenar por ella: vuelve al total.
+  const activeSort: SortState =
+    sort.col === "tramo" && !enTramo ? { col: "monto", dir: "desc" } : sort;
+
+  // Las filas ya llegan acotadas por el servidor (useWalletMatrixGroups recibe
+  // el cliente y el tramo): aquí sólo se ordenan.
   const visibleRows = useMemo(
     () =>
-      ordenar(rows, sort, (g) => {
-        switch (sort.col) {
+      ordenar(rows, activeSort, (g) => {
+        switch (activeSort.col) {
           case "grupo":
             return g.novedadId ?? EST_META[g.tipo].nom;
           case "cliente":
             return g.cliente;
           case "fact":
             return g.facturas;
+          case "tramo":
+            return enTramo ? g.tramos[ti] : g.monto;
           case "gestion":
             return g.diasSinGestion === null ? 99999 : g.diasSinGestion;
           case "estado":
@@ -51,55 +81,77 @@ export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps
             return g.monto;
         }
       }),
-    [rows, sort]
+    [rows, activeSort, enTramo, ti]
   );
 
+  // Al acotar, la tabla suele quedar fuera de pantalla: se trae a la vista.
+  useEffect(() => {
+    if (drilldown) zona.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [drilldown]);
+
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
-  const suma = visibleRows.reduce((a, g) => a + g.monto, 0);
+  const suma = visibleRows.reduce((a, g) => a + (enTramo ? g.tramos[ti] : g.monto), 0);
+  const titulo =
+    drilldown && clienteNombre
+      ? `${clienteNombre} · ${enTramo ? TRAMOS[ti].label : "todos los tramos"}`
+      : "Grupos de facturas";
 
   return (
-    <section className="rounded-xl bg-card shadow-sm">
+    <section ref={zona} className="rounded-xl bg-card text-card-foreground shadow-sm">
       <div className="flex flex-wrap items-center gap-2.5 border-b border-border p-4">
-        <h3 className="text-[13.5px] font-semibold text-foreground">Grupos de facturas</h3>
+        <h3 className="text-[13.5px] font-semibold text-foreground">{titulo}</h3>
         <span className="ml-auto text-[11.5px] text-muted-foreground">
-          {visibleRows.length} grupos · {fmtM(suma)}
+          {grp(visibleRows.length)} · {fmtM(suma)}
+          {enTramo && " en el tramo"} · doble clic para abrir la gestión
         </span>
+        {drilldown && (
+          <button
+            type="button"
+            onClick={onClearDrilldown}
+            className="rounded-md border border-border bg-card px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
+          >
+            Ver todos
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
-              <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} />
-              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
-              <SortableTh col="fact" label="Fact." align="right" sort={sort} onSort={onSort} />
-              <SortableTh col="monto" label="Total" align="right" sort={sort} onSort={onSort} />
-              <th
-                scope="col"
-                className="whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
-              >
+              <SortableTh col="grupo" label="Grupo" sort={activeSort} onSort={onSort} />
+              <SortableTh col="cliente" label="Cliente" sort={activeSort} onSort={onSort} />
+              <SortableTh col="fact" label="Fact." align="right" sort={activeSort} onSort={onSort} />
+              {enTramo && (
+                <SortableTh
+                  col="tramo"
+                  label="Tramo"
+                  align="right"
+                  sort={activeSort}
+                  onSort={onSort}
+                />
+              )}
+              <SortableTh col="monto" label="Total" align="right" sort={activeSort} onSort={onSort} />
+              <th scope="col" className={TH_PLAIN}>
                 Reparto
               </th>
-              <th
-                scope="col"
-                className="whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
-              >
+              <th scope="col" className={TH_PLAIN}>
                 Responsable
               </th>
-              <SortableTh col="gestion" label="Gest." align="right" sort={sort} onSort={onSort} />
-              <th
-                scope="col"
-                className="whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
-              >
+              <SortableTh
+                col="gestion"
+                label="Gest."
+                align="right"
+                sort={activeSort}
+                onSort={onSort}
+              />
+              <th scope="col" className={TH_PLAIN}>
                 Ticket
               </th>
-              <th
-                scope="col"
-                className="whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
-              >
+              <th scope="col" className={TH_PLAIN}>
                 Límite
               </th>
-              <SortableTh col="estado" label="Estado" sort={sort} onSort={onSort} />
+              <SortableTh col="estado" label="Estado" sort={activeSort} onSort={onSort} />
               <th className="border-b border-border bg-muted/40" />
             </tr>
           </thead>
@@ -107,13 +159,20 @@ export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps
           <tbody>
             {visibleRows.length === 0 ? (
               <tr>
-                <td colSpan={11} className="p-9 text-center text-muted-foreground">
+                <td colSpan={enTramo ? 12 : 11} className="p-9 text-center text-muted-foreground">
                   No hay grupos con los filtros actuales.
                 </td>
               </tr>
             ) : (
               visibleRows.map((g) => (
-                <tr key={g.clave} className="border-b border-border last:border-b-0">
+                <tr
+                  key={g.clave}
+                  onDoubleClick={() => onOpenDetail(g.clave)}
+                  className={cn(
+                    "cursor-pointer border-b border-border last:border-b-0",
+                    openGroup === g.clave && "bg-wallet-accent-soft"
+                  )}
+                >
                   <td className="px-3 py-2.5">
                     <span className="inline-flex items-center gap-2 font-semibold text-foreground">
                       <i
@@ -133,12 +192,23 @@ export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps
                   <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
                     {g.facturas}
                   </td>
+                  {enTramo && (
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
+                      {fmtM(g.tramos[ti])}
+                    </td>
+                  )}
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                     {fmtM(g.monto)}
                   </td>
-                  <td className="px-3 py-2.5">
-                    <DistBar tramos={g.tramos} monto={g.monto} />
-                  </td>
+                  <DetailTooltip
+                    title="Reparto por tramo"
+                    rows={tramoRows(g.tramos)}
+                    total={{ value: fmtM(g.monto) }}
+                  >
+                    <td className="px-3 py-2.5">
+                      <DistBar tramos={g.tramos} monto={g.monto} resaltar={ti} />
+                    </td>
+                  </DetailTooltip>
                   <td className="whitespace-nowrap px-3 py-2.5">
                     {g.responsable ? (
                       <span className="text-foreground">{g.responsable}</span>
@@ -179,7 +249,12 @@ export default function InvoiceGroups({ rows, onOpenDetail }: InvoiceGroupsProps
       </div>
 
       <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
-        Estos son los grupos de todo lo que hay en la matriz con los filtros y la búsqueda actuales.{" "}
+        {!drilldown &&
+          "Estos son los grupos de todo lo que hay en la matriz con los filtros y la búsqueda actuales. "}
+        {drilldown && !enTramo && `Todos los grupos de ${clienteNombre}, sin importar el tramo. `}
+        {drilldown &&
+          enTramo &&
+          `Un grupo puede tener facturas en varios tramos: En el tramo es la parte que cae en ${TRAMOS[ti].label.toLowerCase()}. `}
         <b className="font-semibold text-foreground">Total</b> es todo lo que se resuelve con una
         sola gestión.
       </div>

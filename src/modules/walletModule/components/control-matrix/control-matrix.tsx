@@ -1,16 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { cn } from "@/utils/utils";
 import { TRAMOS } from "../../constants";
-import { fmtM, pct } from "../../utils/format";
+import { corto, fmtM, pct } from "../../utils/format";
 import { nextSort, ordenar, rowSegments, tramoTotal } from "../../utils/wallet-calc";
+import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
-import type { IWalletClientRow, SortState } from "../../types";
+import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
 
 interface ControlMatrixProps {
   rows: IWalletClientRow[];
@@ -23,9 +24,15 @@ interface ControlMatrixProps {
   loading?: boolean;
   /** Texto del estado vacío; depende de si hay búsqueda activa. */
   emptyMessage?: string;
+  drilldown: IWalletDrilldown | null;
+  // eslint-disable-next-line no-unused-vars
+  onSelect: (drilldown: IWalletDrilldown) => void;
 }
 
 const TEXTUAL_COLS = ["cliente"];
+
+/** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
+const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accent";
 
 /** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
 export default function ControlMatrix({
@@ -34,7 +41,9 @@ export default function ControlMatrix({
   onSearchChange,
   totalClients,
   loading,
-  emptyMessage = "Ningún cliente coincide con los filtros."
+  emptyMessage = "Ningún cliente coincide con los filtros.",
+  drilldown,
+  onSelect
 }: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
 
@@ -56,8 +65,15 @@ export default function ControlMatrix({
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
 
+  /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
+  const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onSelect(drill);
+  };
+
   return (
-    <section className="rounded-xl bg-card shadow-sm">
+    <section className="rounded-xl bg-card text-card-foreground shadow-sm">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
@@ -115,16 +131,36 @@ export default function ControlMatrix({
               visibleRows.map((row) => {
                 const g = rowSegments(row);
                 const vencido = pct(g.vencido, g.total);
+                const delCliente = drilldown?.clienteId === row.id;
 
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
-                    {/* TODO: al conectar el drilldown, este td abre los grupos del cliente. */}
-                    <td className="min-w-[250px] px-3 py-2.5 align-middle">
-                      <span className="font-semibold text-foreground">{row.nombre}</span>
-                      <div className="text-[11.5px] text-muted-foreground">
-                        <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
-                      </div>
-                    </td>
+                    {/* Abre todos los grupos del cliente, sin importar el tramo. */}
+                    <DetailTooltip
+                      title={`${corto(row.nombre)} · toda la cartera`}
+                      rows={estadoRows(g)}
+                      total={{ value: fmtM(g.total) }}
+                    >
+                      <td
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onSelect({ clienteId: row.id, tramo: null })}
+                        onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
+                        className={cn(
+                          "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
+                          delCliente && drilldown?.tramo === null && SELECTED_CELL
+                        )}
+                      >
+                        <span className="font-semibold text-foreground">{row.nombre}</span>
+                        {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
+                        <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
+                          ver grupos
+                        </span>
+                        <div className="text-[11.5px] text-muted-foreground">
+                          <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
+                        </div>
+                      </td>
+                    </DetailTooltip>
 
                     {row.tramos.map((cell, i) =>
                       cell.total === 0 ? (
@@ -135,10 +171,30 @@ export default function ControlMatrix({
                           —
                         </td>
                       ) : (
-                        <td key={i} className="px-3 py-2.5 text-right align-middle tabular-nums">
-                          <span>{fmtM(cell.total)}</span>
-                          <SegBar segments={cell} />
-                        </td>
+                        // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
+                        // el del navegador se pintaría encima.
+                        <DetailTooltip
+                          key={i}
+                          title={`${row.nombre} · ${TRAMOS[i].label}`}
+                          rows={estadoRows(cell)}
+                          total={{ value: fmtM(cell.total) }}
+                        >
+                          <td
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
+                            onKeyDown={(e) =>
+                              onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
+                            }
+                            className={cn(
+                              "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+                              delCliente && drilldown?.tramo === i && SELECTED_CELL
+                            )}
+                          >
+                            <span>{fmtM(cell.total)}</span>
+                            <SegBar segments={cell} />
+                          </td>
+                        </DetailTooltip>
                       )
                     )}
 

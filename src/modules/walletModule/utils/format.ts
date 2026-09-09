@@ -16,6 +16,7 @@ export const fmtFull = (v: number): string => "$" + Math.round(v).toLocaleString
 
 export const fac = (n: number): string => `${n} ${n === 1 ? "factura" : "facturas"}`;
 export const cli = (n: number): string => `${n} ${n === 1 ? "cliente" : "clientes"}`;
+export const grp = (n: number): string => `${n} ${n === 1 ? "grupo" : "grupos"}`;
 
 /** Quita el sufijo societario para que el nombre quepa en una celda. */
 export const corto = (n: string): string =>

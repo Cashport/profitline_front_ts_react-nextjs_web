@@ -75,7 +75,9 @@ module.exports = {
           "t2-ink": "rgb(var(--wallet-t2-ink) / <alpha-value>)",
           "t3-ink": "rgb(var(--wallet-t3-ink) / <alpha-value>)",
           "t4-ink": "rgb(var(--wallet-t4-ink) / <alpha-value>)",
-          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)"
+          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)",
+          accent: "rgb(var(--wallet-accent) / <alpha-value>)",
+          "accent-soft": "rgb(var(--wallet-accent-soft) / <alpha-value>)"
         },
         sidebar: {
           DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",

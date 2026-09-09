@@ -12,7 +12,10 @@ import {
   Stack,
   ClipboardText,
   ListChecks,
-  ArrowCounterClockwise
+  ArrowCounterClockwise,
+  TextIndent,
+  Ticket,
+  Gauge
 } from "phosphor-react";
 import {
   ChatCircleDots,
@@ -368,6 +371,47 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             icon={<Invoice size={iconSize} />}
             className={path.startsWith("/wallet") ? styles.buttonIcon : styles.buttonIconActive}
             onClick={(e) => handleNavClick(e, "/wallet")}
+          />
+        </Link>
+      )}
+
+      {/* Novelties */}
+      {checkUserViewPermissions(project, "Novelties") && (
+        <Link href="/novelties" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<TextIndent size={iconSize} />}
+            className={path.startsWith("/novelties") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/novelties")}
+          />
+        </Link>
+      )}
+
+      {/* Tickets */}
+      {checkUserViewPermissions(project, "Tickets") && (
+        <Link href="/tickets" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Ticket size={iconSize} />}
+            className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/tickets")}
+          />
+        </Link>
+      )}
+
+      {/* Control tower */}
+      {checkUserViewPermissions(project, "ControlTower") && (
+        <Link href="/torreControl" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Gauge size={iconSize} />}
+            className={
+              path.startsWith("/torreControl") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/torreControl")}
           />
         </Link>
       )}
