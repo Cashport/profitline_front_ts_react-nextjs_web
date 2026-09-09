@@ -3,9 +3,10 @@
 import { HOY, diasEntre } from "./format";
 import type { IWalletInvoice, IWalletNovedad, IWalletTicket, Sev } from "../types";
 
-/** Semáforo del compromiso de una novedad. */
-export function slaDe(nov: IWalletNovedad): { sev: Sev; txt: string } {
+/** Semáforo del compromiso de una novedad. Null si no se conoce la fecha. */
+export function slaDe(nov: IWalletNovedad): { sev: Sev; txt: string } | null {
   if (nov.cerrada) return { sev: "ok", txt: "Cerrada" };
+  if (!nov.compromiso) return null;
 
   const d = diasEntre(HOY, nov.compromiso);
   if (d < 0) return { sev: "crit", txt: `Vencida ${Math.abs(d)}d` };

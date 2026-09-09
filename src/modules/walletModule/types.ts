@@ -51,6 +51,8 @@ export interface IWalletClientRow {
 /** Fila de "Grupos de facturas". */
 export interface IWalletGroupRow {
   clave: string;
+  /** Enlaza el grupo con IWalletClientRow.id: por aquí filtra el drilldown. */
+  clienteId: string;
   tipo: EstadoKey;
   /** Sólo para grupos de tipo "novedad". */
   novedadId?: string;
@@ -78,6 +80,12 @@ export interface IWalletSummary {
 export interface SortState {
   col: string;
   dir: "asc" | "desc";
+}
+
+/** Selección activa de la matriz. `tramo: null` = todos los tramos del cliente. */
+export interface IWalletDrilldown {
+  clienteId: string;
+  tramo: TramoIndex | null;
 }
 
 /* ---------- Detalle de un grupo (modal de gestión) ---------- */
@@ -136,8 +144,9 @@ export interface IWalletNovedad {
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
   estado: { nom: string; sev: Sev };
-  compromiso: Date;
-  limite: Date;
+  /** Null cuando la novedad viene del API: /portfolio/matrix/groups no manda fechas. */
+  compromiso: Date | null;
+  limite: Date | null;
   responsable: IWalletPerson | null;
   cerrada: boolean;
 }

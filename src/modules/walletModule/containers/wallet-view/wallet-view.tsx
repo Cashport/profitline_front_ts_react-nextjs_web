@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
+  useWalletGroupInvoices,
   useWalletMatrix,
   useWalletMatrixGroups,
   useWalletMatrixStatus
@@ -23,8 +24,19 @@ import {
   MatrixSkeleton,
   StatCardsSkeleton
 } from "../../components/wallet-skeleton/wallet-skeleton";
-import { emptySummary, toClientRows, toGroupRows, toSummary } from "../../utils/api-adapter";
+import {
+  TRAMO_BUCKETS,
+  emptySummary,
+  groupKey,
+  toClientRows,
+  toGroupDetail,
+  toGroupRows,
+  toInvoices,
+  toSummary
+} from "../../utils/api-adapter";
+import { corto } from "../../utils/format";
 
+import type { IWalletDrilldown } from "../../types";
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
 
 const PAGE_SIZE = 50;
@@ -58,6 +70,8 @@ export default function WalletView() {
   // Clave del grupo abierto en el modal de gestión. Vive en la vista y no en la
   // tabla para que el drilldown de la matriz pueda abrir el mismo modal.
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  // Celda o cliente seleccionado en la matriz. Acota los grupos de abajo.
+  const [drilldown, setDrilldown] = useState<IWalletDrilldown | null>(null);
 
   const filters: IWalletMatrixFilters = useMemo(
     () => ({ search: debouncedSearch.trim() || undefined, calculateEndMonth }),
@@ -65,7 +79,16 @@ export default function WalletView() {
   );
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, 1, PAGE_SIZE);
-  const { data: groups, loading: groupsLoading } = useWalletMatrixGroups(filters, undefined, undefined, matrix?.snapshot?.runId);
+  // El acotado lo resuelve el servidor: la página sólo tiene 50 clientes, así
+  // que filtrar los grupos en el navegador dejaría fuera lo que no vino.
+  const { data: groups, loading: groupsLoading } = useWalletMatrixGroups(
+    filters,
+    drilldown?.clienteId,
+    drilldown?.tramo === null || drilldown?.tramo === undefined
+      ? undefined
+      : TRAMO_BUCKETS[drilldown.tramo],
+    matrix?.snapshot?.runId
+  );
 
   // El polling sólo corre mientras hay una actualización viva. Es el respaldo
   // del socket: si el evento no llega —el usuario puede estar conectado a otra
@@ -156,9 +179,41 @@ export default function WalletView() {
     }
   };
 
+  // Al cambiar la búsqueda o la proyección, la celda elegida deja de tener
+  // sentido: puede ni existir en la foto nueva.
+  useEffect(() => {
+    setDrilldown(null);
+  }, [debouncedSearch, calculateEndMonth]);
+
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
+
+  // Grupo abierto, tal como vino del API: el modal necesita más campos de los
+  // que sobreviven en la fila de la tabla.
+  const grupoAbierto = useMemo(
+    () => groups?.groups.find((g) => groupKey(g) === openGroup) ?? null,
+    [groups, openGroup]
+  );
+
+  const { rows: invoiceRows, loading: invoicesLoading } = useWalletGroupInvoices(
+    grupoAbierto,
+    filters,
+    matrix?.snapshot?.runId
+  );
+
+  // El modal abre de inmediato con lo que ya trae el grupo; las facturas
+  // llegan después y por eso `loading` viaja aparte.
+  const detalleAbierto = useMemo(
+    () => (grupoAbierto ? toGroupDetail(grupoAbierto, toInvoices(invoiceRows)) : null),
+    [grupoAbierto, invoiceRows]
+  );
+
+  const clienteNombre = useMemo(() => {
+    if (!drilldown) return null;
+    const fila = clientRows.find((c) => c.id === drilldown.clienteId);
+    return fila ? corto(fila.nombre) : null;
+  }, [drilldown, clientRows]);
 
   // Sólo la primera carga muestra skeleton. Con `keepPreviousData`, cambiar un
   // filtro o buscar mantiene la tabla anterior en pantalla, que se lee mucho
@@ -208,16 +263,30 @@ export default function WalletView() {
               ? `No se encontró nada para "${debouncedSearch.trim()}".`
               : "No hay cartera para los filtros actuales."
           }
+          drilldown={drilldown}
+          onSelect={setDrilldown}
         />
       )}
 
       {primeraCarga || (groupsLoading && !groups) ? (
         <GroupsSkeleton />
       ) : (
-        <InvoiceGroups rows={groupRows} onOpenDetail={setOpenGroup} />
+        <InvoiceGroups
+          rows={groupRows}
+          onOpenDetail={setOpenGroup}
+          drilldown={drilldown}
+          clienteNombre={clienteNombre}
+          openGroup={openGroup}
+          onClearDrilldown={() => setDrilldown(null)}
+        />
       )}
 
-      <GroupDetailModal clave={openGroup} onClose={() => setOpenGroup(null)} />
+      <GroupDetailModal
+        clave={openGroup}
+        detail={detalleAbierto}
+        loading={invoicesLoading}
+        onClose={() => setOpenGroup(null)}
+      />
     </div>
   );
 }

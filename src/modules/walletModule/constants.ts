@@ -110,6 +110,13 @@ export const TRAMO_BG = [
 /** Texto que se muestra mientras aún no llegó el corte real del snapshot. */
 export const FECHA_CORTE_PLACEHOLDER = "Cargando corte…";
 
+/**
+ * Corte fijo de los datos simulados. La cartera ya lo toma del snapshot del
+ * API; esto lo siguen usando Torre de control y Novedades, que aún son
+ * mocks, y va emparejado con HOY en utils/format.
+ */
+export const FECHA_CORTE = "Corte 31/08/2026 · 06:40";
+
 /** Días de mora representativos de cada tramo, para derivar vencimientos. */
 export const TRAMO_DIAS = [-10, 15, 45, 75, 105, 150];
 
