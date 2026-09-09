@@ -10,6 +10,8 @@ import type { IWalletGroupDetail } from "../../types";
 
 interface GroupDetailRailProps {
   detail: IWalletGroupDetail;
+  /** Mientras las facturas no lleguen, lo que se deriva de ellas no se pinta. */
+  loading?: boolean;
 }
 
 /** Una fila del listado clave/valor: etiqueta, valor y un chip a la derecha. */
@@ -42,18 +44,18 @@ const GestionChip = ({ dias }: { dias: number | null }) => {
 };
 
 /** Cabecera del panel izquierdo: cifras del grupo y su reparto por tramo. */
-export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
+export default function GroupDetailRail({ detail, loading }: GroupDetailRailProps) {
   const nov = detail.novedad;
   const { vencido, edad } = resumenFacturas(detail.facturas);
 
-  const compromiso = nov && sevDias(nov.compromiso);
-  const limite = nov && sevDias(nov.limite, 5);
+  const compromiso = nov?.compromiso && sevDias(nov.compromiso);
+  const limite = nov?.limite && sevDias(nov.limite, 5);
 
   return (
     <div className="px-[18px] pb-3 pt-[11px]">
       <dl className="m-0 grid grid-cols-2 gap-x-[18px] gap-y-1.5">
         <Row label="Saldo" value={fmtFull(detail.monto)} />
-        <Row label="Facturas" value={detail.facturas.length} />
+        <Row label="Facturas" value={loading ? "…" : detail.facturas.length} />
 
         {nov ? (
           <>
@@ -61,12 +63,12 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
             <Row label="Últ. gestión" chip={<GestionChip dias={detail.diasSinGestion} />} />
             <Row
               label="Compromiso"
-              value={fmtD(nov.compromiso)}
+              value={nov.compromiso ? fmtD(nov.compromiso) : "—"}
               chip={compromiso && <StatusChip sev={compromiso.sev}>{compromiso.txt}</StatusChip>}
             />
             <Row
               label="Fecha límite"
-              value={fmtD(nov.limite)}
+              value={nov.limite ? fmtD(nov.limite) : "—"}
               chip={limite && <StatusChip sev={limite.sev}>{limite.txt}</StatusChip>}
             />
           </>
@@ -74,14 +76,16 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
           <>
             <Row label="Ejecutivo" value={<PersonBadge person={detail.ejecutivo} mini />} />
             <Row label="Últ. gestión" chip={<GestionChip dias={detail.diasSinGestion} />} />
-            <Row label="Vencido" value={fmtM(vencido)} />
+            <Row label="Vencido" value={loading ? "…" : fmtM(vencido)} />
             <Row
               label="Mora prom."
-              value={edad}
+              value={loading ? "…" : edad}
               chip={
-                <span className="whitespace-nowrap text-[11px] text-muted-foreground">
-                  {edad === 1 ? "día" : "días"}
-                </span>
+                !loading && (
+                  <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+                    {edad === 1 ? "día" : "días"}
+                  </span>
+                )
               }
             />
           </>

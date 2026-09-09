@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
+  useWalletGroupInvoices,
   useWalletMatrix,
   useWalletMatrixGroups,
   useWalletMatrixStatus
@@ -26,8 +27,11 @@ import {
 import {
   TRAMO_BUCKETS,
   emptySummary,
+  groupKey,
   toClientRows,
+  toGroupDetail,
   toGroupRows,
+  toInvoices,
   toSummary
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
@@ -185,6 +189,26 @@ export default function WalletView() {
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
 
+  // Grupo abierto, tal como vino del API: el modal necesita más campos de los
+  // que sobreviven en la fila de la tabla.
+  const grupoAbierto = useMemo(
+    () => groups?.groups.find((g) => groupKey(g) === openGroup) ?? null,
+    [groups, openGroup]
+  );
+
+  const { rows: invoiceRows, loading: invoicesLoading } = useWalletGroupInvoices(
+    grupoAbierto,
+    filters,
+    matrix?.snapshot?.runId
+  );
+
+  // El modal abre de inmediato con lo que ya trae el grupo; las facturas
+  // llegan después y por eso `loading` viaja aparte.
+  const detalleAbierto = useMemo(
+    () => (grupoAbierto ? toGroupDetail(grupoAbierto, toInvoices(invoiceRows)) : null),
+    [grupoAbierto, invoiceRows]
+  );
+
   const clienteNombre = useMemo(() => {
     if (!drilldown) return null;
     const fila = clientRows.find((c) => c.id === drilldown.clienteId);
@@ -257,7 +281,12 @@ export default function WalletView() {
         />
       )}
 
-      <GroupDetailModal clave={openGroup} onClose={() => setOpenGroup(null)} />
+      <GroupDetailModal
+        clave={openGroup}
+        detail={detalleAbierto}
+        loading={invoicesLoading}
+        onClose={() => setOpenGroup(null)}
+      />
     </div>
   );
 }

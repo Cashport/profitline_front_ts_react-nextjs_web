@@ -144,8 +144,9 @@ export interface IWalletNovedad {
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
   estado: { nom: string; sev: Sev };
-  compromiso: Date;
-  limite: Date;
+  /** Null cuando la novedad viene del API: /portfolio/matrix/groups no manda fechas. */
+  compromiso: Date | null;
+  limite: Date | null;
   responsable: IWalletPerson | null;
   cerrada: boolean;
 }

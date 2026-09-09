@@ -2,17 +2,24 @@
    componentes de este módulo. Vive aparte para que el diseño no dependa de
    la forma exacta del API: si el contrato cambia, se toca sólo este archivo. */
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
+import { HOY, dias } from "./format";
 import type {
   EstadoKey,
   IWalletClientRow,
+  IWalletGroupDetail,
   IWalletGroupRow,
+  IWalletInvoice,
   IWalletMatrixCell,
+  IWalletPerson,
   IWalletSummary,
+  TramoIndex,
   WalletSegments
 } from "../types";
 import type {
   AgingBucket,
   IWalletMatrix,
+  IWalletMatrixDetailRow,
+  IWalletMatrixGroup,
   IWalletMatrixGroups
 } from "@/types/portfolios/IWalletMatrix";
 
@@ -119,13 +126,22 @@ export const toSummary = (matrix: IWalletMatrix): IWalletSummary => {
   return { segments, clientes: matrix.pagination.totalClients };
 };
 
+/**
+ * Identidad de un grupo dentro de la pantalla.
+ *
+ * La misma función la usan la tabla y el modal: si dejaran de coincidir, el
+ * modal no encontraría el grupo sobre el que se hizo clic.
+ */
+export const groupKey = (g: IWalletMatrixGroup): string =>
+  `${g.statusKey}-${g.noveltyId ?? "sin-novedad"}-${g.clientId}`;
+
 /** Grupos de facturas de la tabla inferior. */
 export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
   groups.groups.map((g) => {
     const tipo = toEstadoKey(g.statusKey);
     const meta = EST_META[tipo];
     return {
-      clave: `${g.statusKey}-${g.noveltyId ?? "sin-novedad"}-${g.clientId}`,
+      clave: groupKey(g),
       clienteId: g.clientId,
       tipo,
       novedadId: g.noveltyId ? String(g.noveltyId) : undefined,
@@ -143,3 +159,77 @@ export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
       estado: { nom: g.noveltyStatus ?? meta.chipTxt, sev: meta.chip }
     };
   });
+
+/** Del API sólo llega el nombre, así que las iniciales se derivan aquí. */
+export const toPerson = (nombre: string | null | undefined): IWalletPerson | null => {
+  const limpio = nombre?.trim();
+  if (!limpio) return null;
+
+  const [uno, dos] = limpio.split(/\s+/);
+  return {
+    id: limpio,
+    nombre: limpio,
+    iniciales: `${uno?.[0] ?? ""}${dos?.[0] ?? ""}`.toUpperCase()
+  };
+};
+
+/** Responsable de respaldo: el formulario de tickets necesita un `id`. */
+const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", iniciales: "—" };
+
+/** Facturas del modal de gestión, desde /portfolio/matrix/detail. */
+export const toInvoices = (rows: IWalletMatrixDetailRow[]): IWalletInvoice[] =>
+  rows.map((row) => {
+    const tramo = TRAMO_BUCKETS.indexOf(row.aging);
+    return {
+      id: row._id,
+      doc: row.erpId ?? row.documentId,
+      // Sin fecha de vencimiento se reconstruye desde la mora, que sí viene
+      // siempre: si no, media columna "Vence" quedaría en blanco.
+      vence: row.expirationDate ? new Date(row.expirationDate) : dias(HOY, -row.daysOverdue),
+      dias: row.daysOverdue,
+      tramo: (tramo < 0 ? 0 : tramo) as TramoIndex,
+      saldo: row.amount
+    };
+  });
+
+/**
+ * Detalle del modal de gestión a partir del grupo del API.
+ *
+ * La bitácora y los tickets van vacíos a propósito: no hay endpoint todavía.
+ * Antes salían de los datos simulados, y por eso el modal dejó de abrir al
+ * conectar la cartera — las claves del API no existen en ese mapa.
+ */
+export const toGroupDetail = (
+  group: IWalletMatrixGroup,
+  facturas: IWalletInvoice[]
+): IWalletGroupDetail => {
+  const tipo = toEstadoKey(group.statusKey);
+  const meta = EST_META[tipo];
+  const responsable = toPerson(group.responsibleName);
+
+  return {
+    clave: groupKey(group),
+    tipo,
+    novedad:
+      group.noveltyId === null
+        ? undefined
+        : {
+            id: `NOV-${group.noveltyId}`,
+            tipoNom: group.noveltyType ?? meta.nom,
+            estado: { nom: group.noveltyStatus ?? meta.chipTxt, sev: meta.chip },
+            // El endpoint de grupos no manda compromiso ni fecha límite.
+            compromiso: null,
+            limite: null,
+            responsable,
+            cerrada: false
+          },
+    cliente: { nombre: group.clientName, nit: group.clientId },
+    ejecutivo: responsable ?? SIN_ASIGNAR,
+    monto: group.total,
+    tramos: group.byAging ?? TRAMOS.map(() => 0),
+    facturas,
+    bitacora: [],
+    tickets: [],
+    diasSinGestion: null
+  };
+};
