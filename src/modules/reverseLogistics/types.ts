@@ -1,10 +1,13 @@
 import { TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 
 // Devoluciones tab filter — every field is a real query param of
-// GET /integration/profit360/visits. `clientId` is single-valued because the
-// endpoint takes one. Estado is not a query param there, so it isn't offered.
+// GET /integration/profit360/visits and the endpoint takes a single value for
+// each. `clientId`, `fromDate` and `toDate` are the long-standing filters;
+// `estadoId` maps to ?status= and `causalId` maps to ?causal=.
 export interface IDevolucionesFilter {
   clientId: string | null;
+  estadoId: string | null;
+  causalId: string | null;
   fromDate: string | null;
   toDate: string | null;
 }

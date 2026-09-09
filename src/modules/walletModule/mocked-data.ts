@@ -38,20 +38,22 @@ const PERFIL_TRAMO: Record<string, number>[] = [
   { compensada: 0.12, pagada: 0.06, conciliado: 0.16, novedad: 0.38, sin_conciliar: 0.28 }
 ];
 
-/** Convierte un total de tramo en su desglose por estado, cuadrando el redondeo. */
+/**
+ * Convierte un total de tramo en su desglose por estado, cuadrando el redondeo.
+ *
+ * PERFIL_TRAMO sólo pesa los cinco estados del diseño original; los cuatro que
+ * llegaron con el API (saldo, glosado, devolución, otros) quedan en cero aquí,
+ * porque estos datos simulados sólo alimentan Torre de control y Novedades.
+ */
 function cell(total: number, ti: number): IWalletMatrixCell {
   const perfil = PERFIL_TRAMO[ti];
-  const parts = ORDEN_EST.map((e) => Math.round(total * perfil[e]));
+  const parts = ORDEN_EST.map((e) => Math.round(total * (perfil[e] ?? 0)));
   const diff = total - parts.reduce((a, b) => a + b, 0);
   parts[2] += diff; // el sobrante cae en conciliado, el segmento más grande
-  return {
-    compensada: parts[0],
-    pagada: parts[1],
-    conciliado: parts[2],
-    novedad: parts[3],
-    sin_conciliar: parts[4],
-    total
-  };
+
+  const c = { total, n: 0 } as IWalletMatrixCell;
+  ORDEN_EST.forEach((e, i) => (c[e] = parts[i]));
+  return c;
 }
 
 const row = (
@@ -112,6 +114,10 @@ export const WALLET_SUMMARY: IWalletSummary = {
     conciliado: 34.88 * MM,
     novedad: 4.37 * MM,
     sin_conciliar: 6.85 * MM,
+    saldo: 0,
+    glosado: 0,
+    devolucion: 0,
+    otros: 0,
     total: 51.26 * MM,
     vencido: 11.4 * MM,
     n: 835
@@ -311,7 +317,11 @@ const FACTURA_PROM: Record<EstadoKey, number> = {
   pagada: 52 * M,
   conciliado: 96 * M,
   novedad: 44 * M,
-  sin_conciliar: 28 * M
+  sin_conciliar: 28 * M,
+  saldo: 20 * M,
+  glosado: 30 * M,
+  devolucion: 25 * M,
+  otros: 35 * M
 };
 
 /** Días sin gestión base de cada estado. null = nunca se ha gestionado. */
@@ -320,7 +330,11 @@ const GESTION_EST: Record<EstadoKey, number | null> = {
   pagada: 6,
   conciliado: 4,
   novedad: 0, // lo define cada novedad
-  sin_conciliar: null
+  sin_conciliar: null,
+  saldo: 9,
+  glosado: 3,
+  devolucion: 7,
+  otros: null
 };
 
 /** Tope de facturas por grupo: la tabla del modal se vuelve inmanejable. */

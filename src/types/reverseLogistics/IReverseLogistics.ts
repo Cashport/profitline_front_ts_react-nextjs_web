@@ -37,33 +37,19 @@ export interface ICalculatedStatus {
   badgeColor: string;
 }
 
-export interface IReturn {
-  id: number;
-  idBoleto: string;
-  fecha: string;
-  cliente: string;
-  direccionCliente: string;
-  canal: string;
-  lineaNegocio?: string;
-  unidades: number;
-  causal: CausalDevolucion;
-  embalaje: string;
-  precintos: number;
-  monto: number;
-  usuario: string;
-  estado: EstadoDevolucion;
-  pdfUrl?: string;
-}
-
-export interface ReturnRow {
+// La fila hoja ES la devolución: se hace spread del objeto de la API para que
+// cualquier campo del backend (Municipio, Direccion, Sucursal, …) se lea directo
+// desde `record` sin re-declararlo aquí. `Partial` porque las filas grupo agregan
+// varias devoluciones y no corresponden a ninguna en concreto.
+export interface ReturnRow extends Partial<IProfit360VisitDevolucion> {
   key: string;
   isGroup: boolean;
   devCount: number;
-  id: number;
+  // Derivados / agregados: en una fila grupo son sumas y uniones, no el valor de
+  // una devolución suelta, así que no pueden salir del spread.
   idBoleto: string;
   fecha: string;
   cliente: string;
-  direccionCliente: string;
   canal: string;
   lineaNegocio?: string;
   unidades: number;
@@ -74,10 +60,6 @@ export interface ReturnRow {
   haveApprove: boolean;
   idDevolucion?: string;
   calculatedStatus?: ICalculatedStatus;
-  // Reference to the original API devolucion so the actions column can
-  // navigate to the approval detail (`IdDevolucion` doubles as the approval
-  // id used in /aprobaciones/:id and /returns/:returnId/approve).
-  originalDev?: IProfit360VisitDevolucion;
   children?: Omit<ReturnRow, "children">[];
 }
 
@@ -308,6 +290,7 @@ export interface IProfit360VisitDevolucion {
   ObservacionAprobacion: string;
   IdEstadoAprobacion: string;
   FechaRegistroAprobacion: string;
+  Direccion: string;
   IdAprobacion: string | null;
   /**
    * Estados / fases por las que pasó la devolución (`DevolucionPaso` join

@@ -62,7 +62,7 @@
                     font-size: 2.5rem;
                     font-weight: 600;
                     color: $white;
-                    max-width: 400px;
+                    white-space: nowrap;
                 }
             }
 
@@ -210,6 +210,14 @@
 @media screen and (max-width: 800px) {
     .confirmedOrderView {
         &__content {
+            &__header {
+                .title {
+                    h2 {
+                        white-space: normal;
+                    }
+                }
+            }
+
             .summaryContainer {
                 &__top {
                     .categories {

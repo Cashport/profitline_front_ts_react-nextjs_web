@@ -25,7 +25,12 @@ const CELDA_VACIA: IWalletMatrixCell = {
   conciliado: 0,
   novedad: 0,
   sin_conciliar: 0,
-  total: 0
+  saldo: 0,
+  glosado: 0,
+  devolucion: 0,
+  otros: 0,
+  total: 0,
+  n: 0
 };
 
 /**

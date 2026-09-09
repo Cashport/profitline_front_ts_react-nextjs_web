@@ -48,15 +48,14 @@ const TabButton = ({
     onClick={onClick}
     className={cn(
       "-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 pb-3 pt-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
-      active && "border-primary text-foreground"
+      active && "border-wallet-nov text-foreground"
     )}
   >
     {children}
     <span
       className={cn(
         "rounded-full px-1.5 text-[10.5px] font-bold leading-[17px] tabular-nums",
-        // El número va en color normal: el lima como texto no se lee.
-        active ? "bg-primary/20 text-foreground" : "bg-muted text-muted-foreground"
+        active ? "bg-wallet-nov/15 text-wallet-nov" : "bg-muted text-muted-foreground"
       )}
     >
       {count}

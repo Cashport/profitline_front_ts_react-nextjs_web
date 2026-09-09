@@ -2,8 +2,6 @@ import { ORDEN_EST } from "../constants";
 import {
   EstadoKey,
   IWalletClientRow,
-  IWalletDrilldown,
-  IWalletGroupRow,
   IWalletMatrixCell,
   SortState,
   WalletSegments
@@ -15,6 +13,10 @@ const emptySegments = (): WalletSegments => ({
   conciliado: 0,
   novedad: 0,
   sin_conciliar: 0,
+  saldo: 0,
+  glosado: 0,
+  devolucion: 0,
+  otros: 0,
   total: 0,
   vencido: 0,
   n: 0
@@ -26,6 +28,7 @@ export function sumCells(cells: IWalletMatrixCell[]): WalletSegments {
   cells.forEach((c) => {
     ORDEN_EST.forEach((e) => (r[e] += c[e]));
     r.total += c.total;
+    r.n += c.n ?? 0;
   });
   return r;
 }
@@ -45,6 +48,7 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
     ORDEN_EST.forEach((e) => (r[e] += s[e]));
     r.total += s.total;
     r.vencido += s.vencido;
+    r.n += s.n;
   });
   return r;
 }
@@ -52,32 +56,6 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
 /** Total de una columna de tramo, sumando todas las filas. */
 export const tramoTotal = (rows: IWalletClientRow[], ti: number): number =>
   rows.reduce((a, row) => a + (row.tramos[ti]?.total ?? 0), 0);
-
-/** Búsqueda de la matriz: nombre, NIT o ejecutivo. */
-export function filtrarClientes(rows: IWalletClientRow[], query: string): IWalletClientRow[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return rows;
-  return rows.filter((r) => `${r.nombre} ${r.nit} ${r.ejecutivo}`.toLowerCase().includes(q));
-}
-
-/**
- * Grupos visibles: primero la búsqueda de la matriz, luego el drilldown. Con un
- * tramo elegido sobrevive el grupo que tenga *algo* ahí, aunque el grueso de su
- * saldo caiga en otro tramo: por eso "Total" y "Tramo" no coinciden.
- */
-export function filtrarGrupos(
-  grupos: IWalletGroupRow[],
-  clientesVisibles: IWalletClientRow[],
-  drill: IWalletDrilldown | null
-): IWalletGroupRow[] {
-  const visibles = new Set(clientesVisibles.map((c) => c.id));
-  const enVista = grupos.filter((g) => visibles.has(g.clienteId));
-  if (!drill) return enVista;
-
-  const delCliente = enVista.filter((g) => g.clienteId === drill.clienteId);
-  const { tramo } = drill;
-  return tramo === null ? delCliente : delCliente.filter((g) => g.tramos[tramo] > 0);
-}
 
 /** Ordena una copia de la lista según el estado de orden y un extractor. */
 export function ordenar<T>(lista: T[], orden: SortState, valor: (item: T) => string | number): T[] {

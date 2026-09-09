@@ -320,6 +320,10 @@ export interface IUploadPurchaseOrderResponse {
   products_count: number;
 }
 
+export interface IUploadPurchaseOrderN8nResponse {
+  request_id: string;
+}
+
 export interface IBatchByProduct {
   id: number;
   batch: string;

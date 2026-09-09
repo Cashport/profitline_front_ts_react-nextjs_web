@@ -11,6 +11,7 @@ import {
   IApprover,
   IApproversResponse,
   IUploadPurchaseOrderResponse,
+  IUploadPurchaseOrderN8nResponse,
   IBatchesByPurchaseOrder,
   ICreatePurchaseOrderPayload,
   IGetAvailableDocuments
@@ -86,6 +87,25 @@ export const uploadPurchaseOrder = async (file: File): Promise<IUploadPurchaseOr
     return response.data;
   } catch (error) {
     console.error("File upload error:", error);
+    throw error;
+  }
+};
+
+export const uploadPurchaseOrderToN8n = async (
+  file: File
+): Promise<IUploadPurchaseOrderN8nResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("interno", "true");
+
+    const response: GenericResponse<IUploadPurchaseOrderN8nResponse> = await API.post(
+      `${config.API_HOST}/purchaseOrder/upload-to-n8n`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("File upload to n8n error:", error);
     throw error;
   }
 };

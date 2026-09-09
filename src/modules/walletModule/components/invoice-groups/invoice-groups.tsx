@@ -14,12 +14,13 @@ import type { IWalletDrilldown, IWalletGroupRow, SortState } from "../../types";
 
 interface InvoiceGroupsProps {
   rows: IWalletGroupRow[];
+  // eslint-disable-next-line no-unused-vars
+  onOpenDetail: (clave: string) => void;
   drilldown: IWalletDrilldown | null;
   /** Nombre corto del cliente del drilldown; null sin selección. */
   clienteNombre: string | null;
   openGroup: string | null;
   onClearDrilldown: () => void;
-  onOpenDetail: (clave: string) => void;
 }
 
 const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
@@ -40,11 +41,11 @@ const GestionChip = ({ dias }: { dias: number | null }) => {
 /** Grupos de facturas: todo lo que se resuelve con una sola gestión. */
 export default function InvoiceGroups({
   rows,
+  onOpenDetail,
   drilldown,
   clienteNombre,
   openGroup,
-  onClearDrilldown,
-  onOpenDetail
+  onClearDrilldown
 }: InvoiceGroupsProps) {
   const [sort, setSort] = useState<SortState>({ col: "monto", dir: "desc" });
   const zona = useRef<HTMLElement>(null);
@@ -57,6 +58,8 @@ export default function InvoiceGroups({
   const activeSort: SortState =
     sort.col === "tramo" && !enTramo ? { col: "monto", dir: "desc" } : sort;
 
+  // Las filas ya llegan acotadas por el servidor (useWalletMatrixGroups recibe
+  // el cliente y el tramo): aquí sólo se ordenan.
   const visibleRows = useMemo(
     () =>
       ordenar(rows, activeSort, (g) => {
@@ -240,7 +243,7 @@ export default function InvoiceGroups({
 
       <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
         {!drilldown &&
-          "Estos son los grupos de todo lo que hay en la matriz con los filtros y la búsqueda actuales. Haz clic en una caja de la matriz o en un cliente para acotarlos. "}
+          "Estos son los grupos de todo lo que hay en la matriz con los filtros y la búsqueda actuales. "}
         {drilldown && !enTramo && `Todos los grupos de ${clienteNombre}, sin importar el tramo. `}
         {drilldown &&
           enTramo &&

@@ -71,18 +71,24 @@ export const returnsColumns: ColumnsType<ReturnRow> = [
     title: "Cliente",
     dataIndex: "cliente",
     sorter: (a, b) => a.cliente.localeCompare(b.cliente),
-    render: (_: unknown, record) => (
-      <div className="break-words">
-        <div className="text-gray-900 text-sm" title={record.cliente}>
-          {record.cliente}
-        </div>
-        {!record.isGroup && record.direccionCliente && (
-          <div className="text-xs text-gray-400 mt-0.5" title={record.direccionCliente}>
-            {record.direccionCliente}
+    render: (_: unknown, record) => {
+      // Las filas grupo agregan varias devoluciones: no tienen ubicación propia.
+      const ubicacion = record.isGroup
+        ? ""
+        : [record.Municipio, record.Direccion].filter(Boolean).join(" - ");
+      return (
+        <div className="break-words">
+          <div className="text-gray-900 text-sm" title={record.cliente}>
+            {record.cliente}
           </div>
-        )}
-      </div>
-    )
+          {ubicacion && (
+            <div className="text-xs text-gray-400 mt-0.5" title={ubicacion}>
+              {ubicacion}
+            </div>
+          )}
+        </div>
+      );
+    }
   },
   {
     title: "Canal / Línea",

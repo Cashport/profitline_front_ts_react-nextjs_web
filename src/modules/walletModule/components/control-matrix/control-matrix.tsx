@@ -13,10 +13,18 @@ import StatusLegend from "../shared/status-legend";
 import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
 
 interface ControlMatrixProps {
-  /** Ya filtradas por la búsqueda: la vista es la dueña del texto. */
   rows: IWalletClientRow[];
+  /** Texto de búsqueda actual; la resuelve el servidor, no esta tabla. */
+  search: string;
+  // eslint-disable-next-line no-unused-vars
+  onSearchChange: (value: string) => void;
+  /** Clientes que coinciden con la búsqueda, no sólo los de esta página. */
+  totalClients: number;
+  loading?: boolean;
+  /** Texto del estado vacío; depende de si hay búsqueda activa. */
+  emptyMessage?: string;
   drilldown: IWalletDrilldown | null;
-  onQueryChange: (value: string) => void;
+  // eslint-disable-next-line no-unused-vars
   onSelect: (drilldown: IWalletDrilldown) => void;
 }
 
@@ -28,12 +36,20 @@ const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accen
 /** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
 export default function ControlMatrix({
   rows,
+  search,
+  onSearchChange,
+  totalClients,
+  loading,
+  emptyMessage = "Ningún cliente coincide con los filtros.",
   drilldown,
-  onQueryChange,
   onSelect
 }: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
 
+  // La búsqueda NO se filtra aquí a propósito: la tabla sólo tiene la página
+  // cargada (50 de miles de clientes), así que filtrar en el navegador daría
+  // "sin resultados" para clientes que sí existen. La resuelve el servidor
+  // sobre la foto completa.
   const visibleRows = useMemo(
     () =>
       ordenar(rows, sort, (row) => {
@@ -69,9 +85,17 @@ export default function ControlMatrix({
         <div className="ml-auto w-full max-w-[400px]">
           <UiSearchInput
             id="wallet-matrix-search"
-            placeholder="Buscar cliente, factura o ejecutivo…"
-            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
+          {search.trim() && (
+            <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+              {loading
+                ? "Buscando…"
+                : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"} coinciden`}
+            </p>
+          )}
         </div>
       </div>
 
@@ -99,7 +123,7 @@ export default function ControlMatrix({
             {visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={9} className="p-9 text-center text-muted-foreground">
-                  Ningún cliente coincide con los filtros.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (
