@@ -220,6 +220,25 @@ export interface IClientDetailArchiveClient {
   data_type: IDataType;
 }
 
+// Un evento del historial de versiones de un archivo (archives_client_data).
+// `event_type` se deja como string: sólo se ha confirmado "created" y los valores
+// no contemplados caen a un ícono/color neutro en lugar de romper el tipado.
+export interface IFileHistoryEvent {
+  id: number;
+  archives_client_data_id: number;
+  file_name: string;
+  url_s3: string | null;
+  version: number;
+  user_id: number | null;
+  user_name: string | null;
+  event_type: string;
+  event_description: string;
+  size_bytes: number;
+  tag: string | null;
+  metadata: { evidence_url: string | null } | null;
+  occurred_at: string;
+}
+
 export interface IClientDetailArchivesByType {
   id_type_archive: number;
   tipo_archivo: string;

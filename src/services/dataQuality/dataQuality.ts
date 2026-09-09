@@ -21,6 +21,7 @@ import {
   IPOS,
   IPOSPayload,
   IClientDetailArchiveClient,
+  IFileHistoryEvent,
   IPostCatalogMaterialEquivalence,
   IFileType,
   IDataEmail,
@@ -402,6 +403,22 @@ export const deleteIntakeFile = async (fileId: number): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error deleting intake file:", error);
+    throw error;
+  }
+};
+
+export const getFileHistory = async (
+  archivesClientDataId: number,
+  page: number = 1,
+  limit: number = 50
+): Promise<IFileHistoryEvent[]> => {
+  try {
+    const response: GenericResponse<IFileHistoryEvent[]> = await API.get(
+      `${config.API_HOST}/data/acd-files/${archivesClientDataId}/history?page=${page}&limit=${limit}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching file history:", error);
     throw error;
   }
 };
