@@ -298,6 +298,7 @@ export interface IMarketAdminClientDetail {
   business_name: string | null;
   phone: string | null;
   email: string | null;
+  city: string | null;
   bu: string | null; // unidad de negocio (se muestra como "Canal")
   nit_id: number;
   pricelist_id: number | null;
@@ -419,7 +420,7 @@ export interface IMarketAdminUserDetail {
 
 // POST /users/:id/clients — el grupo personal lo crea el backend si no existe
 export interface IAssignClientToUserBody {
-  client_nit: string;
+  client_nits: string[];
 }
 
 // ── Profit Loader (cargue de información) ───────────────────────────────────

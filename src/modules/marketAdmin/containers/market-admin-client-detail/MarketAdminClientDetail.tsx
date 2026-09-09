@@ -211,8 +211,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
           <p className="text-sm font-bold text-[#141414] mb-4">Información general</p>
           <div className="grid grid-cols-[1fr_1fr_1fr_2fr] gap-6">
             <Field label="NIT" value={cliente.nit} />
-            {/* TODO: el detalle aún no devuelve la ciudad — pendiente en backend */}
-            <Field label="Ciudad" value="—" />
+            <Field label="Ciudad" value={cliente.city || "—"} />
             <Field label="Canal" value={cliente.bu || "—"} />
             <Field
               label="Líneas de negocio"

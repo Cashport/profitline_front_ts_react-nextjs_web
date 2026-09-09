@@ -59,18 +59,25 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
 
   const asignados = usuario?.clients ?? [];
 
-  const agregarGrupo = async (grupoId: number) => {
-    if (!usuario) return;
+  const agregarGrupo = async (grupoIds: number[]) => {
+    if (!usuario) return false;
     const prev = grupos;
-    setGrupos((p) => [...p, grupoId]);
+    setGrupos((p) => [...p, ...grupoIds]);
     try {
       setIsSavingGrupos(true);
-      await addUserToClientGroups([grupoId], projectId, usuario.id);
-      showMessage("success", "Grupo agregado correctamente.");
+      await addUserToClientGroups(grupoIds, projectId, usuario.id);
+      showMessage(
+        "success",
+        grupoIds.length === 1
+          ? "Grupo agregado correctamente."
+          : `${grupoIds.length} grupos agregados correctamente.`
+      );
       await loadGrupos();
+      return true;
     } catch (err) {
       setGrupos(prev);
       showMessage("error", err instanceof Error ? err.message : "No se pudo agregar el grupo.");
+      return false;
     } finally {
       setIsSavingGrupos(false);
     }
@@ -93,17 +100,24 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     }
   };
 
-  const agregar = async (nit: string) => {
+  const agregar = async (nits: string[]) => {
     try {
       setIsSaving(true);
-      await assignClientToMarketAdminUser(id, { client_nit: nit });
+      await assignClientToMarketAdminUser(id, { client_nits: nits });
       await mutate();
-      showMessage("success", "Cliente asignado correctamente.");
+      showMessage(
+        "success",
+        nits.length === 1
+          ? "Cliente asignado correctamente."
+          : `${nits.length} clientes asignados correctamente.`
+      );
+      return true;
     } catch (err) {
       showMessage(
         "error",
         err instanceof Error ? err.message : "Ocurrió un error al asignar el cliente."
       );
+      return false;
     } finally {
       setIsSaving(false);
     }

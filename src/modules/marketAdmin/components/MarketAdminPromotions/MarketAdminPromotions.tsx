@@ -11,6 +11,7 @@ import {
 } from "@/services/marketAdmin/marketAdmin";
 import { useMessageApi } from "@/context/MessageContext";
 import { IPromocion } from "@/types/marketAdmin/IMarketAdmin";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { buildPromotionPayload } from "./buildPromotionPayload";
 import PromocionCard from "./PromocionCard";
 
@@ -95,7 +96,7 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="text-[#999999] hover:text-[#141414] transition-colors"
+              className="flex items-center gap-1.5 px-2 h-8 rounded-lg text-sm text-[#666666] hover:text-[#141414] hover:bg-[#F0F0F0] transition-colors flex-shrink-0"
             >
               <ArrowLeft size={16} />
             </button>
@@ -106,12 +107,12 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
               </p>
             </div>
           </div>
-          <button
-            onClick={addPromocion}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
-          >
-            <Plus size={14} /> Nueva promoción
-          </button>
+          {/* PrincipalButton fija height:100% con !important, por eso va dentro de un contenedor de alto fijo */}
+          <div className="h-10 flex-shrink-0">
+            <PrincipalButton onClick={addPromocion} icon={<Plus size={15} />}>
+              Nueva promoción
+            </PrincipalButton>
+          </div>
         </div>
 
         {/* Content */}
@@ -120,12 +121,9 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
             <div className="flex flex-col items-center justify-center h-64 gap-3">
               <Gift size={32} className="text-[#DDDDDD]" />
               <p className="text-sm text-[#999999]">No hay promociones creadas</p>
-              <button
-                onClick={addPromocion}
-                className="px-4 py-2 bg-[#141414] text-white text-sm font-semibold rounded-lg hover:bg-[#333333] transition-colors"
-              >
-                Crear primera promoción
-              </button>
+              <div className="h-10 flex-shrink-0">
+                <PrincipalButton onClick={addPromocion}>Crear primera promoción</PrincipalButton>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -142,13 +140,16 @@ export default function MarketAdminPromotions({ onBack, onSaved }: Props) {
 
               {/* Global save */}
               <div className="flex justify-end border-t border-[#EEEEEE] pt-4">
-                <button
-                  onClick={handleGuardar}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#CBE71E] text-[#141414] text-sm font-semibold rounded-lg hover:bg-[#b8d419] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <Save size={15} /> {saving ? "Guardando…" : "Guardar promoción"}
-                </button>
+                <div className="h-10 flex-shrink-0">
+                  <PrincipalButton
+                    onClick={handleGuardar}
+                    disabled={saving}
+                    loading={saving}
+                    icon={<Save size={15} />}
+                  >
+                    {saving ? "Guardando…" : "Guardar promoción"}
+                  </PrincipalButton>
+                </div>
               </div>
             </div>
           )}

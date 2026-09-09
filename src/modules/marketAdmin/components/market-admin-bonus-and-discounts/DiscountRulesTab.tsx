@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Table } from "antd";
+import { Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import useSWR from "swr";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
@@ -15,11 +15,13 @@ import AccionesDropdown from "./AccionesDropdown";
 import DiscountsToolbar from "./DiscountsToolbar";
 import {
   DateCell,
+  ESTADO_FILTER_ALL,
+  ESTADO_FILTER_OPTIONS,
+  ESTADO_SELECT_CLASSNAME,
   PAGE_SIZE,
   StatusPill,
   TextCell,
   TypePill,
-  getStatusLabel,
   headerCell
 } from "./discountsTableConfig";
 
@@ -29,32 +31,26 @@ interface DiscountRulesTabProps {
 
 export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps) {
   const [search, setSearch] = useState("");
-  const [tipoFilter, setTipoFilter] = useState("Todos");
-  const [estadoFilter, setEstadoFilter] = useState("Todos");
+  const [estadoFilter, setEstadoFilter] = useState(ESTADO_FILTER_ALL);
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { data: rulesData, isLoading } = useSWR(ID ? ["discount-rules", ID] : null, () =>
-    getAllDiscounts({ projectId: ID })
+  const { data: rulesData, isLoading } = useSWR(
+    ID ? ["discount-rules", ID, estadoFilter] : null,
+    () =>
+      getAllDiscounts({
+        projectId: ID,
+        params: estadoFilter === ESTADO_FILTER_ALL ? undefined : { active: Number(estadoFilter) }
+      })
   );
 
   const reglas = useMemo(() => rulesData?.data ?? [], [rulesData]);
 
-  const tipos = useMemo(
-    () => Array.from(new Set(reglas.map((r) => r.discount_type).filter(Boolean))),
-    [reglas]
-  );
-
   const filtered = useMemo(
     () =>
-      reglas.filter((r) => {
-        const matchSearch = (r.discount_name ?? "").toLowerCase().includes(search.toLowerCase());
-        const matchTipo = tipoFilter === "Todos" || r.discount_type === tipoFilter;
-        const matchEstado = estadoFilter === "Todos" || getStatusLabel(r.status) === estadoFilter;
-        return matchSearch && matchTipo && matchEstado;
-      }),
-    [search, tipoFilter, estadoFilter, reglas]
+      reglas.filter((r) => (r.discount_name ?? "").toLowerCase().includes(search.toLowerCase())),
+    [search, reglas]
   );
 
   const activas = filtered.filter((r) => r.status === 1).length;
@@ -142,33 +138,17 @@ export default function DiscountRulesTab({ onCrearNuevo }: DiscountRulesTabProps
           entityLabel="regla(s)"
           onClearSelection={() => setSelectedRowKeys([])}
         />
-        <select
-          value={tipoFilter}
-          onChange={(e) => {
-            setTipoFilter(e.target.value);
-            setPage(1);
-          }}
-          className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-        >
-          <option value="Todos">Tipo</option>
-          {tipos.map((tipo) => (
-            <option key={tipo} value={tipo}>
-              {tipo}
-            </option>
-          ))}
-        </select>
-        <select
+        <Select
           value={estadoFilter}
-          onChange={(e) => {
-            setEstadoFilter(e.target.value);
+          onChange={(value) => {
+            setEstadoFilter(value);
             setPage(1);
           }}
-          className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-        >
-          <option value="Todos">Estado</option>
-          <option value="Activo">Activo</option>
-          <option value="Inactivo">Inactivo</option>
-        </select>
+          options={ESTADO_FILTER_OPTIONS}
+          placeholder="Estado"
+          style={{ minWidth: 140 }}
+          className={ESTADO_SELECT_CLASSNAME}
+        />
       </DiscountsToolbar>
 
       {isLoading ? (
