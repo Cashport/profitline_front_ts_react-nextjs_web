@@ -56,7 +56,7 @@ export default function ControlMatrix({
   };
 
   return (
-    <section className="rounded-xl bg-card shadow-sm">
+    <section className="rounded-xl bg-card text-card-foreground shadow-sm">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>

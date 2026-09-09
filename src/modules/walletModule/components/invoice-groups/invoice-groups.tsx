@@ -93,7 +93,7 @@ export default function InvoiceGroups({
       : "Grupos de facturas";
 
   return (
-    <section ref={zona} className="rounded-xl bg-card shadow-sm">
+    <section ref={zona} className="rounded-xl bg-card text-card-foreground shadow-sm">
       <div className="flex flex-wrap items-center gap-2.5 border-b border-border p-4">
         <h3 className="text-[13.5px] font-semibold text-foreground">{titulo}</h3>
         <span className="ml-auto text-[11.5px] text-muted-foreground">
