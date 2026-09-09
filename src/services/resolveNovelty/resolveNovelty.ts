@@ -6,8 +6,10 @@ interface IncidentActionData {
   files?: File[];
 }
 
+// Aprueba/rechaza TODA la novedad (todos sus documentos activos), no una
+// sola factura -- el backend ya no requiere `invoiceId` en la ruta (ver
+// `POST /invoice/incident/:incident_id/approve|reject`).
 export const approveIncident = async (
-  invoiceId: number,
   incidentId: number,
   actionData: IncidentActionData
 ): Promise<any> => {
@@ -21,7 +23,7 @@ export const approveIncident = async (
   }
 
   const response = await API.post(
-    `${config.API_HOST}/invoice/${invoiceId}/approve-incident/${incidentId}`,
+    `${config.API_HOST}/invoice/incident/${incidentId}/approve`,
     formData
   );
 
@@ -29,7 +31,6 @@ export const approveIncident = async (
 };
 
 export const rejectIncident = async (
-  invoiceId: number,
   incidentId: number,
   actionData: IncidentActionData
 ): Promise<any> => {
@@ -43,7 +44,7 @@ export const rejectIncident = async (
   }
 
   const response = await API.post(
-    `${config.API_HOST}/invoice/${invoiceId}/reject-incident/${incidentId}`,
+    `${config.API_HOST}/invoice/incident/${incidentId}/reject`,
     formData
   );
 
