@@ -14,7 +14,8 @@ import {
   ListChecks,
   ArrowCounterClockwise,
   TextIndent,
-  Ticket
+  Ticket,
+  Gauge
 } from "phosphor-react";
 import {
   ChatCircleDots,
@@ -396,6 +397,21 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             icon={<Ticket size={iconSize} />}
             className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
             onClick={(e) => handleNavClick(e, "/tickets")}
+          />
+        </Link>
+      )}
+
+      {/* Control tower */}
+      {checkUserViewPermissions(project, "ControlTower") && (
+        <Link href="/torreControl" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Gauge size={iconSize} />}
+            className={
+              path.startsWith("/torreControl") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/torreControl")}
           />
         </Link>
       )}
