@@ -110,6 +110,41 @@ export const uploadPurchaseOrderToN8n = async (
   }
 };
 
+export const downloadMvpTxt = async ({
+  orderIds,
+  variant = "sku"
+}: {
+  orderIds: number[];
+  variant?: "ean" | "sku";
+}): Promise<void> => {
+  try {
+    const response = await instance.post(
+      `${config.API_HOST}/purchaseOrder/export-mvp-txt`,
+      { order_ids: orderIds, variant },
+      { responseType: "blob", timeout: 60000 }
+    );
+
+    const disposition =
+      (response.headers?.["content-disposition"] as string) || "";
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    const filename =
+      match?.[1] ||
+      `ordenes_${new Date().toISOString().split("T")[0]}.txt`;
+
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading TXT:", error);
+    throw error;
+  }
+};
+
 export const getHistoryTimelineEvents = async (
   orderId: string
 ): Promise<IHistoryTimelineEvent[]> => {
