@@ -79,7 +79,7 @@ export function AprobacionDevolucionModal({
       footer={null}
       centered
       destroyOnClose
-      width={420}
+      width={480}
     >
       <div className="flex flex-col gap-4 py-2">
         <div className="flex flex-col gap-1">
@@ -104,7 +104,6 @@ export function AprobacionDevolucionModal({
           />
         </div>
         <div className="flex items-center justify-end gap-2 pt-2">
-          <SecondaryButton onClick={onClose}>Cancelar</SecondaryButton>
           <SecondaryButton onClick={onClose}>No Aprobar</SecondaryButton>
           <PrincipalButton
             onClick={handleAprobar}

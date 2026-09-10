@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Key } from "react";
 import { useRouter } from "next/navigation";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import dayjs from "dayjs";
 import { message, Modal, Table } from "antd";
 import { ArrowLeft, AlertTriangle, TrendingUp } from "lucide-react";
@@ -75,13 +75,11 @@ function shortCausal(causal: string): string {
   return match ? match[1] : causal;
 }
 
-// Full approval detail backed by GET /integration/profit360/approvals/{id}/resumen.
-// Layout mirrors the legacy AprobacionDetalle so the user doesn't notice the URL
-// change — only the data source moved from the mock to the real Profit360 endpoint.
 export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   const router = useRouter();
+  const { mutate: mutateGlobal } = useSWRConfig();
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading } = useSWR(
     ["reverse-logistics/profit360-approval-resumen", id],
     () => getProfit360ApprovalResumen(id),
     { revalidateOnFocus: false }
@@ -161,7 +159,8 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   };
 
   // Called by the modal with the resolved dropdown + textarea values. Builds
-  // the dynamic POST body and refreshes the detail on success.
+  // the dynamic POST body; on success invalidates the approvals list cache and
+  // sends the user back to the table. Errors bubble up so the modal stays open.
   const handleApprove = async ({
     estadoCodigo,
     causalCodigo,
@@ -182,7 +181,13 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
         causal: causalCodigo,
         causalOriginal: defaultCausalCodigo
       });
-      await mutate();
+      message.success("Devolución aprobada correctamente");
+      // The list is keyed as ["reverse-logistics/profit360-approvals", ...filters];
+      // drop every cached variant so the approved row doesn't reappear on landing.
+      mutateGlobal(
+        (key) => Array.isArray(key) && key[0] === "reverse-logistics/profit360-approvals"
+      );
+      router.push("/logistica-inversa/aprobaciones");
     } finally {
       setApproving(false);
     }
