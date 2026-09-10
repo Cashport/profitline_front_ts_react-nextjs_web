@@ -253,8 +253,6 @@ export default function WalletView() {
         onToggleProjection={setCalculateEndMonth}
       />
 
-      <h2 className="text-lg font-semibold text-foreground">Cartera por cliente y tramo</h2>
-
       {/* <WalletFilters summary={summary} /> */}
 
       {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
