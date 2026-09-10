@@ -1,7 +1,7 @@
 /* Reglas de lectura del detalle de un grupo: SLA, estado de un ticket y
    resumen de sus facturas. Todas son funciones puras sobre los datos. */
 import { HOY, diasEntre } from "./format";
-import type { IWalletInvoice, IWalletNovedad, IWalletTicket, Sev } from "../types";
+import type { IWalletNovedad, IWalletTicket, Sev } from "../types";
 
 /** Semáforo del compromiso de una novedad. Null si no se conoce la fecha. */
 export function slaDe(nov: IWalletNovedad): { sev: Sev; txt: string } | null {
@@ -59,14 +59,12 @@ export function estadoTicket(t: IWalletTicket): TicketStatus {
   return { ...base, tiempo: `En ${d}d`, tsev: null };
 }
 
-/** Saldo, vencido y mora promedio de un conjunto de facturas. */
-export function resumenFacturas(fs: IWalletInvoice[]): {
-  total: number;
-  vencido: number;
-  edad: number;
-} {
-  const total = fs.reduce((a, f) => a + f.saldo, 0);
-  const vencido = fs.filter((f) => f.dias > 0).reduce((a, f) => a + f.saldo, 0);
-  const edad = Math.round(fs.reduce((a, f) => a + Math.max(0, f.dias), 0) / (fs.length || 1));
-  return { total, vencido, edad };
-}
+/**
+ * Vencido del grupo: todo lo que no es corriente.
+ *
+ * Se lee del reparto por tramo y no de las facturas, que son una muestra. Es
+ * el mismo criterio de `toSummary`, así que el dato del modal y el de las
+ * tarjetas superiores no pueden discrepar.
+ */
+export const vencidoDeTramos = (tramos: number[]): number =>
+  tramos.slice(1).reduce((a, m) => a + m, 0);

@@ -11,6 +11,8 @@
    ============================================================ */
 import { EST_META, ORDEN_EST, TRAMO_DIAS } from "./constants";
 import { HOY, dias, fmtDc } from "./utils/format";
+import { groupKey } from "./utils/api-adapter";
+import type { IWalletMatrixGroup } from "@/types/portfolios/IWalletMatrix";
 import {
   EstadoKey,
   IWalletClientRow,
@@ -494,6 +496,31 @@ function buildInvoices(
 }
 
 /**
+ * Facturas de ejemplo para un grupo REAL del API.
+ *
+ * No existe endpoint que devuelva las facturas de un grupo, así que la tabla
+ * del modal se llena derivándolas del reparto por tramo: los saldos suman el
+ * monto real del grupo y los tramos son los suyos, pero los documentos son
+ * inventados. El tope es el mismo MAX_FACTURAS de los datos simulados —la
+ * tabla no está virtualizada y un grupo real puede traer miles—; el conteo de
+ * verdad viaja aparte, en `totalFacturas`.
+ */
+export const facturasDeEjemplo = (group: IWalletMatrixGroup): IWalletInvoice[] => {
+  const tramos = group.byAging ?? [];
+  // buildInvoices reparte sólo entre tramos con saldo y necesita un cupo por
+  // cada uno; sin ninguno no hay nada que repartir.
+  const conSaldo = tramos.filter((t) => t > 0).length;
+  if (!conSaldo) return [];
+
+  return buildInvoices(
+    groupKey(group),
+    tramos,
+    Math.max(conSaldo, Math.min(MAX_FACTURAS, group.invoices)),
+    1000
+  );
+};
+
+/**
  * Bitácora y tickets escritos a mano. Lo demás del detalle se deriva del grupo,
  * así que un grupo sin narrativa igual abre el modal, sólo que sin historia.
  */
@@ -734,6 +761,7 @@ function derivarDetalles(
         ejecutivo,
         monto: g.monto,
         tramos: g.tramos,
+        totalFacturas: g.facturas,
         facturas: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100),
         diasSinGestion: g.diasSinGestion,
         bitacora: narrativa.bitacora,

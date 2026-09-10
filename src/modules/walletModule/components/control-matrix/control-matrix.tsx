@@ -15,11 +15,11 @@ import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "
 
 interface ControlMatrixProps {
   rows: IWalletClientRow[];
-  /** Texto de búsqueda actual; la resuelve el servidor, no esta tabla. */
+  /** Texto de búsqueda actual. Por ahora es sólo visual: no consulta nada. */
   search: string;
   // eslint-disable-next-line no-unused-vars
   onSearchChange: (value: string) => void;
-  /** Clientes que coinciden con la búsqueda, no sólo los de esta página. */
+  /** Clientes de la foto completa, no sólo los de esta página. */
   totalClients: number;
   loading?: boolean;
   /** Texto del estado vacío; depende de si hay búsqueda activa. */
@@ -47,10 +47,10 @@ export default function ControlMatrix({
 }: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
 
-  // La búsqueda NO se filtra aquí a propósito: la tabla sólo tiene la página
-  // cargada (50 de miles de clientes), así que filtrar en el navegador daría
-  // "sin resultados" para clientes que sí existen. La resuelve el servidor
-  // sobre la foto completa.
+  // La búsqueda no filtra: hoy los dos buscadores son sólo interfaz. Tampoco
+  // debería filtrarse aquí cuando se reconecten —la tabla sólo tiene la página
+  // cargada, 50 de miles de clientes, y daría "sin resultados" para clientes
+  // que sí existen—; la resuelve el servidor sobre la foto completa.
   const visibleRows = useMemo(
     () =>
       ordenar(rows, sort, (row) => {
@@ -90,13 +90,11 @@ export default function ControlMatrix({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />
-          {search.trim() && (
-            <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
-              {loading
-                ? "Buscando…"
-                : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"} coinciden`}
-            </p>
-          )}
+          <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+            {loading
+              ? "Actualizando…"
+              : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"}`}
+          </p>
         </div>
       </div>
 

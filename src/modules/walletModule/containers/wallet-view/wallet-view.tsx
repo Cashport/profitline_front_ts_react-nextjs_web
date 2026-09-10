@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
-  useWalletGroupInvoices,
   useWalletMatrix,
   useWalletMatrixGroups,
   useWalletMatrixStatus
 } from "@/hooks/useWalletMatrix";
 import { refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
 import { useWalletMatrixSocket } from "@/context/WalletMatrixSocketContext";
-import { useDebounce } from "@/hooks/useDeabouce";
 import { useMessageApi } from "@/context/MessageContext";
 
 import ControlMatrix from "../../components/control-matrix/control-matrix";
@@ -31,10 +29,10 @@ import {
   toClientRows,
   toGroupDetail,
   toGroupRows,
-  toInvoices,
   toSummary
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
+import { facturasDeEjemplo } from "../../mocked-data";
 
 import type { IWalletDrilldown } from "../../types";
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
@@ -48,10 +46,11 @@ export default function WalletView() {
   const { showMessage } = useMessageApi();
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
-  // `search` es lo que se ve escrito; `debouncedSearch` es lo que se consulta.
-  // Sin el debounce cada tecla dispara una consulta sobre toda la foto.
+  // Los dos buscadores —el de la barra superior y el de la matriz— comparten
+  // este estado, pero por ahora no consultan nada: quedan sólo como interfaz.
+  // Reconectarlos es volver a poner `search` en `filters`; el endpoint de la
+  // matriz sigue soportándolo, el de grupos no.
   const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 350);
   const [calculateEndMonth, setCalculateEndMonth] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   /**
@@ -73,21 +72,22 @@ export default function WalletView() {
   // Celda o cliente seleccionado en la matriz. Acota los grupos de abajo.
   const [drilldown, setDrilldown] = useState<IWalletDrilldown | null>(null);
 
-  const filters: IWalletMatrixFilters = useMemo(
-    () => ({ search: debouncedSearch.trim() || undefined, calculateEndMonth }),
-    [debouncedSearch, calculateEndMonth]
-  );
+  const filters: IWalletMatrixFilters = useMemo(() => ({ calculateEndMonth }), [calculateEndMonth]);
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, 1, PAGE_SIZE);
   // El acotado lo resuelve el servidor: la página sólo tiene 50 clientes, así
-  // que filtrar los grupos en el navegador dejaría fuera lo que no vino.
+  // que filtrar los grupos en el navegador dejaría fuera lo que no vino. El
+  // runId sale de la matriz para que las dos tablas lean la MISMA foto; hasta
+  // que llegue, el hook no pide nada.
   const { data: groups, loading: groupsLoading } = useWalletMatrixGroups(
-    filters,
+    matrix?.snapshot?.runId,
     drilldown?.clienteId,
+    // `tramo` puede ser 0 (corriente), que es falsy: sin esta comparación
+    // explícita, un `&&` dejaría fuera justo esa columna.
     drilldown?.tramo === null || drilldown?.tramo === undefined
       ? undefined
       : TRAMO_BUCKETS[drilldown.tramo],
-    matrix?.snapshot?.runId
+    calculateEndMonth
   );
 
   // El polling sólo corre mientras hay una actualización viva. Es el respaldo
@@ -179,11 +179,11 @@ export default function WalletView() {
     }
   };
 
-  // Al cambiar la búsqueda o la proyección, la celda elegida deja de tener
-  // sentido: puede ni existir en la foto nueva.
+  // Al cambiar la proyección, la celda elegida deja de tener sentido: las
+  // edades se recalculan y la cartera se mueve de tramo.
   useEffect(() => {
     setDrilldown(null);
-  }, [debouncedSearch, calculateEndMonth]);
+  }, [calculateEndMonth]);
 
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
@@ -196,17 +196,17 @@ export default function WalletView() {
     [groups, openGroup]
   );
 
-  const { rows: invoiceRows, loading: invoicesLoading } = useWalletGroupInvoices(
-    grupoAbierto,
-    filters,
-    matrix?.snapshot?.runId
-  );
-
-  // El modal abre de inmediato con lo que ya trae el grupo; las facturas
-  // llegan después y por eso `loading` viaja aparte.
+  // Todo el modal sale del grupo que ya está en memoria: no hay endpoint que
+  // devuelva las facturas de un grupo, así que la tabla se llena con una
+  // muestra derivada del reparto por tramo. El tramo del drilldown viaja con
+  // el detalle porque, cuando lo hay, las cifras del grupo llegan acotadas a
+  // él y el modal tiene que decirlo.
   const detalleAbierto = useMemo(
-    () => (grupoAbierto ? toGroupDetail(grupoAbierto, toInvoices(invoiceRows)) : null),
-    [grupoAbierto, invoiceRows]
+    () =>
+      grupoAbierto
+        ? toGroupDetail(grupoAbierto, facturasDeEjemplo(grupoAbierto), drilldown?.tramo ?? null)
+        : null,
+    [grupoAbierto, drilldown]
   );
 
   const clienteNombre = useMemo(() => {
@@ -258,11 +258,7 @@ export default function WalletView() {
           onSearchChange={setSearch}
           totalClients={matrix?.pagination.totalClients ?? 0}
           loading={loading}
-          emptyMessage={
-            debouncedSearch.trim()
-              ? `No se encontró nada para "${debouncedSearch.trim()}".`
-              : "No hay cartera para los filtros actuales."
-          }
+          emptyMessage="No hay cartera para los filtros actuales."
           drilldown={drilldown}
           onSelect={setDrilldown}
         />
@@ -284,7 +280,6 @@ export default function WalletView() {
       <GroupDetailModal
         clave={openGroup}
         detail={detalleAbierto}
-        loading={invoicesLoading}
         onClose={() => setOpenGroup(null)}
       />
     </div>

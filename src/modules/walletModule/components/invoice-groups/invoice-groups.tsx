@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { EST_META, TRAMOS } from "../../constants";
 import { fmtM, grp } from "../../utils/format";
-import { nextSort, ordenar } from "../../utils/wallet-calc";
+import { nextSort, ordenar, sumaTramos } from "../../utils/wallet-calc";
 import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
 import DistBar from "../shared/dist-bar";
 import SortableTh from "../shared/sortable-th";
@@ -55,24 +55,18 @@ export default function InvoiceGroups({
   const ti = drilldown?.tramo ?? null;
   const enTramo = ti !== null;
 
-  // Sin columna de tramo no hay nada que ordenar por ella: vuelve al total.
-  const activeSort: SortState =
-    sort.col === "tramo" && !enTramo ? { col: "monto", dir: "desc" } : sort;
-
   // Las filas ya llegan acotadas por el servidor (useWalletMatrixGroups recibe
   // el cliente y el tramo): aquí sólo se ordenan.
   const visibleRows = useMemo(
     () =>
-      ordenar(rows, activeSort, (g) => {
-        switch (activeSort.col) {
+      ordenar(rows, sort, (g) => {
+        switch (sort.col) {
           case "grupo":
             return g.novedadId ?? EST_META[g.tipo].nom;
           case "cliente":
             return g.cliente;
           case "fact":
             return g.facturas;
-          case "tramo":
-            return enTramo ? g.tramos[ti] : g.monto;
           case "gestion":
             return g.diasSinGestion === null ? 99999 : g.diasSinGestion;
           case "estado":
@@ -81,7 +75,7 @@ export default function InvoiceGroups({
             return g.monto;
         }
       }),
-    [rows, activeSort, enTramo, ti]
+    [rows, sort]
   );
 
   // Al acotar, la tabla suele quedar fuera de pantalla: se trae a la vista.
@@ -90,7 +84,9 @@ export default function InvoiceGroups({
   }, [drilldown]);
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
-  const suma = visibleRows.reduce((a, g) => a + (enTramo ? g.tramos[ti] : g.monto), 0);
+  // Con un tramo elegido el API ya recortó `monto` a ese tramo, así que no hay
+  // dos cifras que distinguir: la columna es la misma, sólo cambia el rótulo.
+  const suma = visibleRows.reduce((a, g) => a + g.monto, 0);
   const titulo =
     drilldown && clienteNombre
       ? `${clienteNombre} · ${enTramo ? TRAMOS[ti].label : "todos los tramos"}`
@@ -119,39 +115,30 @@ export default function InvoiceGroups({
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
-              <SortableTh col="grupo" label="Grupo" sort={activeSort} onSort={onSort} />
-              <SortableTh col="cliente" label="Cliente" sort={activeSort} onSort={onSort} />
-              <SortableTh col="fact" label="Fact." align="right" sort={activeSort} onSort={onSort} />
-              {enTramo && (
-                <SortableTh
-                  col="tramo"
-                  label="Tramo"
-                  align="right"
-                  sort={activeSort}
-                  onSort={onSort}
-                />
-              )}
-              <SortableTh col="monto" label="Total" align="right" sort={activeSort} onSort={onSort} />
+              <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} />
+              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
+              <SortableTh col="fact" label="Fact." align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="monto"
+                label={enTramo ? `Total ${TRAMOS[ti].short}` : "Total"}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <th scope="col" className={TH_PLAIN}>
                 Reparto
               </th>
               <th scope="col" className={TH_PLAIN}>
                 Responsable
               </th>
-              <SortableTh
-                col="gestion"
-                label="Gest."
-                align="right"
-                sort={activeSort}
-                onSort={onSort}
-              />
+              <SortableTh col="gestion" label="Gest." align="right" sort={sort} onSort={onSort} />
               <th scope="col" className={TH_PLAIN}>
                 Ticket
               </th>
               <th scope="col" className={TH_PLAIN}>
                 Límite
               </th>
-              <SortableTh col="estado" label="Estado" sort={activeSort} onSort={onSort} />
+              <SortableTh col="estado" label="Estado" sort={sort} onSort={onSort} />
               <th className="border-b border-border bg-muted/40" />
             </tr>
           </thead>
@@ -159,7 +146,7 @@ export default function InvoiceGroups({
           <tbody>
             {visibleRows.length === 0 ? (
               <tr>
-                <td colSpan={enTramo ? 12 : 11} className="p-9 text-center text-muted-foreground">
+                <td colSpan={11} className="p-9 text-center text-muted-foreground">
                   No hay grupos con los filtros actuales.
                 </td>
               </tr>
@@ -192,21 +179,19 @@ export default function InvoiceGroups({
                   <td className="px-3 py-2.5 text-right tabular-nums text-foreground">
                     {g.facturas}
                   </td>
-                  {enTramo && (
-                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
-                      {fmtM(g.tramos[ti])}
-                    </td>
-                  )}
                   <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                     {fmtM(g.monto)}
                   </td>
                   <DetailTooltip
                     title="Reparto por tramo"
                     rows={tramoRows(g.tramos)}
-                    total={{ value: fmtM(g.monto) }}
+                    // El pie sale de la suma del reparto y no de `monto`: con un
+                    // tramo pedido el API recorta el total, y el tooltip tiene
+                    // que cerrar con las filas que está mostrando.
+                    total={{ value: fmtM(sumaTramos(g.tramos)) }}
                   >
                     <td className="px-3 py-2.5">
-                      <DistBar tramos={g.tramos} monto={g.monto} resaltar={ti} />
+                      <DistBar tramos={g.tramos} resaltar={ti} />
                     </td>
                   </DetailTooltip>
                   <td className="whitespace-nowrap px-3 py-2.5">
@@ -249,14 +234,24 @@ export default function InvoiceGroups({
       </div>
 
       <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
-        {!drilldown &&
-          "Estos son los grupos de todo lo que hay en la matriz con los filtros y la búsqueda actuales. "}
-        {drilldown && !enTramo && `Todos los grupos de ${clienteNombre}, sin importar el tramo. `}
-        {drilldown &&
-          enTramo &&
-          `Un grupo puede tener facturas en varios tramos: En el tramo es la parte que cae en ${TRAMOS[ti].label.toLowerCase()}. `}
-        <b className="font-semibold text-foreground">Total</b> es todo lo que se resuelve con una
-        sola gestión.
+        {enTramo ? (
+          // Con un tramo elegido el API recorta cada grupo a ese tramo, así que
+          // aquí no se ve el total del grupo sino su parte. Decirlo evita que
+          // el monto se lea como "todo lo que se resuelve con una gestión".
+          <>
+            Sólo los grupos de {clienteNombre} con facturas en{" "}
+            {TRAMOS[ti].label.toLowerCase()}, y los montos son la parte que cae en ese tramo. Un
+            mismo grupo puede tener más cartera en otros tramos.
+          </>
+        ) : (
+          <>
+            {drilldown
+              ? `Todos los grupos de ${clienteNombre}, sin importar el tramo. `
+              : "Estos son los grupos de toda la foto. "}
+            <b className="font-semibold text-foreground">Total</b> es todo lo que se resuelve con
+            una sola gestión.
+          </>
+        )}
       </div>
     </section>
   );
