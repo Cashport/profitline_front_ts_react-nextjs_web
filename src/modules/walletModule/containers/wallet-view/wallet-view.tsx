@@ -197,6 +197,14 @@ export default function WalletView() {
     setDrilldown(null);
   };
 
+  // Volver a pulsar la celda elegida la suelta: es la forma de salir del acotado
+  // desde la matriz sin bajar al "Ver todos" de los grupos. Otra celda de la
+  // misma fila no suelta nada, sólo mueve la selección.
+  const handleSelect = (next: IWalletDrilldown) =>
+    setDrilldown((prev) =>
+      prev && prev.clienteId === next.clienteId && prev.tramo === next.tramo ? null : next
+    );
+
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
@@ -275,7 +283,7 @@ export default function WalletView() {
           loading={loading}
           emptyMessage="No hay cartera para los filtros actuales."
           drilldown={drilldown}
-          onSelect={setDrilldown}
+          onSelect={handleSelect}
         />
       )}
 

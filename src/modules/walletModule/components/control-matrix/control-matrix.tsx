@@ -60,17 +60,22 @@ export default function ControlMatrix({
   // debería filtrarse aquí cuando se reconecten —la tabla sólo tiene la página
   // cargada, 15 de miles de clientes, y daría "sin resultados" para clientes
   // que sí existen—; la resuelve el servidor sobre la foto completa.
-  const visibleRows = useMemo(
-    () =>
-      ordenar(rows, sort, (row) => {
-        if (sort.col === "cliente") return row.nombre;
-        const g = rowSegments(row);
-        if (sort.col === "total") return g.total;
-        if (sort.col === "venc") return pct(g.vencido, g.total);
-        return row.tramos[Number(sort.col)]?.total ?? 0;
-      }),
-    [rows, sort]
-  );
+  const visibleRows = useMemo(() => {
+    // Con una celda elegida la tabla se pliega a esa fila. Es sólo visual —no
+    // consulta nada— y sólo aplica si el cliente sigue en la página: tras una
+    // actualización la foto puede cambiar por debajo y dejarlo fuera; en ese
+    // caso se muestra la página completa en vez de un "sin resultados" falso.
+    const delCliente = drilldown ? rows.filter((r) => r.id === drilldown.clienteId) : [];
+    const base = delCliente.length ? delCliente : rows;
+
+    return ordenar(base, sort, (row) => {
+      if (sort.col === "cliente") return row.nombre;
+      const g = rowSegments(row);
+      if (sort.col === "total") return g.total;
+      if (sort.col === "venc") return pct(g.vencido, g.total);
+      return row.tramos[Number(sort.col)]?.total ?? 0;
+    });
+  }, [rows, sort, drilldown]);
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
 
@@ -139,6 +144,7 @@ export default function ControlMatrix({
                 const g = rowSegments(row);
                 const vencido = pct(g.vencido, g.total);
                 const delCliente = drilldown?.clienteId === row.id;
+                const nombreActiva = delCliente && drilldown?.tramo === null;
 
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
@@ -151,17 +157,18 @@ export default function ControlMatrix({
                       <td
                         role="button"
                         tabIndex={0}
+                        aria-pressed={nombreActiva}
                         onClick={() => onSelect({ clienteId: row.id, tramo: null })}
                         onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
                         className={cn(
                           "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
-                          delCliente && drilldown?.tramo === null && SELECTED_CELL
+                          nombreActiva && SELECTED_CELL
                         )}
                       >
                         <span className="font-semibold text-foreground">{row.nombre}</span>
                         {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
                         <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
-                          ver grupos
+                          {nombreActiva ? "quitar selección" : "ver grupos"}
                         </span>
                         <div className="text-[11.5px] text-muted-foreground">
                           <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
@@ -169,15 +176,21 @@ export default function ControlMatrix({
                       </td>
                     </DetailTooltip>
 
-                    {row.tramos.map((cell, i) =>
-                      cell.total === 0 ? (
-                        <td
-                          key={i}
-                          className="px-3 py-2.5 text-right text-muted-foreground tabular-nums"
-                        >
-                          —
-                        </td>
-                      ) : (
+                    {row.tramos.map((cell, i) => {
+                      if (cell.total === 0) {
+                        return (
+                          <td
+                            key={i}
+                            className="px-3 py-2.5 text-right text-muted-foreground tabular-nums"
+                          >
+                            —
+                          </td>
+                        );
+                      }
+
+                      const activa = delCliente && drilldown?.tramo === i;
+
+                      return (
                         // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
                         // el del navegador se pintaría encima.
                         <DetailTooltip
@@ -189,21 +202,22 @@ export default function ControlMatrix({
                           <td
                             role="button"
                             tabIndex={0}
+                            aria-pressed={activa}
                             onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
                             onKeyDown={(e) =>
                               onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
                             }
                             className={cn(
                               "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
-                              delCliente && drilldown?.tramo === i && SELECTED_CELL
+                              activa && SELECTED_CELL
                             )}
                           >
                             <span>{fmtM(cell.total)}</span>
                             <SegBar segments={cell} />
                           </td>
                         </DetailTooltip>
-                      )
-                    )}
+                      );
+                    })}
 
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                       {fmtM(g.total)}
@@ -244,7 +258,8 @@ export default function ControlMatrix({
         </table>
       </div>
 
-      {/* El orden y los totales del pie son de esta página; el paginador, de la foto completa. */}
+      {/* El orden y los totales del pie son de lo que se ve (la página, o la fila
+          plegada); el paginador, de la foto completa. */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
         <span className="text-[11.5px] text-muted-foreground">
           Mostrando {visibleRows.length} de {totalClients}{" "}
