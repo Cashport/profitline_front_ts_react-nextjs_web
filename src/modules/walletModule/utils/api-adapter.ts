@@ -2,7 +2,6 @@
    componentes de este módulo. Vive aparte para que el diseño no dependa de
    la forma exacta del API: si el contrato cambia, se toca sólo este archivo. */
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
-import { HOY, dias } from "./format";
 import type {
   EstadoKey,
   IWalletClientRow,
@@ -18,7 +17,6 @@ import type {
 import type {
   AgingBucket,
   IWalletMatrix,
-  IWalletMatrixDetailRow,
   IWalletMatrixGroup,
   IWalletMatrixGroups
 } from "@/types/portfolios/IWalletMatrix";
@@ -176,32 +174,24 @@ export const toPerson = (nombre: string | null | undefined): IWalletPerson | nul
 /** Responsable de respaldo: el formulario de tickets necesita un `id`. */
 const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", iniciales: "—" };
 
-/** Facturas del modal de gestión, desde /portfolio/matrix/detail. */
-export const toInvoices = (rows: IWalletMatrixDetailRow[]): IWalletInvoice[] =>
-  rows.map((row) => {
-    const tramo = TRAMO_BUCKETS.indexOf(row.aging);
-    return {
-      id: row._id,
-      doc: row.erpId ?? row.documentId,
-      // Sin fecha de vencimiento se reconstruye desde la mora, que sí viene
-      // siempre: si no, media columna "Vence" quedaría en blanco.
-      vence: row.expirationDate ? new Date(row.expirationDate) : dias(HOY, -row.daysOverdue),
-      dias: row.daysOverdue,
-      tramo: (tramo < 0 ? 0 : tramo) as TramoIndex,
-      saldo: row.amount
-    };
-  });
-
 /**
  * Detalle del modal de gestión a partir del grupo del API.
  *
  * La bitácora y los tickets van vacíos a propósito: no hay endpoint todavía.
  * Antes salían de los datos simulados, y por eso el modal dejó de abrir al
  * conectar la cartera — las claves del API no existen en ese mapa.
+ *
+ * Las facturas tampoco tienen endpoint y por eso llegan de fuera: el conteo
+ * que se muestra es `group.invoices`, no la longitud de esa lista.
+ *
+ * `tramo` es el del drilldown. Si se pidió con `aging`, el API ya recortó el
+ * grupo a ese tramo: monto, reparto y conteo son la parte que cae ahí, no el
+ * grupo entero, y el modal lo rotula distinto.
  */
 export const toGroupDetail = (
   group: IWalletMatrixGroup,
-  facturas: IWalletInvoice[]
+  facturas: IWalletInvoice[],
+  tramo: TramoIndex | null = null
 ): IWalletGroupDetail => {
   const tipo = toEstadoKey(group.statusKey);
   const meta = EST_META[tipo];
@@ -227,6 +217,8 @@ export const toGroupDetail = (
     ejecutivo: responsable ?? SIN_ASIGNAR,
     monto: group.total,
     tramos: group.byAging ?? TRAMOS.map(() => 0),
+    tramo,
+    totalFacturas: group.invoices,
     facturas,
     bitacora: [],
     tickets: [],

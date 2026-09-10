@@ -4,11 +4,15 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IWalletMatrixFilters, IWalletMatrixStatus } from "@/types/portfolios/IWalletMatrix";
 
 /**
- * Serializa los filtros a query string.
+ * Serializa los filtros a query string. Hoy sólo lo usa /portfolio/matrix.
  *
- * Vive en un solo lugar porque matriz, detalle y grupos deben mandar
- * EXACTAMENTE los mismos filtros: si el detalle se pidiera con un filtro
- * distinto, su suma dejaría de coincidir con el monto de la celda.
+ * /portfolio/matrix/groups NO pasa por aquí: acepta únicamente runId, clientId,
+ * aging y calculateEndMonth, y arma su propia query en el hook. Mandarle estos
+ * filtros no acotaba nada y metía ruido en la cache key de SWR.
+ *
+ * `search` se sigue serializando aunque los buscadores estén desconectados: el
+ * endpoint de la matriz lo soporta, así que reconectarlos es volver a poblar
+ * `filters.search` en la vista.
  */
 export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
   if (!filters) return "";

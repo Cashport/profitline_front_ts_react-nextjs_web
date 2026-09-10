@@ -54,7 +54,7 @@ export default function GroupModalHeader({ detail, onClose }: GroupModalHeaderPr
       </div>
 
       <div className="flex flex-none items-center gap-2">
-        <GroupActionsMenu esNovedad={!!nov} totalFacturas={detail.facturas.length} />
+        <GroupActionsMenu esNovedad={!!nov} totalFacturas={detail.totalFacturas} />
         <button
           type="button"
           aria-label="Cerrar"

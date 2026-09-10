@@ -57,6 +57,16 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
 export const tramoTotal = (rows: IWalletClientRow[], ti: number): number =>
   rows.reduce((a, row) => a + (row.tramos[ti]?.total ?? 0), 0);
 
+/**
+ * Suma del reparto por tramo de un grupo.
+ *
+ * Es el denominador de las barras de reparto y el pie de sus tooltips. No se
+ * usa el total del grupo porque, al pedirle un `aging` al API, éste recorta el
+ * total a ese tramo: la proporción quedaría calculada contra una cifra más
+ * chica que la suma y la barra se pasaría del 100%.
+ */
+export const sumaTramos = (tramos: number[]): number => tramos.reduce((a, v) => a + v, 0);
+
 /** Ordena una copia de la lista según el estado de orden y un extractor. */
 export function ordenar<T>(lista: T[], orden: SortState, valor: (item: T) => string | number): T[] {
   const dir = orden.dir === "asc" ? 1 : -1;

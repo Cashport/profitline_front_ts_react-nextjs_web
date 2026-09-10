@@ -138,6 +138,7 @@ export const NOVELTY_DETAIL: IWalletGroupDetail = {
   ejecutivo: NOVELTY_PEOPLE.cosorio,
   monto: 41766000,
   tramos: [0, 0, 0, 41766000, 0, 0],
+  totalFacturas: 1,
   facturas: [
     {
       id: "NOV-1048-1",

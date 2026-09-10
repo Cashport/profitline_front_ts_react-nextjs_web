@@ -5,13 +5,9 @@ import { buildMatrixQuery } from "@/services/walletMatrix/walletMatrix";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
-  AGING_BUCKETS,
   AgingBucket,
   IWalletMatrix,
-  IWalletMatrixDetail,
-  IWalletMatrixDetailRow,
   IWalletMatrixFilters,
-  IWalletMatrixGroup,
   IWalletMatrixGroups,
   IWalletMatrixStatus
 } from "@/types/portfolios/IWalletMatrix";
@@ -44,122 +40,33 @@ export const useWalletMatrix = (
 };
 
 /**
- * Detalle de una celda.
+ * Grupos de facturas de una foto, agrupados por novedad/estado.
  *
- * Recibe los MISMOS filtros que la matriz más el cliente, el tramo y el
- * `runId` de la foto que el usuario tiene en pantalla. El `runId` importa:
- * sin él, si el worker regenera la foto entre el render y el clic, el
- * detalle vendría de una foto distinta y no cuadraría con la celda.
- */
-export const useWalletMatrixDetail = (
-  clientId?: string,
-  aging?: AgingBucket,
-  runId?: string,
-  filters?: IWalletMatrixFilters,
-  page = 1,
-  limit = 50
-) => {
-  const query = buildMatrixQuery(filters);
-  const pathKey =
-    clientId && aging
-      ? `/portfolio/matrix/detail?clientId=${encodeURIComponent(clientId)}&aging=${encodeURIComponent(aging)}&runId=${runId ?? ""}&page=${page}&limit=${limit}&${query}`
-      : null;
-
-  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IWalletMatrixDetail>>(
-    pathKey,
-    fetcher
-  );
-
-  return { data: data?.data, loading: isLoading, error, mutate };
-};
-
-/** Tamaño de página del detalle. El backend pagina; un grupo grande no cabe. */
-const DETAIL_PAGE_SIZE = 200;
-
-/** Todas las filas del detalle de un cliente en un tramo, paginando hasta el final. */
-const fetchBucket = async (
-  clientId: string,
-  aging: AgingBucket,
-  runId: string | undefined,
-  query: string
-): Promise<IWalletMatrixDetailRow[]> => {
-  const url = (page: number) =>
-    `/portfolio/matrix/detail?clientId=${encodeURIComponent(clientId)}&aging=${encodeURIComponent(aging)}&runId=${runId ?? ""}&page=${page}&limit=${DETAIL_PAGE_SIZE}&${query}`;
-
-  const first: GenericResponse<IWalletMatrixDetail> = await fetcher(url(1));
-  const rows = first.data?.rows ?? [];
-  const total = first.data?.pagination?.total ?? rows.length;
-
-  const restantes = Math.ceil(total / DETAIL_PAGE_SIZE) - 1;
-  if (restantes <= 0) return rows;
-
-  const resto: GenericResponse<IWalletMatrixDetail>[] = await Promise.all(
-    Array.from({ length: restantes }, (_, i) => fetcher(url(i + 2)))
-  );
-  return rows.concat(...resto.map((r) => r.data?.rows ?? []));
-};
-
-/**
- * Facturas de un grupo de la tabla inferior.
- *
- * El detalle se pide por tramo y un grupo puede repartirse en varios, así que
- * se consultan sólo los tramos con monto y se concatenan. Se añade el estado
- * del grupo a los filtros para que el acotado lo haga el servidor; lo que no
- * se puede filtrar allá —la novedad concreta— se descarta aquí.
- */
-export const useWalletGroupInvoices = (
-  group: IWalletMatrixGroup | null,
-  filters?: IWalletMatrixFilters,
-  runId?: string
-) => {
-  const buckets = group
-    ? AGING_BUCKETS.filter((_, i) => (group.byAging?.[i] ?? 0) > 0)
-    : [];
-
-  const query = buildMatrixQuery(
-    group ? { ...filters, status: [group.statusKey] } : filters
-  );
-
-  // Con el modal cerrado no se pide nada.
-  const key =
-    group && buckets.length
-      ? ["wallet-group-invoices", group.clientId, group.statusKey, group.noveltyId, runId, query]
-      : null;
-
-  const { data, error, isLoading } = useSWR(key, async () => {
-    const porTramo = await Promise.all(
-      buckets.map((aging) => fetchBucket(group!.clientId, aging, runId, query))
-    );
-
-    return porTramo
-      .flat()
-      .filter((row) => group!.noveltyId === null || row.noveltyId === group!.noveltyId);
-  });
-
-  return { rows: data ?? [], loading: isLoading, error };
-};
-
-/**
- * Grupos de facturas: lo mismo que hay en la matriz con los filtros
- * actuales, agrupado por novedad/estado. Si hay celda seleccionada, se
- * acota a ella.
+ * Con `clientId` trae todos los grupos de ese cliente sin importar el tramo;
+ * sumándole `aging` se queda con los que tienen facturas en ese rango, y OJO:
+ * el total de cada grupo llega acotado a lo que cae en el tramo pedido, no es
+ * el total del grupo.
  */
 export const useWalletMatrixGroups = (
-  filters?: IWalletMatrixFilters,
+  runId?: string,
   clientId?: string,
   aging?: AgingBucket,
-  runId?: string
+  calculateEndMonth = false
 ) => {
-  const query = buildMatrixQuery(filters);
-  const scope = [
-    clientId && `clientId=${encodeURIComponent(clientId)}`,
-    aging && `aging=${encodeURIComponent(aging)}`,
-    runId && `runId=${runId}`
-  ]
-    .filter(Boolean)
-    .join("&");
+  // El endpoint sólo acepta estos cuatro parámetros. Mandarle los filtros de la
+  // matriz no acota nada y ensucia la cache key: cada tecla del buscador pedía
+  // de nuevo exactamente la misma respuesta.
+  const params = new URLSearchParams();
+  if (runId) params.set("runId", runId);
+  if (clientId) params.set("clientId", clientId);
+  if (aging) params.set("aging", aging);
+  params.set("calculateEndMonth", calculateEndMonth ? "1" : "0");
 
-  const pathKey = `/portfolio/matrix/groups?${scope}&${query}`;
+  // Sin runId no se pide. El backend caería en "la última foto generada", que
+  // no tiene por qué ser la que está pintada arriba: si el worker generó otra
+  // entremedio, los grupos no cuadrarían con la matriz. Esperar a que la matriz
+  // diga cuál es evita además la petición doble de cada montaje.
+  const pathKey = runId ? `/portfolio/matrix/groups?${params}` : null;
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IWalletMatrixGroups>>(
     pathKey,

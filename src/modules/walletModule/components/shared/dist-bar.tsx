@@ -2,10 +2,10 @@
 
 import { cn } from "@/utils/utils";
 import { TRAMO_BG } from "../../constants";
+import { sumaTramos } from "../../utils/wallet-calc";
 
 interface DistBarProps {
   tramos: number[];
-  monto: number;
   /** Tramo del drilldown: se resalta su segmento. */
   resaltar?: number | null;
   /** Sobreescribe alto y ancho: la tabla la usa compacta, el modal a lo ancho. */
@@ -13,8 +13,12 @@ interface DistBarProps {
 }
 
 /** Reparto de un grupo entre los seis tramos de vencimiento. */
-export default function DistBar({ tramos, monto, resaltar, className }: DistBarProps) {
-  if (!monto) return null;
+export default function DistBar({ tramos, resaltar, className }: DistBarProps) {
+  // El denominador sale de los propios segmentos y no del total del grupo: al
+  // pedir un `aging`, el API acota el total a ese tramo y no está definido si
+  // acota también el reparto. Así la barra cierra en 100% en los dos casos.
+  const suma = sumaTramos(tramos);
+  if (!suma) return null;
 
   return (
     <div className={cn("flex h-[9px] w-full max-w-[80px] gap-0.5 rounded-sm", className)}>
@@ -29,7 +33,7 @@ export default function DistBar({ tramos, monto, resaltar, className }: DistBarP
               i === resaltar && "outline outline-2 outline-offset-1 outline-wallet-accent"
             )}
             style={{
-              width: `${((v / monto) * 100).toFixed(1)}%`,
+              width: `${((v / suma) * 100).toFixed(1)}%`,
               boxShadow: "inset 0 0 0 1px var(--wallet-seg-edge)"
             }}
           />
