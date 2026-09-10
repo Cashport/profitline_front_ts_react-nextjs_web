@@ -63,13 +63,15 @@ export default function MarketAdmin() {
                 {/* Icon */}
                 <div
                   className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                    disabled ? "bg-[#F5F5F5]" : "bg-[#F5F5F5] group-hover:bg-[#141414]"
+                    disabled
+                      ? "bg-[#F5F5F5]"
+                      : "bg-[#F5F5F5] group-hover:bg-cashport-green group-active:bg-cashport-green"
                   }`}
                 >
                   <Icon
                     size={20}
                     className={`transition-colors ${
-                      disabled ? "text-[#AAAAAA]" : "text-[#141414] group-hover:text-white"
+                      disabled ? "text-[#AAAAAA]" : "text-[#141414]"
                     }`}
                   />
                 </div>
