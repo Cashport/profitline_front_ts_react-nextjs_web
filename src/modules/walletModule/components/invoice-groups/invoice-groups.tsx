@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Pagination } from "antd";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
@@ -25,6 +26,9 @@ interface InvoiceGroupsProps {
 }
 
 const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
+
+/** El endpoint de grupos no pagina, así que se pagina aquí sobre lo cargado. */
+const PAGE_SIZE = 15;
 
 const TH_PLAIN =
   "whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
@@ -77,6 +81,17 @@ export default function InvoiceGroups({
       }),
     [rows, sort]
   );
+
+  const [page, setPage] = useState(1);
+  const pageRows = useMemo(
+    () => visibleRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [visibleRows, page]
+  );
+
+  // Otro acotado u otro orden cambian qué hay en cada página: se vuelve a la primera.
+  useEffect(() => {
+    setPage(1);
+  }, [rows, sort]);
 
   // Al acotar, la tabla suele quedar fuera de pantalla: se trae a la vista.
   useEffect(() => {
@@ -151,7 +166,7 @@ export default function InvoiceGroups({
                 </td>
               </tr>
             ) : (
-              visibleRows.map((g) => (
+              pageRows.map((g) => (
                 <tr
                   key={g.clave}
                   onDoubleClick={() => onOpenDetail(g.clave)}
@@ -233,15 +248,29 @@ export default function InvoiceGroups({
         </table>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
+        <span className="text-[11.5px] text-muted-foreground">
+          Mostrando {pageRows.length} de {grp(visibleRows.length)}
+        </span>
+        <Pagination
+          current={page}
+          pageSize={PAGE_SIZE}
+          total={visibleRows.length}
+          onChange={setPage}
+          showSizeChanger={false}
+          hideOnSinglePage
+        />
+      </div>
+
       <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
         {enTramo ? (
           // Con un tramo elegido el API recorta cada grupo a ese tramo, así que
           // aquí no se ve el total del grupo sino su parte. Decirlo evita que
           // el monto se lea como "todo lo que se resuelve con una gestión".
           <>
-            Sólo los grupos de {clienteNombre} con facturas en{" "}
-            {TRAMOS[ti].label.toLowerCase()}, y los montos son la parte que cae en ese tramo. Un
-            mismo grupo puede tener más cartera en otros tramos.
+            Sólo los grupos de {clienteNombre} con facturas en {TRAMOS[ti].label.toLowerCase()}, y
+            los montos son la parte que cae en ese tramo. Un mismo grupo puede tener más cartera en
+            otros tramos.
           </>
         ) : (
           <>

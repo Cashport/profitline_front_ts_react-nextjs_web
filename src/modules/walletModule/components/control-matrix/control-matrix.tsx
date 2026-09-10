@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type KeyboardEvent } from "react";
+import { Pagination } from "antd";
 
 import UiSearchInput from "@/components/ui/search-input";
 import { cn } from "@/utils/utils";
@@ -21,6 +22,11 @@ interface ControlMatrixProps {
   onSearchChange: (value: string) => void;
   /** Clientes de la foto completa, no sólo los de esta página. */
   totalClients: number;
+  /** Paginación del servidor: la tabla sólo tiene la página cargada. */
+  page: number;
+  pageSize: number;
+  // eslint-disable-next-line no-unused-vars
+  onPageChange: (page: number) => void;
   loading?: boolean;
   /** Texto del estado vacío; depende de si hay búsqueda activa. */
   emptyMessage?: string;
@@ -40,6 +46,9 @@ export default function ControlMatrix({
   search,
   onSearchChange,
   totalClients,
+  page,
+  pageSize,
+  onPageChange,
   loading,
   emptyMessage = "Ningún cliente coincide con los filtros.",
   drilldown,
@@ -49,7 +58,7 @@ export default function ControlMatrix({
 
   // La búsqueda no filtra: hoy los dos buscadores son sólo interfaz. Tampoco
   // debería filtrarse aquí cuando se reconecten —la tabla sólo tiene la página
-  // cargada, 50 de miles de clientes, y daría "sin resultados" para clientes
+  // cargada, 15 de miles de clientes, y daría "sin resultados" para clientes
   // que sí existen—; la resuelve el servidor sobre la foto completa.
   const visibleRows = useMemo(
     () =>
@@ -233,6 +242,22 @@ export default function ControlMatrix({
             </tr>
           </tfoot>
         </table>
+      </div>
+
+      {/* El orden y los totales del pie son de esta página; el paginador, de la foto completa. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
+        <span className="text-[11.5px] text-muted-foreground">
+          Mostrando {visibleRows.length} de {totalClients}{" "}
+          {totalClients === 1 ? "cliente" : "clientes"}
+        </span>
+        <Pagination
+          current={page}
+          pageSize={pageSize}
+          total={totalClients}
+          onChange={onPageChange}
+          showSizeChanger={false}
+          hideOnSinglePage
+        />
       </div>
     </section>
   );

@@ -37,7 +37,7 @@ import { facturasDeEjemplo } from "../../mocked-data";
 import type { IWalletDrilldown } from "../../types";
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 15;
 
 /** Máximo que se espera a una corrida antes de devolver el botón al usuario. */
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
@@ -52,6 +52,8 @@ export default function WalletView() {
   // matriz sigue soportándolo, el de grupos no.
   const [search, setSearch] = useState("");
   const [calculateEndMonth, setCalculateEndMonth] = useState(false);
+  // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
+  const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   /**
    * Foto vigente en el momento de disparar la actualización. La corrida
@@ -74,8 +76,8 @@ export default function WalletView() {
 
   const filters: IWalletMatrixFilters = useMemo(() => ({ calculateEndMonth }), [calculateEndMonth]);
 
-  const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, 1, PAGE_SIZE);
-  // El acotado lo resuelve el servidor: la página sólo tiene 50 clientes, así
+  const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, page, PAGE_SIZE);
+  // El acotado lo resuelve el servidor: la página sólo tiene 15 clientes, así
   // que filtrar los grupos en el navegador dejaría fuera lo que no vino. El
   // runId sale de la matriz para que las dos tablas lean la MISMA foto; hasta
   // que llegue, el hook no pide nada.
@@ -180,10 +182,20 @@ export default function WalletView() {
   };
 
   // Al cambiar la proyección, la celda elegida deja de tener sentido: las
-  // edades se recalculan y la cartera se mueve de tramo.
+  // edades se recalculan y la cartera se mueve de tramo. La página vuelve a la
+  // primera por lo mismo: el orden de los clientes ya no es el que era.
   useEffect(() => {
     setDrilldown(null);
+    setPage(1);
   }, [calculateEndMonth]);
+
+  // Al cambiar de página el cliente elegido ya no está en la tabla, así que la
+  // selección se suelta: si no, los grupos de abajo quedarían acotados a un
+  // cliente que no se ve.
+  const handlePageChange = (next: number) => {
+    setPage(next);
+    setDrilldown(null);
+  };
 
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
   const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
@@ -257,6 +269,9 @@ export default function WalletView() {
           search={search}
           onSearchChange={setSearch}
           totalClients={matrix?.pagination.totalClients ?? 0}
+          page={page}
+          pageSize={PAGE_SIZE}
+          onPageChange={handlePageChange}
           loading={loading}
           emptyMessage="No hay cartera para los filtros actuales."
           drilldown={drilldown}
