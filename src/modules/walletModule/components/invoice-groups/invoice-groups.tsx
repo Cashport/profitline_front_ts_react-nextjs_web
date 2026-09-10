@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pagination } from "antd";
+import { Pagination, Spin } from "antd";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
@@ -23,6 +23,8 @@ interface InvoiceGroupsProps {
   clienteNombre: string | null;
   openGroup: string | null;
   onClearDrilldown: () => void;
+  /** Consultando grupos: la tabla se queda y el cuerpo muestra un spinner. */
+  loading?: boolean;
 }
 
 const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
@@ -50,7 +52,8 @@ export default function InvoiceGroups({
   drilldown,
   clienteNombre,
   openGroup,
-  onClearDrilldown
+  onClearDrilldown,
+  loading
 }: InvoiceGroupsProps) {
   const [sort, setSort] = useState<SortState>({ col: "monto", dir: "desc" });
   const zona = useRef<HTMLElement>(null);
@@ -112,8 +115,14 @@ export default function InvoiceGroups({
       <div className="flex flex-wrap items-center gap-2.5 border-b border-border p-4">
         <h3 className="text-[13.5px] font-semibold text-foreground">{titulo}</h3>
         <span className="ml-auto text-[11.5px] text-muted-foreground">
-          {grp(visibleRows.length)} · {fmtM(suma)}
-          {enTramo && " en el tramo"} · doble clic para abrir la gestión
+          {loading ? (
+            "Actualizando…"
+          ) : (
+            <>
+              {grp(visibleRows.length)} · {fmtM(suma)}
+              {enTramo && " en el tramo"} · doble clic para abrir la gestión
+            </>
+          )}
         </span>
         {drilldown && (
           <button
@@ -159,7 +168,15 @@ export default function InvoiceGroups({
           </thead>
 
           <tbody>
-            {visibleRows.length === 0 ? (
+            {loading ? (
+              // Con `keepPreviousData` las filas de abajo serían de la foto
+              // anterior: mejor el spinner que datos de otro acotado.
+              <tr>
+                <td colSpan={11} className="p-9 text-center">
+                  <Spin size="large" />
+                </td>
+              </tr>
+            ) : visibleRows.length === 0 ? (
               <tr>
                 <td colSpan={11} className="p-9 text-center text-muted-foreground">
                   No hay grupos con los filtros actuales.
@@ -248,19 +265,21 @@ export default function InvoiceGroups({
         </table>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <span className="text-[11.5px] text-muted-foreground">
-          Mostrando {pageRows.length} de {grp(visibleRows.length)}
-        </span>
-        <Pagination
-          current={page}
-          pageSize={PAGE_SIZE}
-          total={visibleRows.length}
-          onChange={setPage}
-          showSizeChanger={false}
-          hideOnSinglePage
-        />
-      </div>
+      {!loading && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
+          <span className="text-[11.5px] text-muted-foreground">
+            Mostrando {pageRows.length} de {grp(visibleRows.length)}
+          </span>
+          <Pagination
+            current={page}
+            pageSize={PAGE_SIZE}
+            total={visibleRows.length}
+            onChange={setPage}
+            showSizeChanger={false}
+            hideOnSinglePage
+          />
+        </div>
+      )}
 
       <div className="border-t border-border px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
         {enTramo ? (

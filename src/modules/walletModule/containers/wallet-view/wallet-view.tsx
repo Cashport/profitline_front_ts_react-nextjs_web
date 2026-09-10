@@ -287,9 +287,11 @@ export default function WalletView() {
         />
       )}
 
-      {primeraCarga || (groupsLoading && !groups) ? (
+      {primeraCarga ? (
         <GroupsSkeleton />
       ) : (
+        // Las recargas de grupos (drilldown, proyección) no vuelven al
+        // skeleton: la tabla se queda y muestra el spinner en el cuerpo.
         <InvoiceGroups
           rows={groupRows}
           onOpenDetail={setOpenGroup}
@@ -297,6 +299,7 @@ export default function WalletView() {
           clienteNombre={clienteNombre}
           openGroup={openGroup}
           onClearDrilldown={() => setDrilldown(null)}
+          loading={groupsLoading}
         />
       )}
 
