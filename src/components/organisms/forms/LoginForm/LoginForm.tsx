@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { Eye, EyeClosed } from "phosphor-react";
 
-import { getAuth } from "../../../../../firebase-utils";
+import { getAuth, signInWithPolicyCheck, continueLoginAfterAuth } from "../../../../../firebase-utils";
 
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -14,6 +14,7 @@ import { openNotification } from "@/components/atoms/Notification/Notification";
 
 import "./loginform.scss";
 import { sendOtp, validateOtp } from "@/services/externalAuth/externalAuth";
+import { sendLoginOtp, verifyLoginOtp } from "@/services/auth/authPolicy";
 
 interface IAuthLogin {
   email: string;
@@ -27,8 +28,8 @@ const schema = yup.object().shape({
     .string()
     .min(5)
     .max(32)
-    .when("$hasToken", {
-      is: true,
+    .when(["$hasToken", "$isCodeSent"], {
+      is: (hasToken: boolean, isCodeSent: boolean) => hasToken || isCodeSent,
       then: (schema) => schema.notRequired(),
       otherwise: (schema) => schema.required()
     }),
@@ -46,8 +47,23 @@ const schema = yup.object().shape({
 interface LoginFormProps {
   setResetPassword: Dispatch<SetStateAction<boolean>>;
   token: string | null;
+  // Fired when the periodic-password-expiration policy requires a new
+  // password before login can complete. The email pre-fills the change
+  // password screen the parent (Login.tsx) swaps in.
+  // eslint-disable-next-line no-unused-vars
+  onExpiredPassword?: (email: string) => void;
+  // Set when the parent already completed sign-in and a password change
+  // (both handled outside this component) and OTP is still pending: skips
+  // straight to the code-entry screen instead of asking for credentials
+  // again, since the Firebase session is already valid.
+  initialOtpEmail?: string;
 }
-export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
+export const LoginForm = ({
+  setResetPassword,
+  token,
+  onExpiredPassword,
+  initialOtpEmail
+}: LoginFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -67,17 +83,10 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSentOtpCode = async (email: string) => {
+  // Marketplace/Cetaphil OTP flow (?token= external link) - unchanged.
+  const handleSendMarketplaceOtp = async (email: string) => {
     setTimeLeft(60);
-    if (!token) {
-      openNotification({
-        api: api,
-        type: "error",
-        title: "Error",
-        message: "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
-      });
-      return;
-    }
+    if (!token) return;
     const isSendedOtp = await sendOtp(email, token);
     if (isSendedOtp.code !== 200) {
       openNotification({
@@ -97,6 +106,40 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
     });
   };
 
+  // Periodic-OTP flow for the plain email+password login, triggered once
+  // signInWithPolicyCheck reports the policy requires it.
+  const handleSendLoginOtp = async () => {
+    setTimeLeft(60);
+    const result = await sendLoginOtp();
+    if (result.status !== 200) {
+      openNotification({
+        api: api,
+        type: "error",
+        title: "Error",
+        // El backend distingue entre cooldown de reenvío, bloqueo por intentos
+        // fallidos y fallo de envío; se muestra su mensaje cuando lo trae.
+        message:
+          result.message || "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
+      });
+      return;
+    }
+    setIsCodeSent(true);
+    openNotification({
+      api: api,
+      type: "success",
+      title: "¡Revisa tu correo!",
+      message: "Te hemos enviado un código de acceso único. Ingrésalo para continuar."
+    });
+  };
+
+  const handleSentOtpCode = async (email: string) => {
+    if (token) {
+      await handleSendMarketplaceOtp(email);
+    } else {
+      await handleSendLoginOtp();
+    }
+  };
+
   const onSubmitHandler = async ({ email, password, otp }: IAuthLogin) => {
     setIsLoading(true);
 
@@ -112,6 +155,7 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
             title: "Error",
             message: "El código OTP ingresado no es válido. Verifica e intenta nuevamente."
           });
+          return;
         }
         await getAuth(
           email.trim(),
@@ -130,9 +174,38 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
       return;
     }
 
-    await getAuth(email.trim(), password!, router, false, openNotification, api);
+    if (isCodeSent && otp) {
+      const result = await verifyLoginOtp(otp);
+      if (result.status !== 200) {
+        setIsLoading(false);
+        setIsInvalidCode(true);
+        openNotification({
+          api: api,
+          type: "error",
+          title: "Error",
+          message:
+            result.message ||
+            "El código OTP ingresado no es válido o ha expirado. Verifica e intenta nuevamente."
+        });
+        return;
+      }
+      const outcome = await continueLoginAfterAuth(router);
+      setIsLoading(false);
+      if (outcome.step === "expiredPassword") {
+        onExpiredPassword?.(outcome.email);
+      }
+      reset();
+      return;
+    }
+
+    const outcome = await signInWithPolicyCheck(email.trim(), password!, router, openNotification, api);
     setIsLoading(false);
-    reset();
+    if (outcome.step === "otp") {
+      await handleSendLoginOtp();
+    } else if (outcome.step === "expiredPassword") {
+      onExpiredPassword?.(outcome.email);
+    }
+    reset({ email });
   };
   const handleForgotPassword = () => {
     setResetPassword(true);
@@ -147,6 +220,15 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
 
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  useEffect(() => {
+    if (!initialOtpEmail) return;
+    reset({ email: initialOtpEmail });
+    handleSendLoginOtp();
+    // Runs once on mount only - initialOtpEmail is set by the parent when
+    // it mounts this step, not meant to re-trigger on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <form className="loginForm" onSubmit={handleSubmit(onSubmitHandler)}>
@@ -178,7 +260,7 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
               <Controller
                 name="otp"
                 control={control}
-                rules={{ required: token && isCodeSent ? true : false }}
+                rules={{ required: isCodeSent }}
                 render={({ field }) => (
                   <Input.OTP
                     className="inputOtp"
@@ -205,7 +287,7 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
             )}
           </div>
         )}
-        {!token && (
+        {!token && !isCodeSent && (
           <div>
             <p className="loginForm__inputTitle">Contraseña</p>
             <Controller
@@ -239,7 +321,7 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
             />
           </div>
         )}
-        {!token && (
+        {!token && !isCodeSent && (
           <p onClick={handleForgotPassword} className="forgotPassword">
             Olvidé mi contraseña
           </p>

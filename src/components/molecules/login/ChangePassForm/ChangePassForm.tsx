@@ -9,10 +9,14 @@ import { Eye, EyeClosed } from "phosphor-react";
 
 import "./changePassForm.scss";
 import { useRouter, useSearchParams } from "next/navigation";
-import { resetPassword } from "../../../../../firebase-utils";
+import { completeLoginAfterPasswordChange } from "../../../../../firebase-utils";
 import { openNotification } from "@/components/atoms/Notification/Notification";
 import { createPassword } from "@/services/users/users";
 import { ApiError } from "@/utils/api/api";
+import {
+  changePassword,
+  confirmPasswordReset as confirmPasswordResetApi
+} from "@/services/auth/authPolicy";
 
 interface IChangePassForm {
   password: string;
@@ -35,20 +39,38 @@ const schema = yup.object().shape({
     .required()
 });
 
-export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
+interface ChangePassFormProps {
+  mode: "accept" | "reset" | "expired";
+  // "expired" mode: the user is already Firebase-authenticated (they just
+  // signed in with a soon-to-be-replaced password), so there is no URL
+  // token to read - the email is passed down for display and for the
+  // re-authentication step after the change succeeds.
+  email?: string;
+  // Lets the parent (Login.tsx) move to the OTP step if the same login
+  // also requires periodic OTP validation once the password is updated.
+  // eslint-disable-next-line no-unused-vars
+  onRequireOtp?: (email: string) => void;
+}
+
+export const ChangePassForm = ({ mode, email, onRequireOtp }: ChangePassFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-  const token = searchParams.get(mode === "accept" ? "token" : "oobCode");
+  const token = mode === "expired" ? null : searchParams.get(mode === "accept" ? "token" : "oobCode");
   const copyText =
     mode === "accept"
       ? {
           title: "Crea una nueva contraseña",
           text: "Ingresa tu nueva contraseña"
         }
-      : {
-          title: "Restablece tu contraseña",
-          text: "Ingresa tu nueva contraseña"
-        };
+      : mode === "expired"
+        ? {
+            title: "Tu contraseña ha vencido",
+            text: "Crea una nueva contraseña para continuar"
+          }
+        : {
+            title: "Restablece tu contraseña",
+            text: "Ingresa tu nueva contraseña"
+          };
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
 
@@ -73,7 +95,7 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
     if (!token) return;
     setIsLoading(true);
     try {
-      await resetPassword(token, password);
+      await confirmPasswordResetApi(token, password);
       openNotification({
         api: api,
         type: "success",
@@ -84,11 +106,15 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
         router.push("/auth/login");
       }, 1500);
     } catch (error) {
+      let message = "Hubo un error al restablecer la contraseña, pruebe mandar otro correo";
+      if (error instanceof ApiError) {
+        message = error.message;
+      }
       openNotification({
         api: api,
         type: "error",
         title: "Error",
-        message: "Hubo un error al restablecer la contraseña, pruebe mandar otro correo"
+        message
       });
     }
     setIsLoading(false);
@@ -122,8 +148,39 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
     }
     setIsLoading(false);
   };
-  const onSubmitHandler = mode === "accept" ? onSubmitHandlerCreatePass : onSubmitResetHandler;
-  if (!token) return;
+  const onSubmitExpiredHandler = async ({ password }: IChangePassForm) => {
+    if (!email) return;
+    setIsLoading(true);
+    try {
+      await changePassword(password);
+      const outcome = await completeLoginAfterPasswordChange(email, password, router);
+      if (outcome.step === "otp") {
+        onRequireOtp?.(email);
+      }
+      // "success" already redirected inside completeLoginAfterPasswordChange.
+    } catch (error) {
+      let message = "Hubo un error al actualizar la contraseña, inténtalo de nuevo";
+      if (error instanceof ApiError) {
+        message = error.message;
+      }
+      openNotification({
+        api: api,
+        type: "error",
+        title: "Error",
+        message: message
+      });
+    }
+    setIsLoading(false);
+  };
+
+  const onSubmitHandler =
+    mode === "accept"
+      ? onSubmitHandlerCreatePass
+      : mode === "expired"
+        ? onSubmitExpiredHandler
+        : onSubmitResetHandler;
+  if (mode !== "expired" && !token) return;
+  if (mode === "expired" && !email) return;
   return (
     <form className="changePassForm" onSubmit={handleSubmit(onSubmitHandler)}>
       {contextHolder}
@@ -260,7 +317,7 @@ export const ChangePassForm = ({ mode }: { mode: "accept" | "reset" }) => {
       </Flex>
 
       <PrincipalButton disabled={!isValid} loading={isLoading} htmlType="submit">
-        Restablecer contraseña
+        {mode === "expired" ? "Actualizar contraseña" : "Restablecer contraseña"}
       </PrincipalButton>
     </form>
   );
