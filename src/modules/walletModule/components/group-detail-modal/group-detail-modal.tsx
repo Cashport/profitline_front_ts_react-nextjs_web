@@ -28,8 +28,6 @@ interface GroupDetailModalProps {
   onClose: () => void;
   /** Detalle ya resuelto. Sin él se busca la clave en los datos de cartera. */
   detail?: IWalletGroupDetail | null;
-  /** Las facturas todavía vienen en camino; el resto del detalle ya está. */
-  loading?: boolean;
 }
 
 type Tab = "gestion" | "facturas";
@@ -69,11 +67,9 @@ const TabButton = ({
  *  que el estado local (comentarios, tickets, selección) nazca limpio. */
 function GroupDetailBody({
   detail,
-  loading,
   onClose
 }: {
   detail: IWalletGroupDetail;
-  loading?: boolean;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("gestion");
@@ -145,7 +141,7 @@ function GroupDetailBody({
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[512px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-muted/40 lg:border-b-0 lg:border-r">
           <div className="min-h-0 flex-1 overflow-auto">
-            <GroupDetailRail detail={detail} loading={loading} />
+            <GroupDetailRail detail={detail} />
             {ticketForm && (
               <GroupTicketForm
                 defaultResponsable={autor}
@@ -173,7 +169,7 @@ function GroupDetailBody({
             </TabButton>
             <TabButton
               active={tab === "facturas"}
-              count={detail.facturas.length}
+              count={detail.totalFacturas}
               onClick={() => setTab("facturas")}
             >
               Facturas
@@ -196,8 +192,8 @@ function GroupDetailBody({
           {tab === "facturas" ? (
             <GroupInvoicesTable
               invoices={detail.facturas}
+              totalFacturas={detail.totalFacturas}
               query={query}
-              loading={loading}
               selected={selected}
               onSelectedChange={setSelected}
             />
@@ -218,12 +214,7 @@ function GroupDetailBody({
 }
 
 /** Modal de gestión de un grupo de facturas. */
-export default function GroupDetailModal({
-  clave,
-  onClose,
-  detail,
-  loading
-}: GroupDetailModalProps) {
+export default function GroupDetailModal({ clave, onClose, detail }: GroupDetailModalProps) {
   const { resolvedTheme } = useWalletTheme();
   const resolved = detail ?? (clave ? WALLET_GROUP_DETAILS[clave] : undefined);
 
@@ -243,12 +234,7 @@ export default function GroupDetailModal({
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: "hidden" } }}
     >
       {resolved && (
-        <GroupDetailBody
-          key={resolved.clave}
-          detail={resolved}
-          loading={loading}
-          onClose={onClose}
-        />
+        <GroupDetailBody key={resolved.clave} detail={resolved} onClose={onClose} />
       )}
     </Modal>
   );

@@ -12,13 +12,15 @@ import {
   removePurchaseOrdersFromPackage,
   deletePurchaseOrders,
   getSalesPlane,
-  getInventoryExport
+  getInventoryExport,
+  downloadMvpTxt
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
 import { ApiError } from "@/utils/api/api";
 import { IPurchaseOrder, IOrder } from "@/types/purchaseOrders/purchaseOrders";
 import { ModalDownloadPlane } from "../modal-download-plane/ModalDownloadPlane";
+import { useAppStore } from "@/lib/store/store";
 
 type ActionsModalPurchaseOrderProps = {
   isOpen: boolean;
@@ -46,6 +48,10 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isDeleteOrderModalOpen, setIsDeleteOrderModalOpen] = useState(false);
   const [isDownloadPlaneOpen, setIsDownloadPlaneOpen] = useState(false);
   const [isInventoryExportLoading, setIsInventoryExportLoading] = useState(false);
+  const [isMvpTxtLoading, setIsMvpTxtLoading] = useState(false);
+
+  const selectedProject = useAppStore((state) => state.selectedProject);
+  const isAbbott = selectedProject?.ID === 204;
 
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
@@ -262,6 +268,27 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleDownloadMvpTxt = async () => {
+    if (!validateOrderSelection()) return;
+
+    setIsMvpTxtLoading(true);
+    const hideLoading = message.loading("Generando TXT...", 0);
+    try {
+      await downloadMvpTxt({
+        orderIds: selectedOrders.map((order) => order.id),
+        variant: "sku"
+      });
+      message.success("TXT generado correctamente");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al generar el TXT"
+      );
+    } finally {
+      hideLoading();
+      setIsMvpTxtLoading(false);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -274,66 +301,77 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         centered
       >
         <div className="modal-content">
-          {canDelete && (
-            <ButtonGenerateAction
-              icon={<Trash className="h-4 w-4" />}
-              title="Eliminar Ordenes seleccionadas"
-              onClick={handleDeleteOrders}
-              disabled={isDispatchLoading}
-            />
-          )}
-          {canSeparateOrder && (
-            <ButtonGenerateAction
-              icon={<SubtractSquare className="h-4 w-4" />}
-              title="Separar OC del pedido"
-              onClick={handleSeparateOrder}
-              disabled={isDispatchLoading}
-            />
-          )}
-          {canSendToBilling && (
-            <ButtonGenerateAction
-              icon={<Invoice size={16} />}
-              title="Enviar a facturación"
-              onClick={() => handleSendToBilling()}
-              disabled={isBillingLoading}
-            />
-          )}
-          {canUploadInvoices && (
-            <ButtonGenerateAction
-              icon={<Invoice size={16} />}
-              title="Cargar facturas"
-              onClick={handleUploadInvoices}
-              disabled={false}
-            />
-          )}
-          {canDownload && (
+          {isAbbott ? (
             <ButtonGenerateAction
               icon={<DownloadSimple className="h-4 w-4" />}
-              title="Descargar plano"
-              onClick={handleOpenDownloadPlaneModal}
-              disabled={isDispatchLoading}
+              title="Generar TXT"
+              onClick={handleDownloadMvpTxt}
+              disabled={isMvpTxtLoading || selectedOrders.length === 0}
             />
+          ) : (
+            <>
+              {canDelete && (
+                <ButtonGenerateAction
+                  icon={<Trash className="h-4 w-4" />}
+                  title="Eliminar Ordenes seleccionadas"
+                  onClick={handleDeleteOrders}
+                  disabled={isDispatchLoading}
+                />
+              )}
+              {canSeparateOrder && (
+                <ButtonGenerateAction
+                  icon={<SubtractSquare className="h-4 w-4" />}
+                  title="Separar OC del pedido"
+                  onClick={handleSeparateOrder}
+                  disabled={isDispatchLoading}
+                />
+              )}
+              {canSendToBilling && (
+                <ButtonGenerateAction
+                  icon={<Invoice size={16} />}
+                  title="Enviar a facturación"
+                  onClick={() => handleSendToBilling()}
+                  disabled={isBillingLoading}
+                />
+              )}
+              {canUploadInvoices && (
+                <ButtonGenerateAction
+                  icon={<Invoice size={16} />}
+                  title="Cargar facturas"
+                  onClick={handleUploadInvoices}
+                  disabled={false}
+                />
+              )}
+              {canDownload && (
+                <ButtonGenerateAction
+                  icon={<DownloadSimple className="h-4 w-4" />}
+                  title="Descargar plano"
+                  onClick={handleOpenDownloadPlaneModal}
+                  disabled={isDispatchLoading}
+                />
+              )}
+              {canSendToDispatch && (
+                <ButtonGenerateAction
+                  icon={<PackageCheck className="h-4 w-4" />}
+                  title="Enviar a despacho"
+                  onClick={handleSendToDispatch}
+                  disabled={isDispatchLoading}
+                />
+              )}
+              <ButtonGenerateAction
+                icon={<PackageCheck className="h-4 w-4" />}
+                title="Exportar plano de ventas"
+                onClick={handleDownloadSalesPlane}
+                disabled={isDispatchLoading}
+              />
+              <ButtonGenerateAction
+                icon={<DownloadSimple className="h-4 w-4" />}
+                title="Exportar inventario"
+                onClick={handleDownloadInventory}
+                disabled={isInventoryExportLoading}
+              />
+            </>
           )}
-          {canSendToDispatch && (
-            <ButtonGenerateAction
-              icon={<PackageCheck className="h-4 w-4" />}
-              title="Enviar a despacho"
-              onClick={handleSendToDispatch}
-              disabled={isDispatchLoading}
-            />
-          )}
-          <ButtonGenerateAction
-            icon={<PackageCheck className="h-4 w-4" />}
-            title="Exportar plano de ventas"
-            onClick={handleDownloadSalesPlane}
-            disabled={isDispatchLoading}
-          />
-          <ButtonGenerateAction
-            icon={<DownloadSimple className="h-4 w-4" />}
-            title="Exportar inventario"
-            onClick={handleDownloadInventory}
-            disabled={isInventoryExportLoading}
-          />
         </div>
       </Modal>
 

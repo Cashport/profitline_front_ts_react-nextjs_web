@@ -10,8 +10,9 @@ import type { IWalletInvoice } from "../../types";
 
 interface GroupInvoicesTableProps {
   invoices: IWalletInvoice[];
+  /** Conteo real del grupo. `invoices` es una muestra y puede venir topada. */
+  totalFacturas: number;
   query: string;
-  loading?: boolean;
   selected: string[];
   onSelectedChange: (ids: string[]) => void;
 }
@@ -23,12 +24,15 @@ const TH =
 /** Facturas del grupo, con selección y totales de lo que se está viendo. */
 export default function GroupInvoicesTable({
   invoices,
+  totalFacturas,
   query,
-  loading,
   selected,
   onSelectedChange
 }: GroupInvoicesTableProps) {
   const todas = useMemo(() => [...invoices].sort((a, b) => b.dias - a.dias), [invoices]);
+
+  // Sin endpoint de detalle la tabla trae una muestra, no el grupo entero.
+  const esMuestra = invoices.length < totalFacturas;
 
   const visibles = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -82,7 +86,9 @@ export default function GroupInvoicesTable({
             {visibles.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-9 text-center text-muted-foreground">
-                  {loading ? "Cargando facturas…" : "Ninguna factura coincide con la búsqueda."}
+                  {todas.length === 0
+                    ? "No hay facturas para mostrar."
+                    : "Ninguna factura coincide con la búsqueda."}
                 </td>
               </tr>
             ) : (
@@ -148,6 +154,9 @@ export default function GroupInvoicesTable({
               >
                 {fac(visibles.length)}
                 {query.trim() ? ` de ${todas.length}` : ""}
+                {esMuestra
+                  ? ` · muestra de ${totalFacturas.toLocaleString("es-CO")} · datos de ejemplo`
+                  : ""}
               </th>
               <th
                 colSpan={2}

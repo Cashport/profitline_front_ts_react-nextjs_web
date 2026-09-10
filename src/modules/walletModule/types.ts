@@ -160,6 +160,14 @@ export interface IWalletGroupDetail {
   ejecutivo: IWalletPerson;
   monto: number;
   tramos: number[];
+  /**
+   * Tramo del drilldown desde el que se abrió. Cuando no es null, `monto`,
+   * `tramos` y `totalFacturas` vienen acotados a él —el API recorta el grupo
+   * al pedirle un `aging`— y las etiquetas tienen que decirlo.
+   */
+  tramo?: TramoIndex | null;
+  /** Conteo real, del grupo. `facturas` es una muestra y puede venir topada. */
+  totalFacturas: number;
   facturas: IWalletInvoice[];
   bitacora: IWalletTimelineEntry[];
   tickets: IWalletTicket[];

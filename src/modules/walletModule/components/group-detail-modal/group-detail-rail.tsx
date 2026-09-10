@@ -1,8 +1,9 @@
 "use client";
 
-import { EST_META } from "../../constants";
+import { EST_META, TRAMOS } from "../../constants";
 import { fmtD, fmtFull, fmtM } from "../../utils/format";
-import { resumenFacturas, sevDias } from "../../utils/group-detail";
+import { sevDias, vencidoDeTramos } from "../../utils/group-detail";
+import { sumaTramos } from "../../utils/wallet-calc";
 import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
 import DistBar from "../shared/dist-bar";
 import PersonBadge from "../shared/person-badge";
@@ -11,9 +12,10 @@ import type { IWalletGroupDetail } from "../../types";
 
 interface GroupDetailRailProps {
   detail: IWalletGroupDetail;
-  /** Mientras las facturas no lleguen, lo que se deriva de ellas no se pinta. */
-  loading?: boolean;
 }
+
+/** Marca de dato pendiente: no hay de dónde sacarlo todavía. */
+const Pendiente = () => <span className="text-muted-foreground">XX</span>;
 
 /** Una fila del listado clave/valor: etiqueta, valor y un chip a la derecha. */
 const Row = ({
@@ -45,9 +47,15 @@ const GestionChip = ({ dias }: { dias: number | null }) => {
 };
 
 /** Cabecera del panel izquierdo: cifras del grupo y su reparto por tramo. */
-export default function GroupDetailRail({ detail, loading }: GroupDetailRailProps) {
+export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
   const nov = detail.novedad;
-  const { vencido, edad } = resumenFacturas(detail.facturas);
+  const vencido = vencidoDeTramos(detail.tramos);
+
+  // Abierto desde una celda de la matriz, el grupo llega recortado a ese tramo:
+  // saldo, reparto y conteo son su parte, no la del grupo entero. Se rotula
+  // para que no se lea como el total de la gestión.
+  const tramo = detail.tramo ?? null;
+  const sufijo = tramo === null ? "" : ` en ${TRAMOS[tramo].short}`;
 
   const compromiso = nov?.compromiso && sevDias(nov.compromiso);
   const limite = nov?.limite && sevDias(nov.limite, 5);
@@ -55,8 +63,8 @@ export default function GroupDetailRail({ detail, loading }: GroupDetailRailProp
   return (
     <div className="px-[18px] pb-3 pt-[11px]">
       <dl className="m-0 grid grid-cols-2 gap-x-[18px] gap-y-1.5">
-        <Row label="Saldo" value={fmtFull(detail.monto)} />
-        <Row label="Facturas" value={loading ? "…" : detail.facturas.length} />
+        <Row label={`Saldo${sufijo}`} value={fmtFull(detail.monto)} />
+        <Row label={`Facturas${sufijo}`} value={detail.totalFacturas} />
 
         {nov ? (
           <>
@@ -77,35 +85,25 @@ export default function GroupDetailRail({ detail, loading }: GroupDetailRailProp
           <>
             <Row label="Ejecutivo" value={<PersonBadge person={detail.ejecutivo} mini />} />
             <Row label="Últ. gestión" chip={<GestionChip dias={detail.diasSinGestion} />} />
-            <Row label="Vencido" value={loading ? "…" : fmtM(vencido)} />
-            <Row
-              label="Mora prom."
-              value={loading ? "…" : edad}
-              chip={
-                !loading && (
-                  <span className="whitespace-nowrap text-[11px] text-muted-foreground">
-                    {edad === 1 ? "día" : "días"}
-                  </span>
-                )
-              }
-            />
+            <Row label="Vencido" value={fmtM(vencido)} />
+            {/* La mora promedio necesita las facturas de verdad; ninguna de las
+                dos respuestas del API la trae, así que se marca pendiente. */}
+            <Row label="Mora prom." value={<Pendiente />} />
           </>
         )}
       </dl>
 
       {/* El div envolvente es para AntD: DistBar no reenvía el ref del Tooltip. */}
-      {detail.monto > 0 && (
+      {sumaTramos(detail.tramos) > 0 && (
         <DetailTooltip
           title="Reparto por tramo"
           rows={tramoRows(detail.tramos)}
-          total={{ value: fmtM(detail.monto) }}
+          // El pie cierra con las filas del propio tooltip, no con `monto`, que
+          // el API recorta cuando se pide un tramo.
+          total={{ value: fmtM(sumaTramos(detail.tramos)) }}
         >
           <div className="mt-[11px]">
-            <DistBar
-              tramos={detail.tramos}
-              monto={detail.monto}
-              className="h-1 max-w-none rounded"
-            />
+            <DistBar tramos={detail.tramos} className="h-1 max-w-none rounded" />
           </div>
         </DetailTooltip>
       )}
