@@ -93,12 +93,12 @@ export default function ControlMatrix({
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
         <div className="ml-auto w-full max-w-[400px]">
-          <UiSearchInput
+          {/* <UiSearchInput
             id="wallet-matrix-search"
             placeholder="Buscar cliente, NIT, factura o ejecutivo…"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-          />
+          /> */}
           <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
             {loading
               ? "Actualizando…"

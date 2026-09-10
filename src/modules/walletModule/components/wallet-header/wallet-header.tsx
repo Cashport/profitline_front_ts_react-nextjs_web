@@ -98,13 +98,13 @@ export default function WalletHeader({
           )
         )}
 
-        <UiSearchInput
+        {/* <UiSearchInput
           id="wallet-global-search"
           showBorder
           placeholder="Cliente, NIT, factura o ejecutivo…"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-        />
+        /> */}
         <WalletThemeToggle />
       </div>
     </header>
