@@ -89,7 +89,7 @@ function Toggle({
       aria-label={label}
       onClick={() => onChange(!value)}
       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${
-        value ? "bg-[#141414]" : "bg-[#DDDDDD]"
+        value ? "bg-cashport-green" : "bg-[#DDDDDD]"
       }`}
     >
       <span
