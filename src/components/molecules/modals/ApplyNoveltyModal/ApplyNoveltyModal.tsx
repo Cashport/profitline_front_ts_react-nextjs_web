@@ -70,7 +70,7 @@ export const ApplyNoveltyModal = ({
   useEffect(() => {
     setCurrentInvoices(
       invoiceSelected.map((invoice) => ({
-        id: invoice.invoice_id,
+        id: invoice.invoice_id!,
         current_value: invoice.invoice_cashport_value,
         newBalance: invoice.invoice_cashport_value
       }))
