@@ -49,50 +49,65 @@ const formatDate = (dateString: string) => {
   };
 };
 
-const renderStatusBadge = (status: string, statusColor: string, noveltyTypes: string) => (
-  <>
-    {noveltyTypes ? (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-1 cursor-help">
-            <Badge
-              variant="outline"
-              className="text-white font-medium border-transparent"
-              style={{
-                backgroundColor: statusColor || "#B0BEC5",
-                fontSize: "12px",
-                padding: "4px 12px",
-                borderRadius: "8px"
-              }}
-            >
-              {status || "-"}
-            </Badge>
-            <AlertCircle className="h-4 w-4 text-orange-500 flex-shrink-0" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="bg-gray-900 text-white p-3 max-w-xs">
-          <div className="space-y-1">
-            <div className="font-semibold text-sm">Tipo de novedad:</div>
-            <div className="text-sm whitespace-pre-wrap">{noveltyTypes}</div>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    ) : (
-      <Badge
-        variant="outline"
-        className="text-white font-medium border-transparent"
-        style={{
-          backgroundColor: statusColor || "#B0BEC5",
-          fontSize: "12px",
-          padding: "4px 12px",
-          borderRadius: "8px"
-        }}
-      >
-        {status || "-"}
-      </Badge>
-    )}
-  </>
-);
+const renderStatusBadge = (
+  status: string,
+  statusColor: string,
+  noveltyTypes: string,
+  projectId?: number
+) => {
+  // Abbott (204): si la OC tiene la novedad "OC duplicada", el fondo del badge
+  // se pinta rojo. Solo color; texto, estado y lógica sin cambios.
+  const isAbbottDuplicate =
+    projectId === 204 &&
+    typeof noveltyTypes === "string" &&
+    noveltyTypes.includes("OC duplicada");
+  const badgeBackground = isAbbottDuplicate ? "#FF0000" : statusColor || "#B0BEC5";
+
+  return (
+    <>
+      {noveltyTypes ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1 cursor-help">
+              <Badge
+                variant="outline"
+                className="text-white font-medium border-transparent"
+                style={{
+                  backgroundColor: badgeBackground,
+                  fontSize: "12px",
+                  padding: "4px 12px",
+                  borderRadius: "8px"
+                }}
+              >
+                {status || "-"}
+              </Badge>
+              <AlertCircle className="h-4 w-4 text-orange-500 flex-shrink-0" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="bg-gray-900 text-white p-3 max-w-xs">
+            <div className="space-y-1">
+              <div className="font-semibold text-sm">Tipo de novedad:</div>
+              <div className="text-sm whitespace-pre-wrap">{noveltyTypes}</div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        <Badge
+          variant="outline"
+          className="text-white font-medium border-transparent"
+          style={{
+            backgroundColor: badgeBackground,
+            fontSize: "12px",
+            padding: "4px 12px",
+            borderRadius: "8px"
+          }}
+        >
+          {status || "-"}
+        </Badge>
+      )}
+    </>
+  );
+};
 
 const renderInvoices = (invoices: IinvoicePurchaseOrder[] | null) => {
   if (!invoices || invoices.length === 0) return <span className="text-gray-400">-</span>;
@@ -152,6 +167,8 @@ export function OrdersTable({
   onOrderClick
 }: OrdersTableProps) {
   const formatMoney = useAppStore((state) => state.formatMoney);
+  // projectId del proyecto seleccionado (para aislar el color de OC duplicada a Abbott).
+  const { ID: selectedProjectId } = useAppStore((projects) => projects.selectedProject);
   const [expandedPackageIds, setExpandedPackageIds] = useState<Set<number>>(new Set());
   const [selectedOrder, setSelectedOrder] = useState({ id: 0, warehouse_id: 0 });
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
@@ -396,7 +413,7 @@ export function OrdersTable({
                         })()}
                       </td>
                       <td className="p-4">
-                        {renderStatusBadge(pkg.status, pkg.statusColor, pkg.noveltyTypes)}
+                        {renderStatusBadge(pkg.status, pkg.statusColor, pkg.noveltyTypes, selectedProjectId)}
                       </td>
                       <td className="p-4">{renderInvoices(pkg.invoices)}</td>
                       <td className="p-4 text-right font-semibold text-cashport-black">
@@ -496,7 +513,7 @@ export function OrdersTable({
 
                         {/* Estado */}
                         <td className="p-4">
-                          {renderStatusBadge(order.status, order.statusColor, order.noveltyTypes)}
+                          {renderStatusBadge(order.status, order.statusColor, order.noveltyTypes, selectedProjectId)}
                         </td>
 
                         {/* Factura */}
