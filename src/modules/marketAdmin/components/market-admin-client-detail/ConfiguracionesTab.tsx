@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
+import { PAYMENT_TYPES } from "@/constants/documentTypes";
 import {
   IMarketAdminClientConfig,
   IUpdateMarketAdminClientConfigBody
@@ -11,6 +12,7 @@ export type ConfigForm = {
   quota: string;
   payment_discount: string;
   payment_condition_code: string;
+  payment_type: string;
   warehouse_id: number | null;
   pricelist_id: string;
 };
@@ -25,6 +27,7 @@ const BLANK_CONFIG: ConfigForm = {
   quota: "",
   payment_discount: "",
   payment_condition_code: "",
+  payment_type: "",
   warehouse_id: null,
   pricelist_id: ""
 };
@@ -35,6 +38,7 @@ const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
         quota: config.quota?.toString() ?? "",
         payment_discount: config.payment_discount?.toString() ?? "",
         payment_condition_code: config.payment_condition_code ?? "",
+        payment_type: config.payment_type?.toString() ?? "",
         warehouse_id: config.warehouse_id,
         pricelist_id: config.pricelist_id?.toString() ?? ""
       }
@@ -59,6 +63,8 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
       body.payment_discount = toNumberOrNull(form.payment_discount);
     if (form.payment_condition_code !== current.payment_condition_code)
       body.payment_condition_code = form.payment_condition_code.trim() || null;
+    if (form.payment_type !== current.payment_type)
+      body.payment_type = toNumberOrNull(form.payment_type);
     if (form.warehouse_id !== current.warehouse_id) body.warehouse_id = form.warehouse_id;
     if (form.pricelist_id !== current.pricelist_id)
       body.pricelist_id = toNumberOrNull(form.pricelist_id);
@@ -136,6 +142,24 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
             onChange={(e) => setForm((f) => ({ ...f, payment_condition_code: e.target.value }))}
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
           />
+        </div>
+
+        {/* Tipo de pago */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Tipo de pago</label>
+          <select
+            disabled={isLoading}
+            value={form.payment_type}
+            onChange={(e) => setForm((f) => ({ ...f, payment_type: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors bg-white"
+          >
+            <option value="">Seleccione un tipo de pago</option>
+            {PAYMENT_TYPES.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Bodega por defecto */}
