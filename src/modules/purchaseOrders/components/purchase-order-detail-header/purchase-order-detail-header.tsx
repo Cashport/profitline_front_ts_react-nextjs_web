@@ -375,7 +375,15 @@ export function PurchaseOrderDetailHeader({
           )}
           <Badge
             className="text-white px-3 py-1 text-sm font-medium"
-            style={{ backgroundColor: data?.status_color || "#B0BEC5" }}
+            style={{
+              // Abbott (204) + novedad "OC duplicada": solo se cambia el fondo a rojo.
+              backgroundColor:
+                data?.project_id === 204 &&
+                Array.isArray(data?.novelties) &&
+                data.novelties.some((n) => n.novelty_type_name === "OC duplicada")
+                  ? "#FF0000"
+                  : data?.status_color || "#B0BEC5"
+            }}
           >
             {data?.status_name ? data.status_name : "Desconocido"}
           </Badge>
