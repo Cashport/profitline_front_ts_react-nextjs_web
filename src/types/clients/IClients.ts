@@ -42,6 +42,7 @@ export interface IClient {
   is_deleted: number;
   locations: IClientLocation[] | null[];
   nit: number;
+  payment_type: number;
   phone: string;
   project_id: number;
   radication_type: number;
@@ -79,6 +80,7 @@ export interface ICreateClient {
   documents: File[];
   client_type_id: number;
   holding_id?: number;
+  payment_type: number;
   day_flag?: boolean;
   day?: number;
   order?: string;
@@ -93,6 +95,7 @@ export interface IUpdateClient {
   email?: string;
   holding_id?: number;
   locations: string;
+  payment_type: number;
   day_flag?: boolean;
   day?: number;
   order?: string;
@@ -118,6 +121,7 @@ export type ClientFormType = {
     radication_type: ISelectType;
     condition_payment: ISelectType;
     billing_period: string;
+    payment_type: ISelectType;
   };
 };
 

@@ -374,6 +374,7 @@ export interface IMarketAdminClientConfig {
   quota: number | null;
   payment_discount: number | null;
   payment_condition_code: string | null;
+  payment_type: number | null;
   warehouse_id: number | null;
   pricelist_id: number | null;
 }
