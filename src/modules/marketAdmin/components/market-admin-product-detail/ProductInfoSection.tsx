@@ -48,7 +48,7 @@ export default function ProductInfoSection({
             <button
               onClick={onToggleActivo}
               className={`w-10 h-5 rounded-full transition-colors relative mt-0.5 ${
-                activo ? "bg-[#141414]" : "bg-[#DDDDDD]"
+                activo ? "bg-cashport-green" : "bg-[#DDDDDD]"
               }`}
             >
               <span
