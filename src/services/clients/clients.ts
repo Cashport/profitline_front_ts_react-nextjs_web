@@ -16,6 +16,8 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { MessageType } from "@/context/MessageContext";
 import { stringToBoolean } from "@/utils/utils";
 
+import { PAYMENT_TYPES } from "@/constants/documentTypes";
+
 // create
 
 export const createClient = async (
@@ -45,6 +47,7 @@ export const createClient = async (
     documents: documents,
     client_type_id: data.client_type.value,
     holding_id: data.holding_id?.value === 0 ? undefined : data.holding_id?.value,
+    payment_type: data.payment_type.value,
     day_flag: typeof billingPeriod === "string" ? undefined : billingPeriod.day_flag === "true",
     day: typeof billingPeriod === "string" ? undefined : billingPeriod.day,
     order: typeof billingPeriod === "string" ? undefined : billingPeriod.order?.toLowerCase(),
@@ -120,6 +123,7 @@ export const updateClient = async (
     document_type: data.document_type.value,
     locations: formatLocations,
     holding_id: data.holding_id.value,
+    payment_type: data.payment_type.value,
     day_flag: stringToBoolean(billingPeriod?.day_flag),
     day: billingPeriod?.day,
     order: billingPeriod?.order?.toLowerCase(),
