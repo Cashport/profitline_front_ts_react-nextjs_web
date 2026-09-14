@@ -22,10 +22,10 @@ export const useMarketAdminProducts = ({
     queryParams.push(`search=${encodeURIComponent(search.trim())}`);
   }
   if (lineId !== undefined) {
-    queryParams.push(`line_id=${lineId}`);
+    queryParams.push(`line_ids=${lineId}`);
   }
   if (categoryId !== undefined) {
-    queryParams.push(`category_id=${categoryId}`);
+    queryParams.push(`category_ids=${categoryId}`);
   }
   // `status` puede ser 0 (inactivos), por eso la guarda es contra undefined
   if (status !== undefined) {
