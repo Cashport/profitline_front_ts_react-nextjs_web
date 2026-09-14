@@ -32,7 +32,6 @@ import {
   toSummary
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
-import { facturasDeEjemplo } from "../../mocked-data";
 
 import type { IWalletDrilldown } from "../../types";
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
@@ -216,16 +215,12 @@ export default function WalletView() {
     [groups, openGroup]
   );
 
-  // Todo el modal sale del grupo que ya está en memoria: no hay endpoint que
-  // devuelva las facturas de un grupo, así que la tabla se llena con una
-  // muestra derivada del reparto por tramo. El tramo del drilldown viaja con
-  // el detalle porque, cuando lo hay, las cifras del grupo llegan acotadas a
-  // él y el modal tiene que decirlo.
+  // Las cifras del modal salen del grupo que ya está en memoria; el seguimiento
+  // lo pide el propio modal al incidente. El tramo del drilldown viaja con el
+  // detalle porque, cuando lo hay, las cifras del grupo llegan acotadas a él y
+  // el modal tiene que decirlo.
   const detalleAbierto = useMemo(
-    () =>
-      grupoAbierto
-        ? toGroupDetail(grupoAbierto, facturasDeEjemplo(grupoAbierto), drilldown?.tramo ?? null)
-        : null,
+    () => (grupoAbierto ? toGroupDetail(grupoAbierto, drilldown?.tramo ?? null) : null),
     [grupoAbierto, drilldown]
   );
 
@@ -301,11 +296,7 @@ export default function WalletView() {
         />
       )}
 
-      <GroupDetailModal
-        clave={openGroup}
-        detail={detalleAbierto}
-        onClose={() => setOpenGroup(null)}
-      />
+      <GroupDetailModal detail={detalleAbierto} onClose={() => setOpenGroup(null)} />
     </div>
   );
 }

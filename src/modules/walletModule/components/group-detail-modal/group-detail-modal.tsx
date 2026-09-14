@@ -6,9 +6,10 @@ import { Search } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
+import { addIncidentComment } from "@/services/resolveNovelty/resolveNovelty";
+import { useMessageApi } from "@/context/MessageContext";
 import { HOY } from "../../utils/format";
 import { toTimelineEntries } from "../../utils/api-adapter";
-import { WALLET_GROUP_DETAILS } from "../../mocked-data";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
 import GroupDetailRail from "./group-detail-rail";
@@ -17,19 +18,12 @@ import GroupModalHeader from "./group-modal-header";
 import GroupTicketForm from "./group-ticket-form";
 import GroupTicketsSection from "./group-tickets-section";
 import GroupTimeline from "./group-timeline";
-import type {
-  IWalletAttachment,
-  IWalletGroupDetail,
-  IWalletTicket,
-  IWalletTimelineEntry
-} from "../../types";
+import type { IWalletGroupDetail, IWalletTicket } from "../../types";
 
 interface GroupDetailModalProps {
-  /** Clave del grupo abierto; null cierra el modal. */
-  clave: string | null;
-  onClose: () => void;
-  /** Detalle ya resuelto. Sin él se busca la clave en los datos de cartera. */
+  /** Grupo abierto; null o undefined cierra el modal. */
   detail?: IWalletGroupDetail | null;
+  onClose: () => void;
 }
 
 type Tab = "gestion" | "facturas";
@@ -71,13 +65,12 @@ const TabButton = ({
 );
 
 /** Contenido del modal. Va en su propio componente y con `key` por grupo para
- *  que el estado local (comentarios, tickets, selección) nazca limpio. */
+ *  que el estado local (tickets, selección) nazca limpio. */
 function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onClose: () => void }) {
+  const { showMessage } = useMessageApi();
   const [tab, setTab] = useState<Tab>("gestion");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  // Sólo lo registrado en esta sesión: la historia real viene del incidente.
-  const [localEntries, setLocalEntries] = useState<IWalletTimelineEntry[]>([]);
   const [tickets, setTickets] = useState<IWalletTicket[]>(detail.tickets);
   const [ticketForm, setTicketForm] = useState(false);
 
@@ -85,15 +78,17 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
   const nextId = useRef(0);
 
   // Grupos de novedad: el seguimiento y el cliente salen del incidente. Sin
-  // `incidentId` (estado sin novedad, o datos simulados) el hook no pide nada.
+  // `incidentId` (estado sin novedad) el hook no pide nada y el seguimiento
+  // queda deshabilitado: no hay dónde leer ni publicar.
   const incidentId = detail.novedad?.incidentId;
-  const { data: incidentData, isLoading: cargandoIncidente } = useIncidentDetail({ incidentId });
+  const {
+    data: incidentData,
+    isLoading: isLoadingIncident,
+    mutate: mutateIncident
+  } = useIncidentDetail({ incidentId });
   const incident = incidentData?.[0];
 
-  const bitacora = useMemo(
-    () => [...(incident ? toTimelineEntries(incident) : detail.bitacora), ...localEntries],
-    [incident, detail.bitacora, localEntries]
-  );
+  const bitacora = useMemo(() => (incident ? toTimelineEntries(incident) : []), [incident]);
 
   // Saldo y conteo siguen siendo los de la fila; sólo se corrige nombre y NIT.
   const headerDetail: IWalletGroupDetail = incident
@@ -114,42 +109,33 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
     return () => `TK-${Math.max(4400, ...nums) + 1 + nextId.current}`;
   }, [tickets]);
 
-  // TODO: estas tres acciones son locales; al conectar el API pasan a mutaciones.
-  const addEntry = (entry: Omit<IWalletTimelineEntry, "id">) => {
+  // El comentario se publica sobre el incidente y el seguimiento se relee del
+  // API: la bitácora nunca se arma en el navegador. Devuelve si quedó
+  // registrado para que el composer conserve el texto si falló.
+  const handleRegisterNoveltyComment = async (comment: string): Promise<boolean> => {
+    if (!incidentId) return false;
+    try {
+      await addIncidentComment(String(incidentId), { comments: comment });
+      await mutateIncident();
+      showMessage("success", "Comentario registrado");
+      return true;
+    } catch {
+      showMessage("error", "No se pudo registrar el comentario");
+      return false;
+    }
+  };
+
+  // TODO: los tickets son locales; al conectar su API pasan a mutaciones.
+  const handleCreateTicket = (data: Omit<IWalletTicket, "id" | "estado">) => {
     nextId.current += 1;
-    setLocalEntries((prev) => [...prev, { ...entry, id: `local-${nextId.current}` }]);
-  };
-
-  const registrarComentario = (texto: string, adjuntos: IWalletAttachment[]) => {
-    addEntry({
-      fecha: HOY,
-      autor,
-      tipo: adjuntos.length ? "adjunto" : "comentario",
-      texto:
-        texto ||
-        (adjuntos.length === 1 ? "Adjuntó un soporte." : `Adjuntó ${adjuntos.length} soportes.`),
-      adjuntos: adjuntos.length ? adjuntos : undefined
-    });
-  };
-
-  const crearTicket = (data: Omit<IWalletTicket, "id" | "estado">) => {
-    const id = nextTicketId();
-    setTickets((prev) => [...prev, { ...data, id, estado: "abierto" }]);
-    addEntry({ fecha: HOY, autor, tipo: "ticket", texto: data.titulo, ticketId: id });
+    setTickets((prev) => [...prev, { ...data, id: nextTicketId(), estado: "abierto" }]);
     setTicketForm(false);
   };
 
-  const resolverTicket = (id: string) => {
-    const ticket = tickets.find((t) => t.id === id);
+  const handleResolveTicket = (id: string) => {
     setTickets((prev) =>
       prev.map((t) => (t.id === id ? { ...t, estado: "resuelto", resueltoEl: HOY } : t))
     );
-    addEntry({
-      fecha: HOY,
-      autor,
-      tipo: "ticket_ok",
-      texto: `Resolvió: ${ticket?.titulo ?? id}`
-    });
   };
 
   return (
@@ -164,14 +150,14 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
               <GroupTicketForm
                 defaultResponsable={autor}
                 onCancel={() => setTicketForm(false)}
-                onCreate={crearTicket}
+                onCreate={handleCreateTicket}
               />
             )}
             <GroupTicketsSection
               tickets={tickets}
               creando={ticketForm}
               onNew={() => setTicketForm(true)}
-              onResolve={resolverTicket}
+              onResolve={handleResolveTicket}
             />
           </div>
         </aside>
@@ -182,6 +168,7 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
               active={tab === "gestion"}
               count={bitacora.length}
               onClick={() => setTab("gestion")}
+              disabled={!incidentId}
             >
               Seguimiento
             </TabButton>
@@ -210,7 +197,11 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
             )}
           </div>
 
-          {tab === "facturas" ? (
+          {!incidentId ? (
+            <p className="flex flex-1 items-center justify-center px-6 text-center text-[12.5px] text-muted-foreground">
+              El seguimiento solo está disponible para grupos con novedad.
+            </p>
+          ) : tab === "facturas" ? (
             <GroupInvoicesTable
               invoices={detail.facturas}
               totalFacturas={detail.totalFacturas}
@@ -222,7 +213,7 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
             <>
               <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
                 <div className="mt-auto w-full px-[22px] pb-2.5 pt-[22px]">
-                  {incidentId && cargandoIncidente ? (
+                  {isLoadingIncident ? (
                     <p className="text-[11.5px] leading-relaxed text-muted-foreground">
                       Cargando seguimiento…
                     </p>
@@ -231,7 +222,7 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
                   )}
                 </div>
               </div>
-              <GroupComposer onSubmit={registrarComentario} />
+              <GroupComposer onSubmit={handleRegisterNoveltyComment} />
             </>
           )}
         </div>
@@ -241,13 +232,12 @@ function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onCl
 }
 
 /** Modal de gestión de un grupo de facturas. */
-export default function GroupDetailModal({ clave, onClose, detail }: GroupDetailModalProps) {
+export default function GroupDetailModal({ onClose, detail }: GroupDetailModalProps) {
   const { resolvedTheme } = useWalletTheme();
-  const resolved = detail ?? (clave ? WALLET_GROUP_DETAILS[clave] : undefined);
 
   return (
     <Modal
-      open={!!resolved}
+      open={!!detail}
       onCancel={onClose}
       footer={null}
       closeIcon={null}
@@ -260,7 +250,7 @@ export default function GroupDetailModal({ clave, onClose, detail }: GroupDetail
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: "hidden" } }}
     >
-      {resolved && <GroupDetailBody key={resolved.clave} detail={resolved} onClose={onClose} />}
+      {detail && <GroupDetailBody key={detail.clave} detail={detail} onClose={onClose} />}
     </Modal>
   );
 }

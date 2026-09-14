@@ -26,10 +26,7 @@ export default function NoveltiesView() {
   // Id de la novedad abierta. Hoy todas muestran el mismo detalle simulado.
   const [openNovelty, setOpenNovelty] = useState<string | null>(null);
 
-  const visibleRows = useMemo(
-    () => filtrarNovedades(NOVELTY_ROWS, filtro, query),
-    [filtro, query]
-  );
+  const visibleRows = useMemo(() => filtrarNovedades(NOVELTY_ROWS, filtro, query), [filtro, query]);
 
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
@@ -73,7 +70,6 @@ export default function NoveltiesView() {
       )}
 
       <GroupDetailModal
-        clave={openNovelty}
         detail={openNovelty ? NOVELTY_DETAIL : null}
         onClose={() => setOpenNovelty(null)}
       />
