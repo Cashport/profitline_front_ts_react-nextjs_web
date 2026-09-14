@@ -12,11 +12,7 @@ interface IEvent {
 
 export type IIncidentDocumentType = "FINANCIAL_RECORD" | "BALANCE";
 
-export type IIncidentDocumentInactiveReason =
-  | "PAID"
-  | "MANUALLY_REMOVED"
-  | "CANCELLED"
-  | "OTHER";
+export type IIncidentDocumentInactiveReason = "PAID" | "MANUALLY_REMOVED" | "CANCELLED" | "OTHER";
 
 // Un documento (factura o saldo) asociado a la novedad. `active: false`
 // significa que el documento ya salió de cartera (pagado/cerrado) pero se
@@ -78,12 +74,13 @@ interface IIncidentDetailResponse {
 }
 
 interface UseIncidentDetailProps {
-  incidentId: number;
+  /** Sin id no se pide nada (grupos de cartera que no son novedad). */
+  incidentId?: number | null;
 }
 
 export const useIncidentDetail = (props: UseIncidentDetailProps) => {
   const { data, isLoading, mutate } = useSWR<IIncidentDetailResponse>(
-    `/invoice/incident-detail/${props.incidentId}`,
+    props.incidentId ? `/invoice/incident-detail/${props.incidentId}` : null,
     fetcher,
     {}
   );

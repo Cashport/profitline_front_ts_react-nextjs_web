@@ -39,6 +39,15 @@ const GeneralDropdown: FC<GeneralDropdownProps> = ({
         return { type: "divider", key: item.key };
       }
 
+      if (item.type === "group") {
+        return {
+          type: "group",
+          key: item.key,
+          label: item.label,
+          children: item.children ? transformItems(item.children) : []
+        };
+      }
+
       return {
         key: item.key,
         label: item.label,

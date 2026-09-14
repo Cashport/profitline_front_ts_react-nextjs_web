@@ -141,6 +141,8 @@ export interface IWalletTimelineEntry {
 /** Datos de la novedad cuando el grupo es de tipo "novedad". */
 export interface IWalletNovedad {
   id: string;
+  /** Id numérico del incidente en el API (para /invoice/incident-detail). */
+  incidentId?: number;
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
   estado: { nom: string; sev: Sev };

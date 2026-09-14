@@ -59,6 +59,20 @@ a {
     background-color: rgba(255, 255, 255, 0.37) !important;
 }
 
+// Dark dashboards: the white !important above would hide light option text.
+// Same #1f1f1f as colorBgElevated in the modules' dark ConfigProvider.
+body.comercio-dark,
+body.wallet-dark,
+body.dashboard-dark {
+    .ant-select-dropdown {
+        background-color: #1f1f1f !important;
+    }
+
+    .ant-select-item-option-selected {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+}
+
 .ant-picker-ok .ant-btn-primary {
     background-color: $secondary !important;
     border-color: $secondary !important;

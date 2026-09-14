@@ -75,7 +75,7 @@ export default function GroupComposer({ onSubmit }: GroupComposerProps) {
 
         <button
           type="submit"
-          className="flex-none rounded-md bg-wallet-nov px-4 py-2 text-[12.5px] font-bold text-white transition-opacity hover:opacity-90"
+          className="flex-none rounded-md bg-cashport-green px-4 py-2 text-[12.5px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90"
         >
           Registrar
         </button>

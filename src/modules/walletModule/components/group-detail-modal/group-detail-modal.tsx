@@ -5,7 +5,9 @@ import { Modal } from "antd";
 import { Search } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
 import { HOY } from "../../utils/format";
+import { toTimelineEntries } from "../../utils/api-adapter";
 import { WALLET_GROUP_DETAILS } from "../../mocked-data";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
@@ -36,26 +38,31 @@ const TabButton = ({
   active,
   count,
   onClick,
+  disabled,
   children
 }: {
   active: boolean;
   count: number;
   onClick: () => void;
+  disabled?: boolean;
   children: React.ReactNode;
 }) => (
   <button
     type="button"
     onClick={onClick}
+    disabled={disabled}
+    title={disabled ? "Próximamente" : undefined}
     className={cn(
       "-mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-1 pb-3 pt-3.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground",
-      active && "border-wallet-nov text-foreground"
+      active && "border-cashport-green text-foreground",
+      disabled && "cursor-not-allowed opacity-50 hover:text-muted-foreground"
     )}
   >
     {children}
     <span
       className={cn(
         "rounded-full px-1.5 text-[10.5px] font-bold leading-[17px] tabular-nums",
-        active ? "bg-wallet-nov/15 text-wallet-nov" : "bg-muted text-muted-foreground"
+        active ? "bg-cashport-green text-cashport-black" : "bg-muted text-muted-foreground"
       )}
     >
       {count}
@@ -65,22 +72,33 @@ const TabButton = ({
 
 /** Contenido del modal. Va en su propio componente y con `key` por grupo para
  *  que el estado local (comentarios, tickets, selección) nazca limpio. */
-function GroupDetailBody({
-  detail,
-  onClose
-}: {
-  detail: IWalletGroupDetail;
-  onClose: () => void;
-}) {
+function GroupDetailBody({ detail, onClose }: { detail: IWalletGroupDetail; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>("gestion");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const [bitacora, setBitacora] = useState<IWalletTimelineEntry[]>(detail.bitacora);
+  // Sólo lo registrado en esta sesión: la historia real viene del incidente.
+  const [localEntries, setLocalEntries] = useState<IWalletTimelineEntry[]>([]);
   const [tickets, setTickets] = useState<IWalletTicket[]>(detail.tickets);
   const [ticketForm, setTicketForm] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
+
+  // Grupos de novedad: el seguimiento y el cliente salen del incidente. Sin
+  // `incidentId` (estado sin novedad, o datos simulados) el hook no pide nada.
+  const incidentId = detail.novedad?.incidentId;
+  const { data: incidentData, isLoading: cargandoIncidente } = useIncidentDetail({ incidentId });
+  const incident = incidentData?.[0];
+
+  const bitacora = useMemo(
+    () => [...(incident ? toTimelineEntries(incident) : detail.bitacora), ...localEntries],
+    [incident, detail.bitacora, localEntries]
+  );
+
+  // Saldo y conteo siguen siendo los de la fila; sólo se corrige nombre y NIT.
+  const headerDetail: IWalletGroupDetail = incident
+    ? { ...detail, cliente: { nombre: incident.client, nit: incident.client_id } }
+    : detail;
 
   // El seguimiento se lee de abajo hacia arriba: lo último siempre a la vista.
   useEffect(() => {
@@ -99,7 +117,7 @@ function GroupDetailBody({
   // TODO: estas tres acciones son locales; al conectar el API pasan a mutaciones.
   const addEntry = (entry: Omit<IWalletTimelineEntry, "id">) => {
     nextId.current += 1;
-    setBitacora((prev) => [...prev, { ...entry, id: `local-${nextId.current}` }]);
+    setLocalEntries((prev) => [...prev, { ...entry, id: `local-${nextId.current}` }]);
   };
 
   const registrarComentario = (texto: string, adjuntos: IWalletAttachment[]) => {
@@ -136,7 +154,7 @@ function GroupDetailBody({
 
   return (
     <div className="wallet-scope flex h-[min(88vh,900px)] flex-col bg-card text-foreground">
-      <GroupModalHeader detail={detail} onClose={onClose} />
+      <GroupModalHeader detail={headerDetail} onClose={onClose} seleccionadas={selected.length} />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[512px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-muted/40 lg:border-b-0 lg:border-r">
@@ -167,10 +185,13 @@ function GroupDetailBody({
             >
               Seguimiento
             </TabButton>
+            {/* Deshabilitado hasta tener endpoint de facturas del grupo; la
+                tabla y el buscador de abajo quedan listos para reactivarlo. */}
             <TabButton
               active={tab === "facturas"}
               count={detail.totalFacturas}
               onClick={() => setTab("facturas")}
+              disabled
             >
               Facturas
             </TabButton>
@@ -201,7 +222,13 @@ function GroupDetailBody({
             <>
               <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
                 <div className="mt-auto w-full px-[22px] pb-2.5 pt-[22px]">
-                  <GroupTimeline entries={bitacora} tickets={tickets} />
+                  {incidentId && cargandoIncidente ? (
+                    <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                      Cargando seguimiento…
+                    </p>
+                  ) : (
+                    <GroupTimeline entries={bitacora} tickets={tickets} />
+                  )}
                 </div>
               </div>
               <GroupComposer onSubmit={registrarComentario} />
@@ -233,9 +260,7 @@ export default function GroupDetailModal({ clave, onClose, detail }: GroupDetail
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: "hidden" } }}
     >
-      {resolved && (
-        <GroupDetailBody key={resolved.clave} detail={resolved} onClose={onClose} />
-      )}
+      {resolved && <GroupDetailBody key={resolved.clave} detail={resolved} onClose={onClose} />}
     </Modal>
   );
 }

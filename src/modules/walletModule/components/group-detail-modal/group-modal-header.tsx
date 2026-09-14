@@ -13,9 +13,15 @@ import type { IWalletGroupDetail } from "../../types";
 interface GroupModalHeaderProps {
   detail: IWalletGroupDetail;
   onClose: () => void;
+  /** Facturas marcadas en la pestaña "Facturas". */
+  seleccionadas: number;
 }
 
-export default function GroupModalHeader({ detail, onClose }: GroupModalHeaderProps) {
+export default function GroupModalHeader({
+  detail,
+  onClose,
+  seleccionadas
+}: GroupModalHeaderProps) {
   const nov = detail.novedad;
   const meta = EST_META[detail.tipo];
   const sla = nov ? slaDe(nov) : null;
@@ -54,7 +60,11 @@ export default function GroupModalHeader({ detail, onClose }: GroupModalHeaderPr
       </div>
 
       <div className="flex flex-none items-center gap-2">
-        <GroupActionsMenu esNovedad={!!nov} totalFacturas={detail.totalFacturas} />
+        <GroupActionsMenu
+          esNovedad={!!nov}
+          totalFacturas={detail.totalFacturas}
+          seleccionadas={seleccionadas}
+        />
         <button
           type="button"
           aria-label="Cerrar"
