@@ -1,3 +1,4 @@
+import { useState } from "react";
 import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
@@ -54,11 +55,14 @@ export const useIncidentList = ({
   if (dateFrom) params.set("date_from", dateFrom);
   if (dateTo) params.set("date_to", dateTo);
 
+  // Momento de la última respuesta exitosa; null hasta la primera.
+  const [fetchedAt, setFetchedAt] = useState<Date | null>(null);
+
   // Los filtros van dentro de la cache key: cada combinación se cachea aparte.
   const { data, error, isLoading, mutate } = useSWR<GenericResponsePage<IIncidentListData>>(
     `/invoice/incident-list?${params.toString()}`,
     fetcher,
-    { keepPreviousData: true }
+    { keepPreviousData: true, onSuccess: () => setFetchedAt(new Date()) }
   );
 
   return {
@@ -70,6 +74,7 @@ export const useIncidentList = ({
       totalPages: 0,
       totalRows: 0
     },
+    fetchedAt,
     isLoading,
     error,
     mutate

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pagination } from "antd";
 
 import ProfitLoader from "@/components/ui/profit-loader";
-import { useDebounce } from "@/hooks/useDeabouce";
 import GroupDetailModal from "@/modules/walletModule/components/group-detail-modal/group-detail-modal";
 import { nextSort } from "@/modules/walletModule/utils/wallet-calc";
 import type { SortState } from "@/modules/walletModule/types";
@@ -43,27 +42,23 @@ export default function NoveltiesView() {
   const [card, setCard] = useState<IncidentCard | null>("abiertas");
   const [statusId, setStatusId] = useState<number | null>(null);
   const [coordinator, setCoordinator] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({ col: "next_ticket_date", dir: "asc" });
   const [vista, setVista] = useState<NoveltyView>("lista");
   // Id de la novedad abierta. Hoy todas muestran el mismo detalle simulado.
   const [openNovelty, setOpenNovelty] = useState<number | null>(null);
 
-  const debouncedSearch = useDebounce(search, 400);
-
   const { data: kpis } = useIncidentListKpis();
   const { statuses } = useNoveltyStatuses();
   const { coordinators } = useIncidentListCoordinators();
-  const { items, summary, pagination, isLoading, error } = useIncidentList({
+  const { items, summary, pagination, fetchedAt, isLoading, error } = useIncidentList({
     page,
     limit: PAGE_SIZE,
     sortBy: sort.col as IncidentSortBy,
     sortDir: sort.dir as IncidentSortDir,
     card,
     noveltyStatusId: statusId,
-    coordinator,
-    search: debouncedSearch
+    coordinator
   });
 
   // Cualquier cambio de filtro vuelve a la primera página.
@@ -79,10 +74,6 @@ export default function NoveltiesView() {
     setCoordinator(next);
     setPage(1);
   };
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
   const handleSort = (col: string) => {
     setSort((s) => nextSort(s, col, TEXTUAL_COLS));
     setPage(1);
@@ -94,7 +85,7 @@ export default function NoveltiesView() {
 
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
-      <NoveltiesHeader onSearchChange={handleSearchChange} />
+      <NoveltiesHeader fetchedAt={fetchedAt} />
 
       <div className="flex flex-wrap items-end gap-3.5">
         <h2 className="text-lg font-semibold text-foreground">Bandeja de novedades</h2>
