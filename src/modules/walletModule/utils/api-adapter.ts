@@ -8,7 +8,6 @@ import type {
   IWalletClientRow,
   IWalletGroupDetail,
   IWalletGroupRow,
-  IWalletInvoice,
   IWalletMatrixCell,
   IWalletPerson,
   IWalletSummary,
@@ -180,12 +179,11 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
 /**
  * Detalle del modal de gestión a partir del grupo del API.
  *
- * La bitácora y los tickets van vacíos a propósito: no hay endpoint todavía.
- * Antes salían de los datos simulados, y por eso el modal dejó de abrir al
- * conectar la cartera — las claves del API no existen en ese mapa.
- *
- * Las facturas tampoco tienen endpoint y por eso llegan de fuera: el conteo
- * que se muestra es `group.invoices`, no la longitud de esa lista.
+ * Sólo lleva las cifras del grupo. El seguimiento no va aquí: el modal lo pide
+ * al incidente (`/invoice/incident-detail`) con `novedad.incidentId`, y lo
+ * publica por `/invoice/incident-comments`. Facturas y tickets van vacíos
+ * porque no tienen endpoint todavía (el tab de facturas está deshabilitado;
+ * el conteo que se muestra es `group.invoices`).
  *
  * `tramo` es el del drilldown. Si se pidió con `aging`, el API ya recortó el
  * grupo a ese tramo: monto, reparto y conteo son la parte que cae ahí, no el
@@ -193,7 +191,6 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  */
 export const toGroupDetail = (
   group: IWalletMatrixGroup,
-  facturas: IWalletInvoice[],
   tramo: TramoIndex | null = null
 ): IWalletGroupDetail => {
   const tipo = toEstadoKey(group.statusKey);
@@ -223,7 +220,7 @@ export const toGroupDetail = (
     tramos: group.byAging ?? TRAMOS.map(() => 0),
     tramo,
     totalFacturas: group.invoices,
-    facturas,
+    facturas: [],
     bitacora: [],
     tickets: [],
     diasSinGestion: null

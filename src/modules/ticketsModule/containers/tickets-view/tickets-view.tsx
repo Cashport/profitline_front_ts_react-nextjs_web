@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import BoardLanes, { type BoardLane } from "@/components/ui/board-lanes/board-lanes";
 import KpiCards, { type KpiCardItem } from "@/components/ui/kpi-cards/kpi-cards";
 import GroupDetailModal from "@/modules/walletModule/components/group-detail-modal/group-detail-modal";
+import { WALLET_GROUP_DETAILS } from "@/modules/walletModule/mocked-data";
 import { fmtM } from "@/modules/walletModule/utils/format";
 import { cn } from "@/utils/utils";
 import TicketBoardCard from "../../components/ticket-board-card/ticket-board-card";
@@ -26,7 +27,7 @@ export default function TicketsView() {
   const [filtro, setFiltro] = useState<TicketFilter>("abiertos");
   const [vista, setVista] = useState<TicketView>("lista");
   const [query, setQuery] = useState("");
-  // Clave del grupo abierto: el modal resuelve su propio detalle a partir de ella.
+  // Clave del grupo abierto; el detalle se resuelve abajo, al renderizar el modal.
   const [openGroup, setOpenGroup] = useState<string | null>(null);
 
   const visibleRows = useMemo(() => filtrarTickets(TICKET_ROWS, filtro, query), [filtro, query]);
@@ -105,7 +106,12 @@ export default function TicketsView() {
         />
       )}
 
-      <GroupDetailModal clave={openGroup} onClose={() => setOpenGroup(null)} />
+      {/* Módulo aún simulado: el detalle se resuelve contra el mismo mapa del
+          que salen las filas (TICKET_ROWS), no contra el API de cartera. */}
+      <GroupDetailModal
+        detail={openGroup ? WALLET_GROUP_DETAILS[openGroup] ?? null : null}
+        onClose={() => setOpenGroup(null)}
+      />
     </div>
   );
 }
