@@ -1,67 +1,67 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-
 import { fac, fmtM } from "@/modules/walletModule/utils/format";
-import { KPI_CARDS, NOVELTY_ESTADOS, NOVELTY_FILTERS } from "../../constants";
-import { contarPorFiltro } from "../../utils/novelties-calc";
-import type { INoveltyRow, NoveltyFilter } from "../../types";
+import type { IIncidentListSummary, INoveltyStatus } from "@/types/novelties/INovelties";
 
 interface NoveltiesToolbarProps {
-  /** Universo sin filtrar: alimenta los conteos del select. */
-  rows: INoveltyRow[];
-  /** Filas ya filtradas: alimentan el resumen de la derecha. */
-  visibleRows: INoveltyRow[];
-  filtro: NoveltyFilter;
-  onFiltroChange: (filtro: NoveltyFilter) => void;
+  statuses: INoveltyStatus[];
+  coordinators: string[];
+  statusId: number | null;
+  coordinator: string | null;
+  onStatusChange: (id: number | null) => void;
+  onCoordinatorChange: (coordinator: string | null) => void;
+  /** Total del universo filtrado, no de la página. */
+  totalRows: number;
+  summary?: IIncidentListSummary;
 }
 
-/** Select de estado + filtros pendientes + resumen de la vista. */
-export default function NoveltiesToolbar({
-  rows,
-  visibleRows,
-  filtro,
-  onFiltroChange
-}: NoveltiesToolbarProps) {
-  const suma = visibleRows.reduce((a, n) => a + n.monto, 0);
-  const vinculadas = visibleRows.reduce((a, n) => a + n.facturas, 0);
+const SELECT_CLASS =
+  "h-12 cursor-pointer rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary";
 
+/** Filtros de estado y coordinador + resumen de la vista. */
+export default function NoveltiesToolbar({
+  statuses,
+  coordinators,
+  statusId,
+  coordinator,
+  onStatusChange,
+  onCoordinatorChange,
+  totalRows,
+  summary
+}: NoveltiesToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Comparte estado con las tarjetas KPI: elegir aquí ilumina la tarjeta. */}
       <select
         aria-label="Filtrar novedades por estado"
-        value={filtro}
-        onChange={(e) => onFiltroChange(e.target.value as NoveltyFilter)}
-        className="h-12 cursor-pointer rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+        value={statusId ?? ""}
+        onChange={(e) => onStatusChange(e.target.value ? Number(e.target.value) : null)}
+        className={SELECT_CLASS}
       >
-        {KPI_CARDS.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.label} ({contarPorFiltro(rows, c.id)})
+        <option value="">Todos los estados</option>
+        {statuses.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.description}
           </option>
         ))}
-        {NOVELTY_ESTADOS.map((e) => (
-          <option key={e.id} value={e.id}>
-            {e.nom}
-          </option>
-        ))}
-        <option value="todas">Todas</option>
       </select>
 
-      {/* TODO: conectar cada chip a un multi-select cuando exista el endpoint de filtros. */}
-      {NOVELTY_FILTERS.map((f) => (
-        <button
-          key={f.key}
-          type="button"
-          className="inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-        >
-          {f.label}
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-        </button>
-      ))}
+      <select
+        aria-label="Filtrar novedades por coordinador"
+        value={coordinator ?? ""}
+        onChange={(e) => onCoordinatorChange(e.target.value || null)}
+        className={SELECT_CLASS}
+      >
+        <option value="">Todos los coordinadores</option>
+        {coordinators.map((c) => (
+          <option key={c} value={c}>
+            {c}
+          </option>
+        ))}
+      </select>
 
       <span className="ml-auto text-[11.5px] text-muted-foreground">
-        {visibleRows.length} novedades · {fmtM(suma)} · {fac(vinculadas)} vinculadas
+        {totalRows} novedades · {fmtM(summary?.total_amount ?? 0)} ·{" "}
+        {fac(summary?.total_invoices ?? 0)} vinculadas
       </span>
     </div>
   );

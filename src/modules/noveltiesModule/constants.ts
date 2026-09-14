@@ -1,5 +1,6 @@
 import type { Sev } from "@/modules/walletModule/types";
-import type { NoveltyCardId, NoveltyEstadoKey, NoveltyTipoKey } from "./types";
+import type { IIncidentListKpis, IncidentCard } from "@/types/novelties/INovelties";
+import type { NoveltyTipoKey } from "./types";
 
 interface TipoMeta {
   id: NoveltyTipoKey;
@@ -21,32 +22,8 @@ export const NOVELTY_TIPOS: TipoMeta[] = [
   { id: "faltante", nom: "Faltante / avería en entrega", sla: 8, area: "logistica" }
 ];
 
-export const TIPO_BY_ID = Object.fromEntries(NOVELTY_TIPOS.map((t) => [t.id, t])) as Record<
-  NoveltyTipoKey,
-  TipoMeta
->;
-
-interface EstadoMeta {
-  id: NoveltyEstadoKey;
-  nom: string;
-  sev: Sev;
-}
-
-/** Orden del catálogo: es también el orden de las columnas del tablero. */
-export const NOVELTY_ESTADOS: EstadoMeta[] = [
-  { id: "sin_asignar", nom: "Sin asignar", sev: "crit" },
-  { id: "en_gestion", nom: "En gestión", sev: "idle" },
-  { id: "esperando_aprob", nom: "Esperando aprobación", sev: "warn" },
-  { id: "aprobada", nom: "Aprobada", sev: "ok" },
-  { id: "cerrada", nom: "Cerrada", sev: "ok" }
-];
-
-export const ESTADO_BY_ID = Object.fromEntries(
-  NOVELTY_ESTADOS.map((e) => [e.id, e])
-) as Record<NoveltyEstadoKey, EstadoMeta>;
-
 interface CardMeta {
-  id: NoveltyCardId;
+  id: IncidentCard;
   label: string;
   /** Segunda línea del pie, tras el conteo. */
   pie: string;
@@ -72,9 +49,14 @@ export const KPI_CARDS: CardMeta[] = [
   { id: "sinresp", label: "Sin responsable", pie: "no tienen dueño asignado", sev: "crit" }
 ];
 
-/** Filtros de la barra superior. Sin opciones todavía: la data llega con el API. */
-export const NOVELTY_FILTERS = [
-  { key: "coordinadores", label: "Todos los coordinadores" },
-  { key: "responsables", label: "Todos los responsables" },
-  { key: "tipos", label: "Todos los tipos" }
-];
+/** Qué campos del endpoint de KPIs alimentan cada tarjeta. */
+export const KPI_FIELDS: Record<
+  IncidentCard,
+  { count: keyof IIncidentListKpis; amount: keyof IIncidentListKpis }
+> = {
+  abiertas: { count: "open_count", amount: "open_amount" },
+  vencidas: { count: "overdue_ticket_count", amount: "overdue_ticket_amount" },
+  frias: { count: "no_management_7d_count", amount: "no_management_7d_amount" },
+  limite: { count: "past_limit_date_count", amount: "past_limit_date_amount" },
+  sinresp: { count: "unassigned_count", amount: "unassigned_amount" }
+};

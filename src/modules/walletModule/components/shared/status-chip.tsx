@@ -11,17 +11,20 @@ const SEV_CLASS: Record<Sev, string> = {
 };
 
 interface StatusChipProps {
-  sev: Sev;
+  sev?: Sev;
+  /** Color hex del catálogo (ej. estado de novedad); reemplaza al semáforo. */
+  color?: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export default function StatusChip({ sev, children, className }: StatusChipProps) {
+export default function StatusChip({ sev = "idle", color, children, className }: StatusChipProps) {
   return (
     <span
+      style={color ? { backgroundColor: `${color}1A`, color } : undefined}
       className={cn(
         "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold",
-        SEV_CLASS[sev],
+        !color && SEV_CLASS[sev],
         className
       )}
     >

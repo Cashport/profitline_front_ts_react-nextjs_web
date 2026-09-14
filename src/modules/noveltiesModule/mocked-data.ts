@@ -1,120 +1,17 @@
 /* ============================================================
    DATOS SIMULADOS — SE REEMPLAZAN POR EL API
    ------------------------------------------------------------
-   Mantienen la forma que debe devolver el backend: al conectar el
-   servicio sólo cambia el origen, no los componentes.
+   Sólo queda el detalle del modal: la bandeja ya lee del API.
    ============================================================ */
 import { WALLET_PEOPLE } from "@/modules/walletModule/mocked-data";
 import { HOY, dias } from "@/modules/walletModule/utils/format";
 import type { IWalletGroupDetail, IWalletPerson } from "@/modules/walletModule/types";
-import type { INoveltyRow } from "./types";
-
-const M = 1e6;
 
 /** Las personas de cartera más el ejecutivo propio de esta bandeja. */
 export const NOVELTY_PEOPLE: Record<string, IWalletPerson> = {
   ...WALLET_PEOPLE,
   malfonso: { id: "malfonso", nombre: "Miguel Alfonso", iniciales: "MA" }
 };
-
-/**
- * Seis novedades escogidas para que ninguna tarjeta quede en cero y el tablero
- * tenga cuatro columnas con contenido. La fecha de corte es el 31/08/2026.
- */
-export const NOVELTY_ROWS: INoveltyRow[] = [
-  {
-    id: "NOV-1042",
-    tipo: "acuerdo",
-    estado: "esperando_aprob",
-    cliente: { nombre: "OXXO COLOMBIA S.A.S.", nit: "843326788" },
-    ejecutivo: NOVELTY_PEOPLE.cosorio,
-    responsable: NOVELTY_PEOPLE.cosorio,
-    accion: "Reprogramar con soporte",
-    facturas: 1,
-    monto: 32 * M,
-    creada: new Date(2026, 6, 24),
-    compromiso: new Date(2026, 7, 2),
-    limite: new Date(2026, 7, 21),
-    diasSinGestion: 15
-  },
-  {
-    id: "NOV-1048",
-    tipo: "cruce",
-    estado: "en_gestion",
-    cliente: { nombre: "KOBA COLOMBIA S.A.S. (D1)", nit: "894204193" },
-    ejecutivo: NOVELTY_PEOPLE.cosorio,
-    responsable: NOVELTY_PEOPLE.cosorio,
-    accion: "Validar saldo en cero",
-    facturas: 1,
-    monto: 41766000,
-    creada: new Date(2026, 6, 28),
-    compromiso: new Date(2026, 7, 3),
-    limite: new Date(2026, 7, 15),
-    diasSinGestion: 27
-  },
-  {
-    id: "NOV-1070",
-    tipo: "acuerdo",
-    estado: "en_gestion",
-    cliente: { nombre: "ALKOSTO S.A.", nit: "860030777" },
-    ejecutivo: NOVELTY_PEOPLE.gtorres,
-    responsable: NOVELTY_PEOPLE.gtorres,
-    accion: "Llamar antes del vencimiento",
-    facturas: 2,
-    monto: 201 * M,
-    creada: new Date(2026, 7, 4),
-    compromiso: new Date(2026, 8, 4),
-    limite: new Date(2026, 8, 22),
-    diasSinGestion: 21
-  },
-  {
-    id: "NOV-1079",
-    tipo: "nc_precio",
-    estado: "esperando_aprob",
-    cliente: { nombre: "DISTRIBUIDORA TROPICAL DEL CARIBE S.A.S.", nit: "900412855" },
-    ejecutivo: NOVELTY_PEOPLE.malfonso,
-    responsable: NOVELTY_PEOPLE.malfonso,
-    accion: "Radicar novedad en formulario Back Office",
-    facturas: 2,
-    monto: 120 * M,
-    creada: new Date(2026, 7, 6),
-    compromiso: new Date(2026, 8, 12),
-    limite: new Date(2026, 8, 2),
-    diasSinGestion: 23
-  },
-  {
-    id: "NOV-1081",
-    tipo: "pago_ni",
-    estado: "aprobada",
-    cliente: { nombre: "COOPERATIVA CONSUMO MEDELLÍN", nit: "817497224" },
-    ejecutivo: NOVELTY_PEOPLE.malfonso,
-    responsable: NOVELTY_PEOPLE.malfonso,
-    accion: "Solicitar detalle de pago al cliente",
-    facturas: 2,
-    monto: 76 * M,
-    creada: new Date(2026, 7, 10),
-    compromiso: new Date(2026, 8, 1),
-    limite: new Date(2026, 8, 3),
-    diasSinGestion: 6
-  },
-  {
-    id: "NOV-1076",
-    tipo: "refact",
-    estado: "sin_asignar",
-    cliente: { nombre: "SUPERMERCADOS LA 14 S.A.", nit: "890303025" },
-    ejecutivo: NOVELTY_PEOPLE.gtorres,
-    // Nadie la ha tomado: alimenta la tarjeta "Sin responsable" y la columna
-    // "Sin asignar" del tablero.
-    responsable: null,
-    accion: "Solicitar anulación de la factura",
-    facturas: 1,
-    monto: 31 * M,
-    creada: new Date(2026, 7, 8),
-    compromiso: new Date(2026, 7, 14),
-    limite: new Date(2026, 8, 4),
-    diasSinGestion: null
-  }
-];
 
 /**
  * Un único detalle para el modal: lo abren todas las filas y todas las tarjetas
