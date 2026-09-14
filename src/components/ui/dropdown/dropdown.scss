@@ -8,4 +8,9 @@
         margin: 0.25rem 0 !important;
         height: 1px;
     }
+
+    // Group: items flush with the title instead of AntD's 8px indent
+    ul.ant-dropdown-menu-item-group-list {
+        margin: 0;
+    }
 }

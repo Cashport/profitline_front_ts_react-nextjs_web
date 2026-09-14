@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { DatePicker, Select } from "antd";
+import { DatePicker, Input, Select } from "antd";
 import { Paperclip } from "lucide-react";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -23,9 +23,6 @@ const PERSONAS = Object.values(WALLET_PEOPLE);
 const Label = ({ children }: { children: React.ReactNode }) => (
   <label className="mb-1 block text-[11.5px] font-semibold text-muted-foreground">{children}</label>
 );
-
-const inputClass =
-  "w-full rounded-md border border-border bg-card px-2.5 py-1.5 text-[12.5px] text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground/30";
 
 /** Alta de un ticket. TODO: enviar al endpoint de acciones en vez de al estado local. */
 export default function GroupTicketForm({
@@ -111,8 +108,7 @@ export default function GroupTicketForm({
 
         <div>
           <Label>Acción</Label>
-          <input
-            className={inputClass}
+          <Input
             value={titulo}
             placeholder="Ej.: recibir acta de la transportadora"
             onChange={(e) => setTitulo(e.target.value)}
@@ -123,8 +119,7 @@ export default function GroupTicketForm({
           <Label>
             Comentario <span className="font-normal opacity-70">opcional</span>
           </Label>
-          <textarea
-            className={`${inputClass} resize-y`}
+          <Input.TextArea
             rows={2}
             value={comentario}
             placeholder="Contexto para quien lo resuelve"
@@ -158,7 +153,7 @@ export default function GroupTicketForm({
           <button
             type="submit"
             disabled={!titulo.trim()}
-            className="rounded-md bg-wallet-nov px-2.5 py-[3px] text-[11.5px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-md bg-cashport-green px-2.5 py-[3px] text-[11.5px] font-bold text-cashport-black transition-colors hover:bg-cashport-green/90 disabled:cursor-not-allowed disabled:opacity-45"
           >
             Crear ticket
           </button>

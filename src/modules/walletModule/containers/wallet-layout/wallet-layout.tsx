@@ -32,6 +32,15 @@ function WalletChrome({ children }: { children: React.ReactNode }) {
             colorSplit: "rgba(253, 253, 253, 0.12)",
             colorBgElevated: "#1f1f1f"
           })
+        },
+        components: {
+          DatePicker: {
+            // The root theme pins controlHeight to 47; match the module's 32px controls.
+            controlHeight: 31,
+            // The root theme also pins colorBgElevated to white at component level, which beats
+            // the global token above; re-declare it so the picker panel follows the dark theme.
+            ...(isDark && { colorBgElevated: "#1f1f1f" })
+          }
         }
       }}
     >
