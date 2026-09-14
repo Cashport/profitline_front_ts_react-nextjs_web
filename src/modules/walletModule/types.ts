@@ -141,6 +141,8 @@ export interface IWalletTimelineEntry {
 /** Datos de la novedad cuando el grupo es de tipo "novedad". */
 export interface IWalletNovedad {
   id: string;
+  /** Id numérico del incidente en el API (para /invoice/incident-detail). */
+  incidentId?: number;
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
   estado: { nom: string; sev: Sev };
@@ -168,6 +170,12 @@ export interface IWalletGroupDetail {
   tramo?: TramoIndex | null;
   /** Conteo real, del grupo. `facturas` es una muestra y puede venir topada. */
   totalFacturas: number;
+  /**
+   * `facturas` y `bitacora` ya no los lee el modal: el seguimiento sale del
+   * incidente (/invoice/incident-detail) y las facturas no tienen endpoint.
+   * Se conservan porque los módulos aún simulados (tickets, novedades) los
+   * construyen.
+   */
   facturas: IWalletInvoice[];
   bitacora: IWalletTimelineEntry[];
   tickets: IWalletTicket[];

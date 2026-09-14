@@ -6,6 +6,8 @@ import { Users, UserX, Bell, FileText, FileX, Tag, Bot } from "lucide-react";
 
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
+import { cn } from "@/utils/utils";
+import { DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 
 import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -176,7 +178,11 @@ export default function DataQualityView() {
                       </TooltipTrigger>
                       <TooltipContent
                         side="bottom"
-                        className="w-64 space-y-1 rounded-lg px-3 py-2.5"
+                        className={cn(
+                          DARK_TOOLTIP_CONTENT,
+                          "w-64 space-y-1 rounded-lg px-3 py-2.5"
+                        )}
+                        arrowClassName={DARK_TOOLTIP_ARROW}
                       >
                         <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
                           Automatizaciones fallidas
@@ -240,7 +246,11 @@ export default function DataQualityView() {
                     </div>
                   </TooltipTrigger>
                   {pendingClients > 0 && (
-                    <TooltipContent side="bottom" className="w-56 space-y-1 rounded-lg px-3 py-2.5">
+                    <TooltipContent
+                      side="bottom"
+                      className={cn(DARK_TOOLTIP_CONTENT, "w-56 space-y-1 rounded-lg px-3 py-2.5")}
+                      arrowClassName={DARK_TOOLTIP_ARROW}
+                    >
                       <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
                         Clientes con archivos pendientes
                       </p>
@@ -284,7 +294,11 @@ export default function DataQualityView() {
                     </div>
                   </TooltipTrigger>
                   {missing > 0 && (
-                    <TooltipContent side="bottom" className="w-64 space-y-1 rounded-lg px-3 py-2.5">
+                    <TooltipContent
+                      side="bottom"
+                      className={cn(DARK_TOOLTIP_CONTENT, "w-64 space-y-1 rounded-lg px-3 py-2.5")}
+                      arrowClassName={DARK_TOOLTIP_ARROW}
+                    >
                       <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
                         Archivos pendientes por cliente
                       </p>

@@ -87,11 +87,7 @@
   --wallet-pag: 15 163 177;
   --wallet-conc: 37 99 201;
   --wallet-nov: 255 85 0;
-  /* Violeta y bronce, no grises: Sin conciliar, Saldo y Otros eran tres
-     neutros indistinguibles dentro de la barra apilada. Otros se queda gris.
-     El bronce de Saldo va apagado a propósito: en ámbar saturado se confundía
-     con el lima de Compensada, que está a 25° de matiz. */
-  --wallet-risk: 124 58 237;
+  --wallet-risk: 201 222 255;
   --wallet-saldo: 161 98 7;
   --wallet-glosa: 0 168 220;
   --wallet-devol: 214 6 93;

@@ -4,13 +4,14 @@
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
 import type {
   EstadoKey,
+  IWalletAttachment,
   IWalletClientRow,
   IWalletGroupDetail,
   IWalletGroupRow,
-  IWalletInvoice,
   IWalletMatrixCell,
   IWalletPerson,
   IWalletSummary,
+  IWalletTimelineEntry,
   TramoIndex,
   WalletSegments
 } from "../types";
@@ -20,6 +21,7 @@ import type {
   IWalletMatrixGroup,
   IWalletMatrixGroups
 } from "@/types/portfolios/IWalletMatrix";
+import type { IIncidentDetail } from "@/hooks/useNoveltyDetail";
 
 /** Los seis tramos, en el orden en el que se pintan las columnas. */
 export const TRAMO_BUCKETS: AgingBucket[] = [
@@ -177,12 +179,11 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
 /**
  * Detalle del modal de gestión a partir del grupo del API.
  *
- * La bitácora y los tickets van vacíos a propósito: no hay endpoint todavía.
- * Antes salían de los datos simulados, y por eso el modal dejó de abrir al
- * conectar la cartera — las claves del API no existen en ese mapa.
- *
- * Las facturas tampoco tienen endpoint y por eso llegan de fuera: el conteo
- * que se muestra es `group.invoices`, no la longitud de esa lista.
+ * Sólo lleva las cifras del grupo. El seguimiento no va aquí: el modal lo pide
+ * al incidente (`/invoice/incident-detail`) con `novedad.incidentId`, y lo
+ * publica por `/invoice/incident-comments`. Facturas y tickets van vacíos
+ * porque no tienen endpoint todavía (el tab de facturas está deshabilitado;
+ * el conteo que se muestra es `group.invoices`).
  *
  * `tramo` es el del drilldown. Si se pidió con `aging`, el API ya recortó el
  * grupo a ese tramo: monto, reparto y conteo son la parte que cae ahí, no el
@@ -190,7 +191,6 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  */
 export const toGroupDetail = (
   group: IWalletMatrixGroup,
-  facturas: IWalletInvoice[],
   tramo: TramoIndex | null = null
 ): IWalletGroupDetail => {
   const tipo = toEstadoKey(group.statusKey);
@@ -205,6 +205,7 @@ export const toGroupDetail = (
         ? undefined
         : {
             id: `NOV-${group.noveltyId}`,
+            incidentId: group.noveltyId,
             tipoNom: group.noveltyType ?? meta.nom,
             estado: { nom: group.noveltyStatus ?? meta.chipTxt, sev: meta.chip },
             // El endpoint de grupos no manda compromiso ni fecha límite.
@@ -219,9 +220,44 @@ export const toGroupDetail = (
     tramos: group.byAging ?? TRAMOS.map(() => 0),
     tramo,
     totalFacturas: group.invoices,
-    facturas,
+    facturas: [],
     bitacora: [],
     tickets: [],
     diasSinGestion: null
   };
 };
+
+/** Los adjuntos de un evento llegan sin tipar: URL suelta u objeto con nombre. */
+const toAttachment = (file: unknown): IWalletAttachment => {
+  const raw =
+    typeof file === "string"
+      ? file
+      : (file as { name?: string; url?: string })?.name ?? (file as { url?: string })?.url ?? "";
+  const nombre = raw.split("/").pop()?.split("?")[0] || "adjunto";
+  return { nombre, peso: "" };
+};
+
+/**
+ * Bitácora del modal a partir de los eventos del incidente.
+ *
+ * Se ordena de más viejo a más nuevo porque el seguimiento se lee de abajo
+ * hacia arriba: lo último queda siempre a la vista.
+ */
+export const toTimelineEntries = (incident: IIncidentDetail): IWalletTimelineEntry[] =>
+  [...(incident.events ?? [])]
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .map((ev, i) => {
+      const adjuntos = (ev.files ?? []).map(toAttachment);
+      const esDecision = !!(ev.approved_by || ev.rejected_by);
+      const texto =
+        ev.comments?.trim() || (ev.approved_by ? "Aprobó la novedad" : "Rechazó la novedad");
+
+      return {
+        id: `ev-${i}`,
+        fecha: new Date(ev.created_at),
+        autor: toPerson(ev.created_by || ev.approved_by || ev.rejected_by),
+        tipo: esDecision ? "evento" : adjuntos.length ? "adjunto" : "comentario",
+        texto,
+        adjuntos: adjuntos.length ? adjuntos : undefined
+      };
+    });

@@ -31,7 +31,7 @@ export default function ProductInfoSection({
   return (
     <div className="grid grid-cols-2 gap-8">
       <div className="flex flex-col gap-5">
-        <p className="text-sm font-bold text-[#141414]">Información del producto</p>
+        <p className="text-base font-bold text-[#141414]">Información del producto</p>
         <div className="grid grid-cols-3 gap-4">
           <Field label="Línea" value={linea} />
           <Field label="Canal" value={canal} />

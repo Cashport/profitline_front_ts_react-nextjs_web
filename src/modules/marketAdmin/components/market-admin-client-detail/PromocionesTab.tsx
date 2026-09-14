@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Table } from "antd";
+import { Input, InputNumber, Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip, Upload, Eye } from "lucide-react";
 import ModalNuevaNegociacion from "@/modules/marketAdmin/components/market-admin-client-detail/ModalNuevaNegociacion";
@@ -261,43 +261,46 @@ export default function PromocionesTab({
           <div className="bg-[#FAFAFA] px-4 py-3 border-b border-[#EEEEEE]">
             <p className="text-xs font-semibold text-[#141414]">Nueva asignación</p>
           </div>
-          <div className="p-4 grid grid-cols-[2fr_80px_1fr_auto] gap-3 items-end">
+          <div className="p-4 grid grid-cols-[2fr_96px_1fr_auto] gap-3 items-end">
             <div>
               <label className="text-xs font-medium text-[#666666] block mb-1">
                 Producto bonificado
               </label>
-              <select
-                value={bonifForm.producto}
-                onChange={(e) => setBonifForm((f) => ({ ...f, producto: e.target.value }))}
-                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
-              >
-                {PRODUCTOS_BONIFICADOS_LIST.map((p) => (
-                  <option key={p}>{p}</option>
-                ))}
-              </select>
+              <Select
+                showSearch
+                size="large"
+                placeholder="Selecciona un producto"
+                value={bonifForm.producto || undefined}
+                options={PRODUCTOS_BONIFICADOS_LIST.map((p) => ({ value: p, label: p }))}
+                onChange={(producto) => setBonifForm((f) => ({ ...f, producto }))}
+                notFoundContent="Sin productos disponibles"
+                filterOption={(input, option) =>
+                  (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                }
+                className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
+                popupClassName="[&_.ant-select-item]:!text-sm"
+              />
             </div>
             <div>
               <label className="text-xs font-medium text-[#666666] block mb-1">Unidades</label>
-              <input
-                type="number"
+              <InputNumber
                 min={1}
+                size="large"
                 value={bonifForm.unidades}
-                onChange={(e) =>
-                  setBonifForm((f) => ({ ...f, unidades: parseInt(e.target.value) || 1 }))
-                }
-                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
+                onChange={(unidades) => setBonifForm((f) => ({ ...f, unidades: unidades ?? 1 }))}
+                className="w-full !rounded-lg !border-[#DDDDDD] [&_.ant-input-number-input]:!text-sm"
               />
             </div>
             <div>
               <label className="text-xs font-medium text-[#666666] block mb-1">
                 Nota interna (opcional)
               </label>
-              <input
-                type="text"
+              <Input
+                size="large"
                 placeholder="Motivo..."
                 value={bonifForm.nota}
                 onChange={(e) => setBonifForm((f) => ({ ...f, nota: e.target.value }))}
-                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2 bg-white outline-none focus:border-[#141414] transition-colors"
+                className="!rounded-lg !border-[#DDDDDD] !text-sm"
               />
             </div>
             <button
