@@ -53,15 +53,26 @@ export const rejectIncident = async (
 
 interface AddCommentData {
   comments: string;
+  files?: File[];
 }
 
+// multipart/form-data: `comments` obligatorio + `files` (0..N) opcional.
 export const addIncidentComment = async (
-  incidentId: string,
+  incidentId: number | string,
   commentData: AddCommentData
 ): Promise<any> => {
+  const formData = new FormData();
+  formData.append("comments", commentData.comments);
+
+  if (commentData.files) {
+    commentData.files.forEach((file) => {
+      formData.append("files", file);
+    });
+  }
+
   const response: any = await API.post(
     `${config.API_HOST}/invoice/incident-comments/${incidentId}`,
-    commentData
+    formData
   );
 
   return response;

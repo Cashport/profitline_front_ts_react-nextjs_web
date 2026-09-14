@@ -661,7 +661,10 @@ const SIN_NARRATIVA: Pick<IWalletGroupDetail, "bitacora" | "tickets"> = {
 const ACCIONES: { titulo: string; categoria: string }[] = [
   { titulo: "Enviar soporte a aprobación comercial", categoria: "Aprobación comercial o RGM" },
   { titulo: "Confirmar la aprobación por correo", categoria: "Correo o seguimiento escrito" },
-  { titulo: "Radicar la novedad en el formulario de Back Office", categoria: "Solicitud a Back Office" },
+  {
+    titulo: "Radicar la novedad en el formulario de Back Office",
+    categoria: "Solicitud a Back Office"
+  },
   { titulo: "Solicitar la anulación de la factura", categoria: "Radicación o reradicación" },
   { titulo: "Confirmar la nueva radicación", categoria: "Radicación o reradicación" },
   { titulo: "Aplicar el cruce en el módulo de aplicación", categoria: "Aplicación o cruce en SAP" },
@@ -670,7 +673,10 @@ const ACCIONES: { titulo: string; categoria: string }[] = [
   { titulo: "Recibir el acta de la transportadora", categoria: "Reclamación a logística" },
   { titulo: "Reprogramar con soporte", categoria: "Acuerdo de pago" },
   { titulo: "Validar que el saldo quede en cero", categoria: "Aplicación o cruce en SAP" },
-  { titulo: "Enviar el estado de cuenta al área de pagos", categoria: "Correo o seguimiento escrito" },
+  {
+    titulo: "Enviar el estado de cuenta al área de pagos",
+    categoria: "Correo o seguimiento escrito"
+  },
   { titulo: "Agendar cita de conciliación", categoria: "Visita o reunión" },
   { titulo: "Escalar el caso al coordinador", categoria: "Escalamiento interno" },
   { titulo: "Adjuntar los soportes al caso", categoria: "Documentación y soportes" }
@@ -762,7 +768,18 @@ function derivarDetalles(
         monto: g.monto,
         tramos: g.tramos,
         totalFacturas: g.facturas,
-        facturas: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100),
+        // El modal ya lee documentos (forma de incident-detail); las facturas
+        // simuladas se traducen como documentos activos sin recuperación.
+        documentos: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100).map((f) => ({
+          id: f.id,
+          doc: f.doc,
+          tipo: "FINANCIAL_RECORD" as const,
+          saldoInicial: f.saldo,
+          saldo: f.saldo,
+          activa: true,
+          inactivaMotivo: null,
+          inactivaEl: null
+        })),
         diasSinGestion: g.diasSinGestion,
         bitacora: narrativa.bitacora,
         tickets: [...narrativa.tickets, ...derivarTickets(nov, ejecutivo, narrativa.tickets, i)]

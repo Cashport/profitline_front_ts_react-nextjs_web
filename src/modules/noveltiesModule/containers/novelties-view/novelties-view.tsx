@@ -18,7 +18,6 @@ import { useIncidentList } from "../../hooks/useIncidentList";
 import { useIncidentListCoordinators } from "../../hooks/useIncidentListCoordinators";
 import { useIncidentListKpis } from "../../hooks/useIncidentListKpis";
 import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
-import { NOVELTY_DETAIL } from "../../mocked-data";
 import type { NoveltyView } from "../../types";
 
 const VISTAS: { key: NoveltyView; label: string }[] = [
@@ -45,7 +44,7 @@ export default function NoveltiesView() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({ col: "next_ticket_date", dir: "asc" });
   const [vista, setVista] = useState<NoveltyView>("lista");
-  // Id de la novedad abierta. Hoy todas muestran el mismo detalle simulado.
+  // Id del incidente abierto en el modal; el modal lo pide a /invoice/incident-detail.
   const [openNovelty, setOpenNovelty] = useState<number | null>(null);
 
   const { data: kpis } = useIncidentListKpis();
@@ -160,10 +159,7 @@ export default function NoveltiesView() {
         </>
       )}
 
-      <GroupDetailModal
-        detail={openNovelty ? NOVELTY_DETAIL : null}
-        onClose={() => setOpenNovelty(null)}
-      />
+      <GroupDetailModal incidentId={openNovelty} onClose={() => setOpenNovelty(null)} />
     </div>
   );
 }
