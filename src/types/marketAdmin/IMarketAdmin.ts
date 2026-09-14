@@ -422,7 +422,7 @@ export interface IMarketAdminUserDetail {
 
 // POST /users/:id/clients — el grupo personal lo crea el backend si no existe
 export interface IAssignClientToUserBody {
-  client_nit: string;
+  client_nits: string[];
 }
 
 // ── Profit Loader (cargue de información) ───────────────────────────────────

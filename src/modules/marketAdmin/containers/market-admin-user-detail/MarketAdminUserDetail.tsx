@@ -96,7 +96,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const agregar = async (nit: string) => {
     try {
       setIsSaving(true);
-      await assignClientToMarketAdminUser(id, { client_nit: nit });
+      await assignClientToMarketAdminUser(id, { client_nits: [nit] });
       await mutate();
       showMessage("success", "Cliente asignado correctamente.");
     } catch (err) {
