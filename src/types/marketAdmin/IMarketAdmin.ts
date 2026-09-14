@@ -296,6 +296,7 @@ export interface IMarketAdminClient {
 export interface IMarketAdminClientDetail {
   nit: string;
   client_name: string;
+  city: string;
   business_name: string | null;
   phone: string | null;
   email: string | null;
