@@ -213,6 +213,7 @@ export interface IMarketAdminProductCategory {
 export interface IMarketAdminProduct {
   id: number;
   sku: string;
+  prices: { id: number; sku: string; description: string; price: number }[];
   description: string; // nombre comercial
   image: string; // URL de la imagen (puede venir como ".")
   id_line: number;

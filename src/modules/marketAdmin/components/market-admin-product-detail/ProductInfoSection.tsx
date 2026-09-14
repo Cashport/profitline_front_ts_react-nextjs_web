@@ -39,9 +39,9 @@ export default function ProductInfoSection({
         </div>
       </div>
       <div className="flex flex-col gap-5">
-        <p className="text-sm font-bold text-[#141414]">Precio y estado</p>
+        {/* <p className="text-sm font-bold text-[#141414]">Precio y estado</p> */}
         <div className="grid grid-cols-3 gap-4">
-          <Field label="Precio base" value={precioBase} />
+          {/* <Field label="Precio base" value={precioBase} /> */}
           <Field label="Lotes" value={String(lotesCount)} />
           <div className="flex flex-col gap-1">
             <span className="text-xs text-[#999999]">Visible en Marketplace</span>
