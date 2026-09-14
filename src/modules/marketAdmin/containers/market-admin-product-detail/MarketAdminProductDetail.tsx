@@ -15,6 +15,7 @@ import ProfitLoader from "@/components/ui/profit-loader";
 import ProductInfoSection from "@/modules/marketAdmin/components/market-admin-product-detail/ProductInfoSection";
 import ProductImageUpload from "@/modules/marketAdmin/components/market-admin-product-detail/ProductImageUpload";
 import ProductSkusTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductSkusTable";
+import ProductPricesTable from "@/modules/marketAdmin/components/market-admin-product-detail/ProductPricesTable";
 import ProductLotes from "@/modules/marketAdmin/components/market-admin-product-detail/ProductLotes";
 
 // Campos que el endpoint aún no devuelve → marcados como pendientes de backend.
@@ -197,6 +198,10 @@ export default function MarketAdminProductDetail({ params }: { params: { id: str
             <ProductSkusTable
               skuList={[{ sku: product.sku, descripcion: product.description, precio: MISSING }]}
             />
+
+            <div className="border-t border-[#EEEEEE]" />
+
+            <ProductPricesTable prices={product.prices ?? []} />
 
             <div className="border-t border-[#EEEEEE]" />
 
