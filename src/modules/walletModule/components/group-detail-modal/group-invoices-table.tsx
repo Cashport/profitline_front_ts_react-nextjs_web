@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Eye } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { DOCUMENT_TYPE_LABEL } from "../../constants";
 import { fac, fmtD, fmtFull, fmtM } from "../../utils/format";
 import StatusChip from "../shared/status-chip";
 import type { IWalletDocument, WalletDocumentInactiveReason } from "../../types";
@@ -24,11 +25,6 @@ const INACTIVE_REASON_LABEL: Record<WalletDocumentInactiveReason, string> = {
   MANUALLY_REMOVED: "Retirada manualmente",
   CANCELLED: "Anulada",
   OTHER: "Otro"
-};
-
-const TIPO_LABEL: Record<IWalletDocument["tipo"], string> = {
-  FINANCIAL_RECORD: "Factura",
-  BALANCE: "Saldo"
 };
 
 /** Documentos de la novedad, con selección y totales de lo que se está viendo. */
@@ -135,7 +131,7 @@ export default function GroupInvoicesTable({
                     />
                   </td>
                   <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{d.doc}</td>
-                  <td className="px-3 py-2.5">{TIPO_LABEL[d.tipo]}</td>
+                  <td className="px-3 py-2.5">{DOCUMENT_TYPE_LABEL[d.tipo]}</td>
                   <td className="whitespace-nowrap px-3 py-2.5">
                     {d.activa ? (
                       <StatusChip sev="ok">Activa</StatusChip>

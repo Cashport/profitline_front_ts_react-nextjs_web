@@ -777,6 +777,7 @@ function derivarDetalles(
         // simuladas se traducen como documentos activos sin recuperación.
         documentos: buildInvoices(g.clave, g.tramos, g.facturas, 1000 + i * 100).map((f) => ({
           id: f.id,
+          documentId: Number(f.id.replace(/\D/g, "")) || 0,
           doc: f.doc,
           tipo: "FINANCIAL_RECORD" as const,
           saldoInicial: f.saldo,

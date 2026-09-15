@@ -56,7 +56,7 @@ export default function NoveltiesView() {
   const { data: kpis } = useIncidentListKpis();
   // El tablero agrupa por estado, así que sigue necesitando el catálogo.
   const { statuses } = useNoveltyStatuses();
-  const { items, summary, pagination, fetchedAt, isLoading, error } = useIncidentList({
+  const { items, summary, pagination, fetchedAt, isLoading, error, mutate } = useIncidentList({
     page,
     limit: PAGE_SIZE,
     sortBy: sort.col as IncidentSortBy,
@@ -168,7 +168,14 @@ export default function NoveltiesView() {
         </>
       )}
 
-      <GroupDetailModal incidentId={openNovelty} onClose={() => setOpenNovelty(null)} />
+      {/* Desde el modal se cambia el estado de la novedad: al cerrar se relee la bandeja. */}
+      <GroupDetailModal
+        incidentId={openNovelty}
+        onClose={() => {
+          setOpenNovelty(null);
+          mutate();
+        }}
+      />
     </div>
   );
 }

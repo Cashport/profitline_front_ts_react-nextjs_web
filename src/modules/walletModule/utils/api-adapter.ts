@@ -252,6 +252,7 @@ export const parseApiDate = (value: string | null | undefined): Date | null => {
 
 const toDocument = (doc: IIncidentDocument): IWalletDocument => ({
   id: String(doc.incident_document_id ?? doc.document_id),
+  documentId: doc.document_id,
   doc: doc.id_erp ?? `#${doc.document_id}`,
   tipo: doc.document_type,
   saldoInicial: doc.initial_amount,
@@ -287,6 +288,7 @@ export const toIncidentGroupDetail = (
       incidentId: incident.incident_id,
       tipoNom: incident.incident_name,
       estado: {
+        id: incident.novelty_status_id ?? undefined,
         nom: incident.novelty_status_name ?? incident.status_name,
         sev: EST_META.novedad.chip,
         color: incident.novelty_status_color ?? undefined
