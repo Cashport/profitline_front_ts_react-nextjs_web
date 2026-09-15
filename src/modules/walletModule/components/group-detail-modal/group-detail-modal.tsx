@@ -7,10 +7,15 @@ import { Search, X } from "lucide-react";
 import { cn } from "@/utils/utils";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
-import { addIncidentComment } from "@/services/resolveNovelty/resolveNovelty";
+import { useIncidentActions } from "@/hooks/useIncidentActions";
+import {
+  addIncidentComment,
+  createIncidentAction,
+  resolveIncidentAction
+} from "@/services/resolveNovelty/resolveNovelty";
 import { useMessageApi } from "@/context/MessageContext";
-import { HOY } from "../../utils/format";
-import { toIncidentGroupDetail, toTimelineEntries } from "../../utils/api-adapter";
+import type { ICreateIncidentActionBody } from "@/types/novelties/INovelties";
+import { toIncidentGroupDetail, toTickets, toTimelineEntries } from "../../utils/api-adapter";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
 import GroupDetailRail from "./group-detail-rail";
@@ -84,7 +89,7 @@ const CloseButton = ({ onClose }: { onClose: () => void }) => (
 );
 
 /** Contenido del modal. Va en su propio componente y con `key` por grupo para
- *  que el estado local (tickets, selección) nazca limpio. */
+ *  que el estado local (pestaña, selección, formulario) nazca limpio. */
 function GroupDetailBody({
   base,
   incidentId,
@@ -99,16 +104,14 @@ function GroupDetailBody({
   const [tab, setTab] = useState<Tab>("gestion");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const [tickets, setTickets] = useState<IWalletTicket[]>(base?.tickets ?? []);
   const [ticketForm, setTicketForm] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const nextId = useRef(0);
 
   // Con `incidentId` el incidente es la fuente de verdad del modal (cabecera,
-  // cifras, facturas y seguimiento). Sin él (grupo de cartera sin novedad) el
-  // hook no pide nada, se muestra la fila y el seguimiento queda deshabilitado:
-  // no hay dónde leer ni publicar.
+  // cifras, facturas, seguimiento y acciones). Sin él (grupo de cartera sin
+  // novedad) los hooks no piden nada, se muestra la fila y seguimiento y
+  // acciones quedan deshabilitados: no hay dónde leer ni publicar.
   const {
     data: incidentData,
     error: incidentError,
@@ -117,22 +120,25 @@ function GroupDetailBody({
   } = useIncidentDetail({ incidentId });
   const incident = incidentData?.[0];
 
+  const {
+    data: actions,
+    error: actionsError,
+    isLoading: isLoadingActions,
+    mutate: mutateActions
+  } = useIncidentActions({ incidentId });
+
   const detail = useMemo(
     () => (incident ? toIncidentGroupDetail(incident, base) : base),
     [incident, base]
   );
   const bitacora = useMemo(() => (incident ? toTimelineEntries(incident) : []), [incident]);
+  const tickets = useMemo(() => toTickets(actions), [actions]);
 
   // El seguimiento se lee de abajo hacia arriba: lo último siempre a la vista.
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [tab, bitacora]);
-
-  const nextTicketId = useMemo(() => {
-    const nums = tickets.map((t) => Number(t.id.replace(/\D/g, "")) || 0);
-    return () => `TK-${Math.max(4400, ...nums) + 1 + nextId.current}`;
-  }, [tickets]);
 
   // El comentario se publica sobre el incidente y el seguimiento se relee del
   // API: la bitácora nunca se arma en el navegador. Devuelve si quedó
@@ -150,17 +156,33 @@ function GroupDetailBody({
     }
   };
 
-  // TODO: los tickets son locales; al conectar su API pasan a mutaciones.
-  const handleCreateTicket = (data: Omit<IWalletTicket, "id" | "estado">) => {
-    nextId.current += 1;
-    setTickets((prev) => [...prev, { ...data, id: nextTicketId(), estado: "abierto" }]);
-    setTicketForm(false);
+  // Crear o resolver una acción mueve el compromiso y la última gestión de la
+  // novedad, así que se releen las acciones y el incidente.
+  const handleCreateTicket = async (body: ICreateIncidentActionBody): Promise<boolean> => {
+    if (!incidentId) return false;
+    try {
+      await createIncidentAction(incidentId, body);
+      await Promise.all([mutateActions(), mutateIncident()]);
+      showMessage("success", "Acción creada");
+      setTicketForm(false);
+      return true;
+    } catch {
+      showMessage("error", "No se pudo crear la acción");
+      return false;
+    }
   };
 
-  const handleResolveTicket = (id: string) => {
-    setTickets((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, estado: "resuelto", resueltoEl: HOY } : t))
-    );
+  const handleResolveTicket = async (ticket: IWalletTicket, comment?: string): Promise<boolean> => {
+    if (!incidentId) return false;
+    try {
+      await resolveIncidentAction(incidentId, ticket.actionId, { resolution_comment: comment });
+      await Promise.all([mutateActions(), mutateIncident()]);
+      showMessage("success", "Acción resuelta");
+      return true;
+    } catch {
+      showMessage("error", "No se pudo resolver la acción");
+      return false;
+    }
   };
 
   // Abierto desde la bandeja no hay fila de respaldo: hasta que llegue el
@@ -180,9 +202,6 @@ function GroupDetailBody({
     );
   }
 
-  /** Autor de lo que se registre: el dueño de la novedad o el ejecutivo. */
-  const autor = detail.novedad?.responsable ?? detail.ejecutivo;
-
   return (
     <div className="wallet-scope flex h-[min(88vh,900px)] flex-col bg-card text-foreground">
       <GroupModalHeader detail={detail} onClose={onClose} seleccionadas={selected.length} />
@@ -191,19 +210,31 @@ function GroupDetailBody({
         <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-muted/40 lg:border-b-0 lg:border-r">
           <div className="min-h-0 flex-1 overflow-auto">
             <GroupDetailRail detail={detail} />
-            {ticketForm && (
-              <GroupTicketForm
-                defaultResponsable={autor}
-                onCancel={() => setTicketForm(false)}
-                onCreate={handleCreateTicket}
-              />
+            {/* Las acciones cuelgan de la novedad: un grupo de cartera sin
+                novedad no tiene dónde leerlas ni crearlas. */}
+            {!!incidentId && (
+              <>
+                {ticketForm && (
+                  <GroupTicketForm
+                    defaultAssignedTo={incident?.assigned_to}
+                    onCancel={() => setTicketForm(false)}
+                    onCreate={handleCreateTicket}
+                  />
+                )}
+                <GroupTicketsSection
+                  tickets={tickets}
+                  creando={ticketForm}
+                  loading={isLoadingActions}
+                  error={
+                    actionsError
+                      ? (actionsError as Error).message || "No se pudieron cargar las acciones."
+                      : undefined
+                  }
+                  onNew={() => setTicketForm(true)}
+                  onResolve={handleResolveTicket}
+                />
+              </>
             )}
-            <GroupTicketsSection
-              tickets={tickets}
-              creando={ticketForm}
-              onNew={() => setTicketForm(true)}
-              onResolve={handleResolveTicket}
-            />
           </div>
         </aside>
 

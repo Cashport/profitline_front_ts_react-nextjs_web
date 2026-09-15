@@ -13,6 +13,7 @@ import type {
   IWalletMatrixCell,
   IWalletPerson,
   IWalletSummary,
+  IWalletTicket,
   IWalletTimelineEntry,
   TramoIndex,
   WalletSegments
@@ -24,6 +25,7 @@ import type {
   IWalletMatrixGroups
 } from "@/types/portfolios/IWalletMatrix";
 import type { IIncidentDetail, IIncidentDocument } from "@/hooks/useNoveltyDetail";
+import type { IIncidentAction } from "@/types/novelties/INovelties";
 
 /** Los seis tramos, en el orden en el que se pintan las columnas. */
 export const TRAMO_BUCKETS: AgingBucket[] = [
@@ -183,9 +185,10 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  *
  * Sólo lleva las cifras del grupo. El seguimiento no va aquí: el modal lo pide
  * al incidente (`/invoice/incident-detail`) con `novedad.incidentId`, y lo
- * publica por `/invoice/incident-comments`. Facturas y tickets van vacíos
- * porque no tienen endpoint todavía (el tab de facturas está deshabilitado;
- * el conteo que se muestra es `group.invoices`).
+ * publica por `/invoice/incident-comments`; las acciones las pide a
+ * `/invoice/incident/:id/actions`. Facturas y tickets van vacíos: el modal no
+ * los lee de aquí (el tab de facturas está deshabilitado; el conteo que se
+ * muestra es `group.invoices`).
  *
  * `tramo` es el del drilldown. Si se pidió con `aging`, el API ya recortó el
  * grupo a ese tramo: monto, reparto y conteo son la parte que cae ahí, no el
@@ -261,9 +264,10 @@ const toDocument = (doc: IIncidentDocument): IWalletDocument => ({
  * Es la fuente de verdad cuando el grupo es una novedad: cliente, estado,
  * responsable, fechas, saldo y conteo salen de aquí, no de la fila. `base` es
  * el detalle armado desde la fila de cartera (si se abrió desde ahí) y sólo
- * aporta lo que el incidente no trae: la clave, el reparto por tramo y los
- * tickets. `tramo` va en null porque las cifras son de la novedad entera,
- * no del recorte del drilldown.
+ * aporta lo que el incidente no trae: la clave y el reparto por tramo. Los
+ * tickets van vacíos: el modal los pide aparte (ver `toTickets`). `tramo` va
+ * en null porque las cifras son de la novedad entera, no del recorte del
+ * drilldown.
  */
 export const toIncidentGroupDetail = (
   incident: IIncidentDetail,
@@ -297,10 +301,31 @@ export const toIncidentGroupDetail = (
     totalFacturas: incident.actual_count,
     documentos: (incident.documents ?? []).map(toDocument),
     bitacora: [],
-    tickets: base?.tickets ?? [],
+    tickets: [],
     diasSinGestion: ultimaGestion ? Math.max(0, diasEntre(ultimaGestion, HOY)) : null
   };
 };
+
+/**
+ * Acción de la novedad (/invoice/incident/:id/actions) → ticket del modal.
+ *
+ * `id` es el código visible y `actionId` el numérico del API. Sólo OPEN está
+ * documentado como estado abierto: cualquier otro se lee como resuelto.
+ */
+export const toTicket = (action: IIncidentAction): IWalletTicket => ({
+  id: action.ticket_code,
+  actionId: action.id,
+  titulo: action.title,
+  comentario: action.description?.trim() || undefined,
+  responsable: toPerson(action.assigned_to_name) ?? SIN_ASIGNAR,
+  deadline: parseApiDate(action.due_date),
+  estado: action.status === "OPEN" ? "abierto" : "resuelto",
+  resueltoEl: parseApiDate(action.resolved_at) ?? undefined,
+  comentarioResolucion: action.resolution_comment?.trim() || undefined
+});
+
+export const toTickets = (actions: IIncidentAction[] = []): IWalletTicket[] =>
+  actions.map(toTicket);
 
 /** Los adjuntos de un evento llegan sin tipar: URL suelta u objeto con nombre. */
 const toAttachment = (file: unknown): IWalletAttachment => {

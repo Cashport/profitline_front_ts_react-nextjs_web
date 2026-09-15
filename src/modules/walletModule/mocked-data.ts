@@ -554,6 +554,7 @@ const NARRATIVA: Record<string, Pick<IWalletGroupDetail, "bitacora" | "tickets">
     tickets: [
       {
         id: "TK-4410",
+        actionId: 4410,
         titulo: "Aprobación de la NC por Comercial",
         comentario: "El descuento pactado está en la cláusula 4 del acuerdo.",
         categoria: "Aprobación comercial o RGM",
@@ -563,6 +564,7 @@ const NARRATIVA: Record<string, Pick<IWalletGroupDetail, "bitacora" | "tickets">
       },
       {
         id: "TK-4402",
+        actionId: 4402,
         titulo: "Confirmar el valor de la NC con el KAM",
         categoria: "Llamada al cliente",
         responsable: WALLET_PEOPLE.cosorio,
@@ -594,6 +596,7 @@ const NARRATIVA: Record<string, Pick<IWalletGroupDetail, "bitacora" | "tickets">
     tickets: [
       {
         id: "TK-4381",
+        actionId: 4381,
         titulo: "Reradicar las facturas en el portal del cliente",
         comentario: "Adjuntar las remisiones firmadas junto con cada factura.",
         categoria: "Radicación o reradicación",
@@ -709,6 +712,7 @@ function derivarTickets(
     const a = accion(0);
     tickets.push({
       id: `TK-${base + 1}`,
+      actionId: base + 1,
       titulo: a.titulo,
       categoria: a.categoria,
       responsable,
@@ -724,6 +728,7 @@ function derivarTickets(
     const deadline = dias(HOY, -(8 + ((i * 5 + k * 11) % 22)));
     tickets.push({
       id: `TK-${base + 2 + k}`,
+      actionId: base + 2 + k,
       titulo: a.titulo,
       categoria: a.categoria,
       responsable,

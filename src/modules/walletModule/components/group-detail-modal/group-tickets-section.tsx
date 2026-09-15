@@ -12,8 +12,13 @@ interface GroupTicketsSectionProps {
   tickets: IWalletTicket[];
   /** Oculta el botón "Nuevo" mientras el formulario está abierto. */
   creando: boolean;
+  /** Primera carga de las acciones: se muestra en lugar del vacío. */
+  loading?: boolean;
+  /** Mensaje de error al cargar las acciones; reemplaza el listado. */
+  error?: string;
   onNew: () => void;
-  onResolve: (id: string) => void;
+  /** Resuelve true si la acción quedó resuelta; sólo entonces la tarjeta se cierra. */
+  onResolve: (ticket: IWalletTicket, comment?: string) => Promise<boolean>;
 }
 
 const Count = ({ children }: { children: React.ReactNode }) => (
@@ -22,10 +27,15 @@ const Count = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
+/** Las acciones sin fecha límite van al final. */
+const deadlineMs = (t: IWalletTicket): number => t.deadline?.getTime() ?? Infinity;
+
 /** Acciones abiertas y cerradas del grupo. */
 export default function GroupTicketsSection({
   tickets,
   creando,
+  loading,
+  error,
   onNew,
   onResolve
 }: GroupTicketsSectionProps) {
@@ -33,14 +43,16 @@ export default function GroupTicketsSection({
 
   const abiertas = tickets
     .filter((t) => t.estado === "abierto")
-    .sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+    .sort((a, b) => deadlineMs(a) - deadlineMs(b));
   const cerradas = tickets
     .filter((t) => t.estado === "resuelto")
     .sort(
-      (a, b) => (b.resueltoEl ?? b.deadline).getTime() - (a.resueltoEl ?? a.deadline).getTime()
+      (a, b) =>
+        ((b.resueltoEl ?? b.deadline)?.getTime() ?? 0) -
+        ((a.resueltoEl ?? a.deadline)?.getTime() ?? 0)
     );
 
-  const vencidas = abiertas.filter((t) => diasEntre(HOY, t.deadline) < 0).length;
+  const vencidas = abiertas.filter((t) => t.deadline && diasEntre(HOY, t.deadline) < 0).length;
   const tarde = cerradas.filter(resueltoTarde).length;
 
   return (
@@ -68,12 +80,16 @@ export default function GroupTicketsSection({
           )}
         </div>
 
-        {abiertas.length ? (
+        {error ? (
+          <p className="text-[12.5px] leading-relaxed text-destructive">{error}</p>
+        ) : abiertas.length ? (
           <div className="flex flex-col gap-2">
             {abiertas.map((t) => (
               <TicketCard key={t.id} ticket={t} onResolve={onResolve} />
             ))}
           </div>
+        ) : loading ? (
+          <p className="text-[11.5px] leading-relaxed text-muted-foreground">Cargando acciones…</p>
         ) : (
           <div className="rounded-lg border border-dashed border-border px-[13px] py-3 text-[12.5px] leading-relaxed text-muted-foreground">
             No hay acciones abiertas. Crea un ticket para fijar la próxima.

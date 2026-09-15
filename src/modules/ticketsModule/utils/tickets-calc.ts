@@ -2,8 +2,9 @@ import { HOY, diasEntre } from "@/modules/walletModule/utils/format";
 import { estadoTicket, resueltoTarde } from "@/modules/walletModule/utils/group-detail";
 import type { ITicketRow, TicketCardId, TicketFilter, TicketLaneId } from "../types";
 
-/** Días de aquí a la fecha de resolución; negativo si ya pasó. */
-export const diasAlLimite = (r: ITicketRow): number => diasEntre(HOY, r.ticket.deadline);
+/** Días de aquí a la fecha de resolución; negativo si ya pasó. Sin fecha, nunca urge. */
+export const diasAlLimite = (r: ITicketRow): number =>
+  r.ticket.deadline ? diasEntre(HOY, r.ticket.deadline) : Infinity;
 
 const abierto = (r: ITicketRow) => r.ticket.estado === "abierto";
 const resuelto = (r: ITicketRow) => r.ticket.estado === "resuelto";
@@ -66,7 +67,7 @@ export function valorDeColumna(r: ITicketRow, col: string): string | number {
     case "resp":
       return r.ticket.responsable.nombre;
     case "fecha":
-      return r.ticket.deadline.getTime();
+      return r.ticket.deadline?.getTime() ?? Infinity;
     // Los abiertos primero dentro de cada estado, como en la referencia.
     case "estado":
       return estadoTicket(r.ticket).estado + (abierto(r) ? "0" : "1");

@@ -134,16 +134,22 @@ export interface IWalletDocument {
   inactivaEl: Date | null;
 }
 
+/** Una acción (ticket) de la novedad, tal como la manda /invoice/incident/:id/actions. */
 export interface IWalletTicket {
+  /** Código visible ("TK-3"): es lo que muestran tarjetas, bitácora y la bandeja. */
   id: string;
+  /** Id numérico de la acción en el API; es el que pide el endpoint de resolver. */
+  actionId: number;
   titulo: string;
   comentario?: string;
   /** Etiqueta de la categoría, ya resuelta contra el catálogo. */
   categoria?: string;
   responsable: IWalletPerson;
-  deadline: Date;
+  /** Null cuando la acción se creó sin fecha límite. */
+  deadline: Date | null;
   estado: "abierto" | "resuelto";
   resueltoEl?: Date;
+  comentarioResolucion?: string;
   adjuntos?: IWalletAttachment[];
 }
 
@@ -199,9 +205,10 @@ export interface IWalletGroupDetail {
    */
   documentos: IWalletDocument[];
   /**
-   * `bitacora` ya no la lee el modal: el seguimiento sale del incidente
-   * (/invoice/incident-detail). Se conserva porque los módulos aún simulados
-   * (tickets) la construyen.
+   * `bitacora` y `tickets` ya no los lee el modal: el seguimiento sale del
+   * incidente (/invoice/incident-detail) y las acciones de
+   * /invoice/incident/:id/actions. Se conservan porque la bandeja de tickets,
+   * aún simulada, los construye.
    */
   bitacora: IWalletTimelineEntry[];
   tickets: IWalletTicket[];

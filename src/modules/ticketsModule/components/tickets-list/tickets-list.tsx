@@ -91,7 +91,9 @@ export default function TicketsList({ rows, onOpenDetail }: TicketsListProps) {
 
                     {/* Abierto: la fecha con semáforo. Resuelto: ya no urge nada. */}
                     <td className="whitespace-nowrap px-3 py-2.5">
-                      {t.estado === "abierto" ? (
+                      {!t.deadline ? (
+                        <span className="text-muted-foreground">Sin fecha</span>
+                      ) : t.estado === "abierto" ? (
                         <StatusChip sev={sevDias(t.deadline, 5).sev}>{fmtD(t.deadline)}</StatusChip>
                       ) : (
                         <span className="tabular-nums text-muted-foreground">

@@ -45,10 +45,14 @@ export default function TicketsView() {
   const lanes: BoardLane<ITicketRow>[] = useMemo(
     () =>
       TICKET_LANES.map((lane) => {
-        // Lo que vence antes, arriba.
+        // Lo que vence antes, arriba; sin fecha, al final.
         const items = visibleRows
           .filter((r) => laneDe(r) === lane.id)
-          .sort((a, b) => a.ticket.deadline.getTime() - b.ticket.deadline.getTime());
+          .sort(
+            (a, b) =>
+              (a.ticket.deadline?.getTime() ?? Infinity) -
+              (b.ticket.deadline?.getTime() ?? Infinity)
+          );
 
         return { id: lane.id, title: lane.nom, items, total: fmtM(sumaMonto(items)) };
       }),
