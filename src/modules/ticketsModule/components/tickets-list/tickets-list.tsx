@@ -5,40 +5,49 @@ import { useMemo, useState } from "react";
 import PersonBadge from "@/modules/walletModule/components/shared/person-badge";
 import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
+import { toPerson } from "@/modules/walletModule/utils/api-adapter";
 import { corto, fmtD, fmtM } from "@/modules/walletModule/utils/format";
-import { estadoTicket, sevDias } from "@/modules/walletModule/utils/group-detail";
 import { nextSort, ordenar } from "@/modules/walletModule/utils/wallet-calc";
-import { valorDeColumna } from "../../utils/tickets-calc";
 import type { SortState } from "@/modules/walletModule/types";
-import type { ITicketRow } from "../../types";
+import { cn } from "@/utils/utils";
+import type { ITicket } from "@/types/tickets/ITickets";
+import {
+  esAbierto,
+  estadoDe,
+  fechaLimite,
+  sevLimite,
+  valorDeColumna
+} from "../../utils/tickets-calc";
 
 interface TicketsListProps {
-  rows: ITicketRow[];
-  onOpenDetail: (clave: string) => void;
+  items: ITicket[];
+  loading: boolean;
+  onOpenDetail: (ticketId: number) => void;
 }
 
 /** Columnas que arrancan ascendentes: las de texto y la fecha (lo más viejo primero). */
 const TEXTUAL_COLS = ["ticket", "cliente", "cat", "resp", "estado", "fecha"];
 
-/** Vista "Lista": la bandeja ordenable, una fila por ticket. */
-export default function TicketsList({ rows, onOpenDetail }: TicketsListProps) {
+/** Vista "Lista": la bandeja ordenable, una fila por ticket. El API no ordena,
+ *  así que el orden es sobre la página actual. */
+export default function TicketsList({ items, loading, onOpenDetail }: TicketsListProps) {
   const [sort, setSort] = useState<SortState>({ col: "fecha", dir: "asc" });
 
   const visibleRows = useMemo(
-    () => ordenar(rows, sort, (r) => valorDeColumna(r, sort.col)),
-    [rows, sort]
+    () => ordenar(items, sort, (t) => valorDeColumna(t, sort.col)),
+    [items, sort]
   );
 
   const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
 
   return (
     <section className="rounded-xl bg-card shadow-sm">
-      <div className="overflow-x-auto">
+      <div className={cn("overflow-x-auto", loading && "pointer-events-none opacity-60")}>
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
               <SortableTh col="ticket" label="Ticket" sort={sort} onSort={onSort} />
-              <SortableTh col="cliente" label="Cliente / novedad" sort={sort} onSort={onSort} />
+              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
               <SortableTh col="monto" label="Monto" align="right" sort={sort} onSort={onSort} />
               <SortableTh col="cat" label="Categoría" sort={sort} onSort={onSort} />
               <SortableTh col="resp" label="Responsable" sort={sort} onSort={onSort} />
@@ -55,50 +64,50 @@ export default function TicketsList({ rows, onOpenDetail }: TicketsListProps) {
                 </td>
               </tr>
             ) : (
-              visibleRows.map((r) => {
-                const t = r.ticket;
-                const e = estadoTicket(t);
+              visibleRows.map((t) => {
+                const e = estadoDe(t);
+                const limite = fechaLimite(t);
 
                 return (
                   <tr
                     key={t.id}
-                    onClick={() => onOpenDetail(r.clave)}
+                    onClick={() => onOpenDetail(t.id)}
                     className="cursor-pointer border-b border-border transition-colors last:border-b-0 hover:bg-muted/60"
                   >
                     <td className="px-3 py-2.5">
-                      <span className="font-mono font-semibold text-foreground">{t.id}</span>
-                      <div className="text-[11.5px] text-muted-foreground">{t.titulo}</div>
+                      <span className="font-mono font-semibold text-foreground">
+                        {t.ticket_code}
+                      </span>
+                      <div className="text-[11.5px] text-muted-foreground">{t.title}</div>
                     </td>
 
                     <td className="px-3 py-2.5 text-foreground">
-                      {corto(r.cliente)}
+                      {corto(t.client_name)}
                       <div className="font-mono text-[11.5px] text-muted-foreground">
-                        {r.novedadId ?? "Grupo sin novedad"}
+                        {t.client_id}
                       </div>
                     </td>
 
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
-                      {fmtM(r.monto)}
+                      {fmtM(t.amount)}
                     </td>
 
                     <td className="px-3 py-2.5 text-[11.5px] text-muted-foreground">
-                      {t.categoria ?? "—"}
+                      {t.category_name ?? "—"}
                     </td>
 
                     <td className="whitespace-nowrap px-3 py-2.5">
-                      <PersonBadge person={t.responsable} />
+                      <PersonBadge person={toPerson(t.assigned_to_name)} />
                     </td>
 
-                    {/* Abierto: la fecha con semáforo. Resuelto: ya no urge nada. */}
+                    {/* Abierto: la fecha con semáforo. Cerrado: ya no urge nada. */}
                     <td className="whitespace-nowrap px-3 py-2.5">
-                      {!t.deadline ? (
+                      {!limite ? (
                         <span className="text-muted-foreground">Sin fecha</span>
-                      ) : t.estado === "abierto" ? (
-                        <StatusChip sev={sevDias(t.deadline, 5).sev}>{fmtD(t.deadline)}</StatusChip>
+                      ) : esAbierto(t) ? (
+                        <StatusChip sev={sevLimite(t)}>{fmtD(limite)}</StatusChip>
                       ) : (
-                        <span className="tabular-nums text-muted-foreground">
-                          {fmtD(t.deadline)}
-                        </span>
+                        <span className="tabular-nums text-muted-foreground">{fmtD(limite)}</span>
                       )}
                     </td>
 

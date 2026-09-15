@@ -1,64 +1,76 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-
-import { fmtM } from "@/modules/walletModule/utils/format";
-import { TICKET_FILTERS, TICKET_KPI_CARDS } from "../../constants";
-import { contarPorFiltro, sumaMonto } from "../../utils/tickets-calc";
-import type { ITicketRow, TicketFilter } from "../../types";
+import type { ITicketCategory } from "@/types/tickets/ITickets";
+import type { IUser } from "@/types/users/IUser";
 
 interface TicketsToolbarProps {
-  /** Universo sin filtrar: alimenta los conteos del select. */
-  rows: ITicketRow[];
-  /** Filas ya filtradas: alimentan el resumen de la derecha. */
-  visibleRows: ITicketRow[];
-  filtro: TicketFilter;
-  onFiltroChange: (filtro: TicketFilter) => void;
+  users: IUser[];
+  categories: ITicketCategory[];
+  assignedToUserId: number | null;
+  categoryId: number | null;
+  onAssignedToChange: (id: number | null) => void;
+  onCategoryChange: (id: number | null) => void;
+  /** Total del universo filtrado, no de la página. */
+  totalRows: number;
 }
 
-/** Select de estado + filtros pendientes + resumen de la vista. */
-export default function TicketsToolbar({
-  rows,
-  visibleRows,
-  filtro,
-  onFiltroChange
-}: TicketsToolbarProps) {
-  const novedades = new Set(visibleRows.map((r) => r.novedadId).filter(Boolean)).size;
+const SELECT_CLASS =
+  "h-12 cursor-pointer rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary";
 
+/** Filtros de responsable y categoría + resumen de la vista. */
+export default function TicketsToolbar({
+  users,
+  categories,
+  assignedToUserId,
+  categoryId,
+  onAssignedToChange,
+  onCategoryChange,
+  totalRows
+}: TicketsToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Comparte estado con las tarjetas KPI: elegir aquí ilumina la tarjeta. */}
+      {/* TODO: filtro por estado (param `status`: OPEN|IN_PROGRESS|COMPLETED|CANCELLED).
+          Pendiente de definir cómo convive con las tarjetas de situación.
+      <select aria-label="Filtrar tickets por estado" className={SELECT_CLASS}>
+        <option value="">Todos los estados</option>
+      </select> */}
+
+      {/* TODO: filtro por coordinador. /tickets aún no recibe un param para él;
+          la lista sale de useIncidentListCoordinators (noveltiesModule).
+      <select aria-label="Filtrar tickets por coordinador" className={SELECT_CLASS}>
+        <option value="">Todos los coordinadores</option>
+      </select> */}
+
       <select
-        aria-label="Filtrar tickets por estado"
-        value={filtro}
-        onChange={(e) => onFiltroChange(e.target.value as TicketFilter)}
-        className="h-12 cursor-pointer rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
+        aria-label="Filtrar tickets por responsable"
+        value={assignedToUserId ?? ""}
+        onChange={(e) => onAssignedToChange(e.target.value ? Number(e.target.value) : null)}
+        className={SELECT_CLASS}
       >
-        {TICKET_KPI_CARDS.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.label} ({contarPorFiltro(rows, c.id)})
+        <option value="">Todos los responsables</option>
+        {users.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.user_name}
           </option>
         ))}
-        <option value="resueltos">Resueltos ({contarPorFiltro(rows, "resueltos")})</option>
-        <option value="todos">Todos ({rows.length})</option>
       </select>
 
-      {/* TODO: conectar cada chip a un multi-select cuando exista el endpoint de filtros. */}
-      {TICKET_FILTERS.map((f) => (
-        <button
-          key={f.key}
-          type="button"
-          className="inline-flex h-12 items-center gap-2 whitespace-nowrap rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary"
-        >
-          {f.label}
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-        </button>
-      ))}
+      <select
+        aria-label="Filtrar tickets por categoría"
+        value={categoryId ?? ""}
+        onChange={(e) => onCategoryChange(e.target.value ? Number(e.target.value) : null)}
+        className={SELECT_CLASS}
+      >
+        <option value="">Todas las categorías</option>
+        {categories.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
 
       <span className="ml-auto text-[11.5px] text-muted-foreground">
-        {visibleRows.length} {visibleRows.length === 1 ? "ticket" : "tickets"} ·{" "}
-        {fmtM(sumaMonto(visibleRows))} en juego · {novedades}{" "}
-        {novedades === 1 ? "novedad" : "novedades"}
+        {totalRows} {totalRows === 1 ? "ticket" : "tickets"}
       </span>
     </div>
   );

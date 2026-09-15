@@ -1,17 +1,15 @@
-import type { IWalletTicket } from "@/modules/walletModule/types";
+import type { TicketSituation } from "@/types/tickets/ITickets";
 
-/** Un ticket con el contexto del grupo del que cuelga, que es lo que ve la fila. */
-export interface ITicketRow {
-  ticket: IWalletTicket;
-  /** Clave del grupo: es lo que abre el modal de gestión. */
-  clave: string;
-  cliente: string;
-  monto: number;
-  /** null cuando el grupo no es una novedad. */
-  novedadId: string | null;
+/**
+ * Filtros que comparten el listado y las tarjetas de resumen. `situation` sólo
+ * aplica al listado: cada tarjeta ya es una situación.
+ */
+export interface TicketFilters {
+  situation?: TicketSituation | null;
+  assignedToUserId?: number | null;
+  categoryId?: number | null;
+  search?: string;
 }
 
-export type TicketCardId = "abiertos" | "vencidos" | "proximos" | "tarde" | "atiempo";
-export type TicketFilter = TicketCardId | "resueltos" | "todos";
 export type TicketLaneId = "vencidos" | "hoy" | "semana" | "despues" | "ok";
 export type TicketView = "lista" | "tablero";
