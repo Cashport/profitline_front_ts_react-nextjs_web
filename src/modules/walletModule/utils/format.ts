@@ -19,8 +19,8 @@ export const cli = (n: number): string => `${n} ${n === 1 ? "cliente" : "cliente
 export const grp = (n: number): string => `${n} ${n === 1 ? "grupo" : "grupos"}`;
 
 /** Quita el sufijo societario para que el nombre quepa en una celda. */
-export const corto = (n: string): string =>
-  n.replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
+export const corto = (n: string | null | undefined): string =>
+  (n ?? "").replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
 
 export const pct = (part: number, total: number): number => (total ? (part / total) * 100 : 0);
 

@@ -61,6 +61,9 @@ const ESTADO_BY_STATUS_KEY: Record<string, EstadoKey> = {
 export const toEstadoKey = (statusKey: string): EstadoKey =>
   ESTADO_BY_STATUS_KEY[statusKey] ?? "otros";
 
+/** El API a veces manda el nombre del cliente en null; la UI siempre espera texto. */
+const clientName = (nombre: string | null | undefined): string => nombre?.trim() || "Sin nombre";
+
 const emptyCell = (): IWalletMatrixCell => {
   const cell = { total: 0, n: 0 } as IWalletMatrixCell;
   ORDEN_EST.forEach((e) => (cell[e] = 0));
@@ -83,7 +86,7 @@ export const emptySummary = (): IWalletSummary => ({
 export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
   matrix.rows.map((row) => ({
     id: row.clientId,
-    nombre: row.clientName,
+    nombre: clientName(row.clientName),
     nit: row.clientId,
     ejecutivo: row.responsibleName ?? "Sin asignar",
     tramos: TRAMO_BUCKETS.map((bucket) => {
@@ -152,7 +155,7 @@ export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
       // Se prefiere el vocabulario del módulo sobre el nombre crudo del ERP,
       // que llega en mayúsculas ("CONCILIADO") y no es texto de interfaz.
       detalle: g.noveltyType ?? meta.corta,
-      cliente: g.clientName,
+      cliente: clientName(g.clientName),
       facturas: g.invoices,
       monto: g.total,
       tramos: g.byAging ?? TRAMOS.map(() => 0),
@@ -219,7 +222,7 @@ export const toGroupDetail = (
             responsable,
             cerrada: false
           },
-    cliente: { nombre: group.clientName, nit: group.clientId },
+    cliente: { nombre: clientName(group.clientName), nit: group.clientId },
     ejecutivo: responsable ?? SIN_ASIGNAR,
     monto: group.total,
     tramos: group.byAging ?? TRAMOS.map(() => 0),
@@ -293,7 +296,7 @@ export const toIncidentGroupDetail = (
       responsable,
       cerrada: incident.is_closed
     },
-    cliente: { nombre: incident.client, nit: incident.client_id },
+    cliente: { nombre: clientName(incident.client), nit: incident.client_id },
     ejecutivo: responsable ?? SIN_ASIGNAR,
     monto: incident.actual_amount,
     tramos: base?.tramos ?? TRAMOS.map(() => 0),

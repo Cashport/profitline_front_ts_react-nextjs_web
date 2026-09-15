@@ -57,6 +57,32 @@ export interface INoveltyStatus {
   sort_order: number;
 }
 
+/** GET /invoice/incident/motives. */
+export interface IIncidentMotive {
+  id: number;
+  name: string;
+  order: number;
+}
+
+/**
+ * Valor canonicalizado de un filtro de texto. `canonical` es lo que se muestra
+ * y lo que se envía de vuelta al listado; `raw_values` es sólo informativo.
+ */
+export interface IIncidentListCanonicalFilter {
+  canonical: string;
+  raw_values: string[];
+}
+
+/** GET /invoice/incident-list/filters: catálogo para todos los selects de filtro. */
+export interface IIncidentListFilters {
+  coordinator: IIncidentListCanonicalFilter[];
+  kam: IIncidentListCanonicalFilter[];
+  market: IIncidentListCanonicalFilter[];
+  executive: { id: number; name: string }[];
+  novelty_type: { id: number; name: string }[];
+  novelty_status: INoveltyStatus[];
+}
+
 /** Parámetro `card` del listado: mismo predicado que cada tarjeta KPI. */
 export type IncidentCard = "abiertas" | "vencidas" | "frias" | "limite" | "sinresp";
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination } from "antd";
 
 import ProfitLoader from "@/components/ui/profit-loader";
+import { useDebounce } from "@/hooks/useDeabouce";
 import GroupDetailModal from "@/modules/walletModule/components/group-detail-modal/group-detail-modal";
 import { nextSort } from "@/modules/walletModule/utils/wallet-calc";
 import type { SortState } from "@/modules/walletModule/types";
@@ -14,11 +15,11 @@ import NoveltiesHeader from "../../components/novelties-header/novelties-header"
 import NoveltiesKpiCards from "../../components/novelties-kpi-cards/novelties-kpi-cards";
 import NoveltiesList from "../../components/novelties-list/novelties-list";
 import NoveltiesToolbar from "../../components/novelties-toolbar/novelties-toolbar";
+import { EMPTY_NOVELTIES_FILTERS } from "../../constants";
 import { useIncidentList } from "../../hooks/useIncidentList";
-import { useIncidentListCoordinators } from "../../hooks/useIncidentListCoordinators";
 import { useIncidentListKpis } from "../../hooks/useIncidentListKpis";
 import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
-import type { NoveltyView } from "../../types";
+import type { INoveltiesFilters, NoveltyView } from "../../types";
 
 const VISTAS: { key: NoveltyView; label: string }[] = [
   { key: "lista", label: "Lista" },
@@ -26,6 +27,9 @@ const VISTAS: { key: NoveltyView; label: string }[] = [
 ];
 
 const PAGE_SIZE = 20;
+
+/** Espera tras la última tecla antes de consultar el listado. */
+const SEARCH_DEBOUNCE_MS = 400;
 
 /** Columnas de texto arrancan ascendentes; las numéricas, descendentes. */
 const TEXTUAL_COLS: IncidentSortBy[] = [
@@ -39,8 +43,10 @@ const TEXTUAL_COLS: IncidentSortBy[] = [
 
 export default function NoveltiesView() {
   const [card, setCard] = useState<IncidentCard | null>("abiertas");
-  const [statusId, setStatusId] = useState<number | null>(null);
-  const [coordinator, setCoordinator] = useState<string | null>(null);
+  const [filters, setFilters] = useState<INoveltiesFilters>(EMPTY_NOVELTIES_FILTERS);
+  // Al listado sólo entra la versión con debounce; el input muestra la cruda.
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE_MS);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState>({ col: "next_ticket_date", dir: "asc" });
   const [vista, setVista] = useState<NoveltyView>("lista");
@@ -48,16 +54,23 @@ export default function NoveltiesView() {
   const [openNovelty, setOpenNovelty] = useState<number | null>(null);
 
   const { data: kpis } = useIncidentListKpis();
+  // El tablero agrupa por estado, así que sigue necesitando el catálogo.
   const { statuses } = useNoveltyStatuses();
-  const { coordinators } = useIncidentListCoordinators();
   const { items, summary, pagination, fetchedAt, isLoading, error } = useIncidentList({
     page,
     limit: PAGE_SIZE,
     sortBy: sort.col as IncidentSortBy,
     sortDir: sort.dir as IncidentSortDir,
     card,
-    noveltyStatusId: statusId,
-    coordinator
+    noveltyStatusId: filters.novelty_status_id,
+    motiveId: filters.motive_id,
+    coordinator: filters.coordinator,
+    kam: filters.kam,
+    market: filters.market,
+    executiveId: filters.executive_id,
+    search: debouncedSearch,
+    dateFrom: filters.date_from,
+    dateTo: filters.date_to
   });
 
   // Cualquier cambio de filtro vuelve a la primera página.
@@ -65,14 +78,13 @@ export default function NoveltiesView() {
     setCard(next);
     setPage(1);
   };
-  const handleStatusChange = (next: number | null) => {
-    setStatusId(next);
+  const handleFiltersChange = (next: INoveltiesFilters) => {
+    setFilters(next);
     setPage(1);
   };
-  const handleCoordinatorChange = (next: string | null) => {
-    setCoordinator(next);
+  useEffect(() => {
     setPage(1);
-  };
+  }, [debouncedSearch]);
   const handleSort = (col: string) => {
     setSort((s) => nextSort(s, col, TEXTUAL_COLS));
     setPage(1);
@@ -84,7 +96,13 @@ export default function NoveltiesView() {
 
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
-      <NoveltiesHeader fetchedAt={fetchedAt} />
+      <NoveltiesHeader
+        fetchedAt={fetchedAt}
+        search={search}
+        onSearchChange={setSearch}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+      />
 
       <div className="flex flex-wrap items-end gap-3.5">
         <h2 className="text-lg font-semibold text-foreground">Bandeja de novedades</h2>
@@ -109,16 +127,7 @@ export default function NoveltiesView() {
         </div>
       </div>
 
-      <NoveltiesToolbar
-        statuses={statuses}
-        coordinators={coordinators}
-        statusId={statusId}
-        coordinator={coordinator}
-        onStatusChange={handleStatusChange}
-        onCoordinatorChange={handleCoordinatorChange}
-        totalRows={pagination.totalRows}
-        summary={summary}
-      />
+      <NoveltiesToolbar totalRows={pagination.totalRows} summary={summary} />
       <NoveltiesKpiCards kpis={kpis} selected={card} onSelect={handleCardChange} />
 
       {primeraCarga ? (
