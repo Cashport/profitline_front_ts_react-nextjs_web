@@ -3,6 +3,7 @@
 import { useMemo, useState, type KeyboardEvent } from "react";
 import { Pagination } from "antd";
 
+import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
 import { cn } from "@/utils/utils";
 import { TRAMOS } from "../../constants";
@@ -16,7 +17,7 @@ import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "
 
 interface ControlMatrixProps {
   rows: IWalletClientRow[];
-  /** Texto de búsqueda actual. Por ahora es sólo visual: no consulta nada. */
+  /** Texto de búsqueda actual. La resuelve el servidor sobre la foto completa. */
   search: string;
   // eslint-disable-next-line no-unused-vars
   onSearchChange: (value: string) => void;
@@ -56,10 +57,9 @@ export default function ControlMatrix({
 }: ControlMatrixProps) {
   const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
 
-  // La búsqueda no filtra: hoy los dos buscadores son sólo interfaz. Tampoco
-  // debería filtrarse aquí cuando se reconecten —la tabla sólo tiene la página
-  // cargada, 15 de miles de clientes, y daría "sin resultados" para clientes
-  // que sí existen—; la resuelve el servidor sobre la foto completa.
+  // La búsqueda no se filtra aquí: la tabla sólo tiene la página cargada, 15
+  // de miles de clientes, y daría "sin resultados" para clientes que sí
+  // existen. La resuelve el servidor sobre la foto completa.
   const visibleRows = useMemo(() => {
     // Con una celda elegida la tabla se pliega a esa fila. Es sólo visual —no
     // consulta nada— y sólo aplica si el cliente sigue en la página: tras una
@@ -97,13 +97,13 @@ export default function ControlMatrix({
         </div>
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
-        <div className="ml-auto w-full max-w-[400px]">
-          {/* <UiSearchInput
+        <div className="ml-auto w-full max-w-[270px]">
+          <UiSearchInput
             id="wallet-matrix-search"
             placeholder="Buscar cliente, NIT, factura o ejecutivo…"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-          /> */}
+          />
           <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
             {loading
               ? "Actualizando…"
@@ -112,7 +112,19 @@ export default function ControlMatrix({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mientras carga, la tabla anterior sigue debajo (keepPreviousData) y el
+          overlay bloquea los clics para que no se elija una celda de una foto
+          que está por cambiar. */}
+      <div className="relative overflow-x-auto">
+        {loading && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center bg-card/70"
+            role="status"
+            aria-live="polite"
+          >
+            <ProfitLoader size="small" />
+          </div>
+        )}
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>

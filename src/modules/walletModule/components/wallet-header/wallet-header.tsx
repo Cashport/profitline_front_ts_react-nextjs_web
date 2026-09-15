@@ -2,14 +2,18 @@
 
 import UiSearchInput from "@/components/ui/search-input";
 import { FECHA_CORTE_PLACEHOLDER } from "../../constants";
-import WalletFilterModal from "../wallet-filter-modal/wallet-filter-modal";
+import ModalFilterMatrix from "../modal-filter-matrix/modal-filter-matrix";
 import WalletThemeToggle from "../wallet-theme-toggle/wallet-theme-toggle";
+import type { IWalletMatrixModalFilters } from "../../types";
 
 interface WalletHeaderProps {
   /** Búsqueda actual. Se comparte con el buscador de la matriz para que los
    *  dos muestren siempre lo mismo y no se contradigan. */
   search?: string;
   onSearchChange: (value: string) => void;
+  /** Filtros confirmados en el modal. */
+  filters: IWalletMatrixModalFilters;
+  onFiltersChange: (next: IWalletMatrixModalFilters) => void;
   /** Fin de la última corrida del worker; null mientras no hay foto. */
   lastUpdatedAt?: string | null;
   /** Fecha contra la que se calcularon las edades de esta consulta. */
@@ -41,6 +45,8 @@ const formatCorte = (value?: string | null) =>
 export default function WalletHeader({
   search,
   onSearchChange,
+  filters,
+  onFiltersChange,
   lastUpdatedAt,
   cutoffDate,
   projected,
@@ -106,7 +112,7 @@ export default function WalletHeader({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
         /> */}
-        <WalletFilterModal />
+        <ModalFilterMatrix value={filters} onChange={onFiltersChange} />
         <WalletThemeToggle />
       </div>
     </header>

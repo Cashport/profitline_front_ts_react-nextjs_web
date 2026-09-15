@@ -1,4 +1,4 @@
-import { EstadoKey, Sev } from "./types";
+import { EstadoKey, IWalletMatrixModalFilters, Sev } from "./types";
 
 export const TRAMOS = [
   { i: 0, id: "corriente", label: "Corriente", short: "Corriente" },
@@ -137,11 +137,32 @@ export const CATEGORIAS = [
   { value: "logistica", label: "Reclamación a logística" }
 ];
 
-/** Filtros de la barra superior. Sin opciones todavía: la data llega con el API. */
-export const WALLET_FILTERS = [
-  { key: "coordinadores", label: "Todos los coordinadores" },
-  { key: "ejecutivos", label: "Todos los ejecutivos" },
-  { key: "kam", label: "Todos los KAM" },
-  { key: "tiposNovedad", label: "Todos los tipos de novedad" },
-  { key: "estados", label: "Todos los estados" }
+export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
+  status: [],
+  noveltyType: [],
+  coordinator: null,
+  market: null,
+  zones: [],
+  lines: [],
+  sublines: [],
+  channels: [],
+  holdings: [],
+  clientGroup: []
+};
+
+/**
+ * statusKey de factura que acepta el filtro `status` de la matriz. No hay
+ * endpoint de catálogo: son las claves que el API manda en cada celda.
+ */
+export const MATRIX_STATUS_OPTIONS: { id: string; name: string }[] = [
+  { id: "CONCILIADO", name: "Conciliado" },
+  { id: "CON_NOVEDAD", name: "Con novedad" },
+  { id: "SIN_CONCILIAR", name: "Sin conciliar" },
+  { id: "SALDO", name: "Saldo" },
+  { id: "SALDO_FACTURA", name: "Saldo de factura" },
+  { id: "GLOSADO", name: "Glosado" },
+  { id: "DEVOLUCION", name: "Devolución" },
+  { id: "VENCIDA", name: "Vencida" },
+  { id: "CORRIENTE", name: "Corriente" },
+  { id: "PAGADA", name: "Pagada" }
 ];

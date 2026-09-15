@@ -7,14 +7,14 @@ import {
   useWalletMatrixGroups,
   useWalletMatrixStatus
 } from "@/hooks/useWalletMatrix";
-import { refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { buildMatrixQuery, refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
 import { useWalletMatrixSocket } from "@/context/WalletMatrixSocketContext";
 import { useMessageApi } from "@/context/MessageContext";
 
 import ControlMatrix from "../../components/control-matrix/control-matrix";
 import GroupDetailModal from "../../components/group-detail-modal/group-detail-modal";
 import InvoiceGroups from "../../components/invoice-groups/invoice-groups";
-import WalletFilters from "../../components/wallet-filters/wallet-filters";
 import WalletHeader from "../../components/wallet-header/wallet-header";
 import WalletStatCards from "../../components/wallet-stat-cards/wallet-stat-cards";
 import {
@@ -32,11 +32,15 @@ import {
   toSummary
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
+import { EMPTY_MATRIX_MODAL_FILTERS } from "../../constants";
 
-import type { IWalletDrilldown } from "../../types";
+import type { IWalletDrilldown, IWalletMatrixModalFilters } from "../../types";
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
 
 const PAGE_SIZE = 15;
+
+/** Espera tras la última tecla antes de consultar la matriz. */
+const SEARCH_DEBOUNCE_MS = 400;
 
 /** Máximo que se espera a una corrida antes de devolver el botón al usuario. */
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
@@ -46,10 +50,13 @@ export default function WalletView() {
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
   // Los dos buscadores —el de la barra superior y el de la matriz— comparten
-  // este estado, pero por ahora no consultan nada: quedan sólo como interfaz.
-  // Reconectarlos es volver a poner `search` en `filters`; el endpoint de la
-  // matriz sigue soportándolo, el de grupos no.
+  // este estado; a la consulta sólo entra la versión con debounce. El endpoint
+  // de grupos no lo soporta.
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE_MS);
+  const [modalFilters, setModalFilters] = useState<IWalletMatrixModalFilters>(
+    EMPTY_MATRIX_MODAL_FILTERS
+  );
   const [calculateEndMonth, setCalculateEndMonth] = useState(false);
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
@@ -73,7 +80,10 @@ export default function WalletView() {
   // Celda o cliente seleccionado en la matriz. Acota los grupos de abajo.
   const [drilldown, setDrilldown] = useState<IWalletDrilldown | null>(null);
 
-  const filters: IWalletMatrixFilters = useMemo(() => ({ calculateEndMonth }), [calculateEndMonth]);
+  const filters: IWalletMatrixFilters = useMemo(
+    () => ({ ...modalFilters, search: debouncedSearch, calculateEndMonth }),
+    [modalFilters, debouncedSearch, calculateEndMonth]
+  );
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, page, PAGE_SIZE);
   // El acotado lo resuelve el servidor: la página sólo tiene 15 clientes, así
@@ -180,13 +190,15 @@ export default function WalletView() {
     }
   };
 
-  // Al cambiar la proyección, la celda elegida deja de tener sentido: las
-  // edades se recalculan y la cartera se mueve de tramo. La página vuelve a la
-  // primera por lo mismo: el orden de los clientes ya no es el que era.
+  // Cuando cambia la consulta (filtros, búsqueda o proyección) la celda
+  // elegida deja de tener sentido y la página vuelve a la primera: el conjunto
+  // y el orden de los clientes ya no son los que eran. Se observa la query
+  // serializada, que no incluye la página, así que paginar no dispara nada.
+  const query = buildMatrixQuery(filters);
   useEffect(() => {
     setDrilldown(null);
     setPage(1);
-  }, [calculateEndMonth]);
+  }, [query]);
 
   // Al cambiar de página el cliente elegido ya no está en la tabla, así que la
   // selección se suelta: si no, los grupos de abajo quedarían acotados a un
@@ -240,6 +252,8 @@ export default function WalletView() {
       <WalletHeader
         search={search}
         onSearchChange={setSearch}
+        filters={modalFilters}
+        onFiltersChange={setModalFilters}
         lastUpdatedAt={matrix?.snapshot?.lastUpdatedAt}
         cutoffDate={matrix?.cutoff?.date}
         projected={calculateEndMonth}
@@ -247,8 +261,6 @@ export default function WalletView() {
         onRefresh={handleRefresh}
         onToggleProjection={setCalculateEndMonth}
       />
-
-      {/* <WalletFilters summary={summary} /> */}
 
       {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
 

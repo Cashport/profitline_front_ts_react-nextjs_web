@@ -4,41 +4,46 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { IWalletMatrixFilters, IWalletMatrixStatus } from "@/types/portfolios/IWalletMatrix";
 
 /**
- * Serializa los filtros a query string. Hoy sólo lo usa /portfolio/matrix.
+ * Serializa los filtros a query string. Sólo lo usa /portfolio/matrix.
  *
  * /portfolio/matrix/groups NO pasa por aquí: acepta únicamente runId, clientId,
  * aging y calculateEndMonth, y arma su propia query en el hook. Mandarle estos
  * filtros no acotaba nada y metía ruido en la cache key de SWR.
  *
- * `search` se sigue serializando aunque los buscadores estén desconectados: el
- * endpoint de la matriz lo soporta, así que reconectarlos es volver a poblar
- * `filters.search` en la vista.
+ * Sólo se serializa lo que tiene valor; la vista también usa el resultado como
+ * disparador para volver a la primera página cuando cambia la consulta.
  */
 export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
-  if (!filters) return "";
-
-  const params: string[] = [];
+  // URLSearchParams codifica espacios y tildes de los valores canónicos
+  // ("Cristina Osorio", "Jurídico"); la coma de las listas también viaja
+  // codificada y el backend la parte tras decodificar.
+  const params = new URLSearchParams();
   const list = (key: string, value?: Array<string | number>) => {
-    if (value?.length) params.push(`${key}=${value.join(",")}`);
+    if (value?.length) params.set(key, value.join(","));
+  };
+  const single = (key: string, value?: string | null) => {
+    const text = value?.trim();
+    if (text) params.set(key, text);
   };
 
-  list("clients", filters.clients);
-  list("status", filters.status);
-  list("novelty_type", filters.noveltyType);
-  list("executive", filters.executive);
-  list("kam", filters.kam);
-  list("zones", filters.zones);
-  list("lines", filters.lines);
-  list("sublines", filters.sublines);
-  list("channels", filters.channels);
-  list("holdings", filters.holdings);
-  list("client_group", filters.clientGroup);
-
-  if (filters.search) params.push(`search=${encodeURIComponent(filters.search)}`);
+  list("clients", filters?.clients);
+  list("status", filters?.status);
+  list("novelty_type", filters?.noveltyType);
+  list("executive", filters?.executive);
+  list("kam", filters?.kam);
+  list("zones", filters?.zones);
+  list("lines", filters?.lines);
+  list("sublines", filters?.sublines);
+  list("channels", filters?.channels);
+  list("holdings", filters?.holdings);
+  list("client_group", filters?.clientGroup);
+  single("coordinator", filters?.coordinator);
+  single("market", filters?.market);
+  single("search", filters?.search);
   // Siempre explícito: el backend lo espera como indicador 0/1.
-  params.push(`calculateEndMonth=${filters.calculateEndMonth ? 1 : 0}`);
+  params.set("calculateEndMonth", filters?.calculateEndMonth ? "1" : "0");
 
-  return params.join("&");
+  return params.toString();
 };
 
 /**
@@ -58,11 +63,7 @@ export const refreshWalletMatrix = async (): Promise<
   return response;
 };
 
-export const getWalletMatrixStatus = async (): Promise<
-  GenericResponse<IWalletMatrixStatus>
-> => {
-  const response: GenericResponse<IWalletMatrixStatus> = await API.get(
-    `/portfolio/matrix/status`
-  );
+export const getWalletMatrixStatus = async (): Promise<GenericResponse<IWalletMatrixStatus>> => {
+  const response: GenericResponse<IWalletMatrixStatus> = await API.get(`/portfolio/matrix/status`);
   return response;
 };

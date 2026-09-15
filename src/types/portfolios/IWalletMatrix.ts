@@ -6,14 +6,7 @@
  * fecha del corte, y por eso la pantalla debe mostrarla.
  */
 
-export const AGING_BUCKETS = [
-  "corriente",
-  "1-30",
-  "31-60",
-  "61-90",
-  "91-120",
-  "+120"
-] as const;
+export const AGING_BUCKETS = ["corriente", "1-30", "31-60", "61-90", "91-120", "+120"] as const;
 
 export type AgingBucket = (typeof AGING_BUCKETS)[number];
 
@@ -171,16 +164,19 @@ export interface IWalletMatrixStatus {
 }
 
 /**
- * Filtros de la pantalla.
+ * Query de GET /portfolio/matrix. Las listas viajan separadas por coma.
  *
- * El mismo objeto alimenta matriz, detalle y grupos. Es lo que garantiza
- * que al hacer clic en una celda el detalle sume exactamente lo que la
- * celda muestra, incluso con filtros puestos.
+ * /portfolio/matrix/groups no lo usa: acepta sólo runId, clientId, aging y
+ * calculateEndMonth, y arma su propia query en el hook.
  */
 export interface IWalletMatrixFilters {
+  /** NITs de cliente. */
   clients?: string[];
+  /** statusKey de factura (CONCILIADO, CON_NOVEDAD, …). */
   status?: string[];
-  noveltyType?: string[];
+  /** Ids de invoice_incident_motive. */
+  noveltyType?: number[];
+  /** Correos del ejecutivo responsable. */
   executive?: string[];
   kam?: number[];
   zones?: number[];
@@ -189,6 +185,10 @@ export interface IWalletMatrixFilters {
   channels?: number[];
   holdings?: number[];
   clientGroup?: number[];
+  /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
+  coordinator?: string | null;
+  market?: string | null;
+  /** Texto libre: cliente, NIT o responsable. */
   search?: string;
   /** Proyecta las edades al último día del mes en curso. */
   calculateEndMonth?: boolean;
