@@ -143,6 +143,8 @@ export type WalletDocumentInactiveReason = "PAID" | "MANUALLY_REMOVED" | "CANCEL
  */
 export interface IWalletDocument {
   id: string;
+  /** `document_id` crudo: es el que reciben los endpoints de novedades. */
+  documentId: number;
   /** Número del ERP o, si no hay, el id interno. */
   doc: string;
   tipo: WalletDocumentType;

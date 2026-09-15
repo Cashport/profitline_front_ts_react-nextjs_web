@@ -8,6 +8,7 @@ import { corto } from "../../utils/format";
 import { slaDe } from "../../utils/group-detail";
 import StatusChip from "../shared/status-chip";
 import GroupActionsMenu from "./group-actions-menu";
+import type { NoveltyModalMode } from "./novelty-drawer";
 import type { IWalletGroupDetail } from "../../types";
 
 interface GroupModalHeaderProps {
@@ -17,13 +18,16 @@ interface GroupModalHeaderProps {
   seleccionadas: number;
   /** Cambia el estado de la novedad; devuelve si quedó aplicado. */
   onChangeStatus: (statusId: number) => Promise<boolean>;
+  /** Abre el panel de crear / editar / vincular novedad. */
+  onOpenNoveltyModal: (mode: NoveltyModalMode) => void;
 }
 
 export default function GroupModalHeader({
   detail,
   onClose,
   seleccionadas,
-  onChangeStatus
+  onChangeStatus,
+  onOpenNoveltyModal
 }: GroupModalHeaderProps) {
   const nov = detail.novedad;
   const meta = EST_META[detail.tipo];
@@ -71,6 +75,7 @@ export default function GroupModalHeader({
           seleccionadas={seleccionadas}
           estadoActualId={nov?.estado.id}
           onChangeStatus={onChangeStatus}
+          onOpenNoveltyModal={onOpenNoveltyModal}
         />
         <button
           type="button"

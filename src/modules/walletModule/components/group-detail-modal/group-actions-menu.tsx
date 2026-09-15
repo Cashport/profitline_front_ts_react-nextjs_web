@@ -16,9 +16,7 @@ import {
 import { cn } from "@/utils/utils";
 import GeneralDropdown, { DropdownItem } from "@/components/ui/dropdown/dropdown";
 import { useNoveltyStatuses } from "@/modules/noveltiesModule/hooks/useNoveltyStatuses";
-import ModalCreateUpdateNoveltyAndLinkInvoices, {
-  NoveltyModalMode
-} from "./modal-create-update-novelty-and-link-invoices";
+import type { NoveltyModalMode } from "./novelty-drawer";
 
 interface GroupActionsMenuProps {
   esNovedad: boolean;
@@ -29,6 +27,8 @@ interface GroupActionsMenuProps {
   estadoActualId?: number;
   /** Cambia el estado de la novedad; devuelve si quedó aplicado. */
   onChangeStatus: (statusId: number) => Promise<boolean>;
+  /** Abre el panel de crear / editar / vincular; los paneles los posee el modal. */
+  onOpenNoveltyModal: (mode: NoveltyModalMode) => void;
 }
 
 // Sin color: el popup vive en un portal fuera de .dark/.wallet-scope, así que
@@ -38,16 +38,16 @@ const titulo = (texto: string) => (
 );
 
 /** Acciones sobre el grupo y la selección.
- *  TODO: conectar el `onClick` de cada ítem cuando existan los endpoints de novedades. */
+ *  TODO: conectar "Resolver" cuando exista el endpoint. */
 export default function GroupActionsMenu({
   esNovedad,
   totalFacturas,
   seleccionadas,
   estadoActualId,
-  onChangeStatus
+  onChangeStatus,
+  onOpenNoveltyModal
 }: GroupActionsMenuProps) {
   const haySeleccion = seleccionadas > 0;
-  const [modalMode, setModalMode] = useState<NoveltyModalMode | null>(null);
 
   // AntD Dropdown sólo soporta submenús laterales, así que la lista de estados
   // se despliega "inline": los estados entran como ítems normales bajo
@@ -106,7 +106,7 @@ export default function GroupActionsMenu({
           key: "editar",
           icon: <Pencil className="h-4 w-4" />,
           label: "Editar datos de la novedad",
-          onClick: () => setModalMode("editar")
+          onClick: () => onOpenNoveltyModal("editar")
         },
         {
           key: "estado",
@@ -137,16 +137,15 @@ export default function GroupActionsMenu({
           key: "crear-novedad",
           icon: <Plus className="h-4 w-4" />,
           label: "Crear novedad",
-          // TODO: volver a exigir `haySeleccion` cuando la selección real de
-          // facturas (pestaña "Facturas") esté conectada; por ahora se deja
-          // habilitado para poder probar el panel.
-          onClick: () => setModalMode("crear")
+          disabled: !haySeleccion,
+          onClick: () => onOpenNoveltyModal("crear")
         },
         {
           key: "vincular",
           icon: <Link2 className="h-4 w-4" />,
           label: "Vincular a una novedad existente",
-          onClick: () => setModalMode("vincular")
+          disabled: !haySeleccion,
+          onClick: () => onOpenNoveltyModal("vincular")
         }
       ]
     }
@@ -181,22 +180,15 @@ export default function GroupActionsMenu({
   ];
 
   return (
-    <>
-      <GeneralDropdown items={items} align="end" open={open} onOpenChange={handleOpenChange}>
-        <button
-          type="button"
-          aria-label="Acciones sobre el grupo"
-          title="Acciones sobre el grupo"
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
-      </GeneralDropdown>
-
-      <ModalCreateUpdateNoveltyAndLinkInvoices
-        mode={modalMode}
-        onClose={() => setModalMode(null)}
-      />
-    </>
+    <GeneralDropdown items={items} align="end" open={open} onOpenChange={handleOpenChange}>
+      <button
+        type="button"
+        aria-label="Acciones sobre el grupo"
+        title="Acciones sobre el grupo"
+        className="flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-border bg-muted text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
+    </GeneralDropdown>
   );
 }
