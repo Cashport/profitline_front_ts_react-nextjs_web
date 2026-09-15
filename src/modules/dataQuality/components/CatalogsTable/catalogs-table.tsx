@@ -7,6 +7,7 @@ import { Button as AntButton, Dropdown, Pagination, Spin, message } from "antd";
 import { DotsThreeVertical, DropboxLogo } from "@phosphor-icons/react";
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
+import { Switch } from "@/modules/chat/ui/switch";
 import UiSearchInput from "@/components/ui/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import {
@@ -109,6 +110,19 @@ export function CatalogsTable() {
     }
   };
 
+  const handleToggleExclusion = async (item: IGetCatalogs, excluded: number) => {
+    setIsLoadingAction(true);
+    try {
+      await editCatalog(item.id, { excluded });
+      mutate();
+      message.success(excluded ? "Producto excluido exitosamente" : "Producto incluido exitosamente");
+    } catch (error) {
+      message.error("Error al actualizar la exclusión del producto");
+    } finally {
+      setIsLoadingAction(false);
+    }
+  };
+
   const handleDownloadCatalog = async () => {
     setIsDownloadCatalogLoading(true);
     const hide = message.open({
@@ -174,7 +188,8 @@ export function CatalogsTable() {
       product_type: Number(data.product_type),
       type_vol: Number(data.type_vol),
       material_code: Number(data.material_code),
-      factor: data.factor
+      factor: data.factor,
+      excluded: data.excluded ? 1 : 0
     };
     setIsLoadingAction(true);
     try {
@@ -247,6 +262,7 @@ export function CatalogsTable() {
               <TableHead style={{ color: "#141414" }}>GMN</TableHead>
               <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
               <TableHead style={{ color: "#141414" }}>Factor</TableHead>
+              <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
               <TableHead style={{ color: "#141414" }}>Estado</TableHead>
               <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
               <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
@@ -276,6 +292,18 @@ export function CatalogsTable() {
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{item.factor}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={item.excluded === 1}
+                      disabled={isLoadingAction}
+                      onCheckedChange={(checked) => handleToggleExclusion(item, checked ? 1 : 0)}
+                    />
+                    <span style={{ color: item.excluded === 1 ? "#cf1322" : "#141414" }}>
+                      {item.excluded === 1 ? "Excluido" : "Incluido"}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell>{getStatusBadge(item.status)}</TableCell>
                 <TableCell>

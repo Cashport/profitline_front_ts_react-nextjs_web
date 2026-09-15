@@ -352,6 +352,7 @@ export interface IGetCatalogs {
   material_code: string | null;
   material_name: string | null;
   factor: number;
+  excluded: number;
 }
 
 export interface ICatalogMaterial {
@@ -375,6 +376,7 @@ export interface ICreateCatalogRequest {
   type_vol: number;
   material_code: number;
   factor: number;
+  excluded?: number;
 }
 
 export interface IAlertFilterCountry {

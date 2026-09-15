@@ -263,7 +263,7 @@ export const createCatalog = async (catalogData: ICreateCatalogRequest): Promise
 
 export const editCatalog = async (
   catalogId: number,
-  catalogData: ICreateCatalogRequest
+  catalogData: Partial<ICreateCatalogRequest>
 ): Promise<any> => {
   try {
     const response: GenericResponse<any> = await API.put(

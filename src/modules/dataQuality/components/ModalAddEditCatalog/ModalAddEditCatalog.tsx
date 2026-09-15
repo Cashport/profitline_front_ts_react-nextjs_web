@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/modules/chat/ui/button";
 import { Input } from "@/modules/chat/ui/input";
 import { Label } from "@/modules/chat/ui/label";
+import { Switch } from "@/modules/chat/ui/switch";
 import Select from "@/modules/dataQuality/components/atoms/select/Select";
 
 import {
@@ -37,7 +38,8 @@ export const catalogFormSchema = yup.object().shape({
     .number()
     .typeError("El factor debe ser un número")
     .required("El factor es requerido")
-    .positive("El factor debe ser positivo")
+    .positive("El factor debe ser positivo"),
+  excluded: yup.boolean().default(false)
 });
 
 export type CatalogFormData = yup.InferType<typeof catalogFormSchema>;
@@ -48,7 +50,8 @@ const INITIAL_VALUES: CatalogFormData = {
   material_code: "",
   product_type: "",
   type_vol: "",
-  factor: undefined as unknown as number
+  factor: undefined as unknown as number,
+  excluded: false
 };
 
 interface Props {
@@ -100,7 +103,8 @@ export default function ModalAddEditCatalog({
         material_code: String(catalogData.material_id),
         product_type: String(catalogData.product_type_id),
         type_vol: String(catalogData.type_vol_id),
-        factor: catalogData.factor
+        factor: catalogData.factor,
+        excluded: catalogData.excluded === 1
       });
     }
     if (!isOpen) {
@@ -317,6 +321,29 @@ export default function ModalAddEditCatalog({
             {errors.factor && (
               <span style={{ color: "#ff4d4f", fontSize: "12px" }}>{errors.factor.message}</span>
             )}
+          </div>
+
+          {/* Campo 7: Exclusión */}
+          <div className="grid gap-2">
+            <Label htmlFor="excluded" style={{ color: "#141414" }}>
+              Exclusión
+            </Label>
+            <Controller
+              name="excluded"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="excluded"
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <span style={{ color: field.value ? "#cf1322" : "#141414" }}>
+                    {field.value ? "Excluido" : "Incluido"}
+                  </span>
+                </div>
+              )}
+            />
           </div>
         </div>
 
