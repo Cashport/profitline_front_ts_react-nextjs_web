@@ -19,7 +19,11 @@ interface UseIncidentListParams {
   noveltyStatusId?: number | null;
   motiveId?: number | null;
   assignedTo?: number | null;
+  /** coordinator, kam y market: valores canónicos de /incident-list/filters. */
   coordinator?: string | null;
+  kam?: string | null;
+  market?: string | null;
+  executiveId?: number | null;
   search?: string;
   dateFrom?: string | null;
   dateTo?: string | null;
@@ -35,6 +39,9 @@ export const useIncidentList = ({
   motiveId = null,
   assignedTo = null,
   coordinator = null,
+  kam = null,
+  market = null,
+  executiveId = null,
   search = "",
   dateFrom = null,
   dateTo = null
@@ -50,6 +57,9 @@ export const useIncidentList = ({
   if (motiveId) params.set("motive_id", String(motiveId));
   if (assignedTo) params.set("assigned_to", String(assignedTo));
   if (coordinator) params.set("coordinator", coordinator);
+  if (kam) params.set("kam", kam);
+  if (market) params.set("market", market);
+  if (executiveId) params.set("executive_id", String(executiveId));
   const term = search.trim();
   if (term) params.set("search", term);
   if (dateFrom) params.set("date_from", dateFrom);

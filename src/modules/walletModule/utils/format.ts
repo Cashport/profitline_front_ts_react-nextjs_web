@@ -19,8 +19,8 @@ export const cli = (n: number): string => `${n} ${n === 1 ? "cliente" : "cliente
 export const grp = (n: number): string => `${n} ${n === 1 ? "grupo" : "grupos"}`;
 
 /** Quita el sufijo societario para que el nombre quepa en una celda. */
-export const corto = (n: string): string =>
-  n.replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
+export const corto = (n: string | null | undefined): string =>
+  (n ?? "").replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
 
 export const pct = (part: number, total: number): number => (total ? (part / total) * 100 : 0);
 
@@ -47,6 +47,18 @@ export const fmtD = (d: Date): string =>
 /** dd/mm/aa */
 export const fmtDc = (d: Date): string =>
   `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)}`;
+
+/** "Actualizado dd/mm/aaaa hh:mm" de la última respuesta; placeholder mientras no llega. */
+export const fmtActualizado = (fecha: Date | null, placeholder: string): string =>
+  fecha
+    ? `Actualizado ${fecha.toLocaleString("es-CO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      })}`
+    : placeholder;
 
 /** Días de `a` a `b`: positivo si `b` es posterior. */
 export const diasEntre = (a: Date, b: Date): number =>

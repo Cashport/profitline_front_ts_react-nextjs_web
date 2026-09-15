@@ -43,7 +43,7 @@ export interface IIncidentDetail {
   invoice_amount_difference: number | null;
   incident_name: string;
   is_open?: boolean;
-  client: string;
+  client: string | null;
   client_id: string;
   client_uuid: string | null;
   responsible_user: string;

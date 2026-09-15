@@ -1,6 +1,6 @@
 import type { Sev } from "@/modules/walletModule/types";
 import type { IIncidentListKpis, IncidentCard } from "@/types/novelties/INovelties";
-import type { NoveltyTipoKey } from "./types";
+import type { INoveltiesFilters, NoveltyTipoKey } from "./types";
 
 interface TipoMeta {
   id: NoveltyTipoKey;
@@ -60,3 +60,17 @@ export const KPI_FIELDS: Record<
   limite: { count: "past_limit_date_count", amount: "past_limit_date_amount" },
   sinresp: { count: "unassigned_count", amount: "unassigned_amount" }
 };
+
+export const EMPTY_NOVELTIES_FILTERS: INoveltiesFilters = {
+  novelty_status_id: null,
+  motive_id: null,
+  coordinator: null,
+  kam: null,
+  market: null,
+  executive_id: null,
+  date_from: null,
+  date_to: null
+};
+
+/** "Fusionada" nunca aparece como tarjeta, así que tampoco se ofrece como filtro. */
+export const NOVELTY_STATUS_FUSIONADA_ID = 14;

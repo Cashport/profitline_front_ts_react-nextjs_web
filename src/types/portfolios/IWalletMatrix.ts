@@ -6,14 +6,7 @@
  * fecha del corte, y por eso la pantalla debe mostrarla.
  */
 
-export const AGING_BUCKETS = [
-  "corriente",
-  "1-30",
-  "31-60",
-  "61-90",
-  "91-120",
-  "+120"
-] as const;
+export const AGING_BUCKETS = ["corriente", "1-30", "31-60", "61-90", "91-120", "+120"] as const;
 
 export type AgingBucket = (typeof AGING_BUCKETS)[number];
 
@@ -64,7 +57,7 @@ export interface IMatrixCell {
 
 export interface IMatrixRow {
   clientId: string;
-  clientName: string;
+  clientName: string | null;
   clientUuid: string | null;
   responsibleName: string | null;
   responsibleEmail: string | null;
@@ -112,7 +105,7 @@ export interface IWalletMatrixDetailRow {
   _id: string;
   source: "INVOICE" | "BALANCE";
   clientId: string;
-  clientName: string;
+  clientName: string | null;
   aging: AgingBucket;
   daysOverdue: number;
   agingDate: string | null;
@@ -147,7 +140,7 @@ export interface IWalletMatrixGroup {
   noveltyType: string | null;
   noveltyStatus: string | null;
   clientId: string;
-  clientName: string;
+  clientName: string | null;
   responsibleName: string | null;
   ticketId: string | null;
   total: number;
@@ -170,17 +163,25 @@ export interface IWalletMatrixStatus {
   isRefreshing: boolean;
 }
 
+/** Columnas por las que ordena el servidor; los tramos usan su AgingBucket. */
+export type WalletMatrixSortBy = "client_name" | AgingBucket | "total" | "overdue_percentage";
+
+export type WalletMatrixSortDir = "asc" | "desc";
+
 /**
- * Filtros de la pantalla.
+ * Query de GET /portfolio/matrix. Las listas viajan separadas por coma.
  *
- * El mismo objeto alimenta matriz, detalle y grupos. Es lo que garantiza
- * que al hacer clic en una celda el detalle sume exactamente lo que la
- * celda muestra, incluso con filtros puestos.
+ * /portfolio/matrix/groups no lo usa: acepta sólo runId, clientId, aging y
+ * calculateEndMonth, y arma su propia query en el hook.
  */
 export interface IWalletMatrixFilters {
+  /** NITs de cliente. */
   clients?: string[];
+  /** statusKey de factura (CONCILIADO, CON_NOVEDAD, …). */
   status?: string[];
-  noveltyType?: string[];
+  /** Ids de invoice_incident_motive. */
+  noveltyType?: number[];
+  /** Correos del ejecutivo responsable. */
   executive?: string[];
   kam?: number[];
   zones?: number[];
@@ -189,7 +190,14 @@ export interface IWalletMatrixFilters {
   channels?: number[];
   holdings?: number[];
   clientGroup?: number[];
+  /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
+  coordinator?: string | null;
+  market?: string | null;
+  /** Texto libre: cliente, NIT o responsable. */
   search?: string;
+  /** Ordena el conjunto completo filtrado, no sólo la página cargada. */
+  sort_by?: WalletMatrixSortBy;
+  sort_dir?: WalletMatrixSortDir;
   /** Proyecta las edades al último día del mes en curso. */
   calculateEndMonth?: boolean;
 }

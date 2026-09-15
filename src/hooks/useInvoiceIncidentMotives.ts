@@ -1,22 +1,17 @@
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
-
-interface Motive {
-  id: number;
-  name: string;
-}
-
-interface GetMotivesResponse {
-  status: number;
-  message: string;
-  data: Motive[];
-}
+import type { GenericResponse } from "@/types/global/IGlobal";
+import type { IIncidentMotive } from "@/types/novelties/INovelties";
 
 export const useInvoiceIncidentMotives = () => {
-  const { data, error } = useSWR<GetMotivesResponse>("/invoice/incident/motives ", fetcher);
+  const { data, error, isLoading } = useSWR<GenericResponse<IIncidentMotive[]>>(
+    "/invoice/incident/motives",
+    fetcher,
+    { revalidateOnFocus: false }
+  );
   return {
     data: data?.data,
-    isLoading: !error && !data,
+    isLoading,
     isError: !!error
   };
 };
