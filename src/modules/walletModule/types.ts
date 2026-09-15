@@ -192,8 +192,8 @@ export interface IWalletNovedad {
   incidentId?: number;
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
-  /** `color` es el hex del catálogo de estados de novedad; si viene, reemplaza al semáforo. */
-  estado: { nom: string; sev: Sev; color?: string };
+  /** `id` y `color` vienen del catálogo de estados de novedad; el color, si viene, reemplaza al semáforo. */
+  estado: { id?: number; nom: string; sev: Sev; color?: string };
   /** Null cuando la novedad viene del API: /portfolio/matrix/groups no manda fechas. */
   compromiso: Date | null;
   limite: Date | null;

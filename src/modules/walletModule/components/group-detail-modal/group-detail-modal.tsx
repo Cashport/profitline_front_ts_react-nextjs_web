@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Modal } from "antd";
+import { Modal, message } from "antd";
 import { Search, X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { ApiError } from "@/utils/api/api";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
 import { useIncidentActions } from "@/hooks/useIncidentActions";
 import {
   addIncidentComment,
   createIncidentAction,
-  resolveIncidentAction
+  resolveIncidentAction,
+  updateIncidentStatus
 } from "@/services/resolveNovelty/resolveNovelty";
 import { useMessageApi } from "@/context/MessageContext";
 import type { ICreateIncidentActionBody } from "@/types/novelties/INovelties";
@@ -185,6 +187,30 @@ function GroupDetailBody({
     }
   };
 
+  // El cambio de estado queda en el historial de la novedad, así que se relee
+  // el incidente (cabecera y seguimiento). Si el backend explica por qué no se
+  // pudo (ApiError), se muestra su mensaje.
+  const handleChangeNoveltyStatus = async (statusId: number): Promise<boolean> => {
+    if (!incidentId) return false;
+    // El menú se cierra al elegir el estado: el loader es el único feedback
+    // hasta que llega la respuesta.
+    const hide = message.open({ type: "loading", content: "Cambiando estado…", duration: 0 });
+    try {
+      await updateIncidentStatus(incidentId, { novelty_status_id: statusId });
+      await mutateIncident();
+      showMessage("success", "Estado actualizado");
+      return true;
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof ApiError && error.message ? error.message : "No se pudo cambiar el estado"
+      );
+      return false;
+    } finally {
+      hide();
+    }
+  };
+
   // Abierto desde la bandeja no hay fila de respaldo: hasta que llegue el
   // incidente no hay nada que pintar más que el estado de carga o el error.
   if (!detail) {
@@ -204,7 +230,12 @@ function GroupDetailBody({
 
   return (
     <div className="wallet-scope flex h-[min(88vh,900px)] flex-col bg-card text-foreground">
-      <GroupModalHeader detail={detail} onClose={onClose} seleccionadas={selected.length} />
+      <GroupModalHeader
+        detail={detail}
+        onClose={onClose}
+        seleccionadas={selected.length}
+        onChangeStatus={handleChangeNoveltyStatus}
+      />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[512px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-muted/40 lg:border-b-0 lg:border-r">

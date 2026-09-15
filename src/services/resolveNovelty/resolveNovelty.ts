@@ -4,7 +4,8 @@ import type { GenericResponse } from "@/types/global/IGlobal";
 import type {
   ICreateIncidentActionBody,
   IIncidentAction,
-  IResolveIncidentActionBody
+  IResolveIncidentActionBody,
+  IUpdateIncidentStatusBody
 } from "@/types/novelties/INovelties";
 
 interface IncidentActionData {
@@ -105,6 +106,19 @@ export const resolveIncidentAction = async (
 ): Promise<GenericResponse<IIncidentAction>> => {
   const response: GenericResponse<IIncidentAction> = await API.patch(
     `${config.API_HOST}/invoice/incident/${incidentId}/actions/${actionId}/resolve`,
+    body
+  );
+
+  return response;
+};
+
+// Cambia el estado de la novedad (catálogo incident_status).
+export const updateIncidentStatus = async (
+  incidentId: number,
+  body: IUpdateIncidentStatusBody
+): Promise<GenericResponse<unknown>> => {
+  const response: GenericResponse<unknown> = await API.patch(
+    `${config.API_HOST}/invoice/incident/${incidentId}/status`,
     body
   );
 

@@ -15,12 +15,15 @@ interface GroupModalHeaderProps {
   onClose: () => void;
   /** Facturas marcadas en la pestaña "Facturas". */
   seleccionadas: number;
+  /** Cambia el estado de la novedad; devuelve si quedó aplicado. */
+  onChangeStatus: (statusId: number) => Promise<boolean>;
 }
 
 export default function GroupModalHeader({
   detail,
   onClose,
-  seleccionadas
+  seleccionadas,
+  onChangeStatus
 }: GroupModalHeaderProps) {
   const nov = detail.novedad;
   const meta = EST_META[detail.tipo];
@@ -66,6 +69,8 @@ export default function GroupModalHeader({
           esNovedad={!!nov}
           totalFacturas={detail.totalFacturas}
           seleccionadas={seleccionadas}
+          estadoActualId={nov?.estado.id}
+          onChangeStatus={onChangeStatus}
         />
         <button
           type="button"

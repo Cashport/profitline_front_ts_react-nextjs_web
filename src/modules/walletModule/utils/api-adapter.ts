@@ -287,6 +287,7 @@ export const toIncidentGroupDetail = (
       incidentId: incident.incident_id,
       tipoNom: incident.incident_name,
       estado: {
+        id: incident.novelty_status_id ?? undefined,
         nom: incident.novelty_status_name ?? incident.status_name,
         sev: EST_META.novedad.chip,
         color: incident.novelty_status_color ?? undefined

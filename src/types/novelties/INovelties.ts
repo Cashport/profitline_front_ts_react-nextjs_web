@@ -137,3 +137,10 @@ export interface ICreateIncidentActionBody {
 export interface IResolveIncidentActionBody {
   resolution_comment?: string;
 }
+
+/** Body de PATCH /invoice/incident/:id/status. `comment` queda en el historial de la novedad. */
+export interface IUpdateIncidentStatusBody {
+  /** Id del catálogo de estados (GET /invoice/novelty-status). */
+  novelty_status_id: number;
+  comment?: string;
+}
