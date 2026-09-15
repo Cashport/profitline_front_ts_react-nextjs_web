@@ -45,7 +45,7 @@ export default function TicketBoardCard({ row, onOpenDetail }: TicketBoardCardPr
       </div>
 
       <div className="mt-[5px] flex items-center gap-2 text-[11px] text-muted-foreground">
-        <span className="tabular-nums">Fecha {fmtD(t.deadline)}</span>
+        <span className="tabular-nums">Fecha {t.deadline ? fmtD(t.deadline) : "—"}</span>
         <span className="ml-auto font-mono">{row.novedadId ?? ""}</span>
       </div>
     </BoardCard>

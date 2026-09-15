@@ -1,17 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Eye } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import { fac, fmtD, fmtFull, fmtM } from "../../utils/format";
-import TramoChip from "../shared/tramo-chip";
-import type { IWalletInvoice } from "../../types";
+import StatusChip from "../shared/status-chip";
+import type { IWalletDocument, WalletDocumentInactiveReason } from "../../types";
 
 interface GroupInvoicesTableProps {
-  invoices: IWalletInvoice[];
-  /** Conteo real del grupo. `invoices` es una muestra y puede venir topada. */
-  totalFacturas: number;
+  documentos: IWalletDocument[];
   query: string;
   selected: string[];
   onSelectedChange: (ids: string[]) => void;
@@ -21,35 +19,56 @@ interface GroupInvoicesTableProps {
 const TH =
   "border-b border-border bg-muted px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
 
-/** Facturas del grupo, con selección y totales de lo que se está viendo. */
+const INACTIVE_REASON_LABEL: Record<WalletDocumentInactiveReason, string> = {
+  PAID: "Pagada",
+  MANUALLY_REMOVED: "Retirada manualmente",
+  CANCELLED: "Anulada",
+  OTHER: "Otro"
+};
+
+const TIPO_LABEL: Record<IWalletDocument["tipo"], string> = {
+  FINANCIAL_RECORD: "Factura",
+  BALANCE: "Saldo"
+};
+
+/** Documentos de la novedad, con selección y totales de lo que se está viendo. */
 export default function GroupInvoicesTable({
-  invoices,
-  totalFacturas,
+  documentos,
   query,
   selected,
   onSelectedChange
 }: GroupInvoicesTableProps) {
-  const todas = useMemo(() => [...invoices].sort((a, b) => b.dias - a.dias), [invoices]);
+  // Las cerradas (pagadas, retiradas…) se ocultan por defecto: siguen en el
+  // histórico pero ya no son cartera.
+  const [verCerradas, setVerCerradas] = useState(false);
 
-  // Sin endpoint de detalle la tabla trae una muestra, no el grupo entero.
-  const esMuestra = invoices.length < totalFacturas;
+  const cerradas = documentos.filter((d) => !d.activa).length;
+
+  const todas = useMemo(
+    () => [...documentos].sort((a, b) => Number(b.activa) - Number(a.activa) || b.saldo - a.saldo),
+    [documentos]
+  );
 
   const visibles = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? todas.filter((f) => f.doc.toLowerCase().includes(q)) : todas;
-  }, [todas, query]);
+    return todas.filter(
+      (d) => (verCerradas || d.activa) && (!q || d.doc.toLowerCase().includes(q))
+    );
+  }, [todas, query, verCerradas]);
 
-  const sumaVista = visibles.reduce((a, f) => a + f.saldo, 0);
-  const vencidoVista = visibles.filter((f) => f.dias > 0).reduce((a, f) => a + f.saldo, 0);
-  const montoSel = invoices.filter((f) => selected.includes(f.id)).reduce((a, f) => a + f.saldo, 0);
+  const sumaVista = visibles.reduce((a, d) => a + d.saldo, 0);
+  const recuperadoVista = visibles.reduce((a, d) => a + (d.saldoInicial - d.saldo), 0);
+  const montoSel = documentos
+    .filter((d) => selected.includes(d.id))
+    .reduce((a, d) => a + d.saldo, 0);
 
-  const todasVisiblesSel = visibles.length > 0 && visibles.every((f) => selected.includes(f.id));
+  const todasVisiblesSel = visibles.length > 0 && visibles.every((d) => selected.includes(d.id));
 
   const toggle = (id: string) =>
     onSelectedChange(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
 
   const toggleAll = (checked: boolean) =>
-    onSelectedChange(checked ? [...new Set([...selected, ...visibles.map((f) => f.id)])] : []);
+    onSelectedChange(checked ? [...new Set([...selected, ...visibles.map((d) => d.id)])] : []);
 
   return (
     <>
@@ -61,7 +80,7 @@ export default function GroupInvoicesTable({
                 <input
                   type="checkbox"
                   aria-label="Seleccionar todo"
-                  className="accent-wallet-nov"
+                  className="accent-wallet-accent"
                   checked={todasVisiblesSel}
                   onChange={(e) => toggleAll(e.target.checked)}
                 />
@@ -70,13 +89,16 @@ export default function GroupInvoicesTable({
                 Factura
               </th>
               <th scope="col" className={TH}>
-                Vence
+                Tipo
               </th>
               <th scope="col" className={TH}>
-                Tramo
+                Estado
               </th>
               <th scope="col" className={cn(TH, "text-right")}>
-                Saldo
+                Saldo inicial
+              </th>
+              <th scope="col" className={cn(TH, "text-right")}>
+                Saldo actual
               </th>
               <th className={cn(TH, "w-10")} />
             </tr>
@@ -85,39 +107,50 @@ export default function GroupInvoicesTable({
           <tbody>
             {visibles.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-9 text-center text-muted-foreground">
+                <td colSpan={7} className="p-9 text-center text-muted-foreground">
                   {todas.length === 0
                     ? "No hay facturas para mostrar."
-                    : "Ninguna factura coincide con la búsqueda."}
+                    : query.trim()
+                      ? "Ninguna factura coincide con la búsqueda."
+                      : "Todas las facturas de la novedad están cerradas."}
                 </td>
               </tr>
             ) : (
-              visibles.map((f) => (
+              visibles.map((d) => (
                 <tr
-                  key={f.id}
+                  key={d.id}
                   className={cn(
                     "border-b border-border last:border-b-0",
-                    selected.includes(f.id) && "bg-wallet-nov/5"
+                    selected.includes(d.id) && "bg-wallet-accent/5",
+                    !d.activa && "text-muted-foreground"
                   )}
                 >
                   <td className="px-3 py-2.5">
                     <input
                       type="checkbox"
-                      aria-label={`Seleccionar ${f.doc}`}
-                      className="accent-wallet-nov"
-                      checked={selected.includes(f.id)}
-                      onChange={() => toggle(f.id)}
+                      aria-label={`Seleccionar ${d.doc}`}
+                      className="accent-wallet-accent"
+                      checked={selected.includes(d.id)}
+                      onChange={() => toggle(d.id)}
                     />
                   </td>
-                  <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{f.doc}</td>
-                  <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-foreground">
-                    {fmtD(f.vence)}
+                  <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{d.doc}</td>
+                  <td className="px-3 py-2.5">{TIPO_LABEL[d.tipo]}</td>
+                  <td className="whitespace-nowrap px-3 py-2.5">
+                    {d.activa ? (
+                      <StatusChip sev="ok">Activa</StatusChip>
+                    ) : (
+                      <StatusChip sev="idle">
+                        {(d.inactivaMotivo && INACTIVE_REASON_LABEL[d.inactivaMotivo]) || "Cerrada"}
+                        {d.inactivaEl && ` · ${fmtD(d.inactivaEl)}`}
+                      </StatusChip>
+                    )}
                   </td>
-                  <td className="px-3 py-2.5">
-                    <TramoChip tramo={f.tramo} />
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
+                    {fmtFull(d.saldoInicial)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
-                    {fmtFull(f.saldo)}
+                    {fmtFull(d.saldo)}
                   </td>
                   <td className="px-3 py-2.5">
                     <button
@@ -136,7 +169,7 @@ export default function GroupInvoicesTable({
 
           <tfoot>
             <tr className="border-t border-border">
-              <th colSpan={3} className="px-3 py-2.5 text-left font-semibold text-foreground">
+              <th colSpan={4} className="px-3 py-2.5 text-left font-semibold text-foreground">
                 Total{query.trim() ? " filtrado" : ""}
               </th>
               <th
@@ -149,20 +182,17 @@ export default function GroupInvoicesTable({
             </tr>
             <tr>
               <th
-                colSpan={3}
+                colSpan={4}
                 className="px-3 pb-2.5 text-left text-[11.5px] font-medium text-muted-foreground"
               >
                 {fac(visibles.length)}
-                {query.trim() ? ` de ${todas.length}` : ""}
-                {esMuestra
-                  ? ` · muestra de ${totalFacturas.toLocaleString("es-CO")} · datos de ejemplo`
-                  : ""}
+                {visibles.length !== todas.length ? ` de ${todas.length}` : ""}
               </th>
               <th
                 colSpan={2}
                 className="whitespace-nowrap px-3 pb-2.5 text-right text-[11.5px] font-medium tabular-nums text-muted-foreground"
               >
-                Vencido {fmtFull(vencidoVista)}
+                Recuperado {fmtFull(recuperadoVista)}
               </th>
               <th />
             </tr>
@@ -170,17 +200,30 @@ export default function GroupInvoicesTable({
         </table>
       </div>
 
-      <div className="flex flex-none items-center justify-end border-t border-border px-5 py-3.5 text-[12.5px] text-muted-foreground">
-        {selected.length ? (
-          <>
-            <b className="font-semibold tabular-nums text-foreground">{selected.length}</b>
-            &nbsp;{selected.length === 1 ? "factura seleccionada" : "facturas seleccionadas"}{" "}
-            ·&nbsp;
-            <b className="font-semibold tabular-nums text-foreground">{fmtM(montoSel)}</b>
-          </>
-        ) : (
-          "Sin facturas seleccionadas"
-        )}
+      <div className="flex flex-none items-center gap-3 border-t border-border px-5 py-3.5 text-[12.5px] text-muted-foreground">
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <input
+            type="checkbox"
+            className="accent-wallet-accent"
+            checked={verCerradas}
+            disabled={cerradas === 0}
+            onChange={(e) => setVerCerradas(e.target.checked)}
+          />
+          Ver cerradas ({cerradas})
+        </label>
+
+        <span className="ml-auto">
+          {selected.length ? (
+            <>
+              <b className="font-semibold tabular-nums text-foreground">{selected.length}</b>
+              &nbsp;{selected.length === 1 ? "factura seleccionada" : "facturas seleccionadas"}{" "}
+              ·&nbsp;
+              <b className="font-semibold tabular-nums text-foreground">{fmtM(montoSel)}</b>
+            </>
+          ) : (
+            "Sin facturas seleccionadas"
+          )}
+        </span>
       </div>
     </>
   );

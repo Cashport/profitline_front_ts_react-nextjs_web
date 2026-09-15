@@ -42,7 +42,7 @@ export interface IIncidentDetail {
   date: string;
   invoice_amount_difference: number | null;
   incident_name: string;
-  is_open: boolean;
+  is_open?: boolean;
   client: string;
   client_id: string;
   client_uuid: string | null;
@@ -54,6 +54,16 @@ export interface IIncidentDetail {
   client_amount: number;
   status: number;
   status_name: string;
+  // Gestión de la novedad (bandeja de novedades): responsable asignado,
+  // próximo ticket, fecha límite, estado del catálogo y última gestión.
+  assigned_to: number | null;
+  assigned_to_name: string | null;
+  next_ticket_date: string | null;
+  limit_date: string | null;
+  novelty_status_id: number | null;
+  novelty_status_name: string | null;
+  novelty_status_color: string | null;
+  last_management_at: string | null;
   // Modelo multi-documento (RN01-RN09): totales sobre TODOS los documentos
   // asociados (initial_*) y solo los activos (actual_*), más el detalle de
   // cada documento (incluye cerrados, para el toggle "Ver cerradas").
@@ -79,7 +89,7 @@ interface UseIncidentDetailProps {
 }
 
 export const useIncidentDetail = (props: UseIncidentDetailProps) => {
-  const { data, isLoading, mutate } = useSWR<IIncidentDetailResponse>(
+  const { data, error, isLoading, mutate } = useSWR<IIncidentDetailResponse>(
     props.incidentId ? `/invoice/incident-detail/${props.incidentId}` : null,
     fetcher,
     {}
@@ -87,6 +97,7 @@ export const useIncidentDetail = (props: UseIncidentDetailProps) => {
 
   return {
     data: data?.data,
+    error,
     isLoading,
     mutate
   };

@@ -176,7 +176,7 @@ function DrawerBody({ mode, onClose }: { mode: NoveltyModalMode; onClose: () => 
                     type="radio"
                     name="novedad-existente"
                     aria-label={`Seleccionar ${n.id}`}
-                    className="accent-wallet-nov"
+                    className="accent-wallet-accent"
                     checked={novedadExistente === n.id}
                     onChange={() => setNovedadExistente(n.id)}
                   />
