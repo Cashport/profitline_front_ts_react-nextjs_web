@@ -80,8 +80,8 @@
 
 /* Wallet (cartera) scoped tokens — estado + tramo colors.
    Surfaces/text/borders come from the tokens above; only these semantic
-   colors are specific to the module. Light values on .wallet-scope,
-   dark values when a .dark ancestor is present. */
+   colors are specific to the module. Declared on .wallet-scope; the tramo
+   and accent tokens get dark values when a .dark ancestor is present. */
 .wallet-scope {
   --wallet-comp: 203 231 30;
   --wallet-pag: 15 163 177;
@@ -115,17 +115,9 @@
   --wallet-seg-edge: rgba(1, 24, 34, 0.14);
 }
 
+/* Los colores de estado (--wallet-comp … --wallet-otros) no cambian entre
+   temas: heredan de .wallet-scope. Sólo se ajustan tramos, tinta y acento. */
 .dark .wallet-scope {
-  --wallet-comp: 203 230 30;
-  --wallet-pag: 34 184 198;
-  --wallet-conc: 90 147 240;
-  --wallet-nov: 255 106 34;
-  --wallet-risk: 167 139 250;
-  --wallet-saldo: 217 164 65;
-  --wallet-glosa: 56 205 255;
-  --wallet-devol: 255 90 140;
-  --wallet-otros: 150 160 170;
-
   --wallet-t0: 42 74 87;
   --wallet-t1: 58 101 119;
   --wallet-t2: 76 130 152;

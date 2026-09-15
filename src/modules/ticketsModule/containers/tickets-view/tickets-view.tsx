@@ -1,67 +1,97 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Pagination } from "antd";
 
 import BoardLanes, { type BoardLane } from "@/components/ui/board-lanes/board-lanes";
-import KpiCards, { type KpiCardItem } from "@/components/ui/kpi-cards/kpi-cards";
-import GroupDetailModal from "@/modules/walletModule/components/group-detail-modal/group-detail-modal";
-import { WALLET_GROUP_DETAILS } from "@/modules/walletModule/mocked-data";
+import KpiCards from "@/components/ui/kpi-cards/kpi-cards";
+import ProfitLoader from "@/components/ui/profit-loader";
+import { useDebounce } from "@/hooks/useDeabouce";
+import { useProjectUsers } from "@/hooks/useProjectUsers";
 import { fmtM } from "@/modules/walletModule/utils/format";
 import { cn } from "@/utils/utils";
+import type { ITicket, TicketSituation } from "@/types/tickets/ITickets";
 import TicketBoardCard from "../../components/ticket-board-card/ticket-board-card";
+import TicketDetailModal from "../../components/ticket-detail-modal/ticket-detail-modal";
 import TicketsHeader from "../../components/tickets-header/tickets-header";
 import TicketsList from "../../components/tickets-list/tickets-list";
 import TicketsToolbar from "../../components/tickets-toolbar/tickets-toolbar";
-import { TICKET_KPI_CARDS, TICKET_LANES } from "../../constants";
-import { TICKET_ROWS } from "../../mocked-data";
-import { TICKET_PREDICATES, filtrarTickets, laneDe, sumaMonto } from "../../utils/tickets-calc";
-import type { ITicketRow, TicketFilter, TicketView } from "../../types";
+import { TICKET_LANES } from "../../constants";
+import { useTicketCategories } from "../../hooks/useTicketCategories";
+import { useTickets } from "../../hooks/useTickets";
+import { useTicketsSummary } from "../../hooks/useTicketsSummary";
+import { diasAlLimite, laneDe, sumaMonto, toKpiCards } from "../../utils/tickets-calc";
+import type { TicketView } from "../../types";
 
 const VISTAS: { key: TicketView; label: string }[] = [
   { key: "lista", label: "Lista" },
   { key: "tablero", label: "Tablero" }
 ];
 
+const PAGE_SIZE = 20;
+
 export default function TicketsView() {
-  // Las tarjetas y el select comparten esta pieza: elegir en uno ilumina el otro.
-  const [filtro, setFiltro] = useState<TicketFilter>("abiertos");
+  // Tarjeta activa = param `situation` del listado; null = todos.
+  const [situation, setSituation] = useState<TicketSituation | null>("pending");
+  const [assignedToUserId, setAssignedToUserId] = useState<number | null>(null);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [vista, setVista] = useState<TicketView>("lista");
-  const [query, setQuery] = useState("");
-  // Clave del grupo abierto; el detalle se resuelve abajo, al renderizar el modal.
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  // Id del ticket abierto en el modal; el modal lo pide a /tickets/:id.
+  const [openTicketId, setOpenTicketId] = useState<number | null>(null);
 
-  const visibleRows = useMemo(() => filtrarTickets(TICKET_ROWS, filtro, query), [filtro, query]);
+  const debouncedSearch = useDebounce(search, 300);
+  const filters = { assignedToUserId, categoryId, search: debouncedSearch };
 
-  const cards: KpiCardItem[] = useMemo(
-    () =>
-      TICKET_KPI_CARDS.map((c) => {
-        // El mismo predicado que filtra las filas, para que el conteo no mienta.
-        const suyos = TICKET_ROWS.filter(TICKET_PREDICATES[c.id]);
-        return { ...c, valor: fmtM(sumaMonto(suyos)), conteo: suyos.length };
-      }),
-    []
-  );
+  const { users } = useProjectUsers();
+  const { categories } = useTicketCategories();
+  const { summary } = useTicketsSummary(filters);
+  const { tickets, pagination, fetchedAt, isLoading, error } = useTickets({
+    page,
+    limit: PAGE_SIZE,
+    situation,
+    ...filters
+  });
 
-  const lanes: BoardLane<ITicketRow>[] = useMemo(
+  // Cualquier cambio de filtro vuelve a la primera página.
+  const handleSituationChange = (id: string) => {
+    setSituation(id === situation ? null : (id as TicketSituation));
+    setPage(1);
+  };
+  const handleAssignedToChange = (next: number | null) => {
+    setAssignedToUserId(next);
+    setPage(1);
+  };
+  const handleCategoryChange = (next: number | null) => {
+    setCategoryId(next);
+    setPage(1);
+  };
+  const handleSearchChange = (next: string) => {
+    setSearch(next);
+    setPage(1);
+  };
+
+  const lanes: BoardLane<ITicket>[] = useMemo(
     () =>
       TICKET_LANES.map((lane) => {
         // Lo que vence antes, arriba; sin fecha, al final.
-        const items = visibleRows
-          .filter((r) => laneDe(r) === lane.id)
-          .sort(
-            (a, b) =>
-              (a.ticket.deadline?.getTime() ?? Infinity) -
-              (b.ticket.deadline?.getTime() ?? Infinity)
-          );
+        const items = (tickets ?? [])
+          .filter((t) => laneDe(t) === lane.id)
+          .sort((a, b) => diasAlLimite(a) - diasAlLimite(b));
 
         return { id: lane.id, title: lane.nom, items, total: fmtM(sumaMonto(items)) };
       }),
-    [visibleRows]
+    [tickets]
   );
+
+  // Sólo la primera carga muestra el loader: después la página anterior se
+  // queda en pantalla (keepPreviousData) y la vista se atenúa.
+  const primeraCarga = !tickets && !error;
 
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
-      <TicketsHeader onSearchChange={setQuery} />
+      <TicketsHeader fetchedAt={fetchedAt} onSearchChange={handleSearchChange} />
 
       <div className="flex flex-wrap items-end gap-3.5">
         <h2 className="text-lg font-semibold text-foreground">Bandeja de tickets</h2>
@@ -87,35 +117,57 @@ export default function TicketsView() {
       </div>
 
       <TicketsToolbar
-        rows={TICKET_ROWS}
-        visibleRows={visibleRows}
-        filtro={filtro}
-        onFiltroChange={setFiltro}
+        users={users}
+        categories={categories}
+        assignedToUserId={assignedToUserId}
+        categoryId={categoryId}
+        onAssignedToChange={handleAssignedToChange}
+        onCategoryChange={handleCategoryChange}
+        totalRows={pagination.totalRows}
       />
       <KpiCards
-        cards={cards}
+        cards={toKpiCards(summary)}
         noun={["ticket", "tickets"]}
-        selected={filtro}
-        onSelect={(id) => setFiltro(id as TicketFilter)}
+        selected={situation}
+        // Volver a pulsar la activa la apaga: sin tarjeta = todos.
+        onSelect={handleSituationChange}
       />
 
-      {vista === "lista" ? (
-        <TicketsList rows={visibleRows} onOpenDetail={setOpenGroup} />
+      {primeraCarga ? (
+        <ProfitLoader size="small" />
+      ) : error ? (
+        <p className="p-9 text-center text-sm text-destructive">
+          {error.message || "No se pudieron cargar los tickets."}
+        </p>
       ) : (
-        <BoardLanes
-          lanes={lanes}
-          renderCard={(r) => (
-            <TicketBoardCard key={r.ticket.id} row={r} onOpenDetail={setOpenGroup} />
+        <>
+          {vista === "lista" ? (
+            <TicketsList items={tickets ?? []} loading={isLoading} onOpenDetail={setOpenTicketId} />
+          ) : (
+            <div className={cn(isLoading && "pointer-events-none opacity-60")}>
+              <BoardLanes
+                lanes={lanes}
+                renderCard={(t) => (
+                  <TicketBoardCard key={t.id} ticket={t} onOpenDetail={setOpenTicketId} />
+                )}
+              />
+            </div>
           )}
-        />
+
+          <Pagination
+            className="self-end"
+            current={page}
+            pageSize={PAGE_SIZE}
+            total={pagination.totalRows}
+            onChange={setPage}
+            showSizeChanger={false}
+            hideOnSinglePage
+            disabled={isLoading}
+          />
+        </>
       )}
 
-      {/* Módulo aún simulado: el detalle se resuelve contra el mismo mapa del
-          que salen las filas (TICKET_ROWS), no contra el API de cartera. */}
-      <GroupDetailModal
-        detail={openGroup ? WALLET_GROUP_DETAILS[openGroup] ?? null : null}
-        onClose={() => setOpenGroup(null)}
-      />
+      <TicketDetailModal ticketId={openTicketId} onClose={() => setOpenTicketId(null)} />
     </div>
   );
 }

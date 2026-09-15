@@ -1,3 +1,5 @@
+import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
+
 /**
  * Estado de un documento dentro de la cartera.
  *
@@ -81,6 +83,23 @@ export interface SortState {
   col: string;
   dir: "asc" | "desc";
 }
+
+/** Lo que posee el modal de filtros; la vista lo mezcla con búsqueda y proyección. */
+export type IWalletMatrixModalFilters = Required<
+  Pick<
+    IWalletMatrixFilters,
+    | "status"
+    | "noveltyType"
+    | "coordinator"
+    | "market"
+    | "zones"
+    | "lines"
+    | "sublines"
+    | "channels"
+    | "holdings"
+    | "clientGroup"
+  >
+>;
 
 /** Selección activa de la matriz. `tramo: null` = todos los tramos del cliente. */
 export interface IWalletDrilldown {
