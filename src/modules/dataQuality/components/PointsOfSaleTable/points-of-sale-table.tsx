@@ -21,7 +21,7 @@ import { CatalogMaterialsActionsModal } from "../CatalogMaterialsActionsModal/Ca
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import {
   deletePointOfSale,
-  downloadPointsOfSaleFile,
+  downloadUnifiedCatalogFile,
   uploadPointsOfSaleFile
 } from "@/services/dataQuality/dataQuality";
 
@@ -48,24 +48,24 @@ export function PointsOfSaleTable() {
     setIsDownloadPointsOfSaleLoading(true);
     const hide = message.open({
       type: "loading",
-      content: "Descargando puntos de venta...",
+      content: "Descargando catálogo...",
       duration: 0
     });
     try {
-      const res = await downloadPointsOfSaleFile({ clientId });
+      const res = await downloadUnifiedCatalogFile({ clientId, countryId });
       const link = document.createElement("a");
       link.href = res.url;
-      link.setAttribute("download", res.filename || "puntos_de_venta.xlsx");
+      link.setAttribute("download", res.filename || "catalogo.xlsx");
       document.body.appendChild(link);
       link.click();
       link.remove();
-      message.success("Puntos de venta descargados exitosamente.");
+      message.success("Catálogo descargado exitosamente.");
       setWhichModalOpen({ selected: 0 });
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
-        "Error al descargar los puntos de venta.";
+        "Error al descargar el catálogo.";
       message.error(errorMessage);
     } finally {
       hide();

@@ -27,7 +27,7 @@ import {
   editCatalog,
   deleteCatalog,
   convertMaterialToPack,
-  downloadCatalogFile,
+  downloadUnifiedCatalogFile,
   uploadCatalogMaterial
 } from "@/services/dataQuality/dataQuality";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
@@ -131,7 +131,7 @@ export function CatalogsTable() {
       duration: 0
     });
     try {
-      const res = await downloadCatalogFile({ clientId });
+      const res = await downloadUnifiedCatalogFile({ clientId, countryId });
       const link = document.createElement("a");
       link.href = res.url;
       link.setAttribute("download", res.filename || "catalogo.xlsx");
