@@ -163,6 +163,11 @@ export interface IWalletMatrixStatus {
   isRefreshing: boolean;
 }
 
+/** Columnas por las que ordena el servidor; los tramos usan su AgingBucket. */
+export type WalletMatrixSortBy = "client_name" | AgingBucket | "total" | "overdue_percentage";
+
+export type WalletMatrixSortDir = "asc" | "desc";
+
 /**
  * Query de GET /portfolio/matrix. Las listas viajan separadas por coma.
  *
@@ -190,6 +195,9 @@ export interface IWalletMatrixFilters {
   market?: string | null;
   /** Texto libre: cliente, NIT o responsable. */
   search?: string;
+  /** Ordena el conjunto completo filtrado, no sólo la página cargada. */
+  sort_by?: WalletMatrixSortBy;
+  sort_dir?: WalletMatrixSortDir;
   /** Proyecta las edades al último día del mes en curso. */
   calculateEndMonth?: boolean;
 }

@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useMemo, type KeyboardEvent } from "react";
 import { Pagination } from "antd";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
+import { AGING_BUCKETS } from "@/types/portfolios/IWalletMatrix";
 import { cn } from "@/utils/utils";
 import { TRAMOS } from "../../constants";
 import { corto, fmtM, pct } from "../../utils/format";
-import { nextSort, ordenar, rowSegments, tramoTotal } from "../../utils/wallet-calc";
+import { rowSegments, tramoTotal } from "../../utils/wallet-calc";
 import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
@@ -21,6 +22,10 @@ interface ControlMatrixProps {
   search: string;
   // eslint-disable-next-line no-unused-vars
   onSearchChange: (value: string) => void;
+  /** Orden del servidor sobre la foto completa; lo posee la vista. `col` es el `sort_by` del API. */
+  sort: SortState;
+  // eslint-disable-next-line no-unused-vars
+  onSort: (col: string) => void;
   /** Clientes de la foto completa, no sólo los de esta página. */
   totalClients: number;
   /** Paginación del servidor: la tabla sólo tiene la página cargada. */
@@ -36,8 +41,6 @@ interface ControlMatrixProps {
   onSelect: (drilldown: IWalletDrilldown) => void;
 }
 
-const TEXTUAL_COLS = ["cliente"];
-
 /** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
 const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accent";
 
@@ -46,6 +49,8 @@ export default function ControlMatrix({
   rows,
   search,
   onSearchChange,
+  sort,
+  onSort,
   totalClients,
   page,
   pageSize,
@@ -55,29 +60,18 @@ export default function ControlMatrix({
   drilldown,
   onSelect
 }: ControlMatrixProps) {
-  const [sort, setSort] = useState<SortState>({ col: "total", dir: "desc" });
-
-  // La búsqueda no se filtra aquí: la tabla sólo tiene la página cargada, 15
-  // de miles de clientes, y daría "sin resultados" para clientes que sí
-  // existen. La resuelve el servidor sobre la foto completa.
+  // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
+  // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
+  // para clientes que sí existen y reordenar contradiría el orden de las
+  // páginas; ambos los resuelve el servidor sobre la foto completa.
   const visibleRows = useMemo(() => {
     // Con una celda elegida la tabla se pliega a esa fila. Es sólo visual —no
     // consulta nada— y sólo aplica si el cliente sigue en la página: tras una
     // actualización la foto puede cambiar por debajo y dejarlo fuera; en ese
     // caso se muestra la página completa en vez de un "sin resultados" falso.
     const delCliente = drilldown ? rows.filter((r) => r.id === drilldown.clienteId) : [];
-    const base = delCliente.length ? delCliente : rows;
-
-    return ordenar(base, sort, (row) => {
-      if (sort.col === "cliente") return row.nombre;
-      const g = rowSegments(row);
-      if (sort.col === "total") return g.total;
-      if (sort.col === "venc") return pct(g.vencido, g.total);
-      return row.tramos[Number(sort.col)]?.total ?? 0;
-    });
-  }, [rows, sort, drilldown]);
-
-  const onSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
+    return delCliente.length ? delCliente : rows;
+  }, [rows, drilldown]);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
   const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
@@ -128,11 +122,12 @@ export default function ControlMatrix({
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
-              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
+              {/* Los `col` son los `sort_by` del API, así la vista los manda tal cual. */}
+              <SortableTh col="client_name" label="Cliente" sort={sort} onSort={onSort} />
               {TRAMOS.map((t) => (
                 <SortableTh
                   key={t.i}
-                  col={String(t.i)}
+                  col={AGING_BUCKETS[t.i]}
                   label={t.short}
                   align="right"
                   sort={sort}
@@ -140,7 +135,13 @@ export default function ControlMatrix({
                 />
               ))}
               <SortableTh col="total" label="Total" align="right" sort={sort} onSort={onSort} />
-              <SortableTh col="venc" label="% vencido" align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="overdue_percentage"
+                label="% vencido"
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
             </tr>
           </thead>
 

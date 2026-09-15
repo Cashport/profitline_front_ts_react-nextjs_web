@@ -40,6 +40,8 @@ export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
   single("coordinator", filters?.coordinator);
   single("market", filters?.market);
   single("search", filters?.search);
+  single("sort_by", filters?.sort_by);
+  single("sort_dir", filters?.sort_dir);
   // Siempre explícito: el backend lo espera como indicador 0/1.
   params.set("calculateEndMonth", filters?.calculateEndMonth ? "1" : "0");
 

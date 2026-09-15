@@ -32,15 +32,23 @@ import {
   toSummary
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
-import { EMPTY_MATRIX_MODAL_FILTERS } from "../../constants";
+import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_DEFAULT_SORT } from "../../constants";
+import { nextSort } from "../../utils/wallet-calc";
 
-import type { IWalletDrilldown, IWalletMatrixModalFilters } from "../../types";
-import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
+import type { IWalletDrilldown, IWalletMatrixModalFilters, SortState } from "../../types";
+import type {
+  IWalletMatrixFilters,
+  WalletMatrixSortBy,
+  WalletMatrixSortDir
+} from "@/types/portfolios/IWalletMatrix";
 
 const PAGE_SIZE = 15;
 
 /** Espera tras la última tecla antes de consultar la matriz. */
 const SEARCH_DEBOUNCE_MS = 400;
+
+/** Columnas de texto arrancan ascendentes; las numéricas, descendentes. */
+const TEXTUAL_COLS: WalletMatrixSortBy[] = ["client_name"];
 
 /** Máximo que se espera a una corrida antes de devolver el botón al usuario. */
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
@@ -57,6 +65,8 @@ export default function WalletView() {
   const [modalFilters, setModalFilters] = useState<IWalletMatrixModalFilters>(
     EMPTY_MATRIX_MODAL_FILTERS
   );
+  // Orden del servidor sobre la foto completa; `col` es el `sort_by` del API.
+  const [sort, setSort] = useState<SortState>(MATRIX_DEFAULT_SORT);
   const [calculateEndMonth, setCalculateEndMonth] = useState(false);
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
@@ -81,8 +91,14 @@ export default function WalletView() {
   const [drilldown, setDrilldown] = useState<IWalletDrilldown | null>(null);
 
   const filters: IWalletMatrixFilters = useMemo(
-    () => ({ ...modalFilters, search: debouncedSearch, calculateEndMonth }),
-    [modalFilters, debouncedSearch, calculateEndMonth]
+    () => ({
+      ...modalFilters,
+      search: debouncedSearch,
+      sort_by: sort.col as WalletMatrixSortBy,
+      sort_dir: sort.dir as WalletMatrixSortDir,
+      calculateEndMonth
+    }),
+    [modalFilters, debouncedSearch, sort, calculateEndMonth]
   );
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, page, PAGE_SIZE);
@@ -208,6 +224,10 @@ export default function WalletView() {
     setDrilldown(null);
   };
 
+  // La vuelta a la primera página la hace el efecto de arriba: el orden entra
+  // en la query.
+  const handleSort = (col: string) => setSort((s) => nextSort(s, col, TEXTUAL_COLS));
+
   // Volver a pulsar la celda elegida la suelta: es la forma de salir del acotado
   // desde la matriz sin bajar al "Ver todos" de los grupos. Otra celda de la
   // misma fila no suelta nada, sólo mueve la selección.
@@ -281,6 +301,8 @@ export default function WalletView() {
           rows={clientRows}
           search={search}
           onSearchChange={setSearch}
+          sort={sort}
+          onSort={handleSort}
           totalClients={matrix?.pagination.totalClients ?? 0}
           page={page}
           pageSize={PAGE_SIZE}

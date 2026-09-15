@@ -1,4 +1,4 @@
-import { EstadoKey, IWalletMatrixModalFilters, Sev } from "./types";
+import { EstadoKey, IWalletMatrixModalFilters, Sev, SortState } from "./types";
 
 export const TRAMOS = [
   { i: 0, id: "corriente", label: "Corriente", short: "Corriente" },
@@ -149,6 +149,9 @@ export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
   holdings: [],
   clientGroup: []
 };
+
+/** Orden inicial de la matriz; `col` es el `sort_by` del API. */
+export const MATRIX_DEFAULT_SORT: SortState = { col: "total", dir: "desc" };
 
 /**
  * statusKey de factura que acepta el filtro `status` de la matriz. No hay
