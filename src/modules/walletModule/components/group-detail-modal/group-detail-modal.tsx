@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Modal, message } from "antd";
+import { Modal } from "antd";
 import { Search, X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
@@ -102,7 +102,7 @@ function GroupDetailBody({
   incidentId?: number;
   onClose: () => void;
 }) {
-  const { showMessage } = useMessageApi();
+  const { showMessage, messageApi } = useMessageApi();
   const [tab, setTab] = useState<Tab>("gestion");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -193,8 +193,9 @@ function GroupDetailBody({
   const handleChangeNoveltyStatus = async (statusId: number): Promise<boolean> => {
     if (!incidentId) return false;
     // El menú se cierra al elegir el estado: el loader es el único feedback
-    // hasta que llega la respuesta.
-    const hide = message.open({ type: "loading", content: "Cambiando estado…", duration: 0 });
+    // hasta que llega la respuesta. Va por el messageApi del contexto (no el
+    // estático de antd) para que herede el tema claro/oscuro del módulo.
+    const hide = messageApi.open({ type: "loading", content: "Cambiando estado…", duration: 0 });
     try {
       await updateIncidentStatus(incidentId, { novelty_status_id: statusId });
       await mutateIncident();

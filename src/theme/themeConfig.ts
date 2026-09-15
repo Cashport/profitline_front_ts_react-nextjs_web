@@ -63,3 +63,11 @@ const theme: ThemeConfig = {
 };
 
 export default theme;
+
+// Elevated surface used by the dark-capable module layouts (wallet, comercio dashboard, …).
+export const DARK_ELEVATED_BG = "#1f1f1f";
+
+// The root theme pins `Message.contentBg` to white at component level, which beats a nested
+// ConfigProvider's dark algorithm/global tokens; module layouts re-declare it with this.
+export const getMessageComponentTheme = (isDark: boolean) =>
+  isDark ? { contentBg: DARK_ELEVATED_BG } : {};
