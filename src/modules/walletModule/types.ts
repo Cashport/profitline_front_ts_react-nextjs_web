@@ -100,6 +100,8 @@ export interface IWalletPerson {
 export interface IWalletAttachment {
   nombre: string;
   peso: string;
+  /** Enlace al archivo ya subido; los adjuntos sin enviar no lo tienen. */
+  url?: string;
 }
 
 /** Una factura dentro de un grupo. `dias` > 0 significa vencida. */
@@ -112,16 +114,42 @@ export interface IWalletInvoice {
   saldo: number;
 }
 
-export interface IWalletTicket {
+export type WalletDocumentType = "FINANCIAL_RECORD" | "BALANCE";
+export type WalletDocumentInactiveReason = "PAID" | "MANUALLY_REMOVED" | "CANCELLED" | "OTHER";
+
+/**
+ * Un documento (factura o saldo) asociado a una novedad, tal como lo manda
+ * /invoice/incident-detail. `activa: false` = ya salió de cartera pero se
+ * conserva en el histórico ("Ver cerradas").
+ */
+export interface IWalletDocument {
   id: string;
+  /** Número del ERP o, si no hay, el id interno. */
+  doc: string;
+  tipo: WalletDocumentType;
+  saldoInicial: number;
+  saldo: number;
+  activa: boolean;
+  inactivaMotivo: WalletDocumentInactiveReason | null;
+  inactivaEl: Date | null;
+}
+
+/** Una acción (ticket) de la novedad, tal como la manda /invoice/incident/:id/actions. */
+export interface IWalletTicket {
+  /** Código visible ("TK-3"): es lo que muestran tarjetas, bitácora y la bandeja. */
+  id: string;
+  /** Id numérico de la acción en el API; es el que pide el endpoint de resolver. */
+  actionId: number;
   titulo: string;
   comentario?: string;
   /** Etiqueta de la categoría, ya resuelta contra el catálogo. */
   categoria?: string;
   responsable: IWalletPerson;
-  deadline: Date;
+  /** Null cuando la acción se creó sin fecha límite. */
+  deadline: Date | null;
   estado: "abierto" | "resuelto";
   resueltoEl?: Date;
+  comentarioResolucion?: string;
   adjuntos?: IWalletAttachment[];
 }
 
@@ -145,7 +173,8 @@ export interface IWalletNovedad {
   incidentId?: number;
   /** Nombre del tipo de novedad, ya resuelto contra el catálogo. */
   tipoNom: string;
-  estado: { nom: string; sev: Sev };
+  /** `color` es el hex del catálogo de estados de novedad; si viene, reemplaza al semáforo. */
+  estado: { nom: string; sev: Sev; color?: string };
   /** Null cuando la novedad viene del API: /portfolio/matrix/groups no manda fechas. */
   compromiso: Date | null;
   limite: Date | null;
@@ -171,12 +200,16 @@ export interface IWalletGroupDetail {
   /** Conteo real, del grupo. `facturas` es una muestra y puede venir topada. */
   totalFacturas: number;
   /**
-   * `facturas` y `bitacora` ya no los lee el modal: el seguimiento sale del
-   * incidente (/invoice/incident-detail) y las facturas no tienen endpoint.
-   * Se conservan porque los módulos aún simulados (tickets, novedades) los
-   * construyen.
+   * Documentos de la novedad (/invoice/incident-detail → `documents`). Vacío
+   * en grupos sin novedad: la pestaña "Facturas" queda deshabilitada.
    */
-  facturas: IWalletInvoice[];
+  documentos: IWalletDocument[];
+  /**
+   * `bitacora` y `tickets` ya no los lee el modal: el seguimiento sale del
+   * incidente (/invoice/incident-detail) y las acciones de
+   * /invoice/incident/:id/actions. Se conservan porque la bandeja de tickets,
+   * aún simulada, los construye.
+   */
   bitacora: IWalletTimelineEntry[];
   tickets: IWalletTicket[];
   diasSinGestion: number | null;

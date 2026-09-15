@@ -1,35 +1,24 @@
 "use client";
 
-import KpiCards, { type KpiCardItem } from "@/components/ui/kpi-cards/kpi-cards";
-import { fmtM } from "@/modules/walletModule/utils/format";
-import { KPI_CARDS } from "../../constants";
-import { NOVELTY_PREDICATES } from "../../utils/novelties-calc";
-import type { INoveltyRow, NoveltyFilter } from "../../types";
+import KpiCards from "@/components/ui/kpi-cards/kpi-cards";
+import type { IIncidentListKpis, IncidentCard } from "@/types/novelties/INovelties";
+import { toKpiCards } from "../../utils/novelties-calc";
 
 interface NoveltiesKpiCardsProps {
-  rows: INoveltyRow[];
-  filtro: NoveltyFilter;
-  onFiltroChange: (filtro: NoveltyFilter) => void;
+  kpis: IIncidentListKpis | undefined;
+  selected: IncidentCard | null;
+  onSelect: (card: IncidentCard | null) => void;
 }
 
 /** Las cinco tarjetas de la bandeja. Elegir una acota la lista y el tablero. */
-export default function NoveltiesKpiCards({
-  rows,
-  filtro,
-  onFiltroChange
-}: NoveltiesKpiCardsProps) {
-  const cards: KpiCardItem[] = KPI_CARDS.map((c) => {
-    // El mismo predicado que filtra las filas, para que el conteo no mienta.
-    const suyas = rows.filter(NOVELTY_PREDICATES[c.id]);
-    return { ...c, valor: fmtM(suyas.reduce((a, n) => a + n.monto, 0)), conteo: suyas.length };
-  });
-
+export default function NoveltiesKpiCards({ kpis, selected, onSelect }: NoveltiesKpiCardsProps) {
   return (
     <KpiCards
-      cards={cards}
+      cards={toKpiCards(kpis)}
       noun={["novedad", "novedades"]}
-      selected={filtro}
-      onSelect={(id) => onFiltroChange(id as NoveltyFilter)}
+      selected={selected}
+      // Volver a pulsar la activa la apaga: sin tarjeta = todas.
+      onSelect={(id) => onSelect(id === selected ? null : (id as IncidentCard))}
     />
   );
 }

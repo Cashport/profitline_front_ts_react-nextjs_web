@@ -39,10 +39,12 @@ export default function GroupModalHeader({
               {nov.id}
             </span>
           )}
-          {nov && sla ? (
+          {nov ? (
             <>
-              <StatusChip sev={nov.estado.sev}>{nov.estado.nom}</StatusChip>
-              <StatusChip sev={sla.sev}>{sla.txt}</StatusChip>
+              <StatusChip sev={nov.estado.sev} color={nov.estado.color}>
+                {nov.estado.nom}
+              </StatusChip>
+              {sla && <StatusChip sev={sla.sev}>{sla.txt}</StatusChip>}
             </>
           ) : (
             <StatusChip sev={meta.chip}>{meta.chipTxt}</StatusChip>

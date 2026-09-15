@@ -1,5 +1,11 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
+import type { GenericResponse } from "@/types/global/IGlobal";
+import type {
+  ICreateIncidentActionBody,
+  IIncidentAction,
+  IResolveIncidentActionBody
+} from "@/types/novelties/INovelties";
 
 interface IncidentActionData {
   comments?: string;
@@ -53,15 +59,53 @@ export const rejectIncident = async (
 
 interface AddCommentData {
   comments: string;
+  files?: File[];
 }
 
+// multipart/form-data: `comments` obligatorio + `files` (0..N) opcional.
 export const addIncidentComment = async (
-  incidentId: string,
+  incidentId: number | string,
   commentData: AddCommentData
 ): Promise<any> => {
+  const formData = new FormData();
+  formData.append("comments", commentData.comments);
+
+  if (commentData.files) {
+    commentData.files.forEach((file) => {
+      formData.append("files", file);
+    });
+  }
+
   const response: any = await API.post(
     `${config.API_HOST}/invoice/incident-comments/${incidentId}`,
-    commentData
+    formData
+  );
+
+  return response;
+};
+
+// Acciones (tickets) de la novedad. `title` es lo único obligatorio.
+export const createIncidentAction = async (
+  incidentId: number,
+  body: ICreateIncidentActionBody
+): Promise<GenericResponse<IIncidentAction>> => {
+  const response: GenericResponse<IIncidentAction> = await API.post(
+    `${config.API_HOST}/invoice/incident/${incidentId}/actions`,
+    body
+  );
+
+  return response;
+};
+
+// Sólo resuelve una acción OPEN de esa misma novedad.
+export const resolveIncidentAction = async (
+  incidentId: number,
+  actionId: number,
+  body: IResolveIncidentActionBody = {}
+): Promise<GenericResponse<IIncidentAction>> => {
+  const response: GenericResponse<IIncidentAction> = await API.patch(
+    `${config.API_HOST}/invoice/incident/${incidentId}/actions/${actionId}/resolve`,
+    body
   );
 
   return response;

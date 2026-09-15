@@ -23,7 +23,7 @@ export function sevDias(fecha: Date, warnEn = 2): { sev: Sev; txt: string } {
 }
 
 export const resueltoTarde = (t: IWalletTicket): boolean =>
-  t.estado === "resuelto" && !!t.resueltoEl && t.resueltoEl > t.deadline;
+  t.estado === "resuelto" && !!t.resueltoEl && !!t.deadline && t.resueltoEl > t.deadline;
 
 export interface TicketStatus {
   /** Clave del borde izquierdo de la tarjeta. */
@@ -48,9 +48,11 @@ export function estadoTicket(t: IWalletTicket): TicketStatus {
     };
   }
 
-  const d = diasEntre(HOY, t.deadline);
   const base = { k: "abierto", ico: "•", estado: "Por resolver", sev: "idle" } as const;
+  // Sin fecha límite no hay urgencia que medir: queda abierto, sin chip de tiempo.
+  if (!t.deadline) return { ...base, tiempo: null, tsev: null };
 
+  const d = diasEntre(HOY, t.deadline);
   if (d < 0) {
     return { ...base, k: "tarde", ico: "!", tiempo: `Vencido ${Math.abs(d)}d`, tsev: "crit" };
   }

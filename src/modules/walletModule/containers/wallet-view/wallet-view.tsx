@@ -215,10 +215,10 @@ export default function WalletView() {
     [groups, openGroup]
   );
 
-  // Las cifras del modal salen del grupo que ya está en memoria; el seguimiento
-  // lo pide el propio modal al incidente. El tramo del drilldown viaja con el
-  // detalle porque, cuando lo hay, las cifras del grupo llegan acotadas a él y
-  // el modal tiene que decirlo.
+  // Grupos sin novedad: las cifras del modal salen del grupo en memoria. El
+  // tramo del drilldown viaja con el detalle porque, cuando lo hay, las cifras
+  // llegan acotadas a él y el modal tiene que decirlo. Grupos con novedad: el
+  // modal pide el incidente y lo reemplaza todo salvo el reparto por tramo.
   const detalleAbierto = useMemo(
     () => (grupoAbierto ? toGroupDetail(grupoAbierto, drilldown?.tramo ?? null) : null),
     [grupoAbierto, drilldown]
