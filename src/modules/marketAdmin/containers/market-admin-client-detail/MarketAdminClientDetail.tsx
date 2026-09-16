@@ -6,14 +6,9 @@ import { ArrowLeft, Package, Tag, Users, MapPin, Settings } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
-import {
-  BONIFICADOS_MANUALES_INIT,
-  DEFAULT_NEGOCIACIONES,
-  NEGOCIACIONES_INIT,
-  type BonifManual,
-  type Negociacion
-} from "@/modules/marketAdmin/mocks/clientDetail";
+import { BONIFICADOS_MANUALES_INIT, type BonifManual } from "@/modules/marketAdmin/mocks/clientDetail";
 import { useMarketAdminClientDetail } from "@/modules/marketAdmin/hooks/useMarketAdminClientDetail";
+import { useMarketAdminClientDiscounts } from "@/modules/marketAdmin/hooks/useMarketAdminClientDiscounts";
 import { useMarketAdminClientAddresses } from "@/modules/marketAdmin/hooks/useMarketAdminClientAddresses";
 import { useMarketAdminClientUsers } from "@/modules/marketAdmin/hooks/useMarketAdminClientUsers";
 import { useMarketAdminClientConfig } from "@/modules/marketAdmin/hooks/useMarketAdminClientConfig";
@@ -72,11 +67,13 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   } = useMarketAdminClientConfig(id);
   const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(id);
 
-  // El tab de promociones sigue sin endpoint: se mantiene en mocks.
-  const [negociaciones, setNegociaciones] = useState<Negociacion[]>(
-    NEGOCIACIONES_INIT[id] ?? DEFAULT_NEGOCIACIONES
+  // Los descuentos se consultan por el NIT que devuelve el detalle, no por el id de ruta.
+  const { data: descuentos, isLoading: isLoadingDescuentos } = useMarketAdminClientDiscounts(
+    cliente?.nit
   );
-  const [bonificados, setBonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
+
+  // Los bonificados manuales siguen sin endpoint: se mantienen en mocks.
+  const [bonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
 
   // ── Mutation handlers ─────────────────────────────────────────────────────
   // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
@@ -138,19 +135,6 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       throw err;
     }
   };
-
-  const createNegociacion = (nueva: Negociacion) => setNegociaciones((prev) => [nueva, ...prev]);
-
-  const createBonificado = (nuevo: Omit<BonifManual, "id" | "estado" | "creadoEn">) =>
-    setBonificados((prev) => [
-      {
-        ...nuevo,
-        id: `bm${Date.now()}`,
-        estado: "pendiente",
-        creadoEn: new Date().toISOString().slice(0, 10)
-      },
-      ...prev
-    ]);
 
   if (isLoading) {
     return (
@@ -261,10 +245,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
         <div>
           {activeTab === "promociones" && (
             <PromocionesTab
-              negociaciones={negociaciones}
-              onCreate={createNegociacion}
+              descuentos={descuentos}
+              isLoadingDescuentos={isLoadingDescuentos}
               bonificados={bonificados}
-              onCreateBonificado={createBonificado}
             />
           )}
           {activeTab === "direcciones" && (

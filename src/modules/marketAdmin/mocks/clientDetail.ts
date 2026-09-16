@@ -49,93 +49,6 @@ export const PRODUCTOS_INIT: Record<string, ProductoLinea[]> = {
   ]
 };
 
-export type NegLineaItem = {
-  productoId: string;
-  productoNombre: string;
-  linea: string;
-  descuento: number;
-  selected: boolean;
-};
-export type NegociacionForm = {
-  nombre: string;
-  vigencia: string;
-  adjunto: File | null;
-  descuentoGlobal: string;
-  items: NegLineaItem[];
-};
-
-export type LineaDescuento = { productoId: string; productoNombre: string; descuento: number };
-export type Negociacion = {
-  id: string;
-  nombre: string;
-  estado: "Activo" | "Inactivo" | "En aprobación";
-  fechaCreacion: string;
-  fechaVencimiento: string;
-  adjunto: string | null;
-  autorizadoPor: string | null;
-  creadoPor: string;
-  lineas: LineaDescuento[];
-};
-
-export const NEGOCIACIONES_INIT: Record<string, Negociacion[]> = {
-  c1: [
-    {
-      id: "neg1",
-      nombre: "Negociación Q1 2025",
-      estado: "Activo",
-      fechaCreacion: "2025-01-10",
-      fechaVencimiento: "2025-12-31",
-      adjunto: "contrato_q1.pdf",
-      autorizadoPor: "María González",
-      creadoPor: "Carlos Pérez",
-      lineas: [
-        { productoId: "e1", productoNombre: "Restylane Volyme 1ml", descuento: 25 },
-        { productoId: "i1", productoNombre: "Dysport 300U", descuento: 15 }
-      ]
-    },
-    {
-      id: "neg2",
-      nombre: "Promo Semestre 2025",
-      estado: "En aprobación",
-      fechaCreacion: "2025-06-03",
-      fechaVencimiento: "2025-06-30",
-      adjunto: null,
-      autorizadoPor: null,
-      creadoPor: "Ana Rodríguez",
-      lineas: [
-        { productoId: "e2", productoNombre: "Restylane Defyne 1ml", descuento: 20 },
-        { productoId: "i2", productoNombre: "Botox 100U", descuento: 10 },
-        { productoId: "a1", productoNombre: "Alastin Regenerating Serum 29.6ml", descuento: 18 }
-      ]
-    }
-  ],
-  c2: [
-    {
-      id: "neg1",
-      nombre: "Acuerdo Anual 2025",
-      estado: "Activo",
-      fechaCreacion: "2025-02-15",
-      fechaVencimiento: "2025-12-31",
-      adjunto: "acuerdo_2025.pdf",
-      autorizadoPor: "Laura Restrepo",
-      creadoPor: "Juan Vélez",
-      lineas: [
-        { productoId: "e1", productoNombre: "Restylane Volyme 1ml", descuento: 22 },
-        { productoId: "a1", productoNombre: "Alastin Regenerating Serum 29.6ml", descuento: 12 }
-      ]
-    }
-  ]
-};
-export const DEFAULT_NEGOCIACIONES: Negociacion[] = [];
-
-export const BLANK_NEG: NegociacionForm = {
-  nombre: "",
-  vigencia: "",
-  adjunto: null,
-  descuentoGlobal: "",
-  items: []
-};
-
 // ── Bonificados manuales ────────────────────────────────────────────────────
 
 export const PRODUCTOS_BONIFICADOS_LIST = [
@@ -158,24 +71,7 @@ export type BonifManual = {
   nota: string;
 };
 
-export const BONIFICADOS_MANUALES_INIT: BonifManual[] = [
-  {
-    id: "bm1",
-    producto: "SCULPTRA INJPRO 2 VIAL",
-    unidades: 5,
-    estado: "aprobado",
-    creadoEn: "2026-04-10",
-    nota: "Premio Q1"
-  },
-  {
-    id: "bm2",
-    producto: "RESTYLANE KYSSE 1ml",
-    unidades: 3,
-    estado: "pendiente",
-    creadoEn: "2026-06-01",
-    nota: ""
-  }
-];
+export const BONIFICADOS_MANUALES_INIT: BonifManual[] = [];
 
 export const BLANK_BONIF = {
   producto: PRODUCTOS_BONIFICADOS_LIST[0],
