@@ -76,6 +76,19 @@ export default function NoveltyAlertsView() {
     );
   };
 
+  const visibleClients =
+    countryFilter === "all"
+      ? filtersData.clients
+      : filtersData.clients.filter((client) => String(client.id_country) === countryFilter);
+
+  const handleCountryChange = (value: string) => {
+    setCountryFilter(value);
+    const selectedClient = filtersData.clients.find((c) => String(c.client_id) === clientFilter);
+    if (value !== "all" && selectedClient && String(selectedClient.id_country) !== value) {
+      setClientFilter("all");
+    }
+  };
+
   const hasActiveFilters =
     typeFilter.length > 0 || countryFilter !== "all" || clientFilter !== "all";
 
@@ -132,7 +145,7 @@ export default function NoveltyAlertsView() {
                 showSearch
                 optionFilterProp="label"
                 value={countryFilter}
-                onChange={setCountryFilter}
+                onChange={handleCountryChange}
                 placeholder="Todos los países"
                 className="w-48"
                 style={{ minWidth: "12rem", height: "48px" }}
@@ -156,7 +169,7 @@ export default function NoveltyAlertsView() {
                 style={{ minWidth: "12rem", height: "48px" }}
                 options={[
                   { label: "Todos los clientes", value: "all" },
-                  ...filtersData.clients.map((client) => ({
+                  ...visibleClients.map((client) => ({
                     label: client.client_name,
                     value: String(client.client_id)
                   }))
