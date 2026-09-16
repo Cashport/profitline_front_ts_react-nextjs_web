@@ -19,6 +19,18 @@ export interface DiscountBasics {
   is_deleted: number;
 }
 
+// GET /discount/by-client — same row as the list plus audit/extra columns
+export interface DiscountByClient extends DiscountBasics {
+  created_at: string;
+  updated_at: string | null;
+  created_by: string;
+  updated_by: string | null;
+  max_units_global_by_product: number | null;
+  special_condition_sku: string | null;
+  activate_cross: number;
+  apply_for_promotions: number;
+}
+
 export interface DiscountGetOne {
   id: number;
   project_id: number;

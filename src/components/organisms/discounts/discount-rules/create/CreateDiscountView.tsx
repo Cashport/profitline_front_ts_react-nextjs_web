@@ -13,7 +13,7 @@ const commonDiscount = [discountCategories.byOrder.id, discountCategories.byClie
 const annualDiscount = [discountCategories.annual.id];
 
 type Props = {
-  params?: { id?: string; basePath?: string; listPath?: string };
+  params?: { id?: string; basePath?: string; listPath?: string; initialCategory?: string };
 };
 
 export function CreateDiscountView({ params }: Props) {

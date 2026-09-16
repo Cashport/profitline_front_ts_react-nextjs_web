@@ -133,6 +133,10 @@ export default function DataQualityView() {
           const listedFileCount = visiblePendingClients.reduce((sum, c) => sum + c.count, 0);
           const remainingFileCount = missing - listedFileCount;
 
+          const visibleAutomationFailures = country.automation_failures.slice(0, 3);
+          const remainingAutomationFailures =
+            country.automation_failures.length - visibleAutomationFailures.length;
+
           return (
             <div
               key={country.id_country}
@@ -180,7 +184,7 @@ export default function DataQualityView() {
                         side="bottom"
                         className={cn(
                           DARK_TOOLTIP_CONTENT,
-                          "w-64 space-y-1 rounded-lg px-3 py-2.5"
+                          "w-[30rem] space-y-1 rounded-lg px-3 py-2.5"
                         )}
                         arrowClassName={DARK_TOOLTIP_ARROW}
                       >
@@ -188,7 +192,7 @@ export default function DataQualityView() {
                           Automatizaciones fallidas
                         </p>
                         <ul className="space-y-1">
-                          {country.automation_failures.map((failure, i) => (
+                          {visibleAutomationFailures.map((failure, i) => (
                             <li key={i} className="text-xs">
                               <span className="font-medium">{failure.name}</span>
                               <br />
@@ -196,6 +200,11 @@ export default function DataQualityView() {
                             </li>
                           ))}
                         </ul>
+                        {remainingAutomationFailures > 0 && (
+                          <p className="text-xs opacity-70 pt-0.5">
+                            +{remainingAutomationFailures} más
+                          </p>
+                        )}
                       </TooltipContent>
                     </Tooltip>
                   )}

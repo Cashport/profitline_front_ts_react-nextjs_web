@@ -9,6 +9,7 @@ import {
 } from "@/hooks/useWalletMatrix";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { buildMatrixQuery, refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
+import { API } from "@/utils/api/api";
 import { useWalletMatrixSocket } from "@/context/WalletMatrixSocketContext";
 import { useMessageApi } from "@/context/MessageContext";
 
@@ -106,7 +107,11 @@ export default function WalletView() {
   // que filtrar los grupos en el navegador dejaría fuera lo que no vino. El
   // runId sale de la matriz para que las dos tablas lean la MISMA foto; hasta
   // que llegue, el hook no pide nada.
-  const { data: groups, loading: groupsLoading } = useWalletMatrixGroups(
+  const {
+    data: groups,
+    loading: groupsLoading,
+    mutate: mutateGroups
+  } = useWalletMatrixGroups(
     matrix?.snapshot?.runId,
     drilldown?.clienteId,
     // `tramo` puede ser 0 (corriente), que es falsy: sin esta comparación
@@ -247,6 +252,24 @@ export default function WalletView() {
     [groups, openGroup]
   );
 
+  // TEST: sondeo de /portfolio/matrix/detail para ver qué campos trae por
+  // cliente (el endpoint de grupos no manda el id del responsable).
+  const runId = matrix?.snapshot?.runId;
+  useEffect(() => {
+    if (!grupoAbierto || !runId) return;
+    const probe = async () => {
+      try {
+        const response = await API.get(
+          `/portfolio/matrix/detail?clientId=${grupoAbierto.clientId}&status=${grupoAbierto.statusKey}&runId=${runId}`
+        );
+        console.log("TEST /portfolio/matrix/detail", response);
+      } catch (error) {
+        console.error("TEST /portfolio/matrix/detail failed", error);
+      }
+    };
+    probe();
+  }, [grupoAbierto, runId]);
+
   // Grupos sin novedad: las cifras del modal salen del grupo en memoria. El
   // tramo del drilldown viaja con el detalle porque, cuando lo hay, las cifras
   // llegan acotadas a él y el modal tiene que decirlo. Grupos con novedad: el
@@ -330,7 +353,14 @@ export default function WalletView() {
         />
       )}
 
-      <GroupDetailModal detail={detalleAbierto} onClose={() => setOpenGroup(null)} />
+      {/* Desde el modal se crean y editan novedades: al cerrar se releen los grupos. */}
+      <GroupDetailModal
+        detail={detalleAbierto}
+        onClose={() => {
+          setOpenGroup(null);
+          mutateGroups();
+        }}
+      />
     </div>
   );
 }

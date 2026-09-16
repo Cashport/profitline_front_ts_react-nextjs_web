@@ -137,3 +137,39 @@ export interface ICreateIncidentActionBody {
 export interface IResolveIncidentActionBody {
   resolution_comment?: string;
 }
+
+/** Body de PATCH /invoice/incident/:id/status. `comment` queda en el historial de la novedad. */
+export interface IUpdateIncidentStatusBody {
+  /** Id del catálogo de estados (GET /invoice/novelty-status). */
+  novelty_status_id: number;
+  comment?: string;
+}
+
+/** Documento (factura o saldo) que se asocia a una novedad al crearla. */
+export interface IIncidentDocumentRef {
+  document_type: "FINANCIAL_RECORD" | "BALANCE";
+  document_id: number;
+}
+
+/** Body de POST /invoice/incident/client/:clientUUID. Las fechas van "YYYY-MM-DD". */
+export interface ICreateIncidentBody {
+  motive_id: number;
+  documents: IIncidentDocumentRef[];
+  comments?: string;
+  assigned_to?: number | null;
+  limit_date?: string;
+  next_ticket_date?: string;
+}
+
+/** `data` de la respuesta de POST /invoice/incident/client/:clientUUID. */
+export interface ICreateIncidentData {
+  incident_id: number;
+}
+
+/** Body de PUT /invoice/incident/:id. Todo opcional: sólo viaja lo que se edita. */
+export interface IUpdateIncidentBody {
+  motive_id?: number;
+  assigned_to?: number | null;
+  limit_date?: string | null;
+  next_ticket_date?: string | null;
+}

@@ -166,24 +166,93 @@ export interface ClienteOption {
   nombre: string;
 }
 
-// Datos recolectados por el modal → entregados al contenedor
+// Datos recolectados por el modal → entregados al contenedor.
+// Los grupos reutilizan el modelo fijo/pool de los regalos de promociones.
 export interface NuevaAsignacionData {
   cliente: ClienteOption;
-  producto: { id: number; nombre: string };
-  unidades: number;
-  fechaInicio: string; // YYYY-MM-DD
+  grupos: IGrupoPremio[];
+  fechaExpiracion: string; // YYYY-MM-DD
   fechaFin: string; // YYYY-MM-DD
   nota: string;
 }
 
-// ── Request body de la API (POST /manager-botification) ─────────────────────
+// ── Request body de la API (POST /manager-bonification) ─────────────────────
+export interface IManualBonusItemProduct {
+  product_id: number;
+  qty: number;
+}
+
+// Mismo modelo que un grupo de regalo de promoción: fixed = cantidad por
+// producto; !fixed = el cliente reparte max_selection_qty entre los productos.
+export interface IManualBonusItem {
+  subgroup_number: number;
+  fixed: boolean;
+  max_selection_qty: number;
+  products: IManualBonusItemProduct[];
+}
+
 export interface ICreateManualBonusBody {
   customer_id: string; // NIT del cliente
-  product_id: number;
-  assigned_qty: number;
-  start_date: string; // YYYY-MM-DD
-  end_date: string; // YYYY-MM-DD
+  assigned_qty: number; // suma de max_selection_qty de todos los items
+  expiration_date: string; // YYYY-MM-DDTHH:mm:ssZ
+  end_date: string; // YYYY-MM-DDTHH:mm:ssZ
   comments: string;
+  items: IManualBonusItem[];
+}
+
+// ── GET /manager-bonification/summary?client_id=:nit ────────────────────────
+// Un grupo = una asignación de bonificado. Las cantidades/estado viven en el
+// grupo; los productos cuelgan de items (subgrupos: fijos o "elige hasta N").
+export interface IManagerBonificationProduct {
+  group_item_product_id: number;
+  product_id: number;
+  qty: number;
+  sku: string;
+  description: string;
+  image: string | null;
+}
+
+export interface IManagerBonificationItem {
+  group_item_id: number;
+  subgroup_number: number;
+  fixed: boolean;
+  max_selection_qty: number;
+  is_deleted: boolean;
+  created_at: string;
+  products: IManagerBonificationProduct[];
+}
+
+export interface IManagerBonificationGroup {
+  group_id: number;
+  status: string; // "AVAILABLE" | ...
+  description: string | null;
+  manager_id: number;
+  created_by: number;
+  assigned_qty: number;
+  available_qty: number;
+  consumed_qty: number;
+  expiration_date: string | null;
+  created_at: string;
+  consumptions: {
+    applied_qty: number;
+    reversed_qty: number;
+    consumptions_count: number;
+    last_consumed_at: string | null;
+  };
+  items: IManagerBonificationItem[];
+}
+
+export interface IManagerBonificationTotals {
+  groups_count: number;
+  total_assigned: number;
+  total_available: number;
+  total_consumed: number;
+}
+
+export interface IManagerBonificationSummary {
+  client_id: string;
+  totals: IManagerBonificationTotals;
+  groups: IManagerBonificationGroup[];
 }
 
 // ── Productos del marketplace (GET/PUT /product) ────────────────────────────
@@ -423,62 +492,6 @@ export interface IMarketAdminUserDetail {
 // POST /users/:id/clients — el grupo personal lo crea el backend si no existe
 export interface IAssignClientToUserBody {
   client_nits: string[];
-}
-
-// ── Profit Loader (cargue de información) ───────────────────────────────────
-// GET /profit-loader/loaders — `required_columns` viaja como JSON string.
-
-export interface IProfitLoader {
-  id: number;
-  name: string;
-  display_name: string;
-  table_target: string;
-  description: string;
-  required_columns: string;
-  config: unknown | null;
-  is_enabled: number;
-  class_path: string;
-  version: string;
-  created_at: string;
-  updated_at: string;
-  s3_url: string;
-  last_file_date: string;
-  url_s3_template?: string;
-  file_name?: string;
-}
-
-export interface IProfitLoaderExecution {
-  id: number;
-  step: string;
-  level: string;
-  message: string;
-  execution_time_ms: number | null;
-  created_at: string;
-}
-
-export interface IProfitLoaderTimelineItem {
-  file_id: number;
-  batch_id: number;
-  file_name: string;
-  uploaded_at: string;
-  uploaded_by: string;
-  s3_url: string;
-  status: string;
-  label: string;
-  color: string;
-  executions: IProfitLoaderExecution[];
-}
-
-// GET /profit-loader/etl/:loaderId/timeline — paginación plana, no encaja en
-// GenericResponsePage (usa total/page/limit/totalPages en vez de `pagination`).
-export interface IProfitLoaderTimelineResponse {
-  status: number;
-  message: string;
-  data: IProfitLoaderTimelineItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 // ── Profit Loader (cargue de información) ───────────────────────────────────

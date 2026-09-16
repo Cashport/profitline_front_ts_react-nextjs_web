@@ -76,6 +76,19 @@ export default function NoveltyAlertsView() {
     );
   };
 
+  const visibleClients =
+    countryFilter === "all"
+      ? filtersData.clients
+      : filtersData.clients.filter((client) => String(client.id_country) === countryFilter);
+
+  const handleCountryChange = (value: string) => {
+    setCountryFilter(value);
+    const selectedClient = filtersData.clients.find((c) => String(c.client_id) === clientFilter);
+    if (value !== "all" && selectedClient && String(selectedClient.id_country) !== value) {
+      setClientFilter("all");
+    }
+  };
+
   const hasActiveFilters =
     typeFilter.length > 0 || countryFilter !== "all" || clientFilter !== "all";
 
@@ -105,12 +118,6 @@ export default function NoveltyAlertsView() {
     <div className="flex flex-col gap-4">
       <Header title="Alertas y Novedades" />
 
-      <AlertCategoryCards
-        categories={filtersData.categories}
-        activeKeys={activeKeys}
-        onCategoryClick={handleCategoryClick}
-      />
-
       <Card className="p-0 border-none">
         <CardContent className="pt-6">
           {/* Compact Filters */}
@@ -138,7 +145,7 @@ export default function NoveltyAlertsView() {
                 showSearch
                 optionFilterProp="label"
                 value={countryFilter}
-                onChange={setCountryFilter}
+                onChange={handleCountryChange}
                 placeholder="Todos los países"
                 className="w-48"
                 style={{ minWidth: "12rem", height: "48px" }}
@@ -162,7 +169,7 @@ export default function NoveltyAlertsView() {
                 style={{ minWidth: "12rem", height: "48px" }}
                 options={[
                   { label: "Todos los clientes", value: "all" },
-                  ...filtersData.clients.map((client) => ({
+                  ...visibleClients.map((client) => ({
                     label: client.client_name,
                     value: String(client.client_id)
                   }))
@@ -195,8 +202,14 @@ export default function NoveltyAlertsView() {
             </div>
           </div>
 
+          <AlertCategoryCards
+            categories={filtersData.categories}
+            activeKeys={activeKeys}
+            onCategoryClick={handleCategoryClick}
+          />
+
           {/* Alerts Table */}
-          <div className="border-t pt-6" style={{ borderColor: "#DDDDDD" }}>
+          <div className="pt-6">
             <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
               Lista de Alertas y Novedades
             </h3>

@@ -1,11 +1,8 @@
 "use client";
 
-import { Fragment } from "react";
 import { AlertTriangle, Bell, Bot, FileText, FileX, Tag, LucideIcon } from "lucide-react";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { cn } from "@/utils/utils";
-import { DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 
 import { IAlertFilterCategory } from "@/types/dataQuality/IDataQuality";
 
@@ -25,6 +22,8 @@ interface AlertCategoryCardsProps {
   onCategoryClick: (category: IAlertFilterCategory) => void;
 }
 
+// Same look as DevolucionesStatCard / CardsClients, but as a toggle button:
+// active flips the card to black, danger only tints the icon square and count.
 export function AlertCategoryCards({
   categories,
   activeKeys,
@@ -33,77 +32,46 @@ export function AlertCategoryCards({
   if (categories.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
       {categories.map((category) => {
         const Icon = CATEGORY_ICONS[category.key] ?? Bell;
         const isActive = activeKeys.includes(category.key);
         const isDanger = category.key === DANGER_CATEGORY && category.count > 0;
 
-        const card = (
+        return (
           <button
+            key={category.key}
             type="button"
             onClick={() => onCategoryClick(category)}
-            className={`text-left rounded-xl border p-3.5 transition-colors ${
+            className={cn(
+              "flex h-full w-full flex-col justify-between gap-2 rounded-lg p-3 text-left transition-colors xl:p-4",
               isActive
-                ? "border-[#141414] bg-[#141414] text-white"
-                : isDanger
-                  ? "border-[#FCA5A5] bg-[#FEF2F2] hover:bg-[#FEE2E2]"
-                  : "border-[#DDDDDD] bg-white hover:bg-gray-50"
-            }`}
+                ? "bg-cashport-black text-white"
+                : "bg-cashport-gray-lighter text-cashport-black hover:bg-[#EFEFEF]"
+            )}
           >
-            <div className="flex items-center justify-between">
-              <span
-                className={`flex items-center justify-center w-7 h-7 rounded-full ${
-                  isActive
-                    ? "bg-white/15"
-                    : isDanger
-                      ? "bg-[#FEE2E2] text-[#DC2626]"
-                      : "bg-[#F5F5F4] text-[#6B7280]"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-              </span>
-              <span
-                className={`text-2xl font-bold ${
-                  isActive ? "text-white" : isDanger ? "text-[#DC2626]" : "text-[#141414]"
-                }`}
-              >
-                {category.count}
-              </span>
-            </div>
-            <p className={`text-xs mt-2 ${isActive ? "text-white/80" : "text-[#6B7280]"}`}>
-              {category.name}
-            </p>
-          </button>
-        );
-
-        if (!category.items?.length) return <Fragment key={category.key}>{card}</Fragment>;
-
-        return (
-          <Tooltip key={category.key}>
-            <TooltipTrigger asChild>{card}</TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className={cn(DARK_TOOLTIP_CONTENT, "w-80 space-y-1 rounded-lg px-3 py-2.5")}
-              arrowClassName={DARK_TOOLTIP_ARROW}
-            >
-              <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+            <span className="flex w-full items-center justify-between gap-2">
+              <span className="block truncate text-[0.938rem] font-light leading-6 xl:text-base">
                 {category.name}
-              </p>
-              <ul className="space-y-1">
-                {category.items.map((item, i) => (
-                  <li key={i} className="text-xs leading-snug">
-                    <span className="font-medium">{item.client}</span>
-                    <br />
-                    <span className="opacity-70">{item.message}</span>
-                  </li>
-                ))}
-              </ul>
-              {category.remaining > 0 && (
-                <p className="text-xs opacity-70 pt-0.5">+{category.remaining} más</p>
+              </span>
+              <span
+                className={cn(
+                  "flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md xl:h-6 xl:w-6",
+                  isDanger ? "bg-[#DC2626] text-white" : "bg-cashport-green text-cashport-black"
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </span>
+            </span>
+            <span
+              className={cn(
+                "block truncate text-[1.3rem] font-medium xl:text-[1.625rem]",
+                isDanger && !isActive && "text-[#DC2626]"
               )}
-            </TooltipContent>
-          </Tooltip>
+            >
+              {category.count}
+            </span>
+          </button>
         );
       })}
     </div>

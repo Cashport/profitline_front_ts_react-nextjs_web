@@ -3,6 +3,7 @@ import { discountTypeByAnnual } from "@/components/organisms/discounts/constants
 import { DiscountSchema } from "@/components/organisms/discounts/discount-rules/create/resolvers/generalResolver";
 import {
   DiscountBasics,
+  DiscountByClient,
   DiscountCreateResponse,
   DiscountGetOne
 } from "@/types/discount/DiscountBasics";
@@ -41,6 +42,13 @@ export const getAllDiscounts = async ({
     }
   );
   return response.success ? response : { ...defaultRes, ...response };
+};
+
+export const getDiscountsByClient = async (clientId: string) => {
+  const response: GenericResponse<DiscountByClient[]> = await API.get(`/discount/by-client`, {
+    params: { client_id: clientId }
+  });
+  return response;
 };
 
 export const getAllDiscountPackages = async ({

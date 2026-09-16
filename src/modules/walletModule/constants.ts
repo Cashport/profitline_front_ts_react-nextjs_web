@@ -1,4 +1,4 @@
-import { EstadoKey, IWalletMatrixModalFilters, Sev, SortState } from "./types";
+import { EstadoKey, IWalletMatrixModalFilters, Sev, SortState, WalletDocumentType } from "./types";
 
 export const TRAMOS = [
   { i: 0, id: "corriente", label: "Corriente", short: "Corriente" },
@@ -95,6 +95,12 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     chipTxt: "Otros",
     corta: "Otros estados del catálogo"
   }
+};
+
+/** Etiqueta de cada tipo de documento de una novedad. */
+export const DOCUMENT_TYPE_LABEL: Record<WalletDocumentType, string> = {
+  FINANCIAL_RECORD: "Factura",
+  BALANCE: "Saldo"
 };
 
 /** Fondo de cada tramo, para la barra de reparto. */

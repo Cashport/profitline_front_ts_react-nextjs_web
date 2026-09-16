@@ -5,16 +5,21 @@ import { Modal } from "antd";
 import { Search, X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { ApiError } from "@/utils/api/api";
+import { useAppStore } from "@/lib/store/store";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
 import { useIncidentActions } from "@/hooks/useIncidentActions";
 import {
   addIncidentComment,
+  createIncident,
   createIncidentAction,
-  resolveIncidentAction
+  resolveIncidentAction,
+  updateIncident,
+  updateIncidentStatus
 } from "@/services/resolveNovelty/resolveNovelty";
 import { useMessageApi } from "@/context/MessageContext";
-import type { ICreateIncidentActionBody } from "@/types/novelties/INovelties";
+import type { ICreateIncidentActionBody, IUpdateIncidentBody } from "@/types/novelties/INovelties";
 import { toIncidentGroupDetail, toTickets, toTimelineEntries } from "../../utils/api-adapter";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
@@ -24,6 +29,10 @@ import GroupModalHeader from "./group-modal-header";
 import GroupTicketForm from "./group-ticket-form";
 import GroupTicketsSection from "./group-tickets-section";
 import GroupTimeline from "./group-timeline";
+import ModalCreateNovelty, { CreateNoveltyBody } from "./modal-create-novelty";
+import ModalEditNovelty from "./modal-edit-novelty";
+import ModalLinkNovelty from "./modal-link-novelty";
+import type { NoveltyModalMode } from "./novelty-drawer";
 import type { IWalletGroupDetail, IWalletTicket } from "../../types";
 
 interface GroupDetailModalProps {
@@ -100,11 +109,12 @@ function GroupDetailBody({
   incidentId?: number;
   onClose: () => void;
 }) {
-  const { showMessage } = useMessageApi();
+  const { showMessage, messageApi } = useMessageApi();
   const [tab, setTab] = useState<Tab>("gestion");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [ticketForm, setTicketForm] = useState(false);
+  const [noveltyModal, setNoveltyModal] = useState<NoveltyModalMode | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +143,10 @@ function GroupDetailBody({
   );
   const bitacora = useMemo(() => (incident ? toTimelineEntries(incident) : []), [incident]);
   const tickets = useMemo(() => toTickets(actions), [actions]);
+  const documentosSeleccionados = useMemo(
+    () => (detail?.documentos ?? []).filter((d) => selected.includes(d.id)),
+    [detail, selected]
+  );
 
   // El seguimiento se lee de abajo hacia arriba: lo último siempre a la vista.
   useEffect(() => {
@@ -185,6 +199,76 @@ function GroupDetailBody({
     }
   };
 
+  // El cambio de estado queda en el historial de la novedad, así que se relee
+  // el incidente (cabecera y seguimiento). Si el backend explica por qué no se
+  // pudo (ApiError), se muestra su mensaje.
+  const handleChangeNoveltyStatus = async (statusId: number): Promise<boolean> => {
+    if (!incidentId) return false;
+    // El menú se cierra al elegir el estado: el loader es el único feedback
+    // hasta que llega la respuesta. Va por el messageApi del contexto (no el
+    // estático de antd) para que herede el tema claro/oscuro del módulo.
+    const hide = messageApi.open({ type: "loading", content: "Cambiando estado…", duration: 0 });
+    try {
+      await updateIncidentStatus(incidentId, { novelty_status_id: statusId });
+      await mutateIncident();
+      showMessage("success", "Estado actualizado");
+      return true;
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof ApiError && error.message ? error.message : "No se pudo cambiar el estado"
+      );
+      return false;
+    } finally {
+      hide();
+    }
+  };
+
+  // La novedad nueva se crea sobre el cliente del incidente abierto (la
+  // selección sólo existe cuando hay incidente). Al quedar creada se relee el
+  // incidente —los documentos pueden haberse movido— y se suelta la selección.
+  const handleCreateNovelty = async (body: CreateNoveltyBody): Promise<boolean> => {
+    const clientUuid = incident?.client_uuid;
+    if (!clientUuid) {
+      showMessage("error", "No se pudo identificar el cliente de la novedad");
+      return false;
+    }
+    try {
+      await createIncident(clientUuid, body);
+      await mutateIncident();
+      setSelected([]);
+      setNoveltyModal(null);
+      showMessage("success", "Novedad creada");
+      return true;
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof ApiError && error.message ? error.message : "No se pudo crear la novedad"
+      );
+      return false;
+    }
+  };
+
+  // Tipo y responsable salen en cabecera y panel izquierdo: se relee el incidente.
+  const handleEditNovelty = async (body: IUpdateIncidentBody): Promise<boolean> => {
+    if (!incidentId) return false;
+    try {
+      await updateIncident(incidentId, body);
+      await mutateIncident();
+      setNoveltyModal(null);
+      showMessage("success", "Novedad actualizada");
+      return true;
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof ApiError && error.message
+          ? error.message
+          : "No se pudo actualizar la novedad"
+      );
+      return false;
+    }
+  };
+
   // Abierto desde la bandeja no hay fila de respaldo: hasta que llegue el
   // incidente no hay nada que pintar más que el estado de carga o el error.
   if (!detail) {
@@ -204,7 +288,38 @@ function GroupDetailBody({
 
   return (
     <div className="wallet-scope flex h-[min(88vh,900px)] flex-col bg-card text-foreground">
-      <GroupModalHeader detail={detail} onClose={onClose} seleccionadas={selected.length} />
+      <GroupModalHeader
+        detail={detail}
+        onClose={onClose}
+        seleccionadas={selected.length}
+        onChangeStatus={handleChangeNoveltyStatus}
+        onOpenNoveltyModal={setNoveltyModal}
+      />
+
+      <ModalCreateNovelty
+        open={noveltyModal === "crear"}
+        clienteNombre={detail.cliente.nombre}
+        documentos={documentosSeleccionados}
+        defaultAssignedTo={incident?.assigned_to}
+        onClose={() => setNoveltyModal(null)}
+        onCreate={handleCreateNovelty}
+      />
+      {/* Editar necesita el incidente cargado: de él salen los valores iniciales. */}
+      {incident && (
+        <ModalEditNovelty
+          open={noveltyModal === "editar"}
+          detail={detail}
+          incident={incident}
+          onClose={() => setNoveltyModal(null)}
+          onSave={handleEditNovelty}
+        />
+      )}
+      <ModalLinkNovelty
+        open={noveltyModal === "vincular"}
+        clienteNombre={detail.cliente.nombre}
+        documentos={documentosSeleccionados}
+        onClose={() => setNoveltyModal(null)}
+      />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[512px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-muted/40 lg:border-b-0 lg:border-r">

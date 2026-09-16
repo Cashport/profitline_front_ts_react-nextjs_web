@@ -1,9 +1,13 @@
 import React, { createContext, useContext, ReactNode, useCallback } from "react";
 import { message } from "antd";
+import type { MessageInstance } from "antd/es/message/interface";
 
 type MessageApiType = {
   // eslint-disable-next-line no-unused-vars
   showMessage: (type: MessageType, content: string) => void;
+  // Raw AntD instance for cases showMessage can't cover (duration: 0, keys, dismiss fn).
+  // Prefer this over the static `message` from "antd", which ignores every ConfigProvider theme.
+  messageApi: MessageInstance;
 };
 const MessageContext = createContext<MessageApiType | null>(null);
 interface MessageProviderProps {
@@ -21,7 +25,7 @@ export const MessageProvider: React.FC<MessageProviderProps> = ({ children }) =>
     [messageApi]
   );
   return (
-    <MessageContext.Provider value={{ showMessage }}>
+    <MessageContext.Provider value={{ showMessage, messageApi }}>
       {contextHolder}
       {children}
     </MessageContext.Provider>

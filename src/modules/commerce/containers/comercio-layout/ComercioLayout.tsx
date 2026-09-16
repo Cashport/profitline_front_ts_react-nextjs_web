@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { MessageProvider } from "@/context/MessageContext";
 import { ThemeProvider, useTheme } from "@/modules/commerce/contexts/theme-context";
+import { getMessageComponentTheme } from "@/theme/themeConfig";
 
 interface ComercioLayoutClientProps {
   children: React.ReactNode;
@@ -47,16 +49,22 @@ function ComercioChrome({ children }: ComercioLayoutClientProps) {
             colorSplit: "rgba(253, 253, 253, 0.12)",
             colorBgElevated: "#1f1f1f"
           })
+        },
+        components: {
+          Message: getMessageComponentTheme(isDark)
         }
       }}
     >
-      <ViewWrapper
-        headerTitle={headerTitle}
-        hideHeader={pathname.startsWith("/comercio/pedido")}
-        className={isDark ? "dark" : ""}
-      >
-        {children}
-      </ViewWrapper>
+      {/* Own message holder so toasts render under this theme, not the root (light) one. */}
+      <MessageProvider>
+        <ViewWrapper
+          headerTitle={headerTitle}
+          hideHeader={pathname.startsWith("/comercio/pedido")}
+          className={isDark ? "dark" : ""}
+        >
+          {children}
+        </ViewWrapper>
+      </MessageProvider>
     </ConfigProvider>
   );
 }
