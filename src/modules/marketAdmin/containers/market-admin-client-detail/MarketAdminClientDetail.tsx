@@ -8,12 +8,9 @@ import ProfitLoader from "@/components/ui/profit-loader";
 import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
-import {
-  BONIFICADOS_MANUALES_INIT,
-  type BonifManual
-} from "@/modules/marketAdmin/mocks/clientDetail";
 import { useMarketAdminClientDetail } from "@/modules/marketAdmin/hooks/useMarketAdminClientDetail";
 import { useMarketAdminClientDiscounts } from "@/modules/marketAdmin/hooks/useMarketAdminClientDiscounts";
+import { useMarketAdminClientBonifications } from "@/modules/marketAdmin/hooks/useMarketAdminClientBonifications";
 import { useMarketAdminClientAddresses } from "@/modules/marketAdmin/hooks/useMarketAdminClientAddresses";
 import { useMarketAdminClientUsers } from "@/modules/marketAdmin/hooks/useMarketAdminClientUsers";
 import { useMarketAdminClientConfig } from "@/modules/marketAdmin/hooks/useMarketAdminClientConfig";
@@ -26,15 +23,13 @@ import {
   updateMarketAdminClientConfig
 } from "@/services/marketAdmin/marketAdmin";
 import { getProductsByProject } from "@/services/products/products";
+import { changeStatus } from "@/services/discount/discount.service";
 import {
   ICreateMarketAdminClientAddressBody,
   IUpdateMarketAdminClientConfigBody,
   NuevaAsignacionData
 } from "@/types/marketAdmin/IMarketAdmin";
-import {
-  buildManualBonusPayload,
-  summarizeManualBonus
-} from "@/modules/marketAdmin/components/MarketAdminManualBonus/buildManualBonusPayload";
+import { buildManualBonusPayload } from "@/modules/marketAdmin/components/MarketAdminManualBonus/buildManualBonusPayload";
 import PromocionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/PromocionesTab";
 import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/DireccionesTab";
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
@@ -81,9 +76,11 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(id);
 
   // Los descuentos se consultan por el NIT que devuelve el detalle, no por el id de ruta.
-  const { data: descuentos, isLoading: isLoadingDescuentos } = useMarketAdminClientDiscounts(
-    cliente?.nit
-  );
+  const {
+    data: descuentos,
+    isLoading: isLoadingDescuentos,
+    mutate: mutateDescuentos
+  } = useMarketAdminClientDiscounts(cliente?.nit);
 
   // Catálogo del proyecto para el select de producto bonificado (misma fuente que
   // la pantalla general de bonificados manuales).
@@ -92,8 +89,12 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   );
   const bonusProducts = bonusProductsRes?.data ?? [];
 
-  // El listado de bonificados manuales sigue sin endpoint: se mantiene en memoria.
-  const [bonificados, setBonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
+  // Bonificados manuales del cliente, también consultados por NIT.
+  const {
+    data: bonificaciones,
+    isLoading: isLoadingBonificados,
+    mutate: mutateBonificados
+  } = useMarketAdminClientBonifications(cliente?.nit);
 
   // ── Mutation handlers ─────────────────────────────────────────────────────
   // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
@@ -145,16 +146,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   const createBonificado = async (data: NuevaAsignacionData) => {
     try {
       await createManualBonus(buildManualBonusPayload(data));
-      const resumen = summarizeManualBonus(data.grupos, bonusProducts);
-      const nuevo: BonifManual = {
-        id: `b${Date.now()}`,
-        producto: resumen.productos,
-        unidades: resumen.unidades,
-        estado: "pendiente",
-        creadoEn: new Date().toISOString().split("T")[0],
-        nota: data.nota
-      };
-      setBonificados((prev) => [nuevo, ...prev]);
+      await mutateBonificados();
       showMessage("success", "Bonificado creado exitosamente.");
     } catch (err) {
       showMessage(
@@ -162,6 +154,31 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
         err instanceof Error ? err.message : "Ocurrió un error al crear el bonificado."
       );
       throw err;
+    }
+  };
+
+  const toggleDescuento = async (discountId: number, newStatus: boolean) => {
+    // Optimistic: flip the row locally, roll back with a revalidate if the API fails
+    mutateDescuentos(
+      (prev) =>
+        prev && {
+          ...prev,
+          data: prev.data.map((d) =>
+            d.id === discountId ? { ...d, status: newStatus ? 1 : 0 } : d
+          )
+        },
+      { revalidate: false }
+    );
+    try {
+      const res = await changeStatus(discountId, newStatus);
+      if (!res.success) throw new Error(res.message);
+      showMessage("success", `Descuento ${newStatus ? "activado" : "desactivado"} con éxito.`);
+    } catch (err) {
+      mutateDescuentos();
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al cambiar el estado."
+      );
     }
   };
 
@@ -290,7 +307,10 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
             <PromocionesTab
               descuentos={descuentos}
               isLoadingDescuentos={isLoadingDescuentos}
-              bonificados={bonificados}
+              onToggleDescuento={toggleDescuento}
+              bonificados={bonificaciones?.groups ?? []}
+              bonificadosTotals={bonificaciones?.totals}
+              isLoadingBonificados={isLoadingBonificados}
               cliente={{ nit: cliente.nit, nombre: cliente.client_name }}
               productos={bonusProducts}
               onCreateBonificado={createBonificado}

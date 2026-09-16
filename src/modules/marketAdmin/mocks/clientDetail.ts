@@ -1,7 +1,5 @@
 // Mock data + tipos para la vista de detalle de cliente del Market Admin.
 
-import { EstadoAprobacion } from "@/types/marketAdmin/IMarketAdmin";
-
 export const LINEAS_CATALOGO: Record<string, { id: string; nombre: string }[]> = {
   Estética: [
     { id: "e1", nombre: "Restylane Volyme 1ml" },
@@ -48,16 +46,3 @@ export const PRODUCTOS_INIT: Record<string, ProductoLinea[]> = {
     { id: "a2", nombre: "Alastin Restorative Skin Complex", linea: "Alastin", activo: true }
   ]
 };
-
-// ── Bonificados manuales ────────────────────────────────────────────────────
-
-export type BonifManual = {
-  id: string;
-  producto: string;
-  unidades: number;
-  estado: EstadoAprobacion;
-  creadoEn: string;
-  nota: string;
-};
-
-export const BONIFICADOS_MANUALES_INIT: BonifManual[] = [];

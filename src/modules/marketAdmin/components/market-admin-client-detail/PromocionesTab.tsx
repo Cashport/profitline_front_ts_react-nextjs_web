@@ -2,30 +2,36 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Table } from "antd";
+import { Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import ProfitLoader from "@/components/ui/profit-loader";
 import NuevaAsignacionModal from "@/modules/marketAdmin/components/MarketAdminManualBonus/NuevaAsignacionModal";
-import { ESTADO_CONFIG } from "@/modules/marketAdmin/components/MarketAdminManualBonus/estadoConfig";
 import {
   DateCell,
-  StatusPill,
   TextCell,
   TypePill,
   headerCell
 } from "@/modules/marketAdmin/components/market-admin-bonus-and-discounts/discountsTableConfig";
+import { bonificadosColumns } from "@/modules/marketAdmin/components/market-admin-client-detail/bonificadosColumns";
 import { MARKET_ADMIN_DISCOUNTS_BASE } from "@/components/organisms/discounts/constants/routes";
-import { type BonifManual } from "@/modules/marketAdmin/mocks/clientDetail";
 import { DiscountByClient } from "@/types/discount/DiscountBasics";
-import { ClienteOption, NuevaAsignacionData } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  ClienteOption,
+  IManagerBonificationGroup,
+  IManagerBonificationTotals,
+  NuevaAsignacionData
+} from "@/types/marketAdmin/IMarketAdmin";
 import { Product } from "@/types/products/products";
 
 type Props = {
   descuentos: DiscountByClient[];
   isLoadingDescuentos: boolean;
-  bonificados: BonifManual[];
+  onToggleDescuento: (id: number, newStatus: boolean) => Promise<void>;
+  bonificados: IManagerBonificationGroup[];
+  bonificadosTotals?: IManagerBonificationTotals;
+  isLoadingBonificados: boolean;
   cliente: ClienteOption;
   productos: Product[];
   onCreateBonificado: (data: NuevaAsignacionData) => Promise<void>;
@@ -34,7 +40,10 @@ type Props = {
 export default function PromocionesTab({
   descuentos,
   isLoadingDescuentos,
+  onToggleDescuento,
   bonificados,
+  bonificadosTotals,
+  isLoadingBonificados,
   cliente,
   productos,
   onCreateBonificado
@@ -115,7 +124,9 @@ export default function PromocionesTab({
       width: 110,
       sorter: (a, b) => a.status - b.status,
       onHeaderCell: headerCell,
-      render: (status: number) => <StatusPill active={status} />
+      render: (status: number, r) => (
+        <Switch checked={status === 1} onChange={(checked) => onToggleDescuento(r.id, checked)} />
+      )
     },
     {
       title: "Adjunto",
@@ -144,53 +155,6 @@ export default function PromocionesTab({
       width: 48,
       onHeaderCell: headerCell,
       render: (_, r) => <GenericEyeButton href={`${MARKET_ADMIN_DISCOUNTS_BASE}/regla/${r.id}`} />
-    }
-  ];
-
-  const bonifColumns: ColumnsType<BonifManual> = [
-    {
-      title: "Producto",
-      dataIndex: "producto",
-      key: "producto",
-      onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414] truncate">{v}</span>
-    },
-    {
-      title: "Unidades",
-      dataIndex: "unidades",
-      key: "unidades",
-      width: 100,
-      onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Estado",
-      dataIndex: "estado",
-      key: "estado",
-      width: 120,
-      onHeaderCell: headerCell,
-      render: (estado: BonifManual["estado"]) => (
-        <span
-          className={`px-2 py-1 text-[11px] font-semibold rounded-lg w-fit ${ESTADO_CONFIG[estado].className}`}
-        >
-          {ESTADO_CONFIG[estado].label}
-        </span>
-      )
-    },
-    {
-      title: "Fecha",
-      dataIndex: "creadoEn",
-      key: "creadoEn",
-      width: 120,
-      onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "Nota",
-      dataIndex: "nota",
-      key: "nota",
-      onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#999999] truncate">{v || "—"}</span>
     }
   ];
 
@@ -223,7 +187,16 @@ export default function PromocionesTab({
       {/* ── Bonificados manuales ── */}
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-bold text-[#141414]">Bonificados manuales</p>
+          <div className="flex items-baseline gap-3">
+            <p className="text-sm font-bold text-[#141414]">Bonificados manuales</p>
+            {bonificadosTotals && (
+              <span className="text-xs text-[#999999]">
+                {bonificadosTotals.total_assigned} asignadas ·{" "}
+                {bonificadosTotals.total_available} disponibles ·{" "}
+                {bonificadosTotals.total_consumed} consumidas
+              </span>
+            )}
+          </div>
           <button
             onClick={handleCreateBonus}
             className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
@@ -232,15 +205,21 @@ export default function PromocionesTab({
           </button>
         </div>
 
-        <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
-          <Table
-            columns={bonifColumns}
-            dataSource={bonificados}
-            rowKey="id"
-            pagination={false}
-            locale={{ emptyText: "No hay bonificados manuales creados aún." }}
-          />
-        </div>
+        {isLoadingBonificados ? (
+          <div className="flex items-center justify-center py-16">
+            <ProfitLoader />
+          </div>
+        ) : (
+          <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
+            <Table
+              columns={bonificadosColumns}
+              dataSource={bonificados}
+              rowKey="group_id"
+              pagination={false}
+              locale={{ emptyText: "No hay bonificados manuales creados aún." }}
+            />
+          </div>
+        )}
       </div>
 
       {showBonusModal && (
