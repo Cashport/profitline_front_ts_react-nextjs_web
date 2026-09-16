@@ -166,24 +166,38 @@ export interface ClienteOption {
   nombre: string;
 }
 
-// Datos recolectados por el modal → entregados al contenedor
+// Datos recolectados por el modal → entregados al contenedor.
+// Los grupos reutilizan el modelo fijo/pool de los regalos de promociones.
 export interface NuevaAsignacionData {
   cliente: ClienteOption;
-  producto: { id: number; nombre: string };
-  unidades: number;
-  fechaInicio: string; // YYYY-MM-DD
+  grupos: IGrupoPremio[];
+  fechaExpiracion: string; // YYYY-MM-DD
   fechaFin: string; // YYYY-MM-DD
   nota: string;
 }
 
-// ── Request body de la API (POST /manager-botification) ─────────────────────
+// ── Request body de la API (POST /manager-bonification) ─────────────────────
+export interface IManualBonusItemProduct {
+  product_id: number;
+  qty: number;
+}
+
+// Mismo modelo que un grupo de regalo de promoción: fixed = cantidad por
+// producto; !fixed = el cliente reparte max_selection_qty entre los productos.
+export interface IManualBonusItem {
+  subgroup_number: number;
+  fixed: boolean;
+  max_selection_qty: number;
+  products: IManualBonusItemProduct[];
+}
+
 export interface ICreateManualBonusBody {
   customer_id: string; // NIT del cliente
-  product_id: number;
-  assigned_qty: number;
-  start_date: string; // YYYY-MM-DD
-  end_date: string; // YYYY-MM-DD
+  assigned_qty: number; // suma de max_selection_qty de todos los items
+  expiration_date: string; // YYYY-MM-DDTHH:mm:ssZ
+  end_date: string; // YYYY-MM-DDTHH:mm:ssZ
   comments: string;
+  items: IManualBonusItem[];
 }
 
 // ── Productos del marketplace (GET/PUT /product) ────────────────────────────

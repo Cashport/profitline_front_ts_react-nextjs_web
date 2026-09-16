@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { ArrowLeft, Package, Tag, Users, MapPin, Settings } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
+import { useAppStore } from "@/lib/store/store";
 import { useMessageApi } from "@/context/MessageContext";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
-import { BONIFICADOS_MANUALES_INIT, type BonifManual } from "@/modules/marketAdmin/mocks/clientDetail";
+import {
+  BONIFICADOS_MANUALES_INIT,
+  type BonifManual
+} from "@/modules/marketAdmin/mocks/clientDetail";
 import { useMarketAdminClientDetail } from "@/modules/marketAdmin/hooks/useMarketAdminClientDetail";
 import { useMarketAdminClientDiscounts } from "@/modules/marketAdmin/hooks/useMarketAdminClientDiscounts";
 import { useMarketAdminClientAddresses } from "@/modules/marketAdmin/hooks/useMarketAdminClientAddresses";
@@ -14,15 +19,22 @@ import { useMarketAdminClientUsers } from "@/modules/marketAdmin/hooks/useMarket
 import { useMarketAdminClientConfig } from "@/modules/marketAdmin/hooks/useMarketAdminClientConfig";
 import { useMarketAdminClientProducts } from "@/modules/marketAdmin/hooks/useMarketAdminClientProducts";
 import {
+  createManualBonus,
   createMarketAdminClientAddress,
   deleteMarketAdminClientAddress,
   updateMarketAdminClientAddress,
   updateMarketAdminClientConfig
 } from "@/services/marketAdmin/marketAdmin";
+import { getProductsByProject } from "@/services/products/products";
 import {
   ICreateMarketAdminClientAddressBody,
-  IUpdateMarketAdminClientConfigBody
+  IUpdateMarketAdminClientConfigBody,
+  NuevaAsignacionData
 } from "@/types/marketAdmin/IMarketAdmin";
+import {
+  buildManualBonusPayload,
+  summarizeManualBonus
+} from "@/modules/marketAdmin/components/MarketAdminManualBonus/buildManualBonusPayload";
 import PromocionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/PromocionesTab";
 import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/DireccionesTab";
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
@@ -47,6 +59,7 @@ const splitLineas = (lineas: string | null | undefined) =>
 export default function MarketAdminClientDetail({ params }: { params: { id: string } }) {
   const { id } = params;
   const { showMessage } = useMessageApi();
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   // Tab — new order: promociones, direcciones, usuarios, productos
   const [activeTab, setActiveTab] = useState<
@@ -72,8 +85,15 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     cliente?.nit
   );
 
-  // Los bonificados manuales siguen sin endpoint: se mantienen en mocks.
-  const [bonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
+  // Catálogo del proyecto para el select de producto bonificado (misma fuente que
+  // la pantalla general de bonificados manuales).
+  const { data: bonusProductsRes } = useSWR(projectId ? ["ma-products", projectId] : null, () =>
+    getProductsByProject(projectId)
+  );
+  const bonusProducts = bonusProductsRes?.data ?? [];
+
+  // El listado de bonificados manuales sigue sin endpoint: se mantiene en memoria.
+  const [bonificados, setBonificados] = useState<BonifManual[]>(BONIFICADOS_MANUALES_INIT);
 
   // ── Mutation handlers ─────────────────────────────────────────────────────
   // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
@@ -117,6 +137,29 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       showMessage(
         "error",
         err instanceof Error ? err.message : "Ocurrió un error al eliminar la dirección."
+      );
+      throw err;
+    }
+  };
+
+  const createBonificado = async (data: NuevaAsignacionData) => {
+    try {
+      await createManualBonus(buildManualBonusPayload(data));
+      const resumen = summarizeManualBonus(data.grupos, bonusProducts);
+      const nuevo: BonifManual = {
+        id: `b${Date.now()}`,
+        producto: resumen.productos,
+        unidades: resumen.unidades,
+        estado: "pendiente",
+        creadoEn: new Date().toISOString().split("T")[0],
+        nota: data.nota
+      };
+      setBonificados((prev) => [nuevo, ...prev]);
+      showMessage("success", "Bonificado creado exitosamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al crear el bonificado."
       );
       throw err;
     }
@@ -248,6 +291,9 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
               descuentos={descuentos}
               isLoadingDescuentos={isLoadingDescuentos}
               bonificados={bonificados}
+              cliente={{ nit: cliente.nit, nombre: cliente.client_name }}
+              productos={bonusProducts}
+              onCreateBonificado={createBonificado}
             />
           )}
           {activeTab === "direcciones" && (

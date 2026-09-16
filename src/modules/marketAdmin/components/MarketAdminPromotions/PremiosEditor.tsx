@@ -2,8 +2,8 @@
 
 import { Plus, Trash2, Gift } from "lucide-react";
 import { Product } from "@/types/products/products";
-import { INivel } from "@/types/marketAdmin/IMarketAdmin";
-import ProductSelect from "./ProductSelect";
+import { IGrupoPremio, INivel } from "@/types/marketAdmin/IMarketAdmin";
+import GrupoPremioEditor from "./GrupoPremioEditor";
 
 const getLetra = (index: number): string => String.fromCharCode(65 + index);
 
@@ -17,8 +17,6 @@ export default function PremiosEditor({
   onChange: (n: INivel) => void;
 }) {
   const defaultProductId = products[0]?.id ?? 0;
-
-  const firstAvailableId = (used: number[]) => products.find((p) => !used.includes(p.id))?.id ?? 0;
 
   const addPremio = () => {
     const ppId = `pp${Date.now()}`;
@@ -83,112 +81,12 @@ export default function PremiosEditor({
     });
   };
 
-  const updateGrupoPool = (prId: string, gId: string, unidades: number) => {
+  const updateGrupo = (prId: string, grupo: IGrupoPremio) => {
     onChange({
       ...nivel,
       premios: nivel.premios.map((pr) =>
         pr.id === prId
-          ? {
-              ...pr,
-              grupos: pr.grupos.map((g) => (g.id === gId ? { ...g, unidadesPool: unidades } : g))
-            }
-          : pr
-      )
-    });
-  };
-
-  const addProductoToGrupo = (prId: string, gId: string) => {
-    const ppId = `pp${Date.now()}`;
-    onChange({
-      ...nivel,
-      premios: nivel.premios.map((pr) =>
-        pr.id === prId
-          ? {
-              ...pr,
-              grupos: pr.grupos.map((g) =>
-                g.id === gId
-                  ? {
-                      ...g,
-                      productos: [
-                        ...g.productos,
-                        {
-                          id: ppId,
-                          productId: firstAvailableId(g.productos.map((pp) => pp.productId))
-                        }
-                      ],
-                      cantidadesFijas:
-                        g.modo === "fijo"
-                          ? { ...(g.cantidadesFijas ?? {}), [ppId]: 1 }
-                          : g.cantidadesFijas
-                    }
-                  : g
-              )
-            }
-          : pr
-      )
-    });
-  };
-
-  const updateProductoInGrupo = (prId: string, gId: string, ppId: string, productId: number) => {
-    onChange({
-      ...nivel,
-      premios: nivel.premios.map((pr) =>
-        pr.id === prId
-          ? {
-              ...pr,
-              grupos: pr.grupos.map((g) =>
-                g.id === gId
-                  ? {
-                      ...g,
-                      productos: g.productos.map((pp) =>
-                        pp.id === ppId ? { ...pp, productId } : pp
-                      )
-                    }
-                  : g
-              )
-            }
-          : pr
-      )
-    });
-  };
-
-  const updateCantidadFija = (prId: string, gId: string, ppId: string, cantidad: number) => {
-    onChange({
-      ...nivel,
-      premios: nivel.premios.map((pr) =>
-        pr.id === prId
-          ? {
-              ...pr,
-              grupos: pr.grupos.map((g) =>
-                g.id === gId
-                  ? { ...g, cantidadesFijas: { ...(g.cantidadesFijas ?? {}), [ppId]: cantidad } }
-                  : g
-              )
-            }
-          : pr
-      )
-    });
-  };
-
-  const removeProductoFromGrupo = (prId: string, gId: string, ppId: string) => {
-    onChange({
-      ...nivel,
-      premios: nivel.premios.map((pr) =>
-        pr.id === prId
-          ? {
-              ...pr,
-              grupos: pr.grupos.map((g) =>
-                g.id === gId
-                  ? {
-                      ...g,
-                      productos: g.productos.filter((pp) => pp.id !== ppId),
-                      cantidadesFijas: Object.fromEntries(
-                        Object.entries(g.cantidadesFijas ?? {}).filter(([k]) => k !== ppId)
-                      )
-                    }
-                  : g
-              )
-            }
+          ? { ...pr, grupos: pr.grupos.map((g) => (g.id === grupo.id ? grupo : g)) }
           : pr
       )
     });
@@ -238,98 +136,14 @@ export default function PremiosEditor({
             {/* Grupos de esta opción */}
             <div className="p-3 flex flex-col gap-3">
               {pr.grupos.map((g) => (
-                <div
+                <GrupoPremioEditor
                   key={g.id}
-                  className={`rounded-lg border ${g.modo === "pool" ? "border-[#FDE68A] bg-[#FFFEF5]" : "border-[#EEEEEE] bg-[#FAFAFA]"} overflow-hidden`}
-                >
-                  {/* Grupo header */}
-                  <div
-                    className={`flex items-center justify-between px-2.5 py-1.5 ${g.modo === "pool" ? "bg-[#FFFBEB]" : "bg-[#F5F5F5]"}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {g.modo === "pool" ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-[#92400E]">El cliente elige</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={g.unidadesPool ?? 5}
-                            onChange={(e) =>
-                              updateGrupoPool(pr.id, g.id, parseInt(e.target.value) || 1)
-                            }
-                            className="w-10 px-1.5 py-0.5 text-xs font-semibold text-[#92400E] bg-white border border-[#FDE68A] rounded text-center outline-none"
-                          />
-                          <span className="text-[10px] text-[#92400E]">und. entre:</span>
-                        </div>
-                      ) : (
-                        <span className="text-[10px] text-[#666666] font-medium">Fijo</span>
-                      )}
-                    </div>
-                    {pr.grupos.length > 1 && (
-                      <button
-                        onClick={() => removeGrupo(pr.id, g.id)}
-                        className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Productos del grupo */}
-                  <div className="p-2 flex flex-col gap-1.5">
-                    {g.productos.map((pp) => (
-                      <div key={pp.id} className="flex items-center gap-2">
-                        <ProductSelect
-                          products={products}
-                          value={pp.productId}
-                          excludedIds={g.productos
-                            .filter((x) => x.id !== pp.id)
-                            .map((x) => x.productId)}
-                          onChange={(productId) =>
-                            updateProductoInGrupo(pr.id, g.id, pp.id, productId)
-                          }
-                          className="[&_.ant-select-selector]:!bg-white [&_.ant-select-selector]:!border-[#EEEEEE]"
-                        />
-                        {g.modo === "fijo" && (
-                          <div className="flex items-center border border-[#EEEEEE] rounded overflow-hidden w-[72px] flex-shrink-0">
-                            <span className="px-1.5 py-1 text-[10px] text-[#999999] bg-[#F7F7F7] border-r border-[#EEEEEE]">
-                              und.
-                            </span>
-                            <input
-                              type="number"
-                              min={1}
-                              value={g.cantidadesFijas?.[pp.id] ?? 1}
-                              onChange={(e) =>
-                                updateCantidadFija(
-                                  pr.id,
-                                  g.id,
-                                  pp.id,
-                                  parseInt(e.target.value) || 1
-                                )
-                              }
-                              className="w-8 px-1 py-1 text-sm text-[#141414] outline-none bg-white text-center"
-                            />
-                          </div>
-                        )}
-                        {g.productos.length > 1 && (
-                          <button
-                            onClick={() => removeProductoFromGrupo(pr.id, g.id, pp.id)}
-                            className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
-                          >
-                            <Trash2 size={10} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addProductoToGrupo(pr.id, g.id)}
-                      disabled={g.productos.length >= products.length}
-                      className="flex items-center gap-1 text-[10px] text-[#6AB000] hover:underline w-fit disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
-                    >
-                      <Plus size={9} /> Agregar producto
-                    </button>
-                  </div>
-                </div>
+                  grupo={g}
+                  products={products}
+                  canRemove={pr.grupos.length > 1}
+                  onChange={(grupo) => updateGrupo(pr.id, grupo)}
+                  onRemove={() => removeGrupo(pr.id, g.id)}
+                />
               ))}
 
               {/* Agregar grupo */}

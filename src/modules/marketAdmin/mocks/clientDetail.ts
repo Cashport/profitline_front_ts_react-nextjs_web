@@ -51,17 +51,6 @@ export const PRODUCTOS_INIT: Record<string, ProductoLinea[]> = {
 
 // ── Bonificados manuales ────────────────────────────────────────────────────
 
-export const PRODUCTOS_BONIFICADOS_LIST = [
-  "SCULPTRA INJPRO 2 VIAL",
-  "RESTYLANE SB VITAL LIDO 1ml",
-  "RESTYLANE VOLYME 1ml",
-  "RESTYLANE REFYNE 1ml",
-  "REST LYFT LIDO 1ml",
-  "RESTYLANE LIDOCAINA 1ml",
-  "RESTYLANE KYSSE 1ml",
-  "RESTYLANE DEFYNE 1ml"
-];
-
 export type BonifManual = {
   id: string;
   producto: string;
@@ -72,9 +61,3 @@ export type BonifManual = {
 };
 
 export const BONIFICADOS_MANUALES_INIT: BonifManual[] = [];
-
-export const BLANK_BONIF = {
-  producto: PRODUCTOS_BONIFICADOS_LIST[0],
-  unidades: 1,
-  nota: ""
-};

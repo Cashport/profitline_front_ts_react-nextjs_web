@@ -3,51 +3,53 @@
 import { useState } from "react";
 import { Modal } from "antd";
 import { Product } from "@/types/products/products";
-import { ClienteOption, NuevaAsignacionData } from "@/types/marketAdmin/IMarketAdmin";
+import { ClienteOption, IGrupoPremio, NuevaAsignacionData } from "@/types/marketAdmin/IMarketAdmin";
 import ClienteSearchSelect from "./ClienteSearchSelect";
+import GruposBonificadoEditor, { createGrupoBonificado } from "./GruposBonificadoEditor";
+import { grupoMaxSelectionQty } from "./buildManualBonusPayload";
 
-const hoy = () => new Date().toISOString().split("T")[0];
+const isGrupoValid = (g: IGrupoPremio) =>
+  g.productos.length > 0 &&
+  g.productos.every((p) => p.productId > 0) &&
+  (g.modo === "fijo"
+    ? g.productos.every((p) => (g.cantidadesFijas?.[p.id] ?? 0) >= 1)
+    : (g.unidadesPool ?? 0) >= 1);
 
 export default function NuevaAsignacionModal({
-  clientes,
+  cliente: clienteFijo,
+  clientes = [],
   productos,
   saving,
   onClose,
   onSave
 }: {
-  clientes: ClienteOption[];
+  // Cliente preseleccionado (p. ej. desde el detalle del cliente): oculta el buscador.
+  cliente?: ClienteOption;
+  clientes?: ClienteOption[];
   productos: Product[];
   saving: boolean;
   onClose: () => void;
   onSave: (data: NuevaAsignacionData) => void;
 }) {
-  const [cliente, setCliente] = useState<ClienteOption | null>(null);
-  const [productoId, setProductoId] = useState<number | "">("");
-  const [unidades, setUnidades] = useState(1);
-  const [fechaInicio, setFechaInicio] = useState(hoy());
+  const [cliente, setCliente] = useState<ClienteOption | null>(clienteFijo ?? null);
+  const [grupos, setGrupos] = useState<IGrupoPremio[]>(() => [createGrupoBonificado("fijo")]);
+  const [fechaExpiracion, setFechaExpiracion] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [nota, setNota] = useState("");
 
-  const productoSeleccionado = productos.find((p) => p.id === productoId);
+  const totalUnidades = grupos.reduce((sum, g) => sum + grupoMaxSelectionQty(g), 0);
 
   const isValid =
     !!cliente &&
-    productoId !== "" &&
-    unidades > 0 &&
-    !!fechaInicio &&
+    grupos.length > 0 &&
+    grupos.every(isGrupoValid) &&
+    !!fechaExpiracion &&
     !!fechaFin &&
-    fechaFin >= fechaInicio;
+    fechaFin >= fechaExpiracion;
 
   const handleSave = () => {
-    if (!isValid || !cliente || !productoSeleccionado || saving) return;
-    onSave({
-      cliente,
-      producto: { id: productoSeleccionado.id, nombre: productoSeleccionado.description },
-      unidades,
-      fechaInicio,
-      fechaFin,
-      nota
-    });
+    if (!isValid || !cliente || saving) return;
+    onSave({ cliente, grupos, fechaExpiracion, fechaFin, nota });
   };
 
   return (
@@ -55,7 +57,7 @@ export default function NuevaAsignacionModal({
       open
       onCancel={onClose}
       centered
-      width={480}
+      width={560}
       title={<span className="text-base font-bold text-[#141414]">Nueva asignación manual</span>}
       styles={{ body: { maxHeight: "60vh", overflowY: "auto" } }}
       footer={
@@ -80,50 +82,40 @@ export default function NuevaAsignacionModal({
         {/* Cliente */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-[#666666]">Cliente</label>
-          <ClienteSearchSelect
-            clientes={clientes}
-            selectedNit={cliente?.nit ?? ""}
-            onSelect={setCliente}
-          />
+          {clienteFijo ? (
+            <div className="px-3 py-2.5 bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg">
+              <p className="text-sm text-[#141414]">{clienteFijo.nombre}</p>
+              <p className="text-xs text-[#999999]">NIT: {clienteFijo.nit}</p>
+            </div>
+          ) : (
+            <ClienteSearchSelect
+              clientes={clientes}
+              selectedNit={cliente?.nit ?? ""}
+              onSelect={setCliente}
+            />
+          )}
         </div>
 
-        {/* Producto bonificado */}
+        {/* Productos bonificados (grupos fijos / a elegir) */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#666666]">Producto bonificado</label>
-          <select
-            value={productoId}
-            onChange={(e) => setProductoId(e.target.value ? Number(e.target.value) : "")}
-            className="px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
-          >
-            <option value="">Selecciona un producto...</option>
-            {productos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.description}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Unidades */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-[#666666]">Unidades a asignar</label>
-          <input
-            type="number"
-            min={1}
-            value={unidades}
-            onChange={(e) => setUnidades(parseInt(e.target.value) || 1)}
-            className="px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414] w-32"
-          />
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium text-[#666666]">Productos bonificados</label>
+            <span className="text-xs text-[#999999]">
+              Total a asignar: <span className="font-semibold text-[#141414]">{totalUnidades}</span>{" "}
+              und.
+            </span>
+          </div>
+          <GruposBonificadoEditor grupos={grupos} products={productos} onChange={setGrupos} />
         </div>
 
         {/* Fechas */}
         <div className="flex gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-[#666666]">Fecha de inicio</label>
+            <label className="text-xs font-medium text-[#666666]">Fecha de expiración</label>
             <input
               type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
+              value={fechaExpiracion}
+              onChange={(e) => setFechaExpiracion(e.target.value)}
               className="px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
             />
           </div>
@@ -132,7 +124,7 @@ export default function NuevaAsignacionModal({
             <input
               type="date"
               value={fechaFin}
-              min={fechaInicio}
+              min={fechaExpiracion}
               onChange={(e) => setFechaFin(e.target.value)}
               className="px-3 py-2.5 text-sm bg-[#F7F7F7] border border-[#DDDDDD] rounded-lg outline-none focus:border-[#141414] transition-colors text-[#141414]"
             />

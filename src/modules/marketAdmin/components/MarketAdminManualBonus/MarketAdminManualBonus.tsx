@@ -17,7 +17,7 @@ import {
 import AsignacionesFilters from "./AsignacionesFilters";
 import AsignacionRow from "./AsignacionRow";
 import NuevaAsignacionModal from "./NuevaAsignacionModal";
-import { buildManualBonusPayload } from "./buildManualBonusPayload";
+import { buildManualBonusPayload, summarizeManualBonus } from "./buildManualBonusPayload";
 import { ASIGNACIONES_INICIALES } from "./mockAsignaciones";
 
 export default function MarketAdminManualBonus({ onBack }: { onBack: () => void }) {
@@ -47,15 +47,16 @@ export default function MarketAdminManualBonus({ onBack }: { onBack: () => void 
     try {
       setSaving(true);
       await createManualBonus(buildManualBonusPayload(data));
+      const resumen = summarizeManualBonus(data.grupos, productos);
       const nueva: AsignacionManual = {
         id: `a${Date.now()}`,
         clienteId: data.cliente.nit,
         clienteNombre: data.cliente.nombre,
         clienteNit: data.cliente.nit,
-        productoBonificadoId: String(data.producto.id),
-        productoBonificadoNombre: data.producto.nombre,
-        unidadesAsignadas: data.unidades,
-        unidadesDisponibles: data.unidades,
+        productoBonificadoId: String(data.grupos[0]?.productos[0]?.productId ?? ""),
+        productoBonificadoNombre: resumen.productos,
+        unidadesAsignadas: resumen.unidades,
+        unidadesDisponibles: resumen.unidades,
         estado: "pendiente",
         creadoEn: new Date().toISOString().split("T")[0],
         nota: data.nota

@@ -7,7 +7,7 @@ import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import ProfitLoader from "@/components/ui/profit-loader";
-import ModalCreateBonus from "@/modules/marketAdmin/components/market-admin-client-detail/ModalCreateBonus";
+import NuevaAsignacionModal from "@/modules/marketAdmin/components/MarketAdminManualBonus/NuevaAsignacionModal";
 import { ESTADO_CONFIG } from "@/modules/marketAdmin/components/MarketAdminManualBonus/estadoConfig";
 import {
   DateCell,
@@ -19,19 +19,45 @@ import {
 import { MARKET_ADMIN_DISCOUNTS_BASE } from "@/components/organisms/discounts/constants/routes";
 import { type BonifManual } from "@/modules/marketAdmin/mocks/clientDetail";
 import { DiscountByClient } from "@/types/discount/DiscountBasics";
+import { ClienteOption, NuevaAsignacionData } from "@/types/marketAdmin/IMarketAdmin";
+import { Product } from "@/types/products/products";
 
 type Props = {
   descuentos: DiscountByClient[];
   isLoadingDescuentos: boolean;
   bonificados: BonifManual[];
+  cliente: ClienteOption;
+  productos: Product[];
+  onCreateBonificado: (data: NuevaAsignacionData) => Promise<void>;
 };
 
-export default function PromocionesTab({ descuentos, isLoadingDescuentos, bonificados }: Props) {
+export default function PromocionesTab({
+  descuentos,
+  isLoadingDescuentos,
+  bonificados,
+  cliente,
+  productos,
+  onCreateBonificado
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [showBonusModal, setShowBonusModal] = useState(false);
+  const [savingBonus, setSavingBonus] = useState(false);
 
   const handleCreateBonus = () => setShowBonusModal(true);
+
+  // El contenedor ya muestra el toast de error; aquí solo se cierra en éxito.
+  const handleSaveBonus = async (data: NuevaAsignacionData) => {
+    try {
+      setSavingBonus(true);
+      await onCreateBonificado(data);
+      setShowBonusModal(false);
+    } catch {
+      // handled upstream
+    } finally {
+      setSavingBonus(false);
+    }
+  };
 
   // Opens the rule-create screen with "Plan anual" preselected; returnTo brings
   // "Volver a la lista" back to this client detail instead of the discounts list.
@@ -217,7 +243,15 @@ export default function PromocionesTab({ descuentos, isLoadingDescuentos, bonifi
         </div>
       </div>
 
-      <ModalCreateBonus open={showBonusModal} onClose={() => setShowBonusModal(false)} />
+      {showBonusModal && (
+        <NuevaAsignacionModal
+          cliente={cliente}
+          productos={productos}
+          saving={savingBonus}
+          onClose={() => setShowBonusModal(false)}
+          onSave={handleSaveBonus}
+        />
+      )}
     </div>
   );
 }

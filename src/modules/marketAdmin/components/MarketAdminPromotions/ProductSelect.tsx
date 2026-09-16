@@ -15,7 +15,7 @@ export default function ProductSelect({
   products: Product[];
   value: number;
   excludedIds: number[];
-  size?: "small" | "middle";
+  size?: "small" | "middle" | "large";
   className?: string;
   onChange: (productId: number) => void;
 }) {
