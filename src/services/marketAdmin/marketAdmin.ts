@@ -4,6 +4,7 @@ import {
   ICreateManualBonusBody,
   ICreateMarketAdminClientAddressBody,
   ICreatePromotionBody,
+  IManagerBonificationSummary,
   IMarketAdminClientAddress,
   IMarketAdminClientsBatchBody,
   IProductInventoryItem,
@@ -31,6 +32,20 @@ export const createManualBonus = async (body: ICreateManualBonusBody) => {
     return response.data;
   } catch (error) {
     console.error("Error al crear el bonificado manual:", error);
+    throw error;
+  }
+};
+
+// GET /manager-bonification/summary?client_id=:nit — grupos de bonificado del cliente
+export const getManagerBonificationSummary = async (clientId: string) => {
+  try {
+    const response: GenericResponse<IManagerBonificationSummary> = await API.get(
+      "/manager-bonification/summary",
+      { params: { client_id: clientId } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los bonificados manuales del cliente:", error);
     throw error;
   }
 };

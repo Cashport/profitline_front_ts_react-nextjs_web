@@ -13,13 +13,15 @@ import { ApiError } from "@/utils/api/api";
 import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id?: string; basePath?: string; listPath?: string };
+  params?: { id?: string; basePath?: string; listPath?: string; initialCategory?: string };
 };
 
 export default function useCreateDiscountView({ params }: Props) {
   const discountId = !!Number(params?.id) ? Number(params?.id) : undefined;
   const [messageApi, contextHolder] = message.useMessage();
-  const [selectedType, setSelectedType] = useState<number>(1);
+  // initialCategory is a key of discountCategories (e.g. "annual"); unknown values fall back to "Por orden"
+  const initialType = discountCategories[params?.initialCategory ?? ""]?.id ?? 1;
+  const [selectedType, setSelectedType] = useState<number>(initialType);
   const { ID } = useAppStore((project) => project.selectedProject);
   const router = useRouter();
   // The page knows which shell it belongs to; the pathname hook is only a fallback.
@@ -34,7 +36,11 @@ export default function useCreateDiscountView({ params }: Props) {
   const [defaultDiscount, setDefaultDiscount] = useState<DiscountSchema>({
     name: "",
     description: "",
-    discount_type: undefined,
+    // Plan anual only has one discount_type, so preselect it like handleClick does
+    discount_type:
+      initialType === discountCategories.annual.id
+        ? getOptionsByType(initialType)[0].value
+        : undefined,
     start_date: null,
     is_active: false,
     products_category: [],
