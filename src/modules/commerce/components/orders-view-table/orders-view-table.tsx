@@ -41,6 +41,7 @@ const TimelineHistoryModal = dynamic(
 interface PropsOrdersViewTable {
   dataSingleOrder: IOrderData | undefined;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
+  setSelectedDrafts: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   selectedRowKeys: Key[];
   orderStatus: string;
@@ -54,6 +55,7 @@ interface PropsOrdersViewTable {
 const OrdersViewTable = ({
   dataSingleOrder: data,
   setSelectedRows,
+  setSelectedDrafts,
   setSelectedRowKeys,
   selectedRowKeys,
   orderStatus,
@@ -119,10 +121,17 @@ const OrdersViewTable = ({
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: IOrder[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
+
+    // Separamos los rows seleccionados entre drafts y no-drafts para que
+    // las acciones (delete, "Generar acción") operen solo sobre órdenes
+    // reales y nunca sobre drafts.
+    const newSelectedNonDrafts = newSelectedRows.filter((row) => !row.is_draft);
+    const newSelectedDrafts = newSelectedRows.filter((row) => row.is_draft);
+
     if (newSelectedRowKeys.length >= 1) {
       setSelectedRows((prevSelectedRows) => {
         if (prevSelectedRows) {
-          const filteredSelectedRows = newSelectedRows.filter(
+          const filteredSelectedRows = newSelectedNonDrafts.filter(
             (newSelectedRow) =>
               !prevSelectedRows.some((prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id)
           );
@@ -139,7 +148,30 @@ const OrdersViewTable = ({
           }
           return [...prevSelectedRows, ...filteredSelectedRows];
         } else {
-          return newSelectedRows;
+          return newSelectedNonDrafts;
+        }
+      });
+
+      setSelectedDrafts((prevSelectedDrafts) => {
+        if (prevSelectedDrafts) {
+          const filteredSelectedDrafts = newSelectedDrafts.filter(
+            (newSelectedRow) =>
+              !prevSelectedDrafts.some((prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id)
+          );
+          const unCheckedRows = prevSelectedDrafts.filter(
+            (prevSelectedRow) =>
+              !newSelectedRowKeys.includes(prevSelectedRow.id) &&
+              prevSelectedRow.order_status === orderStatus
+          );
+          if (unCheckedRows.length > 0) {
+            const filteredPrevSelectedDrafts = prevSelectedDrafts.filter(
+              (prevSelectedRow) => !unCheckedRows.includes(prevSelectedRow)
+            );
+            return filteredPrevSelectedDrafts;
+          }
+          return [...prevSelectedDrafts, ...filteredSelectedDrafts];
+        } else {
+          return newSelectedDrafts;
         }
       });
     }
@@ -147,6 +179,13 @@ const OrdersViewTable = ({
       setSelectedRows((prevSelectedRows) => {
         if (prevSelectedRows) {
           return prevSelectedRows.filter(
+            (prevSelectedRow) => prevSelectedRow.order_status !== orderStatus
+          );
+        }
+      });
+      setSelectedDrafts((prevSelectedDrafts) => {
+        if (prevSelectedDrafts) {
+          return prevSelectedDrafts.filter(
             (prevSelectedRow) => prevSelectedRow.order_status !== orderStatus
           );
         }
