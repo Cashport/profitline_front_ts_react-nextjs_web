@@ -58,7 +58,7 @@ export default function NuevaAsignacionModal({
       onCancel={onClose}
       centered
       width={560}
-      title={<span className="text-base font-bold text-[#141414]">Nueva asignación manual</span>}
+      title={<span className="text-base font-bold text-[#141414]">Crear bonificado</span>}
       styles={{ body: { maxHeight: "60vh", overflowY: "auto" } }}
       footer={
         <div className="flex gap-3">
@@ -73,7 +73,7 @@ export default function NuevaAsignacionModal({
             disabled={!isValid || saving}
             className="flex-1 py-2.5 text-sm font-semibold text-[#141414] bg-[#CBE71E] rounded-lg hover:bg-[#b8d11a] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {saving ? "Guardando…" : "Enviar a aprobación"}
+            {saving ? "Guardando…" : "Crear"}
           </button>
         </div>
       }
