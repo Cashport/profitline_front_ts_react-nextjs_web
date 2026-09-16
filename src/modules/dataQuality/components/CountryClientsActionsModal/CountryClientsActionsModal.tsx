@@ -15,6 +15,7 @@ type CountryClientsActionsModalProps = {
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
   onUploadPacks?: () => void;
+  onUploadInTransitHaleon?: () => void;
   onAddEmails?: () => void;
   isInDetailView?: boolean;
 };
@@ -28,6 +29,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
   onUploadPacks,
+  onUploadInTransitHaleon,
   onAddEmails,
   isInDetailView = false
 }) => {
@@ -70,6 +72,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           title="Cargar Packs"
           onClick={onUploadPacks}
         />
+        {isInDetailView && (
+          <ButtonGenerateAction
+            icon={<UploadSimple size={20} />}
+            title='Cargar "In Transit Haleon"'
+            onClick={onUploadInTransitHaleon}
+          />
+        )}
         {onAddEmails && (
           <ButtonGenerateAction
             icon={<EnvelopeSimple size={20} />}
