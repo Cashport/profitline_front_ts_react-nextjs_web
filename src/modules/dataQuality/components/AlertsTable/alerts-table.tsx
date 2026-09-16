@@ -49,6 +49,7 @@ const columns: TableProps<IAlert>["columns"] = [
       </Badge>
     )
   },
+
   {
     title: "Novedad",
     dataIndex: "error_message",
@@ -61,6 +62,22 @@ const columns: TableProps<IAlert>["columns"] = [
         <span style={{ color: "#141414" }}>{text}</span>
       </Tooltip>
     )
+  },
+  {
+    title: "Periodicidad",
+    dataIndex: "periodicity",
+    render: (periodicity: IAlert["periodicity"]) =>
+      periodicity?.length ? (
+        <div className="flex flex-wrap gap-1">
+          {periodicity.map((item) => (
+            <Badge key={item} variant="outline" className="text-xs">
+              {item}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        "-"
+      )
   },
   {
     title: "Tipo",

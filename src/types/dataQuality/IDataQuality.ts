@@ -439,6 +439,7 @@ export interface IAlert {
   historical_avg_units?: number;
   reported_units?: number;
   variation_percent?: number;
+  periodicity: string[] | null;
 }
 
 export interface IGetAlerts {
