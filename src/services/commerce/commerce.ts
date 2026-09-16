@@ -177,14 +177,16 @@ export const createDraft = async (
 export const deleteOrders = async (
   ordersId: number[],
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
+  showMessage: (type: MessageType, content: string) => void,
+  draftIds: number[] = []
 ) => {
-  const ordersIds = {
-    orders_ids: ordersId
+  const payload = {
+    orders_ids: ordersId,
+    draft_ids: draftIds
   };
   try {
     const response: GenericResponse<[]> = await API.delete(`/marketplace/orders`, {
-      data: ordersIds
+      data: payload
     });
     if (response.status !== 200) {
       throw response;

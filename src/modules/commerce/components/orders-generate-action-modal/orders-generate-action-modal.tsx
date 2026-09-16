@@ -38,6 +38,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   selectedOrders: IOrder[];
+  selectedDrafts?: IOrder[];
   setFetchMutate: () => void;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
@@ -49,6 +50,7 @@ export const OrdersGenerateActionModal = ({
   isOpen,
   onClose,
   selectedOrders,
+  selectedDrafts = [],
   setFetchMutate,
   setSelectedRows,
   setSelectedRowKeys,
@@ -58,6 +60,8 @@ export const OrdersGenerateActionModal = ({
   const ordersId = selectedOrders.map((order) => order.id);
   const selectedCount = selectedOrders.length;
   const operationNumbersText = selectedOrders.map((order) => order.operation_number).join(", ");
+  const draftsCount = selectedDrafts.length;
+  const draftOperationNumbersText = selectedDrafts.map((order) => "dft-" + order.id).join(", ");
   const clientName = selectedOrders[0]?.client_name ?? "";
   const statusName = selectedOrders[0]?.order_status ?? "";
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
@@ -407,6 +411,12 @@ export const OrdersGenerateActionModal = ({
           </Text>
           <Text>{operationNumbersText}</Text>
         </div>
+        {draftsCount > 0 && (
+          <div className="ordersGenerateActionModal__selectedOrders">
+            <Text strong>draft seleccionados: </Text>
+            <Text>{draftOperationNumbersText}</Text>
+          </div>
+        )}
         <Flex vertical gap="0.75rem">
           <ButtonGenerateAction
             onClick={handleChangeOrderState}

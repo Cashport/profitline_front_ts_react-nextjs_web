@@ -39,6 +39,10 @@ export const OrdersView: FC = () => {
   const [isSendInviteModalOpen, setIsSendInviteModalOpen] = useState<boolean>(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<IOrder[] | undefined>([]);
+  // Estado independiente para los drafts. El modal de "Generar acción"
+  // y el delete masivo solo deben operar sobre `selectedRows` (no drafts),
+  // por eso mantenemos la selección de drafts en un estado aparte.
+  const [selectedDrafts, setSelectedDrafts] = useState<IOrder[] | undefined>([]);
   const [selectedFilters, setSelectedFilters] = useState<IMarketplaceOrderFilters>({
     sellers: []
   });
@@ -104,10 +108,12 @@ export const OrdersView: FC = () => {
   };
 
   const handleDeleteOrders = async () => {
-    const selectedOrdersIds = selectedRows?.map((order) => order.id);
-    if (!selectedOrdersIds) return;
+    const selectedOrdersIds = selectedRows?.map((order) => order.id) ?? [];
+    const selectedDraftIds = selectedDrafts?.map((draft) => draft.id) ?? [];
 
-    await deleteOrders(selectedOrdersIds, showMessage);
+    if (selectedOrdersIds.length === 0 && selectedDraftIds.length === 0) return;
+
+    await deleteOrders(selectedOrdersIds, showMessage, selectedDraftIds);
     setIsOpenModalRemove(false);
 
     // Revalidar los datos después de eliminar
@@ -115,6 +121,7 @@ export const OrdersView: FC = () => {
 
     // Limpiar la selección
     setSelectedRows([]);
+    setSelectedDrafts([]);
     setSelectedRowKeys([]);
   };
 
@@ -181,6 +188,7 @@ export const OrdersView: FC = () => {
                   <OrdersViewTable
                     dataSingleOrder={order}
                     setSelectedRows={setSelectedRows}
+                    setSelectedDrafts={setSelectedDrafts}
                     selectedRowKeys={selectedRowKeys}
                     setSelectedRowKeys={setSelectedRowKeys}
                     orderStatus={order.status}
@@ -207,11 +215,13 @@ export const OrdersView: FC = () => {
         isOpen={isGenerateActionModalOpen}
         onClose={() => setIsGenerateActionModalOpen((prev) => !prev)}
         selectedOrders={selectedRows || []}
+        selectedDrafts={selectedDrafts || []}
         setFetchMutate={mutate}
         setSelectedRows={setSelectedRows}
         setSelectedRowKeys={setSelectedRowKeys}
         handleDeleteRows={() => {
-          if (selectedRows?.length === 0) return message.error("No hay órdenes seleccionadas");
+          if ((selectedRows?.length ?? 0) === 0 && (selectedDrafts?.length ?? 0) === 0)
+            return message.error("No hay órdenes seleccionadas");
           setIsGenerateActionModalOpen(false);
           setIsOpenModalRemove(true);
         }}
