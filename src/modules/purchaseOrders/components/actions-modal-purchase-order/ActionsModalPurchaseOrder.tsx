@@ -302,12 +302,22 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
       >
         <div className="modal-content">
           {isAbbott ? (
-            <ButtonGenerateAction
-              icon={<DownloadSimple className="h-4 w-4" />}
-              title="Generar TXT"
-              onClick={handleDownloadMvpTxt}
-              disabled={isMvpTxtLoading || selectedOrders.length === 0}
-            />
+            <>
+              <ButtonGenerateAction
+                icon={<DownloadSimple className="h-4 w-4" />}
+                title="Generar TXT"
+                onClick={handleDownloadMvpTxt}
+                disabled={isMvpTxtLoading || selectedOrders.length === 0}
+              />
+              {canDelete && (
+                <ButtonGenerateAction
+                  icon={<Trash className="h-4 w-4" />}
+                  title="Eliminar Ordenes seleccionadas"
+                  onClick={handleDeleteOrders}
+                  disabled={isDispatchLoading}
+                />
+              )}
+            </>
           ) : (
             <>
               {canDelete && (
