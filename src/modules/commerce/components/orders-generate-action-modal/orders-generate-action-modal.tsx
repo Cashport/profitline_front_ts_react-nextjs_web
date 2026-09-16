@@ -25,6 +25,7 @@ import {
   dowloadOrderCSVOCFormat
 } from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
 import { UploadPurchaseOrdersSummaryModal } from "./upload-purchase-orders-summary-modal";
 
@@ -67,6 +68,8 @@ export const OrdersGenerateActionModal = ({
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
   const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
+  const [isPartialCsvModalOpen, setIsPartialCsvModalOpen] = useState(false);
+  const [isPartialCsvLoading, setIsPartialCsvLoading] = useState(false);
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isUploadProgressOpen, setIsUploadProgressOpen] = useState(false);
@@ -301,19 +304,18 @@ export const OrdersGenerateActionModal = ({
   };
 
   const handleDownloadPartialCsvShowQuestion = () => {
-    Modal.confirm({
-      title: "Descarga parcial CSV",
-      content: "¿Deseas crear una orden de backorder?",
-      okText: "Sí",
-      cancelText: "No",
-      closable: true,
-      onOk() {
-        handleDownloadCsvPartial(true);
-      },
-      onCancel() {
-        handleDownloadCsvPartial(false);
-      }
-    });
+    if (!validateOrdersSelected()) return;
+    setIsPartialCsvModalOpen(true);
+  };
+
+  const handleConfirmPartialCsv = async () => {
+    setIsPartialCsvLoading(true);
+    try {
+      await handleDownloadCsvPartial(true);
+    } finally {
+      setIsPartialCsvLoading(false);
+      setIsPartialCsvModalOpen(false);
+    }
   };
 
   const handleReturnToSeller = async () => {
@@ -405,7 +407,7 @@ export const OrdersGenerateActionModal = ({
     <>
       <Modal
         className="ordersGenerateActionModal"
-        open={isOpen}
+        open={isOpen && !isPartialCsvModalOpen}
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
             Generar acción
@@ -506,6 +508,17 @@ export const OrdersGenerateActionModal = ({
           <Text strong>{errorMessage}</Text>
         </Flex>
       </Modal>
+
+      <ModalConfirmAction
+        isOpen={isPartialCsvModalOpen}
+        onClose={() => setIsPartialCsvModalOpen(false)}
+        onOk={handleConfirmPartialCsv}
+        title="¿Está seguro de querer dividir el pedido?"
+        content="Productos sin unidades se enviarán a backorder"
+        okText="Sí"
+        cancelText="No"
+        okLoading={isPartialCsvLoading}
+      />
 
       <UploadPurchaseOrdersProgressModal
         isOpen={isUploadProgressOpen}
