@@ -105,12 +105,6 @@ export default function NoveltyAlertsView() {
     <div className="flex flex-col gap-4">
       <Header title="Alertas y Novedades" />
 
-      <AlertCategoryCards
-        categories={filtersData.categories}
-        activeKeys={activeKeys}
-        onCategoryClick={handleCategoryClick}
-      />
-
       <Card className="p-0 border-none">
         <CardContent className="pt-6">
           {/* Compact Filters */}
@@ -195,8 +189,14 @@ export default function NoveltyAlertsView() {
             </div>
           </div>
 
+          <AlertCategoryCards
+            categories={filtersData.categories}
+            activeKeys={activeKeys}
+            onCategoryClick={handleCategoryClick}
+          />
+
           {/* Alerts Table */}
-          <div className="border-t pt-6" style={{ borderColor: "#DDDDDD" }}>
+          <div className="pt-6">
             <h3 className="text-lg font-semibold mb-4" style={{ color: "#141414" }}>
               Lista de Alertas y Novedades
             </h3>
