@@ -25,6 +25,7 @@ import {
   dowloadOrderCSVOCFormat
 } from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
 import { UploadPurchaseOrdersSummaryModal } from "./upload-purchase-orders-summary-modal";
 
@@ -56,9 +57,9 @@ export const OrdersGenerateActionModal = ({
 }: Props) => {
   const ordersId = selectedOrders.map((order) => order.id);
   const selectedCount = selectedOrders.length;
-  const operationNumbersText = selectedOrders
-    .map((order) => order.operation_number)
-    .join(", ");
+  const operationNumbersText = selectedOrders.map((order) => order.operation_number).join(", ");
+  const clientName = selectedOrders[0]?.client_name ?? "";
+  const statusName = selectedOrders[0]?.order_status ?? "";
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
 
@@ -67,12 +68,17 @@ export const OrdersGenerateActionModal = ({
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
   const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
+  const [isPartialCsvModalOpen, setIsPartialCsvModalOpen] = useState(false);
+  const [isPartialCsvLoading, setIsPartialCsvLoading] = useState(false);
+  const [isOcFormatModalOpen, setIsOcFormatModalOpen] = useState(false);
+  const [isOcFormatLoading, setIsOcFormatLoading] = useState(false);
 
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isUploadProgressOpen, setIsUploadProgressOpen] = useState(false);
   const [isUploadSummaryOpen, setIsUploadSummaryOpen] = useState(false);
-  const [uploadSummaryData, setUploadSummaryData] =
-    useState<IUploadPurchaseOrdersData | null>(null);
+  const [uploadSummaryData, setUploadSummaryData] = useState<IUploadPurchaseOrdersData | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateOrdersSelected = (): boolean => {
@@ -153,44 +159,17 @@ export const OrdersGenerateActionModal = ({
 
   const handleDownloadCSVOCFormatShowQuestion = () => {
     if (!validateOrdersSelected()) return;
-    const clientName = selectedOrders[0]?.client_name ?? "";
-    const statusName = selectedOrders[0]?.order_status ?? "";
-    Modal.confirm({
-      title: "Descargar CSV Formato OC",
-      content: (
-        <Flex vertical gap={8}>
-          <Text>¿Qué órdenes deseas descargar?</Text>
-          <Text type="secondary">
-            Cliente: <Text strong>{clientName}</Text>
-          </Text>
-          <Text type="secondary">
-            Estado: <Text strong>{statusName}</Text>
-          </Text>
-          <ul style={{ paddingLeft: 18, margin: 0 }}>
-            <li>
-              <b>Solo seleccionadas</b>: descarga únicamente las {selectedCount}{" "}
-              {selectedCount === 1 ? "orden" : "órdenes"} marcadas.
-            </li>
-            <li>
-              <b>Todas del cliente en este estado</b>: descarga todas las
-              órdenes del mismo cliente que estén en el mismo estado.
-            </li>
-          </ul>
-        </Flex>
-      ),
-      okText: "Solo seleccionadas",
-      cancelText: "Todas del cliente (mismo estado)",
-      okButtonProps: { type: "primary" },
-      cancelButtonProps: { type: "default", danger: false },
-      icon: <DownloadSimple size={20} />,
-      closable: true,
-      onOk() {
-        handleDownloadCSVOCFormat(false);
-      },
-      onCancel() {
-        handleDownloadCSVOCFormat(true);
-      }
-    });
+    setIsOcFormatModalOpen(true);
+  };
+
+  const handleConfirmOcFormat = async (downloadAllClient: boolean) => {
+    setIsOcFormatLoading(true);
+    try {
+      await handleDownloadCSVOCFormat(downloadAllClient);
+    } finally {
+      setIsOcFormatLoading(false);
+      setIsOcFormatModalOpen(false);
+    }
   };
 
   const downloadFileFromUrl = (url: string, filename: string) => {
@@ -215,7 +194,10 @@ export const OrdersGenerateActionModal = ({
       showMessage("success", "Descarga exitosa");
       onClose();
     } catch (error) {
-      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Error al descargar el archivo"
+      );
       console.error(error);
     } finally {
       hide();
@@ -236,7 +218,10 @@ export const OrdersGenerateActionModal = ({
       showMessage("success", "Descarga exitosa");
       onClose();
     } catch (error) {
-      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Error al descargar el archivo"
+      );
       console.error(error);
     } finally {
       hide();
@@ -257,7 +242,10 @@ export const OrdersGenerateActionModal = ({
       showMessage("success", "Descarga exitosa");
       onClose();
     } catch (error) {
-      showMessage("error", error instanceof Error ? error.message : "Error al descargar el archivo");
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Error al descargar el archivo"
+      );
       console.error(error);
     } finally {
       hide();
@@ -301,19 +289,18 @@ export const OrdersGenerateActionModal = ({
   };
 
   const handleDownloadPartialCsvShowQuestion = () => {
-    Modal.confirm({
-      title: "Descarga parcial CSV",
-      content: "¿Deseas crear una orden de backorder?",
-      okText: "Sí",
-      cancelText: "No",
-      closable: true,
-      onOk() {
-        handleDownloadCsvPartial(true);
-      },
-      onCancel() {
-        handleDownloadCsvPartial(false);
-      }
-    });
+    if (!validateOrdersSelected()) return;
+    setIsPartialCsvModalOpen(true);
+  };
+
+  const handleConfirmPartialCsv = async () => {
+    setIsPartialCsvLoading(true);
+    try {
+      await handleDownloadCsvPartial(true);
+    } finally {
+      setIsPartialCsvLoading(false);
+      setIsPartialCsvModalOpen(false);
+    }
   };
 
   const handleReturnToSeller = async () => {
@@ -344,8 +331,7 @@ export const OrdersGenerateActionModal = ({
 
     const isXlsx =
       file.name.toLowerCase().endsWith(".xlsx") ||
-      file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     if (!isXlsx) {
       showMessage("error", "Solo se permiten archivos Excel (.xlsx)");
@@ -389,9 +375,7 @@ export const OrdersGenerateActionModal = ({
         setIsUploadProgressOpen(false);
         setUploadFile(null);
         const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Error al procesar las órdenes de compra";
+          error instanceof Error ? error.message : "Error al procesar las órdenes de compra";
         showMessage("error", errorMessage);
       });
 
@@ -405,7 +389,7 @@ export const OrdersGenerateActionModal = ({
     <>
       <Modal
         className="ordersGenerateActionModal"
-        open={isOpen}
+        open={isOpen && !isPartialCsvModalOpen && !isOcFormatModalOpen}
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
             Generar acción
@@ -506,6 +490,50 @@ export const OrdersGenerateActionModal = ({
           <Text strong>{errorMessage}</Text>
         </Flex>
       </Modal>
+
+      <ModalConfirmAction
+        isOpen={isPartialCsvModalOpen}
+        onClose={() => setIsPartialCsvModalOpen(false)}
+        onOk={handleConfirmPartialCsv}
+        title="¿Está seguro de querer dividir el pedido?"
+        content="Productos sin unidades se enviarán a backorder"
+        okText="Sí"
+        cancelText="No"
+        okLoading={isPartialCsvLoading}
+      />
+
+      <ModalConfirmAction
+        isOpen={isOcFormatModalOpen}
+        onClose={() => setIsOcFormatModalOpen(false)}
+        onOk={() => handleConfirmOcFormat(false)}
+        onCancel={() => handleConfirmOcFormat(true)}
+        title="Descargar CSV Formato OC"
+        content={
+          <Flex vertical gap={8}>
+            <Text>¿Qué órdenes deseas descargar?</Text>
+            <Text type="secondary">
+              Cliente: <Text strong>{clientName}</Text>
+            </Text>
+            <Text type="secondary">
+              Estado: <Text strong>{statusName}</Text>
+            </Text>
+            <ul style={{ paddingLeft: 18, margin: 0 }}>
+              <li>
+                <b>Solo seleccionadas</b>: descarga únicamente las {selectedCount}{" "}
+                {selectedCount === 1 ? "orden" : "órdenes"} marcadas.
+              </li>
+              <li>
+                <b>Todas del cliente en este estado</b>: descarga todas las órdenes del mismo
+                cliente que estén en el mismo estado.
+              </li>
+            </ul>
+          </Flex>
+        }
+        okText="Solo seleccionadas"
+        cancelText="Todas del cliente"
+        okLoading={isOcFormatLoading}
+        cancelLoading={isOcFormatLoading}
+      />
 
       <UploadPurchaseOrdersProgressModal
         isOpen={isUploadProgressOpen}
