@@ -6,11 +6,7 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import { useBusinessRulesCatalog } from "@/hooks/useBusinessRules";
-import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
-import { useHolding } from "@/hooks/useHolding";
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
-import { useZone } from "@/hooks/useZone";
 import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncidentListFilters";
 
 import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_STATUS_OPTIONS } from "../../constants";
@@ -31,6 +27,10 @@ type Loading = "loading" | undefined;
 const toOptions = (items?: { id: number | string; name: string }[]): FilterOptionItem[] =>
   (items ?? []).map((i) => ({ id: String(i.id), name: i.name }));
 
+/** Opciones de un filtro canonicalizado: el canónico es a la vez id y etiqueta. */
+const canonicalOptions = (items?: { canonical: string }[]): FilterOptionItem[] =>
+  (items ?? []).map((c) => ({ id: c.canonical, name: c.canonical }));
+
 /** Selección de una categoría multi a partir de los ids confirmados. */
 const many = (ids: Array<string | number>, options: FilterOptionItem[]): FilterOptionItem[] =>
   ids.map((id) => {
@@ -47,61 +47,49 @@ const toTexts = (items?: FilterOptionItem[]) => (items ?? []).map((o) => o.id);
 const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
 
 /**
- * Botón "Filtros" de la matriz. Las listas son multi porque el API las
- * recibe separadas por coma; coordinador y mercado son de un solo valor
+ * Botón "Filtros" de la matriz. Estado, tipo de novedad y ejecutivo son
+ * multi porque el API los recibe separados por coma (ejecutivo viaja por
+ * correo). Coordinador, mercado, KAM y KAM líder son de un solo valor
  * canónico, el mismo que devuelve /invoice/incident-list/filters.
  */
 export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrixProps) {
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
   const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
-  const { data: zones, isLoading: isLoadingZones } = useZone();
-  const { channels, lines, sublines, isLoading: isLoadingBR } = useBusinessRulesCatalog();
-  const { data: holdings, isLoading: isLoadingHoldings } = useHolding();
-  const { data: groups, loading: isLoadingGroups } = useClientsGroupsSimplified();
-
-  const canonicalOptions = (items?: { canonical: string }[]): FilterOptionItem[] =>
-    (items ?? []).map((c) => ({ id: c.canonical, name: c.canonical }));
 
   const coordinadorOptions = canonicalOptions(filters?.coordinator);
   const mercadoOptions = canonicalOptions(filters?.market);
+  const kamOptions = canonicalOptions(filters?.kam);
+  const kamLiderOptions = canonicalOptions(filters?.kam_lider);
+  // El id es el correo: es lo que el filtro `executive` espera de vuelta.
+  const ejecutivoOptions: FilterOptionItem[] = (filters?.executive ?? []).map((e) => ({
+    id: e.email,
+    name: e.name
+  }));
   const estadoOptions = MATRIX_STATUS_OPTIONS;
   const tipoNovedadOptions = toOptions(motives);
-  const zonaOptions = toOptions(zones?.data.map((z) => ({ id: z.ID, name: z.ZONE_DESCRIPTION })));
-  const canalOptions = toOptions(channels);
-  const lineaOptions = toOptions(lines);
-  const sublineaOptions = toOptions(sublines);
-  const holdingOptions = toOptions(holdings?.data);
-  const grupoOptions = toOptions(groups?.map((g) => ({ id: g.id, name: g.group_name })));
 
   const selection: FilterSelection = {
     coordinador: single(value.coordinator, coordinadorOptions),
     mercado: single(value.market, mercadoOptions),
+    kam: single(value.kam, kamOptions),
+    kamLider: single(value.kam_lider, kamLiderOptions),
+    ejecutivo: many(value.executive, ejecutivoOptions),
     estado: many(value.status, estadoOptions),
-    tipoNovedad: many(value.noveltyType, tipoNovedadOptions),
-    zona: many(value.zones, zonaOptions),
-    canal: many(value.channels, canalOptions),
-    linea: many(value.lines, lineaOptions),
-    sublinea: many(value.sublines, sublineaOptions),
-    holding: many(value.holdings, holdingOptions),
-    grupo: many(value.clientGroup, grupoOptions)
+    tipoNovedad: many(value.noveltyType, tipoNovedadOptions)
   };
 
   const selectionToDomain = (sel: FilterSelection): IWalletMatrixModalFilters => ({
     coordinator: toText(sel.coordinador),
     market: toText(sel.mercado),
+    kam: toText(sel.kam),
+    kam_lider: toText(sel.kamLider),
+    executive: toTexts(sel.ejecutivo),
     status: toTexts(sel.estado),
-    noveltyType: toNumbers(sel.tipoNovedad),
-    zones: toNumbers(sel.zona),
-    channels: toNumbers(sel.canal),
-    lines: toNumbers(sel.linea),
-    sublines: toNumbers(sel.sublinea),
-    holdings: toNumbers(sel.holding),
-    clientGroup: toNumbers(sel.grupo)
+    noveltyType: toNumbers(sel.tipoNovedad)
   });
 
   const status = (loading: boolean): Loading => (loading ? "loading" : undefined);
   const filtersStatus = status(isLoadingFilters);
-  const brStatus = status(isLoadingBR);
 
   const categories: FilterCategoryConfig[] = [
     {
@@ -118,28 +106,32 @@ export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrix
       options: mercadoOptions,
       status: filtersStatus
     },
+    {
+      key: "kam",
+      label: "KAM",
+      selectMode: "single",
+      options: kamOptions,
+      status: filtersStatus
+    },
+    {
+      key: "kamLider",
+      label: "KAM líder",
+      selectMode: "single",
+      options: kamLiderOptions,
+      status: filtersStatus
+    },
+    {
+      key: "ejecutivo",
+      label: "Ejecutivo",
+      options: ejecutivoOptions,
+      status: filtersStatus
+    },
     { key: "estado", label: "Estado", options: estadoOptions },
     {
       key: "tipoNovedad",
       label: "Tipo de novedad",
       options: tipoNovedadOptions,
       status: status(isLoadingMotives)
-    },
-    { key: "zona", label: "Zona", options: zonaOptions, status: status(isLoadingZones) },
-    { key: "canal", label: "Canal", options: canalOptions, status: brStatus },
-    { key: "linea", label: "Línea", options: lineaOptions, status: brStatus },
-    { key: "sublinea", label: "Sublínea", options: sublineaOptions, status: brStatus },
-    {
-      key: "holding",
-      label: "Holding",
-      options: holdingOptions,
-      status: status(isLoadingHoldings)
-    },
-    {
-      key: "grupo",
-      label: "Grupo de clientes",
-      options: grupoOptions,
-      status: status(isLoadingGroups)
     }
   ];
 

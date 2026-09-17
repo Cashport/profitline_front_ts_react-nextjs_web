@@ -187,7 +187,6 @@ export interface IWalletMatrixFilters {
   noveltyType?: number[];
   /** Correos del ejecutivo responsable. */
   executive?: string[];
-  kam?: number[];
   zones?: number[];
   lines?: number[];
   sublines?: number[];
@@ -197,6 +196,8 @@ export interface IWalletMatrixFilters {
   /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
   coordinator?: string | null;
   market?: string | null;
+  kam?: string | null;
+  kam_lider?: string | null;
   /** Texto libre: cliente, NIT o responsable. */
   search?: string;
   /** Ordena el conjunto completo filtrado, no sólo la página cargada. */

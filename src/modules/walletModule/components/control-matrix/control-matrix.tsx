@@ -184,7 +184,7 @@ export default function ControlMatrix({
                           {nombreActiva ? "quitar selección" : "ver grupos"}
                         </span>
                         <div className="text-[11.5px] text-muted-foreground">
-                          <span className="font-mono">NIT {row.nit}</span> — {row.ejecutivo}
+                          NIT {row.nit} — {row.ejecutivo}
                         </div>
                       </td>
                     </DetailTooltip>
