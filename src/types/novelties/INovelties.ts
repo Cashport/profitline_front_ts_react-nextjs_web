@@ -77,8 +77,9 @@ export interface IIncidentListCanonicalFilter {
 export interface IIncidentListFilters {
   coordinator: IIncidentListCanonicalFilter[];
   kam: IIncidentListCanonicalFilter[];
+  kam_lider: IIncidentListCanonicalFilter[];
   market: IIncidentListCanonicalFilter[];
-  executive: { id: number; name: string }[];
+  executive: { id: number; name: string; email: string }[];
   novelty_type: { id: number; name: string }[];
   novelty_status: INoveltyStatus[];
 }

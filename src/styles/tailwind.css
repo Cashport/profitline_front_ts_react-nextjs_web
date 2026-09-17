@@ -83,9 +83,9 @@
    colors are specific to the module. Declared on .wallet-scope; the tramo
    and accent tokens get dark values when a .dark ancestor is present. */
 .wallet-scope {
-  --wallet-comp: 203 231 30;
+  --wallet-comp: 37 99 201;
   --wallet-pag: 15 163 177;
-  --wallet-conc: 37 99 201;
+  --wallet-conc: 203 231 30;
   --wallet-nov: 255 85 0;
   --wallet-risk: 201 222 255;
   --wallet-saldo: 161 98 7;
