@@ -105,6 +105,7 @@ export interface IWalletMatrixDetailRow {
   _id: string;
   source: "INVOICE" | "BALANCE";
   clientId: string;
+  clientUuid: string | null;
   clientName: string | null;
   aging: AgingBucket;
   daysOverdue: number;
@@ -122,7 +123,10 @@ export interface IWalletMatrixDetailRow {
   noveltyStatus: string | null;
   ticketId: string | null;
   responsibleName: string | null;
+  responsibleEmail: string | null;
   kamName: string | null;
+  noveltyAssignedTo: string | null;
+  noveltyAssignedToName: string | null;
 }
 
 export interface IWalletMatrixDetail {

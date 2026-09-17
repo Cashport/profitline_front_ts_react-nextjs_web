@@ -9,7 +9,6 @@ import {
 } from "@/hooks/useWalletMatrix";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { buildMatrixQuery, refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
-import { API } from "@/utils/api/api";
 import { useWalletMatrixSocket } from "@/context/WalletMatrixSocketContext";
 import { useMessageApi } from "@/context/MessageContext";
 
@@ -252,25 +251,8 @@ export default function WalletView() {
     [groups, openGroup]
   );
 
-  // TEST: sondeo de /portfolio/matrix/detail para ver qué campos trae por
-  // cliente (el endpoint de grupos no manda el id del responsable).
-  const runId = matrix?.snapshot?.runId;
-  useEffect(() => {
-    if (!grupoAbierto || !runId) return;
-    const probe = async () => {
-      try {
-        const response = await API.get(
-          `/portfolio/matrix/detail?clientId=${grupoAbierto.clientId}&status=${grupoAbierto.statusKey}&runId=${runId}`
-        );
-        console.log("TEST /portfolio/matrix/detail", response);
-      } catch (error) {
-        console.error("TEST /portfolio/matrix/detail failed", error);
-      }
-    };
-    probe();
-  }, [grupoAbierto, runId]);
-
-  // Grupos sin novedad: las cifras del modal salen del grupo en memoria. El
+  // Grupos sin novedad: las cifras del modal salen del grupo en memoria y las
+  // facturas las pide el modal sobre la misma foto (runId). El
   // tramo del drilldown viaja con el detalle porque, cuando lo hay, las cifras
   // llegan acotadas a él y el modal tiene que decirlo. Grupos con novedad: el
   // modal pide el incidente y lo reemplaza todo salvo el reparto por tramo.
@@ -356,6 +338,7 @@ export default function WalletView() {
       {/* Desde el modal se crean y editan novedades: al cerrar se releen los grupos. */}
       <GroupDetailModal
         detail={detalleAbierto}
+        runId={matrix?.snapshot?.runId}
         onClose={() => {
           setOpenGroup(null);
           mutateGroups();
