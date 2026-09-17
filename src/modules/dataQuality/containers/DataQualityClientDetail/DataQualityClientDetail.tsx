@@ -26,7 +26,7 @@ import { ClientDetailInfo } from "../../components/ClientDetailInfo";
 import { ClientDetailArchives } from "../../components/ClientDetailArchives";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
-import { ModalUploadInTransitHaleon } from "../../components/ModalUploadInTransitHaleon/ModalUploadInTransitHaleon";
+import ModalUploadInTransitHaleon from "../../components/ModalUploadInTransitHaleon/ModalUploadInTransitHaleon";
 
 import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
 import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
@@ -244,9 +244,6 @@ export default function DataQualityClientDetails() {
                 Atrás
               </Button>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(7)}>
-                  Cargar &quot;In Transit Haleon&quot;
-                </Button>
                 <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
                   <DotsThree size={"1.5rem"} />
                   Generar acción
@@ -325,6 +322,7 @@ export default function DataQualityClientDetails() {
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
         onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
         onUploadPacks={handleOpenPacksUpload}
+        onUploadInTransitHaleon={() => setWhichModalIsOpen(7)}
         onAddEmails={() => setWhichModalIsOpen(4)}
       />
 
@@ -374,6 +372,7 @@ export default function DataQualityClientDetails() {
       <ModalUploadInTransitHaleon
         isOpen={whichModalIsOpen === 7}
         onClose={() => setWhichModalIsOpen(0)}
+        onSuccess={() => mutate()}
       />
     </div>
   );

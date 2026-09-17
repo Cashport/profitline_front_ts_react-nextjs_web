@@ -148,12 +148,9 @@ export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
   noveltyType: [],
   coordinator: null,
   market: null,
-  zones: [],
-  lines: [],
-  sublines: [],
-  channels: [],
-  holdings: [],
-  clientGroup: []
+  kam: null,
+  kam_lider: null,
+  executive: []
 };
 
 /** Orden inicial de la matriz; `col` es el `sort_by` del API. */

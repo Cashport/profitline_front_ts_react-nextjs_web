@@ -30,7 +30,6 @@ export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
   list("status", filters?.status);
   list("novelty_type", filters?.noveltyType);
   list("executive", filters?.executive);
-  list("kam", filters?.kam);
   list("zones", filters?.zones);
   list("lines", filters?.lines);
   list("sublines", filters?.sublines);
@@ -39,6 +38,8 @@ export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
   list("client_group", filters?.clientGroup);
   single("coordinator", filters?.coordinator);
   single("market", filters?.market);
+  single("kam", filters?.kam);
+  single("kam_lider", filters?.kam_lider);
   single("search", filters?.search);
   single("sort_by", filters?.sort_by);
   single("sort_dir", filters?.sort_dir);

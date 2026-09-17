@@ -92,12 +92,9 @@ export type IWalletMatrixModalFilters = Required<
     | "noveltyType"
     | "coordinator"
     | "market"
-    | "zones"
-    | "lines"
-    | "sublines"
-    | "channels"
-    | "holdings"
-    | "clientGroup"
+    | "kam"
+    | "kam_lider"
+    | "executive"
   >
 >;
 

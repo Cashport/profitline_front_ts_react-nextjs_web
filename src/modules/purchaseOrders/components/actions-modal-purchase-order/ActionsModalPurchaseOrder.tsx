@@ -305,7 +305,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
             <>
               <ButtonGenerateAction
                 icon={<DownloadSimple className="h-4 w-4" />}
-                title="Generar TXT"
+                title="Descargar TXT ERP"
                 onClick={handleDownloadMvpTxt}
                 disabled={isMvpTxtLoading || selectedOrders.length === 0}
               />

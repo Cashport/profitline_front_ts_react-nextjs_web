@@ -1,89 +1,126 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Modal, message } from "antd";
-import { FileText } from "lucide-react";
+import { CaretLeft } from "@phosphor-icons/react";
+import { FileArrowUp } from "phosphor-react";
+import type { Dayjs } from "dayjs";
 
-import { Button } from "@/modules/chat/ui/button";
+import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+
+import "../ModalCreateNewFile/modalCreateNewFile.scss";
+import "./modalUploadInTransitHaleon.scss";
 
 interface ModalUploadInTransitHaleonProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export const ModalUploadInTransitHaleon: React.FC<ModalUploadInTransitHaleonProps> = ({
+interface IFormUploadInTransitHaleon {
+  date: Dayjs | undefined;
+}
+
+const ModalUploadInTransitHaleon = ({
   isOpen,
-  onClose
-}) => {
+  onClose,
+  onSuccess
+}: ModalUploadInTransitHaleonProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset
+  } = useForm<IFormUploadInTransitHaleon>({
+    mode: "onChange",
+    defaultValues: { date: undefined }
+  });
+
+  const handleUpload = async (data: IFormUploadInTransitHaleon) => {
+    if (!file) {
+      message.error("El archivo In Transit Haleon es obligatorio *");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      // MOCK: no llamar al Backend por ahora.
+      // El tipo de archivo queda implícito como "In Transit Haleon".
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      message.success("Archivo cargado correctamente (MOCK)");
+      reset();
+      setFile(null);
+      onSuccess?.();
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleClose = () => {
+    reset();
     setFile(null);
-    setLoading(false);
     onClose();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] ?? null;
-    setFile(selected);
-  };
-
-  const handleUpload = () => {
-    if (!file) return;
-    setLoading(true);
-    // MOCK: no llamar al Backend por ahora.
-    setTimeout(() => {
-      setLoading(false);
-      message.success("Archivo cargado correctamente (MOCK)");
-      handleClose();
-    }, 800);
   };
 
   return (
     <Modal
-      open={isOpen}
-      onCancel={handleClose}
-      title={`Cargar "In Transit Haleon"`}
+      className="modalCreateNewFile"
+      width={460}
       footer={null}
-      centered
-      closable={!loading}
-      maskClosable={!loading}
+      open={isOpen}
+      closable={false}
+      maskClosable={!isSubmitting}
     >
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-gray-600">
-          Adjunta el archivo In Transit Haleon para cargarlo.
-        </p>
+      <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
+        <CaretLeft size="1.25rem" />
+        <h4>Cargar &quot;In Transit Haleon&quot;</h4>
+      </button>
 
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="file"
-            accept=".xls,.xlsx,.csv"
-            onChange={handleFileChange}
-            disabled={loading}
-            style={{ display: "none" }}
-          />
-          <span className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">
-            <FileText size={18} />
-            Seleccionar archivo
-          </span>
-        </label>
+      <form className="modalCreateNewFile__form">
+        <InputDateForm
+          titleInput="Fecha"
+          nameInput="date"
+          control={control}
+          error={errors.date}
+          placeholder="Seleccionar fecha"
+        />
 
-        {file && (
-          <p className="text-sm text-gray-800">
-            Archivo seleccionado: <span className="font-medium">{file.name}</span>
-          </p>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
-            Cancelar
-          </Button>
-          <Button onClick={handleUpload} disabled={!file || loading}>
-            {loading ? "Cargando..." : "Cargar"}
-          </Button>
+        <div className="modalUploadInTransitHaleon__file">
+          <p className="modalUploadInTransitHaleon__file-title">Archivo</p>
+          <label className="modalUploadInTransitHaleon__file-dropzone">
+            <input
+              type="file"
+              accept=".xls,.xlsx,.csv"
+              disabled={isSubmitting}
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              style={{ display: "none" }}
+            />
+            <FileArrowUp size="1.5rem" />
+            <span>Seleccionar archivo</span>
+          </label>
+          {file && (
+            <p className="modalUploadInTransitHaleon__file-name">
+              Archivo seleccionado: <strong>{file.name}</strong>
+            </p>
+          )}
         </div>
-      </div>
+      </form>
+
+      <FooterButtons
+        handleOk={() => handleSubmit(handleUpload)()}
+        onClose={handleClose}
+        titleConfirm="Cargar"
+        titleCancel="Cancelar"
+        isConfirmLoading={isSubmitting}
+        isConfirmDisabled={!isValid || !file}
+      />
     </Modal>
   );
 };
+
+export default ModalUploadInTransitHaleon;
