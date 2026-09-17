@@ -6,10 +6,10 @@ import { Search, X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 import { ApiError } from "@/utils/api/api";
-import { useAppStore } from "@/lib/store/store";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useIncidentDetail } from "@/hooks/useNoveltyDetail";
 import { useIncidentActions } from "@/hooks/useIncidentActions";
+import { useWalletMatrixDetail } from "@/hooks/useWalletMatrix";
 import {
   addIncidentComment,
   createIncident,
@@ -20,7 +20,12 @@ import {
 } from "@/services/resolveNovelty/resolveNovelty";
 import { useMessageApi } from "@/context/MessageContext";
 import type { ICreateIncidentActionBody, IUpdateIncidentBody } from "@/types/novelties/INovelties";
-import { toIncidentGroupDetail, toTickets, toTimelineEntries } from "../../utils/api-adapter";
+import {
+  toIncidentGroupDetail,
+  toMatrixDocument,
+  toTickets,
+  toTimelineEntries
+} from "../../utils/api-adapter";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
 import GroupDetailRail from "./group-detail-rail";
@@ -33,7 +38,7 @@ import ModalCreateNovelty, { CreateNoveltyBody } from "./modal-create-novelty";
 import ModalEditNovelty from "./modal-edit-novelty";
 import ModalLinkNovelty from "./modal-link-novelty";
 import type { NoveltyModalMode } from "./novelty-drawer";
-import type { IWalletGroupDetail, IWalletTicket } from "../../types";
+import type { IWalletDocument, IWalletGroupDetail, IWalletTicket } from "../../types";
 
 interface GroupDetailModalProps {
   /**
@@ -44,10 +49,18 @@ interface GroupDetailModalProps {
   detail?: IWalletGroupDetail | null;
   /** Novedad abierta desde la bandeja: todo sale de /invoice/incident-detail. */
   incidentId?: number | null;
+  /**
+   * Foto de la matriz que está pintada. Los grupos sin novedad piden sus
+   * facturas sobre ella; sin runId no hay de dónde leerlas.
+   */
+  runId?: string;
   onClose: () => void;
 }
 
 type Tab = "gestion" | "facturas";
+
+/** Facturas por página en los grupos sin novedad (/portfolio/matrix/detail). */
+const INVOICES_PAGE_SIZE = 25;
 
 const TabButton = ({
   active,
@@ -102,17 +115,23 @@ const CloseButton = ({ onClose }: { onClose: () => void }) => (
 function GroupDetailBody({
   base,
   incidentId,
+  runId,
   onClose
 }: {
   /** Detalle armado desde la fila de cartera; null cuando se abre desde la bandeja. */
   base: IWalletGroupDetail | null;
   incidentId?: number;
+  runId?: string;
   onClose: () => void;
 }) {
   const { showMessage, messageApi } = useMessageApi();
-  const [tab, setTab] = useState<Tab>("gestion");
+  // Sin novedad no hay seguimiento: el modal abre directo en las facturas.
+  const [tab, setTab] = useState<Tab>(incidentId ? "gestion" : "facturas");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  // Documentos completos y no ids: con paginación, los marcados en otra página
+  // ya no están en la tabla y aun así viajan a crear/vincular novedad.
+  const [selected, setSelected] = useState<IWalletDocument[]>([]);
+  const [invoicesPage, setInvoicesPage] = useState(1);
   const [ticketForm, setTicketForm] = useState(false);
   const [noveltyModal, setNoveltyModal] = useState<NoveltyModalMode | null>(null);
 
@@ -137,16 +156,34 @@ function GroupDetailBody({
     mutate: mutateActions
   } = useIncidentActions({ incidentId });
 
+  // Grupo sin novedad: las facturas no vienen con la fila, se piden paginadas
+  // a la foto de la matriz. `!incidentId` es exactamente ese caso (el id se
+  // resuelve tanto desde la fila como desde la bandeja). Con novedad el hook
+  // no pide nada: los documentos ya vienen en el incidente.
+  const matrixParams =
+    !incidentId && runId && base?.statusKey
+      ? { runId, clientId: base.cliente.nit, status: base.statusKey, noveltyId: null }
+      : null;
+  const {
+    data: matrixDetail,
+    loading: isLoadingInvoices,
+    error: invoicesError
+  } = useWalletMatrixDetail(matrixParams, invoicesPage, INVOICES_PAGE_SIZE);
+
   const detail = useMemo(
     () => (incident ? toIncidentGroupDetail(incident, base) : base),
     [incident, base]
   );
   const bitacora = useMemo(() => (incident ? toTimelineEntries(incident) : []), [incident]);
   const tickets = useMemo(() => toTickets(actions), [actions]);
-  const documentosSeleccionados = useMemo(
-    () => (detail?.documentos ?? []).filter((d) => selected.includes(d.id)),
-    [detail, selected]
+  const documentos = useMemo(
+    () =>
+      incidentId ? detail?.documentos ?? [] : (matrixDetail?.rows ?? []).map(toMatrixDocument),
+    [incidentId, detail, matrixDetail]
   );
+  const totalFacturas = incidentId
+    ? detail?.totalFacturas ?? 0
+    : matrixDetail?.pagination.total ?? detail?.totalFacturas ?? 0;
 
   // El seguimiento se lee de abajo hacia arriba: lo último siempre a la vista.
   useEffect(() => {
@@ -224,11 +261,13 @@ function GroupDetailBody({
     }
   };
 
-  // La novedad nueva se crea sobre el cliente del incidente abierto (la
-  // selección sólo existe cuando hay incidente). Al quedar creada se relee el
-  // incidente —los documentos pueden haberse movido— y se suelta la selección.
+  // La novedad nueva se crea sobre el cliente del grupo: el uuid sale del
+  // incidente abierto o, en un grupo sin novedad, de sus documentos (la foto
+  // lo trae por fila). Al quedar creada se relee el incidente —los documentos
+  // pueden haberse movido— y se suelta la selección. La foto de la matriz no
+  // se relee: es fija hasta la próxima corrida.
   const handleCreateNovelty = async (body: CreateNoveltyBody): Promise<boolean> => {
-    const clientUuid = incident?.client_uuid;
+    const clientUuid = incident?.client_uuid ?? matrixDetail?.rows[0]?.clientUuid;
     if (!clientUuid) {
       showMessage("error", "No se pudo identificar el cliente de la novedad");
       return false;
@@ -299,7 +338,7 @@ function GroupDetailBody({
       <ModalCreateNovelty
         open={noveltyModal === "crear"}
         clienteNombre={detail.cliente.nombre}
-        documentos={documentosSeleccionados}
+        documentos={selected}
         defaultAssignedTo={incident?.assigned_to}
         onClose={() => setNoveltyModal(null)}
         onCreate={handleCreateNovelty}
@@ -317,7 +356,8 @@ function GroupDetailBody({
       <ModalLinkNovelty
         open={noveltyModal === "vincular"}
         clienteNombre={detail.cliente.nombre}
-        documentos={documentosSeleccionados}
+        clienteNit={detail.cliente.nit}
+        documentos={selected}
         onClose={() => setNoveltyModal(null)}
       />
 
@@ -363,13 +403,12 @@ function GroupDetailBody({
             >
               Seguimiento
             </TabButton>
-            {/* Sólo las novedades traen sus documentos (incident-detail); los
-                grupos de cartera no tienen endpoint de facturas todavía. */}
+            {/* Con novedad el conteo es el del incidente; sin ella, el total
+                que reporta la foto (o el del grupo mientras llega). */}
             <TabButton
               active={tab === "facturas"}
-              count={detail.totalFacturas}
+              count={totalFacturas}
               onClick={() => setTab("facturas")}
-              disabled={!incidentId}
             >
               Facturas
             </TabButton>
@@ -388,17 +427,37 @@ function GroupDetailBody({
             )}
           </div>
 
-          {!incidentId ? (
+          {tab === "facturas" ? (
+            invoicesError ? (
+              <p className="flex flex-1 items-center justify-center px-6 text-center text-[12.5px] text-destructive">
+                {(invoicesError as Error)?.message || "No se pudieron cargar las facturas."}
+              </p>
+            ) : isLoadingInvoices && !matrixDetail ? (
+              <div className="flex flex-1 items-center justify-center">
+                <ProfitLoader size="small" />
+              </div>
+            ) : (
+              <GroupInvoicesTable
+                documentos={documentos}
+                query={query}
+                selected={selected}
+                onSelectedChange={setSelected}
+                pagination={
+                  incidentId
+                    ? undefined
+                    : {
+                        page: invoicesPage,
+                        pageSize: INVOICES_PAGE_SIZE,
+                        total: matrixDetail?.pagination.total ?? 0,
+                        onChange: setInvoicesPage
+                      }
+                }
+              />
+            )
+          ) : !incidentId ? (
             <p className="flex flex-1 items-center justify-center px-6 text-center text-[12.5px] text-muted-foreground">
               El seguimiento solo está disponible para grupos con novedad.
             </p>
-          ) : tab === "facturas" ? (
-            <GroupInvoicesTable
-              documentos={detail.documentos}
-              query={query}
-              selected={selected}
-              onSelectedChange={setSelected}
-            />
           ) : (
             <>
               <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col overflow-auto">
@@ -422,7 +481,12 @@ function GroupDetailBody({
 }
 
 /** Modal de gestión de un grupo de facturas / una novedad. */
-export default function GroupDetailModal({ onClose, detail, incidentId }: GroupDetailModalProps) {
+export default function GroupDetailModal({
+  onClose,
+  detail,
+  incidentId,
+  runId
+}: GroupDetailModalProps) {
   const { resolvedTheme } = useWalletTheme();
 
   const open = !!detail || !!incidentId;
@@ -448,6 +512,7 @@ export default function GroupDetailModal({ onClose, detail, incidentId }: GroupD
           key={detail?.clave ?? `inc-${incidentId}`}
           base={detail ?? null}
           incidentId={resolvedIncidentId}
+          runId={runId}
           onClose={onClose}
         />
       )}

@@ -207,6 +207,11 @@ export interface IWalletNovedad {
 export interface IWalletGroupDetail {
   clave: string;
   tipo: EstadoKey;
+  /**
+   * statusKey crudo del API (CONCILIADO, SIN_CONCILIAR, SALDO_FACTURA…). `tipo`
+   * lo agrupa y pierde el valor exacto, que es el que pide /portfolio/matrix/detail.
+   */
+  statusKey?: string;
   novedad?: IWalletNovedad;
   cliente: { nombre: string; nit: string };
   ejecutivo: IWalletPerson;
@@ -222,7 +227,8 @@ export interface IWalletGroupDetail {
   totalFacturas: number;
   /**
    * Documentos de la novedad (/invoice/incident-detail → `documents`). Vacío
-   * en grupos sin novedad: la pestaña "Facturas" queda deshabilitada.
+   * en grupos sin novedad: sus facturas las pide el modal a
+   * /portfolio/matrix/detail, paginadas.
    */
   documentos: IWalletDocument[];
   /**

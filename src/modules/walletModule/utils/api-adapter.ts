@@ -21,6 +21,7 @@ import type {
 import type {
   AgingBucket,
   IWalletMatrix,
+  IWalletMatrixDetailRow,
   IWalletMatrixGroup,
   IWalletMatrixGroups
 } from "@/types/portfolios/IWalletMatrix";
@@ -190,8 +191,9 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  * al incidente (`/invoice/incident-detail`) con `novedad.incidentId`, y lo
  * publica por `/invoice/incident-comments`; las acciones las pide a
  * `/invoice/incident/:id/actions`. Facturas y tickets van vacíos: el modal no
- * los lee de aquí (el tab de facturas está deshabilitado; el conteo que se
- * muestra es `group.invoices`).
+ * los lee de aquí (las facturas de un grupo sin novedad las pide paginadas a
+ * `/portfolio/matrix/detail` con `statusKey`; el conteo que se muestra es
+ * `group.invoices`).
  *
  * `tramo` es el del drilldown. Si se pidió con `aging`, el API ya recortó el
  * grupo a ese tramo: monto, reparto y conteo son la parte que cae ahí, no el
@@ -208,6 +210,7 @@ export const toGroupDetail = (
   return {
     clave: groupKey(group),
     tipo,
+    statusKey: group.statusKey,
     novedad:
       group.noveltyId === null
         ? undefined
@@ -263,6 +266,23 @@ const toDocument = (doc: IIncidentDocument): IWalletDocument => ({
 });
 
 /**
+ * Documento de la foto de cartera (/portfolio/matrix/detail) → documento del
+ * modal. La foto no lleva histórico: todo lo que devuelve es cartera viva, así
+ * que va activo y con el saldo inicial igual al actual.
+ */
+export const toMatrixDocument = (row: IWalletMatrixDetailRow): IWalletDocument => ({
+  id: row._id,
+  documentId: Number(row.documentId),
+  doc: row.erpId ?? `#${row.documentId}`,
+  tipo: row.source === "BALANCE" ? "BALANCE" : "FINANCIAL_RECORD",
+  saldoInicial: row.amount,
+  saldo: row.amount,
+  activa: true,
+  inactivaMotivo: null,
+  inactivaEl: null
+});
+
+/**
  * Detalle del modal a partir del incidente (/invoice/incident-detail).
  *
  * Es la fuente de verdad cuando el grupo es una novedad: cliente, estado,
@@ -283,6 +303,7 @@ export const toIncidentGroupDetail = (
   return {
     clave: base?.clave ?? `NOV-${incident.incident_id}`,
     tipo: "novedad",
+    statusKey: base?.statusKey,
     novedad: {
       id: `NOV-${incident.incident_id}`,
       incidentId: incident.incident_id,

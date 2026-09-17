@@ -1,6 +1,7 @@
 import config from "@/config";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
+import { INotificationByClient } from "@/types/notifications/INotifications";
 
 interface MarkNotificationReadResponse {
   message: string;
@@ -37,6 +38,20 @@ export const getNotificationTypes = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching notification types", error);
+    throw error;
+  }
+};
+
+export const getNotificationsByClient = async (
+  projectId: number,
+  clientId: string
+): Promise<INotificationByClient[]> => {
+  try {
+    const url = `${config.API_HOST}/notification/project/${projectId}/client/${clientId}`;
+    const response: GenericResponse<INotificationByClient[]> = await API.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching client notifications", error);
     throw error;
   }
 };
