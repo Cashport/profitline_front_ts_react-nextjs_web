@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Pagination } from "antd";
 import { Eye } from "lucide-react";
 
 import { cn } from "@/utils/utils";
@@ -9,11 +10,27 @@ import { fac, fmtD, fmtFull, fmtM } from "../../utils/format";
 import StatusChip from "../shared/status-chip";
 import type { IWalletDocument, WalletDocumentInactiveReason } from "../../types";
 
+export interface GroupInvoicesPagination {
+  page: number;
+  pageSize: number;
+  /** Documentos del grupo entero, no sólo de la página cargada. */
+  total: number;
+  onChange: (page: number) => void;
+}
+
 interface GroupInvoicesTableProps {
+  /** Documentos en pantalla: todos los de la novedad o la página cargada del grupo. */
   documentos: IWalletDocument[];
   query: string;
-  selected: string[];
-  onSelectedChange: (ids: string[]) => void;
+  /**
+   * Se guardan documentos y no ids: con paginación del servidor, los marcados
+   * en otra página ya no están en `documentos` y aun así hay que poder
+   * mostrarlos, sumarlos y mandarlos a crear/vincular novedad.
+   */
+  selected: IWalletDocument[];
+  onSelectedChange: (docs: IWalletDocument[]) => void;
+  /** Sólo los grupos sin novedad paginan (la novedad trae todos sus documentos). */
+  pagination?: GroupInvoicesPagination;
 }
 
 // bg-muted opaco (no /40): la cabecera es sticky y las filas pasan por debajo.
@@ -32,7 +49,8 @@ export default function GroupInvoicesTable({
   documentos,
   query,
   selected,
-  onSelectedChange
+  onSelectedChange,
+  pagination
 }: GroupInvoicesTableProps) {
   // Las cerradas (pagadas, retiradas…) se ocultan por defecto: siguen en el
   // histórico pero ya no son cartera.
@@ -54,17 +72,32 @@ export default function GroupInvoicesTable({
 
   const sumaVista = visibles.reduce((a, d) => a + d.saldo, 0);
   const recuperadoVista = visibles.reduce((a, d) => a + (d.saldoInicial - d.saldo), 0);
-  const montoSel = documentos
-    .filter((d) => selected.includes(d.id))
-    .reduce((a, d) => a + d.saldo, 0);
+  const montoSel = selected.reduce((a, d) => a + d.saldo, 0);
 
-  const todasVisiblesSel = visibles.length > 0 && visibles.every((d) => selected.includes(d.id));
+  const selectedIds = useMemo(() => new Set(selected.map((d) => d.id)), [selected]);
+  const isSelected = (d: IWalletDocument) => selectedIds.has(d.id);
 
-  const toggle = (id: string) =>
-    onSelectedChange(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  const todasVisiblesSel = visibles.length > 0 && visibles.every(isSelected);
 
-  const toggleAll = (checked: boolean) =>
-    onSelectedChange(checked ? [...new Set([...selected, ...visibles.map((d) => d.id)])] : []);
+  const toggle = (doc: IWalletDocument) =>
+    onSelectedChange(
+      isSelected(doc) ? selected.filter((d) => d.id !== doc.id) : [...selected, doc]
+    );
+
+  // "Seleccionar todo" actúa sólo sobre lo visible: desmarcarlo no suelta lo
+  // marcado en otras páginas.
+  const toggleAll = (checked: boolean) => {
+    if (checked) {
+      onSelectedChange([...selected, ...visibles.filter((d) => !isSelected(d))]);
+      return;
+    }
+    const visibleIds = new Set(visibles.map((d) => d.id));
+    onSelectedChange(selected.filter((d) => !visibleIds.has(d.id)));
+  };
+
+  // Con paginación el "de N" es el total del grupo; sin ella, lo que se ocultó
+  // por búsqueda o por estar cerrado.
+  const totalConocido = pagination?.total ?? todas.length;
 
   return (
     <>
@@ -117,7 +150,7 @@ export default function GroupInvoicesTable({
                   key={d.id}
                   className={cn(
                     "border-b border-border last:border-b-0",
-                    selected.includes(d.id) && "bg-wallet-accent/5",
+                    isSelected(d) && "bg-wallet-accent/5",
                     !d.activa && "text-muted-foreground"
                   )}
                 >
@@ -126,8 +159,8 @@ export default function GroupInvoicesTable({
                       type="checkbox"
                       aria-label={`Seleccionar ${d.doc}`}
                       className="accent-wallet-accent"
-                      checked={selected.includes(d.id)}
-                      onChange={() => toggle(d.id)}
+                      checked={isSelected(d)}
+                      onChange={() => toggle(d)}
                     />
                   </td>
                   <td className="px-3 py-2.5 font-mono font-semibold text-foreground">{d.doc}</td>
@@ -182,7 +215,7 @@ export default function GroupInvoicesTable({
                 className="px-3 pb-2.5 text-left text-[11.5px] font-medium text-muted-foreground"
               >
                 {fac(visibles.length)}
-                {visibles.length !== todas.length ? ` de ${todas.length}` : ""}
+                {visibles.length !== totalConocido ? ` de ${totalConocido}` : ""}
               </th>
               <th
                 colSpan={2}
@@ -207,6 +240,17 @@ export default function GroupInvoicesTable({
           />
           Ver cerradas ({cerradas})
         </label>
+
+        {pagination && pagination.total > pagination.pageSize && (
+          <Pagination
+            size="small"
+            current={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            showSizeChanger={false}
+            onChange={pagination.onChange}
+          />
+        )}
 
         <span className="ml-auto">
           {selected.length ? (
