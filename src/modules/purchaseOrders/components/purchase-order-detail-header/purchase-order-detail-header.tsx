@@ -21,7 +21,8 @@ import { IPurchaseOrderDetail } from "@/types/purchaseOrders/purchaseOrders";
 import { useAppStore } from "@/lib/store/store";
 import {
   sendPackageToBilling,
-  sendPurchaseOrderToRebilling
+  sendPurchaseOrderToRebilling,
+  downloadMvpTxt
 } from "@/services/purchaseOrders/purchaseOrders";
 import { ApiError } from "@/utils/api/api";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
@@ -80,9 +81,31 @@ export function PurchaseOrderDetailHeader({
   const [isBillingLoading, setIsBillingLoading] = useState(false);
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
   const [isRebillingConfirmOpen, setIsRebillingConfirmOpen] = useState(false);
+  const [isTxtErpLoading, setIsTxtErpLoading] = useState(false);
 
   const allowedStatesForDownload = ["En despacho", "Entregado"];
   const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
+
+  // Abbott 204: en "Generación TXT ERP" solo queda disponible "Descargar TXT ERP".
+  const txtErpLocked = data?.status_name === "Generación TXT ERP";
+
+  const handleDownloadTxtErp = async () => {
+    if (!orderId) return;
+    setIsTxtErpLoading(true);
+    const hideLoading = message.loading("Generando TXT ERP...", 0);
+    try {
+      await downloadMvpTxt({ orderIds: [Number(orderId)], variant: "sku" });
+      message.success("TXT ERP generado correctamente");
+      mutate?.();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al generar el TXT ERP"
+      );
+    } finally {
+      hideLoading();
+      setIsTxtErpLoading(false);
+    }
+  };
 
   if (isCreating) {
     const activeFile = files?.[activeFileIndex];
@@ -204,43 +227,56 @@ export function PurchaseOrderDetailHeader({
       label: "Enviar a facturación",
       icon: <Invoice className="h-4 w-4" />,
       onClick: () => handleSendToBilling(),
-      disabled: data?.status_name !== "Procesado" || isBillingLoading
+      disabled: data?.status_name !== "Procesado" || isBillingLoading || txtErpLocked
     },
     {
       key: "invoice",
       label: "Cargar factura",
       icon: <Receipt className="h-4 w-4" />,
       onClick: () => onOpenModal?.(3),
-      disabled: data?.status_name !== "En facturación"
+      disabled: data?.status_name !== "En facturación" || txtErpLocked
     },
     {
       key: "dispatch",
       label: "Confirmar despacho/entrega",
       icon: <PackageCheck className="h-4 w-4" />,
       onClick: () => onOpenModal?.(4),
-      disabled: data?.status_name !== "En despacho"
+      disabled: data?.status_name !== "En despacho" || txtErpLocked
     },
     {
       key: "back-order",
       label: "Marcar como Backorder",
       icon: <Boxes className="h-4 w-4" />,
       onClick: () => onOpenModal?.(8),
-      disabled: !allowedStatesForBackOrder.includes(data?.status_name ?? "")
+      disabled:
+        !allowedStatesForBackOrder.includes(data?.status_name ?? "") ||
+        txtErpLocked
     },
     {
       key: "rebilling",
       label: "Refacturar",
       icon: <Invoice className="h-4 w-4" />,
       onClick: () => setIsRebillingConfirmOpen(true),
-      disabled: data?.status_name !== "Facturado"
+      disabled: data?.status_name !== "Facturado" || txtErpLocked
     },
     {
       key: "confirm-rebilling",
       label: "Confirmar refacturación",
       icon: <Receipt className="h-4 w-4" />,
       onClick: () => onOpenModal?.(11),
-      disabled: data?.status_name !== "En refacturación"
+      disabled: data?.status_name !== "En refacturación" || txtErpLocked
     },
+    ...(data?.project_id === 204
+      ? [
+          {
+            key: "txt-erp",
+            label: "Descargar TXT ERP",
+            icon: <FileOutput className="h-4 w-4" />,
+            onClick: handleDownloadTxtErp,
+            disabled: isTxtErpLoading
+          } as DropdownItem
+        ]
+      : []),
     {
       key: "divider-1",
       type: "divider"
@@ -250,7 +286,9 @@ export function PurchaseOrderDetailHeader({
       label: "Descargar plano",
       icon: <FileOutput className="h-4 w-4" />,
       onClick: onDownloadCSV,
-      disabled: !allowedStatesForDownload.includes(data?.status_name ?? "")
+      disabled:
+        !allowedStatesForDownload.includes(data?.status_name ?? "") ||
+        txtErpLocked
     }
   ];
 
