@@ -18,7 +18,7 @@ import {
 import "../ModalCreateNewFile/modalCreateNewFile.scss";
 import "./modalUploadInTransitHaleon.scss";
 
-const IN_TRANSIT_HALEON_TYPE_DESCRIPTION = "In Transit Haleon";
+const IN_TRANSIT_HALEON_TYPE_DESCRIPTION = "In-Transit Haleon";
 
 interface ModalUploadInTransitHaleonProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ const ModalUploadInTransitHaleon = ({
     setIsSubmitting(true);
     const hide = message.open({
       type: "loading",
-      content: "Cargando archivo In Transit Haleon...",
+      content: "Cargando archivo In-Transit Haleon...",
       duration: 0
     });
 
@@ -144,7 +144,7 @@ const ModalUploadInTransitHaleon = ({
     >
       <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
         <CaretLeft size="1.25rem" />
-        <h4>Cargar &quot;In Transit Haleon&quot;</h4>
+        <h4>Cargar &quot;In-Transit Haleon&quot;</h4>
       </button>
 
       <form className="modalCreateNewFile__form">
