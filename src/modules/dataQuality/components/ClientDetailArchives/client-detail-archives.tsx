@@ -5,6 +5,8 @@ import { Plus } from "phosphor-react";
 
 import { useArchivesClientDataByType } from "../../hooks/useArchivesClientDataByType";
 
+import { useAppStore } from "@/lib/store/store";
+import { hasDataQualityManagementPermission } from "@/utils/utils";
 import Collapse from "@/components/ui/collapse";
 import { Button } from "@/modules/chat/ui/button";
 import { DateRangeFilter } from "@/components/atoms/DateRangeFilter/DateRangeFilter";
@@ -45,6 +47,9 @@ export function ClientDetailArchives({
     mode: "create" as IModalMode
   });
   const [selectedIntake, setSelectedIntake] = useState<IClientDetailDataArchive | null>(null);
+
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
+  const canManage = hasDataQualityManagementPermission(selectedProject);
 
   // Fetch archives grouped by type for the collapsible sections
   const {
@@ -149,24 +154,28 @@ export function ClientDetailArchives({
           <h2 className="text-lg font-semibold" style={{ color: "#141414" }}>
             Archivos
           </h2>
-          <Button
-            onClick={() => handleOpenIntakeModal("create")}
-            variant="ghost"
-            className="bg-transparent"
-            style={{ color: "#141414" }}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Crear nueva ingesta
-          </Button>
-          <Button
-            onClick={() => setIsCreateFileModalOpen(true)}
-            variant="ghost"
-            className="bg-transparent"
-            style={{ color: "#141414" }}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Crear nuevo archivo
-          </Button>
+          {canManage && (
+            <Button
+              onClick={() => handleOpenIntakeModal("create")}
+              variant="ghost"
+              className="bg-transparent"
+              style={{ color: "#141414" }}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Crear nueva ingesta
+            </Button>
+          )}
+          {canManage && (
+            <Button
+              onClick={() => setIsCreateFileModalOpen(true)}
+              variant="ghost"
+              className="bg-transparent"
+              style={{ color: "#141414" }}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Crear nuevo archivo
+            </Button>
+          )}
         </div>
         <Dropdown dropdownRender={() => filterMenu} trigger={["click"]} placement="bottomRight">
           <Button
