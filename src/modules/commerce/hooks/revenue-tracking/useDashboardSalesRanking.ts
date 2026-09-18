@@ -9,12 +9,13 @@ import { appendSalesFilterParams } from "./salesFilterParams";
 export const useDashboardSalesRanking = (
   dimension: string,
   filters: Record<string, FilterOption[]> = {},
-  limit = 10
+  limit = 10,
+  includeIva = false
 ) => {
   const params = new URLSearchParams();
 
   if (dimension) params.append("dimension", dimension);
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, includeIva);
   params.append("limit", String(limit));
 
   const pathKey = `/dashboard/sales/ranking?${params.toString()}`;
