@@ -23,7 +23,7 @@ export default function ProductSelect({
   // El valor propio siempre queda en la lista: sin él AntD muestra el id crudo en vez del label.
   const options = products
     .filter((p) => p.id === value || !taken.has(p.id))
-    .map((p) => ({ value: p.id, label: p.description }));
+    .map((p) => ({ value: p.id, label: `${p.description} - ${p.sku}` }));
 
   return (
     <Select
