@@ -9,12 +9,13 @@ import { appendSalesFilterParams } from "./salesFilterParams";
 export const useDashboardSalesTreemap = (
   dim1: string,
   dim2: string,
-  filters: Record<string, FilterOption[]> = {}
+  filters: Record<string, FilterOption[]> = {},
+  includeIva = false
 ) => {
   const params = new URLSearchParams();
   if (dim1) params.append("dim1", dim1);
   if (dim2) params.append("dim2", dim2);
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, includeIva);
 
   const queryString = params.toString();
   const pathKey = `/dashboard/sales/treemap${queryString ? `?${queryString}` : ""}`;

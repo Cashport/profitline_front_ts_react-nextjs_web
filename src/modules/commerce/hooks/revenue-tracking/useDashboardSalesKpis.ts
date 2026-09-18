@@ -6,9 +6,12 @@ import { IDashboardSalesKpis } from "@/types/dashboardSales/IDashboardSales";
 import { type FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
 import { appendSalesFilterParams } from "./salesFilterParams";
 
-export const useDashboardSalesKpis = (filters: Record<string, FilterOption[]> = {}) => {
+export const useDashboardSalesKpis = (
+  filters: Record<string, FilterOption[]> = {},
+  includeIva = false
+) => {
   const params = new URLSearchParams();
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, includeIva);
 
   const queryString = params.toString();
   const pathKey = `/dashboard/sales/kpis${queryString ? `?${queryString}` : ""}`;

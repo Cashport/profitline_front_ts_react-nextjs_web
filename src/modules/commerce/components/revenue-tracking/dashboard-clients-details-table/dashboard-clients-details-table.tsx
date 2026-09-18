@@ -86,7 +86,7 @@ const exportToCsv = (items: IDashboardSalesClientDetailItem[]) => {
 
 export default function DashboardClientsDetailsTable() {
   const formatMoney = useAppStore((state) => state.formatMoney);
-  const { filters } = useRevenueTracking();
+  const { filters, includeIva } = useRevenueTracking();
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -101,7 +101,8 @@ export default function DashboardClientsDetailsTable() {
     filters,
     page,
     PAGE_SIZE,
-    debouncedSearch
+    debouncedSearch,
+    includeIva
   );
 
   const items = data?.items ?? [];
