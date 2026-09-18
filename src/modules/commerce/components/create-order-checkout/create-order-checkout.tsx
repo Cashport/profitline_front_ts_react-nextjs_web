@@ -72,6 +72,7 @@ export default function CheckoutPage() {
   const [showWompiModal, setShowWompiModal] = useState(false);
   const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
 
+  const [isCrossSellingConfirmOpen, setIsCrossSellingConfirmOpen] = useState(false);
   const [isPurchaseOrderModalOpen, setIsPurchaseOrderModalOpen] = useState(false);
   const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
   const [purchaseOrderFile, setPurchaseOrderFile] = useState<File | undefined>();
@@ -289,16 +290,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleFinishOrder = async () => {
-    if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
-      showMessage("error", "El total no es válido");
-      return;
-    }
-    if (!order_split_details?.length) {
-      showMessage("error", "Faltan datos de envío");
-      return;
-    }
-
+  const continueFinishOrder = async () => {
     if (client.payment_type === 2) {
       setShowPaymentSupportView(true);
       return;
@@ -315,6 +307,37 @@ export default function CheckoutPage() {
     }
 
     await processOrderCreation(0);
+  };
+
+  const handleFinishOrder = async () => {
+    if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
+      showMessage("error", "El total no es válido");
+      return;
+    }
+    if (!order_split_details?.length) {
+      showMessage("error", "Faltan datos de envío");
+      return;
+    }
+
+    // `deactivateCrossSelling === true` significa que el checkbox de
+    // cross-selling está chequeado (el payload envía su negación).
+    const hasCrossSellingChecked =
+      !!confirmOrderData?.discounts?.secondaryDiscount && deactivateCrossSelling;
+    if (hasCrossSellingChecked) {
+      setIsCrossSellingConfirmOpen(true);
+      return;
+    }
+
+    await continueFinishOrder();
+  };
+
+  const handleCrossSellingConfirmOk = async () => {
+    setIsCrossSellingConfirmOpen(false);
+    await continueFinishOrder();
+  };
+
+  const handleCrossSellingConfirmCancel = () => {
+    setIsCrossSellingConfirmOpen(false);
   };
 
   const handleWompiClose = async (transactionResult?: any) => {
@@ -427,6 +450,16 @@ export default function CheckoutPage() {
         initialPurchaseOrderNumber={purchaseOrderNumber}
         initialFile={purchaseOrderFile}
         isNumberRequired={requiresPurchaseOrder(businessUnit)}
+      />
+
+      <ModalConfirmAction
+        isOpen={isCrossSellingConfirmOpen}
+        onClose={handleCrossSellingConfirmCancel}
+        onCancel={handleCrossSellingConfirmCancel}
+        onOk={handleCrossSellingConfirmOk}
+        title="¿Confirmas continuar el pedido con crosselling?"
+        okText="Sí, continuar"
+        cancelText="Cancelar"
       />
 
       <ModalConfirmAction
