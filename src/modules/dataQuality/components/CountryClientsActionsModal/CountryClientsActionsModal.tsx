@@ -75,7 +75,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         {isInDetailView && (
           <ButtonGenerateAction
             icon={<UploadSimple size={20} />}
-            title='Cargar "In Transit Haleon"'
+            title='Cargar "In-Transit Haleon"'
             onClick={onUploadInTransitHaleon}
           />
         )}
