@@ -372,6 +372,7 @@ export default function DataQualityClientDetails() {
       <ModalUploadInTransitHaleon
         isOpen={whichModalIsOpen === 7}
         onClose={() => setWhichModalIsOpen(0)}
+        clientId={clientId}
         onSuccess={() => mutate()}
       />
     </div>
