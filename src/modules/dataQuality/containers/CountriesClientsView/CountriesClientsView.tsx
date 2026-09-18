@@ -15,6 +15,10 @@ import {
   uploadPacksFile
 } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
+import {
+  checkUserComponentPermission,
+  hasDataQualityManagementPermission
+} from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useCountriesClients } from "../../hooks/useCountriesClients";
@@ -37,7 +41,14 @@ export default function CountriesClientsView() {
   const countryId = params.countryId as string;
 
   const router = useRouter();
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
+  const canManage = hasDataQualityManagementPermission(selectedProject);
+  const canDownloadCatalog = checkUserComponentPermission(
+    selectedProject,
+    "DataQuality",
+    "data-download-catalog"
+  );
   const height = useScreenHeight();
   const width = useScreenWidth();
 
@@ -210,6 +221,7 @@ export default function CountriesClientsView() {
                 className="flex items-center gap-2 px-4 !h-[48px] !bg-[#f7f7f7] !border-none rounded-lg !font-semibold text-base cursor-pointer hover:!border-[#dddddd]"
                 size="large"
                 icon={<DotsThree size={"1.5rem"} />}
+                style={{ display: canManage || canDownloadCatalog ? undefined : "none" }}
                 onClick={() => setWhichModalIsOpen(1)}
               >
                 {width > 1100 && <span className="hidden min-[1100px]:inline">Generar acción</span>}
@@ -225,22 +237,26 @@ export default function CountriesClientsView() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link
-                href={`/data-quality/alerts?countryId=${countryId}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <Button variant="outline" className="h-12">
-                  <BellSimpleRinging size={18} />
-                  <span className="hidden min-[1100px]:inline">Alertas</span>
+              {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+                <Link
+                  href={`/data-quality/alerts?countryId=${countryId}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <Button variant="outline" className="h-12">
+                    <BellSimpleRinging size={18} />
+                    <span className="hidden min-[1100px]:inline">Alertas</span>
+                  </Button>
+                </Link>
+              )}
+              {canManage && (
+                <Button
+                  className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
+                  onClick={() => setWhichModalIsOpen(3)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear cliente
                 </Button>
-              </Link>
-              <Button
-                className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"
-                onClick={() => setWhichModalIsOpen(3)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Crear cliente
-              </Button>
+              )}
             </div>
           </div>
 
@@ -269,6 +285,7 @@ export default function CountriesClientsView() {
         onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
         onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
         onUploadPacks={handleOpenPacksUpload}
+        downloadCatalogOnly={!canManage}
       />
       <ModalUploadFile
         isOpen={whichModalIsOpen === 2}
