@@ -373,6 +373,53 @@ export const checkUserViewPermissions = (
   return viewPermissions.some((permission) => permission.page_name === view);
 };
 
+const DATA_QUALITY_MANAGEMENT_COMPONENTS = [
+  "modify-catalog",
+  "data-manage-pos",
+  "data-manage-alerts",
+  "data-delete-files",
+  "data-manage-client",
+  "data-upload-files-massive",
+  "data-catalog-delete",
+  "data-manage-pos-delete"
+];
+
+export const checkUserComponentPermission = (
+  selectedProject: ISelectedProject | undefined,
+  view: string,
+  component: string
+): boolean => {
+  if (!selectedProject) return false;
+  if (selectedProject.isSuperAdmin) return true;
+
+  const viewPermissions = selectedProject.views_permissions;
+  if (!viewPermissions) return false;
+
+  const page = viewPermissions.find((permission) => permission.page_name === view);
+  if (!page?.components?.length) return false;
+
+  return page.components.some(
+    (c) =>
+      c.component_name === component &&
+      (c.create_permission || c.update_permission || c.delete_permission)
+  );
+};
+
+export const hasDataQualityManagementPermission = (
+  selectedProject: ISelectedProject | undefined
+): boolean => {
+  if (!selectedProject) return false;
+  if (selectedProject.isSuperAdmin) return true;
+
+  return DATA_QUALITY_MANAGEMENT_COMPONENTS.some((component) =>
+    checkUserComponentPermission(selectedProject, "DataQuality", component)
+  );
+};
+
+export const canUploadDataFiles = (selectedProject: ISelectedProject | undefined): boolean =>
+  checkUserComponentPermission(selectedProject, "DataQuality", "data-upload-files");
+
+
 export function capitalize(str: string): string {
   if (typeof str !== "string" || str.length === 0) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);

@@ -9,6 +9,10 @@ import { BellSimpleRinging } from "@phosphor-icons/react";
 import { DotsThree } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
+import {
+  checkUserComponentPermission,
+  hasDataQualityManagementPermission
+} from "@/utils/utils";
 import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
 import {
   downloadUnifiedCatalogFile,
@@ -35,6 +39,13 @@ export default function DataQualityClientDetails() {
   const params = useParams();
   const router = useRouter();
   const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
+  const canManage = hasDataQualityManagementPermission(selectedProject);
+  const canDownloadCatalog = checkUserComponentPermission(
+    selectedProject,
+    "DataQuality",
+    "data-download-catalog"
+  );
 
   const clientId = params.clientId as string;
   const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
@@ -244,35 +255,41 @@ export default function DataQualityClientDetails() {
                 Atrás
               </Button>
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
-                  <DotsThree size={"1.5rem"} />
-                  Generar acción
-                </Button>
-                <Link
-                  href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Button variant="outline" className="">
-                    <BellSimpleRinging size={18} />
-                    Alertas
+                {(canManage || canDownloadCatalog) && (
+                  <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
+                    <DotsThree size={"1.5rem"} />
+                    Generar acción
                   </Button>
-                </Link>
-
-                <Link
-                  href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <Button
-                    className="text-sm font-medium"
-                    style={{
-                      backgroundColor: "#CBE71E",
-                      color: "#141414",
-                      border: "none"
-                    }}
+                )}
+                {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+                  <Link
+                    href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
                   >
-                    Catálogos
-                  </Button>
-                </Link>
+                    <Button variant="outline" className="">
+                      <BellSimpleRinging size={18} />
+                      Alertas
+                    </Button>
+                  </Link>
+                )}
+
+                {checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly") && (
+                  <Link
+                    href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <Button
+                      className="text-sm font-medium"
+                      style={{
+                        backgroundColor: "#CBE71E",
+                        color: "#141414",
+                        border: "none"
+                      }}
+                    >
+                      Catálogos
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -280,6 +297,7 @@ export default function DataQualityClientDetails() {
               clientName={clientDetail?.client_name}
               stakeholder={clientDetail?.stakeholder?.toString()}
               setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
+              showEditButton={canManage}
             />
             <ClientDetailArchives
               clientId={clientId}
@@ -324,6 +342,7 @@ export default function DataQualityClientDetails() {
         onUploadPacks={handleOpenPacksUpload}
         onUploadInTransitHaleon={() => setWhichModalIsOpen(7)}
         onAddEmails={() => setWhichModalIsOpen(4)}
+        downloadCatalogOnly={!canManage}
       />
 
       <ModalDataEmailRules

@@ -17,6 +17,11 @@ import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAc
 import { ModalUploadIntakeFiles } from "@/components/molecules/modals/ModalUploadIntakeFiles/ModalUploadIntakeFiles";
 import InvoiceDownloadModal from "@/modules/clients/components/invoice-download-modal";
 import { ModalFileHistory } from "../ModalFileHistory";
+import { useAppStore } from "@/lib/store/store";
+import {
+  canUploadDataFiles,
+  hasDataQualityManagementPermission
+} from "@/utils/utils";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -75,6 +80,97 @@ export function ClientDetailTable({
   const [isModalFileDetailOpen, setIsModalFileDetailOpen] = useState(false);
   const [fileURL, setFileURL] = useState("");
   const [isFileHistoryModalOpen, setIsFileHistoryModalOpen] = useState(false);
+
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
+  const canUpload = canUploadDataFiles(selectedProject);
+  const canManage = hasDataQualityManagementPermission(selectedProject);
+
+  const buildMenuItems = (file: IClientDetailArchiveClient) => {
+    const items: any[] = [];
+    const cargarChildren: any[] = [];
+
+    if (canUpload) {
+      cargarChildren.push({
+        key: "upload",
+        label: "Archivo cliente",
+        onClick: () => handleUploadIntake(file.id)
+      });
+      cargarChildren.push({
+        key: "upload-generic",
+        label: "Universal",
+        onClick: () => handleUploadGenericIntake(file.id)
+      });
+    }
+    if (canManage) {
+      cargarChildren.push({
+        key: "load-evidence",
+        label: "Soporte auditoria",
+        onClick: () => handleUploadEvidence(file.id),
+        disabled: isUploadingEvidenceLoading
+      });
+    }
+    if (cargarChildren.length) {
+      items.push({
+        key: "group-cargar",
+        type: "group",
+        label: <span className="font-semibold text-black">Cargar</span>,
+        children: cargarChildren
+      });
+    }
+
+    items.push({
+      key: "group-descargas",
+      type: "group",
+      label: <span className="font-semibold text-black">Descargas</span>,
+      children: [
+        {
+          key: "download-original",
+          label: "Archivo cliente",
+          onClick: () => handleDownloadOriginal(file)
+        },
+        {
+          key: "download-universal",
+          label: "Universal .csv",
+          onClick: () => handleProcessedFile(file, "csv")
+        },
+        {
+          key: "download-universal-excel",
+          label: "Universal .xls",
+          onClick: () => handleProcessedFile(file, "excel")
+        }
+      ]
+    });
+
+    if (canManage) {
+      items.push({
+        key: "group-eliminar",
+        type: "group",
+        label: <span className="font-semibold text-black">Eliminar</span>,
+        children: [
+          {
+            key: "delete",
+            label: "Archivo cliente",
+            onClick: () => {
+              setActiveFileId(file.id);
+              setIsDeleteModalOpen(true);
+            },
+            disabled: isDeleteLoading
+          },
+          {
+            key: "delete-date",
+            label: "Fecha ingesta",
+            onClick: () => {
+              setActiveFileId(file.id);
+              setIsDeleteDateModalOpen(true);
+            },
+            disabled: isDeleteDateLoading
+          }
+        ]
+      });
+    }
+
+    return items;
+  };
   // Estado propio: los otros modales resetean activeFileId a null al cerrarse.
   const [historyFile, setHistoryFile] = useState<IClientDetailArchiveClient | null>(null);
 
@@ -412,78 +508,7 @@ export function ClientDetailTable({
                     </Button>
                     <Dropdown
                       menu={{
-                        items: [
-                          {
-                            key: "group-cargar",
-                            type: "group",
-                            label: <span className="font-semibold text-black">Cargar</span>,
-                            children: [
-                              {
-                                key: "upload",
-                                label: "Archivo cliente",
-                                onClick: () => handleUploadIntake(file.id)
-                              },
-                              {
-                                key: "upload-generic",
-                                label: "Universal",
-                                onClick: () => handleUploadGenericIntake(file.id)
-                              },
-                              {
-                                key: "load-evidence",
-                                label: "Soporte auditoria",
-                                onClick: () => handleUploadEvidence(file.id),
-                                disabled: isUploadingEvidenceLoading
-                              }
-                            ]
-                          },
-                          {
-                            key: "group-descargas",
-                            type: "group",
-                            label: <span className="font-semibold text-black">Descargas</span>,
-                            children: [
-                              {
-                                key: "download-original",
-                                label: "Archivo cliente",
-                                onClick: () => handleDownloadOriginal(file)
-                              },
-                              {
-                                key: "download-universal",
-                                label: "Universal .csv",
-                                onClick: () => handleProcessedFile(file, "csv")
-                              },
-                              {
-                                key: "download-universal-excel",
-                                label: "Universal .xls",
-                                onClick: () => handleProcessedFile(file, "excel")
-                              }
-                            ]
-                          },
-                          {
-                            key: "group-eliminar",
-                            type: "group",
-                            label: <span className="font-semibold text-black">Eliminar</span>,
-                            children: [
-                              {
-                                key: "delete",
-                                label: "Archivo cliente",
-                                onClick: () => {
-                                  setActiveFileId(file.id);
-                                  setIsDeleteModalOpen(true);
-                                },
-                                disabled: isDeleteLoading
-                              },
-                              {
-                                key: "delete-date",
-                                label: "Fecha ingesta",
-                                onClick: () => {
-                                  setActiveFileId(file.id);
-                                  setIsDeleteDateModalOpen(true);
-                                },
-                                disabled: isDeleteDateLoading
-                              }
-                            ]
-                          }
-                        ]
+                        items: buildMenuItems(file)
                       }}
                       trigger={["click"]}
                     >
