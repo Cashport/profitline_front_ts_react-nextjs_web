@@ -11,6 +11,7 @@ import { getAuth, signInWithPolicyCheck, continueLoginAfterAuth } from "../../..
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { openNotification } from "@/components/atoms/Notification/Notification";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import "./loginform.scss";
 import { sendOtp, validateOtp } from "@/services/externalAuth/externalAuth";
@@ -68,6 +69,7 @@ export const LoginForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isInvalidCode, setIsInvalidCode] = useState(false);
+  const [isOtpSentModalOpen, setIsOtpSentModalOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const {
     control,
@@ -87,23 +89,20 @@ export const LoginForm = ({
   const handleSendMarketplaceOtp = async (email: string) => {
     setTimeLeft(60);
     if (!token) return;
-    const isSendedOtp = await sendOtp(email, token);
-    if (isSendedOtp.code !== 200) {
+    try {
+      const isSendedOtp = await sendOtp(email, token);
+      if (isSendedOtp.code !== 200) {
+        throw new Error(isSendedOtp.message);
+      }
+      setIsOtpSentModalOpen(true);
+    } catch (error) {
       openNotification({
         api: api,
         type: "error",
         title: "Error",
         message: "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
       });
-      return;
     }
-    setIsCodeSent(true);
-    openNotification({
-      api: api,
-      type: "success",
-      title: "¡Revisa tu correo!",
-      message: "Te hemos enviado un código de acceso único. Ingrésalo para continuar."
-    });
   };
 
   // Periodic-OTP flow for the plain email+password login, triggered once
@@ -123,13 +122,12 @@ export const LoginForm = ({
       });
       return;
     }
+    setIsOtpSentModalOpen(true);
+  };
+
+  const handleConfirmOtpSent = () => {
+    setIsOtpSentModalOpen(false);
     setIsCodeSent(true);
-    openNotification({
-      api: api,
-      type: "success",
-      title: "¡Revisa tu correo!",
-      message: "Te hemos enviado un código de acceso único. Ingrésalo para continuar."
-    });
   };
 
   const handleSentOtpCode = async (email: string) => {
@@ -169,8 +167,8 @@ export const LoginForm = ({
         reset();
         return;
       }
-      setIsLoading(false);
       await handleSentOtpCode(email);
+      setIsLoading(false);
       return;
     }
 
@@ -199,12 +197,12 @@ export const LoginForm = ({
     }
 
     const outcome = await signInWithPolicyCheck(email.trim(), password!, router, openNotification, api);
-    setIsLoading(false);
     if (outcome.step === "otp") {
       await handleSendLoginOtp();
     } else if (outcome.step === "expiredPassword") {
       onExpiredPassword?.(outcome.email);
     }
+    setIsLoading(false);
     reset({ email });
   };
   const handleForgotPassword = () => {
@@ -233,6 +231,19 @@ export const LoginForm = ({
   return (
     <form className="loginForm" onSubmit={handleSubmit(onSubmitHandler)}>
       {contextHolder}
+      <ModalConfirmAction
+        isOpen={isOtpSentModalOpen}
+        onClose={handleConfirmOtpSent}
+        title="Revisa tu correo"
+        content={
+          <p>
+            Por seguridad hemos enviado un código de acceso único a tu correo. Ingrésalo para
+            continuar.
+          </p>
+        }
+        cancelText="OK"
+        hideOkButton
+      />
       <h4 className="loginForm__title">{!token ? "Inicia sesión" : "Ingresar"}</h4>
 
       <Flex vertical gap={"1.5rem"} className="loginForm__content">
