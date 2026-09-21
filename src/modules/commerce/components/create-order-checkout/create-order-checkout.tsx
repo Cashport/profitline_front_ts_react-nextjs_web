@@ -221,7 +221,7 @@ export default function CheckoutPage() {
       order_summary: orderSummary,
       is_electronic_invoicing: isElectronicInvoicing,
       order_split_details: splitDetails,
-      promotion_id: bonus?.id || undefined,
+      promotion_id: hasCommonBonusProducts && activeRangeId && bonus?.id ? bonus?.id : undefined,
       nit_id: channelCode,
       draft_id: draftInfo?.id,
       // business_unit solo se envía cuando el usuario eligió un canal
