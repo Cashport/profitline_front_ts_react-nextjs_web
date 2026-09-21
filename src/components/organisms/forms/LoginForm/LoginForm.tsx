@@ -11,6 +11,7 @@ import { getAuth } from "../../../../../firebase-utils";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { openNotification } from "@/components/atoms/Notification/Notification";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import "./loginform.scss";
 import { sendOtp, validateOtp } from "@/services/externalAuth/externalAuth";
@@ -52,6 +53,7 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isInvalidCode, setIsInvalidCode] = useState(false);
+  const [isOtpSentModalOpen, setIsOtpSentModalOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const {
     control,
@@ -78,23 +80,25 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
       });
       return;
     }
-    const isSendedOtp = await sendOtp(email, token);
-    if (isSendedOtp.code !== 200) {
+    try {
+      const isSendedOtp = await sendOtp(email, token);
+      if (isSendedOtp.code !== 200) {
+        throw new Error(isSendedOtp.message);
+      }
+      setIsOtpSentModalOpen(true);
+    } catch (error) {
       openNotification({
         api: api,
         type: "error",
         title: "Error",
         message: "No se pudo enviar el código OTP. Por favor, inténtalo de nuevo más tarde."
       });
-      return;
     }
+  };
+
+  const handleConfirmOtpSent = () => {
+    setIsOtpSentModalOpen(false);
     setIsCodeSent(true);
-    openNotification({
-      api: api,
-      type: "success",
-      title: "¡Revisa tu correo!",
-      message: "Te hemos enviado un código de acceso único. Ingrésalo para continuar."
-    });
   };
 
   const onSubmitHandler = async ({ email, password, otp }: IAuthLogin) => {
@@ -125,8 +129,8 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
         reset();
         return;
       }
-      setIsLoading(false);
       await handleSentOtpCode(email);
+      setIsLoading(false);
       return;
     }
 
@@ -151,6 +155,19 @@ export const LoginForm = ({ setResetPassword, token }: LoginFormProps) => {
   return (
     <form className="loginForm" onSubmit={handleSubmit(onSubmitHandler)}>
       {contextHolder}
+      <ModalConfirmAction
+        isOpen={isOtpSentModalOpen}
+        onClose={handleConfirmOtpSent}
+        title="Revisa tu correo"
+        content={
+          <p>
+            Por seguridad hemos enviado un código de acceso único a tu correo. Ingrésalo para
+            continuar.
+          </p>
+        }
+        cancelText="OK"
+        hideOkButton
+      />
       <h4 className="loginForm__title">{!token ? "Inicia sesión" : "Ingresar"}</h4>
 
       <Flex vertical gap={"1.5rem"} className="loginForm__content">
