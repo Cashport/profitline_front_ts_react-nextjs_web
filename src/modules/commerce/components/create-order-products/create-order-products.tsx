@@ -34,6 +34,7 @@ interface CategoryMap {
 interface SubGroup {
   categoryId: number;
   categoryName: string;
+  displayName: string;
   products: ISelectedProduct[];
 }
 
@@ -72,7 +73,7 @@ const CreateOrderProducts: FC = () => {
       const categoriesList: IFetchedCategory[] = [];
 
       response.data.forEach((category) => {
-        const categoryName = category.category;
+        const categoryName = category.line_alias || category.category;
         const categoryId = category.category_id;
         const categoryProducts: ISelectedProduct[] = [];
         const productIds: number[] = [];
@@ -92,6 +93,7 @@ const CreateOrderProducts: FC = () => {
             EAN: product.EAN,
             stock: true,
             category_name: product.category_name,
+            category_alias: product.category_alias,
             shipment_unit: product.shipment_unit
           };
 
@@ -155,6 +157,7 @@ const CreateOrderProducts: FC = () => {
           subGroupsMap.set(product.category_id, {
             categoryId: product.category_id,
             categoryName: product.category_name,
+            displayName: product.category_alias || product.category_name,
             products: [product]
           });
         }
@@ -243,7 +246,7 @@ const CategorySubGroups: FC<CategorySubGroupsProps> = ({ subGroups, searchKey })
         className: styles.categorySection,
         label: (
           <Divider orientation="left" orientationMargin={0} className={styles.categoryDivider}>
-            {group.categoryName}
+            {group.displayName}
           </Divider>
         ),
         children: (
