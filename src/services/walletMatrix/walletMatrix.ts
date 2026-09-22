@@ -1,50 +1,89 @@
 import { API } from "@/utils/api/api";
 
 import { GenericResponse } from "@/types/global/IGlobal";
-import { IWalletMatrixFilters, IWalletMatrixStatus } from "@/types/portfolios/IWalletMatrix";
+import {
+  IWalletMatrixFilters,
+  IWalletMatrixGroupsScope,
+  IWalletMatrixSharedFilters,
+  IWalletMatrixStatus
+} from "@/types/portfolios/IWalletMatrix";
+
+// URLSearchParams codifica espacios y tildes de los valores canónicos
+// ("Cristina Osorio", "Jurídico"); la coma de las listas también viaja
+// codificada y el backend la parte tras decodificar.
+const list = (params: URLSearchParams, key: string, value?: Array<string | number>) => {
+  if (value?.length) params.set(key, value.join(","));
+};
+
+const single = (params: URLSearchParams, key: string, value?: string | null) => {
+  const text = value?.trim();
+  if (text) params.set(key, text);
+};
 
 /**
- * Serializa los filtros a query string. Sólo lo usa /portfolio/matrix.
- *
- * /portfolio/matrix/groups NO pasa por aquí: acepta únicamente runId, clientId,
- * aging y calculateEndMonth, y arma su propia query en el hook. Mandarle estos
- * filtros no acotaba nada y metía ruido en la cache key de SWR.
+ * Los filtros que entienden por igual /portfolio/matrix y /portfolio/matrix/groups:
+ * los siete del modal de la matriz más el buscador. Las dos tablas de la
+ * pantalla tienen que quedar acotadas a lo mismo.
+ */
+const appendSharedFilters = (params: URLSearchParams, filters?: IWalletMatrixSharedFilters) => {
+  list(params, "status", filters?.status);
+  list(params, "novelty_type", filters?.noveltyType);
+  list(params, "executive", filters?.executive);
+  single(params, "coordinator", filters?.coordinator);
+  single(params, "market", filters?.market);
+  single(params, "kam", filters?.kam);
+  single(params, "kam_lider", filters?.kam_lider);
+  single(params, "search", filters?.search);
+};
+
+/**
+ * Serializa los filtros de /portfolio/matrix a query string.
  *
  * Sólo se serializa lo que tiene valor; la vista también usa el resultado como
  * disparador para volver a la primera página cuando cambia la consulta.
  */
 export const buildMatrixQuery = (filters?: IWalletMatrixFilters): string => {
-  // URLSearchParams codifica espacios y tildes de los valores canónicos
-  // ("Cristina Osorio", "Jurídico"); la coma de las listas también viaja
-  // codificada y el backend la parte tras decodificar.
   const params = new URLSearchParams();
-  const list = (key: string, value?: Array<string | number>) => {
-    if (value?.length) params.set(key, value.join(","));
-  };
-  const single = (key: string, value?: string | null) => {
-    const text = value?.trim();
-    if (text) params.set(key, text);
-  };
 
-  list("clients", filters?.clients);
-  list("status", filters?.status);
-  list("novelty_type", filters?.noveltyType);
-  list("executive", filters?.executive);
-  list("zones", filters?.zones);
-  list("lines", filters?.lines);
-  list("sublines", filters?.sublines);
-  list("channels", filters?.channels);
-  list("holdings", filters?.holdings);
-  list("client_group", filters?.clientGroup);
-  single("coordinator", filters?.coordinator);
-  single("market", filters?.market);
-  single("kam", filters?.kam);
-  single("kam_lider", filters?.kam_lider);
-  single("search", filters?.search);
-  single("sort_by", filters?.sort_by);
-  single("sort_dir", filters?.sort_dir);
+  appendSharedFilters(params, filters);
+
+  // Lo que sólo entiende /portfolio/matrix.
+  list(params, "clients", filters?.clients);
+  list(params, "zones", filters?.zones);
+  list(params, "lines", filters?.lines);
+  list(params, "sublines", filters?.sublines);
+  list(params, "channels", filters?.channels);
+  list(params, "holdings", filters?.holdings);
+  list(params, "client_group", filters?.clientGroup);
+  single(params, "sort_by", filters?.sort_by);
+  single(params, "sort_dir", filters?.sort_dir);
   // Siempre explícito: el backend lo espera como indicador 0/1.
   params.set("calculateEndMonth", filters?.calculateEndMonth ? "1" : "0");
+
+  return params.toString();
+};
+
+/**
+ * Serializa la query de /portfolio/matrix/groups: el acotado a la foto, el
+ * cliente y el tramo elegidos, más los filtros que comparte con la matriz.
+ *
+ * El orden y las listas de cliente/zona/línea se quedan fuera a propósito: el
+ * endpoint no los acepta y sólo ensuciarían la cache key de SWR, haciendo que
+ * ordenar una columna de la matriz volviera a pedir los mismos grupos.
+ */
+export const buildMatrixGroupsQuery = (
+  scope: IWalletMatrixGroupsScope,
+  filters?: IWalletMatrixSharedFilters
+): string => {
+  const params = new URLSearchParams();
+
+  single(params, "runId", scope.runId);
+  single(params, "clientId", scope.clientId);
+  single(params, "aging", scope.aging);
+
+  appendSharedFilters(params, filters);
+
+  params.set("calculateEndMonth", scope.calculateEndMonth ? "1" : "0");
 
   return params.toString();
 };
