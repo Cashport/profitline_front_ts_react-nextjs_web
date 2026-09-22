@@ -88,14 +88,16 @@ export interface IMatrixCutoff {
   projected?: boolean;
 }
 
+export interface IMatrixTotals {
+  byAging: Record<AgingBucket, { total: number; count: number }>;
+  total: number;
+  invoices: number;
+}
+
 export interface IWalletMatrix {
   columns: AgingBucket[];
   rows: IMatrixRow[];
-  totals: {
-    byAging: Record<AgingBucket, { total: number; count: number }>;
-    total: number;
-    invoices: number;
-  };
+  totals: IMatrixTotals;
   pagination: { page: number; limit: number; totalClients: number };
   snapshot: ISnapshotMeta | null;
   cutoff: IMatrixCutoff;

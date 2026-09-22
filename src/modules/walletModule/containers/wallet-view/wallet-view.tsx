@@ -309,6 +309,7 @@ export default function WalletView() {
           sort={sort}
           onSort={handleSort}
           totalClients={matrix?.pagination.totalClients ?? 0}
+          totals={matrix?.totals}
           page={page}
           pageSize={PAGE_SIZE}
           onPageChange={handlePageChange}
