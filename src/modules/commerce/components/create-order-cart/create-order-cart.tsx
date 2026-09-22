@@ -118,7 +118,7 @@ const CreateOrderCart: FC<CreateOrderCartProps> = ({ onClose }) => {
     const activeRange = confirmOrderData?.promotion?.active_range;
     if (!activeRange?.progress_message) return;
     setPromotionMessage(activeRange.progress_message);
-    const timer = setTimeout(() => setPromotionMessage(null), 5000);
+    const timer = setTimeout(() => setPromotionMessage(null), 12000);
     return () => clearTimeout(timer);
   }, [confirmOrderData?.promotion?.active_range?.range_id]);
 
