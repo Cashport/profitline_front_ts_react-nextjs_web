@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 import ThemeToggle from "@/modules/commerce/components/revenue-tracking/theme-toggle/theme-toggle";
+import IvaToggle from "@/modules/commerce/components/revenue-tracking/iva-toggle/iva-toggle";
 import { getDashboardSalesFilters } from "@/services/dashboardSales/dashboardSales";
 import type { IDashboardSalesFilter } from "@/types/dashboardSales/IDashboardSales";
 import { FilterModal } from "@/components/ui/filter-modal";
@@ -116,7 +117,8 @@ export default function FiltersBar() {
       onCategoryOpen={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key])}
       onRetryCategory={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key], true)}
       barEnd={
-        <div className="shrink-0 sm:ml-auto">
+        <div className="shrink-0 flex items-center gap-3 sm:ml-auto">
+          <IvaToggle />
           <ThemeToggle />
         </div>
       }
