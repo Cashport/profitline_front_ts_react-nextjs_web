@@ -18,6 +18,7 @@ type CountryClientsActionsModalProps = {
   onUploadInTransitHaleon?: () => void;
   onAddEmails?: () => void;
   isInDetailView?: boolean;
+  downloadCatalogOnly?: boolean;
 };
 
 export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProps> = ({
@@ -31,7 +32,8 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onUploadPacks,
   onUploadInTransitHaleon,
   onAddEmails,
-  isInDetailView = false
+  isInDetailView = false,
+  downloadCatalogOnly = false
 }) => {
   return (
     <Modal
@@ -50,41 +52,45 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
           onClick={onDownloadCatalog}
           disabled={isDownloadCatalogLoading}
         />
-        <ButtonGenerateAction
-          icon={<UploadSimple size={20} />}
-          title="Cargar Auxiliar Materiales"
-          onClick={onUploadMaterialsAuxiliary}
-        />
-        {isInDetailView && (
-          <ButtonGenerateAction
-            icon={<UploadSimple size={20} />}
-            title="Cargar Histórico"
-            onClick={onUploadFile}
-          />
-        )}
-        <ButtonGenerateAction
-          icon={<UploadSimple size={20} />}
-          title="Cargar Puntos de venta"
-          onClick={onUploadPointsOfSale}
-        />
-        <ButtonGenerateAction
-          icon={<UploadSimple size={20} />}
-          title="Cargar Packs"
-          onClick={onUploadPacks}
-        />
-        {isInDetailView && (
-          <ButtonGenerateAction
-            icon={<UploadSimple size={20} />}
-            title='Cargar "In Transit Haleon"'
-            onClick={onUploadInTransitHaleon}
-          />
-        )}
-        {onAddEmails && (
-          <ButtonGenerateAction
-            icon={<EnvelopeSimple size={20} />}
-            title="Editar reglas de correo"
-            onClick={onAddEmails}
-          />
+        {!downloadCatalogOnly && (
+          <>
+            <ButtonGenerateAction
+              icon={<UploadSimple size={20} />}
+              title="Cargar Auxiliar Materiales"
+              onClick={onUploadMaterialsAuxiliary}
+            />
+            {isInDetailView && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="Cargar Histórico"
+                onClick={onUploadFile}
+              />
+            )}
+            <ButtonGenerateAction
+              icon={<UploadSimple size={20} />}
+              title="Cargar Puntos de venta"
+              onClick={onUploadPointsOfSale}
+            />
+            <ButtonGenerateAction
+              icon={<UploadSimple size={20} />}
+              title="Cargar Packs"
+              onClick={onUploadPacks}
+            />
+            {isInDetailView && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title='Cargar "In-Transit Haleon"'
+                onClick={onUploadInTransitHaleon}
+              />
+            )}
+            {onAddEmails && (
+              <ButtonGenerateAction
+                icon={<EnvelopeSimple size={20} />}
+                title="Editar reglas de correo"
+                onClick={onAddEmails}
+              />
+            )}
+          </>
         )}
       </div>
     </Modal>

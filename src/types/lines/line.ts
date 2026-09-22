@@ -23,13 +23,16 @@ export interface IProduct {
   discount_code_product_matrix: string | null;
   price: number;
   line_name: string;
+  line_alias?: string | null;
   category_name: string;
+  category_alias?: string | null;
   category_id: number;
 }
 
 export interface ICategory {
   category: string;
   category_id: number;
+  line_alias?: string | null;
   products: IProduct[];
 }
 export interface ISubLine {
