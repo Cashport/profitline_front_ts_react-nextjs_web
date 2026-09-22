@@ -177,8 +177,9 @@ export type WalletMatrixSortDir = "asc" | "desc";
 /**
  * Query de GET /portfolio/matrix. Las listas viajan separadas por coma.
  *
- * /portfolio/matrix/groups no lo usa: acepta sólo runId, clientId, aging y
- * calculateEndMonth, y arma su propia query en el hook.
+ * /portfolio/matrix/groups reutiliza el subconjunto `IWalletMatrixSharedFilters`
+ * (los mismos siete filtros del modal más el buscador) y le suma runId,
+ * clientId y aging.
  */
 export interface IWalletMatrixFilters {
   /** NITs de cliente. */
@@ -206,6 +207,34 @@ export interface IWalletMatrixFilters {
   sort_by?: WalletMatrixSortBy;
   sort_dir?: WalletMatrixSortDir;
   /** Proyecta las edades al último día del mes en curso. */
+  calculateEndMonth?: boolean;
+}
+
+/**
+ * Filtros que /portfolio/matrix y /portfolio/matrix/groups aceptan por igual:
+ * los del modal de la matriz más el buscador.
+ *
+ * Quedan fuera los que sólo entiende /portfolio/matrix (listas de cliente,
+ * zona, línea… y el orden), para que paginar u ordenar la matriz no invalide
+ * la caché de los grupos.
+ */
+export type IWalletMatrixSharedFilters = Pick<
+  IWalletMatrixFilters,
+  | "status"
+  | "noveltyType"
+  | "executive"
+  | "coordinator"
+  | "market"
+  | "kam"
+  | "kam_lider"
+  | "search"
+>;
+
+/** Acotado de GET /portfolio/matrix/groups a una foto, cliente y tramo. */
+export interface IWalletMatrixGroupsScope {
+  runId?: string;
+  clientId?: string;
+  aging?: AgingBucket;
   calculateEndMonth?: boolean;
 }
 
