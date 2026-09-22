@@ -19,8 +19,8 @@ const categoryLabels: Record<CategoryKey, { name: string; unit: string }> = {
 
 export default function TopSales() {
   const [category, setCategory] = useState<CategoryKey>("producto");
-  const { filters } = useRevenueTracking();
-  const { data, isLoading } = useDashboardSalesRanking(category, filters);
+  const { filters, includeIva } = useRevenueTracking();
+  const { data, isLoading } = useDashboardSalesRanking(category, filters, 10, includeIva);
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const labels = categoryLabels[category];
