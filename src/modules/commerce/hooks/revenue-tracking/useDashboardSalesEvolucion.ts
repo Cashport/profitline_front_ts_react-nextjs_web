@@ -6,10 +6,13 @@ import { IDashboardSalesEvolucion } from "@/types/dashboardSales/IDashboardSales
 import { type FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
 import { appendSalesFilterParams } from "./salesFilterParams";
 
-export const useDashboardSalesEvolucion = (filters: Record<string, FilterOption[]> = {}) => {
+export const useDashboardSalesEvolucion = (
+  filters: Record<string, FilterOption[]> = {},
+  includeIva = false
+) => {
   const params = new URLSearchParams();
 
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, includeIva);
 
   const frequency = filters.frecuencia?.[0]?.id;
   if (frequency) params.append("frequency", frequency);

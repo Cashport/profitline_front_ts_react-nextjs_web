@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 
 import { useRevenueTracking } from "@/modules/commerce/contexts/revenue-tracking-context";
 import ThemeToggle from "@/modules/commerce/components/revenue-tracking/theme-toggle/theme-toggle";
+import IvaToggle from "@/modules/commerce/components/revenue-tracking/iva-toggle/iva-toggle";
 import { getDashboardSalesFilters } from "@/services/dashboardSales/dashboardSales";
 import type { IDashboardSalesFilter } from "@/types/dashboardSales/IDashboardSales";
 import { FilterModal } from "@/components/ui/filter-modal";
@@ -30,6 +31,7 @@ const FRECUENCIA_OPTIONS: FilterOptionItem[] = [
 const ENTITY_CATEGORIES: { key: string; label: string; entity: string }[] = [
   { key: "channelIds", label: "Unidad de negocio", entity: "canal" },
   { key: "productIds", label: "Producto", entity: "producto" },
+  { key: "productTypes", label: "Tipo de producto", entity: "tipo_producto" },
   { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
   { key: "clientIds", label: "Cliente", entity: "cliente" },
   { key: "cityIds", label: "Ciudad", entity: "ciudad" },
@@ -116,7 +118,8 @@ export default function FiltersBar() {
       onCategoryOpen={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key])}
       onRetryCategory={(key) => ENTITY_BY_KEY[key] && loadEntity(ENTITY_BY_KEY[key], true)}
       barEnd={
-        <div className="shrink-0 sm:ml-auto">
+        <div className="shrink-0 flex items-center gap-3 sm:ml-auto">
+          <IvaToggle />
           <ThemeToggle />
         </div>
       }

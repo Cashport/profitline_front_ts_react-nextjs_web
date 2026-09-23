@@ -265,12 +265,17 @@ function TreemapRender({
 }
 
 export default function ProductTreemap() {
-  const { filters } = useRevenueTracking();
+  const { filters, includeIva } = useRevenueTracking();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeDim1, setActiveDim1] = useState<DimensionKey>("linea");
   const [activeDim2, setActiveDim2] = useState<DimensionKey>("producto");
 
-  const { data, isLoading } = useDashboardSalesTreemap(activeDim1, activeDim2, filters);
+  const { data, isLoading } = useDashboardSalesTreemap(
+    activeDim1,
+    activeDim2,
+    filters,
+    includeIva
+  );
 
   const chartData = useMemo(
     () => ({

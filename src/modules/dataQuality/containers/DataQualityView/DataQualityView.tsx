@@ -6,7 +6,11 @@ import { Users, UserX, Bell, FileText, FileX, Tag, Bot } from "lucide-react";
 
 import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
-import { cn } from "@/utils/utils";
+import {
+  checkUserComponentPermission,
+  cn,
+  hasDataQualityManagementPermission
+} from "@/utils/utils";
 import { DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 
 import { Badge as BadgeUI } from "@/modules/chat/ui/badge";
@@ -17,6 +21,7 @@ import Header from "@/components/organisms/header";
 import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
 
 export default function DataQualityView() {
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
   const [summaryData, setSummaryData] = useState<ISummaryCountries | null>(null);
@@ -99,24 +104,30 @@ export default function DataQualityView() {
         </div>
 
         <div className="flex gap-2">
-          <Link href="/data-quality/auxiliary-catalogs">
-            <Button variant="outline" className="text-[#141414]">
-              Auxiliares
-            </Button>
-          </Link>
-          <Link href="/data-quality/alerts">
-            <Badge count={totalAlerts} color="#E53935">
-              <Button variant="outline">
-                <BellSimpleRinging size={18} />
-                Alertas
+          {hasDataQualityManagementPermission(selectedProject) && (
+            <Link href="/data-quality/auxiliary-catalogs">
+              <Button variant="outline" className="text-[#141414]">
+                Auxiliares
               </Button>
-            </Badge>
-          </Link>
-          <Link href={`/data-quality/dashboard`}>
-            <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
-              Dashboard
-            </Button>
-          </Link>
+            </Link>
+          )}
+          {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+            <Link href="/data-quality/alerts">
+              <Badge count={totalAlerts} color="#E53935">
+                <Button variant="outline">
+                  <BellSimpleRinging size={18} />
+                  Alertas
+                </Button>
+              </Badge>
+            </Link>
+          )}
+          {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-dashboard") && (
+            <Link href={`/data-quality/dashboard`}>
+              <Button className="w-full text-sm font-medium bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none">
+                Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

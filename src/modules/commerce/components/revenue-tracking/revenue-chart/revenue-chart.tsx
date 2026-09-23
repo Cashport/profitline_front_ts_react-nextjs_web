@@ -177,8 +177,8 @@ const SUBTEXT_BY_FREQUENCY: Record<string, string> = {
 };
 
 export default function RevenueChart() {
-  const { filters, setFilters } = useRevenueTracking();
-  const { data, isLoading } = useDashboardSalesEvolucion(filters);
+  const { filters, setFilters, includeIva } = useRevenueTracking();
+  const { data, isLoading } = useDashboardSalesEvolucion(filters, includeIva);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const frequency = filters?.frecuencia?.[0]?.id || "diaria";

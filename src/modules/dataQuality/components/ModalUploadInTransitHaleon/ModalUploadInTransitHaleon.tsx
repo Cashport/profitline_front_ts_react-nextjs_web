@@ -9,13 +9,21 @@ import type { Dayjs } from "dayjs";
 
 import { InputDateForm } from "@/components/atoms/inputs/InputDate/InputDateForm";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import {
+  createNewFileDate,
+  getFileTypes,
+  uploadGenericIntakeFile
+} from "@/services/dataQuality/dataQuality";
 
 import "../ModalCreateNewFile/modalCreateNewFile.scss";
 import "./modalUploadInTransitHaleon.scss";
 
+const IN_TRANSIT_HALEON_TYPE_DESCRIPTION = "In-Transit Haleon";
+
 interface ModalUploadInTransitHaleonProps {
   isOpen: boolean;
   onClose: () => void;
+  clientId: string;
   onSuccess?: () => void;
 }
 
@@ -23,13 +31,20 @@ interface IFormUploadInTransitHaleon {
   date: Dayjs | undefined;
 }
 
+interface IArchiveDraft {
+  id: number;
+  date: string;
+}
+
 const ModalUploadInTransitHaleon = ({
   isOpen,
   onClose,
+  clientId,
   onSuccess
 }: ModalUploadInTransitHaleonProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [archiveDraft, setArchiveDraft] = useState<IArchiveDraft | null>(null);
 
   const {
     control,
@@ -42,21 +57,71 @@ const ModalUploadInTransitHaleon = ({
   });
 
   const handleUpload = async (data: IFormUploadInTransitHaleon) => {
-    if (!file) {
-      message.error("El archivo In Transit Haleon es obligatorio *");
+    if (!file || !data.date) {
+      message.error("La fecha y el archivo son obligatorios *");
       return;
     }
+
     setIsSubmitting(true);
+    const hide = message.open({
+      type: "loading",
+      content: "Cargando archivo In-Transit Haleon...",
+      duration: 0
+    });
+
     try {
-      // MOCK: no llamar al Backend por ahora.
-      // El tipo de archivo queda implícito como "In Transit Haleon".
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      message.success("Archivo cargado correctamente (MOCK)");
+      const dateStr = data.date.format("YYYY-MM-DD");
+
+      // Reutiliza el registro de fecha ya creado si el reintento es para la
+      // misma fecha (evita duplicar archives_client_data).
+      let idArchivesClientData =
+        archiveDraft && archiveDraft.date === dateStr ? archiveDraft.id : null;
+
+      if (!idArchivesClientData) {
+        // Paso 1: resolver el ID del tipo global por descripción.
+        const fileTypes = await getFileTypes();
+        const inTransitType = fileTypes.find(
+          (fileType) => fileType.description === IN_TRANSIT_HALEON_TYPE_DESCRIPTION
+        );
+
+        if (!inTransitType) {
+          message.error(
+            `No existe el tipo de archivo "${IN_TRANSIT_HALEON_TYPE_DESCRIPTION}". ` +
+              "Contacte al administrador."
+          );
+          return;
+        }
+
+        // Paso 2: crear el registro de fecha para el cliente actual.
+        const createdArchive = await createNewFileDate(Number(clientId), {
+          date_archive: dateStr,
+          id_type_archive: inTransitType.id,
+          id_client_data_archives: Number(clientId)
+        });
+
+        idArchivesClientData = createdArchive?.id;
+        if (!idArchivesClientData) {
+          throw new Error("No se pudo crear el registro de fecha del archivo.");
+        }
+
+        setArchiveDraft({ id: idArchivesClientData, date: dateStr });
+      }
+
+      // Paso 3: subir el archivo por el flujo Universal (/transform/generic).
+      await uploadGenericIntakeFile(idArchivesClientData, file);
+
+      message.success("Archivo cargado correctamente.");
       reset();
       setFile(null);
+      setArchiveDraft(null);
       onSuccess?.();
       onClose();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo."
+      );
     } finally {
+      hide();
       setIsSubmitting(false);
     }
   };
@@ -64,6 +129,7 @@ const ModalUploadInTransitHaleon = ({
   const handleClose = () => {
     reset();
     setFile(null);
+    setArchiveDraft(null);
     onClose();
   };
 
@@ -78,7 +144,7 @@ const ModalUploadInTransitHaleon = ({
     >
       <button className="modalCreateNewFile__header" onClick={handleClose} type="button">
         <CaretLeft size="1.25rem" />
-        <h4>Cargar &quot;In Transit Haleon&quot;</h4>
+        <h4>Cargar &quot;In-Transit Haleon&quot;</h4>
       </button>
 
       <form className="modalCreateNewFile__form">

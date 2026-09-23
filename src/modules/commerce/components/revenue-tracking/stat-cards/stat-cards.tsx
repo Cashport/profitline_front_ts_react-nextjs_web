@@ -16,8 +16,8 @@ const metricTrend = (metric?: IKpiMetric) => {
 };
 
 export default function StatCards() {
-  const { filters } = useRevenueTracking();
-  const { data } = useDashboardSalesKpis(filters);
+  const { filters, includeIva } = useRevenueTracking();
+  const { data } = useDashboardSalesKpis(filters, includeIva);
 
   const stats: Array<{
     title: string;

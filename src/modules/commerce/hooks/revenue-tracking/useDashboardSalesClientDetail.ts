@@ -10,11 +10,12 @@ export const useDashboardSalesClientDetail = (
   filters: Record<string, FilterOption[]> = {},
   page = 1,
   pageSize = 25,
-  search = ""
+  search = "",
+  includeIva = false
 ) => {
   const params = new URLSearchParams();
 
-  appendSalesFilterParams(params, filters);
+  appendSalesFilterParams(params, filters, includeIva);
   params.append("limit", String(pageSize));
   params.append("offset", String((page - 1) * pageSize));
   if (search) params.append("search", search);

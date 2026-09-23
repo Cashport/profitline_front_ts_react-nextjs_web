@@ -47,13 +47,20 @@ const ID_PARAM_BY_KEY: Record<string, string> = {
   productIds: "product_ids",
   cityIds: "city_ids",
   lineIds: "line_ids",
-  channelIds: "channel_ids"
+  channelIds: "channel_ids",
+  // Tipo de producto: los ids son "bonificado" / "regular", no números. Marcar los dos
+  // equivale a no filtrar, que es como lo resuelve el back.
+  productTypes: "product_types"
 };
 
 export const appendSalesFilterParams = (
   params: URLSearchParams,
-  filters: Record<string, FilterOption[]>
+  filters: Record<string, FilterOption[]>,
+  includeIva = false
 ) => {
+  // El back reporta neto por defecto; sólo mandamos el flag cuando el toggle está encendido.
+  if (includeIva) params.append("include_iva", "true");
+
   Object.entries(ID_PARAM_BY_KEY).forEach(([key, param]) => {
     const ids = (filters[key] ?? []).map((o) => o.id);
     if (ids.length > 0) params.append(param, ids.join(","));
