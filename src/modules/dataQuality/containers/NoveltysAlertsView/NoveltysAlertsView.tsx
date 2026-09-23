@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Bot } from "lucide-react";
 import { Select as AntSelect } from "antd";
 
 import { getAlertsFilters } from "@/services/dataQuality/dataQuality";
@@ -199,6 +199,15 @@ export default function NoveltyAlertsView() {
                   Limpiar filtros
                 </Button>
               )}
+
+              <Button
+                variant="outline"
+                onClick={() => router.push("/data-quality/automations")}
+                className="ml-auto whitespace-nowrap h-12"
+              >
+                <Bot className="h-4 w-4 mr-1" />
+                Automatizaciones
+              </Button>
             </div>
           </div>
 
