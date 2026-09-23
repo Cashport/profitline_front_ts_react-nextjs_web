@@ -47,7 +47,10 @@ const ID_PARAM_BY_KEY: Record<string, string> = {
   productIds: "product_ids",
   cityIds: "city_ids",
   lineIds: "line_ids",
-  channelIds: "channel_ids"
+  channelIds: "channel_ids",
+  // Tipo de producto: los ids son "bonificado" / "regular", no números. Marcar los dos
+  // equivale a no filtrar, que es como lo resuelve el back.
+  productTypes: "product_types"
 };
 
 export const appendSalesFilterParams = (

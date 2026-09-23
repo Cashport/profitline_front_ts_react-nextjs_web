@@ -31,6 +31,7 @@ const FRECUENCIA_OPTIONS: FilterOptionItem[] = [
 const ENTITY_CATEGORIES: { key: string; label: string; entity: string }[] = [
   { key: "channelIds", label: "Unidad de negocio", entity: "canal" },
   { key: "productIds", label: "Producto", entity: "producto" },
+  { key: "productTypes", label: "Tipo de producto", entity: "tipo_producto" },
   { key: "sellerIds", label: "Vendedor", entity: "vendedor" },
   { key: "clientIds", label: "Cliente", entity: "cliente" },
   { key: "cityIds", label: "Ciudad", entity: "ciudad" },
