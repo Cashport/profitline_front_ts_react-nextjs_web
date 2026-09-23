@@ -11,8 +11,10 @@ import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { InputFormMoney } from "@/components/atoms/inputs/InputFormMoney/InputFormMoney";
 import ModalAttachEvidence from "../ModalEvidence/ModalAttachEvidence";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 
 import { IInvoice } from "@/types/invoices/IInvoices";
+import { ApiError } from "@/utils/api/api";
 
 import "./registerNews.scss";
 interface RegisterNewsProps {
@@ -44,6 +46,8 @@ const RegisterNews = ({
   const [selectedEvidence, setSelectedEvidence] = useState<File[]>([]);
   const [commentary, setCommentary] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showIncidentConfirmation, setShowIncidentConfirmation] = useState(false);
+  const [lastSubmittedData, setLastSubmittedData] = useState<IFormRegisterNews | null>(null);
 
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
@@ -54,7 +58,19 @@ const RegisterNews = ({
     reset
   } = useForm<IFormRegisterNews>({});
 
-  const onSubmit = async (data: IFormRegisterNews) => {
+  const handleActiveIncidentsResponse = (error: unknown) => {
+    if (
+      error instanceof ApiError &&
+      error.status === 500 &&
+      Array.isArray(error.data?.activeIncidentDocuments) &&
+      error.data.activeIncidentDocuments.length > 0
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const submitIncident = async (data: IFormRegisterNews, createNew = false) => {
     setIsSubmitting(true);
     try {
       await reportInvoiceIncident(
@@ -64,25 +80,48 @@ const RegisterNews = ({
         selectedEvidence,
         clientId?.toString() || "",
         projectId.toString(),
-        data.amount
+        data.amount,
+        createNew
       );
       messageShow.success("Evidencia adjuntada con éxito");
       reset();
       setSelectedEvidence([]);
       setCommentary(undefined);
+      setLastSubmittedData(null);
+      setShowIncidentConfirmation(false);
       onCloseAllModals();
     } catch (error) {
       console.error("Error al registrar una novedad:", error);
-      messageShow.error("Error al adjuntar la evidencia");
+      if (handleActiveIncidentsResponse(error)) {
+        setLastSubmittedData(data);
+        setShowIncidentConfirmation(true);
+      } else {
+        messageShow.error("Error al adjuntar la evidencia");
+      }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const onSubmit = (data: IFormRegisterNews) => submitIncident(data);
+
+  const handleCreateNewIncident = () => {
+    if (lastSubmittedData) {
+      submitIncident(lastSubmittedData, true);
+    }
+  };
+
+  const handleCloseIncidentConfirmation = () => {
+    setShowIncidentConfirmation(false);
+    setLastSubmittedData(null);
   };
 
   const handleClose = () => {
     reset();
     setSelectedEvidence([]);
     setCommentary(undefined);
+    setLastSubmittedData(null);
+    setShowIncidentConfirmation(false);
     onClose();
   };
 
@@ -90,6 +129,8 @@ const RegisterNews = ({
     if (!isOpen) {
       setSelectedEvidence([]);
       setCommentary(undefined);
+      setLastSubmittedData(null);
+      setShowIncidentConfirmation(false);
       reset();
     }
   }, [isOpen]);
@@ -151,6 +192,15 @@ const RegisterNews = ({
           noModal
         />
       </form>
+      <ModalConfirmAction
+        isOpen={showIncidentConfirmation}
+        onClose={handleCloseIncidentConfirmation}
+        onOk={handleCreateNewIncident}
+        title="La facturas ya tienen novedades abiertas ¿Qué desea hacer con las novedades?"
+        okText="Crear novedad nueva"
+        cancelText="No crear nueva novedad"
+        okLoading={isSubmitting}
+      />
     </Modal>
   );
 };

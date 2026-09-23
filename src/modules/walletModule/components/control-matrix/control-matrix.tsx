@@ -15,6 +15,7 @@ import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
 import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
+import type { IMatrixTotals } from "@/types/portfolios/IWalletMatrix";
 
 interface ControlMatrixProps {
   rows: IWalletClientRow[];
@@ -28,6 +29,8 @@ interface ControlMatrixProps {
   onSort: (col: string) => void;
   /** Clientes de la foto completa, no sólo los de esta página. */
   totalClients: number;
+  /** Totales del servidor sobre la foto filtrada completa, no sobre la página. */
+  totals?: IMatrixTotals;
   /** Paginación del servidor: la tabla sólo tiene la página cargada. */
   page: number;
   pageSize: number;
@@ -52,6 +55,7 @@ export default function ControlMatrix({
   sort,
   onSort,
   totalClients,
+  totals,
   page,
   pageSize,
   onPageChange,
@@ -72,6 +76,19 @@ export default function ControlMatrix({
     const delCliente = drilldown ? rows.filter((r) => r.id === drilldown.clienteId) : [];
     return delCliente.length ? delCliente : rows;
   }, [rows, drilldown]);
+
+  // El memo de arriba devuelve `rows` tal cual cuando no pliega, así que esta
+  // identidad distingue la tabla plegada a un cliente de la página completa.
+  const folded = visibleRows !== rows;
+
+  // Plegada por el drilldown, el pie es del cliente elegido; si no, son los
+  // totales del servidor sobre la foto completa: la página es sólo un trozo.
+  const tramoFooter = (i: number) =>
+    folded ? tramoTotal(visibleRows, i) : (totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0);
+
+  const totalFooter = folded
+    ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
+    : (totals?.total ?? 0);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
   const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
@@ -259,11 +276,11 @@ export default function ControlMatrix({
                   key={t.i}
                   className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground"
                 >
-                  {fmtM(tramoTotal(visibleRows, t.i))}
+                  {fmtM(tramoFooter(t.i))}
                 </th>
               ))}
               <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
-                {fmtM(visibleRows.reduce((a, r) => a + rowSegments(r).total, 0))}
+                {fmtM(totalFooter)}
               </th>
               <th />
             </tr>
@@ -271,8 +288,8 @@ export default function ControlMatrix({
         </table>
       </div>
 
-      {/* El orden y los totales del pie son de lo que se ve (la página, o la fila
-          plegada); el paginador, de la foto completa. */}
+      {/* El orden es de lo que se ve; los totales del pie y el paginador, de la
+          foto completa (salvo el pie con una fila plegada, que es de esa fila). */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
         <span className="text-[11.5px] text-muted-foreground">
           Mostrando {visibleRows.length} de {totalClients}{" "}

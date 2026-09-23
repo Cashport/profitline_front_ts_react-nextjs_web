@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
 import { fetcher } from "@/utils/api/api";
-import { buildMatrixQuery } from "@/services/walletMatrix/walletMatrix";
+import { buildMatrixGroupsQuery, buildMatrixQuery } from "@/services/walletMatrix/walletMatrix";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
@@ -43,27 +43,27 @@ export const useWalletMatrix = (filters?: IWalletMatrixFilters, page = 1, limit 
  * sumándole `aging` se queda con los que tienen facturas en ese rango, y OJO:
  * el total de cada grupo llega acotado a lo que cae en el tramo pedido, no es
  * el total del grupo.
+ *
+ * Recibe los mismos `filters` que la matriz: el serializador se queda sólo con
+ * los que este endpoint acepta, así que ordenar o paginar la matriz no vuelve a
+ * pedir los grupos.
  */
 export const useWalletMatrixGroups = (
   runId?: string,
   clientId?: string,
   aging?: AgingBucket,
-  calculateEndMonth = false
+  filters?: IWalletMatrixFilters
 ) => {
-  // El endpoint sólo acepta estos cuatro parámetros. Mandarle los filtros de la
-  // matriz no acota nada y ensucia la cache key: cada tecla del buscador pedía
-  // de nuevo exactamente la misma respuesta.
-  const params = new URLSearchParams();
-  if (runId) params.set("runId", runId);
-  if (clientId) params.set("clientId", clientId);
-  if (aging) params.set("aging", aging);
-  params.set("calculateEndMonth", calculateEndMonth ? "1" : "0");
+  const query = buildMatrixGroupsQuery(
+    { runId, clientId, aging, calculateEndMonth: filters?.calculateEndMonth },
+    filters
+  );
 
   // Sin runId no se pide. El backend caería en "la última foto generada", que
   // no tiene por qué ser la que está pintada arriba: si el worker generó otra
   // entremedio, los grupos no cuadrarían con la matriz. Esperar a que la matriz
   // diga cuál es evita además la petición doble de cada montaje.
-  const pathKey = runId ? `/portfolio/matrix/groups?${params}` : null;
+  const pathKey = runId ? `/portfolio/matrix/groups?${query}` : null;
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponse<IWalletMatrixGroups>>(
     pathKey,
