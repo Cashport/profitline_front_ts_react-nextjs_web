@@ -92,11 +92,15 @@ const RegisterNews = ({
       onCloseAllModals();
     } catch (error) {
       console.error("Error al registrar una novedad:", error);
-      if (handleActiveIncidentsResponse(error)) {
+      // Only show the confirmation modal on the FIRST attempt.
+      // On resubmit, any error should just close the modal and show a toast.
+      if (!createNew && handleActiveIncidentsResponse(error)) {
         setLastSubmittedData(data);
         setShowIncidentConfirmation(true);
       } else {
         messageShow.error("Error al adjuntar la evidencia");
+        setShowIncidentConfirmation(false);
+        setLastSubmittedData(null);
       }
     } finally {
       setIsSubmitting(false);
@@ -106,9 +110,13 @@ const RegisterNews = ({
   const onSubmit = (data: IFormRegisterNews) => submitIncident(data);
 
   const handleCreateNewIncident = () => {
-    if (lastSubmittedData) {
-      submitIncident(lastSubmittedData, true);
-    }
+    if (!lastSubmittedData) return false;
+    // Use the captured data and resubmit with create_new=true
+    submitIncident(lastSubmittedData, true);
+    // Returning false prevents Ant Design's Modal from auto-closing on OK click.
+    // We control the close explicitly via the state changes above so there's
+    // no race condition with the parent's onCloseAllModals side effects.
+    return false;
   };
 
   const handleCloseIncidentConfirmation = () => {
