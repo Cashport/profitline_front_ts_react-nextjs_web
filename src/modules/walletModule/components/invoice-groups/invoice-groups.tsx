@@ -33,7 +33,7 @@ const TEXTUAL_COLS = ["grupo", "cliente", "estado"];
 const PAGE_SIZE = 15;
 
 const TH_PLAIN =
-  "whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "whitespace-nowrap border-b border-border bg-muted/40 px-3 py-2.5 text-left text-[10.5px] font-semibold text-muted-foreground";
 
 /** Días sin gestión: verde ≤3, ámbar ≤7, rojo por encima. */
 const GestionChip = ({ dias }: { dias: number | null }) => {
@@ -139,15 +139,29 @@ export default function InvoiceGroups({
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
-              <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} />
-              <SortableTh col="cliente" label="Cliente" sort={sort} onSort={onSort} />
-              <SortableTh col="fact" label="Fact." align="right" sort={sort} onSort={onSort} />
+              <SortableTh col="grupo" label="Grupo" sort={sort} onSort={onSort} uppercase={false} />
+              <SortableTh
+                col="cliente"
+                label="Cliente"
+                sort={sort}
+                onSort={onSort}
+                uppercase={false}
+              />
+              <SortableTh
+                col="fact"
+                label="Fact."
+                align="right"
+                sort={sort}
+                onSort={onSort}
+                uppercase={false}
+              />
               <SortableTh
                 col="monto"
                 label={enTramo ? `Total ${TRAMOS[ti].short}` : "Total"}
                 align="right"
                 sort={sort}
                 onSort={onSort}
+                uppercase={false}
               />
               <th scope="col" className={TH_PLAIN}>
                 Reparto
@@ -155,14 +169,27 @@ export default function InvoiceGroups({
               <th scope="col" className={TH_PLAIN}>
                 Responsable
               </th>
-              <SortableTh col="gestion" label="Gest." align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="gestion"
+                label="Gest."
+                align="right"
+                sort={sort}
+                onSort={onSort}
+                uppercase={false}
+              />
               <th scope="col" className={TH_PLAIN}>
                 Ticket
               </th>
               <th scope="col" className={TH_PLAIN}>
                 Límite
               </th>
-              <SortableTh col="estado" label="Estado" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="estado"
+                label="Estado"
+                sort={sort}
+                onSort={onSort}
+                uppercase={false}
+              />
               <th className="border-b border-border bg-muted/40" />
             </tr>
           </thead>

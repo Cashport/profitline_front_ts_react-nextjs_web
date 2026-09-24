@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import UiSearchInput from "@/components/ui/search-input";
 import {
   useWalletMatrix,
   useWalletMatrixGroups,
@@ -15,6 +16,7 @@ import { useMessageApi } from "@/context/MessageContext";
 import ControlMatrix from "../../components/control-matrix/control-matrix";
 import GroupDetailModal from "../../components/group-detail-modal/group-detail-modal";
 import InvoiceGroups from "../../components/invoice-groups/invoice-groups";
+import ModalFilterMatrix from "../../components/modal-filter-matrix/modal-filter-matrix";
 import WalletHeader from "../../components/wallet-header/wallet-header";
 import WalletStatCards from "../../components/wallet-stat-cards/wallet-stat-cards";
 import {
@@ -57,9 +59,8 @@ export default function WalletView() {
   const { showMessage } = useMessageApi();
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
-  // Los dos buscadores —el de la barra superior y el de la matriz— comparten
-  // este estado; a la consulta sólo entra la versión con debounce. El endpoint
-  // de grupos no lo soporta.
+  // Buscador de la tarjeta de la matriz; a la consulta sólo entra la versión
+  // con debounce. El endpoint de grupos no lo soporta.
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE_MS);
   const [modalFilters, setModalFilters] = useState<IWalletMatrixModalFilters>(
@@ -275,10 +276,6 @@ export default function WalletView() {
   return (
     <div className="wallet-scope flex flex-col gap-4 pb-6">
       <WalletHeader
-        search={search}
-        onSearchChange={setSearch}
-        filters={modalFilters}
-        onFiltersChange={setModalFilters}
         lastUpdatedAt={matrix?.snapshot?.lastUpdatedAt}
         cutoffDate={matrix?.cutoff?.date}
         projected={calculateEndMonth}
@@ -287,37 +284,50 @@ export default function WalletView() {
         onToggleProjection={setCalculateEndMonth}
       />
 
-      {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
+      <section className="rounded-2xl bg-card p-7 pb-5 shadow-sm">
+        <div className="mb-7 flex flex-wrap items-center gap-3">
+          <UiSearchInput
+            id="wallet-matrix-search"
+            showBorder
+            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <ModalFilterMatrix value={modalFilters} onChange={setModalFilters} />
+        </div>
 
-      {primeraCarga ? (
-        <MatrixSkeleton />
-      ) : error ? (
-        // Se muestra el motivo real y no un "no hay cartera": la causa más
-        // común es no tener grupos de clientes asignados en el proyecto, que
-        // no es lo mismo que un proyecto sin cartera.
-        <p className="py-10 text-center text-sm text-rose-600 dark:text-rose-400">
-          {(error as Error)?.message || "No se pudo cargar la cartera."}
-        </p>
-      ) : (
-        // La tabla se renderiza siempre, incluso sin resultados: su buscador
-        // vive dentro, y ocultarla dejaría al usuario sin forma de corregir o
-        // borrar lo que escribió.
-        <ControlMatrix
-          rows={clientRows}
-          search={search}
-          onSearchChange={setSearch}
-          sort={sort}
-          onSort={handleSort}
-          totalClients={matrix?.pagination.totalClients ?? 0}
-          page={page}
-          pageSize={PAGE_SIZE}
-          onPageChange={handlePageChange}
-          loading={loading}
-          emptyMessage="No hay cartera para los filtros actuales."
-          drilldown={drilldown}
-          onSelect={handleSelect}
-        />
-      )}
+        {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
+
+        <div className="mt-7">
+          {primeraCarga ? (
+            <MatrixSkeleton />
+          ) : error ? (
+            // Se muestra el motivo real y no un "no hay cartera": la causa más
+            // común es no tener grupos de clientes asignados en el proyecto, que
+            // no es lo mismo que un proyecto sin cartera.
+            <p className="py-10 text-center text-sm text-rose-600 dark:text-rose-400">
+              {(error as Error)?.message || "No se pudo cargar la cartera."}
+            </p>
+          ) : (
+            // La tabla se renderiza siempre, incluso sin resultados: el
+            // buscador vive arriba, y ocultar la tabla dejaría al usuario sin
+            // forma de corregir o borrar lo que escribió.
+            <ControlMatrix
+              rows={clientRows}
+              sort={sort}
+              onSort={handleSort}
+              totalClients={matrix?.pagination.totalClients ?? 0}
+              page={page}
+              pageSize={PAGE_SIZE}
+              onPageChange={handlePageChange}
+              loading={loading}
+              emptyMessage="No hay cartera para los filtros actuales."
+              drilldown={drilldown}
+              onSelect={handleSelect}
+            />
+          )}
+        </div>
+      </section>
 
       {primeraCarga ? (
         <GroupsSkeleton />

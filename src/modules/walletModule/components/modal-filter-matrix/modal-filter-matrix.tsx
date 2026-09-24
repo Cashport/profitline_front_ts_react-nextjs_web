@@ -12,9 +12,9 @@ import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncid
 import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_STATUS_OPTIONS } from "../../constants";
 import type { IWalletMatrixModalFilters } from "../../types";
 
-/** Misma superficie que el botón de tema para que los dos lean como un par. */
+/** Combina con el buscador de la barra de la matriz: misma altura y borde. */
 const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
+  "flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-foreground transition-colors hover:border-foreground";
 
 interface ModalFilterMatrixProps {
   value: IWalletMatrixModalFilters;

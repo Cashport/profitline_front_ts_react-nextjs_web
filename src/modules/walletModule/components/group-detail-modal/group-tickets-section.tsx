@@ -59,9 +59,7 @@ export default function GroupTicketsSection({
     <>
       <div className="border-t border-border px-[18px] pb-4 pt-3.5">
         <div className="mb-[11px] flex w-full items-center gap-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
-            Acciones abiertas
-          </h4>
+          <h4 className="text-[11px] font-semibold text-muted-foreground">Acciones abiertas</h4>
           <Count>{abiertas.length}</Count>
           {vencidas > 0 && (
             <span className="text-[11px] text-rose-600 dark:text-rose-400">
@@ -105,9 +103,7 @@ export default function GroupTicketsSection({
             onClick={() => setVerCerradas((v) => !v)}
             className="mb-[11px] flex w-full items-center gap-2 text-left"
           >
-            <h4 className="text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
-              Acciones cerradas
-            </h4>
+            <h4 className="text-[11px] font-semibold text-muted-foreground">Acciones cerradas</h4>
             <Count>{cerradas.length}</Count>
             {tarde > 0 && (
               <span className="text-[11px] text-rose-600 dark:text-rose-400">

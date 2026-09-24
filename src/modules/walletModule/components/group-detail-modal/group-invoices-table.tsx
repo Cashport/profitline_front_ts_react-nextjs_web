@@ -35,7 +35,7 @@ interface GroupInvoicesTableProps {
 
 // bg-muted opaco (no /40): la cabecera es sticky y las filas pasan por debajo.
 const TH =
-  "border-b border-border bg-muted px-3 py-2.5 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "border-b border-border bg-muted px-3 py-2.5 text-left text-[10.5px] font-semibold text-muted-foreground";
 
 const INACTIVE_REASON_LABEL: Record<WalletDocumentInactiveReason, string> = {
   PAID: "Pagada",

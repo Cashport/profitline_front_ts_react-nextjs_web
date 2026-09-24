@@ -20,7 +20,6 @@ const Swatch = ({ estado }: { estado: EstadoKey }) => (
 /** Las cuatro tarjetas de resumen sobre la matriz. */
 export default function WalletStatCards({ summary }: WalletStatCardsProps) {
   const g = summary.segments;
-  const resuelto = g.compensada + g.pagada;
 
   const cards: {
     key: string;
@@ -31,22 +30,16 @@ export default function WalletStatCards({ summary }: WalletStatCardsProps) {
   }[] = [
     {
       key: "saldo",
-      label: "Saldo en vista",
+      label: "Cartera",
       value: fmtM(g.total),
       foot: `${fac(g.n)} · ${cli(summary.clientes)}`,
       bar: <SegBar segments={g} className="mt-2.5 h-1.5" />
     },
     {
-      key: "resuelto",
-      label: (
-        <>
-          <Swatch estado="compensada" />
-          <Swatch estado="pagada" />
-          Ya resuelto
-        </>
-      ),
-      value: fmtM(resuelto),
-      foot: `Compensado ${fmtM(g.compensada)} · pagado sin depurar ${fmtM(g.pagada)}`
+      key: "vencida",
+      label: "Cartera vencida",
+      value: fmtM(g.vencido),
+      foot: `${pct(g.vencido, g.total).toFixed(0)}% de la cartera`
     },
     {
       key: "novedad",
@@ -73,17 +66,15 @@ export default function WalletStatCards({ summary }: WalletStatCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((c) => (
-        <div key={c.key} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground">
-            {c.label}
-          </div>
-          <div className="mt-1.5 text-2xl font-semibold leading-none tracking-tight tabular-nums text-foreground">
+        <div key={c.key} className="flex flex-col rounded-lg bg-muted p-3.5">
+          <div className="flex items-center gap-1.5 text-[13px] text-foreground">{c.label}</div>
+          <div className="mt-1.5 text-[22px] font-medium leading-none tabular-nums text-foreground">
             {c.value}
           </div>
           {c.bar}
-          <div className="mt-auto pt-2 text-[11.5px] text-muted-foreground">{c.foot}</div>
+          <div className="mt-auto pt-2 text-[12px] text-muted-foreground">{c.foot}</div>
         </div>
       ))}
     </div>

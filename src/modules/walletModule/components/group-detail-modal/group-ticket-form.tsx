@@ -55,7 +55,7 @@ export default function GroupTicketForm({
 
   return (
     <div className="border-t border-border px-[18px] pb-4 pt-3.5">
-      <h4 className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+      <h4 className="mb-[11px] text-[11px] font-semibold text-muted-foreground">
         Nuevo ticket
       </h4>
 

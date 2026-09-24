@@ -1,19 +1,12 @@
 "use client";
 
-import UiSearchInput from "@/components/ui/search-input";
+import { RefreshCw } from "lucide-react";
+
 import { FECHA_CORTE_PLACEHOLDER } from "../../constants";
-import ModalFilterMatrix from "../modal-filter-matrix/modal-filter-matrix";
+import ToggleSwitch from "../shared/toggle-switch";
 import WalletThemeToggle from "../wallet-theme-toggle/wallet-theme-toggle";
-import type { IWalletMatrixModalFilters } from "../../types";
 
 interface WalletHeaderProps {
-  /** Búsqueda actual. Se comparte con el buscador de la matriz para que los
-   *  dos muestren siempre lo mismo y no se contradigan. */
-  search?: string;
-  onSearchChange: (value: string) => void;
-  /** Filtros confirmados en el modal. */
-  filters: IWalletMatrixModalFilters;
-  onFiltersChange: (next: IWalletMatrixModalFilters) => void;
   /** Fin de la última corrida del worker; null mientras no hay foto. */
   lastUpdatedAt?: string | null;
   /** Fecha contra la que se calcularon las edades de esta consulta. */
@@ -36,17 +29,14 @@ const formatCorte = (value?: string | null) =>
     : FECHA_CORTE_PLACEHOLDER;
 
 /**
- * Barra superior: título, corte, búsqueda global, proyección, filtros y tema.
+ * Barra superior: título, corte, proyección y tema. Buscador y filtros
+ * viven en la tarjeta de abajo (`WalletView`), junto a lo que filtran.
  *
  * El corte no es decorativo: la pantalla lee una foto que el worker
  * regenera cada 30 minutos, así que sin esa marca el usuario no puede
  * distinguir un dato de hace un minuto de uno de hace media hora.
  */
 export default function WalletHeader({
-  search,
-  onSearchChange,
-  filters,
-  onFiltersChange,
   lastUpdatedAt,
   cutoffDate,
   projected,
@@ -56,7 +46,7 @@ export default function WalletHeader({
 }: WalletHeaderProps) {
   return (
     <header className="flex flex-wrap items-center gap-3.5 border-b border-border pb-3">
-      <h1 className="text-base font-semibold text-foreground">Cartera por cliente y tramo</h1>
+      <h1 className="text-base font-semibold text-foreground">Cartera</h1>
 
       <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
         <span
@@ -65,6 +55,18 @@ export default function WalletHeader({
           }`}
         />
         {formatCorte(lastUpdatedAt)}
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            aria-label="Actualizar ahora"
+            title="Actualizar ahora"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+          </button>
+        )}
       </span>
 
       {projected && cutoffDate && (
@@ -73,46 +75,13 @@ export default function WalletHeader({
         </span>
       )}
 
-      <label className="flex items-center gap-1.5 whitespace-nowrap text-[11.5px] text-muted-foreground">
-        <input
-          type="checkbox"
-          checked={Boolean(projected)}
-          onChange={(e) => onToggleProjection?.(e.target.checked)}
-        />
-        Proyectar a cierre de mes
-      </label>
+      <ToggleSwitch
+        checked={Boolean(projected)}
+        onChange={(v) => onToggleProjection?.(v)}
+        label="Proyectar a cierre de mes"
+      />
 
-      {isRefreshing ? (
-        <span
-          className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-border px-3 py-1.5 text-[11.5px] font-semibold text-muted-foreground"
-          role="status"
-          aria-live="polite"
-        >
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-border border-t-foreground" />
-          Actualizando…
-        </span>
-      ) : (
-        onRefresh && (
-          <button
-            type="button"
-            onClick={onRefresh}
-            className="whitespace-nowrap rounded-lg border border-border px-3 py-1.5 text-[11.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
-          >
-            Actualizar ahora
-          </button>
-        )
-      )}
-
-      {/* UiSearchInput es flex:1, así que el ml-auto va en el grupo, no en él. */}
       <div className="ml-auto flex items-center gap-3">
-        {/* <UiSearchInput
-          id="wallet-global-search"
-          showBorder
-          placeholder="Cliente, NIT, factura o ejecutivo…"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-        /> */}
-        <ModalFilterMatrix value={filters} onChange={onFiltersChange} />
         <WalletThemeToggle />
       </div>
     </header>

@@ -48,3 +48,30 @@ export const TICKET_PRIORITY_LABEL: Record<TicketPriority, string> = {
   HIGH: "Alta",
   URGENT: "Urgente"
 };
+
+/** Orden de las secciones de la Lista, agrupadas por estado. */
+export const TICKET_STATUS_ORDER: TicketStatus[] = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
+
+/** Color del pill de cada sección de estado en la Lista (hex, para StatusChip). */
+export const TICKET_STATUS_COLOR: Record<TicketStatus, string> = {
+  OPEN: "#64748b",
+  IN_PROGRESS: "#7c5cfc",
+  COMPLETED: "#12b76a",
+  CANCELLED: "#94a3b8"
+};
+
+/** Clases de color de la bandera de prioridad (ícono + texto). */
+export const TICKET_PRIORITY_COLOR: Record<TicketPriority, string> = {
+  LOW: "text-muted-foreground",
+  NORMAL: "text-blue-600 dark:text-blue-400",
+  HIGH: "text-amber-600 dark:text-amber-400",
+  URGENT: "text-rose-600 dark:text-rose-400"
+};
+
+/** Rank numérico para poder ordenar la columna "Prioridad". */
+export const TICKET_PRIORITY_RANK: Record<TicketPriority, number> = {
+  LOW: 0,
+  NORMAL: 1,
+  HIGH: 2,
+  URGENT: 3
+};

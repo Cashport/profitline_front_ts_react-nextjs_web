@@ -3,7 +3,7 @@ import { parseApiDate } from "@/modules/walletModule/utils/api-adapter";
 import { diasEntre, fmtM } from "@/modules/walletModule/utils/format";
 import type { Sev } from "@/modules/walletModule/types";
 import type { ITicket, ITicketsSummary } from "@/types/tickets/ITickets";
-import { TICKET_KPI_CARDS, TICKET_STATUS_LABEL } from "../constants";
+import { TICKET_KPI_CARDS, TICKET_PRIORITY_RANK, TICKET_STATUS_LABEL } from "../constants";
 import type { TicketLaneId } from "../types";
 
 /**
@@ -95,9 +95,8 @@ export function valorDeColumna(t: ITicket, col: string): string | number {
       return t.assigned_to_name ?? "";
     case "fecha":
       return fechaLimite(t)?.getTime() ?? Infinity;
-    // Los abiertos primero dentro de cada estado, como en la referencia.
-    case "estado":
-      return estadoDe(t).estado + (esAbierto(t) ? "0" : "1");
+    case "prioridad":
+      return TICKET_PRIORITY_RANK[t.priority];
     default:
       return t.amount;
   }

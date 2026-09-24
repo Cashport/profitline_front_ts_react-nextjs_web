@@ -47,7 +47,7 @@ export const tramoRows = (tramos: number[]): DetailRow[] =>
 
 /** Superficie del tooltip. Sale de los tokens y no del negro por defecto de AntD
  *  para que se lea igual en ambos temas y combine con el resto de la página. */
-const SURFACE: React.CSSProperties = {
+export const SURFACE: React.CSSProperties = {
   background: "rgb(var(--popover))",
   border: "1px solid rgb(var(--border))",
   borderRadius: 8,
@@ -97,6 +97,31 @@ export default function DetailTooltip({ title, rows, total, children }: DetailTo
       title={content}
       placement="top"
       // Sin flecha: se quedaría con el color por defecto de AntD, no con SURFACE.
+      arrow={false}
+      mouseEnterDelay={0.15}
+      rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
+      overlayInnerStyle={SURFACE}
+    >
+      {children}
+    </Tooltip>
+  );
+}
+
+interface MiniTooltipProps {
+  content: React.ReactNode;
+  placement?: "top" | "bottom" | "left" | "right";
+  children: React.ReactElement;
+}
+
+/** Misma superficie que DetailTooltip, para un contenido suelto (sin filas
+ *  ni total) — un dato puntual en vez de un desglose. */
+export function MiniTooltip({ content, placement = "top", children }: MiniTooltipProps) {
+  const { resolvedTheme } = useWalletTheme();
+
+  return (
+    <Tooltip
+      title={<div className="wallet-scope text-[11.5px] text-popover-foreground">{content}</div>}
+      placement={placement}
       arrow={false}
       mouseEnterDelay={0.15}
       rootClassName={resolvedTheme === "dark" ? "dark" : undefined}

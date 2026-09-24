@@ -10,7 +10,7 @@ interface NoveltyDocumentsTableProps {
 }
 
 const TH =
-  "border-b border-border bg-muted px-3 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground";
+  "border-b border-border bg-muted px-3 py-2 text-left text-[10.5px] font-semibold text-muted-foreground";
 
 /**
  * Tabla "Facturas incluidas" de los paneles de novedad: los documentos

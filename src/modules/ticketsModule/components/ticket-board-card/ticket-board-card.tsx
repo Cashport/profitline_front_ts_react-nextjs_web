@@ -4,8 +4,10 @@ import BoardCard from "@/components/ui/board-lanes/board-card";
 import PersonBadge from "@/modules/walletModule/components/shared/person-badge";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
 import { toPerson } from "@/modules/walletModule/utils/api-adapter";
-import { corto, fmtD, fmtM } from "@/modules/walletModule/utils/format";
+import { fmtD, fmtM } from "@/modules/walletModule/utils/format";
 import type { ITicket } from "@/types/tickets/ITickets";
+import ClientTag from "../shared/client-tag";
+import PriorityFlag from "../shared/priority-flag";
 import { estadoDe, fechaLimite } from "../../utils/tickets-calc";
 
 interface TicketBoardCardProps {
@@ -22,6 +24,7 @@ export default function TicketBoardCard({ ticket: t, onOpenDetail }: TicketBoard
     <BoardCard sev={e.tsev ?? e.sev} onClick={() => onOpenDetail(t.id)}>
       <div className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground">
         <span className="font-mono">{t.ticket_code}</span>
+        <PriorityFlag priority={t.priority} mini />
         <span className="ml-auto tabular-nums">{fmtM(t.amount)}</span>
       </div>
 
@@ -29,9 +32,9 @@ export default function TicketBoardCard({ ticket: t, onOpenDetail }: TicketBoard
         {t.title}
       </div>
 
-      <div className="mb-1.5 text-[11.5px] text-muted-foreground">
-        {corto(t.client_name)}
-        {t.category_name ? ` · ${t.category_name}` : ""}
+      <div className="mb-1.5 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+        <ClientTag id={t.client_id} name={t.client_name} mini />
+        {t.category_name ? <span>· {t.category_name}</span> : null}
       </div>
 
       <div className="flex items-center gap-2 text-[11px] text-muted-foreground">

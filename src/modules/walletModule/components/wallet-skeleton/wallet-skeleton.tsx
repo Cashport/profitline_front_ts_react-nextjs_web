@@ -7,18 +7,15 @@ import { TRAMOS } from "../../constants";
  * carga lo comunica el contenedor con `aria-busy`.
  */
 const Bar = ({ className = "" }: { className?: string }) => (
-  <span
-    aria-hidden
-    className={`block animate-pulse rounded bg-secondary ${className}`}
-  />
+  <span aria-hidden className={`block animate-pulse rounded bg-secondary ${className}`} />
 );
 
 /** Las cuatro tarjetas de resumen. */
 export function StatCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-busy>
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-busy>
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
+        <div key={i} className="flex flex-col rounded-lg bg-muted p-3.5">
           <Bar className="h-3 w-24" />
           <Bar className="mt-2.5 h-7 w-32" />
           <Bar className="mt-2.5 h-1.5 w-full" />
@@ -38,15 +35,10 @@ export function StatCardsSkeleton() {
  */
 export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
   return (
-    <section className="rounded-xl bg-card shadow-sm" aria-busy aria-label="Cargando matriz de cartera">
-      <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
-        <div>
-          <Bar className="h-4 w-36" />
-          <Bar className="mt-3 h-3 w-72" />
-        </div>
-        <div className="ml-auto w-full max-w-[400px]">
-          <Bar className="h-10 w-full rounded-lg" />
-        </div>
+    <div aria-busy aria-label="Cargando matriz de cartera">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3.5">
+        <Bar className="h-6 w-56 rounded-md" />
+        <Bar className="h-3 w-72" />
       </div>
 
       <div className="overflow-x-auto">
@@ -95,14 +87,18 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }
 
 /** Tabla inferior de grupos de facturas. */
 export function GroupsSkeleton({ rows = 4 }: { rows?: number }) {
   return (
-    <section className="rounded-xl bg-card shadow-sm" aria-busy aria-label="Cargando grupos de facturas">
+    <section
+      className="rounded-xl bg-card shadow-sm"
+      aria-busy
+      aria-label="Cargando grupos de facturas"
+    >
       <div className="border-b border-border p-4">
         <Bar className="h-4 w-40" />
       </div>

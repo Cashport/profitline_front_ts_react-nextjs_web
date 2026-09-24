@@ -9,13 +9,11 @@ import { useWalletTheme } from "../../contexts/wallet-theme-context";
 export type NoveltyModalMode = "crear" | "editar" | "vincular";
 
 export const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h4 className="mb-[11px] text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
-    {children}
-  </h4>
+  <h4 className="mb-[11px] text-[11px] font-semibold text-muted-foreground">{children}</h4>
 );
 
 export const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+  <label className="mb-1 block text-[10.5px] font-semibold text-muted-foreground">
     {children}
   </label>
 );
