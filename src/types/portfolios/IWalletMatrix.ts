@@ -197,10 +197,10 @@ export interface IWalletMatrixFilters {
   holdings?: number[];
   clientGroup?: number[];
   /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
-  coordinator?: string | null;
-  market?: string | null;
-  kam?: string | null;
-  kam_lider?: string | null;
+  coordinator?: string[];
+  market?: string[];
+  kam?: string[];
+  kam_lider?: string[];
   /** Texto libre: cliente, NIT o responsable. */
   search?: string;
   /** Ordena el conjunto completo filtrado, no sólo la página cargada. */

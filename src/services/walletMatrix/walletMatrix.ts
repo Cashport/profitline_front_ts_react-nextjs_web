@@ -29,10 +29,10 @@ const appendSharedFilters = (params: URLSearchParams, filters?: IWalletMatrixSha
   list(params, "status", filters?.status);
   list(params, "novelty_type", filters?.noveltyType);
   list(params, "executive", filters?.executive);
-  single(params, "coordinator", filters?.coordinator);
-  single(params, "market", filters?.market);
-  single(params, "kam", filters?.kam);
-  single(params, "kam_lider", filters?.kam_lider);
+  list(params, "coordinator", filters?.coordinator);
+  list(params, "market", filters?.market);
+  list(params, "kam", filters?.kam);
+  list(params, "kam_lider", filters?.kam_lider);
   single(params, "search", filters?.search);
 };
 
