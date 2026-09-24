@@ -22,7 +22,8 @@ import { useAppStore } from "@/lib/store/store";
 import {
   sendPackageToBilling,
   sendPurchaseOrderToRebilling,
-  downloadMvpTxt
+  downloadMvpTxt,
+  downloadMvpTxtV2
 } from "@/services/purchaseOrders/purchaseOrders";
 import { ApiError } from "@/utils/api/api";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
@@ -82,6 +83,7 @@ export function PurchaseOrderDetailHeader({
   const [isBillingConfirmOpen, setIsBillingConfirmOpen] = useState(false);
   const [isRebillingConfirmOpen, setIsRebillingConfirmOpen] = useState(false);
   const [isTxtErpLoading, setIsTxtErpLoading] = useState(false);
+  const [isTxtEanLoading, setIsTxtEanLoading] = useState(false);
 
   const allowedStatesForDownload = ["En despacho", "Entregado"];
   const allowedStatesForBackOrder = ["Procesado", "En aprobaciones", "Novedad"];
@@ -104,6 +106,24 @@ export function PurchaseOrderDetailHeader({
     } finally {
       hideLoading();
       setIsTxtErpLoading(false);
+    }
+  };
+
+  const handleDownloadTxtEan = async () => {
+    if (!orderId) return;
+    setIsTxtEanLoading(true);
+    const hideLoading = message.loading("Generando TXT EAN...", 0);
+    try {
+      await downloadMvpTxtV2({ orderIds: [Number(orderId)], variant: "sku" });
+      message.success("TXT EAN generado correctamente");
+      mutate?.();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al generar el TXT EAN"
+      );
+    } finally {
+      hideLoading();
+      setIsTxtEanLoading(false);
     }
   };
 
@@ -274,6 +294,13 @@ export function PurchaseOrderDetailHeader({
             icon: <FileOutput className="h-4 w-4" />,
             onClick: handleDownloadTxtErp,
             disabled: isTxtErpLoading
+          } as DropdownItem,
+          {
+            key: "txt-ean",
+            label: "Descargar TXT EAN",
+            icon: <FileOutput className="h-4 w-4" />,
+            onClick: handleDownloadTxtEan,
+            disabled: isTxtEanLoading
           } as DropdownItem
         ]
       : []),
