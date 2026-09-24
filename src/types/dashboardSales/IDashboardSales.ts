@@ -159,3 +159,38 @@ export interface IDashboardSalesBackorder {
   period: { start: string; end: string };
 }
 export type IDashboardSalesBackorderResponse = GenericResponse<IDashboardSalesBackorder>;
+
+export interface IDashboardSalesNegotiation {
+  discount_id: number;
+  client_id: string;
+  client_name: string;
+  negotiation_name: string;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  negotiation: {
+    /** 1: porcentaje, 2: monto. */
+    computation_type: number;
+    min_discount: number | null;
+    max_discount: number | null;
+    /** Listo para mostrar, p. ej. "50%" o "50% - 58%" si varía por producto. */
+    label: string;
+  };
+  avg_month: number;
+  last_month: number;
+  /** Fecha y hora Colombia del último pedido del cliente (yyyy-MM-dd HH:mm:ss). */
+  last_purchase: string | null;
+}
+export interface IDashboardSalesNegotiations {
+  negotiations: IDashboardSalesNegotiation[];
+  /** Ventana usada para el promedio: meses cerrados con historial, máximo 12. */
+  periods: { average_start: string; average_months: number; last_month_start: string };
+  pagination: {
+    page: number;
+    limit: number;
+    total_count: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+}
