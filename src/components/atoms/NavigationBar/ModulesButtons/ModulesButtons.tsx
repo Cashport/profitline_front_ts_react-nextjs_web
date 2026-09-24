@@ -8,18 +8,18 @@ import {
   Bank,
   SquaresFour,
   Storefront,
-  UsersFour,
-  Stack,
+  // UsersFour,
+  // Stack,
   ClipboardText,
   ListChecks,
   ArrowCounterClockwise,
   TextIndent,
-  Ticket,
-  Gauge
+  Ticket
+  // Gauge
 } from "phosphor-react";
 import {
   ChatCircleDots,
-  SealPercent,
+  // SealPercent,
   HandTap,
   ChartBar,
   ShoppingCartSimple,
@@ -96,7 +96,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )}
 
       {/* Descuentos */}
-      {checkUserViewPermissions(project, "Descuentos") && (
+      {/* {checkUserViewPermissions(project, "Descuentos") && (
         <Link href="/descuentos" passHref legacyBehavior>
           <Button
             type="primary"
@@ -106,7 +106,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/descuentos")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Notificaciones */}
       {checkUserViewPermissions(project, "Notificaciones") && (
@@ -167,7 +167,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )}
 
       {/* Proveedores */}
-      {checkUserViewPermissions(project, "Proveedores") && (
+      {/* {checkUserViewPermissions(project, "Proveedores") && (
         <Link href="/proveedores" passHref legacyBehavior>
           <Button
             type="primary"
@@ -181,7 +181,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/proveedores")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Apply Module */}
       {path === "/applyModule" && (
@@ -197,7 +197,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )}
 
       {/* Administración de Clientes */}
-      {checkUserViewPermissions(project, "AdministracionClientes") && (
+      {/* {checkUserViewPermissions(project, "AdministracionClientes") && (
         <Link href="/client-management" passHref legacyBehavior>
           <Button
             type="primary"
@@ -207,7 +207,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/client-management")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Chat */}
       {checkUserViewPermissions(project, "Whatsapp") && (
@@ -355,7 +355,11 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             size="large"
             icon={<FadersHorizontal size={iconSize} />}
             className={
-              path.startsWith("/market-admin") ? styles.buttonIcon : styles.buttonIconActive
+              path.startsWith("/market-admin") ||
+              path.startsWith("/settings") ||
+              path.startsWith("/mass-communications")
+                ? styles.buttonIcon
+                : styles.buttonIconActive
             }
             onClick={(e) => handleNavClick(e, "/market-admin")}
           />
@@ -402,7 +406,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )}
 
       {/* Control tower */}
-      {checkUserViewPermissions(project, "ControlTower") && (
+      {/* {checkUserViewPermissions(project, "ControlTower") && (
         <Link href="/torreControl" passHref legacyBehavior>
           <Button
             type="primary"
@@ -414,7 +418,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/torreControl")}
           />
         </Link>
-      )}
+      )} */}
     </div>
   );
 };

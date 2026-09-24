@@ -141,13 +141,6 @@ export const WalletTab = () => {
     });
   };
 
-  const handleOpenBalanceLegalization = () => {
-    setisGenerateActionOpen(false);
-    openModal("balanceLegalization", {
-      // selectedAdjustments: selectedRows
-    });
-  };
-
   const validateInvoiceIsSelected = (): boolean => {
     if (!selectedRows || selectedRows.length === 0) {
       messageShow.error("Seleccione al menos una factura");
@@ -281,7 +274,6 @@ export const WalletTab = () => {
         }}
         validateInvoiceIsSelected={validateInvoiceIsSelected}
         addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
-        balanceLegalization={handleOpenBalanceLegalization}
         markAsBalance={handleMarkAsBalance}
       />
       <PaymentAgreementModal
