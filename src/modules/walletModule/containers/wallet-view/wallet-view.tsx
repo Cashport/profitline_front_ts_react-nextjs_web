@@ -67,7 +67,7 @@ export default function WalletView() {
   );
   // Orden del servidor sobre la foto completa; `col` es el `sort_by` del API.
   const [sort, setSort] = useState<SortState>(MATRIX_DEFAULT_SORT);
-  const [calculateEndMonth, setCalculateEndMonth] = useState(false);
+  const [calculateEndMonth, setCalculateEndMonth] = useState(true);
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);

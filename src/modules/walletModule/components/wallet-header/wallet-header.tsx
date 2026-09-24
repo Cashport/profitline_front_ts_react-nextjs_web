@@ -76,6 +76,7 @@ export default function WalletHeader({
       <label className="flex items-center gap-1.5 whitespace-nowrap text-[11.5px] text-muted-foreground">
         <input
           type="checkbox"
+          className="accent-wallet-accent"
           checked={Boolean(projected)}
           onChange={(e) => onToggleProjection?.(e.target.checked)}
         />
