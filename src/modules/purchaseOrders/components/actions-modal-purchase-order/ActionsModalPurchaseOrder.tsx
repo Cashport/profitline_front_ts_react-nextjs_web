@@ -13,7 +13,8 @@ import {
   deletePurchaseOrders,
   getSalesPlane,
   getInventoryExport,
-  downloadMvpTxt
+  downloadMvpTxt,
+  downloadMvpTxtV2
 } from "@/services/purchaseOrders/purchaseOrders";
 
 import "./actionsModalPurchaseOrder.scss";
@@ -49,6 +50,7 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const [isDownloadPlaneOpen, setIsDownloadPlaneOpen] = useState(false);
   const [isInventoryExportLoading, setIsInventoryExportLoading] = useState(false);
   const [isMvpTxtLoading, setIsMvpTxtLoading] = useState(false);
+  const [isMvpTxtV2Loading, setIsMvpTxtV2Loading] = useState(false);
 
   const selectedProject = useAppStore((state) => state.selectedProject);
   const isAbbott = selectedProject?.ID === 204;
@@ -289,6 +291,27 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
     }
   };
 
+  const handleDownloadMvpTxtV2 = async () => {
+    if (!validateOrderSelection()) return;
+
+    setIsMvpTxtV2Loading(true);
+    const hideLoading = message.loading("Generando TXT EAN...", 0);
+    try {
+      await downloadMvpTxtV2({
+        orderIds: selectedOrders.map((order) => order.id),
+        variant: "sku"
+      });
+      message.success("TXT EAN generado correctamente");
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al generar el TXT EAN"
+      );
+    } finally {
+      hideLoading();
+      setIsMvpTxtV2Loading(false);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -308,6 +331,12 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
                 title="Descargar TXT ERP"
                 onClick={handleDownloadMvpTxt}
                 disabled={isMvpTxtLoading || selectedOrders.length === 0}
+              />
+              <ButtonGenerateAction
+                icon={<DownloadSimple className="h-4 w-4" />}
+                title="Descargar TXT EAN"
+                onClick={handleDownloadMvpTxtV2}
+                disabled={isMvpTxtV2Loading || selectedOrders.length === 0}
               />
               {canDelete && (
                 <ButtonGenerateAction

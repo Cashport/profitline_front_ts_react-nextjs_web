@@ -110,16 +110,19 @@ export const uploadPurchaseOrderToN8n = async (
   }
 };
 
-export const downloadMvpTxt = async ({
-  orderIds,
-  variant = "sku"
-}: {
-  orderIds: number[];
-  variant?: "ean" | "sku";
-}): Promise<void> => {
+const downloadMvpTxtFromEndpoint = async (
+  endpoint: string,
+  {
+    orderIds,
+    variant = "sku"
+  }: {
+    orderIds: number[];
+    variant?: "ean" | "sku";
+  }
+): Promise<void> => {
   try {
     const response = await instance.post(
-      `${config.API_HOST}/purchaseOrder/export-mvp-txt`,
+      `${config.API_HOST}${endpoint}`,
       { order_ids: orderIds, variant },
       { responseType: "blob", timeout: 60000 }
     );
@@ -144,6 +147,31 @@ export const downloadMvpTxt = async ({
     throw error;
   }
 };
+
+export const downloadMvpTxt = async ({
+  orderIds,
+  variant = "sku"
+}: {
+  orderIds: number[];
+  variant?: "ean" | "sku";
+}): Promise<void> =>
+  downloadMvpTxtFromEndpoint("/purchaseOrder/export-mvp-txt", {
+    orderIds,
+    variant
+  });
+
+// V2 (Abbott 204): mismo body/descarga que V1, endpoint experimental aislado.
+export const downloadMvpTxtV2 = async ({
+  orderIds,
+  variant = "sku"
+}: {
+  orderIds: number[];
+  variant?: "ean" | "sku";
+}): Promise<void> =>
+  downloadMvpTxtFromEndpoint("/purchaseOrder/export-mvp-txt-v2", {
+    orderIds,
+    variant
+  });
 
 export const getHistoryTimelineEvents = async (
   orderId: string
