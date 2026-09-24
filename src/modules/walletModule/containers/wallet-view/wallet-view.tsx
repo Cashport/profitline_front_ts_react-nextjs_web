@@ -58,8 +58,8 @@ export default function WalletView() {
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
   // Los dos buscadores —el de la barra superior y el de la matriz— comparten
-  // este estado; a la consulta sólo entra la versión con debounce. El endpoint
-  // de grupos no lo soporta.
+  // este estado; a la consulta sólo entra la versión con debounce, que acota
+  // tanto la matriz como los grupos.
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE_MS);
   const [modalFilters, setModalFilters] = useState<IWalletMatrixModalFilters>(
@@ -103,9 +103,11 @@ export default function WalletView() {
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, page, PAGE_SIZE);
   // El acotado lo resuelve el servidor: la página sólo tiene 15 clientes, así
-  // que filtrar los grupos en el navegador dejaría fuera lo que no vino. El
-  // runId sale de la matriz para que las dos tablas lean la MISMA foto; hasta
-  // que llegue, el hook no pide nada.
+  // que filtrar los grupos en el navegador dejaría fuera lo que no vino. Por eso
+  // van los mismos `filters` de la matriz: sin ellos la tabla de abajo mostraría
+  // grupos de clientes que los filtros ya sacaron de arriba. El runId sale de la
+  // matriz para que las dos tablas lean la MISMA foto; hasta que llegue, el hook
+  // no pide nada.
   const {
     data: groups,
     loading: groupsLoading,
@@ -118,7 +120,7 @@ export default function WalletView() {
     drilldown?.tramo === null || drilldown?.tramo === undefined
       ? undefined
       : TRAMO_BUCKETS[drilldown.tramo],
-    calculateEndMonth
+    filters
   );
 
   // El polling sólo corre mientras hay una actualización viva. Es el respaldo
@@ -309,6 +311,7 @@ export default function WalletView() {
           sort={sort}
           onSort={handleSort}
           totalClients={matrix?.pagination.totalClients ?? 0}
+          totals={matrix?.totals}
           page={page}
           pageSize={PAGE_SIZE}
           onPageChange={handlePageChange}
