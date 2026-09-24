@@ -51,3 +51,130 @@
         }
     }
 }
+
+.billingDateRangeStep {
+    display: flex;
+    flex-direction: column;
+
+    &__back {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        max-width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font: inherit;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #6b6b6b;
+        cursor: pointer;
+        text-align: left;
+
+        span {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        &:hover {
+            color: #141414;
+        }
+    }
+
+    &__description {
+        margin: 1rem 0 0;
+        font-size: 0.875rem;
+        color: #444;
+    }
+
+    &__presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        margin-top: 0.75rem;
+    }
+
+    &__preset {
+        height: 30px;
+        padding: 0 0.75rem;
+        border: 1px solid #e3e3e3;
+        border-radius: 6px;
+        background: #fff;
+        font: inherit;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #141414;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+
+        &:hover {
+            border-color: #141414;
+        }
+
+        &--active {
+            border-color: #141414;
+            background: #141414;
+            color: #fff;
+        }
+    }
+
+    &__fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.625rem;
+        margin-top: 1rem;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        color: #6b6b6b;
+
+        .ant-picker {
+            width: 100%;
+            height: 38px;
+            border-radius: 6px;
+        }
+    }
+
+    &__hint {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: #8a8a8a !important;
+
+        &--error {
+            color: #d4380d !important;
+        }
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    &__cancel,
+    &__confirm {
+        height: 38px;
+        padding: 0 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    &__confirm,
+    &__confirm:not(:disabled):hover {
+        border-color: #141414 !important;
+        background: #141414 !important;
+        color: #fff !important;
+        font-weight: 600;
+    }
+
+    &__confirm:disabled {
+        opacity: 0.35;
+    }
+}

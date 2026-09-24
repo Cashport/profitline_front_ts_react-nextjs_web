@@ -28,6 +28,7 @@ import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/Bu
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
 import { UploadPurchaseOrdersSummaryModal } from "./upload-purchase-orders-summary-modal";
+import { BillingDateRangeStep } from "./billing-date-range-step";
 
 import { IOrder } from "@/types/commerce/ICommerce";
 
@@ -71,6 +72,7 @@ export const OrdersGenerateActionModal = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
   const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
+  const [isBillingDetailDateStep, setIsBillingDetailDateStep] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
   const [isPartialCsvModalOpen, setIsPartialCsvModalOpen] = useState(false);
   const [isPartialCsvLoading, setIsPartialCsvLoading] = useState(false);
@@ -84,6 +86,10 @@ export const OrdersGenerateActionModal = ({
     null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) setIsBillingDetailDateStep(false);
+  }, [isOpen]);
 
   const validateOrdersSelected = (): boolean => {
     if (ordersId.length === 0) {
@@ -209,7 +215,12 @@ export const OrdersGenerateActionModal = ({
     }
   };
 
-  const handleDownloadBillingDetail = async () => {
+  const handleCloseMainModal = () => {
+    setIsBillingDetailDateStep(false);
+    onClose();
+  };
+
+  const handleDownloadBillingDetail = async (startDate: string, endDate: string) => {
     setIsBillingDetailLoading(true);
     const hide = message.open({
       type: "loading",
@@ -217,10 +228,10 @@ export const OrdersGenerateActionModal = ({
       duration: 0
     });
     try {
-      const res = await downloadBillingDetailExcel(projectId);
+      const res = await downloadBillingDetailExcel(projectId, startDate, endDate);
       downloadFileFromUrl(res.url, res.filename);
       showMessage("success", "Descarga exitosa");
-      onClose();
+      handleCloseMainModal();
     } catch (error) {
       showMessage(
         "error",
@@ -400,92 +411,103 @@ export const OrdersGenerateActionModal = ({
           </Title>
         }
         footer={null}
-        onCancel={onClose}
+        onCancel={handleCloseMainModal}
       >
-        <p className="ordersGenerateActionModal__description">
-          Selecciona la acción que vas a realizar
-        </p>
-        <div className="ordersGenerateActionModal__selectedOrders">
-          <Text strong>
-            {selectedCount} {selectedCount === 1 ? "seleccionada" : "seleccionadas"}:{" "}
-          </Text>
-          <Text>{operationNumbersText}</Text>
-        </div>
-        {draftsCount > 0 && (
-          <div className="ordersGenerateActionModal__selectedOrders">
-            <Text strong>draft seleccionados: </Text>
-            <Text>{draftOperationNumbersText}</Text>
-          </div>
-        )}
-        <Flex vertical gap="0.75rem">
-          <ButtonGenerateAction
-            onClick={handleChangeOrderState}
-            icon={<NewspaperClipping size={16} />}
-            title="Enviar pedido a facturado"
-          />
-          <ButtonGenerateAction
-            onClick={handleDownloadCSV}
-            icon={<DownloadSimple size={16} />}
-            title="Descargar CSV"
-          />
-          <ButtonGenerateAction
-            onClick={handleDownloadBillingReport}
-            icon={<DownloadSimple size={16} />}
-            title="Descargar informe de facturación"
-            disabled={isBillingReportLoading}
-          />
-          <ButtonGenerateAction
-            onClick={handleDownloadBillingDetail}
-            icon={<DownloadSimple size={16} />}
+        {isBillingDetailDateStep ? (
+          <BillingDateRangeStep
             title="Descargar informe de facturación detallado"
-            disabled={isBillingDetailLoading}
+            loading={isBillingDetailLoading}
+            onBack={() => setIsBillingDetailDateStep(false)}
+            onConfirm={handleDownloadBillingDetail}
           />
-          <ButtonGenerateAction
-            onClick={handleDownloadSalesDetail}
-            icon={<DownloadSimple size={16} />}
-            title="Descargar informe de ventas"
-            disabled={isSalesDetailLoading}
-          />
-          <ButtonGenerateAction
-            onClick={handleDownloadPartialCsvShowQuestion}
-            icon={<DownloadSimple size={16} />}
-            title="Descarga parcial CSV"
-          />
-          <ButtonGenerateAction
-            onClick={handleDownloadCSVOCFormatShowQuestion}
-            icon={<DownloadSimple size={16} />}
-            title="Descargar csv Formato OC"
-          />
-          <ButtonGenerateAction
-            onClick={handleDeleteRows}
-            icon={<Trash size={16} />}
-            title="Eliminar"
-          />
-          <ButtonGenerateAction
-            onClick={handleSendInvite}
-            icon={<EnvelopeSimple size={16} />}
-            title="Enviar invitación"
-          />
-          <ButtonGenerateAction
-            onClick={handleReturnToSeller}
-            icon={<ArrowULeftDown size={16} />}
-            title="Retornar al vendedor"
-            disabled={ordersId.length !== 1}
-          />
-          <ButtonGenerateAction
-            onClick={handleOpenUploadPurchaseOrders}
-            icon={<FileArrowUp size={16} />}
-            title="Subir orden de compra"
-          />
-        </Flex>
+        ) : (
+          <>
+            <p className="ordersGenerateActionModal__description">
+              Selecciona la acción que vas a realizar
+            </p>
+            <div className="ordersGenerateActionModal__selectedOrders">
+              <Text strong>
+                {selectedCount} {selectedCount === 1 ? "seleccionada" : "seleccionadas"}:{" "}
+              </Text>
+              <Text>{operationNumbersText}</Text>
+            </div>
+            {draftsCount > 0 && (
+              <div className="ordersGenerateActionModal__selectedOrders">
+                <Text strong>draft seleccionados: </Text>
+                <Text>{draftOperationNumbersText}</Text>
+              </div>
+            )}
+            <Flex vertical gap="0.75rem">
+              <ButtonGenerateAction
+                onClick={handleChangeOrderState}
+                icon={<NewspaperClipping size={16} />}
+                title="Enviar pedido a facturado"
+              />
+              <ButtonGenerateAction
+                onClick={handleDownloadCSV}
+                icon={<DownloadSimple size={16} />}
+                title="Descargar CSV"
+              />
+              <ButtonGenerateAction
+                onClick={handleDownloadBillingReport}
+                icon={<DownloadSimple size={16} />}
+                title="Descargar informe de facturación"
+                disabled={isBillingReportLoading}
+              />
+              <ButtonGenerateAction
+                onClick={() => setIsBillingDetailDateStep(true)}
+                icon={<DownloadSimple size={16} />}
+                title="Descargar informe de facturación detallado"
+                disabled={isBillingDetailLoading}
+              />
+              <ButtonGenerateAction
+                onClick={handleDownloadSalesDetail}
+                icon={<DownloadSimple size={16} />}
+                title="Descargar informe de ventas"
+                disabled={isSalesDetailLoading}
+              />
+              <ButtonGenerateAction
+                onClick={handleDownloadPartialCsvShowQuestion}
+                icon={<DownloadSimple size={16} />}
+                title="Descarga parcial CSV"
+              />
+              <ButtonGenerateAction
+                onClick={handleDownloadCSVOCFormatShowQuestion}
+                icon={<DownloadSimple size={16} />}
+                title="Descargar csv Formato OC"
+              />
+              <ButtonGenerateAction
+                onClick={handleDeleteRows}
+                icon={<Trash size={16} />}
+                title="Eliminar"
+              />
+              <ButtonGenerateAction
+                onClick={handleSendInvite}
+                icon={<EnvelopeSimple size={16} />}
+                title="Enviar invitación"
+              />
+              <ButtonGenerateAction
+                onClick={handleReturnToSeller}
+                icon={<ArrowULeftDown size={16} />}
+                title="Retornar al vendedor"
+                disabled={ordersId.length !== 1}
+              />
+              <ButtonGenerateAction
+                onClick={handleOpenUploadPurchaseOrders}
+                icon={<FileArrowUp size={16} />}
+                title="Subir orden de compra"
+              />
+            </Flex>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          onChange={handleUploadFileChange}
-          style={{ display: "none" }}
-        />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              onChange={handleUploadFileChange}
+              style={{ display: "none" }}
+            />
+          </>
+        )}
       </Modal>
 
       <Modal
