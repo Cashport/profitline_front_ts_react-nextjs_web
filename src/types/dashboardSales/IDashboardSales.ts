@@ -107,3 +107,55 @@ export interface IDashboardSalesTreemap {
   period: { start: string; end: string };
 }
 export type IDashboardSalesTreemapResponse = GenericResponse<IDashboardSalesTreemap>;
+
+export interface IDashboardSalesPromotionClient {
+  client_id: string;
+  client_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+}
+export interface IDashboardSalesPromotionItem {
+  promotion_id: number;
+  promotion_name: string;
+  seller_id: number | null;
+  seller_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+  /** Detalle que se muestra al desplegar la fila. */
+  clients: IDashboardSalesPromotionClient[];
+}
+export interface IDashboardSalesPromotions {
+  items: IDashboardSalesPromotionItem[];
+  total: number;
+  totals: { orders: number; units: number; amount: number };
+  period: { start: string; end: string };
+}
+export type IDashboardSalesPromotionsResponse = GenericResponse<IDashboardSalesPromotions>;
+
+export interface IDashboardSalesBackorderClient {
+  client_id: string;
+  client_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+}
+export interface IDashboardSalesBackorderItem {
+  product_id: number;
+  product_name: string;
+  sku: string | null;
+  orders: number;
+  units: number;
+  amount: number;
+  /** Detalle que se muestra al desplegar la fila. */
+  clients: IDashboardSalesBackorderClient[];
+}
+export interface IDashboardSalesBackorder {
+  items: IDashboardSalesBackorderItem[];
+  total: number;
+  /** `orders` no es sumable entre productos: un pedido con varios productos suma en cada fila. */
+  totals: { orders: number; units: number; amount: number };
+  period: { start: string; end: string };
+}
+export type IDashboardSalesBackorderResponse = GenericResponse<IDashboardSalesBackorder>;

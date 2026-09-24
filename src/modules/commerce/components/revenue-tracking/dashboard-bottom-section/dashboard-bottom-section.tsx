@@ -6,12 +6,21 @@ import { ChevronDown, Layers } from "lucide-react";
 import { useIsMobile } from "@/modules/chat/hooks/use-mobile";
 import SalesTable from "@/modules/commerce/components/sales-dashboard/salesTable/salesTable";
 import DashboardClientsDetailsTable from "@/modules/commerce/components/revenue-tracking/dashboard-clients-details-table/dashboard-clients-details-table";
+import DashboardPromotionsTable from "@/modules/commerce/components/revenue-tracking/dashboard-promotions-table/dashboard-promotions-table";
+import DashboardBackorderTable from "@/modules/commerce/components/revenue-tracking/dashboard-backorder-table/dashboard-backorder-table";
 
-type TabType = "gross-to-net" | "regional-vendedor" | "detalles-cliente";
+type TabType =
+  | "gross-to-net"
+  | "regional-vendedor"
+  | "detalles-cliente"
+  | "promociones"
+  | "backorder";
 
 const tabs = [
   { id: "detalles-cliente", label: "Detalles cliente" },
-  { id: "regional-vendedor", label: "Regional/Vendedor" }
+  { id: "regional-vendedor", label: "Regional/Vendedor" },
+  { id: "promociones", label: "Promociones" },
+  { id: "backorder", label: "Backorder" }
 ];
 
 export function DashboardBottomSection() {
@@ -98,6 +107,8 @@ export function DashboardBottomSection() {
         )}
         {activeTab === "regional-vendedor" && <SalesTable />}
         {activeTab === "detalles-cliente" && <DashboardClientsDetailsTable />}
+        {activeTab === "promociones" && <DashboardPromotionsTable />}
+        {activeTab === "backorder" && <DashboardBackorderTable />}
       </div>
     </div>
   );
