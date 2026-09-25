@@ -79,7 +79,8 @@ export const ClientsViewTable = () => {
 
     const pathKey = `/portfolio/client/project/${ID}?${queryParams}`;
 
-    return fetcher(pathKey);
+    return fetcher(pathKey, 30000);
+    // se agrega un timeout de 30 segundos para esta consulta debido a que puede tardar más de lo normal en responder cuando se tienen muchos datos o filtros aplicados
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery(
@@ -93,7 +94,9 @@ export const ClientsViewTable = () => {
         )
           return undefined;
         return pages.length + 1;
-      }
+      },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false
     }
   );
 
@@ -280,7 +283,8 @@ export const ClientsViewTable = () => {
           (client, index, self) => self.findIndex((other) => other.id === client.id) === index
         ) || []
     );
-    setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
+    if (data?.pages[0]?.data?.pagination?.page === 1)
+      setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
     setNoResults(data?.pages[0]?.message === "no rows");
   }, [data]);
 

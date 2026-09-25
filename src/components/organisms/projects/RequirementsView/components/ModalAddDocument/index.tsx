@@ -4,7 +4,7 @@ import type { ColumnsType } from "antd/es/table";
 import { FileArrowDown, Plus } from "phosphor-react";
 import Link from "next/link";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface Document {
   key: string;
@@ -49,7 +49,7 @@ interface Props {
   selectedClientType: number | null;
 }
 
-const DocumentModal = ({ isOpen, onClose, selectedClientType }: Props) => {
+const DocumentModal = ({ isOpen, onClose }: Props) => {
   // const [isModalVisible, setIsModalVisible] = useState(true);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 

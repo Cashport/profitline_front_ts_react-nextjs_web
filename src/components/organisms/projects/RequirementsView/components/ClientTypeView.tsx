@@ -2,9 +2,7 @@ import { Button, Flex, Table, Tooltip, Typography } from "antd";
 import {
   ArrowsClockwise,
   CaretLeft,
-  DotsThree,
   DotsThreeVertical,
-  Download,
   FileArrowDown,
   Pencil,
   Plus,
@@ -85,7 +83,7 @@ interface ClientTypeViewProps {
   selectedClientType: number | null;
   goBack: () => void;
 }
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewProps) => {
   const [statusForm, setStatusForm] = useState<"edit" | "review">("review");
@@ -187,7 +185,7 @@ export const ClientTypeView = ({ selectedClientType, goBack }: ClientTypeViewPro
       key: "actions",
       dataIndex: "actions",
 
-      render: (text, record) => (
+      render: (_text, _record) => (
         <Tooltip
           color="#FFFFFF"
           placement="bottom"

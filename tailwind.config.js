@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class", // Dark mode solo se activa con clase .dark (no por preferencia del sistema)
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,6 +10,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        "cashport-green": "rgb(var(--cashport-green) / <alpha-value>)",
+        "cashport-orange": "rgb(var(--cashport-orange) / <alpha-value>)",
+        "cashport-black": "rgb(var(--cashport-black) / <alpha-value>)",
+        "cashport-gray-light": "rgb(var(--cashport-gray-light) / <alpha-value>)",
+        "cashport-gray-lighter": "rgb(var(--cashport-gray-lighter) / <alpha-value>)",
+        "cashport-white": "rgb(var(--cashport-white) / <alpha-value>)",
         background: "rgb(var(--background) / <alpha-value>)",
         foreground: "rgb(var(--foreground) / <alpha-value>)",
         card: {
@@ -47,6 +54,31 @@ module.exports = {
         "chart-3": "var(--chart-3)",
         "chart-4": "var(--chart-4)",
         "chart-5": "var(--chart-5)",
+        wallet: {
+          comp: "rgb(var(--wallet-comp) / <alpha-value>)",
+          pag: "rgb(var(--wallet-pag) / <alpha-value>)",
+          conc: "rgb(var(--wallet-conc) / <alpha-value>)",
+          nov: "rgb(var(--wallet-nov) / <alpha-value>)",
+          risk: "rgb(var(--wallet-risk) / <alpha-value>)",
+          saldo: "rgb(var(--wallet-saldo) / <alpha-value>)",
+          glosa: "rgb(var(--wallet-glosa) / <alpha-value>)",
+          devol: "rgb(var(--wallet-devol) / <alpha-value>)",
+          otros: "rgb(var(--wallet-otros) / <alpha-value>)",
+          t0: "rgb(var(--wallet-t0) / <alpha-value>)",
+          t1: "rgb(var(--wallet-t1) / <alpha-value>)",
+          t2: "rgb(var(--wallet-t2) / <alpha-value>)",
+          t3: "rgb(var(--wallet-t3) / <alpha-value>)",
+          t4: "rgb(var(--wallet-t4) / <alpha-value>)",
+          t5: "rgb(var(--wallet-t5) / <alpha-value>)",
+          "t0-ink": "rgb(var(--wallet-t0-ink) / <alpha-value>)",
+          "t1-ink": "rgb(var(--wallet-t1-ink) / <alpha-value>)",
+          "t2-ink": "rgb(var(--wallet-t2-ink) / <alpha-value>)",
+          "t3-ink": "rgb(var(--wallet-t3-ink) / <alpha-value>)",
+          "t4-ink": "rgb(var(--wallet-t4-ink) / <alpha-value>)",
+          "t5-ink": "rgb(var(--wallet-t5-ink) / <alpha-value>)",
+          accent: "rgb(var(--wallet-accent) / <alpha-value>)",
+          "accent-soft": "rgb(var(--wallet-accent-soft) / <alpha-value>)"
+        },
         sidebar: {
           DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",
           foreground: "rgb(var(--sidebar-foreground) / <alpha-value>)",

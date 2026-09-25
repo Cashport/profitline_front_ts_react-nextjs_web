@@ -19,7 +19,6 @@ interface InviteFormValues {
 
 const ModalSendInvitation: React.FC<InviteModalProps> = ({ isOpen, onCancel, onSubmit }) => {
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,

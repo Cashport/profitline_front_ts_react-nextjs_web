@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
+import { extractChannelLineSublines } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
 import { IChanel } from "@/types/bre/IBRE";
 import { MessageInstance } from "antd/es/message/interface";
@@ -67,4 +69,11 @@ export const useStructureBR = () => {
     removeLine,
     removeSubline
   };
+};
+
+/** Canales, líneas y sublíneas aplanados para selects; misma cache que `useStructureBR`. */
+export const useBusinessRulesCatalog = () => {
+  const { data, isLoading } = useStructureBR();
+  const catalog = useMemo(() => extractChannelLineSublines(data?.data ?? []), [data]);
+  return { ...catalog, isLoading };
 };

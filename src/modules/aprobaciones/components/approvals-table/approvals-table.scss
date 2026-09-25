@@ -1,0 +1,39 @@
+@import "@/styles/variables.scss";
+
+.approvalsTable {
+  margin-top: 1rem;
+
+  .ant-table-column-title {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+  }
+
+  .ant-table-container {
+    table {
+      .ant-table-cell {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        font-size: 1rem !important;
+      }
+    }
+  }
+
+  .idText {
+    color: $link;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .clientText {
+    max-width: 250px;
+    display: block;
+  }
+
+  .daysText {
+    font-weight: 600;
+  }
+
+  .buttonSeeDetail {
+    background-color: $background !important;
+  }
+}

@@ -215,3 +215,89 @@ export interface ITemplateCommunication {
   files: string[]; // Array of file URLs
   recipients: string[]; // Array of recipient emails
 }
+
+export interface IMassiveCommunicationTemplate {
+  id: number;
+  id_project: number;
+  name: string;
+  description: string;
+  subject: string;
+  message: string;
+  via: string;
+  attachments: Array<string | { id: number; name: string }>;
+  action_type_ids: number[];
+  sub_action_type_ids: number[];
+  id_comunicacion_type: number;
+  client_group: number[];
+  json_clients: string[];
+  has_cache: boolean;
+}
+
+export interface ICreateCommunicationTemplate {
+  project_id: number;
+  name: string;
+  description: string;
+  subject: string;
+  message: string;
+  via: string;
+  contact_roles: number[];
+  attachment_ids: number[];
+  comunication_type: number;
+  action_type_ids: number[];
+}
+
+export interface IValidatedClients {
+  clientId: string;
+  identifier: string;
+  clientName: null;
+  status: "NOT_FOUND" | "FOUND";
+}
+
+export interface IGetValidatedClientsResponse {
+  clientId: string;
+  clientName: string;
+  isValid?: boolean;
+}
+
+export interface IMessagePreviewAttachment {
+  type: number;
+  name: string;
+}
+
+export interface IMessagePreview {
+  client_id: string;
+  via: string;
+  subject: string;
+  body: string;
+  recipient_addresses: string[];
+  attachments: IMessagePreviewAttachment[];
+}
+
+export interface ICircularizationClientContacts {
+  contact_name: string;
+  channel: string;
+  address: string;
+}
+
+export interface IPreviewClientContact {
+  name: string;
+  phone: string;
+}
+
+export interface IPreviewClient {
+  client_id: string;
+  client_name: string;
+  total_portfolio: number;
+  past_due_amount: number;
+  active_payment_agreements: number;
+  total_contacts: number;
+  contacts?: IPreviewClientContact[];
+}
+
+export interface IGetPreviewClients {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+  clients: IPreviewClient[];
+}

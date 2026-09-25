@@ -1,10 +1,11 @@
 import { FC, useEffect, useState } from "react";
 import { CaretDoubleRight, Check, X } from "phosphor-react";
-import { Button, message, Typography } from "antd";
+import { Button, message, Tag, Typography } from "antd";
 
 import { approveIncident, rejectIncident } from "@/services/resolveNovelty/resolveNovelty";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useGeneralPortfolio } from "@/hooks/useGeneralPortfolio";
+import { useAppStore } from "@/lib/store/store";
 
 import { InfoSection } from "./components/infoSection/InfoSection";
 import { InfoInvoice } from "./components/infoInvoice/InfoInvoice";
@@ -21,14 +22,17 @@ interface MoldalNoveltyDetailProps {
   onClose: () => void;
   noveltyId: number;
   deselectInvoices?: () => void;
+  onResolved?: () => void;
 }
 
 const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
   onClose,
   noveltyId,
-  deselectInvoices
+  deselectInvoices,
+  onResolved
 }) => {
   const { data, isLoading, mutate: mutateIncident } = useIncidentDetail({ incidentId: noveltyId }); // TODO CAMBIAR ESTO
+  const projectId = useAppStore((state) => state.selectedProject.ID);
   const { mutate: mutateWallet } = useInvoices({});
   const { mutate: mutateGeneralDashboardData } = useGeneralPortfolio();
   const [incidentData, setIncidentData] = useState<IIncidentDetail | null>(null);
@@ -57,10 +61,10 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
 
     try {
       if (isResolving) {
-        await approveIncident(incidentData.invoice_id, noveltyId, actionData); // TODO CAMBIAR ESTO
+        await approveIncident(noveltyId, actionData);
         messageShow.success("Incidente aprobado exitosamente");
       } else {
-        await rejectIncident(incidentData.invoice_id, noveltyId, actionData); // TODO CAMBIAR ESTO
+        await rejectIncident(noveltyId, actionData);
         messageShow.success("Incidente rechazado exitosamente");
       }
       setOpenResolveModal(false);
@@ -68,6 +72,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       mutateGeneralDashboardData();
       deselectInvoices && deselectInvoices();
       mutateIncident();
+      onResolved?.();
       onClose(); // Cierra el modal principal después de resolver/rechazar
     } catch (error) {
       console.error("Error al procesar el incidente:", error);
@@ -83,6 +88,8 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
     return <div></div>;
   }
 
+  const hasDocuments = !!incidentData.documents && incidentData.documents.length > 0;
+
   return (
     <aside className={`wrapper__new  wrapper__new_hide`}>
       {contextHolder}
@@ -94,8 +101,15 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
         </div>
 
         <div className="header">
-          <Title level={4}>{incidentData.incident_name}</Title>
-          {incidentData.status_name === "pendiente" && (
+          <Title level={4}>
+            {incidentData.incident_name}
+            {incidentData.is_closed && (
+              <Tag color="default" style={{ marginLeft: 8 }}>
+                Cerrada
+              </Tag>
+            )}
+          </Title>
+          {(incidentData.status_name.toLowerCase() === "pendiente" || incidentData.status == 3) && (
             <div className="header-buttons">
               <Button onClick={() => handleOpenResolveModal(false)}>
                 <X />
@@ -103,7 +117,7 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
               </Button>
               <Button type="primary" onClick={() => handleOpenResolveModal(true)}>
                 <Check />
-                Resolver
+                Aprobar
               </Button>
             </div>
           )}
@@ -112,10 +126,12 @@ const MoldalNoveltyDetail: FC<MoldalNoveltyDetailProps> = ({
       <InfoSection
         responsable={incidentData.responsible_user}
         fecha={incidentData.date}
-        cliente={incidentData.client}
+        cliente={incidentData.client ?? "Sin nombre"}
+        clienteId={incidentData.client_uuid ?? undefined}
+        projectId={projectId}
         aprobadores={[{ nombre: incidentData.approvers_users, estado: "pendiente" }]}
       />
-      <InfoInvoice incidentData={incidentData} />
+      {hasDocuments && <InfoInvoice incidentData={incidentData} />}
       <EvidenceSection
         evidenceComments={incidentData.evidence_comments}
         evidenceFiles={incidentData.evidence_files}

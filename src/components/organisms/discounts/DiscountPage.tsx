@@ -34,7 +34,6 @@ function DiscountPage() {
     res,
     handleChangePage,
     handleChangeStatus,
-    handleDeleteDiscount,
     handleSelectToDelete,
     loading
   } = useDiscount({ messageApi, tabActive });

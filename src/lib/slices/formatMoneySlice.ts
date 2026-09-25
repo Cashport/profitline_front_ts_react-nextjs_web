@@ -45,7 +45,7 @@ export const formatMoneySlice = (set: any, get: any): IFormatMoneyStore => ({
       const formatter = new Intl.NumberFormat(finalLocale, {
         style: "currency",
         currency: finalCurrency,
-        minimumFractionDigits: 0
+        maximumFractionDigits: hideDecimals ? 0 : 2
       });
 
       if (!amount) {
@@ -56,7 +56,6 @@ export const formatMoneySlice = (set: any, get: any): IFormatMoneyStore => ({
       }
 
       const parsedNum = typeof amount === "string" ? parseFloat(amount) : amount;
-
       let number = parsedNum;
       for (let i = 0; i < scaleFactor; i++) {
         number /= 10; // divides

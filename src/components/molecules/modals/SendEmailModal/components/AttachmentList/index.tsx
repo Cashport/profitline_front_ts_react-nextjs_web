@@ -1,11 +1,6 @@
 import { Button } from "antd";
 import { X } from "phosphor-react";
 
-interface Attachment {
-  name: string;
-  size: number;
-}
-
 interface AttachmentListProps {
   attachments: File[];
   shortenFileName: (name: string, maxLength: number) => string;

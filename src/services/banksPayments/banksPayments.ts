@@ -214,3 +214,46 @@ export const approvePayment = async ({ payments, project_id, client_id }: IAppro
     throw error;
   }
 };
+
+export const downloadPaymentsPlane = async (
+  payment_ids: number[]
+): Promise<{ url: string; filename?: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename?: string }> = await API.post(
+      "/bank/generate-atemco-txt",
+      { payment_ids }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al descargar el plano:", error);
+    throw error;
+  }
+};
+
+interface IConfirmERPUploadPayload {
+  payment_id: number;
+  id_erp: string | null;
+  id_erp_compensation: string | null;
+}
+
+export const confirmERPUpload = async (payload: IConfirmERPUploadPayload) => {
+  try {
+    const response: GenericResponse<any> = await API.put("/bank/payment-erp-fields", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error al confirmar el cargue al ERP:", error);
+    throw error;
+  }
+};
+
+export const changeStatusUploadERP = async (paymentids: number[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post("/bank/set-atemco-status", {
+      payment_ids: paymentids
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado después del cargue al ERP:", error);
+    throw error;
+  }
+};

@@ -1,5 +1,5 @@
 import { Badge, List, Popover, Spin, Flex } from "antd";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import Link from "next/link";
 import { BellSimpleRinging, Envelope, Eye } from "phosphor-react";
@@ -36,8 +36,13 @@ export const PopoverUserNotifications: React.FC<PopoverUserNotificationsProps> =
   isPopoverVisible,
   projectId
 }) => {
-  const { notificationCount, updateNotificationCount } = useNotificationStore();
+  const { notificationCount, updateNotificationCount, startPolling } =
+    useNotificationStore();
   const { openModal } = useModalDetail();
+
+  useEffect(() => {
+    startPolling();
+  }, [startPolling]);
   const queryClient = useQueryClient();
   const [shouldFetchData, setShouldFetchData] = useState(false);
 

@@ -1,0 +1,316 @@
+"use client";
+
+import { useMemo, type KeyboardEvent } from "react";
+import { Pagination } from "antd";
+
+import ProfitLoader from "@/components/ui/profit-loader";
+import UiSearchInput from "@/components/ui/search-input";
+import { AGING_BUCKETS } from "@/types/portfolios/IWalletMatrix";
+import { cn } from "@/utils/utils";
+import { TRAMOS } from "../../constants";
+import { corto, fmtM, pct } from "../../utils/format";
+import { rowSegments, tramoTotal } from "../../utils/wallet-calc";
+import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
+import SegBar from "../shared/seg-bar";
+import SortableTh from "../shared/sortable-th";
+import StatusLegend from "../shared/status-legend";
+import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
+import type { IMatrixTotals } from "@/types/portfolios/IWalletMatrix";
+
+interface ControlMatrixProps {
+  rows: IWalletClientRow[];
+  /** Texto de búsqueda actual. La resuelve el servidor sobre la foto completa. */
+  search: string;
+  // eslint-disable-next-line no-unused-vars
+  onSearchChange: (value: string) => void;
+  /** Orden del servidor sobre la foto completa; lo posee la vista. `col` es el `sort_by` del API. */
+  sort: SortState;
+  // eslint-disable-next-line no-unused-vars
+  onSort: (col: string) => void;
+  /** Clientes de la foto completa, no sólo los de esta página. */
+  totalClients: number;
+  /** Totales del servidor sobre la foto filtrada completa, no sobre la página. */
+  totals?: IMatrixTotals;
+  /** Paginación del servidor: la tabla sólo tiene la página cargada. */
+  page: number;
+  pageSize: number;
+  // eslint-disable-next-line no-unused-vars
+  onPageChange: (page: number) => void;
+  loading?: boolean;
+  /** Texto del estado vacío; depende de si hay búsqueda activa. */
+  emptyMessage?: string;
+  drilldown: IWalletDrilldown | null;
+  // eslint-disable-next-line no-unused-vars
+  onSelect: (drilldown: IWalletDrilldown) => void;
+}
+
+/** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
+const SELECTED_CELL = "bg-wallet-accent-soft ring-2 ring-inset ring-wallet-accent";
+
+/** Matriz cliente × tramo, con el desglose por estado bajo cada monto. */
+export default function ControlMatrix({
+  rows,
+  search,
+  onSearchChange,
+  sort,
+  onSort,
+  totalClients,
+  totals,
+  page,
+  pageSize,
+  onPageChange,
+  loading,
+  emptyMessage = "Ningún cliente coincide con los filtros.",
+  drilldown,
+  onSelect
+}: ControlMatrixProps) {
+  // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
+  // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
+  // para clientes que sí existen y reordenar contradiría el orden de las
+  // páginas; ambos los resuelve el servidor sobre la foto completa.
+  const visibleRows = useMemo(() => {
+    // Con una celda elegida la tabla se pliega a esa fila. Es sólo visual —no
+    // consulta nada— y sólo aplica si el cliente sigue en la página: tras una
+    // actualización la foto puede cambiar por debajo y dejarlo fuera; en ese
+    // caso se muestra la página completa en vez de un "sin resultados" falso.
+    const delCliente = drilldown ? rows.filter((r) => r.id === drilldown.clienteId) : [];
+    return delCliente.length ? delCliente : rows;
+  }, [rows, drilldown]);
+
+  // El memo de arriba devuelve `rows` tal cual cuando no pliega, así que esta
+  // identidad distingue la tabla plegada a un cliente de la página completa.
+  const folded = visibleRows !== rows;
+
+  // Plegada por el drilldown, el pie es del cliente elegido; si no, son los
+  // totales del servidor sobre la foto completa: la página es sólo un trozo.
+  const tramoFooter = (i: number) =>
+    folded ? tramoTotal(visibleRows, i) : (totals?.byAging?.[AGING_BUCKETS[i]]?.total ?? 0);
+
+  const totalFooter = folded
+    ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
+    : (totals?.total ?? 0);
+
+  // Vencido del pie: todos los tramos menos corriente (el 0).
+  const vencidoFooter = TRAMOS.slice(1).reduce((a, t) => a + tramoFooter(t.i), 0);
+  const vencidoFooterPct = pct(vencidoFooter, totalFooter);
+
+  /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
+  const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    onSelect(drill);
+  };
+
+  return (
+    <section className="rounded-xl bg-card text-card-foreground shadow-sm">
+      <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
+        <div>
+          <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
+          <div className="mt-2">
+            <StatusLegend />
+          </div>
+        </div>
+
+        {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
+        <div className="ml-auto w-full max-w-[270px]">
+          <UiSearchInput
+            id="wallet-matrix-search"
+            placeholder="Buscar cliente, NIT, factura o ejecutivo…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+          <p className="mt-1.5 text-right text-[11.5px] text-muted-foreground">
+            {loading
+              ? "Actualizando…"
+              : `${totalClients} ${totalClients === 1 ? "cliente" : "clientes"}`}
+          </p>
+        </div>
+      </div>
+
+      {/* Mientras carga, la tabla anterior sigue debajo (keepPreviousData) y el
+          overlay bloquea los clics para que no se elija una celda de una foto
+          que está por cambiar. */}
+      <div className="relative overflow-x-auto">
+        {loading && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center bg-card/70"
+            role="status"
+            aria-live="polite"
+          >
+            <ProfitLoader size="small" />
+          </div>
+        )}
+        <table className="w-full border-collapse text-[12.5px]">
+          <thead>
+            <tr>
+              {/* Los `col` son los `sort_by` del API, así la vista los manda tal cual. */}
+              <SortableTh col="client_name" label="Cliente" sort={sort} onSort={onSort} />
+              {TRAMOS.map((t) => (
+                <SortableTh
+                  key={t.i}
+                  col={AGING_BUCKETS[t.i]}
+                  label={t.short}
+                  align="right"
+                  sort={sort}
+                  onSort={onSort}
+                />
+              ))}
+              <SortableTh col="total" label="Total" align="right" sort={sort} onSort={onSort} />
+              <SortableTh
+                col="overdue_percentage"
+                label="% vencido"
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
+            </tr>
+          </thead>
+
+          <tbody>
+            {visibleRows.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="p-9 text-center text-muted-foreground">
+                  {emptyMessage}
+                </td>
+              </tr>
+            ) : (
+              visibleRows.map((row) => {
+                const g = rowSegments(row);
+                const vencido = pct(g.vencido, g.total);
+                const delCliente = drilldown?.clienteId === row.id;
+                const nombreActiva = delCliente && drilldown?.tramo === null;
+
+                return (
+                  <tr key={row.id} className="border-b border-border last:border-b-0">
+                    {/* Abre todos los grupos del cliente, sin importar el tramo. */}
+                    <DetailTooltip
+                      title={`${corto(row.nombre)} · toda la cartera`}
+                      rows={estadoRows(g)}
+                      total={{ value: fmtM(g.total) }}
+                    >
+                      <td
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={nombreActiva}
+                        onClick={() => onSelect({ clienteId: row.id, tramo: null })}
+                        onKeyDown={(e) => onCellKeyDown(e, { clienteId: row.id, tramo: null })}
+                        className={cn(
+                          "group/name min-w-[250px] cursor-pointer px-3 py-2.5 align-middle transition-colors hover:bg-muted/60",
+                          nombreActiva && SELECTED_CELL
+                        )}
+                      >
+                        <span className="font-semibold text-foreground">{row.nombre}</span>
+                        {/* Neutro y no verde: el lima sobre fondo claro no se lee. */}
+                        <span className="ml-2 whitespace-nowrap text-[10.5px] font-semibold text-foreground opacity-0 transition-opacity group-hover/name:opacity-100">
+                          {nombreActiva ? "quitar selección" : "ver grupos"}
+                        </span>
+                        <div className="text-[11.5px] text-muted-foreground">
+                          NIT {row.nit} — {row.ejecutivo}
+                        </div>
+                      </td>
+                    </DetailTooltip>
+
+                    {row.tramos.map((cell, i) => {
+                      if (cell.total === 0) {
+                        return (
+                          <td
+                            key={i}
+                            className="px-3 py-2.5 text-right text-muted-foreground tabular-nums"
+                          >
+                            —
+                          </td>
+                        );
+                      }
+
+                      const activa = delCliente && drilldown?.tramo === i;
+
+                      return (
+                        // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
+                        // el del navegador se pintaría encima.
+                        <DetailTooltip
+                          key={i}
+                          title={`${row.nombre} · ${TRAMOS[i].label}`}
+                          rows={estadoRows(cell)}
+                          total={{ value: fmtM(cell.total) }}
+                        >
+                          <td
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={activa}
+                            onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
+                            onKeyDown={(e) =>
+                              onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
+                            }
+                            className={cn(
+                              "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+                              activa && SELECTED_CELL
+                            )}
+                          >
+                            <span>{fmtM(cell.total)}</span>
+                            <SegBar segments={cell} />
+                          </td>
+                        </DetailTooltip>
+                      );
+                    })}
+
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                      {fmtM(g.total)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
+                      {fmtM(g.vencido)}
+                      <span className="text-muted-foreground"> · </span>
+                      <span className={cn(vencido > 30 && "text-rose-600 dark:text-rose-400")}>
+                        {vencido.toFixed(0)}%
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+
+          <tfoot>
+            <tr className="border-t border-border">
+              <th scope="row" className="px-3 py-2.5 text-left font-semibold text-foreground">
+                Total
+              </th>
+              {TRAMOS.map((t) => (
+                <th
+                  key={t.i}
+                  className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground"
+                >
+                  {fmtM(tramoFooter(t.i))}
+                </th>
+              ))}
+              <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                {fmtM(totalFooter)}
+              </th>
+              <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                {fmtM(vencidoFooter)}
+                <span className="text-muted-foreground"> · </span>
+                {vencidoFooterPct.toFixed(0)}%
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* El orden es de lo que se ve; los totales del pie y el paginador, de la
+          foto completa (salvo el pie con una fila plegada, que es de esa fila). */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
+        <span className="text-[11.5px] text-muted-foreground">
+          Mostrando {visibleRows.length} de {totalClients}{" "}
+          {totalClients === 1 ? "cliente" : "clientes"}
+        </span>
+        <Pagination
+          current={page}
+          pageSize={pageSize}
+          total={totalClients}
+          onChange={onPageChange}
+          showSizeChanger={false}
+          hideOnSinglePage
+        />
+      </div>
+    </section>
+  );
+}

@@ -33,7 +33,7 @@ export const useClientsGroups = ({
   const pageQuery = page ? `&page=${page}` : "";
   const limitQuery = noLimit ? "&noLimit=true" : "";
   const searchQueryParam = searchQuery
-    ? `&searchQuery=${encodeURIComponent(searchQuery.toLowerCase().trim())}`
+    ? `&name=${encodeURIComponent(searchQuery.toLowerCase().trim())}`
     : "";
 
   const pathKey = `/group-client/?project_id=${projectId}${pageQuery}${clientsQuery}${subsQuery}${statusQuery}${limitQuery}${searchQueryParam}`;

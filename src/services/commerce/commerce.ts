@@ -1,22 +1,29 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import { API, ApiError } from "@/utils/api/api";
 import {
+  ICityWarehouse,
   ICommerceAddressesData,
   IConfirmOrderData,
   ICreateOrderData,
   IDiscountPackageAvailable,
+  IDraftOrderDetail,
   IEcommerceClient,
+  IGeneratePaymentLinkResponse,
+  IInventoriesByWarehouse,
   IMarketplaceOrdersFilters,
   IOrderConfirmedResponse,
   IOrderData,
+  IPaymentLinkData,
   IProductData,
-  ISingleOrder
+  ISucessCreateOrder,
+  ISalesDashboard,
+  ISingleOrder,
+  IWarehouseProductsStock,
+  IAllWarehouse
 } from "@/types/commerce/ICommerce";
 import { MessageType } from "@/context/MessageContext";
-import {
-  InventoriesByWarehouse,
-  WarehouseProductsStock
-} from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
+import { FilterOption } from "@/modules/commerce/contexts/revenue-tracking-context";
+import { appendSalesFilterParams } from "@/modules/commerce/hooks/revenue-tracking/salesFilterParams";
 
 export const getAllOrders = async (projectId: number) => {
   const response: GenericResponse<IOrderData[]> = await API.get(
@@ -39,9 +46,18 @@ export const getClients = async (projectId: number) => {
   return response;
 };
 
-export const getProductsByClient = async (projectId: number, clientId: string) => {
+export const getProductsByClient = async (
+  projectId: number,
+  clientId: string,
+  businessUnit?: string
+) => {
+  const queryParams = new URLSearchParams();
+  if (businessUnit) {
+    queryParams.append("business_unit", businessUnit);
+  }
   const response: GenericResponse<IProductData[]> = await API.get(
-    `/marketplace/projects/${projectId}/clients/${clientId}/products`
+    `/marketplace/projects/${projectId}/clients/${clientId}/products`,
+    { params: queryParams }
   );
   return response;
 };
@@ -56,6 +72,16 @@ export const getAdresses = async (clientId: string) => {
     console.error("Error al obtener las direcciones del cliente:", error);
     throw Error("Error al obtener las direcciones del cliente");
   }
+};
+
+export const getCityWarehouses = async () => {
+  const response: GenericResponse<ICityWarehouse[]> = await API.get(`/marketplace/city-warehouses`);
+  return response;
+};
+
+export const getAllWarehouses = async () => {
+  const response: GenericResponse<IAllWarehouse[]> = await API.get(`/warehouse/all`);
+  return response;
 };
 
 export const getDiscounts = async (
@@ -95,22 +121,34 @@ export const createOrder = async (
   clientId: string,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
-): Promise<GenericResponse<{ id_order: number; notificationId: number }>> => {
-  try {
-    const response: GenericResponse<{ id_order: number; notificationId: number }> = await API.post(
-      `/marketplace/projects/${projectId}/clients/${clientId}/create-order`,
-      data
-    );
-    if (response.status !== 200) {
-      throw response;
-    }
-    showMessage("success", "Orden creada correctamente");
-    return response;
-  } catch (error) {
-    showMessage("error", "Error al crear orden");
-    throw error;
+  showMessage: (type: MessageType, content: string) => void,
+  paymentSupports?: File[],
+  purchaseOrderFile?: File
+): Promise<GenericResponse<ISucessCreateOrder>> => {
+  let response: GenericResponse<ISucessCreateOrder>;
+  const url = `/marketplace/projects/${projectId}/clients/${clientId}/create-order`;
+  if ((paymentSupports && paymentSupports.length > 0) || purchaseOrderFile) {
+    const formData = new FormData();
+    formData.append("request", JSON.stringify(data));
+    paymentSupports?.forEach((file, index) => {
+      if (file) formData.append(`evidence${index + 1}`, file);
+    });
+    if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
+
+    response = await API.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+  } else {
+    response = await API.post(url, data);
   }
+
+  if (response.status !== 200) {
+    throw response;
+  }
+  showMessage("success", "Orden creada correctamente");
+  return response;
 };
 
 export const createDraft = async (
@@ -139,14 +177,16 @@ export const createDraft = async (
 export const deleteOrders = async (
   ordersId: number[],
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
+  showMessage: (type: MessageType, content: string) => void,
+  draftIds: number[] = []
 ) => {
-  const ordersIds = {
-    orders_ids: ordersId
+  const payload = {
+    orders_ids: ordersId,
+    draft_ids: draftIds
   };
   try {
     const response: GenericResponse<[]> = await API.delete(`/marketplace/orders`, {
-      data: ordersIds
+      data: payload
     });
     if (response.status !== 200) {
       throw response;
@@ -165,13 +205,31 @@ export const createOrderFromDraft = async (
   orderId: number,
   data: ICreateOrderData,
   // eslint-disable-next-line no-unused-vars
-  showMessage: (type: MessageType, content: string) => void
+  showMessage: (type: MessageType, content: string) => void,
+  paymentSupport?: File,
+  purchaseOrderFile?: File
 ) => {
   try {
-    const response: GenericResponse<{ id_order: number }> = await API.put(
-      `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`,
-      data
-    );
+    let response: GenericResponse<{ id_order: number }>;
+
+    // si el cliente adjunta soporte de pago al crear la orden desde el borrador
+    const url = `/marketplace/projects/${projectId}/clients/${clientId}/draft-to-order/${orderId}`;
+    if (paymentSupport || purchaseOrderFile) {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      if (paymentSupport) formData.append("file", paymentSupport);
+      // El PDF de orden de compra es uno solo, así la orden tenga varios splits.
+      if (purchaseOrderFile) formData.append("OC-0", purchaseOrderFile);
+
+      response = await API.put(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+    } else {
+      response = await API.put(url, data);
+    }
+
     if (response.status !== 200) {
       throw response;
     }
@@ -202,7 +260,9 @@ export const changeOrderState = async (
     showMessage("success", "Estado cambiado correctamente");
     return response;
   } catch (error) {
-    showMessage("error", "Error al cambiar el estado de la orden");
+    const messageError =
+      error instanceof Error ? error.message : "Error al cambiar el estado de la orden";
+    showMessage("error", messageError);
     throw error;
   }
 };
@@ -235,16 +295,39 @@ export const dowloadOrderCSV = async (
   }
 };
 
-export const downloadPartialOrderCSV = async (orderId: number, sendToBackorder: boolean) => {
+export const dowloadOrderCSVOCFormat = async (
+  ordersIds: number[],
+  downloadAllClient = false
+): Promise<DownloadResponse | null> => {
+  const ordersIdsObject = {
+    order_ids: ordersIds,
+    download_all_client: downloadAllClient
+  };
   try {
-    const payload = { sendToBackorder };
+    const response: GenericResponse<string> = await API.post(
+      `/marketplace/downloadtxtformatoc`,
+      ordersIdsObject
+    );
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { message: error.message, data: "" };
+    }
+    return null;
+  }
+};
+
+export const downloadPartialOrderCSV = async (orderIds: number[], sendToBackorder: boolean) => {
+  try {
+    const payload = { order_ids: orderIds, sendToBackorder };
     const formData = new FormData();
     formData.append("request", JSON.stringify(payload));
     const response: GenericResponse<{
       txtContent: string;
-      createdBackorderId: number | undefined;
-    }> = await API.post(`/marketplace/orders/${orderId}/download-csv`, formData);
-    return response.data;
+      createdBackorderIds: number[];
+      failedOrders: number[];
+    }> = await API.post(`/marketplace/orders/download-csv`, formData);
+    return response;
   } catch (error) {
     if (error instanceof ApiError) {
       throw new Error(error.message || "Error al descargar el CSV parcial");
@@ -252,13 +335,61 @@ export const downloadPartialOrderCSV = async (orderId: number, sendToBackorder: 
     throw new Error("Error desconocido al descargar el CSV parcial");
   }
 };
+
+export const downloadBillingReportExcel = async (
+  projectId: number
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/billing-report/excel`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching billing report excel:", error);
+    throw error;
+  }
+};
+
+export const downloadSalesDetailExcel = async (
+  projectId: number
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/sales-detail/excel`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales detail excel:", error);
+    throw error;
+  }
+};
+export const downloadBillingDetailExcel = async (
+  projectId: number,
+  startDate?: string,
+  endDate?: string
+): Promise<{ url: string; filename: string }> => {
+  try {
+    const params: Record<string, string> = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+      `/marketplace/projects/${projectId}/billing-detail/excel`,
+      { params }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching billing detail excel:", error);
+    throw error;
+  }
+};
+
 export const getInventoriesWarehouse = async (projectId: number, orderIds: number[]) => {
   try {
     const form = {
       projectId,
       orderIds
     };
-    const response: GenericResponse<InventoriesByWarehouse[]> = await API.post(
+    const response: GenericResponse<IInventoriesByWarehouse[]> = await API.post(
       `/warehouse/calculate-warehouses-availables`,
       form
     );
@@ -285,7 +416,7 @@ export const getWarehouseProducts = async (
       warehouseId,
       orderIds: [orderId]
     };
-    const response: GenericResponse<WarehouseProductsStock[]> = await API.post(
+    const response: GenericResponse<IWarehouseProductsStock[]> = await API.post(
       `/warehouse/get-warehouse-details-by-order`,
       form
     );
@@ -373,5 +504,118 @@ export const getMarketplaceConfig = async () => {
   } catch (error) {
     console.error("Error al obtener la configuración del marketplace:", error);
     throw new Error("Error al obtener la configuración del marketplace");
+  }
+};
+
+export const reprocessOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/reprocess-wallet`
+    );
+    if (response.status !== 200) throw response;
+    return response;
+  } catch (error) {
+    console.error("Error al reprocesar la orden:", error);
+    throw error;
+  }
+};
+
+export const changeStatusOrder = async (orderId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `/marketplace/orders/${orderId}/mark-created`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado de la orden:", error);
+    throw new Error(
+      error instanceof Error ? error.message : "Error al cambiar el estado de la orden"
+    );
+  }
+};
+
+// For dashboard sales data
+
+export const getSalesDashboard = async (filters: Record<string, FilterOption[]> = {}) => {
+  try {
+    const params = new URLSearchParams();
+    appendSalesFilterParams(params, filters);
+    const queryString = params.toString();
+    const response: GenericResponse<ISalesDashboard> = await API.get(
+      `/galderma-dashboard/sellers?${queryString}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales dashboard data:", error);
+    throw error;
+  }
+};
+
+export const generatePaymentLink = async (clientId: string, modelData: IPaymentLinkData) => {
+  try {
+    const response: GenericResponse<IGeneratePaymentLinkResponse> = await API.post(
+      `/marketplace/clients/${clientId}/payment-links/invoices`,
+      modelData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al generar el link de pago:", error);
+    throw error;
+  }
+};
+
+export const getOrderDraft = async (projectId: number, draftId: number) => {
+  try {
+    const response: GenericResponse<IDraftOrderDetail> = await API.get(
+      `/marketplace/projects/${projectId}/draft/${draftId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el borrador de la orden:", error);
+    throw error;
+  }
+};
+
+export interface IUploadedPurchaseOrder {
+  orderId: number;
+  codigoIscala: string;
+  direccion: string;
+  ciudad: string;
+  total: number;
+}
+
+export interface IUploadPurchaseOrdersSummary {
+  ordersCreated: number;
+  skusProcessed: number;
+  totalAmount: number;
+}
+
+export interface IUploadPurchaseOrdersData {
+  packageId: number;
+  draftId: number;
+  orders: IUploadedPurchaseOrder[];
+  summary: IUploadPurchaseOrdersSummary;
+}
+
+export const uploadPurchaseOrders = async (
+  file: File
+): Promise<GenericResponse<IUploadPurchaseOrdersData>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response: GenericResponse<IUploadPurchaseOrdersData> = await API.post(
+      `/marketplace/upload-purchase-orders`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al subir las órdenes de compra:", error);
+    throw error;
   }
 };

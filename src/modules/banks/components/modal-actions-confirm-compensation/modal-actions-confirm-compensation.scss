@@ -1,0 +1,25 @@
+@import "@/styles/variables.scss";
+
+.modalActionsConfirmCompensation {
+    .ant-modal-content {
+        padding: 2rem !important;
+
+        .ant-modal-close {
+            margin: 1rem;
+        }
+    }
+
+    &__title {
+        margin-bottom: 1rem !important;
+    }
+
+    &__body {
+        margin-bottom: 1.5rem;
+    }
+
+    &__footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Controller, UseFormReturn, useFieldArray } from "react-hook-form";
 import { Button, DatePicker, Flex, Select, Typography } from "antd";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
@@ -7,7 +7,6 @@ import {
   UploadDocumentButton
 } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import AnnualFeatures from "./annualFeatures/AnnualFeatures";
-import { getOptionsByType } from "../../../../constants/discountTypes";
 import { DiscountSchema } from "../../resolvers/generalResolver";
 import { useAppStore } from "@/lib/store/store";
 import { Pencil } from "phosphor-react";
@@ -29,7 +28,6 @@ type Props = {
 };
 
 export default function AnnualDiscountDefinition({
-  selectedType,
   form,
   setFiles,
   statusForm,
@@ -56,26 +54,17 @@ export default function AnnualDiscountDefinition({
   );
 
   const {
-    setValue,
     control,
     getValues,
     formState: { errors },
     watch
   } = form;
-  const formNow = watch();
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "annual_ranges"
   });
   const clientName = watch("client_name");
-  useEffect(() => {
-    const options = getOptionsByType(selectedType);
-    setValue("discount_type", options[0].value);
-    return () => {
-      setValue("discount_type", undefined);
-    };
-  }, [selectedType, setValue]);
 
   const options = useMemo(() => {
     return (

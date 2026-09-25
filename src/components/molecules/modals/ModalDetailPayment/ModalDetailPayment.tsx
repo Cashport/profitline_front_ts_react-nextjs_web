@@ -77,7 +77,9 @@ const ModalDetailPayment: FC<ModalDetailPaymentProps> = ({
         ) : (
           <>
             <div className={styles.header}>
-              <h4 className={styles.numberInvoice}>ID pago {paymentData?.id}</h4>
+              <h4 className={styles.numberInvoice}>
+                ID pago {paymentData?.ID_ERP ? paymentData?.ID_ERP : paymentData?.id}
+              </h4>
               <Flex gap="1rem">
                 {paymentData?.evidence_url && (
                   <Flex

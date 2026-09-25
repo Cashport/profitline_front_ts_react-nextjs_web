@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "@/config";
 import { auth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { useNotificationStore } from "@/context/CountNotification";
+
 export async function getIdToken(forceRefresh?: boolean) {
   const user = auth.currentUser;
   if (user) {
@@ -21,38 +21,22 @@ export let idProject: number | null = null;
 
 const instance = axios.create({
   baseURL: config.API_HOST,
-  timeout: 10000,
+  timeout: 20000,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json; charset=utf-8"
   }
 });
 
-instance.interceptors.response.use(
-  async (response) => {
-    if (!response.config.url?.includes("/notification/count")) {
-      try {
-        await useNotificationStore.getState().updateNotificationCount();
-      } catch (error) {
-        console.error("Error updating notification count:", error);
-      }
-    }
-    return response;
-  },
-  (error) => {
-    console.error("Interceptor error:", error);
-    return Promise.reject(error);
-  }
-);
 
 interface IError {
   error: boolean;
   message: string;
 }
 
-export const fetcher = async (url: string) => {
+export const fetcher = async (url: string, overrideTimeout?: number) => {
   return instance
-    .get(url)
+    .get(url, { timeout: overrideTimeout })
     .then((res) => {
       if (!res.data) {
         throw Error(res.data.message);
@@ -120,17 +104,19 @@ API.interceptors.response.use(
     if (response?.data?.message) {
       error.message = response.data.message;
     }
-    throw new ApiError(response?.status, error.message);
+    throw new ApiError(response?.status, error.message, response?.data?.data || response?.data?.error);
   }
 );
 
 export class ApiError extends Error {
   status: number;
   message: string;
-  constructor(status: number, message: string) {
+  data?: any;
+  constructor(status: number, message: string, data?: any) {
     super(message);
     this.status = status;
     this.message = message;
+    this.data = data;
   }
 }
 

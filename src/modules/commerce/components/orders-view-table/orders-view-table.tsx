@@ -1,75 +1,137 @@
-import { Dispatch, Key, SetStateAction, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button, Flex, Table, TableProps, Typography } from "antd";
-import { Eye } from "phosphor-react";
-import { WarningDiamond } from "@phosphor-icons/react";
+import { Dispatch, Key, ReactNode, SetStateAction, useState } from "react";
+import dynamic from "next/dynamic";
+import { Button, Dropdown, MenuProps, message, Table, TableProps, Tooltip, Typography } from "antd";
+import {
+  Clock,
+  DotsThreeVertical,
+  Eye,
+  NewspaperClipping,
+  Receipt,
+  WarningCircle,
+  WarningDiamond
+} from "@phosphor-icons/react";
 
 import { useAppStore } from "@/lib/store/store";
-import { formatDateDMY, formatTimeAgo } from "@/utils/utils";
+import { useModalDetail } from "@/context/ModalContext";
+import { useMessageApi } from "@/context/MessageContext";
+import { reprocessOrder } from "@/services/commerce/commerce";
+import { formatLocalDateTimeParts, formatTimeAgo } from "@/utils/utils";
 
 import OrderTrackingModal from "@/components/molecules/modals/OrderTrackingModal";
 import { ChangeWarehouseModal } from "@/components/molecules/modals/ChangeWarehouseModal/ChangeWarehouseModal";
+import TablePaginator from "@/components/atoms/tablePaginator/TablePaginator";
 // import { getTagColor } from "@/components/organisms/proveedores/utils/utils";
 // import { Tag } from "@/components/atoms/Tag/Tag";
 
-import { IOrder } from "@/types/commerce/ICommerce";
+import { IDraftOrder, IOrder, IOrderData } from "@/types/commerce/ICommerce";
 
 import "./orders-view-table.scss";
 const { Text } = Typography;
 
+const TimelineHistoryModal = dynamic(
+  () =>
+    import(
+      "@/modules/purchaseOrders/components/timeline-history-modal/timeline-history-modal"
+    ).then((mod) => ({
+      default: mod.TimelineHistoryModal
+    })),
+  { ssr: false }
+);
+
 interface PropsOrdersViewTable {
-  dataSingleOrder: any[];
+  dataSingleOrder: IOrderData | undefined;
   setSelectedRows: Dispatch<SetStateAction<IOrder[] | undefined>>;
+  setSelectedDrafts: Dispatch<SetStateAction<IOrder[] | undefined>>;
   setSelectedRowKeys: Dispatch<SetStateAction<Key[]>>;
   selectedRowKeys: Key[];
   orderStatus: string;
   setFetchMutate: () => void;
   onlyKeyInfo?: boolean;
+  onChangePage: (statusId: number, page: number) => void;
+  currentPage?: number;
+  isLoadingPagination?: boolean;
 }
 
 const OrdersViewTable = ({
   dataSingleOrder: data,
   setSelectedRows,
+  setSelectedDrafts,
   setSelectedRowKeys,
   selectedRowKeys,
   orderStatus,
   setFetchMutate,
-  onlyKeyInfo = false
+  onlyKeyInfo = false,
+  onChangePage,
+  currentPage,
+  isLoadingPagination = false
 }: PropsOrdersViewTable) => {
-  const router = useRouter();
   const setDraftInfo = useAppStore((state) => state.setDraftInfo);
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const { openModal } = useModalDetail();
+  const { showMessage } = useMessageApi();
 
   const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
   const [currentWarehouseId, setCurrentWarehouseId] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isOrderTrackingModalOpen, setIsOrderTrackingModalOpen] = useState<boolean>(false);
+  const [historyOrder, setHistoryOrder] = useState<IOrder | null>(null);
 
-  const handleSeeDetail = (order: IOrder) => {
-    const { id: orderId, order_status } = order;
+  const REJECTED_STATUS_ID = 6;
+  const WALLET_BLOCKED_STATUS_ID = 5;
+  const NOVELTY_STATUS_IDS = [WALLET_BLOCKED_STATUS_ID, REJECTED_STATUS_ID];
 
-    console.log(order);
-    if (order_status === "Borrador") {
-      const draftInfo = {
-        id: orderId,
-        client_name: order.client_name
-      };
-      setDraftInfo(draftInfo);
-      router.push("/comercio/pedido");
-    } else {
-      const url = `/comercio/pedidoConfirmado/${orderId}`;
-      router.prefetch(url);
-      router.push(url);
+  const handleResendToBilling = async (orderId: number) => {
+    const hide = message.open({
+      type: "loading",
+      content: "Reenviando a facturación...",
+      duration: 0
+    });
+    try {
+      await reprocessOrder(orderId);
+      showMessage("success", "Orden reenviada a facturación correctamente");
+      setFetchMutate();
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Error al reenviar a facturación"
+      );
+    } finally {
+      hide();
     }
+  };
+
+  const handleSeeDetail = (order: IOrder | IDraftOrder) => {
+    if ("is_draft" in order) {
+      setDraftInfo({
+        id: order.id,
+        client_name: order.client_name
+      });
+      window.open("/comercio/pedido", "_blank");
+      return;
+    }
+
+    const notificationQuery = order.notification_id ? `?notification=${order.notification_id}` : "";
+    setDraftInfo({
+      id: undefined,
+      client_name: undefined
+    });
+    window.open(`/comercio/pedidoConfirmado/${order.id}${notificationQuery}`, "_blank");
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[], newSelectedRows: IOrder[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
+
+    // Separamos los rows seleccionados entre drafts y no-drafts para que
+    // las acciones (delete, "Generar acción") operen solo sobre órdenes
+    // reales y nunca sobre drafts.
+    const newSelectedNonDrafts = newSelectedRows.filter((row) => !row.is_draft);
+    const newSelectedDrafts = newSelectedRows.filter((row) => row.is_draft);
+
     if (newSelectedRowKeys.length >= 1) {
       setSelectedRows((prevSelectedRows) => {
         if (prevSelectedRows) {
-          const filteredSelectedRows = newSelectedRows.filter(
+          const filteredSelectedRows = newSelectedNonDrafts.filter(
             (newSelectedRow) =>
               !prevSelectedRows.some((prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id)
           );
@@ -86,7 +148,30 @@ const OrdersViewTable = ({
           }
           return [...prevSelectedRows, ...filteredSelectedRows];
         } else {
-          return newSelectedRows;
+          return newSelectedNonDrafts;
+        }
+      });
+
+      setSelectedDrafts((prevSelectedDrafts) => {
+        if (prevSelectedDrafts) {
+          const filteredSelectedDrafts = newSelectedDrafts.filter(
+            (newSelectedRow) =>
+              !prevSelectedDrafts.some((prevSelectedRow) => prevSelectedRow.id === newSelectedRow.id)
+          );
+          const unCheckedRows = prevSelectedDrafts.filter(
+            (prevSelectedRow) =>
+              !newSelectedRowKeys.includes(prevSelectedRow.id) &&
+              prevSelectedRow.order_status === orderStatus
+          );
+          if (unCheckedRows.length > 0) {
+            const filteredPrevSelectedDrafts = prevSelectedDrafts.filter(
+              (prevSelectedRow) => !unCheckedRows.includes(prevSelectedRow)
+            );
+            return filteredPrevSelectedDrafts;
+          }
+          return [...prevSelectedDrafts, ...filteredSelectedDrafts];
+        } else {
+          return newSelectedDrafts;
         }
       });
     }
@@ -94,6 +179,13 @@ const OrdersViewTable = ({
       setSelectedRows((prevSelectedRows) => {
         if (prevSelectedRows) {
           return prevSelectedRows.filter(
+            (prevSelectedRow) => prevSelectedRow.order_status !== orderStatus
+          );
+        }
+      });
+      setSelectedDrafts((prevSelectedDrafts) => {
+        if (prevSelectedDrafts) {
+          return prevSelectedDrafts.filter(
             (prevSelectedRow) => prevSelectedRow.order_status !== orderStatus
           );
         }
@@ -108,13 +200,18 @@ const OrdersViewTable = ({
 
   const allColumns: TableProps<IOrder>["columns"] = [
     {
-      title: "TR",
+      title: "ID",
       dataIndex: "id",
       key: "id",
       render: (invoiceId, row) => (
-        <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
-          {row.operation_number}
-        </Text>
+        <div className="ordersViewTable__idCell">
+          <Text className="ordersViewTable__id" onClick={() => handleSeeDetail(row)}>
+            {row.operation_number}
+          </Text>
+          {row.marketplace_number && (
+            <Text className="ordersViewTable__marketplace">{row.marketplace_number}</Text>
+          )}
+        </div>
       ),
       sorter: (a, b) => a.operation_number - b.operation_number,
       showSorterTooltip: false
@@ -128,34 +225,57 @@ const OrdersViewTable = ({
       showSorterTooltip: false
     },
     {
-      title: "Fecha de creación",
-      key: "order_date",
-      dataIndex: "order_date",
-      render: (date) => <Text className="cell">{date ? formatDateDMY(date) : ""}</Text>,
-      sorter: (a, b) => new Date(a.order_date)?.getTime() - new Date(b.order_date)?.getTime(),
-      showSorterTooltip: false
-    },
-    {
       title: "Ciudad",
       key: "city",
       dataIndex: "city",
-      render: (text) => <Text className="cell">{text}</Text>,
+      width: 260,
+      render: (_, row) => (
+        <Tooltip
+          placement="topLeft"
+          overlayClassName="locationTooltip"
+          title={
+            <>
+              {row.address && <span>{row.address}</span>}
+              {row.city && <span>{row.city}</span>}
+              {row.contacto && <span>{row.contacto}</span>}
+            </>
+          }
+        >
+          <div className="locationCell">
+            <Text className="locationCell__primary">
+              {[row.city, row.address].filter(Boolean).join(" - ")}
+            </Text>
+            <Text className="locationCell__secondary">{row.warehousename}</Text>
+          </div>
+        </Tooltip>
+      ),
       sorter: (a, b) => a.city.localeCompare(b.city),
       showSorterTooltip: false
     },
     {
-      title: "Bodega",
-      key: "warehousename",
-      dataIndex: "warehousename",
-      render: (warehousename) => <Text className="cell">{warehousename}</Text>,
-      sorter: (a, b) => a.warehousename.localeCompare(b.warehousename),
+      title: "Unidad de negocio",
+      key: "business_unit",
+      dataIndex: "business_unit",
+      render: (text) => <Text className="cell">{text}</Text>,
+      sorter: (a, b) => (a.business_unit ?? "").localeCompare(b.business_unit ?? ""),
       showSorterTooltip: false
     },
     {
-      title: "Contacto",
-      key: "contacto",
-      dataIndex: "contacto",
-      render: (text) => <Text className="cell">{text}</Text>
+      title: "Fecha de creación",
+      key: "order_date",
+      dataIndex: "order_date",
+      render: (date) => {
+        if (!date) return <Text className="cell" />;
+        const { date: dateText, time } = formatLocalDateTimeParts(date);
+        return (
+          <div className="dateCell">
+            <Text className="dateCell__primary">{dateText}</Text>
+            <Text className="dateCell__secondary">{time}</Text>
+          </div>
+        );
+      },
+      sorter: (a, b) => new Date(a.order_date)?.getTime() - new Date(b.order_date)?.getTime(),
+      showSorterTooltip: false
     },
     {
       title: "Tiempo transcurrido",
@@ -170,6 +290,12 @@ const OrdersViewTable = ({
         return dateA - dateB;
       },
       showSorterTooltip: false
+    },
+    {
+      title: "Vendedor",
+      key: "vendor_name",
+      dataIndex: "vendor_name",
+      render: (text) => <Text className="cell">{text}</Text>
     },
     // TO DO: Uncomment when the status column is needed
     // {
@@ -221,22 +347,26 @@ const OrdersViewTable = ({
     //   }
     // },
     {
-      title: "Total pronto pago",
-      key: "total_pronto_pago",
-      dataIndex: "total_pronto_pago",
-      render: (amount) => (
-        <p className="cell fontMonoSpace">{formatMoney(amount, { hideDecimals: true })}</p>
-      ),
-      sorter: (a, b) => a.total_pronto_pago - b.total_pronto_pago,
-      showSorterTooltip: false,
-      align: "right"
-    },
-    {
       title: "Total",
       key: "total",
       dataIndex: "total",
-      render: (amount) => (
-        <p className="cell fontMonoSpace bold">{formatMoney(amount, { hideDecimals: true })}</p>
+      render: (amount, row) => (
+        <Tooltip
+          placement="topRight"
+          overlayClassName="prontoPagoTooltip"
+          title={
+            row.total_pronto_pago != null ? (
+              <>
+                <span>Pronto pago</span>
+                <span className="fontMonoSpace">
+                  {formatMoney(row.total_pronto_pago, { hideDecimals: true })}
+                </span>
+              </>
+            ) : null
+          }
+        >
+          <p className="cell fontMonoSpace bold">{formatMoney(amount, { hideDecimals: true })}</p>
+        </Tooltip>
       ),
       sorter: (a, b) => a.total - b.total,
       showSorterTooltip: false,
@@ -247,29 +377,120 @@ const OrdersViewTable = ({
       key: "buttonOpenModal",
       width: 64,
       dataIndex: "",
-      render: (_, row) => (
-        <Flex gap={8}>
-          <Button
-            onClick={() => {
-              setSelectedOrder(row.id);
-              setCurrentWarehouseId(row.warehouseid);
-              setIsModalOpen(true);
-            }}
-            className="buttonSeeProject"
-            icon={<WarningDiamond size={"1.3rem"} />}
-          />
-          <Button
-            onClick={() => handleSeeDetail(row)}
-            className="buttonSeeProject"
-            icon={<Eye size={"1.3rem"} />}
-          />
-        </Flex>
-      )
+      render: (_, row) => {
+        const isBlockedByWallet = row.order_status_id === WALLET_BLOCKED_STATUS_ID;
+        const hasNovelty =
+          NOVELTY_STATUS_IDS.includes(row.order_status_id) && row.incident_id !== null;
+
+        const items: NonNullable<MenuProps["items"]> = [];
+
+        if (hasNovelty) {
+          items.push({
+            key: "verNovedad",
+            label: (
+              <Button
+                icon={<WarningCircle size={20} />}
+                className="buttonNoBorder"
+                onClick={() =>
+                  openModal("novelty", {
+                    noveltyId: row.incident_id as number,
+                    onResolved: setFetchMutate
+                  })
+                }
+              >
+                Ver novedad
+              </Button>
+            )
+          });
+        }
+
+        if (!isBlockedByWallet) {
+          items.push(
+            {
+              key: "verBodega",
+              label: (
+                <Button
+                  icon={<WarningDiamond size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => {
+                    setSelectedOrder(row.id);
+                    setCurrentWarehouseId(row.warehouseid);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Ver bodega
+                </Button>
+              )
+            },
+            {
+              key: "detalle",
+              label: (
+                <Button
+                  icon={row.is_draft ? <NewspaperClipping size={20} /> : <Eye size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => handleSeeDetail(row)}
+                >
+                  {row.is_draft ? "Continuar pedido" : "Detalle"}
+                </Button>
+              )
+            }
+          );
+
+          if (!row.is_draft) {
+            items.push({
+              key: "historial",
+              label: (
+                <Button
+                  icon={<Clock size={20} />}
+                  className="buttonNoBorder"
+                  onClick={() => setHistoryOrder(row)}
+                >
+                  Historial
+                </Button>
+              )
+            });
+          }
+        }
+
+        if (row.order_status_id === REJECTED_STATUS_ID) {
+          items.push({
+            key: "resendToBilling",
+            label: (
+              <Button
+                icon={<Receipt size={20} />}
+                className="buttonNoBorder"
+                onClick={() => handleResendToBilling(row.id)}
+              >
+                Reenviar a facturación
+              </Button>
+            )
+          });
+        }
+
+        const customDropdown = (menu: ReactNode) => (
+          <div className="dropdownApplicationTable">{menu}</div>
+        );
+
+        return (
+          <Dropdown
+            dropdownRender={customDropdown}
+            menu={{ items }}
+            placement="bottomLeft"
+            trigger={["click"]}
+          >
+            <Button className="dotsBtn">
+              <DotsThreeVertical size={16} />
+            </Button>
+          </Dropdown>
+        );
+      }
     }
   ];
 
   const columns = onlyKeyInfo
-    ? allColumns.filter((col) => ["id", "client_name", "total"].includes(col.key as string))
+    ? allColumns.filter((col) =>
+        ["id", "client_name", "total", "buttonOpenModal"].includes(col.key as string)
+      )
     : allColumns;
 
   return (
@@ -277,9 +498,18 @@ const OrdersViewTable = ({
       <Table
         className="ordersViewTable"
         columns={columns}
-        dataSource={data.map((data) => ({ ...data, key: data.id }))}
+        dataSource={data?.orders?.map((data) => ({ ...data, key: data.id }))}
         rowSelection={rowSelection}
-        pagination={false}
+        pagination={{
+          current: currentPage || data?.pagination?.page || 1,
+          pageSize: data?.pagination?.limit || 25,
+          total: data?.pagination?.total_count || 0,
+          showSizeChanger: false,
+          position: ["none", "bottomRight"],
+          onChange: (page) => onChangePage(data?.status_id || 0, page),
+          itemRender: TablePaginator
+        }}
+        loading={isLoadingPagination}
       />
       <ChangeWarehouseModal
         selectedOrder={selectedOrder ?? 0}
@@ -292,6 +522,12 @@ const OrdersViewTable = ({
         isOpen={isOrderTrackingModalOpen}
         onClose={() => setIsOrderTrackingModalOpen(false)}
         idInvoice={1}
+      />
+      <TimelineHistoryModal
+        isOpen={!!historyOrder}
+        onClose={() => setHistoryOrder(null)}
+        orderId={historyOrder?.id}
+        orderLabel={historyOrder ? `Pedido #${historyOrder.operation_number}` : undefined}
       />
     </>
   );

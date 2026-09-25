@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import Image from "next/image";
 import { Flex } from "antd";
 import { Minus, Plus } from "phosphor-react";
@@ -6,6 +6,7 @@ import { Minus, Plus } from "phosphor-react";
 import { useAppStore } from "@/lib/store/store";
 
 import { useHandleProductsItems } from "../../hooks/create-order/handle-products-items.hook";
+import { getProductImageSrc, PRODUCT_IMAGE_FALLBACK } from "../../utils/get-product-image-src";
 
 import SecondaryButton from "@/components/atoms/buttons/secondaryButton/SecondaryButton";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -32,6 +33,7 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
     handleIncrementQuantity,
     handleChangeQuantity
   } = useHandleProductsItems(product, categoryName);
+  const [imgSrc, setImgSrc] = useState(() => getProductImageSrc(product.image));
 
   const price = config?.include_iva ? product.price_taxes || product.price : product.price;
 
@@ -40,15 +42,17 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
       <div className={styles.imageContainer}>
         <Image
           className={styles.imageContainer__img}
-          src={product.image || "/images/watermark.svg"}
-          alt="product image"
-          width={400}
-          height={400}
+          src={imgSrc}
+          alt={product.name}
+          fill
+          sizes="(max-width: 840px) 90vw, (max-width: 1280px) 45vw, 30vw"
+          onError={() => setImgSrc(PRODUCT_IMAGE_FALLBACK)}
         />
       </div>
       <hr className={styles.separator} />
       <h4 className={styles.name}>
         {product.name}
+        {product.EAN?.trim() && <span className={styles.sku}>EAN: {product.EAN}</span>}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"
@@ -92,6 +96,11 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
             className={styles.quantityInput}
             defaultValue={alreadySelectedProduct ? alreadySelectedProduct.quantity : undefined}
             onBlur={(e) => handleChangeQuantity(e, product.id, product.category_id)}
+            onKeyDown={(e) => {
+              if (["e", "E", "+", "-", "."].includes(e.key)) {
+                return e.preventDefault();
+              }
+            }}
           />
           <PrincipalButton
             customStyles={{ padding: "0.5rem" }}

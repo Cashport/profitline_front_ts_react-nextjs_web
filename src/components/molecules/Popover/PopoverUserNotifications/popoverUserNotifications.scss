@@ -122,3 +122,9 @@
         }
     }
 }
+
+// Comercio dashboard dark theme: the bell sits in a white circle, so keep the icon dark
+// (the header foreground override would otherwise turn it white → invisible on white).
+.dark .notifications {
+    color: #141414;
+}

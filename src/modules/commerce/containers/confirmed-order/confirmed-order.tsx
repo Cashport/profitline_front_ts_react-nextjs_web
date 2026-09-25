@@ -1,16 +1,18 @@
-import { FC, useEffect, useState } from "react";
-import { Flex, Spin, Typography } from "antd";
+import { FC, useCallback, useEffect, useState } from "react";
+import { Button, Flex, Spin, Typography } from "antd";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "phosphor-react";
+import { DotsThree } from "@phosphor-icons/react";
 
-import { extractSingleParam, formatNumber } from "@/utils/utils";
+import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/utils";
 import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 
-import ConfirmedOrderItem from "../../components/confirmed-order-item";
+import ProductsTable, { ProductsTableCategory } from "@/modules/commerce/components/products-table";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
+import { ModalOrderActions } from "../../components/modal-order-actions/modal-order-actions";
 
 import { GALDERMA_PROJECT_ID } from "@/utils/constants/globalConstants";
 import { DiscountItem, ISingleOrder } from "@/types/commerce/ICommerce";
@@ -28,27 +30,69 @@ export const ConfirmedOrderView: FC = () => {
   const [order, setOrder] = useState<ISingleOrder>();
   const [loading, setLoading] = useState(false);
   const [appliedDiscounts, setAppliedDiscounts] = useState<DiscountItem[]>([]);
+  const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
 
   // TO DO: Refactor to use a more robust state management solution if needed
   // notificationIdIsNeeded for sendingNovelty with evidence
   const notificationId = searchParams.get("notification");
 
-  useEffect(() => {
+  const fetchOrder = useCallback(async () => {
     if (!orderIdParam || !projectId) return;
-    const fetchOrder = async () => {
-      setLoading(true);
-      const response = await getSingleOrder(projectId, parseInt(orderIdParam));
-      setOrder(response?.data[0]);
-      if (response.data[0].detail?.discounts?.discountItems?.length > 0)
-        setAppliedDiscounts(response.data[0].detail?.discounts?.discountItems);
-      setLoading(false);
-    };
+    setLoading(true);
+    const response = await getSingleOrder(projectId, parseInt(orderIdParam));
+    setOrder(response?.data[0]);
+    if (response.data[0].detail?.discounts?.discountItems?.length > 0)
+      setAppliedDiscounts(
+        response.data[0].detail?.discounts?.discountItems?.map((item) => ({
+          ...item,
+          item_uuid: item.item_uuid ?? generateShortUuid()
+        }))
+      );
+    setLoading(false);
+  }, [orderIdParam, projectId]);
+
+  useEffect(() => {
     fetchOrder();
   }, [params, projectId]);
 
   const handleGoBack = () => {
     router.push("/comercio/");
   };
+
+  const tableCategories: ProductsTableCategory[] = (order?.detail?.products ?? []).map(
+    (category) => ({
+      key: category.id_category,
+      name: category.category,
+      rows: category.products.map((product) => {
+        const discountData = appliedDiscounts.find((d) =>
+          product.item_uuid
+            ? d.item_uuid === product.item_uuid
+            : d.product_sku === product.product_sku
+        )?.discount;
+        const primary =
+          discountData && discountData.subtotalDiscount > 0 ? discountData.primary : undefined;
+        return {
+          key: `${product.id}-${product.product_sku}`,
+          description: product.product_name,
+          sku: product.product_sku,
+          originalPrice: product.original_price ?? product.price,
+          finalPrice: primary?.new_price ?? product.price,
+          quantity: product.quantity,
+          discountPct: primary?.discount_applied?.discount ?? 0
+        };
+      })
+    })
+  );
+
+  const totalCantidad = tableCategories.reduce(
+    (sum, category) => sum + category.rows.reduce((s, r) => s + r.quantity, 0),
+    0
+  );
+  const totalMonto = tableCategories.reduce(
+    (sum, category) => sum + category.rows.reduce((s, r) => s + r.finalPrice * r.quantity, 0),
+    0
+  );
+
   return (
     <>
       {loading ? (
@@ -63,80 +107,84 @@ export const ConfirmedOrderView: FC = () => {
               <div className={styles.confirmedOrderView__content__header}>
                 <p>Pedido #{order?.operation_number}</p>
                 <div className={styles.title}>
-                  <h2>Tu pedido ha sido solicitado</h2>
+                  <h2>Tu pedido ha sido creado</h2>
                   <CheckCircle className={styles.check} size={90} weight="fill" />
                 </div>
               </div>
 
               <div className={styles.summaryContainer}>
                 <div className={styles.summaryContainer__top}>
+                  <Flex justify="space-between" align="center">
+                    <h2>
+                      <strong>Datos de envío</strong>
+                    </h2>
+                    <Button
+                      className={styles.generateActionButton}
+                      size="large"
+                      icon={<DotsThree size={"1.5rem"} />}
+                      onClick={() => setIsActionsModalOpen(true)}
+                    >
+                      Generar acción
+                    </Button>
+                  </Flex>
+                  <div className={styles.shippingData}>
+                    <ConfirmedOrderShippingInfo title="Cliente" data={order?.client_name} />
+                    <ConfirmedOrderShippingInfo title="Nit" data={order?.client_id} />
+                    <ConfirmedOrderShippingInfo
+                      title="Dirección de despacho"
+                      data={order?.shipping_info?.dispatch_address}
+                    />
+                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
+                    <ConfirmedOrderShippingInfo
+                      title="Unidad de negocio"
+                      data={order?.business_unit}
+                    />
+                    <ConfirmedOrderShippingInfo title="Bodega" data={order?.warehouse_name} />
+                    <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
+                    <ConfirmedOrderShippingInfo
+                      title="Contacto"
+                      data={order?.shipping_info?.phone_number}
+                    />
+                    <ConfirmedOrderShippingInfo title="Vendedor" data={order?.vendor_name} />
+                    <ConfirmedOrderShippingInfo
+                      title="Observaciones"
+                      data={order?.shipping_info?.comments}
+                    />
+                  </div>
+
                   <Flex
                     className={styles.summaryContainer__top__header}
                     align="center"
                     justify="space-between"
                   >
-                    <h2 className={styles.mainTitle}>Resumen</h2>
-                    <p className={styles.quantity}>SKUs: {order?.detail?.products?.length}</p>
+                    <strong>Resumen</strong>
+                    <Flex className={styles.quantities}>
+                      <p className={styles.quantity}>
+                        SKUs:{" "}
+                        {order?.detail?.products?.reduce(
+                          (acc, category) => acc + category.products.length,
+                          0
+                        )}
+                      </p>
+                      <p className={styles.quantity}>
+                        Total Productos:{" "}
+                        {order?.detail?.products?.length &&
+                          order?.detail?.products.reduce(
+                            (acc, category) =>
+                              acc +
+                              category.products.reduce((acc, product) => acc + product.quantity, 0),
+                            0
+                          )}
+                      </p>
+                    </Flex>
                   </Flex>
 
-                  <div className={styles.categories}>
-                    {order?.detail?.products?.map((category) => (
-                      <div className={styles.category} key={category.id_category}>
-                        <Flex justify="space-between" align="center">
-                          <p className={styles.category__header}>{category.category}</p>
-                          <p className={styles.category__header}>
-                            Skus: {category.products.length}
-                          </p>
-                        </Flex>
-                        <div className={styles.products}>
-                          {category.products.map((product) => {
-                            const productDiscount = appliedDiscounts?.find(
-                              (discount: any) => discount.product_sku === product.product_sku
-                            )?.discount;
-                            const productDiscountData =
-                              productDiscount && productDiscount.subtotalDiscount > 0
-                                ? {
-                                    discountPercentage:
-                                      productDiscount.primary?.discount_applied?.discount,
-                                    subtotal: productDiscount.primary?.new_price
-                                  }
-                                : undefined;
-                            return (
-                              <ConfirmedOrderItem
-                                key={product.product_sku}
-                                product={product}
-                                productDiscount={productDiscountData}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className={styles.shippingData}>
-                    <h2>Datos de envío</h2>
-                    <ConfirmedOrderShippingInfo
-                      title="Direcciones"
-                      data={order?.shipping_info.address}
-                      customStyles={{ gridColumn: "1 / span 2" }}
-                    />
-                    <ConfirmedOrderShippingInfo title="Ciudad" data={order?.shipping_info?.city} />
-                    <ConfirmedOrderShippingInfo
-                      title="Dirección de despacho"
-                      data={order?.shipping_info?.dispatch_address}
-                    />
-                    <ConfirmedOrderShippingInfo title="Email" data={order?.shipping_info?.email} />
-                    <ConfirmedOrderShippingInfo
-                      title="Teléfono contacto"
-                      data={order?.shipping_info?.phone_number}
-                    />
-                    <ConfirmedOrderShippingInfo
-                      title="Observaciones"
-                      data={order?.shipping_info?.comments}
-                      customStyles={{ gridColumn: "1 / span 2" }}
-                    />
-                  </div>
+                  <ProductsTable
+                    categories={tableCategories}
+                    totalCantidad={totalCantidad}
+                    totalMonto={totalMonto}
+                    responsive
+                  />
 
                   {order?.detail.discount_package_id ? (
                     <div className={styles.discountsContainer}>
@@ -177,13 +225,18 @@ export const ConfirmedOrderView: FC = () => {
                       -${formatNumber(order?.detail?.discounts?.totalOrderDiscount ?? 0)}
                     </Text>
                   </Flex>
+                  <div className={styles.footer__separator} />
                   <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
-                    <strong>Total</strong>
-                    <strong>${formatNumber(order?.total ?? 0)}</strong>
+                    <p>Total sin IVA</p>
+                    <p>${formatNumber(order?.total_without_taxes ?? 0)}</p>
                   </Flex>
                   <Flex justify="space-between">
                     <p>IVA 19%</p>
                     <p>${formatNumber(order?.detail?.taxes ?? 0)}</p>
+                  </Flex>
+                  <Flex justify="space-between" style={{ marginTop: "0.5rem" }}>
+                    <strong>Total</strong>
+                    <strong>${formatNumber(order?.total ?? 0)}</strong>
                   </Flex>
                   <Flex className={styles.footer__earlyPaymentTotal} justify="space-between">
                     <p>Total con pronto pago</p>
@@ -194,6 +247,12 @@ export const ConfirmedOrderView: FC = () => {
               </div>
             </div>
           </div>
+          <ModalOrderActions
+            isOpen={isActionsModalOpen}
+            onClose={() => setIsActionsModalOpen(false)}
+            orderId={parseInt(orderIdParam ?? "")}
+            onActionSuccess={fetchOrder}
+          />
         </>
       )}
     </>

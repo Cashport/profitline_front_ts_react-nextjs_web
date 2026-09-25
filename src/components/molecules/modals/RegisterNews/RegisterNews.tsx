@@ -124,6 +124,7 @@ const RegisterNews = ({
             placeholder="Ingresar monto"
             typeInput="number"
             customStyle={{ width: "100%" }}
+            validationRules={{ required: false }}
           />
           <div />
         </div>

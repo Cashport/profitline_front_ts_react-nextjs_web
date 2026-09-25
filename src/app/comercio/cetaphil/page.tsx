@@ -1,17 +1,20 @@
 "use client";
-import { Dispatch, FC, createContext, useEffect, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 
 import { useAppStore } from "@/lib/store/store";
-import { getSingleOrder, getDiscounts } from "@/services/commerce/commerce";
+import { getDiscounts } from "@/services/commerce/commerce";
 
 import CreateOrderMarket from "@/modules/commerce/components/create-order-market";
 import CreateOrderCart from "@/modules/commerce/components/create-order-cart";
 import CreateOrderCheckout from "@/modules/commerce/components/create-order-checkout";
 
 import {
+  IBonus,
   IDiscountPackageAvailable,
+  IExecutiveDiscount,
   IFetchedCategories,
   IOrderConfirmedResponse,
+  IOrderSplitDetail,
   ISelectedProduct,
   IShippingInformation
 } from "@/types/commerce/ICommerce";
@@ -33,12 +36,14 @@ export interface IOrderViewContext {
     id: string;
     email: string;
     payment_type: number;
+    nit_id: string;
   };
   setClient: Dispatch<{
     name: string;
     id: string;
     email: string;
     payment_type: number;
+    nit_id: string;
   }>;
   selectedCategories: ISelectedCategories[];
   setSelectedCategories: Dispatch<ISelectedCategories[]>;
@@ -48,6 +53,17 @@ export interface IOrderViewContext {
   setConfirmOrderData: Dispatch<IOrderConfirmedResponse>;
   shippingInfo: IShippingInformation | undefined;
   setShippingInfo: Dispatch<IShippingInformation>;
+  channelCode: string;
+  setChannelCode: Dispatch<SetStateAction<string>>;
+  channelName?: string;
+  setChannelName?: Dispatch<SetStateAction<string>>;
+  /**
+   * Nombre de la unidad de negocio (`client_bu[n].bu_name`) elegida en el
+   * dropdown "Canal". Se envía como `business_unit` en la orden de
+   * marketplace. Vacío cuando no se ha seleccionado un canal.
+   */
+  businessUnit: string;
+  setBusinessUnit: Dispatch<SetStateAction<string>>;
   selectedDiscount: IDiscountPackageAvailable | undefined;
   setSelectedDiscount: Dispatch<IDiscountPackageAvailable | undefined>;
   categories: IFetchedCategories[];
@@ -55,6 +71,17 @@ export interface IOrderViewContext {
   discounts: IDiscountPackageAvailable[];
   setDiscounts: Dispatch<IDiscountPackageAvailable[]>;
   discountsLoading: boolean;
+  executiveDiscounts: IExecutiveDiscount[];
+  setExecutiveDiscounts: Dispatch<SetStateAction<IExecutiveDiscount[]>>;
+  deactivateCrossSelling: boolean;
+  setDeactivateCrossSelling: Dispatch<SetStateAction<boolean>>;
+  order_split_details: IOrderSplitDetail[];
+  setOrderSplitDetails: Dispatch<SetStateAction<IOrderSplitDetail[]>>;
+  toggleCart?: () => void;
+  isCartVisible?: boolean;
+  numberOfItems?: number;
+  bonus: IBonus | undefined;
+  setBonus: Dispatch<SetStateAction<IBonus | undefined>>;
 }
 
 const CreateOrderView: FC = () => {
@@ -67,23 +94,30 @@ const CreateOrderView: FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
   const [confirmOrderData, setConfirmOrderData] = useState({} as IOrderConfirmedResponse);
   const [shippingInfo, setShippingInfo] = useState<IShippingInformation>();
+  const [channelCode, setChannelCode] = useState("");
+  const [businessUnit, setBusinessUnit] = useState("");
   const [selectedDiscount, setSelectedDiscount] = useState<IDiscountPackageAvailable | undefined>(
     undefined
   );
   const [discounts, setDiscounts] = useState<IDiscountPackageAvailable[]>([]);
   const [discountsLoading, setDiscountsLoading] = useState(false);
-  const { draftInfo, setDraftInfo, selectedProject } = useAppStore((state) => state);
+  const [executiveDiscounts, setExecutiveDiscounts] = useState<IExecutiveDiscount[]>([]);
+  const [deactivateCrossSelling, setDeactivateCrossSelling] = useState(true);
+  const [orderSplitDetails, setOrderSplitDetails] = useState<IOrderSplitDetail[]>([]);
+  const [bonus, setBonus] = useState<IBonus | undefined>(undefined);
+  const { selectedProject } = useAppStore((state) => state);
   const decoder = useDecodeToken();
   const token = localStorage.getItem(STORAGE_TOKEN);
 
   // Fetch discounts cuando el cliente cambia
   useEffect(() => {
+    setSelectedDiscount(undefined);
     const fetchDiscounts = async () => {
       if (!client?.id || !selectedProject?.ID) return;
 
       setDiscountsLoading(true);
       try {
-        const response = await getDiscounts(selectedProject.ID, client.id);
+        const response = await getDiscounts(selectedProject.ID, client.nit_id || client.id);
 
         if (response.data && response.data.length > 0) {
           setDiscounts(response.data);
@@ -113,7 +147,8 @@ const CreateOrderView: FC = () => {
         name: decodedToken?.claims?.guestName || "",
         id: decodedToken?.claims?.guestDocument || "",
         email: decodedToken?.claims?.guestEmail || "",
-        payment_type: client?.payment_type || 3
+        payment_type: client?.payment_type || 3,
+        nit_id: decodedToken?.claims?.guestDocument || ""
       });
       setIsLoadingLocalClient(false);
     }
@@ -132,13 +167,25 @@ const CreateOrderView: FC = () => {
         setConfirmOrderData,
         shippingInfo,
         setShippingInfo,
+        channelCode,
+        setChannelCode,
+        businessUnit,
+        setBusinessUnit,
         selectedDiscount,
         setSelectedDiscount,
         categories,
         setCategories,
         discounts,
         setDiscounts,
-        discountsLoading
+        discountsLoading,
+        executiveDiscounts,
+        setExecutiveDiscounts,
+        deactivateCrossSelling,
+        setDeactivateCrossSelling,
+        order_split_details: orderSplitDetails,
+        setOrderSplitDetails,
+        bonus,
+        setBonus
       }}
     >
       <div className={styles.ordersView}>

@@ -3,6 +3,7 @@ export interface ITicketCustomer {
   name: string;
   clientName: string;
   phoneNumber: string;
+  customerCashportUUID: string | null;
 }
 
 export interface ITicketAgent {
@@ -21,13 +22,16 @@ export interface ITicket {
   customerId: string;
   clientName: string;
   assignedTo: string | null;
-  status: string;
+  status: "OPEN" | "CLOSED";
   priority: string;
   subject: string;
   tags: string | null;
   metadata: any | null;
+  escalated: boolean;
   closedAt: string | null;
   lastMessageAt: string;
+  lastViewedAt: string | null;
+  lastViewedBy: string | null;
   createdAt: string;
   updatedAt: string;
   customer: ITicketCustomer;
@@ -41,11 +45,24 @@ export interface IMessage {
   content: string;
   type: "TEXT" | "MEDIA" | "TEMPLATE" | string;
   direction: "INBOUND" | "OUTBOUND";
-  status: "DELIVERED" | "SENT" | "FAILED" | "READ";
+  status: "DELIVERED" | "SENT" | "FAILED" | "READ" | "PENDING";
   timestamp: string;
   mediaUrl: string | null;
   templateName?: string;
   templateData?: any;
+  metadata: any;
+  ticket?: {
+    id: string;
+    subject: string;
+    status: "CLOSED" | "OPEN";
+    closedAt: string | null;
+    closedBy?: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+  authorType: "BOT" | "HUMAN_AGENT" | "CUSTOMER" | null;
 }
 
 interface IPagination {
@@ -108,11 +125,24 @@ export interface IMessageSocket {
   updatedAt: string;
   customer: ICustomerSocket;
   ticket: ITicketSocket;
+  authorType: "BOT" | "HUMAN_AGENT" | "CUSTOMER" | null;
+}
+
+export interface ITicketEvent {
+  id: string;
+  ticketId: string;
+  type: string;
+  actor: string;
+  reason: string;
+  summary: string;
+  metadata: any;
+  createdAt: string;
 }
 
 export interface IChatData {
   messages: IMessage[];
   pagination: IPagination;
+  events?: ITicketEvent[];
 }
 
 export interface IWhatsAppTemplate {
@@ -122,7 +152,8 @@ export interface IWhatsAppTemplate {
   category: string;
   language: string;
   status: string;
-  components: string;
+  usage: "INTERNAL" | "EXTERNAL" | "BOTH";
+  components: { [key: string]: string }[];
   metadata: any;
   createdAt: string;
   updatedAt: string;
@@ -146,4 +177,54 @@ export interface ITicketUpdate {
   ticketId: string;
   message: IMessageSocketExtended;
   customer: ICustomerSocketExtended;
+}
+
+interface ISelectType {
+  value: string | number;
+  label: string;
+}
+
+export interface IAddClientForm {
+  name: string;
+  lastname?: string;
+  position: string;
+  role: ISelectType;
+  indicative: ISelectType;
+  phone: string;
+  email: string;
+  client: ISelectType;
+}
+
+interface TemplateParameter {
+  type: string;
+  text: string;
+}
+
+interface TemplateComponent {
+  type: "body" | "button";
+  parameters: TemplateParameter[];
+  sub_type?: string;
+  index?: string;
+}
+
+interface TemplateData {
+  components: TemplateComponent[];
+}
+
+export interface PayloadByTicket {
+  ticketId: string;
+  templateId: string;
+  senderId: string;
+  templateData: TemplateData;
+}
+
+export interface IDigitalRecordFile {
+  fileName: string;
+  url: string;
+}
+
+export interface ITemplateRequest {
+  templateId: string;
+  clientUuid?: string;
+  destinationNumber: [string];
 }

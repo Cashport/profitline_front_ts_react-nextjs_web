@@ -30,63 +30,10 @@
         }
     }
 
-    &__titleInput {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: $gray;
-        margin-bottom: 6px;
-    }
-
-    &__files {
-        max-height: 120px;
-        overflow-y: scroll;
-        scrollbar-width: none;
-    }
-
-    &__addDocument {
-        display: flex;
-        grid-column-start: 2;
-        align-items: center;
-        border: none !important;
-        box-shadow: none !important;
-        font-size: 0.75rem;
-        padding: 0 !important;
-        margin-top: 0rem;
-        width: fit-content;
-
-        &:hover {
-            opacity: 0.8;
-        }
-    }
-
     &__footer {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
-    }
-
-    &__textArea {
-        grid-column: 1 / span 2;
-
-        &__label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: $gray;
-            margin-bottom: 0.25rem;
-        }
-
-        textarea {
-            background-color: $background;
-            border: none;
-            border-radius: 0.25rem;
-            padding: 0.875rem 1rem;
-            width: 100%;
-            min-height: 6.5rem;
-            resize: none;
-            font-family: inherit;
-            font-size: 1rem;
-            scrollbar-width: thin;
-        }
     }
 }
 

@@ -37,7 +37,7 @@ export default function DiscountPackages({
       pagination={{
         pageSize: 25,
         showSizeChanger: false,
-        total: res?.pagination.totalPages || 0,
+        total: res?.pagination?.totalPages || 0,
         onChange: handleChangePage,
         itemRender: TablePaginator,
         current: page

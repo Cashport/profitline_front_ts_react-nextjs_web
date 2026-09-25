@@ -40,6 +40,14 @@
             scrollbar-width: thin;
         }
 
+        .ant-upload-drag-container {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
         .draggerIcon {
             color: $gray;
         }

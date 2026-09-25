@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Cashport Brand Colors - RGB format for Tailwind compatibility */
+  --cashport-black: 20 20 20;
+  --cashport-green: 203 231 30;
+  --cashport-orange: 255 167 38;
+  --cashport-gray-light: 221 221 221;
+  --cashport-gray-lighter: 247 247 247;
+  --cashport-white: 255 255 255;
+  --accent: 244 244 245;
+  --accent-foreground: 24 24 27;
+
+  /* Theme tokens using Cashport colors */
+  --background: var(--cashport-white);
+  --foreground: var(--cashport-black);
+  --card: var(--cashport-white);
+  --card-foreground: var(--cashport-black);
+  --popover: var(--cashport-white);
+  --popover-foreground: var(--cashport-black);
+  --primary: var(--cashport-green);
+  --primary-foreground: var(--cashport-black);
+  --secondary: var(--cashport-gray-lighter);
+  --secondary-foreground: var(--cashport-black);
+  --muted: var(--cashport-gray-lighter);
+  --muted-foreground: 102 102 102;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: var(--cashport-gray-light);
+  --input: var(--cashport-gray-light);
+  --ring: var(--cashport-gray-light);
+  --radius: 0.5rem;
+
+  /* Chart colors */
+  --chart-1: 251 146 60;
+  --chart-2: 56 189 248;
+  --chart-3: 129 140 248;
+  --chart-4: 132 204 22;
+  --chart-5: 245 158 11;
+
+  /* Sidebar */
+  --sidebar: var(--cashport-white);
+  --sidebar-foreground: var(--cashport-black);
+  --sidebar-primary: var(--cashport-black);
+  --sidebar-primary-foreground: var(--cashport-white);
+  --sidebar-accent: var(--cashport-gray-lighter);
+  --sidebar-accent-foreground: var(--cashport-black);
+  --sidebar-border: var(--cashport-gray-light);
+  --sidebar-ring: var(--cashport-gray-light);
+}
+
+/* Dark theme tokens — scoped to elements carrying the .dark class
+   (only the revenue-tracking module sets it). RGB triplets, brand green kept. */
+.dark {
+  --background: 9 9 11;
+  --foreground: 250 250 250;
+  --card: 1 24 34;
+  --card-foreground: 250 250 250;
+  --popover: 1 24 34;
+  --popover-foreground: 250 250 250;
+  --primary: 203 231 30;
+  --primary-foreground: 9 9 11;
+  --secondary: 39 39 42;
+  --secondary-foreground: 250 250 250;
+  --muted: 39 39 42;
+  --muted-foreground: 161 161 170;
+  --accent: 39 39 42;
+  --accent-foreground: 250 250 250;
+  --border: 39 39 42;
+  --input: 39 39 42;
+  --ring: 203 231 30;
+  --sidebar: 1 24 34;
+  --sidebar-foreground: 250 250 250;
+  --sidebar-accent: 39 39 42;
+  --sidebar-accent-foreground: 250 250 250;
+  --sidebar-border: 39 39 42;
+}
+
+/* Wallet (cartera) scoped tokens — estado + tramo colors.
+   Surfaces/text/borders come from the tokens above; only these semantic
+   colors are specific to the module. Declared on .wallet-scope; the tramo
+   and accent tokens get dark values when a .dark ancestor is present. */
+.wallet-scope {
+  --wallet-comp: 37 99 201;
+  --wallet-pag: 15 163 177;
+  --wallet-conc: 203 231 30;
+  --wallet-nov: 255 85 0;
+  --wallet-risk: 201 222 255;
+  --wallet-saldo: 161 98 7;
+  --wallet-glosa: 0 168 220;
+  --wallet-devol: 214 6 93;
+  --wallet-otros: 120 130 140;
+
+  --wallet-t0: 203 216 221;
+  --wallet-t1: 157 182 191;
+  --wallet-t2: 114 149 163;
+  --wallet-t3: 75 118 136;
+  --wallet-t4: 42 86 106;
+  --wallet-t5: 18 58 75;
+
+  /* Texto legible sobre cada fondo de tramo (chips de la tabla de facturas). */
+  --wallet-t0-ink: 59 85 96;
+  --wallet-t1-ink: 30 59 70;
+  --wallet-t2-ink: 255 255 255;
+  --wallet-t3-ink: 255 255 255;
+  --wallet-t4-ink: 255 255 255;
+  --wallet-t5-ink: 255 255 255;
+
+  /* Selección del drilldown y estados activos. Verde de marca (--cashport-green). */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 246 251 215;
+
+  --wallet-seg-edge: rgba(1, 24, 34, 0.14);
+}
+
+/* Los colores de estado (--wallet-comp … --wallet-otros) no cambian entre
+   temas: heredan de .wallet-scope. Sólo se ajustan tramos, tinta y acento. */
+.dark .wallet-scope {
+  --wallet-t0: 42 74 87;
+  --wallet-t1: 58 101 119;
+  --wallet-t2: 76 130 152;
+  --wallet-t3: 107 162 182;
+  --wallet-t4: 147 193 209;
+  --wallet-t5: 196 225 235;
+
+  --wallet-t0-ink: 220 234 239;
+  --wallet-t1-ink: 255 255 255;
+  --wallet-t2-ink: 4 25 31;
+  --wallet-t3-ink: 4 25 31;
+  --wallet-t4-ink: 4 25 31;
+  --wallet-t5-ink: 4 25 31;
+
+  /* El verde no cambia entre temas; sólo se oscurece su fondo suave. */
+  --wallet-accent: 203 231 30;
+  --wallet-accent-soft: 51 55 28;
+
+  --wallet-seg-edge: rgba(255, 255, 255, 0.16);
+}
+
+/* Cashport utility classes */
+.text-cashport-black {
+  color: rgb(var(--cashport-black));
+}
+.text-cashport-green {
+  color: rgb(var(--cashport-green));
+}
+.text-cashport-gray-light {
+  color: rgb(var(--cashport-gray-light));
+}
+.bg-accent {
+  background-color: rgb(var(--accent));
+}
+.bg-accent-foreground {
+  background-color: rgb(var(--accent-foreground));
+}
+.bg-cashport-black {
+  background-color: rgb(var(--cashport-black));
+}
+.bg-cashport-green {
+  background-color: rgb(var(--cashport-green));
+}
+.bg-cashport-gray-light {
+  background-color: rgb(var(--cashport-gray-light));
+}
+.bg-cashport-gray-lighter {
+  background-color: rgb(var(--cashport-gray-lighter));
+}
+.bg-cashport-white {
+  background-color: rgb(var(--cashport-white));
+}
+.border-cashport-gray-light {
+  border-color: rgb(var(--cashport-gray-light));
+}
+.border-cashport-green {
+  border-color: rgb(var(--cashport-green));
+}
+
+/* Thin scrollbar utility (Firefox/Chromium standard + WebKit fallback) */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d8de transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #d6d8de;
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #c2c5cd;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animación fadeIn para componentes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* MapLibre popup styles */
+.cashport-popup .maplibregl-popup-content {
+  padding: 0;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f3f4f6;
+}
+
+.cashport-popup .maplibregl-popup-tip {
+  border-top-color: #fff;
+}

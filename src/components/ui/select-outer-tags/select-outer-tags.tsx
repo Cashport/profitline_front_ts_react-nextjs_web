@@ -22,13 +22,14 @@ type ExtendedFieldError =
 interface PropsGeneralSelect<T extends FieldValues> {
   errors: ExtendedFieldError | undefined;
   field: ControllerRenderProps<T, any>;
-  title: string;
+  title?: string;
   placeholder: string;
   options: OptionType[] | string[] | undefined;
   loading?: boolean;
   customStyleContainer?: React.CSSProperties;
   hiddenTags?: boolean;
   titleAbsolute?: boolean;
+  customStyleSelect?: React.CSSProperties;
   // eslint-disable-next-line no-unused-vars
   addedOnchangeBehaviour?: (value: OptionType[], deletedValue: OptionType[]) => void;
   disableValueRetention?: boolean;
@@ -44,6 +45,7 @@ const SelectOuterTags = <T extends FieldValues>({
   customStyleContainer,
   hiddenTags,
   titleAbsolute,
+  customStyleSelect,
   addedOnchangeBehaviour,
   disableValueRetention
 }: PropsGeneralSelect<T>) => {
@@ -110,7 +112,7 @@ const SelectOuterTags = <T extends FieldValues>({
 
   return (
     <div className="selectOuterTags" style={customStyleContainer}>
-      <h4 className={`inputTitle ${titleAbsolute && "-absolute"}`}>{title}</h4>
+      {title && <h4 className={`inputTitle ${titleAbsolute && "-absolute"}`}>{title}</h4>}
       <Select
         {...field}
         variant="borderless"
@@ -126,6 +128,7 @@ const SelectOuterTags = <T extends FieldValues>({
         onChange={handleChange}
         options={usedOptions}
         labelInValue
+        style={customStyleSelect}
       />
       {selectedOptions.length > 0 && (
         <div className={`selectPlaceholder ${titleAbsolute && "-absolute"}`}>{placeholder}</div>

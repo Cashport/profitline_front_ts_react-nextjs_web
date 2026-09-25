@@ -1,0 +1,203 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
+import { PAYMENT_TYPES } from "@/constants/documentTypes";
+import {
+  IMarketAdminClientConfig,
+  IUpdateMarketAdminClientConfigBody
+} from "@/types/marketAdmin/IMarketAdmin";
+
+export type ConfigForm = {
+  quota: string;
+  payment_discount: string;
+  payment_condition_code: string;
+  payment_type: string;
+  warehouse_id: number | null;
+  pricelist_id: string;
+};
+
+type Props = {
+  config?: IMarketAdminClientConfig;
+  isLoading?: boolean;
+  onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
+};
+
+const BLANK_CONFIG: ConfigForm = {
+  quota: "",
+  payment_discount: "",
+  payment_condition_code: "",
+  payment_type: "",
+  warehouse_id: null,
+  pricelist_id: ""
+};
+
+const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
+  config
+    ? {
+        quota: config.quota?.toString() ?? "",
+        payment_discount: config.payment_discount?.toString() ?? "",
+        payment_condition_code: config.payment_condition_code ?? "",
+        payment_type: config.payment_type?.toString() ?? "",
+        warehouse_id: config.warehouse_id,
+        pricelist_id: config.pricelist_id?.toString() ?? ""
+      }
+    : BLANK_CONFIG;
+
+const toNumberOrNull = (value: string) => (value.trim() === "" ? null : Number(value));
+
+export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
+  const [form, setForm] = useState<ConfigForm>(toForm(config));
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setForm(toForm(config));
+  }, [config]);
+
+  // Solo se envía lo que cambió respecto a la configuración actual.
+  const buildBody = (): IUpdateMarketAdminClientConfigBody => {
+    const current = toForm(config);
+    const body: IUpdateMarketAdminClientConfigBody = {};
+    if (form.quota !== current.quota) body.quota = toNumberOrNull(form.quota);
+    if (form.payment_discount !== current.payment_discount)
+      body.payment_discount = toNumberOrNull(form.payment_discount);
+    if (form.payment_condition_code !== current.payment_condition_code)
+      body.payment_condition_code = form.payment_condition_code.trim() || null;
+    if (form.payment_type !== current.payment_type)
+      body.payment_type = toNumberOrNull(form.payment_type);
+    if (form.warehouse_id !== current.warehouse_id) body.warehouse_id = form.warehouse_id;
+    if (form.pricelist_id !== current.pricelist_id)
+      body.pricelist_id = toNumberOrNull(form.pricelist_id);
+    return body;
+  };
+
+  const isDirty = Object.keys(buildBody()).length > 0;
+
+  const handleSave = async () => {
+    const body = buildBody();
+    if (Object.keys(body).length === 0) return;
+    try {
+      setIsSaving(true);
+      await onSave(body);
+    } catch {
+      // El contenedor ya muestra el mensaje de error.
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-lg">
+      <p className="text-sm text-[#999999] mb-6">Ajustes financieros y operativos del cliente.</p>
+
+      <div className="flex flex-col gap-5">
+        {/* Cupo de crédito */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Cupo de crédito</label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
+              $
+            </span>
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              disabled={isLoading}
+              value={form.quota}
+              onChange={(e) => setForm((f) => ({ ...f, quota: e.target.value }))}
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg pl-7 pr-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Descuento pronto pago */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">
+            Descuento pronto pago
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              disabled={isLoading}
+              value={form.payment_discount}
+              onChange={(e) => setForm((f) => ({ ...f, payment_discount: e.target.value }))}
+              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 pr-7 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
+              %
+            </span>
+          </div>
+        </div>
+
+        {/* Condición de pago */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Condición de pago</label>
+          <input
+            type="text"
+            placeholder="Código de condición de pago"
+            disabled={isLoading}
+            value={form.payment_condition_code}
+            onChange={(e) => setForm((f) => ({ ...f, payment_condition_code: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+
+        {/* Tipo de pago */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Tipo de pago</label>
+          <select
+            disabled={isLoading}
+            value={form.payment_type}
+            onChange={(e) => setForm((f) => ({ ...f, payment_type: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors bg-white"
+          >
+            <option value="">Seleccione un tipo de pago</option>
+            {PAYMENT_TYPES.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Bodega por defecto */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Bodega por defecto</label>
+          <WarehouseSelect
+            value={form.warehouse_id ?? undefined}
+            onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
+            disabled={isLoading}
+            size="large"
+          />
+        </div>
+
+        {/* Lista de precios */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Lista de precios</label>
+          <input
+            type="number"
+            min={0}
+            placeholder="ID de la lista de precios"
+            disabled={isLoading}
+            value={form.pricelist_id}
+            onChange={(e) => setForm((f) => ({ ...f, pricelist_id: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+
+        {/* Save button */}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleSave}
+            disabled={!isDirty || isSaving || isLoading}
+            className="text-sm font-semibold bg-[#141414] text-white px-5 py-2.5 rounded-lg hover:bg-[#333333] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isSaving ? "Guardando..." : "Guardar cambios"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

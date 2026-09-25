@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Hourglass } from "phosphor-react";
 import { Typography, Avatar, Steps, Button } from "antd";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
+import rehypeRaw from "rehype-raw";
 import "./eventsection.scss";
 import { IconLabel } from "@/components/atoms/IconLabel/IconLabel";
 import { addIncidentComment } from "@/services/resolveNovelty/resolveNovelty";
@@ -83,7 +86,18 @@ export const EventSection: React.FC<EventSectionProps> = ({
             title={
               <div className="event-content">
                 <Text strong>{getEventUser(event)}</Text>
-                <Text>{event.comments || getEventAction(event)}</Text>
+                {event.comments ? (
+                  <div className="event-comment-markdown">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkBreaks]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
+                      {event.comments}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <Text>{getEventAction(event)}</Text>
+                )}
                 <Text type="secondary">{formatDate(event.created_at)}</Text>
               </div>
             }

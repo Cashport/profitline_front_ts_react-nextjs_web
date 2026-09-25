@@ -12,11 +12,8 @@ type UseDiscountFeatsProps = {
 };
 export default function useDiscountFeats({ setValue }: UseDiscountFeatsProps) {
   const { ID } = useAppStore((state) => state.selectedProject);
-  const { data: products, isLoading } = useSWR(
-    {
-      id: ID
-    },
-    ({ id }) => getProductsByProject(id)
+  const { data: products, isLoading } = useSWR(ID ? ["products-by-project", ID] : null, () =>
+    getProductsByProject(ID)
   );
   const [lines, setLines] = useState<ProductLine[]>([]);
 

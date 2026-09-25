@@ -2,9 +2,11 @@ import { IFormDigitalRecordModal } from "@/components/molecules/modals/DigitalRe
 import config from "@/config";
 import { IFinancialDiscountForm } from "@/modules/clients/containers/accounting-adjustments-tab/Modals/ModalEditAdjustments/ModalEditAdjustments";
 import { DiscountRequestBody } from "@/types/accountingAdjustment/IAccountingAdjustment";
+import { IBalancesFilters } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IPaymentDetail } from "@/types/paymentAgreement/IPaymentAgreement";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
+import { getCorrectMimeType } from "@/utils/files/getCorrectMimeType";
 
 interface RadicationData {
   invoices_id: number[];
@@ -44,7 +46,8 @@ export const applyAccountingAdjustment = async (
   if (comment) formData.append("comment", comment);
   if (docFiles) {
     docFiles.forEach((file) => {
-      formData.append("doc", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("doc", correctedFile);
     });
   }
 
@@ -69,7 +72,8 @@ export const changeStatusInvoice = async (
   formData.append("comments", comments);
   if (docFiles) {
     docFiles.forEach((file) => {
-      formData.append("files", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("files", correctedFile);
     });
   }
 
@@ -98,7 +102,8 @@ export const reportInvoiceIncident = async (
 
   if (files) {
     files.forEach((file) => {
-      formData.append("files", file);
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("files", correctedFile);
     });
   }
 
@@ -121,7 +126,8 @@ export const radicateInvoice = async (
   radicationData.comments && formData.append("comments", radicationData.comments);
 
   files.forEach((file) => {
-    formData.append("files", file);
+    const correctedFile = getCorrectMimeType(file);
+    formData.append("files", correctedFile);
   });
 
   const response = await API.post(
@@ -138,19 +144,29 @@ export const createPaymentAgreement = async (
   adjustmentData: AdjustmentData[],
   file: File | null
 ) => {
-  const formData = new FormData();
-  formData.append("adjustment_data", JSON.stringify(adjustmentData));
+  try {
+    const formData = new FormData();
+    formData.append("adjustment_data", JSON.stringify(adjustmentData));
 
-  if (file) {
-    formData.append("file", file);
+    if (file) {
+      const correctedFile = getCorrectMimeType(file);
+      formData.append("file", correctedFile);
+    }
+
+    const response = await instance.post(
+      `${config.API_HOST}/invoice/paymentAgreement/project/${projectId}/client/${clientId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": undefined
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error creating payment agreement", error);
+    throw error;
   }
-
-  const response = await API.post(
-    `${config.API_HOST}/invoice/paymentAgreement/project/${projectId}/client/${clientId}`,
-    formData
-  );
-
-  return response;
 };
 
 export const getDetailPaymentAgreement = async (incident_id: number) => {
@@ -195,14 +211,22 @@ export const legalizeFinancialDiscount = async (
   return response;
 };
 
-interface User {
+interface IAttachments {
+  id: number;
+  name: string;
+}
+
+export interface IUser {
+  contact_id: number;
   label: string;
   value: string;
+  full_phone: string;
 }
 
 interface DigitalRecordResponse {
-  usuarios: User[];
+  usuarios: IUser[];
   asunto: string;
+  attachments: IAttachments[];
 }
 
 export const getDigitalRecordFormInfo = async (
@@ -221,37 +245,15 @@ export const getDigitalRecordFormInfo = async (
   }
 };
 
-export const createDigitalRecord = async (
-  data: IFormDigitalRecordModal,
-  project_id: number,
-  user_id: number,
-  clientId: string
-) => {
-  const forward_to = data.forward_to.map((user) => user.value);
-  const copy_to = data?.copy_to?.map((user) => user.value);
-
-  const formData = new FormData();
-
-  formData.append("forward_to", JSON.stringify(forward_to));
-  if (copy_to) formData.append("copy_to", JSON.stringify(copy_to));
-  formData.append("subject", data.subject);
-  formData.append("commentary", data.comment);
-  formData.append("user_id", user_id.toString());
-  formData.append("project_id", project_id.toString());
-  formData.append("clientUUID", clientId.toString());
-  data.attachments.forEach((file) => {
-    formData.append("attachments", file);
-  });
-
+export const sendDigitalRecord = async (clientUUID: string, data: IFormDigitalRecordModal) => {
   try {
-    const response = await API.post(
-      `${config.API_HOST}/client/digital-record?projectId=${project_id}`,
-      formData
-    );
-
+    const response = await API.post(`${config.API_HOST}/client/digital-record-background`, {
+      clientUUID,
+      to: data.forward_to.map((user) => user.value)
+    });
     return response;
   } catch (error) {
-    console.error("Error creating digital record", error);
+    console.error("Error sending digital record", error);
     throw error;
   }
 };
@@ -334,6 +336,18 @@ export const getAvailableAdjustmentsForSelect = async (
   }
 };
 
+export const getBalancesFilter = async (): Promise<IBalancesFilters> => {
+  try {
+    const response: GenericResponse<IBalancesFilters> = await API.get(
+      `${config.API_HOST}/financial-discount/balances/filters`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting balances filters", error);
+    throw error;
+  }
+};
+
 interface IBalances {
   financialDiscountId: number;
   financialDiscountIdBalance: number;
@@ -357,15 +371,43 @@ export const balanceLegalization = async (balances: IBalances[]): Promise<Generi
 export const addCommentHistoricAction = async (
   clientId: string,
   project_id: number,
-  comment: string
+  comment: string,
+  management_type_id: number,
+  management_status_id: number,
+  contact_id?: number,
+  file?: File,
+  extraFields?: Record<string, string | number | boolean>
 ): Promise<GenericResponse> => {
-  const body = {
-    comment: comment
-  };
+  const formData = new FormData();
+
+  formData.append("comment", comment);
+  formData.append("management_type_id", String(management_type_id));
+  formData.append("management_status_id", String(management_status_id));
+
+  if (contact_id) {
+    formData.append("contact_id", String(contact_id));
+  }
+
+  if (file) {
+    const correctedFile = getCorrectMimeType(file);
+    formData.append("file", correctedFile);
+  }
+
+  if (extraFields) {
+    Object.entries(extraFields).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+  }
+
   try {
     const response: GenericResponse = await API.post(
       `${config.API_HOST}/portfolio/add-comment-history/client/${clientId}/project/${project_id}`,
-      body
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
     );
     return response;
   } catch (error) {
@@ -389,6 +431,45 @@ export const markInvoiceAsBalance = async (
     return response;
   } catch (error) {
     console.error("Error marking invoice as balance", error);
+    throw error;
+  }
+};
+
+export const getManagementTypes = async (): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/management/types`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting management types", error);
+    throw error;
+  }
+};
+
+export const getManagementStatus = async (): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/management/status`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting management status", error);
+    throw error;
+  }
+};
+
+export const getContactsByClient = async (
+  clientId: string,
+  project_id: number
+): Promise<GenericResponse> => {
+  try {
+    const response: GenericResponse = await API.get(
+      `${config.API_HOST}/portfolio/clients/${clientId}/project/${project_id}/contacts`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting contacts by client", error);
     throw error;
   }
 };

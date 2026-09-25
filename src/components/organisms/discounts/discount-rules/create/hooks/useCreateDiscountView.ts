@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import discountCategories from "../../../constants/discountTypes";
+import discountCategories, { getOptionsByType } from "../../../constants/discountTypes";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { DiscountSchema, generalResolver } from "../resolvers/generalResolver";
@@ -9,17 +9,25 @@ import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocume
 import { useRouter } from "next/navigation";
 import { mapDiscountGetOneToDiscountSchema } from "../logic/createDiscountLogic";
 import { message } from "antd";
+import { ApiError } from "@/utils/api/api";
+import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string; initialCategory?: string };
 };
 
 export default function useCreateDiscountView({ params }: Props) {
   const discountId = !!Number(params?.id) ? Number(params?.id) : undefined;
   const [messageApi, contextHolder] = message.useMessage();
-  const [selectedType, setSelectedType] = useState<number>(1);
+  // initialCategory is a key of discountCategories (e.g. "annual"); unknown values fall back to "Por orden"
+  const initialType = discountCategories[params?.initialCategory ?? ""]?.id ?? 1;
+  const [selectedType, setSelectedType] = useState<number>(initialType);
   const { ID } = useAppStore((project) => project.selectedProject);
   const router = useRouter();
+  // The page knows which shell it belongs to; the pathname hook is only a fallback.
+  const fallbackBasePath = useDiscountsBasePath();
+  const basePath = params?.basePath ?? fallbackBasePath;
+  const listPath = params?.listPath ?? basePath;
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<FileObject[]>([]);
   const [statusForm, setStatusForm] = useState<"create" | "edit" | "review">(
@@ -28,7 +36,11 @@ export default function useCreateDiscountView({ params }: Props) {
   const [defaultDiscount, setDefaultDiscount] = useState<DiscountSchema>({
     name: "",
     description: "",
-    discount_type: undefined,
+    // Plan anual only has one discount_type, so preselect it like handleClick does
+    discount_type:
+      initialType === discountCategories.annual.id
+        ? getOptionsByType(initialType)[0].value
+        : undefined,
     start_date: null,
     is_active: false,
     products_category: [],
@@ -62,7 +74,7 @@ export default function useCreateDiscountView({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push("/descuentos");
+      router.push(listPath);
     }
     return defaultDiscount;
   };
@@ -70,7 +82,7 @@ export default function useCreateDiscountView({ params }: Props) {
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
       // if id is not a number and it is a string then the path is incorrect
-      router.push("/descuentos");
+      router.push(listPath);
     }
   }, [params?.id]);
 
@@ -89,9 +101,17 @@ export default function useCreateDiscountView({ params }: Props) {
 
   const handleClick = (type: number) => {
     setSelectedType(type);
+    // Limpiar discount_type al cambiar de categoría
+    form.resetField("discount_type");
+
+    // Si es Plan anual (categoría 3), asignar automáticamente el primer valor
+    if (type === discountCategories.annual.id) {
+      const options = getOptionsByType(type);
+      form.setValue("discount_type", options[0].value);
+    }
   };
 
-  const form = useForm({
+  const form = useForm<DiscountSchema>({
     resolver: yupResolver(generalResolver),
     defaultValues: Number(params?.id) ? fetchDiscount : defaultDiscount,
     disabled: statusForm === "review"
@@ -102,11 +122,17 @@ export default function useCreateDiscountView({ params }: Props) {
     try {
       const res = await createDiscount({ ...e, project_id: ID }, files);
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/regla/${res.idDiscount}`);
+      router.push(`${basePath}/regla/${res.idDiscount}`);
     } catch (e: any) {
-      const errorMessage = e.response?.data?.message || e.message || "Error al crear el descuento";
-      messageApi.error(errorMessage);
-      console.error(e);
+      if (e instanceof ApiError) {
+        console.error(e);
+        messageApi.error(e.message);
+      } else {
+        console.error(e);
+        const errorMessage =
+          e.response?.data?.message || e.message || "Error al crear el descuento";
+        messageApi.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -121,10 +147,14 @@ export default function useCreateDiscountView({ params }: Props) {
       setStatusForm("review");
       form.reset(mapDiscountGetOneToDiscountSchema(res));
     } catch (e: any) {
-      const errorMessage =
-        e.response?.data?.message || e.message || "Error al actualizar el descuento";
-      messageApi.error(errorMessage);
       console.error(e);
+      if (e instanceof ApiError) {
+        messageApi.error(e.message);
+      } else {
+        const errorMessage =
+          e.response?.data?.message || e.message || "Error al actualizar el descuento";
+        messageApi.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -140,6 +170,7 @@ export default function useCreateDiscountView({ params }: Props) {
 
   return {
     discountId,
+    listPath,
     selectedType,
     handleClick,
     form,

@@ -10,6 +10,7 @@ import { SelectContactIndicative } from "@/components/molecules/selects/contacts
 import { MessageType, useMessageApi } from "@/context/MessageContext";
 import { getContact } from "@/services/contacts/contacts";
 import "./contacts-tab-modal.scss";
+import { useContactModalOptions } from "@/hooks/useContactModalOptions";
 
 type showContactModalType = {
   isOpen: boolean;
@@ -24,7 +25,7 @@ interface PropsInvoicesTable {
     contactInfo: IContactForm,
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   updateContact: (
     // eslint-disable-next-line no-unused-vars
     contactInfo: IContactForm,
@@ -32,8 +33,9 @@ interface PropsInvoicesTable {
     contactId: number,
     // eslint-disable-next-line no-unused-vars
     showMessage: (type: MessageType, content: string) => void
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   clientId: string;
+  isActionLoading: boolean;
 }
 
 const ContactsTabModal = ({
@@ -41,11 +43,14 @@ const ContactsTabModal = ({
   setShowContactModal,
   createContact,
   updateContact,
-  clientId
+  clientId,
+  isActionLoading
 }: PropsInvoicesTable) => {
   const { showMessage } = useMessageApi();
   const [ableToEdit, setAbleToEdit] = useState(false);
   const [contactDetails, setContactDetails] = useState<IContact>();
+  console.log("contactDetails", contactDetails);
+  const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
   const {
     control,
     handleSubmit,
@@ -69,11 +74,13 @@ const ContactsTabModal = ({
     fetchData();
   }, [showContactModal.contactId]);
 
-  const onSubmitForm = (data: IContactForm) => {
+  const onSubmitForm = async (data: IContactForm) => {
     if (showContactModal.contactId) {
-      updateContact(data, showContactModal.contactId, showMessage);
+      const success = await updateContact(data, showContactModal.contactId, showMessage);
+      if (!success) return;
     } else {
-      createContact(data, showMessage);
+      const success = await createContact(data, showMessage);
+      if (!success) return;
     }
 
     setShowContactModal({ isOpen: false, contactId: 0 });
@@ -132,7 +139,13 @@ const ContactsTabModal = ({
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
-                <SelectContactRole errors={errors.role} field={field} readOnly={!ableToEdit} />
+                <SelectContactRole
+                  errors={errors.role}
+                  field={field}
+                  readOnly={!ableToEdit}
+                  options={roleOptions}
+                  isLoading={isLoading}
+                />
               )}
             />
           </div>
@@ -147,6 +160,8 @@ const ContactsTabModal = ({
                   errors={errors.indicative}
                   field={field}
                   readOnly={!ableToEdit}
+                  options={callingCodeOptions}
+                  isLoading={isLoading}
                 />
               )}
             />
@@ -159,9 +174,13 @@ const ContactsTabModal = ({
             readOnly={!ableToEdit}
             typeInput="number"
             validationRules={{
-              pattern: {
-                value: /^\d{10}$/,
-                message: "El teléfono debe tener 10 dígitos"
+              validate: (value, formValues) => {
+                const isColombia = formValues.indicative?.value === 1;
+
+                if (isColombia) {
+                  return /^\d{10}$/.test(value) || "El teléfono debe tener 10 dígitos";
+                }
+                return /^\d{7,12}$/.test(value) || "El teléfono debe tener entre 7 y 12 dígitos";
               }
             }}
           />
@@ -195,13 +214,20 @@ const ContactsTabModal = ({
               >
                 Cancelar
               </SecondaryButton>
-              <PrincipalButton disabled={!isValid} onClick={handleSubmit(onSubmitForm)}>
+              <PrincipalButton
+                disabled={!isValid}
+                onClick={handleSubmit(onSubmitForm)}
+                loading={isActionLoading}
+              >
                 {showContactModal.contactId ? "Guardar cambios" : "Crear contacto"}
               </PrincipalButton>
             </>
           ) : (
             <>
-              <SecondaryButton onClick={() => setShowContactModal({ isOpen: false, contactId: 0 })}>
+              <SecondaryButton
+                onClick={() => setShowContactModal({ isOpen: false, contactId: 0 })}
+                disabled={isActionLoading}
+              >
                 Cancelar
               </SecondaryButton>
               <PrincipalButton onClick={() => setAbleToEdit(true)}>Editar</PrincipalButton>

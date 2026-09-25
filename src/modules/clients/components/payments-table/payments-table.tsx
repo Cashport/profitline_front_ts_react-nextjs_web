@@ -40,9 +40,9 @@ const PaymentsTable = ({
     setSelectedPayments((prevSelectedPayments) => {
       if (newSelectedRowKeys.length >= 1) {
         // Filter out newly selected rows that aren't already in prevSelectedPayments
-        const filteredNewRows = newSelectedRows.filter(
-          (newRow) => !prevSelectedPayments.some((prevRow) => prevRow.id === newRow.id)
-        );
+        const filteredNewRows = newSelectedRows
+          .filter((newRow) => !prevSelectedPayments.some((prevRow) => prevRow.id === newRow.id))
+          .map((newRow) => ({ ...newRow, payments_status_id: paymentStatusId }));
 
         // Filter out unselected rows for this payment status
         const remainingRows = prevSelectedPayments.filter(
@@ -77,6 +77,15 @@ const PaymentsTable = ({
       width: 130
     },
     {
+      title: "Id ERP",
+      dataIndex: "ID_ERP",
+      key: "ID_ERP",
+      render: (erpId) => <p>{erpId || "-"}</p>,
+      sorter: (a, b) => a.id - b.id,
+      showSorterTooltip: false,
+      width: 130
+    },
+    {
       title: "Ingreso",
       dataIndex: "payment_date",
       key: "payment_date",
@@ -87,10 +96,11 @@ const PaymentsTable = ({
     },
     {
       title: "Identificación",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (text) => <Text className="cell">{formatDate(text)}</Text>,
-      sorter: (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
+      dataIndex: "identification_date",
+      key: "identification_date",
+      render: (text) => <Text className="cell">{text ? formatDate(text) : "-"}</Text>,
+      sorter: (a, b) =>
+        Date.parse(a.identification_date || "") - Date.parse(b.identification_date || ""),
       showSorterTooltip: false
     },
     {

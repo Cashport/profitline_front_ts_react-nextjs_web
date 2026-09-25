@@ -1,0 +1,71 @@
+@import "@styles/variables.scss";
+
+.timePickerContainer {
+    display: flex;
+    flex-direction: column;
+
+    .input-time-custom-title {
+        color: #909090;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        margin-bottom: 0.375rem;
+    }
+
+    .timeInputForm {
+        background-color: $background;
+        border: none !important;
+        padding: 0.71rem !important;
+        font-size: 1rem;
+
+        .ant-picker-input {
+            border-radius: 0.25rem;
+            width: 100%;
+
+            > input::placeholder {
+                color: #dddddd !important;
+            }
+
+            &:disabled {
+                background-color: #909090;
+                color: $dark-gray !important;
+            }
+        }
+
+        &__icon {
+            font-size: 20px;
+            color: black;
+        }
+
+        &:hover {
+            background-color: $background;
+        }
+    }
+
+    .timeInputFormError {
+        background-color: $background;
+        padding: 0.71rem;
+        border: 1px dashed red;
+        .ant-picker {
+            background-color: $background !important;
+            padding: 0.7rem;
+            font-size: 1rem;
+            border-radius: 0.25rem;
+
+            &::placeholder {
+                color: $secondary-gray;
+            }
+        }
+        &:hover {
+            background-color: $background;
+        }
+    }
+
+    .textError {
+        padding-left: 0.5rem;
+        color: red;
+        font-size: 0.875em;
+        margin-top: 4px;
+    }
+}

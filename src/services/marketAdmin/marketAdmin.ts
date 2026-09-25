@@ -1,0 +1,274 @@
+import { GenericResponse } from "@/types/global/IGlobal";
+import {
+  IAssignClientToUserBody,
+  ICreateManualBonusBody,
+  ICreateMarketAdminClientAddressBody,
+  ICreatePromotionBody,
+  IManagerBonificationSummary,
+  IMarketAdminClientAddress,
+  IMarketAdminClientsBatchBody,
+  IProductInventoryItem,
+  IProfitLoader,
+  IProfitLoaderTimelineResponse,
+  IUpdateMarketAdminClientAddressBody,
+  IUpdateMarketAdminClientConfigBody,
+  IUpdateMarketAdminProductBody
+} from "@/types/marketAdmin/IMarketAdmin";
+import { API } from "@/utils/api/api";
+
+export const createBonification = async (body: ICreatePromotionBody) => {
+  try {
+    const response: GenericResponse<unknown> = await API.post("/promotion", body);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear la promoción:", error);
+    throw error;
+  }
+};
+
+export const createManualBonus = async (body: ICreateManualBonusBody) => {
+  try {
+    const response: GenericResponse<unknown> = await API.post("/manager-bonification", body);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear el bonificado manual:", error);
+    throw error;
+  }
+};
+
+// GET /manager-bonification/summary?client_id=:nit — grupos de bonificado del cliente
+export const getManagerBonificationSummary = async (clientId: string) => {
+  try {
+    const response: GenericResponse<IManagerBonificationSummary> = await API.get(
+      "/manager-bonification/summary",
+      { params: { client_id: clientId } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los bonificados manuales del cliente:", error);
+    throw error;
+  }
+};
+
+// PUT /product/:id — multipart/form-data, se envía solo lo que cambia
+export const updateMarketAdminProduct = async (
+  id: number | string,
+  body: IUpdateMarketAdminProductBody
+) => {
+  try {
+    const formData = new FormData();
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        formData.append(key, value as string | Blob);
+      }
+    });
+
+    const response: GenericResponse<unknown> = await API.put(`/product/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar el producto:", error);
+    throw error;
+  }
+};
+
+// GET /product/:id/inventory — inventario por lote y bodega
+export const getProductInventory = async (id: number | string) => {
+  try {
+    const response: GenericResponse<IProductInventoryItem[]> = await API.get(
+      `/product/${id}/inventory`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el inventario del producto:", error);
+    throw error;
+  }
+};
+
+// ── Clientes ────────────────────────────────────────────────────────────────
+
+// PUT /marketplace-admin/clients/batch — activar/inactivar en lote
+export const updateMarketAdminClientsBatch = async (body: IMarketAdminClientsBatchBody) => {
+  try {
+    const response: GenericResponse<unknown> = await API.put(
+      "/marketplace-admin/clients/batch",
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar los clientes en lote:", error);
+    throw error;
+  }
+};
+
+export const createMarketAdminClientAddress = async (
+  clientId: string,
+  body: ICreateMarketAdminClientAddressBody
+) => {
+  try {
+    const response: GenericResponse<IMarketAdminClientAddress> = await API.post(
+      `/marketplace-admin/clients/${clientId}/addresses`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear la dirección del cliente:", error);
+    throw error;
+  }
+};
+
+export const updateMarketAdminClientAddress = async (
+  clientId: string,
+  addressId: number,
+  body: IUpdateMarketAdminClientAddressBody
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.put(
+      `/marketplace-admin/clients/${clientId}/addresses/${addressId}`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar la dirección del cliente:", error);
+    throw error;
+  }
+};
+
+// DELETE /marketplace-admin/clients/:client_id/addresses/:id — soft delete
+export const deleteMarketAdminClientAddress = async (clientId: string, addressId: number) => {
+  try {
+    const response: GenericResponse<unknown> = await API.delete(
+      `/marketplace-admin/clients/${clientId}/addresses/${addressId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al eliminar la dirección del cliente:", error);
+    throw error;
+  }
+};
+
+// PUT /marketplace-admin/clients/:client_id/config — se envía solo lo que cambia
+export const updateMarketAdminClientConfig = async (
+  clientId: string,
+  body: IUpdateMarketAdminClientConfigBody
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.put(
+      `/marketplace-admin/clients/${clientId}/config`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar la configuración del cliente:", error);
+    throw error;
+  }
+};
+
+// ── Usuarios ────────────────────────────────────────────────────────────────
+
+// POST /marketplace-admin/users/:id/clients — crea el grupo personal si no existe
+export const assignClientToMarketAdminUser = async (
+  userId: string | number,
+  body: IAssignClientToUserBody
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.post(
+      `/marketplace-admin/users/${userId}/clients`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al asignar el cliente al usuario:", error);
+    throw error;
+  }
+};
+
+// DELETE /marketplace-admin/users/:id/clients/:client_nit
+export const removeClientFromMarketAdminUser = async (
+  userId: string | number,
+  clientNit: string
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.delete(
+      `/marketplace-admin/users/${userId}/clients/${clientNit}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al quitar el cliente del usuario:", error);
+    throw error;
+  }
+};
+
+// ── Profit Loader (cargue de información) ───────────────────────────────────
+
+// GET /profit-loader/loaders
+export const getProfitLoaders = async () => {
+  try {
+    const response: GenericResponse<IProfitLoader[]> = await API.get("/profit-loader/loaders");
+    return response;
+  } catch (error) {
+    console.error("Error al obtener los loaders:", error);
+    throw error;
+  }
+};
+
+// GET /profit-loader/loaders/:id
+export const getProfitLoaderById = async (id: number) => {
+  try {
+    const response: GenericResponse<IProfitLoader> = await API.get(`/profit-loader/loaders/${id}`);
+    return response;
+  } catch (error) {
+    console.error("Error al obtener el detalle del loader:", error);
+    throw error;
+  }
+};
+
+// GET /profit-loader/etl/:loaderId/timeline
+export const getProfitLoaderTimeline = async (loaderId: number) => {
+  try {
+    const response: IProfitLoaderTimelineResponse = await API.get(
+      `/profit-loader/etl/${loaderId}/timeline`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al obtener el historial de cargues:", error);
+    throw error;
+  }
+};
+
+// POST /profit-loader/etl/:id/upload — multipart/form-data, el archivo viaja en la key "file"
+export const uploadProfitLoaderFile = async (id: number, file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response: GenericResponse<unknown> = await API.post(
+      `/profit-loader/etl/${id}/upload`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cargar el archivo del loader:", error);
+    throw error;
+  }
+};
+
+// ── Unidades de negocio ─────────────────────────────────────────────────────
+
+// GET /marketplace-admin/business-units/:project_id
+// Devuelve la lista de unidades de negocio (strings) configuradas en el
+// proyecto. Se usa para poblar el selector de business_unit al crear/editar
+// promociones.
+export const getProjectBusinessUnits = async (projectId: number) => {
+  try {
+    const response: GenericResponse<string[]> = await API.get(
+      `/marketplace-admin/business-units/${projectId}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error al obtener las unidades de negocio del proyecto:", error);
+    throw error;
+  }
+};

@@ -5,7 +5,7 @@ import { IInvoice } from "@/types/invoices/IInvoices";
 import UiTabs from "@/components/ui/ui-tabs";
 import ItemApplyModal from "@/components/atoms/ItemsApplyModal/ItemsApplyModal";
 import Table, { ColumnsType } from "antd/es/table";
-import { Flex, InputNumber, Modal } from "antd";
+import { InputNumber, Modal } from "antd";
 import EvidenceModal from "@/modules/clients/components/wallet-tab-evidence-modal/wallet-tab-evidence-modal";
 import { applyAccountingAdjustment } from "@/services/accountingAdjustment/accountingAdjustment";
 import { useParams } from "next/navigation";
@@ -57,7 +57,7 @@ export const ApplyAccountingAdjustment = ({
   const [currentAdjustment, setCurrentAdjustment] = useState(
     selectedNotes.map((row) => row.current_value)
   );
-  const [currentAdjustmentStatic, setCurrentAdjustmentStatic] = useState(
+  const [currentAdjustmentStatic, _setCurrentAdjustmentStatic] = useState(
     selectedNotes.map((row) => row.current_value)
   );
   const [applyValues, setApplyValues] = useState<{

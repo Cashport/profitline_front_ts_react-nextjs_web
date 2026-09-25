@@ -18,6 +18,16 @@ body {
     margin: 0;
 }
 
+// Dashboard dark theme: match the page background to the dark token.
+// (.dark is set on a descendant <main>, so <body> can't read it via CSS alone — the class is
+// toggled by ComercioLayout on /comercio/dashboard and PurchaseOrdersLayout on
+// /purchase-orders/dashboard.)
+body.comercio-dark,
+body.wallet-dark,
+body.dashboard-dark {
+    background-color: rgb(9 9 11); // matches .dark --background in tailwind.css
+}
+
 a {
     color: inherit;
     text-decoration: none;
@@ -47,6 +57,27 @@ a {
 
 .ant-select-item-option-selected {
     background-color: rgba(255, 255, 255, 0.37) !important;
+}
+
+// Dark dashboards: the white !important above would hide light option text.
+// Same #1f1f1f as colorBgElevated in the modules' dark ConfigProvider.
+body.comercio-dark,
+body.wallet-dark,
+body.dashboard-dark {
+    .ant-select-dropdown {
+        background-color: #1f1f1f !important;
+    }
+
+    .ant-select-item-option-selected {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+}
+
+.ant-picker-ok .ant-btn-primary {
+    background-color: $secondary !important;
+    border-color: $secondary !important;
+    color: $black !important;
+    box-shadow: none !important;
 }
 
 .ant-cascader-menus,
@@ -181,4 +212,23 @@ a {
 
 .standardSearch {
     width: 460px;
+}
+
+// Sheet slide animation (uses @keyframes so Radix waits for animationend)
+@keyframes sheetSlideIn {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+@keyframes sheetSlideOut {
+    from { transform: translateX(0); }
+    to   { transform: translateX(100%); }
+}
+
+[data-slot="sheet-content"][data-state="open"] {
+    animation: sheetSlideIn 0.3s ease-in-out;
+}
+
+[data-slot="sheet-content"][data-state="closed"] {
+    animation: sheetSlideOut 0.3s ease-in-out forwards;
 }

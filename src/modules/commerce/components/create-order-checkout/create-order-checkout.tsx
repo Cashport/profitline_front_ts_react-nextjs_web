@@ -1,521 +1,515 @@
-import { FC, useContext, useEffect, useState } from "react";
+"use client";
+
+import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Flex } from "antd";
-import { CaretLeft } from "phosphor-react";
-import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import { Controller, useForm } from "react-hook-form";
-import styles from "./create-order-checkout.module.scss";
-import GeneralSelect from "@/components/ui/general-select";
-import AlternativeBlackButton from "@/components/atoms/buttons/alternativeBlackButton/alternativeBlackButton";
-import {
-  createDraft,
-  createOrder,
-  createOrderFromDraft,
-  getAdresses as getAdressesAndNumber
-} from "@/services/commerce/commerce";
+import { AxiosError } from "axios";
+
 import { useAppStore } from "@/lib/store/store";
+import { confirmOrder, createDraft, createOrder } from "@/services/commerce/commerce";
+import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 import {
-  ICommerceAdresses,
+  IConfirmOrderData,
+  ICreateOrderData,
   IDiscountPackageAvailable,
-  IShippingInformation
+  IOrderSummaryPayload
 } from "@/types/commerce/ICommerce";
 import { useMessageApi } from "@/context/MessageContext";
-import { GenericResponse } from "@/types/global/IGlobal";
-import InputRadioRightSide from "@/components/ui/input-radio-right-side";
-import { SelectContactIndicative } from "@/components/molecules/selects/contacts/SelectContactIndicative";
-import { SelectLocations } from "@/components/molecules/selects/clients/SelectLocations/SelectLocations";
-import { OrderViewContext } from "../../contexts/orderViewContext";
-import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { ApiError } from "@/utils/api/api";
 import { CETAPHIL_PROJECT_ID } from "@/utils/constants/globalConstants";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import WompiModal from "@/components/organisms/paymentWeb/PaymentWebView";
+import ModalAttachEvidence from "@/components/molecules/modals/ModalEvidence/ModalAttachEvidence";
+import { GenericResponse } from "@/types/global/IGlobal";
+import { generateShortUuid } from "@/utils/utils";
+import { requiresPurchaseOrder } from "@/modules/commerce/utils/constants/checkout";
 
-interface IShippingInfoForm {
-  isElectronicInvoicing: number;
-  addresses: {
-    value: string;
-    label: string;
-  };
-  city: {
-    value: string;
-    label: string;
-  };
-  address: string;
+import ProductsDetailsAndDiscounts from "./products-details-and-discounts";
+import OrderShipmentConfirm from "./order-shipment-confirm/order-shipment-confirm";
+import ModalPurchaseOrderInfo from "./modal-purchase-order-info";
+
+export type IShippingInfo = {
+  id: string;
+  addressSelectValue: string;
+  addressId?: number;
+  warehouse_id?: number;
+  city: string;
+  dispatch_address: string;
   email: string;
-  indicative: {
-    value: string;
-    label: string;
-  };
-  phone: string;
-  comment: string;
-}
-
-// Constante para identificar la opción de nueva dirección
-const NEW_ADDRESS_OPTION = {
-  value: "new_address",
-  label: "+ Nueva dirección"
+  indicativo: string;
+  telefono: string;
+  observaciones: string;
+  cantidades: Record<string, number>;
+  bonusCantidades: Record<string, number>;
+  otherBonusCantidades: Record<string, number>;
 };
 
-const CreateOrderCheckout: FC = ({}) => {
-  const {
-    setCheckingOut,
-    client,
-    confirmOrderData,
-    shippingInfo,
-    selectedDiscount,
-    setSelectedDiscount,
-    discounts
-  } = useContext(OrderViewContext);
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
-  const { draftInfo } = useAppStore((state) => state);
-  const [loading, setLoading] = useState(false);
-  const [addresses, setAddresses] = useState<ICommerceAdresses[]>([]);
-  const [isNewAddress, setIsNewAddress] = useState(false);
-  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
-  const [pendingFormData, setPendingFormData] = useState<IShippingInfoForm | null>(null);
+export default function CheckoutPage() {
   const router = useRouter();
+  const projectId = useAppStore((state) => state.selectedProject.ID);
+  const draftInfo = useAppStore((state) => state.draftInfo);
+  const {
+    client,
+    selectedCategories,
+    selectedDiscount,
+    executiveDiscounts,
+    setConfirmOrderData,
+    confirmOrderData,
+    order_split_details,
+    deactivateCrossSelling,
+    bonus,
+    channelCode,
+    businessUnit
+  } = useContext(OrderViewContext);
   const { showMessage } = useMessageApi();
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isValid }
-  } = useForm<IShippingInfoForm>({
-    mode: "onChange",
-    defaultValues: shippingInfo ? shippingInfoToForm(shippingInfo) : undefined
-  });
-  const watchSelectAddress = watch("addresses");
+  const [multiEntrega, setMultiEntrega] = useState(false);
+  const [entregas, setEntregas] = useState<IShippingInfo[]>([]);
 
-  useEffect(() => {
-    // Verificar si se seleccionó "Nueva dirección"
-    if (watchSelectAddress?.value === NEW_ADDRESS_OPTION.value) {
-      setIsNewAddress(true);
-      // Limpiar los campos para permitir entrada manual
-      setValue("city", { label: "", value: "" });
-      setValue("address", "");
-    } else if (watchSelectAddress) {
-      setIsNewAddress(false);
-      // Buscar la dirección seleccionada en el array de direcciones
-      const selectedAddress = addresses.find(
-        (address) => address.address === watchSelectAddress.label
-      );
-      if (selectedAddress) {
-        setValue("city", {
-          label: selectedAddress.city,
-          value: selectedAddress.city
-        });
-        setValue("address", selectedAddress.address);
-      }
-    }
-  }, [watchSelectAddress, addresses, setValue]);
-
-  // when mounting
-  useEffect(() => {
-    if (!client) return;
-    setValue("email", client.email);
-    const fetchAdresses = async () => {
-      const response = await getAdressesAndNumber(client.id);
-      setAddresses(response.otherAddresses);
-      if (response.phone) {
-        setValue("phone", response.phone);
-      }
-    };
-    fetchAdresses();
-  }, []);
-
-  const handleGoBack = () => {
-    setCheckingOut(false);
-  };
-
-  const handleRadioClick = (value: IDiscountPackageAvailable) => {
-    if (selectedDiscount === value) setSelectedDiscount(undefined);
-    else setSelectedDiscount(value);
-  };
-
+  const [loadingFinish, setLoadingFinish] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [isElectronicBillingModalOpen, setIsElectronicBillingModalOpen] = useState(false);
+  const [showPaymentSupportView, setShowPaymentSupportView] = useState(false);
   const [showWompiModal, setShowWompiModal] = useState(false);
+  const [selectedPaymentSupport, setSelectedPaymentSupport] = useState<File[]>([]);
 
-  const handleWompiClose = async (transactionResult?: any) => {
-    setShowWompiModal(false); // cerramos modal
+  const [isCrossSellingConfirmOpen, setIsCrossSellingConfirmOpen] = useState(false);
+  const [isPurchaseOrderModalOpen, setIsPurchaseOrderModalOpen] = useState(false);
+  const [purchaseOrderNumber, setPurchaseOrderNumber] = useState("");
+  const [purchaseOrderFile, setPurchaseOrderFile] = useState<File | undefined>();
 
-    if (!pendingFormData) return;
+  // Conserva los uuids generados previamente para reutilizarlos cuando
+  // se revalida el descuento (mismo sku + misma quantity => mismo uuid),
+  // de modo que el backend pueda correlacionar el producto entre revalidaciones.
+  const previousItemUuidsRef = useRef<Map<string, string>>(new Map());
 
-    if (transactionResult?.transaction?.status === "APPROVED") {
-      await processOrderCreation(pendingFormData);
-    } else {
-      showMessage("info", "Pago no completado, orden no generada");
-    }
-
-    setPendingFormData(null); // limpiamos después de procesar
-  };
-
-  const onSubmitSaveDraft = async (data: IShippingInfoForm) => {
-    setLoading(true);
-    router.prefetch("/comercio");
-    const createOrderModelData = {
-      shipping_information: {
-        address: data.address,
-        city: data.city.label,
-        dispatch_address: data.address,
-        email: data.email,
-        phone_number: `${data.indicative}${data.phone}`,
-        comments: data.comment,
-        id: data.addresses.value
-      },
-      order_summary: confirmOrderData
+  useEffect(() => {
+    const fetchTotalValues = async () => {
+      if (selectedCategories.length === 0) return;
+      const products = selectedCategories
+        .flatMap((category) => category.products)
+        .map((product) => ({
+          product_sku: product.SKU,
+          quantity: product.quantity
+        }));
+      // promotion_applyed se calcula SOLO con los bonificados comunes
+      // (bonusOptions). Los "other bonified" (otherBonificated) NO cuentan,
+      // porque no pertenecen al rango activo de la promoción.
+      const promotionApplyed = (bonus?.bonusOptions ?? []).some((opt) =>
+        opt.cards.some((card) => card.items.length > 0)
+      );
+      const payload: IConfirmOrderData = {
+        discount_package: selectedDiscount,
+        order_summary: products,
+        executive_discounts: executiveDiscounts,
+        business_unit: businessUnit,
+        deactivate_cross_selling: !deactivateCrossSelling,
+        ...(bonus?.id !== undefined && { promotion_id: bonus.id }),
+        promotion_applyed: promotionApplyed
+      };
+      try {
+        const response = await confirmOrder(projectId, client?.id || "", payload);
+        if (response.status === 200) {
+          response?.data?.discounts?.discountItems?.forEach((item) => {
+            const key = `${item.product_sku}::${item.quantity}`;
+            const existing = previousItemUuidsRef.current.get(key);
+            const item_uuid = existing ?? generateShortUuid();
+            previousItemUuidsRef.current.set(key, item_uuid);
+            item.item_uuid = item_uuid;
+          });
+          setConfirmOrderData(response.data);
+        }
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error("Error confirmando orden", error.message);
+        } else {
+          console.error("Unexpected error", error);
+        }
+      }
     };
 
-    if (!client) return;
+    const timeOut = setTimeout(() => {
+      fetchTotalValues();
+    }, 500);
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [selectedCategories, selectedDiscount, executiveDiscounts, deactivateCrossSelling]);
 
+  const cantidadesAsignadas = (sku: string) =>
+    entregas.reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+
+  const cantidadesAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas.filter((e) => e.id !== excludeId).reduce((s, e) => s + (e.cantidades[sku] ?? 0), 0);
+
+  const bonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.bonusCantidades[sku] ?? 0), 0);
+
+  const otherBonusAsignadasExcluyendo = (sku: string, excludeId: string | null) =>
+    entregas
+      .filter((e) => e.id !== excludeId)
+      .reduce((s, e) => s + (e.otherBonusCantidades[sku] ?? 0), 0);
+
+  const buildOrderPayload = (isElectronicInvoicing: number): ICreateOrderData => {
+    // 1) Para cada línea de order_summary.products, reutiliza el uuid previo
+    //    si existe (mismo sku + quantity) o genera uno nuevo. Esto preserva
+    //    la correlación cuando se revalida el descuento (override o
+    //    desactivación de cross-selling).
+    const summaryProducts = (confirmOrderData?.products ?? []).map((p) => {
+      const key = `${p.product_sku}::${p.quantity}`;
+      const existing = previousItemUuidsRef.current.get(key);
+      const item_uuid = existing ?? generateShortUuid();
+      previousItemUuidsRef.current.set(key, item_uuid);
+      return { ...p, item_uuid };
+    });
+
+    // 2) Mapa de lookup por (sku + quantity) para inyectar el mismo uuid
+    //    en discounts.discountItems y en order_split_details[*].products.
+    const uuidByKey = new Map<string, string>();
+    summaryProducts.forEach((p) => {
+      if (p.item_uuid) uuidByKey.set(`${p.product_sku}::${p.quantity}`, p.item_uuid);
+    });
+
+    // 3) Inyecta el mismo uuid en order_summary.discounts.discountItems
+    //    (mismo source que order_split_details[*].products).
+    const summaryDiscountItems = (confirmOrderData?.discounts?.discountItems ?? []).map((p) => {
+      const key = `${p.product_sku}::${p.quantity}`;
+      const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
+      return { ...p, item_uuid };
+    });
+
+    // 4) Clona order_split_details inyectando item_uuid en cada producto del
+    //    split y el # de orden de compra, que aplica a todos los splits.
+    const cleanedPurchaseOrderNumber = purchaseOrderNumber.trim();
+    const splitDetails = order_split_details.map((split) => ({
+      ...split,
+      products: split.products.map((p) => {
+        const key = `${p.product_sku}::${p.quantity}`;
+        const item_uuid = uuidByKey.get(key) ?? p.item_uuid ?? generateShortUuid();
+        return { ...p, item_uuid };
+      }),
+      ...(cleanedPurchaseOrderNumber ? { marketplace_number: cleanedPurchaseOrderNumber } : {})
+    }));
+
+    const orderSummary: IOrderSummaryPayload = {
+      ...confirmOrderData,
+      products: summaryProducts,
+      discounts: {
+        ...confirmOrderData.discounts,
+        discountItems: summaryDiscountItems
+      },
+      discount_package: selectedDiscount as IDiscountPackageAvailable,
+      executive_discounts: executiveDiscounts,
+      deactivate_cross_selling: !deactivateCrossSelling,
+      client: client,
+      business_unit: businessUnit
+    };
+
+    // El range_promotion_id es el id del rango activo
+    // (promotion.active_range.range_id) del que provienen los
+    // bonificados comunes (bonusOptions). Los "other bonified"
+    // (otherBonificated) no pertenecen a un rango, así que nunca
+    // son fuente de este id; solo usamos bonusOptions para detectar
+    // si aplica enviarlo.
+    const hasCommonBonusProducts = (bonus?.bonusOptions ?? []).some((opt) =>
+      opt.cards.some((card) => card.items.length > 0)
+    );
+    const activeRangeId = confirmOrderData?.promotion?.active_range?.range_id;
+
+    return {
+      order_summary: orderSummary,
+      is_electronic_invoicing: isElectronicInvoicing,
+      order_split_details: splitDetails,
+      promotion_id: hasCommonBonusProducts && activeRangeId && bonus?.id ? bonus?.id : undefined,
+      nit_id: channelCode,
+      draft_id: draftInfo?.id,
+      // business_unit solo se envía cuando el usuario eligió un canal
+      // (client_bu[n].bu_name). Es opcional y solo aplica a marketplace.
+      ...(businessUnit ? { business_unit: businessUnit } : {}),
+      ...(hasCommonBonusProducts && activeRangeId ? { range_promotion_id: activeRangeId } : {})
+    };
+  };
+
+  const processOrderCreation = async (isElectronic: number) => {
     try {
-      const response = (await createDraft(
+      setLoadingFinish(true);
+      if (!client?.id) {
+        showMessage("error", "Cliente no encontrado");
+        return;
+      }
+      const payload = buildOrderPayload(isElectronic);
+
+      const response = await createOrder(
         projectId,
         client.id,
-        createOrderModelData,
-        showMessage
-      )) as GenericResponse<{ id_order: number }>;
-
+        payload,
+        showMessage,
+        selectedPaymentSupport,
+        purchaseOrderFile
+      );
       if (response.status === 200) {
-        router.push(`/comercio`);
+        const queryParams = [];
+        if (response.data?.notificationId) {
+          queryParams.push(`notification=${response.data.notificationId}`);
+        }
+        const queryParamsString = queryParams.join("&");
+
+        const orders = response.data?.orders ?? [];
+        if (orders.length === 0) {
+          throw new Error("No se pudo obtener la orden creada");
+        }
+
+        const [firstOrder, ...restOrders] = orders;
+
+        restOrders.forEach((o) => {
+          const extraUrl = `/comercio/pedidoConfirmado/${o.orderId}`;
+          window.open(extraUrl, "_blank", "noopener,noreferrer");
+        });
+
+        const firstUrl = `/comercio/pedidoConfirmado/${firstOrder.orderId}${
+          queryParamsString ? `?${queryParamsString}` : ""
+        }`;
+        router.prefetch(firstUrl);
+        router.push(firstUrl);
       }
     } catch (error) {
-      showMessage("error", "Error creating draft");
+      console.error(error);
+      if (error instanceof ApiError) {
+        showMessage("error", error.message || "Error al crear la orden");
+        if (error.status === 400 && Array.isArray(error.data)) {
+          error.data.forEach((err: { msg?: string }) => {
+            if (err.msg) showMessage("error", err.msg);
+          });
+        }
+      } else {
+        showMessage("error", "Error al crear la orden");
+      }
+    } finally {
+      setLoadingFinish(false);
     }
-    setLoading(false);
   };
 
-  // Función helper para procesar la creación de la orden
-  const processOrderCreation = async (data: IShippingInfoForm) => {
-    setLoading(true);
-
-    if (!client) {
-      showMessage("error", "Cliente no encontrado");
-      setLoading(false);
-      return;
-    }
-
-    const indicative = data.indicative.label.split(" ")[0];
-    const createOrderModelData = {
-      shipping_information: {
-        address: data.address,
-        city: data.city.label,
-        dispatch_address: data.address,
-        email: data.email,
-        phone_number: `${indicative}${data.phone}`,
-        comments: data.comment,
-        // Solo incluir id_address si NO es una nueva dirección
-        ...(data.addresses.value !== NEW_ADDRESS_OPTION.value && {
-          id: data.addresses.value
-        })
-      },
-      order_summary: confirmOrderData,
-      is_electronic_invoicing: data.isElectronicInvoicing ?? 0
-    };
-
-    if (!!draftInfo?.id || (!!draftInfo.client_name && draftInfo.id !== undefined)) {
-      const response = (await createOrderFromDraft(
-        projectId,
-        client.id,
-        draftInfo.id,
-        createOrderModelData,
-        showMessage
-      )) as GenericResponse<{ id_order: number }>;
-
-      if (response.status === 200) {
-        const url = `/comercio/pedidoConfirmado/${draftInfo.id}`;
-        router.prefetch(url);
-        router.push(url);
-      }
-      setLoading(false);
-      return;
-    }
-
-    const response = await createOrder(projectId, client.id, createOrderModelData, showMessage);
-    if (response.status === 200) {
-      const queryParams = [];
-      if (!response.data?.notificationId) {
-        queryParams.push(`notification=${response.data.id_order}`);
-      }
-      const queryParamsString = queryParams.join("&");
-      const url = `/comercio/pedidoConfirmado/${response.data.id_order}${queryParams.length > 0 ? `?${queryParamsString}` : ""}`;
-      router.prefetch(url);
-      router.push(url);
-    }
-
-    setLoading(false);
-  };
-
-  const onSubmitFinishOrder = async (data: IShippingInfoForm) => {
-    if (confirmOrderData.total <= 0) {
-      showMessage("error", "El total no es valido");
+  const continueFinishOrder = async () => {
+    if (client.payment_type === 2) {
+      setShowPaymentSupportView(true);
       return;
     }
 
     if (CETAPHIL_PROJECT_ID === projectId && client.payment_type === 3) {
-      setPendingFormData(data);
       setShowWompiModal(true);
       return;
     }
 
     if (CETAPHIL_PROJECT_ID === projectId) {
-      setPendingFormData(data);
       setIsElectronicBillingModalOpen(true);
       return;
     }
 
-    await processOrderCreation(data);
+    await processOrderCreation(0);
+  };
+
+  const handleFinishOrder = async () => {
+    if (!confirmOrderData?.total || confirmOrderData.total <= 0) {
+      showMessage("error", "El total no es válido");
+      return;
+    }
+    if (!order_split_details?.length) {
+      showMessage("error", "Faltan datos de envío");
+      return;
+    }
+
+    // `deactivateCrossSelling === true` significa que el checkbox de
+    // cross-selling está chequeado (el payload envía su negación).
+    const hasCrossSellingChecked =
+      !!confirmOrderData?.discounts?.secondaryDiscount && deactivateCrossSelling;
+    if (hasCrossSellingChecked) {
+      setIsCrossSellingConfirmOpen(true);
+      return;
+    }
+
+    await continueFinishOrder();
+  };
+
+  const handleCrossSellingConfirmOk = async () => {
+    setIsCrossSellingConfirmOpen(false);
+    await continueFinishOrder();
+  };
+
+  const handleCrossSellingConfirmCancel = () => {
+    setIsCrossSellingConfirmOpen(false);
+  };
+
+  const handleWompiClose = async (transactionResult?: any) => {
+    setShowWompiModal(false);
+    if (transactionResult?.transaction?.status === "APPROVED") {
+      setIsElectronicBillingModalOpen(true);
+    } else {
+      showMessage("info", "Pago no completado, orden no generada");
+    }
   };
 
   const handleElectronicBillingClose = async (isElectronic?: boolean) => {
-    if (!pendingFormData) return;
-
-    // Agregamos el campo para saber si el usuario eligió Sí o No
-    const formDataWithElectronic = {
-      ...pendingFormData,
-      isElectronicInvoicing: isElectronic ? 1 : 0
-    };
-
-    await processOrderCreation(formDataWithElectronic);
+    if (isElectronic === undefined) {
+      setIsElectronicBillingModalOpen(false);
+      return;
+    }
     setIsElectronicBillingModalOpen(false);
-    setPendingFormData(null);
+    await processOrderCreation(isElectronic ? 1 : 0);
   };
 
-  // Preparar opciones del select con "Nueva dirección" al principio
-  const addressOptions = [
-    NEW_ADDRESS_OPTION,
-    ...addresses.map((address) => ({
-      label: address.address,
-      value: address.id
-    }))
-  ];
+  const handlePaymentSupportSubmit = async () => {
+    if (selectedPaymentSupport.length === 0) {
+      showMessage("error", "Por favor, adjunta el soporte de pago");
+      return;
+    }
+
+    if (CETAPHIL_PROJECT_ID === projectId) {
+      setShowPaymentSupportView(false);
+      setIsElectronicBillingModalOpen(true);
+      return;
+    }
+
+    setShowPaymentSupportView(false);
+    await processOrderCreation(0);
+  };
+
+  const handlePaymentSupportCancel = () => {
+    setShowPaymentSupportView(false);
+    setSelectedPaymentSupport([]);
+  };
+
+  const handleDraftOrder = async () => {
+    if (!client?.id) return;
+    if (!order_split_details?.length) {
+      showMessage("error", "Faltan datos de envío");
+      return;
+    }
+    setLoadingDraft(true);
+    router.prefetch("/comercio");
+    try {
+      const payload = buildOrderPayload(0);
+      const response = (await createDraft(
+        projectId,
+        client.id,
+        payload,
+        showMessage
+      )) as GenericResponse<{ id_order: number }>;
+
+      if (response.status === 200) {
+        router.push("/comercio");
+      }
+    } catch {
+      showMessage("error", "Error creating draft");
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
+
+  const wompiPrimaryShipping = order_split_details?.[0]?.shipping_information;
+  const wompiPhoneRaw = wompiPrimaryShipping?.phone_number ?? "";
+  const wompiPhoneMatch = wompiPhoneRaw.match(/^(\+\d{1,3})(\d+)$/);
+  const wompiIndicative = wompiPhoneMatch ? wompiPhoneMatch[1] : "+57";
+  const wompiPhone = wompiPhoneMatch ? wompiPhoneMatch[2] : wompiPhoneRaw;
 
   return (
-    <div className={styles.checkoutContainer}>
-      <Button
-        type="text"
-        size="large"
-        className={styles.buttonGoBack}
-        icon={<CaretLeft size={"1.3rem"} />}
-        onClick={handleGoBack}
-      >
-        Volver
-      </Button>
-      <h3 className={styles.title}>Confirma datos de envío</h3>
+    <div className="flex h-full gap-6 bg-[#F7F7F7] overflow-hidden">
+      <ProductsDetailsAndDiscounts
+        multiEntrega={multiEntrega}
+        cantidadesAsignadas={cantidadesAsignadas}
+      />
+      <OrderShipmentConfirm
+        multiEntrega={multiEntrega}
+        setMultiEntrega={setMultiEntrega}
+        entregas={entregas}
+        setEntregas={setEntregas}
+        cantidadesAsignadasExcluyendo={cantidadesAsignadasExcluyendo}
+        bonusAsignadasExcluyendo={bonusAsignadasExcluyendo}
+        otherBonusAsignadasExcluyendo={otherBonusAsignadasExcluyendo}
+        onConfirm={handleFinishOrder}
+        onDraft={handleDraftOrder}
+        loadingFinish={loadingFinish}
+        loadingDraft={loadingDraft}
+        purchaseOrderNumber={purchaseOrderNumber}
+        purchaseOrderFile={purchaseOrderFile}
+        onOpenPurchaseOrder={() => setIsPurchaseOrderModalOpen(true)}
+        onClearPurchaseOrder={() => {
+          setPurchaseOrderNumber("");
+          setPurchaseOrderFile(undefined);
+        }}
+      />
 
-      <div className={styles.checkoutContainer__content}>
-        <div className={styles.shippingInfo}>
-          <Controller
-            name="addresses"
-            control={control}
-            rules={{ required: true, minLength: 1 }}
-            render={({ field }) => (
-              <GeneralSelect
-                errors={errors.addresses}
-                field={field}
-                title="Direcciones"
-                placeholder="Seleccione una dirección"
-                options={addressOptions}
-                customStyleContainer={{ gridColumn: "1 / span 2" }}
-                autoSelectFirst={true}
-              />
-            )}
-          />
-          <Controller
-            name="city"
-            control={control}
-            rules={
-              isNewAddress
-                ? {
-                    required: "La ciudad es obligatoria",
-                    minLength: {
-                      value: 2,
-                      message: "La ciudad debe tener al menos 2 caracteres"
-                    }
-                  }
-                : undefined
-            }
-            render={({ field }) => (
-              <SelectLocations errors={errors?.city} field={field} disabled={!isNewAddress} />
-            )}
-          />
-          <InputForm
-            readOnly={!isNewAddress}
-            titleInput="Dirección de despacho"
-            control={control}
-            nameInput="address"
-            error={errors.address}
-            validationRules={
-              isNewAddress
-                ? {
-                    required: "La dirección es obligatoria",
-                    minLength: {
-                      value: 5,
-                      message: "La dirección debe tener al menos 5 caracteres"
-                    }
-                  }
-                : undefined
-            }
-          />
-          <InputForm titleInput="Email" control={control} nameInput="email" error={errors.email} />
-          <Flex gap={"0.5rem"} align="flex-start">
-            <Flex vertical>
-              <p className={styles.inputLabel}>Indicativo</p>
+      <ModalPurchaseOrderInfo
+        isOpen={isPurchaseOrderModalOpen}
+        onCancel={() => setIsPurchaseOrderModalOpen(false)}
+        onOk={(number, file) => {
+          setPurchaseOrderNumber(number);
+          setPurchaseOrderFile(file);
+          setIsPurchaseOrderModalOpen(false);
+        }}
+        initialPurchaseOrderNumber={purchaseOrderNumber}
+        initialFile={purchaseOrderFile}
+        isNumberRequired={requiresPurchaseOrder(businessUnit)}
+      />
 
-              <Controller
-                name="indicative"
-                control={control}
-                rules={{ required: "El indicativo es obligatorio" }}
-                render={({ field }) => (
-                  <SelectContactIndicative
-                    errors={errors.indicative}
-                    field={field}
-                    readOnly={false}
-                    className={styles.selectIndicative}
-                    isColombia
-                  />
-                )}
-              />
-            </Flex>
-            <InputForm
-              titleInput="Teléfono de contacto"
-              control={control}
-              nameInput="phone"
-              error={errors.phone}
-              changeInterceptor={(value) => {
-                // Eliminar caracteres no numéricos
-                const numericValue = value.replace(/\D/g, "");
-                // Limitar a 10 dígitos
-                const truncatedValue = numericValue.slice(0, 10);
-                // Actualizar el valor en el formulario
-                setValue("phone", truncatedValue);
-              }}
-              validationRules={{
-                required: "El teléfono es obligatorio",
-                pattern: {
-                  value: /^\d{10}$/,
-                  message: "El teléfono debe tener exactamente 10 dígitos"
-                }
-              }}
-              customStyle={{ width: "100%" }}
-            />
-          </Flex>
-          <Controller
-            name="comment"
-            control={control}
-            render={({ field }) => (
-              <div className={styles.textArea}>
-                <p className={styles.textArea__label}>Observaciones</p>
-                <textarea
-                  {...field}
-                  placeholder="Ingresar un comentario"
-                  style={errors.comment ? { borderColor: "red" } : {}}
-                  maxLength={35}
-                />
-              </div>
-            )}
-          />
-        </div>
-
-        <div className={styles.discounts}>
-          <h4 className={styles.discounts__title}>Seleccionar descuento a aplicar</h4>
-          <div className={styles.radioGroup}>
-            {discounts.map((discountPackage) => (
-              <InputRadioRightSide
-                key={discountPackage.id}
-                value={discountPackage.id}
-                customStyles={{ border: "2px solid #e0e0e0", borderRadius: "8px", padding: "1rem" }}
-                onClick={() => handleRadioClick(discountPackage)}
-                checked={
-                  selectedDiscount &&
-                  selectedDiscount.id === discountPackage.id &&
-                  selectedDiscount.idAnnualDiscount === discountPackage.idAnnualDiscount
-                }
-              >
-                <div className={styles.radioGroup__label}>
-                  <p>{discountPackage.name}</p>
-                </div>
-              </InputRadioRightSide>
-            ))}
-          </div>
-        </div>
-
-        <Flex gap={"1rem"}>
-          <AlternativeBlackButton
-            onClick={handleSubmit(onSubmitSaveDraft)}
-            fullWidth
-            loading={loading}
-            disabled={!!draftInfo?.id || !!draftInfo.client_name}
-          >
-            Guardar borrador
-          </AlternativeBlackButton>
-          <PrincipalButton
-            onClick={handleSubmit(onSubmitFinishOrder)}
-            fullWidth
-            disabled={!isValid}
-            loading={loading}
-          >
-            Finalizar pedido
-          </PrincipalButton>
-        </Flex>
-      </div>
+      <ModalConfirmAction
+        isOpen={isCrossSellingConfirmOpen}
+        onClose={handleCrossSellingConfirmCancel}
+        onCancel={handleCrossSellingConfirmCancel}
+        onOk={handleCrossSellingConfirmOk}
+        title="¿Confirmas continuar el pedido con crosselling?"
+        okText="Sí, continuar"
+        cancelText="Cancelar"
+      />
 
       <ModalConfirmAction
         isOpen={isElectronicBillingModalOpen}
-        onClose={() => handleElectronicBillingClose(undefined)} // Cierra sin acción
-        onOk={() => handleElectronicBillingClose(true)} // “Sí, necesito”
-        onCancel={() => handleElectronicBillingClose(false)} // “No”
+        onClose={() => handleElectronicBillingClose(undefined)}
+        onOk={() => handleElectronicBillingClose(true)}
+        onCancel={() => handleElectronicBillingClose(false)}
         title="¿Necesita facturación electrónica?"
         okText="Sí, necesito"
         cancelText="No"
+        cancelLoading={loadingFinish}
+        okLoading={loadingFinish}
       />
 
-      {showWompiModal && pendingFormData && (
-        <>
-          <WompiModal
-            visible={showWompiModal}
-            onClose={handleWompiClose}
-            client={{
-              name: client.name,
-              email: pendingFormData.email || client.email,
-              phone: pendingFormData.phone || "",
-              indicative: {
-                value: pendingFormData.indicative?.label || "+57"
-              }
-            }}
-            amountInCents={(confirmOrderData.total || 0) * 100}
-            orderId={draftInfo?.id?.toString() || Date.now().toString()}
-          />
-        </>
+      {showWompiModal && (
+        <WompiModal
+          visible={showWompiModal}
+          onClose={handleWompiClose}
+          client={{
+            name: client.name,
+            email: wompiPrimaryShipping?.email || client.email,
+            phone: wompiPhone,
+            indicative: {
+              value: wompiIndicative
+            }
+          }}
+          amountInCents={(confirmOrderData.total || 0) * 100}
+          orderId={draftInfo?.id?.toString() || Date.now().toString()}
+        />
       )}
+
+      <ModalAttachEvidence
+        selectedEvidence={selectedPaymentSupport}
+        setSelectedEvidence={setSelectedPaymentSupport}
+        handleAttachEvidence={handlePaymentSupportSubmit}
+        isOpen={showPaymentSupportView}
+        handleCancel={handlePaymentSupportCancel}
+        customTexts={{
+          title: "Cargar soporte de pago",
+          description: "Cliente de contado, adjunta la evidencia del pago",
+          acceptButtonText: "Enviar soporte",
+          cancelButtonText: "Cancelar"
+        }}
+        multipleFiles={true}
+        noComment={true}
+        noDescription={true}
+        isMandatory={{ evidence: true }}
+        confirmDisabled={selectedPaymentSupport.length === 0}
+        loading={loadingFinish}
+      />
     </div>
   );
-};
-
-export default CreateOrderCheckout;
-
-const shippingInfoToForm = (shippingInfo: IShippingInformation) => {
-  // Extraer el indicativo y el número del phone_number
-  const phoneMatch = shippingInfo.phone_number?.match(/^(\+\d{1,3})(\d+)$/);
-  const indicative = phoneMatch ? phoneMatch[1] : "+57"; // Por defecto Colombia
-  const phoneNumber = phoneMatch ? phoneMatch[2] : shippingInfo.phone_number;
-
-  return {
-    addresses: {
-      label: shippingInfo.address,
-      value: shippingInfo.address
-    },
-    city: {
-      label: shippingInfo.city,
-      value: shippingInfo.city
-    },
-    address: shippingInfo.address,
-    email: shippingInfo.email,
-    indicative: {
-      label: indicative,
-      value: indicative
-    },
-    phone: phoneNumber || "",
-    comment: shippingInfo.comments
-  };
-};
+}

@@ -1,0 +1,92 @@
+// Styles the AntD Select so it blends with the neighboring native tailwind
+// inputs (F7F7F7 background, #DDDDDD border, rounded-lg) in the checkout /
+// new-address forms. Heights are keyed to the `size` prop so the picker lines
+// up with the adjacent Ciudad / Dirección fields.
+.citiesSelect {
+  width: 100%;
+
+  // Every text in the closed box (value / placeholder / search input) at 12px.
+  &.ant-select,
+  .ant-select-selector,
+  .ant-select-selection-item,
+  .ant-select-selection-placeholder,
+  .ant-select-selection-search-input {
+    font-size: 12px !important;
+  }
+
+  &.ant-select .ant-select-selector {
+    background-color: #f7f7f7 !important;
+    border: 1px solid #dddddd !important;
+    border-radius: 0.5rem !important;
+    color: #141414;
+  }
+
+  &.ant-select:hover:not(.ant-select-disabled) .ant-select-selector,
+  &.ant-select-focused:not(.ant-select-disabled) .ant-select-selector {
+    border-color: #141414 !important;
+    box-shadow: none !important;
+  }
+
+  .ant-select-selection-placeholder {
+    color: #999999;
+  }
+
+  &.ant-select-disabled .ant-select-selector {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  // Middle (default) — line up with the text-sm native inputs (~40px).
+  &.ant-select-single:not(.ant-select-sm):not(.ant-select-lg) {
+    .ant-select-selector {
+      height: 40px !important;
+      padding: 0 11px !important;
+    }
+    .ant-select-selection-item,
+    .ant-select-selection-placeholder {
+      line-height: 38px !important;
+    }
+    .ant-select-selection-search-input {
+      height: 38px !important;
+    }
+  }
+
+  // Small — the compact multi-delivery modal form (~34px).
+  &.ant-select-sm {
+    .ant-select-selector {
+      height: 34px !important;
+      padding: 0 8px !important;
+    }
+    .ant-select-selection-item,
+    .ant-select-selection-placeholder {
+      line-height: 32px !important;
+    }
+    .ant-select-selection-search-input {
+      height: 32px !important;
+    }
+  }
+}
+
+// The dropdown renders in a portal (outside .citiesSelect), so its options
+// are targeted through popupClassName. Keep every option at 12px too.
+.citiesSelectPopup {
+  .ant-select-item,
+  .ant-select-item-option-content,
+  .ant-select-item-empty {
+    font-size: 12px !important;
+  }
+}
+
+// Subtle hover for the "Add new city" pseudo-option appended at the bottom
+// of the dropdown when the search text doesn't match any existing city.
+.citiesSelect__add {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #141414;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: #f7f7f7;
+  }
+}

@@ -1,11 +1,8 @@
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
-import { Button, Col, Flex, Row, Typography } from "antd";
+import { Button, Col, Flex, Row } from "antd";
 import { Trash } from "phosphor-react";
-import { Control, FieldErrors, UseFormRegister, useForm } from "react-hook-form";
+import { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { DiscountSchema } from "../../../resolvers/generalResolver";
-import { useEffect } from "react";
-
-const { Text } = Typography;
 
 type RangesRowProps = {
   id: number;

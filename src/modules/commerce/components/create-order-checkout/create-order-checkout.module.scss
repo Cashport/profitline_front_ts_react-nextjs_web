@@ -54,13 +54,19 @@
                     margin-bottom: 0.25rem;
                 }
 
+                &__hint {
+                    font-size: 0.75rem;
+                    color: $gray;
+                    margin-top: 0.25rem;
+                }
+
                 textarea {
                     background-color: $background;
                     border: none;
                     border-radius: 0.25rem;
                     padding: 0.875rem 1rem;
                     width: 100%;
-                    min-height: 6rem;
+                    height: 3.25rem;
                     resize: none;
                     font-family: inherit;
                     font-size: 1rem;
@@ -98,6 +104,11 @@
                 }
             }
         }
+
+        .actionButtons {
+            display: flex;
+            gap: 1rem;
+        }
     }
 
     .selectIndicative {
@@ -111,5 +122,30 @@
         font-weight: 600;
         line-height: normal;
         margin-bottom: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .checkoutContainer {
+        &__content {
+            .shippingInfo {
+                grid-template-columns: 1fr !important;
+
+                // Forzar todos los elementos a 1 columna
+                > * {
+                    grid-column: 1 / span 1 !important;
+                }
+            }
+
+            .discounts {
+                .radioGroup {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .actionButtons {
+                flex-direction: column;
+            }
+        }
     }
 }

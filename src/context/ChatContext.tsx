@@ -219,7 +219,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Optimized ticket handler
   // eslint-disable-next-line no-unused-vars
-  const handleNewTicket = useCallback((data: any) => {
+  const handleNewTicket = useCallback((_data: any) => {
     setStats((prev) => ({ ...prev, activeTickets: prev.activeTickets + 1 }));
   }, []);
 

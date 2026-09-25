@@ -21,7 +21,6 @@ import {
   RegistrationDialog,
   type RegistrationFormData
 } from "@/modules/cetaphil/components/registration-dialog";
-
 import "@/modules/cetaphil/styles/cetaphilStyles.css";
 import {
   acceptInvitation,
