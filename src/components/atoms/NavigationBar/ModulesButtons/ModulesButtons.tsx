@@ -303,7 +303,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
         </Link>
       )}
       {/* Mass Communications */}
-      {checkUserViewPermissions(project, "MassCommunications") && (
+      {/* {checkUserViewPermissions(project, "MassCommunications") && (
         <Link href="/mass-communications" passHref legacyBehavior>
           <Button
             type="primary"
@@ -315,7 +315,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/mass-communications")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Cuentas Médicas */}
       {checkUserViewPermissions(project, "MedicalAccounts") && (
