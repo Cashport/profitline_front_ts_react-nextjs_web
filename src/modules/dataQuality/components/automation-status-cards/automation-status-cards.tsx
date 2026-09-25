@@ -7,7 +7,7 @@ import { cn } from "@/utils/utils";
 import { BOT_STATUS_META } from "../../constants";
 import { BotStatus, BotStatusFilter, IBotsSummary } from "../../types/automations";
 
-const STATUS_KEYS: BotStatus[] = ["success", "error", "running"];
+const STATUS_KEYS: BotStatus[] = ["EXITOSO", "FALLIDO", "EN_EJECUCION"];
 
 interface AutomationStatusCardsProps {
   summary: IBotsSummary;
@@ -83,7 +83,7 @@ export function AutomationStatusCards({
                 }}
               >
                 <Icon
-                  className={cn("h-3.5 w-3.5", key === "running" && "animate-spin")}
+                  className={cn("h-3.5 w-3.5", key === "EN_EJECUCION" && "animate-spin")}
                   strokeWidth={2.5}
                 />
               </span>
@@ -91,7 +91,7 @@ export function AutomationStatusCards({
             <span
               className={cn(
                 "block truncate text-[1.3rem] font-medium xl:text-[1.625rem]",
-                key === "error" && !isActive && summary.error > 0 && "text-[#DC2626]"
+                key === "FALLIDO" && !isActive && summary.FALLIDO > 0 && "text-[#DC2626]"
               )}
             >
               {summary[key]}

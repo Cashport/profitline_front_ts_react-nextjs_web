@@ -3,28 +3,30 @@
 import { useMemo } from "react";
 import { Table } from "antd";
 
-import { IBotHealth } from "../../types/automations";
+import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
+
 import { getBotsColumns } from "./columns";
 
 interface BotsTableProps {
-  bots: IBotHealth[];
+  bots: IBotStatusItem[];
   totalBots: number;
-  onViewHistory: (bot: IBotHealth) => void;
-  onRunNow: (bot: IBotHealth) => void;
+  loading?: boolean;
 }
 
-export function BotsTable({ bots, totalBots, onViewHistory, onRunNow }: BotsTableProps) {
-  const columns = useMemo(
-    () => getBotsColumns({ onViewHistory, onRunNow }),
-    [onViewHistory, onRunNow]
-  );
+// La API no trae id: la fila se identifica por cliente, bot, país y tipo de archivo.
+const getBotRowKey = (bot: IBotStatusItem) =>
+  `${bot.cliente}-${bot.bot}-${bot.pais}-${bot.tipo_archivo}`;
+
+export function BotsTable({ bots, totalBots, loading }: BotsTableProps) {
+  const columns = useMemo(() => getBotsColumns(), []);
 
   return (
     <>
-      <Table<IBotHealth>
+      <Table<IBotStatusItem>
         columns={columns}
         dataSource={bots}
-        rowKey="id"
+        rowKey={getBotRowKey}
+        loading={loading}
         pagination={false}
         showSorterTooltip={false}
         size="small"
@@ -32,7 +34,7 @@ export function BotsTable({ bots, totalBots, onViewHistory, onRunNow }: BotsTabl
         scroll={{ x: 100 }}
       />
 
-      <div className="mt-4 text-sm text-gray-500">
+      <div className="my-4 text-sm text-gray-500">
         Mostrando {bots.length} de {totalBots} bots
       </div>
     </>
