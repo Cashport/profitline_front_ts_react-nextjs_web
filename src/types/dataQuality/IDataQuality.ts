@@ -740,4 +740,5 @@ export interface IBotStatusItem {
   estado: "EXITOSO" | "FALLIDO" | "EN_EJECUCION";
   cantidad_ejecuciones: number;
   error: string | null;
+  error_legible?: string | null;
 }
