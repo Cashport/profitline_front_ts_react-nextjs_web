@@ -81,6 +81,8 @@ export interface IWalletMatrixDetailParams {
   status: string;
   /** null → se manda la cadena "null": documentos sin novedad asociada. */
   noveltyId: number | null;
+  /** Grupo de saldos: tipo del grupo (null = "Sin clasificar"). Sin él no filtra. */
+  balanceTypeId?: number | null;
 }
 
 /**
@@ -103,6 +105,12 @@ export const useWalletMatrixDetail = (
       page: String(page),
       limit: String(limit)
     });
+    if (params.balanceTypeId !== undefined) {
+      query.set(
+        "balanceTypeId",
+        params.balanceTypeId === null ? "null" : String(params.balanceTypeId)
+      );
+    }
     pathKey = `/portfolio/matrix/detail?${query}`;
   }
 

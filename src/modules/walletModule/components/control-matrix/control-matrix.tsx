@@ -90,6 +90,10 @@ export default function ControlMatrix({
     ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
     : (totals?.total ?? 0);
 
+  // Vencido del pie: todos los tramos menos corriente (el 0).
+  const vencidoFooter = TRAMOS.slice(1).reduce((a, t) => a + tramoFooter(t.i), 0);
+  const vencidoFooterPct = pct(vencidoFooter, totalFooter);
+
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
   const onCellKeyDown = (e: KeyboardEvent<HTMLTableCellElement>, drill: IWalletDrilldown) => {
     if (e.key !== "Enter" && e.key !== " ") return;
@@ -252,13 +256,12 @@ export default function ControlMatrix({
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                       {fmtM(g.total)}
                     </td>
-                    <td
-                      className={cn(
-                        "px-3 py-2.5 text-right tabular-nums",
-                        vencido > 30 ? "text-rose-600 dark:text-rose-400" : "text-foreground"
-                      )}
-                    >
-                      {vencido.toFixed(0)}%
+                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
+                      {fmtM(g.vencido)}
+                      <span className="text-muted-foreground"> · </span>
+                      <span className={cn(vencido > 30 && "text-rose-600 dark:text-rose-400")}>
+                        {vencido.toFixed(0)}%
+                      </span>
                     </td>
                   </tr>
                 );
@@ -282,7 +285,11 @@ export default function ControlMatrix({
               <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                 {fmtM(totalFooter)}
               </th>
-              <th />
+              <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                {fmtM(vencidoFooter)}
+                <span className="text-muted-foreground"> · </span>
+                {vencidoFooterPct.toFixed(0)}%
+              </th>
             </tr>
           </tfoot>
         </table>
