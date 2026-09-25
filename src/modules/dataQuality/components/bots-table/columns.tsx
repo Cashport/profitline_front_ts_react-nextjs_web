@@ -5,10 +5,11 @@ import { Clock, Eye, Loader2, Package, Play } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/tooltip";
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
-import { formatLocalDateTimeParts } from "@/utils/utils";
+import { cn, formatLocalDateTimeParts } from "@/utils/utils";
 
-import { BOT_FREQUENCY_LABELS } from "../../constants";
+import { BOT_FREQUENCY_LABELS, DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
 import { BotStatusBadge } from "./bot-status-badge";
 
 interface RunTimestampProps {
@@ -25,6 +26,40 @@ function RunTimestamp({ isoDate, emptyLabel }: RunTimestampProps) {
       {date}
       <div className="text-xs text-gray-500">{time}</div>
     </div>
+  );
+}
+
+interface RunErrorProps {
+  error: string | null;
+  readableError?: string | null;
+}
+
+// En la celda va el mensaje legible, o el error crudo si no llegó.
+// El error técnico completo se despliega al pasar el mouse.
+function RunError({ error, readableError }: RunErrorProps) {
+  const summary = readableError || error;
+  if (!summary) return null;
+
+  const summaryText = (
+    <div className="mt-0.5 max-w-58 truncate text-xs text-[#DC2626]">{summary}</div>
+  );
+  if (!error) return summaryText;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{summaryText}</TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="start"
+        className={cn(DARK_TOOLTIP_CONTENT, "max-w-[30rem] space-y-1 rounded-lg px-3 py-2.5")}
+        arrowClassName={DARK_TOOLTIP_ARROW}
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
+          Detalle del error - {summary}
+        </p>
+        <p className="overflow-y-auto whitespace-pre-wrap break-words text-xs">{error}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -77,8 +112,8 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
     render: (_, record: IBotStatusItem) => (
       <>
         <RunTimestamp isoDate={record.ultima_ejecucion} emptyLabel="Sin registro" />
-        {record.estado === "FALLIDO" && record.error && (
-          <div className="mt-0.5 max-w-48 truncate text-xs text-[#DC2626]">{record.error}</div>
+        {record.estado === "FALLIDO" && (
+          <RunError error={record.error} readableError={record.error_legible} />
         )}
       </>
     )
