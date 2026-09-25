@@ -728,3 +728,17 @@ export interface IRegion {
   region_code: string;
   country_count: number;
 }
+
+export interface IBotStatusItem {
+  cliente: string;
+  bot: string;
+  pais: string;
+  tipo_archivo: string;
+  periodicidad: string[];
+  proxima_ejecucion: string | null;
+  ultima_ejecucion: string | null;
+  estado: "EXITOSO" | "FALLIDO" | "EN_EJECUCION";
+  cantidad_ejecuciones: number;
+  error: string | null;
+  error_legible?: string | null;
+}

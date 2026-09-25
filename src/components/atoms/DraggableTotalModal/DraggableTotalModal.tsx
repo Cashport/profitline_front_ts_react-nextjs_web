@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import Draggable, { ControlPosition, DraggableData, DraggableEvent } from "react-draggable";
 import { NewspaperClipping } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
@@ -11,14 +11,21 @@ interface Props {
   itemName: string;
   count: number;
   icon?: ReactNode;
+  initialPosition?: ControlPosition;
 }
 
-export const DraggableTotalModal = ({ totalAmount, itemName, count, icon }: Props) => {
+export const DraggableTotalModal = ({
+  totalAmount,
+  itemName,
+  count,
+  icon,
+  initialPosition
+}: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const draggleRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-  const [defaultPosition, setDefaultPosition] = useState({ x: 0, y: -160 });
+  const [defaultPosition, setDefaultPosition] = useState(initialPosition ?? { x: 0, y: -160 });
 
   const updateDefaultPosition = () => {
     const modalWidth = draggleRef.current?.offsetWidth || 240;

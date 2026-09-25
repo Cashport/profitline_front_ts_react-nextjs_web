@@ -41,6 +41,7 @@ interface ActivePaymentsTabProps {
 }
 
 const STATUS_ORDER = ["Sin identificar", "Pendiente ingreso a SAP", "Identificado", "Pago aplicado"];
+const PAGO_APLICADO_STATUS_ID = 4;
 
 export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
@@ -237,6 +238,14 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 selectedRows.length > 1
               ) {
                 showMessage("info", "Solo puedes seleccionar un pago para esta acción");
+                return;
+              }
+
+              if (
+                selected === 2 &&
+                selectedRows?.some((row) => row.id_status === PAGO_APLICADO_STATUS_ID)
+              ) {
+                showMessage("info", "No puedes asignar cliente a pagos en estado Pago aplicado");
                 return;
               }
 
