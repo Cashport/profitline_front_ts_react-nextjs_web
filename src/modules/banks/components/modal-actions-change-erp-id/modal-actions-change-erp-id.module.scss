@@ -1,0 +1,12 @@
+@import "@/styles/variables";
+
+.comment {
+    :global(.ant-input) {
+        resize: none;
+
+        &:hover,
+        &:focus {
+            background-color: $background;
+        }
+    }
+}

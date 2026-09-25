@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { Flex, message, Modal } from "antd";
-import { CheckCircle, FileArrowDown } from "@phosphor-icons/react";
+import { ArrowsClockwise, CheckCircle, FileArrowDown } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import ModalActionsConfirmCompensation from "../modal-actions-confirm-compensation";
+import ModalActionsChangeErpId from "../modal-actions-change-erp-id";
 import { useAppStore } from "@/lib/store/store";
 import {
   approvePayment,
@@ -30,6 +31,7 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isCompensationOpen, setIsCompensationOpen] = useState(false);
+  const [isChangeErpIdOpen, setIsChangeErpIdOpen] = useState(false);
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
 
@@ -145,6 +147,16 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
     setIsCompensationOpen(true);
   };
 
+  const handleChangeErpIdOpen = () => {
+    if (selectedRows?.length !== 1) {
+      message.warning("Selecciona exactamente un pago");
+      return;
+    }
+
+    onClose();
+    setIsChangeErpIdOpen(true);
+  };
+
   return (
     <>
       <Modal
@@ -175,6 +187,11 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
             title="Confirmar compensación"
           />
           <ButtonGenerateAction
+            onClick={handleChangeErpIdOpen}
+            icon={<ArrowsClockwise size={16} />}
+            title="Cambiar id ERP"
+          />
+          <ButtonGenerateAction
             onClick={handleApproveAssignmentOpen}
             icon={<CheckCircle size={16} />}
             title="Aprobar asignación"
@@ -202,6 +219,12 @@ const ModalActionsWalletPayments = ({ isOpen, onClose, selectedRows, onSuccess }
         isOpen={isCompensationOpen}
         onClose={() => setIsCompensationOpen(false)}
         selectedRow={selectedRows?.[0]}
+        onSuccess={onSuccess}
+      />
+      <ModalActionsChangeErpId
+        isOpen={isChangeErpIdOpen}
+        onClose={() => setIsChangeErpIdOpen(false)}
+        selectedRows={selectedRows}
         onSuccess={onSuccess}
       />
     </>
