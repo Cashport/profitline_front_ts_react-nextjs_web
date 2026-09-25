@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { Flex, Spin } from "antd";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
 import { Sheet, SheetContent } from "@/modules/chat/ui/sheet";
@@ -23,6 +24,7 @@ import {
 import { BalancesTable } from "@/modules/balances/components/BalancesTable/BalancesTable";
 import { BalanceDetailModal } from "@/modules/balances/components/BalanceDetailModal/BalanceDetailModal";
 import { useSaldos } from "@/modules/balances/context/saldos-context";
+import { useSelectedBalances } from "@/modules/balances/hooks/useSelectedBalances";
 
 export function ClientBalancesView() {
   const params = useParams();
@@ -56,6 +58,11 @@ export function ClientBalancesView() {
   const { state, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
     useSaldos();
 
+  const { selectedBalances, totalPending } = useSelectedBalances(
+    balancesData,
+    state.selectedSaldoIds
+  );
+
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
@@ -73,6 +80,13 @@ export function ClientBalancesView() {
 
   return (
     <>
+      {selectedBalances.length > 0 && (
+        <DraggableTotalModal
+          totalAmount={totalPending}
+          itemName="Saldos"
+          count={selectedBalances.length}
+        />
+      )}
       <div className="clientBalancesView">
         <Flex justify="space-between" className="clientStickyHeader">
           <Flex gap={"0.5rem"}>

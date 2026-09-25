@@ -7,6 +7,7 @@ import { Spin } from "antd";
 import { CheckCircle, Clock, XCircle, CircleDot } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 import { ModalBalancesActions } from "../../components/ModalBalancesActions/ModalBalancesActions";
 import Collapse from "@/components/ui/collapse";
 import LabelCollapse from "@/components/ui/label-collapse";
@@ -15,6 +16,7 @@ import { Card, CardContent } from "@/modules/chat/ui/card";
 import { BalanceDetailModal } from "../../components/BalanceDetailModal/BalanceDetailModal";
 import { BalancesTable } from "../../components/BalancesTable/BalancesTable";
 import { useSaldos } from "../../context/saldos-context";
+import { useSelectedBalances } from "../../hooks/useSelectedBalances";
 import { useBalances } from "@/hooks/useBalances";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useFinancialDiscountMotives } from "@/hooks/useFinancialDiscountMotives";
@@ -65,6 +67,11 @@ export function BalancesView() {
   const { state, setFilter, toggleSaldoSelection, selectAllSaldos, deselectSaldos, clearSelection } =
     useSaldos();
 
+  const { selectedBalances, totalPending } = useSelectedBalances(
+    balancesData,
+    state.selectedSaldoIds
+  );
+
   const [selectedSaldoForDetail, setSelectedSaldoForDetail] = useState<IBalanceRow | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
@@ -91,6 +98,14 @@ export function BalancesView() {
   return (
     <>
       <main>
+        {selectedBalances.length > 0 && (
+          <DraggableTotalModal
+            totalAmount={totalPending}
+            itemName="Saldos"
+            count={selectedBalances.length}
+            initialPosition={{ x: 0, y: 0 }}
+          />
+        )}
         <Card className="bg-cashport-white border-0 shadow-sm">
           <CardContent>
             <div className="mb-6 flex items-center justify-between">
