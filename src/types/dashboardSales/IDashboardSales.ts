@@ -107,3 +107,90 @@ export interface IDashboardSalesTreemap {
   period: { start: string; end: string };
 }
 export type IDashboardSalesTreemapResponse = GenericResponse<IDashboardSalesTreemap>;
+
+export interface IDashboardSalesPromotionClient {
+  client_id: string;
+  client_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+}
+export interface IDashboardSalesPromotionItem {
+  promotion_id: number;
+  promotion_name: string;
+  seller_id: number | null;
+  seller_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+  /** Detalle que se muestra al desplegar la fila. */
+  clients: IDashboardSalesPromotionClient[];
+}
+export interface IDashboardSalesPromotions {
+  items: IDashboardSalesPromotionItem[];
+  total: number;
+  totals: { orders: number; units: number; amount: number };
+  period: { start: string; end: string };
+}
+export type IDashboardSalesPromotionsResponse = GenericResponse<IDashboardSalesPromotions>;
+
+export interface IDashboardSalesBackorderClient {
+  client_id: string;
+  client_name: string;
+  orders: number;
+  units: number;
+  amount: number;
+}
+export interface IDashboardSalesBackorderItem {
+  product_id: number;
+  product_name: string;
+  sku: string | null;
+  orders: number;
+  units: number;
+  amount: number;
+  /** Detalle que se muestra al desplegar la fila. */
+  clients: IDashboardSalesBackorderClient[];
+}
+export interface IDashboardSalesBackorder {
+  items: IDashboardSalesBackorderItem[];
+  total: number;
+  /** `orders` no es sumable entre productos: un pedido con varios productos suma en cada fila. */
+  totals: { orders: number; units: number; amount: number };
+  period: { start: string; end: string };
+}
+export type IDashboardSalesBackorderResponse = GenericResponse<IDashboardSalesBackorder>;
+
+export interface IDashboardSalesNegotiation {
+  discount_id: number;
+  client_id: string;
+  client_name: string;
+  negotiation_name: string;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  negotiation: {
+    /** 1: porcentaje, 2: monto. */
+    computation_type: number;
+    min_discount: number | null;
+    max_discount: number | null;
+    /** Listo para mostrar, p. ej. "50%" o "50% - 58%" si varía por producto. */
+    label: string;
+  };
+  avg_month: number;
+  last_month: number;
+  /** Fecha y hora Colombia del último pedido del cliente (yyyy-MM-dd HH:mm:ss). */
+  last_purchase: string | null;
+}
+export interface IDashboardSalesNegotiations {
+  negotiations: IDashboardSalesNegotiation[];
+  /** Ventana usada para el promedio: meses cerrados con historial, máximo 12. */
+  periods: { average_start: string; average_months: number; last_month_start: string };
+  pagination: {
+    page: number;
+    limit: number;
+    total_count: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+}

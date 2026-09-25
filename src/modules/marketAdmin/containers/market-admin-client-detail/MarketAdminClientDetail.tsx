@@ -23,13 +23,15 @@ import {
   updateMarketAdminClientConfig
 } from "@/services/marketAdmin/marketAdmin";
 import { getProductsByProject } from "@/services/products/products";
-import { changeStatus } from "@/services/discount/discount.service";
+import { changeStatus, createDiscount } from "@/services/discount/discount.service";
 import {
   ICreateMarketAdminClientAddressBody,
   IUpdateMarketAdminClientConfigBody,
+  NewClientDiscountData,
   NuevaAsignacionData
 } from "@/types/marketAdmin/IMarketAdmin";
 import { buildManualBonusPayload } from "@/modules/marketAdmin/components/MarketAdminManualBonus/buildManualBonusPayload";
+import { buildClientDiscountPayload } from "@/modules/marketAdmin/components/market-admin-client-detail/buildClientDiscountPayload";
 import PromocionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/PromocionesTab";
 import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/DireccionesTab";
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
@@ -152,6 +154,27 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
       showMessage(
         "error",
         err instanceof Error ? err.message : "Ocurrió un error al crear el bonificado."
+      );
+      throw err;
+    }
+  };
+
+  const createClientDiscount = async (data: NewClientDiscountData) => {
+    if (!cliente) return;
+    try {
+      await createDiscount(
+        {
+          ...buildClientDiscountPayload(data, { nit: cliente.nit, nombre: cliente.client_name }),
+          project_id: projectId
+        },
+        [{ docReference: "Contrato", file: data.file }]
+      );
+      await mutateDescuentos();
+      showMessage("success", "Descuento creado exitosamente.");
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al crear el descuento."
       );
       throw err;
     }
@@ -308,6 +331,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
               descuentos={descuentos}
               isLoadingDescuentos={isLoadingDescuentos}
               onToggleDescuento={toggleDescuento}
+              onCreateDiscount={createClientDiscount}
               bonificados={bonificaciones?.groups ?? []}
               bonificadosTotals={bonificaciones?.totals}
               isLoadingBonificados={isLoadingBonificados}
