@@ -109,7 +109,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )} */}
 
       {/* Notificaciones */}
-      {checkUserViewPermissions(project, "Notificaciones") && (
+      {/* {checkUserViewPermissions(project, "Notificaciones") && (
         <Link href="/notificaciones" passHref legacyBehavior>
           <Button
             type="primary"
@@ -121,7 +121,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/notificaciones")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Marketplace / Comercio */}
       {checkUserViewPermissions(project, "Marketplace") && (
@@ -150,7 +150,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
       )}
 
       {/* Configuración / Settings */}
-      {checkUserViewPermissions(project, "Configuracion") && (
+      {/* {checkUserViewPermissions(project, "Configuracion") && (
         <Link href="/settings" passHref legacyBehavior>
           <Button
             type="primary"
@@ -164,7 +164,7 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             onClick={(e) => handleNavClick(e, "/settings")}
           />
         </Link>
-      )}
+      )} */}
 
       {/* Proveedores */}
       {/* {checkUserViewPermissions(project, "Proveedores") && (
