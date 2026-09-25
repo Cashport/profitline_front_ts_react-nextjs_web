@@ -209,6 +209,11 @@ export interface IWalletGroupDetail {
    * lo agrupa y pierde el valor exacto, que es el que pide /portfolio/matrix/detail.
    */
   statusKey?: string;
+  /**
+   * Tipo de saldo del grupo (null = "Sin clasificar"). Solo en grupos de saldos;
+   * acota /portfolio/matrix/detail a los saldos de ese tipo.
+   */
+  balanceTypeId?: number | null;
   novedad?: IWalletNovedad;
   cliente: { nombre: string; nit: string };
   ejecutivo: IWalletPerson;
