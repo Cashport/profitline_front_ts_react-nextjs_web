@@ -40,6 +40,7 @@ export interface ISingleBank {
   account_number: string;
   ID_ERP: string | null;
   id_erp_compensation: string | null;
+  initial_document: string | null;
 }
 
 export interface IPaymentDetail extends ISingleBank {

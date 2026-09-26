@@ -22,6 +22,7 @@ import ModalActionsUploadEvidence from "../../components/modal-actions-upload-ev
 import ModalActionsAssignClient from "../../components/modal-actions-assign-client";
 import ModalActionsSplitPayment from "../../components/modal-actions-split-payment";
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
+import ModalActionsChangeErpId from "../../components/modal-actions-change-erp-id";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import {
@@ -308,6 +309,11 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
             isOpen={isSelectOpen.selected === 8}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             onOk={handlePaymentUnidentified}
+          />
+          <ModalActionsChangeErpId
+            isOpen={isSelectOpen.selected === 9}
+            onClose={onCloseModal}
+            selectedRows={selectedRows}
           />
         </Flex>
       )}

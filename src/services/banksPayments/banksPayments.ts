@@ -246,6 +246,23 @@ export const confirmERPUpload = async (payload: IConfirmERPUploadPayload) => {
   }
 };
 
+interface IChangePaymentIdERPPayload {
+  payment_id: number;
+  id_erp: string;
+  previous_id_erp?: string;
+  comment?: string;
+}
+
+export const changePaymentIdERP = async (payload: IChangePaymentIdERPPayload) => {
+  try {
+    const response: GenericResponse<any> = await API.put("/bank/payment-erp-document", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el id ERP del pago:", error);
+    throw error;
+  }
+};
+
 export const changeStatusUploadERP = async (paymentids: number[]) => {
   try {
     const response: GenericResponse<any> = await API.post("/bank/set-atemco-status", {
