@@ -10,6 +10,15 @@ export const AGING_BUCKETS = ["corriente", "1-30", "31-60", "61-90", "91-120", "
 
 export type AgingBucket = (typeof AGING_BUCKETS)[number];
 
+/**
+ * Columna agregada de la matriz: todos los tramos menos corriente. No es un
+ * tramo más —no entra en AGING_BUCKETS ni en `byAging` de los grupos—, pero
+ * tiene su celda, su total, su orden y su acotado de grupos.
+ */
+export const OVERDUE_BUCKET = "vencido" as const;
+
+export type MatrixColumnKey = AgingBucket | typeof OVERDUE_BUCKET;
+
 /** Etiquetas de las columnas, tal como se ven en la tabla. */
 export const AGING_LABELS: Record<AgingBucket, string> = {
   corriente: "Corriente",
@@ -61,7 +70,7 @@ export interface IMatrixRow {
   clientUuid: string | null;
   responsibleName: string | null;
   responsibleEmail: string | null;
-  cells: Record<AgingBucket, IMatrixCell>;
+  cells: Record<MatrixColumnKey, IMatrixCell>;
   total: number;
   invoices: number;
   overdueAmount: number;
@@ -89,9 +98,49 @@ export interface IMatrixCutoff {
 }
 
 export interface IMatrixTotals {
-  byAging: Record<AgingBucket, { total: number; count: number }>;
+  byAging: Record<MatrixColumnKey, { total: number; count: number }>;
+  /** Mismo reparto que el catálogo de estados, pero sobre la foto filtrada. */
+  byStatus: IMatrixStatusCatalogItem[];
   total: number;
   invoices: number;
+}
+
+export interface IMatrixSummaryComposition {
+  statusKey: string;
+  statusLabel: string;
+  total: number;
+  count: number;
+  percentage: number;
+}
+
+export interface IMatrixSummaryTotal {
+  amount: number;
+  /** Facturas más saldos; `invoices` cuenta sólo las facturas. */
+  documents: number;
+  invoices: number;
+  clients: number;
+  /** Reparto del total por statusKey de factura. */
+  composition: IMatrixSummaryComposition[];
+}
+
+export interface IMatrixSummaryMetric {
+  amount: number;
+  count: number;
+  clients: number;
+  /** Sobre la cartera total, de 0 a 100. */
+  percentage: number;
+  /** La regla de negocio aún no está cerrada: la cifra es una aproximación. */
+  definitionPending: boolean;
+}
+
+/** Cifras de las tarjetas superiores, sobre todo el conjunto filtrado y no sólo la página. */
+export interface IMatrixSummary {
+  total: IMatrixSummaryTotal;
+  overdue: IMatrixSummaryMetric;
+  openNovelty: IMatrixSummaryMetric;
+  unreconciled: IMatrixSummaryMetric;
+  openBalances: IMatrixSummaryMetric;
+  pendingCompensation: IMatrixSummaryMetric;
 }
 
 export interface IWalletMatrix {
@@ -101,6 +150,7 @@ export interface IWalletMatrix {
   pagination: { page: number; limit: number; totalClients: number };
   snapshot: ISnapshotMeta | null;
   cutoff: IMatrixCutoff;
+  summary: IMatrixSummary | null;
 }
 
 export interface IWalletMatrixDetailRow {
@@ -178,8 +228,24 @@ export interface IWalletMatrixStatus {
   isRefreshing: boolean;
 }
 
-/** Columnas por las que ordena el servidor; los tramos usan su AgingBucket. */
-export type WalletMatrixSortBy = "client_name" | AgingBucket | "total" | "overdue_percentage";
+/** Un statusKey del catálogo, con su monto y conteo en la foto. */
+export interface IMatrixStatusCatalogItem {
+  statusKey: string;
+  statusLabel: string;
+  total: number;
+  count: number;
+}
+
+/**
+ * Catálogo de estados de GET /portfolio/matrix/statuses. Ignora el filtro de
+ * estados, así que elegir uno no hace desaparecer los demás.
+ */
+export interface IWalletMatrixStatusCatalog {
+  statuses: IMatrixStatusCatalogItem[];
+}
+
+/** Columnas por las que ordena el servidor; los tramos y vencido usan su clave de celda. */
+export type WalletMatrixSortBy = "client_name" | MatrixColumnKey | "total" | "overdue_percentage";
 
 export type WalletMatrixSortDir = "asc" | "desc";
 
@@ -193,8 +259,11 @@ export type WalletMatrixSortDir = "asc" | "desc";
 export interface IWalletMatrixFilters {
   /** NITs de cliente. */
   clients?: string[];
-  /** statusKey de factura (CONCILIADO, CON_NOVEDAD, …). */
-  status?: string[];
+  /**
+   * statusKey de factura (CONCILIADO, CON_NOVEDAD, …). La vista los arma a
+   * partir de los estados elegidos en los chips o en el modal.
+   */
+  statuses?: string[];
   /** Ids de invoice_incident_motive. */
   noveltyType?: number[];
   /** Correos del ejecutivo responsable. */
@@ -206,10 +275,10 @@ export interface IWalletMatrixFilters {
   holdings?: number[];
   clientGroup?: number[];
   /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
-  coordinator?: string | null;
-  market?: string | null;
-  kam?: string | null;
-  kam_lider?: string | null;
+  coordinator?: string[];
+  market?: string[];
+  kam?: string[];
+  kam_lider?: string[];
   /** Texto libre: cliente, NIT o responsable. */
   search?: string;
   /** Ordena el conjunto completo filtrado, no sólo la página cargada. */
@@ -229,7 +298,7 @@ export interface IWalletMatrixFilters {
  */
 export type IWalletMatrixSharedFilters = Pick<
   IWalletMatrixFilters,
-  | "status"
+  | "statuses"
   | "noveltyType"
   | "executive"
   | "coordinator"
@@ -243,7 +312,8 @@ export type IWalletMatrixSharedFilters = Pick<
 export interface IWalletMatrixGroupsScope {
   runId?: string;
   clientId?: string;
-  aging?: AgingBucket;
+  /** Un tramo o "vencido": todos los tramos menos corriente. */
+  aging?: MatrixColumnKey;
   calculateEndMonth?: boolean;
 }
 

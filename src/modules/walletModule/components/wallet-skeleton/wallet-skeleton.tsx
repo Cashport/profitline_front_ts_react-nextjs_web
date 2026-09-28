@@ -1,4 +1,4 @@
-import { TRAMOS } from "../../constants";
+import { TRAMOS, VENCIDO } from "../../constants";
 
 /**
  * Bloque gris con pulso. Es el ladrillo de todos los skeletons de la pantalla.
@@ -13,14 +13,14 @@ const Bar = ({ className = "" }: { className?: string }) => (
   />
 );
 
-/** Las cuatro tarjetas de resumen. */
+/** Las seis tarjetas de resumen. */
 export function StatCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-busy>
-      {[0, 1, 2, 3].map((i) => (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" aria-busy>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
           <Bar className="h-3 w-24" />
-          <Bar className="mt-2.5 h-7 w-32" />
+          <Bar className="mt-2.5 h-6 w-32" />
           <Bar className="mt-2.5 h-1.5 w-full" />
           <Bar className="mt-4 h-3 w-40" />
         </div>
@@ -33,7 +33,7 @@ export function StatCardsSkeleton() {
  * Matriz cliente × tramo.
  *
  * Reproduce la misma rejilla y los mismos espaciados que `ControlMatrix`
- * (una columna de cliente + los seis tramos + total + % vencido) para que al
+ * (una columna de cliente + los seis tramos + vencido + total + % vencido) para que al
  * llegar los datos la tabla no salte de tamaño.
  */
 export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
@@ -56,7 +56,7 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
               <th className="min-w-[250px] px-3 py-2.5 text-left">
                 <Bar className="h-3 w-16" />
               </th>
-              {TRAMOS.map((t) => (
+              {[...TRAMOS, VENCIDO].map((t) => (
                 <th key={t.id} className="px-3 py-2.5">
                   <Bar className="ml-auto h-3 w-14" />
                 </th>
@@ -77,7 +77,7 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
                   <Bar className="h-3.5 w-48" />
                   <Bar className="mt-1.5 h-2.5 w-36" />
                 </td>
-                {TRAMOS.map((t) => (
+                {[...TRAMOS, VENCIDO].map((t) => (
                   <td key={t.id} className="px-3 py-2.5">
                     <Bar className="ml-auto h-3.5 w-16" />
                     {/* La barra de estados vive bajo cada monto. */}

@@ -3,10 +3,11 @@
 import { Tooltip } from "antd";
 
 import { cn } from "@/utils/utils";
-import { EST_META, ORDEN_EST, TRAMOS, TRAMO_BG } from "../../constants";
+import { TRAMOS, TRAMO_BG } from "../../constants";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
+import { estadoMeta, estadosOf } from "../../utils/estados";
 import { fmtM } from "../../utils/format";
-import type { EstadoKey, WalletSegments } from "../../types";
+import type { MontosPorEstado } from "../../types";
 
 export interface DetailRow {
   key: string;
@@ -26,15 +27,18 @@ interface DetailTooltipProps {
   children: React.ReactElement;
 }
 
-/** Desglose por estado de un monto. Pide sólo los estados y no un WalletSegments
- *  entero para que una celda de la matriz (sin `vencido`) también encaje. */
-export const estadoRows = (g: Pick<WalletSegments, EstadoKey>): DetailRow[] =>
-  ORDEN_EST.filter((e) => g[e] > 0).map((e) => ({
-    key: e,
-    swatch: EST_META[e].bg,
-    label: EST_META[e].nom,
-    value: fmtM(g[e])
-  }));
+/** Desglose por estado de un monto, nuevos incluidos. Pide sólo los montos y no
+ *  un WalletSegments entero para que una celda de la matriz (sin `vencido`)
+ *  también encaje. */
+export const estadoRows = (g: MontosPorEstado): DetailRow[] =>
+  estadosOf(g)
+    .filter((e) => (g[e] ?? 0) > 0)
+    .map((e) => ({
+      key: e,
+      swatch: estadoMeta(e).bg,
+      label: estadoMeta(e).nom,
+      value: fmtM(g[e] ?? 0)
+    }));
 
 /** Desglose por tramo de un monto: lo que piden las barras de reparto. */
 export const tramoRows = (tramos: number[]): DetailRow[] =>

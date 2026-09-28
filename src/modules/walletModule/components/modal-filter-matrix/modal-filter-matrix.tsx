@@ -9,8 +9,9 @@ import type {
 import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncidentListFilters";
 
-import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_STATUS_OPTIONS } from "../../constants";
-import type { IWalletMatrixModalFilters } from "../../types";
+import { EMPTY_MATRIX_MODAL_FILTERS } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
+import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
 
 /** Misma superficie que el botón de tema para que los dos lean como un par. */
 const TRIGGER_CLASS =
@@ -19,6 +20,10 @@ const TRIGGER_CLASS =
 interface ModalFilterMatrixProps {
   value: IWalletMatrixModalFilters;
   onChange: (next: IWalletMatrixModalFilters) => void;
+  /** Los mismos estados que se pueden elegir en los chips de la matriz. */
+  selectableEstados: EstadoId[];
+  /** El catálogo de estados aún no llega. */
+  estadosLoading?: boolean;
 }
 
 type Loading = "loading" | undefined;
@@ -38,21 +43,22 @@ const many = (ids: Array<string | number>, options: FilterOptionItem[]): FilterO
     return { id: key, name: options.find((o) => o.id === key)?.name ?? key };
   });
 
-/** Selección de una categoría "single" a partir del valor confirmado. */
-const single = (id: string | null, options: FilterOptionItem[]): FilterOptionItem[] =>
-  id ? [{ id, name: options.find((o) => o.id === id)?.name ?? id }] : [];
-
 const toNumbers = (items?: FilterOptionItem[]) => (items ?? []).map((o) => Number(o.id));
 const toTexts = (items?: FilterOptionItem[]) => (items ?? []).map((o) => o.id);
-const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
 
 /**
- * Botón "Filtros" de la matriz. Estado, tipo de novedad y ejecutivo son
- * multi porque el API los recibe separados por coma (ejecutivo viaja por
- * correo). Coordinador, mercado, KAM y KAM líder son de un solo valor
- * canónico, el mismo que devuelve /invoice/incident-list/filters.
+ * Botón "Filtros" de la matriz. Todas las categorías son multi: el API recibe
+ * cada lista separada por coma. Ejecutivo viaja por correo; coordinador,
+ * mercado, KAM y KAM líder, por el valor canónico que devuelve
+ * /invoice/incident-list/filters. Estado comparte la selección con los chips de
+ * la matriz: son estados de la pantalla, y la vista los traduce a statusKey.
  */
-export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrixProps) {
+export default function ModalFilterMatrix({
+  value,
+  onChange,
+  selectableEstados,
+  estadosLoading = false
+}: ModalFilterMatrixProps) {
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
   const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
 
@@ -65,26 +71,30 @@ export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrix
     id: e.email,
     name: e.name
   }));
-  const estadoOptions = MATRIX_STATUS_OPTIONS;
+  const estadoOptions: FilterOptionItem[] = selectableEstados.map((e) => ({
+    id: e,
+    name: estadoMeta(e).nom
+  }));
   const tipoNovedadOptions = toOptions(motives);
 
   const selection: FilterSelection = {
-    coordinador: single(value.coordinator, coordinadorOptions),
-    mercado: single(value.market, mercadoOptions),
-    kam: single(value.kam, kamOptions),
-    kamLider: single(value.kam_lider, kamLiderOptions),
+    coordinador: many(value.coordinator, coordinadorOptions),
+    mercado: many(value.market, mercadoOptions),
+    kam: many(value.kam, kamOptions),
+    kamLider: many(value.kam_lider, kamLiderOptions),
     ejecutivo: many(value.executive, ejecutivoOptions),
-    estado: many(value.status, estadoOptions),
+    estado: many(value.estados, estadoOptions),
     tipoNovedad: many(value.noveltyType, tipoNovedadOptions)
   };
 
   const selectionToDomain = (sel: FilterSelection): IWalletMatrixModalFilters => ({
-    coordinator: toText(sel.coordinador),
-    market: toText(sel.mercado),
-    kam: toText(sel.kam),
-    kam_lider: toText(sel.kamLider),
+    coordinator: toTexts(sel.coordinador),
+    market: toTexts(sel.mercado),
+    kam: toTexts(sel.kam),
+    kam_lider: toTexts(sel.kamLider),
     executive: toTexts(sel.ejecutivo),
-    status: toTexts(sel.estado),
+    // Los ids de las opciones son los EstadoId de `selectableEstados`.
+    estados: toTexts(sel.estado) as EstadoId[],
     noveltyType: toNumbers(sel.tipoNovedad)
   });
 
@@ -95,28 +105,24 @@ export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrix
     {
       key: "coordinador",
       label: "Coordinador",
-      selectMode: "single",
       options: coordinadorOptions,
       status: filtersStatus
     },
     {
       key: "mercado",
       label: "Mercado",
-      selectMode: "single",
       options: mercadoOptions,
       status: filtersStatus
     },
     {
       key: "kam",
       label: "KAM",
-      selectMode: "single",
       options: kamOptions,
       status: filtersStatus
     },
     {
       key: "kamLider",
       label: "KAM líder",
-      selectMode: "single",
       options: kamLiderOptions,
       status: filtersStatus
     },
@@ -126,7 +132,12 @@ export default function ModalFilterMatrix({ value, onChange }: ModalFilterMatrix
       options: ejecutivoOptions,
       status: filtersStatus
     },
-    { key: "estado", label: "Estado", options: estadoOptions },
+    {
+      key: "estado",
+      label: "Estado",
+      options: estadoOptions,
+      status: status(estadosLoading)
+    },
     {
       key: "tipoNovedad",
       label: "Tipo de novedad",

@@ -3,11 +3,12 @@
 import { cn } from "@/utils/utils";
 import { TRAMO_BG } from "../../constants";
 import { sumaTramos } from "../../utils/wallet-calc";
+import type { MatrixColumn } from "../../types";
 
 interface DistBarProps {
   tramos: number[];
-  /** Tramo del drilldown: se resalta su segmento. */
-  resaltar?: number | null;
+  /** Columna del drilldown: se resalta su segmento, o los cinco vencidos con "vencido". */
+  resaltar?: MatrixColumn | null;
   /** Sobreescribe alto y ancho: la tabla la usa compacta, el modal a lo ancho. */
   className?: string;
 }
@@ -30,7 +31,8 @@ export default function DistBar({ tramos, resaltar, className }: DistBarProps) {
               "block h-full min-w-[2px] rounded-[2px]",
               TRAMO_BG[i],
               // outline y no ring: el box-shadow del segmento ya está ocupado.
-              i === resaltar && "outline outline-2 outline-offset-1 outline-wallet-accent"
+              (resaltar === "vencido" ? i > 0 : i === resaltar) &&
+                "outline outline-2 outline-offset-1 outline-wallet-accent"
             )}
             style={{
               width: `${((v / suma) * 100).toFixed(1)}%`,

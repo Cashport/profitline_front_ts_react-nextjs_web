@@ -12,6 +12,7 @@
 import { EST_META, ORDEN_EST, TRAMO_DIAS } from "./constants";
 import { HOY, dias, fmtDc } from "./utils/format";
 import { groupKey } from "./utils/api-adapter";
+import { sumCells } from "./utils/wallet-calc";
 import type { IWalletMatrixGroup } from "@/types/portfolios/IWalletMatrix";
 import {
   EstadoKey,
@@ -64,13 +65,10 @@ const row = (
   nit: string,
   ejecutivo: string,
   totales: number[]
-): IWalletClientRow => ({
-  id,
-  nombre,
-  nit,
-  ejecutivo,
-  tramos: totales.map((t, i) => cell(t, i))
-});
+): IWalletClientRow => {
+  const tramos = totales.map((t, i) => cell(t, i));
+  return { id, nombre, nit, ejecutivo, tramos, vencido: sumCells(tramos.slice(1)) };
+};
 
 export const WALLET_CLIENT_ROWS: IWalletClientRow[] = [
   row("C001", "OXXO COLOMBIA S.A.S.", "843326788", "Cristina Osorio", [
@@ -117,6 +115,7 @@ export const WALLET_SUMMARY: IWalletSummary = {
     novedad: 4.37 * MM,
     sin_conciliar: 6.85 * MM,
     saldo: 0,
+    saldo_factura: 0,
     glosado: 0,
     devolucion: 0,
     otros: 0,
@@ -321,6 +320,7 @@ const FACTURA_PROM: Record<EstadoKey, number> = {
   novedad: 44 * M,
   sin_conciliar: 28 * M,
   saldo: 20 * M,
+  saldo_factura: 20 * M,
   glosado: 30 * M,
   devolucion: 25 * M,
   otros: 35 * M
@@ -334,6 +334,7 @@ const GESTION_EST: Record<EstadoKey, number | null> = {
   novedad: 0, // lo define cada novedad
   sin_conciliar: null,
   saldo: 9,
+  saldo_factura: 9,
   glosado: 3,
   devolucion: 7,
   otros: null

@@ -1,11 +1,14 @@
-import { API } from "@/utils/api/api";
+import axios from "axios";
+
+import { API, default as instance } from "@/utils/api/api";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IWalletMatrixFilters,
   IWalletMatrixGroupsScope,
   IWalletMatrixSharedFilters,
-  IWalletMatrixStatus
+  IWalletMatrixStatus,
+  IWalletMatrixStatusCatalog
 } from "@/types/portfolios/IWalletMatrix";
 
 // URLSearchParams codifica espacios y tildes de los valores canónicos
@@ -26,13 +29,13 @@ const single = (params: URLSearchParams, key: string, value?: string | null) => 
  * pantalla tienen que quedar acotadas a lo mismo.
  */
 const appendSharedFilters = (params: URLSearchParams, filters?: IWalletMatrixSharedFilters) => {
-  list(params, "status", filters?.status);
+  list(params, "statuses", filters?.statuses);
   list(params, "novelty_type", filters?.noveltyType);
   list(params, "executive", filters?.executive);
-  single(params, "coordinator", filters?.coordinator);
-  single(params, "market", filters?.market);
-  single(params, "kam", filters?.kam);
-  single(params, "kam_lider", filters?.kam_lider);
+  list(params, "coordinator", filters?.coordinator);
+  list(params, "market", filters?.market);
+  list(params, "kam", filters?.kam);
+  list(params, "kam_lider", filters?.kam_lider);
   single(params, "search", filters?.search);
 };
 
@@ -108,4 +111,60 @@ export const refreshWalletMatrix = async (): Promise<
 export const getWalletMatrixStatus = async (): Promise<GenericResponse<IWalletMatrixStatus>> => {
   const response: GenericResponse<IWalletMatrixStatus> = await API.get(`/portfolio/matrix/status`);
   return response;
+};
+
+/**
+ * Catálogo de estados de la foto: cada statusKey con su monto y conteo. No
+ * lleva parámetros; los chips de la matriz lo usan para saber qué statusKey
+ * mandar por cada estado, sobre todo por "Otros".
+ */
+export const getWalletMatrixStatusCatalog = async (): Promise<
+  GenericResponse<IWalletMatrixStatusCatalog>
+> => {
+  const response: GenericResponse<IWalletMatrixStatusCatalog> = await API.get(
+    `/portfolio/matrix/statuses`
+  );
+  return response;
+};
+
+/**
+ * Descarga la matriz en .xlsx con la misma query de /portfolio/matrix, sin
+ * page ni limit: el archivo trae todo el conjunto filtrado, en el orden de la
+ * tabla.
+ */
+export const downloadWalletMatrixExcel = async (filters?: IWalletMatrixFilters): Promise<void> => {
+  try {
+    // `instance` y no `API`: el interceptor de `API` devuelve sólo el cuerpo y
+    // aquí hacen falta los headers para leer el nombre del archivo.
+    const response = await instance.get(`/portfolio/matrix/export?${buildMatrixQuery(filters)}`, {
+      responseType: "blob",
+      timeout: 60000
+    });
+
+    const disposition = (response.headers["content-disposition"] as string) || "";
+    // en-CA formatea YYYY-MM-DD en hora local; toISOString daría el día UTC.
+    const filename =
+      disposition.match(/filename="?([^";]+)"?/)?.[1] ||
+      `cartera-por-cliente-y-tramo_${new Date().toLocaleDateString("en-CA")}.xlsx`;
+
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    // Con responseType "blob" el error del backend también llega como Blob.
+    let message: string | undefined;
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        message = JSON.parse(await error.response.data.text())?.message;
+      } catch {
+        // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
+      }
+    }
+    throw new Error(message || "No se pudo descargar el Excel de la cartera.");
+  }
 };

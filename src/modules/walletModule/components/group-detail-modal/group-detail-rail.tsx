@@ -1,6 +1,7 @@
 "use client";
 
-import { EST_META, TRAMOS } from "../../constants";
+import { columnMeta } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
 import { fmtD, fmtFull, fmtM } from "../../utils/format";
 import { sevDias, vencidoDeTramos } from "../../utils/group-detail";
 import { sumaTramos } from "../../utils/wallet-calc";
@@ -55,7 +56,7 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
   // saldo, reparto y conteo son su parte, no la del grupo entero. Se rotula
   // para que no se lea como el total de la gestión.
   const tramo = detail.tramo ?? null;
-  const sufijo = tramo === null ? "" : ` en ${TRAMOS[tramo].short}`;
+  const sufijo = tramo === null ? "" : ` en ${columnMeta(tramo).short}`;
 
   const compromiso = nov?.compromiso && sevDias(nov.compromiso);
   const limite = nov?.limite && sevDias(nov.limite, 5);
@@ -110,7 +111,7 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
 
       {!nov && (
         <p className="mt-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
-          {EST_META[detail.tipo].corta}.
+          {estadoMeta(detail.tipo).corta}.
         </p>
       )}
     </div>

@@ -8,7 +8,12 @@ import {
   useWalletMatrixStatus
 } from "@/hooks/useWalletMatrix";
 import { useDebounce } from "@/hooks/useDeabouce";
-import { buildMatrixQuery, refreshWalletMatrix } from "@/services/walletMatrix/walletMatrix";
+import {
+  buildMatrixQuery,
+  downloadWalletMatrixExcel,
+  getWalletMatrixStatusCatalog,
+  refreshWalletMatrix
+} from "@/services/walletMatrix/walletMatrix";
 import { useWalletMatrixSocket } from "@/context/WalletMatrixSocketContext";
 import { useMessageApi } from "@/context/MessageContext";
 
@@ -23,20 +28,21 @@ import {
   StatCardsSkeleton
 } from "../../components/wallet-skeleton/wallet-skeleton";
 import {
-  TRAMO_BUCKETS,
-  emptySummary,
+  columnBucket,
   groupKey,
+  statusKeysByEstado,
   toClientRows,
   toGroupDetail,
-  toGroupRows,
-  toSummary
+  toGroupRows
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
 import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_DEFAULT_SORT } from "../../constants";
-import { nextSort } from "../../utils/wallet-calc";
+import { isEstadoNuevo, orderEstados } from "../../utils/estados";
+import { nextEstadoSelection, nextSort } from "../../utils/wallet-calc";
 
-import type { IWalletDrilldown, IWalletMatrixModalFilters, SortState } from "../../types";
+import type { EstadoId, IWalletDrilldown, IWalletMatrixModalFilters, SortState } from "../../types";
 import type {
+  IMatrixStatusCatalogItem,
   IWalletMatrixFilters,
   WalletMatrixSortBy,
   WalletMatrixSortDir
@@ -54,7 +60,7 @@ const TEXTUAL_COLS: WalletMatrixSortBy[] = ["client_name"];
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
 
 export default function WalletView() {
-  const { showMessage } = useMessageApi();
+  const { showMessage, messageApi } = useMessageApi();
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
   // Los dos buscadores —el de la barra superior y el de la matriz— comparten
@@ -67,10 +73,11 @@ export default function WalletView() {
   );
   // Orden del servidor sobre la foto completa; `col` es el `sort_by` del API.
   const [sort, setSort] = useState<SortState>(MATRIX_DEFAULT_SORT);
-  const [calculateEndMonth, setCalculateEndMonth] = useState(false);
+  const [calculateEndMonth, setCalculateEndMonth] = useState(true);
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
   /**
    * Foto vigente en el momento de disparar la actualización. La corrida
    * terminó cuando aparece una DISTINTA a esta.
@@ -90,16 +97,47 @@ export default function WalletView() {
   // Celda o cliente seleccionado en la matriz. Acota los grupos de abajo.
   const [drilldown, setDrilldown] = useState<IWalletDrilldown | null>(null);
 
-  const filters: IWalletMatrixFilters = useMemo(
-    () => ({
-      ...modalFilters,
+  // Catálogo de estados de la foto: qué statusKey hay detrás de cada chip. Los
+  // `statuses` de la consulta salen de aquí. null mientras llega la primera vez.
+  const [statusCatalog, setStatusCatalog] = useState<IMatrixStatusCatalogItem[] | null>(null);
+  const keysByEstado = useMemo(() => statusKeysByEstado(statusCatalog ?? []), [statusCatalog]);
+  // Chips de la leyenda: los estados que trae el catálogo, en el orden de las
+  // barras, y los que el front no conoce con chip propio. Los que no llegan
+  // (Compensada, Pagada…) no se muestran; Otros se queda siempre.
+  const legendEstados = useMemo(
+    () =>
+      statusCatalog?.length
+        ? orderEstados(Array.from(keysByEstado.keys()).filter(isEstadoNuevo)).filter(
+            (e) => e === "otros" || keysByEstado.has(e)
+          )
+        : [],
+    [statusCatalog, keysByEstado]
+  );
+  // Se eligen los que tienen statusKey detrás; el modal ofrece los mismos.
+  const selectableEstados = useMemo(
+    () => legendEstados.filter((e) => keysByEstado.has(e)),
+    [legendEstados, keysByEstado]
+  );
+  // Los elegidos que de verdad filtran, en el orden de la leyenda. Con una foto
+  // nueva un estado elegido puede quedarse sin statusKey: mandarlo vacío
+  // quitaría el filtro sin que el chip lo dijera, así que deja de contar.
+  const activeEstados = useMemo(
+    () => selectableEstados.filter((e) => modalFilters.estados.includes(e)),
+    [selectableEstados, modalFilters.estados]
+  );
+
+  const filters: IWalletMatrixFilters = useMemo(() => {
+    // `estados` son de la pantalla; al API van sus statusKey.
+    const { estados: _estados, ...apiModalFilters } = modalFilters;
+    return {
+      ...apiModalFilters,
+      statuses: activeEstados.flatMap((e) => keysByEstado.get(e) ?? []),
       search: debouncedSearch,
       sort_by: sort.col as WalletMatrixSortBy,
       sort_dir: sort.dir as WalletMatrixSortDir,
       calculateEndMonth
-    }),
-    [modalFilters, debouncedSearch, sort, calculateEndMonth]
-  );
+    };
+  }, [modalFilters, activeEstados, keysByEstado, debouncedSearch, sort, calculateEndMonth]);
 
   const { data: matrix, loading, error, mutate } = useWalletMatrix(filters, page, PAGE_SIZE);
   // El acotado lo resuelve el servidor: la página sólo tiene 15 clientes, así
@@ -119,7 +157,7 @@ export default function WalletView() {
     // explícita, un `&&` dejaría fuera justo esa columna.
     drilldown?.tramo === null || drilldown?.tramo === undefined
       ? undefined
-      : TRAMO_BUCKETS[drilldown.tramo],
+      : columnBucket(drilldown.tramo),
     filters
   );
 
@@ -135,13 +173,35 @@ export default function WalletView() {
     setBaselineReady(false);
   }, []);
 
+  // Si falla, los chips quedan como leyenda: se conserva el catálogo anterior
+  // y, si no había, se deja vacío para que el modal no se quede "cargando".
+  const loadStatusCatalog = useCallback(async () => {
+    try {
+      const response = await getWalletMatrixStatusCatalog();
+      setStatusCatalog(response.data.statuses);
+    } catch (error) {
+      console.error("Error fetching wallet matrix statuses:", error);
+      setStatusCatalog((prev) => prev ?? []);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStatusCatalog();
+  }, [loadStatusCatalog]);
+
+  // La foto nueva trae su propio catálogo de estados: se releen juntos.
+  const reloadSnapshot = useCallback(() => {
+    mutate();
+    loadStatusCatalog();
+  }, [mutate, loadStatusCatalog]);
+
   // El socket avisa que el worker terminó.
   useEffect(() => {
     if (!refreshedAt) return;
     stopRefreshing();
-    mutate();
+    reloadSnapshot();
     mutateStatus();
-  }, [refreshedAt, mutate, mutateStatus, stopRefreshing]);
+  }, [refreshedAt, reloadSnapshot, mutateStatus, stopRefreshing]);
 
   // Respaldo por polling, para cuando el evento del socket no llega: se
   // considera terminada cuando el último run completado ya no es el que se
@@ -157,9 +217,9 @@ export default function WalletView() {
 
     if (hayFotoNueva && !status.isRefreshing) {
       stopRefreshing();
-      mutate();
+      reloadSnapshot();
     }
-  }, [refreshing, baselineReady, status, baselineRunId, mutate, stopRefreshing]);
+  }, [refreshing, baselineReady, status, baselineRunId, reloadSnapshot, stopRefreshing]);
 
   // Tope de espera: si una corrida queda colgada, el botón vuelve en vez de
   // dejar el spinner girando para siempre y al usuario sin forma de reintentar.
@@ -168,7 +228,7 @@ export default function WalletView() {
 
     const id = setTimeout(() => {
       stopRefreshing();
-      mutate();
+      reloadSnapshot();
       showMessage(
         "warning",
         "La actualización está tardando más de lo esperado. Se muestra la última foto disponible."
@@ -176,7 +236,7 @@ export default function WalletView() {
     }, REFRESH_TIMEOUT_MS);
 
     return () => clearTimeout(id);
-  }, [refreshing, mutate, showMessage, stopRefreshing]);
+  }, [refreshing, reloadSnapshot, showMessage, stopRefreshing]);
 
   const handleRefresh = async () => {
     // Guarda de reentrada: aunque el botón ya no se renderiza mientras corre,
@@ -212,6 +272,27 @@ export default function WalletView() {
     }
   };
 
+  // Va con los mismos `filters` de la matriz: el Excel trae lo que se ve en
+  // pantalla, en el mismo orden. El menú se cierra al elegir la opción, así que
+  // el loader es el único feedback hasta que llega el archivo.
+  const handleDownloadExcel = async () => {
+    if (downloadingExcel) return;
+
+    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    try {
+      setDownloadingExcel(true);
+      await downloadWalletMatrixExcel(filters);
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudo descargar el Excel de la cartera."
+      );
+    } finally {
+      hide();
+      setDownloadingExcel(false);
+    }
+  };
+
   // Cuando cambia la consulta (filtros, búsqueda o proyección) la celda
   // elegida deja de tener sentido y la página vuelve a la primera: el conjunto
   // y el orden de los clientes ya no son los que eran. Se observa la query
@@ -242,8 +323,18 @@ export default function WalletView() {
       prev && prev.clienteId === next.clienteId && prev.tramo === next.tramo ? null : next
     );
 
+  // Los chips escriben en el mismo `estados` que el modal. Se parte de los que
+  // filtran de verdad, que son los que se ven resaltados. La vuelta a la primera
+  // página la hace el efecto de `query`: los estados entran en la consulta.
+  const handleEstadoSelect = (estado: EstadoId, additive: boolean) =>
+    setModalFilters((f) => ({
+      ...f,
+      estados: nextEstadoSelection(activeEstados, estado, additive)
+    }));
+
+  const handleEstadosClear = () => setModalFilters((f) => ({ ...f, estados: [] }));
+
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
-  const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
 
   // Grupo abierto, tal como vino del API: el modal necesita más campos de los
@@ -279,17 +370,26 @@ export default function WalletView() {
       <WalletHeader
         search={search}
         onSearchChange={setSearch}
-        filters={modalFilters}
+        // El modal muestra los mismos estados que resaltan los chips.
+        filters={{ ...modalFilters, estados: activeEstados }}
         onFiltersChange={setModalFilters}
+        selectableEstados={selectableEstados}
+        estadosLoading={statusCatalog === null}
         lastUpdatedAt={matrix?.snapshot?.lastUpdatedAt}
         cutoffDate={matrix?.cutoff?.date}
         projected={calculateEndMonth}
         isRefreshing={isRefreshing}
         onRefresh={handleRefresh}
         onToggleProjection={setCalculateEndMonth}
+        onDownloadExcel={handleDownloadExcel}
+        downloadingExcel={downloadingExcel}
       />
 
-      {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
+      {primeraCarga ? (
+        <StatCardsSkeleton />
+      ) : (
+        matrix?.summary && <WalletStatCards summary={matrix.summary} totals={matrix.totals} />
+      )}
 
       {primeraCarga ? (
         <MatrixSkeleton />
@@ -319,6 +419,11 @@ export default function WalletView() {
           emptyMessage="No hay cartera para los filtros actuales."
           drilldown={drilldown}
           onSelect={handleSelect}
+          legendEstados={legendEstados}
+          estados={activeEstados}
+          selectableEstados={selectableEstados}
+          onEstadoSelect={handleEstadoSelect}
+          onEstadosClear={handleEstadosClear}
         />
       )}
 

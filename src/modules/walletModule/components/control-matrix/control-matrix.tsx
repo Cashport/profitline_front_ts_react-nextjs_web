@@ -5,16 +5,24 @@ import { Pagination } from "antd";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
-import { AGING_BUCKETS } from "@/types/portfolios/IWalletMatrix";
+import { AGING_BUCKETS, OVERDUE_BUCKET } from "@/types/portfolios/IWalletMatrix";
 import { cn } from "@/utils/utils";
-import { TRAMOS } from "../../constants";
+import { TRAMOS, VENCIDO, columnMeta } from "../../constants";
 import { corto, fmtM, pct } from "../../utils/format";
 import { rowSegments, tramoTotal } from "../../utils/wallet-calc";
 import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
-import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
+import type {
+  EstadoId,
+  IWalletClientRow,
+  IWalletDrilldown,
+  IWalletMatrixCell,
+  MatrixColumn,
+  SortState,
+  TramoIndex
+} from "../../types";
 import type { IMatrixTotals } from "@/types/portfolios/IWalletMatrix";
 
 interface ControlMatrixProps {
@@ -42,6 +50,16 @@ interface ControlMatrixProps {
   drilldown: IWalletDrilldown | null;
   // eslint-disable-next-line no-unused-vars
   onSelect: (drilldown: IWalletDrilldown) => void;
+  /** Chips de la leyenda: los estados que trae el catálogo, en orden de pintado. */
+  legendEstados: EstadoId[];
+  /** Estados que filtran la matriz y los grupos; vacío = todos. */
+  estados: EstadoId[];
+  /** Estados con algún statusKey en la foto: los únicos chips que se pueden elegir. */
+  selectableEstados: EstadoId[];
+  /** `additive` es el shift+clic: suma o quita el estado sin soltar los demás. */
+  // eslint-disable-next-line no-unused-vars
+  onEstadoSelect: (estado: EstadoId, additive: boolean) => void;
+  onEstadosClear: () => void;
 }
 
 /** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
@@ -62,7 +80,12 @@ export default function ControlMatrix({
   loading,
   emptyMessage = "Ningún cliente coincide con los filtros.",
   drilldown,
-  onSelect
+  onSelect,
+  legendEstados,
+  estados,
+  selectableEstados,
+  onEstadoSelect,
+  onEstadosClear
 }: ControlMatrixProps) {
   // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
   // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
@@ -90,8 +113,9 @@ export default function ControlMatrix({
     ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
     : (totals?.total ?? 0);
 
-  // Vencido del pie: todos los tramos menos corriente (el 0).
-  const vencidoFooter = TRAMOS.slice(1).reduce((a, t) => a + tramoFooter(t.i), 0);
+  const vencidoFooter = folded
+    ? visibleRows.reduce((a, r) => a + r.vencido.total, 0)
+    : (totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0);
   const vencidoFooterPct = pct(vencidoFooter, totalFooter);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
@@ -101,14 +125,79 @@ export default function ControlMatrix({
     onSelect(drill);
   };
 
+  /** Celda de un tramo o de vencido: monto, barra por estado y drilldown. */
+  const renderCell = (row: IWalletClientRow, cell: IWalletMatrixCell, col: MatrixColumn) => {
+    if (cell.total === 0) {
+      return (
+        <td key={col} className="px-3 py-2.5 text-right text-muted-foreground tabular-nums">
+          —
+        </td>
+      );
+    }
+
+    const drill: IWalletDrilldown = { clienteId: row.id, tramo: col };
+    const activa = drilldown?.clienteId === row.id && drilldown.tramo === col;
+
+    return (
+      // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
+      // el del navegador se pintaría encima.
+      <DetailTooltip
+        key={col}
+        title={`${row.nombre} · ${columnMeta(col).label}`}
+        rows={estadoRows(cell)}
+        total={{ value: fmtM(cell.total) }}
+      >
+        <td
+          role="button"
+          tabIndex={0}
+          aria-pressed={activa}
+          onClick={() => onSelect(drill)}
+          onKeyDown={(e) => onCellKeyDown(e, drill)}
+          className={cn(
+            "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+            activa && SELECTED_CELL
+          )}
+        >
+          <span>{fmtM(cell.total)}</span>
+          <SegBar segments={cell} />
+        </td>
+      </DetailTooltip>
+    );
+  };
+
   return (
     <section className="rounded-xl bg-card text-card-foreground shadow-sm">
       <div className="flex flex-wrap items-start gap-3 border-b border-border p-4">
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
           <div className="mt-2">
-            <StatusLegend />
+            <StatusLegend
+              estados={legendEstados}
+              selected={estados}
+              selectable={selectableEstados}
+              onSelect={onEstadoSelect}
+            />
           </div>
+          {/* Hasta que llega el catálogo ningún chip se puede elegir: la pista esperaría. */}
+          {selectableEstados.length > 0 && (
+            <p className="mt-1.5 text-[11.5px] text-muted-foreground">
+              {estados.length === 0 ? (
+                "clic en un estado para filtrar · shift+clic para sumar varios"
+              ) : (
+                <>
+                  {estados.length} {estados.length === 1 ? "estado filtrando" : "estados filtrando"}{" "}
+                  la matriz y los grupos ·{" "}
+                  <button
+                    type="button"
+                    onClick={onEstadosClear}
+                    className="font-semibold text-foreground hover:underline"
+                  >
+                    Quitar filtro
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}
@@ -155,6 +244,13 @@ export default function ControlMatrix({
                   onSort={onSort}
                 />
               ))}
+              <SortableTh
+                col={OVERDUE_BUCKET}
+                label={VENCIDO.short}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <SortableTh col="total" label="Total" align="right" sort={sort} onSort={onSort} />
               <SortableTh
                 col="overdue_percentage"
@@ -169,16 +265,15 @@ export default function ControlMatrix({
           <tbody>
             {visibleRows.length === 0 ? (
               <tr>
-                <td colSpan={9} className="p-9 text-center text-muted-foreground">
+                <td colSpan={10} className="p-9 text-center text-muted-foreground">
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
               visibleRows.map((row) => {
                 const g = rowSegments(row);
-                const vencido = pct(g.vencido, g.total);
-                const delCliente = drilldown?.clienteId === row.id;
-                const nombreActiva = delCliente && drilldown?.tramo === null;
+                const vencidoPct = pct(row.vencido.total, g.total);
+                const nombreActiva = drilldown?.clienteId === row.id && drilldown.tramo === null;
 
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
@@ -210,58 +305,19 @@ export default function ControlMatrix({
                       </td>
                     </DetailTooltip>
 
-                    {row.tramos.map((cell, i) => {
-                      if (cell.total === 0) {
-                        return (
-                          <td
-                            key={i}
-                            className="px-3 py-2.5 text-right text-muted-foreground tabular-nums"
-                          >
-                            —
-                          </td>
-                        );
-                      }
-
-                      const activa = delCliente && drilldown?.tramo === i;
-
-                      return (
-                        // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
-                        // el del navegador se pintaría encima.
-                        <DetailTooltip
-                          key={i}
-                          title={`${row.nombre} · ${TRAMOS[i].label}`}
-                          rows={estadoRows(cell)}
-                          total={{ value: fmtM(cell.total) }}
-                        >
-                          <td
-                            role="button"
-                            tabIndex={0}
-                            aria-pressed={activa}
-                            onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
-                            onKeyDown={(e) =>
-                              onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
-                            }
-                            className={cn(
-                              "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
-                              activa && SELECTED_CELL
-                            )}
-                          >
-                            <span>{fmtM(cell.total)}</span>
-                            <SegBar segments={cell} />
-                          </td>
-                        </DetailTooltip>
-                      );
-                    })}
+                    {row.tramos.map((cell, i) => renderCell(row, cell, i as TramoIndex))}
+                    {renderCell(row, row.vencido, "vencido")}
 
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                       {fmtM(g.total)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
-                      {fmtM(g.vencido)}
-                      <span className="text-muted-foreground"> · </span>
-                      <span className={cn(vencido > 30 && "text-rose-600 dark:text-rose-400")}>
-                        {vencido.toFixed(0)}%
-                      </span>
+                    <td
+                      className={cn(
+                        "whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground",
+                        vencidoPct > 30 && "text-rose-600 dark:text-rose-400"
+                      )}
+                    >
+                      {vencidoPct.toFixed(0)}%
                     </td>
                   </tr>
                 );
@@ -283,11 +339,12 @@ export default function ControlMatrix({
                 </th>
               ))}
               <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                {fmtM(vencidoFooter)}
+              </th>
+              <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                 {fmtM(totalFooter)}
               </th>
               <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
-                {fmtM(vencidoFooter)}
-                <span className="text-muted-foreground"> · </span>
                 {vencidoFooterPct.toFixed(0)}%
               </th>
             </tr>

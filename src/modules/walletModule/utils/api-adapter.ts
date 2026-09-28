@@ -2,8 +2,10 @@
    componentes de este módulo. Vive aparte para que el diseño no dependa de
    la forma exacta del API: si el contrato cambia, se toca sólo este archivo. */
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
+import { estadoMeta, toEstadoNuevo } from "./estados";
 import { HOY, diasEntre } from "./format";
 import type {
+  EstadoId,
   EstadoKey,
   IWalletAttachment,
   IWalletClientRow,
@@ -12,18 +14,20 @@ import type {
   IWalletGroupRow,
   IWalletMatrixCell,
   IWalletPerson,
-  IWalletSummary,
   IWalletTicket,
   IWalletTimelineEntry,
-  TramoIndex,
-  WalletSegments
+  MatrixColumn
 } from "../types";
+import { OVERDUE_BUCKET } from "@/types/portfolios/IWalletMatrix";
 import type {
   AgingBucket,
+  IMatrixCell,
+  IMatrixStatusCatalogItem,
   IWalletMatrix,
   IWalletMatrixDetailRow,
   IWalletMatrixGroup,
-  IWalletMatrixGroups
+  IWalletMatrixGroups,
+  MatrixColumnKey
 } from "@/types/portfolios/IWalletMatrix";
 import type { IIncidentDetail, IIncidentDocument } from "@/hooks/useNoveltyDetail";
 import type { IIncidentAction } from "@/types/novelties/INovelties";
@@ -52,15 +56,32 @@ const ESTADO_BY_STATUS_KEY: Record<string, EstadoKey> = {
   CON_NOVEDAD: "novedad",
   SIN_CONCILIAR: "sin_conciliar",
   SALDO: "saldo",
-  SALDO_FACTURA: "saldo",
+  SALDO_FACTURA: "saldo_factura",
   GLOSADO: "glosado",
   DEVOLUCION: "devolucion"
 };
 
-/** Cualquier estado sin categoría propia cae en "otros", nunca se descarta:
- *  si se descartara, la barra dejaría de sumar el total de la celda. */
-export const toEstadoKey = (statusKey: string): EstadoKey =>
-  ESTADO_BY_STATUS_KEY[statusKey] ?? "otros";
+/** Un estado sin categoría propia nunca se descarta: si se descartara, la barra
+ *  dejaría de sumar el total de la celda. Se pinta aparte, como estado nuevo. */
+export const toEstadoId = (statusKey: string): EstadoId =>
+  ESTADO_BY_STATUS_KEY[statusKey] ?? toEstadoNuevo(statusKey);
+
+/**
+ * statusKey del catálogo detrás de cada estado de la pantalla: lo que hay que
+ * mandar en `statuses` para filtrar por él. Sólo trae los estados que llegaron.
+ * Las claves van ordenadas para que la query no cambie si el catálogo llega en
+ * otro orden.
+ */
+export const statusKeysByEstado = (
+  catalog: IMatrixStatusCatalogItem[]
+): Map<EstadoId, string[]> => {
+  const keys = new Map<EstadoId, string[]>();
+  catalog.forEach((s) => {
+    const e = toEstadoId(s.statusKey);
+    keys.set(e, [...(keys.get(e) ?? []), s.statusKey].sort());
+  });
+  return keys;
+};
 
 /** El API a veces manda el nombre del cliente en null; la UI siempre espera texto. */
 const clientName = (nombre: string | null | undefined): string => nombre?.trim() || "Sin nombre";
@@ -71,68 +92,33 @@ const emptyCell = (): IWalletMatrixCell => {
   return cell;
 };
 
-const emptySegments = (): WalletSegments => {
-  const seg = { total: 0, vencido: 0, n: 0 } as WalletSegments;
-  ORDEN_EST.forEach((e) => (seg[e] = 0));
-  return seg;
+const toCell = (source?: IMatrixCell): IWalletMatrixCell => {
+  const cell = emptyCell();
+  if (!source) return cell;
+
+  cell.total = source.total;
+  cell.n = source.count;
+  source.statuses.forEach((s) => {
+    const e = toEstadoId(s.status);
+    cell[e] = (cell[e] ?? 0) + s.amount;
+  });
+  return cell;
 };
 
-/** Resumen en cero, para el primer render antes de que llegue la foto. */
-export const emptySummary = (): IWalletSummary => ({
-  segments: emptySegments(),
-  clientes: 0
-});
-
-/** Filas de la matriz: un cliente por fila, seis celdas por fila. */
+/** Filas de la matriz: un cliente por fila, seis celdas de tramo más la de vencido. */
 export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
   matrix.rows.map((row) => ({
     id: row.clientId,
     nombre: clientName(row.clientName),
     nit: row.clientId,
     ejecutivo: row.responsibleName ?? "Sin asignar",
-    tramos: TRAMO_BUCKETS.map((bucket) => {
-      const source = row.cells?.[bucket];
-      const cell = emptyCell();
-      if (!source) return cell;
-
-      cell.total = source.total;
-      cell.n = source.count;
-      source.statuses.forEach((s) => {
-        cell[toEstadoKey(s.status)] += s.amount;
-      });
-      return cell;
-    })
+    tramos: TRAMO_BUCKETS.map((bucket) => toCell(row.cells?.[bucket])),
+    vencido: toCell(row.cells?.[OVERDUE_BUCKET])
   }));
 
-/**
- * Totales de las tarjetas superiores.
- *
- * Se arman con los totales que devuelve el API sobre el universo filtrado
- * COMPLETO, no sumando las filas de la página: si se sumara la página, las
- * tarjetas cambiarían al paginar.
- */
-export const toSummary = (matrix: IWalletMatrix): IWalletSummary => {
-  const segments = emptySegments();
-  segments.total = matrix.totals.total;
-  segments.n = matrix.totals.invoices;
-  segments.vencido = TRAMO_BUCKETS.slice(1).reduce(
-    (acc, bucket) => acc + (matrix.totals.byAging?.[bucket]?.total ?? 0),
-    0
-  );
-
-  // El desglose por estado no viene agregado a nivel global, así que se
-  // reconstruye desde las celdas de la página. Es el mismo criterio que ya
-  // usaba el módulo con los datos simulados.
-  matrix.rows.forEach((row) =>
-    TRAMO_BUCKETS.forEach((bucket) =>
-      row.cells?.[bucket]?.statuses.forEach((s) => {
-        segments[toEstadoKey(s.status)] += s.amount;
-      })
-    )
-  );
-
-  return { segments, clientes: matrix.pagination.totalClients };
-};
+/** Valor de `aging` para /portfolio/matrix/groups según la columna elegida. */
+export const columnBucket = (col: MatrixColumn): MatrixColumnKey =>
+  col === "vencido" ? OVERDUE_BUCKET : TRAMO_BUCKETS[col];
 
 /**
  * Identidad de un grupo dentro de la pantalla.
@@ -148,8 +134,8 @@ export const groupKey = (g: IWalletMatrixGroup): string =>
 /** Grupos de facturas de la tabla inferior. */
 export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
   groups.groups.map((g) => {
-    const tipo = toEstadoKey(g.statusKey);
-    const meta = EST_META[tipo];
+    const tipo = toEstadoId(g.statusKey);
+    const meta = estadoMeta(tipo);
     return {
       clave: groupKey(g),
       clienteId: g.clientId,
@@ -203,10 +189,10 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  */
 export const toGroupDetail = (
   group: IWalletMatrixGroup,
-  tramo: TramoIndex | null = null
+  tramo: MatrixColumn | null = null
 ): IWalletGroupDetail => {
-  const tipo = toEstadoKey(group.statusKey);
-  const meta = EST_META[tipo];
+  const tipo = toEstadoId(group.statusKey);
+  const meta = estadoMeta(tipo);
   const responsable = toPerson(group.responsibleName);
 
   return {
