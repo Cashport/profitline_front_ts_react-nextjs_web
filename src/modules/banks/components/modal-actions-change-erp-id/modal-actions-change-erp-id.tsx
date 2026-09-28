@@ -46,14 +46,19 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
     const payment = selectedRows?.[0];
     if (!payment) return;
 
+    const idErp = data.erpId.trim();
+
     setIsLoading(true);
     try {
       await changePaymentIdERP({
         payment_id: payment.id,
-        id_erp: data.erpId.trim(),
+        id_erp: idErp,
         comment: data.comment?.trim() || undefined
       });
-      showMessage("success", "Id ERP actualizado correctamente");
+      showMessage(
+        "success",
+        idErp ? "Id ERP actualizado correctamente" : "Id ERP eliminado correctamente"
+      );
       onSuccess?.();
       onClose();
     } catch (error) {
@@ -91,7 +96,7 @@ const ModalActionsChangeErpId = ({ isOpen, onClose, selectedRows, onSuccess }: P
           control={control}
           error={errors.erpId}
           // The API treats a blank/whitespace id as "delete the ERP id"
-          validationRules={{ validate: (value: string) => !!value?.trim() }}
+          validationRules={{ required: false }}
           placeholder="Ingresar id ERP"
         />
         <InputForm
