@@ -146,10 +146,10 @@ export const CATEGORIAS = [
 export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
   status: [],
   noveltyType: [],
-  coordinator: null,
-  market: null,
-  kam: null,
-  kam_lider: null,
+  coordinator: [],
+  market: [],
+  kam: [],
+  kam_lider: [],
   executive: []
 };
 

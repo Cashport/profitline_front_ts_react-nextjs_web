@@ -73,7 +73,7 @@ export interface IWalletGroupRow {
   estado: { nom: string; sev: Sev };
 }
 
-/** Totales de las tarjetas superiores. */
+/** Totales del portafolio, las tarjetas ya leen el `summary` del API. */
 export interface IWalletSummary {
   segments: WalletSegments;
   clientes: number;
@@ -88,13 +88,7 @@ export interface SortState {
 export type IWalletMatrixModalFilters = Required<
   Pick<
     IWalletMatrixFilters,
-    | "status"
-    | "noveltyType"
-    | "coordinator"
-    | "market"
-    | "kam"
-    | "kam_lider"
-    | "executive"
+    "status" | "noveltyType" | "coordinator" | "market" | "kam" | "kam_lider" | "executive"
   >
 >;
 

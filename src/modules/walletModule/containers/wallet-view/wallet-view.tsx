@@ -24,12 +24,10 @@ import {
 } from "../../components/wallet-skeleton/wallet-skeleton";
 import {
   TRAMO_BUCKETS,
-  emptySummary,
   groupKey,
   toClientRows,
   toGroupDetail,
-  toGroupRows,
-  toSummary
+  toGroupRows
 } from "../../utils/api-adapter";
 import { corto } from "../../utils/format";
 import { EMPTY_MATRIX_MODAL_FILTERS, MATRIX_DEFAULT_SORT } from "../../constants";
@@ -67,7 +65,7 @@ export default function WalletView() {
   );
   // Orden del servidor sobre la foto completa; `col` es el `sort_by` del API.
   const [sort, setSort] = useState<SortState>(MATRIX_DEFAULT_SORT);
-  const [calculateEndMonth, setCalculateEndMonth] = useState(false);
+  const [calculateEndMonth, setCalculateEndMonth] = useState(true);
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
@@ -243,7 +241,6 @@ export default function WalletView() {
     );
 
   const clientRows = useMemo(() => (matrix ? toClientRows(matrix) : []), [matrix]);
-  const summary = useMemo(() => (matrix ? toSummary(matrix) : emptySummary()), [matrix]);
   const groupRows = useMemo(() => (groups ? toGroupRows(groups) : []), [groups]);
 
   // Grupo abierto, tal como vino del API: el modal necesita más campos de los
@@ -289,7 +286,11 @@ export default function WalletView() {
         onToggleProjection={setCalculateEndMonth}
       />
 
-      {primeraCarga ? <StatCardsSkeleton /> : <WalletStatCards summary={summary} />}
+      {primeraCarga ? (
+        <StatCardsSkeleton />
+      ) : (
+        matrix?.summary && <WalletStatCards summary={matrix.summary} totals={matrix.totals} />
+      )}
 
       {primeraCarga ? (
         <MatrixSkeleton />

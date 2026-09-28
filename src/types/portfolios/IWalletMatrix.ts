@@ -94,6 +94,44 @@ export interface IMatrixTotals {
   invoices: number;
 }
 
+export interface IMatrixSummaryComposition {
+  statusKey: string;
+  statusLabel: string;
+  total: number;
+  count: number;
+  percentage: number;
+}
+
+export interface IMatrixSummaryTotal {
+  amount: number;
+  /** Facturas más saldos; `invoices` cuenta sólo las facturas. */
+  documents: number;
+  invoices: number;
+  clients: number;
+  /** Reparto del total por statusKey de factura. */
+  composition: IMatrixSummaryComposition[];
+}
+
+export interface IMatrixSummaryMetric {
+  amount: number;
+  count: number;
+  clients: number;
+  /** Sobre la cartera total, de 0 a 100. */
+  percentage: number;
+  /** La regla de negocio aún no está cerrada: la cifra es una aproximación. */
+  definitionPending: boolean;
+}
+
+/** Cifras de las tarjetas superiores, sobre todo el conjunto filtrado y no sólo la página. */
+export interface IMatrixSummary {
+  total: IMatrixSummaryTotal;
+  overdue: IMatrixSummaryMetric;
+  openNovelty: IMatrixSummaryMetric;
+  unreconciled: IMatrixSummaryMetric;
+  openBalances: IMatrixSummaryMetric;
+  pendingCompensation: IMatrixSummaryMetric;
+}
+
 export interface IWalletMatrix {
   columns: AgingBucket[];
   rows: IMatrixRow[];
@@ -101,6 +139,7 @@ export interface IWalletMatrix {
   pagination: { page: number; limit: number; totalClients: number };
   snapshot: ISnapshotMeta | null;
   cutoff: IMatrixCutoff;
+  summary: IMatrixSummary | null;
 }
 
 export interface IWalletMatrixDetailRow {
@@ -206,10 +245,10 @@ export interface IWalletMatrixFilters {
   holdings?: number[];
   clientGroup?: number[];
   /** Valores canónicos de GET /invoice/incident-list/filters, no texto libre. */
-  coordinator?: string | null;
-  market?: string | null;
-  kam?: string | null;
-  kam_lider?: string | null;
+  coordinator?: string[];
+  market?: string[];
+  kam?: string[];
+  kam_lider?: string[];
   /** Texto libre: cliente, NIT o responsable. */
   search?: string;
   /** Ordena el conjunto completo filtrado, no sólo la página cargada. */
@@ -229,14 +268,7 @@ export interface IWalletMatrixFilters {
  */
 export type IWalletMatrixSharedFilters = Pick<
   IWalletMatrixFilters,
-  | "status"
-  | "noveltyType"
-  | "executive"
-  | "coordinator"
-  | "market"
-  | "kam"
-  | "kam_lider"
-  | "search"
+  "status" | "noveltyType" | "executive" | "coordinator" | "market" | "kam" | "kam_lider" | "search"
 >;
 
 /** Acotado de GET /portfolio/matrix/groups a una foto, cliente y tramo. */

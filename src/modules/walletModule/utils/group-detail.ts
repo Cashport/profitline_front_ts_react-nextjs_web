@@ -64,9 +64,7 @@ export function estadoTicket(t: IWalletTicket): TicketStatus {
 /**
  * Vencido del grupo: todo lo que no es corriente.
  *
- * Se lee del reparto por tramo y no de las facturas, que son una muestra. Es
- * el mismo criterio de `toSummary`, así que el dato del modal y el de las
- * tarjetas superiores no pueden discrepar.
+ * Se lee del reparto por tramo y no de las facturas, que son una muestra.
  */
 export const vencidoDeTramos = (tramos: number[]): number =>
   tramos.slice(1).reduce((a, m) => a + m, 0);
