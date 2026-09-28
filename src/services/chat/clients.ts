@@ -8,7 +8,9 @@ import axios from "axios";
 export async function getWhatsappClients() {
   try {
     const res =
-      await API.get<{ uuid: string; id: string; client_name: string }[]>("/client/whatsapp");
+      await API.get<{ uuid: string; id: string; client_name: string; acountCodes: string[] }[]>(
+        "/client/whatsapp"
+      );
     return res.data;
   } catch (error) {
     console.error("Error fetching WhatsApp clients:", error);
