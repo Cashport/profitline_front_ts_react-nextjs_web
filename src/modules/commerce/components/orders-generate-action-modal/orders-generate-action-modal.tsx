@@ -26,6 +26,7 @@ import {
 } from "@/services/commerce/commerce";
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { ModalDownloadBillingExcel } from "./modal-download-billing-excel";
 import { UploadPurchaseOrdersProgressModal } from "./upload-purchase-orders-progress-modal";
 import { UploadPurchaseOrdersSummaryModal } from "./upload-purchase-orders-summary-modal";
 
@@ -71,6 +72,7 @@ export const OrdersGenerateActionModal = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [isBillingReportLoading, setIsBillingReportLoading] = useState(false);
   const [isBillingDetailLoading, setIsBillingDetailLoading] = useState(false);
+  const [isBillingDetailModalOpen, setIsBillingDetailModalOpen] = useState(false);
   const [isSalesDetailLoading, setIsSalesDetailLoading] = useState(false);
   const [isPartialCsvModalOpen, setIsPartialCsvModalOpen] = useState(false);
   const [isPartialCsvLoading, setIsPartialCsvLoading] = useState(false);
@@ -209,7 +211,11 @@ export const OrdersGenerateActionModal = ({
     }
   };
 
-  const handleDownloadBillingDetail = async () => {
+  const handleOpenBillingDetailModal = () => {
+    setIsBillingDetailModalOpen(true);
+  };
+
+  const handleDownloadBillingDetail = async (startDate: string, endDate: string) => {
     setIsBillingDetailLoading(true);
     const hide = message.open({
       type: "loading",
@@ -217,9 +223,10 @@ export const OrdersGenerateActionModal = ({
       duration: 0
     });
     try {
-      const res = await downloadBillingDetailExcel(projectId);
+      const res = await downloadBillingDetailExcel(projectId, startDate, endDate);
       downloadFileFromUrl(res.url, res.filename);
       showMessage("success", "Descarga exitosa");
+      setIsBillingDetailModalOpen(false);
       onClose();
     } catch (error) {
       showMessage(
@@ -393,7 +400,7 @@ export const OrdersGenerateActionModal = ({
     <>
       <Modal
         className="ordersGenerateActionModal"
-        open={isOpen && !isPartialCsvModalOpen && !isOcFormatModalOpen}
+        open={isOpen && !isPartialCsvModalOpen && !isOcFormatModalOpen && !isBillingDetailModalOpen}
         title={
           <Title className="ordersGenerateActionModal__title" level={4}>
             Generar acción
@@ -435,7 +442,7 @@ export const OrdersGenerateActionModal = ({
             disabled={isBillingReportLoading}
           />
           <ButtonGenerateAction
-            onClick={handleDownloadBillingDetail}
+            onClick={handleOpenBillingDetailModal}
             icon={<DownloadSimple size={16} />}
             title="Descargar informe de facturación detallado"
             disabled={isBillingDetailLoading}
@@ -543,6 +550,13 @@ export const OrdersGenerateActionModal = ({
         cancelText="Todas del cliente"
         okLoading={isOcFormatLoading}
         cancelLoading={isOcFormatLoading}
+      />
+
+      <ModalDownloadBillingExcel
+        isOpen={isBillingDetailModalOpen}
+        onClose={() => setIsBillingDetailModalOpen(false)}
+        onDownload={handleDownloadBillingDetail}
+        isLoading={isBillingDetailLoading}
       />
 
       <UploadPurchaseOrdersProgressModal

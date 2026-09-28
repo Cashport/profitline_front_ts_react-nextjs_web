@@ -14,3 +14,13 @@ export const getDashboardSalesFilters = async (entity: string) => {
     return error as any;
   }
 };
+
+// El export respeta los mismos filtros que la grilla de negociaciones (sin paginar).
+export const downloadNegotiationsExcel = async (
+  params: URLSearchParams
+): Promise<{ url: string; filename: string }> => {
+  const response: GenericResponse<{ url: string; filename: string }> = await API.get(
+    `${config.API_HOST}/dashboard/sales/negociaciones/excel?${params.toString()}`
+  );
+  return response.data;
+};

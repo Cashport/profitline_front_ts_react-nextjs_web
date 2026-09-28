@@ -139,9 +139,7 @@ export default function ProductsDetailsAndDiscounts({
   const discountBySku = new Map(discountItems.map((d) => [d.product_sku, d]));
 
   // Sin descuentos el backend no devuelve `discounts`; los productos llegan en `products`.
-  const productsBySku = new Map(
-    (confirmOrderData?.products ?? []).map((p) => [p.product_sku, p])
-  );
+  const productsBySku = new Map((confirmOrderData?.products ?? []).map((p) => [p.product_sku, p]));
 
   const secondaryDiscount = confirmOrderData?.discounts?.secondaryDiscount;
 
@@ -255,29 +253,27 @@ export default function ProductsDetailsAndDiscounts({
         />
 
         {/* Otros descuentos */}
-        {secondaryDiscount && (
-          <div className="mx-5 mt-4 mb-5 rounded-xl border border-[#EEEEEE] overflow-hidden flex-shrink-0">
-            <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
-              <p className="text-xs font-semibold text-[#141414]">Otros descuentos</p>
-            </div>
-            <div className="flex items-center gap-3 px-4 py-3">
-              <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount.name}</span>
-              <span className="text-sm font-semibold text-red-500">
-                -{formatPrice(orderTotalDiscount)}
-              </span>
-              <button
-                onClick={() => setDeactivateCrossSelling((prev) => !prev)}
-                className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
-                  deactivateCrossSelling
-                    ? "bg-[#141414] border-[#141414] text-white"
-                    : "bg-white border-[#DDDDDD] hover:border-[#141414]"
-                }`}
-              >
-                {deactivateCrossSelling && <Check size={11} />}
-              </button>
-            </div>
+        <div className="mx-5 mt-4 mb-5 rounded-xl border border-[#EEEEEE] overflow-hidden flex-shrink-0">
+          <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#EEEEEE]">
+            <p className="text-xs font-semibold text-[#141414]">Otros descuentos</p>
           </div>
-        )}
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="flex-1 text-sm text-[#141414]">{secondaryDiscount?.name}</span>
+            <span className="text-sm font-semibold text-red-500">
+              -{formatPrice(orderTotalDiscount || 0)}
+            </span>
+            <button
+              onClick={() => setDeactivateCrossSelling((prev) => !prev)}
+              className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
+                deactivateCrossSelling
+                  ? "bg-[#141414] border-[#141414] text-white"
+                  : "bg-white border-[#DDDDDD] hover:border-[#141414]"
+              }`}
+            >
+              {deactivateCrossSelling && <Check size={11} />}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

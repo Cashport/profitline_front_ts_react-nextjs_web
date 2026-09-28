@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Users, User, Package, Tag, UploadCloud, ChevronRight } from "lucide-react";
+import { ComponentType } from "react";
+import { Users, User, Package, Tag, UploadCloud, Settings, ChevronRight } from "lucide-react";
+import { Chats } from "@phosphor-icons/react";
 
 type Section = {
   href: string;
-  icon: typeof Users;
+  icon: ComponentType<{ size?: string | number; className?: string }>;
   label: string;
   description: string;
   disabled?: boolean;
@@ -41,6 +43,18 @@ const sections: Section[] = [
     icon: UploadCloud,
     label: "Cargue de información",
     description: "Alimenta el app con ETLs manuales: inventario, precios, clientes y más."
+  },
+  {
+    href: "/mass-communications",
+    icon: Chats,
+    label: "Comunicaciones Masivas",
+    description: "Envía comunicaciones masivas a los clientes en minutos."
+  },
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Configuraciones",
+    description: "Gestión administrativa del proyecto."
   }
 ];
 

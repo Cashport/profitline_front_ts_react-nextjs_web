@@ -452,6 +452,31 @@ export interface IMarketAdminClientConfig {
 
 export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
 
+// ── Descuento (plan anual) creado desde el detalle del cliente ──────────────
+// lineId = category_id de GET marketplace/projects/:p/clients/:c/products (idLine del plan anual)
+export interface IDiscountGroupProduct {
+  id: number;
+  description: string;
+  lineId: number;
+  lineName: string;
+}
+
+// lineId solo filtra el buscador; cada producto lleva su propia línea al payload.
+export interface IDiscountGroup {
+  id: string;
+  discount: number;
+  units: number;
+  lineId?: number;
+  products: IDiscountGroupProduct[];
+}
+
+export interface NewClientDiscountData {
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  file: File;
+  groups: IDiscountGroup[];
+}
+
 // ── Usuarios del marketplace (/marketplace-admin/users) ─────────────────────
 
 export interface IUseMarketAdminUsersParams {

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Plus, Paperclip } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
 import ProfitLoader from "@/components/ui/profit-loader";
 import NuevaAsignacionModal from "@/modules/marketAdmin/components/MarketAdminManualBonus/NuevaAsignacionModal";
+import ModalCreateDiscount from "@/modules/marketAdmin/components/market-admin-client-detail/ModalCreateDiscount";
 import {
   DateCell,
   TextCell,
@@ -21,6 +21,7 @@ import {
   ClienteOption,
   IManagerBonificationGroup,
   IManagerBonificationTotals,
+  NewClientDiscountData,
   NuevaAsignacionData
 } from "@/types/marketAdmin/IMarketAdmin";
 import { Product } from "@/types/products/products";
@@ -29,6 +30,7 @@ type Props = {
   descuentos: DiscountByClient[];
   isLoadingDescuentos: boolean;
   onToggleDescuento: (id: number, newStatus: boolean) => Promise<void>;
+  onCreateDiscount: (data: NewClientDiscountData) => Promise<void>;
   bonificados: IManagerBonificationGroup[];
   bonificadosTotals?: IManagerBonificationTotals;
   isLoadingBonificados: boolean;
@@ -41,6 +43,7 @@ export default function PromocionesTab({
   descuentos,
   isLoadingDescuentos,
   onToggleDescuento,
+  onCreateDiscount,
   bonificados,
   bonificadosTotals,
   isLoadingBonificados,
@@ -48,10 +51,10 @@ export default function PromocionesTab({
   productos,
   onCreateBonificado
 }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
   const [showBonusModal, setShowBonusModal] = useState(false);
   const [savingBonus, setSavingBonus] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [savingDiscount, setSavingDiscount] = useState(false);
 
   const handleCreateBonus = () => setShowBonusModal(true);
 
@@ -68,12 +71,19 @@ export default function PromocionesTab({
     }
   };
 
-  // Opens the rule-create screen with "Plan anual" preselected; returnTo brings
-  // "Volver a la lista" back to this client detail instead of the discounts list.
-  const handleCreateDiscount = () =>
-    router.push(
-      `${MARKET_ADMIN_DISCOUNTS_BASE}/regla/create?category=annual&returnTo=${encodeURIComponent(pathname)}`
-    );
+  const handleCreateDiscount = () => setShowDiscountModal(true);
+
+  const handleSaveDiscount = async (data: NewClientDiscountData) => {
+    try {
+      setSavingDiscount(true);
+      await onCreateDiscount(data);
+      setShowDiscountModal(false);
+    } catch {
+      // handled upstream
+    } finally {
+      setSavingDiscount(false);
+    }
+  };
 
   const columns: ColumnsType<DiscountByClient> = [
     {
@@ -229,6 +239,15 @@ export default function PromocionesTab({
           saving={savingBonus}
           onClose={() => setShowBonusModal(false)}
           onSave={handleSaveBonus}
+        />
+      )}
+
+      {showDiscountModal && (
+        <ModalCreateDiscount
+          clientId={cliente.nit}
+          saving={savingDiscount}
+          onClose={() => setShowDiscountModal(false)}
+          onSave={handleSaveDiscount}
         />
       )}
     </div>
