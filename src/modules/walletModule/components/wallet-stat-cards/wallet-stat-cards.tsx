@@ -2,11 +2,11 @@
 
 import { cn } from "@/utils/utils";
 import { EST_META, ORDEN_EST } from "../../constants";
-import { toEstadoKey } from "../../utils/api-adapter";
+import { toEstadoId } from "../../utils/api-adapter";
 import { cli, doc, fac, fmtM, fmtPct } from "../../utils/format";
 import SegBar from "../shared/seg-bar";
 import StatusChip from "../shared/status-chip";
-import type { EstadoKey, WalletSegments } from "../../types";
+import type { MontosPorEstado } from "../../types";
 import { AGING_BUCKETS } from "@/types/portfolios/IWalletMatrix";
 import type {
   IMatrixSummary,
@@ -26,12 +26,15 @@ const Swatch = ({ className }: { className: string }) => (
   />
 );
 
-/** SegBar pinta por estado de la pantalla, no por statusKey: SALDO y SALDO_FACTURA
- *  caen juntos en "saldo" y los segmentos siguen el orden de la leyenda. */
+/** SegBar pinta por estado de la pantalla, no por statusKey: los segmentos siguen
+ *  el orden de la leyenda y un estado nuevo entra con su color de respaldo. */
 const compositionSegments = (total: IMatrixSummaryTotal) => {
-  const segments = { total: total.amount } as Pick<WalletSegments, EstadoKey | "total">;
+  const segments = { total: total.amount } as MontosPorEstado & { total: number };
   ORDEN_EST.forEach((e) => (segments[e] = 0));
-  total.composition.forEach((c) => (segments[toEstadoKey(c.statusKey)] += c.total));
+  total.composition.forEach((c) => {
+    const e = toEstadoId(c.statusKey);
+    segments[e] = (segments[e] ?? 0) + c.total;
+  });
   return segments;
 };
 

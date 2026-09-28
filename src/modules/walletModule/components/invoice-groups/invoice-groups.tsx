@@ -5,7 +5,8 @@ import { Pagination, Spin } from "antd";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
-import { EST_META, TRAMOS } from "../../constants";
+import { TRAMOS } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
 import { fmtM, grp } from "../../utils/format";
 import { nextSort, ordenar, sumaTramos } from "../../utils/wallet-calc";
 import DetailTooltip, { tramoRows } from "../shared/detail-tooltip";
@@ -69,7 +70,7 @@ export default function InvoiceGroups({
       ordenar(rows, sort, (g) => {
         switch (sort.col) {
           case "grupo":
-            return g.novedadId ?? EST_META[g.tipo].nom;
+            return g.novedadId ?? estadoMeta(g.tipo).nom;
           case "cliente":
             return g.cliente;
           case "fact":
@@ -195,13 +196,13 @@ export default function InvoiceGroups({
                   <td className="px-3 py-2.5">
                     <span className="inline-flex items-center gap-2 font-semibold text-foreground">
                       <i
-                        className={cn("h-2.5 w-2.5 shrink-0 rounded-[3px]", EST_META[g.tipo].bg)}
+                        className={cn("h-2.5 w-2.5 shrink-0 rounded-[3px]", estadoMeta(g.tipo).bg)}
                         style={{ boxShadow: "inset 0 0 0 1px var(--wallet-seg-edge)" }}
                       />
                       {g.novedadId ? (
                         <span className="font-mono">{g.novedadId}</span>
                       ) : (
-                        EST_META[g.tipo].nom
+                        estadoMeta(g.tipo).nom
                       )}
                     </span>
                     <div className="text-[11.5px] text-muted-foreground">{g.detalle}</div>

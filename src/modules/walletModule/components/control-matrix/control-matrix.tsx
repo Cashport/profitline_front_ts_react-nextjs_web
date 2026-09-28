@@ -14,7 +14,13 @@ import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
 import SegBar from "../shared/seg-bar";
 import SortableTh from "../shared/sortable-th";
 import StatusLegend from "../shared/status-legend";
-import type { IWalletClientRow, IWalletDrilldown, SortState, TramoIndex } from "../../types";
+import type {
+  EstadoId,
+  IWalletClientRow,
+  IWalletDrilldown,
+  SortState,
+  TramoIndex
+} from "../../types";
 import type { IMatrixTotals } from "@/types/portfolios/IWalletMatrix";
 
 interface ControlMatrixProps {
@@ -42,6 +48,16 @@ interface ControlMatrixProps {
   drilldown: IWalletDrilldown | null;
   // eslint-disable-next-line no-unused-vars
   onSelect: (drilldown: IWalletDrilldown) => void;
+  /** Chips de la leyenda: los estados que trae el catálogo, en orden de pintado. */
+  legendEstados: EstadoId[];
+  /** Estados que filtran la matriz y los grupos; vacío = todos. */
+  estados: EstadoId[];
+  /** Estados con algún statusKey en la foto: los únicos chips que se pueden elegir. */
+  selectableEstados: EstadoId[];
+  /** `additive` es el shift+clic: suma o quita el estado sin soltar los demás. */
+  // eslint-disable-next-line no-unused-vars
+  onEstadoSelect: (estado: EstadoId, additive: boolean) => void;
+  onEstadosClear: () => void;
 }
 
 /** Celda seleccionada: el verde va por dentro, sin mover el layout de la tabla. */
@@ -62,7 +78,12 @@ export default function ControlMatrix({
   loading,
   emptyMessage = "Ningún cliente coincide con los filtros.",
   drilldown,
-  onSelect
+  onSelect,
+  legendEstados,
+  estados,
+  selectableEstados,
+  onEstadoSelect,
+  onEstadosClear
 }: ControlMatrixProps) {
   // Ni la búsqueda ni el orden se resuelven aquí: la tabla sólo tiene la
   // página cargada, 15 de miles de clientes. Filtrar daría "sin resultados"
@@ -107,8 +128,33 @@ export default function ControlMatrix({
         <div>
           <h3 className="text-[13.5px] font-semibold text-foreground">Matriz de control</h3>
           <div className="mt-2">
-            <StatusLegend />
+            <StatusLegend
+              estados={legendEstados}
+              selected={estados}
+              selectable={selectableEstados}
+              onSelect={onEstadoSelect}
+            />
           </div>
+          {/* Hasta que llega el catálogo ningún chip se puede elegir: la pista esperaría. */}
+          {selectableEstados.length > 0 && (
+            <p className="mt-1.5 text-[11.5px] text-muted-foreground">
+              {estados.length === 0 ? (
+                "clic en un estado para filtrar · shift+clic para sumar varios"
+              ) : (
+                <>
+                  {estados.length} {estados.length === 1 ? "estado filtrando" : "estados filtrando"}{" "}
+                  la matriz y los grupos ·{" "}
+                  <button
+                    type="button"
+                    onClick={onEstadosClear}
+                    className="font-semibold text-foreground hover:underline"
+                  >
+                    Quitar filtro
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         {/* UiSearchInput es flex:1, así que el ml-auto va en el contenedor. */}

@@ -4,7 +4,7 @@ import BarList, { type BarListRow } from "@/components/ui/bar-list/bar-list";
 import PanelCard from "@/components/ui/panel-card/panel-card";
 import DetailTooltip, { estadoRows } from "@/modules/walletModule/components/shared/detail-tooltip";
 import StatusLegend from "@/modules/walletModule/components/shared/status-legend";
-import { EST_META } from "@/modules/walletModule/constants";
+import { estadoMeta } from "@/modules/walletModule/utils/estados";
 import { fmtM } from "@/modules/walletModule/utils/format";
 import { segmentWidths } from "@/modules/walletModule/utils/wallet-calc";
 import type { ITorreEjecutivo } from "../../types";
@@ -27,7 +27,7 @@ export default function ExecutivePanel({ ejecutivos }: ExecutivePanelProps) {
     segments: segmentWidths(e.segments).map((s) => ({
       key: s.estado,
       width: s.width,
-      className: EST_META[s.estado].bg
+      className: estadoMeta(s.estado).bg
     })),
     value: fmtM(e.sinConciliar)
   }));

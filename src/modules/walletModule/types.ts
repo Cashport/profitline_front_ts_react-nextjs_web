@@ -1,13 +1,12 @@
 import type { IWalletMatrixFilters } from "@/types/portfolios/IWalletMatrix";
 
 /**
- * Estado de un documento dentro de la cartera.
+ * Estado de un documento dentro de la cartera, de los que tienen color propio.
  *
- * Los cinco primeros son los del diseño original. Los cuatro siguientes se
- * agregaron al conectar el API: la cartera real trae saldos, glosas y
- * devoluciones, y `otros` recoge cualquier estado del catálogo que no tenga
- * un color propio. Sin ellos la barra apilada de una celda no sumaría el
- * total de esa celda, que es justo lo que no puede pasar en este reporte.
+ * Los cinco primeros son los del diseño original. Los siguientes se agregaron
+ * al conectar el API: la cartera real trae saldos, saldos de factura, glosas y
+ * devoluciones. `otros` sigue definido, pero un estado del catálogo sin color
+ * propio ya no cae ahí: se pinta aparte, como EstadoNuevo.
  */
 export type EstadoKey =
   | "compensada"
@@ -16,9 +15,29 @@ export type EstadoKey =
   | "novedad"
   | "sin_conciliar"
   | "saldo"
+  | "saldo_factura"
   | "glosado"
   | "devolucion"
   | "otros";
+
+/**
+ * Estado que el API mandó y el front aún no conoce: su statusKey con prefijo,
+ * para que no choque con los conocidos. Se pinta con un color de respaldo y su
+ * nombre sale del statusKey (ver utils/estados).
+ */
+export type EstadoNuevo = `nuevo:${string}`;
+
+/** Cualquier estado que se puede pintar o elegir: uno conocido o uno nuevo. */
+export type EstadoId = EstadoKey | EstadoNuevo;
+
+/**
+ * Montos por estado. Los conocidos están siempre, en cero si no hay; los
+ * nuevos, sólo si llegaron. Sin ellos la barra apilada de una celda no sumaría
+ * el total de esa celda, que es justo lo que no puede pasar en este reporte.
+ */
+export type MontosPorEstado = Record<EstadoKey, number> & {
+  [e: EstadoNuevo]: number | undefined;
+};
 
 /** Severidad visual compartida por chips y estados de novedad. */
 export type Sev = "ok" | "warn" | "crit" | "idle";
@@ -27,14 +46,14 @@ export type Sev = "ok" | "warn" | "crit" | "idle";
 export type TramoIndex = 0 | 1 | 2 | 3 | 4 | 5;
 
 /** Montos por estado + totales de un conjunto de facturas. */
-export interface WalletSegments extends Record<EstadoKey, number> {
+export interface WalletSegments extends MontosPorEstado {
   total: number;
   vencido: number;
   n: number;
 }
 
 /** Una celda de la matriz: el cruce cliente × tramo. */
-export interface IWalletMatrixCell extends Record<EstadoKey, number> {
+export interface IWalletMatrixCell extends MontosPorEstado {
   total: number;
   /** Documentos que componen la celda. */
   n: number;
@@ -55,7 +74,7 @@ export interface IWalletGroupRow {
   clave: string;
   /** Enlaza el grupo con IWalletClientRow.id: por aquí filtra el drilldown. */
   clienteId: string;
-  tipo: EstadoKey;
+  tipo: EstadoId;
   /** Sólo para grupos de tipo "novedad". */
   novedadId?: string;
   /** Subtítulo: tipo de novedad, o la descripción corta del estado. */
@@ -84,13 +103,19 @@ export interface SortState {
   dir: "asc" | "desc";
 }
 
-/** Lo que posee el modal de filtros; la vista lo mezcla con búsqueda y proyección. */
+/**
+ * Lo que posee el modal de filtros; la vista lo mezcla con búsqueda y proyección.
+ *
+ * `estados` lo comparten el modal y los chips de la matriz. Son estados de la
+ * pantalla y no statusKey: los de "Otros" salen del catálogo, así que la vista
+ * los traduce a los `statuses` del API al armar la consulta.
+ */
 export type IWalletMatrixModalFilters = Required<
   Pick<
     IWalletMatrixFilters,
-    "status" | "noveltyType" | "coordinator" | "market" | "kam" | "kam_lider" | "executive"
+    "noveltyType" | "coordinator" | "market" | "kam" | "kam_lider" | "executive"
   >
->;
+> & { estados: EstadoId[] };
 
 /** Selección activa de la matriz. `tramo: null` = todos los tramos del cliente. */
 export interface IWalletDrilldown {
@@ -197,7 +222,7 @@ export interface IWalletNovedad {
 /** Todo lo que necesita el modal de gestión de un grupo. */
 export interface IWalletGroupDetail {
   clave: string;
-  tipo: EstadoKey;
+  tipo: EstadoId;
   /**
    * statusKey crudo del API (CONCILIADO, SIN_CONCILIAR, SALDO_FACTURA…). `tipo`
    * lo agrupa y pierde el valor exacto, que es el que pide /portfolio/matrix/detail.

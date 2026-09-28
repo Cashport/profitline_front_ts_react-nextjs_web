@@ -89,9 +89,18 @@
   --wallet-nov: 255 85 0;
   --wallet-risk: 201 222 255;
   --wallet-saldo: 161 98 7;
+  --wallet-saldo-fact: 124 58 237;
   --wallet-glosa: 0 168 220;
   --wallet-devol: 214 6 93;
   --wallet-otros: 120 130 140;
+
+  /* Respaldo para los estados que el API mande y el front aún no conozca. Cada
+     uno se separa de los colores de arriba; entre sí, lo que los distingue es
+     el nombre que acompaña al color en chips y tooltips. */
+  --wallet-nuevo-1: 27 175 122;
+  --wallet-nuevo-2: 237 161 0;
+  --wallet-nuevo-3: 49 46 129;
+  --wallet-nuevo-4: 253 164 175;
 
   --wallet-t0: 203 216 221;
   --wallet-t1: 157 182 191;
