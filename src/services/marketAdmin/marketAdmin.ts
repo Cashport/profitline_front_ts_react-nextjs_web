@@ -7,6 +7,7 @@ import {
   IManagerBonificationSummary,
   IMarketAdminClientAddress,
   IMarketAdminClientsBatchBody,
+  IMarketAdminFacturador,
   IProductInventoryItem,
   IProfitLoader,
   IProfitLoaderTimelineResponse,
@@ -196,6 +197,49 @@ export const removeClientFromMarketAdminUser = async (
     return response.data;
   } catch (error) {
     console.error("Error al quitar el cliente del usuario:", error);
+    throw error;
+  }
+};
+
+// GET /marketplace-admin/billers — usuarios con rol Facturador del proyecto actual
+export const getMarketAdminFacturadores = async () => {
+  try {
+    const response: GenericResponse<IMarketAdminFacturador[]> = await API.get(
+      "/marketplace-admin/billers"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los facturadores:", error);
+    throw error;
+  }
+};
+
+// PUT /marketplace-admin/users/:id/biller — asigna o cambia el facturador
+export const assignMarketAdminUserBiller = async (
+  userId: string | number,
+  billerUserId: number
+) => {
+  try {
+    const response: GenericResponse<unknown> = await API.put(
+      `/marketplace-admin/users/${userId}/biller`,
+      { biller_user_id: billerUserId }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al asignar el facturador al usuario:", error);
+    throw error;
+  }
+};
+
+// DELETE /marketplace-admin/users/:id/biller — quita el facturador
+export const removeMarketAdminUserBiller = async (userId: string | number) => {
+  try {
+    const response: GenericResponse<unknown> = await API.delete(
+      `/marketplace-admin/users/${userId}/biller`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al quitar el facturador del usuario:", error);
     throw error;
   }
 };
