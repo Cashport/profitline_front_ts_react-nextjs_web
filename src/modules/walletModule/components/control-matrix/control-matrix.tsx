@@ -5,9 +5,9 @@ import { Pagination } from "antd";
 
 import ProfitLoader from "@/components/ui/profit-loader";
 import UiSearchInput from "@/components/ui/search-input";
-import { AGING_BUCKETS } from "@/types/portfolios/IWalletMatrix";
+import { AGING_BUCKETS, OVERDUE_BUCKET } from "@/types/portfolios/IWalletMatrix";
 import { cn } from "@/utils/utils";
-import { TRAMOS } from "../../constants";
+import { TRAMOS, VENCIDO, columnMeta } from "../../constants";
 import { corto, fmtM, pct } from "../../utils/format";
 import { rowSegments, tramoTotal } from "../../utils/wallet-calc";
 import DetailTooltip, { estadoRows } from "../shared/detail-tooltip";
@@ -18,6 +18,8 @@ import type {
   EstadoId,
   IWalletClientRow,
   IWalletDrilldown,
+  IWalletMatrixCell,
+  MatrixColumn,
   SortState,
   TramoIndex
 } from "../../types";
@@ -111,8 +113,9 @@ export default function ControlMatrix({
     ? visibleRows.reduce((a, r) => a + rowSegments(r).total, 0)
     : (totals?.total ?? 0);
 
-  // Vencido del pie: todos los tramos menos corriente (el 0).
-  const vencidoFooter = TRAMOS.slice(1).reduce((a, t) => a + tramoFooter(t.i), 0);
+  const vencidoFooter = folded
+    ? visibleRows.reduce((a, r) => a + r.vencido.total, 0)
+    : (totals?.byAging?.[OVERDUE_BUCKET]?.total ?? 0);
   const vencidoFooterPct = pct(vencidoFooter, totalFooter);
 
   /** Las celdas son <td>, así que el teclado hay que cablearlo a mano. */
@@ -120,6 +123,46 @@ export default function ControlMatrix({
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     onSelect(drill);
+  };
+
+  /** Celda de un tramo o de vencido: monto, barra por estado y drilldown. */
+  const renderCell = (row: IWalletClientRow, cell: IWalletMatrixCell, col: MatrixColumn) => {
+    if (cell.total === 0) {
+      return (
+        <td key={col} className="px-3 py-2.5 text-right text-muted-foreground tabular-nums">
+          —
+        </td>
+      );
+    }
+
+    const drill: IWalletDrilldown = { clienteId: row.id, tramo: col };
+    const activa = drilldown?.clienteId === row.id && drilldown.tramo === col;
+
+    return (
+      // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
+      // el del navegador se pintaría encima.
+      <DetailTooltip
+        key={col}
+        title={`${row.nombre} · ${columnMeta(col).label}`}
+        rows={estadoRows(cell)}
+        total={{ value: fmtM(cell.total) }}
+      >
+        <td
+          role="button"
+          tabIndex={0}
+          aria-pressed={activa}
+          onClick={() => onSelect(drill)}
+          onKeyDown={(e) => onCellKeyDown(e, drill)}
+          className={cn(
+            "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
+            activa && SELECTED_CELL
+          )}
+        >
+          <span>{fmtM(cell.total)}</span>
+          <SegBar segments={cell} />
+        </td>
+      </DetailTooltip>
+    );
   };
 
   return (
@@ -201,6 +244,13 @@ export default function ControlMatrix({
                   onSort={onSort}
                 />
               ))}
+              <SortableTh
+                col={OVERDUE_BUCKET}
+                label={VENCIDO.short}
+                align="right"
+                sort={sort}
+                onSort={onSort}
+              />
               <SortableTh col="total" label="Total" align="right" sort={sort} onSort={onSort} />
               <SortableTh
                 col="overdue_percentage"
@@ -215,16 +265,15 @@ export default function ControlMatrix({
           <tbody>
             {visibleRows.length === 0 ? (
               <tr>
-                <td colSpan={9} className="p-9 text-center text-muted-foreground">
+                <td colSpan={10} className="p-9 text-center text-muted-foreground">
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
               visibleRows.map((row) => {
                 const g = rowSegments(row);
-                const vencido = pct(g.vencido, g.total);
-                const delCliente = drilldown?.clienteId === row.id;
-                const nombreActiva = delCliente && drilldown?.tramo === null;
+                const vencidoPct = pct(row.vencido.total, g.total);
+                const nombreActiva = drilldown?.clienteId === row.id && drilldown.tramo === null;
 
                 return (
                   <tr key={row.id} className="border-b border-border last:border-b-0">
@@ -256,58 +305,19 @@ export default function ControlMatrix({
                       </td>
                     </DetailTooltip>
 
-                    {row.tramos.map((cell, i) => {
-                      if (cell.total === 0) {
-                        return (
-                          <td
-                            key={i}
-                            className="px-3 py-2.5 text-right text-muted-foreground tabular-nums"
-                          >
-                            —
-                          </td>
-                        );
-                      }
-
-                      const activa = delCliente && drilldown?.tramo === i;
-
-                      return (
-                        // Sin `title` nativo: el tooltip ya dice qué hay en la celda y
-                        // el del navegador se pintaría encima.
-                        <DetailTooltip
-                          key={i}
-                          title={`${row.nombre} · ${TRAMOS[i].label}`}
-                          rows={estadoRows(cell)}
-                          total={{ value: fmtM(cell.total) }}
-                        >
-                          <td
-                            role="button"
-                            tabIndex={0}
-                            aria-pressed={activa}
-                            onClick={() => onSelect({ clienteId: row.id, tramo: i as TramoIndex })}
-                            onKeyDown={(e) =>
-                              onCellKeyDown(e, { clienteId: row.id, tramo: i as TramoIndex })
-                            }
-                            className={cn(
-                              "cursor-pointer px-3 py-2.5 text-right align-middle tabular-nums transition-colors hover:bg-muted/60",
-                              activa && SELECTED_CELL
-                            )}
-                          >
-                            <span>{fmtM(cell.total)}</span>
-                            <SegBar segments={cell} />
-                          </td>
-                        </DetailTooltip>
-                      );
-                    })}
+                    {row.tramos.map((cell, i) => renderCell(row, cell, i as TramoIndex))}
+                    {renderCell(row, row.vencido, "vencido")}
 
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                       {fmtM(g.total)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
-                      {fmtM(g.vencido)}
-                      <span className="text-muted-foreground"> · </span>
-                      <span className={cn(vencido > 30 && "text-rose-600 dark:text-rose-400")}>
-                        {vencido.toFixed(0)}%
-                      </span>
+                    <td
+                      className={cn(
+                        "whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground",
+                        vencidoPct > 30 && "text-rose-600 dark:text-rose-400"
+                      )}
+                    >
+                      {vencidoPct.toFixed(0)}%
                     </td>
                   </tr>
                 );
@@ -329,11 +339,12 @@ export default function ControlMatrix({
                 </th>
               ))}
               <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                {fmtM(vencidoFooter)}
+              </th>
+              <th className="px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                 {fmtM(totalFooter)}
               </th>
               <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
-                {fmtM(vencidoFooter)}
-                <span className="text-muted-foreground"> · </span>
                 {vencidoFooterPct.toFixed(0)}%
               </th>
             </tr>

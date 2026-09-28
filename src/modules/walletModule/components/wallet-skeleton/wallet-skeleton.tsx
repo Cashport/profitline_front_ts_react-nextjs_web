@@ -1,4 +1,4 @@
-import { TRAMOS } from "../../constants";
+import { TRAMOS, VENCIDO } from "../../constants";
 
 /**
  * Bloque gris con pulso. Es el ladrillo de todos los skeletons de la pantalla.
@@ -33,7 +33,7 @@ export function StatCardsSkeleton() {
  * Matriz cliente × tramo.
  *
  * Reproduce la misma rejilla y los mismos espaciados que `ControlMatrix`
- * (una columna de cliente + los seis tramos + total + % vencido) para que al
+ * (una columna de cliente + los seis tramos + vencido + total + % vencido) para que al
  * llegar los datos la tabla no salte de tamaño.
  */
 export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
@@ -56,7 +56,7 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
               <th className="min-w-[250px] px-3 py-2.5 text-left">
                 <Bar className="h-3 w-16" />
               </th>
-              {TRAMOS.map((t) => (
+              {[...TRAMOS, VENCIDO].map((t) => (
                 <th key={t.id} className="px-3 py-2.5">
                   <Bar className="ml-auto h-3 w-14" />
                 </th>
@@ -77,7 +77,7 @@ export function MatrixSkeleton({ rows = 8 }: { rows?: number }) {
                   <Bar className="h-3.5 w-48" />
                   <Bar className="mt-1.5 h-2.5 w-36" />
                 </td>
-                {TRAMOS.map((t) => (
+                {[...TRAMOS, VENCIDO].map((t) => (
                   <td key={t.id} className="px-3 py-2.5">
                     <Bar className="ml-auto h-3.5 w-16" />
                     {/* La barra de estados vive bajo cada monto. */}

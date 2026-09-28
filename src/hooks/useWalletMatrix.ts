@@ -5,12 +5,12 @@ import { buildMatrixGroupsQuery, buildMatrixQuery } from "@/services/walletMatri
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
-  AgingBucket,
   IWalletMatrix,
   IWalletMatrixDetail,
   IWalletMatrixFilters,
   IWalletMatrixGroups,
-  IWalletMatrixStatus
+  IWalletMatrixStatus,
+  MatrixColumnKey
 } from "@/types/portfolios/IWalletMatrix";
 
 /**
@@ -40,9 +40,9 @@ export const useWalletMatrix = (filters?: IWalletMatrixFilters, page = 1, limit 
  * Grupos de facturas de una foto, agrupados por novedad/estado.
  *
  * Con `clientId` trae todos los grupos de ese cliente sin importar el tramo;
- * sumándole `aging` se queda con los que tienen facturas en ese rango, y OJO:
- * el total de cada grupo llega acotado a lo que cae en el tramo pedido, no es
- * el total del grupo.
+ * sumándole `aging` se queda con los que tienen facturas en ese rango
+ * (`vencido` = cualquier tramo menos corriente), y OJO: el total de cada grupo
+ * llega acotado a lo que cae en el tramo pedido, no es el total del grupo.
  *
  * Recibe los mismos `filters` que la matriz: el serializador se queda sólo con
  * los que este endpoint acepta, así que ordenar o paginar la matriz no vuelve a
@@ -51,7 +51,7 @@ export const useWalletMatrix = (filters?: IWalletMatrixFilters, page = 1, limit 
 export const useWalletMatrixGroups = (
   runId?: string,
   clientId?: string,
-  aging?: AgingBucket,
+  aging?: MatrixColumnKey,
   filters?: IWalletMatrixFilters
 ) => {
   const query = buildMatrixGroupsQuery(

@@ -12,6 +12,7 @@
 import { EST_META, ORDEN_EST, TRAMO_DIAS } from "./constants";
 import { HOY, dias, fmtDc } from "./utils/format";
 import { groupKey } from "./utils/api-adapter";
+import { sumCells } from "./utils/wallet-calc";
 import type { IWalletMatrixGroup } from "@/types/portfolios/IWalletMatrix";
 import {
   EstadoKey,
@@ -64,13 +65,10 @@ const row = (
   nit: string,
   ejecutivo: string,
   totales: number[]
-): IWalletClientRow => ({
-  id,
-  nombre,
-  nit,
-  ejecutivo,
-  tramos: totales.map((t, i) => cell(t, i))
-});
+): IWalletClientRow => {
+  const tramos = totales.map((t, i) => cell(t, i));
+  return { id, nombre, nit, ejecutivo, tramos, vencido: sumCells(tramos.slice(1)) };
+};
 
 export const WALLET_CLIENT_ROWS: IWalletClientRow[] = [
   row("C001", "OXXO COLOMBIA S.A.S.", "843326788", "Cristina Osorio", [

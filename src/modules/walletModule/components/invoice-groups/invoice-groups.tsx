@@ -5,7 +5,7 @@ import { Pagination, Spin } from "antd";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/utils/utils";
-import { TRAMOS } from "../../constants";
+import { columnMeta } from "../../constants";
 import { estadoMeta } from "../../utils/estados";
 import { fmtM, grp } from "../../utils/format";
 import { nextSort, ordenar, sumaTramos } from "../../utils/wallet-calc";
@@ -108,7 +108,7 @@ export default function InvoiceGroups({
   const suma = visibleRows.reduce((a, g) => a + g.monto, 0);
   const titulo =
     drilldown && clienteNombre
-      ? `${clienteNombre} · ${enTramo ? TRAMOS[ti].label : "todos los tramos"}`
+      ? `${clienteNombre} · ${enTramo ? columnMeta(ti).label : "todos los tramos"}`
       : "Grupos de facturas";
 
   return (
@@ -145,7 +145,7 @@ export default function InvoiceGroups({
               <SortableTh col="fact" label="Fact." align="right" sort={sort} onSort={onSort} />
               <SortableTh
                 col="monto"
-                label={enTramo ? `Total ${TRAMOS[ti].short}` : "Total"}
+                label={enTramo ? `Total ${columnMeta(ti).short}` : "Total"}
                 align="right"
                 sort={sort}
                 onSort={onSort}
@@ -287,11 +287,18 @@ export default function InvoiceGroups({
           // Con un tramo elegido el API recorta cada grupo a ese tramo, así que
           // aquí no se ve el total del grupo sino su parte. Decirlo evita que
           // el monto se lea como "todo lo que se resuelve con una gestión".
-          <>
-            Sólo los grupos de {clienteNombre} con facturas en {TRAMOS[ti].label.toLowerCase()}, y
-            los montos son la parte que cae en ese tramo. Un mismo grupo puede tener más cartera en
-            otros tramos.
-          </>
+          ti === "vencido" ? (
+            <>
+              Sólo los grupos de {clienteNombre} con facturas vencidas, y los montos son su parte
+              vencida. Un mismo grupo puede tener más cartera en corriente.
+            </>
+          ) : (
+            <>
+              Sólo los grupos de {clienteNombre} con facturas en{" "}
+              {columnMeta(ti).label.toLowerCase()}, y los montos son la parte que cae en ese tramo.
+              Un mismo grupo puede tener más cartera en otros tramos.
+            </>
+          )
         ) : (
           <>
             {drilldown
