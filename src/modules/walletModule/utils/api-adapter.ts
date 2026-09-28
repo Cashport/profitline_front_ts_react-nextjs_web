@@ -12,11 +12,9 @@ import type {
   IWalletGroupRow,
   IWalletMatrixCell,
   IWalletPerson,
-  IWalletSummary,
   IWalletTicket,
   IWalletTimelineEntry,
-  TramoIndex,
-  WalletSegments
+  TramoIndex
 } from "../types";
 import type {
   AgingBucket,
@@ -71,18 +69,6 @@ const emptyCell = (): IWalletMatrixCell => {
   return cell;
 };
 
-const emptySegments = (): WalletSegments => {
-  const seg = { total: 0, vencido: 0, n: 0 } as WalletSegments;
-  ORDEN_EST.forEach((e) => (seg[e] = 0));
-  return seg;
-};
-
-/** Resumen en cero, para el primer render antes de que llegue la foto. */
-export const emptySummary = (): IWalletSummary => ({
-  segments: emptySegments(),
-  clientes: 0
-});
-
 /** Filas de la matriz: un cliente por fila, seis celdas por fila. */
 export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
   matrix.rows.map((row) => ({
@@ -103,36 +89,6 @@ export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
       return cell;
     })
   }));
-
-/**
- * Totales de las tarjetas superiores.
- *
- * Se arman con los totales que devuelve el API sobre el universo filtrado
- * COMPLETO, no sumando las filas de la página: si se sumara la página, las
- * tarjetas cambiarían al paginar.
- */
-export const toSummary = (matrix: IWalletMatrix): IWalletSummary => {
-  const segments = emptySegments();
-  segments.total = matrix.totals.total;
-  segments.n = matrix.totals.invoices;
-  segments.vencido = TRAMO_BUCKETS.slice(1).reduce(
-    (acc, bucket) => acc + (matrix.totals.byAging?.[bucket]?.total ?? 0),
-    0
-  );
-
-  // El desglose por estado no viene agregado a nivel global, así que se
-  // reconstruye desde las celdas de la página. Es el mismo criterio que ya
-  // usaba el módulo con los datos simulados.
-  matrix.rows.forEach((row) =>
-    TRAMO_BUCKETS.forEach((bucket) =>
-      row.cells?.[bucket]?.statuses.forEach((s) => {
-        segments[toEstadoKey(s.status)] += s.amount;
-      })
-    )
-  );
-
-  return { segments, clientes: matrix.pagination.totalClients };
-};
 
 /**
  * Identidad de un grupo dentro de la pantalla.

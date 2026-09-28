@@ -13,14 +13,14 @@ const Bar = ({ className = "" }: { className?: string }) => (
   />
 );
 
-/** Las cuatro tarjetas de resumen. */
+/** Las seis tarjetas de resumen. */
 export function StatCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-busy>
-      {[0, 1, 2, 3].map((i) => (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" aria-busy>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="flex flex-col rounded-xl bg-card p-4 shadow-sm">
           <Bar className="h-3 w-24" />
-          <Bar className="mt-2.5 h-7 w-32" />
+          <Bar className="mt-2.5 h-6 w-32" />
           <Bar className="mt-2.5 h-1.5 w-full" />
           <Bar className="mt-4 h-3 w-40" />
         </div>

@@ -17,12 +17,16 @@ export const fmtFull = (v: number): string => "$" + Math.round(v).toLocaleString
 export const fac = (n: number): string => `${n} ${n === 1 ? "factura" : "facturas"}`;
 export const cli = (n: number): string => `${n} ${n === 1 ? "cliente" : "clientes"}`;
 export const grp = (n: number): string => `${n} ${n === 1 ? "grupo" : "grupos"}`;
+export const doc = (n: number): string => `${n} ${n === 1 ? "doc" : "docs"}`;
 
 /** Quita el sufijo societario para que el nombre quepa en una celda. */
 export const corto = (n: string | null | undefined): string =>
   (n ?? "").replace(/\s+(S\.A\.S\.?|S\.A\.|LTDA\.?|E\.U\.)\s*$/i, "").trim();
 
 export const pct = (part: number, total: number): number => (total ? (part / total) * 100 : 0);
+
+/** Porcentaje entero; lo que no llega al 1% no se muestra como "0%". */
+export const fmtPct = (p: number): string => (p > 0 && p < 1 ? "<1%" : `${p.toFixed(0)}%`);
 
 /* ---------- Fechas ----------
    Todo se mide contra la fecha de corte de la carga, no contra el reloj del
