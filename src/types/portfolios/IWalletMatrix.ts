@@ -217,6 +217,22 @@ export interface IWalletMatrixStatus {
   isRefreshing: boolean;
 }
 
+/** Un statusKey del catálogo, con su monto y conteo en la foto. */
+export interface IMatrixStatusCatalogItem {
+  statusKey: string;
+  statusLabel: string;
+  total: number;
+  count: number;
+}
+
+/**
+ * Catálogo de estados de GET /portfolio/matrix/statuses. Ignora el filtro de
+ * estados, así que elegir uno no hace desaparecer los demás.
+ */
+export interface IWalletMatrixStatusCatalog {
+  statuses: IMatrixStatusCatalogItem[];
+}
+
 /** Columnas por las que ordena el servidor; los tramos usan su AgingBucket. */
 export type WalletMatrixSortBy = "client_name" | AgingBucket | "total" | "overdue_percentage";
 
@@ -232,8 +248,11 @@ export type WalletMatrixSortDir = "asc" | "desc";
 export interface IWalletMatrixFilters {
   /** NITs de cliente. */
   clients?: string[];
-  /** statusKey de factura (CONCILIADO, CON_NOVEDAD, …). */
-  status?: string[];
+  /**
+   * statusKey de factura (CONCILIADO, CON_NOVEDAD, …). La vista los arma a
+   * partir de los estados elegidos en los chips o en el modal.
+   */
+  statuses?: string[];
   /** Ids de invoice_incident_motive. */
   noveltyType?: number[];
   /** Correos del ejecutivo responsable. */
@@ -268,7 +287,14 @@ export interface IWalletMatrixFilters {
  */
 export type IWalletMatrixSharedFilters = Pick<
   IWalletMatrixFilters,
-  "status" | "noveltyType" | "executive" | "coordinator" | "market" | "kam" | "kam_lider" | "search"
+  | "statuses"
+  | "noveltyType"
+  | "executive"
+  | "coordinator"
+  | "market"
+  | "kam"
+  | "kam_lider"
+  | "search"
 >;
 
 /** Acotado de GET /portfolio/matrix/groups a una foto, cliente y tramo. */

@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/utils/utils";
-import { EST_META } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
 import { segmentWidths } from "../../utils/wallet-calc";
-import type { EstadoKey, WalletSegments } from "../../types";
+import type { MontosPorEstado } from "../../types";
 
 interface SegBarProps {
-  segments: Pick<WalletSegments, EstadoKey | "total">;
+  segments: MontosPorEstado & { total: number };
   className?: string;
 }
 
@@ -19,7 +19,7 @@ export default function SegBar({ segments, className }: SegBarProps) {
       {segmentWidths(segments).map(({ estado, width }) => (
         <i
           key={estado}
-          className={cn("block h-full rounded-[2px]", EST_META[estado].bg)}
+          className={cn("block h-full rounded-[2px]", estadoMeta(estado).bg)}
           style={{
             width: `${width.toFixed(2)}%`,
             boxShadow: "inset 0 0 0 1px var(--wallet-seg-edge)"

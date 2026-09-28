@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
-import { EST_META } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
 import { corto } from "../../utils/format";
 import { slaDe } from "../../utils/group-detail";
 import StatusChip from "../shared/status-chip";
@@ -30,7 +30,7 @@ export default function GroupModalHeader({
   onOpenNoveltyModal
 }: GroupModalHeaderProps) {
   const nov = detail.novedad;
-  const meta = EST_META[detail.tipo];
+  const meta = estadoMeta(detail.tipo);
   const sla = nov ? slaDe(nov) : null;
 
   return (

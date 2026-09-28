@@ -1,8 +1,9 @@
-import { ORDEN_EST } from "../constants";
+import { estadosOf } from "./estados";
 import {
-  EstadoKey,
+  EstadoId,
   IWalletClientRow,
   IWalletMatrixCell,
+  MontosPorEstado,
   SortState,
   WalletSegments
 } from "../types";
@@ -14,6 +15,7 @@ const emptySegments = (): WalletSegments => ({
   novedad: 0,
   sin_conciliar: 0,
   saldo: 0,
+  saldo_factura: 0,
   glosado: 0,
   devolucion: 0,
   otros: 0,
@@ -22,11 +24,11 @@ const emptySegments = (): WalletSegments => ({
   n: 0
 });
 
-/** Suma celdas de la matriz en un único desglose por estado. */
+/** Suma celdas de la matriz en un único desglose por estado, nuevos incluidos. */
 export function sumCells(cells: IWalletMatrixCell[]): WalletSegments {
   const r = emptySegments();
   cells.forEach((c) => {
-    ORDEN_EST.forEach((e) => (r[e] += c[e]));
+    estadosOf(c).forEach((e) => (r[e] = (r[e] ?? 0) + (c[e] ?? 0)));
     r.total += c.total;
     r.n += c.n ?? 0;
   });
@@ -45,7 +47,7 @@ export function totalSegments(rows: IWalletClientRow[]): WalletSegments {
   const r = emptySegments();
   rows.forEach((row) => {
     const s = rowSegments(row);
-    ORDEN_EST.forEach((e) => (r[e] += s[e]));
+    estadosOf(s).forEach((e) => (r[e] = (r[e] ?? 0) + (s[e] ?? 0)));
     r.total += s.total;
     r.vencido += s.vencido;
     r.n += s.n;
@@ -87,10 +89,26 @@ export function nextSort(current: SortState, col: string, textualCols: string[] 
   return { col, dir: textualCols.includes(col) ? "asc" : "desc" };
 }
 
+/**
+ * Selección de los chips de estado. Clic: sólo ese estado, o ninguno si ya era
+ * el único. Shift+clic (`additive`): lo suma o lo quita sin tocar los demás.
+ */
+export function nextEstadoSelection(
+  current: EstadoId[],
+  estado: EstadoId,
+  additive: boolean
+): EstadoId[] {
+  if (additive) {
+    return current.includes(estado) ? current.filter((e) => e !== estado) : [...current, estado];
+  }
+  return current.length === 1 && current[0] === estado ? [] : [estado];
+}
+
 /** Porcentaje de cada estado sobre el total, para el ancho de los segmentos. */
-export const segmentWidths = (g: Pick<WalletSegments, EstadoKey | "total">) =>
-  ORDEN_EST.map((e) => ({
-    estado: e,
-    value: g[e],
-    width: g.total ? (g[e] / g.total) * 100 : 0
-  })).filter((s) => s.value > 0);
+export const segmentWidths = (g: MontosPorEstado & { total: number }) =>
+  estadosOf(g)
+    .map((e) => {
+      const value = g[e] ?? 0;
+      return { estado: e, value, width: g.total ? (value / g.total) * 100 : 0 };
+    })
+    .filter((s) => s.value > 0);

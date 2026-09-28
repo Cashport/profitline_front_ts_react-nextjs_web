@@ -1,6 +1,7 @@
 "use client";
 
-import { EST_META, TRAMOS } from "../../constants";
+import { TRAMOS } from "../../constants";
+import { estadoMeta } from "../../utils/estados";
 import { fmtD, fmtFull, fmtM } from "../../utils/format";
 import { sevDias, vencidoDeTramos } from "../../utils/group-detail";
 import { sumaTramos } from "../../utils/wallet-calc";
@@ -110,7 +111,7 @@ export default function GroupDetailRail({ detail }: GroupDetailRailProps) {
 
       {!nov && (
         <p className="mt-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
-          {EST_META[detail.tipo].corta}.
+          {estadoMeta(detail.tipo).corta}.
         </p>
       )}
     </div>

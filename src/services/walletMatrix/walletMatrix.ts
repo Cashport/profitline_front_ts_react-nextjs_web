@@ -5,7 +5,8 @@ import {
   IWalletMatrixFilters,
   IWalletMatrixGroupsScope,
   IWalletMatrixSharedFilters,
-  IWalletMatrixStatus
+  IWalletMatrixStatus,
+  IWalletMatrixStatusCatalog
 } from "@/types/portfolios/IWalletMatrix";
 
 // URLSearchParams codifica espacios y tildes de los valores canónicos
@@ -26,7 +27,7 @@ const single = (params: URLSearchParams, key: string, value?: string | null) => 
  * pantalla tienen que quedar acotadas a lo mismo.
  */
 const appendSharedFilters = (params: URLSearchParams, filters?: IWalletMatrixSharedFilters) => {
-  list(params, "status", filters?.status);
+  list(params, "statuses", filters?.statuses);
   list(params, "novelty_type", filters?.noveltyType);
   list(params, "executive", filters?.executive);
   list(params, "coordinator", filters?.coordinator);
@@ -107,5 +108,19 @@ export const refreshWalletMatrix = async (): Promise<
 
 export const getWalletMatrixStatus = async (): Promise<GenericResponse<IWalletMatrixStatus>> => {
   const response: GenericResponse<IWalletMatrixStatus> = await API.get(`/portfolio/matrix/status`);
+  return response;
+};
+
+/**
+ * Catálogo de estados de la foto: cada statusKey con su monto y conteo. No
+ * lleva parámetros; los chips de la matriz lo usan para saber qué statusKey
+ * mandar por cada estado, sobre todo por "Otros".
+ */
+export const getWalletMatrixStatusCatalog = async (): Promise<
+  GenericResponse<IWalletMatrixStatusCatalog>
+> => {
+  const response: GenericResponse<IWalletMatrixStatusCatalog> = await API.get(
+    `/portfolio/matrix/statuses`
+  );
   return response;
 };

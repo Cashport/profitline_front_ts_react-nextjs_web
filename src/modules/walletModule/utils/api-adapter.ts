@@ -2,8 +2,10 @@
    componentes de este módulo. Vive aparte para que el diseño no dependa de
    la forma exacta del API: si el contrato cambia, se toca sólo este archivo. */
 import { EST_META, ORDEN_EST, TRAMOS } from "../constants";
+import { estadoMeta, toEstadoNuevo } from "./estados";
 import { HOY, diasEntre } from "./format";
 import type {
+  EstadoId,
   EstadoKey,
   IWalletAttachment,
   IWalletClientRow,
@@ -18,6 +20,7 @@ import type {
 } from "../types";
 import type {
   AgingBucket,
+  IMatrixStatusCatalogItem,
   IWalletMatrix,
   IWalletMatrixDetailRow,
   IWalletMatrixGroup,
@@ -50,15 +53,32 @@ const ESTADO_BY_STATUS_KEY: Record<string, EstadoKey> = {
   CON_NOVEDAD: "novedad",
   SIN_CONCILIAR: "sin_conciliar",
   SALDO: "saldo",
-  SALDO_FACTURA: "saldo",
+  SALDO_FACTURA: "saldo_factura",
   GLOSADO: "glosado",
   DEVOLUCION: "devolucion"
 };
 
-/** Cualquier estado sin categoría propia cae en "otros", nunca se descarta:
- *  si se descartara, la barra dejaría de sumar el total de la celda. */
-export const toEstadoKey = (statusKey: string): EstadoKey =>
-  ESTADO_BY_STATUS_KEY[statusKey] ?? "otros";
+/** Un estado sin categoría propia nunca se descarta: si se descartara, la barra
+ *  dejaría de sumar el total de la celda. Se pinta aparte, como estado nuevo. */
+export const toEstadoId = (statusKey: string): EstadoId =>
+  ESTADO_BY_STATUS_KEY[statusKey] ?? toEstadoNuevo(statusKey);
+
+/**
+ * statusKey del catálogo detrás de cada estado de la pantalla: lo que hay que
+ * mandar en `statuses` para filtrar por él. Sólo trae los estados que llegaron.
+ * Las claves van ordenadas para que la query no cambie si el catálogo llega en
+ * otro orden.
+ */
+export const statusKeysByEstado = (
+  catalog: IMatrixStatusCatalogItem[]
+): Map<EstadoId, string[]> => {
+  const keys = new Map<EstadoId, string[]>();
+  catalog.forEach((s) => {
+    const e = toEstadoId(s.statusKey);
+    keys.set(e, [...(keys.get(e) ?? []), s.statusKey].sort());
+  });
+  return keys;
+};
 
 /** El API a veces manda el nombre del cliente en null; la UI siempre espera texto. */
 const clientName = (nombre: string | null | undefined): string => nombre?.trim() || "Sin nombre";
@@ -84,7 +104,8 @@ export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
       cell.total = source.total;
       cell.n = source.count;
       source.statuses.forEach((s) => {
-        cell[toEstadoKey(s.status)] += s.amount;
+        const e = toEstadoId(s.status);
+        cell[e] = (cell[e] ?? 0) + s.amount;
       });
       return cell;
     })
@@ -104,8 +125,8 @@ export const groupKey = (g: IWalletMatrixGroup): string =>
 /** Grupos de facturas de la tabla inferior. */
 export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
   groups.groups.map((g) => {
-    const tipo = toEstadoKey(g.statusKey);
-    const meta = EST_META[tipo];
+    const tipo = toEstadoId(g.statusKey);
+    const meta = estadoMeta(tipo);
     return {
       clave: groupKey(g),
       clienteId: g.clientId,
@@ -161,8 +182,8 @@ export const toGroupDetail = (
   group: IWalletMatrixGroup,
   tramo: TramoIndex | null = null
 ): IWalletGroupDetail => {
-  const tipo = toEstadoKey(group.statusKey);
-  const meta = EST_META[tipo];
+  const tipo = toEstadoId(group.statusKey);
+  const meta = estadoMeta(tipo);
   const responsable = toPerson(group.responsibleName);
 
   return {

@@ -4,7 +4,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { FECHA_CORTE_PLACEHOLDER } from "../../constants";
 import ModalFilterMatrix from "../modal-filter-matrix/modal-filter-matrix";
 import WalletThemeToggle from "../wallet-theme-toggle/wallet-theme-toggle";
-import type { IWalletMatrixModalFilters } from "../../types";
+import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
 
 interface WalletHeaderProps {
   /** Búsqueda actual. Se comparte con el buscador de la matriz para que los
@@ -14,6 +14,9 @@ interface WalletHeaderProps {
   /** Filtros confirmados en el modal. */
   filters: IWalletMatrixModalFilters;
   onFiltersChange: (next: IWalletMatrixModalFilters) => void;
+  /** Estados elegibles en la categoría Estado: los mismos que los chips de la matriz. */
+  selectableEstados: EstadoId[];
+  estadosLoading?: boolean;
   /** Fin de la última corrida del worker; null mientras no hay foto. */
   lastUpdatedAt?: string | null;
   /** Fecha contra la que se calcularon las edades de esta consulta. */
@@ -47,6 +50,8 @@ export default function WalletHeader({
   onSearchChange,
   filters,
   onFiltersChange,
+  selectableEstados,
+  estadosLoading,
   lastUpdatedAt,
   cutoffDate,
   projected,
@@ -115,7 +120,12 @@ export default function WalletHeader({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
         /> */}
-        <ModalFilterMatrix value={filters} onChange={onFiltersChange} />
+        <ModalFilterMatrix
+          value={filters}
+          onChange={onFiltersChange}
+          selectableEstados={selectableEstados}
+          estadosLoading={estadosLoading}
+        />
         <WalletThemeToggle />
       </div>
     </header>

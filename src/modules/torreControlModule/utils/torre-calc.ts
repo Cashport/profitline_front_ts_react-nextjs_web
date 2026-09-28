@@ -26,6 +26,7 @@ const CELDA_VACIA: IWalletMatrixCell = {
   novedad: 0,
   sin_conciliar: 0,
   saldo: 0,
+  saldo_factura: 0,
   glosado: 0,
   devolucion: 0,
   otros: 0,

@@ -17,12 +17,13 @@ export const ORDEN_EST: EstadoKey[] = [
   "novedad",
   "sin_conciliar",
   "saldo",
+  "saldo_factura",
   "glosado",
   "devolucion",
   "otros"
 ];
 
-interface EstadoMeta {
+export interface EstadoMeta {
   nom: string;
   /** Clase Tailwind de fondo, ligada a los tokens .wallet-scope. */
   bg: string;
@@ -74,6 +75,13 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     chipTxt: "Saldo",
     corta: "Saldo a favor pendiente de cruce"
   },
+  saldo_factura: {
+    nom: "Saldo de factura",
+    bg: "bg-wallet-saldo-fact",
+    chip: "idle",
+    chipTxt: "Saldo de factura",
+    corta: "Saldo pendiente de la factura"
+  },
   glosado: {
     nom: "Glosado",
     bg: "bg-wallet-glosa",
@@ -96,6 +104,18 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     corta: "Otros estados del catálogo"
   }
 };
+
+/**
+ * Fondos de respaldo para los estados que el API mande y el front aún no
+ * conozca. Van como clases completas para que Tailwind las genere; cada estado
+ * nuevo toma una según su statusKey (ver utils/estados).
+ */
+export const FALLBACK_BG = [
+  "bg-wallet-nuevo-1",
+  "bg-wallet-nuevo-2",
+  "bg-wallet-nuevo-3",
+  "bg-wallet-nuevo-4"
+];
 
 /** Etiqueta de cada tipo de documento de una novedad. */
 export const DOCUMENT_TYPE_LABEL: Record<WalletDocumentType, string> = {
@@ -144,7 +164,7 @@ export const CATEGORIAS = [
 ];
 
 export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
-  status: [],
+  estados: [],
   noveltyType: [],
   coordinator: [],
   market: [],
@@ -155,20 +175,3 @@ export const EMPTY_MATRIX_MODAL_FILTERS: IWalletMatrixModalFilters = {
 
 /** Orden inicial de la matriz; `col` es el `sort_by` del API. */
 export const MATRIX_DEFAULT_SORT: SortState = { col: "total", dir: "desc" };
-
-/**
- * statusKey de factura que acepta el filtro `status` de la matriz. No hay
- * endpoint de catálogo: son las claves que el API manda en cada celda.
- */
-export const MATRIX_STATUS_OPTIONS: { id: string; name: string }[] = [
-  { id: "CONCILIADO", name: "Conciliado" },
-  { id: "CON_NOVEDAD", name: "Con novedad" },
-  { id: "SIN_CONCILIAR", name: "Sin conciliar" },
-  { id: "SALDO", name: "Saldo" },
-  { id: "SALDO_FACTURA", name: "Saldo de factura" },
-  { id: "GLOSADO", name: "Glosado" },
-  { id: "DEVOLUCION", name: "Devolución" },
-  { id: "VENCIDA", name: "Vencida" },
-  { id: "CORRIENTE", name: "Corriente" },
-  { id: "PAGADA", name: "Pagada" }
-];
