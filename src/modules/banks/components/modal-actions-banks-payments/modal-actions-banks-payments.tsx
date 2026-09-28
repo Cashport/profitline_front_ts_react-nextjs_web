@@ -83,6 +83,13 @@ const ModalActionsBanksPayments = ({ isOpen, onClose, setSelectOpen }: Props) =>
           }}
         />
         <ButtonGenerateAction
+          icon={<ArrowsClockwise size={16} />}
+          title="Cambiar id ERP"
+          onClick={() => {
+            handleOpenModal(9);
+          }}
+        />
+        <ButtonGenerateAction
           icon={<ArrowDownLeft size={20} />}
           title="Marcar como sin identificar"
           onClick={() => {
