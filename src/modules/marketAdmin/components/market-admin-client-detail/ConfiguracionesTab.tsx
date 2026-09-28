@@ -16,6 +16,8 @@ export type ConfigForm = {
   payment_type: string;
   warehouse_id: number | null;
   pricelist_id: string;
+  receives_partials: string;
+  lots_greater_than: string;
 };
 
 type Props = {
@@ -30,7 +32,9 @@ const BLANK_CONFIG: ConfigForm = {
   payment_condition_code: "",
   payment_type: "",
   warehouse_id: null,
-  pricelist_id: ""
+  pricelist_id: "",
+  receives_partials: "",
+  lots_greater_than: ""
 };
 
 const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
@@ -41,11 +45,22 @@ const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
         payment_condition_code: config.payment_condition_code ?? "",
         payment_type: config.payment_type?.toString() ?? "",
         warehouse_id: config.warehouse_id,
-        pricelist_id: config.pricelist_id?.toString() ?? ""
+        pricelist_id: config.pricelist_id?.toString() ?? "",
+        receives_partials: config.receives_partials?.toString() ?? "",
+        lots_greater_than: config.lots_greater_than?.toString() ?? ""
       }
     : BLANK_CONFIG;
 
 const toNumberOrNull = (value: string) => (value.trim() === "" ? null : Number(value));
+
+// Para los campos que deben guardar NULL cuando el valor es vacío o 0.
+const toNonZeroNumberOrNull = (value: string) => {
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) return null;
+  return parsed === 0 ? null : parsed;
+};
 
 export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
@@ -69,6 +84,10 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
     if (form.warehouse_id !== current.warehouse_id) body.warehouse_id = form.warehouse_id;
     if (form.pricelist_id !== current.pricelist_id)
       body.pricelist_id = toNumberOrNull(form.pricelist_id);
+    if (form.receives_partials !== current.receives_partials)
+      body.receives_partials = toNonZeroNumberOrNull(form.receives_partials);
+    if (form.lots_greater_than !== current.lots_greater_than)
+      body.lots_greater_than = toNonZeroNumberOrNull(form.lots_greater_than);
     return body;
   };
 
@@ -184,6 +203,34 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
             disabled={isLoading}
             value={form.pricelist_id}
             onChange={(e) => setForm((f) => ({ ...f, pricelist_id: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+
+        {/* Recibe parciales de lotes */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">
+            Recibe parciales de lotes
+          </label>
+          <input
+            type="number"
+            min={0}
+            disabled={isLoading}
+            value={form.receives_partials}
+            onChange={(e) => setForm((f) => ({ ...f, receives_partials: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+
+        {/* Lotes mayores a */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Lotes mayores a</label>
+          <input
+            type="number"
+            min={0}
+            disabled={isLoading}
+            value={form.lots_greater_than}
+            onChange={(e) => setForm((f) => ({ ...f, lots_greater_than: e.target.value }))}
             className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
           />
         </div>
