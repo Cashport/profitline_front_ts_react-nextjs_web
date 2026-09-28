@@ -496,6 +496,9 @@ export interface IMarketAdminUser {
   role_name: string;
   clients_count: number; // clientes del grupo personal (special_type=4)
   is_active: 1 | 0;
+  // Facturador actual del vendedor (null si no tiene / no aplica)
+  biller_id: number | null;
+  biller_name: string | null;
 }
 
 // GET /users/:id — el detalle solo devuelve nit y nombre por cliente
@@ -511,7 +514,17 @@ export interface IMarketAdminUserDetail {
   role_id: number;
   role_name: string;
   is_active: 1 | 0;
+  // Facturador actual del vendedor (null si no tiene / no aplica)
+  biller_id: number | null;
+  biller_name: string | null;
   clients: IMarketAdminUserClient[];
+}
+
+// GET /billers — usuarios con rol Facturador del proyecto actual (selector)
+export interface IMarketAdminFacturador {
+  id: number;
+  name: string;
+  email: string;
 }
 
 // POST /users/:id/clients — el grupo personal lo crea el backend si no existe

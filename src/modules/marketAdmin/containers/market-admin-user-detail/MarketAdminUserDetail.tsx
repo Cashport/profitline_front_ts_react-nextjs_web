@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Layers, Users } from "lucide-react";
+import { mutate as globalMutate } from "swr";
+import { ArrowLeft, Layers, Settings, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
+import { useMarketAdminFacturadores } from "@/modules/marketAdmin/hooks/useMarketAdminFacturadores";
 import {
   assignClientToMarketAdminUser,
-  removeClientFromMarketAdminUser
+  assignMarketAdminUserBiller,
+  removeClientFromMarketAdminUser,
+  removeMarketAdminUserBiller
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
@@ -20,6 +24,7 @@ import {
 import { useAppStore } from "@/lib/store/store";
 import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
+import ConfiguracionFacturadorTab from "@/modules/marketAdmin/components/market-admin-user-detail/ConfiguracionFacturadorTab";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -38,8 +43,16 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
   const { data: allGrupos } = useClientsGroupsSimplified();
 
-  const [activeTab, setActiveTab] = useState<"clientes" | "grupos">("clientes");
+  // El facturador solo aplica a vendedores (KAM). Se evita la consulta para otros roles.
+  const isSeller = usuario?.role_name === "KAM";
+  const { data: facturadores, isLoading: isLoadingFacturadores } =
+    useMarketAdminFacturadores(isSeller);
+
+  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "configuraciones">(
+    "clientes"
+  );
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingBiller, setIsSavingBiller] = useState(false);
   const [isSavingGrupos, setIsSavingGrupos] = useState(false);
   const [grupos, setGrupos] = useState<number[]>([]);
   const [gruposLoaded, setGruposLoaded] = useState(false);
@@ -139,6 +152,37 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     }
   };
 
+  const saveBiller = async (billerUserId: number | null) => {
+    try {
+      setIsSavingBiller(true);
+      if (billerUserId === null) {
+        await removeMarketAdminUserBiller(id);
+      } else {
+        await assignMarketAdminUserBiller(id, billerUserId);
+      }
+      await mutate();
+      // Refresca el listado para que la columna "Facturador" quede sincronizada.
+      await globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/marketplace-admin/users"),
+        undefined,
+        { revalidate: true }
+      );
+      showMessage(
+        "success",
+        billerUserId === null
+          ? "Facturador eliminado correctamente."
+          : "Facturador actualizado correctamente."
+      );
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al actualizar el facturador."
+      );
+    } finally {
+      setIsSavingBiller(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -157,7 +201,8 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
 
   const TABS = [
     { id: "clientes", label: `Clientes (${asignados.length})`, icon: Users },
-    { id: "grupos", label: `Grupos de clientes (${grupos.length})`, icon: Layers }
+    { id: "grupos", label: `Grupos de clientes (${grupos.length})`, icon: Layers },
+    ...(isSeller ? [{ id: "configuraciones", label: "Configuraciones", icon: Settings }] : [])
   ];
 
   return (
@@ -235,6 +280,15 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               disabled={isSavingGrupos}
               onAgregar={agregarGrupo}
               onQuitar={quitarGrupo}
+            />
+          )}
+          {activeTab === "configuraciones" && isSeller && (
+            <ConfiguracionFacturadorTab
+              currentBillerId={usuario.biller_id}
+              facturadores={facturadores}
+              isLoading={isLoadingFacturadores}
+              isSaving={isSavingBiller}
+              onSave={saveBiller}
             />
           )}
         </div>
