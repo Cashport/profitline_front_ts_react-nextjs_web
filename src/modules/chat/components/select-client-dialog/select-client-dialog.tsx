@@ -15,9 +15,17 @@ type Props = {
   onSuccess: () => void;
 };
 
+type ClientOption = {
+  label: string;
+  value: string;
+  clientId: string;
+  className: string;
+  acountCodes: string[];
+};
+
 export default function SelectClientDialog({ open, templateId, onOpenChange, onSuccess }: Props) {
   const { toast } = useToast();
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name: string; acountCodes: string[] }[]>([]);
   const [contacts, setContacts] = useState<
     { id: number; contact_name: string; contact_phone: string }[]
   >([]);
@@ -28,7 +36,11 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
 
   useEffect(() => {
     getWhatsappClients()
-      .then((res) => setClients(res.map((c) => ({ id: c.uuid, name: c.client_name }))))
+      .then((res) =>
+        setClients(
+          res.map((c) => ({ id: c.uuid, name: c.client_name, acountCodes: c.acountCodes }))
+        )
+      )
       .catch((err) => console.error("Error fetching WhatsApp clients:", err));
   }, []);
 
@@ -55,6 +67,17 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
       }
     })();
   }, [selectedClient]);
+
+  const filterOption = (input: string, option?: ClientOption) => {
+    const search = input.trim().toLowerCase();
+    if (!search) return true;
+
+    return (
+      (option?.label?.toLowerCase().includes(search) ?? false) ||
+      (option?.clientId?.toLowerCase().includes(search) ?? false) ||
+      (option?.acountCodes?.includes(search) ?? false)
+    );
+  };
 
   const handleConfirm = async () => {
     const contact = contacts.find((c) => c.id.toString() === selectedContact);
@@ -103,12 +126,16 @@ export default function SelectClientDialog({ open, templateId, onOpenChange, onS
               showSearch
               placeholder="Cliente"
               style={{ width: "100%", height: "48px" }}
-              options={clients.map((c) => ({ value: c.id, label: c.name }))}
+              options={clients.map<ClientOption>((c) => ({
+                value: c.id,
+                label: c.name,
+                acountCodes: c.acountCodes,
+                className: "",
+                clientId: c.id
+              }))}
               value={selectedClient || undefined}
               onChange={(clientUUID: string) => setSelectedClient(clientUUID)}
-              filterOption={(input, option) =>
-                option?.label ? option.label.toLowerCase().includes(input.toLowerCase()) : false
-              }
+              filterOption={filterOption}
             />
           </div>
 
