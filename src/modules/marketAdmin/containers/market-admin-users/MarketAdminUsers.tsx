@@ -171,6 +171,13 @@ export default function MarketAdminUsers() {
       )
     },
     {
+      title: "Facturador",
+      dataIndex: "biller_name",
+      key: "biller_name",
+      onHeaderCell: headerCell,
+      render: (v: string | null) => <span className="text-sm text-[#141414]">{v ?? ""}</span>
+    },
+    {
       title: "",
       key: "ver",
       width: 48,
