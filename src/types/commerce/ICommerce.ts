@@ -15,6 +15,7 @@ export interface IClientBU {
 export interface IProductData {
   category_id: number;
   category: string;
+  line_alias?: string | null;
   products: IProduct[];
 }
 
@@ -34,7 +35,9 @@ export interface IProduct {
   price: number;
   price_taxes: number;
   line_name: string;
+  line_alias?: string | null;
   category_name: string;
+  category_alias?: string | null;
   shipment_unit: number;
   created_by?: string;
   updated_at?: string;
@@ -56,6 +59,7 @@ export interface ISelectedProduct {
   image: string | null;
   category_id: number;
   category_name: string;
+  category_alias?: string | null;
   SKU: string;
   EAN?: string | null;
   stock: boolean;

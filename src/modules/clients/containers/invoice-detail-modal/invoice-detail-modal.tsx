@@ -219,9 +219,10 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                         : styles.tagLabelGray
                                     }`}
                                   >
-                                    {item.is_rejected || item.is_rejected === 0
+                                    {(item.is_rejected || item.is_rejected === 0
                                       ? "Cerrada"
-                                      : "Abierta"}
+                                      : "Abierta") +
+                                      (item.is_reconciled === 1 ? " - Desvinculada" : "")}
                                   </span>
                                 )}
                                 {item.event_type_name === "Cierre de novedad" && (

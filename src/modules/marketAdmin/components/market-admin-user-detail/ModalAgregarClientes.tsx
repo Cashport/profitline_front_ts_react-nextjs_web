@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
 import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
 
 type Props = {
   asignadosNits: Set<string>;
-  onAgregar: (nit: string) => void;
+  onAgregar: (nits: string[]) => Promise<boolean>;
   onClose: () => void;
   disabled?: boolean;
 };
@@ -28,6 +28,7 @@ export default function ModalAgregarClientes({
 }: Props) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedNits, setSelectedNits] = useState<string[]>([]);
   const debouncedSearch = useDebounce(search, 400);
 
   const {
@@ -41,6 +42,27 @@ export default function ModalAgregarClientes({
   });
 
   const disponibles = clientes.filter((c) => !asignadosNits.has(c.client_id));
+
+  // La tabla es paginada en el servidor: solo se reconcilian las filas visibles
+  // para que la selección de otras páginas no se pierda al paginar o buscar.
+  const visibleSelectedNits = useMemo(
+    () => disponibles.filter((c) => selectedNits.includes(c.client_id)).map((c) => c.client_id),
+    [disponibles, selectedNits]
+  );
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    const nextVisible = newSelectedRowKeys.map(String);
+    const visibleNits = new Set(disponibles.map((c) => c.client_id));
+    setSelectedNits((prev) => [
+      ...prev.filter((nit) => !visibleNits.has(nit)),
+      ...nextVisible.filter((nit) => visibleNits.has(nit))
+    ]);
+  };
+
+  const handleAgregar = async () => {
+    const ok = await onAgregar(selectedNits);
+    if (ok) onClose();
+  };
 
   const columns: ColumnsType<IMarketAdminClient> = [
     {
@@ -65,22 +87,6 @@ export default function ModalAgregarClientes({
       width: 160,
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
-    },
-    {
-      title: "",
-      key: "agregar",
-      width: 48,
-      onHeaderCell: headerCell,
-      render: (_, c) => (
-        <button
-          title="Agregar cliente"
-          disabled={disabled}
-          onClick={() => onAgregar(c.client_id)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#E6F9E6] hover:text-[#1A7A1A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#CCCCCC]"
-        >
-          <Plus size={13} />
-        </button>
-      )
     }
   ];
 
@@ -95,6 +101,7 @@ export default function ModalAgregarClientes({
     >
       <div className="mb-4">
         <UiSearchInput
+          id="modal-agregar-clientes-search"
           placeholder="Buscar cliente..."
           onChange={(e) => {
             setSearch(e.target.value);
@@ -110,6 +117,11 @@ export default function ModalAgregarClientes({
         loading={isLoading}
         scroll={{ y: 360 }}
         locale={{ emptyText: "No se encontraron clientes." }}
+        rowSelection={{
+          columnWidth: 40,
+          selectedRowKeys: visibleSelectedNits,
+          onChange: onSelectChange
+        }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
@@ -122,6 +134,25 @@ export default function ModalAgregarClientes({
           if (extra.action === "paginate") setPage(pag.current ?? 1);
         }}
       />
+
+      {selectedNits.length > 0 && (
+        <p className="mt-3 text-sm text-[#666666]">
+          {selectedNits.length === 1
+            ? "1 cliente seleccionado"
+            : `${selectedNits.length} clientes seleccionados`}
+        </p>
+      )}
+
+      <div className="mt-6">
+        <FooterButtons
+          titleCancel="Cancelar"
+          titleConfirm="Agregar seleccionados"
+          onClose={onClose}
+          handleOk={handleAgregar}
+          isConfirmDisabled={selectedNits.length === 0}
+          isConfirmLoading={disabled}
+        />
+      </div>
     </Modal>
   );
 }

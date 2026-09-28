@@ -30,7 +30,8 @@ yarn-error.log*
 .env.development
 
 # vercel
-.vercel
+.verce
+
 
 # typescript
 *.tsbuildinfo
@@ -42,3 +43,4 @@ CLAUDE.md
 .claude
 .env.staging
 .env.production
+.env.local

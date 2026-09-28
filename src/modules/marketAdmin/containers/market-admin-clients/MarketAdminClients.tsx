@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ChevronLeft } from "lucide-react";
@@ -11,6 +11,9 @@ import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
+import FilterClientsModal, {
+  IMarketAdminClientsFilter
+} from "@/modules/marketAdmin/components/market-admin-clients/FilterClientsModal";
 import { updateMarketAdminClientsBatch } from "@/services/marketAdmin/marketAdmin";
 import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
@@ -54,8 +57,10 @@ const splitLineas = (lineas: string | null) =>
 export default function MarketAdminClients() {
   const { showMessage } = useMessageApi();
   const [search, setSearch] = useState("");
-  const [estadoFilter, setEstadoFilter] = useState("Todos");
-  const [lineaFilter, setLineaFilter] = useState("Todas");
+  const [filter, setFilter] = useState<IMarketAdminClientsFilter>({
+    linea: null,
+    status: null
+  });
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
@@ -73,15 +78,14 @@ export default function MarketAdminClients() {
     page,
     limit: PAGE_SIZE,
     search: debouncedSearch,
-    status: estadoFilter === "Todos" ? undefined : estadoFilter === "Activo" ? 1 : 0,
-    linea: lineaFilter === "Todas" ? undefined : lineaFilter
+    status: filter.status ?? undefined,
+    linea: filter.linea ?? undefined
   });
 
-  // Opciones tomadas de la página actual (mismo criterio que el listado de productos).
-  const lineas = useMemo(
-    () => Array.from(new Set(clientes.flatMap((c) => splitLineas(c.lineas)))),
-    [clientes]
-  );
+  function handleFilterChange(next: IMarketAdminClientsFilter) {
+    setFilter(next);
+    setPage(1);
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -245,33 +249,7 @@ export default function MarketAdminClients() {
               </div>
             )}
           </div>
-          <select
-            value={lineaFilter}
-            onChange={(e) => {
-              setLineaFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="Todas">Línea</option>
-            {lineas.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <select
-            value={estadoFilter}
-            onChange={(e) => {
-              setEstadoFilter(e.target.value);
-              setPage(1);
-            }}
-            className="text-sm border border-[#E0E0E0] rounded-lg px-3 py-2 bg-white text-[#555555] outline-none focus:border-[#141414] transition-colors"
-          >
-            <option value="Todos">Estado</option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+          <FilterClientsModal value={filter} onChange={handleFilterChange} />
         </div>
 
         <Table

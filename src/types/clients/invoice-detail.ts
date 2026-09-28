@@ -49,4 +49,5 @@ export interface IData {
   type_incident: string | null;
   user_id: number | null;
   user_name: string | null;
+  is_reconciled: 1 | 0;
 }

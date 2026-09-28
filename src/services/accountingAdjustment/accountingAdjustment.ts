@@ -91,7 +91,8 @@ export const reportInvoiceIncident = async (
   files: File[] | null,
   clientId: string,
   project_id: string,
-  amount?: string
+  amount?: string,
+  createNew?: boolean
 ) => {
   const formData = new FormData();
   formData.append("project_id", project_id);
@@ -99,6 +100,7 @@ export const reportInvoiceIncident = async (
   formData.append("comments", comments);
   formData.append("motive_id", motiveId);
   if (amount) formData.append("amount", amount);
+  if (createNew) formData.append("create_new", "true");
 
   if (files) {
     files.forEach((file) => {

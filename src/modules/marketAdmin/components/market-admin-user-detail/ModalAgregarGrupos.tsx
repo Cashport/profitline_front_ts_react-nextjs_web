@@ -3,15 +3,15 @@
 import { useMemo, useState } from "react";
 import { Modal, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Plus } from "lucide-react";
 import UiSearchInput from "@/components/ui/search-input";
+import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
 
 type GrupoItem = { id: number; group_name: string };
 
 type Props = {
   asignadosIds: number[];
   allGrupos: GrupoItem[];
-  onAgregar: (grupoId: number) => void;
+  onAgregar: (grupoIds: number[]) => Promise<boolean>;
   onClose: () => void;
   disabled?: boolean;
 };
@@ -26,12 +26,34 @@ export default function ModalAgregarGrupos({
   disabled
 }: Props) {
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const disponibles = useMemo(() => {
     const q = search.trim().toLowerCase();
     const items = allGrupos.filter((g) => !asignadosIds.includes(g.id));
     return q ? items.filter((g) => g.group_name.toLowerCase().includes(q)) : items;
   }, [allGrupos, asignadosIds, search]);
+
+  // El filtro de búsqueda es local: solo se reconcilian las filas visibles para
+  // no perder lo seleccionado antes de escribir en el buscador.
+  const visibleSelectedIds = useMemo(
+    () => disponibles.filter((g) => selectedIds.includes(g.id)).map((g) => g.id),
+    [disponibles, selectedIds]
+  );
+
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    const nextVisible = newSelectedRowKeys.map(Number);
+    const visibleIds = new Set(disponibles.map((g) => g.id));
+    setSelectedIds((prev) => [
+      ...prev.filter((id) => !visibleIds.has(id)),
+      ...nextVisible.filter((id) => visibleIds.has(id))
+    ]);
+  };
+
+  const handleAgregar = async () => {
+    const ok = await onAgregar(selectedIds);
+    if (ok) onClose();
+  };
 
   const columns: ColumnsType<GrupoItem> = [
     {
@@ -40,22 +62,6 @@ export default function ModalAgregarGrupos({
       key: "group_name",
       onHeaderCell: headerCell,
       render: (v: string) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
-      title: "",
-      key: "agregar",
-      width: 48,
-      onHeaderCell: headerCell,
-      render: (_, g) => (
-        <button
-          title="Agregar grupo"
-          disabled={disabled}
-          onClick={() => onAgregar(g.id)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#CCCCCC] hover:bg-[#E6F9E6] hover:text-[#1A7A1A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#CCCCCC]"
-        >
-          <Plus size={13} />
-        </button>
-      )
     }
   ];
 
@@ -69,7 +75,11 @@ export default function ModalAgregarGrupos({
       footer={null}
     >
       <div className="mb-4">
-        <UiSearchInput placeholder="Buscar grupo..." onChange={(e) => setSearch(e.target.value)} />
+        <UiSearchInput
+          id="modal-agregar-grupos-search"
+          placeholder="Buscar grupo..."
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <Table
@@ -80,7 +90,31 @@ export default function ModalAgregarGrupos({
         pagination={false}
         scroll={{ y: 320 }}
         locale={{ emptyText: "Todos los grupos ya están asignados." }}
+        rowSelection={{
+          columnWidth: 40,
+          selectedRowKeys: visibleSelectedIds,
+          onChange: onSelectChange
+        }}
       />
+
+      {selectedIds.length > 0 && (
+        <p className="mt-3 text-sm text-[#666666]">
+          {selectedIds.length === 1
+            ? "1 grupo seleccionado"
+            : `${selectedIds.length} grupos seleccionados`}
+        </p>
+      )}
+
+      <div className="mt-6">
+        <FooterButtons
+          titleCancel="Cancelar"
+          titleConfirm="Agregar seleccionados"
+          onClose={onClose}
+          handleOk={handleAgregar}
+          isConfirmDisabled={selectedIds.length === 0}
+          isConfirmLoading={disabled}
+        />
+      </div>
     </Modal>
   );
 }
