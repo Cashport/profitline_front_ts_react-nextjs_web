@@ -24,6 +24,7 @@ type ClientOption = {
   value: string;
   clientId: string;
   className: string;
+  acountCodes: string[];
 };
 
 interface PropsInvoicesTable {
@@ -43,7 +44,9 @@ const AddClientModal = ({
   initialPhone,
   onSuccess
 }: PropsInvoicesTable) => {
-  const [clients, setClients] = useState<{ uuid: string; id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<
+    { uuid: string; id: string; name: string; acountCodes: string[] }[]
+  >([]);
   const { callingCodeOptions, roleOptions, isLoading } = useContactModalOptions();
 
   const initialPhoneData = extractNationalNumber(initialPhone, callingCodeOptions);
@@ -67,7 +70,12 @@ const AddClientModal = ({
     const fetchClients = async () => {
       try {
         const res = await getWhatsappClients();
-        const formatted = res.map((c) => ({ uuid: c.uuid, id: c.id, name: c.client_name }));
+        const formatted = res.map((c) => ({
+          uuid: c.uuid,
+          id: c.id,
+          name: c.client_name,
+          acountCodes: c.acountCodes
+        }));
         setClients(formatted);
       } catch (error) {
         console.error("Error fetching WhatsApp clients:", error);
@@ -128,7 +136,8 @@ const AddClientModal = ({
 
     return (
       (option?.label?.toLowerCase().includes(search) ?? false) ||
-      (option?.clientId?.toLowerCase().includes(search) ?? false)
+      (option?.clientId?.toLowerCase().includes(search) ?? false) ||
+      (option?.acountCodes?.includes(search) ?? false)
     );
   };
 
@@ -247,7 +256,8 @@ const AddClientModal = ({
                       label: client.name,
                       value: client.uuid,
                       clientId: String(client.id ?? ""),
-                      className: "selectOptions"
+                      className: "selectOptions",
+                      acountCodes: client.acountCodes
                     }))}
                     labelInValue
                     allowClear
