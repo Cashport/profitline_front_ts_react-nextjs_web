@@ -448,6 +448,9 @@ export interface IMarketAdminClientConfig {
   payment_type: number | null;
   warehouse_id: number | null;
   pricelist_id: number | null;
+  // client_marketplace.receives_partials es VARCHAR(255): puede llegar como string o número.
+  receives_partials: string | number | null;
+  lots_greater_than: number | null;
 }
 
 export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
