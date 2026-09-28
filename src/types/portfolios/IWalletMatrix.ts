@@ -145,6 +145,15 @@ export interface IWalletMatrixGroup {
   noveltyId: number | null;
   noveltyType: string | null;
   noveltyStatus: string | null;
+  /**
+   * Solo en los grupos de saldos (statusKey SALDO), que el API separa por tipo:
+   * id del tipo (null = "Sin clasificar"), su nombre y el estado del saldo de
+   * mayor monto. En los saldos `noveltyType` ya trae el tipo y `noveltyStatus`
+   * el estado, así que la tabla los pinta sin tratarlos aparte.
+   */
+  balanceTypeId?: number | null;
+  balanceType?: string | null;
+  balanceStatus?: string | null;
   clientId: string;
   clientName: string | null;
   responsibleName: string | null;

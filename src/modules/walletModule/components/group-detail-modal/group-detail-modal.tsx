@@ -162,7 +162,13 @@ function GroupDetailBody({
   // no pide nada: los documentos ya vienen en el incidente.
   const matrixParams =
     !incidentId && runId && base?.statusKey
-      ? { runId, clientId: base.cliente.nit, status: base.statusKey, noveltyId: null }
+      ? {
+          runId,
+          clientId: base.cliente.nit,
+          status: base.statusKey,
+          noveltyId: null,
+          balanceTypeId: base.balanceTypeId
+        }
       : null;
   const {
     data: matrixDetail,

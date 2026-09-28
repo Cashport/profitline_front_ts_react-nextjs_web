@@ -69,7 +69,9 @@ export default function WalletHeader({
 
       {projected && cutoffDate && (
         <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11.5px] font-medium text-amber-800">
-          Proyectado a {new Date(cutoffDate).toLocaleDateString("es-CO")}
+          {/* El API manda la fecha como medianoche UTC ("2026-09-30T00:00:00Z"):
+              leída en hora local (UTC-5) se pintaría el día anterior. */}
+          Proyectado a {new Date(cutoffDate).toLocaleDateString("es-CO", { timeZone: "UTC" })}
         </span>
       )}
 

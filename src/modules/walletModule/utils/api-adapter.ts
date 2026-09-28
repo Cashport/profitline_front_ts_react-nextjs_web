@@ -141,7 +141,9 @@ export const toSummary = (matrix: IWalletMatrix): IWalletSummary => {
  * modal no encontraría el grupo sobre el que se hizo clic.
  */
 export const groupKey = (g: IWalletMatrixGroup): string =>
-  `${g.statusKey}-${g.noveltyId ?? "sin-novedad"}-${g.clientId}`;
+  `${g.statusKey}-${g.noveltyId ?? "sin-novedad"}-${g.clientId}` +
+  // Los saldos de un cliente vienen en un grupo por tipo: sin esto chocarían.
+  (g.balanceTypeId === undefined ? "" : `-${g.balanceTypeId ?? "sin-tipo"}`);
 
 /** Grupos de facturas de la tabla inferior. */
 export const toGroupRows = (groups: IWalletMatrixGroups): IWalletGroupRow[] =>
@@ -211,6 +213,7 @@ export const toGroupDetail = (
     clave: groupKey(group),
     tipo,
     statusKey: group.statusKey,
+    balanceTypeId: group.balanceTypeId,
     novedad:
       group.noveltyId === null
         ? undefined
