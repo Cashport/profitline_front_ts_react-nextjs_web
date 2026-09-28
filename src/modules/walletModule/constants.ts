@@ -1,4 +1,11 @@
-import { EstadoKey, IWalletMatrixModalFilters, Sev, SortState, WalletDocumentType } from "./types";
+import {
+  EstadoKey,
+  IWalletMatrixModalFilters,
+  MatrixColumn,
+  Sev,
+  SortState,
+  WalletDocumentType
+} from "./types";
 
 export const TRAMOS = [
   { i: 0, id: "corriente", label: "Corriente", short: "Corriente" },
@@ -8,6 +15,12 @@ export const TRAMOS = [
   { i: 4, id: "t4", label: "91 – 120 días", short: "91–120" },
   { i: 5, id: "t5", label: "Más de 120 días", short: "+120" }
 ] as const;
+
+/** Columna "Vencido" de la matriz: no es un tramo, junta del 1–30 al +120. */
+export const VENCIDO = { id: "vencido", label: "Vencido", short: "Vencido" } as const;
+
+/** Rótulos de una columna elegible de la matriz, sea tramo o vencido. */
+export const columnMeta = (col: MatrixColumn) => (col === "vencido" ? VENCIDO : TRAMOS[col]);
 
 /** Orden en el que se pintan los segmentos de las barras y la leyenda. */
 export const ORDEN_EST: EstadoKey[] = [

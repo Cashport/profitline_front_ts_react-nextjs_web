@@ -16,15 +16,18 @@ import type {
   IWalletPerson,
   IWalletTicket,
   IWalletTimelineEntry,
-  TramoIndex
+  MatrixColumn
 } from "../types";
+import { OVERDUE_BUCKET } from "@/types/portfolios/IWalletMatrix";
 import type {
   AgingBucket,
+  IMatrixCell,
   IMatrixStatusCatalogItem,
   IWalletMatrix,
   IWalletMatrixDetailRow,
   IWalletMatrixGroup,
-  IWalletMatrixGroups
+  IWalletMatrixGroups,
+  MatrixColumnKey
 } from "@/types/portfolios/IWalletMatrix";
 import type { IIncidentDetail, IIncidentDocument } from "@/hooks/useNoveltyDetail";
 import type { IIncidentAction } from "@/types/novelties/INovelties";
@@ -89,27 +92,33 @@ const emptyCell = (): IWalletMatrixCell => {
   return cell;
 };
 
-/** Filas de la matriz: un cliente por fila, seis celdas por fila. */
+const toCell = (source?: IMatrixCell): IWalletMatrixCell => {
+  const cell = emptyCell();
+  if (!source) return cell;
+
+  cell.total = source.total;
+  cell.n = source.count;
+  source.statuses.forEach((s) => {
+    const e = toEstadoId(s.status);
+    cell[e] = (cell[e] ?? 0) + s.amount;
+  });
+  return cell;
+};
+
+/** Filas de la matriz: un cliente por fila, seis celdas de tramo más la de vencido. */
 export const toClientRows = (matrix: IWalletMatrix): IWalletClientRow[] =>
   matrix.rows.map((row) => ({
     id: row.clientId,
     nombre: clientName(row.clientName),
     nit: row.clientId,
     ejecutivo: row.responsibleName ?? "Sin asignar",
-    tramos: TRAMO_BUCKETS.map((bucket) => {
-      const source = row.cells?.[bucket];
-      const cell = emptyCell();
-      if (!source) return cell;
-
-      cell.total = source.total;
-      cell.n = source.count;
-      source.statuses.forEach((s) => {
-        const e = toEstadoId(s.status);
-        cell[e] = (cell[e] ?? 0) + s.amount;
-      });
-      return cell;
-    })
+    tramos: TRAMO_BUCKETS.map((bucket) => toCell(row.cells?.[bucket])),
+    vencido: toCell(row.cells?.[OVERDUE_BUCKET])
   }));
+
+/** Valor de `aging` para /portfolio/matrix/groups según la columna elegida. */
+export const columnBucket = (col: MatrixColumn): MatrixColumnKey =>
+  col === "vencido" ? OVERDUE_BUCKET : TRAMO_BUCKETS[col];
 
 /**
  * Identidad de un grupo dentro de la pantalla.
@@ -180,7 +189,7 @@ const SIN_ASIGNAR: IWalletPerson = { id: "sin-asignar", nombre: "Sin asignar", i
  */
 export const toGroupDetail = (
   group: IWalletMatrixGroup,
-  tramo: TramoIndex | null = null
+  tramo: MatrixColumn | null = null
 ): IWalletGroupDetail => {
   const tipo = toEstadoId(group.statusKey);
   const meta = estadoMeta(tipo);

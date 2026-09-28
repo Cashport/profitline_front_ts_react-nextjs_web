@@ -28,7 +28,7 @@ import {
   StatCardsSkeleton
 } from "../../components/wallet-skeleton/wallet-skeleton";
 import {
-  TRAMO_BUCKETS,
+  columnBucket,
   groupKey,
   statusKeysByEstado,
   toClientRows,
@@ -157,7 +157,7 @@ export default function WalletView() {
     // explícita, un `&&` dejaría fuera justo esa columna.
     drilldown?.tramo === null || drilldown?.tramo === undefined
       ? undefined
-      : TRAMO_BUCKETS[drilldown.tramo],
+      : columnBucket(drilldown.tramo),
     filters
   );
 

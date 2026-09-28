@@ -45,6 +45,9 @@ export type Sev = "ok" | "warn" | "crit" | "idle";
 /** Índice de tramo de vencimiento: 0 = corriente … 5 = +120 días. */
 export type TramoIndex = 0 | 1 | 2 | 3 | 4 | 5;
 
+/** Columna que se puede elegir en la matriz: un tramo o "vencido" (1–30 a +120 juntos). */
+export type MatrixColumn = TramoIndex | "vencido";
+
 /** Montos por estado + totales de un conjunto de facturas. */
 export interface WalletSegments extends MontosPorEstado {
   total: number;
@@ -67,6 +70,8 @@ export interface IWalletClientRow {
   ejecutivo: string;
   /** Seis celdas, una por tramo, en el orden de TRAMOS. */
   tramos: IWalletMatrixCell[];
+  /** Celda "vencido" del API: todos los tramos menos corriente. */
+  vencido: IWalletMatrixCell;
 }
 
 /** Fila de "Grupos de facturas". */
@@ -120,7 +125,7 @@ export type IWalletMatrixModalFilters = Required<
 /** Selección activa de la matriz. `tramo: null` = todos los tramos del cliente. */
 export interface IWalletDrilldown {
   clienteId: string;
-  tramo: TramoIndex | null;
+  tramo: MatrixColumn | null;
 }
 
 /* ---------- Detalle de un grupo (modal de gestión) ---------- */
@@ -243,7 +248,7 @@ export interface IWalletGroupDetail {
    * `tramos` y `totalFacturas` vienen acotados a él —el API recorta el grupo
    * al pedirle un `aging`— y las etiquetas tienen que decirlo.
    */
-  tramo?: TramoIndex | null;
+  tramo?: MatrixColumn | null;
   /** Conteo real, del grupo. `facturas` es una muestra y puede venir topada. */
   totalFacturas: number;
   /**

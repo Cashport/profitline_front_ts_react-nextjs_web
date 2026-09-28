@@ -10,6 +10,15 @@ export const AGING_BUCKETS = ["corriente", "1-30", "31-60", "61-90", "91-120", "
 
 export type AgingBucket = (typeof AGING_BUCKETS)[number];
 
+/**
+ * Columna agregada de la matriz: todos los tramos menos corriente. No es un
+ * tramo más —no entra en AGING_BUCKETS ni en `byAging` de los grupos—, pero
+ * tiene su celda, su total, su orden y su acotado de grupos.
+ */
+export const OVERDUE_BUCKET = "vencido" as const;
+
+export type MatrixColumnKey = AgingBucket | typeof OVERDUE_BUCKET;
+
 /** Etiquetas de las columnas, tal como se ven en la tabla. */
 export const AGING_LABELS: Record<AgingBucket, string> = {
   corriente: "Corriente",
@@ -61,7 +70,7 @@ export interface IMatrixRow {
   clientUuid: string | null;
   responsibleName: string | null;
   responsibleEmail: string | null;
-  cells: Record<AgingBucket, IMatrixCell>;
+  cells: Record<MatrixColumnKey, IMatrixCell>;
   total: number;
   invoices: number;
   overdueAmount: number;
@@ -89,7 +98,9 @@ export interface IMatrixCutoff {
 }
 
 export interface IMatrixTotals {
-  byAging: Record<AgingBucket, { total: number; count: number }>;
+  byAging: Record<MatrixColumnKey, { total: number; count: number }>;
+  /** Mismo reparto que el catálogo de estados, pero sobre la foto filtrada. */
+  byStatus: IMatrixStatusCatalogItem[];
   total: number;
   invoices: number;
 }
@@ -233,8 +244,8 @@ export interface IWalletMatrixStatusCatalog {
   statuses: IMatrixStatusCatalogItem[];
 }
 
-/** Columnas por las que ordena el servidor; los tramos usan su AgingBucket. */
-export type WalletMatrixSortBy = "client_name" | AgingBucket | "total" | "overdue_percentage";
+/** Columnas por las que ordena el servidor; los tramos y vencido usan su clave de celda. */
+export type WalletMatrixSortBy = "client_name" | MatrixColumnKey | "total" | "overdue_percentage";
 
 export type WalletMatrixSortDir = "asc" | "desc";
 
@@ -301,7 +312,8 @@ export type IWalletMatrixSharedFilters = Pick<
 export interface IWalletMatrixGroupsScope {
   runId?: string;
   clientId?: string;
-  aging?: AgingBucket;
+  /** Un tramo o "vencido": todos los tramos menos corriente. */
+  aging?: MatrixColumnKey;
   calculateEndMonth?: boolean;
 }
 
