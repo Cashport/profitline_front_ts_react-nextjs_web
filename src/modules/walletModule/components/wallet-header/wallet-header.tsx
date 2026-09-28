@@ -3,6 +3,7 @@
 import UiSearchInput from "@/components/ui/search-input";
 import { FECHA_CORTE_PLACEHOLDER } from "../../constants";
 import ModalFilterMatrix from "../modal-filter-matrix/modal-filter-matrix";
+import WalletActionsMenu from "../wallet-actions-menu/wallet-actions-menu";
 import WalletThemeToggle from "../wallet-theme-toggle/wallet-theme-toggle";
 import type { EstadoId, IWalletMatrixModalFilters } from "../../types";
 
@@ -25,6 +26,9 @@ interface WalletHeaderProps {
   isRefreshing?: boolean;
   onRefresh?: () => void;
   onToggleProjection?: (value: boolean) => void;
+  /** Descarga en .xlsx la matriz con los filtros y el orden actuales. */
+  onDownloadExcel?: () => void;
+  downloadingExcel?: boolean;
 }
 
 const formatCorte = (value?: string | null) =>
@@ -39,7 +43,8 @@ const formatCorte = (value?: string | null) =>
     : FECHA_CORTE_PLACEHOLDER;
 
 /**
- * Barra superior: título, corte, búsqueda global, proyección, filtros y tema.
+ * Barra superior: título, corte, búsqueda global, proyección, acciones
+ * (descarga a Excel), filtros y tema.
  *
  * El corte no es decorativo: la pantalla lee una foto que el worker
  * regenera cada 30 minutos, así que sin esa marca el usuario no puede
@@ -57,7 +62,9 @@ export default function WalletHeader({
   projected,
   isRefreshing,
   onRefresh,
-  onToggleProjection
+  onToggleProjection,
+  onDownloadExcel,
+  downloadingExcel
 }: WalletHeaderProps) {
   return (
     <header className="flex flex-wrap items-center gap-3.5 border-b border-border pb-3">
@@ -120,6 +127,9 @@ export default function WalletHeader({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
         /> */}
+        {onDownloadExcel && (
+          <WalletActionsMenu onDownloadExcel={onDownloadExcel} downloading={downloadingExcel} />
+        )}
         <ModalFilterMatrix
           value={filters}
           onChange={onFiltersChange}

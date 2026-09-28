@@ -1,4 +1,6 @@
-import { API } from "@/utils/api/api";
+import axios from "axios";
+
+import { API, default as instance } from "@/utils/api/api";
 
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
@@ -123,4 +125,46 @@ export const getWalletMatrixStatusCatalog = async (): Promise<
     `/portfolio/matrix/statuses`
   );
   return response;
+};
+
+/**
+ * Descarga la matriz en .xlsx con la misma query de /portfolio/matrix, sin
+ * page ni limit: el archivo trae todo el conjunto filtrado, en el orden de la
+ * tabla.
+ */
+export const downloadWalletMatrixExcel = async (filters?: IWalletMatrixFilters): Promise<void> => {
+  try {
+    // `instance` y no `API`: el interceptor de `API` devuelve sólo el cuerpo y
+    // aquí hacen falta los headers para leer el nombre del archivo.
+    const response = await instance.get(`/portfolio/matrix/export?${buildMatrixQuery(filters)}`, {
+      responseType: "blob",
+      timeout: 60000
+    });
+
+    const disposition = (response.headers["content-disposition"] as string) || "";
+    // en-CA formatea YYYY-MM-DD en hora local; toISOString daría el día UTC.
+    const filename =
+      disposition.match(/filename="?([^";]+)"?/)?.[1] ||
+      `cartera-por-cliente-y-tramo_${new Date().toLocaleDateString("en-CA")}.xlsx`;
+
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    // Con responseType "blob" el error del backend también llega como Blob.
+    let message: string | undefined;
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        message = JSON.parse(await error.response.data.text())?.message;
+      } catch {
+        // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
+      }
+    }
+    throw new Error(message || "No se pudo descargar el Excel de la cartera.");
+  }
 };

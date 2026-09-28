@@ -10,6 +10,7 @@ import {
 import { useDebounce } from "@/hooks/useDeabouce";
 import {
   buildMatrixQuery,
+  downloadWalletMatrixExcel,
   getWalletMatrixStatusCatalog,
   refreshWalletMatrix
 } from "@/services/walletMatrix/walletMatrix";
@@ -59,7 +60,7 @@ const TEXTUAL_COLS: WalletMatrixSortBy[] = ["client_name"];
 const REFRESH_TIMEOUT_MS = 3 * 60 * 1000;
 
 export default function WalletView() {
-  const { showMessage } = useMessageApi();
+  const { showMessage, messageApi } = useMessageApi();
   const { refreshedAt, isRefreshing: socketRefreshing } = useWalletMatrixSocket();
 
   // Los dos buscadores —el de la barra superior y el de la matriz— comparten
@@ -76,6 +77,7 @@ export default function WalletView() {
   // Página de la matriz: la pagina el servidor, la vista sólo pide la que toca.
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
   /**
    * Foto vigente en el momento de disparar la actualización. La corrida
    * terminó cuando aparece una DISTINTA a esta.
@@ -270,6 +272,27 @@ export default function WalletView() {
     }
   };
 
+  // Va con los mismos `filters` de la matriz: el Excel trae lo que se ve en
+  // pantalla, en el mismo orden. El menú se cierra al elegir la opción, así que
+  // el loader es el único feedback hasta que llega el archivo.
+  const handleDownloadExcel = async () => {
+    if (downloadingExcel) return;
+
+    const hide = messageApi.open({ type: "loading", content: "Descargando Excel…", duration: 0 });
+    try {
+      setDownloadingExcel(true);
+      await downloadWalletMatrixExcel(filters);
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudo descargar el Excel de la cartera."
+      );
+    } finally {
+      hide();
+      setDownloadingExcel(false);
+    }
+  };
+
   // Cuando cambia la consulta (filtros, búsqueda o proyección) la celda
   // elegida deja de tener sentido y la página vuelve a la primera: el conjunto
   // y el orden de los clientes ya no son los que eran. Se observa la query
@@ -358,6 +381,8 @@ export default function WalletView() {
         isRefreshing={isRefreshing}
         onRefresh={handleRefresh}
         onToggleProjection={setCalculateEndMonth}
+        onDownloadExcel={handleDownloadExcel}
+        downloadingExcel={downloadingExcel}
       />
 
       {primeraCarga ? (
