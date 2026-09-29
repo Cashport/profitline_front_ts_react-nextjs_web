@@ -20,12 +20,14 @@ import {
 } from "@/services/resolveNovelty/resolveNovelty";
 import { useMessageApi } from "@/context/MessageContext";
 import type { ICreateIncidentActionBody, IUpdateIncidentBody } from "@/types/novelties/INovelties";
+import type { WalletMatrixDetailSortBy } from "@/types/portfolios/IWalletMatrix";
 import {
   toIncidentGroupDetail,
   toMatrixDocument,
   toTickets,
   toTimelineEntries
 } from "../../utils/api-adapter";
+import { nextSort } from "../../utils/wallet-calc";
 import { useWalletTheme } from "../../contexts/wallet-theme-context";
 import GroupComposer from "./group-composer";
 import GroupDetailRail from "./group-detail-rail";
@@ -38,7 +40,7 @@ import ModalCreateNovelty, { CreateNoveltyBody } from "./modal-create-novelty";
 import ModalEditNovelty from "./modal-edit-novelty";
 import ModalLinkNovelty from "./modal-link-novelty";
 import type { NoveltyModalMode } from "./novelty-drawer";
-import type { IWalletDocument, IWalletGroupDetail, IWalletTicket } from "../../types";
+import type { IWalletDocument, IWalletGroupDetail, IWalletTicket, SortState } from "../../types";
 
 interface GroupDetailModalProps {
   /**
@@ -59,8 +61,19 @@ interface GroupDetailModalProps {
 
 type Tab = "gestion" | "facturas";
 
-/** Facturas por página en los grupos sin novedad (/portfolio/matrix/detail). */
+/** Facturas por página de la pestaña Facturas (/portfolio/matrix/detail). */
 const INVOICES_PAGE_SIZE = 25;
+
+/** Orden inicial de las facturas; `col` es el `sort_by` del API. */
+const INVOICES_DEFAULT_SORT: SortState = { col: "amount", dir: "desc" };
+
+/** Columnas de texto (y la fecha) arrancan ascendentes; los montos, descendentes. */
+const INVOICES_TEXTUAL_COLS: WalletMatrixDetailSortBy[] = [
+  "document",
+  "type",
+  "status",
+  "document_date"
+];
 
 const TabButton = ({
   active,
@@ -132,6 +145,8 @@ function GroupDetailBody({
   // ya no están en la tabla y aun así viajan a crear/vincular novedad.
   const [selected, setSelected] = useState<IWalletDocument[]>([]);
   const [invoicesPage, setInvoicesPage] = useState(1);
+  // Lo ordena el servidor sobre el grupo completo, así que entra en la consulta.
+  const [invoicesSort, setInvoicesSort] = useState<SortState>(INVOICES_DEFAULT_SORT);
   const [ticketForm, setTicketForm] = useState(false);
   const [noveltyModal, setNoveltyModal] = useState<NoveltyModalMode | null>(null);
 
@@ -156,18 +171,23 @@ function GroupDetailBody({
     mutate: mutateActions
   } = useIncidentActions({ incidentId });
 
-  // Grupo sin novedad: las facturas no vienen con la fila, se piden paginadas
-  // a la foto de la matriz. `!incidentId` es exactamente ese caso (el id se
-  // resuelve tanto desde la fila como desde la bandeja). Con novedad el hook
-  // no pide nada: los documentos ya vienen en el incidente.
+  // Las facturas, con o sin novedad, se piden paginadas y ordenadas a la foto
+  // de la matriz: es la que trae la fecha del documento. Desde cartera el
+  // grupo se pide exacto (foto pintada, estado y tipo de saldo de la fila).
+  // Desde la bandeja sólo se conoce la novedad: va sin foto ni estado y el
+  // cliente sale del incidente. Sin novedad, foto y estado son obligatorios:
+  // sin ellos saldrían todas las facturas sin novedad del cliente.
+  const clientId = base?.cliente.nit ?? incident?.client_id;
   const matrixParams =
-    !incidentId && runId && base?.statusKey
+    clientId && (incidentId || (runId && base?.statusKey))
       ? {
           runId,
-          clientId: base.cliente.nit,
-          status: base.statusKey,
-          noveltyId: null,
-          balanceTypeId: base.balanceTypeId
+          clientId,
+          status: base?.statusKey,
+          noveltyId: incidentId ?? null,
+          balanceTypeId: base?.balanceTypeId,
+          sort_by: invoicesSort.col as WalletMatrixDetailSortBy,
+          sort_dir: invoicesSort.dir
         }
       : null;
   const {
@@ -183,13 +203,17 @@ function GroupDetailBody({
   const bitacora = useMemo(() => (incident ? toTimelineEntries(incident) : []), [incident]);
   const tickets = useMemo(() => toTickets(actions), [actions]);
   const documentos = useMemo(
-    () =>
-      incidentId ? detail?.documentos ?? [] : (matrixDetail?.rows ?? []).map(toMatrixDocument),
-    [incidentId, detail, matrixDetail]
+    () => (matrixDetail?.rows ?? []).map(toMatrixDocument),
+    [matrixDetail]
   );
-  const totalFacturas = incidentId
-    ? detail?.totalFacturas ?? 0
-    : matrixDetail?.pagination.total ?? detail?.totalFacturas ?? 0;
+  const totalFacturas = matrixDetail?.pagination.total ?? detail?.totalFacturas ?? 0;
+
+  // Otro orden cambia qué hay en cada página: se vuelve a la primera. La
+  // selección se conserva, porque guarda documentos y no posiciones.
+  const handleInvoicesSort = (col: string) => {
+    setInvoicesSort((s) => nextSort(s, col, INVOICES_TEXTUAL_COLS));
+    setInvoicesPage(1);
+  };
 
   // El seguimiento se lee de abajo hacia arriba: lo último siempre a la vista.
   useEffect(() => {
@@ -409,8 +433,7 @@ function GroupDetailBody({
             >
               Seguimiento
             </TabButton>
-            {/* Con novedad el conteo es el del incidente; sin ella, el total
-                que reporta la foto (o el del grupo mientras llega). */}
+            {/* El total que reporta la foto (o el del grupo mientras llega). */}
             <TabButton
               active={tab === "facturas"}
               count={totalFacturas}
@@ -448,16 +471,14 @@ function GroupDetailBody({
                 query={query}
                 selected={selected}
                 onSelectedChange={setSelected}
-                pagination={
-                  incidentId
-                    ? undefined
-                    : {
-                        page: invoicesPage,
-                        pageSize: INVOICES_PAGE_SIZE,
-                        total: matrixDetail?.pagination.total ?? 0,
-                        onChange: setInvoicesPage
-                      }
-                }
+                sort={invoicesSort}
+                onSort={handleInvoicesSort}
+                pagination={{
+                  page: invoicesPage,
+                  pageSize: INVOICES_PAGE_SIZE,
+                  total: matrixDetail?.pagination.total ?? 0,
+                  onChange: setInvoicesPage
+                }}
               />
             )
           ) : !incidentId ? (
