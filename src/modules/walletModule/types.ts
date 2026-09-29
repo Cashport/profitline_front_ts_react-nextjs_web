@@ -144,23 +144,11 @@ export interface IWalletAttachment {
   url?: string;
 }
 
-/** Una factura dentro de un grupo. `dias` > 0 significa vencida. */
-export interface IWalletInvoice {
-  id: string;
-  doc: string;
-  vence: Date;
-  dias: number;
-  tramo: TramoIndex;
-  saldo: number;
-}
-
 export type WalletDocumentType = "FINANCIAL_RECORD" | "BALANCE";
-export type WalletDocumentInactiveReason = "PAID" | "MANUALLY_REMOVED" | "CANCELLED" | "OTHER";
 
 /**
- * Un documento (factura o saldo) asociado a una novedad, tal como lo manda
- * /invoice/incident-detail. `activa: false` = ya salió de cartera pero se
- * conserva en el histórico ("Ver cerradas").
+ * Un documento (factura o saldo) de un grupo, tal como lo manda
+ * /portfolio/matrix/detail. Es cartera viva: la foto no trae documentos cerrados.
  */
 export interface IWalletDocument {
   id: string;
@@ -169,11 +157,11 @@ export interface IWalletDocument {
   /** Número del ERP o, si no hay, el id interno. */
   doc: string;
   tipo: WalletDocumentType;
+  fechaDoc: Date | null;
+  /** statusLabel del API (Conciliado, Sin conciliar…), tal cual. */
+  estado: string;
   saldoInicial: number;
   saldo: number;
-  activa: boolean;
-  inactivaMotivo: WalletDocumentInactiveReason | null;
-  inactivaEl: Date | null;
 }
 
 /** Una acción (ticket) de la novedad, tal como la manda /invoice/incident/:id/actions. */
@@ -249,21 +237,7 @@ export interface IWalletGroupDetail {
    * al pedirle un `aging`— y las etiquetas tienen que decirlo.
    */
   tramo?: MatrixColumn | null;
-  /** Conteo real, del grupo. `facturas` es una muestra y puede venir topada. */
+  /** Conteo real del grupo. */
   totalFacturas: number;
-  /**
-   * Documentos de la novedad (/invoice/incident-detail → `documents`). Vacío
-   * en grupos sin novedad: sus facturas las pide el modal a
-   * /portfolio/matrix/detail, paginadas.
-   */
-  documentos: IWalletDocument[];
-  /**
-   * `bitacora` y `tickets` ya no los lee el modal: el seguimiento sale del
-   * incidente (/invoice/incident-detail) y las acciones de
-   * /invoice/incident/:id/actions. Se conservan porque la bandeja de tickets,
-   * aún simulada, los construye.
-   */
-  bitacora: IWalletTimelineEntry[];
-  tickets: IWalletTicket[];
   diasSinGestion: number | null;
 }

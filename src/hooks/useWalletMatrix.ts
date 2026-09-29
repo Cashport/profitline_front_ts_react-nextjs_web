@@ -10,7 +10,9 @@ import {
   IWalletMatrixFilters,
   IWalletMatrixGroups,
   IWalletMatrixStatus,
-  MatrixColumnKey
+  MatrixColumnKey,
+  WalletMatrixDetailSortBy,
+  WalletMatrixSortDir
 } from "@/types/portfolios/IWalletMatrix";
 
 /**
@@ -75,20 +77,25 @@ export const useWalletMatrixGroups = (
 };
 
 export interface IWalletMatrixDetailParams {
-  runId: string;
+  /** Foto pintada. Sin ella (novedad abierta desde la bandeja) el API usa la última. */
+  runId?: string;
   clientId: string;
-  /** statusKey crudo del grupo (CONCILIADO, SIN_CONCILIAR, …). */
-  status: string;
+  /** statusKey crudo del grupo (CONCILIADO, SIN_CONCILIAR, …). Sin él no filtra. */
+  status?: string;
   /** null → se manda la cadena "null": documentos sin novedad asociada. */
   noveltyId: number | null;
   /** Grupo de saldos: tipo del grupo (null = "Sin clasificar"). Sin él no filtra. */
   balanceTypeId?: number | null;
+  /** Ordena el grupo completo, no sólo la página cargada. */
+  sort_by?: WalletMatrixDetailSortBy;
+  sort_dir?: WalletMatrixSortDir;
 }
 
 /**
  * Documentos exactos de un grupo de la matriz (cliente × estado × novedad),
- * paginados, sobre la misma foto que está pintada. Sin `params` no pide nada:
- * los grupos con novedad leen sus documentos de /invoice/incident-detail.
+ * paginados y ordenados por el servidor, sobre la misma foto que está
+ * pintada. Sin `params` no pide nada. Una novedad abierta desde la bandeja no
+ * tiene foto ni estado: se pide sólo por cliente y novedad.
  */
 export const useWalletMatrixDetail = (
   params: IWalletMatrixDetailParams | null,
@@ -98,19 +105,21 @@ export const useWalletMatrixDetail = (
   let pathKey: string | null = null;
   if (params) {
     const query = new URLSearchParams({
-      runId: params.runId,
       clientId: params.clientId,
-      status: params.status,
       noveltyId: params.noveltyId === null ? "null" : String(params.noveltyId),
       page: String(page),
       limit: String(limit)
     });
+    if (params.runId) query.set("runId", params.runId);
+    if (params.status) query.set("status", params.status);
     if (params.balanceTypeId !== undefined) {
       query.set(
         "balanceTypeId",
         params.balanceTypeId === null ? "null" : String(params.balanceTypeId)
       );
     }
+    if (params.sort_by) query.set("sort_by", params.sort_by);
+    if (params.sort_dir) query.set("sort_dir", params.sort_dir);
     pathKey = `/portfolio/matrix/detail?${query}`;
   }
 
