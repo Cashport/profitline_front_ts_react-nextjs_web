@@ -13,7 +13,8 @@ import {
   Receipt,
   XCircle,
   MagnifyingGlassMinus,
-  Info
+  Info,
+  ArrowsClockwise
 } from "phosphor-react";
 import CardsClients from "../../../molecules/modals/CardsClients/CardsClients";
 
@@ -26,8 +27,9 @@ import {
 } from "@/components/atoms/Filters/FilterPortfolio/FilterPortfolio";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import { fetcher } from "@/utils/api/api";
-import { useInfiniteQuery } from "react-query";
+import { useInfiniteQuery, useQueryClient } from "react-query";
 import { useAppStore } from "@/lib/store/store";
+import { usePortfolioClientsRefresh } from "@/hooks/usePortfolioClientsRefresh";
 
 import "./ClientsViewTable.scss";
 import { formatTimeAgo } from "@/utils/utils";
@@ -52,7 +54,18 @@ export const ClientsViewTable = () => {
   const [flattenedData, setFlattenedData] = useState<IClientsPortfolio[]>([]);
   const [grandTotal, setGrandTotal] = useState<any>({});
   const [noResults, setNoResults] = useState<boolean>(false);
-  const { ID } = useAppStore((state) => state.selectedProject);
+  const { ID, isSuperAdmin, rol_id } = useAppStore((state) => state.selectedProject);
+  const queryClient = useQueryClient();
+
+  // Mismo criterio que el backend (`isAdminORSuperAdmin`): super admin o rol 2 en el proyecto.
+  const canRefresh = Boolean(isSuperAdmin) || rol_id === 2;
+  const {
+    refresh: refreshPortfolio,
+    refreshing: refreshingPortfolio,
+    lastUpdatedAt
+  } = usePortfolioClientsRefresh(canRefresh, () => {
+    queryClient.invalidateQueries("portfolios");
+  });
 
   const [loadingOpenPortfolio, setLoadingOpenPortfolio] = useState({
     isLoading: false,
@@ -83,7 +96,7 @@ export const ClientsViewTable = () => {
     // se agrega un timeout de 30 segundos para esta consulta debido a que puede tardar más de lo normal en responder cuando se tienen muchos datos o filtros aplicados
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, error } = useInfiniteQuery(
     ["portfolios", debouncedSearchQuery, filters, ID],
     fetchPortfolios,
     {
@@ -96,9 +109,16 @@ export const ClientsViewTable = () => {
         return pages.length + 1;
       },
       refetchOnWindowFocus: false,
-      refetchOnReconnect: false
+      refetchOnReconnect: false,
+      // Un 4xx (p. ej. sin grupos asignados) no se arregla reintentando; con
+      // los 3 reintentos por defecto la tabla quedaba cargando sin mensaje.
+      retry: 1
     }
   );
+  const loadErrorMessage =
+    status === "error"
+      ? (error as Error)?.message || "No se pudo cargar la información de cartera"
+      : null;
 
   const { ref, inView } = useInView({
     threshold: 0
@@ -292,10 +312,29 @@ export const ClientsViewTable = () => {
     <main className="mainClientsTable">
       <div style={{ marginBottom: "10px" }}>
         <Flex justify="space-between" className="mainClientsTable_header">
-          <Flex gap={"10px"}>
+          <Flex gap={"10px"} align="center">
             <OptimizedSearchComponent onSearch={handleSearch} />
             <FilterPortfolio setSelectedFilters={setFilters} />
             <Button size="large" icon={<DotsThree size={"1.5rem"} />} />
+            {canRefresh && (
+              <Tooltip
+                title={
+                  lastUpdatedAt
+                    ? `Última actualización: ${new Date(lastUpdatedAt).toLocaleString("es-CO")}`
+                    : undefined
+                }
+              >
+                <Button
+                  size="large"
+                  style={{ marginLeft: "auto" }}
+                  icon={<ArrowsClockwise size={"1.3rem"} />}
+                  loading={refreshingPortfolio}
+                  onClick={refreshPortfolio}
+                >
+                  {refreshingPortfolio ? "Recargando…" : "Recargar información"}
+                </Button>
+              </Tooltip>
+            )}
           </Flex>
         </Flex>
         <Row gutter={8}>
@@ -375,7 +414,9 @@ export const ClientsViewTable = () => {
           } as any
         }
         locale={{
-          emptyText: noResults ? "No se encontraron resultados" : "No hay datos disponibles"
+          emptyText:
+            loadErrorMessage ??
+            (noResults ? "No se encontraron resultados" : "No hay datos disponibles")
         }}
       />
       {(hasNextPage || isFetchingNextPage) && !noResults && (
@@ -383,11 +424,15 @@ export const ClientsViewTable = () => {
           {isFetchingNextPage ? <Spin /> : "Load More"}
         </div>
       )}
-      {!hasNextPage && status !== "loading" && flattenedData.length <= 0 && !noResults && (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <Text>No hay más datos para cargar</Text>
-        </div>
-      )}
+      {!hasNextPage &&
+        status !== "loading" &&
+        !loadErrorMessage &&
+        flattenedData.length <= 0 &&
+        !noResults && (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <Text>No hay más datos para cargar</Text>
+          </div>
+        )}
     </main>
   );
 };
