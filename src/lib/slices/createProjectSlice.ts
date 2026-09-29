@@ -9,6 +9,8 @@ export type ISelectedProject = {
   views_permissions?: IViewPermission[];
   action_permissions?: string[];
   isSuperAdmin?: boolean;
+  /** Rol del usuario en el proyecto (2 = administrador). */
+  rol_id?: number;
 };
 export interface ProjectSlice {
   projects: IProject[];
