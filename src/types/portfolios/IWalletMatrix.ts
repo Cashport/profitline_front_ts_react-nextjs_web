@@ -166,6 +166,7 @@ export interface IWalletMatrixDetailRow {
   statusKey: string;
   statusLabel: string;
   amount: number;
+  initialAmount: number;
   documentId: string;
   erpId: string | null;
   documentDate: string | null;
@@ -248,6 +249,15 @@ export interface IWalletMatrixStatusCatalog {
 export type WalletMatrixSortBy = "client_name" | MatrixColumnKey | "total" | "overdue_percentage";
 
 export type WalletMatrixSortDir = "asc" | "desc";
+
+/** Columnas por las que ordena /portfolio/matrix/detail los documentos del grupo. */
+export type WalletMatrixDetailSortBy =
+  | "document"
+  | "type"
+  | "status"
+  | "initial_amount"
+  | "amount"
+  | "document_date";
 
 /**
  * Query de GET /portfolio/matrix. Las listas viajan separadas por coma.

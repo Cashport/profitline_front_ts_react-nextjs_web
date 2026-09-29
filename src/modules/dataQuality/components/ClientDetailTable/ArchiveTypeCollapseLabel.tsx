@@ -54,9 +54,9 @@ export function ArchiveTypeCollapseLabel({
               {intake.periodicity}
             </Badge>
             <p className="text-xs" style={{ color: "#141414" }}>
-              Se produce {intake.periodicity_json.repeat.frequency}{" "}
-              {intake.periodicity_json.repeat.interval} veces iniciando el{" "}
-              {intake.periodicity_json.start_date}
+              Se produce {intake.periodicity_json?.repeat?.frequency}{" "}
+              {intake.periodicity_json?.repeat?.interval} veces iniciando el{" "}
+              {intake.periodicity_json?.start_date}
             </p>
             <span className="text-xs font-semibold" style={{ color: "#141414" }}>
               Fuente:

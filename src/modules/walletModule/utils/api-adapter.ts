@@ -29,7 +29,7 @@ import type {
   IWalletMatrixGroups,
   MatrixColumnKey
 } from "@/types/portfolios/IWalletMatrix";
-import type { IIncidentDetail, IIncidentDocument } from "@/hooks/useNoveltyDetail";
+import type { IIncidentDetail } from "@/hooks/useNoveltyDetail";
 import type { IIncidentAction } from "@/types/novelties/INovelties";
 
 /** Los seis tramos, en el orden en el que se pintan las columnas. */
@@ -220,9 +220,6 @@ export const toGroupDetail = (
     tramos: group.byAging ?? TRAMOS.map(() => 0),
     tramo,
     totalFacturas: group.invoices,
-    documentos: [],
-    bitacora: [],
-    tickets: [],
     diasSinGestion: null
   };
 };
@@ -242,33 +239,16 @@ export const parseApiDate = (value: string | null | undefined): Date | null => {
   return Number.isNaN(fecha.getTime()) ? null : fecha;
 };
 
-const toDocument = (doc: IIncidentDocument): IWalletDocument => ({
-  id: String(doc.incident_document_id ?? doc.document_id),
-  documentId: doc.document_id,
-  doc: doc.id_erp ?? `#${doc.document_id}`,
-  tipo: doc.document_type,
-  saldoInicial: doc.initial_amount,
-  saldo: doc.actual_amount,
-  activa: doc.active,
-  inactivaMotivo: doc.inactive_reason,
-  inactivaEl: parseApiDate(doc.date_inactivated)
-});
-
-/**
- * Documento de la foto de cartera (/portfolio/matrix/detail) → documento del
- * modal. La foto no lleva histórico: todo lo que devuelve es cartera viva, así
- * que va activo y con el saldo inicial igual al actual.
- */
+/** Documento de la foto de cartera (/portfolio/matrix/detail) → documento del modal. */
 export const toMatrixDocument = (row: IWalletMatrixDetailRow): IWalletDocument => ({
   id: row._id,
   documentId: Number(row.documentId),
   doc: row.erpId ?? `#${row.documentId}`,
   tipo: row.source === "BALANCE" ? "BALANCE" : "FINANCIAL_RECORD",
-  saldoInicial: row.amount,
-  saldo: row.amount,
-  activa: true,
-  inactivaMotivo: null,
-  inactivaEl: null
+  fechaDoc: parseApiDate(row.documentDate?.slice(0, 10)),
+  estado: row.statusLabel,
+  saldoInicial: row.initialAmount,
+  saldo: row.amount
 });
 
 /**
@@ -277,9 +257,8 @@ export const toMatrixDocument = (row: IWalletMatrixDetailRow): IWalletDocument =
  * Es la fuente de verdad cuando el grupo es una novedad: cliente, estado,
  * responsable, fechas, saldo y conteo salen de aquí, no de la fila. `base` es
  * el detalle armado desde la fila de cartera (si se abrió desde ahí) y sólo
- * aporta lo que el incidente no trae: la clave y el reparto por tramo. Los
- * tickets van vacíos: el modal los pide aparte (ver `toTickets`). `tramo` va
- * en null porque las cifras son de la novedad entera, no del recorte del
+ * aporta lo que el incidente no trae: la clave y el reparto por tramo. `tramo`
+ * va en null porque las cifras son de la novedad entera, no del recorte del
  * drilldown.
  */
 export const toIncidentGroupDetail = (
@@ -314,9 +293,6 @@ export const toIncidentGroupDetail = (
     tramos: base?.tramos ?? TRAMOS.map(() => 0),
     tramo: null,
     totalFacturas: incident.actual_count,
-    documentos: (incident.documents ?? []).map(toDocument),
-    bitacora: [],
-    tickets: [],
     diasSinGestion: ultimaGestion ? Math.max(0, diasEntre(ultimaGestion, HOY)) : null
   };
 };
