@@ -182,7 +182,7 @@ export interface IClientDetailDataArchive {
   id_type_archive: number;
   tipo_archivo: string;
   periodicity: string;
-  periodicity_json: IPeriodicity;
+  periodicity_json: IPeriodicity | null;
   strategy: string;
   input_file_skip_rows: number;
   url: string;
