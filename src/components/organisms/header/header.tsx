@@ -1,5 +1,5 @@
 "use client";
-import { FC, useCallback, useState } from "react";
+import { FC, ReactNode, useCallback } from "react";
 import { CaretDown, User } from "phosphor-react";
 import styles from "./header.module.scss";
 import { Avatar, Button, Popover } from "antd";
@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   title: string;
+  titleExtra?: ReactNode;
 }
 
-const Header: FC<HeaderProps> = ({ title }) => {
+const Header: FC<HeaderProps> = ({ title, titleExtra }) => {
   const router = useRouter();
 
   const handleLogOut = useCallback(() => {
@@ -19,7 +20,10 @@ const Header: FC<HeaderProps> = ({ title }) => {
 
   return (
     <header className={styles.wrapper}>
-      <h1 className={styles.title}>{title}</h1>
+      <div className={styles.titleWrapper}>
+        <h1 className={styles.title}>{title}</h1>
+        {titleExtra}
+      </div>
       <div className={styles.actions}>
         <div className={styles.profile}>
           <Avatar icon={<User />} />

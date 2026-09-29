@@ -13,8 +13,7 @@ import {
   Receipt,
   XCircle,
   MagnifyingGlassMinus,
-  Info,
-  ArrowsClockwise
+  Info
 } from "phosphor-react";
 import CardsClients from "../../../molecules/modals/CardsClients/CardsClients";
 
@@ -27,9 +26,8 @@ import {
 } from "@/components/atoms/Filters/FilterPortfolio/FilterPortfolio";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import { fetcher } from "@/utils/api/api";
-import { useInfiniteQuery, useQueryClient } from "react-query";
+import { useInfiniteQuery } from "react-query";
 import { useAppStore } from "@/lib/store/store";
-import { usePortfolioClientsRefresh } from "@/hooks/usePortfolioClientsRefresh";
 
 import "./ClientsViewTable.scss";
 import { formatTimeAgo } from "@/utils/utils";
@@ -54,19 +52,7 @@ export const ClientsViewTable = () => {
   const [flattenedData, setFlattenedData] = useState<IClientsPortfolio[]>([]);
   const [grandTotal, setGrandTotal] = useState<any>({});
   const [noResults, setNoResults] = useState<boolean>(false);
-  const { ID, isSuperAdmin, rol_id } = useAppStore((state) => state.selectedProject);
-  const queryClient = useQueryClient();
-
-  // Mismo criterio que el backend (`isAdminORSuperAdmin`): super admin o rol 2 en el proyecto.
-  const canRefresh = Boolean(isSuperAdmin) || rol_id === 2;
-  const {
-    refresh: refreshPortfolio,
-    refreshing: refreshingPortfolio,
-    lastUpdatedAt
-  } = usePortfolioClientsRefresh(canRefresh, () => {
-    queryClient.invalidateQueries("portfolios");
-  });
-
+  const { ID } = useAppStore((state) => state.selectedProject);
   const [loadingOpenPortfolio, setLoadingOpenPortfolio] = useState({
     isLoading: false,
     loadingId: ""
@@ -316,25 +302,6 @@ export const ClientsViewTable = () => {
             <OptimizedSearchComponent onSearch={handleSearch} />
             <FilterPortfolio setSelectedFilters={setFilters} />
             <Button size="large" icon={<DotsThree size={"1.5rem"} />} />
-            {canRefresh && (
-              <Tooltip
-                title={
-                  lastUpdatedAt
-                    ? `Última actualización: ${new Date(lastUpdatedAt).toLocaleString("es-CO")}`
-                    : undefined
-                }
-              >
-                <Button
-                  size="large"
-                  style={{ marginLeft: "auto" }}
-                  icon={<ArrowsClockwise size={"1.3rem"} />}
-                  loading={refreshingPortfolio}
-                  onClick={refreshPortfolio}
-                >
-                  {refreshingPortfolio ? "Recargando…" : "Recargar información"}
-                </Button>
-              </Tooltip>
-            )}
           </Flex>
         </Flex>
         <Row gutter={8}>

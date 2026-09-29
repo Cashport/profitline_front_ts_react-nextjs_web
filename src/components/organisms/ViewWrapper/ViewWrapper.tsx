@@ -5,6 +5,7 @@ import styles from "./ViewWrapper.module.scss";
 
 interface IViewWrapper {
   headerTitle: string;
+  headerTitleExtra?: React.ReactNode;
   children: React.ReactNode;
   gapTitle?: string;
   hideHeader?: boolean;
@@ -12,6 +13,7 @@ interface IViewWrapper {
 }
 export default function ViewWrapper({
   headerTitle,
+  headerTitleExtra,
   children,
   gapTitle = "1rem",
   hideHeader = false,
@@ -21,7 +23,7 @@ export default function ViewWrapper({
     <main className={`${styles.mainWrapper} ${className ?? ""}`}>
       <SideBar />
       <Flex vertical className={styles.rightContent} gap={gapTitle}>
-        {!hideHeader ? <Header title={headerTitle} /> : null}
+        {!hideHeader ? <Header title={headerTitle} titleExtra={headerTitleExtra} /> : null}
         {children}
       </Flex>
     </main>
