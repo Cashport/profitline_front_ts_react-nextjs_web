@@ -66,7 +66,6 @@ export const ClientsViewTable = () => {
   } = usePortfolioClientsRefresh(canRefresh, () => {
     queryClient.invalidateQueries("portfolios");
   });
-
   const [loadingOpenPortfolio, setLoadingOpenPortfolio] = useState({
     isLoading: false,
     loadingId: ""

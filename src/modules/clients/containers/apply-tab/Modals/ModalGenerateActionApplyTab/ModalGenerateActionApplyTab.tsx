@@ -56,12 +56,12 @@ export const ModalGenerateActionApplyTab = ({
         <ButtonGenerateAction
           onClick={downloadLog}
           icon={<DownloadSimple size={20} />}
-          title="Descargar Log"
+          title="Descargar Log IA"
         />
         <ButtonGenerateAction
           onClick={downloadExcelLog}
           icon={<DownloadSimple size={20} />}
-          title="Descargar excel log"
+          title="Descargar excel log aplicación"
         />
         <ButtonGenerateAction
           onClick={() => {
