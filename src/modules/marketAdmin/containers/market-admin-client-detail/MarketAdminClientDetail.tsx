@@ -19,8 +19,10 @@ import {
   createManualBonus,
   createMarketAdminClientAddress,
   deleteMarketAdminClientAddress,
+  downloadMarketAdminClientConfigSheet,
   updateMarketAdminClientAddress,
-  updateMarketAdminClientConfig
+  updateMarketAdminClientConfig,
+  uploadMarketAdminClientConfigSheet
 } from "@/services/marketAdmin/marketAdmin";
 import { getProductsByProject } from "@/services/products/products";
 import { changeStatus, createDiscount } from "@/services/discount/discount.service";
@@ -55,7 +57,7 @@ const splitLineas = (lineas: string | null | undefined) =>
 
 export default function MarketAdminClientDetail({ params }: { params: { id: string } }) {
   const { id } = params;
-  const { showMessage } = useMessageApi();
+  const { showMessage, messageApi } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
   // Tab — new order: promociones, direcciones, usuarios, productos
@@ -219,6 +221,39 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     }
   };
 
+  // Hoja de configuración (.xlsx). El menú de acciones se cierra al elegir la
+  // opción, así que el loader es el único feedback hasta que termina. No
+  // relanzan el error porque no hay un modal que mantener abierto.
+  const uploadConfigSheet = async (file: File) => {
+    const hide = messageApi.open({ type: "loading", content: "Cargando archivo…", duration: 0 });
+    try {
+      await uploadMarketAdminClientConfigSheet(id, file);
+      await mutateConfig();
+      showMessage("success", `Archivo "${file.name}" cargado correctamente.`);
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al cargar el archivo."
+      );
+    } finally {
+      hide();
+    }
+  };
+
+  const downloadConfigSheet = async () => {
+    const hide = messageApi.open({ type: "loading", content: "Descargando archivo…", duration: 0 });
+    try {
+      await downloadMarketAdminClientConfigSheet(id);
+    } catch (err) {
+      showMessage(
+        "error",
+        err instanceof Error ? err.message : "Ocurrió un error al descargar el archivo."
+      );
+    } finally {
+      hide();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -362,6 +397,8 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
               usuarios={usuarios}
               isLoadingUsuarios={isLoadingUsuarios}
               onSave={saveConfig}
+              onUploadSheet={uploadConfigSheet}
+              onDownloadSheet={downloadConfigSheet}
             />
           )}
         </div>

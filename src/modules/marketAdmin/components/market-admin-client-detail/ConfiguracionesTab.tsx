@@ -36,6 +36,8 @@ type Props = {
   usuarios: IMarketAdminClientUser[];
   isLoadingUsuarios?: boolean;
   onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
+  onUploadSheet: (file: File) => Promise<void>;
+  onDownloadSheet: () => Promise<void>;
 };
 
 const BLANK_CONFIG: ConfigForm = {
@@ -99,10 +101,13 @@ export default function ConfiguracionesTab({
   isLoading,
   usuarios,
   isLoadingUsuarios,
-  onSave
+  onSave,
+  onUploadSheet,
+  onDownloadSheet
 }: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
+  const [isSheetBusy, setIsSheetBusy] = useState(false);
   const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -160,13 +165,28 @@ export default function ConfiguracionesTab({
     }
   };
 
-  const handleBulkFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // El contenedor muestra el loader y los mensajes; aquí solo se bloquea el menú
+  // mientras dura la petición para no lanzar dos a la vez.
+  const handleBulkFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     // El input se resetea siempre para poder volver a elegir el mismo archivo.
     e.target.value = "";
     if (!file) return;
-    // TODO: enviar el archivo al backend cuando exista el endpoint de actualización masiva.
-    console.log("Actualización masiva - archivo seleccionado:", file);
+    setIsSheetBusy(true);
+    try {
+      await onUploadSheet(file);
+    } finally {
+      setIsSheetBusy(false);
+    }
+  };
+
+  const handleDownloadSheet = async () => {
+    setIsSheetBusy(true);
+    try {
+      await onDownloadSheet();
+    } finally {
+      setIsSheetBusy(false);
+    }
   };
 
   return (
@@ -177,6 +197,7 @@ export default function ConfiguracionesTab({
         <Dropdown
           trigger={["click"]}
           placement="bottomRight"
+          disabled={isSheetBusy}
           menu={{
             items: [
               {
@@ -189,8 +210,7 @@ export default function ConfiguracionesTab({
                 key: "exportar-clientes",
                 label: "Exportar clientes",
                 icon: <Download size={14} />,
-                // TODO: conectar con el endpoint de exportación cuando exista.
-                onClick: () => console.log("Exportar clientes")
+                onClick: handleDownloadSheet
               }
             ]
           }}
@@ -198,7 +218,8 @@ export default function ConfiguracionesTab({
           <button
             type="button"
             title="Acciones"
-            className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors"
+            disabled={isSheetBusy}
+            className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
           >
             <DotsThreeVertical size={"1.2rem"} />
           </button>
@@ -206,7 +227,7 @@ export default function ConfiguracionesTab({
         <input
           ref={bulkFileInputRef}
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx"
           className="hidden"
           onChange={handleBulkFileSelected}
         />
