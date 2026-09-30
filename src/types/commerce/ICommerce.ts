@@ -12,11 +12,61 @@ export interface IClientBU {
   internal_code: string;
   bu_name: string;
 }
+
+/**
+ * Producto contenido dentro de un pack (`IPack`). A diferencia de un
+ * `IProduct`, no tiene id_line/id_category/etc. propios: solo lo que se
+ * necesita para mostrarlo como sub-fila del pack en la pantalla de
+ * resumen y para calcular su aporte al precio total del pack.
+ */
+export interface IPackProduct {
+  product_id: number;
+  sku: string;
+  description: string;
+  image: string | null;
+  taxes: number;
+  quantity: number;
+  price: number;
+  price_taxes: number;
+}
+
+/**
+ * Pack (agrupación de productos con precio propio) devuelto por el
+ * endpoint `getProductsByClient`. El frontend lo trata como un producto
+ * más en el marketplace, pero con la particularidad de que en el
+ * resumen debe mostrar los productos que lo componen como una sub-tabla.
+ */
+export interface IPack {
+  id: number;
+  sku: string;
+  description: string;
+  image: string | null;
+  id_line: number;
+  id_category: number;
+  project_id: number;
+  is_available: number;
+  line_name: string;
+  line_alias?: string | null;
+  category_name: string;
+  category_alias?: string | null;
+  category_id: number;
+  price: number;
+  price_taxes: number;
+  products: IPackProduct[];
+}
+
 export interface IProductData {
   category_id: number;
   category: string;
   line_alias?: string | null;
   products: IProduct[];
+  /**
+   * Packs disponibles para la línea. Opcional para mantener
+   * retrocompatibilidad con respuestas del backend que aún no lo
+   * incluyen; cuando está presente se renderizan en el marketplace
+   * como productos adicionales (etiquetados como "Pack").
+   */
+  packs?: IPack[];
 }
 
 export interface IProduct {
@@ -65,6 +115,13 @@ export interface ISelectedProduct {
   stock: boolean;
   shipment_unit: number;
   autoAssigned?: boolean;
+  /**
+   * `true` cuando la línea representa un pack y no un producto regular.
+   * En ese caso `pack_products` trae los productos que componen el pack,
+   * que se renderizan como sub-tabla en la pantalla de resumen.
+   */
+  is_pack?: boolean;
+  pack_products?: IPackProduct[];
 }
 
 export interface IFetchedCategories {
@@ -82,6 +139,13 @@ export interface IConfirmOrderData {
   order_summary: {
     product_sku: string;
     quantity: number;
+    /**
+     * `1` cuando la línea representa un pack (agrupación de productos con
+     * precio propio) y `0` cuando es un producto regular. El backend lo
+     * necesita para saber si debe desglosar el pack en sus productos
+     * contenidos al calcular descuentos / bonificaciones.
+     */
+    is_pack: 0 | 1;
   }[];
   business_unit: string;
   executive_discounts: IExecutiveDiscount[];
