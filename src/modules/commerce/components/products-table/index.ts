@@ -3,5 +3,7 @@ export type {
   ProductsTableProps,
   ProductsTableRow,
   ProductsTableCategory,
-  ProductsTableBonusItem
+  ProductsTableBonusItem,
+  ProductsTablePackItem,
+  ProductsTablePackSubProduct
 } from "./products-table";

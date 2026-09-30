@@ -8,7 +8,8 @@ import { DiscountItem, IBonus, IExecutiveDiscount } from "@/types/commerce/IComm
 import ProductsTable, {
   formatPrice,
   ProductsTableBonusItem,
-  ProductsTableCategory
+  ProductsTableCategory,
+  ProductsTablePackItem
 } from "@/modules/commerce/components/products-table";
 
 type CheckoutItem = Omit<DiscountItem, "discount"> & { discount?: DiscountItem["discount"] };
@@ -165,42 +166,95 @@ export default function ProductsDetailsAndDiscounts({
     });
   };
 
-  const tableCategories: ProductsTableCategory[] = selectedCategories.map((category) => ({
-    key: category.category_id,
-    name: category.products[0]?.category_name ?? "",
-    rows: category.products.map((product) => {
-      const item: CheckoutItem = discountBySku.get(product.SKU) ??
-        productsBySku.get(product.SKU) ?? {
-          product_sku: product.SKU,
-          quantity: product.quantity,
-          shipment_unit: product.shipment_unit,
-          price: product.price,
-          price_taxes: product.price_taxes,
+  const tableCategories: ProductsTableCategory[] = selectedCategories
+    .map((category) => ({
+      key: category.category_id,
+      name: category.products[0]?.category_name ?? "",
+      rows: category.products
+        // Los packs se renderizan en su propia sección (caja con
+        // sub-tabla), así que los excluimos de las filas regulares.
+        .filter((product) => !product.is_pack)
+        .map((product) => {
+          const item: CheckoutItem = discountBySku.get(product.SKU) ??
+            productsBySku.get(product.SKU) ?? {
+              product_sku: product.SKU,
+              quantity: product.quantity,
+              shipment_unit: product.shipment_unit,
+              price: product.price,
+              price_taxes: product.price_taxes,
+              taxes: 0,
+              image: product.image,
+              category_id: product.category_id,
+              line_id: 0,
+              product_id: product.id,
+              description: product.name
+            };
+          const finalPrice = item.discount?.primary?.new_price ?? item.price;
+          const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
+          const executiveEntry = executiveDiscounts.find(
+            (e) => e.product_sku === item.product_sku
+          );
+          return {
+            key: `${product.id}-${product.SKU}`,
+            description: item.description,
+            sku: item.product_sku,
+            originalPrice: item.price,
+            finalPrice,
+            quantity: item.quantity,
+            discountPct: executiveEntry?.primary_discount_pct ?? maxPercentage,
+            maxDiscountPct: maxPercentage,
+            restante: item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku),
+            onDiscountChange: (v: number) => updatePrimaryDiscount(item, v),
+            onRemove: () => handleRemoveProduct(item.product_sku)
+          };
+        })
+    }))
+    // Si después de filtrar packs la categoría queda vacía, la omitimos.
+    .filter((category) => category.rows.length > 0);
+
+  const packItems: ProductsTablePackItem[] = selectedCategories
+    .flatMap((category) => category.products)
+    .filter((product) => product.is_pack)
+    .map((pack) => {
+      // El backend incluye los packs en `confirmOrderData.products` y en
+      // `discounts.discountItems`, igual que cualquier producto, así que
+      // podemos reutilizar el mismo lookup para sacar el descuento.
+      const item: CheckoutItem =
+        discountBySku.get(pack.SKU) ??
+        productsBySku.get(pack.SKU) ?? {
+          product_sku: pack.SKU,
+          quantity: pack.quantity,
+          shipment_unit: pack.shipment_unit,
+          price: pack.price,
+          price_taxes: pack.price_taxes,
           taxes: 0,
-          image: product.image,
-          category_id: product.category_id,
+          image: pack.image,
+          category_id: pack.category_id,
           line_id: 0,
-          product_id: product.id,
-          description: product.name
+          product_id: pack.id,
+          description: pack.name
         };
       const finalPrice = item.discount?.primary?.new_price ?? item.price;
-      const maxPercentage = item.discount?.primary?.discount_applied?.max_discount ?? 0;
-      const executiveEntry = executiveDiscounts.find((e) => e.product_sku === item.product_sku);
+      const discountPct = item.discount?.primary?.discount_applied?.max_discount ?? 0;
+
       return {
-        key: `${product.id}-${product.SKU}`,
-        description: item.description,
-        sku: item.product_sku,
+        key: `pack-${pack.id}-${pack.SKU}`,
+        description: pack.name,
+        sku: pack.SKU,
+        quantity: pack.quantity,
         originalPrice: item.price,
         finalPrice,
-        quantity: item.quantity,
-        discountPct: executiveEntry?.primary_discount_pct ?? maxPercentage,
-        maxDiscountPct: maxPercentage,
-        restante: item.quantity - cantidadesAsignadas(item.item_uuid || item.product_sku),
-        onDiscountChange: (v: number) => updatePrimaryDiscount(item, v),
-        onRemove: () => handleRemoveProduct(item.product_sku)
+        discountPct,
+        products: (pack.pack_products ?? []).map((sub) => ({
+          sku: sub.sku,
+          description: sub.description,
+          quantity: sub.quantity,
+          unitPrice: sub.price,
+          unitPriceTaxes: sub.price_taxes
+        })),
+        onRemove: () => handleRemoveProduct(pack.SKU)
       };
-    })
-  }));
+    });
 
   const allRows = tableCategories.flatMap((c) => c.rows);
   const totalCantidad = allRows.reduce((s, r) => s + r.quantity, 0);
@@ -246,6 +300,7 @@ export default function ProductsDetailsAndDiscounts({
           className="flex-1 min-h-0 mx-5"
           categories={tableCategories}
           bonusItems={tableBonus}
+          packItems={packItems}
           multiEntrega={multiEntrega}
           showActionsColumn
           totalCantidad={totalCantidad}
