@@ -451,6 +451,12 @@ export interface IMarketAdminClientConfig {
   // client_marketplace.receives_partials es VARCHAR(255): puede llegar como string o número.
   receives_partials: string | number | null;
   lots_greater_than: number | null;
+  // Datos del cliente: emails de los responsables y mercado, se guardan tal cual (null los limpia).
+  asigned_user: string | null; // email del Ejecutivo; el backend lo escribe con una sola "s"
+  coordinator: string | null;
+  kam: string | null;
+  kam_lider: string | null;
+  market: string | null;
 }
 
 export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
