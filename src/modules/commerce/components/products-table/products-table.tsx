@@ -275,10 +275,19 @@ export default function ProductsTable({
           )}
         </div>
 
-        {/* Sub-tabla con los productos contenidos en el pack */}
+        {/* Sub-tabla con los productos contenidos en el pack. Usa el mismo
+            gridTemplateColumns que la cabecera del pack para que las celdas
+            caigan bajo las mismas columnas (Producto / SKU / P. Original /
+            Descuento / P. Final / Cant. / Total). */}
         <div className="px-4 pb-3 pt-2 border-x border-b border-[#EEEEEE] border-t-0 bg-white rounded-b-lg">
-          <div className="grid items-center py-1.5 border-b border-[#F0F0F0]">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#AAAAAA]">
+          <div
+            className="grid items-center py-1.5 border-b border-[#F0F0F0]"
+            style={{ gridTemplateColumns }}
+          >
+            <span
+              className="text-[10px] font-semibold uppercase tracking-widest text-[#AAAAAA] col-span-full"
+              style={{ gridColumn: "1 / -1" }}
+            >
               Productos del pack
             </span>
           </div>
@@ -290,20 +299,37 @@ export default function ProductsTable({
                 className={`grid items-center py-2 ${
                   sIdx < pack.products.length - 1 ? "border-b border-[#F4F4F4]" : ""
                 }`}
-                style={{ gridTemplateColumns: "1fr 90px 110px 90px" }}
+                style={{ gridTemplateColumns }}
               >
                 <p
-                  className="text-sm text-[#141414] truncate pr-3"
+                  className={`text-sm text-[#141414] truncate pr-3 ${
+                    compact ? "min-w-0" : ""
+                  }`}
                   title={sub.description}
                 >
                   {sub.description}
                 </p>
-                <p className="text-xs text-[#999999] text-right">{sub.sku}</p>
-                <p className="text-sm text-[#141414] text-right">
-                  {formatPrice(sub.unitPrice)}
+                {!compact && (
+                  <>
+                    <p className="text-xs text-[#999999] text-right">{sub.sku}</p>
+                    {/* P. Original - no aplica al sub-producto */}
+                    <span />
+                    {/* Descuento - no aplica al sub-producto */}
+                    <span />
+                    {/* P. Final - precio unitario del sub-producto */}
+                    <p className="text-sm text-[#141414] text-right">
+                      {formatPrice(sub.unitPrice)}
+                    </p>
+                  </>
+                )}
+                {/* Cant. - no se muestra individual para sub-productos */}
+                <span className={compact ? "" : "hidden"} />
+                {/* Total - cantidad × subtotal del sub-producto */}
+                <p className="text-sm font-semibold text-[#141414] text-right">
+                  {sub.quantity}
                 </p>
                 <p className="text-sm font-semibold text-[#141414] text-right">
-                  {sub.quantity} × {formatPrice(subTotal)}
+                  {formatPrice(subTotal)}
                 </p>
               </div>
             );

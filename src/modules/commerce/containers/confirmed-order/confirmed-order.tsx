@@ -8,7 +8,10 @@ import { extractSingleParam, formatNumber, generateShortUuid } from "@/utils/uti
 import { getSingleOrder } from "@/services/commerce/commerce";
 import { useAppStore } from "@/lib/store/store";
 
-import ProductsTable, { ProductsTableCategory } from "@/modules/commerce/components/products-table";
+import ProductsTable, {
+  ProductsTableCategory,
+  ProductsTablePackItem
+} from "@/modules/commerce/components/products-table";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import ConfirmedOrderShippingInfo from "../../components/confirmed-order-shipping-info";
 import ConfirmedOrderModalBlocked from "../../components/confirmed-order-modalBlocked";
