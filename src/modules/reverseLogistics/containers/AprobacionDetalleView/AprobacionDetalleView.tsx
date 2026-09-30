@@ -32,7 +32,7 @@ interface AprobacionDetalleViewProps {
 // Backend name for the estado we set when approving. Resolved at runtime from
 // the filters context so the modal keeps working if the backend ever rotates
 // the GUID behind that name.
-const APROBADO_ESTADO_NOMBRE = "Aprobado";
+const APROBADO_ESTADO_NOMBRE = ["Aprobado","Aprobacion Realizada"];
 
 // Maps the Profit360 hex color (e.g. "#7ED961") to one of the three badge
 // palettes used by the products table.
@@ -97,7 +97,7 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
   // Picklists shared with the devoluciones tab via the layout-level provider.
   const { estados, causales } = useProfit360Filters();
   const aprobadoEstadoCodigo = useMemo(
-    () => estados.find((e) => e.nombre === APROBADO_ESTADO_NOMBRE)?.codigo ?? "",
+    () => estados.find((e) => APROBADO_ESTADO_NOMBRE.includes(e.nombre))?.codigo ?? "",
     [estados]
   );
 
