@@ -10,7 +10,7 @@ import CreateOrderProduct from "../create-order-product";
 import { getProductsByClient } from "@/services/commerce/commerce";
 
 import { ISelectType } from "@/types/clients/IClients";
-import { IOrderConfirmedResponse, ISelectedProduct } from "@/types/commerce/ICommerce";
+import { IOrderConfirmedResponse, IPack, ISelectedProduct } from "@/types/commerce/ICommerce";
 
 import styles from "./create-order-products.module.scss";
 import { useDebounce } from "@/hooks/useSearch";
@@ -100,6 +100,35 @@ const CreateOrderProducts: FC = () => {
           newProductsMap.set(formattedProduct.id, formattedProduct);
           productIds.push(formattedProduct.id);
           categoryProducts.push(formattedProduct);
+        });
+
+        // Los packs viven al mismo nivel que `products` en la respuesta del
+        // backend; los mezclamos en el mismo grid del marketplace para que
+        // se rendericen como productos más, marcados con "Pack".
+        (category.packs ?? []).forEach((pack: IPack) => {
+          const formattedPack: ISelectedProduct = {
+            id: Number(pack.id),
+            name: pack.description,
+            price: pack.price,
+            price_taxes: pack.price_taxes,
+            discount: 0,
+            discount_percentage: 0,
+            quantity: 0,
+            image: pack.image,
+            category_id: Number(pack.category_id ?? pack.id_category),
+            SKU: pack.sku,
+            EAN: null,
+            stock: true,
+            category_name: pack.category_name,
+            category_alias: pack.category_alias,
+            shipment_unit: 1,
+            is_pack: true,
+            pack_products: pack.products
+          };
+
+          newProductsMap.set(formattedPack.id, formattedPack);
+          productIds.push(formattedPack.id);
+          categoryProducts.push(formattedPack);
         });
 
         newCategoriesMap.set(categoryId, {

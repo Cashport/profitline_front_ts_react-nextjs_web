@@ -48,11 +48,24 @@ const CreateOrderProduct: FC<CreateOrderProductProps> = ({ product, categoryName
           sizes="(max-width: 840px) 90vw, (max-width: 1280px) 45vw, 30vw"
           onError={() => setImgSrc(PRODUCT_IMAGE_FALLBACK)}
         />
+        {product.is_pack && (
+          <span className={styles.packBadge}>
+            <SimpleTag text="Pack" colorTag="#141414" colorText="#ffffff" fontSize="0.7rem" />
+          </span>
+        )}
       </div>
       <hr className={styles.separator} />
       <h4 className={styles.name}>
         {product.name}
-        {product.EAN?.trim() && <span className={styles.sku}>EAN: {product.EAN}</span>}
+        {product.is_pack && product.pack_products && (
+          <span className={styles.sku}>
+            {product.pack_products.length} producto
+            {product.pack_products.length === 1 ? "" : "s"}
+          </span>
+        )}
+        {product.EAN?.trim() && !product.is_pack && (
+          <span className={styles.sku}>EAN: {product.EAN}</span>
+        )}
         {!product.stock && (
           <SimpleTag
             text="Stock insuficiente"

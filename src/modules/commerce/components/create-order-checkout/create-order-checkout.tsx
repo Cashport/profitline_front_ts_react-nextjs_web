@@ -89,7 +89,10 @@ export default function CheckoutPage() {
         .flatMap((category) => category.products)
         .map((product) => ({
           product_sku: product.SKU,
-          quantity: product.quantity
+          quantity: product.quantity,
+          // El backend distingue packs de productos regulares para saber
+          // si debe desglosar el pack al confirmar la orden.
+          is_pack: (product.is_pack ? 1 : 0) as 0 | 1
         }));
       // promotion_applyed se calcula SOLO con los bonificados comunes
       // (bonusOptions). Los "other bonified" (otherBonificated) NO cuentan,

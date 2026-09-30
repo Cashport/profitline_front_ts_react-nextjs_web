@@ -20,7 +20,7 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
       (c) => c.category_id === product.category_id
     );
 
-    const productToAdd = {
+    const productToAdd: ISelectedProduct = {
       id: product.id,
       name: product.name,
       price: product.price,
@@ -34,7 +34,10 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
       EAN: product.EAN,
       stock: product.stock,
       category_name: product.category_name,
-      shipment_unit: product.shipment_unit
+      shipment_unit: product.shipment_unit,
+      // Propaga el flag de pack y los productos contenidos para que la
+      // pantalla de resumen pueda renderizar la sub-tabla del pack.
+      ...(product.is_pack ? { is_pack: true, pack_products: product.pack_products } : {})
     };
 
     if (categoryIndex === -1) {
