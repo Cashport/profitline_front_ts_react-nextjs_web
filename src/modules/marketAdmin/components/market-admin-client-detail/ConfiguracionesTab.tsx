@@ -107,10 +107,12 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
   };
 
   return (
-    <div className="max-w-lg">
-      <p className="text-sm text-[#999999] mb-6">Ajustes financieros y operativos del cliente.</p>
+    <div>
+      <p className="text-sm font-bold text-[#141414] mb-4">
+        Ajustes financieros y operativos del cliente
+      </p>
 
-      <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
         {/* Cupo de crédito */}
         <div>
           <label className="text-xs font-bold text-[#141414] block mb-1.5">Cupo de crédito</label>
@@ -236,7 +238,7 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
         </div>
 
         {/* Save button */}
-        <div className="flex justify-end pt-2">
+        <div className="col-span-full flex justify-end pt-2">
           <PrincipalButton
             onClick={handleSave}
             disabled={!isDirty || isSaving || isLoading}

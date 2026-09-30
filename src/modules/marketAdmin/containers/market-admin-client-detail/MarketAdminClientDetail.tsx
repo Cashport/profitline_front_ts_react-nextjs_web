@@ -61,7 +61,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   // Tab — new order: promociones, direcciones, usuarios, productos
   const [activeTab, setActiveTab] = useState<
     "promociones" | "direcciones" | "usuarios" | "productos" | "configuraciones"
-  >("promociones");
+  >("configuraciones");
 
   const { data: cliente, isLoading, error } = useMarketAdminClientDetail(id);
   const {

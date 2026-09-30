@@ -155,15 +155,6 @@ export default function MarketAdminClients() {
       render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
     },
     {
-      title: "Productos",
-      dataIndex: "productos_count",
-      key: "productos_count",
-      width: 110,
-      sorter: (a, b) => a.productos_count - b.productos_count,
-      onHeaderCell: headerCell,
-      render: (v: number) => <span className="text-sm text-[#141414]">{v}</span>
-    },
-    {
       title: "Líneas",
       dataIndex: "lineas",
       key: "lineas",
