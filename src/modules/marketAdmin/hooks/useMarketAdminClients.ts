@@ -40,7 +40,7 @@ export const useMarketAdminClients = ({
 
   const { data, error, isLoading, mutate } = useSWR<GenericResponsePage<IMarketAdminClient[]>>(
     ID ? `/marketplace-admin/clients${queryString}` : null,
-    fetcher,
+    (url: string) => fetcher(url, 30000),
     { keepPreviousData: true }
   );
 
