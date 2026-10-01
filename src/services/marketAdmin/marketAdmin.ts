@@ -9,6 +9,7 @@ import {
   IManagerBonificationSummary,
   IMarketAdminClientAddress,
   IMarketAdminClientsBatchBody,
+  IMarketAdminClientsMassiveUpdateResponse,
   IMarketAdminFacturador,
   IProductInventoryItem,
   IProfitLoader,
@@ -168,19 +169,20 @@ export const updateMarketAdminClientConfig = async (
   }
 };
 
-// GET /marketplace-admin/clients/:client_id/config/download — hoja de configuración en .xlsx
-export const downloadMarketAdminClientConfigSheet = async (clientId: string): Promise<void> => {
+// POST /marketplace-admin/clients/config/download — .xlsx con la configuración de los NIT enviados
+export const downloadMarketAdminClientsConfig = async (nits: string[]): Promise<void> => {
   try {
     // `instance` y no `API`: el interceptor de `API` devuelve sólo el cuerpo y
     // aquí hacen falta los headers para leer el nombre del archivo.
-    const response = await instance.get(`/marketplace-admin/clients/${clientId}/config/download`, {
-      responseType: "blob",
-      timeout: 60000
-    });
+    const response = await instance.post(
+      "/marketplace-admin/clients/config/download",
+      { nits },
+      { responseType: "blob", timeout: 60000 }
+    );
 
     const disposition = (response.headers["content-disposition"] as string) || "";
     const filename =
-      disposition.match(/filename="?([^";]+)"?/)?.[1] || `configuracion-cliente-${clientId}.xlsx`;
+      disposition.match(/filename="?([^";]+)"?/)?.[1] || "configuracion_clientes.xlsx";
 
     const url = window.URL.createObjectURL(response.data as Blob);
     const link = document.createElement("a");
@@ -191,7 +193,7 @@ export const downloadMarketAdminClientConfigSheet = async (clientId: string): Pr
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("Error al descargar la hoja de configuración del cliente:", error);
+    console.error("Error al descargar la configuración de los clientes:", error);
     // Con responseType "blob" el error del backend también llega como Blob.
     let message: string | undefined;
     if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
@@ -201,24 +203,25 @@ export const downloadMarketAdminClientConfigSheet = async (clientId: string): Pr
         // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
       }
     }
-    throw new Error(message || "No se pudo descargar la hoja de configuración del cliente.");
+    throw new Error(message || "No se pudo descargar la configuración de los clientes.");
   }
 };
 
-// POST /marketplace-admin/clients/:client_id/config/upload — multipart, el archivo va en la key "file"
-export const uploadMarketAdminClientConfigSheet = async (clientId: string, file: File) => {
+// POST /marketplace-admin/clients/config/massive-update — multipart, el archivo va en la key "file".
+// Cada fila se identifica por NIT; los que no existen vuelven en `not_found`.
+export const massiveUpdateMarketAdminClientsConfig = async (file: File) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response: GenericResponse<unknown> = await API.post(
-      `/marketplace-admin/clients/${clientId}/config/upload`,
+    const response: GenericResponse<IMarketAdminClientsMassiveUpdateResponse> = await API.post(
+      "/marketplace-admin/clients/config/massive-update",
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
     return response.data;
   } catch (error) {
-    console.error("Error al cargar la hoja de configuración del cliente:", error);
+    console.error("Error en la actualización masiva de clientes:", error);
     throw error;
   }
 };

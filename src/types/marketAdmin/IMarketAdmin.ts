@@ -357,7 +357,8 @@ export interface IUseMarketAdminClientsParams {
 
 // GET /clients — item del listado
 export interface IMarketAdminClient {
-  client_id: string; // NIT — también es el id de ruta
+  client_id: string; // id de ruta de /clients/:client_id/... (no es el NIT)
+  nit: string;
   client_name: string;
   city: string;
   is_active: 1 | 0;
@@ -395,6 +396,12 @@ export interface IMarketAdminClientDetail {
 export interface IMarketAdminClientsBatchBody {
   client_ids: string[];
   action: "activate" | "inactivate";
+}
+
+// POST /clients/config/massive-update
+export interface IMarketAdminClientsMassiveUpdateResponse {
+  updated: number;
+  not_found: string[]; // NIT del archivo que no existen
 }
 
 // GET /clients/:client_id/addresses — la de code_address "00" es la principal

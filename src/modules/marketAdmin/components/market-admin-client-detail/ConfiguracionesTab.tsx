@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Dropdown, Select } from "antd";
-import { DotsThreeVertical } from "@phosphor-icons/react";
-import { Download, Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Select } from "antd";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
@@ -36,8 +34,6 @@ type Props = {
   usuarios: IMarketAdminClientUser[];
   isLoadingUsuarios?: boolean;
   onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
-  onUploadSheet: (file: File) => Promise<void>;
-  onDownloadSheet: () => Promise<void>;
 };
 
 const BLANK_CONFIG: ConfigForm = {
@@ -101,14 +97,10 @@ export default function ConfiguracionesTab({
   isLoading,
   usuarios,
   isLoadingUsuarios,
-  onSave,
-  onUploadSheet,
-  onDownloadSheet
+  onSave
 }: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
-  const [isSheetBusy, setIsSheetBusy] = useState(false);
-  const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setForm(toForm(config));
@@ -165,73 +157,10 @@ export default function ConfiguracionesTab({
     }
   };
 
-  // El contenedor muestra el loader y los mensajes; aquí solo se bloquea el menú
-  // mientras dura la petición para no lanzar dos a la vez.
-  const handleBulkFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    // El input se resetea siempre para poder volver a elegir el mismo archivo.
-    e.target.value = "";
-    if (!file) return;
-    setIsSheetBusy(true);
-    try {
-      await onUploadSheet(file);
-    } finally {
-      setIsSheetBusy(false);
-    }
-  };
-
-  const handleDownloadSheet = async () => {
-    setIsSheetBusy(true);
-    try {
-      await onDownloadSheet();
-    } finally {
-      setIsSheetBusy(false);
-    }
-  };
-
   return (
     <div>
       {/* Ajustes datos del cliente */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <p className="text-sm font-bold text-[#141414]">Ajustes datos del cliente</p>
-        <Dropdown
-          trigger={["click"]}
-          placement="bottomRight"
-          disabled={isSheetBusy}
-          menu={{
-            items: [
-              {
-                key: "actualizacion-masiva",
-                label: "Actualización masiva",
-                icon: <Upload size={14} />,
-                onClick: () => bulkFileInputRef.current?.click()
-              },
-              {
-                key: "exportar-clientes",
-                label: "Exportar clientes",
-                icon: <Download size={14} />,
-                onClick: handleDownloadSheet
-              }
-            ]
-          }}
-        >
-          <button
-            type="button"
-            title="Acciones"
-            disabled={isSheetBusy}
-            className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
-          >
-            <DotsThreeVertical size={"1.2rem"} />
-          </button>
-        </Dropdown>
-        <input
-          ref={bulkFileInputRef}
-          type="file"
-          accept=".xlsx"
-          className="hidden"
-          onChange={handleBulkFileSelected}
-        />
-      </div>
+      <p className="text-sm font-bold text-[#141414] mb-4">Ajustes datos del cliente</p>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
         {/* Ejecutivo, Coordinador, KAM y KAM líder */}
