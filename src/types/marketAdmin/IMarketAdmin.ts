@@ -348,6 +348,11 @@ export interface IUseMarketAdminClientsParams {
   search?: string; // busca en client_name y client_id (NIT)
   status?: 1 | 0; // 1 → activo, 0 → inactivo
   linea?: string; // business unit, ej. "Institucional"
+  // Responsables: emails tal como se guardan en el cliente; viajan separados por coma
+  asigned_user?: string[]; // Ejecutivo; el backend lo escribe con una sola "s"
+  coordinator?: string[];
+  kam?: string[];
+  kam_lider?: string[];
 }
 
 // GET /clients — item del listado
