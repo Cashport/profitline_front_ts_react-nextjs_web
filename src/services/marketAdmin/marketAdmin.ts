@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IAssignClientToUserBody,
@@ -15,7 +17,7 @@ import {
   IUpdateMarketAdminClientConfigBody,
   IUpdateMarketAdminProductBody
 } from "@/types/marketAdmin/IMarketAdmin";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 
 export const createBonification = async (body: ICreatePromotionBody) => {
   try {
@@ -162,6 +164,61 @@ export const updateMarketAdminClientConfig = async (
     return response.data;
   } catch (error) {
     console.error("Error al actualizar la configuración del cliente:", error);
+    throw error;
+  }
+};
+
+// GET /marketplace-admin/clients/:client_id/config/download — hoja de configuración en .xlsx
+export const downloadMarketAdminClientConfigSheet = async (clientId: string): Promise<void> => {
+  try {
+    // `instance` y no `API`: el interceptor de `API` devuelve sólo el cuerpo y
+    // aquí hacen falta los headers para leer el nombre del archivo.
+    const response = await instance.get(`/marketplace-admin/clients/${clientId}/config/download`, {
+      responseType: "blob",
+      timeout: 60000
+    });
+
+    const disposition = (response.headers["content-disposition"] as string) || "";
+    const filename =
+      disposition.match(/filename="?([^";]+)"?/)?.[1] || `configuracion-cliente-${clientId}.xlsx`;
+
+    const url = window.URL.createObjectURL(response.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error al descargar la hoja de configuración del cliente:", error);
+    // Con responseType "blob" el error del backend también llega como Blob.
+    let message: string | undefined;
+    if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        message = JSON.parse(await error.response.data.text())?.message;
+      } catch {
+        // Cuerpo que no es JSON (p. ej. un 502 del gateway): queda el texto por defecto.
+      }
+    }
+    throw new Error(message || "No se pudo descargar la hoja de configuración del cliente.");
+  }
+};
+
+// POST /marketplace-admin/clients/:client_id/config/upload — multipart, el archivo va en la key "file"
+export const uploadMarketAdminClientConfigSheet = async (clientId: string, file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response: GenericResponse<unknown> = await API.post(
+      `/marketplace-admin/clients/${clientId}/config/upload`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cargar la hoja de configuración del cliente:", error);
     throw error;
   }
 };

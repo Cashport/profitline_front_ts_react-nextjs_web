@@ -1,15 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Dropdown, Select } from "antd";
+import { DotsThreeVertical } from "@phosphor-icons/react";
+import { Download, Upload } from "lucide-react";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
 import {
   IMarketAdminClientConfig,
+  IMarketAdminClientUser,
   IUpdateMarketAdminClientConfigBody
 } from "@/types/marketAdmin/IMarketAdmin";
 
 export type ConfigForm = {
+  // Ajustes datos del cliente
+  asigned_user: string;
+  coordinator: string;
+  kam: string;
+  kam_lider: string;
+  market: string;
   quota: string;
   payment_discount: string;
   payment_condition_code: string;
@@ -23,10 +33,19 @@ export type ConfigForm = {
 type Props = {
   config?: IMarketAdminClientConfig;
   isLoading?: boolean;
+  usuarios: IMarketAdminClientUser[];
+  isLoadingUsuarios?: boolean;
   onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
+  onUploadSheet: (file: File) => Promise<void>;
+  onDownloadSheet: () => Promise<void>;
 };
 
 const BLANK_CONFIG: ConfigForm = {
+  asigned_user: "",
+  coordinator: "",
+  kam: "",
+  kam_lider: "",
+  market: "",
   quota: "",
   payment_discount: "",
   payment_condition_code: "",
@@ -37,9 +56,24 @@ const BLANK_CONFIG: ConfigForm = {
   lots_greater_than: ""
 };
 
+const CLIENT_DATA_KEYS = ["asigned_user", "coordinator", "kam", "kam_lider", "market"] as const;
+
+// Cada select guarda el email del usuario seleccionado.
+const USER_SELECTS: { key: (typeof CLIENT_DATA_KEYS)[number]; label: string }[] = [
+  { key: "asigned_user", label: "Ejecutivo" },
+  { key: "coordinator", label: "Coordinador" },
+  { key: "kam", label: "KAM" },
+  { key: "kam_lider", label: "KAM líder" }
+];
+
 const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
   config
     ? {
+        asigned_user: config.asigned_user ?? "",
+        coordinator: config.coordinator ?? "",
+        kam: config.kam ?? "",
+        kam_lider: config.kam_lider ?? "",
+        market: config.market ?? "",
         quota: config.quota?.toString() ?? "",
         payment_discount: config.payment_discount?.toString() ?? "",
         payment_condition_code: config.payment_condition_code ?? "",
@@ -62,13 +96,34 @@ const toNonZeroNumberOrNull = (value: string) => {
   return parsed === 0 ? null : parsed;
 };
 
-export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
+export default function ConfiguracionesTab({
+  config,
+  isLoading,
+  usuarios,
+  isLoadingUsuarios,
+  onSave,
+  onUploadSheet,
+  onDownloadSheet
+}: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
+  const [isSheetBusy, setIsSheetBusy] = useState(false);
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setForm(toForm(config));
   }, [config]);
+
+  const userOptions = useMemo(
+    () =>
+      usuarios
+        .filter((usuario) => usuario.email)
+        .map((usuario) => ({
+          value: usuario.email,
+          label: `${usuario.name} - ${usuario.email}`
+        })),
+    [usuarios]
+  );
 
   // Solo se envía lo que cambió respecto a la configuración actual.
   const buildBody = (): IUpdateMarketAdminClientConfigBody => {
@@ -88,6 +143,10 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
       body.receives_partials = toNonZeroNumberOrNull(form.receives_partials);
     if (form.lots_greater_than !== current.lots_greater_than)
       body.lots_greater_than = toNonZeroNumberOrNull(form.lots_greater_than);
+    // Los datos del cliente se guardan tal cual; vacío se envía como null para limpiarlos.
+    CLIENT_DATA_KEYS.forEach((key) => {
+      if (form[key] !== current[key]) body[key] = form[key].trim() || null;
+    });
     return body;
   };
 
@@ -106,11 +165,120 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
     }
   };
 
-  return (
-    <div className="max-w-lg">
-      <p className="text-sm text-[#999999] mb-6">Ajustes financieros y operativos del cliente.</p>
+  // El contenedor muestra el loader y los mensajes; aquí solo se bloquea el menú
+  // mientras dura la petición para no lanzar dos a la vez.
+  const handleBulkFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // El input se resetea siempre para poder volver a elegir el mismo archivo.
+    e.target.value = "";
+    if (!file) return;
+    setIsSheetBusy(true);
+    try {
+      await onUploadSheet(file);
+    } finally {
+      setIsSheetBusy(false);
+    }
+  };
 
-      <div className="flex flex-col gap-5">
+  const handleDownloadSheet = async () => {
+    setIsSheetBusy(true);
+    try {
+      await onDownloadSheet();
+    } finally {
+      setIsSheetBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* Ajustes datos del cliente */}
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <p className="text-sm font-bold text-[#141414]">Ajustes datos del cliente</p>
+        <Dropdown
+          trigger={["click"]}
+          placement="bottomRight"
+          disabled={isSheetBusy}
+          menu={{
+            items: [
+              {
+                key: "actualizacion-masiva",
+                label: "Actualización masiva",
+                icon: <Upload size={14} />,
+                onClick: () => bulkFileInputRef.current?.click()
+              },
+              {
+                key: "exportar-clientes",
+                label: "Exportar clientes",
+                icon: <Download size={14} />,
+                onClick: handleDownloadSheet
+              }
+            ]
+          }}
+        >
+          <button
+            type="button"
+            title="Acciones"
+            disabled={isSheetBusy}
+            className="w-8 h-8 rounded-md flex items-center justify-center bg-[#F7F7F7] text-[#141414] border border-transparent hover:border-[#141414] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-transparent"
+          >
+            <DotsThreeVertical size={"1.2rem"} />
+          </button>
+        </Dropdown>
+        <input
+          ref={bulkFileInputRef}
+          type="file"
+          accept=".xlsx"
+          className="hidden"
+          onChange={handleBulkFileSelected}
+        />
+      </div>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
+        {/* Ejecutivo, Coordinador, KAM y KAM líder */}
+        {USER_SELECTS.map(({ key, label }) => (
+          <div key={key}>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">{label}</label>
+            <Select
+              showSearch
+              allowClear
+              size="large"
+              placeholder="Seleccione un usuario"
+              className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
+              popupClassName="[&_.ant-select-item]:!text-sm"
+              value={form[key] || undefined}
+              options={userOptions}
+              loading={isLoadingUsuarios}
+              disabled={isLoading}
+              notFoundContent="Sin usuarios disponibles"
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(email?: string) => setForm((f) => ({ ...f, [key]: email ?? "" }))}
+            />
+          </div>
+        ))}
+
+        {/* Mercado */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Mercado</label>
+          <input
+            type="text"
+            placeholder="Mercado del cliente"
+            maxLength={255}
+            disabled={isLoading}
+            value={form.market}
+            onChange={(e) => setForm((f) => ({ ...f, market: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* Ajustes financieros y operativos */}
+      <p className="text-sm font-bold text-[#141414] mt-8 pt-8 border-t border-[#F0F0F0] mb-4">
+        Ajustes financieros y operativos del cliente
+      </p>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
         {/* Cupo de crédito */}
         <div>
           <label className="text-xs font-bold text-[#141414] block mb-1.5">Cupo de crédito</label>
@@ -236,7 +404,7 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
         </div>
 
         {/* Save button */}
-        <div className="flex justify-end pt-2">
+        <div className="col-span-full flex justify-end pt-2">
           <PrincipalButton
             onClick={handleSave}
             disabled={!isDirty || isSaving || isLoading}
