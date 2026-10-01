@@ -5,9 +5,9 @@ import { Select } from "antd";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
+import { useProjectUsers } from "@/hooks/useProjectUsers";
 import {
   IMarketAdminClientConfig,
-  IMarketAdminClientUser,
   IUpdateMarketAdminClientConfigBody
 } from "@/types/marketAdmin/IMarketAdmin";
 
@@ -31,8 +31,6 @@ export type ConfigForm = {
 type Props = {
   config?: IMarketAdminClientConfig;
   isLoading?: boolean;
-  usuarios: IMarketAdminClientUser[];
-  isLoadingUsuarios?: boolean;
   onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
 };
 
@@ -92,15 +90,11 @@ const toNonZeroNumberOrNull = (value: string) => {
   return parsed === 0 ? null : parsed;
 };
 
-export default function ConfiguracionesTab({
-  config,
-  isLoading,
-  usuarios,
-  isLoadingUsuarios,
-  onSave
-}: Props) {
+export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
+  // Todos los usuarios del proyecto, no solo los asociados al cliente.
+  const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   useEffect(() => {
     setForm(toForm(config));
@@ -108,13 +102,13 @@ export default function ConfiguracionesTab({
 
   const userOptions = useMemo(
     () =>
-      usuarios
-        .filter((usuario) => usuario.email)
-        .map((usuario) => ({
-          value: usuario.email,
-          label: `${usuario.name} - ${usuario.email}`
+      users
+        .filter((user) => user.email)
+        .map((user) => ({
+          value: user.email,
+          label: `${user.user_name} - ${user.email}`
         })),
-    [usuarios]
+    [users]
   );
 
   // Solo se envía lo que cambió respecto a la configuración actual.
@@ -176,7 +170,7 @@ export default function ConfiguracionesTab({
               popupClassName="[&_.ant-select-item]:!text-sm"
               value={form[key] || undefined}
               options={userOptions}
-              loading={isLoadingUsuarios}
+              loading={isLoadingUsers}
               disabled={isLoading}
               notFoundContent="Sin usuarios disponibles"
               filterOption={(input, option) =>

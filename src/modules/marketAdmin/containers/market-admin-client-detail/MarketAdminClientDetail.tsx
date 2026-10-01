@@ -356,13 +356,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
             <ProductosTab categorias={productos} isLoading={isLoadingProductos} />
           )}
           {activeTab === "configuraciones" && (
-            <ConfiguracionesTab
-              config={config}
-              isLoading={isLoadingConfig}
-              usuarios={usuarios}
-              isLoadingUsuarios={isLoadingUsuarios}
-              onSave={saveConfig}
-            />
+            <ConfiguracionesTab config={config} isLoading={isLoadingConfig} onSave={saveConfig} />
           )}
         </div>
       </div>
