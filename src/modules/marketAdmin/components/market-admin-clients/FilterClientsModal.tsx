@@ -6,8 +6,9 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import { useProjectUsers } from "@/hooks/useProjectUsers";
+import { useProjectUsersByRole } from "@/hooks/useProjectUsers";
 import { useMarketAdminLines } from "@/modules/marketAdmin/hooks/useMarketAdminLines";
+import type { IUserWithRole } from "@/types/users/IUser";
 
 export interface IMarketAdminClientsFilter {
   linea: string | null; // el listado de clientes filtra por NOMBRE de línea, no por id
@@ -32,11 +33,12 @@ type ResponsableKey = "asigned_user" | "coordinator" | "kam" | "kam_lider";
 
 // Mismas claves y etiquetas que los selects de responsables de ConfiguracionesTab.
 // La clave de la categoría es el campo del filtro, así el mapeo es directo.
-const RESPONSABLE_CATEGORIES: { key: ResponsableKey; label: string }[] = [
-  { key: "asigned_user", label: "Ejecutivo" },
-  { key: "coordinator", label: "Coordinador" },
-  { key: "kam", label: "KAM" },
-  { key: "kam_lider", label: "KAM líder" }
+// Cada categoría solo ofrece los usuarios con su rol en el proyecto (rol_id).
+const RESPONSABLE_CATEGORIES: { key: ResponsableKey; label: string; rolId: number }[] = [
+  { key: "asigned_user", label: "Ejecutivo", rolId: 4 },
+  { key: "coordinator", label: "Coordinador", rolId: 3 },
+  { key: "kam", label: "KAM", rolId: 14 },
+  { key: "kam_lider", label: "KAM líder", rolId: 31 }
 ];
 
 const ESTADO_OPTIONS: FilterOptionItem[] = [
@@ -54,7 +56,7 @@ interface FilterClientsModalProps {
 
 export default function FilterClientsModal({ value, onChange }: FilterClientsModalProps) {
   const { data: lines, isLoading: isLoadingLines } = useMarketAdminLines();
-  const { users, isLoading: isLoadingUsers } = useProjectUsers();
+  const { users, isLoading: isLoadingUsers } = useProjectUsersByRole();
 
   // El id de la opción es el propio nombre: es el valor que espera el endpoint,
   // así reconstruir la selección no necesita un lookup inverso.
@@ -64,11 +66,13 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
   }));
 
   // El cliente guarda el email de cada responsable, así que ese es el id. La etiqueta
-  // también lo lleva para poder buscar por email y distinguir homónimos.
-  const userOptions: FilterOptionItem[] = users
-    .filter((u) => u.email)
-    .map((u) => ({ id: u.email, name: `${u.user_name} - ${u.email}` }));
-  const userLabelByEmail = new Map(userOptions.map((o) => [o.id, o.name]));
+  // es el nombre; si no llega, el email.
+  const toUserOption = (u: IUserWithRole): FilterOptionItem => ({
+    id: u.email,
+    name: u.user_name?.trim() || u.email
+  });
+  const usersWithEmail = users.filter((u) => u.email);
+  const userLabelByEmail = new Map(usersWithEmail.map(toUserOption).map((o) => [o.id, o.name]));
 
   // Mientras cargan los usuarios, el tag muestra solo el email.
   const toUserItems = (emails: string[]): FilterOptionItem[] =>
@@ -115,10 +119,10 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
     },
     // Sin selectMode (multi): se pueden elegir varios usuarios por responsable
     ...RESPONSABLE_CATEGORIES.map(
-      ({ key, label }): FilterCategoryConfig => ({
+      ({ key, label, rolId }): FilterCategoryConfig => ({
         key,
         label,
-        options: userOptions,
+        options: usersWithEmail.filter((u) => u.rol_id === rolId).map(toUserOption),
         status: isLoadingUsers ? "loading" : undefined
       })
     )
