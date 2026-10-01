@@ -96,6 +96,34 @@ export interface ProductsTableCategory {
   rows: ProductsTableRow[];
 }
 
+/**
+ * Producto contenido dentro de un pack (`ProductsTablePackItem`). Solo
+ * se necesita para renderizar la sub-tabla con los productos que
+ * componen el pack en la pantalla de resumen.
+ */
+export interface ProductsTablePackSubProduct {
+  sku: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  unitPriceTaxes: number;
+}
+
+export interface ProductsTablePackItem {
+  key: string;
+  description: string;
+  sku: string;
+  quantity: number;
+  /** Precio original del pack (antes de descuento), usado para tacharlo. */
+  originalPrice: number;
+  /** Precio final del pack (con descuento aplicado si lo hay). */
+  finalPrice: number;
+  /** Porcentaje de descuento mostrado en la celda "Descuento". */
+  discountPct: number;
+  products: ProductsTablePackSubProduct[];
+  onRemove?: () => void;
+}
+
 export interface ProductsTableBonusItem {
   key: string;
   description: string;
@@ -112,6 +140,12 @@ export interface ProductsTableProps {
   multiEntrega?: boolean;
   /** Renders the "Productos bonificados" section when non-empty. */
   bonusItems?: ProductsTableBonusItem[];
+  /**
+   * Renderiza la sección "Packs" cuando hay elementos. Cada pack se
+   * muestra como una caja con una sub-tabla que lista los productos que
+   * lo componen.
+   */
+  packItems?: ProductsTablePackItem[];
   /** Adds the trailing action column (trash buttons). */
   showActionsColumn?: boolean;
   /** When true, collapses to only Producto / Cant. / Total on viewports < 800px. */
@@ -128,6 +162,7 @@ export default function ProductsTable({
   totalMonto,
   multiEntrega = false,
   bonusItems = [],
+  packItems = [],
   showActionsColumn = false,
   responsive = false,
   collapsible = false,
@@ -174,6 +209,135 @@ export default function ProductsTable({
       ].join(" ");
 
   const showBonus = bonusItems.length > 0;
+  const showPacks = packItems.length > 0;
+
+  const renderPack = (pack: ProductsTablePackItem) => {
+    const packTotal = pack.finalPrice * pack.quantity;
+    // Reusa el mismo gridTemplateColumns que las filas regulares para
+    // que las celdas del pack se alineen con las celdas de los productos
+    // (Producto / SKU / P. Original / Descuento / P. Final / Cant. / Total
+    // / Rest. / Acciones). Los packs no tienen "restante" de
+    // multi-entrega; esa columna se deja vacía para conservar la
+    // alineación.
+    return (
+      <div key={pack.key} className="mb-3 last:mb-0">
+        <div
+          className="grid items-center px-4 py-3 border border-[#EEEEEE] bg-[#FAFAFA] rounded-lg"
+          style={{ gridTemplateColumns }}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-white bg-[#141414] rounded px-1.5 py-0.5 flex-shrink-0">
+              Pack
+            </span>
+            <p className="text-sm font-medium text-[#141414] truncate" title={pack.description}>
+              {pack.description}
+            </p>
+          </div>
+          {!compact && (
+            <>
+              <p className="text-xs text-[#CCCCCC] text-right">{pack.sku}</p>
+              <p
+                className={`text-xs text-right ${
+                  pack.discountPct > 0 ? "text-[#CCCCCC] line-through" : "text-[#CCCCCC]"
+                }`}
+              >
+                {formatPrice(pack.originalPrice)}
+              </p>
+              <div className="flex justify-center">
+                {pack.discountPct > 0 ? (
+                  <span className="text-xs font-semibold text-red-500">-{pack.discountPct}%</span>
+                ) : (
+                  <span className="text-xs text-[#999999] italic">Sin desc.</span>
+                )}
+              </div>
+              <p className="text-sm font-semibold text-[#141414] text-right">
+                {formatPrice(pack.finalPrice)}
+              </p>
+            </>
+          )}
+          <p className="text-sm text-[#141414] text-right">{pack.quantity}</p>
+          <p className="text-sm font-semibold text-[#141414] text-right">
+            {formatPrice(packTotal)}
+          </p>
+          {multiEntrega && !compact && <span />}
+          {showActionsColumn && !compact && (
+            pack.onRemove ? (
+              <button
+                onClick={pack.onRemove}
+                title="Eliminar pack"
+                className="w-5 h-5 rounded flex items-center justify-center text-[#CCCCCC] hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 justify-self-end"
+              >
+                <Trash2 size={12} />
+              </button>
+            ) : (
+              <span />
+            )
+          )}
+        </div>
+
+        {/* Sub-tabla con los productos contenidos en el pack. Usa el mismo
+            gridTemplateColumns que la cabecera del pack para que las celdas
+            caigan bajo las mismas columnas (Producto / SKU / P. Original /
+            Descuento / P. Final / Cant. / Total). */}
+        <div className="px-4 pb-3 pt-2 border-x border-b border-[#EEEEEE] border-t-0 bg-white rounded-b-lg">
+          <div
+            className="grid items-center py-1.5 border-b border-[#F0F0F0]"
+            style={{ gridTemplateColumns }}
+          >
+            <span
+              className="text-[10px] font-semibold uppercase tracking-widest text-[#AAAAAA] col-span-full"
+              style={{ gridColumn: "1 / -1" }}
+            >
+              Productos del pack
+            </span>
+          </div>
+          {pack.products.map((sub, sIdx) => {
+            const subTotal = sub.unitPrice * sub.quantity;
+            return (
+              <div
+                key={`${pack.key}-${sub.sku}-${sIdx}`}
+                className={`grid items-center py-2 ${
+                  sIdx < pack.products.length - 1 ? "border-b border-[#F4F4F4]" : ""
+                }`}
+                style={{ gridTemplateColumns }}
+              >
+                <p
+                  className={`text-sm text-[#141414] truncate pr-3 ${
+                    compact ? "min-w-0" : ""
+                  }`}
+                  title={sub.description}
+                >
+                  {sub.description}
+                </p>
+                {!compact && (
+                  <>
+                    <p className="text-xs text-[#999999] text-right">{sub.sku}</p>
+                    {/* P. Original - no aplica al sub-producto */}
+                    <span />
+                    {/* Descuento - no aplica al sub-producto */}
+                    <span />
+                    {/* P. Final - precio unitario del sub-producto */}
+                    <p className="text-sm text-[#141414] text-right">
+                      {formatPrice(sub.unitPrice)}
+                    </p>
+                  </>
+                )}
+                {/* Cant. - no se muestra individual para sub-productos */}
+                <span className={compact ? "" : "hidden"} />
+                {/* Total - cantidad × subtotal del sub-producto */}
+                <p className="text-sm font-semibold text-[#141414] text-right">
+                  {sub.quantity}
+                </p>
+                <p className="text-sm font-semibold text-[#141414] text-right">
+                  {formatPrice(subTotal)}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   const renderRow = (row: ProductsTableRow) => {
     const totalLinea = row.finalPrice * row.quantity;
@@ -312,6 +476,18 @@ export default function ProductsTable({
             ))
           )}
 
+          {/* Sección packs */}
+          {showPacks && (
+            <>
+              <div className="flex items-center gap-3 px-4 py-2 bg-[#F4F4F4] border-t border-[#EEEEEE]">
+                <span className="text-[11px] font-semibold text-[#141414] uppercase tracking-wide">
+                  Packs
+                </span>
+              </div>
+              <div className="py-3">{packItems.map(renderPack)}</div>
+            </>
+          )}
+
           {/* Sección bonificados */}
           {showBonus && (
             <>
@@ -390,9 +566,11 @@ export default function ProductsTable({
               <span />
             </>
           )}
-          <span className="text-sm font-bold text-[#141414] text-right">{totalCantidad}</span>
           <span className="text-sm font-bold text-[#141414] text-right">
-            {formatPrice(totalMonto)}
+            {totalCantidad + packItems.reduce((s, p) => s + p.quantity, 0)}
+          </span>
+          <span className="text-sm font-bold text-[#141414] text-right">
+            {formatPrice(totalMonto + packItems.reduce((s, p) => s + p.finalPrice * p.quantity, 0))}
           </span>
           {multiEntrega && !compact && <span />}
           {showActionsColumn && !compact && <span />}
