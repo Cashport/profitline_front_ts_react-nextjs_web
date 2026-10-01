@@ -15,7 +15,11 @@ import FilterClientsModal, {
   EMPTY_CLIENTS_FILTER,
   IMarketAdminClientsFilter
 } from "@/modules/marketAdmin/components/market-admin-clients/FilterClientsModal";
-import { updateMarketAdminClientsBatch } from "@/services/marketAdmin/marketAdmin";
+import {
+  downloadMarketAdminClientsConfig,
+  massiveUpdateMarketAdminClientsConfig,
+  updateMarketAdminClientsBatch
+} from "@/services/marketAdmin/marketAdmin";
 import { IMarketAdminClient } from "@/types/marketAdmin/IMarketAdmin";
 import { LINEA_COLORS, lineaAbrev } from "@/modules/marketAdmin/mocks/clients";
 
@@ -64,6 +68,7 @@ export default function MarketAdminClients() {
   const [showAcciones, setShowAcciones] = useState(false);
   const [isRunningAccion, setIsRunningAccion] = useState(false);
   const accionesRef = useRef<HTMLDivElement>(null);
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -83,6 +88,13 @@ export default function MarketAdminClients() {
     kam: filter.kam,
     kam_lider: filter.kam_lider
   });
+
+  // NIT de cada cliente cargado: la selección puede abarcar varias páginas y la
+  // descarga se pide por NIT, no por client_id.
+  const nitByClientId = useRef(new Map<string, string>());
+  useEffect(() => {
+    clientes.forEach((c) => nitByClientId.current.set(c.client_id, c.nit));
+  }, [clientes]);
 
   function handleFilterChange(next: IMarketAdminClientsFilter) {
     setFilter(next);
@@ -124,10 +136,47 @@ export default function MarketAdminClients() {
     }
   }
 
-  function runAccion(accion: string) {
+  async function handleBulkFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    // El input se resetea siempre para poder volver a elegir el mismo archivo.
+    e.target.value = "";
+    if (!file) return;
+    try {
+      setIsRunningAccion(true);
+      const { updated, not_found } = await massiveUpdateMarketAdminClientsConfig(file);
+      // La hoja cambia Ejecutivo/Coordinador/KAM, por los que también filtra el listado.
+      await mutate();
+      showMessage("success", `${updated} cliente(s) actualizado(s) correctamente.`);
+      if (not_found.length > 0) {
+        const extra = not_found.length > 5 ? ` y ${not_found.length - 5} más` : "";
+        showMessage("warning", `NIT no encontrados: ${not_found.slice(0, 5).join(", ")}${extra}.`);
+      }
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Ocurrió un error al cargar el archivo."
+      );
+    } finally {
+      setIsRunningAccion(false);
+    }
+  }
+
+  async function handleExportarClientes() {
     setShowAcciones(false);
-    setSelectedRowKeys([]);
-    alert(`Acción "${accion}" aplicada a ${selectedRowKeys.length} cliente(s).`);
+    const nits = selectedRowKeys
+      .map((key) => nitByClientId.current.get(String(key)))
+      .filter((nit): nit is string => !!nit);
+    try {
+      setIsRunningAccion(true);
+      await downloadMarketAdminClientsConfig(nits);
+    } catch (error) {
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "Ocurrió un error al exportar los clientes."
+      );
+    } finally {
+      setIsRunningAccion(false);
+    }
   }
 
   const columns: ColumnsType<IMarketAdminClient> = [
@@ -213,34 +262,52 @@ export default function MarketAdminClients() {
           {/* Generar acción */}
           <div className="relative" ref={accionesRef}>
             <GenerateActionButton
-              disabled={selectedRowKeys.length === 0 || isRunningAccion}
-              onClick={() =>
-                selectedRowKeys.length > 0 && !isRunningAccion && setShowAcciones((v) => !v)
-              }
+              disabled={isRunningAccion}
+              onClick={() => !isRunningAccion && setShowAcciones((v) => !v)}
             />
             {showAcciones && (
               <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#EEEEEE] rounded-xl shadow-lg z-30 w-48 py-1">
                 <button
+                  disabled={selectedRowKeys.length === 0}
                   onClick={() => runAccionEstado("activate")}
-                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
                   Activar
                 </button>
                 <button
+                  disabled={selectedRowKeys.length === 0}
                   onClick={() => runAccionEstado("inactivate")}
-                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 >
                   Inactivar
                 </button>
                 <div className="h-px bg-[#EEEEEE] my-1" />
                 <button
-                  onClick={() => runAccion("Exportar")}
+                  onClick={() => {
+                    setShowAcciones(false);
+                    bulkFileInputRef.current?.click();
+                  }}
                   className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors"
                 >
-                  Exportar selección
+                  Actualización masiva
+                </button>
+                <button
+                  disabled={selectedRowKeys.length === 0}
+                  onClick={handleExportarClientes}
+                  className="w-full text-left px-4 py-2.5 text-sm text-[#141414] hover:bg-[#F5F5F5] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                >
+                  Exportar clientes
                 </button>
               </div>
             )}
+            {/* Fuera del menú: si se desmontara al cerrarlo, el onChange nunca llegaría. */}
+            <input
+              ref={bulkFileInputRef}
+              type="file"
+              accept=".xlsx"
+              className="hidden"
+              onChange={handleBulkFileSelected}
+            />
           </div>
           <FilterClientsModal value={filter} onChange={handleFilterChange} />
         </div>
