@@ -12,6 +12,7 @@ import { useDebounce } from "@/hooks/useDeabouce";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminClients } from "@/modules/marketAdmin/hooks/useMarketAdminClients";
 import FilterClientsModal, {
+  EMPTY_CLIENTS_FILTER,
   IMarketAdminClientsFilter
 } from "@/modules/marketAdmin/components/market-admin-clients/FilterClientsModal";
 import { updateMarketAdminClientsBatch } from "@/services/marketAdmin/marketAdmin";
@@ -57,10 +58,7 @@ const splitLineas = (lineas: string | null) =>
 export default function MarketAdminClients() {
   const { showMessage } = useMessageApi();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<IMarketAdminClientsFilter>({
-    linea: null,
-    status: null
-  });
+  const [filter, setFilter] = useState<IMarketAdminClientsFilter>(EMPTY_CLIENTS_FILTER);
   const [page, setPage] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [showAcciones, setShowAcciones] = useState(false);
@@ -79,7 +77,11 @@ export default function MarketAdminClients() {
     limit: PAGE_SIZE,
     search: debouncedSearch,
     status: filter.status ?? undefined,
-    linea: filter.linea ?? undefined
+    linea: filter.linea ?? undefined,
+    asigned_user: filter.asigned_user,
+    coordinator: filter.coordinator,
+    kam: filter.kam,
+    kam_lider: filter.kam_lider
   });
 
   function handleFilterChange(next: IMarketAdminClientsFilter) {

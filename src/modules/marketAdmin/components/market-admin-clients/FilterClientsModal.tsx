@@ -6,12 +6,38 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
+import { useProjectUsers } from "@/hooks/useProjectUsers";
 import { useMarketAdminLines } from "@/modules/marketAdmin/hooks/useMarketAdminLines";
 
 export interface IMarketAdminClientsFilter {
   linea: string | null; // el listado de clientes filtra por NOMBRE de línea, no por id
   status: 0 | 1 | null;
+  // Responsables: emails, igual que en la configuración del cliente
+  asigned_user: string[];
+  coordinator: string[];
+  kam: string[];
+  kam_lider: string[];
 }
+
+export const EMPTY_CLIENTS_FILTER: IMarketAdminClientsFilter = {
+  linea: null,
+  status: null,
+  asigned_user: [],
+  coordinator: [],
+  kam: [],
+  kam_lider: []
+};
+
+type ResponsableKey = "asigned_user" | "coordinator" | "kam" | "kam_lider";
+
+// Mismas claves y etiquetas que los selects de responsables de ConfiguracionesTab.
+// La clave de la categoría es el campo del filtro, así el mapeo es directo.
+const RESPONSABLE_CATEGORIES: { key: ResponsableKey; label: string }[] = [
+  { key: "asigned_user", label: "Ejecutivo" },
+  { key: "coordinator", label: "Coordinador" },
+  { key: "kam", label: "KAM" },
+  { key: "kam_lider", label: "KAM líder" }
+];
 
 const ESTADO_OPTIONS: FilterOptionItem[] = [
   { id: "1", name: "Activo" },
@@ -28,6 +54,7 @@ interface FilterClientsModalProps {
 
 export default function FilterClientsModal({ value, onChange }: FilterClientsModalProps) {
   const { data: lines, isLoading: isLoadingLines } = useMarketAdminLines();
+  const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   // El id de la opción es el propio nombre: es el valor que espera el endpoint,
   // así reconstruir la selección no necesita un lookup inverso.
@@ -36,19 +63,39 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
     name: l.description_line
   }));
 
+  // El cliente guarda el email de cada responsable, así que ese es el id. La etiqueta
+  // también lo lleva para poder buscar por email y distinguir homónimos.
+  const userOptions: FilterOptionItem[] = users
+    .filter((u) => u.email)
+    .map((u) => ({ id: u.email, name: `${u.user_name} - ${u.email}` }));
+  const userLabelByEmail = new Map(userOptions.map((o) => [o.id, o.name]));
+
+  // Mientras cargan los usuarios, el tag muestra solo el email.
+  const toUserItems = (emails: string[]): FilterOptionItem[] =>
+    emails.map((email) => ({ id: email, name: userLabelByEmail.get(email) ?? email }));
+
   const selection: FilterSelection = {
     linea: value.linea ? [{ id: value.linea, name: value.linea }] : [],
     estado:
       value.status !== null
         ? [{ id: String(value.status), name: value.status === 1 ? "Activo" : "Inactivo" }]
-        : []
+        : [],
+    asigned_user: toUserItems(value.asigned_user),
+    coordinator: toUserItems(value.coordinator),
+    kam: toUserItems(value.kam),
+    kam_lider: toUserItems(value.kam_lider)
   };
 
   const selectionToDomain = (sel: FilterSelection): IMarketAdminClientsFilter => {
     const estadoId = sel.estado?.[0]?.id;
+    const emails = (key: ResponsableKey) => (sel[key] ?? []).map((o) => o.id);
     return {
       linea: sel.linea?.[0]?.id ?? null,
-      status: estadoId === "1" ? 1 : estadoId === "0" ? 0 : null
+      status: estadoId === "1" ? 1 : estadoId === "0" ? 0 : null,
+      asigned_user: emails("asigned_user"),
+      coordinator: emails("coordinator"),
+      kam: emails("kam"),
+      kam_lider: emails("kam_lider")
     };
   };
 
@@ -65,7 +112,16 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
       label: "Estado",
       selectMode: "single",
       options: ESTADO_OPTIONS
-    }
+    },
+    // Sin selectMode (multi): se pueden elegir varios usuarios por responsable
+    ...RESPONSABLE_CATEGORIES.map(
+      ({ key, label }): FilterCategoryConfig => ({
+        key,
+        label,
+        options: userOptions,
+        status: isLoadingUsers ? "loading" : undefined
+      })
+    )
   ];
 
   return (
@@ -75,7 +131,7 @@ export default function FilterClientsModal({ value, onChange }: FilterClientsMod
       trigger={{ className: TRIGGER_CLASS, showChevron: true }}
       onApply={(sel) => onChange(selectionToDomain(sel))}
       onValueChange={(sel) => onChange(selectionToDomain(sel))}
-      onClearAll={() => onChange({ linea: null, status: null })}
+      onClearAll={() => onChange(EMPTY_CLIENTS_FILTER)}
     />
   );
 }
