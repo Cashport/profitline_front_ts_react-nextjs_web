@@ -30,9 +30,12 @@ export const FILE_EXTENSIONS = [
   ".xml",
   ".msg",
   ".eml",
-  ".zip"
+  ".zip",
+  ".html"
 ];
 
 export const GALDERMA_PROJECT_ID = 165;
 
 export const CETAPHIL_PROJECT_ID = 175;
+
+export const GILEAD_PROJECT_ID = 166;

@@ -11,9 +11,5 @@ export default function CetaphilLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <div className="cetaphil-theme">{children}</div>;
 }

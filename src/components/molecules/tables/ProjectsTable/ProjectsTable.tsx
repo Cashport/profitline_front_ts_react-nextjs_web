@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Avatar, Button, Flex, Table, Typography, message } from "antd";
 import type { TableProps } from "antd";
 import { Clipboard, Eye, Plus, Triangle } from "phosphor-react";
 
 import { useAppStore } from "@/lib/store/store";
 import { useProjects } from "@/hooks/useProjects";
-import { countries } from "@/utils/countries";
 
 import { FilterProjects } from "@/components/atoms/Filters/FilterProjects/FilterProjects";
 import UiSearchInput from "@/components/ui/search-input";
@@ -38,6 +38,7 @@ export const ProjectTable = () => {
   const projects = useAppStore((state) => state.projects);
   const setProjects = useAppStore((state) => state.setProjects);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
+  const projectsBasicInfo = useAppStore((state) => state.projectsBasicInfo);
   const router = useRouter();
 
   const onChangePage = (pagePagination: number) => {
@@ -64,10 +65,14 @@ export const ProjectTable = () => {
   }, [error]);
 
   const handleOpenProject = (row: IProject) => {
+    const projectPermissions = projectsBasicInfo?.find((p) => p.ID === row.ID);
     setSelectedProject({
       ID: row.ID,
       NAME: row.PROJECT_DESCRIPTION,
-      LOGO: row.LOGO ?? ""
+      LOGO: row.LOGO ?? "",
+      views_permissions: projectPermissions?.views_permissions,
+      action_permissions: projectPermissions?.action_permissions,
+      isSuperAdmin: projectPermissions?.isSuperAdmin
     });
 
     router.push(`/proyectos/review/${row.ID}/detail`);
@@ -108,7 +113,12 @@ export const ProjectTable = () => {
       key: "COUNTRY_NAME",
       render: (text) => (
         <Text className="text">
-          {countries(text)}
+          <Image
+            src={`https://cdn.countryflags.com/thumbs/${text.toLowerCase()}/flag-400.png`}
+            alt={`${text} flag`}
+            width={16}
+            height={16}
+          />
           {text}
         </Text>
       )

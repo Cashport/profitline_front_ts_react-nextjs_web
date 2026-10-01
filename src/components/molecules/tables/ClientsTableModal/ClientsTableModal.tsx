@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState, useEffect, useMemo } from "react";
+import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Flex, message, Spin, Table, TableProps, Typography } from "antd";
 import { Triangle } from "phosphor-react";
@@ -77,8 +77,7 @@ export const ClientsTableModal = ({ setClientsKeys, selectedClientsKeys }: Props
     };
   }, []);
 
-  // eslint-disable-next-line no-unused-vars
-  const initializeStates = useMemo(() => {
+  useEffect(() => {
     if (selectedClientsKeys && selectedClientsKeys.length > 0) {
       setSelectedRowKeys(selectedClientsKeys);
       setAllSelectedKeys(selectedClientsKeys);

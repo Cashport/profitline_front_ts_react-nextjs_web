@@ -31,7 +31,6 @@ export const useClientDetails = (filters: IClientPortfolioFilters) => {
   const {
     data: portfolioData,
     error,
-    isLoading,
     mutate
   } = useSWR<GenericResponse<IDataSection>>(pathKey, fetcher);
 

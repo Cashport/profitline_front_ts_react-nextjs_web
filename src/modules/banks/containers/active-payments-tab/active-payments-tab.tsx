@@ -7,6 +7,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useMessageApi } from "@/context/MessageContext";
 import { useAppStore } from "@/lib/store/store";
 import { useBankPayments } from "@/hooks/useBankPayments";
+import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
 import { approvePayment } from "@/services/banksPayments/banksPayments";
 import { markPaymentsAsUnidentified } from "@/services/applyTabClients/applyTabClients";
 
@@ -21,6 +22,7 @@ import ModalActionsUploadEvidence from "../../components/modal-actions-upload-ev
 import ModalActionsAssignClient from "../../components/modal-actions-assign-client";
 import ModalActionsSplitPayment from "../../components/modal-actions-split-payment";
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
+import ModalActionsChangeErpId from "../../components/modal-actions-change-erp-id";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import {
@@ -35,7 +37,14 @@ import { IFormFilterDates } from "../../components/modal-filter-select-dates/mod
 
 import styles from "./active-payments-tab.module.scss";
 
-export const ActivePaymentsTab: FC = () => {
+interface ActivePaymentsTabProps {
+  isActive: boolean;
+}
+
+const STATUS_ORDER = ["Sin identificar", "Pendiente ingreso a SAP", "Identificado", "Pago aplicado"];
+const PAGO_APLICADO_STATUS_ID = 4;
+
+export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
   const [showBankRules, setShowBankRules] = useState<boolean>(false);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
@@ -53,7 +62,12 @@ export const ActivePaymentsTab: FC = () => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
-  const { data, isLoading, mutate } = useBankPayments({ like: searchQuery, selectedFilters });
+  const { data, isLoading, mutate } = useBankPayments({
+    like: searchQuery,
+    selectedFilters,
+    enabled: isActive,
+    transaction_type: [PaymentTransactionType.Formal, PaymentTransactionType.Homemarket]
+  });
 
   const handleOpenBankRules = () => {
     setShowBankRules(true);
@@ -181,7 +195,11 @@ export const ActivePaymentsTab: FC = () => {
             <Collapse
               stickyLabel
               labelStickyOffset={"6rem"}
-              items={data?.map((status) => ({
+              items={data?.slice().sort((a, b) => {
+                const ia = STATUS_ORDER.indexOf(a.payments_status);
+                const ib = STATUS_ORDER.indexOf(b.payments_status);
+                return (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib);
+              }).map((status) => ({
                 key: status.payments_status_id,
                 label: (
                   <LabelCollapse
@@ -221,6 +239,14 @@ export const ActivePaymentsTab: FC = () => {
                 selectedRows.length > 1
               ) {
                 showMessage("info", "Solo puedes seleccionar un pago para esta acción");
+                return;
+              }
+
+              if (
+                selected === 2 &&
+                selectedRows?.some((row) => row.id_status === PAGO_APLICADO_STATUS_ID)
+              ) {
+                showMessage("info", "No puedes asignar cliente a pagos en estado Pago aplicado");
                 return;
               }
 
@@ -283,6 +309,11 @@ export const ActivePaymentsTab: FC = () => {
             isOpen={isSelectOpen.selected === 8}
             onClose={() => setIsSelectOpen({ selected: 0 })}
             onOk={handlePaymentUnidentified}
+          />
+          <ModalActionsChangeErpId
+            isOpen={isSelectOpen.selected === 9}
+            onClose={onCloseModal}
+            selectedRows={selectedRows}
           />
         </Flex>
       )}

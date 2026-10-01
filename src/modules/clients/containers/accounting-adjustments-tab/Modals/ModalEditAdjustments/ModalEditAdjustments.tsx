@@ -62,15 +62,9 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
   });
 
   useEffect(() => {
-    return () => {
-      reset();
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (selectedRows) {
-      const defaultRows = selectedRows.map((row) => ({
-        id: row.financial_discount_id || 0,
+    if (isOpen) {
+      const defaultRows = (selectedRows ?? []).map((row) => ({
+        id: row.balance_id || 0,
         adjustmentId: row.erp_id?.toString() || "",
         requirementType: {
           value: row.motive_id || 0,
@@ -82,8 +76,10 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
       }));
 
       reset({ rows: defaultRows });
+    } else {
+      reset({ rows: [] });
     }
-  }, [selectedRows, reset]);
+  }, [isOpen, selectedRows, reset]);
 
   const onSubmit = async (data: IEditAdjustment) => {
     setIsSubmitting(true);
@@ -184,7 +180,9 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
           placeholder="Valor"
           validationRules={{
             required: "Valor es obligatorio",
-            validate: (value) => parseFloat(value) != 0 || "El valor debe ser distinto a 0"
+            validate: (value) =>
+              parseFloat(value?.replaceAll(".", "").replaceAll(",", ".") || "0") != 0 ||
+              "El valor debe ser distinto a 0"
           }}
           allowNegative={true}
           fixedDecimalScale={true}
@@ -221,7 +219,7 @@ const ModalEditAdjustments = ({ isOpen, onClose, selectedRows, handleDeleteRow }
         closable={false}
         destroyOnClose
       >
-        <Title level={4}>Edición de ajustes</Title>
+        <Title level={4}>Edición de saldos</Title>
 
         <Table
           className="modalEditAdjustments__adjustmentsTable"

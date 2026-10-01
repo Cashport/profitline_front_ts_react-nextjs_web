@@ -124,3 +124,10 @@ interface ISelectType {
   value: number;
   label: string;
 }
+
+export interface IUser {
+  id: number;
+  user_name: string;
+  email: string;
+  project_id: number;
+}

@@ -8,50 +8,79 @@ import {
   Bank,
   SquaresFour,
   Storefront,
-  UsersFour,
-  Stack,
-  ClipboardText
+  // UsersFour,
+  // Stack,
+  ClipboardText,
+  ListChecks,
+  ArrowCounterClockwise,
+  TextIndent,
+  Ticket
+  // Gauge
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
+import {
+  ChatCircleDots,
+  // SealPercent,
+  HandTap,
+  ChartBar,
+  ShoppingCartSimple,
+  Database,
+  CurrencyCircleDollar,
+  Chats,
+  FadersHorizontal,
+  Invoice
+} from "@phosphor-icons/react";
+import { FileHeart } from "lucide-react";
 
-import { checkUserViewPermissions } from "@/utils/utils";
+import { checkUserViewPermissions, cn } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
+import useScrollFade from "@/components/hooks/useScrollFade";
+import { useUnsavedChanges } from "@/context/UnsavedChangesContext";
 
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
 
 import styles from "./ModulesButtons.module.scss";
 
 interface ModulesButtonsProps {
-  isSideBarLarge: boolean;
   path: string;
   project: ISelectedProject | undefined;
   isMobileMenu?: boolean;
 }
 
-export const ModulesButtons = ({
-  isSideBarLarge,
-  path,
-  project,
-  isMobileMenu = false
-}: ModulesButtonsProps) => {
+export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesButtonsProps) => {
   const height = useScreenHeight();
   const width = useScreenWidth();
   const iconSize = (height && height >= 1000) || (width && width > 768) ? 26 : 18;
+  const { attemptNavigation } = useUnsavedChanges();
+  // the mobile dropdown lays out in a row and never scrolls, so it needs no fade
+  const { ref: containerRef, fade } = useScrollFade<HTMLDivElement>(!isMobileMenu);
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (attemptNavigation(href)) e.preventDefault();
+  };
 
   return (
-    <div className={`${styles.containerButtons} ${isMobileMenu ? styles.mobile : ""}`}>
+    <div
+      ref={containerRef}
+      className={cn(
+        styles.containerButtons,
+        isMobileMenu && styles.mobile,
+        fade.top && styles.fadeTop,
+        fade.bottom && styles.fadeBottom
+      )}
+    >
       {/* Dashboard */}
-      <Link href="/dashboard" passHref legacyBehavior>
-        <Button
-          type="primary"
-          size="large"
-          icon={<SquaresFour size={iconSize} />}
-          className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
-        >
-          {isSideBarLarge && "Dashboard"}
-        </Button>
-      </Link>
+      {checkUserViewPermissions(project, "Dashboard") && (
+        <Link href="/dashboard" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SquaresFour size={iconSize} />}
+            className={path.startsWith("/dashboard") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/dashboard")}
+          />
+        </Link>
+      )}
 
       {/* Clientes */}
       {checkUserViewPermissions(project, "Clientes") && (
@@ -61,28 +90,26 @@ export const ModulesButtons = ({
             size="large"
             icon={<User size={iconSize} />}
             className={path.startsWith("/clientes") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Clientes"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/clientes/all")}
+          />
         </Link>
       )}
 
       {/* Descuentos */}
-      {checkUserViewPermissions(project, "Descuentos") && (
+      {/* {checkUserViewPermissions(project, "Descuentos") && (
         <Link href="/descuentos" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
             icon={<SealPercent size={iconSize} />}
             className={path.startsWith("/descuentos") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Descuentos"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/descuentos")}
+          />
         </Link>
-      )}
+      )} */}
 
       {/* Notificaciones */}
-      {checkUserViewPermissions(project, "Notificaciones") && (
+      {/* {checkUserViewPermissions(project, "Notificaciones") && (
         <Link href="/notificaciones" passHref legacyBehavior>
           <Button
             type="primary"
@@ -91,11 +118,10 @@ export const ModulesButtons = ({
             className={
               path.startsWith("/notificaciones") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Notificaciones"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/notificaciones")}
+          />
         </Link>
-      )}
+      )} */}
 
       {/* Marketplace / Comercio */}
       {checkUserViewPermissions(project, "Marketplace") && (
@@ -105,9 +131,8 @@ export const ModulesButtons = ({
             size="large"
             icon={<Storefront size={iconSize} />}
             className={path.startsWith("/comercio") ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Comercio"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/comercio")}
+          />
         </Link>
       )}
 
@@ -119,14 +144,13 @@ export const ModulesButtons = ({
             size="large"
             icon={<Bank size={iconSize} />}
             className={path === "/banco" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Bancos"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/banco")}
+          />
         </Link>
       )}
 
       {/* Configuración / Settings */}
-      {checkUserViewPermissions(project, "Configuracion") && (
+      {/* {checkUserViewPermissions(project, "Configuracion") && (
         <Link href="/settings" passHref legacyBehavior>
           <Button
             type="primary"
@@ -137,14 +161,13 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Configuración"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/settings")}
+          />
         </Link>
-      )}
+      )} */}
 
       {/* Proveedores */}
-      {checkUserViewPermissions(project, "Proveedores") && (
+      {/* {checkUserViewPermissions(project, "Proveedores") && (
         <Link href="/proveedores" passHref legacyBehavior>
           <Button
             type="primary"
@@ -155,25 +178,10 @@ export const ModulesButtons = ({
                 ? styles.buttonIcon
                 : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Proveedores"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/proveedores")}
+          />
         </Link>
-      )}
-
-      {/* Gestor de Tareas */}
-      {checkUserViewPermissions(project, "GestorTareas") && (
-        <Link href="/gestor-tareas" passHref legacyBehavior>
-          <Button
-            type="primary"
-            size="large"
-            icon={<ClipboardText size={iconSize} />}
-            className={path === "/gestor-tareas" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Tareas"}
-          </Button>
-        </Link>
-      )}
+      )} */}
 
       {/* Apply Module */}
       {path === "/applyModule" && (
@@ -183,25 +191,23 @@ export const ModulesButtons = ({
             size="large"
             icon={<HandTap size={iconSize} />}
             className={path === "/applyModule" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Apply"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/applyModule")}
+          />
         </Link>
       )}
 
       {/* Administración de Clientes */}
-      {checkUserViewPermissions(project, "AdministracionClientes") && (
+      {/* {checkUserViewPermissions(project, "AdministracionClientes") && (
         <Link href="/client-management" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
             icon={<Stack size={iconSize} />}
             className={path === "/client-management" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Admin Clientes"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/client-management")}
+          />
         </Link>
-      )}
+      )} */}
 
       {/* Chat */}
       {checkUserViewPermissions(project, "Whatsapp") && (
@@ -211,11 +217,208 @@ export const ModulesButtons = ({
             size="large"
             icon={<ChatCircleDots size={iconSize} />}
             className={path === "/chat" ? styles.buttonIcon : styles.buttonIconActive}
-          >
-            {isSideBarLarge && "Chat"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/chat")}
+          />
         </Link>
       )}
+
+      {/* Aprobaciones */}
+      {checkUserViewPermissions(project, "Aprobaciones") && (
+        <Link href="/aprobaciones" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ListChecks size={iconSize} />}
+            className={path === "/aprobaciones" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/aprobaciones")}
+          />
+        </Link>
+      )}
+
+      {/* New Dashboard */}
+      {false && (
+        <Link href="/newDashboard" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ChartBar size={iconSize} />}
+            className={path === "/newDashboard" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/newDashboard")}
+          />
+        </Link>
+      )}
+
+      {/* New Task Manager */}
+      {checkUserViewPermissions(project, "GestorTareas") && (
+        <Link href="/task-manager" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ClipboardText size={iconSize} />}
+            className={path === "/task-manager" ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/task-manager")}
+          />
+        </Link>
+      )}
+
+      {/* Purchase Orders */}
+      {checkUserViewPermissions(project, "PurchaseOrders") && (
+        <Link href="/purchase-orders" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ShoppingCartSimple size={iconSize} />}
+            className={
+              path.startsWith("/purchase-orders") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/purchase-orders")}
+          />
+        </Link>
+      )}
+
+      {/* Data Quality */}
+      {checkUserViewPermissions(project, "DataQuality") && (
+        <Link href="/data-quality" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Database size={iconSize} />}
+            className={
+              path.startsWith("/data-quality") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/data-quality")}
+          />
+        </Link>
+      )}
+      {/* Balances */}
+      {checkUserViewPermissions(project, "Balances") && (
+        <Link href="/balances" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<CurrencyCircleDollar size={iconSize} />}
+            className={path.startsWith("/balances") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/balances")}
+          />
+        </Link>
+      )}
+      {/* Mass Communications */}
+      {/* {checkUserViewPermissions(project, "MassCommunications") && (
+        <Link href="/mass-communications" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Chats size={iconSize} />}
+            className={
+              path.startsWith("/mass-communications") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/mass-communications")}
+          />
+        </Link>
+      )} */}
+
+      {/* Cuentas Médicas */}
+      {checkUserViewPermissions(project, "MedicalAccounts") && (
+        <Link href="/cuentas-medicas" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<FileHeart size={iconSize} />}
+            className={
+              path.startsWith("/cuentas-medicas") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/cuentas-medicas")}
+          />
+        </Link>
+      )}
+
+      {/* Logística Inversa */}
+      {checkUserViewPermissions(project, "ReverseLogistics") && (
+        <Link href="/logistica-inversa" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<ArrowCounterClockwise size={iconSize} />}
+            className={
+              path.startsWith("/logistica-inversa") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/logistica-inversa")}
+          />
+        </Link>
+      )}
+
+      {/* Market Admin */}
+      {checkUserViewPermissions(project, "MarketAdmin") && (
+        <Link href="/market-admin" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<FadersHorizontal size={iconSize} />}
+            className={
+              path.startsWith("/market-admin") ||
+              path.startsWith("/settings") ||
+              path.startsWith("/mass-communications")
+                ? styles.buttonIcon
+                : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/market-admin")}
+          />
+        </Link>
+      )}
+
+      {/* New wallet */}
+      {checkUserViewPermissions(project, "Wallet") && (
+        <Link href="/wallet" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Invoice size={iconSize} />}
+            className={path.startsWith("/wallet") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/wallet")}
+          />
+        </Link>
+      )}
+
+      {/* Novelties */}
+      {checkUserViewPermissions(project, "Novelties") && (
+        <Link href="/novelties" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<TextIndent size={iconSize} />}
+            className={path.startsWith("/novelties") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/novelties")}
+          />
+        </Link>
+      )}
+
+      {/* Tickets */}
+      {checkUserViewPermissions(project, "Tickets") && (
+        <Link href="/tickets" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Ticket size={iconSize} />}
+            className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/tickets")}
+          />
+        </Link>
+      )}
+
+      {/* Control tower */}
+      {/* {checkUserViewPermissions(project, "ControlTower") && (
+        <Link href="/torreControl" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Gauge size={iconSize} />}
+            className={
+              path.startsWith("/torreControl") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/torreControl")}
+          />
+        </Link>
+      )} */}
     </div>
   );
 };

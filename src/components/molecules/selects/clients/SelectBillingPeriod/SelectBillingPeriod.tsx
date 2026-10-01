@@ -6,8 +6,8 @@ interface Props {
   placeHolder?: string;
   options: any[];
   orderRadioValue: string | undefined;
-  setValueSelected: (event: string) => void
-  disabled: boolean
+  setValueSelected: (event: string) => void;
+  disabled: boolean;
 }
 const { Option } = Select;
 export const SelectBillingPeriod = ({
@@ -30,6 +30,7 @@ export const SelectBillingPeriod = ({
         optionLabelProp="label"
         onChange={onChangeSelect}
         value={orderRadioValue}
+        disabled={disabled}
       >
         {options?.map((value) => {
           return (

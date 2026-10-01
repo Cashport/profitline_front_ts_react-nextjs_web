@@ -34,6 +34,7 @@ export interface IData {
   is_legalized: number;
   is_rejected: number | null;
   payment_id: number | null;
+  payment_identification_url?: string;
   payment_agreement_id: number;
   previous_status: string | null;
   previous_status_id: number | null;
@@ -48,4 +49,5 @@ export interface IData {
   type_incident: string | null;
   user_id: number | null;
   user_name: string | null;
+  is_reconciled: 1 | 0;
 }

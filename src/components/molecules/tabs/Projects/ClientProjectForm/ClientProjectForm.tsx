@@ -25,6 +25,7 @@ import { SelectDocumentTypes } from "@/components/molecules/selects/clients/Sele
 import { SelectClientTypes } from "@/components/molecules/selects/clients/SelectClientTypes/SelectClientTypes";
 import { SelectRadicationTypes } from "@/components/molecules/selects/clients/SelectRadicationTypes/SelectRadicationTypes";
 import { SelectPaymentConditions } from "@/components/molecules/selects/clients/SelectPaymentConditions/SelectPaymentCondition";
+import { SelectPaymentTypes } from "@/components/molecules/selects/clients/SelectPaymentTypes/SelectPaymentTypes";
 import { SelectHoldings } from "@/components/molecules/selects/clients/SelectHoldings/SelectHoldings";
 import { IBillingPeriodForm } from "@/types/billingPeriod/IBillingPeriod";
 import { addAddressToLocation } from "@/services/locations/locations";
@@ -35,6 +36,7 @@ import { useMessageApi } from "@/context/MessageContext";
 
 import "./clientprojectform.scss";
 import { DocumentButtonAction } from "@/components/atoms/DocumentButtonAction/DocumentButtonAction";
+import { PAYMENT_TYPES } from "@/constants/documentTypes";
 
 const { Title } = Typography;
 
@@ -105,6 +107,10 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
         condition_payment: {
           value: data.condition_payment_id,
           label: `A ${data.condition_payment} días`
+        },
+        payment_type: {
+          value: data.payment_type,
+          label: PAYMENT_TYPES.find((type) => type.id === data.payment_type)?.label ?? ""
         },
         billing_period: data.billing_period,
         documents: data.documents
@@ -477,6 +483,22 @@ export const ClientProjectForm = ({ onGoBackTable, isViewDetailsClient }: Props)
                         />
                       );
                     }}
+                  />
+                </Flex>
+                <Flex vertical className="inputContainer">
+                  <Title className="inputContainer__title" level={5}>
+                    Tipo de pago
+                  </Title>
+                  <Controller
+                    name="infoClient.payment_type"
+                    control={control}
+                    rules={{ required: true, minLength: 1 }}
+                    render={({ field }) => (
+                      <SelectPaymentTypes<ClientFormType>
+                        errors={errors.infoClient?.payment_type}
+                        field={field}
+                      />
+                    )}
                   />
                 </Flex>
               </div>

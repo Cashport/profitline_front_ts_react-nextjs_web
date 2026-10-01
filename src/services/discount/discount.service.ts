@@ -1,9 +1,9 @@
 import { FileObject } from "@/components/atoms/UploadDocumentButton/UploadDocumentButton";
 import { discountTypeByAnnual } from "@/components/organisms/discounts/constants/discountTypes";
 import { DiscountSchema } from "@/components/organisms/discounts/discount-rules/create/resolvers/generalResolver";
-import config from "@/config";
 import {
   DiscountBasics,
+  DiscountByClient,
   DiscountCreateResponse,
   DiscountGetOne
 } from "@/types/discount/DiscountBasics";
@@ -12,6 +12,7 @@ import { GenericResponse, GenericResponsePage } from "@/types/global/IGlobal";
 import { API, getIdToken, idProject } from "@/utils/api/api";
 import {
   Discount,
+  DiscountPackage,
   DiscountPackageCreateResponse,
   DiscountPackageGetOne
 } from "@/types/discount/DiscountPackage";
@@ -43,14 +44,21 @@ export const getAllDiscounts = async ({
   return response.success ? response : { ...defaultRes, ...response };
 };
 
+export const getDiscountsByClient = async (clientId: string) => {
+  const response: GenericResponse<DiscountByClient[]> = await API.get(`/discount/by-client`, {
+    params: { client_id: clientId }
+  });
+  return response;
+};
+
 export const getAllDiscountPackages = async ({
   projectId,
   params
 }: {
   projectId: number;
   params?: Record<string, string | number>;
-}): Promise<GenericResponsePage<DiscountBasics[]>> => {
-  const response: GenericResponsePage<DiscountBasics[]> = await API.get(
+}): Promise<GenericResponsePage<DiscountPackage[]>> => {
+  const response: GenericResponsePage<DiscountPackage[]> = await API.get(
     `/discount/all/discount-packages/project/${projectId}`,
     {
       params

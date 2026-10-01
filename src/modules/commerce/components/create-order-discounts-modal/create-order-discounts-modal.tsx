@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useContext, useEffect, useState } from "react";
-import { Spin } from "antd";
+import { Modal, Spin } from "antd";
 import { WarningDiamond, X } from "@phosphor-icons/react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -12,10 +12,14 @@ import styles from "./create-order-discounts-modal.module.scss";
 
 export interface CreateOrderDiscountsModalProps {
   setOpenDiscountsModal: Dispatch<SetStateAction<boolean>>;
+  floating?: boolean;
+  open?: boolean;
 }
 
 const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
-  setOpenDiscountsModal
+  setOpenDiscountsModal,
+  floating = false,
+  open = false
 }) => {
   const [radioValue, setRadioValue] = useState<IDiscountPackageAvailable>();
   const { selectedDiscount, setSelectedDiscount, discounts, discountsLoading } =
@@ -49,8 +53,8 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
     padding: "1rem"
   };
 
-  return (
-    <div className={styles.discountsModal}>
+  const content = (
+    <>
       <div className={styles.header}>
         <h3>Descuentos</h3>
         <button onClick={() => setOpenDiscountsModal(false)} className={styles.buttonClose}>
@@ -92,7 +96,27 @@ const CreateOrderDiscountsModal: FC<CreateOrderDiscountsModalProps> = ({
       <PrincipalButton disabled={false} onClick={handleApplyDiscounts}>
         Aplicar
       </PrincipalButton>
-    </div>
+    </>
+  );
+
+  if (floating) {
+    return (
+      <Modal
+        open={open}
+        onCancel={() => setOpenDiscountsModal(false)}
+        footer={null}
+        closable={false}
+        centered
+        width={520}
+        className="createOrderDiscountsModalFloating"
+      >
+        <div className={styles.discountsModalContent}>{content}</div>
+      </Modal>
+    );
+  }
+
+  return (
+    <div className={`${styles.discountsModalContent} ${styles.discountsModal}`}>{content}</div>
   );
 };
 

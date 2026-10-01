@@ -1,6 +1,5 @@
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import Header from "@/components/organisms/header";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { PortfolioClientsCutoff } from "@/components/molecules/PortfolioClientsCutoff/PortfolioClientsCutoff";
 import { Metadata } from "next";
 import { FC, ReactNode } from "react";
 
@@ -14,7 +13,11 @@ interface ClientsLayoutProps {
 }
 
 const ClientsLayout: FC<ClientsLayoutProps> = ({ children }) => {
-  return <ViewWrapper headerTitle="Clientes">{children}</ViewWrapper>;
+  return (
+    <ViewWrapper headerTitle="Clientes" headerTitleExtra={<PortfolioClientsCutoff />}>
+      {children}
+    </ViewWrapper>
+  );
 };
 
 export default ClientsLayout;

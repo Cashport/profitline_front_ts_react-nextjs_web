@@ -127,6 +127,22 @@ export const BanksTable = ({
       width: 100
     },
     {
+      title: "Id ERP",
+      dataIndex: "ID_ERP",
+      key: "ID_ERP",
+      render: (ID_ERP, record) => (
+        <div className="accountBankTextContainer">
+          <Text>{ID_ERP}</Text>
+          {record.initial_document && (
+            <p className="accountBankText">{record.initial_document}</p>
+          )}
+        </div>
+      ),
+      sorter: (a, b) => Number(a.ID_ERP ?? 0) - Number(b.ID_ERP ?? 0),
+      showSorterTooltip: false,
+      width: 110
+    },
+    {
       title: "Cliente",
       dataIndex: "CLIENT_NAME",
       key: "CLIENT_NAME",

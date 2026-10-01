@@ -53,7 +53,6 @@ export const ClientsViewTable = () => {
   const [grandTotal, setGrandTotal] = useState<any>({});
   const [noResults, setNoResults] = useState<boolean>(false);
   const { ID } = useAppStore((state) => state.selectedProject);
-
   const [loadingOpenPortfolio, setLoadingOpenPortfolio] = useState({
     isLoading: false,
     loadingId: ""
@@ -79,10 +78,11 @@ export const ClientsViewTable = () => {
 
     const pathKey = `/portfolio/client/project/${ID}?${queryParams}`;
 
-    return fetcher(pathKey);
+    return fetcher(pathKey, 30000);
+    // se agrega un timeout de 30 segundos para esta consulta debido a que puede tardar más de lo normal en responder cuando se tienen muchos datos o filtros aplicados
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status, error } = useInfiniteQuery(
     ["portfolios", debouncedSearchQuery, filters, ID],
     fetchPortfolios,
     {
@@ -93,9 +93,18 @@ export const ClientsViewTable = () => {
         )
           return undefined;
         return pages.length + 1;
-      }
+      },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      // Un 4xx (p. ej. sin grupos asignados) no se arregla reintentando; con
+      // los 3 reintentos por defecto la tabla quedaba cargando sin mensaje.
+      retry: 1
     }
   );
+  const loadErrorMessage =
+    status === "error"
+      ? (error as Error)?.message || "No se pudo cargar la información de cartera"
+      : null;
 
   const { ref, inView } = useInView({
     threshold: 0
@@ -280,7 +289,8 @@ export const ClientsViewTable = () => {
           (client, index, self) => self.findIndex((other) => other.id === client.id) === index
         ) || []
     );
-    setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
+    if (data?.pages[0]?.data?.pagination?.page === 1)
+      setGrandTotal(data?.pages[0]?.data?.grandTotal || {});
     setNoResults(data?.pages[0]?.message === "no rows");
   }, [data]);
 
@@ -288,7 +298,7 @@ export const ClientsViewTable = () => {
     <main className="mainClientsTable">
       <div style={{ marginBottom: "10px" }}>
         <Flex justify="space-between" className="mainClientsTable_header">
-          <Flex gap={"10px"}>
+          <Flex gap={"10px"} align="center">
             <OptimizedSearchComponent onSearch={handleSearch} />
             <FilterPortfolio setSelectedFilters={setFilters} />
             <Button size="large" icon={<DotsThree size={"1.5rem"} />} />
@@ -371,7 +381,9 @@ export const ClientsViewTable = () => {
           } as any
         }
         locale={{
-          emptyText: noResults ? "No se encontraron resultados" : "No hay datos disponibles"
+          emptyText:
+            loadErrorMessage ??
+            (noResults ? "No se encontraron resultados" : "No hay datos disponibles")
         }}
       />
       {(hasNextPage || isFetchingNextPage) && !noResults && (
@@ -379,11 +391,15 @@ export const ClientsViewTable = () => {
           {isFetchingNextPage ? <Spin /> : "Load More"}
         </div>
       )}
-      {!hasNextPage && status !== "loading" && flattenedData.length <= 0 && !noResults && (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <Text>No hay más datos para cargar</Text>
-        </div>
-      )}
+      {!hasNextPage &&
+        status !== "loading" &&
+        !loadErrorMessage &&
+        flattenedData.length <= 0 &&
+        !noResults && (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <Text>No hay más datos para cargar</Text>
+          </div>
+        )}
     </main>
   );
 };

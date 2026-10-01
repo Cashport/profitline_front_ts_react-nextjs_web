@@ -1,34 +1,101 @@
+import { IOrderViewContext } from "@/app/comercio/cetaphil/page";
+
 export interface IEcommerceClient {
   client_id: string;
   client_name: string;
   client_email: string;
   payment_type: number;
+  client_bu: IClientBU[];
+}
+
+export interface IClientBU {
+  internal_code: string;
+  bu_name: string;
+}
+
+/**
+ * Producto contenido dentro de un pack (`IPack`). A diferencia de un
+ * `IProduct`, no tiene id_line/id_category/etc. propios: solo lo que se
+ * necesita para mostrarlo como sub-fila del pack en la pantalla de
+ * resumen y para calcular su aporte al precio total del pack.
+ */
+export interface IPackProduct {
+  product_id: number;
+  sku: string;
+  description: string;
+  image: string | null;
+  taxes: number;
+  quantity: number;
+  price: number;
+  price_taxes: number;
+}
+
+/**
+ * Pack (agrupación de productos con precio propio) devuelto por el
+ * endpoint `getProductsByClient`. El frontend lo trata como un producto
+ * más en el marketplace, pero con la particularidad de que en el
+ * resumen debe mostrar los productos que lo componen como una sub-tabla.
+ */
+export interface IPack {
+  id: number;
+  sku: string;
+  description: string;
+  image: string | null;
+  id_line: number;
+  id_category: number;
+  project_id: number;
+  is_available: number;
+  line_name: string;
+  line_alias?: string | null;
+  category_name: string;
+  category_alias?: string | null;
+  category_id: number;
+  price: number;
+  price_taxes: number;
+  products: IPackProduct[];
 }
 
 export interface IProductData {
   category_id: number;
   category: string;
+  line_alias?: string | null;
   products: IProduct[];
+  /**
+   * Packs disponibles para la línea. Opcional para mantener
+   * retrocompatibilidad con respuestas del backend que aún no lo
+   * incluyen; cuando está presente se renderizan en el marketplace
+   * como productos adicionales (etiquetados como "Pack").
+   */
+  packs?: IPack[];
 }
 
 export interface IProduct {
   id: number;
   SKU: string;
   description: string;
-  image: string;
+  image: string | null;
   id_line: number;
   id_category: number;
   taxes: number;
-  kit: number;
-  locked: number;
+  kit: number | null;
+  locked: number | null;
   is_available: number;
-  EAN: string;
+  EAN: string | null;
   project_id: number;
   price: number;
   price_taxes: number;
   line_name: string;
+  line_alias?: string | null;
   category_name: string;
+  category_alias?: string | null;
   shipment_unit: number;
+  created_by?: string;
+  updated_at?: string;
+  is_deleted?: number;
+  discount_code_product_matrix?: null;
+  order_marketplace?: number;
+  product_units?: number;
+  category_id?: number;
 }
 
 export interface ISelectedProduct {
@@ -39,12 +106,22 @@ export interface ISelectedProduct {
   discount: number | undefined;
   discount_percentage: number | undefined;
   quantity: number;
-  image: string;
+  image: string | null;
   category_id: number;
   category_name: string;
+  category_alias?: string | null;
   SKU: string;
+  EAN?: string | null;
   stock: boolean;
   shipment_unit: number;
+  autoAssigned?: boolean;
+  /**
+   * `true` cuando la línea representa un pack y no un producto regular.
+   * En ese caso `pack_products` trae los productos que componen el pack,
+   * que se renderizan como sub-tabla en la pantalla de resumen.
+   */
+  is_pack?: boolean;
+  pack_products?: IPackProduct[];
 }
 
 export interface IFetchedCategories {
@@ -52,17 +129,41 @@ export interface IFetchedCategories {
   products: ISelectedProduct[];
 }
 
+export interface IExecutiveDiscount {
+  product_sku: string;
+  primary_discount_pct: number;
+  secondary_discount_pct: number;
+}
 export interface IConfirmOrderData {
   discount_package: IDiscountPackageAvailable | undefined;
   order_summary: {
     product_sku: string;
     quantity: number;
+    /**
+     * `1` cuando la línea representa un pack (agrupación de productos con
+     * precio propio) y `0` cuando es un producto regular. El backend lo
+     * necesita para saber si debe desglosar el pack en sus productos
+     * contenidos al calcular descuentos / bonificaciones.
+     */
+    is_pack: 0 | 1;
   }[];
+  business_unit: string;
+  executive_discounts: IExecutiveDiscount[];
+  deactivate_cross_selling: boolean;
+  promotion_id?: number;
+  /**
+   * Indica si la promoción aplica al carrito actual. Se calcula en base a
+   * los bonificados comunes (`bonusOptions`), NO a los "other bonified"
+   * (`otherBonificated`). Es `true` cuando al menos una tarjeta de
+   * `bonusOptions` tiene productos, y `false` en caso contrario.
+   */
+  promotion_applyed: boolean;
 }
 
 export interface IProductInDetail {
   id: number;
   product_sku: string;
+  item_uuid?: string;
   product_name: string;
   quantity: number;
   price: number;
@@ -74,12 +175,14 @@ export interface IProductInDetail {
   discount: number;
   discount_percentage: number;
   shipment_unit: number;
+  original_price: number;
 }
 export interface DiscountApplied {
   id: number;
   discount: number;
   description: string;
   discount_name: string;
+  max_discount: number;
 }
 
 export interface PrimaryDiscount {
@@ -90,23 +193,33 @@ export interface PrimaryDiscount {
   unit_discount: number;
   discount_applied: DiscountApplied;
   new_price: number;
+  new_price_taxes: number;
 }
 
 export interface Discount {
   subtotalDiscount: number;
   primary: PrimaryDiscount;
+  secondary?: PrimaryDiscount;
 }
 export interface DiscountItem {
   product_sku: string;
   quantity: number;
+  shipment_unit: number;
   price: number;
+  price_taxes: number;
   taxes: number;
-  image: string;
+  image: string | null;
   category_id: number;
   line_id: number;
   product_id: number;
   description: string;
   discount: Discount;
+  /**
+   * UUID corto generado en el front que correlaciona este producto
+   * con su línea origen en `order_summary.products`. Permite al backend
+   * mapear de dónde viene cada producto en cada split.
+   */
+  item_uuid?: string;
 }
 export interface DiscountOrder {
   discountId: number;
@@ -118,6 +231,129 @@ export interface OrderDiscount {
   totalProductDiscount: number;
   discountOrder: DiscountOrder[];
   discountItems: DiscountItem[];
+  secondaryDiscount: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface IBonificatedProductsPost {
+  product_id: number;
+  quantity: number;
+  product_sku: string;
+  description: string;
+}
+
+export interface IGiftItem {
+  product_id: number;
+  qty: number;
+  sku: string;
+  description: string;
+  image: string;
+}
+
+/**
+ * Producto individual dentro de un subgrupo de bonificado discrecional
+ * ("other bonified"). Equivale al `Item2` de la respuesta del backend y
+ * se acumula hasta el `max_selection_qty` del subgrupo que lo contiene.
+ */
+export interface IOtherBonusProduct {
+  product_id: number;
+  qty: number;
+  sku: string;
+  description: string;
+  image: string;
+}
+
+/**
+ * Subgrupo de un bonificado discrecional ("other bonified"). Equivale al
+ * `Item` de la respuesta del backend. Puede ser `fixed: true` (cantidad
+ * ya fijada, sin acumulacion) o `fixed: false` (pool donde el usuario
+ * acumula cualquier producto hasta `max_selection_qty`).
+ */
+export interface IOtherBonusSubgroup {
+  group_item_id: number;
+  group_id: number;
+  fixed: boolean;
+  subgroup_number: number;
+  max_selection_qty: number;
+  items: IOtherBonusProduct[];
+}
+
+/**
+ * Grupo de bonificados discrecionales ("other bonified"). Equivale al
+ * `Root` de la respuesta del backend. Contiene los subgrupos
+ * (fijos / pool) entre los que el usuario reparte `available_qty`
+ * unidades hasta la fecha de `expiration_date`.
+ */
+export interface IOtherBonusGroup {
+  group_id: number;
+  description: string;
+  assigned_qty: number;
+  available_qty: number;
+  expiration_date: string;
+  items: IOtherBonusSubgroup[];
+}
+
+export interface IBonus {
+  id?: number;
+  bonusOptions: {
+    cards: {
+      fixed: boolean;
+      items: Omit<IGiftItem, "image">[];
+    }[];
+  }[];
+  /**
+   * Bonificados discrecionales ("other bonified") seleccionados por el
+   * usuario. Se modelan igual que `bonusOptions` (cards fijos / pool)
+   * para poder reutilizar la misma UI y reglas de acumulacion.
+   */
+  otherBonificated: {
+    group_id: number;
+    description: string;
+    assigned_qty: number;
+    available_qty: number;
+    expiration_date: string;
+    cards: {
+      fixed: boolean;
+      subgroup_number: number;
+      max_selection_qty: number;
+      items: Omit<IOtherBonusProduct, "image">[];
+    }[];
+  }[];
+}
+
+export interface IGiftItemGroup {
+  gift_item_group_id: number;
+  gift_group_id: number;
+  max_selection_qty: number;
+  items: IGiftItem[];
+  fixed: boolean;
+  subgroup_number: number;
+}
+
+export interface IGiftOption {
+  gift_group_id: number;
+  option_number: number;
+  items: IGiftItemGroup[];
+}
+
+export interface IPromotionRange {
+  range_id: number;
+  range_number: number;
+  min_amount: number;
+  is_eligible: boolean;
+  amount_remaining: number;
+  progress_message: string;
+  gift_options: IGiftOption[];
+}
+
+export interface IPromotion {
+  promotion_id: number;
+  promotion_name: string;
+  promotion_type: string;
+  active_range: IPromotionRange;
+  ranges: IPromotionRange[];
 }
 
 export interface IOrderConfirmedResponse {
@@ -125,13 +361,23 @@ export interface IOrderConfirmedResponse {
     id: number;
     idAnnualDiscount: number;
   };
-  products?: IProductInDetail[];
+  products?: Omit<DiscountItem, "discount">[];
   subtotal: number;
   taxes: number;
   discounts: OrderDiscount;
   total: number;
   total_pronto_pago: number;
   insufficientStockProducts: string[];
+  promotion?: IPromotion;
+  other_bonificated_products?: IOtherBonusGroup[];
+  client: IOrderViewContext["client"];
+  business_unit: string;
+}
+
+export interface IOrderSummaryPayload extends Omit<IOrderConfirmedResponse, "discount_package"> {
+  discount_package: IDiscountPackageAvailable;
+  executive_discounts: IExecutiveDiscount[];
+  deactivate_cross_selling: boolean;
 }
 
 export interface IShippingInformation {
@@ -142,12 +388,77 @@ export interface IShippingInformation {
   phone_number: string;
   comments: string;
   // selected id address
-  id?: string;
+  id?: number | string;
+  warehouse_id?: number;
+}
+
+export interface ICityWarehouse {
+  id: number;
+  city_name: string;
+  sort_order: number;
+  warehouse_id: number;
+  warehouse_name: string;
+}
+
+export interface IAllWarehouse {
+  id: number;
+  warehouse: string;
+  warehouse_description: string;
+}
+
+export interface IOrderSplitShippingInfo {
+  address: string;
+  city: string;
+  dispatch_address: string;
+  email: string;
+  phone_number: string;
+  comments: string;
+  id?: number;
+  warehouse_id: number;
+}
+
+export interface IOrderSplitDetail {
+  index: number;
+  shipping_information: IOrderSplitShippingInfo;
+  products: DiscountItem[];
+  bonificated_products?: IBonificatedProductsPost[];
+  other_bonificated_products?: IBonificatedProductsPost[];
+  marketplace_number?: string;
 }
 
 export interface ICreateOrderData {
-  shipping_information: IShippingInformation;
-  order_summary: IOrderConfirmedResponse;
+  order_summary: IOrderSummaryPayload;
+  is_electronic_invoicing: number;
+  order_split_details: IOrderSplitDetail[];
+  promotion_id?: number;
+  nit_id: string;
+  /**
+   * Unidad de negocio seleccionada por el usuario en el dropdown "Canal"
+   * durante la creación de la orden. Se obtiene de `client_bu[n].bu_name`
+   * del endpoint `/marketplace/projects/:project/clients`.
+   *
+   * Opcional: solo aplica al flujo de marketplace (esta interfaz no se usa
+   * en órdenes de compra / purchase orders).
+   */
+  business_unit?: string;
+  /**
+   * ID del rango activo (`promotion.active_range.range_id`) del que
+   * provienen los productos bonificados comunes (bonusOptions).
+   * No aplica a los "other bonified" (otherBonificated), que no
+   * pertenecen a un rango de la promoción.
+   */
+  range_promotion_id?: number;
+  draft_id: number | undefined;
+}
+
+export interface ISucessCreateOrder {
+  packageId: number;
+  draftId: number;
+  orders: {
+    orderId: number;
+    index: number;
+  }[];
+  notificationId: number;
 }
 
 export interface ICommerceAddressAndDetails {
@@ -159,10 +470,37 @@ export interface ICommerceAdresses {
   city: string;
   email: string;
   id: number;
+  warehouse_id: number;
+  warehouse: string;
+  warehouse_description: string;
 }
 export interface ICommerceAddressesData {
   otherAddresses: ICommerceAdresses[];
   phone: string;
+}
+
+export interface IClientSummary {
+  client: {
+    nit: string;
+    uuid: string;
+    name: string;
+    payment_type: number;
+  };
+  main_address: {
+    label: string;
+    address: string;
+    city: string;
+  };
+  cartera: {
+    totalPortfolio: number;
+    pastDueAmount: number;
+  };
+  cupo: {
+    totalQuota: number;
+    availableQuota: number;
+    percentageUsed: number;
+    availablePercentage: number;
+  };
 }
 
 export interface ISingleOrder {
@@ -173,6 +511,7 @@ export interface ISingleOrder {
   city: string;
   contacto: string;
   total: number;
+  total_without_taxes: number;
   total_pronto_pago: number;
   order_status: string;
   detail: IDetailOrder;
@@ -185,6 +524,10 @@ export interface ISingleOrder {
   is_draft: number;
   client_name: string;
   block_flag: boolean;
+  vendor_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  business_unit: string;
 }
 
 interface IDetailOrder {
@@ -208,25 +551,84 @@ export interface ICategories {
 export interface IOrderData {
   color: string;
   status: string;
+  status_id: number;
   count: number;
   orders: IOrder[];
   total: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total_count: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
 }
 
 export interface IOrder {
   order_status: string;
+  order_status_id: number;
   rgb: string;
   id: number;
   operation_number: number;
+  marketplace_number?: string | null;
   order_date: string;
   city: string;
   contacto: string;
+  business_unit: string;
+  address: string;
   total: number;
   total_pronto_pago: number;
   client_name: string;
+  vendor_name: string;
   warehousename: string;
   warehouseid: number;
   last_datestamp: string | null;
+  files: string | null;
+  notification_id: number | null;
+  incident_id: number | null;
+  has_stock: number;
+  is_draft?: boolean;
+}
+export interface IDraftOrder {
+  id: number;
+  mongo_id: string;
+  client_id: string;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  order_date: string;
+  warehouseid: number;
+  client_name: string;
+  vendor_name: string;
+  warehousename: string;
+  is_draft: boolean;
+}
+
+export interface IDraftOrderDetail {
+  id: number;
+  mongo_id: string;
+  project_id: number;
+  client_id: string;
+  nit_id?: string;
+  created_by: number;
+  total: number;
+  subtotal: number;
+  taxes: number;
+  total_discount: number;
+  product_count: number;
+  city: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  created_at: string;
+  client_name: string;
+  vendor_name: string;
+  order_summary: IOrderSummaryPayload;
+  shipping_info: IShippingInformation;
+  executive_discounts: IExecutiveDiscount[];
 }
 
 export interface IDiscount {
@@ -242,6 +644,8 @@ export interface IDiscountPackageAvailable {
   idAnnualDiscount: number;
   name: string;
   description: string;
+  priority?: number;
+  is_combinable?: number;
 }
 
 // Define la interfaz para los vendedores individuales.
@@ -261,4 +665,91 @@ interface ISellerGroup {
 // Define la interfaz principal que contiene el filtro de vendedores.
 export interface IMarketplaceOrdersFilters {
   sellerFilter: ISellerGroup[];
+}
+
+// Sales Dashboard Interfaces
+export interface IUnitsByCategory {
+  categoria: number;
+  producto: string;
+  cantidad: number;
+  monto: number;
+}
+
+// Base interface with common metrics for sales dashboard
+interface ISalesDashboardMetrics {
+  total_sales: number;
+  total_sales_pp: number;
+  total_sales_invoiced: number;
+  total_sales_pp_invoiced: number;
+  total_sales_in_process: number;
+  total_sales_pp_in_process: number;
+  total_sales_pending: number;
+  total_sales_pp_pending: number;
+  total_sales_wallet: number;
+  total_sales_pp_wallet: number;
+  cuantity_orders: number;
+  total_cuota: number;
+  percentage_cuota: number;
+  pending_cuota: number;
+  units_by_category: IUnitsByCategory[];
+  total_sales_month: number;
+  total_sales_previous_month: number;
+  percentage_sales_comparison: number;
+  total_products_month: number;
+  total_products_previous_month: number;
+  percentage_products_comparison: number;
+  unique_clients_month: number;
+  orders_pending_month: number;
+}
+
+export interface ISalesDashboardTotal extends ISalesDashboardMetrics {}
+
+export interface ISalesDashboardSeller extends ISalesDashboardMetrics {
+  seller: string;
+}
+
+export interface ISalesDashboardSellerLeader extends ISalesDashboardMetrics {
+  seller_leader: string;
+  sellers: ISalesDashboardSeller[];
+}
+
+export interface ISalesDashboard {
+  total: ISalesDashboardTotal;
+  seller_leaders: ISalesDashboardSellerLeader[];
+}
+
+export interface IPaymentLinkData {
+  ticket_id: string;
+  fecha_vencimiento: string;
+  hora_vencimiento: string;
+  amount: number;
+  descripcion: string;
+  email: string;
+  invoice_ids: number[];
+}
+
+export interface IGeneratePaymentLinkResponse {
+  id: number;
+  client: string;
+  amount: number;
+  status: string;
+  expiration: string;
+  link: string;
+}
+
+export interface IWarehouseProductsStock {
+  sku: string;
+  product_id: number;
+  quantity: number;
+  description: string;
+  requested: number;
+  inWarehouse: number;
+}
+
+export interface IInventoriesByWarehouse {
+  id: number;
+  warehouse: string;
+  warehouse_description?: string;
+  availability: boolean;
+  availability_msg: string;
 }

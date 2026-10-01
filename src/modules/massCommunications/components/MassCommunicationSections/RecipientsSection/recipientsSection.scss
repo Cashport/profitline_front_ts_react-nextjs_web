@@ -1,0 +1,43 @@
+@import "@styles/variables.scss";
+
+.recipientsTextarea {
+    font-family: inherit;
+    resize: none;
+    width: 100%;
+    field-sizing: content;
+    min-height: 120px;
+    max-height: 380px;
+    padding: 4px 11px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 1.5714285714285714;
+    transition: all 0.2s;
+    outline: none;
+    scrollbar-width: thin;
+
+    &:hover {
+        border-color: $secondary;
+    }
+
+    &:focus,
+    &:focus-visible {
+        border-color: $secondary;
+        box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+    }
+
+    &::placeholder {
+        color: #0a0a0ad0;
+    }
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+}

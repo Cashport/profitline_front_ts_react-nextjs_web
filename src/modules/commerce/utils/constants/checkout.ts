@@ -1,0 +1,42 @@
+export const NEW_ADDRESS_OPTION = {
+  value: "new_address",
+  label: "+ Nueva dirección"
+};
+
+export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export const isValidEmail = (value: string) => EMAIL_REGEX.test(value.trim());
+
+export const isValidPhone = (telefono: string, _indicativo: string) => {
+  const digits = telefono.trim();
+  if (!/^\d+$/.test(digits)) return false;
+
+  // if (indicativo === "+57") return digits.length === 10;
+  // return digits.length >= 10 && digits.length <= 12;
+  return true;
+};
+
+// Comentarios de envío: sin saltos de línea y sin caracteres de 4 bytes (emojis)
+// que la columna utf8mb3 del backend no admite. Se conservan tildes y ñ.
+export const sanitizeComment = (value: string) =>
+  value
+    .replace(/[\r\n]+/g, " ") // enters -> espacio
+    .replace(/[\u{10000}-\u{10FFFF}]/gu, ""); // emojis / 4-byte chars -> fuera
+
+export const INSTITUCIONAL_DEFAULT_COMMENT = "USO INSTITUCIONAL";
+
+// Comentario de envío por defecto según la unidad de negocio (bu_name del canal).
+// Para el canal "Institucional" se prellena con "PEDIDO INSTITUCIONAL".
+export const getDefaultCommentForBusinessUnit = (businessUnit?: string): string =>
+  businessUnit?.trim().toLowerCase() === "institucional" ? INSTITUCIONAL_DEFAULT_COMMENT : "";
+
+// Canales (bu_name) que exigen # de orden de compra para poder finalizar el pedido.
+const CHANNELS_REQUIRING_PURCHASE_ORDER = ["institucional", "trade"];
+
+export const requiresPurchaseOrder = (businessUnit?: string): boolean =>
+  CHANNELS_REQUIRING_PURCHASE_ORDER.includes(businessUnit?.trim().toLowerCase() ?? "");
+
+export const phoneErrorMessage = (indicativo: string) =>
+  indicativo === "+57"
+    ? "Teléfono debe tener 10 dígitos"
+    : "Teléfono debe tener entre 10 y 12 dígitos";

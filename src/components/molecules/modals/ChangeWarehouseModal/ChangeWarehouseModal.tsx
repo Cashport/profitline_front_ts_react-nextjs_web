@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Typography, Button, Table, Flex, Radio, message } from "antd";
 import { CaretLeft, Eye } from "phosphor-react";
 import { ColumnsType } from "antd/es/table";
@@ -9,6 +9,7 @@ import {
   updateWarehouse
 } from "@/services/commerce/commerce";
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
+import { IInventoriesByWarehouse, IWarehouseProductsStock } from "@/types/commerce/ICommerce";
 const { Title, Text } = Typography;
 
 interface Props {
@@ -16,21 +17,7 @@ interface Props {
   selectedOrder: number;
   currentWarehouseId: number;
   onClose: () => void;
-  setFetchMutate: Dispatch<SetStateAction<boolean>>;
-}
-export interface InventoriesByWarehouse {
-  id: number;
-  warehouse: string;
-  warehouse_description?: string;
-  availability: boolean;
-  availability_msg: string;
-}
-
-export interface WarehouseProductsStock {
-  sku: string;
-  quantity: number;
-  requested: number;
-  inWarehouse: number;
+  setFetchMutate: () => void;
 }
 
 export const ChangeWarehouseModal: React.FC<Props> = ({
@@ -42,16 +29,16 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
 }) => {
   const [view, setView] = useState<"change-warehouse" | "warehouse-detail">("change-warehouse");
   const [warehouseSelected, setWarehouseSelected] = useState<number | null>(currentWarehouseId);
-  const [viewWarehouseDetails, setViewWarehouseDetails] = useState<InventoriesByWarehouse | null>(
+  const [viewWarehouseDetails, setViewWarehouseDetails] = useState<IInventoriesByWarehouse | null>(
     null
   );
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [inventoriesByWarehouse, setInventoriesByWarehouse] = useState<InventoriesByWarehouse[]>(
+  const [inventoriesByWarehouse, setInventoriesByWarehouse] = useState<IInventoriesByWarehouse[]>(
     []
   );
-  const [warehouseProductsStock, setWarehouseProductsStock] = useState<WarehouseProductsStock[]>(
+  const [warehouseProductsStock, setWarehouseProductsStock] = useState<IWarehouseProductsStock[]>(
     []
   );
   useEffect(() => {
@@ -68,25 +55,32 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       setLoading(false);
     };
     isOpen && fetchWarehouses();
-  }, [selectedOrder]);
+  }, [selectedOrder, isOpen]);
 
   useEffect(() => {
     const fetchWarehouseStock = async () => {
       setLoading(true);
       if (viewWarehouseDetails?.id) {
-        const response = await getWarehouseProducts(
-          projectId,
-          viewWarehouseDetails?.id,
-          selectedOrder
-        );
-        setWarehouseProductsStock(response);
+        try {
+          const response = await getWarehouseProducts(
+            projectId,
+            viewWarehouseDetails?.id,
+            selectedOrder
+          );
+          setWarehouseProductsStock(response);
+        } catch (error) {
+          message.error(
+            error instanceof Error ? error.message : "Error fetching warehouse stock details",
+            3
+          );
+        }
       }
       setLoading(false);
     };
     isOpen && fetchWarehouseStock();
   }, [viewWarehouseDetails?.id]);
 
-  const columns: ColumnsType<InventoriesByWarehouse> = [
+  const columns: ColumnsType<IInventoriesByWarehouse> = [
     {
       title: "Bodega",
       dataIndex: "warehouse",
@@ -134,7 +128,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       )
     }
   ];
-  const columnsDetails: ColumnsType<WarehouseProductsStock> = [
+  const columnsDetails: ColumnsType<IWarehouseProductsStock> = [
     {
       title: "Producto",
       dataIndex: "description",
@@ -149,7 +143,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       title: "Stock",
       dataIndex: "inWarehouse",
       key: "inWarehouse",
-      render: (inWarehouse: number, record: WarehouseProductsStock) => (
+      render: (inWarehouse: number, record: IWarehouseProductsStock) => (
         <Text {...(inWarehouse < record.requested && { type: "danger" })}>{inWarehouse}</Text>
       )
     }
@@ -160,14 +154,11 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     try {
       const orderIds = [selectedOrder];
       await updateWarehouse(orderIds, warehouseSelected as number);
-      message.success("Bodega actualizada", 2, onClose);
-      setFetchMutate((prev) => !prev);
+      onClose();
+      message.success("Bodega actualizada", 2);
+      setFetchMutate();
     } catch (error) {
-      message.error(
-        error instanceof Error ? error.message : "Error al actualizar la bodega",
-        3,
-        onClose
-      );
+      message.error(error instanceof Error ? error.message : "Error al actualizar la bodega", 3);
     } finally {
       setLoadingSubmit(false);
     }
@@ -177,6 +168,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
     const viewMap = {
       "change-warehouse": (
         <Table
+          key="change-warehouse"
           dataSource={inventoriesByWarehouse}
           columns={columns}
           pagination={false}
@@ -185,6 +177,7 @@ export const ChangeWarehouseModal: React.FC<Props> = ({
       ),
       "warehouse-detail": (
         <Table
+          key="warehouse-detail"
           dataSource={warehouseProductsStock}
           columns={columnsDetails}
           pagination={false}

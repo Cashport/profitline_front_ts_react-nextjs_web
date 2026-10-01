@@ -1,5 +1,6 @@
 export interface Product {
   id: number;
+  sku: string;
   id_material: number;
   description: string;
   id_line: number;

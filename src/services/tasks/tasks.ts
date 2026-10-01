@@ -1,6 +1,12 @@
 import config from "@/config";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { ITaskStatus, ITaskTypes } from "@/types/tasks/ITasks";
+import {
+  ITaskByStatus,
+  ITaskDetail,
+  ITaskStatus,
+  ITaskTabState,
+  ITaskTypes
+} from "@/types/tasks/ITasks";
 import { API } from "@/utils/api/api";
 
 export const getTasksStatus = async (): Promise<ITaskStatus[]> => {
@@ -18,6 +24,112 @@ export const getTaskTypes = async (): Promise<ITaskTypes[]> => {
   try {
     const response: GenericResponse<ITaskTypes[]> = await API.get(
       `${config.API_HOST}/task/get-types`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTaskTabs = async (dates?: {
+  from_date?: string;
+  to_date?: string;
+}): Promise<ITaskTabState[]> => {
+  const params = new URLSearchParams();
+  if (dates?.from_date) params.append("from_date", dates.from_date);
+  if (dates?.to_date) params.append("to_date", dates.to_date);
+  const query = params.toString() ? `?${params.toString()}` : "";
+
+  try {
+    const response: GenericResponse<ITaskTabState[]> = await API.get(
+      `${config.API_HOST}/task/counts-by-status${query}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTasksByStatus = async (
+  statusId: string,
+  page: number = 1,
+  dates?: { from_date?: string; to_date?: string }
+): Promise<ITaskByStatus> => {
+  const body = {
+    page,
+    limit: 25,
+    ...(dates?.from_date && { from_date: dates.from_date }),
+    ...(dates?.to_date && { to_date: dates.to_date })
+  };
+
+  try {
+    const response: GenericResponse<ITaskByStatus> = await API.post(
+      `${config.API_HOST}/task/status-group/${statusId}`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTaskDetails = async ({
+  taskId,
+  queueId
+}: {
+  taskId?: string;
+  queueId?: string;
+}): Promise<ITaskDetail> => {
+  if (!taskId && !queueId) {
+    throw new Error("Either taskId or queueId must be provided");
+  }
+  if (taskId && queueId) {
+    throw new Error("Only one of taskId or queueId can be provided, not both");
+  }
+  try {
+    const body = taskId ? { taskId } : { queueId };
+    const response: GenericResponse<ITaskDetail> = await API.post(
+      `${config.API_HOST}/task/get-task-details`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const patchTask = async (
+  taskId: number,
+  data: { client_id?: string; task_type?: number; assigned_to?: number }
+) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/task/${taskId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const changeTaskStatus = async (taskId: number, statusId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.patch(
+      `${config.API_HOST}/task/${taskId}/status`,
+      { status_id: statusId }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const reprocessAttachmentTask = async (attachmentId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/task/reprocess-attachment`,
+      { attachment_id: attachmentId }
     );
     return response.data;
   } catch (error) {

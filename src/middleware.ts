@@ -6,17 +6,22 @@ export async function middleware(request: NextRequest) {
   const apiHost = process.env.NEXT_PUBLIC_API_HOST?.slice(0, -4) ?? "";
   const apin8nHost = env.API_APPLY_TAB_AI?.slice(0, -45) ?? "";
   const apin8nHost2 = env.API_APPLY_TAB_AI_DEMO?.slice(0, -45) ?? "";
+  const apin8nHost3 = env.API_PURCHASE_ORDERS_AI?.slice(0, -45) ?? "";
   const apiChatHost = env.API_CHAT?.slice(0, -4) ?? "";
-  const apiChatWsHost = apiChatHost.replace('https://', 'wss://').replace('http://', 'ws://');
+  const apiChatWsHost = apiChatHost.replace("https://", "wss://").replace("http://", "ws://");
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const unpkgForPDF = "https://unpkg.com";
+  const amazonFiles = "https://*.amazonaws.com";
+  const azureBlob = "https://*.blob.core.windows.net";
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co ${unpkgForPDF};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' https://*.amazonaws.com data: blob: https://www.gstatic.com;
+    img-src 'self' https: data: blob:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apiChatHost} ${apiChatWsHost} https://checkout.wompi.co;
+    connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
+    media-src 'self' blob: ${amazonFiles} ${azureBlob};
     object-src 'none';
     frame-ancestors 'self';
     base-uri 'self';
@@ -42,7 +47,7 @@ export async function middleware(request: NextRequest) {
   const session = request.cookies.get(process.env.NEXT_PUBLIC_COOKIE_SESSION_NAME ?? "");
 
   const { pathname } = request.nextUrl;
-  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil"];
+  const noAuthRoutes = ["/auth", "/mobile", "/cetaphil", "/portal-archivos"];
   //Return to /login if there is no session cookie
   if (noAuthRoutes.some((route) => pathname.startsWith(route))) {
     const res = NextResponse.next({
