@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { Key } from "react";
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
 import { Table } from "antd";
@@ -17,8 +16,7 @@ import {
 import { getProfit360Visits } from "@/services/reverseLogistics/reverseLogistics";
 import { DevolucionesStatsBar } from "../DevolucionesStatsBar/DevolucionesStatsBar";
 import { FilterDevolucionesTab } from "../FilterDevolucionesTab/FilterDevolucionesTab";
-import { resolveDatePreset } from "../FilterDateTab/FilterDateTab";
-import { IDevolucionesFilter } from "../../types";
+import { useDevolucionesTabState } from "../../contexts/ReverseLogisticsFiltersContext";
 import { parseCausales } from "../../utils/causales";
 import { returnsColumns } from "./columns";
 import { highestFaseLabel } from "../../constants";
@@ -153,26 +151,18 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit, visitIndex: number): Retu
 };
 
 export function DevolucionesTab() {
-  // Default filter = the "Este mes" preset, resolved from the same definitions the
-  // date panel uses so the Fecha tag opens naming that period.
-  const defaultDates = resolveDatePreset("este_mes");
-  const [filter, setFilter] = useState<IDevolucionesFilter>({
-    clientId: null,
-    estadoId: null,
-    causalId: null,
-    fromDate: defaultDates.from,
-    toDate: defaultDates.to
-  });
-  const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
-
-  // Any filter change invalidates the current page — the backend re-paginates
-  // from scratch with the new query params.
-  const handleFilterChange = (next: IDevolucionesFilter) => {
-    setFilter(next);
-    setPage(1);
-  };
+  // Filter / search / page / selection state live in ReverseLogisticsFiltersProvider
+  // so they survive tab switches between Devoluciones and Aprobaciones.
+  const {
+    filter,
+    searchTerm,
+    page,
+    selectedRowKeys,
+    setFilter: handleFilterChange,
+    setSearchTerm,
+    setPage,
+    setSelectedRowKeys
+  } = useDevolucionesTabState();
 
   const swrKey = [
     "reverse-logistics/profit360-visits",

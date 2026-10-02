@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { Key } from "react";
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
@@ -10,10 +9,10 @@ import UiSearchInput from "@/components/ui/search-input/search-input";
 import { GenerateActionButton } from "@/components/atoms/GenerateActionButton";
 import { IApproval, TipoAprobacion } from "@/types/reverseLogistics/IReverseLogistics";
 import { getProfit360Approvals } from "@/services/reverseLogistics/reverseLogistics";
-import { APPROVALS_FETCH_LIMIT, ESTADO_PENDIENTE_APROBACION_ID, PAGE_SIZE } from "../../constants";
-import { IAprobacionesFilter } from "../../types";
+import { APPROVALS_FETCH_LIMIT, PAGE_SIZE } from "../../constants";
 import { parseCausales } from "../../utils/causales";
 import { FilterAprobacionesTab } from "../FilterAprobacionesTab/FilterAprobacionesTab";
+import { useAprobacionesTabState } from "../../contexts/ReverseLogisticsFiltersContext";
 import { getApprovalsColumns, IApprovalRow } from "./columns";
 
 // Stable numeric id derived from a GUID string. The AntD table needs a numeric
@@ -68,19 +67,18 @@ const mapProfit360ToApprovalRow = (raw: {
 export function AprobacionesList() {
   const router = useRouter();
 
-  // Default filter = today + pendientes de aprobación, the view the tab is meant to
-  // open on. clientId/status/fromDate/toDate reach the backend; tipos/ciudades are
-  // applied client-side. The estado default is seeded from the constant rather than
-  // from the picklist so the SWR key is stable on the first render.
-  const today = dayjs().format("YYYY-MM-DD");
-  const [filter, setFilter] = useState<IAprobacionesFilter>({
-    clientId: null,
-    status: ESTADO_PENDIENTE_APROBACION_ID,
-    fromDate: today,
-    toDate: today,
-    tipos: [],
-    ciudades: []
-  });
+  // Filter / search / page / selection state live in ReverseLogisticsFiltersProvider
+  // so they survive tab switches between Devoluciones and Aprobaciones.
+  const {
+    filter,
+    searchTerm,
+    currentPage,
+    selectedRowKeys,
+    setFilter: handleFilterChange,
+    setSearchTerm,
+    setCurrentPage,
+    setSelectedRowKeys
+  } = useAprobacionesTabState();
 
   const { data, isLoading } = useSWR(
     [
@@ -106,10 +104,6 @@ export function AprobacionesList() {
     () => (data?.data ?? []).map(mapProfit360ToApprovalRow),
     [data]
   );
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
   const columns = useMemo(
     () => getApprovalsColumns((guid) => router.push(`/logistica-inversa/aprobaciones/${guid}`)),
@@ -143,13 +137,6 @@ export function AprobacionesList() {
     [approvals, searchTerm, filter.tipos, filter.ciudades]
   );
 
-  const resetPage = () => setCurrentPage(1);
-
-  const handleFilterChange = (next: IAprobacionesFilter) => {
-    setFilter(next);
-    resetPage();
-  };
-
   return (
     <>
       {/* Toolbar */}
@@ -158,7 +145,7 @@ export function AprobacionesList() {
           placeholder="Buscar"
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            resetPage();
+            setCurrentPage(1);
           }}
         />
 
