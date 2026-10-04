@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
+import { ListMagnifyingGlass } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
@@ -16,10 +17,12 @@ import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
 import UiSearchInput from "@/components/ui/search-input";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
 import WalletTabChangeStatusModal from "@/modules/clients/components/wallet-tab-change-status-modal";
+import WalletTabBulkSearchModal from "@/modules/clients/components/wallet-tab-bulk-search-modal";
 import PaymentAgreementModal from "@/modules/clients/components/wallet-tab-payment-agreement-modal";
 import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalActionDiscountCredit/ModalActionDiscountCredit";
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
@@ -47,6 +50,7 @@ export const WalletTab = () => {
   const [invoices, setInvoices] = useState<InvoicesData[] | undefined>([]);
   const [selectedRows, setSelectedRows] = useState<IInvoice[] | undefined>(undefined);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
+  const [isBulkSearchOpen, setIsBulkSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -204,13 +208,20 @@ export const WalletTab = () => {
       )}
       <div className="walletTab">
         <div className="walletTab__header clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+          {/* Alto fijo: PrincipalButton usa height 100% para igualar a los demás botones */}
+          <Flex gap={"0.5rem"} style={{ height: "3rem" }}>
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar por ID"
               onChange={handleSearchChange}
             />
             {/* <WalletTabFilter setSelectedFilters={setFilters} /> */}
+            <PrincipalButton
+              icon={<ListMagnifyingGlass size={18} />}
+              onClick={() => setIsBulkSearchOpen(true)}
+            >
+              Búsqueda masiva
+            </PrincipalButton>
             <Button
               className="button__actions"
               size="large"
@@ -349,6 +360,11 @@ export const WalletTab = () => {
         isOpen={isSelectOpen.selected === 9}
         onClose={onCloseModal}
         clientId={clientId}
+      />
+      <WalletTabBulkSearchModal
+        isOpen={isBulkSearchOpen}
+        onClose={() => setIsBulkSearchOpen(false)}
+        clientName={portfolioData?.data_wallet.client_name}
       />
       <ModalAgreementDetail
         isModalPaymentAgreementOpen={isModalPaymentAgreementOpen}
