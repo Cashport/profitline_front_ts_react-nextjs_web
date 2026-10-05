@@ -94,6 +94,7 @@ export const WALLET_SUMMARY: IWalletSummary = {
     compensada: 2.12 * MM,
     pagada: 3.04 * MM,
     conciliado: 34.88 * MM,
+    abono: 0,
     novedad: 4.37 * MM,
     sin_conciliar: 6.85 * MM,
     saldo: 0,
