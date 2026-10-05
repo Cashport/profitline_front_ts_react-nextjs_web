@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Select } from "antd";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import WarehouseSelect from "@/modules/commerce/components/warehouse-select/warehouse-select";
 import { PAYMENT_TYPES } from "@/constants/documentTypes";
+import { useProjectUsers } from "@/hooks/useProjectUsers";
 import {
   IMarketAdminClientConfig,
   IUpdateMarketAdminClientConfigBody
 } from "@/types/marketAdmin/IMarketAdmin";
 
 export type ConfigForm = {
+  // Ajustes datos del cliente
+  asigned_user: string;
+  coordinator: string;
+  kam: string;
+  kam_lider: string;
+  market: string;
   quota: string;
   payment_discount: string;
   payment_condition_code: string;
@@ -27,6 +35,11 @@ type Props = {
 };
 
 const BLANK_CONFIG: ConfigForm = {
+  asigned_user: "",
+  coordinator: "",
+  kam: "",
+  kam_lider: "",
+  market: "",
   quota: "",
   payment_discount: "",
   payment_condition_code: "",
@@ -37,9 +50,24 @@ const BLANK_CONFIG: ConfigForm = {
   lots_greater_than: ""
 };
 
+const CLIENT_DATA_KEYS = ["asigned_user", "coordinator", "kam", "kam_lider", "market"] as const;
+
+// Cada select guarda el email del usuario seleccionado.
+const USER_SELECTS: { key: (typeof CLIENT_DATA_KEYS)[number]; label: string }[] = [
+  { key: "asigned_user", label: "Ejecutivo" },
+  { key: "coordinator", label: "Coordinador" },
+  { key: "kam", label: "KAM" },
+  { key: "kam_lider", label: "KAM líder" }
+];
+
 const toForm = (config?: IMarketAdminClientConfig): ConfigForm =>
   config
     ? {
+        asigned_user: config.asigned_user ?? "",
+        coordinator: config.coordinator ?? "",
+        kam: config.kam ?? "",
+        kam_lider: config.kam_lider ?? "",
+        market: config.market ?? "",
         quota: config.quota?.toString() ?? "",
         payment_discount: config.payment_discount?.toString() ?? "",
         payment_condition_code: config.payment_condition_code ?? "",
@@ -65,10 +93,23 @@ const toNonZeroNumberOrNull = (value: string) => {
 export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
+  // Todos los usuarios del proyecto, no solo los asociados al cliente.
+  const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   useEffect(() => {
     setForm(toForm(config));
   }, [config]);
+
+  const userOptions = useMemo(
+    () =>
+      users
+        .filter((user) => user.email)
+        .map((user) => ({
+          value: user.email,
+          label: `${user.user_name} - ${user.email}`
+        })),
+    [users]
+  );
 
   // Solo se envía lo que cambió respecto a la configuración actual.
   const buildBody = (): IUpdateMarketAdminClientConfigBody => {
@@ -88,6 +129,10 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
       body.receives_partials = toNonZeroNumberOrNull(form.receives_partials);
     if (form.lots_greater_than !== current.lots_greater_than)
       body.lots_greater_than = toNonZeroNumberOrNull(form.lots_greater_than);
+    // Los datos del cliente se guardan tal cual; vacío se envía como null para limpiarlos.
+    CLIENT_DATA_KEYS.forEach((key) => {
+      if (form[key] !== current[key]) body[key] = form[key].trim() || null;
+    });
     return body;
   };
 
@@ -107,10 +152,56 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
   };
 
   return (
-    <div className="max-w-lg">
-      <p className="text-sm text-[#999999] mb-6">Ajustes financieros y operativos del cliente.</p>
+    <div>
+      {/* Ajustes datos del cliente */}
+      <p className="text-sm font-bold text-[#141414] mb-4">Ajustes datos del cliente</p>
 
-      <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
+        {/* Ejecutivo, Coordinador, KAM y KAM líder */}
+        {USER_SELECTS.map(({ key, label }) => (
+          <div key={key}>
+            <label className="text-xs font-bold text-[#141414] block mb-1.5">{label}</label>
+            <Select
+              showSearch
+              allowClear
+              size="large"
+              placeholder="Seleccione un usuario"
+              className="w-full [&_.ant-select-selector]:!rounded-lg [&_.ant-select-selector]:!border-[#DDDDDD] [&_.ant-select-selector]:!text-sm"
+              popupClassName="[&_.ant-select-item]:!text-sm"
+              value={form[key] || undefined}
+              options={userOptions}
+              loading={isLoadingUsers}
+              disabled={isLoading}
+              notFoundContent="Sin usuarios disponibles"
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(email?: string) => setForm((f) => ({ ...f, [key]: email ?? "" }))}
+            />
+          </div>
+        ))}
+
+        {/* Mercado */}
+        <div>
+          <label className="text-xs font-bold text-[#141414] block mb-1.5">Mercado</label>
+          <input
+            type="text"
+            placeholder="Mercado del cliente"
+            maxLength={255}
+            disabled={isLoading}
+            value={form.market}
+            onChange={(e) => setForm((f) => ({ ...f, market: e.target.value }))}
+            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* Ajustes financieros y operativos */}
+      <p className="text-sm font-bold text-[#141414] mt-8 pt-8 border-t border-[#F0F0F0] mb-4">
+        Ajustes financieros y operativos del cliente
+      </p>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
         {/* Cupo de crédito */}
         <div>
           <label className="text-xs font-bold text-[#141414] block mb-1.5">Cupo de crédito</label>
@@ -236,7 +327,7 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
         </div>
 
         {/* Save button */}
-        <div className="flex justify-end pt-2">
+        <div className="col-span-full flex justify-end pt-2">
           <PrincipalButton
             onClick={handleSave}
             disabled={!isDirty || isSaving || isLoading}

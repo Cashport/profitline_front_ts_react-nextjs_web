@@ -348,11 +348,17 @@ export interface IUseMarketAdminClientsParams {
   search?: string; // busca en client_name y client_id (NIT)
   status?: 1 | 0; // 1 → activo, 0 → inactivo
   linea?: string; // business unit, ej. "Institucional"
+  // Responsables: emails tal como se guardan en el cliente; viajan separados por coma
+  asigned_user?: string[]; // Ejecutivo; el backend lo escribe con una sola "s"
+  coordinator?: string[];
+  kam?: string[];
+  kam_lider?: string[];
 }
 
 // GET /clients — item del listado
 export interface IMarketAdminClient {
-  client_id: string; // NIT — también es el id de ruta
+  client_id: string; // id de ruta de /clients/:client_id/... (no es el NIT)
+  nit: string;
   client_name: string;
   city: string;
   is_active: 1 | 0;
@@ -390,6 +396,12 @@ export interface IMarketAdminClientDetail {
 export interface IMarketAdminClientsBatchBody {
   client_ids: string[];
   action: "activate" | "inactivate";
+}
+
+// POST /clients/config/massive-update
+export interface IMarketAdminClientsMassiveUpdateResponse {
+  updated: number;
+  not_found: string[]; // NIT del archivo que no existen
 }
 
 // GET /clients/:client_id/addresses — la de code_address "00" es la principal
@@ -451,6 +463,12 @@ export interface IMarketAdminClientConfig {
   // client_marketplace.receives_partials es VARCHAR(255): puede llegar como string o número.
   receives_partials: string | number | null;
   lots_greater_than: number | null;
+  // Datos del cliente: emails de los responsables y mercado, se guardan tal cual (null los limpia).
+  asigned_user: string | null; // email del Ejecutivo; el backend lo escribe con una sola "s"
+  coordinator: string | null;
+  kam: string | null;
+  kam_lider: string | null;
+  market: string | null;
 }
 
 export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
