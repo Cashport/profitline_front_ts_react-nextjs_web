@@ -12,6 +12,7 @@ export const getUserPermissions = async (): Promise<IUserPermissions> => {
         data: {
           permissions: [],
           id_user: 0,
+          userName: "",
           preferences: {
             currency: "",
             id: ""
