@@ -27,6 +27,7 @@ export const ORDEN_EST: EstadoKey[] = [
   "compensada",
   "pagada",
   "conciliado",
+  "abono",
   "novedad",
   "sin_conciliar",
   "saldo",
@@ -66,6 +67,13 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     chip: "idle",
     chipTxt: "Esperando pago",
     corta: "Esperando pago del cliente"
+  },
+  abono: {
+    nom: "Abono",
+    bg: "bg-wallet-conc",
+    chip: "idle",
+    chipTxt: "Abono",
+    corta: "Pago parcial aplicado; queda saldo pendiente"
   },
   novedad: {
     nom: "Con novedad",
