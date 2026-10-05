@@ -12,6 +12,7 @@ export type EstadoKey =
   | "compensada"
   | "pagada"
   | "conciliado"
+  | "abono"
   | "novedad"
   | "sin_conciliar"
   | "saldo"

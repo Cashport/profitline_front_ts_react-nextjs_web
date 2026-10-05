@@ -53,6 +53,7 @@ export const TRAMO_BUCKETS: AgingBucket[] = [
  */
 const ESTADO_BY_STATUS_KEY: Record<string, EstadoKey> = {
   CONCILIADO: "conciliado",
+  ABONO: "abono",
   CON_NOVEDAD: "novedad",
   SIN_CONCILIAR: "sin_conciliar",
   SALDO: "saldo",

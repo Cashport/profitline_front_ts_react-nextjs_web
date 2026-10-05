@@ -112,6 +112,7 @@ export const WALLET_SUMMARY: IWalletSummary = {
     compensada: 2.12 * MM,
     pagada: 3.04 * MM,
     conciliado: 34.88 * MM,
+    abono: 0,
     novedad: 4.37 * MM,
     sin_conciliar: 6.85 * MM,
     saldo: 0,
@@ -317,6 +318,7 @@ const FACTURA_PROM: Record<EstadoKey, number> = {
   compensada: 38 * M,
   pagada: 52 * M,
   conciliado: 96 * M,
+  abono: 0,
   novedad: 44 * M,
   sin_conciliar: 28 * M,
   saldo: 20 * M,
@@ -331,6 +333,7 @@ const GESTION_EST: Record<EstadoKey, number | null> = {
   compensada: 5,
   pagada: 6,
   conciliado: 4,
+  abono: 0,
   novedad: 0, // lo define cada novedad
   sin_conciliar: null,
   saldo: 9,

@@ -12,6 +12,7 @@ const emptySegments = (): WalletSegments => ({
   compensada: 0,
   pagada: 0,
   conciliado: 0,
+  abono: 0,
   novedad: 0,
   sin_conciliar: 0,
   saldo: 0,
