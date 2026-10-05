@@ -37,6 +37,7 @@ export const AGING_LABELS: Record<AgingBucket, string> = {
  */
 export const STATUS_COLORS: Record<string, string> = {
   CONCILIADO: "#0085FF",
+  ABONO: "#0085FF",
   CON_NOVEDAD: "#FF6B00",
   SIN_CONCILIAR: "#969696",
   SALDO: "#3D3D3D",
