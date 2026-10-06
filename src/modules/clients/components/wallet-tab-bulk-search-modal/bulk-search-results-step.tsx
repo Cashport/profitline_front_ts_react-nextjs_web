@@ -7,17 +7,20 @@ import PrincipalButton from "@/components/atoms/buttons/principalButton/Principa
 import UiSearchInput from "@/components/ui/search-input";
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
-import { MOCK_STATUS_COLORS, RESULT_META } from "./bulk-search-mock-data";
-import { downloadCsv, formatMillions } from "./bulk-search-utils";
+import { IInvoiceBulkSearchSummary } from "@/types/invoices/IInvoices";
+import { RESULT_META } from "./bulk-search-mock-data";
+import { formatMillions } from "./bulk-search-utils";
 import { BulkResultKind, IBulkSearchRow } from "./types";
 
 interface Props {
   rows: IBulkSearchRow[];
+  summary: IInvoiceBulkSearchSummary;
   tab: BulkResultKind;
   query: string;
-  clientName?: string;
+  isDownloading: boolean;
   onTabChange: (tab: BulkResultKind) => void;
   onQueryChange: (query: string) => void;
+  onDownload: () => void;
   onRestart: () => void;
   onContinue: () => void;
 }
@@ -34,27 +37,34 @@ const getDetail = (row: IBulkSearchRow) => {
   return "—";
 };
 
+// Días de vencimiento del servicio: > 0 ya venció, < 0 todavía no
+const formatDueDays = (days: number) => {
+  if (!days) return "Hoy";
+  const label = `${formatNumber(Math.abs(days))} ${Math.abs(days) === 1 ? "día" : "días"}`;
+  return days > 0 ? `Hace ${label}` : `En ${label}`;
+};
+
 const BulkSearchResultsStep = ({
   rows,
+  summary,
   tab,
   query,
-  clientName,
+  isDownloading,
   onTabChange,
   onQueryChange,
+  onDownload,
   onRestart,
   onContinue
 }: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
-  const { counts, foundAmount } = useMemo(() => {
-    const totals: Record<BulkResultKind, number> = { found: 0, missing: 0, other: 0, dup: 0 };
-    let amount = 0;
-    rows.forEach((row) => {
-      totals[row.result]++;
-      if (row.result === "found") amount += row.amount ?? 0;
-    });
-    return { counts: totals, foundAmount: amount };
-  }, [rows]);
+  // IDs por resultado: las cuatro suman el total recibido
+  const counts: Record<BulkResultKind, number> = {
+    found: summary.found,
+    missing: summary.not_found,
+    other: summary.other_client,
+    dup: summary.duplicated
+  };
 
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toUpperCase();
@@ -64,25 +74,11 @@ const BulkSearchResultsStep = ({
   }, [rows, tab, query]);
 
   const cardMeta: Record<BulkResultKind, string> = {
-    found: `${formatMillions(foundAmount)} pendiente`,
+    found: `${formatMillions(summary.found_pending_amount)} pendiente`,
     missing: "No existen en Cashport",
-    other: "Pertenecen a otro NIT",
+    other: "Pertenecen a otro cliente",
     dup: "Repetidas en tu archivo"
   };
-
-  const handleDownload = () =>
-    downloadCsv(
-      "busqueda_masiva_resultados.csv",
-      ["ID factura", "Resultado", "Estado", "Cliente", "Pendiente", "Días vencimiento"],
-      rows.map((row) => [
-        row.id,
-        RESULT_META[row.result].label,
-        row.status ?? "",
-        row.result === "found" ? clientName ?? "" : row.otherClient ?? "",
-        row.amount ?? "",
-        row.dueDays ?? ""
-      ])
-    );
 
   const columns: ColumnsType<IBulkSearchRow> = [
     {
@@ -117,7 +113,7 @@ const BulkSearchResultsStep = ({
           {row.status && (
             <span
               className="h-1.5 w-1.5 flex-none rounded-full"
-              style={{ backgroundColor: MOCK_STATUS_COLORS[row.status] }}
+              style={{ backgroundColor: row.statusColor }}
             />
           )}
           <span className="truncate">{getDetail(row)}</span>
@@ -139,10 +135,10 @@ const BulkSearchResultsStep = ({
       title: "Vence",
       dataIndex: "dueDays",
       align: "right",
-      width: 90,
+      width: 110,
       render: (days?: number) =>
         days !== undefined && (
-          <span className="whitespace-nowrap text-muted-foreground">{days} días</span>
+          <span className="whitespace-nowrap text-muted-foreground">{formatDueDays(days)}</span>
         )
     }
   ];
@@ -193,7 +189,12 @@ const BulkSearchResultsStep = ({
               ? `Mostrando ${VISIBLE_ROWS} de ${formatNumber(filteredRows.length)} · el Excel trae todo`
               : `${formatNumber(filteredRows.length)} registros`}
           </span>
-          <Button size="large" icon={<DownloadSimple size={14} />} onClick={handleDownload}>
+          <Button
+            size="large"
+            icon={<DownloadSimple size={14} />}
+            loading={isDownloading}
+            onClick={onDownload}
+          >
             Descargar Excel
           </Button>
         </div>
@@ -217,12 +218,12 @@ const BulkSearchResultsStep = ({
         </Button>
         <div className="flex-1" />
         <PrincipalButton
-          disabled={!counts.found}
+          disabled={!summary.found_invoices}
           onClick={onContinue}
           icon={<ArrowRight size={14} />}
           iconPosition="end"
         >
-          Continuar con {formatNumber(counts.found)} encontradas
+          Continuar con {formatNumber(summary.found_invoices)} encontradas
         </PrincipalButton>
       </footer>
     </>

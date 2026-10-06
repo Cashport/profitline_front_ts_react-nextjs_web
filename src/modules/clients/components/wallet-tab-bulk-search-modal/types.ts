@@ -16,7 +16,9 @@ export interface IBulkSearchRow {
   result: BulkResultKind;
   /** Sólo en las encontradas. */
   status?: string;
+  statusColor?: string;
   amount?: number;
+  /** > 0 vencida, < 0 días para vencer. */
   dueDays?: number;
   /** Sólo en las de otro cliente. */
   otherClient?: string;
@@ -24,7 +26,9 @@ export interface IBulkSearchRow {
 
 export interface IBulkSearchFile {
   name: string;
-  ids: string[];
+  file: File;
+  /** Sólo en .csv/.txt, para mostrar cuántos trae: el Excel lo lee el backend. */
+  ids?: string[];
 }
 
 export interface IBulkActionConfig {

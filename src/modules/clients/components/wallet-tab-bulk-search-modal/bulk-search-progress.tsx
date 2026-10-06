@@ -5,13 +5,12 @@ import { cn } from "@/utils/utils";
 
 interface Props {
   title: string;
-  /** De 0 a 100. */
   progress: number;
-  /** Pasos que se van completando a medida que avanza el progreso. */
   stepLabels: string[];
+  footnote: string;
 }
 
-const BulkSearchProgress = ({ title, progress, stepLabels }: Props) => {
+const BulkSearchProgress = ({ title, progress, stepLabels, footnote }: Props) => {
   const isComplete = progress >= 100;
   const current = Math.min(stepLabels.length - 1, Math.floor(progress / (100 / stepLabels.length)));
 
@@ -59,9 +58,7 @@ const BulkSearchProgress = ({ title, progress, stepLabels }: Props) => {
           })}
         </ul>
 
-        <span className="text-[11px] text-[#8a8a8a]">
-          Puedes cerrar esta ventana; te avisaremos cuando termine.
-        </span>
+        <span className="text-[11px] text-[#8a8a8a]">{footnote}</span>
       </div>
     </div>
   );

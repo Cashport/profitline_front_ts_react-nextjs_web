@@ -3,16 +3,15 @@ import { Button, Input, Typography, Upload } from "antd";
 import { UploadSimple, X } from "phosphor-react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
-import { cn, formatNumber } from "@/utils/utils";
-import { sampleIds } from "./bulk-search-mock-data";
-import { MAX_BULK_IDS, downloadCsv, parseIds } from "./bulk-search-utils";
+import { formatNumber } from "@/utils/utils";
+import { downloadCsv, parseIds } from "./bulk-search-utils";
 import { IBulkSearchFile } from "./types";
 
 interface Props {
   text: string;
   file: IBulkSearchFile | null;
-  /** IDs del archivo o, si no hay archivo, del texto pegado. */
-  ids: string[];
+  /** IDs del archivo o, si no hay archivo, del texto pegado. Sin definir si es un Excel. */
+  ids?: string[];
   onTextChange: (text: string) => void;
   onFileChange: (file: IBulkSearchFile | null) => void;
   onCancel: () => void;
@@ -31,14 +30,14 @@ const BulkSearchInputStep = ({
   onCancel,
   onSearch
 }: Props) => {
-  const repeated = useMemo(() => ids.length - new Set(ids).size, [ids]);
-  const isOverLimit = ids.length > MAX_BULK_IDS;
-  const isInvalid = !ids.length || isOverLimit;
+  const repeated = useMemo(() => (ids ? ids.length - new Set(ids).size : 0), [ids]);
+  // Del Excel no se sabe cuántos trae hasta buscar
+  const isInvalid = ids !== undefined && !ids.length;
 
-  const summary = !ids.length
-    ? "Sin identificadores todavía"
-    : isOverLimit
-      ? `${formatNumber(ids.length)} registros · el máximo es ${formatNumber(MAX_BULK_IDS)} por búsqueda`
+  const summary = !ids
+    ? "Excel listo para buscar"
+    : !ids.length
+      ? "Sin identificadores todavía"
       : `${formatNumber(ids.length)} identificadores${repeated ? ` · ${formatNumber(repeated)} repetidos` : ""}`;
 
   const handleBeforeUpload = (selectedFile: File) => {
@@ -46,14 +45,15 @@ const BulkSearchInputStep = ({
       selectedFile.text().then((content) =>
         onFileChange({
           name: selectedFile.name,
+          file: selectedFile,
           ids: parseIds(content).filter((id) => !TEMPLATE_HEADER_TOKENS.includes(id))
         })
       );
     } else {
-      // Mock: el Excel todavía no se lee, se simulan 30.000 registros
-      onFileChange({ name: selectedFile.name, ids: sampleIds(MAX_BULK_IDS) });
+      // El Excel lo lee el backend al buscar
+      onFileChange({ name: selectedFile.name, file: selectedFile });
     }
-    // Sólo se lee el archivo, no se sube
+    // No se sube aquí: el archivo se envía al buscar
     return Upload.LIST_IGNORE;
   };
 
@@ -91,7 +91,7 @@ const BulkSearchInputStep = ({
                 <span className="min-w-0">
                   <span className="block truncate text-[13px] font-medium">{file.name}</span>
                   <span className="block text-[11px] text-[#8a8a8a]">
-                    {formatNumber(file.ids.length)} registros
+                    {file.ids ? `${formatNumber(file.ids.length)} registros` : "Se lee al buscar"}
                   </span>
                 </span>
                 <Button
@@ -104,7 +104,7 @@ const BulkSearchInputStep = ({
             </div>
           ) : (
             <Upload.Dragger
-              accept=".csv,.txt,.xlsx,.xls"
+              accept=".csv,.txt,.xlsx"
               showUploadList={false}
               beforeUpload={handleBeforeUpload}
               className="flex min-h-[200px] flex-1 flex-col"
@@ -133,34 +133,17 @@ const BulkSearchInputStep = ({
             >
               Descargar plantilla
             </Typography.Link>
-            {/* Mock: atajo para probar el flujo; se quita al conectar el servicio */}
-            <Typography.Link
-              underline
-              className="!text-[11px]"
-              onClick={() =>
-                onFileChange({ name: "facturas_ejemplo.xlsx", ids: sampleIds(MAX_BULK_IDS) })
-              }
-            >
-              Probar con {formatNumber(MAX_BULK_IDS)} registros de ejemplo
-            </Typography.Link>
           </div>
         </div>
       </div>
 
       <footer className="flex flex-none items-center gap-2.5 border-t border-[#ececec] px-[22px] py-3.5">
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate text-xs",
-            isOverLimit ? "text-[#c4321c]" : "text-muted-foreground"
-          )}
-        >
-          {summary}
-        </span>
+        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{summary}</span>
         <Button type="text" size="large" onClick={onCancel}>
           Cancelar
         </Button>
         <PrincipalButton disabled={isInvalid} onClick={onSearch}>
-          {isInvalid ? "Buscar facturas" : `Buscar ${formatNumber(ids.length)} facturas`}
+          {ids?.length ? `Buscar ${formatNumber(ids.length)} facturas` : "Buscar facturas"}
         </PrincipalButton>
       </footer>
     </>

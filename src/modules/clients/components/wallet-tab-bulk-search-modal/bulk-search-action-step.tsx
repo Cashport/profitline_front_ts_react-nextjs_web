@@ -7,8 +7,7 @@ import {
   BULK_ACTIONS,
   MOCK_NEW_STATUSES,
   MOCK_NOVELTY_TYPES,
-  MOCK_PAYMENTS,
-  MOCK_STATUS_COLORS
+  MOCK_PAYMENTS
 } from "./bulk-search-mock-data";
 import { computePaymentCoverage, formatMillions } from "./bulk-search-utils";
 import { BulkPaymentOrder, IBulkActionConfig, IBulkSearchRow } from "./types";
@@ -39,12 +38,16 @@ const BulkSearchActionStep = ({
   onBack,
   onRun
 }: Props) => {
-  const countByStatus = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // Estados de las encontradas en el orden en que aparecen, con su color y cuántas hay
+  const statuses = useMemo(() => {
+    const byStatus = new Map<string, { color?: string; count: number }>();
     foundRows.forEach((row) => {
-      if (row.status) counts[row.status] = (counts[row.status] ?? 0) + 1;
+      if (!row.status) return;
+      const item = byStatus.get(row.status);
+      if (item) item.count++;
+      else byStatus.set(row.status, { color: row.statusColor, count: 1 });
     });
-    return counts;
+    return Array.from(byStatus, ([name, item]) => ({ name, ...item }));
   }, [foundRows]);
 
   const scopedAmount = useMemo(
@@ -83,30 +86,25 @@ const BulkSearchActionStep = ({
             </span>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {Object.keys(MOCK_STATUS_COLORS)
-              .filter((status) => countByStatus[status])
-              .map((status) => (
-                <Checkbox
-                  key={status}
-                  checked={!!config.scope[status]}
-                  onChange={(event) =>
-                    onConfigChange({ scope: { ...config.scope, [status]: event.target.checked } })
-                  }
-                  className={cn(
-                    "!flex h-[30px] !items-center whitespace-nowrap rounded-md border bg-white !px-2.5 !text-xs font-medium",
-                    config.scope[status] ? "border-foreground" : "border-[#e3e3e3]"
-                  )}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span
-                      className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: MOCK_STATUS_COLORS[status] }}
-                    />
-                    {status}
-                    <span className="text-[#8a8a8a]">{formatNumber(countByStatus[status])}</span>
-                  </span>
-                </Checkbox>
-              ))}
+            {statuses.map(({ name, color, count }) => (
+              <Checkbox
+                key={name}
+                checked={!!config.scope[name]}
+                onChange={(event) =>
+                  onConfigChange({ scope: { ...config.scope, [name]: event.target.checked } })
+                }
+                className={cn(
+                  "!flex h-[30px] !items-center whitespace-nowrap rounded-md border bg-white !px-2.5 !text-xs font-medium",
+                  config.scope[name] ? "border-foreground" : "border-[#e3e3e3]"
+                )}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+                  {name}
+                  <span className="text-[#8a8a8a]">{formatNumber(count)}</span>
+                </span>
+              </Checkbox>
+            ))}
           </div>
         </div>
 

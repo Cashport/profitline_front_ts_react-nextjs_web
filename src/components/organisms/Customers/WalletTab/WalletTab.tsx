@@ -364,6 +364,7 @@ export const WalletTab = () => {
       <WalletTabBulkSearchModal
         isOpen={isBulkSearchOpen}
         onClose={() => setIsBulkSearchOpen(false)}
+        clientUUID={portfolioData?.data_wallet.uuid || ""}
         clientName={portfolioData?.data_wallet.client_name}
       />
       <ModalAgreementDetail
