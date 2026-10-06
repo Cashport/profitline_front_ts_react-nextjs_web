@@ -23,6 +23,7 @@ import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
 import WalletTabChangeStatusModal from "@/modules/clients/components/wallet-tab-change-status-modal";
 import WalletTabBulkSearchModal from "@/modules/clients/components/wallet-tab-bulk-search-modal";
+import { BulkActionKey } from "@/modules/clients/components/wallet-tab-bulk-search-modal/types";
 import PaymentAgreementModal from "@/modules/clients/components/wallet-tab-payment-agreement-modal";
 import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalActionDiscountCredit/ModalActionDiscountCredit";
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
@@ -178,6 +179,21 @@ export const WalletTab = () => {
           `Error al añadir facturas(s) a la tabla de aplicación de pagos ${error.message}`
         );
       }
+    }
+  };
+
+  const handleBulkActionDone = (action: BulkActionKey) => {
+    if (action === "pago") {
+      mutateApplyTabData();
+      return;
+    }
+    mutate();
+    // Igual que RegisterNews: después de registrar la novedad se ofrece notificarla por correo
+    if (action === "novedad") {
+      setIsBulkSearchOpen(false);
+      openModal("sendEmail", {
+        event_id: "1"
+      });
     }
   };
 
@@ -366,6 +382,7 @@ export const WalletTab = () => {
         onClose={() => setIsBulkSearchOpen(false)}
         clientUUID={portfolioData?.data_wallet.uuid || ""}
         clientName={portfolioData?.data_wallet.client_name}
+        onActionDone={handleBulkActionDone}
       />
       <ModalAgreementDetail
         isModalPaymentAgreementOpen={isModalPaymentAgreementOpen}

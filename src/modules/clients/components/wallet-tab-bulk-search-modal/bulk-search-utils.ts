@@ -1,7 +1,6 @@
 import { formatNumber } from "@/utils/utils";
 import { IInvoiceBulkSearchData } from "@/types/invoices/IInvoices";
-import { PAID_STATUS } from "./bulk-search-mock-data";
-import { BulkPaymentOrder, IBulkPaymentCoverage, IBulkSearchRow } from "./types";
+import { IBulkSearchRow } from "./types";
 
 // IDs separados por saltos de línea, espacios, comas o punto y coma (p. ej. pegados desde Excel)
 export const parseIds = (value: string) =>
@@ -17,6 +16,7 @@ export const toBulkSearchRows = (data: IInvoiceBulkSearchData): IBulkSearchRow[]
     ...data.found.map((invoice) => ({
       id: invoice.id_erp,
       result: "found" as const,
+      invoiceId: invoice.id,
       status: invoice.status,
       statusColor: invoice.status_color,
       amount: invoice.current_value,
@@ -61,40 +61,4 @@ export const downloadCsv = (fileName: string, header: string[], rows: (string | 
   link.click();
   document.body.removeChild(link);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-};
-
-// Cuántas facturas pendientes cubre el pago, aplicándolo en el orden elegido
-export const computePaymentCoverage = (
-  rows: IBulkSearchRow[],
-  payment: number,
-  order: BulkPaymentOrder
-): IBulkPaymentCoverage => {
-  const pendingRows = rows.filter((row) => row.status !== PAID_STATUS);
-  const sorted = [...pendingRows].sort((a, b) =>
-    order === "antiguedad" ? (b.dueDays ?? 0) - (a.dueDays ?? 0) : (a.amount ?? 0) - (b.amount ?? 0)
-  );
-
-  let left = payment;
-  let covered = 0;
-  let partial = false;
-  for (const row of sorted) {
-    if (left <= 0) break;
-    const amount = row.amount ?? 0;
-    if (amount <= left) {
-      left -= amount;
-      covered++;
-    } else {
-      partial = true;
-      left = 0;
-    }
-  }
-
-  return {
-    covered,
-    partial,
-    left,
-    total: pendingRows.reduce((acc, row) => acc + (row.amount ?? 0), 0),
-    pending: pendingRows.length,
-    payment
-  };
 };

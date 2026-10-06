@@ -1,9 +1,6 @@
-import { BulkResultKind, IBulkAction, IBulkPayment } from "./types";
+import { BulkResultKind, IBulkAction } from "./types";
 
-// La búsqueda ya usa el servicio; la acción masiva sigue con datos de ejemplo
-// mientras no exista su endpoint
-
-/** Estado que la acción deja fuera por defecto y que no cuenta como pendiente al aplicar pagos. */
+/** Estado que la acción deja fuera por defecto. */
 export const PAID_STATUS = "Pagada";
 
 export const RESULT_META: Record<
@@ -44,7 +41,7 @@ export const BULK_ACTIONS: IBulkAction[] = [
   {
     key: "pago",
     label: "Aplicar pago",
-    description: "Cruza un pago recibido contra las facturas",
+    description: "Las lleva a la tabla de aplicación de pagos",
     verb: "Aplicar pago a"
   },
   {
@@ -62,23 +59,7 @@ export const BULK_ACTIONS: IBulkAction[] = [
   {
     key: "estado_cta",
     label: "Enviar estado de cuenta",
-    description: "Envía el detalle al contacto de cartera",
+    description: "Por correo, WhatsApp o descarga",
     verb: "Enviar estado de cuenta de"
   }
-];
-
-export const MOCK_NEW_STATUSES = [
-  "Radicada",
-  "En revisión",
-  "Aprobada para pago",
-  "Glosada",
-  "Castigada"
-];
-
-export const MOCK_NOVELTY_TYPES = ["Glosa", "Devolución", "Faltante", "Diferencia de precio"];
-
-export const MOCK_PAYMENTS: IBulkPayment[] = [
-  { id: "PG-88121", bank: "Bancolombia", date: "Recibido 22/09/2026", amount: 4850000000 },
-  { id: "PG-88107", bank: "Davivienda", date: "Recibido 19/09/2026", amount: 1275400000 },
-  { id: "PG-88094", bank: "BBVA", date: "Recibido 15/09/2026", amount: 312900000 }
 ];

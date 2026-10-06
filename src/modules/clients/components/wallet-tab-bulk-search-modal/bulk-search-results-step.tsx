@@ -8,7 +8,7 @@ import UiSearchInput from "@/components/ui/search-input";
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
 import { IInvoiceBulkSearchSummary } from "@/types/invoices/IInvoices";
-import { RESULT_META } from "./bulk-search-mock-data";
+import { RESULT_META } from "./bulk-search-constants";
 import { formatMillions } from "./bulk-search-utils";
 import { BulkResultKind, IBulkSearchRow } from "./types";
 

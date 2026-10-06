@@ -1,32 +1,32 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
+import axios from "axios";
 import { Button, ConfigProvider, Modal, Steps, message } from "antd";
 import { Check, X } from "phosphor-react";
 
+import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
 import {
   downloadInvoicesBulkSearch,
   searchInvoicesBulk
 } from "@/services/invoices/invoiceBulkSearch";
+import { getDigitalRecordFormInfo } from "@/services/accountingAdjustment/accountingAdjustment";
+import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import { IInvoiceBulkSearchSummary, InvoiceBulkSearchInput } from "@/types/invoices/IInvoices";
 import BulkSearchActionStep from "./bulk-search-action-step";
 import BulkSearchDoneStep from "./bulk-search-done-step";
 import BulkSearchInputStep from "./bulk-search-input-step";
 import BulkSearchProgress from "./bulk-search-progress";
 import BulkSearchResultsStep from "./bulk-search-results-step";
-import {
-  BULK_ACTIONS,
-  MOCK_NEW_STATUSES,
-  MOCK_NOVELTY_TYPES,
-  MOCK_PAYMENTS,
-  PAID_STATUS
-} from "./bulk-search-mock-data";
+import { hasActiveIncidents, runBulkAction } from "./bulk-search-actions";
+import { BULK_ACTIONS, PAID_STATUS } from "./bulk-search-constants";
 import { parseIds, toBulkSearchRows } from "./bulk-search-utils";
 import {
+  BulkActionKey,
   BulkBusyKind,
   BulkResultKind,
   BulkSearchStep,
   IBulkActionConfig,
-  IBulkDoneSummary,
   IBulkSearchFile,
   IBulkSearchRow
 } from "./types";
@@ -36,31 +36,42 @@ interface Props {
   onClose: () => void;
   clientUUID: string;
   clientName?: string;
+  /** Al terminar una acción, para refrescar lo que cambió. */
+  onActionDone?: (action: BulkActionKey) => void;
 }
 
 const STEP_TITLES = ["Cargar", "Resultados", "Acción"];
 
-// Duración simulada de la acción, que todavía no tiene servicio
-const MOCK_ACTION_MS = 2400;
-
-// La búsqueda no informa su avance: la barra se acerca a este valor y el 100 % llega con la respuesta
-const SEARCH_PROGRESS_CAP = 90;
+// Ni la búsqueda ni las acciones informan su avance: la barra se acerca a este valor y el 100 %
+// llega con la respuesta
+const PROGRESS_CAP = 90;
 
 const INITIAL_ACTION_CONFIG: IBulkActionConfig = {
   // Se arma con los estados encontrados al terminar cada búsqueda
   scope: {},
   action: "estado",
-  newStatus: MOCK_NEW_STATUSES[0],
-  paymentId: MOCK_PAYMENTS[0].id,
-  order: "antiguedad",
-  noveltyType: MOCK_NOVELTY_TYPES[0],
-  comment: ""
+  noveltyAmount: null,
+  radicationDate: null,
+  evidence: [],
+  comment: "",
+  statementMethod: "correo",
+  recipients: []
 };
 
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof Error && error.message ? error.message : fallback;
+const getErrorMessage = (error: unknown, fallback: string) => {
+  // `instance` (p. ej. al llevar facturas a la tabla de aplicación) no traduce el error del backend
+  if (axios.isAxiosError(error)) return error.response?.data?.message || fallback;
+  return error instanceof Error && error.message ? error.message : fallback;
+};
 
-const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: Props) => {
+const WalletTabBulkSearchModal = ({
+  isOpen,
+  onClose,
+  clientUUID,
+  clientName,
+  onActionDone
+}: Props) => {
+  const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const [step, setStep] = useState<BulkSearchStep>("input");
   const [busyKind, setBusyKind] = useState<BulkBusyKind>("search");
   const [progress, setProgress] = useState(0);
@@ -74,8 +85,13 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
   const [resultTab, setResultTab] = useState<BulkResultKind>("found");
   const [resultQuery, setResultQuery] = useState("");
   const [actionConfig, setActionConfig] = useState<IBulkActionConfig>(INITIAL_ACTION_CONFIG);
-  const [doneSummary, setDoneSummary] = useState<IBulkDoneSummary>({ ok: 0, errors: 0 });
+  // Resumen de la acción: llega con su respuesta
+  const [doneMessage, setDoneMessage] = useState<string | null>(null);
+  // Registrar novedad: alguna factura ya tiene una novedad abierta
+  const [isIncidentConflict, setIsIncidentConflict] = useState(false);
   const searchAbortRef = useRef<AbortController | null>(null);
+  // Cambia al cerrar: la respuesta de una acción lanzada antes ya no toca el modal
+  const actionRunRef = useRef(0);
   const [messageApi, contextHolder] = message.useMessage();
 
   // Sin definir cuando el archivo es un Excel: lo lee el backend
@@ -88,14 +104,28 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
   const selectedAction =
     BULK_ACTIONS.find((item) => item.key === actionConfig.action) ?? BULK_ACTIONS[0];
 
-  // Mientras la búsqueda responde la barra avanza hacia el tope; con la respuesta se completa
-  // y pasa a los resultados
-  useEffect(() => {
-    if (step !== "busy" || busyKind !== "search") return;
+  // Contactos y archivos del estado de cuenta: sólo se piden si se elige esa acción
+  const statement = useSWR(
+    actionConfig.action === "estado_cta"
+      ? ["bulk-search-digital-record", projectId, clientUUID]
+      : null,
+    () => getDigitalRecordFormInfo(projectId, clientUUID),
+    { revalidateOnFocus: false }
+  );
 
-    if (summary) {
+  // Mientras el proceso responde la barra avanza hacia el tope; con la respuesta se completa
+  // y pasa a los resultados o al resumen de la acción
+  useEffect(() => {
+    if (step !== "busy") return;
+
+    const isFinished = busyKind === "search" ? !!summary : doneMessage !== null;
+    if (isFinished) {
       setProgress(100);
       const finishTimeout = setTimeout(() => {
+        if (busyKind === "action") {
+          setStep("done");
+          return;
+        }
         setResultTab("found");
         setResultQuery("");
         setStep("results");
@@ -104,32 +134,11 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
     }
 
     const interval = setInterval(
-      () => setProgress((prev) => prev + (SEARCH_PROGRESS_CAP - prev) * 0.03),
+      () => setProgress((prev) => prev + (PROGRESS_CAP - prev) * 0.03),
       60
     );
     return () => clearInterval(interval);
-  }, [step, busyKind, summary]);
-
-  // Progreso simulado de la acción: al llegar al 100 % pasa al resumen
-  useEffect(() => {
-    if (step !== "busy" || busyKind !== "action") return;
-
-    const startedAt = Date.now();
-    let finishTimeout: ReturnType<typeof setTimeout> | undefined;
-    const interval = setInterval(() => {
-      const value = Math.min(100, ((Date.now() - startedAt) / MOCK_ACTION_MS) * 100);
-      setProgress(value);
-      if (value < 100) return;
-
-      clearInterval(interval);
-      finishTimeout = setTimeout(() => setStep("done"), 250);
-    }, 60);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(finishTimeout);
-    };
-  }, [step, busyKind]);
+  }, [step, busyKind, summary, doneMessage]);
 
   // Si el modal se desmonta con una búsqueda en curso, se cancela
   useEffect(() => () => searchAbortRef.current?.abort(), []);
@@ -188,21 +197,70 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
     }
   };
 
-  const handleRunAction = (count: number) => {
-    // Mock: alrededor del 0,4 % de las facturas falla
-    const errors = Math.round(count * 0.004);
-    setDoneSummary({ ok: count - errors, errors });
+  const handleRunAction = async (createNewIncident = false) => {
+    const runId = actionRunRef.current;
+    const config = actionConfig;
+    const invoiceIds = scopedRows.flatMap((row) => row.invoiceId ?? []);
+    setDoneMessage(null);
     startProcess("action");
+
+    try {
+      const result = await runBulkAction({
+        config,
+        invoiceIds,
+        contacts: statement.data?.usuarios ?? [],
+        clientUUID,
+        projectId,
+        createNewIncident
+      });
+      // También avisa si el modal se cerró mientras tanto
+      messageApi.success(result);
+      onActionDone?.(config.action);
+      if (runId !== actionRunRef.current) return;
+
+      setDoneMessage(result);
+      // Se limpia el formulario para que "Otra acción" no repita la misma por error
+      setActionConfig((prev) => ({
+        ...INITIAL_ACTION_CONFIG,
+        scope: prev.scope,
+        action: prev.action,
+        statementMethod: prev.statementMethod
+      }));
+    } catch (error) {
+      const isCurrentRun = runId === actionRunRef.current;
+      if (isCurrentRun) setStep("action");
+      // Con el modal abierto se ofrece crear la novedad igual; si se cerró, sólo se avisa
+      if (
+        isCurrentRun &&
+        config.action === "novedad" &&
+        !createNewIncident &&
+        hasActiveIncidents(error)
+      ) {
+        setIsIncidentConflict(true);
+        return;
+      }
+      messageApi.error(getErrorMessage(error, `No se pudo ${selectedAction.label.toLowerCase()}.`));
+    }
   };
 
   const handleClose = () => {
-    // Cerrar a mitad de un proceso lo cancela; después de terminar se vuelve a empezar en Cargar.
-    // En los demás pasos se conserva todo para retomar donde se dejó.
-    if (step === "busy" || step === "done") {
-      searchAbortRef.current?.abort();
-      setStep("input");
-    }
+    // La búsqueda en curso se cancela; una acción sigue en el servidor y sólo avisa al terminar
+    searchAbortRef.current?.abort();
+    actionRunRef.current++;
     onClose();
+  };
+
+  // Cada apertura empieza de cero. Se limpia al terminar de cerrarse, para no ver el cambio de
+  // paso durante la animación
+  const resetModal = () => {
+    setStep("input");
+    setText("");
+    setFile(null);
+    setSearchInput(null);
+    setRows([]);
+    setSummary(null);
+    setActionConfig(INITIAL_ACTION_CONFIG);
+    setDoneMessage(null);
   };
 
   const stepIndex =
@@ -237,6 +295,17 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
     };
   });
 
+  // El estado de cuenta es del cliente: su progreso no habla de facturas
+  const isStatement = actionConfig.action === "estado_cta";
+  const isStatementDownload = actionConfig.statementMethod === "descargar";
+
+  const busyTitle =
+    busyKind === "search"
+      ? "Buscando facturas"
+      : isStatement
+        ? `${isStatementDownload ? "Descargando" : "Enviando"} estado de cuenta`
+        : `Procesando ${formatNumber(scopedRows.length)} facturas`;
+
   const busyLabels =
     busyKind === "search"
       ? [
@@ -245,12 +314,16 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
           "Cruzando con la cartera del cliente",
           "Preparando resultados"
         ]
-      : [
-          "Validando facturas",
-          `Aplicando ${selectedAction.label.toLowerCase()}`,
-          "Registrando en historial",
-          "Generando reporte"
-        ];
+      : isStatement
+        ? [
+            "Generando estado de cuenta",
+            isStatementDownload ? "Preparando archivos" : "Enviando a los destinatarios"
+          ]
+        : [
+            "Validando facturas",
+            `Aplicando ${selectedAction.label.toLowerCase()}`,
+            "Registrando en historial"
+          ];
 
   return (
     <>
@@ -258,6 +331,7 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
       <Modal
         open={isOpen}
         onCancel={handleClose}
+        afterClose={resetModal}
         footer={null}
         closeIcon={null}
         centered
@@ -313,11 +387,7 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
 
             {step === "busy" && (
               <BulkSearchProgress
-                title={
-                  busyKind === "search"
-                    ? "Buscando facturas"
-                    : `Procesando ${formatNumber(scopedRows.length)} facturas`
-                }
+                title={busyTitle}
                 progress={progress}
                 stepLabels={busyLabels}
                 footnote={
@@ -348,17 +418,20 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
                 foundRows={foundRows}
                 scopedRows={scopedRows}
                 config={actionConfig}
+                statementInfo={statement.data}
+                isStatementLoading={statement.isLoading}
+                hasStatementError={!!statement.error}
+                messageApi={messageApi}
                 onConfigChange={(patch) => setActionConfig((prev) => ({ ...prev, ...patch }))}
                 onBack={() => setStep("results")}
-                onRun={handleRunAction}
+                onRun={() => handleRunAction()}
               />
             )}
 
-            {step === "done" && (
+            {step === "done" && doneMessage !== null && (
               <BulkSearchDoneStep
                 action={selectedAction}
-                summary={doneSummary}
-                rows={scopedRows}
+                message={doneMessage}
                 onAnotherAction={() => setStep("action")}
                 onClose={handleClose}
               />
@@ -366,6 +439,17 @@ const WalletTabBulkSearchModal = ({ isOpen, onClose, clientUUID, clientName }: P
           </div>
         </ConfigProvider>
       </Modal>
+      <ModalConfirmAction
+        isOpen={isIncidentConflict}
+        onClose={() => setIsIncidentConflict(false)}
+        onOk={() => {
+          setIsIncidentConflict(false);
+          handleRunAction(true);
+        }}
+        title="Algunas facturas ya tienen novedades abiertas. ¿Qué deseas hacer con las novedades?"
+        okText="Crear novedad nueva"
+        cancelText="No crear nueva novedad"
+      />
     </>
   );
 };

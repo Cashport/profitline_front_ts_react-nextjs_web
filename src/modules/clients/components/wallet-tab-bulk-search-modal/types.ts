@@ -1,3 +1,5 @@
+import type { Dayjs } from "dayjs";
+
 export type BulkSearchStep = "input" | "busy" | "results" | "action" | "done";
 
 // Lo que está procesando la vista de progreso
@@ -7,13 +9,16 @@ export type BulkResultKind = "found" | "missing" | "other" | "dup";
 
 export type BulkActionKey = "estado" | "pago" | "novedad" | "radicar" | "estado_cta";
 
-export type BulkPaymentOrder = "antiguedad" | "menor";
+// Cómo se entrega el estado de cuenta
+export type BulkStatementMethod = "correo" | "whatsapp" | "descargar";
 
 export interface IBulkSearchRow {
   /** Único por fila: los duplicados comparten id. */
   key: number;
   id: string;
   result: BulkResultKind;
+  /** Sólo en las encontradas: id de la factura, el que reciben las acciones. */
+  invoiceId?: number;
   /** Sólo en las encontradas. */
   status?: string;
   statusColor?: string;
@@ -35,11 +40,23 @@ export interface IBulkActionConfig {
   /** Estados de factura incluidos en la acción. */
   scope: Record<string, boolean>;
   action: BulkActionKey;
-  newStatus: string;
-  paymentId: string;
-  order: BulkPaymentOrder;
-  noveltyType: string;
+  /** Cambiar estado: en minúsculas, como lo espera el servicio. */
+  newStatus?: string;
+  /** Registrar novedad. El monto va como texto, igual que lo recibe el servicio. */
+  motiveId?: number;
+  noveltyAmount: string | null;
+  /** Radicar facturas. */
+  radicationDate: Dayjs | null;
+  evidence: File[];
+  /** Cambiar estado, registrar novedad y radicar. */
   comment: string;
+  /** Enviar estado de cuenta. */
+  statementMethod: BulkStatementMethod;
+  /**
+   * Contactos elegidos (su contact_id) o destinos escritos a mano. Correo y WhatsApp comparten la
+   * lista, como en AccountStatementModal: al enviar se usa el correo o el teléfono de cada uno.
+   */
+  recipients: string[];
 }
 
 export interface IBulkAction {
@@ -48,27 +65,4 @@ export interface IBulkAction {
   description: string;
   /** Inicio del texto del botón: "Cambiar estado de 120 facturas". */
   verb: string;
-}
-
-export interface IBulkPayment {
-  id: string;
-  bank: string;
-  date: string;
-  amount: number;
-}
-
-export interface IBulkPaymentCoverage {
-  /** Facturas que el pago cubre completas. */
-  covered: number;
-  /** Si queda una factura cubierta a medias. */
-  partial: boolean;
-  left: number;
-  total: number;
-  pending: number;
-  payment: number;
-}
-
-export interface IBulkDoneSummary {
-  ok: number;
-  errors: number;
 }
