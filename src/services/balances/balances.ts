@@ -162,3 +162,36 @@ export const changeBalanceEligibility = async (
     throw error;
   }
 };
+
+export interface IInvoiceBalance {
+  id: number;
+  project_id: number;
+  client_id: string;
+  financial_record_id: number | null;
+  financial_discount_motive_id: number | null;
+  motive_name: string | null;
+  balance_status_id: number | null;
+  balance_status_code: string | null;
+  balance_status_name: string | null;
+  balance_status_color: string | null;
+  initial_value: number;
+  current_value: number;
+  is_legalized: number | null;
+  is_deleted: number;
+  id_erp: string | null;
+  comments: string | null;
+  created_at: string | null;
+}
+
+/**
+ * HU Galderma — "Ver Saldos": balances (`financial_record_id`) de una factura.
+ * Solo lectura, reutiliza la misma tabla `balances` que el módulo de saldos.
+ */
+export const getBalancesByFinancialRecord = async (
+  financialRecordId: number
+): Promise<GenericResponse<IInvoiceBalance[]>> => {
+  const response: GenericResponse<IInvoiceBalance[]> = await API.get(
+    `${config.API_HOST}/financial-discount/balance/financial-record/${financialRecordId}`
+  );
+  return response;
+};
