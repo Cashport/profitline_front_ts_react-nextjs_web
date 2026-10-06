@@ -225,7 +225,7 @@ export interface IUser {
   full_phone: string;
 }
 
-interface DigitalRecordResponse {
+export interface DigitalRecordResponse {
   usuarios: IUser[];
   asunto: string;
   attachments: IAttachments[];
