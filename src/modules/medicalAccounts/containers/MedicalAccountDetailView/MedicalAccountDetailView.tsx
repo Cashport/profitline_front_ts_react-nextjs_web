@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Popconfirm } from "antd";
+import { mutate as globalMutate } from "swr";
 import {
   ArrowLeft,
   Check,
@@ -21,6 +22,7 @@ import { MedicalAccountInfoPanel } from "../../components/MedicalAccountInfoPane
 import { MedicalAccountNovedades } from "../../components/MedicalAccountNovedades/MedicalAccountNovedades";
 import { MedicalAccountDocuments } from "../../components/MedicalAccountDocuments/MedicalAccountDocuments";
 import { MedicalAccountFacturas } from "../../components/MedicalAccountFacturas/MedicalAccountFacturas";
+import { MedicalAccountRadicado } from "../../components/MedicalAccountRadicado/MedicalAccountRadicado";
 import { MedicalAccountTimeline } from "../../components/MedicalAccountTimeline/MedicalAccountTimeline";
 import { ModalRadiateMedicalAccount } from "../../components/ModalRadiateMedicalAccount/ModalRadiateMedicalAccount";
 import { ModalUploadInvoice } from "../../components/ModalUploadInvoice/ModalUploadInvoice";
@@ -138,6 +140,16 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
       );
     },
     [mutate]
+  );
+
+  // Al radicar, además del detalle se actualiza el historial para que la
+  // sección de evidencia de radicación refleje la nueva evidencia.
+  const handleRadiateSuccess = useCallback(
+    (updated: IMedicalAccountUploadData) => {
+      handleDetailUpdate(updated);
+      globalMutate(`/medical-accounts/${accountId}/history`);
+    },
+    [accountId, handleDetailUpdate]
   );
 
   const handleSendToAudit = useCallback(async () => {
@@ -359,6 +371,9 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
           <MedicalAccountFacturas facturas={account.facturas} />
         )}
 
+        {/* Evidencia de radicación (solo cuando la cuenta ya fue radicada) */}
+        <MedicalAccountRadicado accountId={account.id} />
+
         {/* Status tracking timeline */}
         <div className="border-b border-gray-100">
           <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/40 px-6 py-3">
@@ -390,7 +405,7 @@ export function MedicalAccountDetailView({ accountId }: MedicalAccountDetailView
         isOpen={showRadiate}
         accountId={account.id}
         onClose={() => setShowRadiate(false)}
-        onSuccess={handleDetailUpdate}
+        onSuccess={handleRadiateSuccess}
       />
     </main>
   );

@@ -85,7 +85,7 @@ export function ModalUploadInvoice({
   };
 
   const handleOk = async () => {
-    if (!invoiceNumber.trim() || !pdfFile || !zipFile) return;
+    if (!invoiceNumber.trim() || !pdfFile) return;
 
     setIsLoading(true);
     try {
@@ -128,7 +128,7 @@ export function ModalUploadInvoice({
         <FooterButtons
           titleConfirm="Facturar"
           showLeftButton={false}
-          isConfirmDisabled={!invoiceNumber.trim() || !pdfFile || !zipFile}
+          isConfirmDisabled={!invoiceNumber.trim() || !pdfFile}
           isConfirmLoading={isLoading}
           onClose={handleClose}
           handleOk={handleOk}
@@ -138,7 +138,7 @@ export function ModalUploadInvoice({
     >
       <Flex vertical gap="1.25rem">
         <p className="-mt-2 text-sm text-gray-500">
-          Ingresa el número de factura y adjunta los archivos PDF y ZIP.
+          Ingresa el número de factura y adjunta el PDF. El ZIP es opcional.
         </p>
 
         <div>
@@ -170,7 +170,7 @@ export function ModalUploadInvoice({
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            ZIP de la factura <span className="text-red-500">*</span>
+            ZIP de la factura <span className="font-normal normal-case text-gray-400">(opcional)</span>
           </p>
           {zipFile ? (
             <FileChip file={zipFile} label="ZIP" onRemove={() => setZipFile(null)} />
