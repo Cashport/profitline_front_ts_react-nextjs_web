@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button, Checkbox, Dropdown, Table, TableProps, Tooltip, Typography } from "antd";
 import {
   CheckCircle,
+  Coins,
   DotsThreeVertical,
   Eye,
   Handshake,
@@ -15,6 +16,7 @@ import { useAppStore } from "@/lib/store/store";
 import { calculateDaysDifference, daysLeft, formatDate } from "@/utils/utils";
 
 import { ModalInvoiceClaims } from "@/components/molecules/modals/ModalInvoiceClaims/ModalInvoiceClaims";
+import { ModalInvoiceBalances } from "@/components/molecules/modals/ModalInvoiceBalances/ModalInvoiceBalances";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
@@ -50,6 +52,7 @@ export const InvoicesTable = ({
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [claimsInvoice, setClaimsInvoice] = useState<IInvoice | null>(null);
+  const [balancesInvoice, setBalancesInvoice] = useState<IInvoice | null>(null);
 
   useEffect(() => {
     if (selectedRows) {
@@ -345,6 +348,12 @@ export const InvoicesTable = ({
                   label: "Ver glosas",
                   icon: <ArrowsSplit size={16} />,
                   onClick: () => setClaimsInvoice(record)
+                },
+                {
+                  key: "balances",
+                  label: "Ver Saldos",
+                  icon: <Coins size={16} />,
+                  onClick: () => setBalancesInvoice(record)
                 }
               ]
             }}
@@ -398,6 +407,12 @@ export const InvoicesTable = ({
         isOpen={!!claimsInvoice}
         invoice={claimsInvoice}
         onClose={() => setClaimsInvoice(null)}
+      />
+
+      <ModalInvoiceBalances
+        isOpen={!!balancesInvoice}
+        invoice={balancesInvoice}
+        onClose={() => setBalancesInvoice(null)}
       />
     </>
   );

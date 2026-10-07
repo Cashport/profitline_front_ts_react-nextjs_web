@@ -519,7 +519,8 @@ const InvoiceDetailModal: FC<InvoiceDetailModalProps> = ({
                                 </div>
                               ) : null}
 
-                              {item.event_type_name === "Pago aplicado" ? (
+                              {item.event_type_name === "Pago aplicado" ||
+                              item.event_type_name === "Pago parcial" ? (
                                 <div>
                                   <div className={styles.icons}>
                                     <Envelope size={14} onClick={() => {}} />
