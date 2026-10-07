@@ -274,3 +274,30 @@ export const changeStatusUploadERP = async (paymentids: number[]) => {
     throw error;
   }
 };
+
+// HU payment_period: ajuste manual/masivo del periodo contable (formato YYYY-MM).
+// Permitido para pagos identificados y aplicados; el backend rechaza otros estados.
+interface IChangePaymentPeriodPayload {
+  payment_ids: number[];
+  payment_period: string;
+}
+
+export const changePaymentPeriod = async ({
+  payment_ids,
+  payment_period
+}: IChangePaymentPeriodPayload) => {
+  try {
+    const response: GenericResponse<{
+      updated: number;
+      payment_period: string;
+      project_id: number;
+    }> = await API.put(`${config.API_HOST}/bank/payment-period`, {
+      payment_ids,
+      payment_period
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el periodo contable de los pagos:", error);
+    throw error;
+  }
+};

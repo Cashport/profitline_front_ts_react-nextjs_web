@@ -23,6 +23,7 @@ import ModalActionsAssignClient from "../../components/modal-actions-assign-clie
 import ModalActionsSplitPayment from "../../components/modal-actions-split-payment";
 import ModalActionsChangeStatus from "../../components/modal-actions-change-status";
 import ModalActionsChangeErpId from "../../components/modal-actions-change-erp-id";
+import ModalActionsChangePeriod from "../../components/modal-actions-change-period";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
 import OptimizedSearchComponent from "@/components/atoms/inputs/OptimizedSearchComponent/OptimizedSearchComponent";
 import {
@@ -43,6 +44,7 @@ interface ActivePaymentsTabProps {
 
 const STATUS_ORDER = ["Sin identificar", "Pendiente ingreso a SAP", "Identificado", "Pago aplicado"];
 const PAGO_APLICADO_STATUS_ID = 4;
+const IDENTIFICADO_STATUS_ID = 1;
 
 export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
   const [selectedRows, setSelectedRows] = useState<ISingleBank[]>();
@@ -235,6 +237,7 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 selected !== 2 &&
                 selected !== 3 &&
                 selected !== 6 &&
+                selected !== 10 &&
                 selectedRows &&
                 selectedRows.length > 1
               ) {
@@ -247,6 +250,21 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
                 selectedRows?.some((row) => row.id_status === PAGO_APLICADO_STATUS_ID)
               ) {
                 showMessage("info", "No puedes asignar cliente a pagos en estado Pago aplicado");
+                return;
+              }
+
+              if (
+                selected === 10 &&
+                selectedRows?.some(
+                  (row) =>
+                    row.id_status !== IDENTIFICADO_STATUS_ID &&
+                    row.id_status !== PAGO_APLICADO_STATUS_ID
+                )
+              ) {
+                showMessage(
+                  "info",
+                  "Solo puedes cambiar el periodo contable de pagos identificados o aplicados"
+                );
                 return;
               }
 
@@ -312,6 +330,11 @@ export const ActivePaymentsTab: FC<ActivePaymentsTabProps> = ({ isActive }) => {
           />
           <ModalActionsChangeErpId
             isOpen={isSelectOpen.selected === 9}
+            onClose={onCloseModal}
+            selectedRows={selectedRows}
+          />
+          <ModalActionsChangePeriod
+            isOpen={isSelectOpen.selected === 10}
             onClose={onCloseModal}
             selectedRows={selectedRows}
           />
