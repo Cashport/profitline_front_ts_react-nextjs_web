@@ -41,6 +41,7 @@ export interface ISingleBank {
   ID_ERP: string | null;
   id_erp_compensation: string | null;
   initial_document: string | null;
+  payment_period: string | null;
 }
 
 export interface IPaymentDetail extends ISingleBank {
