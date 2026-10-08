@@ -28,7 +28,8 @@ import {
   Chats,
   FadersHorizontal,
   Invoice,
-  MapPin
+  MapPin,
+  Robot
 } from "@phosphor-icons/react";
 import { FileHeart } from "lucide-react";
 
@@ -209,6 +210,22 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
           />
         </Link>
       )} */}
+
+      {/* Salud de Automatizaciones */}
+      {checkUserViewPermissions(project, "SaludAutomatizaciones") && (
+        <Link href="/salud-automatizaciones" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Robot size={iconSize} />}
+            className={
+              path.startsWith("/salud-automatizaciones") ? styles.buttonIcon : styles.buttonIconActive
+            }
+          >
+            {isSideBarLarge && "Salud Bots"}
+          </Button>
+        </Link>
+      )}
 
       {/* Chat */}
       {checkUserViewPermissions(project, "Whatsapp") && (

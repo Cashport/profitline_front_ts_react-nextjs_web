@@ -9,9 +9,11 @@ import {
   getClientAiContext,
   editClientPrompt
 } from "@/services/dataQuality/dataQuality";
-import { isValidEmail } from "@/modules/commerce/utils/constants/checkout";
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
 import { IDataEmail } from "@/types/dataQuality/IDataQuality";
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const isValidEmail = (value: string) => EMAIL_REGEX.test(value.trim());
 
 import "./modalDataEmailRules.scss";
 
