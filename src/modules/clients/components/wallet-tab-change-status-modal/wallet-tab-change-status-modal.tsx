@@ -21,7 +21,7 @@ interface Props {
   onCloseAllModals: () => void;
 }
 
-const invoiceStates = [
+export const invoiceStates = [
   "Conciliada",
   "Sin conciliar",
   "Glosado",
