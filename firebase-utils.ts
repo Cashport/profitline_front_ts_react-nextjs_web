@@ -7,7 +7,7 @@ import {
   signInWithCustomToken
 } from "firebase/auth";
 import { IOpenNotificationProps } from "@/components/atoms/Notification/Notification";
-import { auth, customGetAuth } from "./firebase";
+import { getClientAuth, customGetAuth } from "./firebase";
 import { COOKIE_NAME, STORAGE_TOKEN } from "@/utils/constants/globalConstants";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useAppStore } from "@/lib/store/store";
@@ -35,7 +35,7 @@ const getAuth = async (
   resetStore();
   setHydrated();
   if (isSignUp) {
-    createUserWithEmailAndPassword(auth, email, password)
+    createUserWithEmailAndPassword(getClientAuth(), email, password)
       .then(async (userCred) => {
         const token = await userCred.user.getIdToken();
         fetch("/api/auth", {
@@ -54,13 +54,13 @@ const getAuth = async (
         alert(`Sign up failed: ${error.message} - ${error.code}`);
       });
   } else {
-    signInWithEmailAndPassword(auth, email.trim(), password)
+    signInWithEmailAndPassword(getClientAuth(), email.trim(), password)
       .then(async (userCred) => {
         // Check email verification
         //cuando se active la verificación de correo, descomentar
         // if (!userCred.user.emailVerified) {
         //   // Sign out the user
-        //   await signOut(auth);
+        //   await signOut(getClientAuth());
         //   openNotification({
         //     api: api,
         //     type: "warning",
@@ -102,7 +102,7 @@ const getAuth = async (
 // user and redirects into the app. Only called once the periodic-OTP /
 // password-expiration policy has already been satisfied (or doesn't apply).
 const mintSessionCookie = async (router: AppRouterInstance) => {
-  const user = auth.currentUser;
+  const user = getClientAuth().currentUser;
   if (!user) return;
   const token = await user.getIdToken();
   const response = await fetch("/api/auth", {
@@ -161,7 +161,7 @@ export const signInWithPolicyCheck = async (
   resetStore();
   setHydrated();
   try {
-    await signInWithEmailAndPassword(auth, email.trim(), password);
+    await signInWithEmailAndPassword(getClientAuth(), email.trim(), password);
     return await continueLoginAfterAuth(router);
   } catch (error) {
     console.error({ error });
@@ -184,13 +184,13 @@ export const completeLoginAfterPasswordChange = async (
   newPassword: string,
   router: AppRouterInstance
 ): Promise<LoginOutcome> => {
-  await signInWithEmailAndPassword(auth, email.trim(), newPassword);
+  await signInWithEmailAndPassword(getClientAuth(), email.trim(), newPassword);
   return await continueLoginAfterAuth(router);
 };
 
 export const getIdTokenWithToken = async (token: string) => {
   try {
-    const idToken = await signInWithCustomToken(auth, token);
+    const idToken = await signInWithCustomToken(getClientAuth(), token);
     return idToken;
   } catch (error) {
     handleError(error);
@@ -206,7 +206,7 @@ const logOut = async (router?: AppRouterInstance) => {
       currentPath: window.location.pathname
     });
 
-    signOut(auth);
+    signOut(getClientAuth());
     const { resetStore } = useAppStore.getState();
     resetStore();
 
@@ -223,7 +223,7 @@ const logOut = async (router?: AppRouterInstance) => {
 
 const sendEmailResetPassword = async (email: string) => {
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(getClientAuth(), email);
   } catch (error) {
     handleError(error);
   }
@@ -231,7 +231,7 @@ const sendEmailResetPassword = async (email: string) => {
 
 const resetPassword = async (oobCode: string, newPassword: string) => {
   try {
-    await confirmPasswordReset(auth, oobCode, newPassword);
+    await confirmPasswordReset(getClientAuth(), oobCode, newPassword);
   } catch (error) {
     handleError(error);
   }
@@ -239,9 +239,10 @@ const resetPassword = async (oobCode: string, newPassword: string) => {
 
 // New helper function to check email verification
 const checkEmailVerification = async (): Promise<boolean> => {
-  if (!auth.currentUser) return false;
-  await auth.currentUser.reload();
-  return auth.currentUser.emailVerified;
+  const authInstance = getClientAuth();
+  if (!authInstance.currentUser) return false;
+  await authInstance.currentUser.reload();
+  return authInstance.currentUser.emailVerified;
 };
 
 // New function to resend verification email
@@ -250,7 +251,7 @@ const resendVerificationEmail = async (
   api: NotificationInstance
 ) => {
   try {
-    if (auth.currentUser) {
+    if (getClientAuth().currentUser) {
       openNotification({
         api: api,
         type: "success",

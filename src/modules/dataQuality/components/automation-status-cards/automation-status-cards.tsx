@@ -5,9 +5,16 @@ import { Bot } from "lucide-react";
 import { cn } from "@/utils/utils";
 
 import { BOT_STATUS_META } from "../../constants";
-import { BotStatus, BotStatusFilter, IBotsSummary } from "../../types/automations";
+import { BotStatusFilter, IBotsSummary } from "../../types/automations";
 
-const STATUS_KEYS: BotStatus[] = ["EXITOSO", "FALLIDO", "EN_EJECUCION"];
+// Orden pedido por producto: Operativo, Con fallas, En revisión, Ejecutando.
+// PENDIENTE/SIN_EJECUCIONES no tienen card propia (solo cuentan en el Total).
+const STATUS_KEYS: Array<"EXITOSO" | "FALLIDO" | "EN_REVISION" | "EN_EJECUCION"> = [
+  "EXITOSO",
+  "FALLIDO",
+  "EN_REVISION",
+  "EN_EJECUCION"
+];
 
 interface AutomationStatusCardsProps {
   summary: IBotsSummary;
@@ -17,6 +24,8 @@ interface AutomationStatusCardsProps {
 
 // Mismo look que AlertCategoryCards: tarjeta-botón que al activarse se voltea a negro.
 // Acá el cuadro del icono se colorea según el estado en vez de ir siempre en verde.
+// Pasó de 4 a 5 tarjetas (se sumó "En revisión"): grid-cols-3 en breakpoints medios
+// para que no queden huecos antes de llegar a las 5 columnas en pantallas grandes.
 export function AutomationStatusCards({
   summary,
   statusFilter,
@@ -25,7 +34,7 @@ export function AutomationStatusCards({
   const isTotalActive = statusFilter === "all";
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
       <button
         type="button"
         onClick={() => onStatusClick("all")}

@@ -5,7 +5,7 @@ import { Flex } from "antd";
 import { PencilSimpleLine } from "@phosphor-icons/react";
 
 import { signInWithCustomToken } from "@firebase/auth";
-import { auth } from "../../../../../firebase";
+import { getClientAuth } from "../../../../../firebase";
 import { getClientWallet } from "@/services/clients/clients";
 
 import MobileNavBar from "../../components/atoms/MobileNavBar/MobileNavBar";
@@ -45,7 +45,7 @@ const MobileConfirmPayment: React.FC = () => {
     setError(null);
 
     try {
-      const res = await signInWithCustomToken(auth, token);
+      const res = await signInWithCustomToken(getClientAuth(), token);
       const idToken = await res.user.getIdToken();
       const walletData = await getClientWallet(idToken);
 

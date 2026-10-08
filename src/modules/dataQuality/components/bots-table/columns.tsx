@@ -32,11 +32,12 @@ function RunTimestamp({ isoDate, emptyLabel }: RunTimestampProps) {
 interface RunErrorProps {
   error: string | null;
   readableError?: string | null;
+  category?: string | null;
 }
 
 // En la celda va el mensaje legible, o el error crudo si no llegó.
 // El error técnico completo se despliega al pasar el mouse.
-function RunError({ error, readableError }: RunErrorProps) {
+function RunError({ error, readableError, category }: RunErrorProps) {
   const summary = readableError || error;
   if (!summary) return null;
 
@@ -55,7 +56,7 @@ function RunError({ error, readableError }: RunErrorProps) {
         arrowClassName={DARK_TOOLTIP_ARROW}
       >
         <p className="text-[11px] font-semibold uppercase tracking-wide opacity-70">
-          Detalle del error - {summary}
+          Detalle del error{category ? ` - ${category}` : ""}
         </p>
         <p className="overflow-y-auto whitespace-pre-wrap break-words text-xs">{error}</p>
       </TooltipContent>
@@ -63,7 +64,19 @@ function RunError({ error, readableError }: RunErrorProps) {
   );
 }
 
-export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
+interface GetBotsColumnsOptions {
+  executingScheduleId: number | null;
+  // eslint-disable-next-line no-unused-vars
+  onRun: (bot: IBotStatusItem) => void;
+  // eslint-disable-next-line no-unused-vars
+  onViewHistory: (bot: IBotStatusItem) => void;
+}
+
+export const getBotsColumns = ({
+  executingScheduleId,
+  onRun,
+  onViewHistory
+}: GetBotsColumnsOptions): TableProps<IBotStatusItem>["columns"] => [
   {
     title: "Bot",
     dataIndex: "bot",
@@ -77,7 +90,7 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
     title: "Cliente",
     dataIndex: "cliente",
     render: (text: string) => (
-      <span className="text-sm" style={{ color: "#141414" }}>
+      <span className="cursor-pointer text-sm hover:underline" style={{ color: "#141414" }}>
         {text}
       </span>
     )
@@ -85,19 +98,19 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
   {
     title: "País",
     dataIndex: "pais",
-    render: (text: string) => (
+    render: (text: string | null) => (
       <Badge variant="outline" className="text-xs">
-        {text}
+        {text || "No disponible"}
       </Badge>
     )
   },
   {
     title: "Tipo de archivo",
     dataIndex: "tipo_archivo",
-    render: (text: string) => (
+    render: (text: string | null) => (
       <div className="flex items-center gap-1.5 text-sm" style={{ color: "#141414" }}>
         <Package className="h-3.5 w-3.5 text-gray-400" />
-        {text}
+        {text || "No disponible"}
       </div>
     )
   },
@@ -113,7 +126,11 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
       <>
         <RunTimestamp isoDate={record.ultima_ejecucion} emptyLabel="Sin registro" />
         {record.estado === "FALLIDO" && (
-          <RunError error={record.error} readableError={record.error_legible} />
+          <RunError
+            error={record.error}
+            readableError={record.error_legible}
+            category={record.categoria_error}
+          />
         )}
       </>
     )
@@ -124,9 +141,7 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
     render: (periodicidad: IBotStatusItem["periodicidad"]) => (
       <div className="flex items-center gap-1.5 text-sm" style={{ color: "#141414" }}>
         <Clock className="h-3.5 w-3.5 text-gray-400" />
-        {periodicidad
-          .map((periodicity) => BOT_FREQUENCY_LABELS[periodicity] ?? periodicity)
-          .join(", ")}
+        {periodicidad.map((periodicity) => BOT_FREQUENCY_LABELS[periodicity] ?? periodicity).join(", ")}
       </div>
     )
   },
@@ -141,17 +156,27 @@ export const getBotsColumns = (): TableProps<IBotStatusItem>["columns"] => [
     title: "Acciones",
     width: 100,
     render: (_, record: IBotStatusItem) => {
-      const isRunning = record.estado === "EN_EJECUCION";
+      const isRunning = record.estado === "EN_EJECUCION" || executingScheduleId === record.schedule_id;
+
       return (
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="ghost" size="sm" title="Ejecutar bot a demanda" disabled>
-            {isRunning ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4" />
-            )}
+        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Ejecutar bot a demanda"
+            disabled={isRunning}
+            onClick={() => onRun(record)}
+            className="transition-colors hover:bg-[#F0FDF4] hover:text-[#16A34A]"
+          >
+            {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           </Button>
-          <Button variant="ghost" size="sm" title="Ver historial de ejecuciones" disabled>
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Ver detalle e historial de ejecuciones"
+            onClick={() => onViewHistory(record)}
+            className="transition-colors hover:bg-[#e2ecfe] hover:text-[#2143b0]"
+          >
             <Eye className="h-4 w-4" />
           </Button>
         </div>
