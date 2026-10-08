@@ -244,3 +244,62 @@
 .cashport-popup .maplibregl-popup-tip {
   border-top-color: #fff;
 }
+
+/* Visitas — tooltips del mapa. El popup vive dentro del contenedor del mapa, bajo
+   <main class="dark">, así que los tokens ya traen el valor del tema. */
+.visits-popup .maplibregl-popup-content {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgb(var(--popover));
+  color: rgb(var(--popover-foreground));
+  border: 1px solid rgb(var(--border));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-poppins), sans-serif;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.visits-popup .maplibregl-popup-tip {
+  display: none;
+}
+
+/* Visitas — anillo que late alrededor del asesor en visita o en tránsito. */
+@keyframes visits-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.visits-ring {
+  opacity: 0;
+  animation: visits-ring 2s infinite;
+}
+
+/* Visitas — controles de MapLibre (zoom, atribución) sobre el tema oscuro. */
+.dark .visits-map .maplibregl-ctrl-group,
+.dark .visits-map .maplibregl-ctrl-attrib {
+  background: rgb(var(--card));
+  color: rgb(var(--muted-foreground));
+}
+
+.dark .visits-map .maplibregl-ctrl-group:not(:empty) {
+  box-shadow: 0 0 0 1px rgb(var(--border));
+}
+
+.dark .visits-map .maplibregl-ctrl-group button + button {
+  border-top-color: rgb(var(--border));
+}
+
+.dark .visits-map .maplibregl-ctrl button .maplibregl-ctrl-icon,
+.dark .visits-map .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}
+
+.dark .visits-map .maplibregl-ctrl-attrib a {
+  color: rgb(var(--foreground));
+}
