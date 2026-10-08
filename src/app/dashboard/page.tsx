@@ -1,8 +1,5 @@
-"use client";
-import GeneralDashboardView from "@/components/organisms/dashboard/GeneralDashboardView/GeneralDashboardView";
+import RecaudoView from "@/modules/recaudoModule/containers/recaudo-view/recaudo-view";
 
-function Page() {
-  return <GeneralDashboardView />;
+export default function DashboardPage() {
+  return <RecaudoView />;
 }
-
-export default Page;
