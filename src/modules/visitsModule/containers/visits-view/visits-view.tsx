@@ -46,7 +46,7 @@ import {
   type ILiveVisibilityContext
 } from "../../utils/visits-live";
 
-// MapLibre necesita el navegador (WebGL, window): el mapa se carga sólo en cliente.
+// Mapbox GL necesita el navegador (WebGL, window): el mapa se carga sólo en cliente.
 const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map"), {
   ssr: false,
   loading: () => (

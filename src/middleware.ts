@@ -13,13 +13,15 @@ export async function middleware(request: NextRequest) {
   const unpkgForPDF = "https://unpkg.com";
   const amazonFiles = "https://*.amazonaws.com";
   const azureBlob = "https://*.blob.core.windows.net";
+  // Mapa de Visitas: estilo, teselas, fuentes y sprites por fetch, más la telemetría de Mapbox.
+  const mapboxHosts = "https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com";
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://checkout.wompi.co ${unpkgForPDF};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' https: data: blob:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} https://checkout.wompi.co;
+    connect-src 'self' blob: https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com ${apiHost} ${apin8nHost} ${apin8nHost2} ${apin8nHost3} ${apiChatHost} ${apiChatWsHost} ${amazonFiles} ${mapboxHosts} https://checkout.wompi.co;
     frame-src 'self' https://*.firebaseapp.com https://*.firebaseio.com https://www.gstatic.com https://checkout.wompi.co;
     media-src 'self' blob: ${amazonFiles} ${azureBlob};
     object-src 'none';

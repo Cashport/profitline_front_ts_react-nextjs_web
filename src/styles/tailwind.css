@@ -247,7 +247,7 @@
 
 /* Visitas — tooltips del mapa. El popup vive dentro del contenedor del mapa, bajo
    <main class="dark">, así que los tokens ya traen el valor del tema. */
-.visits-popup .maplibregl-popup-content {
+.visits-popup .mapboxgl-popup-content {
   padding: 4px 8px;
   border-radius: 6px;
   background: rgb(var(--popover));
@@ -259,7 +259,7 @@
   line-height: 1.35;
 }
 
-.visits-popup .maplibregl-popup-tip {
+.visits-popup .mapboxgl-popup-tip {
   display: none;
 }
 
@@ -280,26 +280,26 @@
   animation: visits-ring 2s infinite;
 }
 
-/* Visitas — controles de MapLibre (zoom, atribución) sobre el tema oscuro. */
-.dark .visits-map .maplibregl-ctrl-group,
-.dark .visits-map .maplibregl-ctrl-attrib {
+/* Visitas — controles de Mapbox (zoom, atribución) sobre el tema oscuro. */
+.dark .visits-map .mapboxgl-ctrl-group,
+.dark .visits-map .mapboxgl-ctrl-attrib {
   background: rgb(var(--card));
   color: rgb(var(--muted-foreground));
 }
 
-.dark .visits-map .maplibregl-ctrl-group:not(:empty) {
+.dark .visits-map .mapboxgl-ctrl-group:not(:empty) {
   box-shadow: 0 0 0 1px rgb(var(--border));
 }
 
-.dark .visits-map .maplibregl-ctrl-group button + button {
+.dark .visits-map .mapboxgl-ctrl-group button + button {
   border-top-color: rgb(var(--border));
 }
 
-.dark .visits-map .maplibregl-ctrl button .maplibregl-ctrl-icon,
-.dark .visits-map .maplibregl-ctrl-attrib-button {
+.dark .visits-map .mapboxgl-ctrl button .mapboxgl-ctrl-icon,
+.dark .visits-map .mapboxgl-ctrl-attrib-button {
   filter: invert(1);
 }
 
-.dark .visits-map .maplibregl-ctrl-attrib a {
+.dark .visits-map .mapboxgl-ctrl-attrib a {
   color: rgb(var(--foreground));
 }

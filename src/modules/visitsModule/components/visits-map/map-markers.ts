@@ -2,10 +2,11 @@ import { cn } from "@/utils/utils";
 
 import { MISSING } from "../../constants";
 
-/* Marcadores del mapa como elementos DOM. El elemento raíz es de MapLibre: le pone
-   su clase (maplibregl-marker, que lo posiciona) y lo mueve con `transform`, así que
-   las clases de estado y las escalas van siempre en un hijo. Viven dentro de
-   <main class="dark">, por eso los tokens (bg-card, text-foreground) siguen el tema. */
+/* Marcadores del mapa como elementos DOM. El elemento raíz es de Mapbox: le pone
+   su clase (mapboxgl-marker, que lo posiciona), lo mueve con `transform` y a veces
+   escribe su opacidad, así que las clases de estado, las escalas y la opacidad van
+   siempre en un hijo. Viven dentro de <main class="dark">, por eso los tokens
+   (bg-card, text-foreground) siguen el tema. */
 
 /** Escribe la clase sólo si cambió: se actualiza en cada cuadro de la reproducción. */
 const setClass = (el: Element, value: string) => {
@@ -13,7 +14,7 @@ const setClass = (el: Element, value: string) => {
 };
 
 const ADVISOR_BODY =
-  "relative grid h-[30px] w-[30px] place-items-center rounded-full border-2 border-solid border-[color:var(--sc)] bg-card text-[9.5px] font-semibold text-foreground shadow-[0_0_0_3px_rgb(var(--card)),0_4px_12px_rgba(0,0,0,0.3)] transition-transform duration-150";
+  "relative grid h-[30px] w-[30px] place-items-center rounded-full border-2 border-solid border-[color:var(--sc)] bg-card text-[9.5px] font-semibold text-foreground shadow-[0_0_0_3px_rgb(var(--card)),0_4px_12px_rgba(0,0,0,0.3)] transition-[transform,opacity] duration-150";
 const ADVISOR_RING =
   "visits-ring pointer-events-none absolute -inset-1.5 rounded-full border-2 border-[color:var(--sc)]";
 const BADGE =
@@ -90,7 +91,7 @@ const STOP_PHASE = {
 };
 
 export interface StopMarkerHandles {
-  /** Para el Marker de MapLibre. */
+  /** Para el Marker de Mapbox. */
   root: HTMLDivElement;
   /** El círculo numerado: recibe las clases de estado. */
   body: HTMLDivElement;

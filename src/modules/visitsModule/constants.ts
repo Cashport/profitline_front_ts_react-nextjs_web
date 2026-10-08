@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import type {
   AdvisorProject,
   AdvisorStatus,
@@ -165,19 +163,10 @@ export const MAP_CENTER: LngLat = [-74.09, 4.66];
 export const MAP_ZOOM = 12;
 
 /**
- * Mapas base de CARTO, uno por tema. CARTO exige la llave (`?key=`); sin ella las
- * teselas llegan con la marca "API KEY REQUIRED".
+ * Mapas base de Mapbox, uno por tema (los equivalentes de Positron y Dark Matter).
+ * La atribución la trae el propio estilo.
  */
-const cartoKey = config.CARTO_KEY ? `?key=${config.CARTO_KEY}` : "";
-const cartoTiles = (style: "light_all" | "dark_all") =>
-  ["a", "b", "c", "d"].map(
-    (s) => `https://${s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}.png${cartoKey}`
-  );
-
-export const BASEMAP_TILES = {
-  light: cartoTiles("light_all"),
-  dark: cartoTiles("dark_all")
+export const MAP_STYLES = {
+  light: "mapbox://styles/mapbox/light-v11",
+  dark: "mapbox://styles/mapbox/dark-v11"
 };
-
-export const BASEMAP_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';

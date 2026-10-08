@@ -114,7 +114,7 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
 
       <div
         className={cn(
-          "absolute bottom-[26px] left-3 z-[2] flex max-w-[calc(100%-90px)] flex-wrap gap-x-3 gap-y-1 rounded-lg px-2.5 py-[7px] text-[11px] text-foreground/80 max-[1200px]:hidden",
+          "absolute bottom-10 left-3 z-[2] flex max-w-[calc(100%-90px)] flex-wrap gap-x-3 gap-y-1 rounded-lg px-2.5 py-[7px] text-[11px] text-foreground/80 max-[1200px]:hidden",
           GLASS
         )}
       >

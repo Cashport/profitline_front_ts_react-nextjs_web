@@ -1,49 +1,11 @@
-import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
+import type { LayerSpecification } from "mapbox-gl";
 
-import { BASEMAP_ATTRIBUTION, BASEMAP_TILES } from "../../constants";
 import type { LngLat } from "../../types";
 
-export const BASEMAP_LAYERS = {
-  light: "visits-basemap-light",
-  dark: "visits-basemap-dark"
-} as const;
-
 /**
- * Estilo base sin token: los dos mapas de CARTO como capas raster y el tema
- * sólo cambia cuál se ve. Así el tema no recarga el estilo y las capas propias
- * (clientes, recorridos) no se pierden. La capa oculta no descarga teselas.
+ * Fuentes y capas propias. Cada estilo base (uno por tema) llega sin ellas: el mapa
+ * las vuelve a agregar en cada "style.load".
  */
-export function buildBaseStyle(isDark: boolean): StyleSpecification {
-  const source = (tiles: string[]) => ({
-    type: "raster" as const,
-    tiles,
-    tileSize: 256,
-    maxzoom: 20,
-    attribution: BASEMAP_ATTRIBUTION
-  });
-  return {
-    version: 8,
-    sources: {
-      [BASEMAP_LAYERS.light]: source(BASEMAP_TILES.light),
-      [BASEMAP_LAYERS.dark]: source(BASEMAP_TILES.dark)
-    },
-    layers: [
-      {
-        id: BASEMAP_LAYERS.light,
-        type: "raster",
-        source: BASEMAP_LAYERS.light,
-        layout: { visibility: isDark ? "none" : "visible" }
-      },
-      {
-        id: BASEMAP_LAYERS.dark,
-        type: "raster",
-        source: BASEMAP_LAYERS.dark,
-        layout: { visibility: isDark ? "visible" : "none" }
-      }
-    ]
-  };
-}
-
 export const SOURCES = {
   clients: "visits-clients",
   tracks: "visits-tracks",

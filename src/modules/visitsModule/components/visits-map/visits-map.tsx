@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import maplibregl, {
+import mapboxgl, {
   type GeoJSONSource,
-  type Map as MapLibreMap,
-  type MapLayerMouseEvent,
+  type Map as MapboxMap,
+  type MapMouseEvent,
   type Marker,
   type PaddingOptions,
   type Popup
-} from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+} from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-import { MAP_CENTER, MAP_ZOOM, MISSING } from "../../constants";
+import config from "@/config";
+
+import { MAP_CENTER, MAP_STYLES, MAP_ZOOM, MISSING } from "../../constants";
 import type {
   ILiveAdvisor,
   ILiveRun,
@@ -39,11 +41,9 @@ import {
 } from "./map-markers";
 import MapOverlays from "./map-overlays";
 import {
-  BASEMAP_LAYERS,
   CLIENTS_LAYER,
   OVERLAY_LAYERS,
   SOURCES,
-  buildBaseStyle,
   featureCollection,
   lineFeatures,
   pointFeature,
@@ -120,11 +120,14 @@ const framePoints = (a: ILiveAdvisor): LngLat[] => [
 
 const FIT_ALL_PADDING: PaddingOptions = { top: 60, bottom: 40, left: 24, right: 24 };
 
+/** Token público de Mapbox; sin él un estilo `mapbox://` lanza al crear el mapa. */
+const MAPBOX_TOKEN = config.MAPS_ACCESS_TOKEN;
+
 /**
- * Mapa de Visitas con MapLibre (la misma API de mapbox-gl 1.x que usa TMS, sin
- * token). Se crea una sola vez; cada cuadro sólo actualiza los datos de las
- * fuentes GeoJSON y la posición y clase de los marcadores. Todo sale de los puntos
- * que reporta cada asesor (`locations` del API), interpolados en el minuto `t`.
+ * Mapa de Visitas con Mapbox GL (la librería de TMS). Se crea una sola vez; el tema
+ * cambia el estilo base y cada cuadro sólo actualiza los datos de las fuentes
+ * GeoJSON y la posición y clase de los marcadores. Todo sale de los puntos que
+ * reporta cada asesor (`locations` del API), interpolados en el minuto `t`.
  */
 export default function VisitsMap(props: VisitsMapProps) {
   const {
@@ -145,7 +148,9 @@ export default function VisitsMap(props: VisitsMapProps) {
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<MapLibreMap | null>(null);
+  const mapRef = useRef<MapboxMap | null>(null);
+  /** Estilo base pedido por última vez: el tema sólo lo cambia si es otro. */
+  const styleRef = useRef<string | null>(null);
   const popupRef = useRef<Popup | null>(null);
   const advisorMarkers = useRef(
     new Map<number, { marker: Marker; handles: AdvisorMarkerHandles }>()
@@ -153,7 +158,9 @@ export default function VisitsMap(props: VisitsMapProps) {
   const stopMarkers = useRef<{ el: HTMLDivElement; phaseAt: (t: number) => Phase }[]>([]);
   /** Lugares de visita pintados: los eventos de la capa los buscan por su índice. */
   const places = useRef<IVisitPlace[]>([]);
-  const [ready, setReady] = useState(false);
+  /** Cuántas veces cargó un estilo base con las capas propias; 0 = aún ninguno. */
+  const [styleVersion, setStyleVersion] = useState(0);
+  const ready = styleVersion > 0;
 
   // Los eventos del mapa se registran una sola vez: leen siempre las props vigentes.
   const latest = useRef(props);
@@ -173,24 +180,28 @@ export default function VisitsMap(props: VisitsMapProps) {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !MAPBOX_TOKEN) return;
 
-    const map = new maplibregl.Map({
+    const style = latest.current.isDark ? MAP_STYLES.dark : MAP_STYLES.light;
+    const map = new mapboxgl.Map({
       container,
-      style: buildBaseStyle(latest.current.isDark),
+      accessToken: MAPBOX_TOKEN,
+      style,
       center: MAP_CENTER,
       zoom: MAP_ZOOM,
-      // Teselas con <img>: el CSP (src/middleware.ts) permite img-src https: pero no
-      // abre connect-src a CARTO, que es lo que usaría fetch (el modo por defecto).
-      refreshExpiredTiles: false,
-      attributionControl: { compact: true },
+      // Plano siempre: los estilos v11 traen globo por defecto.
+      projection: "mercator",
+      // Aquí Mapbox sólo acepta un booleano; la atribución compacta va abajo.
+      attributionControl: false,
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false
     });
+    styleRef.current = style;
     map.touchZoomRotate.disableRotation();
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
-    popupRef.current = new maplibregl.Popup({
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
+    popupRef.current = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false,
       anchor: "bottom",
@@ -198,30 +209,31 @@ export default function VisitsMap(props: VisitsMapProps) {
       maxWidth: "260px"
     });
 
-    map.on("load", () => {
+    // Cada estilo base (al crear el mapa y con cada cambio de tema) llega sin las capas
+    // propias: se vuelven a agregar y el cuadro siguiente les devuelve los datos.
+    map.on("style.load", () => {
       Object.values(SOURCES).forEach((id) =>
         map.addSource(id, { type: "geojson", data: featureCollection([]) })
       );
       OVERLAY_LAYERS.forEach((layer) => map.addLayer(layer));
+      setStyleVersion((v) => v + 1);
+    });
 
-      const placeAt = (e: MapLayerMouseEvent) =>
-        places.current[Number(e.features?.[0]?.properties?.id)];
-      map.on("mousemove", CLIENTS_LAYER, (e) => {
-        const place = placeAt(e);
-        if (!place) return;
-        map.getCanvas().style.cursor = "pointer";
-        showTooltip(place.position, place.title, place.detail, 8);
-      });
-      map.on("mouseleave", CLIENTS_LAYER, () => {
-        map.getCanvas().style.cursor = "";
-        hideTooltip();
-      });
-      map.on("click", CLIENTS_LAYER, (e) => {
-        const place = placeAt(e);
-        if (place) latest.current.onSelectAdvisor(place.advisor.id, place.position);
-      });
-
-      setReady(true);
+    // Eventos delegados por capa: se registran una vez y siguen valiendo con cada estilo.
+    const placeAt = (e: MapMouseEvent) => places.current[Number(e.features?.[0]?.properties?.id)];
+    map.on("mousemove", CLIENTS_LAYER, (e) => {
+      const place = placeAt(e);
+      if (!place) return;
+      map.getCanvas().style.cursor = "pointer";
+      showTooltip(place.position, place.title, place.detail, 8);
+    });
+    map.on("mouseleave", CLIENTS_LAYER, () => {
+      map.getCanvas().style.cursor = "";
+      hideTooltip();
+    });
+    map.on("click", CLIENTS_LAYER, (e) => {
+      const place = placeAt(e);
+      if (place) latest.current.onSelectAdvisor(place.advisor.id, place.position);
     });
 
     // El contenedor cambia de tamaño sin que cambie la ventana (p. ej. al plegar el menú).
@@ -234,17 +246,21 @@ export default function VisitsMap(props: VisitsMapProps) {
       popupRef.current?.remove();
       map.remove();
       mapRef.current = null;
-      setReady(false);
+      styleRef.current = null;
+      setStyleVersion(0);
     };
   }, []);
 
-  // Tema: sólo cambia qué mapa base se ve.
+  // Tema: cambia el estilo base. Sin diff, Mapbox rehace el estilo entero y dispara
+  // "style.load"; con diff quitaría las capas propias sin avisar.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready) return;
-    map.setLayoutProperty(BASEMAP_LAYERS.light, "visibility", isDark ? "none" : "visible");
-    map.setLayoutProperty(BASEMAP_LAYERS.dark, "visibility", isDark ? "visible" : "none");
-  }, [ready, isDark]);
+    const style = isDark ? MAP_STYLES.dark : MAP_STYLES.light;
+    if (!map || styleRef.current === style) return;
+    styleRef.current = style;
+    // El tipo exige las fuentes locales; Mapbox completa con las del mapa las que faltan.
+    map.setStyle(style, { diff: false } as Parameters<MapboxMap["setStyle"]>[1]);
+  }, [isDark]);
 
   // Un marcador por asesor con puntos; se rehacen cuando cambian los datos.
   useEffect(() => {
@@ -267,7 +283,7 @@ export default function VisitsMap(props: VisitsMapProps) {
         showTooltip([lng, lat], a.name, `${s.label}${client}`, 18);
       });
       handles.root.addEventListener("mouseleave", hideTooltip);
-      const marker = new maplibregl.Marker({ element: handles.root, anchor: "center" })
+      const marker = new mapboxgl.Marker({ element: handles.root, anchor: "center" })
         .setLngLat(a.track[0].position)
         .addTo(map);
       markers.set(a.id, { marker, handles });
@@ -286,7 +302,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     if (!map || !focused?.track.length) return;
     const markers: Marker[] = [];
     const addMarker = (el: HTMLElement, at: LngLat) => {
-      const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(at);
+      const marker = new mapboxgl.Marker({ element: el, anchor: "center" }).setLngLat(at);
       markers.push(marker.addTo(map));
     };
 
@@ -309,7 +325,7 @@ export default function VisitsMap(props: VisitsMapProps) {
       });
       root.addEventListener("mouseleave", hideTooltip);
       addMarker(root, run.position);
-      // El estado se pinta en `body`: escribir clases en `root` borraría la de MapLibre.
+      // El estado se pinta en `body`: escribir clases en `root` borraría la de Mapbox.
       return { el: body, phaseAt: (m: number) => runPhase(run, m) };
     });
 
@@ -345,10 +361,10 @@ export default function VisitsMap(props: VisitsMapProps) {
     };
   }, [advisors, selectedId]);
 
-  // Cada cuadro: posiciones, clases y datos de las fuentes.
+  // Cada cuadro, y tras cada estilo base nuevo: posiciones, clases y datos de las fuentes.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready) return;
+    if (!map || !styleVersion) return;
     const focused = advisors.find((a) => a.id === selectedId) ?? null;
     const setData = (id: string, data: GeoJSON.FeatureCollection) =>
       map.getSource<GeoJSONSource>(id)?.setData(data);
@@ -369,7 +385,8 @@ export default function VisitsMap(props: VisitsMapProps) {
         leader: leaderId === a.id
       });
       const opacity = focused ? (focused.id === a.id ? 1 : 0.28) : visibleIds.has(a.id) ? 1 : 0.18;
-      entry.marker.setOpacity(String(opacity));
+      // En el hijo: la opacidad de la raíz la escribe Mapbox (niebla, globo, terreno).
+      entry.handles.body.style.opacity = String(opacity);
       entry.handles.root.style.zIndex =
         selectedId === a.id ? "3" : hoveredId === a.id ? "2" : "";
     });
@@ -431,7 +448,7 @@ export default function VisitsMap(props: VisitsMapProps) {
       setData(SOURCES.focusPlan, featureCollection([]));
     }
   }, [
-    ready,
+    styleVersion,
     advisors,
     t,
     isLive,
@@ -454,7 +471,7 @@ export default function VisitsMap(props: VisitsMapProps) {
       if (!points.length) return;
       const bounds = points.reduce(
         (b, p) => b.extend(p),
-        new maplibregl.LngLatBounds(points[0], points[0])
+        new mapboxgl.LngLatBounds(points[0], points[0])
       );
       map.fitBounds(bounds, { padding, duration, maxZoom: 16 });
     };
@@ -470,9 +487,11 @@ export default function VisitsMap(props: VisitsMapProps) {
     }
   }, [ready, camera.id]);
 
+  const mapNotice = MAPBOX_TOKEN ? notice : "Mapa no disponible: falta el token de Mapbox";
+
   return (
     <div className="visits-map relative h-full min-h-0 w-full overflow-hidden rounded-2xl border border-border bg-secondary">
-      {/* MapLibre fuerza position: relative en su contenedor (.maplibregl-map), que le gana a
+      {/* Mapbox fuerza position: relative en su contenedor (.mapboxgl-map), que le gana a
           `absolute inset-0` y lo deja en 0px: el tamaño sale del contenedor padre. */}
       <div ref={containerRef} className="h-full w-full" />
       <MapOverlays
@@ -481,10 +500,10 @@ export default function VisitsMap(props: VisitsMapProps) {
         focused={advisors.some((a) => a.id === selectedId)}
         palette={palette}
       />
-      {notice && (
+      {mapNotice && (
         <div className="pointer-events-none absolute inset-0 z-[3] grid place-items-center p-4">
           <span className="rounded-lg border border-border bg-card/95 px-3 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
-            {notice}
+            {mapNotice}
           </span>
         </div>
       )}

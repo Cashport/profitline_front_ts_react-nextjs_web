@@ -1,5 +1,5 @@
 /**
- * Coordenada en orden GeoJSON/MapLibre: [longitud, latitud]. El prototipo usaba
+ * Coordenada en orden GeoJSON/Mapbox: [longitud, latitud]. El prototipo usaba
  * el [lat, lng] de Leaflet; aquí todo viaja ya en el orden del mapa.
  */
 export type LngLat = [number, number];
