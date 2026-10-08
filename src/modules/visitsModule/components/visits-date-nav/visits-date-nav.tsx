@@ -2,7 +2,7 @@
 
 import { DatePicker } from "antd";
 import esES from "antd/es/date-picker/locale/es_ES";
-import type { Dayjs } from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -16,6 +16,12 @@ interface VisitsDateNavProps {
 
 const STEP_CLASS =
   "flex w-10 items-center justify-center text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
+
+/**
+ * antd trae su propia copia de dayjs (sin los plugins del proyecto), así que sus fechas
+ * no son el `Dayjs` de aquí: se pasan a la copia del proyecto por su timestamp.
+ */
+const fromPicker = (value: { valueOf(): number }) => dayjs(value.valueOf()).startOf("day");
 
 /**
  * Día que se mira: flechas de a un día y la etiqueta abre un calendario para saltar
@@ -37,8 +43,8 @@ export default function VisitsDateNav({ day, today, onChange }: VisitsDateNavPro
         <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
         <DatePicker
           value={day}
-          onChange={(value) => value && onChange(value.startOf("day"))}
-          format={(value) => fmtDayLabel(value, today)}
+          onChange={(value) => value && onChange(fromPicker(value))}
+          format={(value) => fmtDayLabel(fromPicker(value), today)}
           locale={esES}
           allowClear={false}
           inputReadOnly
