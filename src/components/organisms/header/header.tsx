@@ -9,9 +9,10 @@ import { useRouter } from "next/navigation";
 interface HeaderProps {
   title: string;
   titleExtra?: ReactNode;
+  actionsExtra?: ReactNode;
 }
 
-const Header: FC<HeaderProps> = ({ title, titleExtra }) => {
+const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra }) => {
   const router = useRouter();
 
   const handleLogOut = useCallback(() => {
@@ -25,6 +26,7 @@ const Header: FC<HeaderProps> = ({ title, titleExtra }) => {
         {titleExtra}
       </div>
       <div className={styles.actions}>
+        {actionsExtra}
         <div className={styles.profile}>
           <Avatar icon={<User />} />
           <Popover
