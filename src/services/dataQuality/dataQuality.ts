@@ -25,7 +25,9 @@ import {
   IFileType,
   IDataEmail,
   IRegion,
-  IPacksUploadResult
+  IPacksUploadResult,
+  IBotRunNowResult,
+  IBotHistoryList
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -402,6 +404,38 @@ export const deleteIntakeFile = async (fileId: number): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error deleting intake file:", error);
+    throw error;
+  }
+};
+
+// POST /data/bots/run-now/:scheduleId: ejecuta a demanda únicamente el schedule
+// indicado (no todos los bots). El header projectId lo inyecta el interceptor de API.
+export const runBotNow = async (scheduleId: number): Promise<IBotRunNowResult> => {
+  try {
+    const response: GenericResponse<IBotRunNowResult> = await API.post(
+      `${config.API_HOST}/data/bots/run-now/${scheduleId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error running bot:", error);
+    throw error;
+  }
+};
+
+// GET /data/bots/:scheduleId/history: historial real de ejecuciones (data.scheduler_runs),
+// más reciente primero (ya ordenado por backend).
+export const getBotHistory = async (
+  scheduleId: number,
+  page: number = 1,
+  limit: number = 20
+): Promise<IBotHistoryList> => {
+  try {
+    const response: GenericResponse<IBotHistoryList> = await API.get(
+      `${config.API_HOST}/data/bots/${scheduleId}/history?page=${page}&limit=${limit}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching bot history:", error);
     throw error;
   }
 };

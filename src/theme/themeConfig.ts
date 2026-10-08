@@ -22,6 +22,9 @@ const theme: ThemeConfig = {
     Modal: {
       colorBgElevated: "#FFFFFF"
     },
+    Drawer: {
+      colorBgElevated: "#FFFFFF"
+    },
     Radio: {
       colorPrimary: "#CBE71E",
       colorBorder: "#b3b2b2",

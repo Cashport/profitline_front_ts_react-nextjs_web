@@ -203,15 +203,17 @@ export const ModulesButtons = ({
         </Link>
       )}
 
-      {/* Salud de Automatizaciones */}
-      {checkUserViewPermissions(project, "SaludAutomatizaciones") && (
-        <Link href="/salud-automatizaciones" passHref legacyBehavior>
+      {/* Salud de Automatizaciones: vive bajo Data Quality (origin/main no tiene un
+          permiso "SaludAutomatizaciones" propio en el catálogo, solo "DataQuality").
+          Reutiliza ese permiso real en vez de uno inventado. */}
+      {checkUserViewPermissions(project, "DataQuality") && (
+        <Link href="/data-quality/automations" passHref legacyBehavior>
           <Button
             type="primary"
             size="large"
             icon={<Robot size={iconSize} />}
             className={
-              path.startsWith("/salud-automatizaciones") ? styles.buttonIcon : styles.buttonIconActive
+              path.startsWith("/data-quality/automations") ? styles.buttonIcon : styles.buttonIconActive
             }
           >
             {isSideBarLarge && "Salud Bots"}

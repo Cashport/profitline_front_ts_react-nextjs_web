@@ -1,15 +1,15 @@
 import axios from "axios";
 import config from "@/config";
-import { auth } from "../../../firebase";
+import { getClientAuth } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNotificationStore } from "@/context/CountNotification";
 export async function getIdToken(forceRefresh?: boolean) {
-  const user = auth.currentUser;
+  const user = getClientAuth().currentUser;
   if (user) {
     return await user.getIdToken(forceRefresh);
   } else {
     return new Promise((resolve, reject) => {
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(getClientAuth(), async (user) => {
         if (user) resolve(await user.getIdToken(forceRefresh));
         else reject(new Error("Token not found"));
       });

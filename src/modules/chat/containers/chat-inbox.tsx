@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Chat, Funnel, MagnifyingGlass, Users, ChatCircleDots } from "@phosphor-icons/react";
 
 import { getTickets } from "@/services/chat/chat";
-import { auth } from "../../../../firebase";
+import { getClientAuth } from "../../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSocket } from "@/context/ChatContext";
 import { cn } from "@/utils/utils";
@@ -91,7 +91,7 @@ export default function ChatInbox() {
 
   useEffect(() => {
     // Esperamos a que Firebase Auth termine de inicializar
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(getClientAuth(), (user) => {
       if (activeId && user?.uid) {
         connect({
           userId: user.uid

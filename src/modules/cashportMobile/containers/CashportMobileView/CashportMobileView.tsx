@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { message, Tabs } from "antd";
 import type { TabsProps } from "antd";
 
-import { signInWithCustomToken } from "@firebase/auth";
-import { auth } from "../../../../../firebase";
+import { signInWithCustomToken } from "firebase/auth";
+import { getClientAuth } from "../../../../../firebase";
 
 import { getClientWallet, getMobileToken } from "@/services/clients/clients";
 
@@ -90,7 +90,7 @@ const CashportMobileView: React.FC = () => {
   const signInAndGetWallet = async (paramsToken: string) => {
     try {
       try {
-        const res = await signInWithCustomToken(auth, paramsToken);
+        const res = await signInWithCustomToken(getClientAuth(), paramsToken);
         const idToken = await res.user.getIdToken();
 
         try {
