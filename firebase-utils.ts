@@ -71,13 +71,30 @@ const getAuth = async (
             Authorization: `Bearer ${token}`,
             tokenExm: `${JSON.stringify(userCred)}`
           }
-        }).then(async (response) => {
-          const data = await response.json();
-          if (response.status === 200) {
-            localStorage.setItem(STORAGE_TOKEN, data.data.token);
-            router.push("/clientes/all");
-          }
-        });
+        })
+          .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (response.status === 200 && data) {
+              localStorage.setItem(STORAGE_TOKEN, data.data.token);
+              router.push("/clientes/all");
+            } else {
+              openNotification({
+                api: api,
+                type: "error",
+                title: "Error",
+                message: "No se pudo conectar con el servidor. Intenta de nuevo más tarde."
+              });
+            }
+          })
+          .catch((error) => {
+            console.error({ error });
+            openNotification({
+              api: api,
+              type: "error",
+              title: "Error",
+              message: "No se pudo conectar con el servidor. Intenta de nuevo más tarde."
+            });
+          });
       })
       .catch((error) => {
         console.error({ error });

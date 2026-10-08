@@ -9,7 +9,14 @@ import {
   FIREBASE_STORAGE_BUCKET
 } from "@/utils/constants/globalConstants";
 import { initializeApp } from "firebase/app";
-import { getAuth, ParsedToken, signInWithCustomToken } from "firebase/auth";
+import {
+  Auth,
+  getAuth,
+  initializeAuth,
+  inMemoryPersistence,
+  ParsedToken,
+  signInWithCustomToken
+} from "firebase/auth";
 import "firebase/auth";
 import "firebase/functions";
 import "firebase/firestore";
@@ -32,11 +39,32 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+// getAuth() depende de APIs del navegador (IndexedDB) para registrar su
+// componente interno; ejecutarlo en SSR (Node) lanza "Component auth has not
+// been registered yet". Este módulo se importa transitivamente desde el
+// layout raíz (vía api.ts -> store -> ModalContext), por lo que se evalúa en
+// cada request SSR. Se difiere a undefined en servidor: todo uso real de
+// `auth` ocurre dentro de funciones invocadas desde el cliente (handlers,
+// efectos), nunca durante el render de servidor.
+export const auth = (typeof window !== "undefined" ? getAuth(app) : undefined) as Auth;
+
+// En servidor (API routes) no hay IndexedDB/localStorage, por lo que `auth` (arriba)
+// queda undefined. Para esos casos se usa una instancia de Auth sin persistencia,
+// creada una sola vez y únicamente bajo demanda (nunca durante el render SSR del layout).
+let serverAuth: Auth | undefined;
+function getServerAuth(): Auth {
+  if (!serverAuth) {
+    serverAuth = initializeAuth(app, { persistence: inMemoryPersistence });
+  }
+  return serverAuth;
+}
+
+function resolveAuth(): Auth {
+  return typeof window !== "undefined" ? auth : getServerAuth();
+}
 
 export async function customGetAuth(token: string) {
-  const customToken = await signInWithCustomToken(auth, token);
+  const customToken = await signInWithCustomToken(resolveAuth(), token);
   customToken.user.getIdTokenResult();
   return customToken;
 }
@@ -51,7 +79,7 @@ interface Claims extends ParsedToken {
 }
 
 export const decodedClaims = async (token: string) => {
-  const decoded = await signInWithCustomToken(auth, token);
+  const decoded = await signInWithCustomToken(resolveAuth(), token);
   const decodedIdToken = await decoded.user.getIdTokenResult();
   const claims = decodedIdToken.claims;
   const permissionsEncoded = claims.permissions as string;

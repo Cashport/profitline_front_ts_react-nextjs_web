@@ -136,7 +136,7 @@ export function ClientDetailArchives({
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg w-80 p-4">
       <DateRangeFilter
         dateRange={dateRange}
-        onDateRangeChange={(start, end) => setDateRange({ start, end })}
+        onDateRangeChange={(start: string, end: string) => setDateRange({ start, end })}
         onClear={() => setDateRange({ start: null, end: null })}
       />
     </div>
