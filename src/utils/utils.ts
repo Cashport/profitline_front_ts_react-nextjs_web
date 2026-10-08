@@ -312,6 +312,13 @@ export const formatDateDMY = (dateString: string): string => {
   return date.utc().format("DD/MM/YYYY");
 };
 
+// Para instantes UTC reales. Devuelve fecha y hora juntas para que nunca se conviertan por
+// separado: una hora local al lado de una fecha en UTC muestra el día equivocado.
+export const formatLocalDateTimeParts = (dateString: string): { date: string; time: string } => {
+  const parsed = dayjs(dateString);
+  return { date: parsed.format("DD/MM/YYYY"), time: parsed.format("HH:mm") };
+};
+
 export const checkUserViewPermissions = (
   selectedProject: ISelectedProject | undefined,
   view?: string

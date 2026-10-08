@@ -12,7 +12,7 @@ import {
   Stack,
   ClipboardText
 } from "phosphor-react";
-import { ChatCircleDots, SealPercent, HandTap } from "@phosphor-icons/react";
+import { ChatCircleDots, SealPercent, HandTap, Robot } from "@phosphor-icons/react";
 
 import { checkUserViewPermissions } from "@/utils/utils";
 import useScreenHeight from "@/components/hooks/useScreenHeight";
@@ -199,6 +199,24 @@ export const ModulesButtons = ({
             className={path === "/client-management" ? styles.buttonIcon : styles.buttonIconActive}
           >
             {isSideBarLarge && "Admin Clientes"}
+          </Button>
+        </Link>
+      )}
+
+      {/* Salud de Automatizaciones: vive bajo Data Quality (origin/main no tiene un
+          permiso "SaludAutomatizaciones" propio en el catálogo, solo "DataQuality").
+          Reutiliza ese permiso real en vez de uno inventado. */}
+      {checkUserViewPermissions(project, "DataQuality") && (
+        <Link href="/data-quality/automations" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Robot size={iconSize} />}
+            className={
+              path.startsWith("/data-quality/automations") ? styles.buttonIcon : styles.buttonIconActive
+            }
+          >
+            {isSideBarLarge && "Salud Bots"}
           </Button>
         </Link>
       )}

@@ -28,6 +28,7 @@ dayjs.extend(weekOfYear);
 dayjs.extend(weekYear);
 
 import "../styles/globals.scss";
+import "../styles/tailwind.css";
 
 const queryClient = new QueryClient();
 
