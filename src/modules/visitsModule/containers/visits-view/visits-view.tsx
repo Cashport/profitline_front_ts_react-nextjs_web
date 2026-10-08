@@ -6,7 +6,6 @@ import dayjs, { type Dayjs } from "dayjs";
 
 import UiSearchInput from "@/components/ui/search-input";
 
-import AdvisorDayModal from "../../components/advisor-day-modal/advisor-day-modal";
 import AdvisorDetail from "../../components/advisor-detail/advisor-detail";
 import LiveClock from "../../components/live-clock/live-clock";
 import RankingPanel from "../../components/ranking-panel/ranking-panel";
@@ -21,34 +20,31 @@ import {
   SEEK_STEP_MIN,
   layersFor
 } from "../../constants";
+import { useNowMinutes } from "../../hooks/useNowMinutes";
+import { useTodayVisits } from "../../hooks/useTodayVisits";
 import { useVisitsPalette } from "../../hooks/useVisitsPalette";
 import { useVisitsPlayback } from "../../hooks/useVisitsPlayback";
-import { MOCK_NOW_MINUTES, buildMockVisitsDay } from "../../mocked-data";
 import type {
-  AdvisorItem,
   AdvisorStatus,
   DayMode,
-  IVisitsAdvisor,
+  ILiveAdvisor,
+  ILiveRun,
   IVisitsFilters,
   IVisitsLayers,
   LngLat,
   VisitsCameraRequest,
   VisitsCameraTarget
 } from "../../types";
+import { hasActiveFilters, normalizeQuery, overviewBuckets } from "../../utils/visits-calc";
 import {
-  clientOwners,
-  effectiveTime,
-  hasActiveFilters,
-  isAdvisorVisible,
-  normalizeQuery,
-  overviewBuckets,
-  rankAdvisors,
-  stateAt,
-  statusCounts,
-  teamKpis,
-  type IVisibilityContext
-} from "../../utils/visits-calc";
-import { fmtDayLabel } from "../../utils/visits-format";
+  isLiveVisible,
+  liveStateAt,
+  liveStatusCounts,
+  liveTeamKpis,
+  rankLiveAdvisors,
+  toLiveAdvisor,
+  type ILiveVisibilityContext
+} from "../../utils/visits-live";
 
 // MapLibre necesita el navegador (WebGL, window): el mapa se carga sólo en cliente.
 const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map"), {
@@ -58,10 +54,14 @@ const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map")
   )
 });
 
+/** Aviso del panel y del mapa en los días que el API aún no trae. */
+const NOT_FROM_API = "Este día aún no llega del API.";
+
 /**
- * Visitas: seguimiento del día de los asesores en campo. Todo sale de un día
- * (hoy con datos simulados) y de un minuto `t` que mueve la línea de tiempo;
- * ranking, mapa y KPIs se recalculan a partir de ese minuto.
+ * Visitas: seguimiento del día de los asesores en campo, desde GET
+ * /visit-admin/today-visits (sólo hoy; los demás días quedan vacíos). Todo sale de
+ * los puntos que reporta cada asesor y de un minuto `t` que mueve la línea de
+ * tiempo; ranking, mapa y KPIs se recalculan a partir de ese minuto.
  */
 export default function VisitsView() {
   const { palette, isDark } = useVisitsPalette();
@@ -70,23 +70,20 @@ export default function VisitsView() {
   const offset = day.diff(today, "day");
   const dayMode: DayMode = offset < 0 ? "past" : offset > 0 ? "future" : "today";
   const future = dayMode === "future";
-  // Hoy corre a la hora simulada; un día pasado se ve cerrado y uno futuro, sin empezar.
-  const now = dayMode === "past" ? DAY_END_MIN : future ? DAY_START_MIN : MOCK_NOW_MINUTES;
+  const clock = useNowMinutes();
+  // Hoy corre a la hora real, dentro de la jornada (hasta montar no hay hora: arranca al
+  // inicio); un día pasado se ve cerrado y uno futuro, sin empezar.
+  const now =
+    dayMode === "past"
+      ? DAY_END_MIN
+      : future || clock == null
+        ? DAY_START_MIN
+        : Math.min(DAY_END_MIN, Math.max(DAY_START_MIN, clock));
 
-  const data = useMemo(() => buildMockVisitsDay(day, dayMode === "today"), [day, dayMode]);
-  const { advisors, clients, zones } = data;
-  const cityByZone = useMemo(
-    () => Object.fromEntries(zones.map((z) => [z.id, z.city] as const)),
-    [zones]
-  );
-  const zoneNames = useMemo(
-    () => Object.fromEntries(zones.map((z) => [z.id, z.name] as const)),
-    [zones]
-  );
-  const owners = useMemo(() => clientOwners(advisors), [advisors]);
-  const scheduledClients = useMemo(
-    () => clients.filter((c) => owners.has(c.id)),
-    [clients, owners]
+  const { todayVisits, isLoading, error } = useTodayVisits();
+  const advisors = useMemo(
+    () => (dayMode === "today" ? (todayVisits?.users.map(toLiveAdvisor) ?? []) : []),
+    [dayMode, todayVisits]
   );
 
   const [filters, setFilters] = useState<IVisitsFilters>(EMPTY_VISITS_FILTERS);
@@ -94,7 +91,6 @@ export default function VisitsView() {
   const query = normalizeQuery(search);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [dayModalId, setDayModalId] = useState<number | null>(null);
   const [layers, setLayers] = useState<IVisitsLayers>(() => layersFor(false));
   const [camera, setCamera] = useState<VisitsCameraRequest>({ id: 0, kind: "fit-all" });
   const requestCamera = useCallback(
@@ -104,48 +100,61 @@ export default function VisitsView() {
 
   const { t, playing, speed, seek, togglePlay, toggleSpeed, goLive, pause } = useVisitsPlayback(
     now,
-    data.date
+    day.format("YYYY-MM-DD")
   );
   const isLive = dayMode === "today" && t === now;
 
   const view = useMemo(() => {
-    const ctx: IVisibilityContext = { filters, query, t, cityByZone };
-    const states = new Map(advisors.map((a) => [a.id, stateAt(a, t)]));
-    const stateOf = (a: IVisitsAdvisor) => states.get(a.id) ?? stateAt(a, t);
-    const visible = advisors.filter((a) => isAdvisorVisible(a, stateOf(a).status, ctx));
-    const ranked = rankAdvisors(advisors, t);
+    const ctx: ILiveVisibilityContext = { filters, query };
+    const states = new Map(advisors.map((a) => [a.id, liveStateAt(a, t)]));
+    const stateOf = (a: ILiveAdvisor) => states.get(a.id) ?? liveStateAt(a, t);
+    const visible = advisors.filter((a) => isLiveVisible(a, stateOf(a).status, ctx));
     return {
       stateOf,
       visibleIds: new Set(visible.map((a) => a.id)),
-      rows: rankAdvisors(visible, t).map((advisor) => ({ advisor, state: stateOf(advisor) })),
-      kpis: teamKpis(visible, t),
-      counts: statusCounts(advisors, ctx),
-      ranks: new Map(ranked.map((a, i) => [a.id, i + 1])),
-      leaderId: ranked[0]?.id ?? null
+      rows: rankLiveAdvisors(visible).map((advisor) => ({ advisor, state: stateOf(advisor) })),
+      kpis: liveTeamKpis(visible, t),
+      counts: liveStatusCounts(advisors, t, ctx),
+      leaderId: rankLiveAdvisors(advisors)[0]?.id ?? null
     };
-  }, [advisors, filters, query, t, cityByZone]);
+  }, [advisors, filters, query, t]);
 
   // Las barras del equipo no dependen del cabezal: el estado de cada tramo hasta `now`.
   const buckets = useMemo(() => {
-    const ctx: IVisibilityContext = { filters, query, t: now, cityByZone };
-    const visibleNow = advisors.filter((a) => isAdvisorVisible(a, stateAt(a, now).status, ctx));
-    return overviewBuckets(visibleNow, now);
-  }, [advisors, filters, query, now, cityByZone]);
+    const ctx: ILiveVisibilityContext = { filters, query };
+    const visibleNow = advisors.filter((a) => isLiveVisible(a, liveStateAt(a, now).status, ctx));
+    return overviewBuckets(visibleNow, now, (a, minute) => liveStateAt(a, minute).status);
+  }, [advisors, filters, query, now]);
 
   const filtersActive = hasActiveFilters(filters, query);
   const selected = advisors.find((a) => a.id === selectedId) ?? null;
-  const dayModalAdvisor = advisors.find((a) => a.id === dayModalId) ?? null;
+  const emptyText =
+    dayMode !== "today"
+      ? NOT_FROM_API
+      : error
+        ? "No se pudieron cargar las visitas de hoy."
+        : isLoading
+          ? "Cargando asesores…"
+          : advisors.length
+            ? "Ningún asesor coincide con el filtro."
+            : "No hay asesores en campo hoy.";
+
+  // El primer encuadre llega antes que los datos: se repite cuando aparecen los asesores,
+  // también al volver a hoy desde otro día.
+  const hasAdvisors = advisors.length > 0;
+  useEffect(() => {
+    if (!hasAdvisors) return;
+    requestCamera(
+      selectedId != null ? { kind: "fit-advisor", advisorId: selectedId } : { kind: "fit-all" }
+    );
+  }, [hasAdvisors]);
 
   const changeDay = (next: Dayjs) => {
     const nextDay = next.startOf("day");
     if (nextDay.isSame(day, "day")) return;
     setDay(nextDay);
     setLayers(layersFor(nextDay.isAfter(today, "day")));
-    setDayModalId(null);
     setHoveredId(null);
-    requestCamera(
-      selectedId != null ? { kind: "fit-advisor", advisorId: selectedId } : { kind: "fit-all" }
-    );
   };
 
   const selectAdvisor = (id: number, focus?: LngLat) => {
@@ -161,16 +170,14 @@ export default function VisitsView() {
     requestCamera({ kind: "fit-all" });
   };
 
-  /** Parada de la ruta: el cabezal salta a su inicio (si ya pasó) y el mapa vuela a ella. */
-  const jumpToItem = (item: AdvisorItem) => {
-    if (!selected) return;
+  /** Pausa o visita de la ruta: el cabezal salta a su inicio y el mapa vuela a donde fue. */
+  const jumpToRun = (run: ILiveRun) => {
     pause();
-    if (item.start <= effectiveTime(selected, now)) seek(Math.min(now, Math.round(item.start + 1)));
-    requestCamera({
-      kind: "fly-to",
-      center: item.type === "visita" ? item.checkIn : item.position
-    });
+    seek(Math.min(now, Math.round(run.start + 1)));
+    requestCamera({ kind: "fly-to", center: run.position });
   };
+
+  const flyTo = (center: LngLat) => requestCamera({ kind: "fly-to", center });
 
   const changeFilters = (next: IVisitsFilters) => {
     setFilters(next);
@@ -188,14 +195,9 @@ export default function VisitsView() {
   const toggleLayer = (key: keyof IVisitsLayers) => setLayers((l) => ({ ...l, [key]: !l[key] }));
 
   const handleTogglePlay = () =>
-    togglePlay(selected ? Math.floor(selected.dayStart) - 10 : DAY_START_MIN);
+    togglePlay(selected?.dayStart != null ? Math.floor(selected.dayStart) - 10 : DAY_START_MIN);
 
   const handleGoLive = () => (dayMode === "today" ? goLive() : changeDay(today));
-
-  const showOnMap = (id: number) => {
-    setDayModalId(null);
-    selectAdvisor(id);
-  };
 
   // Atajos: espacio reproduce, flechas mueven 5 min, Esc suelta al asesor enfocado.
   const onKeyDown = useRef<(e: KeyboardEvent) => void>(() => {});
@@ -203,8 +205,6 @@ export default function VisitsView() {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     const target = e.target instanceof HTMLElement ? e.target : null;
     if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
-    // Con el modal del día abierto no se mueve nada detrás; Esc lo cierra el propio modal.
-    if (dayModalId != null) return;
     if (e.key === "Escape" && selectedId != null) {
       clearSelection();
     } else if (e.key === " " && !target?.closest("button, a, [role='button']")) {
@@ -243,8 +243,9 @@ export default function VisitsView() {
             value={filters}
             onChange={changeFilters}
             advisors={advisors}
-            zones={zones}
-            clients={scheduledClients}
+            // Zonas y clientes aún no llegan del API.
+            zones={[]}
+            clients={[]}
             future={future}
             barEnd={
               <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -270,26 +271,21 @@ export default function VisitsView() {
               state={view.stateOf(selected)}
               t={t}
               isLive={isLive}
-              dayMode={dayMode}
-              zoneName={zoneNames[selected.zoneId]}
               palette={palette}
               onBack={clearSelection}
-              onOpenDay={setDayModalId}
-              onJumpToItem={jumpToItem}
+              onJumpToRun={jumpToRun}
+              onFlyTo={flyTo}
             />
           ) : (
             <RankingPanel
               rows={view.rows}
               totalAdvisors={advisors.length}
-              kpis={view.kpis}
+              kpis={dayMode === "today" ? view.kpis : null}
               t={t}
-              now={now}
-              dayMode={dayMode}
-              zoneNames={zoneNames}
               palette={palette}
+              emptyText={emptyText}
               onSelect={selectAdvisor}
               onHover={setHoveredId}
-              onOpenDay={setDayModalId}
             />
           )}
         </aside>
@@ -297,8 +293,6 @@ export default function VisitsView() {
         <div className="col-start-2 row-start-2 min-h-0 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-3">
           <VisitsMap
             advisors={advisors}
-            clients={clients}
-            owners={owners}
             t={t}
             isLive={isLive}
             visibleIds={view.visibleIds}
@@ -309,10 +303,11 @@ export default function VisitsView() {
             layers={layers}
             palette={palette}
             isDark={isDark}
-            future={future}
             camera={camera}
+            notice={dayMode === "today" ? null : NOT_FROM_API}
             onSelectAdvisor={selectAdvisor}
-            onJumpToItem={jumpToItem}
+            onJumpToRun={jumpToRun}
+            onFlyTo={flyTo}
             onToggleLayer={toggleLayer}
           />
         </div>
@@ -334,20 +329,6 @@ export default function VisitsView() {
           />
         </div>
       </div>
-
-      <AdvisorDayModal
-        advisor={dayModalAdvisor}
-        t={t}
-        dayMode={dayMode}
-        dayLabel={dayMode === "today" ? "Hoy" : fmtDayLabel(day, today)}
-        rank={dayModalAdvisor ? view.ranks.get(dayModalAdvisor.id) ?? 0 : 0}
-        totalAdvisors={advisors.length}
-        zoneName={dayModalAdvisor ? zoneNames[dayModalAdvisor.zoneId] : ""}
-        palette={palette}
-        isDark={isDark}
-        onClose={() => setDayModalId(null)}
-        onShowOnMap={showOnMap}
-      />
     </div>
   );
 }

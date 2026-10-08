@@ -1,49 +1,52 @@
 "use client";
 
-import type { DayMode, IAdvisorState, IVisitsAdvisor, IVisitsPalette } from "../../types";
-import type { ITeamKpis } from "../../utils/visits-calc";
+import { MISSING } from "../../constants";
+import type { ILiveAdvisor, ILiveState, IVisitsPalette } from "../../types";
 import { fmtNumber } from "../../utils/visits-format";
+import type { ILiveTeamKpis } from "../../utils/visits-live";
 import RankingRow from "./ranking-row";
 
 interface RankingPanelProps {
-  /** Asesores visibles, ya en orden de ranking. */
-  rows: { advisor: IVisitsAdvisor; state: IAdvisorState }[];
+  /** Asesores visibles, ya en orden de ranking, con su estado en `t`. */
+  rows: { advisor: ILiveAdvisor; state: ILiveState }[];
   totalAdvisors: number;
-  kpis: ITeamKpis;
+  /** null cuando el día no viene del API: KPIs y contador en "XX". */
+  kpis: ILiveTeamKpis | null;
   t: number;
-  now: number;
-  dayMode: DayMode;
-  zoneNames: Record<string, string>;
   palette: IVisitsPalette;
+  /** Lo que dice la lista cuando no hay filas (cargando, error, sin coincidencias…). */
+  emptyText: string;
   onSelect: (id: number) => void;
   onHover: (id: number | null) => void;
-  onOpenDay: (id: number) => void;
 }
 
-/** Vista de equipo: KPIs del día y ranking de asesores por actividades exitosas. */
+/** Vista de equipo: KPIs del día y ranking de asesores, desde el API. */
 export default function RankingPanel({
   rows,
   totalAdvisors,
   kpis,
   t,
-  now,
-  dayMode,
-  zoneNames,
   palette,
+  emptyText,
   onSelect,
-  onHover,
-  onOpenDay
+  onHover
 }: RankingPanelProps) {
-  const counter =
-    rows.length === totalAdvisors
-      ? `${totalAdvisors} ${dayMode === "future" ? "programados" : dayMode === "past" ? "usuarios" : "en campo hoy"}`
+  const counter = !kpis
+    ? MISSING
+    : rows.length === totalAdvisors
+      ? `${totalAdvisors} en campo hoy`
       : `${rows.length} de ${totalAdvisors}`;
 
   const tiles = [
-    { label: "Activos", value: kpis.active, suffix: `/${kpis.total}` },
-    { label: "Visitas", value: kpis.visitsDone, suffix: `/${kpis.visitsPlanned}` },
-    { label: "Efect.", value: fmtNumber(kpis.effectivenessPct), suffix: "%" },
-    { label: "Actividades", value: kpis.activitiesOk, suffix: `/${kpis.activitiesGoal}` }
+    { label: "Activos", value: kpis?.active ?? MISSING, suffix: `/${kpis?.total ?? MISSING}` },
+    {
+      label: "Visitas",
+      value: kpis?.visitsDone ?? MISSING,
+      suffix: `/${kpis?.visitsPlanned ?? MISSING}`
+    },
+    { label: "Efect.", value: kpis ? fmtNumber(kpis.effectivenessPct) : MISSING, suffix: "%" },
+    // Las actividades aún no llegan del backend.
+    { label: "Actividades", value: MISSING, suffix: `/${MISSING}` }
   ];
 
   return (
@@ -78,19 +81,13 @@ export default function RankingPanel({
               state={state}
               position={i + 1}
               t={t}
-              now={now}
-              dayMode={dayMode}
-              zoneName={zoneNames[advisor.zoneId]}
               palette={palette}
               onSelect={onSelect}
               onHover={onHover}
-              onOpenDay={onOpenDay}
             />
           ))
         ) : (
-          <li className="px-2 py-3.5 text-xs text-muted-foreground">
-            Ningún asesor coincide con el filtro.
-          </li>
+          <li className="px-2 py-3.5 text-xs text-muted-foreground">{emptyText}</li>
         )}
       </ol>
     </div>

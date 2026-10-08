@@ -126,6 +126,72 @@ export interface IAdvisorState {
   signalLostAt?: number;
 }
 
+/** Tramo continuo en un mismo estado, armado con los puntos de `locations` del API. */
+export interface ILiveRun {
+  status: AdvisorStatus;
+  /** Etiqueta del backend (`state_name`). */
+  label: string;
+  start: number;
+  /** null mientras siga abierto: es el estado actual del asesor. */
+  end: number | null;
+  /** Dónde empezó el tramo. */
+  position: LngLat;
+}
+
+export interface ILiveNextVisit {
+  clientName: string;
+  /** NIT del cliente: hace las veces de su código. */
+  nit: string;
+  start: number;
+  end: number;
+  /** null mientras el cliente no tenga coordenadas. */
+  position: LngLat | null;
+}
+
+/**
+ * Asesor de GET /visit-admin/today-visits (cada `user` es un asesor). Los tiempos van
+ * en minutos desde medianoche. Lo que el backend aún no envía queda en null y se pinta
+ * "XX" (MISSING); "—" es para lo que llega, pero vacío.
+ */
+export interface ILiveAdvisor {
+  id: number;
+  name: string;
+  initials: string;
+  /** Estado actual según el backend: el que vale mientras no haya puntos. */
+  status: AdvisorStatus;
+  /** Etiqueta del backend (`state_name`). */
+  statusLabel: string;
+  /** completed + failed + pending = total; `done` = completed + failed. */
+  visits: { total: number; completed: number; failed: number; pending: number; done: number };
+  next: ILiveNextVisit | null;
+  /** Primer punto del día: inicio de jornada. */
+  dayStart: number | null;
+  /** Puntos del día en orden, con los km acumulados desde el primero. */
+  track: ITrackPoint[];
+  /** Tramos por estado, seguidos: cada uno termina donde empieza el siguiente. */
+  runs: ILiveRun[];
+  /* Aún no llegan del backend: siempre null por ahora. */
+  code: string | null;
+  zoneName: string | null;
+  project: AdvisorProject | null;
+  /** Meta diaria de actividades exitosas. */
+  goal: number | null;
+  activitiesOk: number | null;
+  battery: number | null;
+  gpsAccuracy: number | null;
+  /** Cliente de la visita en curso: hoy sólo llega `activeVisitId`. */
+  currentClient: string | null;
+}
+
+/** Estado de un asesor del API en un minuto dado. */
+export interface ILiveState {
+  status: AdvisorStatus;
+  /** Etiqueta del backend; "Sin iniciar" antes del primer punto. */
+  label: string;
+  /** Tramo en curso en ese minuto. */
+  run: ILiveRun | null;
+}
+
 export interface IVisitsLayers {
   track: boolean;
   plan: boolean;

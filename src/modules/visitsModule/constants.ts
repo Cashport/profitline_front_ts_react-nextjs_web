@@ -51,6 +51,19 @@ export const STATUS_ORDER: AdvisorStatus[] = [
 /** Estados que cuentan como activos en los KPIs y en las barras de la línea de tiempo. */
 export const ACTIVE_STATUSES: AdvisorStatus[] = ["visita", "transito", "pausa"];
 
+/** Dato que el backend aún no envía: se pinta así a propósito, para ver qué falta. */
+export const MISSING = "XX";
+
+/**
+ * Código de estado del API (`state`) → estado de la pantalla. Los códigos que no estén
+ * aquí se pintan como "nostart" (gris), con la etiqueta que manda el backend.
+ */
+export const API_STATUS: Record<string, AdvisorStatus> = {
+  IN_VISIT: "visita",
+  IN_TRANSIT: "transito",
+  ON_PAUSE: "pausa"
+};
+
 export const RESULT_LABELS: Record<VisitResult, string> = {
   efectiva: "Efectiva",
   reprogramada: "Reprogramada",

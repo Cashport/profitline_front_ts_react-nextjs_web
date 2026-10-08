@@ -1,5 +1,4 @@
 import {
-  ACTIVE_STATUSES,
   ACTIVITY_HOURS,
   DAY_START_MIN,
   PROJECTION_END_MIN,
@@ -10,6 +9,7 @@ import type {
   DayMode,
   IAdvisorState,
   IAdvisorVisit,
+  ITrackPoint,
   IVisitsAdvisor,
   IVisitsFilters,
   LngLat
@@ -35,8 +35,10 @@ export const effectiveTime = (a: IVisitsAdvisor, t: number) =>
   a.lastPing ? Math.min(t, a.lastPing) : t;
 
 /** Posición y km recorridos en el minuto `t`, interpolando el recorrido. */
-export function positionAt(a: IVisitsAdvisor, t: number): { position: LngLat; km: number } {
-  const track = a.track;
+export const positionAt = (a: IVisitsAdvisor, t: number) => positionOnTrack(a.track, t);
+
+/** Posición y km en el minuto `t` sobre un recorrido con al menos un punto. */
+export function positionOnTrack(track: ITrackPoint[], t: number): { position: LngLat; km: number } {
   if (t <= track[0].t) return { position: track[0].position, km: 0 };
   for (let i = 1; i < track.length; i++) {
     const q = track[i];
@@ -173,40 +175,6 @@ export function statusCounts(advisors: IVisitsAdvisor[], ctx: IVisibilityContext
   return counts;
 }
 
-export interface ITeamKpis {
-  active: number;
-  total: number;
-  visitsDone: number;
-  visitsPlanned: number;
-  effectivenessPct: number;
-  activitiesOk: number;
-  activitiesGoal: number;
-}
-
-export function teamKpis(advisors: IVisitsAdvisor[], t: number): ITeamKpis {
-  const kpis: ITeamKpis = {
-    active: 0,
-    total: advisors.length,
-    visitsDone: 0,
-    visitsPlanned: 0,
-    effectivenessPct: 0,
-    activitiesOk: 0,
-    activitiesGoal: 0
-  };
-  let effective = 0;
-  advisors.forEach((a) => {
-    if (ACTIVE_STATUSES.includes(stateAt(a, t).status)) kpis.active++;
-    const done = completedVisits(a, t);
-    kpis.visitsDone += done.length;
-    kpis.visitsPlanned += visitsOf(a).length;
-    effective += done.filter((v) => v.result === "efectiva").length;
-    kpis.activitiesOk += okActivities(a, t);
-    kpis.activitiesGoal += a.goal;
-  });
-  kpis.effectivenessPct = kpis.visitsDone ? (effective / kpis.visitsDone) * 100 : 0;
-  return kpis;
-}
-
 export interface ITimelineBucket {
   start: number;
   counts: Partial<Record<AdvisorStatus, number>>;
@@ -214,13 +182,17 @@ export interface ITimelineBucket {
 }
 
 /** Barras de la vista general: estado de cada asesor a mitad de cada tramo, hasta `now`. */
-export function overviewBuckets(advisors: IVisitsAdvisor[], now: number): ITimelineBucket[] {
+export function overviewBuckets<A>(
+  advisors: A[],
+  now: number,
+  statusAt: (a: A, minute: number) => AdvisorStatus
+): ITimelineBucket[] {
   const out: ITimelineBucket[] = [];
   for (let m = DAY_START_MIN; m < now; m += TIMELINE_BUCKET_MIN) {
     const mid = m + TIMELINE_BUCKET_MIN / 2;
     const counts: Partial<Record<AdvisorStatus, number>> = {};
     advisors.forEach((a) => {
-      const { status } = stateAt(a, mid);
+      const status = statusAt(a, mid);
       counts[status] = (counts[status] ?? 0) + 1;
     });
     out.push({ start: m, counts, total: advisors.length });

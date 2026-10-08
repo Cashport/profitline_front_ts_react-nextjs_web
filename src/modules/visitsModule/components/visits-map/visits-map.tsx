@@ -4,34 +4,30 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl, {
   type GeoJSONSource,
   type Map as MapLibreMap,
+  type MapLayerMouseEvent,
   type Marker,
   type PaddingOptions,
   type Popup
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { MAP_CENTER, MAP_ZOOM, RESULT_LABELS, statusLabel } from "../../constants";
+import { MAP_CENTER, MAP_ZOOM, MISSING } from "../../constants";
 import type {
-  AdvisorItem,
-  IAdvisorVisit,
-  IVisitsAdvisor,
-  IVisitsClient,
+  ILiveAdvisor,
+  ILiveRun,
   IVisitsLayers,
   IVisitsPalette,
   LngLat,
   VisitsCameraRequest
 } from "../../types";
-import {
-  effectiveTime,
-  okActivities,
-  pendingVisits,
-  positionAt,
-  stateAt,
-  trackUntil,
-  visitPhase,
-  visitsOf
-} from "../../utils/visits-calc";
 import { fmtClock } from "../../utils/visits-format";
+import {
+  livePositionAt,
+  liveStateAt,
+  liveTrackUntil,
+  liveVisitRuns,
+  runPhase
+} from "../../utils/visits-live";
 import {
   applyAdvisorMarkerState,
   applyStopState,
@@ -55,10 +51,8 @@ import {
 } from "./map-style";
 
 interface VisitsMapProps {
-  advisors: IVisitsAdvisor[];
-  clients: IVisitsClient[];
-  /** Quién visita a cada cliente hoy. */
-  owners: Map<number, { advisor: IVisitsAdvisor; visit: IAdvisorVisit }>;
+  /** Asesores del día según el API; vacío en los días que aún no llegan. */
+  advisors: ILiveAdvisor[];
   t: number;
   isLive: boolean;
   /** Asesores que pasan filtros y búsqueda. */
@@ -71,25 +65,70 @@ interface VisitsMapProps {
   layers: IVisitsLayers;
   palette: IVisitsPalette;
   isDark: boolean;
-  future: boolean;
   camera: VisitsCameraRequest;
+  /** Aviso sobre el mapa cuando el día no trae datos. */
+  notice: string | null;
   onSelectAdvisor: (id: number, focus?: LngLat) => void;
-  onJumpToItem: (item: AdvisorItem) => void;
+  onJumpToRun: (run: ILiveRun) => void;
+  onFlyTo: (center: LngLat) => void;
   onToggleLayer: (key: keyof IVisitsLayers) => void;
 }
+
+type Phase = "done" | "now" | "pending";
+
+/** Lugar de una visita: dónde se hizo según los puntos, o la próxima si trae coordenadas. */
+interface IVisitPlace {
+  advisor: ILiveAdvisor;
+  position: LngLat;
+  phase: Phase;
+  title: string;
+  detail: string;
+}
+
+/** Visitas del asesor como lugares en el minuto `t`; de las hechas aún no llega el cliente. */
+function visitPlaces(a: ILiveAdvisor, t: number): IVisitPlace[] {
+  const places: IVisitPlace[] = liveVisitRuns(a).map((run) => ({
+    advisor: a,
+    position: run.position,
+    phase: runPhase(run, t),
+    title: MISSING,
+    detail: `${MISSING} · ${a.name}`
+  }));
+  if (a.next?.position) {
+    places.push({
+      advisor: a,
+      position: a.next.position,
+      phase: "pending",
+      title: a.next.clientName,
+      detail: `${a.next.nit} · ${a.name}`
+    });
+  }
+  return places;
+}
+
+/** Lo que falta: de la posición en `t` a la próxima visita, si trae coordenadas. */
+function planLine(a: ILiveAdvisor, t: number, color: string) {
+  const at = livePositionAt(a, t);
+  return at && a.next?.position ? lineFeatures([at.position, a.next.position], { color }) : [];
+}
+
+/** Lo que entra en el encuadre de un asesor: su recorrido y la próxima visita. */
+const framePoints = (a: ILiveAdvisor): LngLat[] => [
+  ...a.track.map((q) => q.position),
+  ...(a.next?.position ? [a.next.position] : [])
+];
 
 const FIT_ALL_PADDING: PaddingOptions = { top: 60, bottom: 40, left: 24, right: 24 };
 
 /**
  * Mapa de Visitas con MapLibre (la misma API de mapbox-gl 1.x que usa TMS, sin
  * token). Se crea una sola vez; cada cuadro sólo actualiza los datos de las
- * fuentes GeoJSON y la posición y clase de los marcadores.
+ * fuentes GeoJSON y la posición y clase de los marcadores. Todo sale de los puntos
+ * que reporta cada asesor (`locations` del API), interpolados en el minuto `t`.
  */
 export default function VisitsMap(props: VisitsMapProps) {
   const {
     advisors,
-    clients,
-    owners,
     t,
     isLive,
     visibleIds,
@@ -101,6 +140,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     palette,
     isDark,
     camera,
+    notice,
     onToggleLayer
   } = props;
 
@@ -110,7 +150,9 @@ export default function VisitsMap(props: VisitsMapProps) {
   const advisorMarkers = useRef(
     new Map<number, { marker: Marker; handles: AdvisorMarkerHandles }>()
   );
-  const stopMarkers = useRef<{ el: HTMLDivElement; visit: IAdvisorVisit }[]>([]);
+  const stopMarkers = useRef<{ el: HTMLDivElement; phaseAt: (t: number) => Phase }[]>([]);
+  /** Lugares de visita pintados: los eventos de la capa los buscan por su índice. */
+  const places = useRef<IVisitPlace[]>([]);
   const [ready, setReady] = useState(false);
 
   // Los eventos del mapa se registran una sola vez: leen siempre las props vigentes.
@@ -162,27 +204,21 @@ export default function VisitsMap(props: VisitsMapProps) {
       );
       OVERLAY_LAYERS.forEach((layer) => map.addLayer(layer));
 
+      const placeAt = (e: MapLayerMouseEvent) =>
+        places.current[Number(e.features?.[0]?.properties?.id)];
       map.on("mousemove", CLIENTS_LAYER, (e) => {
-        const id = Number(e.features?.[0]?.properties?.id);
-        const { clients: allClients, owners: allOwners } = latest.current;
-        const client = allClients.find((c) => c.id === id);
-        if (!client) return;
+        const place = placeAt(e);
+        if (!place) return;
         map.getCanvas().style.cursor = "pointer";
-        const owner = allOwners.get(id);
-        showTooltip(
-          client.position,
-          client.name,
-          `${client.code} · ${owner ? owner.advisor.name : "sin programar hoy"}`,
-          8
-        );
+        showTooltip(place.position, place.title, place.detail, 8);
       });
       map.on("mouseleave", CLIENTS_LAYER, () => {
         map.getCanvas().style.cursor = "";
         hideTooltip();
       });
       map.on("click", CLIENTS_LAYER, (e) => {
-        const owner = latest.current.owners.get(Number(e.features?.[0]?.properties?.id));
-        if (owner) latest.current.onSelectAdvisor(owner.advisor.id, owner.visit.client.position);
+        const place = placeAt(e);
+        if (place) latest.current.onSelectAdvisor(place.advisor.id, place.position);
       });
 
       setReady(true);
@@ -210,12 +246,13 @@ export default function VisitsMap(props: VisitsMapProps) {
     map.setLayoutProperty(BASEMAP_LAYERS.dark, "visibility", isDark ? "visible" : "none");
   }, [ready, isDark]);
 
-  // Un marcador por asesor; se rehacen al cambiar de día.
+  // Un marcador por asesor con puntos; se rehacen cuando cambian los datos.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     const markers = advisorMarkers.current;
     advisors.forEach((a) => {
+      if (!a.track.length) return;
       const handles = createAdvisorMarkerElement(a.initials);
       handles.root.addEventListener("click", (ev) => {
         ev.stopPropagation();
@@ -224,15 +261,14 @@ export default function VisitsMap(props: VisitsMapProps) {
       handles.root.addEventListener("mouseenter", () => {
         const entry = markers.get(a.id);
         if (!entry) return;
-        const s = stateAt(a, latest.current.t);
-        const client = s.item?.type === "visita" ? ` · ${s.item.client.name}` : "";
-        const detail = `${statusLabel(s.status, latest.current.future)}${client}`;
+        const s = liveStateAt(a, latest.current.t);
+        const client = s.status === "visita" ? ` · ${a.currentClient ?? MISSING}` : "";
         const { lng, lat } = entry.marker.getLngLat();
-        showTooltip([lng, lat], a.name, detail, 18);
+        showTooltip([lng, lat], a.name, `${s.label}${client}`, 18);
       });
       handles.root.addEventListener("mouseleave", hideTooltip);
       const marker = new maplibregl.Marker({ element: handles.root, anchor: "center" })
-        .setLngLat(a.base)
+        .setLngLat(a.track[0].position)
         .addTo(map);
       markers.set(a.id, { marker, handles });
     });
@@ -243,47 +279,64 @@ export default function VisitsMap(props: VisitsMapProps) {
     };
   }, [advisors]);
 
-  // Paradas numeradas y punto de inicio del asesor enfocado.
+  // Visitas numeradas, la próxima y el punto de inicio del asesor enfocado.
   useEffect(() => {
     const map = mapRef.current;
     const focused = advisors.find((a) => a.id === selectedId);
-    if (!map || !focused) return;
+    if (!map || !focused?.track.length) return;
     const markers: Marker[] = [];
-    const stops = visitsOf(focused).map((visit, k) => {
+    const addMarker = (el: HTMLElement, at: LngLat) => {
+      const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(at);
+      markers.push(marker.addTo(map));
+    };
+
+    const visitRuns = liveVisitRuns(focused);
+    const stops = visitRuns.map((run, k) => {
       const { root, body } = createStopMarkerElement(k + 1);
       root.addEventListener("click", (ev) => {
         ev.stopPropagation();
-        latest.current.onJumpToItem(visit);
+        latest.current.onJumpToRun(run);
       });
       root.addEventListener("mouseenter", () => {
-        const phase = visitPhase(visit, effectiveTime(focused, latest.current.t));
+        const phase = runPhase(run, latest.current.t);
         const detail =
           phase === "done"
-            ? `${fmtClock(visit.start)}–${fmtClock(visit.end)} · ${RESULT_LABELS[visit.result]}`
+            ? `${fmtClock(run.start)}–${fmtClock(run.end ?? run.start)} · ${MISSING}`
             : phase === "now"
-              ? `En curso desde ${fmtClock(visit.start)}`
-              : `ETA ${fmtClock(visit.start)}`;
-        showTooltip(visit.client.position, visit.client.name, detail, 14);
+              ? `En curso desde ${fmtClock(run.start)}`
+              : `Desde ${fmtClock(run.start)}`;
+        showTooltip(run.position, MISSING, detail, 14);
       });
       root.addEventListener("mouseleave", hideTooltip);
-      markers.push(
-        new maplibregl.Marker({ element: root, anchor: "center" })
-          .setLngLat(visit.client.position)
-          .addTo(map)
-      );
+      addMarker(root, run.position);
       // El estado se pinta en `body`: escribir clases en `root` borraría la de MapLibre.
-      return { el: body, visit };
+      return { el: body, phaseAt: (m: number) => runPhase(run, m) };
     });
+
+    const next = focused.next;
+    if (next?.position) {
+      const at = next.position;
+      const { root, body } = createStopMarkerElement(visitRuns.length + 1);
+      root.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        latest.current.onFlyTo(at);
+      });
+      root.addEventListener("mouseenter", () =>
+        showTooltip(at, next.clientName, `ETA ${fmtClock(next.start)}`, 14)
+      );
+      root.addEventListener("mouseleave", hideTooltip);
+      addMarker(root, at);
+      stops.push({ el: body, phaseAt: () => "pending" });
+    }
+
+    const start = focused.track[0].position;
     const startEl = createStartMarkerElement();
     startEl.addEventListener("mouseenter", () =>
-      showTooltip(focused.base, "Punto de inicio", undefined, 10)
+      showTooltip(start, "Punto de inicio", undefined, 10)
     );
     startEl.addEventListener("mouseleave", hideTooltip);
-    markers.push(
-      new maplibregl.Marker({ element: startEl, anchor: "center" })
-        .setLngLat(focused.base)
-        .addTo(map)
-    );
+    addMarker(startEl, start);
+
     stopMarkers.current = stops;
     return () => {
       markers.forEach((m) => m.remove());
@@ -302,16 +355,17 @@ export default function VisitsMap(props: VisitsMapProps) {
 
     advisors.forEach((a) => {
       const entry = advisorMarkers.current.get(a.id);
-      if (!entry) return;
-      const status = stateAt(a, t).status;
-      entry.marker.setLngLat(positionAt(a, effectiveTime(a, t)).position);
+      const at = livePositionAt(a, t);
+      if (!entry || !at) return;
+      const { status } = liveStateAt(a, t);
+      entry.marker.setLngLat(at.position);
       applyAdvisorMarkerState(entry.handles, {
         color: palette.status[status],
         selected: selectedId === a.id,
         hovered: hoveredId === a.id,
         lost: status === "sinsenal",
         pulse: isLive && (status === "visita" || status === "transito"),
-        count: okActivities(a, t),
+        count: a.activitiesOk,
         leader: leaderId === a.id
       });
       const opacity = focused ? (focused.id === a.id ? 1 : 0.28) : visibleIds.has(a.id) ? 1 : 0.18;
@@ -320,97 +374,57 @@ export default function VisitsMap(props: VisitsMapProps) {
         selectedId === a.id ? "3" : hoveredId === a.id ? "2" : "";
     });
 
-    // Vista de equipo: recorrido hecho y plan pendiente de los asesores visibles.
+    // Vista de equipo: recorrido hecho y lo que falta hasta la próxima visita.
     const overview = focused ? [] : advisors.filter((a) => visibleIds.has(a.id));
     setData(
       SOURCES.tracks,
       featureCollection(
         layers.track
-          ? overview.flatMap((a) => lineFeatures(trackUntil(a, t), { color: palette.ink3 }))
+          ? overview.flatMap((a) => lineFeatures(liveTrackUntil(a, t), { color: palette.ink3 }))
           : []
       )
     );
     setData(
       SOURCES.plans,
-      featureCollection(
-        layers.plan
-          ? overview.flatMap((a) =>
-              stateAt(a, t).status === "fin"
-                ? []
-                : lineFeatures(
-                    [
-                      positionAt(a, effectiveTime(a, t)).position,
-                      ...pendingVisits(a, t).map((v) => v.client.position)
-                    ],
-                    { color: palette.ink2 }
-                  )
-            )
-          : []
-      )
+      featureCollection(layers.plan ? overview.flatMap((a) => planLine(a, t, palette.ink2)) : [])
     );
 
-    // Clientes: color del resultado, verde de marca en visita, anillo si está pendiente.
-    const dots = clients.flatMap((c) => {
-      const owner = owners.get(c.id);
-      let color = palette.ink3;
-      let fill = 0.35;
-      let radius = 3;
-      if (owner) {
-        const phase = visitPhase(owner.visit, effectiveTime(owner.advisor, t));
-        if (phase === "done") {
-          color = palette.result[owner.visit.result];
-          fill = 0.95;
-          radius = 4.5;
-        } else if (phase === "now") {
-          color = palette.accent;
-          fill = 1;
-          radius = 5.5;
-        } else {
-          color = palette.bone;
-          fill = 0;
-          radius = 4;
-        }
-      }
-      const matches = !filtersActive || (owner && visibleIds.has(owner.advisor.id));
+    // Lugares de visita: verde de marca la que está en curso y anillo la pendiente. Las
+    // hechas van en gris mientras no llegue su resultado.
+    places.current = advisors.flatMap((a) => visitPlaces(a, t));
+    const dots = places.current.flatMap((p, id) => {
+      const matches = !filtersActive || visibleIds.has(p.advisor.id);
       const opacity = focused || !layers.clients ? 0 : matches ? 1 : 0.12;
       if (!opacity) return [];
+      const style =
+        p.phase === "done"
+          ? { color: palette.ink3, radius: 4.5, fill: 0.95 }
+          : p.phase === "now"
+            ? { color: palette.accent, radius: 5.5, fill: 1 }
+            : { color: palette.bone, radius: 4, fill: 0 };
       return [
-        pointFeature<ClientDotProperties>(c.position, {
-          id: c.id,
-          color,
-          radius,
-          fillOpacity: fill * opacity,
+        pointFeature<ClientDotProperties>(p.position, {
+          id,
+          color: style.color,
+          radius: style.radius,
+          fillOpacity: style.fill * opacity,
           strokeOpacity: opacity * 0.95
         })
       ];
     });
     setData(SOURCES.clients, featureCollection(dots));
 
-    // Asesor enfocado: su recorrido con contorno, lo que falta y el estado de cada parada.
+    // Asesor enfocado: su recorrido con contorno, lo que falta y el estado de cada visita.
     if (focused) {
-      const te = effectiveTime(focused, t);
       setData(
         SOURCES.focusTrack,
         featureCollection(
-          lineFeatures(trackUntil(focused, t), { color: palette.accent, under: palette.under })
+          lineFeatures(liveTrackUntil(focused, t), { color: palette.accent, under: palette.under })
         )
       );
-      setData(
-        SOURCES.focusPlan,
-        featureCollection(
-          stateAt(focused, t).status === "fin"
-            ? []
-            : lineFeatures(
-                [
-                  positionAt(focused, te).position,
-                  ...pendingVisits(focused, t).map((v) => v.client.position)
-                ],
-                { color: palette.ink }
-              )
-        )
-      );
-      stopMarkers.current.forEach(({ el, visit }) =>
-        applyStopState(el, visitPhase(visit, te), palette.result[visit.result])
+      setData(SOURCES.focusPlan, featureCollection(planLine(focused, t, palette.ink)));
+      stopMarkers.current.forEach(({ el, phaseAt }) =>
+        applyStopState(el, phaseAt(t), palette.ink3)
       );
     } else {
       setData(SOURCES.focusTrack, featureCollection([]));
@@ -419,8 +433,6 @@ export default function VisitsMap(props: VisitsMapProps) {
   }, [
     ready,
     advisors,
-    clients,
-    owners,
     t,
     isLive,
     visibleIds,
@@ -451,12 +463,10 @@ export default function VisitsMap(props: VisitsMapProps) {
       map.flyTo({ center: camera.center, zoom: 16, duration: 700 });
     } else if (camera.kind === "fit-advisor") {
       const a = advisors.find((x) => x.id === camera.advisorId);
-      if (a) fit([a.base, ...visitsOf(a).map((v) => v.client.position)], 70);
+      if (a) fit(framePoints(a), 70);
     } else {
-      const points = advisors
-        .filter((a) => visibleIds.has(a.id))
-        .flatMap((a) => visitsOf(a).map((v) => v.client.position));
-      fit(points.length ? points : clients.map((c) => c.position), FIT_ALL_PADDING);
+      const points = advisors.filter((a) => visibleIds.has(a.id)).flatMap(framePoints);
+      fit(points.length ? points : advisors.flatMap(framePoints), FIT_ALL_PADDING);
     }
   }, [ready, camera.id]);
 
@@ -468,9 +478,16 @@ export default function VisitsMap(props: VisitsMapProps) {
       <MapOverlays
         layers={layers}
         onToggleLayer={onToggleLayer}
-        focused={selectedId != null}
+        focused={advisors.some((a) => a.id === selectedId)}
         palette={palette}
       />
+      {notice && (
+        <div className="pointer-events-none absolute inset-0 z-[3] grid place-items-center p-4">
+          <span className="rounded-lg border border-border bg-card/95 px-3 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+            {notice}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

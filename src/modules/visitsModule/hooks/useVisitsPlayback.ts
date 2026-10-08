@@ -4,7 +4,8 @@ import { DAY_START_MIN, PLAYBACK_SPEEDS, PLAYBACK_TICK_MS } from "../constants";
 
 /**
  * Cabezal de la línea de tiempo: el minuto `t` que se mira, entre el inicio de la
- * jornada y `now`. Al cambiar de día (`resetKey`) vuelve a `now` y se detiene.
+ * jornada y `now`. Al cambiar de día (`resetKey`) vuelve a `now` y se detiene; si sólo
+ * avanza el reloj de hoy, lo sigue cuando estaba en vivo y si no, se queda donde está.
  */
 export function useVisitsPlayback(now: number, resetKey: string) {
   const [t, setT] = useState(now);
@@ -13,12 +14,14 @@ export function useVisitsPlayback(now: number, resetKey: string) {
 
   // Se ajusta durante el render (no en un efecto) para no pintar un cuadro del día
   // nuevo con el minuto del anterior.
-  const key = `${resetKey}|${now}`;
-  const [prevKey, setPrevKey] = useState(key);
-  if (prevKey !== key) {
-    setPrevKey(key);
+  const [prev, setPrev] = useState({ key: resetKey, now });
+  if (prev.key !== resetKey) {
+    setPrev({ key: resetKey, now });
     setT(now);
     setPlaying(false);
+  } else if (prev.now !== now) {
+    setPrev({ key: resetKey, now });
+    if (t === prev.now) setT(now);
   }
 
   useEffect(() => {

@@ -4,91 +4,53 @@ import { MapPin } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 
-import { PROJECTS } from "../../constants";
-import type { DayMode, IAdvisorState, IVisitsAdvisor, IVisitsPalette } from "../../types";
-import { completedVisits, okActivities, visitsOf } from "../../utils/visits-calc";
+import { MISSING, PROJECTS } from "../../constants";
+import type { ILiveAdvisor, ILiveState, IVisitsPalette } from "../../types";
 import { fmtClock, fmtDuration } from "../../utils/visits-format";
 
 interface RankingRowProps {
-  advisor: IVisitsAdvisor;
-  state: IAdvisorState;
+  advisor: ILiveAdvisor;
+  /** Estado en el minuto que se mira. */
+  state: ILiveState;
   /** Puesto dentro de la lista visible (1 = primero). */
   position: number;
   t: number;
-  now: number;
-  dayMode: DayMode;
-  zoneName: string;
   palette: IVisitsPalette;
   onSelect: (id: number) => void;
   onHover: (id: number | null) => void;
-  onOpenDay: (id: number) => void;
 }
 
-/** Qué hace el asesor (estado + detalle) y dónde está, como lo cuenta la fila. */
-function describe(
-  a: IVisitsAdvisor,
-  s: IAdvisorState,
-  t: number,
-  now: number,
-  dayMode: DayMode,
-  zoneName: string
-) {
-  const done = completedVisits(a, t);
-  const planned = visitsOf(a);
-  const last = done[done.length - 1];
-  let status: string;
+/** Detalle del estado y dónde está, como lo cuenta la fila; "XX" en lo que aún no llega. */
+function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
+  const since = s.run ? fmtDuration(t - s.run.start) : null;
+  const zone = a.zoneName ?? MISSING;
   let detail: string | null = null;
   let where: string;
 
   switch (s.status) {
-    case "visita": {
-      const client = s.item?.type === "visita" ? s.item.client.name : "";
-      status = a.fixed ? "En punto" : "En visita";
-      detail = a.fixed
-        ? `desde ${fmtClock(s.item?.start ?? t)}`
-        : fmtDuration(t - (s.item?.start ?? t));
-      where = client;
+    case "visita":
+      detail = since;
+      where = a.currentClient ?? MISSING;
       break;
-    }
     case "transito":
-      status = "En tránsito";
-      detail = s.next ? `ETA ${fmtClock(s.next.start)}` : null;
-      where = s.next ? `Hacia ${s.next.client.name}` : `Zona ${zoneName}`;
+      detail = a.next ? `ETA ${fmtClock(a.next.start)}` : null;
+      where = a.next ? `Hacia ${a.next.clientName}` : `Zona ${zone}`;
       break;
     case "pausa":
-      status = "En pausa";
-      detail = fmtDuration(t - (s.item?.start ?? t));
-      where = last ? `Cerca de ${last.client.name}` : `Zona ${zoneName}`;
-      break;
-    case "sinsenal": {
-      const lost = s.signalLostAt ?? t;
-      const at = s.item?.type === "visita" ? ` en ${s.item.client.name}` : "";
-      status = "Sin señal";
-      detail = fmtDuration(t - lost);
-      where = `Última vez ${fmtClock(lost)}${at}`;
-      break;
-    }
-    case "nostart":
-      if (dayMode === "future") {
-        status = "Programado";
-        detail = `${planned.length} visitas`;
-        where = planned[0]
-          ? `Primera visita ${fmtClock(planned[0].start)} · ${planned[0].client.name}`
-          : "Sin visitas";
-      } else {
-        status = "Sin iniciar";
-        where =
-          dayMode === "today" && a.dayStart > now
-            ? `No ha abierto jornada · ${planned.length} programadas`
-            : `Inicia ${fmtClock(a.dayStart)}`;
-      }
+      detail = since;
+      // El día simulado nombraba el último cliente visitado; el API aún no lo envía.
+      where = `Cerca de ${MISSING}`;
       break;
     default:
-      status = "Jornada cerrada";
-      where = last ? `Última visita ${fmtClock(last.end)} · ${last.client.name}` : "Sin visitas";
+      // Sin iniciar (antes del primer punto) o un estado que aún no se mapea.
+      where = !s.run
+        ? `No ha abierto jornada · ${a.visits.total} programadas`
+        : a.next
+          ? `Próxima ${fmtClock(a.next.start)} · ${a.next.clientName}`
+          : "Sin visitas pendientes";
   }
 
-  return { status, detail, where: `${where} · ${zoneName}` };
+  return { detail, where: `${where} · ${zone}` };
 }
 
 export default function RankingRow({
@@ -96,22 +58,17 @@ export default function RankingRow({
   state,
   position,
   t,
-  now,
-  dayMode,
-  zoneName,
   palette,
   onSelect,
-  onHover,
-  onOpenDay
+  onHover
 }: RankingRowProps) {
   const color = palette.status[state.status];
-  const ok = okActivities(a, t);
-  const ratio = ok / a.goal;
-  const low = ratio < 0.35;
-  const doneCount = completedVisits(a, t).length;
-  const { status, detail, where } = describe(a, state, t, now, dayMode, zoneName);
-  // El podio sólo se pinta si ya hay actividades: con todos en cero no hay líder.
-  const podium = position <= 3 && ok > 0 ? position : 0;
+  const project = a.project ? PROJECTS[a.project] : null;
+  const ratio = a.activitiesOk != null && a.goal ? a.activitiesOk / a.goal : null;
+  const low = ratio == null || ratio < 0.35;
+  const { detail, where } = describe(a, state, t);
+  // Mientras no lleguen las actividades, el podio sale de las visitas efectivas.
+  const podium = position <= 3 && a.visits.completed > 0 ? position : 0;
 
   return (
     <li
@@ -145,7 +102,7 @@ export default function RankingRow({
         <div className="flex min-w-0 items-baseline gap-1.5">
           <span className="min-w-0 truncate text-[13px] font-semibold text-foreground">{a.name}</span>
           <span className="shrink-0 whitespace-nowrap rounded bg-secondary px-[5px] py-px text-[9.5px] font-semibold text-muted-foreground">
-            {PROJECTS[a.project].name}
+            {project?.name ?? MISSING}
           </span>
         </div>
         <div className="truncate text-[11.5px] text-muted-foreground">
@@ -154,7 +111,7 @@ export default function RankingRow({
               className="mr-[5px] inline-block h-1.5 w-1.5 rounded-full align-[1px]"
               style={{ background: color }}
             />
-            {status}
+            {state.label}
           </b>
           {detail && ` · ${detail}`}
         </div>
@@ -166,33 +123,28 @@ export default function RankingRow({
 
       <div
         className="flex flex-col items-end gap-[3px] pt-px"
-        title={`Actividades · ${PROJECTS[a.project].definition}`}
+        title={`Actividades · ${project?.definition ?? MISSING}`}
       >
-        <button
-          type="button"
-          title="Ver cómo va en el día"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenDay(a.id);
-          }}
+        {/* Sin abrir el día: su modal sigue con datos simulados. */}
+        <span
           className={cn(
-            "flex h-[26px] min-w-[50px] items-center justify-center gap-0.5 rounded-lg px-2 transition-colors",
-            low
-              ? "bg-secondary text-foreground hover:bg-border"
-              : "bg-[#cbe71e] text-[#141414] hover:bg-[#b9d417]"
+            "flex h-[26px] min-w-[50px] items-center justify-center gap-0.5 rounded-lg px-2",
+            low ? "bg-secondary text-foreground" : "bg-[#cbe71e] text-[#141414]"
           )}
         >
-          <b className="text-[15px] font-bold tracking-[-0.02em]">{ok}</b>
+          <b className="text-[15px] font-bold tracking-[-0.02em]">{a.activitiesOk ?? MISSING}</b>
           <small
             className={cn("text-[11px] font-medium", low ? "text-muted-foreground" : "text-[#3d4a00]")}
           >
-            /{a.goal}
+            /{a.goal ?? MISSING}
           </small>
-        </button>
+        </span>
         <span className="whitespace-nowrap text-[10.5px] text-muted-foreground">
-          <b className="font-semibold text-foreground">{Math.round(ratio * 100)}%</b>
+          <b className="font-semibold text-foreground">
+            {ratio != null ? Math.round(ratio * 100) : MISSING}%
+          </b>
           {" · "}
-          {a.fixed ? "fijo" : `${doneCount}/${visitsOf(a).length} vis.`}
+          {a.visits.done}/{a.visits.total} vis.
         </span>
       </div>
     </li>

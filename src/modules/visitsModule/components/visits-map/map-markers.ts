@@ -1,5 +1,7 @@
 import { cn } from "@/utils/utils";
 
+import { MISSING } from "../../constants";
+
 /* Marcadores del mapa como elementos DOM. El elemento raíz es de MapLibre: le pone
    su clase (maplibregl-marker, que lo posiciona) y lo mueve con `transform`, así que
    las clases de estado y las escalas van siempre en un hijo. Viven dentro de
@@ -49,7 +51,8 @@ export interface AdvisorMarkerState {
   lost: boolean;
   /** En vivo y en visita o tránsito: anillo que late. */
   pulse: boolean;
-  count: number;
+  /** Actividades exitosas; null mientras no lleguen del backend ("XX"). */
+  count: number | null;
   /** Primero del ranking: conteo en negro con verde. */
   leader: boolean;
 }
@@ -66,13 +69,13 @@ export function applyAdvisorMarkerState(h: AdvisorMarkerHandles, s: AdvisorMarke
     )
   );
   setClass(h.ring, cn(ADVISOR_RING, !s.pulse && "hidden"));
-  const count = String(s.count);
+  const count = s.count == null ? MISSING : String(s.count);
   if (h.badge.textContent !== count) h.badge.textContent = count;
   setClass(
     h.badge,
     cn(
       BADGE,
-      s.count === 0 ? BADGE_ZERO : s.leader && BADGE_LEADER,
+      !s.count ? BADGE_ZERO : s.leader && BADGE_LEADER,
       (s.selected || s.hovered) && "scale-[.8]"
     )
   );

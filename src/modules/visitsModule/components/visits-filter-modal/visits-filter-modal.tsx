@@ -23,7 +23,6 @@ import {
 import type {
   AdvisorProject,
   AdvisorStatus,
-  IVisitsAdvisor,
   IVisitsClient,
   IVisitsFilters,
   IVisitsZone,
@@ -38,7 +37,7 @@ const TRIGGER_CLASS =
 interface VisitsFilterModalProps {
   value: IVisitsFilters;
   onChange: (next: IVisitsFilters) => void;
-  advisors: IVisitsAdvisor[];
+  advisors: { id: number; name: string }[];
   zones: IVisitsZone[];
   /** Clientes con visita programada en el día. */
   clients: IVisitsClient[];

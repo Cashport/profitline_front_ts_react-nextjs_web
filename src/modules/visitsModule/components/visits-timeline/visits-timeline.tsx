@@ -9,19 +9,14 @@ import {
   ACTIVE_STATUSES,
   DAY_END_MIN,
   DAY_START_MIN,
+  MISSING,
   STATUS_LABELS,
   TIMELINE_BUCKET_MIN
 } from "../../constants";
-import type { AdvisorStatus, DayMode, IVisitsAdvisor, IVisitsPalette } from "../../types";
-import {
-  advisorSegments,
-  effectiveTime,
-  visitsOf,
-  type IAdvisorSegment,
-  type ITimelineBucket,
-  type SegmentKind
-} from "../../utils/visits-calc";
+import type { AdvisorStatus, DayMode, ILiveAdvisor, IVisitsPalette } from "../../types";
+import type { IAdvisorSegment, ITimelineBucket, SegmentKind } from "../../utils/visits-calc";
 import { fmtClock, fmtDuration } from "../../utils/visits-format";
+import { liveSegments } from "../../utils/visits-live";
 
 interface VisitsTimelineProps {
   t: number;
@@ -32,7 +27,7 @@ interface VisitsTimelineProps {
   /** Barras de todo el equipo; se ignoran cuando hay un asesor enfocado. */
   buckets: ITimelineBucket[];
   /** Asesor enfocado: la línea muestra sus tramos en lugar del equipo. */
-  advisor: IVisitsAdvisor | null;
+  advisor: ILiveAdvisor | null;
   palette: IVisitsPalette;
   onTogglePlay: () => void;
   onToggleSpeed: () => void;
@@ -90,7 +85,12 @@ export default function VisitsTimeline({
   }, []);
 
   const hours = width < 260 ? [7, 12, 17] : width < 480 ? [7, 10, 13, 16] : [7, 9, 11, 13, 15, 17];
-  const segments = advisor ? advisorSegments(advisor, now) : [];
+  const segments = advisor ? liveSegments(advisor, now) : [];
+  // De la ruta sólo llega la próxima visita: se marca mientras no empiece.
+  const upcoming =
+    advisor?.next && advisor.next.start > now
+      ? { left: pct(advisor.next.start), right: pct(Math.min(advisor.next.end, DAY_END_MIN)) }
+      : null;
   const isLive = dayMode === "today" && t === now;
   const legend: AdvisorStatus[] = advisor ? [...ACTIVE_STATUSES, "sinsenal"] : ACTIVE_STATUSES;
 
@@ -134,11 +134,8 @@ export default function VisitsTimeline({
             label: `${STATUS_LABELS[k]} acumulado`,
             value: fmtDuration(totals[k] ?? 0)
           })),
-        {
-          color: palette.ink,
-          label: "Actividades",
-          value: String(advisor.activities.filter((g) => g.ok && g.t <= m).length)
-        }
+        // Las actividades aún no llegan del backend.
+        { color: palette.ink, label: "Actividades", value: MISSING }
       ]
     };
   };
@@ -257,7 +254,7 @@ export default function VisitsTimeline({
 
             {advisor && (
               <>
-                {advisor.dayStart > DAY_START_MIN && (
+                {advisor.dayStart != null && advisor.dayStart > DAY_START_MIN && (
                   <span
                     className="absolute bottom-0 left-0 h-1.5 rounded-[2px] opacity-35"
                     style={{
@@ -273,32 +270,17 @@ export default function VisitsTimeline({
                     style={segmentStyle(s)}
                   />
                 ))}
-                {advisor.activities
-                  .filter((g) => g.ok && g.t <= effectiveTime(advisor, now))
-                  .map((g) => (
-                    <span
-                      key={g.t}
-                      className="absolute bottom-[31px] h-[3px] w-0.5 rounded-[1px]"
-                      style={{
-                        left: `${pct(g.t)}%`,
-                        background: palette.ink,
-                        opacity: g.t > t ? 0.3 : 1
-                      }}
-                    />
-                  ))}
-                {visitsOf(advisor)
-                  .filter((v) => v.start > effectiveTime(advisor, now))
-                  .map((v) => (
-                    <span
-                      key={v.client.id}
-                      className="absolute bottom-0 box-border h-[30px] rounded-[2px] border border-b-0 border-dashed"
-                      style={{
-                        left: `${pct(v.start)}%`,
-                        width: `calc(${pct(Math.min(v.end, DAY_END_MIN)) - pct(v.start)}% - 1px)`,
-                        borderColor: palette.ink3
-                      }}
-                    />
-                  ))}
+                {/* Las actividades aún no llegan del backend: sin sus marcas. */}
+                {upcoming && (
+                  <span
+                    className="absolute bottom-0 box-border h-[30px] rounded-[2px] border border-b-0 border-dashed"
+                    style={{
+                      left: `${upcoming.left}%`,
+                      width: `calc(${upcoming.right - upcoming.left}% - 1px)`,
+                      borderColor: palette.ink3
+                    }}
+                  />
+                )}
               </>
             )}
           </div>

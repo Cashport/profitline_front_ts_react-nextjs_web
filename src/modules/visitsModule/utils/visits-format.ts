@@ -1,6 +1,22 @@
-import type { Dayjs } from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Fecha ISO (o Dayjs) → minutos desde medianoche en hora local, la unidad de la jornada. */
+export const minutesOfDay = (value: string | Dayjs) => {
+  const d = dayjs(value);
+  return d.diff(d.startOf("day"), "minute", true);
+};
+
+/** "Felipe Angarita" → "FA"; tres letras como máximo. */
+export const initialsOf = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 3)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
 /** Minutos desde medianoche → "14:20". */
 export const fmtClock = (minutes: number) => {

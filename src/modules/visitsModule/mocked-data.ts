@@ -21,6 +21,7 @@ import type {
   LngLat,
   VisitResult
 } from "./types";
+import { initialsOf } from "./utils/visits-format";
 
 /** Hora simulada de "ahora" para el día de hoy: cuando llegue el API será el reloj real. */
 export const MOCK_NOW_MINUTES = 14 * 60 + 20;
@@ -137,12 +138,6 @@ function shuffle<T>(items: T[], random: Random): T[] {
 
 /** Distancia aproximada en km entre dos puntos [lat, lng] cercanos (Bogotá). */
 const distanceKm = (a: LatLng, b: LatLng) => Math.hypot(a[0] - b[0], (a[1] - b[1]) * 0.997) * 111.2;
-
-const initialsOf = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .join("");
 
 interface InternalClient {
   client: IVisitsClient;
