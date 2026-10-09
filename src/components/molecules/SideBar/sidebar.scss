@@ -14,11 +14,23 @@
     position: relative;
     box-shadow: 7px 1px 5px 2px #f0f0f0;
 
+    // logo + module-buttons group: allow it to shrink below its content height so the
+    // buttons list can scroll instead of clipping / pushing the logout button off-screen
+    .modulesGroup {
+        min-height: 0;
+    }
+
+    // keep the logout button anchored/visible when the module list overflows
+    .exit {
+        flex-shrink: 0;
+    }
+
     .logoContainer {
         display: flex;
         border: none;
         cursor: pointer;
         margin-bottom: 2rem;
+        flex-shrink: 0; // keep the logo full size; only the button list absorbs the shrink
         border: 1px solid transparent;
         transition: all 0.3s ease;
         border-radius: 8px;
@@ -42,21 +54,6 @@
         aspect-ratio: 1 / 1 !important;
         padding: 12px 6px;
     }
-}
-
-.mainLarge {
-    width: 272px;
-    height: 100%;
-    background-color: $white;
-    border-radius: 0 1rem 1rem 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3rem 0;
-    padding-top: 5rem;
-    position: relative;
-    box-shadow: 7px 1px 5px 2px #f0f0f0;
 }
 
 // Mobile menu wrapper styles
@@ -120,5 +117,31 @@
         .buttonExit {
             padding: 4px 2px;
         }
+    }
+}
+
+// Dark theme overrides — active only when a .dark ancestor is present
+// (ComercioLayout sets it on the ViewWrapper root). Light mode is unchanged.
+.dark {
+    .sidebar.main {
+        background-color: rgb(var(--sidebar));
+        box-shadow: 7px 1px 12px 2px rgba(0, 0, 0, 0.45);
+
+        .logoContainer:hover {
+            border-color: rgb(var(--sidebar-border));
+        }
+    }
+
+    .mobileMenuWrapper {
+        background-color: rgb(var(--sidebar));
+        border-top-color: rgb(var(--sidebar-border));
+        box-shadow: 1px 25px 58px -29px rgba(0, 0, 0, 0.7);
+    }
+
+    .buttonExit,
+    .buttonMenu {
+        // AntD text-buttons keep a dark color; force light so the logout arrow and the
+        // mobile hamburger-menu icon stay visible on the dark sidebar
+        color: rgb(var(--sidebar-foreground)) !important;
     }
 }

@@ -1,0 +1,176 @@
+@import "@/styles/variables.scss";
+
+.uploadPurchaseOrdersSummaryModal {
+    .ant-modal-content {
+        padding: 1.75rem !important;
+        border-radius: 12px;
+    }
+
+    &__titleIcon {
+        color: #1aaa55;
+    }
+
+    &__successBanner {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: rgba(26, 170, 85, 0.1);
+        color: #1aaa55;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(26, 170, 85, 0.25);
+    }
+
+    &__tiles {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    &__tile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        background-color: $background;
+        border: 1px solid $dark-gray;
+        border-radius: 0.625rem;
+        min-width: 0;
+        transition:
+            border-color 0.2s ease,
+            transform 0.2s ease;
+
+        &:hover {
+            border-color: $secondary;
+            transform: translateY(-1px);
+        }
+
+        &--highlight {
+            display: flex;
+            align-items: center;
+            background-color: $light-yellow;
+            border: 1px solid $secondary;
+            box-shadow: inset 0 0 0 1px $secondary;
+            border-radius: 0.625rem;
+            padding: 0.875rem 1rem;
+
+            .uploadPurchaseOrdersSummaryModal__tileValue {
+                color: $black;
+            }
+
+            .uploadPurchaseOrdersSummaryModal__tileLabel {
+                color: $black !important;
+                opacity: 0.7;
+            }
+
+            .uploadPurchaseOrdersSummaryModal__tileIcon {
+                background-color: $white;
+                border: 1px solid $secondary;
+            }
+        }
+    }
+
+    &__tileIcon {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $white;
+        border: 1px solid $dark-gray;
+        border-radius: 0.5rem;
+        color: $black;
+    }
+
+    &__tileContent {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__tileLabel {
+        font-size: 0.7rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: $gray !important;
+        line-height: 1.2;
+    }
+
+    &__tileValue {
+        font-size: 1rem !important;
+        color: $black;
+        word-break: break-word;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+    &__tableWrapper {
+        border: 1px solid $dark-gray;
+        border-radius: 0.625rem;
+        padding: 0.75rem;
+        background-color: $white;
+
+        // Oculta el selector "10 / page" del paginador por defecto de antd
+        .ant-pagination-options-size-changer,
+        .ant-pagination-options {
+            display: none !important;
+        }
+    }
+
+    &__tableHeader {
+        padding: 0.25rem 0.5rem 0.75rem;
+    }
+
+    &__tableHint {
+        font-size: 0.8rem;
+    }
+
+    &__mono {
+        font-family: $font-mono-space;
+        color: $black;
+    }
+
+    &__address {
+        font-size: 0.85rem;
+    }
+
+    &__ok {
+        background-color: $secondary !important;
+        border-color: $secondary !important;
+        color: $black !important;
+        font-weight: 600 !important;
+        box-shadow: none !important;
+
+        &:hover {
+            background-color: darken($secondary, 5%) !important;
+            border-color: darken($secondary, 5%) !important;
+            color: $black !important;
+        }
+    }
+}
+
+@media (max-width: 992px) {
+    .uploadPurchaseOrdersSummaryModal {
+        &__tiles {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .uploadPurchaseOrdersSummaryModal {
+        &__tiles {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .uploadPurchaseOrdersSummaryModal {
+        &__tiles {
+            grid-template-columns: 1fr;
+        }
+    }
+}

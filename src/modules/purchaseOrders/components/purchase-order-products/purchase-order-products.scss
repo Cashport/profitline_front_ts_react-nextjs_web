@@ -1,0 +1,6 @@
+@import "@/styles/variables.scss";
+
+.batch-select-dropdown .ant-select-item-option-selected {
+    background-color: $secondary !important;
+    border-radius: 8px;
+}

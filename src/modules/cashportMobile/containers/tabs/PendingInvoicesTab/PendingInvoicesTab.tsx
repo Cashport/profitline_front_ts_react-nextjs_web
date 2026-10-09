@@ -1,39 +1,26 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flex } from "antd";
-import { PlusCircle } from "@phosphor-icons/react";
+import { CaretDown, CaretUp } from "@phosphor-icons/react";
 
 import PendingInvoiceCard from "@/modules/cashportMobile/components/PendingInvoiceCard/PendingInvoiceCard";
-import CreditBalanceCard from "@/modules/cashportMobile/components/CreditBalanceCard/CreditBalanceCard";
 
 import "./pendingInvoicesTab.scss";
-
-interface Invoice {
-  id: string | number;
-  code: string;
-  date: string;
-  isPastDue?: boolean;
-  formattedAmount: string;
-  formattedOriginalAmount?: string;
-}
-
-interface CreditBalance {
-  id: string | number;
-  description: string;
-  date: string;
-  formattedAmount: string;
-}
+import { InvoiceFormated } from "@/types/clients/IClients";
 
 export interface PendingInvoicesTabProps {
-  pendingInvoices: Invoice[];
-  creditBalances: CreditBalance[];
+  pendingInvoices: InvoiceFormated[];
 }
 const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
-  pendingInvoices,
-  creditBalances
+  pendingInvoices
 }) => {
   const router = useRouter();
+  const [showAll, setShowAll] = useState(false);
+  const INITIAL_COUNT = 5;
+
+  const visibleInvoices = showAll ? pendingInvoices : pendingInvoices.slice(0, INITIAL_COUNT);
+  const hasMore = pendingInvoices.length > INITIAL_COUNT;
 
   const handleClickInvoice = (invoiceId: string | number) => {
     router.push(`/mobile/invoice/${invoiceId}`);
@@ -42,13 +29,14 @@ const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
   return (
     <Flex className="pendingInvoicesTab" vertical gap="2rem">
       <Flex vertical gap="0.5rem">
-        {pendingInvoices.map((invoice: Invoice) => (
+        {visibleInvoices.map((invoice: InvoiceFormated) => (
           <PendingInvoiceCard
             key={invoice.id}
             invoice={{
               id: invoice.id,
               code: invoice.code,
               date: invoice.date,
+              status: invoice.status as any,
               isPastDue: invoice.isPastDue || false,
               formattedAmount: invoice.formattedAmount,
               formattedOriginalAmount: invoice.formattedOriginalAmount
@@ -58,21 +46,14 @@ const PendingInvoicesTab: React.FC<PendingInvoicesTabProps> = ({
         ))}
       </Flex>
 
-      {creditBalances.length > 0 && (
-        <Flex vertical gap="1rem">
-          <h4 className="pendingInvoicesTab__title">Saldo a favor</h4>
-
-          <Flex vertical gap="0.5rem">
-            {creditBalances.map((credit) => (
-              <CreditBalanceCard key={credit.id} credit={credit} />
-            ))}
-          </Flex>
-
-          <button className="pendingInvoicesTab__reportButton">
-            Reportar novedad
-            <PlusCircle size={14} />
-          </button>
-        </Flex>
+      {hasMore && (
+        <button
+          className="pendingInvoicesTab__seeMoreButton"
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? "Ver menos" : "Ver más"}
+          {showAll ? <CaretUp size={14} /> : <CaretDown size={14} />}
+        </button>
       )}
     </Flex>
   );

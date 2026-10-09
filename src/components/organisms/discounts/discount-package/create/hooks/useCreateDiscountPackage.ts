@@ -6,14 +6,15 @@ import { useRouter } from "next/navigation";
 import { message } from "antd";
 import { DiscountPackageSchema, generalResolver } from "../resolvers/generaResolver";
 import useSWR from "swr";
-import { fetcher } from "@/utils/api/api";
+import { ApiError, fetcher } from "@/utils/api/api";
 import { createDiscountPackage, getOneDiscountPackage } from "@/services/discount/discount.service";
 import { Discount } from "@/types/discount/DiscountPackage";
 import { mapGetOneToDiscountPackageSchema } from "../logic/createPackageLogic";
 import { useClientsGroups } from "@/hooks/useClientsGroups";
+import { useDiscountsBasePath } from "../../../hooks/useDiscountsBasePath";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 export interface DiscountListData {
   status: number;
@@ -26,6 +27,10 @@ export default function useCreateDiscountPackage({ params }: Props) {
   const { ID: projectId } = useAppStore((project) => project.selectedProject);
 
   const router = useRouter();
+  // The page knows which shell it belongs to; the pathname hook is only a fallback.
+  const fallbackBasePath = useDiscountsBasePath();
+  const basePath = params?.basePath ?? fallbackBasePath;
+  const listPath = params?.listPath ?? basePath;
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -59,7 +64,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
     } catch (e: any) {
       messageApi.error(e.message);
       console.error(e.message);
-      router.push("/descuentos");
+      router.push(listPath);
     }
     return defaultDiscount;
   };
@@ -95,9 +100,9 @@ export default function useCreateDiscountPackage({ params }: Props) {
     name: "secondaryDiscounts"
   });
 
-    const { clients, loading: isLoadingClients } = useClientsGroups({
-      noLimit: true
-    });
+  const { clients, loading: isLoadingClients } = useClientsGroups({
+    noLimit: true
+  });
 
   const { data: dataDiscountList, isLoading: isLoadingSelect } = useSWR<DiscountListData>(
     `/discount/discounts-to-apply/project/${projectId}`,
@@ -105,21 +110,49 @@ export default function useCreateDiscountPackage({ params }: Props) {
     {}
   );
 
-  const optionsDiscounts = useMemo(
+  const CROSS_DISCOUNT_TYPE_IDS = [3, 4];
+
+  const optionsPrimaryDiscounts = useMemo(
     () =>
-      dataDiscountList?.data.map((option) => ({
-        value: option.id,
-        label: option.discount_name ?? ""
-      })),
+      dataDiscountList?.data
+        .filter((option) => !CROSS_DISCOUNT_TYPE_IDS.includes(option.discount_type_id!))
+        .map((option) => ({
+          value: option.id,
+          label: option.discount_name ?? ""
+        })),
     [dataDiscountList]
   );
 
-  const discountList = useMemo(
+  const optionsSecondaryDiscounts = useMemo(
     () =>
-      dataDiscountList?.data.map((discount) => ({
-        ...discount,
-        packageId: discount.id
-      })),
+      dataDiscountList?.data
+        .filter((option) => CROSS_DISCOUNT_TYPE_IDS.includes(option.discount_type_id!))
+        .map((option) => ({
+          value: option.id,
+          label: option.discount_name ?? ""
+        })),
+    [dataDiscountList]
+  );
+
+  const primaryDiscountList = useMemo(
+    () =>
+      dataDiscountList?.data
+        .filter((discount) => !CROSS_DISCOUNT_TYPE_IDS.includes(discount.discount_type_id!))
+        .map((discount) => ({
+          ...discount,
+          packageId: discount.id
+        })),
+    [dataDiscountList]
+  );
+
+  const secondaryDiscountList = useMemo(
+    () =>
+      dataDiscountList?.data
+        .filter((discount) => CROSS_DISCOUNT_TYPE_IDS.includes(discount.discount_type_id!))
+        .map((discount) => ({
+          ...discount,
+          packageId: discount.id
+        })),
     [dataDiscountList]
   );
 
@@ -129,7 +162,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
 
   useEffect(() => {
     if (!Number(params?.id) && typeof params?.id === "string") {
-      router.push("/descuentos");
+      router.push(listPath);
     }
   }, [params?.id]);
 
@@ -144,9 +177,13 @@ export default function useCreateDiscountPackage({ params }: Props) {
     try {
       const res = await createDiscountPackage({ ...e, project_id: projectId });
       messageApi.success("Descuento creado exitosamente");
-      router.push(`/descuentos/paquete/${res.id}`);
+      router.push(`${basePath}/paquete/${res.id}`);
     } catch (e: any) {
-      messageApi.error(e.response.data.message);
+      if (e instanceof ApiError) {
+        messageApi.error(e.message);
+      } else {
+        messageApi.error(e.response.data.message);
+      }
       console.error(e);
     } finally {
       setLoading(false);
@@ -160,6 +197,7 @@ export default function useCreateDiscountPackage({ params }: Props) {
 
   return {
     form,
+    listPath,
     handleExecCallback,
     loading,
     statusForm,
@@ -179,9 +217,11 @@ export default function useCreateDiscountPackage({ params }: Props) {
     removeDiscount,
     removeAdditionalDiscount,
     watch,
-    optionsDiscounts,
+    optionsPrimaryDiscounts,
+    optionsSecondaryDiscounts,
     isLoadingSelect,
-    discountList,
+    primaryDiscountList,
+    secondaryDiscountList,
     discountId: discountPackageId,
     isFormDisabled: disabled,
     clients,

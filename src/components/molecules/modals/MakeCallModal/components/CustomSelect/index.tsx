@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button, Select, SelectProps, Tag, Typography } from "antd";
 import { Flex } from "antd";
 import styles from "./CustomSelect.module.scss"; // Archivo de estilos opcional
@@ -30,7 +30,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       onChange(selectedOption);
     }
   };
-  const handleRemove = (phone: string) => {
+  const handleRemove = () => {
     onChange(null);
   };
   return (
@@ -49,7 +49,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 backgroundColor: "transparent"
               }}
               closeIcon={<X />}
-              onClose={() => handleRemove(opt.phone)}
+               onClose={handleRemove}
             >
               {opt.name}
             </Tag>

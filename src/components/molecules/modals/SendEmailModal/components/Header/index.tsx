@@ -65,7 +65,7 @@ export const Header = ({
             onClick={handleRestore}
           />
         )}
-        <Button type="text" icon={<X color="#ffffff" size={20} />} onClick={onClose} />
+        <Button type="text" icon={<X color="#ffffff" size={20} />} onClick={() => onClose()} />
       </Flex>
     </div>
   );

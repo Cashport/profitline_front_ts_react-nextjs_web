@@ -9,6 +9,8 @@ interface InfoSectionProps {
   responsable: string;
   fecha: string;
   cliente: string;
+  clienteId?: string;
+  projectId?: string | number;
   aprobadores: Array<{ nombre: string; estado: "pendiente" | "aprobado" }>;
 }
 
@@ -16,6 +18,8 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   responsable,
   fecha,
   cliente,
+  clienteId,
+  projectId,
   aprobadores
 }) => {
   return (
@@ -30,7 +34,18 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       </div>
       <div className="info-row">
         <IconLabel icon={<ShoppingBag size={20} />} text={`Cliente: `} />
-        <p>{cliente}</p>
+        {clienteId && projectId !== undefined ? (
+          <a
+            className="client-link"
+            href={`/clientes/detail/${clienteId}/project/${projectId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {cliente}
+          </a>
+        ) : (
+          <p>{cliente}</p>
+        )}
       </div>
       <div className="info-row">
         <IconLabel icon={<Users size={20} />} text="Aprobadores:" />

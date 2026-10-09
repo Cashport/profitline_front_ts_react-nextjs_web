@@ -124,3 +124,16 @@ interface ISelectType {
   value: number;
   label: string;
 }
+
+export interface IUser {
+  id: number;
+  user_name: string;
+  email: string;
+  project_id: number;
+}
+
+// GET /user/lte/:projectId/by-role: las mismas filas que /user/lte, con el rol en el proyecto.
+export interface IUserWithRole extends IUser {
+  rol_id: number;
+  rol_name: string;
+}

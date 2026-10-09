@@ -26,39 +26,29 @@ export const getContact = async (clientId: string, contactId: number): Promise<I
 };
 
 export const postContact = async (contact: ICreateEditContact): Promise<genericResponse> => {
-  try {
-    const response: genericResponse = await API.post(`${config.API_HOST}/client/contact`, contact);
+  const response: genericResponse = await API.post(`/client/contact`, contact);
 
-    return response;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return response;
 };
 
 export const putContact = async (
   contact: ICreateEditContact,
   contactId: number
 ): Promise<genericResponse> => {
-  try {
-    const response: genericResponse = await API.put(
-      `${config.API_HOST}/client/contact/${contactId}`,
-      contact
-    );
+  const response: genericResponse = await API.put(`/client/contact/${contactId}`, contact);
 
-    return response;
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return response;
 };
 
 export const deleteContact = async (
   contactsIds: { contacts_ids: number[] },
+  inactivate: boolean,
   clientId: string,
   projectId: number
 ): Promise<genericResponse> => {
   try {
     const customConfig = {
-      data: contactsIds
+      data: { contacts_ids: contactsIds.contacts_ids, inactivate }
     };
 
     const response: genericResponse = await API.delete(

@@ -1,15 +1,18 @@
 import config from "@/config";
-import { API } from "@/utils/api/api";
+import instance, { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IApplicationInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 import { IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { StatusGroup } from "@/hooks/useAcountingAdjustment";
+import { IApplicationBalanceStatusGroup } from "@/types/applyTabClients/IApplyTabClients";
 import { CLIENTUUID_DEMO, PROJECTID_DEMO } from "@/utils/constants/globalConstants";
+import { getCorrectMimeType } from "@/utils/files/getCorrectMimeType";
+import { balanceLegalization } from "../accountingAdjustment/accountingAdjustment";
 
 export const addItemsToTable = async (
   project_id: number,
   client_id: string,
-  adding_type: "invoices" | "payments" | "discounts",
+  adding_type: "invoices" | "payments" | "credit_notes" | "balances",
   selected_items_ids: number[]
 ) => {
   const modelData = {
@@ -17,10 +20,11 @@ export const addItemsToTable = async (
     clientUUID: client_id,
     ...(adding_type === "invoices" && { invoice_ids: selected_items_ids }),
     ...(adding_type === "payments" && { payment_ids: selected_items_ids }),
-    ...(adding_type === "discounts" && { discount_ids: selected_items_ids })
+    ...(adding_type === "credit_notes" && { discount_ids: selected_items_ids }),
+    ...(adding_type === "balances" && { balance_ids: selected_items_ids })
   };
   try {
-    const response: GenericResponse<{ applications: number[] }> = await API.post(
+    const response: GenericResponse<{ applications: number[] }> = await instance.post(
       `${config.API_HOST}/paymentApplication/applications/batch`,
       modelData
     );
@@ -157,7 +161,7 @@ export const saveApplication = async ({
     formData.append("useExistingFile", "true"); // O "1"
   } else if (file) {
     // Adjunta el archivo, pero NO el flag
-    formData.append("files", file);
+    formData.append("files", getCorrectMimeType(file));
   }
 
   try {
@@ -197,6 +201,18 @@ export const getApplicationPayments = async (project_id: number, client_id: stri
     return response.data;
   } catch (error) {
     console.error("error getApplicationPayments", error);
+    throw error;
+  }
+};
+
+export const getApplicationBalances = async (project_id: number, client_id: string) => {
+  try {
+    const response: GenericResponse<IApplicationBalanceStatusGroup[]> = await API.get(
+      `${config.API_HOST}/financial-discount/balances/project/${project_id}/client/${client_id}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error getApplicationBalances", error);
     throw error;
   }
 };
@@ -251,12 +267,9 @@ export const applyWithCashportAI = async (
   if (comment) formData.append("content", comment);
 
   try {
-    const isDemo =
-      projectId === PROJECTID_DEMO && clientId === CLIENTUUID_DEMO;
+    const isDemo = projectId === PROJECTID_DEMO && clientId === CLIENTUUID_DEMO;
 
-    const endpoint = isDemo
-      ? config.API_APPLY_TAB_AI_DEMO!
-      : config.API_APPLY_TAB_AI!;
+    const endpoint = isDemo ? config.API_APPLY_TAB_AI_DEMO! : config.API_APPLY_TAB_AI!;
 
     const response: GenericResponse<any> = await API.post(endpoint, formData);
 
@@ -324,8 +337,7 @@ export const createPrompt = async (
   prompt: string
 ) => {
   try {
-    const isInvalidClientUUID =
-      clientUUID == null || clientUUID === "" || clientUUID === "0";
+    const isInvalidClientUUID = clientUUID == null || clientUUID === "" || clientUUID === "0";
 
     const validClientUUID = isInvalidClientUUID ? CLIENTUUID_DEMO : clientUUID;
 
@@ -335,7 +347,7 @@ export const createPrompt = async (
         id_project: projectId,
         clientUUID: validClientUUID,
         id_ai_type_task: aiTypeTaskId,
-        prompt: prompt,
+        prompt: prompt
       }
     );
 
@@ -345,7 +357,6 @@ export const createPrompt = async (
     throw error;
   }
 };
-
 
 export interface IPrompt {
   id: number;
@@ -364,10 +375,7 @@ export const getPromptByClientAndAITask = async (
 ) => {
   try {
     const validClientUUID =
-      clientUUID === undefined ||
-      clientUUID === null ||
-      clientUUID === "" ||
-      clientUUID === "0"
+      clientUUID === undefined || clientUUID === null || clientUUID === "" || clientUUID === "0"
         ? CLIENTUUID_DEMO
         : clientUUID;
 
@@ -376,7 +384,7 @@ export const getPromptByClientAndAITask = async (
       {
         id_project: projectId,
         clientUUID: validClientUUID,
-        id_ai_type_task: aiTypeTaskId,
+        id_ai_type_task: aiTypeTaskId
       }
     );
 
@@ -386,7 +394,6 @@ export const getPromptByClientAndAITask = async (
     throw error;
   }
 };
-
 
 export const updatePrompt = async (id: number, prompt: string, updatedBy: string) => {
   try {
@@ -399,6 +406,19 @@ export const updatePrompt = async (id: number, prompt: string, updatedBy: string
     return response.data;
   } catch (error) {
     console.error("error updatePrompt", error);
+    throw error;
+  }
+};
+
+export const getApplicationsExcelLog = async (project_id: number, clientUUID: string) => {
+  try {
+    const response: GenericResponse<{ excel_url: string; file_name: string }> = await API.get(
+      `${config.API_HOST}/paymentApplication/applications/excel?project_id=${project_id}&clientUUID=${clientUUID}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("error getApplicationsExcelLog", error);
     throw error;
   }
 };

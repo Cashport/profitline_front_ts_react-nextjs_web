@@ -1,5 +1,15 @@
 @import "@/styles/variables.scss";
 
+.generateActionButton {
+    padding: 0.75rem 1rem !important;
+    background-color: $background !important;
+    border: solid 1px transparent !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 3rem !important;
+}
+
 .confirmedOrderView {
     display: flex;
     flex-direction: column;
@@ -27,7 +37,7 @@
 
     &__content {
         z-index: 2;
-        width: 800px;
+        width: 90%;
         border-radius: 1rem;
         box-shadow: 0px 4px 44px 0px rgba(0, 0, 0, 0.14);
 
@@ -52,7 +62,7 @@
                     font-size: 2.5rem;
                     font-weight: 600;
                     color: $white;
-                    max-width: 400px;
+                    white-space: nowrap;
                 }
             }
 
@@ -67,7 +77,7 @@
 
             &__top {
                 padding: 1.5rem;
-                padding-top: 2.5rem;
+                padding-top: 1.625rem;
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem;
@@ -82,9 +92,15 @@
                     }
 
                     .quantity {
-                        font-size: 1.125rem;
+                        font-size: 0.875rem;
                         font-weight: 500;
                         color: $black;
+                    }
+
+                    .quantities {
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 1.5rem;
                     }
                 }
 
@@ -162,6 +178,13 @@
                 font-weight: 500;
                 color: $gray;
             }
+
+            &__separator {
+                width: 100%;
+                height: 1px;
+                margin: 0.25rem 0;
+                background-color: $light-gray;
+            }
         }
     }
 }
@@ -187,6 +210,14 @@
 @media screen and (max-width: 800px) {
     .confirmedOrderView {
         &__content {
+            &__header {
+                .title {
+                    h2 {
+                        white-space: normal;
+                    }
+                }
+            }
+
             .summaryContainer {
                 &__top {
                     .categories {
@@ -204,6 +235,24 @@
                     .discountsContainer {
                         &__discounts {
                             grid-template-columns: 1fr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 420px) {
+    .confirmedOrderView {
+        &__content {
+            .summaryContainer {
+                &__top {
+                    &__header {
+                        .quantities {
+                            flex-direction: column;
+                            align-items: flex-end;
+                            gap: 0.5rem;
                         }
                     }
                 }

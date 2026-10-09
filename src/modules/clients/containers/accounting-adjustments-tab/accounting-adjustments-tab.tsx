@@ -11,7 +11,7 @@ import { useModalDetail } from "@/context/ModalContext";
 import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useFinancialDiscounts } from "@/hooks/useFinancialDiscounts";
 import { useDebounce } from "@/hooks/useDeabouce";
-import { ClientDetailsContext } from "../client-details/client-details";
+import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-context";
 
 import LabelCollapse from "@/components/ui/label-collapse";
 import UiSearchInput from "@/components/ui/search-input";
@@ -19,6 +19,7 @@ import AccountingAdjustmentsTable from "@/modules/clients/components/accounting-
 import Collapse from "@/components/ui/collapse";
 import { SelectedFiltersAccountingAdjustments } from "@/components/atoms/Filters/FilterAccountingAdjustmentTab/FilterAccountingAdjustmentTab";
 import { ModalActionAccountingAdjustments } from "@/components/molecules/modals/ModalActionAccountingAdjustments/ModalActionAccountingAdjustments";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 
 import {
   FinancialDiscount,
@@ -49,18 +50,16 @@ const AccountingAdjustmentsTab = () => {
     zones: [],
     channels: []
   });
-  const JustOthersMotiveType = 2; // no trae ajustes financieros
   const {
     data,
     isLoading,
     mutate: mutateFinancialDiscounts
   } = useFinancialDiscounts({
     clientId,
-    id: debouncedSearchQuery ? parseInt(debouncedSearchQuery) : undefined,
+    search: debouncedSearchQuery ? debouncedSearchQuery : undefined,
     line: filters.lines,
     zone: filters.zones,
-    channel: filters.channels,
-    motive_id: JustOthersMotiveType
+    channel: filters.channels
   });
 
   const { clientFilters } = useContext(ClientDetailsContext);
@@ -113,7 +112,7 @@ const AccountingAdjustmentsTab = () => {
       await addItemsToTable(
         Number(projectId) || 0,
         clientId,
-        "discounts",
+        "credit_notes",
         selectedRows?.map((adjustment) => adjustment.id) || []
       );
       setIsModalOpen({ selected: 0 });
@@ -143,8 +142,21 @@ const AccountingAdjustmentsTab = () => {
     setIsModalOpen({ selected });
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value?.trim();
+    // Separar los IDs por saltos de línea y luego unirlos con comas
+    const formattedValue = value.split(/\s+/).join(",");
+    setSearch(formattedValue);
+  };
   return (
     <>
+      {selectedRows && selectedRows.length > 0 && (
+        <DraggableTotalModal
+          totalAmount={selectedRows.reduce((acc, adjustment) => acc + adjustment.current_value, 0)}
+          itemName="Ajustes"
+          count={selectedRows.length}
+        />
+      )}
       <div className="accountingAdjustmentsTab">
         <Flex
           justify="space-between"
@@ -154,9 +166,7 @@ const AccountingAdjustmentsTab = () => {
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar"
-              onChange={(event) => {
-                setSearch(event.target.value);
-              }}
+              onChange={handleSearchChange}
             />
             {/* <AccountingAdjustmentsFilter onFilterChange={setFilters} /> */}
             <Button
@@ -196,6 +206,7 @@ const AccountingAdjustmentsTab = () => {
                     openAdjustmentDetail={handleOpenAdjustmentDetail}
                     financialStatusId={financialState.status_id}
                     legalized={financialState.legalized}
+                    isSearchActive={Boolean(debouncedSearchQuery)}
                     selectedRows={selectedRows?.map((item) => ({
                       ...item,
                       label_status_id: financialState.status_id

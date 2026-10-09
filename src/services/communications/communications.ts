@@ -10,8 +10,14 @@ import {
   ICommunicationForm,
   ICreateCommunication,
   IPeriodicityModalForm,
+  ICreateCommunicationTemplate,
+  IMassiveCommunicationTemplate,
   ITemplateCommunication,
-  Iattachments
+  Iattachments,
+  IValidatedClients,
+  IGetValidatedClientsResponse,
+  IMessagePreview,
+  ICircularizationClientContacts
 } from "@/types/communications/ICommunications";
 import { GenericResponse } from "@/types/global/IGlobal";
 import { IFormEmailNotification } from "@/components/molecules/modals/ModalSendEmail/ModalSendEmail";
@@ -77,6 +83,7 @@ export const getSubActions = async (action_ids: string[]): Promise<IGetSelect[]>
 
 interface IGetTags extends IGetSelect {
   description: string;
+  mock: string;
 }
 
 export const getTemplateTags = async (): Promise<IGetTags[]> => {
@@ -105,13 +112,10 @@ interface ICreateCommunicationProps {
 export const createCommunication = async ({
   data,
   selectedPeriodicity,
-  zones,
-  selectedBusinessRules,
   assignedGroups,
   projectId,
   showMessage
 }: ICreateCommunicationProps) => {
-  const token = await getIdToken();
   const eventTriggerDays = data?.trigger?.settings?.noticeDaysEvent;
 
   const sendToRoles = data.template.send_to
@@ -210,23 +214,24 @@ export const createCommunication = async ({
 export const sendEmailNotification = async (data: IFormEmailNotification) => {
   const token = await getIdToken();
 
-  const modelData = {
-    subject: data.subject,
-    body: data.body,
-    to: data.forward_to.map((email) => email.value),
-    copy: data.copy_to?.map((email) => email.value),
-    files: data.attachments
-  };
-
   const formData = new FormData();
 
-  // for each of the keys in the data object, append the key and value to the formData object
-  Object.entries(modelData).forEach(([key, value]) => {
-    if (key === "files" && Array.isArray(value)) {
-      value.forEach((file) => formData.append("files", file));
-    } else if (value !== undefined && value !== null && value !== "") {
-      formData.append(key, typeof value === "string" ? value : JSON.stringify(value));
-    }
+  formData.append("subject", data.subject);
+  formData.append("body", data.body);
+
+  // PARA
+  data.forward_to.forEach((email) => {
+    formData.append("to[]", email.value);
+  });
+
+  // CC
+  data.copy_to?.forEach((email) => {
+    formData.append("copy[]", email.value);
+  });
+
+  // ARCHIVOS
+  data.attachments.forEach((file) => {
+    formData.append("files", file);
   });
 
   try {
@@ -260,6 +265,171 @@ export const getTemplateByEvent = async (
     return response.data;
   } catch (error) {
     console.error("Error getting template by event", error);
+    throw error;
+  }
+};
+
+export const sendIndividualCommunication = async (projectId: number, communicationId: number) => {
+  const body = {
+    id_project: projectId,
+    id_comunicacion: communicationId
+  };
+
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/activate`,
+      body
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending individual communication", error);
+    throw error;
+  }
+};
+
+export const sendEmailCommunicationFromCache = async (communicationId: number) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/activate-from-cache`,
+      { id_comunicacion: communicationId }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending communication from cache", error);
+    throw error;
+  }
+};
+
+export const sendWhatsappComunicationFromCache = async (whatsappTemplateId: string) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/cashport-whatsapp/send-template-bulk`,
+      { templateId: whatsappTemplateId }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error sending whatsapp communication from cache", error);
+    throw error;
+  }
+};
+
+export const createCommunicationTemplate = async (body: ICreateCommunicationTemplate) => {
+  try {
+    const response: GenericResponse<any> = await API.post(`${config.API_HOST}/comunication`, body);
+    return response;
+  } catch (error) {
+    console.error("Error creating communication template", error);
+    throw error;
+  }
+};
+
+export const getMassiveCommunicationTemplates = async () => {
+  try {
+    const response: IMassiveCommunicationTemplate[] = await API.get(
+      `${config.API_HOST}/comunication/available-to-massive`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting massive communication templates", error);
+    throw error;
+  }
+};
+
+export const validateClients = async (clientIds: string[]) => {
+  try {
+    const response: GenericResponse<IValidatedClients[]> = await API.post(
+      `${config.API_HOST}/comunication/validate-client-list`,
+      { client_ids: clientIds }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error validating clients", error);
+    throw error;
+  }
+};
+
+export const getCurrentValidatedClients = async () => {
+  try {
+    const response: GenericResponse<IGetValidatedClientsResponse[]> = await API.get(
+      `${config.API_HOST}/comunication/my-client-list`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting current validated clients", error);
+    throw error;
+  }
+};
+
+export const activateCircularizationClients = async (
+  communicationId: number,
+  clientIds: string[]
+) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/activate-clients`,
+      { id_comunicacion: communicationId, client_ids: clientIds }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error activating circularization clients", error);
+    throw error;
+  }
+};
+
+export const getCircularizationMessagePreview = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<IMessagePreview> = await API.get(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}/message-preview`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting circularization message preview", error);
+    throw error;
+  }
+};
+
+export const getCircularizationClientContacts = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<ICircularizationClientContacts[]> = await API.get(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}/contacts`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error getting circularization client contacts", error);
+    throw error;
+  }
+};
+
+export const addClientToCircularization = async (communicationId: number, clientIds: string[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients`,
+      { client_ids: clientIds }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error adding client to circularization", error);
+    throw error;
+  }
+};
+
+export const removeClientFromCircularization = async (
+  communicationId: number,
+  clientId: string
+) => {
+  try {
+    const response: GenericResponse<any> = await API.delete(
+      `${config.API_HOST}/comunication/circularizations/${communicationId}/clients/${clientId}`
+    );
+    return response;
+  } catch (error) {
+    console.error("Error removing client from circularization", error);
     throw error;
   }
 };

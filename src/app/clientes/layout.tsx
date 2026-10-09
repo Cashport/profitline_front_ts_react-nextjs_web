@@ -1,6 +1,8 @@
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
-import Header from "@/components/organisms/header";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import {
+  ClientsHomeHeaderActions,
+  ClientsHomeHeaderExtra
+} from "@/modules/clients/components/clients-home/clients-home-header/clients-home-header";
 import { Metadata } from "next";
 import { FC, ReactNode } from "react";
 
@@ -14,7 +16,15 @@ interface ClientsLayoutProps {
 }
 
 const ClientsLayout: FC<ClientsLayoutProps> = ({ children }) => {
-  return <ViewWrapper headerTitle="Clientes">{children}</ViewWrapper>;
+  return (
+    <ViewWrapper
+      headerTitle="Clientes"
+      headerTitleExtra={<ClientsHomeHeaderExtra />}
+      headerActions={<ClientsHomeHeaderActions />}
+    >
+      {children}
+    </ViewWrapper>
+  );
 };
 
 export default ClientsLayout;

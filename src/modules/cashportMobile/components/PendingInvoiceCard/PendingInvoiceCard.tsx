@@ -2,9 +2,11 @@
 
 import React from "react";
 import { Flex } from "antd";
-import { CalendarSlash, Invoice } from "@phosphor-icons/react";
+import { Invoice } from "@phosphor-icons/react";
 import "./pendingInvoiceCard.scss";
 import BaseCard from "../atoms/BaseCard/BaseCard";
+
+export type InvoiceStatus = "Overdue" | "Due soon" | "Current";
 
 export interface PendingInvoiceCardProps {
   invoice: {
@@ -12,6 +14,7 @@ export interface PendingInvoiceCardProps {
     code: string;
     date: string;
     isPastDue: boolean;
+    status: InvoiceStatus;
     formattedAmount?: string;
     formattedOriginalAmount?: string;
   };
@@ -26,10 +29,34 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
   rightColumnNode,
   isInteractive = true
 }) => {
-  const extra = invoice.isPastDue ? (
-    <Flex gap={"0.25rem"} align="center">
-      <CalendarSlash color="#ff0010" size={12} weight="light" />
-      <span className="pendingInvoiceCard__text-overdue">Factura vencida</span>
+  const getStatusConfig = () => {
+    if (invoice.isPastDue || invoice.status === "Overdue") {
+      return { color: "#ff6b6b", text: "Vencidas" };
+    }
+    if (invoice.status === "Due soon") {
+      return { color: "#ff9f43", text: "Vence pronto" };
+    }
+    if (invoice.status === "Current") {
+      return { color: "#feca57", text: "Vigente" };
+    }
+    return null;
+  };
+
+  const statusConfig = getStatusConfig();
+
+  const extra = statusConfig ? (
+    <Flex gap={"0.5rem"} align="center">
+      <div
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          backgroundColor: statusConfig.color
+        }}
+      />
+      <span style={{ color: statusConfig.color, fontSize: "12px", fontWeight: 500 }}>
+        {statusConfig.text}
+      </span>
     </Flex>
   ) : null;
 
@@ -43,7 +70,7 @@ const PendingInvoiceCard: React.FC<PendingInvoiceCardProps> = ({
       extra={extra}
       amount={invoice.formattedAmount}
       originalAmount={invoice.formattedOriginalAmount}
-      amountColor={invoice.isPastDue ? "#ff0010" : undefined}
+      amountColor={statusConfig ? statusConfig.color : undefined}
       isInteractive={isInteractive}
       onClick={onClick}
       className="pendingInvoiceCard"

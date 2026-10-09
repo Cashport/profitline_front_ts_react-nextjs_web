@@ -1,0 +1,17 @@
+@import "@styles/variables.scss";
+
+:global(.ant-table-pagination) {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.buttonSeeProject {
+    background-color: $dark-gray !important;
+    width: 32px !important;
+    height: 32px !important;
+    aspect-ratio: 1/1 !important;
+
+    &:hover {
+        background-color: $white !important;
+    }
+}

@@ -1,4 +1,4 @@
-import { EmailData, EmailOption, ITemplateEmailData, ITemplateName } from "@/types/sendEmail";
+import { EmailOption, ITemplateEmailData, ITemplateName } from "@/types/sendEmail";
 import { MenuProps } from "antd";
 
 interface ICustomButtonProps {

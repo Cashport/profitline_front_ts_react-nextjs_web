@@ -1,0 +1,36 @@
+@import "@/styles/variables.scss";
+
+.errorMobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    background-color: $white;
+
+    &__icon {
+        font-size: 4rem;
+        color: $error; // Assuming $error is defined in variables, otherwise I'll check variables.scss
+        margin-bottom: 1rem;
+    }
+
+    &__title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: $black;
+    }
+
+    &__message {
+        font-size: 1rem;
+        color: $secondary;
+        margin-bottom: 2rem;
+    }
+
+    &__button {
+        width: 100%;
+        max-width: 300px;
+    }
+}

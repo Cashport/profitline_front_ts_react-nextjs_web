@@ -1,15 +1,7 @@
-import { Col, Flex, Row, Typography } from "antd";
+import { Col, Flex, Row } from "antd";
 import styles from "./ModalHeader.module.scss"; // Ajusta la ruta según tu estructura
 import { IInvoiceDetail } from "../../interfaces/interface";
 import { Calendar, Globe, Phone, User } from "phosphor-react";
-
-const { Text } = Typography;
-
-interface TransferOrderState {
-  id: string;
-  name: string;
-  bgColor: string;
-}
 
 interface ModalHeaderProps {
   invoice: IInvoiceDetail | null;

@@ -158,8 +158,12 @@ export function extractSingleParam(value: string | string[] | undefined): string
   }
   return value;
 }
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale?: "es-CO" | string): string {
   const date = new Date(dateString);
+  if (locale === "es-CO") {
+    const hsToSub = 5;
+    date.setHours(date.getHours() - hsToSub);
+  }
 
   if (isNaN(date.getTime())) {
     return "-"; // Return empty string for invalid dates
@@ -195,6 +199,32 @@ export const formatDatePlane = (dateString: string): string => {
 
   return `${day} ${month}, ${year}`;
 };
+
+export const formatDatePlaneWithTime = (dateString: string): string => {
+  if (!dateString || dateString === "0000-00-00") {
+    return "Fecha no disponible";
+  }
+
+  let iso = dateString;
+  const mysqlMatch = iso.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(\.\d+)?$/);
+  if (mysqlMatch) {
+    iso = `${mysqlMatch[1]}T${mysqlMatch[2]}Z`;
+  }
+
+  const d = new Date(iso);
+
+  if (isNaN(d.getTime())) {
+    return "Fecha inválida";
+  }
+
+  const year = d.getUTCFullYear();
+  const month = new Intl.DateTimeFormat("es-ES", { month: "long", timeZone: "UTC" }).format(d);
+  const day = d.getUTCDate();
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+
+  return `${day} ${month}, ${year} ${hours}:${minutes}`;
+};
 export function daysLeft(dateString: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -206,6 +236,13 @@ export function daysLeft(dateString: string): number {
 
   return diffInDays;
 }
+export function monthsUntilExpiration(dateString: string): number {
+  const today = dayjs().utc().startOf("day");
+  const expiration = dayjs(dateString).utc().startOf("day");
+  const months = expiration.diff(today, "month");
+  return months <= 1 ? 0 : months;
+}
+
 export const insertPeriodEveryThreeDigits = (number: number) => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
@@ -312,6 +349,13 @@ export const formatDateDMY = (dateString: string): string => {
   return date.utc().format("DD/MM/YYYY");
 };
 
+// Para instantes UTC reales. Devuelve fecha y hora juntas para que nunca se conviertan por
+// separado: una hora local al lado de una fecha en UTC muestra el día equivocado.
+export const formatLocalDateTimeParts = (dateString: string): { date: string; time: string } => {
+  const parsed = dayjs(dateString);
+  return { date: parsed.format("DD/MM/YYYY"), time: parsed.format("HH:mm") };
+};
+
 export const checkUserViewPermissions = (
   selectedProject: ISelectedProject | undefined,
   view?: string
@@ -328,6 +372,53 @@ export const checkUserViewPermissions = (
 
   return viewPermissions.some((permission) => permission.page_name === view);
 };
+
+const DATA_QUALITY_MANAGEMENT_COMPONENTS = [
+  "modify-catalog",
+  "data-manage-pos",
+  "data-manage-alerts",
+  "data-delete-files",
+  "data-manage-client",
+  "data-upload-files-massive",
+  "data-catalog-delete",
+  "data-manage-pos-delete"
+];
+
+export const checkUserComponentPermission = (
+  selectedProject: ISelectedProject | undefined,
+  view: string,
+  component: string
+): boolean => {
+  if (!selectedProject) return false;
+  if (selectedProject.isSuperAdmin) return true;
+
+  const viewPermissions = selectedProject.views_permissions;
+  if (!viewPermissions) return false;
+
+  const page = viewPermissions.find((permission) => permission.page_name === view);
+  if (!page?.components?.length) return false;
+
+  return page.components.some(
+    (c) =>
+      c.component_name === component &&
+      (c.create_permission || c.update_permission || c.delete_permission)
+  );
+};
+
+export const hasDataQualityManagementPermission = (
+  selectedProject: ISelectedProject | undefined
+): boolean => {
+  if (!selectedProject) return false;
+  if (selectedProject.isSuperAdmin) return true;
+
+  return DATA_QUALITY_MANAGEMENT_COMPONENTS.some((component) =>
+    checkUserComponentPermission(selectedProject, "DataQuality", component)
+  );
+};
+
+export const canUploadDataFiles = (selectedProject: ISelectedProject | undefined): boolean =>
+  checkUserComponentPermission(selectedProject, "DataQuality", "data-upload-files");
+
 
 export function capitalize(str: string): string {
   if (typeof str !== "string" || str.length === 0) return "";
@@ -433,6 +524,51 @@ export function formatTimeAgo(utcDateString: string): string {
   return `${years} años`;
 }
 
+export function formatChatDate(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+
+  now.setHours(0, 0, 0, 0);
+  const dateOnly = new Date(date);
+  dateOnly.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.floor((now.getTime() - dateOnly.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays >= 0 && diffDays < 7) {
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    return days[date.getDay()];
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}/${month}/${year}`;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export const formatEmailBodyHtml = (body: string): string => {
+  if (!body) return "";
+  const trimmed = body.trim();
+  const isHtml = /<[a-z][\s\S]*>/i.test(trimmed);
+  if (isHtml) return trimmed;
+  return trimmed
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br/>");
+};
+
+/**
+ * Genera un UUID corto (8 caracteres hex) a partir de `crypto.randomUUID()`.
+ * Suficiente para correlacionar items dentro de un mismo request de orden.
+ */
+export function generateShortUuid(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  }
+  // Fallback para entornos sin crypto.randomUUID
+  return Math.random().toString(16).slice(2, 10).padEnd(8, "0");
 }

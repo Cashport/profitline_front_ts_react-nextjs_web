@@ -7,11 +7,16 @@ const theme: ThemeConfig = {
     colorTextSecondary: "#FFFFFF",
     colorTextPlaceholder: "#000000",
     colorSplit: "#FFFFFF",
-    colorBgElevated: "#575a6b",
     fontFamily: "inherit",
-    green: "#CBE71E"
+    green: "#CBE71E",
+    colorBgElevated: "#FFFFFF"
   },
   components: {
+    Button: {
+      primaryShadow: "none",
+      defaultShadow: "none",
+      dangerShadow: "none"
+    },
     Message: {
       contentBg: "#FFFFFF"
     },
@@ -44,7 +49,10 @@ const theme: ThemeConfig = {
     },
     DatePicker: {
       colorBgElevated: "#FFFFFF",
-      controlHeight: 47
+      controlHeight: 47,
+      controlItemBgActive: "#CBE71E",
+      colorPrimary: "#CBE71E",
+      colorTextLightSolid: "#000000"
     },
     Notification: {
       colorBgElevated: "#141414",
@@ -55,3 +63,11 @@ const theme: ThemeConfig = {
 };
 
 export default theme;
+
+// Elevated surface used by the dark-capable module layouts (wallet, comercio dashboard, …).
+export const DARK_ELEVATED_BG = "#1f1f1f";
+
+// The root theme pins `Message.contentBg` to white at component level, which beats a nested
+// ConfigProvider's dark algorithm/global tokens; module layouts re-declare it with this.
+export const getMessageComponentTheme = (isDark: boolean) =>
+  isDark ? { contentBg: DARK_ELEVATED_BG } : {};

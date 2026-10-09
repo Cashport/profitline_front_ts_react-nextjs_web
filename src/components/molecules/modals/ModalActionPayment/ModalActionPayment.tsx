@@ -11,7 +11,6 @@ import "./modalActionPayment.scss";
 type ModalActionPaymentProps = {
   isOpen: boolean;
   onClose: () => void;
-  // eslint-disable-next-line no-unused-vars
   onChangeTab: (activeKey: string) => void;
   setIsSelectedActionModalOpen: Dispatch<
     SetStateAction<{
@@ -26,12 +25,15 @@ type ModalActionPaymentProps = {
 export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
   isOpen,
   onClose,
-  onChangeTab,
+  onChangeTab: _onChangeTab,
   setIsSelectedActionModalOpen,
   setIsModalActionPaymentOpen,
   addPaymentsToApplicationTable,
   selectedPayments
 }) => {
+  const isApplyDisabled =
+    selectedPayments.length === 0 || selectedPayments.some((p) => p.payments_status_id !== 1);
+
   return (
     <Modal
       open={isOpen}
@@ -64,6 +66,7 @@ export const ModalActionPayment: React.FC<ModalActionPaymentProps> = ({
             }
             addPaymentsToApplicationTable();
           }}
+          disabled={isApplyDisabled}
         />
         <ButtonGenerateAction
           icon={<PushPin size={20} />}

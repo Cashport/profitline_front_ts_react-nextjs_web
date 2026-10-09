@@ -7,6 +7,13 @@ interface UiSearchInputProps {
   name?: string;
   placeholder?: string;
   className?: string;
+  showBorder?: boolean;
+  /**
+   * Si se pasa, el input queda controlado por el padre. Sirve para tener dos
+   * buscadores sobre la misma consulta sin que se desincronicen. Si se omite,
+   * el componente mantiene su propio estado, como siempre.
+   */
+  value?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -15,19 +22,23 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   name,
   placeholder,
   className,
+  showBorder = false,
+  value,
   onChange
 }) => {
-  const [inputValue, setInputValue] = useState("");
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = useState("");
+  const inputValue = isControlled ? value : internalValue;
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+    if (!isControlled) setInternalValue(event.target.value);
     if (onChange) {
       onChange(event);
     }
   };
 
   const handleClearClick = () => {
-    setInputValue("");
+    if (!isControlled) setInternalValue("");
     if (onChange) {
       const event = {
         target: { value: "" }
@@ -37,7 +48,12 @@ const UiSearchInput: FC<UiSearchInputProps> = ({
   };
 
   return (
-    <label htmlFor={id} className={`${styles.inputBox} ${className}`}>
+    <label
+      htmlFor={id}
+      className={[styles.inputBox, showBorder && styles.bordered, className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <MagnifyingGlass className={styles.icon} weight="bold" />
       <input
         type="text"

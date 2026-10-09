@@ -1,9 +1,12 @@
-import { IUserForm, WelcomeData } from "@/types/users/IUser";
+import { IUser, IUserForm, WelcomeData } from "@/types/users/IUser";
 import { API } from "@/utils/api/api";
 import { SUCCESS } from "@/utils/constants/globalConstants";
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
 import { IGroupsByUser } from "@/types/clientsGroups/IClientsGroups";
 import { MessageType } from "@/context/MessageContext";
+import axios from "axios";
+import config from "@/config";
+import { GenericResponse } from "@/types/global/IGlobal";
 
 export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
@@ -16,27 +19,37 @@ export const getUserById = async (idUser: string): Promise<WelcomeData> => {
 };
 
 // create
+interface InviteUserOptions {
+  selectedBusinessRules?: ISelectedBussinessRules;
+  selectedGroups?: number[];
+  zones?: number[];
+}
+
 export const inviteUser = async (
   data: IUserForm,
-  selectedBusinessRules: ISelectedBussinessRules,
-  selectedGroups: number[],
-  zones: any,
-  ID: any
+  projectId: number,
+  { selectedBusinessRules, selectedGroups, zones }: InviteUserOptions = {}
 ): Promise<any> => {
-  const modelData = {
+  const modelData: Record<string, any> = {
     email: data.info.email,
     user_name: data.info.name,
-    channel: selectedBusinessRules.channels,
-    line: selectedBusinessRules.lines,
-    subline: selectedBusinessRules.sublines,
-    zone: zones,
     password: "123456",
     phone: data.info.phone,
     position: data.info.cargo,
-    project_id: ID,
-    rol_id: data.info.rol?.value,
-    groups_id: selectedGroups
+    project_id: projectId,
+    rol_id: data.info.rol?.value
   };
+  if (selectedBusinessRules) {
+    modelData.channel = selectedBusinessRules.channels;
+    modelData.line = selectedBusinessRules.lines;
+    modelData.subline = selectedBusinessRules.sublines;
+  }
+  if (zones?.length) {
+    modelData.zone = zones;
+  }
+  if (selectedGroups?.length) {
+    modelData.groups_id = selectedGroups;
+  }
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";
   try {
     const response = await API.post(`/user/invitation/${endpointRole}/email`, modelData);
@@ -61,30 +74,51 @@ export const createPassword = async (token: string, password: string): Promise<a
   }
 };
 //update
+interface UpdateUserOptions {
+  data?: IUserForm;
+  selectedBusinessRules?: ISelectedBussinessRules;
+  selectedGroups?: number[];
+  zones?: number[];
+  isActive?: boolean;
+}
+
 export const updateUser = async (
-  data: IUserForm,
-  selectedBusinessRules: ISelectedBussinessRules,
-  selectedGroups: number[],
-  zones: any,
-  ID: any,
+  ID: number,
   project_id: number,
-  isActive: boolean
+  options: UpdateUserOptions = {}
 ): Promise<any> => {
-  const modelData = {
-    active: isActive ? 1 : 0,
-    channel: selectedBusinessRules.channels,
-    email: data.info.email,
+  const { data, selectedBusinessRules, selectedGroups, zones, isActive } = options;
+
+  const modelData: Record<string, any> = {
     id: ID,
-    line: selectedBusinessRules.lines,
-    phone: data.info.phone,
-    position: data.info.cargo,
-    project_id: `${project_id}`,
-    rol_id: data.info.rol?.value,
-    subline: selectedBusinessRules.sublines,
-    user_name: data.info.name,
-    zones: zones.map((zone: number) => ({ ZONE_ID: zone })),
-    groups_id: selectedGroups
+    project_id: `${project_id}`
   };
+
+  if (data) {
+    modelData.email = data.info.email;
+    modelData.user_name = data.info.name;
+    modelData.phone = data.info.phone;
+    modelData.position = data.info.cargo;
+    modelData.rol_id = data.info.rol?.value;
+  }
+
+  if (selectedBusinessRules) {
+    modelData.channel = selectedBusinessRules.channels;
+    modelData.line = selectedBusinessRules.lines;
+    modelData.subline = selectedBusinessRules.sublines;
+  }
+
+  if (zones?.length) {
+    modelData.zones = zones.map((zone: number) => ({ ZONE_ID: zone }));
+  }
+
+  if (selectedGroups) {
+    modelData.groups_id = selectedGroups;
+  }
+
+  if (isActive !== undefined) {
+    modelData.active = isActive ? 1 : 0;
+  }
 
   try {
     const response = await API.put(`/user`, modelData);
@@ -200,5 +234,20 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
   } catch (error) {
     console.warn("error getting groups by user: ", error);
     return error as any;
+  }
+};
+
+export const sendEmailResetPassword = async (email: string): Promise<any> => {
+  const response = await axios.post(`${config.API_HOST}/user/reset-password`, { email });
+  return response;
+};
+
+export const getUsersByProject = async (projectId: number) => {
+  try {
+    const response: GenericResponse<IUser[]> = await API.get(`/user/lte/${projectId}`);
+    return response;
+  } catch (error) {
+    console.warn("error getting users by project: ", error);
+    return error;
   }
 };

@@ -1,8 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
+/* Cetaphil brand tokens — scoped to the `.cetaphil-theme` class so they never leak onto the
+   global :root and override the app's Cashport tokens. Tailwind base/utilities and the base
+   layer are provided once, globally, by src/styles/tailwind.css. */
+.cetaphil-theme {
   /* Updated to use Cashport color palette - RGB format */
   --cashport-black: 20 20 20;
   --cashport-green: 203 231 30;
@@ -47,7 +46,7 @@
   --sidebar-ring: var(--cashport-gray-light);
 }
 
-.dark {
+.cetaphil-theme.dark {
   --background: var(--cashport-black);
   --foreground: var(--cashport-white);
   --card: 26 26 26;
@@ -80,13 +79,4 @@
   --sidebar-accent-foreground: var(--cashport-white);
   --sidebar-border: 51 51 51;
   --sidebar-ring: 51 51 51;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }

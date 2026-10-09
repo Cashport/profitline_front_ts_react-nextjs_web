@@ -4,7 +4,7 @@ import styles from "./button.module.scss";
 
 interface GenerateActionButtonProps {
   label?: string; // Texto del botón
-  onClick: () => void; // Acción a ejecutar al hacer clic
+  onClick?: () => void; // Acción a ejecutar al hacer clic
   icon?: React.ReactNode; // Icono opcional
   size?: "small" | "middle" | "large"; // Tamaño del botón
   style?: React.CSSProperties; // Estilos personalizados

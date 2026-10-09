@@ -5,13 +5,12 @@ import {
   Merge,
   FieldError as OriginalFieldError
 } from "react-hook-form";
-import { selectClientForm } from "../create-order-search-client/create-order-search-client";
+import { ISelectClientForm } from "../create-order-search-client/create-order-search-client";
 import { useAppStore } from "@/lib/store/store";
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getClients } from "@/services/commerce/commerce";
 import "./create-order-select-client.scss";
 import { IEcommerceClient } from "@/types/commerce/ICommerce";
-import { OrderViewContext } from "@/modules/commerce/contexts/orderViewContext";
 
 type ExtendedFieldError =
   | OriginalFieldError
@@ -19,14 +18,13 @@ type ExtendedFieldError =
 
 interface Props {
   errors: ExtendedFieldError | undefined;
-  field: ControllerRenderProps<selectClientForm, "client">;
+  field: ControllerRenderProps<ISelectClientForm, "client">;
 }
 
 const SelectClientSimplified = ({ errors, field }: Props) => {
   const { ID } = useAppStore((state) => state.selectedProject);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<IEcommerceClient[]>([]);
-  const { setClient } = useContext(OrderViewContext); // Obtenemos la función del contexto
 
   useEffect(() => {
     if (!ID) return;
@@ -91,16 +89,12 @@ const SelectClientSimplified = ({ errors, field }: Props) => {
         payment_type: clientPaymentTypeMap[value.value] || ""
       };
 
-      console.log("Cliente seleccionado:", enrichedValue); // <-- aquí
-
       // Enviar al formulario
       field.onChange(enrichedValue);
     } else {
       field.onChange(null);
-      console.log("Cliente deseleccionado");
     }
   };
-
 
   return (
     <Select
