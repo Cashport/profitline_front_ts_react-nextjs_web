@@ -44,7 +44,7 @@ export default function MapOverlays({ layers, onToggleLayer, focused, palette }:
       key: "clients",
       label: "Clientes",
       swatch: (
-        <span className="h-2 w-2 rounded-full" style={{ background: palette.status.visita }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: palette.status.IN_VISIT }} />
       )
     }
   ];

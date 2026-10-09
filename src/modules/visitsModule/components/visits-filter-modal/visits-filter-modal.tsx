@@ -17,8 +17,8 @@ import {
   PROJECTS,
   RESULT_LABELS,
   RESULT_ORDER,
-  STATUS_ORDER,
-  statusLabel
+  STATUS_LABELS,
+  STATUS_ORDER
 } from "../../constants";
 import type {
   AdvisorProject,
@@ -41,7 +41,6 @@ interface VisitsFilterModalProps {
   zones: IVisitsZone[];
   /** Clientes con visita programada en el día. */
   clients: IVisitsClient[];
-  future: boolean;
   /** Contenido al final de la barra del botón y sus etiquetas (chips de estado, reloj). */
   barEnd?: ReactNode;
 }
@@ -70,7 +69,6 @@ export default function VisitsFilterModal({
   advisors,
   zones,
   clients,
-  future,
   barEnd
 }: VisitsFilterModalProps) {
   const proyectoOptions: FilterOptionItem[] = PROJECT_ORDER.map((p) => ({
@@ -93,7 +91,7 @@ export default function VisitsFilterModal({
     .sort(byName);
   const estadoOptions: FilterOptionItem[] = STATUS_ORDER.map((s) => ({
     id: s,
-    name: statusLabel(s, future)
+    name: STATUS_LABELS[s]
   }));
   const resultadoOptions: FilterOptionItem[] = RESULT_ORDER.map((r) => ({
     id: r,

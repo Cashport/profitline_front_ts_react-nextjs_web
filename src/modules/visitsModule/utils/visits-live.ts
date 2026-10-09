@@ -1,6 +1,11 @@
-import type { ITodayVisitsUser } from "@/types/visits/IVisits";
+import type {
+  IAdvisorVisitDetail,
+  ITodayVisitsLocation,
+  ITodayVisitsPosition,
+  ITodayVisitsUser
+} from "@/types/visits/IVisits";
 
-import { ACTIVE_STATUSES, API_STATUS, STATUS_LABELS } from "../constants";
+import { ACTIVE_STATUSES, STATUS_LABELS } from "../constants";
 import type {
   AdvisorStatus,
   ILiveAdvisor,
@@ -8,55 +13,50 @@ import type {
   ILiveState,
   ITrackPoint,
   IVisitsFilters,
-  LngLat
+  LngLat,
+  SegmentKind
 } from "../types";
-import {
-  normalizeQuery,
-  positionOnTrack,
-  type IAdvisorSegment,
-  type SegmentKind
-} from "./visits-calc";
+import { normalizeQuery, positionOnTrack, type IAdvisorSegment } from "./visits-calc";
 import { initialsOf, minutesOfDay } from "./visits-format";
 
-/* GET /visit-admin/today-visits → forma de la pantalla. Lo que no llega tal cual sale
-   de los puntos de `locations`; lo que el backend aún no envía queda en null y se pinta
-   "XX". Como en el día simulado, `t` es el minuto que se mira y `now` el de ahora. */
+/* Los asesores del API con la forma del mapa y la línea de tiempo: today-visits para
+   el equipo y, para el abierto, su detalle del día. Estados y etiquetas van tal cual
+   llegan; lo que el backend aún no envía queda en null y se pinta "XX". Como en el día
+   simulado, `t` es el minuto que se mira y `now` el de ahora. */
 
-const statusOf = (state: string): AdvisorStatus => API_STATUS[state] ?? "nostart";
-
-interface IPoint {
-  t: number;
-  position: LngLat;
-  state: string;
+interface IPoint extends ITrackPoint {
+  state: SegmentKind;
   label: string;
-  /** Metros desde el punto anterior. */
-  meters: number;
   visitId: number | null;
 }
 
-/** `locations` y, si es más nueva, `current_position`: los puntos del día en orden. */
-function pointsOf(u: ITodayVisitsUser): IPoint[] {
-  const points = u.locations.map((p): IPoint => ({
-    t: minutesOfDay(p.timestamp),
-    position: [p.longitude, p.latitude],
-    state: p.state,
-    label: p.state_name,
-    meters: p.distanceFromPreviousMeters ?? 0,
-    visitId: p.activeVisitId ?? null
-  }));
-  const cur = u.current_position;
-  const last = points[points.length - 1];
-  if (cur && (!last || minutesOfDay(cur.timestamp) > last.t)) {
-    points.push({
-      t: minutesOfDay(cur.timestamp),
-      position: [cur.longitude, cur.latitude],
-      state: cur.state,
-      label: cur.state === u.state ? u.state_name : STATUS_LABELS[statusOf(cur.state)],
-      meters: cur.distanceFromPreviousMeters ?? 0,
-      visitId: cur.activeVisitId ?? null
-    });
-  }
-  return points;
+/**
+ * `locations` y, si es más nueva, `current_position`: los puntos del día en orden, con
+ * los km acumulados. El primero trae la distancia desde uno anterior al día: los km
+ * empiezan en él.
+ */
+function pointsOf(
+  locations: ITodayVisitsLocation[],
+  cur: ITodayVisitsPosition | null = null
+): IPoint[] {
+  const lastAt = locations.length ? minutesOfDay(locations[locations.length - 1].timestamp) : -1;
+  // `current_position` no trae etiqueta.
+  const reports =
+    cur && minutesOfDay(cur.timestamp) > lastAt
+      ? [...locations, { ...cur, state_name: STATUS_LABELS[cur.state] }]
+      : locations;
+  let km = 0;
+  return reports.map((p, i): IPoint => {
+    if (i) km += (p.distanceFromPreviousMeters ?? 0) / 1000;
+    return {
+      t: minutesOfDay(p.timestamp),
+      position: [p.longitude, p.latitude],
+      km,
+      state: p.state,
+      label: p.state_name,
+      visitId: p.activeVisitId ?? null
+    };
+  });
 }
 
 /** Tramos: los puntos seguidos con el mismo estado (y la misma visita) forman uno. */
@@ -69,32 +69,20 @@ function runsOf(points: IPoint[]): ILiveRun[] {
     prevKey = key;
     const last = runs[runs.length - 1];
     if (last) last.end = p.t;
-    runs.push({
-      status: statusOf(p.state),
-      label: p.label,
-      start: p.t,
-      end: null,
-      position: p.position
-    });
+    runs.push({ status: p.state, label: p.label, start: p.t, end: null, position: p.position });
   });
   return runs;
 }
 
 export function toLiveAdvisor(u: ITodayVisitsUser): ILiveAdvisor {
-  const points = pointsOf(u);
-  // El primer punto trae la distancia desde uno anterior al día: los km empiezan en él.
-  let km = 0;
-  const track = points.map((p, i): ITrackPoint => {
-    if (i) km += p.meters / 1000;
-    return { t: p.t, position: p.position, km };
-  });
+  const points = pointsOf(u.locations, u.current_position);
   const next = u.next_visit;
 
   return {
     id: u.user_id,
     name: u.user.userName,
     initials: initialsOf(u.user.userName),
-    status: statusOf(u.state),
+    status: u.state,
     statusLabel: u.state_name,
     visits: {
       total: u.total_visits,
@@ -112,32 +100,62 @@ export function toLiveAdvisor(u: ITodayVisitsUser): ILiveAdvisor {
         next.latitude != null && next.longitude != null ? [next.longitude, next.latitude] : null
     },
     dayStart: points[0]?.t ?? null,
-    track,
+    track: points,
     runs: runsOf(points),
-    // Aún no llegan del backend.
-    code: null,
-    zoneName: null,
+    // Aún no llegan en today-visits.
     project: null,
+    currentClient: null,
+    zoneName: null,
     goal: null,
-    activitiesOk: null,
-    battery: null,
-    gpsAccuracy: null,
-    currentClient: null
+    activitiesOk: null
   };
 }
 
-/** Estado en el minuto `t`: el del tramo en curso. Antes del primer punto, sin iniciar. */
+/**
+ * El asesor abierto, de GET /visit-admin/users/:user_id/day-detail: sus puntos son
+ * `tracking.locations` (el último, la última posición conocida). La ruta no trae
+ * coordenadas, así que la próxima visita va sin posición.
+ */
+export function toDetailAdvisor(d: IAdvisorVisitDetail): ILiveAdvisor {
+  const points = pointsOf(d.tracking.locations);
+  const { total, completed, failed, pending, route } = d.visits;
+  const next = route.find((v) => v.status_code === "SCHEDULED");
+
+  return {
+    id: d.user_id,
+    name: d.user.userName,
+    initials: initialsOf(d.user.userName),
+    status: d.state,
+    statusLabel: d.state_name,
+    visits: { total, completed, failed, pending, done: completed + failed },
+    next: next
+      ? {
+          clientName: next.client_name,
+          nit: next.client_nit,
+          start: minutesOfDay(next.scheduled_start_at),
+          end: minutesOfDay(next.scheduled_end_at),
+          position: null
+        }
+      : null,
+    dayStart: points[0]?.t ?? null,
+    track: points,
+    runs: runsOf(points),
+    project: null,
+    currentClient: route.find((v) => v.status_code === "IN_PROGRESS")?.client_name ?? null,
+    zoneName: d.zones.join(", ") || null,
+    goal: d.activities.goal,
+    activitiesOk: d.activities.effective
+  };
+}
+
+/** El estado del asesor (el del backend, fijo) y su tramo de puntos en el minuto `t`. */
 export function liveStateAt(a: ILiveAdvisor, t: number): ILiveState {
-  // Sin puntos no hay tiempos: vale el estado que manda el backend.
-  if (!a.runs.length) return { status: a.status, label: a.statusLabel, run: null };
   let run: ILiveRun | null = null;
   for (const r of a.runs) {
     if (r.start > t) break;
     run = r;
   }
-  return run
-    ? { status: run.status, label: run.label, run }
-    : { status: "nostart", label: STATUS_LABELS.nostart, run: null };
+  return { status: a.status, label: a.statusLabel, run };
 }
 
 /** Posición y km en `t` sobre los puntos reportados; null si aún no hay puntos. */
@@ -156,31 +174,18 @@ export function liveTrackUntil(a: ILiveAdvisor, t: number): LngLat[] {
   return out;
 }
 
-/** Último punto reportado hasta `t`. */
-export function liveSignalAt(a: ILiveAdvisor, t: number): number | null {
-  let last: number | null = null;
-  for (const q of a.track) {
-    if (q.t > t) break;
-    last = q.t;
-  }
-  return last;
-}
-
 /** Visitas vistas en los puntos del día (tramos en visita), en orden. */
-export const liveVisitRuns = (a: ILiveAdvisor) => a.runs.filter((r) => r.status === "visita");
+export const liveVisitRuns = (a: ILiveAdvisor) => a.runs.filter((r) => r.status === "IN_VISIT");
 
 /** Fase de un tramo en el minuto `t`. */
 export const runPhase = (r: ILiveRun, t: number): "done" | "now" | "pending" =>
   r.start > t ? "pending" : r.end != null && r.end <= t ? "done" : "now";
 
-const SEGMENT_KINDS: AdvisorStatus[] = ["visita", "transito", "pausa", "sinsenal"];
-const isSegmentKind = (s: AdvisorStatus): s is SegmentKind => SEGMENT_KINDS.includes(s);
-
 /** Tramos del día hasta `now` para la línea de tiempo del asesor. */
 export const liveSegments = (a: ILiveAdvisor, now: number): IAdvisorSegment[] =>
   a.runs.flatMap((r) => {
     const end = Math.min(r.end ?? now, now);
-    return isSegmentKind(r.status) && r.start < end ? [{ kind: r.status, start: r.start, end }] : [];
+    return r.start < end ? [{ kind: r.status, start: r.start, end }] : [];
   });
 
 /** Sin actividades en el API todavía, el ranking va por visitas efectivas y luego por nombre. */
@@ -201,13 +206,9 @@ export interface ILiveVisibilityContext {
  * proyecto mientras sea null) no coinciden con nadie. La búsqueda mira el asesor y su
  * próximo cliente, el único que llega.
  */
-export function isLiveVisible(
-  a: ILiveAdvisor,
-  status: AdvisorStatus,
-  { filters: f, query }: ILiveVisibilityContext
-) {
+export function isLiveVisible(a: ILiveAdvisor, { filters: f, query }: ILiveVisibilityContext) {
   if (f.advisor.length && !f.advisor.includes(a.id)) return false;
-  if (f.status.length && !f.status.includes(status)) return false;
+  if (f.status.length && !f.status.includes(a.status)) return false;
   if (f.project.length && !(a.project && f.project.includes(a.project))) return false;
   if (f.operation.length || f.zone.length || f.city.length || f.client.length || f.result.length) {
     return false;
@@ -219,13 +220,12 @@ export function isLiveVisible(
   );
 }
 
-/** Conteo por estado en `t` para los chips; ignora el propio filtro de estado. */
-export function liveStatusCounts(advisors: ILiveAdvisor[], t: number, ctx: ILiveVisibilityContext) {
+/** Conteo por estado para los chips; ignora el propio filtro de estado. */
+export function liveStatusCounts(advisors: ILiveAdvisor[], ctx: ILiveVisibilityContext) {
   const noStatus = { ...ctx, filters: { ...ctx.filters, status: [] } };
   const counts: Partial<Record<AdvisorStatus, number>> = {};
   advisors.forEach((a) => {
-    const { status } = liveStateAt(a, t);
-    if (isLiveVisible(a, status, noStatus)) counts[status] = (counts[status] ?? 0) + 1;
+    if (isLiveVisible(a, noStatus)) counts[a.status] = (counts[a.status] ?? 0) + 1;
   });
   return counts;
 }
@@ -238,8 +238,8 @@ export interface ILiveTeamKpis {
   effectivenessPct: number;
 }
 
-/** KPIs de los asesores visibles: activos en `t`; las visitas son las del día completo. */
-export function liveTeamKpis(advisors: ILiveAdvisor[], t: number): ILiveTeamKpis {
+/** KPIs de los asesores visibles: activos según su estado; las visitas, las del día. */
+export function liveTeamKpis(advisors: ILiveAdvisor[]): ILiveTeamKpis {
   const kpis: ILiveTeamKpis = {
     active: 0,
     total: advisors.length,
@@ -249,7 +249,7 @@ export function liveTeamKpis(advisors: ILiveAdvisor[], t: number): ILiveTeamKpis
   };
   let effective = 0;
   advisors.forEach((a) => {
-    if (ACTIVE_STATUSES.includes(liveStateAt(a, t).status)) kpis.active++;
+    if (ACTIVE_STATUSES.includes(a.status)) kpis.active++;
     kpis.visitsDone += a.visits.done;
     kpis.visitsPlanned += a.visits.total;
     effective += a.visits.completed;

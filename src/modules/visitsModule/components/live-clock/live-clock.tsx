@@ -17,12 +17,12 @@ interface LiveClockProps {
 export default function LiveClock({ dayMode, isLive, t, palette }: LiveClockProps) {
   const tag =
     dayMode === "future"
-      ? { label: "PROGRAMACIÓN", color: palette.status.transito }
+      ? { label: "PROGRAMACIÓN", color: palette.status.IN_TRANSIT }
       : dayMode === "past"
         ? { label: "HISTÓRICO", color: palette.ink3 }
         : isLive
-          ? { label: "EN VIVO", color: palette.status.visita }
-          : { label: "REPRODUCCIÓN", color: palette.status.pausa };
+          ? { label: "EN VIVO", color: palette.status.IN_VISIT }
+          : { label: "REPRODUCCIÓN", color: palette.status.ON_PAUSE };
   const pulse = dayMode === "today" && isLive;
 
   return (

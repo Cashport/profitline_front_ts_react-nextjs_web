@@ -2,7 +2,7 @@
 
 import { cn } from "@/utils/utils";
 
-import { STATUS_ORDER, statusLabel } from "../../constants";
+import { STATUS_LABELS, STATUS_ORDER } from "../../constants";
 import type { AdvisorStatus, IVisitsPalette } from "../../types";
 
 interface StatusChipsProps {
@@ -11,17 +11,10 @@ interface StatusChipsProps {
   selected: AdvisorStatus[];
   onToggle: (status: AdvisorStatus) => void;
   palette: IVisitsPalette;
-  future: boolean;
 }
 
 /** Filtro rápido por estado; sólo aparecen los estados con asesores (o ya elegidos). */
-export default function StatusChips({
-  counts,
-  selected,
-  onToggle,
-  palette,
-  future
-}: StatusChipsProps) {
+export default function StatusChips({ counts, selected, onToggle, palette }: StatusChipsProps) {
   const statuses = STATUS_ORDER.filter((s) => counts[s] || selected.includes(s));
 
   return (
@@ -44,7 +37,7 @@ export default function StatusChips({
             )}
           >
             <span className="h-[7px] w-[7px] rounded-full" style={{ background: palette.status[s] }} />
-            {statusLabel(s, future)}
+            {STATUS_LABELS[s]}
             <span className="text-[10px] text-muted-foreground max-[1200px]:hidden">
               {counts[s] ?? 0}
             </span>
