@@ -2,44 +2,53 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import type { IAdvisorVisitDetail } from "@/types/visits/IVisits";
 import { cn } from "@/utils/utils";
 
-import { MISSING, PROJECTS } from "../../constants";
-import type { ILiveAdvisor, ILiveRun, ILiveState, IVisitsPalette, LngLat } from "../../types";
-import { fmtClock, fmtDuration, fmtNumber } from "../../utils/visits-format";
-import { livePositionAt, liveSignalAt, liveVisitRuns, runPhase } from "../../utils/visits-live";
+import { ACTIVITY_HOURS } from "../../constants";
+import type { IVisitsPalette } from "../../types";
+import {
+  fmtClock,
+  fmtDuration,
+  fmtNumber,
+  initialsOf,
+  minutesOfDay
+} from "../../utils/visits-format";
 import StatusPill from "../shared/status-pill";
 
 interface AdvisorDetailProps {
-  advisor: ILiveAdvisor;
-  /** Estado en el minuto que se mira. */
-  state: ILiveState;
+  /** GET /visit-admin/users/:user_id/day-detail: todo lo que pinta el panel. */
+  detail: IAdvisorVisitDetail;
   t: number;
   isLive: boolean;
   palette: IVisitsPalette;
   onBack: () => void;
-  onJumpToRun: (run: ILiveRun) => void;
-  onFlyTo: (center: LngLat) => void;
+  onOpenDay: () => void;
+  /** Lleva el cabezal y el mapa a ese minuto. */
+  onJumpTo: (minute: number) => void;
 }
 
-/** Qué está haciendo en `t`, en una línea junto al estado. */
-function nowText(a: ILiveAdvisor, s: ILiveState, t: number) {
-  if (s.status === "visita" && s.run) {
-    return `en ${a.currentClient ?? MISSING} · ${fmtDuration(t - s.run.start)}`;
+/** Qué está haciendo, en una línea junto al estado: la visita en curso o la próxima. */
+function nowText({ state, visits }: IAdvisorVisitDetail) {
+  if (state === "IN_VISIT") {
+    const current = visits.route.find((v) => v.status_code === "IN_PROGRESS");
+    if (current?.started_at) {
+      return `en ${current.client_name} · desde ${fmtClock(minutesOfDay(current.started_at))}`;
+    }
   }
-  if (s.status === "transito" && a.next) {
-    return `hacia ${a.next.clientName} · ETA ${fmtClock(a.next.start)}`;
+  if (state === "EN_ROUTE") {
+    const next = visits.route.find((v) => v.status_code === "SCHEDULED");
+    if (next) return `hacia ${next.client_name} · ${fmtClock(minutesOfDay(next.scheduled_start_at))}`;
   }
-  if (s.status === "pausa" && s.run) return `desde ${fmtClock(s.run.start)}`;
   return "";
 }
 
-/** Antigüedad de la última posición: "ahora" dentro del primer minuto. */
+/** Antigüedad de la última señal: "ahora" dentro del primer minuto. */
 const signalAge = (minutes: number) => (minutes < 1 ? "ahora" : `hace ${fmtDuration(minutes)}`);
 
 const STOP_ROW =
   "grid cursor-pointer grid-cols-[44px_16px_minmax(0,1fr)] gap-2 rounded-[7px] pr-1.5 transition-colors hover:bg-secondary";
-/** Fila sin un lugar al que llevar el mapa. */
+/** Fila sin un minuto al que llevar el cabezal. */
 const STATIC_ROW = cn(STOP_ROW, "cursor-default hover:bg-transparent");
 
 /** Riel de la ruta: línea vertical (verde si ya se recorrió) con el nodo encima. */
@@ -58,64 +67,50 @@ function Rail({ done, children }: { done: boolean; children: React.ReactNode }) 
 const NODE =
   "relative mt-[9px] grid h-3.5 w-3.5 place-items-center rounded-full border-2 bg-card text-[8px] font-semibold";
 
-/** Vista de un asesor: estado, actividades, KPIs y ruta del día; "XX" en lo que aún no llega. */
+/** Vista de un asesor desde su detalle del día: estado, actividades, KPIs y ruta. */
 export default function AdvisorDetail({
-  advisor: a,
-  state,
+  detail: d,
   t,
   isLive,
   palette,
   onBack,
-  onJumpToRun,
-  onFlyTo
+  onOpenDay,
+  onJumpTo
 }: AdvisorDetailProps) {
-  const color = palette.status[state.status];
-  const project = a.project ? PROJECTS[a.project] : null;
-  const { total, completed, failed, pending, done } = a.visits;
-  // Inicio de jornada, si en `t` ya había empezado.
-  const startedAt = a.dayStart != null && t >= a.dayStart ? a.dayStart : null;
-  const startText = startedAt != null ? fmtClock(startedAt) : "—";
-  const km = livePositionAt(a, t)?.km ?? 0;
-  const signalAt = liveSignalAt(a, t);
-  const gps = a.gpsAccuracy != null ? `±${a.gpsAccuracy} m` : MISSING;
-  const ok = a.activitiesOk;
-  const progress = ok != null && a.goal ? Math.min(100, (ok / a.goal) * 100) : 0;
-  // Los tramos cuentan hasta `t`: lo que viene después aún no pasa en el minuto que se mira.
-  const runMinutes = (r: ILiveRun) => Math.min(r.end ?? t, t) - r.start;
-  const visitRuns = liveVisitRuns(a);
-  const visitsSoFar = visitRuns.filter((r) => r.start <= t);
-  const closedVisits = visitsSoFar.filter((r) => runPhase(r, t) === "done");
-  const inVisit = visitsSoFar.reduce((sum, r) => sum + runMinutes(r), 0);
-  const closedMinutes = closedVisits.reduce((sum, r) => sum + runMinutes(r), 0);
-  const nextAt = a.next?.position ?? null;
-  // Los totales de visitas son los del día: van con el estado actual, no con el de `t`.
-  const inProgress = a.status === "visita";
-  const restOfRoute = Math.max(0, pending - (inProgress ? 1 : 0) - (a.next ? 1 : 0));
+  const { activities, visits, tracking } = d;
+  const color = palette.status[d.state];
+  const dayStart = tracking.started_at ? minutesOfDay(tracking.started_at) : null;
+  const startText = dayStart != null ? fmtClock(dayStart) : "—";
+  const lastSignal = tracking.last_signal_at ? minutesOfDay(tracking.last_signal_at) : null;
+  const maxHour = Math.max(1, ...activities.by_hour.map((h) => h.count));
 
   const tiles: { label: string; value: string | number; suffix?: string; detail: string }[] = [
-    { label: "Visitas", value: done, suffix: `/ ${total}`, detail: `${pending} por hacer` },
+    {
+      label: "Visitas",
+      value: visits.completed + visits.failed,
+      suffix: `/ ${visits.total}`,
+      detail: `${visits.pending} por hacer`
+    },
     {
       label: "Efectividad",
-      value: done ? fmtNumber((completed / done) * 100) : 0,
-      suffix: "%",
-      detail: `${completed} efectivas`
+      value: visits.effectivity_pct != null ? fmtNumber(visits.effectivity_pct) : "—",
+      suffix: visits.effectivity_pct != null ? "%" : undefined,
+      detail: `${visits.completed} efectivas`
     },
-    { label: "Recorrido", value: fmtNumber(km, 1), suffix: "km", detail: `desde ${startText}` },
+    {
+      label: "Recorrido",
+      value: fmtNumber(tracking.distance_km, 1),
+      suffix: "km",
+      detail: `desde ${startText}`
+    },
     {
       label: "En visita",
-      value: fmtDuration(inVisit),
-      detail: closedVisits.length
-        ? `${Math.round(closedMinutes / closedVisits.length)} min prom.`
-        : "—"
+      value: visits.total_visit_minutes != null ? fmtDuration(visits.total_visit_minutes) : "—",
+      detail:
+        visits.average_duration_minutes != null
+          ? `${Math.round(visits.average_duration_minutes)} min prom.`
+          : "—"
     }
-  ];
-
-  // Barra de visitas: efectivas, fallidas, la que está en curso y las pendientes (sin color).
-  const strip: (string | null)[] = [
-    ...Array<string>(completed).fill(palette.result.efectiva),
-    ...Array<string>(failed).fill(palette.result.sincontacto),
-    ...(inProgress ? [palette.accent] : []),
-    ...Array<null>(Math.max(0, pending - (inProgress ? 1 : 0))).fill(null)
   ];
 
   return (
@@ -134,46 +129,35 @@ export default function AdvisorDetail({
           className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 bg-secondary text-sm font-semibold text-foreground"
           style={{ borderColor: color }}
         >
-          {a.initials}
+          {initialsOf(d.user.userName)}
         </div>
         <div className="min-w-0">
           <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-foreground">
-            {a.name}
+            {d.user.userName}
           </h2>
-          <div className="text-xs text-muted-foreground">
-            {a.code ?? MISSING} · Zona {a.zoneName ?? MISSING}
-          </div>
+          {d.zones.length > 0 && (
+            <div className="text-xs text-muted-foreground">Zona {d.zones.join(", ")}</div>
+          )}
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <StatusPill label={state.label} color={color} />
-            {/* El modal del día sigue con datos simulados: se habilita cuando se conecte. */}
+            <StatusPill label={d.state_name} color={color} />
             <button
               type="button"
-              disabled
-              title="Aún no conectado"
-              className="flex h-6 items-center gap-0.5 rounded-lg bg-[#cbe71e] pl-2 pr-1.5 text-xs font-bold text-[#141414] transition-colors enabled:hover:bg-[#b9d417] disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={onOpenDay}
+              className="flex h-6 items-center gap-0.5 rounded-lg bg-[#cbe71e] pl-2 pr-1.5 text-xs font-bold text-[#141414] transition-colors hover:bg-[#b9d417]"
             >
               Ver día
               <ChevronRight className="h-3 w-3" />
             </button>
-            <span className="text-[11.5px] text-muted-foreground">{nowText(a, state, t)}</span>
+            <span className="text-[11.5px] text-muted-foreground">{nowText(d)}</span>
           </div>
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1 text-[10.5px] text-muted-foreground">
         <span className="whitespace-nowrap">
-          Batería{" "}
-          <b className="font-medium text-foreground/80">
-            {a.battery != null ? `${a.battery}%` : MISSING}
-          </b>
-        </span>
-        <span className="whitespace-nowrap">
-          GPS <b className="font-medium text-foreground/80">{gps}</b>
-        </span>
-        <span className="whitespace-nowrap">
           Últ. señal{" "}
           <b className="font-medium text-foreground/80">
-            {signalAt == null ? "—" : isLive ? signalAge(t - signalAt) : fmtClock(signalAt)}
+            {lastSignal == null ? "—" : isLive ? signalAge(t - lastSignal) : fmtClock(lastSignal)}
           </b>
         </span>
         <span className="whitespace-nowrap">
@@ -183,23 +167,36 @@ export default function AdvisorDetail({
 
       <div className="mt-3 rounded-xl border border-border px-3 py-2.5">
         <div className="flex items-baseline justify-between gap-2 text-xs font-semibold text-foreground">
-          <span>Actividades · {project?.name ?? MISSING}</span>
+          <span>Actividades</span>
           <b className="whitespace-nowrap text-xl font-semibold">
-            {ok ?? MISSING}
-            <small className="text-xs font-medium text-muted-foreground">
-              /{a.goal ?? MISSING}
-            </small>
+            {activities.effective}
+            <small className="text-xs font-medium text-muted-foreground">/{activities.goal}</small>
           </b>
         </div>
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-[3px] bg-secondary">
-          <i className="block h-full bg-[#cbe71e]" style={{ width: `${progress}%` }} />
+          <i
+            className="block h-full bg-[#cbe71e]"
+            style={{ width: `${Math.min(100, activities.goal_pct)}%` }}
+          />
         </div>
         <div className="mt-1.5 text-[11px] text-muted-foreground">
-          {project?.definition ?? MISSING} · {MISSING} registradas
+          {activities.registered} registradas
         </div>
-        {/* Las actividades por hora salen del registro de actividades, que aún no llega. */}
-        <div className="mt-2.5 grid h-[38px] place-items-center rounded-sm bg-secondary text-[11px] font-semibold text-muted-foreground">
-          {MISSING}
+        <div className="mt-2.5 flex h-[38px] items-end gap-[3px]">
+          {ACTIVITY_HOURS.map((hour) => {
+            const count = activities.by_hour.find((h) => h.hour === hour)?.count ?? 0;
+            return (
+              <span
+                key={hour}
+                title={`${hour}:00 · ${count}`}
+                className={cn("min-h-px flex-1 rounded-t-sm", !count && "bg-border")}
+                style={{
+                  height: `${(count / maxHour) * 100}%`,
+                  background: count ? palette.status.IN_VISIT : undefined
+                }}
+              />
+            );
+          })}
         </div>
         <div className="mt-[3px] flex justify-between text-[9.5px] text-muted-foreground">
           <span>7:00</span>
@@ -225,24 +222,28 @@ export default function AdvisorDetail({
         ))}
       </div>
 
+      {/* Barra de la ruta: una por visita, del color de su estado; las agendadas sin color. */}
       <div className="mt-3 flex h-[5px] gap-0.5">
-        {strip.map((background, i) => (
-          <i
-            key={i}
-            className={cn("flex-1 rounded-sm", !background && "bg-border")}
-            style={{ background: background ?? undefined }}
-          />
-        ))}
+        {visits.route.map((v) => {
+          const scheduled = v.status_code === "SCHEDULED";
+          return (
+            <i
+              key={v.visit_id}
+              className={cn("flex-1 rounded-sm", scheduled && "bg-border")}
+              style={{ background: scheduled ? undefined : palette.visit[v.status_code] }}
+            />
+          );
+        })}
       </div>
 
       <div className="mb-1.5 mt-[18px] flex items-baseline justify-between whitespace-nowrap">
         <span className="text-[11.5px] font-medium text-muted-foreground">Ruta del día</span>
-        <span className="text-[10.5px] text-muted-foreground">{pending} pendientes</span>
+        <span className="text-[10.5px] text-muted-foreground">{visits.pending} pendientes</span>
       </div>
 
       <ol className="relative">
-        {startedAt != null && (
-          <li className={STATIC_ROW}>
+        {dayStart != null && (
+          <li className={STOP_ROW} onClick={() => onJumpTo(dayStart)}>
             <div className="pt-2 text-right text-[11px] tabular-nums text-foreground/70">
               {startText}
             </div>
@@ -253,125 +254,94 @@ export default function AdvisorDetail({
               <div className="text-[12.5px] font-semibold leading-[1.3] text-foreground">
                 Inicio de jornada
               </div>
-              <div className="mt-0.5 text-[11.5px] text-muted-foreground">Check-in app · {gps}</div>
+              <div className="mt-0.5 text-[11.5px] text-muted-foreground">Check-in app</div>
             </div>
           </li>
         )}
 
-        {/* Pausas y visitas reportadas hasta `t`; el tránsito queda entre paradas. */}
-        {a.runs.map((run) => {
-          if (run.start > t) return null;
-          const closed = runPhase(run, t) === "done";
-          if (run.status === "pausa") {
-            return (
-              <li key={`p-${run.start}`} className={STOP_ROW} onClick={() => onJumpToRun(run)}>
-                <div className="pt-2 text-right text-[11px] tabular-nums text-foreground/70">
-                  {fmtClock(run.start)}
-                </div>
-                <Rail done={closed}>
-                  <div className={NODE} style={{ borderColor: palette.status.pausa }} />
-                </Rail>
-                <div className="min-w-0 pb-2.5 pt-1.5">
-                  <div
-                    className="text-[12.5px] font-semibold leading-[1.3]"
-                    style={{ color: palette.status.pausa }}
-                  >
-                    Pausa
-                  </div>
-                  <div className="mt-0.5 text-[11.5px] text-muted-foreground">
-                    {closed
-                      ? fmtDuration(runMinutes(run))
-                      : `en curso · ${fmtDuration(runMinutes(run))}`}
-                  </div>
-                </div>
-              </li>
-            );
-          }
-          if (run.status !== "visita") return null;
-          // De las visitas cerradas no llega el cliente; de la que está en curso, tampoco aún.
-          const client = closed ? null : a.currentClient;
+        {/* El estado de cada visita es el del backend: no cambia con el minuto que se mira. */}
+        {visits.route.map((v, i) => {
+          const n = i + 1;
+          const visitColor = palette.visit[v.status_code];
+          const scheduled = v.status_code === "SCHEDULED";
+          const inProgress = v.status_code === "IN_PROGRESS";
+          const started = v.started_at ? minutesOfDay(v.started_at) : null;
 
           return (
-            <li key={`v-${run.start}`} className={STOP_ROW} onClick={() => onJumpToRun(run)}>
-              <div className="pt-2 text-right text-[11px] tabular-nums text-foreground/70">
-                {fmtClock(run.start)}
+            <li
+              key={v.visit_id}
+              className={started != null ? STOP_ROW : STATIC_ROW}
+              onClick={started != null ? () => onJumpTo(started) : undefined}
+            >
+              <div
+                className={cn(
+                  "pt-2 text-right text-[11px] tabular-nums",
+                  scheduled ? "text-muted-foreground" : "text-foreground/70"
+                )}
+              >
+                {fmtClock(started ?? minutesOfDay(v.scheduled_start_at))}
               </div>
-              <Rail done={closed}>
+              <Rail done={v.finished_at != null}>
                 <div
                   className={cn(
                     NODE,
-                    !closed &&
+                    scheduled && "border-dashed text-muted-foreground",
+                    inProgress &&
                       "border-[#141414] bg-[#cbe71e] shadow-[0_0_0_4px_rgba(203,231,30,0.4)]"
                   )}
-                  style={closed ? { borderColor: palette.ink2 } : undefined}
-                />
+                  style={inProgress ? undefined : { borderColor: visitColor }}
+                >
+                  {scheduled ? n : null}
+                </div>
               </Rail>
               <div className="min-w-0 pb-2.5 pt-1.5">
-                <div className="text-[12.5px] font-semibold leading-[1.3] text-foreground">
-                  {visitRuns.indexOf(run) + 1}. {client ?? MISSING}
+                <div
+                  className={cn(
+                    "text-[12.5px] leading-[1.3]",
+                    scheduled ? "font-medium text-foreground/70" : "font-semibold text-foreground"
+                  )}
+                >
+                  {!scheduled && `${n}. `}
+                  {v.client_name}
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-[3px] text-[11.5px] text-muted-foreground">
-                  {closed ? (
-                    // El resultado de la visita aún no llega.
-                    <span className="whitespace-nowrap text-[11px] font-semibold">{MISSING}</span>
+                  {scheduled ? (
+                    <>
+                      <span className="whitespace-nowrap">{v.client_nit}</span>
+                      <span className="whitespace-nowrap">
+                        ~
+                        {fmtDuration(
+                          minutesOfDay(v.scheduled_end_at) - minutesOfDay(v.scheduled_start_at)
+                        )}
+                      </span>
+                    </>
+                  ) : inProgress ? (
+                    <>
+                      <span className="whitespace-nowrap rounded bg-[#cbe71e] px-1.5 text-[11px] font-semibold text-[#141414]">
+                        {v.status_name}
+                      </span>
+                      {started != null && (
+                        <span className="whitespace-nowrap">desde {fmtClock(started)}</span>
+                      )}
+                    </>
                   ) : (
-                    <span className="whitespace-nowrap rounded bg-[#cbe71e] px-1.5 text-[11px] font-semibold text-[#141414]">
-                      En curso
-                    </span>
+                    <>
+                      <span
+                        className="whitespace-nowrap text-[11px] font-semibold"
+                        style={{ color: visitColor }}
+                      >
+                        {v.status_name}
+                      </span>
+                      {v.duration_minutes != null && (
+                        <span className="whitespace-nowrap">{fmtDuration(v.duration_minutes)}</span>
+                      )}
+                    </>
                   )}
-                  <span className="whitespace-nowrap">{fmtDuration(runMinutes(run))}</span>
                 </div>
               </div>
             </li>
           );
         })}
-
-        {a.next && (
-          <li
-            className={nextAt ? STOP_ROW : STATIC_ROW}
-            onClick={nextAt ? () => onFlyTo(nextAt) : undefined}
-          >
-            <div className="pt-2 text-right text-[11px] tabular-nums text-muted-foreground">
-              {fmtClock(a.next.start)}
-            </div>
-            <Rail done={false}>
-              <div
-                className={cn(NODE, "border-dashed text-muted-foreground")}
-                style={{ borderColor: palette.ink3 }}
-              >
-                {visitRuns.length + 1}
-              </div>
-            </Rail>
-            <div className="min-w-0 pb-2.5 pt-1.5">
-              <div className="text-[12.5px] font-medium leading-[1.3] text-foreground/70">
-                {a.next.clientName}
-              </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-[3px] text-[11.5px] text-muted-foreground">
-                <span className="whitespace-nowrap">{a.next.nit}</span>
-                <span className="whitespace-nowrap">~{fmtDuration(a.next.end - a.next.start)}</span>
-              </div>
-            </div>
-          </li>
-        )}
-
-        {restOfRoute > 0 && (
-          <li className={STATIC_ROW}>
-            <div className="pt-2 text-right text-[11px] tabular-nums text-muted-foreground">
-              {MISSING}
-            </div>
-            <Rail done={false}>
-              <div className={cn(NODE, "border-dashed")} style={{ borderColor: palette.ink3 }} />
-            </Rail>
-            <div className="min-w-0 pb-2.5 pt-1.5">
-              <div className="text-[12.5px] font-medium leading-[1.3] text-foreground/70">
-                {restOfRoute === 1 ? "1 visita más" : `${restOfRoute} visitas más`}
-              </div>
-              <div className="mt-0.5 text-[11.5px] text-muted-foreground">
-                Clientes y horarios: {MISSING}
-              </div>
-            </div>
-          </li>
-        )}
       </ol>
     </div>
   );

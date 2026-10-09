@@ -3,18 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 
-import { cn } from "@/utils/utils";
-
 import {
-  ACTIVE_STATUSES,
   DAY_END_MIN,
   DAY_START_MIN,
   MISSING,
+  SEGMENT_KINDS,
   STATUS_LABELS,
   TIMELINE_BUCKET_MIN
 } from "../../constants";
-import type { AdvisorStatus, DayMode, ILiveAdvisor, IVisitsPalette } from "../../types";
-import type { IAdvisorSegment, ITimelineBucket, SegmentKind } from "../../utils/visits-calc";
+import type { DayMode, ILiveAdvisor, IVisitsPalette, SegmentKind } from "../../types";
+import type { IAdvisorSegment, ITimelineBucket } from "../../utils/visits-calc";
 import { fmtClock, fmtDuration } from "../../utils/visits-format";
 import { liveSegments } from "../../utils/visits-live";
 
@@ -39,10 +37,9 @@ const pct = (m: number) => ((m - DAY_START_MIN) / (DAY_END_MIN - DAY_START_MIN))
 
 /** Altura de cada tramo del asesor: la visita manda, el tránsito y la pausa quedan por debajo. */
 const SEGMENT_HEIGHT: Record<SegmentKind, number> = {
-  visita: 30,
-  transito: 18,
-  pausa: 14,
-  sinsenal: 30
+  IN_VISIT: 30,
+  IN_TRANSIT: 18,
+  ON_PAUSE: 14
 };
 
 interface Tooltip {
@@ -92,7 +89,6 @@ export default function VisitsTimeline({
       ? { left: pct(advisor.next.start), right: pct(Math.min(advisor.next.end, DAY_END_MIN)) }
       : null;
   const isLive = dayMode === "today" && t === now;
-  const legend: AdvisorStatus[] = advisor ? [...ACTIVE_STATUSES, "sinsenal"] : ACTIVE_STATUSES;
 
   const minuteAt = (clientX: number) => {
     const rect = trackRef.current?.getBoundingClientRect();
@@ -107,10 +103,10 @@ export default function VisitsTimeline({
         Math.floor((m - DAY_START_MIN) / TIMELINE_BUCKET_MIN) * TIMELINE_BUCKET_MIN + DAY_START_MIN;
       const bucket = buckets.find((b) => b.start === start);
       if (!bucket) return null;
-      const on = ACTIVE_STATUSES.reduce((sum, s) => sum + (bucket.counts[s] ?? 0), 0);
+      const on = SEGMENT_KINDS.reduce((sum, s) => sum + (bucket.counts[s] ?? 0), 0);
       return {
         title: `${fmtClock(start)}–${fmtClock(start + TIMELINE_BUCKET_MIN)} · ${on} de ${bucket.total} conectados`,
-        rows: ACTIVE_STATUSES.filter((s) => bucket.counts[s]).map((s) => ({
+        rows: SEGMENT_KINDS.filter((s) => bucket.counts[s]).map((s) => ({
           color: palette.status[s],
           label: STATUS_LABELS[s],
           value: String(bucket.counts[s])
@@ -123,12 +119,10 @@ export default function VisitsTimeline({
       if (s.end <= m) totals[s.kind] = (totals[s.kind] ?? 0) + (s.end - s.start);
       else if (s.start < m) totals[s.kind] = (totals[s.kind] ?? 0) + (m - s.start);
     });
-    const kinds: SegmentKind[] = ["visita", "transito", "pausa"];
     return {
-      title: `${fmtClock(m)} · ${current ? STATUS_LABELS[current.kind] : "Sin iniciar"}`,
+      title: `${fmtClock(m)} · ${current ? STATUS_LABELS[current.kind] : "Sin puntos"}`,
       rows: [
-        ...kinds
-          .filter((k) => totals[k])
+        ...SEGMENT_KINDS.filter((k) => totals[k])
           .map((k) => ({
             color: palette.status[k],
             label: `${STATUS_LABELS[k]} acumulado`,
@@ -150,19 +144,13 @@ export default function VisitsTimeline({
     setTooltip({ ...info, x: clientX - wrap.left });
   };
 
-  const segmentStyle = (s: IAdvisorSegment) => {
-    const color = palette.status[s.kind];
-    return {
-      left: `${pct(s.start)}%`,
-      width: `calc(${pct(s.end) - pct(s.start)}% - 1px)`,
-      height: SEGMENT_HEIGHT[s.kind],
-      background:
-        s.kind === "sinsenal"
-          ? `repeating-linear-gradient(90deg, ${color} 0 2px, transparent 2px 5px)`
-          : color,
-      opacity: s.start > t ? 0.3 : 1
-    };
-  };
+  const segmentStyle = (s: IAdvisorSegment) => ({
+    left: `${pct(s.start)}%`,
+    width: `calc(${pct(s.end) - pct(s.start)}% - 1px)`,
+    height: SEGMENT_HEIGHT[s.kind],
+    background: palette.status[s.kind],
+    opacity: s.start > t ? 0.3 : 1
+  });
 
   return (
     <div className="grid h-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 rounded-2xl border border-border bg-card px-4">
@@ -224,7 +212,7 @@ export default function VisitsTimeline({
           <div className="absolute inset-x-0 bottom-[3px] h-[34px]">
             {!advisor &&
               buckets.map((b) => {
-                const on = ACTIVE_STATUSES.reduce((sum, s) => sum + (b.counts[s] ?? 0), 0);
+                const on = SEGMENT_KINDS.reduce((sum, s) => sum + (b.counts[s] ?? 0), 0);
                 if (!on) return null;
                 return (
                   <i
@@ -238,7 +226,7 @@ export default function VisitsTimeline({
                       opacity: b.start <= t ? 1 : 0.3
                     }}
                   >
-                    {ACTIVE_STATUSES.filter((s) => b.counts[s]).map((s) => (
+                    {SEGMENT_KINDS.filter((s) => b.counts[s]).map((s) => (
                       <b
                         key={s}
                         className="block w-full"
@@ -259,7 +247,7 @@ export default function VisitsTimeline({
                     className="absolute bottom-0 left-0 h-1.5 rounded-[2px] opacity-35"
                     style={{
                       width: `${pct(Math.min(advisor.dayStart, now))}%`,
-                      background: palette.status.nostart
+                      background: palette.ink3
                     }}
                   />
                 )}
@@ -307,14 +295,8 @@ export default function VisitsTimeline({
         </div>
 
         <div className="absolute left-0 top-[62px] flex max-w-full flex-nowrap gap-2.5 overflow-hidden text-[10px] text-muted-foreground">
-          {legend.map((s) => (
-            <span
-              key={s}
-              className={cn(
-                "flex items-center gap-1 whitespace-nowrap",
-                s === "sinsenal" && "max-[1300px]:hidden"
-              )}
-            >
+          {SEGMENT_KINDS.map((s) => (
+            <span key={s} className="flex items-center gap-1 whitespace-nowrap">
               <i className="h-[7px] w-[7px] rounded-[2px]" style={{ background: palette.status[s] }} />
               {STATUS_LABELS[s]}
             </span>
@@ -343,7 +325,7 @@ export default function VisitsTimeline({
         disabled={isLive}
         onClick={onGoLive}
         className="flex items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-card px-2.5 py-1.5 text-[10.5px] font-semibold tracking-[0.04em] text-muted-foreground transition-colors enabled:hover:border-[color:var(--live)] enabled:hover:text-[color:var(--live)] disabled:cursor-default disabled:opacity-35"
-        style={{ "--live": palette.status.visita } as React.CSSProperties}
+        style={{ "--live": palette.status.IN_VISIT } as React.CSSProperties}
       >
         <svg width="8" height="8" aria-hidden>
           <circle cx="4" cy="4" r="4" fill="currentColor" />

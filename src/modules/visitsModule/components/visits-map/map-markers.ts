@@ -48,9 +48,7 @@ export interface AdvisorMarkerState {
   color: string;
   selected: boolean;
   hovered: boolean;
-  /** Sin señal: borde punteado. */
-  lost: boolean;
-  /** En vivo y en visita o tránsito: anillo que late. */
+  /** En vivo y en un estado activo: anillo que late. */
   pulse: boolean;
   /** Actividades exitosas; null mientras no lleguen del backend ("XX"). */
   count: number | null;
@@ -65,8 +63,7 @@ export function applyAdvisorMarkerState(h: AdvisorMarkerHandles, s: AdvisorMarke
     cn(
       ADVISOR_BODY,
       s.hovered && "scale-125",
-      s.selected && "scale-[1.35] bg-[color:var(--sc)] text-card",
-      s.lost && "border-dashed"
+      s.selected && "scale-[1.35] bg-[color:var(--sc)] text-card"
     )
   );
   setClass(h.ring, cn(ADVISOR_RING, !s.pulse && "hidden"));

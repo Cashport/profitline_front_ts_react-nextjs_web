@@ -22,32 +22,26 @@ interface RankingRowProps {
 
 /** Detalle del estado y dónde está, como lo cuenta la fila; "XX" en lo que aún no llega. */
 function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
-  const since = s.run ? fmtDuration(t - s.run.start) : null;
   const zone = a.zoneName ?? MISSING;
   let detail: string | null = null;
   let where: string;
 
   switch (s.status) {
-    case "visita":
-      detail = since;
+    case "IN_VISIT":
+      // Tiempo en la visita: el tramo de puntos en visita en curso.
+      detail = s.run?.status === "IN_VISIT" ? fmtDuration(t - s.run.start) : null;
       where = a.currentClient ?? MISSING;
       break;
-    case "transito":
+    case "AT_POINT":
+      where = a.currentClient ?? MISSING;
+      break;
+    case "EN_ROUTE":
       detail = a.next ? `ETA ${fmtClock(a.next.start)}` : null;
       where = a.next ? `Hacia ${a.next.clientName}` : `Zona ${zone}`;
       break;
-    case "pausa":
-      detail = since;
-      // El día simulado nombraba el último cliente visitado; el API aún no lo envía.
-      where = `Cerca de ${MISSING}`;
-      break;
     default:
-      // Sin iniciar (antes del primer punto) o un estado que aún no se mapea.
-      where = !s.run
-        ? `No ha abierto jornada · ${a.visits.total} programadas`
-        : a.next
-          ? `Próxima ${fmtClock(a.next.start)} · ${a.next.clientName}`
-          : "Sin visitas pendientes";
+      // NO_VISITS.
+      where = a.visits.total ? "Sin visitas pendientes" : "Sin visitas programadas";
   }
 
   return { detail, where: `${where} · ${zone}` };

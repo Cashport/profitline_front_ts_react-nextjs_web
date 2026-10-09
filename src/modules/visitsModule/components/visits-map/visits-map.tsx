@@ -13,7 +13,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import config from "@/config";
 
-import { MAP_CENTER, MAP_STYLES, MAP_ZOOM, MISSING } from "../../constants";
+import { ACTIVE_STATUSES, MAP_CENTER, MAP_STYLES, MAP_ZOOM, MISSING } from "../../constants";
 import type {
   ILiveAdvisor,
   ILiveRun,
@@ -278,7 +278,7 @@ export default function VisitsMap(props: VisitsMapProps) {
         const entry = markers.get(a.id);
         if (!entry) return;
         const s = liveStateAt(a, latest.current.t);
-        const client = s.status === "visita" ? ` · ${a.currentClient ?? MISSING}` : "";
+        const client = s.status === "IN_VISIT" ? ` · ${a.currentClient ?? MISSING}` : "";
         const { lng, lat } = entry.marker.getLngLat();
         showTooltip([lng, lat], a.name, `${s.label}${client}`, 18);
       });
@@ -379,8 +379,7 @@ export default function VisitsMap(props: VisitsMapProps) {
         color: palette.status[status],
         selected: selectedId === a.id,
         hovered: hoveredId === a.id,
-        lost: status === "sinsenal",
-        pulse: isLive && (status === "visita" || status === "transito"),
+        pulse: isLive && ACTIVE_STATUSES.includes(status),
         count: a.activitiesOk,
         leader: leaderId === a.id
       });
