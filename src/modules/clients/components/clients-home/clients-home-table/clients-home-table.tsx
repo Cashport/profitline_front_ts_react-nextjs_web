@@ -50,6 +50,8 @@ interface ClientsHomeTableProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
+  /** Contenedor con scroll de las filas (tabla o lista angosta). */
+  listRef?: React.RefObject<HTMLDivElement>;
 }
 
 interface Column {
@@ -83,17 +85,6 @@ const tipPosition = (b: DOMRect, size: { width: number; height: number }) => {
   return { x, y: Math.max(8, y) };
 };
 
-/** Primer ancestro con scroll vertical (el contenedor de la vista). */
-const scrollParentOf = (el: HTMLElement | null): HTMLElement | null => {
-  let node = el?.parentElement ?? null;
-  while (node) {
-    const { overflowY } = getComputedStyle(node);
-    if (overflowY === "auto" || overflowY === "scroll") return node;
-    node = node.parentElement;
-  }
-  return null;
-};
-
 const col = (
   key: string,
   label: string,
@@ -119,7 +110,8 @@ export default function ClientsHomeTable({
   error,
   hasNextPage,
   isFetchingNextPage,
-  fetchNextPage
+  fetchNextPage,
+  listRef
 }: ClientsHomeTableProps) {
   const router = useRouter();
   const f = useClientsHomeFilters(
@@ -142,12 +134,10 @@ export default function ClientsHomeTable({
   );
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const rowsRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1400);
   const [expAge, setExpAge] = useState(false);
   const [tip, setTip] = useState<Tip>(null);
   const [qf, setQf] = useState<QuickFilter>(null);
-  const [totFixed, setTotFixed] = useState<{ left: number; width: number } | null>(null);
   const { ref: sentinelRef, inView } = useInView();
 
   useEffect(() => {
@@ -162,46 +152,6 @@ export default function ClientsHomeTable({
     ro.observe(el);
     setWidth(el.clientWidth);
     return () => ro.disconnect();
-  }, []);
-
-  // Como en el diseño: la rueda baja primero la página hasta que la tabla
-  // ocupa la pantalla, y recién ahí desplaza las filas. Mientras la tabla
-  // sigue por debajo del borde, la fila de totales queda fija abajo.
-  useEffect(() => {
-    const parent = scrollParentOf(cardRef.current);
-    if (!parent) return;
-    const onWheel = (e: WheelEvent) => {
-      const max = parent.scrollHeight - parent.clientHeight - 1;
-      if (e.deltaY > 0 && parent.scrollTop < max) {
-        e.preventDefault();
-        parent.scrollTop = Math.min(parent.scrollTop + e.deltaY, max + 1);
-      }
-    };
-    const onScroll = () => {
-      const card = cardRef.current;
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const rs = rowsRef.current?.getBoundingClientRect() ?? r;
-      const H = window.innerHeight;
-      const fixed = r.bottom > H - 4 && rs.top + 132 < H;
-      setTotFixed((prev) => {
-        const next = fixed
-          ? { left: Math.round(r.left + 10), width: Math.round(r.width - 20) }
-          : null;
-        return prev?.left === next?.left && prev?.width === next?.width ? prev : next;
-      });
-    };
-    parent.addEventListener("wheel", onWheel, { passive: false });
-    parent.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    requestAnimationFrame(onScroll);
-    const t = setTimeout(onScroll, 300);
-    return () => {
-      parent.removeEventListener("wheel", onWheel);
-      parent.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      clearTimeout(t);
-    };
   }, []);
 
   const focus = meta?.agingFocus ?? null;
@@ -602,8 +552,7 @@ export default function ClientsHomeTable({
   return (
     <div
       ref={cardRef}
-      className="box-border flex min-h-[320px] min-w-0 flex-none flex-col rounded-[14px] bg-white px-2.5 pb-2 pt-3"
-      style={{ height: "calc(100vh - 100px)" }}
+      className="box-border flex min-h-[320px] min-w-0 flex-1 flex-col rounded-[14px] bg-white px-2.5 pb-2 pt-3"
     >
       {/* Título, mercados y buscador */}
       <div className="flex flex-none flex-wrap items-start justify-between gap-x-4 gap-y-2.5 px-1.5 pb-3 pt-2">
@@ -682,7 +631,7 @@ export default function ClientsHomeTable({
           {!cardMode ? (
             <>
               <div
-                ref={rowsRef}
+                ref={listRef}
                 className="min-h-0 flex-[1_1_0] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] [scrollbar-width:thin]"
                 style={{ opacity: refreshing ? 0.6 : 1 }}
               >
@@ -714,22 +663,15 @@ export default function ClientsHomeTable({
               {rows.length > 0 && totals && (
                 <div
                   className="box-border grid flex-none items-center gap-x-3.5 overflow-hidden border-t border-[#e3e3e3] bg-[#f7f7f7] px-3.5 py-3 shadow-[0_-6px_12px_-8px_rgba(0,0,0,.12)] [scrollbar-gutter:stable]"
-                  style={{
-                    gridTemplateColumns: gridCols,
-                    position: totFixed ? "fixed" : "relative",
-                    left: totFixed ? totFixed.left : "auto",
-                    width: totFixed ? totFixed.width : "auto",
-                    bottom: 8,
-                    zIndex: 30
-                  }}
+                  style={{ gridTemplateColumns: gridCols }}
                 >
                   {columns.map(renderTotal)}
                 </div>
               )}
-              <div className="flex-none" style={{ height: totFixed ? 46 : 0 }} />
             </>
           ) : (
             <CardList
+              listRef={listRef}
               rows={rows}
               onOpen={(row) => router.push(detailHref(row))}
               portfolioBar={portfolioBar}
@@ -914,6 +856,7 @@ const QuickFilterPopover = ({
 
 /** Vista angosta (< 820px): una tarjeta por cliente con chips de orden arriba. */
 const CardList = ({
+  listRef,
   rows,
   onOpen,
   portfolioBar,
@@ -922,6 +865,7 @@ const CardList = ({
   sentinelRef,
   footer
 }: {
+  listRef?: React.RefObject<HTMLDivElement>;
   rows: IClientsHomeRow[];
   onOpen: (row: IClientsHomeRow) => void;
   portfolioBar: (row: IClientsHomeRow, height: number) => React.ReactNode;
@@ -942,7 +886,7 @@ const CardList = ({
     ["Nombre", "name"]
   ];
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto">
+    <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto">
       <div className="flex flex-wrap gap-2 overflow-hidden border-b border-[#ececec] px-1 pb-2.5 pt-1.5">
         {chips.map(([label, key]) => (
           <button

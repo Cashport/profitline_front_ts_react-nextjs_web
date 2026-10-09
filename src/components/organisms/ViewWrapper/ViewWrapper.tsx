@@ -12,6 +12,8 @@ interface IViewWrapper {
   gapTitle?: string;
   hideHeader?: boolean;
   className?: string;
+  headerClassName?: string;
+  contentClassName?: string;
 }
 export default function ViewWrapper({
   headerTitle,
@@ -20,14 +22,21 @@ export default function ViewWrapper({
   children,
   gapTitle = "1rem",
   hideHeader = false,
-  className
+  className,
+  headerClassName,
+  contentClassName
 }: Readonly<IViewWrapper>) {
   return (
     <main className={`${styles.mainWrapper} ${className ?? ""}`}>
       <SideBar />
-      <Flex vertical className={styles.rightContent} gap={gapTitle}>
+      <Flex vertical className={`${styles.rightContent} ${contentClassName ?? ""}`} gap={gapTitle}>
         {!hideHeader ? (
-          <Header title={headerTitle} titleExtra={headerTitleExtra} actionsExtra={headerActions} />
+          <Header
+            title={headerTitle}
+            titleExtra={headerTitleExtra}
+            actionsExtra={headerActions}
+            className={headerClassName}
+          />
         ) : null}
         {children}
       </Flex>

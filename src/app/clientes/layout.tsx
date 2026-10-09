@@ -1,8 +1,4 @@
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
-import {
-  ClientsHomeHeaderActions,
-  ClientsHomeHeaderExtra
-} from "@/modules/clients/components/clients-home/clients-home-header/clients-home-header";
+import ClientsLayout from "@/modules/clients/containers/clients-layout/clients-layout";
 import { Metadata } from "next";
 import { FC, ReactNode } from "react";
 
@@ -11,20 +7,12 @@ export const metadata: Metadata = {
   description: "Clientes"
 };
 
-interface ClientsLayoutProps {
+interface LayoutProps {
   children?: ReactNode;
 }
 
-const ClientsLayout: FC<ClientsLayoutProps> = ({ children }) => {
-  return (
-    <ViewWrapper
-      headerTitle="Clientes"
-      headerTitleExtra={<ClientsHomeHeaderExtra />}
-      headerActions={<ClientsHomeHeaderActions />}
-    >
-      {children}
-    </ViewWrapper>
-  );
+const Layout: FC<LayoutProps> = ({ children }) => {
+  return <ClientsLayout>{children}</ClientsLayout>;
 };
 
-export default ClientsLayout;
+export default Layout;
