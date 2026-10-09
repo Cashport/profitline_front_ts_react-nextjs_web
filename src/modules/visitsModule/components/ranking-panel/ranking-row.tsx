@@ -60,6 +60,8 @@ export default function RankingRow({
   const project = a.project ? PROJECTS[a.project] : null;
   const ratio = a.activitiesOk != null && a.goal ? a.activitiesOk / a.goal : null;
   const low = ratio == null || ratio < 0.35;
+  // Avance de visitas: las completadas sobre el total del día.
+  const visitsPct = a.visits.total ? Math.round((a.visits.completed / a.visits.total) * 100) : null;
   const { detail, where } = describe(a, state, t);
   // Mientras no lleguen las actividades, el podio sale de las visitas efectivas.
   const podium = position <= 3 && a.visits.completed > 0 ? position : 0;
@@ -119,7 +121,7 @@ export default function RankingRow({
         className="flex flex-col items-end gap-[3px] pt-px"
         title={`Actividades · ${project?.definition ?? MISSING}`}
       >
-        {/* Sin abrir el día: su modal sigue con datos simulados. */}
+        {/* Las actividades aún no llegan en today-visits. */}
         <span
           className={cn(
             "flex h-[26px] min-w-[50px] items-center justify-center gap-0.5 rounded-lg px-2",
@@ -135,7 +137,7 @@ export default function RankingRow({
         </span>
         <span className="whitespace-nowrap text-[10.5px] text-muted-foreground">
           <b className="font-semibold text-foreground">
-            {ratio != null ? Math.round(ratio * 100) : MISSING}%
+            {visitsPct != null ? `${visitsPct}%` : "—"}
           </b>
           {" · "}
           {a.visits.done}/{a.visits.total} vis.
