@@ -41,7 +41,7 @@ function RunError({ error, readableError }: RunErrorProps) {
   if (!summary) return null;
 
   const summaryText = (
-    <div className="mt-0.5 max-w-58 truncate text-xs text-[#DC2626]">{summary}</div>
+    <div className="mt-0.5 max-w-[140px] truncate text-xs text-[#DC2626]">{summary}</div>
   );
   if (!error) return summaryText;
 

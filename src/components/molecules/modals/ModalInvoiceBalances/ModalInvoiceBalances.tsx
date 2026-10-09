@@ -9,6 +9,8 @@ import { useInvoiceBalances } from "@/hooks/useInvoiceBalances";
 import { IInvoiceBalance } from "@/services/balances/balances";
 import { IInvoice } from "@/types/invoices/IInvoices";
 
+import "./modalInvoiceBalances.scss";
+
 const { Text } = Typography;
 
 interface ModalInvoiceBalancesProps {
@@ -69,13 +71,6 @@ export const ModalInvoiceBalances = ({
           )
       },
       {
-        title: "Eliminado",
-        dataIndex: "is_deleted",
-        key: "is_deleted",
-        width: 100,
-        render: (value: number) => (Number(value) === 1 ? "Sí" : "No")
-      },
-      {
         title: "Fecha",
         dataIndex: "created_at",
         key: "created_at",
@@ -97,6 +92,9 @@ export const ModalInvoiceBalances = ({
       onCancel={onClose}
       footer={null}
       width={1000}
+      centered
+      className="modalInvoiceBalances"
+      style={{ maxWidth: "calc(100vw - 32px)" }}
       destroyOnClose
       title={
         <span>
@@ -105,12 +103,14 @@ export const ModalInvoiceBalances = ({
       }
     >
       <Table<IInvoiceBalance>
+        className="modalInvoiceBalances__table"
         rowKey="id"
         size="small"
         loading={loading}
         columns={columns}
         dataSource={balances}
         pagination={false}
+        scroll={{ y: "40vh" }}
         locale={{ emptyText: "Esta factura no tiene saldos asociados" }}
       />
     </Modal>

@@ -35,24 +35,37 @@ interface KpiValueProps {
   caption?: React.ReactNode;
   /** "lg" para el valor principal de la tarjeta, "md" para los de una tarjeta compartida. */
   size?: "lg" | "md";
+  /** Clases extra para el monto (ej. un tamaño que cambia con el ancho). */
+  valueClassName?: string;
   className?: string;
 }
 
-export function KpiValue({ label, value, unit, caption, size = "lg", className }: KpiValueProps) {
+/** Si el monto no cabe se corta con elipsis; la unidad queda visible y el title lo muestra. */
+export function KpiValue({
+  label,
+  value,
+  unit,
+  caption,
+  size = "lg",
+  valueClassName,
+  className
+}: KpiValueProps) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <span className="truncate text-[13px] text-[#6b6b6b]">{label}</span>
       <div
+        title={typeof value === "string" ? [value, unit].filter(Boolean).join(" ") : undefined}
         className={cn(
-          "whitespace-nowrap font-semibold leading-none",
-          size === "lg" ? "text-[26px] tracking-[-0.6px]" : "text-[20px] tracking-[-0.4px]"
+          "flex items-baseline font-semibold leading-none",
+          size === "lg" ? "text-[26px] tracking-[-0.6px]" : "text-[20px] tracking-[-0.4px]",
+          valueClassName
         )}
       >
-        {value}
+        <span className="min-w-0 truncate">{value}</span>
         {unit && (
           <span
             className={cn(
-              "ml-[3px] font-medium text-[#6b6b6b]",
+              "ml-[3px] shrink-0 font-medium text-[#6b6b6b]",
               size === "lg" ? "text-xs" : "text-[11px]"
             )}
           >
@@ -60,7 +73,7 @@ export function KpiValue({ label, value, unit, caption, size = "lg", className }
           </span>
         )}
       </div>
-      {caption && <span className="whitespace-nowrap text-[11.5px] text-[#6b6b6b]">{caption}</span>}
+      {caption && <span className="truncate text-[11.5px] text-[#6b6b6b]">{caption}</span>}
     </div>
   );
 }

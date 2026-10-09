@@ -11,13 +11,12 @@ import { useClientsHomeSummary } from "../../../hooks/clients-home/use-clients-h
 import { useClientsHomeFilters } from "../../../stores/clients-home-filters";
 import {
   AGING_BY_KEY,
+  CLIENTS_HOME_PATH,
   CLIENTS_HOME_QUERY_KEY,
   FORECAST_STATUS
 } from "../../../constants/clients-home";
 import { fmtCutoff, fmtIsoDate } from "../../../utils/clients-home-format";
 import ClientsHomeFilterModal from "../clients-home-filter-modal/clients-home-filter-modal";
-
-const CLIENTS_HOME_PATH = "/clientes/all";
 
 /* El layout de /clientes también envuelve el detalle del cliente: estas
    piezas solo se muestran en el Home. */
