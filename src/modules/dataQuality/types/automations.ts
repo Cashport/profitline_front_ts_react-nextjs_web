@@ -17,3 +17,19 @@ export interface IBotsSummary {
   EN_REVISION: number;
 }
 
+// Fila sintética para agrupar la tabla "Bots por cliente" por cliente (expandible).
+// No viene del backend: se construye en frontend a partir del array plano de
+// IBotStatusItem para poder colapsar/expandir los bots de un mismo cliente.
+// Mantiene periodicidad/próxima_ejecución agregadas (no en blanco) para no
+// perder esa info mientras la fila está colapsada.
+export interface IBotClientGroupRow {
+  key: string;
+  isGroup: true;
+  id_client_data: number;
+  cliente: string;
+  pais: string | null;
+  periodicidad: string[];
+  proxima_ejecucion: string | null;
+  bots: IBotStatusItem[];
+}
+

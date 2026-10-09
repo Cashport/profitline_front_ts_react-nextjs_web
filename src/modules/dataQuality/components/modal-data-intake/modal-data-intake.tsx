@@ -20,11 +20,12 @@ import { fetcher } from "@/utils/api/api";
 import { IParameterData, IClientDetailDataArchive, IPeriodicity } from "@/types/dataQuality/IDataQuality";
 import { transformParameterDataToFormData } from "../../utils/transformParameterData";
 import { GenericResponse } from "@/types/global/IGlobal";
-import { Edit } from "lucide-react";
+import { Edit, History } from "lucide-react";
 import { InputClickableStyled } from "../input-clickable-styled/input-clickable-styled";
 import { ModalPeriodicity } from "@/components/molecules/modals/ModalPeriodicity/ModalPeriodicity";
 import { IPeriodicityModalForm } from "@/types/communications/ICommunications";
 import { createIntake, editIntake } from "@/services/dataQuality/dataQuality";
+import { VariableHistoryDrawer } from "../variable-history-drawer";
 
 // Mode type definition
 export type IModalMode = "create" | "view";
@@ -140,6 +141,7 @@ export function ModalDataIntake({
   const [initialPeriodicity, setInitialPeriodicity] = useState<IPeriodicityModalForm | undefined>(
     undefined
   );
+  const [isVariableHistoryOpen, setIsVariableHistoryOpen] = useState(false);
 
   // Fetch parameter data with clientId using SWR
   const {
@@ -205,6 +207,11 @@ export function ModalDataIntake({
     name: "ingestaVariables"
   });
 
+  // Cantidad de variables YA configuradas al abrir el modal: en modo "view" su
+  // nombre (key) queda de solo lectura, solo se puede ajustar el valor. Las que
+  // se agreguen después con "+ Agregar variable" sí permiten nombre editable.
+  const [lockedVariableCount, setLockedVariableCount] = useState(0);
+
   // Watch for attached file
   const attachedFileValue = watch("attachedFile");
 
@@ -224,8 +231,9 @@ export function ModalDataIntake({
           : [{ key: "", value: "" }]
       };
       reset(resetData);
+      setLockedVariableCount(mode === "view" ? resetData.ingestaVariables.length : 0);
     }
-  }, [open, formInitialData, reset, clientName]);
+  }, [open, formInitialData, reset, clientName, mode]);
 
   // Handle fetch errors
   useEffect(() => {
@@ -562,7 +570,19 @@ export function ModalDataIntake({
       {/* Variables de configuración */}
       <div className="grid gap-2">
         <div className="flex items-center justify-between">
-          <Label>Variables de configuración</Label>
+          <div className="flex items-center gap-1.5">
+            <Label>Variables de configuración</Label>
+            {mode === "view" && intakeData?.id && (
+              <button
+                type="button"
+                title="Historial de variables de configuración"
+                onClick={() => setIsVariableHistoryOpen(true)}
+                className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
+              >
+                <History className="h-3.5 w-3.5 text-gray-500" />
+              </button>
+            )}
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -574,39 +594,54 @@ export function ModalDataIntake({
           </Button>
         </div>
         <div className="space-y-2 max-h-[200px] overflow-y-auto">
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <Controller
-                name={`ingestaVariables.${index}.key`}
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    placeholder="Nombre (ej: EMAIL, API_URL)"
-                    className="border-[#DDDDDD] flex-1 font-mono text-sm"
+          {fields.map((field, index) => {
+            const isLockedKey = index < lockedVariableCount;
+            return (
+              <div key={field.id} className="flex items-center gap-2">
+                {isLockedKey ? (
+                  <Controller
+                    name={`ingestaVariables.${index}.key`}
+                    control={control}
+                    render={({ field }) => (
+                      <div className="flex-1 truncate rounded-md border border-[#DDDDDD] bg-gray-50 px-3 py-2 font-mono text-sm text-gray-500">
+                        {field.value}
+                      </div>
+                    )}
+                  />
+                ) : (
+                  <Controller
+                    name={`ingestaVariables.${index}.key`}
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder="Nombre (ej: EMAIL, API_URL)"
+                        className="border-[#DDDDDD] flex-1 font-mono text-sm"
+                      />
+                    )}
                   />
                 )}
-              />
-              <Controller
-                name={`ingestaVariables.${index}.value`}
-                control={control}
-                render={({ field }) => (
-                  <Input {...field} placeholder="Valor" className="border-[#DDDDDD] flex-1" />
+                <Controller
+                  name={`ingestaVariables.${index}.value`}
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} placeholder="Valor" className="border-[#DDDDDD] flex-1" />
+                  )}
+                />
+                {fields.length > 1 && !isLockedKey && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                    className="text-red-600 hover:text-red-700 px-2"
+                  >
+                    ✕
+                  </Button>
                 )}
-              />
-              {fields.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => remove(index)}
-                  className="text-red-600 hover:text-red-700 px-2"
-                >
-                  ✕
-                </Button>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
         <p className="text-xs text-gray-500">
           Agregue variables como EMAIL, API_URL, PASSWORD, etc.
@@ -676,7 +711,19 @@ export function ModalDataIntake({
 
       {/* Variables de configuración */}
       <div className="grid gap-2">
-        <Label>Variables de configuración</Label>
+        <div className="flex items-center gap-1.5">
+          <Label>Variables de configuración</Label>
+          {intakeData?.id && (
+            <button
+              type="button"
+              title="Historial de variables de configuración"
+              onClick={() => setIsVariableHistoryOpen(true)}
+              className="flex h-6 w-6 items-center justify-center rounded transition-colors hover:bg-gray-100"
+            >
+              <History className="h-3.5 w-3.5 text-gray-500" />
+            </button>
+          )}
+        </div>
         <div className="space-y-1">
           {formInitialData.ingestaVariables
             ?.filter((v) => v.key && v.value)
@@ -802,6 +849,12 @@ export function ModalDataIntake({
         isEditAvailable={true}
         showCommunicationDetails={{ communicationId: 0, active: false }}
         resetOnParentClose={!open}
+      />
+
+      <VariableHistoryDrawer
+        archiveId={intakeData?.id ?? null}
+        isOpen={isVariableHistoryOpen}
+        onClose={() => setIsVariableHistoryOpen(false)}
       />
     </>
   );

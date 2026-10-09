@@ -36,3 +36,21 @@ export const BOT_FREQUENCY_LABELS: Record<string, string> = {
 
 export const BOT_MUTED_TEXT_COLOR = "#6B7280";
 
+// Orden de severidad (peor primero) para decidir qué badge mostrar en la fila
+// resumen de un cliente agrupado en la tabla, mientras está colapsada.
+const BOT_STATUS_SEVERITY: BotStatus[] = [
+  "FALLIDO",
+  "EN_REVISION",
+  "EN_EJECUCION",
+  "PENDIENTE",
+  "SIN_EJECUCIONES",
+  "EXITOSO"
+];
+
+export function getWorstBotStatus(bots: { estado: BotStatus }[]): BotStatus {
+  for (const status of BOT_STATUS_SEVERITY) {
+    if (bots.some((bot) => bot.estado === status)) return status;
+  }
+  return "SIN_EJECUCIONES";
+}
+
