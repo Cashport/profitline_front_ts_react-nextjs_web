@@ -10,9 +10,10 @@ interface HeaderProps {
   title: string;
   titleExtra?: ReactNode;
   actionsExtra?: ReactNode;
+  className?: string;
 }
 
-const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra }) => {
+const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra, className }) => {
   const router = useRouter();
 
   const handleLogOut = useCallback(() => {
@@ -20,7 +21,7 @@ const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra }) => {
   }, [router]);
 
   return (
-    <header className={styles.wrapper}>
+    <header className={`${styles.wrapper} ${className ?? ""}`}>
       <div className={styles.titleWrapper}>
         <h1 className={styles.title}>{title}</h1>
         {titleExtra}

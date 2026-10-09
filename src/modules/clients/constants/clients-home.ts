@@ -5,6 +5,9 @@ import type {
 
 /* Home de Clientes: tramos, colores y umbrales del diseño "Clientes Home". */
 
+/** Ruta del Home (el layout de /clientes también envuelve el detalle). */
+export const CLIENTS_HOME_PATH = "/clientes/all";
+
 export const AGING_BUCKETS: {
   key: ClientsHomeAgingBucket;
   label: string;
