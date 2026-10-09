@@ -27,7 +27,8 @@ import {
   IRegion,
   IPacksUploadResult,
   IBotRunNowResult,
-  IBotHistoryList
+  IBotHistoryList,
+  IVariableHistoryEntry
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -195,6 +196,22 @@ export const editIntake = async (
     return response.data;
   } catch (error) {
     console.error("Error editing intake:", error);
+    throw error;
+  }
+};
+
+// GET /data/client-archive-monthly/:id/variable-history: auditoria de cambios
+// (quien/cuando/que) de las variables de configuracion (credenciales) de una ingesta.
+export const getVariableHistory = async (
+  archiveId: number
+): Promise<IVariableHistoryEntry[]> => {
+  try {
+    const response: GenericResponse<IVariableHistoryEntry[]> = await API.get(
+      `${config.API_HOST}/data/client-archive-monthly/${archiveId}/variable-history`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching variable history:", error);
     throw error;
   }
 };

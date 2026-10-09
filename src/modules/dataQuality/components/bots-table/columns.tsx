@@ -1,7 +1,7 @@
 "use client";
 
 import { TableProps } from "antd";
-import { Clock, Eye, Loader2, Package, Play } from "lucide-react";
+import { Eye, Loader2, Play } from "lucide-react";
 
 import { Badge } from "@/modules/chat/ui/badge";
 import { Button } from "@/modules/chat/ui/button";
@@ -9,7 +9,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/chat/ui/toolt
 import { IBotStatusItem } from "@/types/dataQuality/IDataQuality";
 import { cn, formatLocalDateTimeParts } from "@/utils/utils";
 
-import { BOT_FREQUENCY_LABELS, DARK_TOOLTIP_ARROW, DARK_TOOLTIP_CONTENT } from "../../constants";
+import {
+  BOT_FREQUENCY_LABELS,
+  BOT_MUTED_TEXT_COLOR,
+  BOT_STATUS_META,
+  DARK_TOOLTIP_ARROW,
+  DARK_TOOLTIP_CONTENT,
+  getWorstBotStatus
+} from "../../constants";
+import { IBotClientGroupRow } from "../../types/automations";
 import { BotStatusBadge } from "./bot-status-badge";
 
 interface RunTimestampProps {
@@ -64,7 +72,104 @@ function RunError({ error, readableError, category }: RunErrorProps) {
   );
 }
 
-interface GetBotsColumnsOptions {
+// "Con fallas" a secas si TODOS los bots del cliente fallaron (incluido el caso de
+// un único bot); "N con fallas" solo cuando el grupo está mezclado (algunos ok,
+// otros no), para no perder la señal de cuántos realmente fallaron.
+function getGroupStatusLabel(bots: IBotStatusItem[]): { label: string; color: string } {
+  const failedCount = bots.filter((bot) => bot.estado === "FALLIDO").length;
+  if (failedCount > 0 && failedCount < bots.length) {
+    return { label: `${failedCount} con fallas`, color: BOT_STATUS_META.FALLIDO.color };
+  }
+  const worst = getWorstBotStatus(bots);
+  return { label: BOT_STATUS_META[worst].label, color: BOT_STATUS_META[worst].color };
+}
+
+interface GetGroupColumnsOptions {
+  // eslint-disable-next-line no-unused-vars
+  onClientClick: (bot: IBotStatusItem) => void;
+}
+
+// Columnas de la fila por cliente (colapsable): compactas, sin País/Tipo de
+// archivo/Acciones -- esos solo tienen sentido por bot individual, no agregados.
+export const getGroupColumns = ({
+  onClientClick
+}: GetGroupColumnsOptions): TableProps<IBotClientGroupRow>["columns"] => [
+  {
+    title: "Cliente",
+    key: "cliente",
+    render: (_, record) => (
+      <div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClientClick(record.bots[0]);
+          }}
+          className="text-left text-sm font-semibold hover:underline"
+          style={{ color: "#141414" }}
+        >
+          {record.cliente}
+        </button>
+        <p className="text-xs" style={{ color: BOT_MUTED_TEXT_COLOR }}>
+          {record.bots.length} bots
+        </p>
+      </div>
+    )
+  },
+  {
+    title: "Bots",
+    key: "bots",
+    render: (_, record) => (
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {record.bots.map((bot) => (
+          <span
+            key={bot.schedule_id}
+            className="flex items-center gap-1.5 text-sm"
+            style={{ color: "#141414" }}
+          >
+            <span
+              className="h-1.5 w-1.5 shrink-0 rounded-full"
+              style={{ backgroundColor: BOT_STATUS_META[bot.estado].color }}
+            />
+            {bot.tipo_archivo || bot.bot}
+          </span>
+        ))}
+      </div>
+    )
+  },
+  {
+    title: "Estado",
+    key: "estado",
+    render: (_, record) => {
+      const { label, color } = getGroupStatusLabel(record.bots);
+      return (
+        <span className="text-sm font-medium" style={{ color }}>
+          {label}
+        </span>
+      );
+    }
+  },
+  {
+    title: "Periodicidad",
+    key: "periodicidad",
+    render: (_, record) => (
+      <span className="text-sm" style={{ color: "#141414" }}>
+        {record.periodicidad.length > 0
+          ? record.periodicidad.map((p) => BOT_FREQUENCY_LABELS[p] ?? p).join(", ")
+          : "—"}
+      </span>
+    )
+  },
+  {
+    title: "Próxima ejecución",
+    key: "proxima_ejecucion",
+    render: (_, record) => (
+      <RunTimestamp isoDate={record.proxima_ejecucion} emptyLabel="Sin programar" />
+    )
+  }
+];
+
+interface GetBotColumnsOptions {
   executingScheduleId: number | null;
   // eslint-disable-next-line no-unused-vars
   onRun: (bot: IBotStatusItem) => void;
@@ -72,26 +177,18 @@ interface GetBotsColumnsOptions {
   onViewHistory: (bot: IBotStatusItem) => void;
 }
 
-export const getBotsColumns = ({
+// Columnas de cada bot individual dentro del cliente expandido.
+export const getBotColumns = ({
   executingScheduleId,
   onRun,
   onViewHistory
-}: GetBotsColumnsOptions): TableProps<IBotStatusItem>["columns"] => [
+}: GetBotColumnsOptions): TableProps<IBotStatusItem>["columns"] => [
   {
     title: "Bot",
-    dataIndex: "bot",
-    render: (text: string) => (
-      <span className="font-medium" style={{ color: "#141414" }}>
-        {text}
-      </span>
-    )
-  },
-  {
-    title: "Cliente",
-    dataIndex: "cliente",
-    render: (text: string) => (
-      <span className="cursor-pointer text-sm hover:underline" style={{ color: "#141414" }}>
-        {text}
+    dataIndex: "tipo_archivo",
+    render: (text: string | null, record: IBotStatusItem) => (
+      <span className="text-sm font-medium" style={{ color: "#141414" }}>
+        {text || record.bot}
       </span>
     )
   },
@@ -102,16 +199,6 @@ export const getBotsColumns = ({
       <Badge variant="outline" className="text-xs">
         {text || "No disponible"}
       </Badge>
-    )
-  },
-  {
-    title: "Tipo de archivo",
-    dataIndex: "tipo_archivo",
-    render: (text: string | null) => (
-      <div className="flex items-center gap-1.5 text-sm" style={{ color: "#141414" }}>
-        <Package className="h-3.5 w-3.5 text-gray-400" />
-        {text || "No disponible"}
-      </div>
     )
   },
   {
@@ -139,22 +226,16 @@ export const getBotsColumns = ({
     title: "Periodicidad",
     dataIndex: "periodicidad",
     render: (periodicidad: IBotStatusItem["periodicidad"]) => (
-      <div className="flex items-center gap-1.5 text-sm" style={{ color: "#141414" }}>
-        <Clock className="h-3.5 w-3.5 text-gray-400" />
-        {periodicidad.map((periodicity) => BOT_FREQUENCY_LABELS[periodicity] ?? periodicity).join(", ")}
-      </div>
-    )
-  },
-  {
-    title: "Próxima ejecución",
-    dataIndex: "proxima_ejecucion",
-    render: (proximaEjecucion: IBotStatusItem["proxima_ejecucion"]) => (
-      <RunTimestamp isoDate={proximaEjecucion} emptyLabel="Sin programar" />
+      <span className="text-sm" style={{ color: "#141414" }}>
+        {periodicidad.length > 0
+          ? periodicidad.map((p) => BOT_FREQUENCY_LABELS[p] ?? p).join(", ")
+          : "—"}
+      </span>
     )
   },
   {
     title: "Acciones",
-    width: 100,
+    width: 90,
     render: (_, record: IBotStatusItem) => {
       const isRunning = record.estado === "EN_EJECUCION" || executingScheduleId === record.schedule_id;
 
@@ -184,3 +265,4 @@ export const getBotsColumns = ({
     }
   }
 ];
+

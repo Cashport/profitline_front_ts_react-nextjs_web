@@ -129,7 +129,7 @@ export default function AutomationsView() {
 
               <div className="flex-1 min-w-64">
                 <UiSearchInput
-                  placeholder="Buscar bot o cliente..."
+                  placeholder="Buscar cliente o bot..."
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>

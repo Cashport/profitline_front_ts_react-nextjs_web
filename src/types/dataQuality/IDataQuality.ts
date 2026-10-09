@@ -196,6 +196,21 @@ export interface IClientDetailDataArchive {
   data_type: IDataType;
 }
 
+// Espejo de VariableHistoryEntryDTO (cashport-backend), una fila de auditoría de
+// data.client_data_variable_history. GET /data/client-archive-monthly/:id/variable-history.
+export interface IVariableHistoryEntry {
+  id: number;
+  id_client_data: number;
+  id_data_archives: number;
+  variable_key: string;
+  change_type: "CREATED" | "UPDATED" | "DELETED";
+  old_value: string | null;
+  new_value: string | null;
+  changed_by_user_id: number | null;
+  changed_by_email: string | null;
+  created_at: string;
+}
+
 export interface IClientDetailArchiveClient {
   id: number;
   id_client_data_archives: any | null;
