@@ -105,6 +105,7 @@ const DocumentsCard = ({ totals }: { totals: IClientsHomeTotals }) => {
   ];
   return (
     <>
+      {/* El monto baja de 20px a 18px con el ancho de su columna; si aún no cabe, elipsis. */}
       {items.map((it, i) => (
         <KpiValue
           key={it.label}
@@ -112,7 +113,8 @@ const DocumentsCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           label={it.label}
           value={fmt(it.amount)}
           unit="M"
-          className={`justify-between gap-2 px-3.5 ${i > 0 ? "border-l border-[#ececec]" : ""}`}
+          valueClassName="text-[clamp(18px,21cqi,20px)]"
+          className={`justify-between gap-2 px-3.5 [container-type:inline-size] ${i > 0 ? "border-l border-[#ececec]" : ""}`}
           caption={
             <>
               <b className="font-semibold text-[#141414]">{it.count.toLocaleString("es-CO")}</b>{" "}
@@ -171,8 +173,9 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
           ]}
         />
         <div className="min-w-0 [container-type:inline-size]">
-          <div className="flex min-w-0 flex-nowrap items-center justify-between gap-2 whitespace-nowrap text-[clamp(9px,2.45cqi,11px)] text-[#6b6b6b]">
-            <span className="flex flex-nowrap items-center gap-2">
+          {/* Sin espacio, el forecast baja a su propia línea, siempre a la derecha. */}
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 whitespace-nowrap text-[clamp(9px,2.45cqi,11px)] text-[#6b6b6b]">
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <LegendItem color={COLLECTION_COLORS.agreementsActive} label="Acuerdos">
                 {fmt(c.agreementsActive)} M
               </LegendItem>
@@ -180,7 +183,7 @@ const CollectionCard = ({ totals }: { totals: IClientsHomeTotals }) => {
                 {fmt(c.agreementsBroken)} M
               </LegendItem>
             </span>
-            <span>
+            <span className="ml-auto">
               Forecast <b className="font-semibold text-[#141414]">{fmt(c.forecast)} M</b>
               {c.forecastPct !== null && ` · ${pct1(c.forecastPct)}`}
             </span>
