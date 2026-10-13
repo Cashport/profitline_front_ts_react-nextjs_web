@@ -25,7 +25,12 @@ const FooterButtons = ({
     return (
       <Row style={{ width: "100%" }}>
         <Col span={24} style={{ minHeight: 48 }}>
-          <PrincipalButton fullWidth onClick={handleOk} disabled={isConfirmDisabled}>
+          <PrincipalButton
+            fullWidth
+            onClick={handleOk}
+            disabled={isConfirmDisabled || isConfirmLoading}
+            loading={isConfirmLoading}
+          >
             {titleConfirm ?? "Confirmar"}
           </PrincipalButton>
         </Col>

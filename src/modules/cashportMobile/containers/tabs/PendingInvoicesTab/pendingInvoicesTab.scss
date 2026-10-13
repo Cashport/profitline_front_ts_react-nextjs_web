@@ -20,4 +20,25 @@
         background-color: transparent;
         padding: 0.75rem 1rem;
     }
+
+    &__seeMoreButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.5rem;
+        background-color: transparent;
+        border: none;
+        color: $cashportMobileBlue;
+        font-family: $font-poppins;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    
+        &:hover {
+          text-decoration: underline;
+        }
+    }
 }

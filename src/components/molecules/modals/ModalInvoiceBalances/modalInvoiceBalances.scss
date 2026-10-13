@@ -1,0 +1,19 @@
+/**
+ * Modal «Ver Saldos» (Galderma).
+ *
+ * La tabla define un alto máximo mediante `scroll={{ y }}` de antd, de modo que:
+ *  - con muchas filas hace scroll DENTRO del cuerpo de la tabla y el encabezado
+ *    permanece visible;
+ *  - con pocas filas el modal no crece más allá de lo necesario.
+ *
+ * antd usa `overflow-y: scroll` en el cuerpo cuando se define `scroll.y`, lo que
+ * deja una barra inactiva aunque haya pocas filas. Se cambia a `auto` para que la
+ * barra aparezca únicamente cuando realmente se necesita.
+ */
+.modalInvoiceBalances {
+  .modalInvoiceBalances__table {
+    .ant-table-body {
+      overflow-y: auto !important;
+    }
+  }
+}

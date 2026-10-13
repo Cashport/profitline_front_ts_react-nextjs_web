@@ -1,16 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { DotsThree, Plus, Sparkle } from "phosphor-react";
 import { Button, Flex, Spin } from "antd";
 
-import { useApplicationTable } from "@/hooks/useApplicationTable";
-import Collapse from "@/components/ui/collapse";
-import LabelCollapse from "@/components/ui/label-collapse";
-import { useParams } from "next/navigation";
-
 import { useAppStore } from "@/lib/store/store";
 import { extractSingleParam } from "@/utils/utils";
+import { useApplicationTable } from "@/hooks/useApplicationTable";
 import {
   addItemsToTable,
+  getApplicationsExcelLog,
   markPaymentsAsUnidentified,
   removeItemsFromTable,
   removeMultipleRows,
@@ -19,6 +17,8 @@ import {
 import { useMessageApi } from "@/context/MessageContext";
 // import { useSelectedPayments } from "@/context/SelectedPaymentsContext";
 
+import LabelCollapse from "@/components/ui/label-collapse";
+import Collapse from "@/components/ui/collapse";
 import UiSearchInput from "@/components/ui/search-input/search-input";
 import InvoiceTable from "./tables/InvoiceTable";
 import PaymentsTable from "./tables/PaymentsTable";
@@ -41,16 +41,19 @@ import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 import "./apply-tab.scss";
 import { CLIENTUUID_DEMO } from "@/utils/constants/globalConstants";
+import { type } from "node:os";
 
+export type IAddingType = "invoices" | "payments" | "credit_notes" | "balances";
 interface ISelectedRowKeys {
   invoices: React.Key[];
   payments: React.Key[];
   discounts: React.Key[];
+  balances: React.Key[];
 }
 
 export interface IModalAddToTableOpen {
   isOpen: boolean;
-  adding?: "invoices" | "payments";
+  adding?: "invoices" | "payments" | "credit_notes" | "balances";
 }
 
 export interface IModalAdjustmentsState {
@@ -75,7 +78,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   className,
   defaultPositionDragModal,
   isInApplyModule = false,
-  clientUUID,
+  clientUUID
 }) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
   const params = useParams();
@@ -101,7 +104,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<ISelectedRowKeys>({
     invoices: [],
     payments: [],
-    discounts: []
+    discounts: [],
+    balances: []
   });
   const [selectedRows, setSelectedRows] = useState<IApplyTabRecord[]>();
   const [isModalOpen, setIsModalOpen] = useState({ selected: 0 });
@@ -116,7 +120,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     isValidating,
     setPreventRevalidation
   } = useApplicationTable();
-  const showModal = (adding_type: "invoices" | "payments") => {
+  const showModal = (adding_type: "invoices" | "payments" | "credit_notes" | "balances") => {
     setIsModalAddToTableOpen({
       isOpen: true,
       adding: adding_type
@@ -124,10 +128,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   useEffect(() => {
-    if (applicationData?.summary.url_attachment) {
-      setUseDefaultFileInEvidence(true);
+    if (isModalOpen.selected === 1) {
+      setUseDefaultFileInEvidence(Boolean(applicationData?.summary?.url_attachment));
     }
-  }, [applicationData?.summary, isModalOpen.selected]);
+  }, [isModalOpen.selected]);
 
   const handleCancel = () => {
     setIsModalAddToTableOpen({
@@ -135,26 +139,23 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     });
   };
 
-  const handleAdd = async (
-    adding_type: "invoices" | "payments" | "discounts",
-    selectedIds: number[]
-  ) => {
+  const handleAdd = async (adding_type: IAddingType, selectedIds: number[]) => {
+    console.log("handleAdd called with:", { adding_type, selectedIds });
     // Handle adding selected
     try {
       await addItemsToTable(projectId, clientId, adding_type, selectedIds);
 
       showMessage("success", "Se han agregado los elementos correctamente");
-      if (adding_type !== "discounts") {
-        setIsModalAddToTableOpen({
-          isOpen: false
-        });
-      } else {
-        setModalAdjustmentsState({
-          isOpen: false,
-          modal: 0,
-          adjustmentType: undefined
-        });
-      }
+      // handleAdd is shared by ModalAddToTables and ModalListAdjustments; only one is open
+      // at a time, so close both regardless of adding_type.
+      setIsModalAddToTableOpen({
+        isOpen: false
+      });
+      setModalAdjustmentsState({
+        isOpen: false,
+        modal: 0,
+        adjustmentType: undefined
+      });
 
       mutate();
     } catch (error) {
@@ -200,7 +201,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         const updatedSelectedRowKeys: ISelectedRowKeys = {
           payments: [],
           invoices: [],
-          discounts: []
+          discounts: [],
+          balances: []
         };
         updatedSelectedRowKeys[tableKey] = newSelectedRowKeys;
         return updatedSelectedRowKeys;
@@ -232,7 +234,9 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       mutate();
       setIsModalOpen({ selected: 0 });
     } catch (error) {
-      showMessage("error", "Ha ocurrido un error al guardar la aplicación");
+      const errormessage =
+        error instanceof Error ? error.message : "Ha ocurrido un error al guardar la aplicación";
+      showMessage("error", errormessage);
     }
     setLoadingSave(false);
     setPreventRevalidation(false);
@@ -243,7 +247,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
   };
 
   const filteredData = useMemo(() => {
-    if (!applicationData) return { invoices: [], payments: [], discounts: [] };
+    if (!applicationData) return { invoices: [], payments: [], discounts: [], balances: [] };
 
     const filteredInvoices = applicationData.invoices.filter((invoice) =>
       invoice?.id_erp?.toString().toLowerCase().includes(searchQuery)
@@ -257,10 +261,15 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       discount?.financial_discount_id?.toString().toLowerCase().includes(searchQuery)
     );
 
+    const filteredBalances = applicationData.balances.filter((balance) =>
+      balance?.balance_id?.toString().toLowerCase().includes(searchQuery)
+    );
+
     return {
       invoices: filteredInvoices,
       payments: filteredPayments,
-      discounts: filteredDiscounts
+      discounts: filteredDiscounts,
+      balances: filteredBalances
     };
   }, [applicationData, searchQuery]);
 
@@ -284,19 +293,33 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     };
 
     const discounts = {
-      statusName: "ajustes",
+      statusName: "notas crédito",
       color: "#E53261",
       statusId: 3,
       itemsList: filteredData?.discounts,
-      total: filteredData?.discounts.length && applicationData?.summary.total_discounts,
+      total: applicationData?.summary.total_discounts,
       count: filteredData?.discounts.length
     };
 
-    return [invoices, payments, discounts];
+    const balances = {
+      statusName: "saldos",
+      color: "#000000",
+      statusId: 4,
+      itemsList: filteredData?.balances,
+      total: applicationData?.summary.total_application_balance,
+      count: filteredData?.balances.length
+    };
+
+    return [invoices, payments, discounts, balances];
   }, [filteredData]);
 
   const allRows = useMemo(
-    () => [...filteredData.invoices, ...filteredData.payments, ...filteredData.discounts],
+    () => [
+      ...filteredData.invoices,
+      ...filteredData.payments,
+      ...filteredData.discounts,
+      ...filteredData.balances
+    ],
     [filteredData]
   );
 
@@ -356,11 +379,27 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     }
   };
 
+  const handleDownloadExcelLog = async () => {
+    try {
+      const data = await getApplicationsExcelLog(projectId, clientId);
+
+      if (data?.excel_url) {
+        window.open(data.excel_url, "_blank");
+        setIsModalOpen({ selected: 0 });
+      } else {
+        showMessage("error", "No se pudo obtener el excel log");
+      }
+    } catch (error) {
+      showMessage("error", "Error al descargar el excel log");
+    }
+  };
+
   const deselectAllRows = () => {
     setSelectedRowKeys({
       invoices: [],
       payments: [],
-      discounts: []
+      discounts: [],
+      balances: []
     });
     setSelectedRows([]);
   };
@@ -370,7 +409,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     const allRowsIds = [
       ...(applicationData?.payments?.map((payment) => payment.id) ?? []),
       ...(applicationData?.invoices?.map((invoice) => invoice.id) ?? []),
-      ...(applicationData?.discounts?.map((discount) => discount.id) ?? [])
+      ...(applicationData?.discounts?.map((discount) => discount.id) ?? []),
+      ...(applicationData?.balances?.map((balance) => balance.id) ?? [])
     ];
 
     try {
@@ -385,11 +425,6 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
     setLoadingRequest(false);
   };
 
-  const handleEditAdjustment = (record: IApplyTabRecord) => {
-    setIsModalOpen({ selected: 5 });
-    setSelectedRows([record]);
-  };
-
   const isConfirmDisabled = useMemo(() => {
     if (useDefaultFileInEvidence) {
       return isValidating || !commentary;
@@ -402,6 +437,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
       <ModalResultAppy
         invoices={applicationData?.summary.total_invoices}
         desconts={applicationData?.summary.total_discounts}
+        balances={applicationData?.summary.total_application_balance}
         payments={applicationData?.summary.total_payments}
         total={applicationData?.summary.total_balance}
         defaultPosition={defaultPositionDragModal}
@@ -476,7 +512,10 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                         if (section.statusName === "pagos") {
                           showModal("payments");
                         }
-                        if (section.statusName === "ajustes") {
+                        if (section.statusName === "notas crédito") {
+                          showModal("credit_notes");
+                        }
+                        if (section.statusName === "saldos") {
                           setModalAdjustmentsState(
                             modalAdjustmentsState.isOpen
                               ? { isOpen: false, modal: 1 }
@@ -499,6 +538,8 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       handleDeleteRow={handleRemoveRow}
                       handleEditRow={handleEditRow}
                       rowSelection={rowSelection("invoices")}
+                      clientId={clientId}
+                      projectId={projectId}
                     />
                   )}
                   {section.statusName === "pagos" && (
@@ -510,12 +551,24 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
                       markPaymentAsUnidentified={handlePaymentUnidentified}
                     />
                   )}
-                  {section.statusName === "ajustes" && (
+                  {section.statusName === "notas crédito" && (
                     <DiscountTable
                       data={section.itemsList}
                       handleDeleteRow={handleRemoveRow}
                       rowSelection={rowSelection("discounts")}
                       handleEditRow={(row) => handleEditRow(row, "discount")}
+                      clientId={clientId}
+                      projectId={projectId}
+                    />
+                  )}
+                  {section.statusName === "saldos" && (
+                    <DiscountTable
+                      data={section.itemsList}
+                      handleDeleteRow={handleRemoveRow}
+                      rowSelection={rowSelection("balances")}
+                      handleEditRow={(row) => handleEditRow(row, "discount")}
+                      clientId={clientId}
+                      projectId={projectId}
                     />
                   )}
                 </div>
@@ -599,7 +652,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
             mutate();
           } else {
             setModalAdjustmentsState((prev) => {
-              return { ...prev, isOpen: true, modal: 2 };
+              return { ...prev, isOpen: true, modal: 1 };
             });
           }
         }}
@@ -651,6 +704,7 @@ const ApplyTab: React.FC<IApplyTabProps> = ({
         handleOpenModal={handleOpenModal}
         selectedRows={selectedRows}
         downloadLog={handleDownloadLog}
+        downloadExcelLog={handleDownloadExcelLog}
       />
 
       <ModalConfirmAction

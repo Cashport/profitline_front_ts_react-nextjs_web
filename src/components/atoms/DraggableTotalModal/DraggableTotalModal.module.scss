@@ -1,0 +1,42 @@
+@import "@styles/variables.scss";
+
+.modal {
+    position: absolute;
+    right: 0;
+    max-width: 20rem;
+    min-width: 15rem;
+    width: fit-content;
+    background-color: $white;
+    color: $black;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.16);
+    cursor: grab;
+    z-index: 20;
+
+    &__title {
+        font-size: 1rem;
+        font-weight: 300;
+    }
+
+    &__total {
+        font-size: 1.625rem;
+        font-weight: 600;
+        margin: 0;
+        margin-bottom: 0.5rem;
+        line-height: 1.125rem;
+    }
+
+    &__count {
+        border-radius: 0.5rem;
+        width: fit-content;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: $background;
+        padding: 0.25rem 0.5rem;
+    }
+}

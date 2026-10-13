@@ -1,10 +1,22 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Table, TableProps, Tooltip, Typography } from "antd";
-import { CheckCircle, Eye, Handshake, Warning, WarningCircle } from "phosphor-react";
+import { Button, Checkbox, Dropdown, Table, TableProps, Tooltip, Typography } from "antd";
+import {
+  CheckCircle,
+  Coins,
+  DotsThreeVertical,
+  Eye,
+  Handshake,
+  Warning,
+  WarningCircle
+} from "phosphor-react";
+import { ArrowsSplit } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 
 import { useAppStore } from "@/lib/store/store";
 import { calculateDaysDifference, daysLeft, formatDate } from "@/utils/utils";
+
+import { ModalInvoiceClaims } from "@/components/molecules/modals/ModalInvoiceClaims/ModalInvoiceClaims";
+import { ModalInvoiceBalances } from "@/components/molecules/modals/ModalInvoiceBalances/ModalInvoiceBalances";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
@@ -19,21 +31,28 @@ interface PropsInvoicesTable {
   openInvoiceDetail: (invoice: IInvoice) => void;
   // eslint-disable-next-line no-unused-vars
   fetchData?: (newPage: number) => void;
+  // eslint-disable-next-line no-unused-vars
+  onOpenPaymentAgreement?: (incidentId: number) => void;
 
   selectedRows?: IInvoice[];
+  isSearchActive?: boolean;
 }
 
 export const InvoicesTable = ({
   stateId,
   dataInvoiceByStatus: data,
   setSelectedRows,
-  fetchData,
+  fetchData: _fetchData,
   selectedRows,
-  openInvoiceDetail
+  openInvoiceDetail,
+  isSearchActive: _isSearchActive = false,
+  onOpenPaymentAgreement
 }: PropsInvoicesTable) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [claimsInvoice, setClaimsInvoice] = useState<IInvoice | null>(null);
+  const [balancesInvoice, setBalancesInvoice] = useState<IInvoice | null>(null);
 
   useEffect(() => {
     if (selectedRows) {
@@ -98,9 +117,39 @@ export const InvoicesTable = ({
     }
   };
 
-  const rowSelection = {
+  const allInvoiceIds = data.invoices.map((invoice) => invoice.id);
+  // selectedRowKeys can hold ids from other status tables, so scope the header state to this table
+  const selectedKeys = new Set(selectedRowKeys);
+  const selectedInTableCount = allInvoiceIds.filter((id) => selectedKeys.has(id)).length;
+  const isAllInvoicesSelected =
+    allInvoiceIds.length > 0 && selectedInTableCount === allInvoiceIds.length;
+  const isAnyInvoiceSelected = selectedInTableCount > 0 && !isAllInvoicesSelected;
+
+  const handleSelectAllAcrossPages = (checked: boolean) => {
+    if (checked) {
+      setSelectedRowKeys(allInvoiceIds);
+      setSelectedRows((prevSelectedRows) => {
+        const otherStatusRows = (prevSelectedRows || []).filter((row) => row.status_id !== stateId);
+        return [...otherStatusRows, ...data.invoices];
+      });
+    } else {
+      setSelectedRowKeys([]);
+      setSelectedRows((prevSelectedRows) =>
+        (prevSelectedRows || []).filter((row) => row.status_id !== stateId)
+      );
+    }
+  };
+
+  const rowSelection: TableProps<IInvoice>["rowSelection"] = {
     selectedRowKeys,
-    onChange: onSelectChange
+    onChange: onSelectChange,
+    columnTitle: (
+      <Checkbox
+        checked={isAllInvoicesSelected}
+        indeterminate={isAnyInvoiceSelected}
+        onChange={(e) => handleSelectAllAcrossPages(e.target.checked)}
+      />
+    )
   };
 
   const columns: TableProps<IInvoice>["columns"] = [
@@ -172,6 +221,15 @@ export const InvoicesTable = ({
       width: 140
     },
     {
+      title: "Detalle",
+      dataIndex: "comments",
+      key: "comments",
+      render: (text) => <p className="cell -alignRight">{text ? text : "-"}</p>,
+      sorter: (a, b) => a.comments.localeCompare(b.comments),
+      showSorterTooltip: false,
+      align: "right"
+    },
+    {
       title: "Monto inicial",
       key: "initial_value",
       dataIndex: "initial_value",
@@ -225,6 +283,11 @@ export const InvoicesTable = ({
               key={`A${record.id}`}
             >
               <Button
+                onClick={() => {
+                  if (record.agreement_info?.id) {
+                    onOpenPaymentAgreement?.(record.agreement_info.id);
+                  }
+                }}
                 icon={
                   <Handshake
                     size={"1.2rem"}
@@ -274,6 +337,32 @@ export const InvoicesTable = ({
           )}
 
           <Button onClick={() => handleOpenDetail(record)} icon={<Eye size={"1.2rem"} />} />
+
+          <Dropdown
+            trigger={["click"]}
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: "claims",
+                  label: "Ver glosas",
+                  icon: <ArrowsSplit size={16} />,
+                  onClick: () => setClaimsInvoice(record)
+                },
+                {
+                  key: "balances",
+                  label: "Ver Saldos",
+                  icon: <Coins size={16} />,
+                  onClick: () => setBalancesInvoice(record)
+                }
+              ]
+            }}
+          >
+            <Button
+              onClick={(e) => e.stopPropagation()}
+              icon={<DotsThreeVertical size={"1.2rem"} />}
+            />
+          </Dropdown>
         </div>
       ),
       width: 100,
@@ -312,6 +401,18 @@ export const InvoicesTable = ({
             offsetHeader: 160
           } as any
         }
+      />
+
+      <ModalInvoiceClaims
+        isOpen={!!claimsInvoice}
+        invoice={claimsInvoice}
+        onClose={() => setClaimsInvoice(null)}
+      />
+
+      <ModalInvoiceBalances
+        isOpen={!!balancesInvoice}
+        invoice={balancesInvoice}
+        onClose={() => setBalancesInvoice(null)}
       />
     </>
   );

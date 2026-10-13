@@ -15,7 +15,7 @@ import { Discount } from "@/types/discount/DiscountPackage";
 import GroupClientsPackage from "./components/GroupClientsPackage";
 
 type Props = {
-  params?: { id: string };
+  params?: { id?: string; basePath?: string; listPath?: string };
 };
 export type TypeDiscount = "principal" | "additional";
 const { Title, Text } = Typography;
@@ -39,19 +39,23 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
     removeDiscount,
     removeAdditionalDiscount,
     isLoadingSelect,
-    optionsDiscounts,
-    discountList,
+    optionsPrimaryDiscounts,
+    optionsSecondaryDiscounts,
+    primaryDiscountList,
+    secondaryDiscountList,
     //discountId,
     isFormDisabled,
     form,
     clients,
-    isLoadingClients
+    isLoadingClients,
+    listPath
   } = useCreateDiscountPackage({ params });
 
   const [typeDiscount, setTypeDiscount] = useState<TypeDiscount | null>(null);
 
   const handleConfirmModal = (id: number) => {
-    const completeOptionSelected = discountList?.find((d) => d.id === id);
+    const list = typeDiscount === "principal" ? primaryDiscountList : secondaryDiscountList;
+    const completeOptionSelected = list?.find((d) => d.id === id);
     if (completeOptionSelected) {
       if (typeDiscount === "principal") {
         appendDiscount(completeOptionSelected);
@@ -76,11 +80,17 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
   const filteredOptions = useMemo(
     () =>
       filterAvailableDiscountOptions(
-        optionsDiscounts,
+        typeDiscount === "principal" ? optionsPrimaryDiscounts : optionsSecondaryDiscounts,
         primaryDiscountsFields,
         secondaryDiscountsFields
       ),
-    [optionsDiscounts, primaryDiscountsFields, secondaryDiscountsFields]
+    [
+      typeDiscount,
+      optionsPrimaryDiscounts,
+      optionsSecondaryDiscounts,
+      primaryDiscountsFields,
+      secondaryDiscountsFields
+    ]
   );
 
   return (
@@ -236,7 +246,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
                 columns={discountsFormColumns({ remove: removeAdditionalDiscount, isFormDisabled })}
                 pagination={false}
               />
-              {!isFormDisabled && (
+              {!isFormDisabled && secondaryDiscountsFields.length === 0 && (
                 <Flex justify="flex-end">
                   <PrincipalButton
                     onClick={() => {
@@ -255,7 +265,7 @@ export function CreateDiscountPackageView({ params }: Readonly<Props>) {
           </Flex>
         </Flex>
         <Flex gap={20} justify="space-between">
-          <Link href="/descuentos" passHref legacyBehavior>
+          <Link href={listPath} passHref legacyBehavior>
             <Button
               style={{ height: "100%", backgroundColor: "#d3d3d3" }}
               className={styles.buttonEdit}

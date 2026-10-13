@@ -51,3 +51,99 @@ export interface IFinancialDiscountsResponse {
   count: number;
   rows: StatusFinancialDiscounts[];
 }
+
+export interface IBalance {
+  id: number;
+  project_id: number;
+  client_id: string;
+  client_name: string;
+  kam_id: number;
+  kam_name: string;
+  motive_name: string;
+  status_id: number;
+  status_name: string;
+  status_code: string;
+  status_color: string;
+  initial_amount: number;
+  pending_amount: number;
+  balance_date: string;
+  created_at: string;
+}
+
+export interface IEligibilityStatus {
+  id: number;
+  description: string;
+  status_color: string;
+  background_color: string;
+}
+
+// One balance row as returned by getBalancesByProject (keys are the SQL aliases)
+export interface IBalanceRow {
+  id: number;
+  project_id: number;
+  client_id: string;
+  client_name: string;
+  kam_id: number | null; // LEFT JOIN user → can be null
+  kam_name: string | null;
+  initial_amount: number; // b.INITIAL_VALUE (decimal — may arrive as string)
+  pending_amount: number; // b.CURRENT_VALUE (decimal — may arrive as string)
+  status_id: number;
+  status_code: string;
+  status_name: string;
+  status_color: string;
+  order_number: string | null;
+  motive_id: number | null;
+  motive_name: string;
+  created_at: string;
+  financial_record_date: string;
+  audit_file_url: string | null;
+  audit_file_name: string | null;
+  audit_observation: string | null;
+  client_documents: IClientDocument[] | null;
+  COMMENTS?: string | null;
+  comments?: string | null;
+  eligibility_status: IEligibilityStatus | null;
+}
+
+export interface IClientDocument {
+  id: number;
+  balance_id: number;
+  document: string;
+  created_by: number;
+  created_at: string;
+}
+
+// One state group
+export interface IGetBalances {
+  balance_status_id: number; // = status_id
+  balance_status: string; // = status_name
+  color: string; // = status_color
+  balances_count: number; // balances.length
+  pending_total: number; // Σ pending_amount within the state
+  balances: IBalanceRow[];
+}
+
+export interface IBalancesFilterUser {
+  id: number;
+  name: string;
+}
+export interface IBalancesFilterClient {
+  id: string;
+  name: string;
+}
+export interface IBalancesFilters {
+  users: IBalancesFilterUser[];
+  clients: IBalancesFilterClient[];
+}
+
+// Selections collected in the UI and handed to useBalances
+export interface IBalancesFilter {
+  users: number[]; // selected kam_ids
+  clients: string[]; // selected client_ids
+  from_date: string | null;
+  to_date: string | null;
+  client_uuid?: string;
+  motive_ids?: number[]; // selected motive ids
+  eligibility_status?: string[]; // selected eligibility status ids
+  search?: string; // free-text search term
+}

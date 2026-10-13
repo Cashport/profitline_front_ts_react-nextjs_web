@@ -20,7 +20,7 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
       (c) => c.category_id === product.category_id
     );
 
-    const productToAdd = {
+    const productToAdd: ISelectedProduct = {
       id: product.id,
       name: product.name,
       price: product.price,
@@ -31,9 +31,13 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
       image: product.image,
       category_id: product.category_id,
       SKU: product.SKU,
+      EAN: product.EAN,
       stock: product.stock,
       category_name: product.category_name,
-      shipment_unit: product.shipment_unit
+      shipment_unit: product.shipment_unit,
+      // Propaga el flag de pack y los productos contenidos para que la
+      // pantalla de resumen pueda renderizar la sub-tabla del pack.
+      ...(product.is_pack ? { is_pack: true, pack_products: product.pack_products } : {})
     };
 
     if (categoryIndex === -1) {
@@ -62,7 +66,8 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
 
       const updatedProduct = {
         ...newState[categoryIndex].products[productIndex],
-        quantity: selectedCategories[categoryIndex].products[productIndex].quantity - 1
+        quantity: selectedCategories[categoryIndex].products[productIndex].quantity - 1,
+        autoAssigned: false
       };
 
       if (updatedProduct.quantity === 0) {
@@ -92,7 +97,8 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
 
       const updatedProduct = {
         ...newState[categoryIndex].products[productIndex],
-        quantity: newState[categoryIndex].products[productIndex].quantity + 1
+        quantity: newState[categoryIndex].products[productIndex].quantity + 1,
+        autoAssigned: false
       };
 
       // Replace the old product with the updated product in the products array
@@ -133,7 +139,7 @@ export const useHandleProductsItems = (product: ISelectedProduct, categoryName: 
           const updatedProducts = category.products.map((product) => {
             if (product.id === productId) {
               // Update the quantity of the matched product
-              return { ...product, quantity: newQuantity };
+              return { ...product, quantity: newQuantity, autoAssigned: false };
             }
             return product;
           });

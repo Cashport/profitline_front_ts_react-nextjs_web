@@ -8,6 +8,7 @@ export interface IClientPayment {
   id_client: string;
   payment_date: string; // ISO Date string
   created_at: string; // ISO Date string
+  identification_date: string | null; // ISO Date string
   currency: string;
   initial_value: number;
   current_value: number;
@@ -29,6 +30,8 @@ export interface IClientPayment {
   bank_description: string;
   account_number: string;
   type_account: string;
+  ID_ERP: string | null;
+  payments_status_id?: number;
 }
 
 export interface IClientPaymentStatus {
@@ -36,6 +39,8 @@ export interface IClientPaymentStatus {
   payments_status_id: number;
   color: string; // Hex color code
   payments: IClientPayment[];
+  total_account: number;
+  payments_count: number;
 }
 
 export interface IIdentifiedPayment {
@@ -62,6 +67,7 @@ export interface IIdentifiedPayment {
   CLIENT_NAME: string | null;
   account_number: string;
   bank_name: string;
+  ID_ERP: string | null;
 }
 
 interface ISelect {

@@ -23,6 +23,7 @@ import PaymentsTable from "@/modules/clients/components/payments-table";
 import { ModalActionPayment } from "@/components/molecules/modals/ModalActionPayment/ModalActionPayment";
 import ModalIdentifyPayment from "../../components/payments-tab/modal-identify-payment-action";
 import { ModalConfirmAction } from "@/components/molecules/modals/ModalConfirmAction/ModalConfirmAction";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 
 import { IClientPayment, IClientPaymentStatus } from "@/types/clientPayments/IClientPayments";
 import { ISingleBank } from "@/types/banks/IBanks";
@@ -30,11 +31,10 @@ import { ISingleBank } from "@/types/banks/IBanks";
 import "./payments-tab.scss";
 
 interface PaymentProd {
-  // eslint-disable-next-line no-unused-vars
-  onChangeTab: (activeKey: string) => void;
+  onChangeTab?: (activeKey: string) => void;
 }
 
-const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
+const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab: _onChangeTab }) => {
   const params = useParams();
   const clientId = extractSingleParam(params.clientId);
   const projectId = extractSingleParam(params.projectId);
@@ -45,7 +45,6 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [isModalActionPaymentOpen, setIsModalActionPaymentOpen] = useState(false);
-  const [mutatedPaymentDetail, mutatePaymentDetail] = useState<boolean>(false);
 
   const { showMessage } = useMessageApi();
   const { openModal } = useModalDetail();
@@ -63,11 +62,13 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
       const description = payment.description?.toLowerCase() || "";
       const currentValue = payment.current_value?.toString() || "";
       const initialValue = payment.initial_value?.toString() || "";
+      const idErp = payment.ID_ERP?.toLowerCase() || "";
 
       return (
         description.includes(normalizedSearch) ||
         currentValue.includes(normalizedSearch) ||
-        initialValue.includes(normalizedSearch)
+        initialValue.includes(normalizedSearch) ||
+        idErp.includes(normalizedSearch)
       );
     });
   };
@@ -94,11 +95,11 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
       paymentId: paymentId,
       handleActionInDetail: handleActionInDetail,
       handleOpenPaymentDetail,
-      mutatedPaymentDetail
+      mutatedPaymentDetail: false
     });
   };
 
-  const onChangetabWithCloseModal = (activeKey: string) => {
+  const onChangetabWithCloseModal = (_activeKey: string) => {
     setIsModalActionPaymentOpen(false);
     // onChangeTab(activeKey);
   };
@@ -134,7 +135,7 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
       if (error instanceof AxiosError) {
         showMessage(
           "error",
-          `Error al añadir pagos a la tabla de aplicación de pagos ${error.message}`
+          `${error.response?.data?.message || "Error al añadir pagos a la tabla de aplicación de pagos"}`
         );
       } else {
         showMessage("error", `Error al añadir pagos a la tabla de aplicación de pagos`);
@@ -159,6 +160,13 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
 
   return (
     <>
+      {selectedPayments && selectedPayments.length > 0 && (
+        <DraggableTotalModal
+          totalAmount={selectedPayments.reduce((acc, payment) => acc + payment.current_value, 0)}
+          itemName="Pagos"
+          count={selectedPayments.length}
+        />
+      )}
       <div className="paymentsTab">
         <Flex justify="space-between" className="paymentsTab__header clientStickyHeader">
           <Flex gap={"0.5rem"}>
@@ -194,7 +202,12 @@ const PaymentsTab: React.FC<PaymentProd> = ({ onChangeTab }) => {
             items={filteredData?.map((PaymentStatus) => ({
               key: PaymentStatus.payments_status_id,
               label: (
-                <LabelCollapse status={PaymentStatus.payments_status} color={PaymentStatus.color} />
+                <LabelCollapse
+                  status={PaymentStatus.payments_status}
+                  color={PaymentStatus.color}
+                  total={PaymentStatus.total_account}
+                  quantity={PaymentStatus.payments_count}
+                />
               ),
               children: (
                 <PaymentsTable

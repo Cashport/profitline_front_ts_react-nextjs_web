@@ -16,11 +16,21 @@
         padding-right: 2rem;
         overflow-y: auto;
     }
+
+    &:global(.dark) {
+        .rightContent {
+            background-color: rgb(var(--background));
+        }
+    }
 }
 
 // media queries
 @media (max-width: 768px) {
     .mainWrapper {
         flex-direction: column;
+
+        .rightContent {
+            padding: 1rem 0;
+        }
     }
 }

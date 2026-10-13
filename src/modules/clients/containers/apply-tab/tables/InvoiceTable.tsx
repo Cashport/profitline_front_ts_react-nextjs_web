@@ -4,12 +4,15 @@ import { DotsThreeVertical, Eye, Trash } from "phosphor-react";
 
 import { formatDate } from "@/utils/utils";
 import { useAppStore } from "@/lib/store/store";
+import { useModalDetail } from "@/context/ModalContext";
 import { ModalRemove } from "@/components/molecules/modals/ModalRemove/ModalRemove";
 
 import { IApplyTabRecord } from "@/types/applyTabClients/IApplyTabClients";
 
 interface InvoiceTableProps {
   data?: IApplyTabRecord[];
+  clientId: string;
+  projectId: number;
   // eslint-disable-next-line no-unused-vars
   handleDeleteRow?: (id: number) => void;
   // eslint-disable-next-line no-unused-vars
@@ -24,6 +27,8 @@ interface InvoiceTableProps {
 
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
   data,
+  clientId,
+  projectId,
   handleDeleteRow,
   handleEditRow,
   rowSelection
@@ -31,13 +36,33 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [activeRow, setActiveRow] = useState<IApplyTabRecord | null>(null);
   const [removeModal, setRemoveModal] = useState(false);
   const formatMoney = useAppStore((state) => state.formatMoney);
+  const { openModal } = useModalDetail();
 
   const columns: TableProps<IApplyTabRecord>["columns"] = [
     {
       title: "Factura",
       dataIndex: "id_erp",
       key: "id_erp",
-      render: (id_erp) => <p className="sectionContainerTable__id">{id_erp}</p>,
+      render: (id_erp, row) => {
+        if (!row.financial_record_id) {
+          return <p>{id_erp}</p>;
+        }
+        return (
+          <p
+            className="sectionContainerTable__id"
+            onClick={() =>
+              openModal("invoice", {
+                invoiceId: row.financial_record_id as number,
+                showId: row.id_erp,
+                clientId,
+                projectId
+              })
+            }
+          >
+            {id_erp}
+          </p>
+        );
+      },
       sorter: (a, b) => a.id_erp.localeCompare(b.id_erp),
       showSorterTooltip: false
     },
@@ -50,7 +75,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       showSorterTooltip: false
     },
     {
-      title: "Monto",
+      title: "Monto inicial",
       dataIndex: "initial_value",
       key: "initial_value",
       render: (initial_value) => <p className="fontMonoSpace">{formatMoney(initial_value)}</p>,
@@ -59,27 +84,37 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       align: "right"
     },
     {
-      title: "Pago",
-      dataIndex: "amount",
-      key: "amount",
-      render: () => <p className="fontMonoSpace">{formatMoney(0)}</p>,
-      sorter: (a, b) => a.amount - b.amount,
-      showSorterTooltip: false,
+      title: "Ajuste contable",
+      dataIndex: "adjustments",
+      key: "adjustments",
+      render: (_, row: IApplyTabRecord) => {
+        const adjustments = row.adjustments;
+        if (!adjustments?.length) return <p>-</p>;
+        return (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {adjustments.map((adj) => (
+              <p
+                key={adj.adjustment_id}
+                className="sectionContainerTable__id"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openModal("adjustment", {
+                    adjusmentId: adj.adjustment_id,
+                    clientId,
+                    projectId
+                  });
+                }}
+              >
+                {adj.id_erp ?? adj.adjustment_id}
+              </p>
+            ))}
+          </div>
+        );
+      },
       align: "right"
     },
     {
-      title: "Ajuste",
-      dataIndex: "total_adjustments",
-      key: "total_adjustments",
-      render: (total_adjustments) => (
-        <p className="fontMonoSpace">{formatMoney(total_adjustments)}</p>
-      ),
-      sorter: (a, b) => (a.total_adjustments ?? 0) - (b.total_adjustments ?? 0),
-      showSorterTooltip: false,
-      align: "right"
-    },
-    {
-      title: "Saldo",
+      title: "Monto aplicado",
       dataIndex: "amount",
       key: "amount",
       render: (amount) => <p className="fontMonoSpace">{formatMoney(amount)}</p>,

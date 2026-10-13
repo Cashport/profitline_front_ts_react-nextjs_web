@@ -14,11 +14,13 @@ import useScreenHeight from "@/components/hooks/useScreenHeight";
 import useScreenWidth from "@/components/hooks/useScreenWidth";
 import { ModalProjectSelector } from "../modals/ModalProjectSelector/ModalProjectSelector";
 import { ModulesButtons } from "@/components/atoms/NavigationBar/ModulesButtons/ModulesButtons";
+import { usePermissionRedirect } from "@/hooks/usePermissionRedirect";
 
 import "./sidebar.scss";
 
 export const SideBar = () => {
-  const [isSideBarLarge, setIsSideBarLarge] = useState(false);
+  usePermissionRedirect();
+
   const [modalProjectSelectorOpen, setModalProjectSelectorOpen] = useState(false);
   const [isComponentLoading, setIsComponentLoading] = useState(true);
   const [isModuleMenuOpen, setIsModuleMenuOpen] = useState(false);
@@ -126,7 +128,7 @@ export const SideBar = () => {
   }, [isHy]);
 
   return (
-    <div className={`sidebar ${isSideBarLarge ? "mainLarge" : "main"}`} ref={mobileMenuRef}>
+    <div className="sidebar main" ref={mobileMenuRef}>
       {isMobile && (
         <Button
           type="text"
@@ -140,14 +142,13 @@ export const SideBar = () => {
       {isMobile && isModuleMenuOpen && (
         <div className="mobileMenuWrapper">
           <ModulesButtons
-            isSideBarLarge={isSideBarLarge}
             path={path}
             project={project}
             isMobileMenu={true}
           />
         </div>
       )}
-      <Flex vertical align="center">
+      <Flex vertical align="center" className="modulesGroup">
         <button className="logoContainer" onClick={() => setModalProjectSelectorOpen(true)}>
           {LOGO ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -163,7 +164,6 @@ export const SideBar = () => {
 
         {!isMobile && (
           <ModulesButtons
-            isSideBarLarge={isSideBarLarge}
             path={path}
             project={project}
             isMobileMenu={false}
@@ -178,7 +178,6 @@ export const SideBar = () => {
           icon={<ArrowLineRight size={iconSize} />}
           className="buttonExit"
         >
-          {isSideBarLarge && "Salir"}
         </Button>
       </Flex>
 

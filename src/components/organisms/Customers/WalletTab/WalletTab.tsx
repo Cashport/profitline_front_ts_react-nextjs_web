@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button, Flex, Spin, message } from "antd";
 import { useParams } from "next/navigation";
 import { DotsThree } from "phosphor-react";
+import { ListMagnifyingGlass } from "@phosphor-icons/react";
 import { AxiosError } from "axios";
 
 import { extractSingleParam } from "@/utils/utils";
@@ -11,23 +12,27 @@ import { useApplicationTable } from "@/hooks/useApplicationTable";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useModalDetail } from "@/context/ModalContext";
-import { ClientDetailsContext } from "@/modules/clients/containers/client-details/client-details";
+import { ClientDetailsContext } from "@/modules/clients/contexts/client-details-context";
 
 import { InvoicesTable } from "@/components/molecules/tables/InvoicesTable/InvoicesTable";
 import { ModalGenerateAction } from "@/components/molecules/modals/ModalGenerateAction/ModalGenerateAction";
 import UiSearchInput from "@/components/ui/search-input";
-import { ModalEstimateTotalInvoices } from "@/components/molecules/modals/modal-estimate-total-invoices/modal-estimate-total-invoices";
+import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
+import { DraggableTotalModal } from "@/components/atoms/DraggableTotalModal/DraggableTotalModal";
 import LabelCollapse from "@/components/ui/label-collapse";
 import Collapse from "@/components/ui/collapse";
 import WalletTabChangeStatusModal from "@/modules/clients/components/wallet-tab-change-status-modal";
+import WalletTabBulkSearchModal from "@/modules/clients/components/wallet-tab-bulk-search-modal";
+import { BulkActionKey } from "@/modules/clients/components/wallet-tab-bulk-search-modal/types";
 import PaymentAgreementModal from "@/modules/clients/components/wallet-tab-payment-agreement-modal";
 import { ModalActionDiscountCredit } from "@/components/molecules/modals/ModalActionDiscountCredit/ModalActionDiscountCredit";
 import RadicationInvoice from "@/components/molecules/modals/Radication/RadicationInvoice";
 import RegisterNews from "@/components/molecules/modals/RegisterNews/RegisterNews";
-import DigitalRecordModal from "@/components/molecules/modals/DigitalRecordModal/DigitalRecordModal";
+import AccountStatementModal from "@/modules/chat/components/account-statement-modal";
 import { SelectedFiltersWallet } from "@/components/atoms/Filters/FilterWalletTab/FilterWalletTab";
 import SendExternalLinkModal from "@/components/molecules/modals/SendExternalLinkModal/SendExternalLinkModal";
 import ModalEnterProcess from "@/components/molecules/modals/ModalEnterProcess/ModalEnterProcess";
+import { ModalAgreementDetail } from "@/components/molecules/modals/ModalAgreementDetail/ModalAgreementDetail";
 
 import { IInvoice, InvoicesData } from "@/types/invoices/IInvoices";
 
@@ -46,6 +51,7 @@ export const WalletTab = () => {
   const [invoices, setInvoices] = useState<InvoicesData[] | undefined>([]);
   const [selectedRows, setSelectedRows] = useState<IInvoice[] | undefined>(undefined);
   const [isGenerateActionOpen, setisGenerateActionOpen] = useState(false);
+  const [isBulkSearchOpen, setIsBulkSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const params = useParams();
   const clientIdParam = extractSingleParam(params.clientId);
@@ -61,6 +67,10 @@ export const WalletTab = () => {
   });
   const [isSelectOpen, setIsSelectOpen] = useState({
     selected: 0
+  });
+  const [isModalPaymentAgreementOpen, setIsModalPaymentAgreementOpen] = useState({
+    isOpen: false,
+    incident_id: 0
   });
   const [messageShow, contextHolder] = message.useMessage();
   const clientId = clientIdParam || "";
@@ -136,13 +146,6 @@ export const WalletTab = () => {
     });
   };
 
-  const handleOpenBalanceLegalization = () => {
-    setisGenerateActionOpen(false);
-    openModal("balanceLegalization", {
-      // selectedAdjustments: selectedRows
-    });
-  };
-
   const validateInvoiceIsSelected = (): boolean => {
     if (!selectedRows || selectedRows.length === 0) {
       messageShow.error("Seleccione al menos una factura");
@@ -179,6 +182,21 @@ export const WalletTab = () => {
     }
   };
 
+  const handleBulkActionDone = (action: BulkActionKey) => {
+    if (action === "pago") {
+      mutateApplyTabData();
+      return;
+    }
+    mutate();
+    // Igual que RegisterNews: después de registrar la novedad se ofrece notificarla por correo
+    if (action === "novedad") {
+      setIsBulkSearchOpen(false);
+      openModal("sendEmail", {
+        event_id: "1"
+      });
+    }
+  };
+
   const handleMarkAsBalance = async () => {
     try {
       await markInvoiceAsBalance(
@@ -198,17 +216,28 @@ export const WalletTab = () => {
     <>
       {contextHolder}
       {selectedRows && selectedRows?.length > 0 && (
-        <ModalEstimateTotalInvoices selectedInvoices={selectedRows} />
+        <DraggableTotalModal
+          totalAmount={selectedRows.reduce((acc, invoice) => acc + invoice.current_value, 0)}
+          itemName="Facturas"
+          count={selectedRows.length}
+        />
       )}
       <div className="walletTab">
         <div className="walletTab__header clientStickyHeader">
-          <Flex gap={"0.5rem"}>
+          {/* Alto fijo: PrincipalButton usa height 100% para igualar a los demás botones */}
+          <Flex gap={"0.5rem"} style={{ height: "3rem" }}>
             <UiSearchInput
               className="standardSearch"
               placeholder="Buscar por ID"
               onChange={handleSearchChange}
             />
             {/* <WalletTabFilter setSelectedFilters={setFilters} /> */}
+            <PrincipalButton
+              icon={<ListMagnifyingGlass size={18} />}
+              onClick={() => setIsBulkSearchOpen(true)}
+            >
+              Búsqueda masiva
+            </PrincipalButton>
             <Button
               className="button__actions"
               size="large"
@@ -244,6 +273,10 @@ export const WalletTab = () => {
                   stateId={invoiceState.status_id}
                   setSelectedRows={setSelectedRows}
                   selectedRows={selectedRows}
+                  isSearchActive={Boolean(debouncedSearchQuery)}
+                  onOpenPaymentAgreement={(incidentId) =>
+                    setIsModalPaymentAgreementOpen({ isOpen: true, incident_id: incidentId })
+                  }
                   // fetchData={(page: number) => {
                   //   getAccountingAdjustmentsById(invoiceState.status_id, page);
                   // }}
@@ -268,7 +301,6 @@ export const WalletTab = () => {
         }}
         validateInvoiceIsSelected={validateInvoiceIsSelected}
         addInvoicesToApplicationTable={handleAddSelectedInvoicesToApplicationTable}
-        balanceLegalization={handleOpenBalanceLegalization}
         markAsBalance={handleMarkAsBalance}
       />
       <PaymentAgreementModal
@@ -327,12 +359,9 @@ export const WalletTab = () => {
           });
         }}
       />
-      <DigitalRecordModal
-        isOpen={isSelectOpen.selected === 7}
+      <AccountStatementModal
+        showModal={isSelectOpen.selected === 7}
         onClose={onCloseModal}
-        messageShow={messageShow}
-        projectId={projectId}
-        invoiceSelected={selectedRows}
         clientId={clientId}
       />
       <SendExternalLinkModal
@@ -347,6 +376,20 @@ export const WalletTab = () => {
         isOpen={isSelectOpen.selected === 9}
         onClose={onCloseModal}
         clientId={clientId}
+      />
+      <WalletTabBulkSearchModal
+        isOpen={isBulkSearchOpen}
+        onClose={() => setIsBulkSearchOpen(false)}
+        clientUUID={portfolioData?.data_wallet.uuid || ""}
+        clientName={portfolioData?.data_wallet.client_name}
+        onActionDone={handleBulkActionDone}
+      />
+      <ModalAgreementDetail
+        isModalPaymentAgreementOpen={isModalPaymentAgreementOpen}
+        onClose={() => {
+          mutate();
+          setIsModalPaymentAgreementOpen({ isOpen: false, incident_id: 0 });
+        }}
       />
     </>
   );

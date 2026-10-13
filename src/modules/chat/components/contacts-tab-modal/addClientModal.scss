@@ -1,0 +1,49 @@
+@import "@styles/variables.scss";
+
+.AddClientModalContainer {
+    width: 60% !important;
+    min-width: 400px !important;
+    max-width: 575px !important;
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        &__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        &__info {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+    }
+    &__content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        gap: 1rem;
+
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            gap: 0.3rem;
+
+            &__title {
+                font-size: 12px;
+                color: $gray;
+                font-weight: 600;
+            }
+        }
+    }
+
+    &__footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}

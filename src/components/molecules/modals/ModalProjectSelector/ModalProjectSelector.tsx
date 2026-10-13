@@ -4,6 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { useAppStore } from "@/lib/store/store";
 import { ISelectedProject } from "@/lib/slices/createProjectSlice";
+import { checkUserViewPermissions } from "@/utils/utils";
+import { getFirstPermittedRoute } from "@/utils/permissions/routePermissions";
 
 import "./modalProjectSelector.scss";
 interface Props {
@@ -32,9 +34,12 @@ export const ModalProjectSelector = ({ isOpen, onClose }: Props) => {
     if (path.startsWith("/proyectos/review")) {
       router.push(`/proyectos/review/${project.ID}/detail`);
     } else if (path.startsWith("/clientes/all")) {
-      // do nothing
+      if (!checkUserViewPermissions(projectInfo, "Clientes")) {
+        router.push(getFirstPermittedRoute(projectInfo));
+      }
     } else {
-      router.push("/dashboard");
+      const firstRoute = getFirstPermittedRoute(projectInfo);
+      router.push(firstRoute);
     }
 
     onClose();

@@ -3,7 +3,8 @@ export interface DiscountPackage {
   name: string;
   description: string;
   startDate: string;
-  endDate?: string;
+  endDate: string | null;
+  projectId: number;
   active: number;
   discountType: string;
 }

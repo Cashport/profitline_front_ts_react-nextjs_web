@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import ComercioLayout from "@/modules/commerce/containers/comercio-layout/ComercioLayout";
 
 export const metadata: Metadata = {
   title: "Comercio",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ViewWrapper headerTitle="Mis pedidos">{children}</ViewWrapper>;
+  return <ComercioLayout>{children}</ComercioLayout>;
 }

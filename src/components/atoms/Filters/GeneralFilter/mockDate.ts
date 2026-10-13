@@ -58,7 +58,7 @@ export const getCategories = (parentIds: string[]): Promise<FilterOption[]> => {
   });
 };
 
-export const getPrices = (parentIds: string[]): Promise<FilterOption[]> => {
+export const getPrices = (): Promise<FilterOption[]> => {
   return new Promise((resolve) => {
     resolve([
       { id: "low", name: "Bajo" },

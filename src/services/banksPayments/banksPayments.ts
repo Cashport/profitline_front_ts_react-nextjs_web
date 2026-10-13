@@ -214,3 +214,90 @@ export const approvePayment = async ({ payments, project_id, client_id }: IAppro
     throw error;
   }
 };
+
+export const downloadPaymentsPlane = async (
+  payment_ids: number[]
+): Promise<{ url: string; filename?: string }> => {
+  try {
+    const response: GenericResponse<{ url: string; filename?: string }> = await API.post(
+      "/bank/generate-atemco-txt",
+      { payment_ids }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al descargar el plano:", error);
+    throw error;
+  }
+};
+
+interface IConfirmERPUploadPayload {
+  payment_id: number;
+  id_erp: string | null;
+  id_erp_compensation: string | null;
+}
+
+export const confirmERPUpload = async (payload: IConfirmERPUploadPayload) => {
+  try {
+    const response: GenericResponse<any> = await API.put("/bank/payment-erp-fields", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error al confirmar el cargue al ERP:", error);
+    throw error;
+  }
+};
+
+interface IChangePaymentIdERPPayload {
+  payment_id: number;
+  id_erp: string;
+  previous_id_erp?: string;
+  comment?: string;
+}
+
+export const changePaymentIdERP = async (payload: IChangePaymentIdERPPayload) => {
+  try {
+    const response: GenericResponse<any> = await API.put("/bank/payment-erp-document", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el id ERP del pago:", error);
+    throw error;
+  }
+};
+
+export const changeStatusUploadERP = async (paymentids: number[]) => {
+  try {
+    const response: GenericResponse<any> = await API.post("/bank/set-atemco-status", {
+      payment_ids: paymentids
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado después del cargue al ERP:", error);
+    throw error;
+  }
+};
+
+// HU payment_period: ajuste manual/masivo del periodo contable (formato YYYY-MM).
+// Permitido para pagos identificados y aplicados; el backend rechaza otros estados.
+interface IChangePaymentPeriodPayload {
+  payment_ids: number[];
+  payment_period: string;
+}
+
+export const changePaymentPeriod = async ({
+  payment_ids,
+  payment_period
+}: IChangePaymentPeriodPayload) => {
+  try {
+    const response: GenericResponse<{
+      updated: number;
+      payment_period: string;
+      project_id: number;
+    }> = await API.put(`${config.API_HOST}/bank/payment-period`, {
+      payment_ids,
+      payment_period
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el periodo contable de los pagos:", error);
+    throw error;
+  }
+};

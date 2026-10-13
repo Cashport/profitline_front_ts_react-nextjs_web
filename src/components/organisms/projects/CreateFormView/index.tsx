@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Row, Col, Select, Flex, Typography, Form } from "antd";
+import { Button, Row, Col, Select, Flex, Typography } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { Plus } from "phosphor-react";
 import style from "./form.module.scss";
 import QuestionCard from "./components/QuestionCard";
 import { SelectType } from "./components/SelectType";
 import { FormMode, FormValues, Question, QuestionType } from "./controllers/formSchema";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { InputSelect } from "@/components/atoms/inputs/InputSelect/InputSelect";
 import { FooterButtons } from "@/components/molecules/FooterButtons/FooterButtons";
@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { mockData } from "./mocked-data";
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
 const defaultQuestion = {
@@ -27,8 +27,7 @@ const defaultQuestion = {
 };
 
 const CreateFormView: React.FC = () => {
-  const formId = 1;
-  const { control, register, handleSubmit, watch, reset, formState } = useForm<FormValues>({
+  const { control, handleSubmit, watch, reset, formState } = useForm<FormValues>({
     defaultValues: {
       formName: "",
       formDescription: "",
@@ -36,10 +35,8 @@ const CreateFormView: React.FC = () => {
       questions: [defaultQuestion]
     }
   });
-  const formName = useWatch({ control, name: "formName" });
   console.log("formState", formState);
   const [mode, setMode] = useState<FormMode>(FormMode.CREATE);
-  const [loading, setLoading] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "questions",
@@ -48,10 +45,8 @@ const CreateFormView: React.FC = () => {
   // Simulación de carga de datos desde la API
   useEffect(() => {
     if (mode === FormMode.EDIT) {
-      setLoading(true);
       setTimeout(() => {
         reset(mockData);
-        setLoading(false);
       }, 1000);
       // fetch("/api/form-data") // Cambiar a tu endpoint real
       //   .then((res) => res.json())
@@ -74,10 +69,6 @@ const CreateFormView: React.FC = () => {
     console.log("SUBMIT", data);
   };
   console.log("fields", fields);
-
-  const handleFinish = (values: any) => {
-    console.log("Form values:", values);
-  };
   const handleTypeClick = (index: number, question: Question, type: QuestionType) => {
     update(index, { ...question, type });
   };

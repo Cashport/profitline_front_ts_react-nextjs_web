@@ -113,6 +113,11 @@ export interface IProjectForFormData {
   day?: number;
   order?: string;
   day_of_week?: string;
+  otp_required?: boolean;
+  otp_revalidation_days?: number;
+  password_expiration_days?: number;
+  trusted_devices_enabled?: boolean;
+  trusted_device_days?: number;
 }
 
 export interface IUpdateProjectData extends IProjectForFormData {

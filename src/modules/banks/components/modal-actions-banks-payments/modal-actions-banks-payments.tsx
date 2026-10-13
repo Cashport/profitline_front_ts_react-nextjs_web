@@ -7,7 +7,8 @@ import {
   CirclesFour,
   FileArrowUp,
   ArrowsClockwise,
-  ArrowDownLeft
+  ArrowDownLeft,
+  CalendarBlank
 } from "@phosphor-icons/react";
 
 import { ButtonGenerateAction } from "@/components/atoms/ButtonGenerateAction/ButtonGenerateAction";
@@ -80,6 +81,20 @@ const ModalActionsBanksPayments = ({ isOpen, onClose, setSelectOpen }: Props) =>
           title="Cambiar de estado"
           onClick={() => {
             handleOpenModal(6);
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<ArrowsClockwise size={16} />}
+          title="Cambiar id ERP"
+          onClick={() => {
+            handleOpenModal(9);
+          }}
+        />
+        <ButtonGenerateAction
+          icon={<CalendarBlank size={16} />}
+          title="Cambiar periodo contable"
+          onClick={() => {
+            handleOpenModal(10);
           }}
         />
         <ButtonGenerateAction

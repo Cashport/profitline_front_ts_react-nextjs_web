@@ -1,3 +1,5 @@
+import { ITicket, ITicketAgent, IWhatsAppTemplate } from "@/types/chat/IChat";
+
 export type Message = {
   id: string;
   from: "agent" | "customer";
@@ -27,21 +29,22 @@ export type Conversation = {
   customer: string;
   customerId: string;
   client_name: string;
+  phoneNumber: string;
+  customerCashportUUID: string | null;
   initials: string;
   phone: string;
   email?: string;
-  document?: string;
-  segment?: string;
-  status: "Abierto" | "Cerrado";
-  overdueDays: number;
   lastMessage: string;
   updatedAt: string;
   tags: string[];
   metrics: { totalVencido: number; ultimoPago: string }; // totalVencido in COP
-  timeline: TimelineItem[];
-  messages: Message[];
   hasUnreadUpdate?: boolean;
   lastMessageAt: string;
+  timeline: TimelineItem[];
+  countMessages: number;
+  status: "OPEN" | "CLOSED";
+  escalated: boolean;
+  agent: ITicketAgent | null;
 };
 
 export function formatRelativeTime(iso: string) {

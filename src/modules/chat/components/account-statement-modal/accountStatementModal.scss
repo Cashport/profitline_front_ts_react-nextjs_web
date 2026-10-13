@@ -1,0 +1,71 @@
+@import "@styles/variables.scss";
+
+.AccountStatementModalContainer {
+    width: 60% !important;
+    min-width: 400px !important;
+    max-width: 575px !important;
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        &__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        &__info {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+    }
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        // Tabs styling
+        [data-slot="tabs"] {
+            width: 100%;
+        }
+
+        [data-slot="tabs-list"] {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            background-color: #F5F5F5;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        [data-slot="tabs-trigger"] {
+            flex: 0 0 auto;
+            min-width: 100px;
+        }
+
+        [data-slot="tabs-content"] {
+            padding-top: 1rem;
+        }
+
+        .inputContainer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            gap: 0.3rem;
+
+            &__title {
+                font-size: 12px;
+                color: $gray;
+                font-weight: 600;
+            }
+        }
+    }
+
+    &__footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}

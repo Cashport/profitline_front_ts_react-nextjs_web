@@ -16,6 +16,8 @@ import { GenericResponse } from "@/types/global/IGlobal";
 import { MessageType } from "@/context/MessageContext";
 import { stringToBoolean } from "@/utils/utils";
 
+import { PAYMENT_TYPES } from "@/constants/documentTypes";
+
 // create
 
 export const createClient = async (
@@ -45,6 +47,7 @@ export const createClient = async (
     documents: documents,
     client_type_id: data.client_type.value,
     holding_id: data.holding_id?.value === 0 ? undefined : data.holding_id?.value,
+    payment_type: data.payment_type.value,
     day_flag: typeof billingPeriod === "string" ? undefined : billingPeriod.day_flag === "true",
     day: typeof billingPeriod === "string" ? undefined : billingPeriod.day,
     order: typeof billingPeriod === "string" ? undefined : billingPeriod.order?.toLowerCase(),
@@ -120,6 +123,7 @@ export const updateClient = async (
     document_type: data.document_type.value,
     locations: formatLocations,
     holding_id: data.holding_id.value,
+    payment_type: data.payment_type.value,
     day_flag: stringToBoolean(billingPeriod?.day_flag),
     day: billingPeriod?.day,
     order: billingPeriod?.order?.toLowerCase(),
@@ -271,7 +275,6 @@ export const getMobileToken = async (clientUUID: string): Promise<string> => {
     clientUUID
   };
   try {
-    console.log("entrando uuid", clientUUID);
     const response: { status: number; message: string; token: string } = await API.post(
       `${config.API_HOST}/client/create-mobile-token`,
       body,
@@ -281,7 +284,6 @@ export const getMobileToken = async (clientUUID: string): Promise<string> => {
         }
       }
     );
-    console.log("saliendo", response);
 
     if (response.status !== 200) {
       throw new Error(`Failed to get mobile token: ${response.message}`);
@@ -308,19 +310,5 @@ export const getClientWallet = async (token: string): Promise<IClientWalletData>
   } catch (error) {
     console.error("error getting client wallet: ", error);
     throw error;
-  }
-};
-
-export const getPayloadByTicket = async (ticketId: string): Promise<any> => {
-  try {
-    const response = await API.get(`${config.API_HOST}/client/get-payload-by-ticket`, {
-      params: { ticketId, templateId: "estado_de_cuenta" }
-    });
-    const data = response?.data?.data || response?.data || response;
-
-    return data;
-  } catch (error) {
-    console.warn("error getting payload by ticket: ", error);
-    return null;
   }
 };

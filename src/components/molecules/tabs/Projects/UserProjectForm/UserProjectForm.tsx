@@ -114,16 +114,18 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
 
     try {
       const response = isViewDetailsUser?.id
-        ? await updateUser(
+        ? await updateUser(isViewDetailsUser?.id, ID, {
             data,
             selectedBusinessRules,
-            assignedGroups,
+            selectedGroups: assignedGroups,
             zones,
-            isViewDetailsUser?.id,
-            ID,
-            dataUser.data?.ACTIVE === 1
-          )
-        : await inviteUser(data, selectedBusinessRules, assignedGroups, zones, ID);
+            isActive: dataUser.data?.ACTIVE === 1
+          })
+        : await inviteUser(data, ID, {
+            selectedBusinessRules,
+            selectedGroups: assignedGroups,
+            zones
+          });
 
       if (response.status === 200 || response.status === 202) {
         const isEdit = isViewDetailsUser?.id ? "editado" : "creado";

@@ -6,7 +6,7 @@ import { GenericResponse } from "@/types/global/IGlobal";
 
 interface Props {
   clientId: string;
-  id?: number;
+  search?: string;
   line?: number[];
   subline?: number[];
   channel?: number[];
@@ -18,28 +18,24 @@ interface Props {
 
 export const useFinancialDiscounts = ({
   clientId,
-  id,
+  search,
   line,
   subline,
   channel,
   zone,
-  searchQuery,
   motive_id,
   page = 1
 }: Props) => {
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
 
-  const idQuery = id ? `&id=${id}` : "";
+  const searchQueryParam = search ? `&search=${search}` : "";
   const lineQuery = line && line.length > 0 ? `&line=${line.join(",")}` : "";
   const sublineQuery = subline && subline.length > 0 ? `&subline=${subline.join(",")}` : "";
   const channelQuery = channel && channel.length > 0 ? `&channel=${channel.join(",")}` : "";
   const zoneQuery = zone && zone.length > 0 ? `&zone=${zone.join(",")}` : "";
   const motiveQuery = motive_id ? `&motive_id=${motive_id}` : "";
-  const searchQueryParam = searchQuery
-    ? `&searchQuery=${encodeURIComponent(searchQuery.toLowerCase().trim())}`
-    : "";
 
-  const pathKey = `/financial-discount/project/${projectId}/client/${clientId}?page=${page}${idQuery}${lineQuery}${sublineQuery}${channelQuery}${zoneQuery}${searchQueryParam}${motiveQuery}`;
+  const pathKey = `/financial-discount/project/${projectId}/client/${clientId}?page=${page}${searchQueryParam}${lineQuery}${sublineQuery}${channelQuery}${zoneQuery}${motiveQuery}`;
 
   const { data, error, mutate } = useSWR<GenericResponse<StatusFinancialDiscounts[]>>(
     pathKey,

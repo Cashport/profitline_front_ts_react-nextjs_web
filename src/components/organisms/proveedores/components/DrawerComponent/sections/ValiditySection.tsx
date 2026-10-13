@@ -1,10 +1,10 @@
-import { Calendar, Hourglass } from "phosphor-react";
+import { Calendar } from "phosphor-react";
 import ColumnText from "../../ColumnText/ColumnText";
 import { Flex } from "antd";
 import { formatDate } from "@/utils/utils";
 
 export const ValiditySection: React.FC<{ validity: string; date: string | null }> = ({
-  validity,
+  validity: _validity,
   date
 }) => (
   <Flex vertical gap={8}>

@@ -1,29 +1,94 @@
-import { FC } from "react";
+"use client";
+import { FC, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import UiTab from "@/components/ui/ui-tab";
 
 import styles from "./banks-view.module.scss";
 import ActivePaymentsTab from "../active-payments-tab";
+import PaymentApplicationsTab from "../payment-applications-tab";
+import WalletPaymentsTab from "../wallet-payments-tab";
+import { PaymentTransactionType } from "@/modules/banks/constants/paymentTransactionType";
+
+const TAB_KEYS = {
+  activePayments: "active-payments",
+  paymentApplications: "payment-applications",
+  paymentApplicationsInformal: "payment-applications-informal",
+  legalizaciones: "legalizaciones",
+  walletPayments: "wallet-payments"
+};
+
+const VALID_TABS = new Set<string>(Object.values(TAB_KEYS));
 
 export const BanksView: FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const tabFromUrl = searchParams.get("tab");
+  const activeKey = tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : TAB_KEYS.activePayments;
+
+  const handleChangeTab = useCallback(
+    (key: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", key);
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams]
+  );
+
   const items = [
     {
-      key: "1",
+      key: TAB_KEYS.activePayments,
       label: "Pagos activos",
-      children: <ActivePaymentsTab />
+      children: <ActivePaymentsTab isActive={activeKey === TAB_KEYS.activePayments} />
     },
     {
-      key: "2",
-      label: "Historial",
-      children: <h4>Historial...</h4>
+      key: TAB_KEYS.walletPayments,
+      label: "Otros pagos",
+      children: <WalletPaymentsTab isActive={activeKey === TAB_KEYS.walletPayments} />
+    },
+    {
+      key: TAB_KEYS.paymentApplications,
+      label: "Aplicaciones de pago",
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.paymentApplications}
+          transactionType={[PaymentTransactionType.Formal, PaymentTransactionType.Homemarket]}
+        />
+      )
+    },
+    {
+      key: TAB_KEYS.paymentApplicationsInformal,
+      label: "Aplicación de pago Informal",
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.paymentApplicationsInformal}
+          transactionType={[PaymentTransactionType.Informal, PaymentTransactionType.Wallet]}
+        />
+      )
+    },
+    {
+      key: TAB_KEYS.legalizaciones,
+      label: "Legalizaciones",
+      children: (
+        <PaymentApplicationsTab
+          isActive={activeKey === TAB_KEYS.legalizaciones}
+          transactionType={[PaymentTransactionType.Legalizacion]}
+        />
+      )
     }
   ];
 
   return (
-    <>
-      <div className={styles.banksView}>
-        <UiTab tabs={items} sticky stickyOffset="-1rem" />
-      </div>
-    </>
+    <div className={styles.banksView}>
+      <UiTab
+        tabs={items}
+        sticky
+        stickyOffset="-1rem"
+        activeKey={activeKey}
+        onChangeTab={handleChangeTab}
+      />
+    </div>
   );
 };
 

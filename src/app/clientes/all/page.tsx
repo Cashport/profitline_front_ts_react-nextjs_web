@@ -1,13 +1,9 @@
 "use client";
 
-import { ClientsViewTable } from "@/components/organisms/Customers/ClientsViewTable/ClientsViewTable";
+import ClientsHome from "@/modules/clients/containers/clients-home/clients-home";
 
 function ClientsPage() {
-  return (
-    <>
-      <ClientsViewTable />
-    </>
-  );
+  return <ClientsHome />;
 }
 
 export default ClientsPage;

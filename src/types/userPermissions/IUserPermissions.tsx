@@ -7,6 +7,7 @@ export interface IUserPermissions {
 interface IPermissionData {
   permissions: IPermissionsByProject[];
   id_user: number;
+  userName: string;
   preferences: IPreferences;
   isMarketplaceGuest?: boolean;
   guestName?: string;

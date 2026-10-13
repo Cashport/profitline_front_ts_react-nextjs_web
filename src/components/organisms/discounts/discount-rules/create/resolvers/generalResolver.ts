@@ -24,11 +24,7 @@ export const generalResolver: ObjectSchema<DiscountSchema> = yup.object({
     .string()
     .min(3, "La descripción debe tener al menos 3 caracteres")
     .required("La descripción es requerida"),
-  discount_type: yup
-    .number()
-    .nullable()
-    .required("El tipo de descuento es requerido")
-    .default(null),
+  discount_type: yup.number().required("El tipo de descuento es requerido"),
   start_date: yup
     .date()
     .required("La fecha de inicio es requerida")

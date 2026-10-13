@@ -16,6 +16,9 @@ interface InputDateProps {
   customStyleContainer?: React.CSSProperties;
   hiddenIcon?: boolean;
   minDate?: dayjs.Dayjs;
+  maxDate?: dayjs.Dayjs;
+  format?: string;
+  allowClear?: boolean;
 }
 
 export const InputDate = ({
@@ -28,7 +31,10 @@ export const InputDate = ({
   className,
   customStyleContainer,
   hiddenIcon,
-  minDate
+  minDate,
+  maxDate,
+  format,
+  allowClear
 }: InputDateProps) => {
   return (
     <Flex vertical className={`datePickerContainer ${className}`} style={customStyleContainer}>
@@ -44,6 +50,9 @@ export const InputDate = ({
         }
         className="dateInputForm"
         minDate={minDate}
+        maxDate={maxDate}
+        format={format}
+        allowClear={allowClear}
       />
     </Flex>
   );

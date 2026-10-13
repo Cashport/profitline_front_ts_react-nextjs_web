@@ -10,6 +10,7 @@ const { Text, Title } = Typography;
 interface TotalDebtProps {
   totalDebt: number | string;
   readyToPay: number | string;
+  ppToPay?: number | string;
   onPay?: () => void;
 }
 
@@ -29,11 +30,20 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
               })}
             </Title>
           </div>
+          <Text className="TotalDebtCard__label">Total a pagar</Text>
+          <div className="TotalDebtCard__total-row">
+            <Title level={3} className="TotalDebtCard__total-amount">
+              <span className="TotalDebtCard__currency">$</span>{" "}
+              {formatMoney(readyToPay, {
+                hideCurrencySymbol: true
+              })}
+            </Title>
+          </div>
         </div>
 
         <Image
           src={
-            "https://www.cocacolaep.com/assets/legacy-assets/Uploads/resources/Coca-Cola-1210.jpg"
+            "https://media.istockphoto.com/id/2147589548/es/vector/fondo-degradado-blanco-producto-de-presentaci%C3%B3n-de-estudio-abstracto-ilustraci%C3%B3n-vectorial.jpg?s=612x612&w=0&k=20&c=PBDOG8tvsOBcAzN0NvPmBXRexy6O2jSmdnJk7IkUuoU="
           }
           alt="Brand"
           width={60}
@@ -42,7 +52,7 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
         />
       </Flex>
 
-      <span className="TotalDebtCard__divider" />
+      {/* <span className="TotalDebtCard__divider" />
 
       <Flex align="center" justify="space-between">
         <Text className="TotalDebtCard__label-400">
@@ -51,16 +61,17 @@ const TotalDebtCard: React.FC<TotalDebtProps> = ({ totalDebt, readyToPay, onPay 
 
         <Title level={5} className="TotalDebtCard__ready-amount">
           <span className="TotalDebtCard__currency">$</span>
-          {formatMoney(readyToPay, {
+          {formatMoney(ppToPay, {
             hideCurrencySymbol: true
           })}
         </Title>
-      </Flex>
+      </Flex> */}
 
       <Button
         type="primary"
         size="large"
         block
+        disabled={!onPay}
         className="TotalDebtCard__pay-button"
         onClick={onPay}
       >

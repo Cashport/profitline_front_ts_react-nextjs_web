@@ -1,0 +1,13 @@
+@import "@styles/variables.scss";
+
+.textarea {
+    background-color: $background;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+    width: 100%;
+    min-height: 3.25rem;
+    resize: none;
+    font-family: inherit;
+    font-size: 1rem;
+}

@@ -42,6 +42,7 @@ export interface IClient {
   is_deleted: number;
   locations: IClientLocation[] | null[];
   nit: number;
+  payment_type: number;
   phone: string;
   project_id: number;
   radication_type: number;
@@ -79,6 +80,7 @@ export interface ICreateClient {
   documents: File[];
   client_type_id: number;
   holding_id?: number;
+  payment_type: number;
   day_flag?: boolean;
   day?: number;
   order?: string;
@@ -93,6 +95,7 @@ export interface IUpdateClient {
   email?: string;
   holding_id?: number;
   locations: string;
+  payment_type: number;
   day_flag?: boolean;
   day?: number;
   order?: string;
@@ -118,6 +121,7 @@ export type ClientFormType = {
     radication_type: ISelectType;
     condition_payment: ISelectType;
     billing_period: string;
+    payment_type: ISelectType;
   };
 };
 
@@ -127,15 +131,76 @@ export interface ISelectType {
 }
 
 export interface IClientInvoice {
-  factura: string;
-  valor: number;
+  invoice: string;
+  emission_date: string;
+  value: number;
   expiration_date: string;
-  estado: string;
+  status: string;
 }
 
 export interface IClientWalletData {
-  deuda_total: number;
-  descuento_pronto_pago: number;
-  listado_facturas: IClientInvoice[];
-  saldos_a_favor: any[];
+  total_debt: number;
+  total_to_pay: number;
+  early_payment_discount: number;
+  payment_link?: string | null;
+  invoices_list: IClientInvoice[];
+  credit_balances: CreditBalance[];
+  payments: CreditBalancePayments[];
+}
+
+export interface CreditBalance {
+  reason: string;
+  value: number;
+  creation_date: string;
+}
+
+export interface CreditBalancePayments {
+  id: number;
+  current_value: number;
+  id_status: number;
+  description: string;
+  color: string;
+  status_description: string;
+  payment_date: string;
+}
+
+export interface InvoiceFormated {
+  id: string;
+  code: string;
+  date: string;
+  amount: number;
+  formattedAmount: string;
+  originalAmount?: number;
+  formattedOriginalAmount?: string;
+  isPastDue?: boolean;
+  status?: "overdue" | "dueToday" | "dueTomorrow" | "normal";
+}
+
+export interface CreditBalanceFormated {
+  id: string;
+  description: string;
+  date: string;
+  formattedAmount: string;
+}
+
+export interface IClientSegmentationDetail {
+  client: {
+    uuid: string;
+    nit: string | null;
+    business_name: string;
+    phone: string;
+    email: string;
+    segment: string | null;
+    contact_id: number | null;
+    shipto_codes: string[];
+    related_user: { user_name: string; id: number } | null;
+    channel: string[];
+  };
+  portfolio: {
+    total_portfolio: number;
+    past_due_amount: number;
+    unapplied_payments: number;
+    last_payment_date: string;
+    dso: number | null;
+  };
 }

@@ -74,6 +74,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
             className="buttonOutlined"
             onClick={onClickChangeState}
             icon={<ArrowsClockwise size={"1.45rem"} />}
+            loading={loading}
           >
             Cambiar Estado
           </Button>
@@ -82,6 +83,7 @@ export const SelectedGroupView = ({ onClickBack, showGroupDetails }: PropsSelect
             onClick={handleEditGroup}
             className="buttonOutlined"
             icon={<Pencil size={"1.45rem"} />}
+            loading={loading}
           >
             Editar Grupo
           </Button>

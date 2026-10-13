@@ -1,35 +1,33 @@
 "use client";
-import { FC, useCallback, useState } from "react";
+import { FC, ReactNode, useCallback } from "react";
 import { CaretDown, User } from "phosphor-react";
 import styles from "./header.module.scss";
 import { Avatar, Button, Popover } from "antd";
 import { logOut } from "../../../../firebase-utils";
 import { useRouter } from "next/navigation";
-import { PopoverUserNotifications } from "@/components/molecules/Popover/PopoverUserNotifications/PopoverUserNotifications";
-import { useAppStore } from "@/lib/store/store";
 
 interface HeaderProps {
   title: string;
+  titleExtra?: ReactNode;
+  actionsExtra?: ReactNode;
+  className?: string;
 }
 
-const Header: FC<HeaderProps> = ({ title }) => {
+const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra, className }) => {
   const router = useRouter();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const { ID } = useAppStore((state) => state.selectedProject);
 
   const handleLogOut = useCallback(() => {
     logOut(router);
   }, [router]);
 
   return (
-    <header className={styles.wrapper}>
-      <h1 className={styles.title}>{title}</h1>
+    <header className={`${styles.wrapper} ${className ?? ""}`}>
+      <div className={styles.titleWrapper}>
+        <h1 className={styles.title}>{title}</h1>
+        {titleExtra}
+      </div>
       <div className={styles.actions}>
-        <PopoverUserNotifications
-          setIsPopoverVisible={setIsModalVisible}
-          isPopoverVisible={isModalVisible}
-          projectId={ID}
-        />
+        {actionsExtra}
         <div className={styles.profile}>
           <Avatar icon={<User />} />
           <Popover

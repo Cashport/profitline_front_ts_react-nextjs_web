@@ -1,0 +1,399 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { message } from "antd";
+import { ArrowLeft } from "lucide-react";
+import { BellSimpleRinging } from "@phosphor-icons/react";
+import { DotsThree } from "phosphor-react";
+
+import { useAppStore } from "@/lib/store/store";
+import {
+  checkUserComponentPermission,
+  hasDataQualityManagementPermission
+} from "@/utils/utils";
+import { useDataQualityClientDetail } from "../../hooks/useDataQualityClientDetail";
+import {
+  downloadUnifiedCatalogFile,
+  uploadCatalogMaterial,
+  uploadMassiveOrHistoricalFile,
+  uploadPointsOfSaleFile,
+  uploadPacksFile
+} from "@/services/dataQuality/dataQuality";
+
+import Header from "@/components/organisms/header";
+import { Button } from "@/modules/chat/ui/button";
+import { Card, CardContent } from "@/modules/chat/ui/card";
+import { ModalCreateEditClient } from "../../components/ModalCreateEditClient";
+import { ClientDetailInfo } from "../../components/ClientDetailInfo";
+import { ClientDetailArchives } from "../../components/ClientDetailArchives";
+import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
+import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
+import ModalUploadInTransitHaleon from "../../components/ModalUploadInTransitHaleon/ModalUploadInTransitHaleon";
+
+import { IUploadMassiveOrHistoricalRequest } from "@/types/dataQuality/IDataQuality";
+import { ModalDataEmailRules } from "../../components/ModalDataRegisteredEmails/ModalDataEmailRules";
+
+export default function DataQualityClientDetails() {
+  const params = useParams();
+  const router = useRouter();
+  const { ID: projectId } = useAppStore((projects) => projects.selectedProject);
+  const selectedProject = useAppStore((projects) => projects.selectedProject);
+  const canManage = hasDataQualityManagementPermission(selectedProject);
+  const canDownloadCatalog = checkUserComponentPermission(
+    selectedProject,
+    "DataQuality",
+    "data-download-catalog"
+  );
+
+  const clientId = params.clientId as string;
+  const [isDownloadCatalogLoading, setIsDownloadCatalogLoading] = useState(false);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
+  const [isUploadPacksLoading, setIsUploadPacksLoading] = useState(false);
+  const [whichModalIsOpen, setWhichModalIsOpen] = useState(0);
+  const [uploadType, setUploadType] = useState<"massive" | "auxiliary">("massive");
+  const [archiveCounts, setArchiveCounts] = useState({ shown: 0, total: 0 });
+
+  // Fetch client detail data using SWR hook
+  const { clientDetail, isLoading, error, mutate } = useDataQualityClientDetail(
+    clientId,
+    projectId
+  );
+
+  const handleDownloadCatalog = async () => {
+    setIsDownloadCatalogLoading(true);
+
+    const hide = message.open({
+      type: "loading",
+      content: "Descargando catálogo...",
+      duration: 0
+    });
+
+    try {
+      const res = await downloadUnifiedCatalogFile({ clientId });
+
+      window.open(res.url, "_blank");
+
+      message.success("Catálogo descargado exitosamente.");
+      setWhichModalIsOpen(0);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Error al descargar el catálogo.";
+
+      message.error(errorMessage);
+    } finally {
+      hide();
+      setIsDownloadCatalogLoading(false);
+    }
+  };
+
+  const handleOpenMassiveUpload = () => {
+    setUploadType("massive");
+    setWhichModalIsOpen(3);
+  };
+
+  const handleOpenAuxiliaryUpload = () => {
+    setUploadType("auxiliary");
+    setWhichModalIsOpen(3);
+  };
+
+  const handleOpenPointsOfSaleUpload = () => {
+    setWhichModalIsOpen(5);
+  };
+
+  const handleUploadPointsOfSale = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      await uploadPointsOfSaleFile(file);
+      message.success("Archivo de puntos de venta cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error ? error.message : "Error al cargar el archivo de puntos de venta."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleOpenPacksUpload = () => {
+    setWhichModalIsOpen(6);
+  };
+
+  const handleUploadPacks = async (file: File) => {
+    setIsUploadPacksLoading(true);
+    try {
+      const res = await uploadPacksFile(file);
+      const summary = `Packs procesados: ${res.total} (creados: ${res.created}, actualizados: ${res.updated}, errores: ${res.errors})`;
+      if (res.error_log?.url) {
+        message.warning(`${summary}. Se generó un log de errores.`);
+        window.open(res.error_log.url, "_blank");
+      } else {
+        message.success(summary);
+      }
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo de packs.");
+    } finally {
+      setIsUploadPacksLoading(false);
+    }
+  };
+
+  const handleUploadMassive = async (file: File) => {
+    setIsUploadLoading(true);
+    const requestObject: IUploadMassiveOrHistoricalRequest = {
+      id_client: Number(clientId),
+      id_country: Number(clientDetail?.id_country),
+      id_type_archive: 1,
+      data_type: ""
+    };
+    try {
+      await uploadMassiveOrHistoricalFile({ file, requestObject });
+      message.success("Archivo cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Error al cargar el archivo.");
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  const handleUploadMaterialsAuxiliary = async (file: File) => {
+    setIsUploadLoading(true);
+    try {
+      // Implement the upload logic here, similar to handleUploadMassive
+      await uploadCatalogMaterial(file);
+      message.success("Archivo de auxiliar de materiales cargado exitosamente.");
+      setWhichModalIsOpen(0);
+      mutate();
+    } catch (error) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Error al cargar el archivo de auxiliar de materiales."
+      );
+    } finally {
+      setIsUploadLoading(false);
+    }
+  };
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            <p className="text-gray-600">Cargando información del cliente...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">
+              <h2 className="text-xl font-semibold">Error al cargar los datos</h2>
+            </div>
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <Button onClick={() => window.location.reload()}>Reintentar</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle empty state
+  if (!clientDetail) {
+    return (
+      <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+        <Header title="" />
+        <div className="min-h-[400px] flex items-center justify-center">
+          <p className="text-gray-600">No se encontraron datos para este cliente.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Map API data to component props
+  const countryName = clientDetail.country_name;
+  const clientName = clientDetail.client_name;
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/data-quality");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4" style={{ backgroundColor: "#F7F7F7" }}>
+      <Header title={`${countryName} - ${clientName}` || ""} />
+      <main>
+        <Card className="border-none">
+          <CardContent>
+            <div className="flex items-center justify-between mb-6 ">
+              <Button
+                onClick={handleGoBack}
+                variant="ghost"
+                size="sm"
+                className="text-gray-700 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Atrás
+              </Button>
+              <div className="flex items-center gap-3">
+                {(canManage || canDownloadCatalog) && (
+                  <Button variant="outline" className="" onClick={() => setWhichModalIsOpen(2)}>
+                    <DotsThree size={"1.5rem"} />
+                    Generar acción
+                  </Button>
+                )}
+                {checkUserComponentPermission(selectedProject, "DataQuality", "data-view-alerts") && (
+                  <Link
+                    href={`/data-quality/alerts?countryId=${clientDetail.id_country}&clientId=${clientDetail.id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <Button variant="outline" className="">
+                      <BellSimpleRinging size={18} />
+                      Alertas
+                    </Button>
+                  </Link>
+                )}
+
+                {checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly") && (
+                  <Link
+                    href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <Button
+                      className="text-sm font-medium"
+                      style={{
+                        backgroundColor: "#CBE71E",
+                        color: "#141414",
+                        border: "none"
+                      }}
+                    >
+                      Catálogos
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <ClientDetailInfo
+              clientName={clientDetail?.client_name}
+              stakeholder={clientDetail?.stakeholder?.toString()}
+              setIsEditClientOpen={(isOpen) => setWhichModalIsOpen(isOpen ? 1 : 0)}
+              showEditButton={canManage}
+            />
+            <ClientDetailArchives
+              clientId={clientId}
+              clientName={clientName}
+              clientNIT={clientDetail.id_client}
+              idCountry={clientDetail.id_country}
+              intakes={clientDetail.client_data_archives}
+              onMutateDetail={() => mutate()}
+              onCountsChange={setArchiveCounts}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="mt-4 text-sm" style={{ color: "#141414" }}>
+          Mostrando {archiveCounts.shown} de {archiveCounts.total} archivos
+        </div>
+      </main>
+
+      <ModalCreateEditClient
+        isOpen={whichModalIsOpen === 1}
+        onClose={() => setWhichModalIsOpen(0)}
+        onSuccess={() => mutate()}
+        countryName={countryName || ""}
+        countryId={String(clientDetail.id_country || "")}
+        mode="edit"
+        clientData={{
+          id: clientDetail.id!,
+          client_name: clientDetail.client_name || "",
+          stakeholder: String(clientDetail.stakeholder || "")
+        }}
+      />
+
+      <CountryClientsActionsModal
+        isOpen={whichModalIsOpen === 2}
+        isInDetailView
+        onClose={() => setWhichModalIsOpen(0)}
+        onDownloadCatalog={handleDownloadCatalog}
+        isDownloadCatalogLoading={isDownloadCatalogLoading}
+        onUploadFile={handleOpenMassiveUpload}
+        onUploadMaterialsAuxiliary={handleOpenAuxiliaryUpload}
+        onUploadPointsOfSale={handleOpenPointsOfSaleUpload}
+        onUploadPacks={handleOpenPacksUpload}
+        onUploadInTransitHaleon={() => setWhichModalIsOpen(7)}
+        onAddEmails={() => setWhichModalIsOpen(4)}
+        downloadCatalogOnly={!canManage}
+      />
+
+      <ModalDataEmailRules
+        isOpen={whichModalIsOpen === 4}
+        onClose={() => setWhichModalIsOpen(0)}
+        clientId={Number(clientId)}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 3}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={
+          uploadType === "massive" ? handleUploadMassive : handleUploadMaterialsAuxiliary
+        }
+        loading={isUploadLoading}
+        allowedExtensions={[
+          ".pdf",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".xls",
+          ".xlsx",
+          ".csv",
+          ".txt",
+          ".eml",
+          ".msg"
+        ]}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 5}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={handleUploadPointsOfSale}
+        loading={isUploadLoading}
+        allowedExtensions={[".xls", ".xlsx", ".csv"]}
+      />
+
+      <ModalUploadFile
+        isOpen={whichModalIsOpen === 6}
+        onClose={() => setWhichModalIsOpen(0)}
+        onFileUpload={handleUploadPacks}
+        loading={isUploadPacksLoading}
+        allowedExtensions={[".xls", ".xlsx"]}
+      />
+
+      <ModalUploadInTransitHaleon
+        isOpen={whichModalIsOpen === 7}
+        onClose={() => setWhichModalIsOpen(0)}
+        clientId={clientId}
+        onSuccess={() => mutate()}
+      />
+    </div>
+  );
+}

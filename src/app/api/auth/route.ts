@@ -38,6 +38,7 @@ export async function POST() {
     const compressedClaims = deflateSync(buffer).toString("base64");
     const idCustomToken = await auth().createCustomToken(decodedToken.uid, {
       ...extraPermissions,
+      userName: permissions?.userName,
       permissions: compressedClaims
     });
     const idCustomTokenSession = await auth().createCustomToken(decodedToken.uid);

@@ -37,6 +37,7 @@ interface InvoiceModalProps {
 interface NoveltyModalProps {
   noveltyId: number;
   deselectInvoices?: () => void;
+  onResolved?: () => void;
 }
 
 interface AdjustmentModalProps {

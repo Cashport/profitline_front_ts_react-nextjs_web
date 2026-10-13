@@ -11,6 +11,7 @@ const { Panel } = Collapse;
 interface Props {
   invoices?: number;
   desconts?: number;
+  balances?: number;
   payments?: number;
   total?: number;
   defaultPosition?: { x: number; y: number };
@@ -19,6 +20,7 @@ interface Props {
 export const ModalResultAppy = ({
   invoices,
   desconts,
+  balances,
   payments,
   total,
   defaultPosition: defaultPositionProp
@@ -37,9 +39,7 @@ export const ModalResultAppy = ({
 
   const draggleRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-  const [defaultPosition, setDefaultPosition] = useState(
-    defaultPositionProp ?? { x: 0, y: -160 }
-  );
+  const [defaultPosition, setDefaultPosition] = useState(defaultPositionProp ?? { x: 0, y: -160 });
 
   const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
     const { clientWidth, clientHeight } = window.document.documentElement;
@@ -83,9 +83,15 @@ export const ModalResultAppy = ({
                 <div>{formatMoney(payments)}</div>
               </Flex>
               <Flex justify="space-between" className="descuentos">
-                <div>Descuentos</div>
+                <div>Notas crédito</div>
                 <div className={desconts === 0 ? "no-value" : ""}>
                   {desconts === 0 ? "-" : formatMoney(desconts)}
+                </div>
+              </Flex>
+              <Flex justify="space-between" className="descuentos">
+                <div>Saldos</div>
+                <div className={balances === 0 ? "no-value" : ""}>
+                  {balances === 0 ? "-" : formatMoney(balances)}
                 </div>
               </Flex>
             </Flex>

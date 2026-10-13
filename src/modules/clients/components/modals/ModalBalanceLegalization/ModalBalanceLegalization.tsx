@@ -288,8 +288,8 @@ const ModalBalanceLegalization = ({
                     ? JSON.parse(option.title)
                     : undefined;
                   return (
-                    item?.erp_id.toLowerCase().includes(input.toLowerCase()) ||
-                    item?.comments.toLowerCase().includes(input.toLowerCase())
+                    item?.erp_id?.toLowerCase().includes(input.toLowerCase()) ||
+                    item?.comments?.toLowerCase().includes(input.toLowerCase())
                   );
                 }}
               />

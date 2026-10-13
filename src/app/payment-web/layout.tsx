@@ -1,6 +1,4 @@
 import { Metadata } from "next";
-import Header from "@/components/organisms/header";
-import { SideBar } from "@/components/molecules/SideBar/SideBar";
 import PaymentWebPage from "./page";
 import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
 

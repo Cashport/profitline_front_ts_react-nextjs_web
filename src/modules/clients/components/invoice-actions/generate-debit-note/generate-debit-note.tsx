@@ -1,5 +1,5 @@
 import { FC, Fragment } from "react";
-import { Button, Checkbox } from "antd";
+import { Checkbox } from "antd";
 import { CaretLeft, FileArrowUp, Plus } from "phosphor-react";
 import UiTabs from "@/components/ui/ui-tabs";
 import styles from "./generate-debit-note.module.scss";
