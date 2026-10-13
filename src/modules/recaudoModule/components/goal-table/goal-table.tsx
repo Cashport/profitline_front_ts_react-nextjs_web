@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
@@ -10,6 +10,7 @@ import { cn } from "@/utils/utils";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { AVANCE_SCALE, GROUPINGS, GROUPING_BY_ID, TONE_TEXT } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
+import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { Grouping, Tone } from "../../types";
 import { withAlpha } from "../../utils/chart";
 import { dimensionPatch, indexCatalogs, isDimensionSelected } from "../../utils/filters";
@@ -18,6 +19,7 @@ import { GoalRow, goalRows, nextSort, sortRows, sumBy } from "../../utils/rows";
 import { FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
 import GoalBar from "../shared/goal-bar";
+import SentinelRow from "../shared/sentinel-row";
 import {
   AMOUNT,
   EMPTY,
@@ -50,6 +52,8 @@ const COLUMNS: {
   { col: "compliance", label: "Avance", width: "w-[14%]", dir: "asc" },
   { col: "forecast", label: "Forecast", align: "right", width: "w-[14%]", dir: "desc" }
 ];
+
+const diffTone = (diff: number) => TONE_TEXT[diff < 0 ? "crit" : "ok"];
 
 interface AvanceProps {
   collected: number;
@@ -104,6 +108,70 @@ function Avance({ collected, goal, forecast, pace, color }: AvanceProps) {
   );
 }
 
+interface GoalTableRowProps {
+  row: GoalRow;
+  selected: boolean;
+  color: string;
+  onSelect: (row: GoalRow) => void;
+}
+
+/** Una fila de la tabla. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
+const GoalTableRow = memo(function GoalTableRow({ row: r, selected, color, onSelect }: GoalTableRowProps) {
+  return (
+    <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onSelect(r)}>
+      <td className={TD}>
+        <span className={r.person ? PERSON : NAME}>{r.name}</span>
+        <span className={SUB}>{r.sub}</span>
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <TowerTooltip
+          title="Recaudo"
+          rows={[{ key: "v", color, label: "Valor", value: full(r.collected) }]}
+        >
+          <span className={AMOUNT}>{money(r.collected)}</span>
+        </TowerTooltip>
+      </td>
+      <td className={cn(TD, "text-right", HIDE_SM)}>
+        <span className={AMOUNT}>{money(r.goal)}</span>
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <span className={cn(AMOUNT, diffTone(r.diff))}>{money(r.diff, true)}</span>
+      </td>
+      <td className={TD}>
+        <Avance
+          collected={r.collected}
+          goal={r.goal}
+          forecast={r.forecast}
+          pace={r.pace}
+          color={color}
+        />
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <TowerTooltip
+          title="Forecast"
+          rows={[
+            { key: "rec", color, label: "Recaudado", value: money(r.collected) },
+            {
+              key: "in",
+              color: withAlpha(color, 0.16),
+              label: "Por entrar",
+              value: money(r.forecast - r.collected)
+            },
+            {
+              key: "dif",
+              color: FOREGROUND,
+              label: "Frente a la meta",
+              value: money(r.forecast - r.goal, true)
+            }
+          ]}
+        >
+          <span className={AMOUNT}>{money(r.forecast)}</span>
+        </TowerTooltip>
+      </td>
+    </tr>
+  );
+});
+
 /**
  * "Clientes frente a su meta" (o ejecutivos, canales, coordinadores): recaudo,
  * meta, diferencia, avance y forecast. Clic en una fila filtra el tablero.
@@ -112,17 +180,27 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
   const { filters, patch } = useTowerFilters();
   const [by, setBy] = useState<Grouping>("client");
   const [sort, setSort] = useState<SortState>({ col: "diff", dir: "asc" });
+  const scrollRef = useRef<HTMLDivElement>(null);
   const ix = indexCatalogs(data.catalogs);
   const color = data.summary.series.collected.color;
   const grouping = GROUPING_BY_ID[by];
-  const rows = sortRows(goalRows(data.clients, by, ix), sort, (r, col) => r[col as keyof GoalRow] as string | number);
-  const onPace = rows.filter((r) => r.compliance >= r.pace).length;
+  const rows = useMemo(
+    () => sortRows(goalRows(data.clients, by, ix), sort, (r, col) => r[col as keyof GoalRow] as string | number),
+    [data.clients, by, ix, sort]
+  );
+  const { visible, hasMore, sentinelRef } = useProgressiveRows(rows, scrollRef);
+  const select = useCallback((r: GoalRow) => patch((f) => dimensionPatch(f, by, r, ix)), [patch, by, ix]);
 
-  const tCollected = sumBy(rows, (r) => r.collected);
-  const tGoal = sumBy(rows, (r) => r.goal);
-  const tForecast = sumBy(rows, (r) => r.forecast);
-  const tPace = tGoal ? sumBy(rows, (r) => r.pace * r.goal) / tGoal : 1;
-  const diffTone = (diff: number) => TONE_TEXT[diff < 0 ? "crit" : "ok"];
+  const { onPace, tCollected, tGoal, tForecast, tPace } = useMemo(() => {
+    const goal = sumBy(rows, (r) => r.goal);
+    return {
+      onPace: rows.filter((r) => r.compliance >= r.pace).length,
+      tCollected: sumBy(rows, (r) => r.collected),
+      tGoal: goal,
+      tForecast: sumBy(rows, (r) => r.forecast),
+      tPace: goal ? sumBy(rows, (r) => r.pace * r.goal) / goal : 1
+    };
+  }, [rows]);
 
   return (
     <PanelCard
@@ -150,7 +228,7 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
       }
     >
       <div className="relative min-h-[360px] flex-1">
-        <div className="scrollbar-thin absolute inset-0 overflow-y-auto">
+        <div ref={scrollRef} className="scrollbar-thin absolute inset-0 overflow-y-auto">
           <table className={TABLE}>
             <thead className={THEAD}>
               <tr>
@@ -169,62 +247,14 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
             </thead>
             <tbody>
               {rows.length ? (
-                rows.map((r) => (
-                  <tr
+                visible.map((r) => (
+                  <GoalTableRow
                     key={r.id}
-                    className={cn(ROW_CLICK, isDimensionSelected(filters, by, r) && ROW_SELECTED)}
-                    onClick={() => patch((f) => dimensionPatch(f, by, r, ix))}
-                  >
-                    <td className={TD}>
-                      <span className={r.person ? PERSON : NAME}>{r.name}</span>
-                      <span className={SUB}>{r.sub}</span>
-                    </td>
-                    <td className={cn(TD, "text-right")}>
-                      <TowerTooltip
-                        title="Recaudo"
-                        rows={[{ key: "v", color, label: "Valor", value: full(r.collected) }]}
-                      >
-                        <span className={AMOUNT}>{money(r.collected)}</span>
-                      </TowerTooltip>
-                    </td>
-                    <td className={cn(TD, "text-right", HIDE_SM)}>
-                      <span className={AMOUNT}>{money(r.goal)}</span>
-                    </td>
-                    <td className={cn(TD, "text-right")}>
-                      <span className={cn(AMOUNT, diffTone(r.diff))}>{money(r.diff, true)}</span>
-                    </td>
-                    <td className={TD}>
-                      <Avance
-                        collected={r.collected}
-                        goal={r.goal}
-                        forecast={r.forecast}
-                        pace={r.pace}
-                        color={color}
-                      />
-                    </td>
-                    <td className={cn(TD, "text-right")}>
-                      <TowerTooltip
-                        title="Forecast"
-                        rows={[
-                          { key: "rec", color, label: "Recaudado", value: money(r.collected) },
-                          {
-                            key: "in",
-                            color: withAlpha(color, 0.16),
-                            label: "Por entrar",
-                            value: money(r.forecast - r.collected)
-                          },
-                          {
-                            key: "dif",
-                            color: FOREGROUND,
-                            label: "Frente a la meta",
-                            value: money(r.forecast - r.goal, true)
-                          }
-                        ]}
-                      >
-                        <span className={AMOUNT}>{money(r.forecast)}</span>
-                      </TowerTooltip>
-                    </td>
-                  </tr>
+                    row={r}
+                    selected={isDimensionSelected(filters, by, r)}
+                    color={color}
+                    onSelect={select}
+                  />
                 ))
               ) : (
                 <tr>
@@ -233,6 +263,7 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
                   </td>
                 </tr>
               )}
+              {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
               {rows.length > 0 && (
                 <tr>
                   <td className={TD_TOTAL}>Total</td>

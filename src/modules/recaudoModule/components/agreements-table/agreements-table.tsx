@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
 
 import PanelCard from "@/components/ui/panel-card/panel-card";
@@ -15,13 +15,15 @@ import type {
 } from "@/types/collectionTower/ICollectionTower";
 import { AGREEMENT_VIEWS, LATE_DAYS_CRIT, TONE_TEXT } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
+import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { AgreementView } from "../../types";
 import { withAlpha } from "../../utils/chart";
-import { indexCatalogs } from "../../utils/filters";
+import { CatalogIndex, indexCatalogs } from "../../utils/filters";
 import { fecha, fechaCorta, full, money, plural } from "../../utils/format";
 import { agreementRows, clientName, clientSub, nextSort, sumBy } from "../../utils/rows";
 import { FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
+import SentinelRow from "../shared/sentinel-row";
 import {
   AMOUNT,
   EMPTY,
@@ -91,6 +93,75 @@ function DaysCell({ a }: { a: ITowerAgreement }) {
   return <span className="text-[10.5px] text-muted-foreground">a tiempo</span>;
 }
 
+// El saldo va en rojo si ya venció sin pagarse completo.
+const overdue = (a: ITowerAgreement) => a.balance > 0 && a.status !== "PENDING";
+
+interface AgreementRowProps {
+  a: ITowerAgreement;
+  ix: CatalogIndex;
+  statuses: Map<string, ITowerSeries>;
+  selected: boolean;
+  onToggle: (clientId: string) => void;
+}
+
+/** Una fila del detalle. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
+const AgreementRow = memo(function AgreementRow({
+  a,
+  ix,
+  statuses,
+  selected,
+  onToggle
+}: AgreementRowProps) {
+  return (
+    <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onToggle(a.clientId)}>
+      <td className={TD}>
+        <span className={NAME}>{clientName(ix, a.clientId)}</span>
+        <span className={SUB}>{clientSub(ix, a.clientId)}</span>
+      </td>
+      <td className={cn(TD, HIDE_SM)}>
+        <span className="block tabular-nums">{fecha(a.dueDate)}</span>
+        <span className={SUB}>
+          cargado {fechaCorta(a.loadedAt)}
+          {a.reschedules ? ` · reprog. ×${a.reschedules}` : ""}
+        </span>
+      </td>
+      <td className={TD}>
+        <DaysCell a={a} />
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <TowerTooltip
+          title="Acuerdo"
+          rows={[
+            { key: "a", color: FOREGROUND, label: "Acordado", value: full(a.agreed) },
+            {
+              key: "p",
+              color: statuses.get("FULFILLED")?.color,
+              label: "Pagado",
+              value: full(a.paid)
+            },
+            {
+              key: "s",
+              color: statuses.get("BROKEN")?.color,
+              label: "Saldo",
+              value: full(a.balance)
+            }
+          ]}
+        >
+          <span className="inline-block">
+            <span className={cn(AMOUNT, "block", overdue(a) && TONE_TEXT.crit)}>
+              {money(a.balance)}
+            </span>
+            <span className={SUB}>de {money(a.agreed)}</span>
+          </span>
+        </TowerTooltip>
+      </td>
+      <td className={TD}>
+        <StateChip status={statuses.get(a.status)} />
+      </td>
+    </tr>
+  );
+});
+
 /**
  * "Detalle de acuerdos". Por defecto, incumplidos y luego pendientes, por
  * monto. Con segmentos elegidos en el gráfico muestra sólo esos.
@@ -99,13 +170,19 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
   const { filters, patch, toggleClient } = useTowerFilters();
   const [view, setView] = useState<AgreementView>("all");
   const [sort, setSort] = useState<SortState | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const ix = indexCatalogs(data.catalogs);
-  const statuses = new Map(data.agreementStatuses.map((s) => [s.key, s]));
+  const statuses = useMemo(
+    () => new Map<string, ITowerSeries>(data.agreementStatuses.map((s) => [s.key, s])),
+    [data.agreementStatuses]
+  );
   const bySegments = filters.segments.length > 0;
-  const list = agreementRows(data.agreements, view, bySegments, sort, ix);
-  const balance = sumBy(list, (a) => a.balance);
-  // El saldo va en rojo si ya venció sin pagarse completo.
-  const overdue = (a: ITowerAgreement) => a.balance > 0 && a.status !== "PENDING";
+  const list = useMemo(
+    () => agreementRows(data.agreements, view, bySegments, sort, ix),
+    [data.agreements, view, bySegments, sort, ix]
+  );
+  const { visible, hasMore, sentinelRef } = useProgressiveRows(list, scrollRef);
+  const balance = useMemo(() => sumBy(list, (a) => a.balance), [list]);
 
   const changeView = (next: AgreementView) => {
     setView(next);
@@ -139,7 +216,7 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
       }
     >
       <div className="relative min-h-[360px] flex-1">
-        <div className="scrollbar-thin absolute inset-0 overflow-y-auto">
+        <div ref={scrollRef} className="scrollbar-thin absolute inset-0 overflow-y-auto">
           <table className={TABLE}>
             <thead className={THEAD}>
               <tr>
@@ -158,61 +235,16 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
             </thead>
             <tbody>
               {list.length ? (
-                list.map((a) => {
-                  const name = clientName(ix, a.clientId);
-                  return (
-                    <tr
-                      key={a.id}
-                      className={cn(ROW_CLICK, filters.search === name && ROW_SELECTED)}
-                      onClick={() => toggleClient(name)}
-                    >
-                      <td className={TD}>
-                        <span className={NAME}>{name}</span>
-                        <span className={SUB}>{clientSub(ix, a.clientId)}</span>
-                      </td>
-                      <td className={cn(TD, HIDE_SM)}>
-                        <span className="block tabular-nums">{fecha(a.dueDate)}</span>
-                        <span className={SUB}>
-                          cargado {fechaCorta(a.loadedAt)}
-                          {a.reschedules ? ` · reprog. ×${a.reschedules}` : ""}
-                        </span>
-                      </td>
-                      <td className={TD}>
-                        <DaysCell a={a} />
-                      </td>
-                      <td className={cn(TD, "text-right")}>
-                        <TowerTooltip
-                          title="Acuerdo"
-                          rows={[
-                            { key: "a", color: FOREGROUND, label: "Acordado", value: full(a.agreed) },
-                            {
-                              key: "p",
-                              color: statuses.get("FULFILLED")?.color,
-                              label: "Pagado",
-                              value: full(a.paid)
-                            },
-                            {
-                              key: "s",
-                              color: statuses.get("BROKEN")?.color,
-                              label: "Saldo",
-                              value: full(a.balance)
-                            }
-                          ]}
-                        >
-                          <span className="inline-block">
-                            <span className={cn(AMOUNT, "block", overdue(a) && TONE_TEXT.crit)}>
-                              {money(a.balance)}
-                            </span>
-                            <span className={SUB}>de {money(a.agreed)}</span>
-                          </span>
-                        </TowerTooltip>
-                      </td>
-                      <td className={TD}>
-                        <StateChip status={statuses.get(a.status)} />
-                      </td>
-                    </tr>
-                  );
-                })
+                visible.map((a) => (
+                  <AgreementRow
+                    key={a.id}
+                    a={a}
+                    ix={ix}
+                    statuses={statuses}
+                    selected={filters.client === a.clientId}
+                    onToggle={toggleClient}
+                  />
+                ))
               ) : (
                 <tr>
                   <td colSpan={COLUMNS.length} className={EMPTY}>
@@ -220,6 +252,7 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
                   </td>
                 </tr>
               )}
+              {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
               {list.length > 0 && (
                 <tr>
                   <td className={TD_TOTAL}>Total</td>

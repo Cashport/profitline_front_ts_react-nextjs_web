@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { Select } from "antd";
 import { ExternalLink } from "lucide-react";
 
@@ -9,11 +9,15 @@ import SortableTh from "@/modules/walletModule/components/shared/sortable-th";
 import StatusChip from "@/modules/walletModule/components/shared/status-chip";
 import type { SortState } from "@/modules/walletModule/types";
 import { cn } from "@/utils/utils";
-import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
+import type {
+  ICollectionTower,
+  ITowerUnappliedPayment
+} from "@/types/collectionTower/ICollectionTower";
 import { PNA_AGES, PNA_DAYS_CRIT, PNA_DAYS_WARN } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
+import { useProgressiveRows } from "../../hooks/use-progressive-rows";
 import type { PnaAge } from "../../types";
-import { indexCatalogs } from "../../utils/filters";
+import { CatalogIndex, indexCatalogs } from "../../utils/filters";
 import { fmt, fmtPaidAt, full, money, plural } from "../../utils/format";
 import {
   clientName,
@@ -24,6 +28,7 @@ import {
   unappliedRows
 } from "../../utils/rows";
 import ExcelButton from "../shared/excel-button";
+import SentinelRow from "../shared/sentinel-row";
 import {
   AMOUNT,
   EMPTY,
@@ -60,6 +65,73 @@ const ageTone = (days: number) =>
 
 const payments = (n: number) => plural(n, "pago", "pagos");
 
+interface UnappliedRowProps {
+  p: ITowerUnappliedPayment;
+  ix: CatalogIndex;
+  color: string;
+  selected: boolean;
+  onToggle: (clientId: string) => void;
+}
+
+/** Un pago. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
+const UnappliedRow = memo(function UnappliedRow({
+  p,
+  ix,
+  color,
+  selected,
+  onToggle
+}: UnappliedRowProps) {
+  const days = pendingDays(p);
+  const paid = fmtPaidAt(p.paidAt);
+  return (
+    <tr
+      className={cn(ROW_CLICK, selected && ROW_SELECTED)}
+      // El link abre el pago en otra pestaña; el resto de la fila filtra por el cliente.
+      onClick={(e) => {
+        if (!(e.target as HTMLElement).closest("a")) onToggle(p.clientId);
+      }}
+    >
+      <td className={TD}>
+        {p.url ? (
+          <a
+            href={p.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir el pago en Cashport"
+            className="inline-flex items-center gap-[5px] text-[11px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
+          >
+            {p.id}
+            <ExternalLink className="h-[11px] w-[11px]" />
+          </a>
+        ) : (
+          <span className="text-[11px] font-semibold tabular-nums">{p.id}</span>
+        )}
+      </td>
+      <td className={TD}>
+        <span className={NAME}>{clientName(ix, p.clientId)}</span>
+        <span className={SUB}>{clientSub(ix, p.clientId)}</span>
+      </td>
+      <td className={cn(TD, HIDE_SM)}>
+        <span className="block tabular-nums">{paid.date}</span>
+        <span className={SUB}>{paid.time ? `${paid.weekday} · ${paid.time}` : paid.weekday}</span>
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <StatusChip sev={ageTone(days)} className="rounded tabular-nums">
+          {`${days ? `${days} d ` : ""}${p.pendingHours % 24} h`}
+        </StatusChip>
+      </td>
+      <td className={cn(TD, "text-right")}>
+        <TowerTooltip
+          title="Pago sin aplicar"
+          rows={[{ key: "v", color, label: "Monto", value: full(p.amount) }]}
+        >
+          <span className={AMOUNT}>{money(p.amount)}</span>
+        </TowerTooltip>
+      </td>
+    </tr>
+  );
+});
+
 /**
  * "Pagos identificados sin aplicar (PNA)": cada pago con su tiempo pendiente,
  * filtros rápidos por coordinador (selección múltiple) y por antigüedad.
@@ -69,24 +141,30 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
   const [age, setAge] = useState<PnaAge>("all");
   const [coordinators, setCoordinators] = useState<string[]>([]);
   const [sort, setSort] = useState<SortState>({ col: "days", dir: "desc" });
+  const scrollRef = useRef<HTMLDivElement>(null);
   const ix = indexCatalogs(data.catalogs);
   const color = data.application.series.unapplied.color;
   const minDays = PNA_AGES.find((a) => a.id === age)?.minDays ?? null;
-  const { rows, byCoordinator, active } = unappliedRows(
-    data.unappliedPayments,
-    minDays,
-    coordinators,
-    sort,
-    ix
+  const { rows, byCoordinator, active } = useMemo(
+    () => unappliedRows(data.unappliedPayments, minDays, coordinators, sort, ix),
+    [data.unappliedPayments, minDays, coordinators, sort, ix]
   );
-  const total = sumBy(rows, (p) => p.amount);
-  const avgDays = total ? sumBy(rows, (p) => (p.amount * p.pendingHours) / 24) / total : 0;
+  const { visible, hasMore, sentinelRef } = useProgressiveRows(rows, scrollRef);
+  const { total, avgDays } = useMemo(() => {
+    const amount = sumBy(rows, (p) => p.amount);
+    return {
+      total: amount,
+      avgDays: amount ? sumBy(rows, (p) => (p.amount * p.pendingHours) / 24) / amount : 0
+    };
+  }, [rows]);
 
   const toggleCoordinator = (id: string) =>
     setCoordinators((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
   const hint = `${
-    active.length ? `${plural(active.length, "coordinador filtrando", "coordinadores filtrando")} · ` : ""
+    active.length
+      ? `${plural(active.length, "coordinador filtrando", "coordinadores filtrando")} · `
+      : ""
   }${payments(rows.length)} · ${money(total)}`;
 
   return (
@@ -149,7 +227,10 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
           })}
       </div>
 
-      <div className="scrollbar-thin max-h-[min(560px,calc(100vh_-_150px))] overflow-y-auto border-t border-border">
+      <div
+        ref={scrollRef}
+        className="scrollbar-thin max-h-[min(560px,calc(100vh_-_150px))] overflow-y-auto border-t border-border"
+      >
         <table className={TABLE}>
           <thead className={THEAD}>
             <tr>
@@ -168,61 +249,16 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
           </thead>
           <tbody>
             {rows.length ? (
-              rows.map((p) => {
-                const name = clientName(ix, p.clientId);
-                const days = pendingDays(p);
-                const paid = fmtPaidAt(p.paidAt);
-                return (
-                  <tr
-                    key={`${p.id}-${p.paidAt}`}
-                    className={cn(ROW_CLICK, filters.search === name && ROW_SELECTED)}
-                    // El link abre el pago en otra pestaña; el resto de la fila filtra por el cliente.
-                    onClick={(e) => {
-                      if (!(e.target as HTMLElement).closest("a")) toggleClient(name);
-                    }}
-                  >
-                    <td className={TD}>
-                      {p.url ? (
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Abrir el pago en Cashport"
-                          className="inline-flex items-center gap-[5px] text-[11px] font-semibold tabular-nums text-foreground underline-offset-2 hover:underline"
-                        >
-                          {p.id}
-                          <ExternalLink className="h-[11px] w-[11px]" />
-                        </a>
-                      ) : (
-                        <span className="text-[11px] font-semibold tabular-nums">{p.id}</span>
-                      )}
-                    </td>
-                    <td className={TD}>
-                      <span className={NAME}>{name}</span>
-                      <span className={SUB}>{clientSub(ix, p.clientId)}</span>
-                    </td>
-                    <td className={cn(TD, HIDE_SM)}>
-                      <span className="block tabular-nums">{paid.date}</span>
-                      <span className={SUB}>
-                        {paid.weekday} · {paid.time}
-                      </span>
-                    </td>
-                    <td className={cn(TD, "text-right")}>
-                      <StatusChip sev={ageTone(days)} className="rounded tabular-nums">
-                        {`${days ? `${days} d ` : ""}${p.pendingHours % 24} h`}
-                      </StatusChip>
-                    </td>
-                    <td className={cn(TD, "text-right")}>
-                      <TowerTooltip
-                        title="Pago sin aplicar"
-                        rows={[{ key: "v", color, label: "Monto", value: full(p.amount) }]}
-                      >
-                        <span className={AMOUNT}>{money(p.amount)}</span>
-                      </TowerTooltip>
-                    </td>
-                  </tr>
-                );
-              })
+              visible.map((p) => (
+                <UnappliedRow
+                  key={`${p.id}-${p.paidAt}`}
+                  p={p}
+                  ix={ix}
+                  color={color}
+                  selected={filters.client === p.clientId}
+                  onToggle={toggleClient}
+                />
+              ))
             ) : (
               <tr>
                 <td colSpan={COLUMNS.length} className={EMPTY}>
@@ -230,6 +266,7 @@ export default function UnappliedTable({ data }: { data: ICollectionTower }) {
                 </td>
               </tr>
             )}
+            {hasMore && <SentinelRow ref={sentinelRef} colSpan={COLUMNS.length} />}
             {rows.length > 0 && (
               <tr>
                 <td className={TD_TOTAL}>Total</td>

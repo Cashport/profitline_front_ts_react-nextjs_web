@@ -90,9 +90,13 @@ export const fechaCorta = (iso: string) => {
 /** "2026-09-28" → "Lun 28/09" (títulos de los tooltips por día). */
 export const diaLabel = (iso: string) => `${cap(WEEKDAYS[weekdayOf(iso)])} ${fechaCorta(iso)}`;
 
+/** El corte y los pagos se leen en hora de Colombia, no en la del navegador. */
+const TIME_ZONE = "America/Bogota";
+
 /** Corte de la foto: "28/09/2026, 05:00 p. m.". */
 export const fmtCutoff = (iso: string) =>
   new Date(iso).toLocaleString("es-CO", {
+    timeZone: TIME_ZONE,
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -100,12 +104,31 @@ export const fmtCutoff = (iso: string) =>
     minute: "2-digit"
   });
 
-/** Fecha y hora de un pago: { date: "27/09/2026", weekday: "dom", time: "14:05" }. */
+const BOGOTA_PARTS = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23"
+});
+
+/**
+ * Fecha (y hora, si la trae) de un pago: { date: "27/09/2026", weekday: "dom",
+ * time: "14:05" }. Los pagos del banco son sólo fecha ("YYYY-MM-DD"): time null.
+ */
 export const fmtPaidAt = (iso: string) => {
-  const d = new Date(iso);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return { date: fecha(iso), weekday: WEEKDAYS[weekdayOf(iso)], time: null };
+  }
+  const parts = Object.fromEntries(
+    BOGOTA_PARTS.formatToParts(new Date(iso)).map((part) => [part.type, part.value])
+  );
+  const day = `${parts.year}-${parts.month}-${parts.day}`;
   return {
-    date: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`,
-    weekday: WEEKDAYS[d.getDay()],
-    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`
+    date: fecha(day),
+    weekday: WEEKDAYS[weekdayOf(day)],
+    time: `${parts.hour}:${parts.minute}`
   };
 };

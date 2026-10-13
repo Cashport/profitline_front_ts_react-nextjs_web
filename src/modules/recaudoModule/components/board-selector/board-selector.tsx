@@ -1,6 +1,6 @@
 "use client";
 
-import { Dropdown, Tooltip } from "antd";
+import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,15 +12,15 @@ import { useTowerFilters } from "../../contexts/tower-filters-context";
 
 /**
  * Título del encabezado y selector de tableros del módulo ("cambiar tablero").
- * Con un solo tablero listo no hay a dónde cambiar: el selector se ve, pero no
- * abre. Se habilita solo al marcar `enabled` otro tablero en BOARDS.
+ * Lista todos los tableros de BOARDS: los que no tienen vista se pueden
+ * elegir y muestran "en diseño" (PendingBoard). El menú de antd se cierra al
+ * elegir, al hacer clic por fuera o con Esc, y se usa con teclado.
  */
 export default function BoardSelector() {
   const router = useRouter();
   const { resolvedTheme } = useWalletTheme();
   const { filters, patch } = useTowerFilters();
   const active = BOARDS.find((b) => b.id === filters.board) ?? BOARDS[0];
-  const selectable = BOARDS.filter((b) => b.enabled).length > 1;
 
   const items: MenuProps["items"] = [
     {
@@ -29,7 +29,6 @@ export default function BoardSelector() {
       label: "Tableros de recaudo",
       children: BOARDS.map((b) => ({
         key: b.id,
-        disabled: !b.enabled,
         label: (
           <span className="grid grid-cols-[1fr_16px] items-center gap-x-2.5 py-0.5">
             <b className="text-[12.5px] font-semibold">{b.name}</b>
@@ -51,31 +50,22 @@ export default function BoardSelector() {
     else patch({ board: board.id });
   };
 
-  const trigger = (
-    <button
-      type="button"
-      disabled={!selectable}
-      aria-haspopup="menu"
-      className="-ml-1.5 flex items-center gap-2 rounded-md border-0 bg-transparent px-1.5 py-1 text-base font-bold text-foreground enabled:cursor-pointer enabled:hover:bg-muted disabled:cursor-default"
-    >
-      {active.name}
-      <ChevronDown className={cn("h-4 w-4 text-muted-foreground", !selectable && "opacity-40")} />
-    </button>
-  );
-
   return (
     <h1 className="m-0">
-      {selectable ? (
-        <Dropdown
-          trigger={["click"]}
-          rootClassName={cn("wallet-scope", resolvedTheme === "dark" && "dark")}
-          menu={{ items, selectable: true, selectedKeys: [active.id], onClick: choose }}
+      <Dropdown
+        trigger={["click"]}
+        rootClassName={cn("wallet-scope", resolvedTheme === "dark" && "dark")}
+        menu={{ items, selectable: true, selectedKeys: [active.id], onClick: choose }}
+      >
+        <button
+          type="button"
+          aria-haspopup="menu"
+          className="-ml-1.5 flex cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-1.5 py-1 text-base font-bold text-foreground hover:bg-muted"
         >
-          {trigger}
-        </Dropdown>
-      ) : (
-        <Tooltip title="Más tableros próximamente">{trigger}</Tooltip>
-      )}
+          {active.name}
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </button>
+      </Dropdown>
     </h1>
   );
 }

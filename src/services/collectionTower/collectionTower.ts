@@ -8,10 +8,12 @@ import {
   TowerExportTable
 } from "@/types/collectionTower/ICollectionTower";
 
-/* Torre de control de recaudo. Las rutas son la propuesta de contrato (ver
-   ICollectionTower): confirmarlas con backend antes de apagar USE_TOWER_MOCK. */
+/* Torre de control de recaudo (contrato en ICollectionTower). */
 
 export const towerPath = (projectId: number) => `/collection/tower/project/${projectId}`;
+
+/** Catálogos de la torre (opciones de los filtros y nombres): van aparte del tablero. */
+export const towerCatalogsPath = (projectId: number) => `${towerPath(projectId)}?part=catalogs`;
 
 /**
  * Serializa los filtros del tablero. Sólo va lo que tiene valor, así un campo
@@ -25,6 +27,7 @@ export const buildTowerQuery = (query: ICollectionTowerQuery): string => {
   if (query.coordinator) params.set("coordinator", query.coordinator);
   if (query.executive) params.set("executive", query.executive);
   if (query.channel) params.set("channel", query.channel);
+  if (query.client) params.set("client", query.client);
   const search = query.search.trim();
   if (search) params.set("search", search);
   if (query.aging) params.set("aging", query.aging);
@@ -69,7 +72,11 @@ export const downloadCollectionTowerExcel = async (
     });
 
     const disposition = (response.headers["content-disposition"] as string) || "";
-    const filename = disposition.match(/filename="?([^";]+)"?/)?.[1] || fallbackName;
+    const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+    const filename =
+      (encoded && decodeURIComponent(encoded)) ||
+      disposition.match(/filename="?([^";]+)"?/)?.[1] ||
+      fallbackName;
 
     const url = window.URL.createObjectURL(response.data as Blob);
     const link = document.createElement("a");

@@ -10,6 +10,7 @@ import type {
   ICollectionTower,
   ITowerAgreementSegment
 } from "@/types/collectionTower/ICollectionTower";
+import { STATUS_PLURAL } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { useContainerSize } from "../../hooks/use-container-size";
 import { nice } from "../../utils/chart";
@@ -30,7 +31,7 @@ import {
   WEEK_TICK
 } from "../shared/chart-styles";
 import { LegendItem, Swatch } from "../shared/legend";
-import TowerTooltip, { TipContentProps, TipRow } from "../shared/tower-tooltip";
+import TowerTooltip, { TipContentProps, TipRow, TowerPopover } from "../shared/tower-tooltip";
 
 /** Las líneas guía van cada $500 M cuando el máximo lo permite. */
 const GUIDE_STEP = 5e8;
@@ -84,8 +85,18 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
     const day = days[i];
     if (!day.count) return;
     const idx = sel.findIndex((x) => x.date === day.date && x.status === status);
+    const wholeDay = sel.findIndex((x) => x.date === day.date && x.status === null);
     let next: ITowerAgreementSegment[];
-    if (e.shiftKey) {
+    if (e.shiftKey && status !== null && wholeDay >= 0) {
+      // El día completo ya estaba: quitar un estado deja elegidos los demás de ese día.
+      const others = agreementStatuses
+        .filter((s) => s.key !== status && day.values[s.key])
+        .map((s) => ({ date: day.date, status: s.key }));
+      next = [...sel.filter((_, j) => j !== wholeDay), ...others];
+    } else if (e.shiftKey && status === null && idx < 0) {
+      // El día completo absorbe los estados sueltos de ese día (sin duplicarlos).
+      next = [...sel.filter((x) => x.date !== day.date), { date: day.date, status: null }];
+    } else if (e.shiftKey) {
       next = idx >= 0 ? sel.filter((_, j) => j !== idx) : [...sel, { date: day.date, status }];
     } else {
       next = idx >= 0 && sel.length === 1 ? [] : [{ date: day.date, status }];
@@ -99,7 +110,7 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
       .map((s) => ({
         key: s.key,
         color: s.color,
-        label: `${s.label}s (${day.values[s.key]?.count ?? 0})`,
+        label: `${STATUS_PLURAL[s.key]} (${day.values[s.key]?.count ?? 0})`,
         value: money(day.values[s.key]?.amount ?? 0)
       }));
     if (!rows.length) rows.push({ key: "none", label: "Sin compromisos", value: "—" });
@@ -263,7 +274,7 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
       return {
         key: s.key,
         color: s.color,
-        label: `${s.label}s${broken ? " · saldo" : ""} (${group.length})`,
+        label: `${STATUS_PLURAL[s.key]}${broken ? " · saldo" : ""} (${group.length})`,
         value: money(sumBy(group, (a) => (broken ? a.balance : a.agreed)))
       };
     })
@@ -276,7 +287,7 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
       hint="clic para filtrar · Shift + clic para sumar varios"
       flush
       actions={
-        <TowerTooltip
+        <TowerPopover
           title={`Resumen · ${month}`}
           rows={summaryRows}
           total={{
@@ -287,7 +298,7 @@ export default function AgreementsChart({ data }: { data: ICollectionTower }) {
           <Button size="small" icon={<BarChart3 className="h-3.5 w-3.5" />}>
             Resumen
           </Button>
-        </TowerTooltip>
+        </TowerPopover>
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-2.5 text-[10.5px] text-foreground/80">

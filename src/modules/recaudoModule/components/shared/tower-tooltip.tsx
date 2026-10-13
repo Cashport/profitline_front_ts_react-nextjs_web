@@ -1,6 +1,6 @@
 "use client";
 
-import { Tooltip } from "antd";
+import { Popover, Tooltip } from "antd";
 import type { TooltipProps } from "antd";
 
 import { cn } from "@/utils/utils";
@@ -127,5 +127,30 @@ export default function TowerTooltip({
     >
       {children}
     </Tooltip>
+  );
+}
+
+/**
+ * El mismo contenido, pero se abre con clic (botón "Resumen" de acuerdos):
+ * queda abierto para leerlo y se cierra con clic por fuera o Esc.
+ */
+export function TowerPopover({
+  children,
+  placement = "bottomRight",
+  ...content
+}: Omit<TowerTooltipProps, "delay">) {
+  const { resolvedTheme } = useWalletTheme();
+
+  return (
+    <Popover
+      content={<TipContent {...content} />}
+      trigger="click"
+      placement={placement}
+      arrow={false}
+      rootClassName={resolvedTheme === "dark" ? "dark" : undefined}
+      overlayInnerStyle={SURFACE}
+    >
+      {children}
+    </Popover>
   );
 }

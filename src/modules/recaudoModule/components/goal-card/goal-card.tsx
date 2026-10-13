@@ -31,6 +31,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
       open ? s.forecast : 0
     ) * 1.02 || 1;
   const [value, unit] = splitUnit(money(s.collected));
+  // Ritmo esperado a hoy: lo que un mes típico ya llevaría de la meta al día del
+  // corte. El ritmo total es el de los clientes ponderado por su meta.
+  const goalOfClients = data.clients.reduce((acc, c) => acc + c.goal, 0);
+  const pace = goalOfClients
+    ? data.clients.reduce((acc, c) => acc + c.pace * c.goal, 0) / goalOfClients
+    : 0;
+  const expected = open && pace > 0 ? s.goal * pace : null;
 
   const forecastRows: TipRow[] = [
     { key: "rec", color: cs.color, label: "Recaudado", value: money(s.collected), tag: ofGoal(s.collected) },
@@ -173,6 +180,31 @@ export default function GoalCard({ data, className }: GoalCardProps) {
               }
             : null
         }
+        pace={
+          expected === null
+            ? null
+            : {
+                value: expected,
+                tip: {
+                  title: "Ritmo a hoy",
+                  rows: [
+                    {
+                      key: "esp",
+                      color: MUTED,
+                      label: `Esperado al día ${period.cutoffDay}`,
+                      value: money(expected)
+                    },
+                    { key: "rec", color: cs.color, label: "Recaudado", value: money(s.collected) },
+                    {
+                      key: "dif",
+                      label: "Diferencia",
+                      value: money(s.collected - expected, true),
+                      tone: s.collected >= expected ? "pos" : "neg"
+                    }
+                  ]
+                }
+              }
+        }
         goal={{
           value: s.goal,
           tip: {
@@ -202,6 +234,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
           label={bs.label}
           value={money(s.brokenAgreements)}
         />
+        {expected !== null && (
+          <span className="inline-flex items-center gap-[5px] whitespace-nowrap">
+            <i className="inline-block h-[9px] w-0 border-l-2 border-dotted border-muted-foreground" />
+            Ritmo a hoy{" "}
+            <b className="font-bold tabular-nums text-foreground">{money(expected)}</b>
+          </span>
+        )}
         <span className="ml-auto inline-flex items-center gap-[5px] whitespace-nowrap">
           {open ? (
             <>

@@ -17,6 +17,7 @@ const INITIAL: TowerFilters = {
   coordinator: null,
   executive: null,
   channel: null,
+  client: null,
   search: "",
   aging: null,
   segments: []
@@ -29,8 +30,8 @@ interface TowerFiltersContextValue {
   patch: (patch: Patch) => void;
   /** "Limpiar filtros": quita todo menos el tablero y el periodo. */
   clear: () => void;
-  /** Clic en un cliente: filtra por él o, si ya estaba, quita el filtro. */
-  toggleClient: (name: string) => void;
+  /** Clic en un cliente (por id): filtra por él o, si ya estaba, quita el filtro. */
+  toggleClient: (clientId: string) => void;
   /** Clic en un tramo de "Recaudo por tramo". */
   toggleAging: (key: string) => void;
 }
@@ -51,11 +52,13 @@ export function TowerFiltersProvider({ children }: { children: ReactNode }) {
           coordinator: null,
           executive: null,
           channel: null,
+          client: null,
           search: "",
           aging: null,
           segments: []
         }),
-      toggleClient: (name: string) => patch((f) => ({ search: f.search === name ? "" : name })),
+      toggleClient: (clientId: string) =>
+        patch((f) => (f.client === clientId ? { client: null } : { client: clientId, search: "" })),
       toggleAging: (key: string) => patch((f) => ({ aging: f.aging === key ? null : key }))
     };
   }, []);

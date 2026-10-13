@@ -10,16 +10,15 @@ import type {
 } from "./types";
 
 /**
- * Mientras no exista el API de la torre, el tablero lee los datos de ejemplo
- * (utils/tower-mock), que tienen la misma forma que la respuesta real.
- * OJO: con true, todo el que entre a /dashboard ve cifras de ejemplo.
+ * Datos de ejemplo (utils/tower-mock, misma forma que la respuesta real) en
+ * vez del API: sólo para desarrollar sin backend (NEXT_PUBLIC_TOWER_MOCK=true).
  */
-export const USE_TOWER_MOCK = true;
+export const USE_TOWER_MOCK = process.env.NEXT_PUBLIC_TOWER_MOCK === "true";
 
 /**
- * Tableros del encabezado ("cambiar tablero"). El selector se habilita sólo
- * cuando hay más de uno listo; uno en otra ruta (la cartera en /wallet, por
- * ejemplo) entra con `href`.
+ * Tableros del encabezado ("cambiar tablero"). Los que no tienen vista se
+ * pueden elegir y muestran "en diseño"; uno en otra ruta entra con `href`.
+ * Para agregar uno: su vista en BOARD_VIEWS (recaudo-view) y `enabled: true`.
  */
 export const BOARDS: Board[] = [
   {
@@ -27,6 +26,24 @@ export const BOARDS: Board[] = [
     name: "Torre de control de recaudo",
     description: "Meta, forecast, acuerdos de pago y PNA del mes",
     enabled: true
+  },
+  {
+    id: "tramo",
+    name: "Cartera por cliente y tramo",
+    description: "Saldo por edad de mora y cliente",
+    enabled: false
+  },
+  {
+    id: "apl",
+    name: "Aplicación de pagos",
+    description: "Pagos aplicados, PNA y tiempos de aplicación",
+    enabled: false
+  },
+  {
+    id: "nov",
+    name: "Novedades",
+    description: "Novedades abiertas por responsable y antigüedad",
+    enabled: false
   }
 ];
 
@@ -65,6 +82,13 @@ export const CURVE_REFERENCES: { value: CurveReference; label: string }[] = [
   { value: "both", label: "Ambas" }
 ];
 
+/** Estados en plural (chips y resumen): no se arma sumando "s" a la etiqueta del API. */
+export const STATUS_PLURAL: Record<AgreementStatus, string> = {
+  FULFILLED: "Cumplidos",
+  BROKEN: "Incumplidos",
+  PENDING: "Pendientes"
+};
+
 /** Orden del detalle de acuerdos: incumplidos → pendientes → cumplidos. */
 export const STATUS_ORDER: Record<AgreementStatus, number> = {
   BROKEN: 0,
@@ -97,4 +121,4 @@ export const TONE_TEXT: Record<Tone, string> = {
 };
 
 export const FOOT_NOTE =
-  "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas.";
+  "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes + saldo de los acuerdos incumplidos. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas.";

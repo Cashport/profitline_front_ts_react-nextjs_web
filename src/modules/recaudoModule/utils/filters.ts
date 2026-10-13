@@ -9,6 +9,7 @@ import type {
   ITowerCoordinator,
   ITowerExecutive
 } from "@/types/collectionTower/ICollectionTower";
+import { STATUS_PLURAL } from "../constants";
 import type { Grouping, TowerFilters } from "../types";
 import { WEEKDAYS, fechaCorta, weekdayOf } from "./format";
 
@@ -40,11 +41,19 @@ export const indexCatalogs = (catalogs: ITowerCatalogs): CatalogIndex => {
   return ix;
 };
 
+/* Gerencia, coordinador, ejecutivo y canal son campos sueltos del cliente.
+   Los "padres" de los catálogos (el coordinador más frecuente de un
+   ejecutivo, la gerencia más frecuente de un coordinador) sólo sirven para
+   las cascadas del panel; agrupar y filtrar va por los campos del cliente. */
+
 export const coordinatorOf = (ix: CatalogIndex, executiveId: string) =>
   ix.executives.get(executiveId)?.coordinatorId ?? "";
 
 export const managementOf = (ix: CatalogIndex, coordinatorId: string) =>
   ix.coordinators.get(coordinatorId)?.managementId ?? "";
+
+export const coordinatorOfClient = (ix: CatalogIndex, clientId: string) =>
+  ix.clients.get(clientId)?.coordinatorId ?? "";
 
 /* ---------- cascadas del panel de filtros ---------- */
 
@@ -95,7 +104,7 @@ export const executivePatch = (
 
 /* ---------- clic en filas agrupadas ---------- */
 
-/** Fila de una tabla agrupada: `id` del grupo y `name` (por cliente se filtra por nombre). */
+/** Fila de una tabla agrupada: `id` del grupo (por cliente, el id del cliente) y `name`. */
 export interface DimensionRow {
   id: string;
   name: string;
@@ -108,7 +117,9 @@ export const dimensionPatch = (
   row: DimensionRow,
   ix: CatalogIndex
 ): Partial<TowerFilters> => {
-  if (by === "client") return { search: f.search === row.name ? "" : row.name };
+  if (by === "client") {
+    return f.client === row.id ? { client: null } : { client: row.id, search: "" };
+  }
   if (by === "executive") return f.executive === row.id ? { executive: null } : executivePatch(row.id, ix);
   if (by === "channel") return { channel: f.channel === row.id ? null : row.id };
   return f.coordinator === row.id ? { coordinator: null } : coordinatorPatch(f, row.id, ix);
@@ -117,25 +128,22 @@ export const dimensionPatch = (
 /** ¿La fila es el filtro activo? */
 export const isDimensionSelected = (f: TowerFilters, by: Grouping, row: DimensionRow) =>
   by === "client"
-    ? f.search === row.name
+    ? f.client === row.id
     : by === "executive"
       ? f.executive === row.id
       : by === "channel"
         ? f.channel === row.id
         : f.coordinator === row.id;
 
-/** Clientes al alcance de la gerencia, el coordinador y el ejecutivo elegidos: sugerencias del buscador. */
-export const clientsInScope = (catalogs: ITowerCatalogs, f: TowerFilters) => {
-  const ix = indexCatalogs(catalogs);
-  return catalogs.clients.filter((c) => {
-    const coordinator = coordinatorOf(ix, c.executiveId);
-    return (
+/** Clientes al alcance de los filtros de dimensión elegidos: sugerencias del buscador. */
+export const clientsInScope = (catalogs: ITowerCatalogs, f: TowerFilters) =>
+  catalogs.clients.filter(
+    (c) =>
       (!f.executive || c.executiveId === f.executive) &&
-      (!f.coordinator || coordinator === f.coordinator) &&
-      (!f.management || managementOf(ix, coordinator) === f.management)
-    );
-  });
-};
+      (!f.coordinator || c.coordinatorId === f.coordinator) &&
+      (!f.management || c.managementId === f.management) &&
+      (!f.channel || c.channelId === f.channel)
+  );
 
 /** Sugerencias del buscador: el nombre (que es lo que filtra) y el NIT para buscar también por él. */
 export const clientOptions = (catalogs: ITowerCatalogs, f: TowerFilters) =>
@@ -150,7 +158,7 @@ export const matchesClient = (input: string, option?: { value?: unknown; nit?: s
 /* ---------- chips ---------- */
 
 export const activeFilterCount = (f: TowerFilters) =>
-  [f.management, f.coordinator, f.executive, f.channel, f.search].filter(Boolean).length +
+  [f.management, f.coordinator, f.executive, f.channel, f.client, f.search].filter(Boolean).length +
   (f.aging !== null ? 1 : 0) +
   (f.segments.length > 0 ? 1 : 0);
 
@@ -198,7 +206,15 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
       remove: { channel: null }
     });
   }
-  if (f.search) chips.push({ key: "search", label: "Cliente", value: f.search, remove: { search: "" } });
+  if (f.client) {
+    chips.push({
+      key: "client",
+      label: "Cliente",
+      value: name("clients", f.client),
+      remove: { client: null }
+    });
+  }
+  if (f.search) chips.push({ key: "search", label: "Búsqueda", value: f.search, remove: { search: "" } });
   if (f.aging !== null) {
     chips.push({
       key: "aging",
@@ -209,13 +225,13 @@ export const filterChips = (f: TowerFilters, data?: ICollectionTower): FilterChi
   }
   if (f.segments.length) {
     const [s] = f.segments;
-    const status = data?.agreementStatuses.find((x) => x.key === s.status)?.label;
+    const status = s.status ? STATUS_PLURAL[s.status] : null;
     chips.push({
       key: "segments",
       label: "Acuerdos",
       value:
         f.segments.length === 1
-          ? `${status ? `${status}s · ` : ""}${WEEKDAYS[weekdayOf(s.date)]} ${fechaCorta(s.date)}`
+          ? `${status ? `${status} · ` : ""}${WEEKDAYS[weekdayOf(s.date)]} ${fechaCorta(s.date)}`
           : `${f.segments.length} segmentos`,
       remove: { segments: [] }
     });

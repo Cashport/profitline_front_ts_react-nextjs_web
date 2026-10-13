@@ -1,13 +1,13 @@
 import type { ICollectionTowerQuery } from "@/types/collectionTower/ICollectionTower";
 
-/** Tableros del módulo de recaudo. Hoy sólo la torre; se agregan aquí y en BOARDS. */
-export type BoardId = "torre";
+/** Tableros del módulo de recaudo (BOARDS). Sólo la torre tiene vista; los demás, "en diseño". */
+export type BoardId = "torre" | "tramo" | "apl" | "nov";
 
 export interface Board {
   id: BoardId;
   name: string;
   description: string;
-  /** Sin vista lista: el selector la muestra deshabilitada y, si llega a elegirse, sale PendingBoard. */
+  /** Sin vista lista: al elegirlo sale PendingBoard ("en diseño"). */
   enabled: boolean;
   /** Tablero que vive en otra ruta (p. ej. la cartera en /wallet): elegirlo navega allá. */
   href?: string;

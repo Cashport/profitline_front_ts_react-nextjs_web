@@ -9,7 +9,7 @@ import type {
 import type { SortState } from "@/modules/walletModule/types";
 import { DUE_SOON_DAYS, STATUS_ORDER } from "../constants";
 import type { AgreementView, Grouping } from "../types";
-import { CatalogIndex, coordinatorOf, managementOf } from "./filters";
+import { CatalogIndex, coordinatorOf, coordinatorOfClient, managementOf } from "./filters";
 import { plural } from "./format";
 
 export const sumBy = <T>(rows: T[], f: (row: T) => number) =>
@@ -55,17 +55,16 @@ export const clientSub = (ix: CatalogIndex, clientId: string) => {
   return `${executive} · ${ix.channels.get(c.channelId)?.name ?? "Sin canal"}`;
 };
 
-export const coordinatorOfClient = (ix: CatalogIndex, clientId: string) =>
-  coordinatorOf(ix, ix.clients.get(clientId)?.executiveId ?? "");
+export { coordinatorOfClient };
 
-/** Llave del grupo de un cliente en la agrupación `by`. */
+/** Llave del grupo de un cliente en la agrupación `by`: sus propios campos. */
 const groupKeyOf = (by: Grouping, clientId: string, ix: CatalogIndex) => {
   if (by === "client") return clientId;
   const c = ix.clients.get(clientId);
   if (!c) return "";
   if (by === "executive") return c.executiveId;
   if (by === "channel") return c.channelId;
-  return coordinatorOf(ix, c.executiveId);
+  return c.coordinatorId;
 };
 
 export const groupName = (by: Grouping, id: string, ix: CatalogIndex) => {

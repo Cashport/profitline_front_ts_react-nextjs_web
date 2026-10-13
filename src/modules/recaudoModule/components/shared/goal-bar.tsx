@@ -21,6 +21,8 @@ interface GoalBarProps {
   forecast?: { from: number; to: number; color: string; tip?: TipContentProps } | null;
   /** Marca vertical de la meta. */
   goal?: { value: number; tip?: TipContentProps } | null;
+  /** Marca punteada de lo que un mes típico ya llevaría a hoy (ritmo esperado). */
+  pace?: { value: number; tip?: TipContentProps } | null;
   /** Alto en px. */
   height: number;
   /** Cuánto sobresale la marca de la meta arriba y abajo, en px. */
@@ -43,6 +45,7 @@ export default function GoalBar({
   segments,
   forecast,
   goal,
+  pace,
   height,
   goalOverhang = 4,
   dashWidth = 1.5,
@@ -85,6 +88,21 @@ export default function GoalBar({
             }}
           />,
           forecast.tip
+        )}
+
+      {pace &&
+        pace.value > 0 &&
+        withTip(
+          <span
+            className="absolute w-0 border-l-2 border-dotted border-muted-foreground"
+            style={{
+              left: pctOf(pace.value),
+              top: -goalOverhang + 1,
+              bottom: -goalOverhang + 1,
+              transform: "translateX(-1px)"
+            }}
+          />,
+          pace.tip
         )}
 
       {goal &&

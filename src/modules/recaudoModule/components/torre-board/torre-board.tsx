@@ -1,6 +1,7 @@
 "use client";
 
-import { Alert } from "antd";
+import { memo } from "react";
+import { Alert, Empty } from "antd";
 
 import { cn } from "@/utils/utils";
 import { useCollectionTower } from "@/hooks/useCollectionTower";
@@ -30,7 +31,16 @@ const PAIR =
  * Corte de la foto. Viene del API (mes cerrado: el último día a las 11:59 p. m.):
  * no se toma del reloj del navegador.
  */
-function Cutoff({ cutoffAt, refreshing }: { cutoffAt?: string; refreshing: boolean }) {
+function Cutoff({
+  cutoffAt,
+  refreshing,
+  noProject
+}: {
+  cutoffAt?: string;
+  refreshing: boolean;
+  noProject: boolean;
+}) {
+  if (noProject) return null;
   return (
     <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
       <span
@@ -44,7 +54,11 @@ function Cutoff({ cutoffAt, refreshing }: { cutoffAt?: string; refreshing: boole
   );
 }
 
-function TorreContent({ data }: { data: ICollectionTower }) {
+/**
+ * El tablero con datos. memo: escribir en el buscador o abrir los filtros
+ * re-renderiza TorreBoard sin cambiar `data`, y el tablero no tiene que repintarse.
+ */
+const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTower }) {
   return (
     <>
       <section className="grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)]">
@@ -67,20 +81,32 @@ function TorreContent({ data }: { data: ICollectionTower }) {
       </p>
     </>
   );
-}
+});
 
-/** Tablero "Torre de control de recaudo": meta, forecast, acuerdos de pago y PNA del mes. */
+/**
+ * Tablero "Torre de control de recaudo": meta, forecast, acuerdos de pago y PNA del mes.
+ *
+ * Al cambiar un filtro el tablero pasa al skeleton hasta que llega el nuevo
+ * (no se repinta el anterior con los filtros nuevos). El encabezado sigue con
+ * el último tablero recibido: los catálogos y periodos no se apagan.
+ */
 export default function TorreBoard() {
   const { filters } = useTowerFilters();
-  const { data, loading, validating, error } = useCollectionTower(filters);
-  const refreshing = validating && !loading;
+  const { data, lastData, loading, refreshing, error, noProject, pending } =
+    useCollectionTower(filters);
 
   return (
     <>
       <RecaudoHeader
-        info={<Cutoff cutoffAt={data?.cutoffAt} refreshing={refreshing} />}
-        tools={<TorreToolbar data={data} />}
-        below={<FilterChips data={data} />}
+        info={
+          <Cutoff
+            cutoffAt={lastData?.cutoffAt}
+            refreshing={loading || refreshing}
+            noProject={noProject}
+          />
+        }
+        tools={<TorreToolbar data={lastData} />}
+        below={<FilterChips data={lastData} />}
       />
 
       {error && (
@@ -92,13 +118,24 @@ export default function TorreBoard() {
         />
       )}
 
+      {pending && (
+        <Alert
+          type="info"
+          showIcon
+          message="Estamos preparando la foto de recaudo"
+          description="Es la primera vez que se abre en este proyecto: el tablero aparece solo en unos segundos."
+        />
+      )}
+
+      {noProject && (
+        <Empty
+          className="rounded-xl bg-card p-10 shadow-sm"
+          description="Elige un proyecto para ver la torre de control de recaudo."
+        />
+      )}
+
       {data ? (
-        <div
-          className={cn(
-            "flex flex-col gap-3.5 transition-opacity",
-            refreshing && "opacity-70"
-          )}
-        >
+        <div className={cn("flex flex-col gap-3.5 transition-opacity", refreshing && "opacity-70")}>
           <TorreContent data={data} />
         </div>
       ) : (

@@ -1,16 +1,15 @@
 /* ============================================================
-   Respuesta simulada de la torre (ICollectionTower) — TEMPORAL.
+   Respuesta simulada de la torre (ICollectionTower), sólo para desarrollar
+   sin backend (NEXT_PUBLIC_TOWER_MOCK=true).
    ------------------------------------------------------------
-   Port de data/reglas.js del prototipo y de los cálculos que hacían sus
-   componentes. Mientras el API no exista es la fuente del tablero, y es la
-   definición de referencia de cada cifra para el backend: las reglas se
-   pueden mover allá, pero su definición no puede cambiar.
+   Port de data/reglas.js del prototipo con las reglas de la socialización
+   del 8/10/2026, las mismas del backend (collectionTowerCalc.ts):
    - Forecast = recaudo al corte + saldo de los acuerdos PENDIENTES que
-     vencen antes del cierre (en mes cerrado, = recaudo). El de un grupo es
-     la suma del de sus clientes.
-   - Estados: Pendiente (no ha llegado la fecha, o vence hoy sin pago
-     completo) · Cumplido (pagado completo) · Incumplido (venció sin pago
-     completo; los parciales cuentan aquí).
+     vencen antes del cierre + saldo de los INCUMPLIDOS (en mes cerrado,
+     = recaudo). El de un grupo es la suma del de sus clientes.
+   - Estados: Cumplido (pagado completo, aunque sea antes de la fecha) ·
+     Pendiente (no ha llegado la fecha, o vence hoy con el mes en curso) ·
+     Incumplido (venció sin pago completo; los parciales cuentan aquí).
    ============================================================ */
 import type {
   AgreementStatus,
@@ -108,17 +107,18 @@ interface Agreement extends MockAgreement {
   atraso: number;
 }
 
-function estadoAcuerdo(a: MockAgreement, cut: Date): AgreementStatus {
-  if (a.comp > cut) return "PENDING";
+function estadoAcuerdo(a: MockAgreement, cut: Date, open: boolean): AgreementStatus {
   if (a.pag >= a.v) return "FULFILLED";
-  if (a.comp.getTime() === cut.getTime()) return "PENDING";
+  if (a.comp > cut) return "PENDING";
+  if (a.comp.getTime() === cut.getTime() && open) return "PENDING";
   return "BROKEN";
 }
 
 function acuerdos(cls: MockClient[], mi: number): Agreement[] {
   const cut = fdate(mi, corte(mi));
+  const open = corte(mi) < MOCK_MONTHS[mi].dim;
   return acuerdosDe(cls, mi).map((a) => {
-    const st = estadoAcuerdo(a, cut);
+    const st = estadoAcuerdo(a, cut, open);
     return {
       ...a,
       st,
@@ -136,6 +136,7 @@ interface MockFilters {
   c: string;
   e: string;
   kam: string;
+  client: string;
   q: string;
   tramo: number | null;
   sel: { k: string; st: AgreementStatus | null }[];
@@ -150,6 +151,7 @@ function filtrarClientes(S: MockFilters): MockClient[] {
     if (S.kam && c.kam !== S.kam) return false;
     if (S.c && e.c !== S.c) return false;
     if (S.g && co.g !== S.g) return false;
+    if (S.client && c.id !== S.client) return false;
     if (q && !(c.n.toLowerCase().includes(q) || c.nit.includes(q))) return false;
     return true;
   });
@@ -256,13 +258,18 @@ function analizar(cls: MockClient[], mi: number, tf: TramoFactor): Analisis {
 
 /**
  * FORECAST = recaudo al corte + saldo de los acuerdos PENDIENTES que vencen
- * antes del cierre. En meses cerrados, forecast = recaudo. Reescala la
- * proyección para que termine en el forecast.
+ * antes del cierre + saldo de los INCUMPLIDOS. En meses cerrados, forecast =
+ * recaudo. Reescala la proyección para que termine en el forecast.
  */
 function forecastPorAcuerdos(A: Analisis, acu: Agreement[], mi: number): Analisis {
   if (A.D >= A.dim) return A;
   const fin = fdate(mi, MOCK_MONTHS[mi].dim);
-  const fc = A.actual + sum(acu.filter((a) => a.st === "PENDING" && a.comp <= fin), (a) => a.saldo);
+  const fc =
+    A.actual +
+    sum(
+      acu.filter((a) => (a.st === "PENDING" && a.comp <= fin) || a.st === "BROKEN"),
+      (a) => a.saldo
+    );
   const old = A.forecast;
   const n = A.proy.length - 1;
   A.proy =
@@ -353,6 +360,7 @@ export function buildTowerMock(query: ICollectionTowerQuery): ICollectionTower {
     c: query.coordinator ?? "",
     e: query.executive ?? "",
     kam: query.channel ?? "",
+    client: query.client ?? "",
     q: query.search,
     tramo: tramo >= 0 ? tramo : null,
     sel: query.segments.map((s) => ({ k: s.date, st: s.status }))
@@ -448,7 +456,9 @@ export function buildTowerMock(query: ICollectionTowerQuery): ICollectionTower {
         name: c.n,
         nit: c.nit,
         executiveId: c.e,
-        channelId: c.kam
+        channelId: c.kam,
+        coordinatorId: E[c.e].c,
+        managementId: C[E[c.e].c].g
       }))
     },
     summary: {

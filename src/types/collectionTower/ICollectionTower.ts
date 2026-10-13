@@ -1,19 +1,27 @@
 /* Torre de control de recaudo (/dashboard).
 
-   PROPUESTA DE CONTRATO, pendiente de confirmar con backend:
+   Contrato con el backend (`collectionTower.dto.ts` en profitline_back; mantener iguales):
    - GET /collection/tower/project/:projectId?{filtros}             → ICollectionTower
    - GET /collection/tower/project/:projectId/export?table=…&{filtros} → .xlsx (blob)
 
-   El backend calcula todo (estados de acuerdos, forecast, mediana, PNA); el
-   front sólo agrupa, ordena y pinta. La definición exacta de cada cifra está
-   en modules/recaudoModule/utils/tower-mock.ts, que arma esta misma respuesta
-   con los datos de ejemplo mientras el endpoint no exista.
+   El backend lee una foto en Mongo que regenera cada 30 minutos (el "Corte"
+   es la hora de esa foto) y calcula todo (estados de acuerdos, forecast,
+   mediana, PNA); el front sólo agrupa, ordena y pinta. Sin foto todavía, el
+   API responde 202 con `{ snapshotPending: true }` y el hook reintenta.
 
-   Fechas: "YYYY-MM-DD" para días y ISO con hora para corte y pagos. Montos en
-   pesos. Ninguna fecha sale del reloj del navegador: todo se mide contra el
-   corte que manda el API. */
+   Mientras se desarrolla sin API, modules/recaudoModule/utils/tower-mock.ts
+   arma esta misma respuesta con datos de ejemplo (NEXT_PUBLIC_TOWER_MOCK=true).
 
-/** Estado de un acuerdo de pago a la fecha de corte. Los parciales vencidos cuentan como BROKEN. */
+   Fechas: "YYYY-MM-DD" para días e ISO con zona (-05:00) para el corte.
+   Montos en pesos. Ninguna fecha sale del reloj del navegador: todo se mide
+   contra el corte que manda el API. */
+
+/**
+ * Estado de un acuerdo de pago a la fecha de corte, por el saldo de sus
+ * facturas a la fecha prometida: FULFILLED si lo acordado quedó cubierto
+ * (aunque se haya pagado antes), PENDING si aún no vence (o vence hoy con el
+ * mes en curso) y BROKEN si venció sin cubrirse (los parciales cuentan aquí).
+ */
 export type AgreementStatus = "FULFILLED" | "BROKEN" | "PENDING";
 
 /**
@@ -34,17 +42,25 @@ export interface ITowerCatalogItem {
 }
 
 export interface ITowerCoordinator extends ITowerCatalogItem {
+  /** Gerencia más frecuente entre sus clientes: sólo para la cascada de filtros. */
   managementId: string;
 }
 
 export interface ITowerExecutive extends ITowerCatalogItem {
+  /** Coordinador más frecuente entre sus clientes: sólo para la cascada de filtros. */
   coordinatorId: string;
 }
 
+/**
+ * En la base gerencia, coordinador, ejecutivo y canal son campos sueltos del
+ * cliente (no una jerarquía): las tablas agrupan por los del cliente.
+ */
 export interface ITowerClient extends ITowerCatalogItem {
   nit: string;
   executiveId: string;
   channelId: string;
+  coordinatorId: string;
+  managementId: string;
 }
 
 /** Estructura comercial del proyecto: opciones de los filtros y nombres de las tablas. */
@@ -78,8 +94,9 @@ export interface ITowerSummary {
   collected: number;
   goal: number;
   /**
-   * Recaudo + saldo de los acuerdos pendientes que vencen antes del cierre; en
-   * un mes cerrado, igual al recaudo. Es la suma del forecast de cada cliente.
+   * Recaudo + saldo de los acuerdos pendientes que vencen antes del cierre +
+   * saldo de los incumplidos; en un mes cerrado, igual al recaudo. Es la suma
+   * del forecast de cada cliente.
    */
   forecast: number;
   /** Cumplimiento promedio (0–1) de los 3 meses anteriores al mismo día del mes; null sin historia. */
@@ -184,7 +201,7 @@ export interface ITowerClientRow {
 export interface ITowerUnappliedPayment {
   id: string;
   clientId: string;
-  /** Fecha y hora del pago (ISO). */
+  /** Fecha del pago ("YYYY-MM-DD"; el banco no trae hora) o ISO con hora. */
   paidAt: string;
   amount: number;
   /** Horas desde el pago hasta el corte. */
@@ -213,6 +230,18 @@ export interface ICollectionTower {
   unappliedPayments: ITowerUnappliedPayment[];
 }
 
+/**
+ * Respuesta de la torre en cada cambio de filtro: el tablero sin catálogos y
+ * la foto (`runId`) de la que salió. Los catálogos llegan aparte.
+ */
+export type ITowerBoard = Omit<ICollectionTower, "catalogs"> & { runId: string };
+
+/** `?part=catalogs`: opciones de los filtros y nombres de las tablas. Cambian con la foto. */
+export interface ITowerCatalogsResponse {
+  runId: string;
+  catalogs: ITowerCatalogs;
+}
+
 /** Segmento elegido en "Acuerdos de pago por día": un día entero (status null) o un estado de ese día. */
 export interface ITowerAgreementSegment {
   date: string;
@@ -227,6 +256,8 @@ export interface ICollectionTowerQuery {
   coordinator: string | null;
   executive: string | null;
   channel: string | null;
+  /** Cliente exacto (id del catálogo): clic en una fila. */
+  client: string | null;
   /** Cliente por nombre o NIT. */
   search: string;
   /** Key del tramo de mora elegido en "Recaudo por tramo". */
