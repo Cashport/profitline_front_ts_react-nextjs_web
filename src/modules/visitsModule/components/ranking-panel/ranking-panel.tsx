@@ -46,7 +46,7 @@ export default function RankingPanel({
     },
     { label: "Efect.", value: kpis ? fmtNumber(kpis.effectivenessPct) : MISSING, suffix: "%" },
     // Las actividades aún no llegan del backend.
-    { label: "Actividades", value: MISSING, suffix: `/${MISSING}` }
+    { label: "Actividades", value: kpis ? fmtNumber(kpis.total) : MISSING }
   ];
 
   return (

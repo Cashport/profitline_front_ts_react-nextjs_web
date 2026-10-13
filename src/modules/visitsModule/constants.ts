@@ -45,7 +45,7 @@ export const ACTIVE_STATUSES: AdvisorStatus[] = ["IN_VISIT", "AT_POINT", "EN_ROU
 export const SEGMENT_KINDS: SegmentKind[] = ["IN_VISIT", "IN_TRANSIT", "ON_PAUSE"];
 
 /** Dato que el backend aún no envía: se pinta así a propósito, para ver qué falta. */
-export const MISSING = "XX";
+export const MISSING = "0";
 
 export const RESULT_LABELS: Record<VisitResult, string> = {
   efectiva: "Efectiva",
@@ -118,7 +118,7 @@ export const VISITS_PALETTE: Record<"light" | "dark", IVisitsPalette> = {
     },
     result: { efectiva: "#5f9400", reprogramada: "#138a9e", sincontacto: "#c98200" },
     visit: {
-      SCHEDULED: "#8a8a8a",
+      SCHEDULED: "#5f9400",
       IN_PROGRESS: "#cbe71e",
       COMPLETED: "#5f9400",
       NOT_COMPLETED: "#c98200",
