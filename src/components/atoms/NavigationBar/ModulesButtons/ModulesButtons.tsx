@@ -27,7 +27,8 @@ import {
   CurrencyCircleDollar,
   Chats,
   FadersHorizontal,
-  Invoice
+  Invoice,
+  MapPin
 } from "@phosphor-icons/react";
 import { FileHeart } from "lucide-react";
 
@@ -401,6 +402,19 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             icon={<Ticket size={iconSize} />}
             className={path.startsWith("/tickets") ? styles.buttonIcon : styles.buttonIconActive}
             onClick={(e) => handleNavClick(e, "/tickets")}
+          />
+        </Link>
+      )}
+
+      {/* Visitas */}
+      {checkUserViewPermissions(project, "Visits") && (
+        <Link href="/visits" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<MapPin size={iconSize} />}
+            className={path.startsWith("/visits") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/visits")}
           />
         </Link>
       )}
