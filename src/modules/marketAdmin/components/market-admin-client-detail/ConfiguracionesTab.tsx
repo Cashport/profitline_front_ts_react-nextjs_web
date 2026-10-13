@@ -31,6 +31,10 @@ export type ConfigForm = {
 type Props = {
   config?: IMarketAdminClientConfig;
   isLoading?: boolean;
+  // false cuando el cliente no tiene fila en `client_marketplace`: todo lo que
+  // está en "Ajustes financieros y operativos" se guarda en esa tabla, así que
+  // no hay nada que editar ni dónde guardarlo.
+  inMarketplace?: boolean;
   onSave: (body: IUpdateMarketAdminClientConfigBody) => Promise<void>;
 };
 
@@ -90,7 +94,12 @@ const toNonZeroNumberOrNull = (value: string) => {
   return parsed === 0 ? null : parsed;
 };
 
-export default function ConfiguracionesTab({ config, isLoading, onSave }: Props) {
+export default function ConfiguracionesTab({
+  config,
+  isLoading,
+  inMarketplace = true,
+  onSave
+}: Props) {
   const [form, setForm] = useState<ConfigForm>(toForm(config));
   const [isSaving, setIsSaving] = useState(false);
   // Todos los usuarios del proyecto, no solo los asociados al cliente.
@@ -196,146 +205,172 @@ export default function ConfiguracionesTab({ config, isLoading, onSave }: Props)
         </div>
       </div>
 
-      {/* Ajustes financieros y operativos */}
-      <p className="text-sm font-bold text-[#141414] mt-8 pt-8 border-t border-[#F0F0F0] mb-4">
-        Ajustes financieros y operativos del cliente
-      </p>
+      {/* Ajustes financieros y operativos. Todos estos campos se guardan en
+          `client_marketplace`: si el cliente no está en esa tabla, el guardado
+          no tendría dónde escribir. */}
+      {inMarketplace ? (
+        <>
+          <p className="text-sm font-bold text-[#141414] mt-8 pt-8 border-t border-[#F0F0F0] mb-4">
+            Ajustes financieros y operativos del cliente
+          </p>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
-        {/* Cupo de crédito */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Cupo de crédito</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
-              $
-            </span>
-            <input
-              type="number"
-              min={0}
-              placeholder="0"
-              disabled={isLoading}
-              value={form.quota}
-              onChange={(e) => setForm((f) => ({ ...f, quota: e.target.value }))}
-              className="w-full text-sm border border-[#DDDDDD] rounded-lg pl-7 pr-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            />
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-6 gap-y-5">
+            {/* Cupo de crédito */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Cupo de crédito
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
+                  $
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  disabled={isLoading}
+                  value={form.quota}
+                  onChange={(e) => setForm((f) => ({ ...f, quota: e.target.value }))}
+                  className="w-full text-sm border border-[#DDDDDD] rounded-lg pl-7 pr-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Descuento pronto pago */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Descuento pronto pago
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  disabled={isLoading}
+                  value={form.payment_discount}
+                  onChange={(e) => setForm((f) => ({ ...f, payment_discount: e.target.value }))}
+                  className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 pr-7 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
+                  %
+                </span>
+              </div>
+            </div>
+
+            {/* Condición de pago */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Condición de pago
+              </label>
+              <input
+                type="text"
+                placeholder="Código de condición de pago"
+                disabled={isLoading}
+                value={form.payment_condition_code}
+                onChange={(e) => setForm((f) => ({ ...f, payment_condition_code: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
+
+            {/* Tipo de pago */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">Tipo de pago</label>
+              <select
+                disabled={isLoading}
+                value={form.payment_type}
+                onChange={(e) => setForm((f) => ({ ...f, payment_type: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors bg-white"
+              >
+                <option value="">Seleccione un tipo de pago</option>
+                {PAYMENT_TYPES.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Bodega por defecto */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Bodega por defecto
+              </label>
+              <WarehouseSelect
+                value={form.warehouse_id ?? undefined}
+                onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
+                disabled={isLoading}
+                size="large"
+              />
+            </div>
+
+            {/* Lista de precios */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Lista de precios
+              </label>
+              <input
+                type="number"
+                min={0}
+                placeholder="ID de la lista de precios"
+                disabled={isLoading}
+                value={form.pricelist_id}
+                onChange={(e) => setForm((f) => ({ ...f, pricelist_id: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
+
+            {/* Recibe parciales de lotes */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Recibe parciales de lotes
+              </label>
+              <input
+                type="number"
+                min={0}
+                disabled={isLoading}
+                value={form.receives_partials}
+                onChange={(e) => setForm((f) => ({ ...f, receives_partials: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
+
+            {/* Lotes mayores a */}
+            <div>
+              <label className="text-xs font-bold text-[#141414] block mb-1.5">
+                Lotes mayores a
+              </label>
+              <input
+                type="number"
+                min={0}
+                disabled={isLoading}
+                value={form.lots_greater_than}
+                onChange={(e) => setForm((f) => ({ ...f, lots_greater_than: e.target.value }))}
+                className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
+              />
+            </div>
           </div>
+        </>
+      ) : (
+        <div className="mt-8 pt-8 border-t border-[#F0F0F0]">
+          <p className="text-sm font-bold text-[#141414] mb-1">
+            Ajustes financieros y operativos del cliente
+          </p>
+          <p className="text-sm text-[#999999]">
+            Este cliente no está en el marketplace, por lo que sus opciones de marketplace no están
+            disponibles.
+          </p>
         </div>
+      )}
 
-        {/* Descuento pronto pago */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">
-            Descuento pronto pago
-          </label>
-          <div className="relative">
-            <input
-              type="number"
-              min={0}
-              placeholder="0"
-              disabled={isLoading}
-              value={form.payment_discount}
-              onChange={(e) => setForm((f) => ({ ...f, payment_discount: e.target.value }))}
-              className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 pr-7 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#999999]">
-              %
-            </span>
-          </div>
-        </div>
-
-        {/* Condición de pago */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Condición de pago</label>
-          <input
-            type="text"
-            placeholder="Código de condición de pago"
-            disabled={isLoading}
-            value={form.payment_condition_code}
-            onChange={(e) => setForm((f) => ({ ...f, payment_condition_code: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-          />
-        </div>
-
-        {/* Tipo de pago */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Tipo de pago</label>
-          <select
-            disabled={isLoading}
-            value={form.payment_type}
-            onChange={(e) => setForm((f) => ({ ...f, payment_type: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors bg-white"
-          >
-            <option value="">Seleccione un tipo de pago</option>
-            {PAYMENT_TYPES.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Bodega por defecto */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Bodega por defecto</label>
-          <WarehouseSelect
-            value={form.warehouse_id ?? undefined}
-            onChange={(warehouseId) => setForm((f) => ({ ...f, warehouse_id: warehouseId }))}
-            disabled={isLoading}
-            size="large"
-          />
-        </div>
-
-        {/* Lista de precios */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Lista de precios</label>
-          <input
-            type="number"
-            min={0}
-            placeholder="ID de la lista de precios"
-            disabled={isLoading}
-            value={form.pricelist_id}
-            onChange={(e) => setForm((f) => ({ ...f, pricelist_id: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-          />
-        </div>
-
-        {/* Recibe parciales de lotes */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">
-            Recibe parciales de lotes
-          </label>
-          <input
-            type="number"
-            min={0}
-            disabled={isLoading}
-            value={form.receives_partials}
-            onChange={(e) => setForm((f) => ({ ...f, receives_partials: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-          />
-        </div>
-
-        {/* Lotes mayores a */}
-        <div>
-          <label className="text-xs font-bold text-[#141414] block mb-1.5">Lotes mayores a</label>
-          <input
-            type="number"
-            min={0}
-            disabled={isLoading}
-            value={form.lots_greater_than}
-            onChange={(e) => setForm((f) => ({ ...f, lots_greater_than: e.target.value }))}
-            className="w-full text-sm border border-[#DDDDDD] rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#141414] transition-colors"
-          />
-        </div>
-
-        {/* Save button */}
-        <div className="col-span-full flex justify-end pt-2">
-          <PrincipalButton
-            onClick={handleSave}
-            disabled={!isDirty || isSaving || isLoading}
-            loading={isSaving}
-          >
-            Guardar cambios
-          </PrincipalButton>
-        </div>
+      {/* Save button */}
+      <div className="flex justify-end mt-8">
+        <PrincipalButton
+          onClick={handleSave}
+          disabled={!isDirty || isSaving || isLoading}
+          loading={isSaving}
+        >
+          Guardar cambios
+        </PrincipalButton>
       </div>
     </div>
   );

@@ -357,17 +357,27 @@ export interface IUseMarketAdminClientsParams {
 
 // GET /clients — item del listado
 export interface IMarketAdminClient {
-  client_id: string; // id de ruta de /clients/:client_id/... (no es el NIT)
+  client_id: string; // NIT del cliente: es el id de ruta de /clients/:client_id
   nit: string;
   client_name: string;
   city: string;
-  is_active: 1 | 0;
+  is_active: 1 | 0; // estado en marketplace; 0 si el cliente no está
+  in_marketplace: 1 | 0; // 0 = sin registro en client_marketplace
+  total_portfolio: number | null; // client_portfolio.total_portfolio, ordena el listado
   usuarios_count: number;
   productos_count: number;
   lineas: string | null; // separadas por coma: "Institucional,Retail"
 }
 
-// GET /clients/:client_id — detalle + conteos de los tabs
+// Una fila de `client_marketplace`: el código externo (`nit_id`) cambia por
+// unidad de negocio, así que un cliente puede tener varias.
+export interface IMarketAdminClientCode {
+  nit_id: string;
+  bu: string | null;
+  is_active: 1 | 0;
+}
+
+// GET /clients/:client_id — detalle + conteos de los tabs. `:client_id` es el NIT.
 export interface IMarketAdminClientDetail {
   nit: string;
   client_name: string;
@@ -375,8 +385,10 @@ export interface IMarketAdminClientDetail {
   business_name: string | null;
   phone: string | null;
   email: string | null;
-  bu: string | null; // unidad de negocio (se muestra como "Canal")
-  nit_id: number;
+  bu: string | null; // unidad de negocio de la fila canónica (se muestra como "Canal")
+  nit_id: string | null; // código externo de la fila canónica; null si no está en marketplace
+  marketplace_codes: IMarketAdminClientCode[]; // códigos sobre los que se puede editar
+  in_marketplace: 1 | 0;
   pricelist_id: number | null;
   warehouse_id: number | null;
   warehouse_code: string | null;
@@ -460,6 +472,10 @@ export interface IMarketAdminClientConfig {
   payment_type: number | null;
   warehouse_id: number | null;
   pricelist_id: number | null;
+  // 0 cuando el cliente no tiene fila en `client_marketplace`: los campos de
+  // marketplace vienen en null y la UI los oculta.
+  in_marketplace: 1 | 0;
+  is_active: 1 | 0;
   // client_marketplace.receives_partials es VARCHAR(255): puede llegar como string o número.
   receives_partials: string | number | null;
   lots_greater_than: number | null;
@@ -471,7 +487,10 @@ export interface IMarketAdminClientConfig {
   market: string | null;
 }
 
-export type IUpdateMarketAdminClientConfigBody = Partial<IMarketAdminClientConfig>;
+// El PUT no envía los flags de solo lectura del GET.
+export type IUpdateMarketAdminClientConfigBody = Partial<
+  Omit<IMarketAdminClientConfig, "in_marketplace" | "is_active">
+>;
 
 // ── Descuento (plan anual) creado desde el detalle del cliente ──────────────
 // lineId = category_id de GET marketplace/projects/:p/clients/:c/products (idLine del plan anual)

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Package, Tag, Users, MapPin, Settings } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useAppStore } from "@/lib/store/store";
@@ -37,6 +38,7 @@ import DireccionesTab from "@/modules/marketAdmin/components/market-admin-client
 import UsuariosTab from "@/modules/marketAdmin/components/market-admin-client-detail/UsuariosTab";
 import ProductosTab from "@/modules/marketAdmin/components/market-admin-client-detail/ProductosTab";
 import ConfiguracionesTab from "@/modules/marketAdmin/components/market-admin-client-detail/ConfiguracionesTab";
+import ClientCodeSelect from "@/modules/marketAdmin/components/market-admin-client-detail/ClientCodeSelect";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -54,9 +56,10 @@ const splitLineas = (lineas: string | null | undefined) =>
     .filter(Boolean) ?? [];
 
 export default function MarketAdminClientDetail({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const { id } = params; // NIT del cliente (`client.NIT`)
   const { showMessage } = useMessageApi();
   const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const searchParams = useSearchParams();
 
   // Tab — new order: promociones, direcciones, usuarios, productos
   const [activeTab, setActiveTab] = useState<
@@ -64,18 +67,30 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   >("configuraciones");
 
   const { data: cliente, isLoading, error } = useMarketAdminClientDetail(id);
+
+  // `client_marketplace` tiene una fila por unidad de negocio, cada una con su
+  // propio `nit_id`. Ese código es el que reciben los sub-recursos del detalle
+  // (configuración, productos, direcciones, usuarios) y el sobre el que se
+  // guardan los cambios. Si el cliente no está en marketplace no hay código:
+  // se usa el NIT para poder leer y editar los datos que sí son de `client`.
+  const codes = cliente?.marketplace_codes ?? [];
+  const codigoParam = searchParams.get("codigo") ?? undefined;
+  const codigo =
+    codigoParam && codes.some((c) => c.nit_id === codigoParam) ? codigoParam : codes[0]?.nit_id;
+  const scope = codigo ?? id;
+
   const {
     data: direcciones,
     isLoading: isLoadingDirecciones,
     mutate: mutateDirecciones
-  } = useMarketAdminClientAddresses(id);
-  const { data: usuarios, isLoading: isLoadingUsuarios } = useMarketAdminClientUsers(id);
+  } = useMarketAdminClientAddresses(codigo);
+  const { data: usuarios, isLoading: isLoadingUsuarios } = useMarketAdminClientUsers(cliente?.nit);
   const {
     data: config,
     isLoading: isLoadingConfig,
     mutate: mutateConfig
-  } = useMarketAdminClientConfig(id);
-  const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(id);
+  } = useMarketAdminClientConfig(scope);
+  const { data: productos, isLoading: isLoadingProductos } = useMarketAdminClientProducts(codigo);
 
   // Los descuentos se consultan por el NIT que devuelve el detalle, no por el id de ruta.
   const {
@@ -102,7 +117,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
   // Muestran el mensaje de error y lo relanzan para que el tab no cierre el modal.
   const addDireccion = async (values: ICreateMarketAdminClientAddressBody) => {
     try {
-      await createMarketAdminClientAddress(id, values);
+      await createMarketAdminClientAddress(scope, values);
       await mutateDirecciones();
       showMessage("success", "Dirección creada correctamente.");
     } catch (err) {
@@ -119,7 +134,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     values: ICreateMarketAdminClientAddressBody
   ) => {
     try {
-      await updateMarketAdminClientAddress(id, addressId, values);
+      await updateMarketAdminClientAddress(scope, addressId, values);
       await mutateDirecciones();
       showMessage("success", "Dirección actualizada correctamente.");
     } catch (err) {
@@ -133,7 +148,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
   const deleteDireccion = async (addressId: number) => {
     try {
-      await deleteMarketAdminClientAddress(id, addressId);
+      await deleteMarketAdminClientAddress(scope, addressId);
       await mutateDirecciones();
       showMessage("success", "Dirección eliminada correctamente.");
     } catch (err) {
@@ -207,7 +222,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
 
   const saveConfig = async (body: IUpdateMarketAdminClientConfigBody) => {
     try {
-      await updateMarketAdminClientConfig(id, body);
+      await updateMarketAdminClientConfig(scope, body);
       await mutateConfig();
       showMessage("success", "Configuración actualizada correctamente.");
     } catch (err) {
@@ -241,6 +256,12 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
     ? cliente.products_count
     : productos.reduce((n, c) => n + c.products.length, 0);
 
+  // El estado pertenece a la fila de `client_marketplace` del código elegido.
+  const isActive = codigo
+    ? codes.find((c) => c.nit_id === codigo)?.is_active ?? 0
+    : cliente.is_active;
+  const inMarketplace = cliente.in_marketplace === 1;
+
   const TABS = [
     { id: "promociones", label: "Promociones", icon: Tag },
     { id: "direcciones", label: `Direcciones (${direccionesCount})`, icon: MapPin },
@@ -262,15 +283,20 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
           >
             <ArrowLeft size={14} /> Volver
           </Link>
-          <span
-            className={`text-xs font-semibold px-3 py-1 rounded-full ${
-              cliente.is_active === 1
-                ? "bg-[#E6F9E6] text-[#1A7A1A]"
-                : "bg-[#EEEEEE] text-[#999999]"
-            }`}
-          >
-            {cliente.is_active === 1 ? "Activo" : "Inactivo"}
-          </span>
+          <div className="flex items-center gap-3">
+            <ClientCodeSelect nit={cliente.nit} codigo={codigo} codes={codes} />
+            <span
+              className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                isActive === 1 ? "bg-[#E6F9E6] text-[#1A7A1A]" : "bg-[#EEEEEE] text-[#999999]"
+              }`}
+            >
+              {cliente.in_marketplace === 0
+                ? "Sin marketplace"
+                : isActive === 1
+                  ? "Activo"
+                  : "Inactivo"}
+            </span>
+          </div>
         </div>
 
         {/* Información general */}
@@ -347,6 +373,7 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
               onAdd={addDireccion}
               onUpdate={updateDireccion}
               onDelete={deleteDireccion}
+              canCreate={inMarketplace}
             />
           )}
           {activeTab === "usuarios" && (
@@ -356,7 +383,12 @@ export default function MarketAdminClientDetail({ params }: { params: { id: stri
             <ProductosTab categorias={productos} isLoading={isLoadingProductos} />
           )}
           {activeTab === "configuraciones" && (
-            <ConfiguracionesTab config={config} isLoading={isLoadingConfig} onSave={saveConfig} />
+            <ConfiguracionesTab
+              config={config}
+              isLoading={isLoadingConfig}
+              inMarketplace={inMarketplace}
+              onSave={saveConfig}
+            />
           )}
         </div>
       </div>

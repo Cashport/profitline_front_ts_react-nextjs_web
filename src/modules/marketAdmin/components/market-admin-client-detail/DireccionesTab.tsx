@@ -16,6 +16,10 @@ type Props = {
   onAdd: (values: ICreateMarketAdminClientAddressBody) => Promise<void>;
   onUpdate: (id: number, values: ICreateMarketAdminClientAddressBody) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
+  // Crear una dirección copia el `nit_id` desde `client_marketplace`: sin fila
+  // ahí el backend no tiene de dónde tomar el código. Editar y eliminar
+  // escriben en `clients_other_address`, así que siguen disponibles.
+  canCreate?: boolean;
 };
 
 type ModalState = { mode: "new" } | { mode: "edit"; direccion: IMarketAdminClientAddress } | null;
@@ -27,7 +31,8 @@ export default function DireccionesTab({
   isLoading,
   onAdd,
   onUpdate,
-  onDelete
+  onDelete,
+  canCreate = true
 }: Props) {
   const [modal, setModal] = useState<ModalState>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -114,12 +119,14 @@ export default function DireccionesTab({
         <p className="text-sm text-[#666666]">
           {direcciones.length} {direcciones.length === 1 ? "dirección" : "direcciones"} registradas
         </p>
-        <button
-          onClick={() => setModal({ mode: "new" })}
-          className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
-        >
-          <Plus size={14} /> Nueva dirección
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setModal({ mode: "new" })}
+            className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors"
+          >
+            <Plus size={14} /> Nueva dirección
+          </button>
+        )}
       </div>
 
       <Table

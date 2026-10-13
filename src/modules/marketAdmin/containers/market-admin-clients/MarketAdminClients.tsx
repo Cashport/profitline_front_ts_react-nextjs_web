@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { Table } from "antd";
+import { Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { ChevronLeft } from "lucide-react";
 import GenericEyeButton from "@/components/ui/generic-eye-button";
@@ -51,6 +51,10 @@ function LineasBadges({ lineas }: { lineas: string[] }) {
 
 const PAGE_SIZE = 20;
 
+// Un cliente puede tener direcciones en muchas ciudades: se muestran las
+// primeras tres y el resto queda en el tooltip del (+N).
+const MAX_CIUDADES = 3;
+
 const headerCell = () => ({ style: { color: "#141414", fontWeight: 600 } });
 
 const splitLineas = (lineas: string | null) =>
@@ -58,6 +62,31 @@ const splitLineas = (lineas: string | null) =>
     ?.split(",")
     .map((l) => l.trim())
     .filter(Boolean) ?? [];
+
+function Ciudades({ value }: { value: string | null }) {
+  const ciudades =
+    value
+      ?.split(",")
+      .map((c) => c.trim())
+      .filter(Boolean) ?? [];
+  if (ciudades.length === 0) return <span className="text-sm text-[#141414]">—</span>;
+
+  const visibles = ciudades.slice(0, MAX_CIUDADES);
+  const ocultas = ciudades.slice(MAX_CIUDADES);
+
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      <span className="text-sm text-[#141414]">{visibles.join(", ")}</span>
+      {ocultas.length > 0 && (
+        <Tooltip title={ciudades.join(", ")}>
+          <span className="text-xs font-semibold text-[#999999] cursor-default">
+            (+{ocultas.length})
+          </span>
+        </Tooltip>
+      )}
+    </div>
+  );
+}
 
 export default function MarketAdminClients() {
   const { showMessage } = useMessageApi();
@@ -194,7 +223,7 @@ export default function MarketAdminClients() {
       key: "city",
       sorter: (a, b) => (a.city ?? "").localeCompare(b.city ?? ""),
       onHeaderCell: headerCell,
-      render: (v: string) => <span className="text-sm text-[#141414]">{v || "—"}</span>
+      render: (v: string) => <Ciudades value={v} />
     },
     {
       title: "Usuarios",
@@ -217,25 +246,33 @@ export default function MarketAdminClients() {
       title: "Estado",
       dataIndex: "is_active",
       key: "is_active",
-      width: 100,
-      sorter: (a, b) => Number(a.is_active) - Number(b.is_active),
+      width: 140,
+      sorter: (a, b) =>
+        Number(a.in_marketplace) - Number(b.in_marketplace) ||
+        Number(a.is_active) - Number(b.is_active),
       onHeaderCell: headerCell,
-      render: (isActive: 1 | 0) => (
-        <span
-          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
-            isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
-          }`}
-        >
-          {isActive === 1 ? "Activo" : "Inactivo"}
-        </span>
-      )
+      render: (isActive: 1 | 0, c: IMarketAdminClient) =>
+        c.in_marketplace === 0 ? (
+          // Sin registro en client_marketplace: no hay estado que editar.
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit bg-[#F0F0F0] text-[#999999]">
+            Sin marketplace
+          </span>
+        ) : (
+          <span
+            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
+              isActive === 1 ? "bg-[#E8F9E8] text-[#1A7A1A]" : "bg-[#F0F0F0] text-[#999999]"
+            }`}
+          >
+            {isActive === 1 ? "Activo" : "Inactivo"}
+          </span>
+        )
     },
     {
       title: "",
       key: "ver",
       width: 48,
       onHeaderCell: headerCell,
-      render: (_, c) => <GenericEyeButton href={`/market-admin/clientes/${c.client_id}`} />
+      render: (_, c) => <GenericEyeButton href={`/market-admin/clientes/${c.nit}`} />
     }
   ];
 
@@ -319,11 +356,18 @@ export default function MarketAdminClients() {
           loading={isLoading || isRunningAccion}
           showSorterTooltip={false}
           locale={{ emptyText: "No se encontraron clientes." }}
-          rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: setSelectedRowKeys,
+            // Activar/inactivar escribe en client_marketplace: un cliente que no
+            // está en esa tabla no tiene nada sobre lo que actuar.
+            getCheckboxProps: (record) => ({ disabled: record.in_marketplace === 0 })
+          }}
           onRow={(record) => ({
             onClick: (e) => {
               // The selection checkbox handles its own toggle — don't double-toggle
               if ((e.target as HTMLElement).closest(".ant-table-selection-column")) return;
+              if (record.in_marketplace === 0) return;
               setSelectedRowKeys((prev) =>
                 prev.includes(record.client_id)
                   ? prev.filter((k) => k !== record.client_id)
