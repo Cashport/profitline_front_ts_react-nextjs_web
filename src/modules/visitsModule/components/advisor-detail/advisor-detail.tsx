@@ -99,7 +99,7 @@ export default function AdvisorDetail({
     },
     {
       label: "Recorrido",
-      value: fmtNumber(tracking.distance_km, 1),
+      value: fmtNumber(tracking.distance_km || 0, 1),
       suffix: "km",
       detail: `desde ${startText}`
     },
@@ -169,8 +169,7 @@ export default function AdvisorDetail({
         <div className="flex items-baseline justify-between gap-2 text-xs font-semibold text-foreground">
           <span>Actividades</span>
           <b className="whitespace-nowrap text-xl font-semibold">
-            {activities.effective}
-            <small className="text-xs font-medium text-muted-foreground">/{activities.goal}</small>
+            {activities.registered}
           </b>
         </div>
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-[3px] bg-secondary">

@@ -254,6 +254,6 @@ export function liveTeamKpis(advisors: ILiveAdvisor[]): ILiveTeamKpis {
     kpis.visitsPlanned += a.visits.total;
     effective += a.visits.completed;
   });
-  kpis.effectivenessPct = kpis.visitsDone ? (effective / kpis.visitsDone) * 100 : 0;
+  kpis.effectivenessPct = effective ? (effective / kpis.visitsPlanned) * 100 : 0;
   return kpis;
 }

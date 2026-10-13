@@ -302,6 +302,7 @@ export default function VisitsMap(props: VisitsMapProps) {
     if (!map || !focused?.track.length) return;
     const markers: Marker[] = [];
     const addMarker = (el: HTMLElement, at: LngLat) => {
+      console.log(el)
       const marker = new mapboxgl.Marker({ element: el, anchor: "center" }).setLngLat(at);
       markers.push(marker.addTo(map));
     };
