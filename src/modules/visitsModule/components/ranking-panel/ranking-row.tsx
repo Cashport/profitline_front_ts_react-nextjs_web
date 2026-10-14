@@ -29,8 +29,11 @@ function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
   switch (s.status) {
     case "IN_VISIT":
       // Tiempo en la visita: el tramo de puntos en visita en curso.
-      detail = s.run?.status === "IN_VISIT" ? fmtDuration(t - s.run.start) : null;
-      where = a.currentClient ?? MISSING;
+      detail =
+        s.run?.status === "IN_VISIT"
+          ? fmtDuration(t - s.run.start)
+          : (a.next?.start && fmtDuration(t - a.next?.start)) || null;
+      where = a.currentClient ?? a.next?.clientName ?? MISSING;
       break;
     case "AT_POINT":
       where = a.currentClient ?? MISSING;
@@ -44,7 +47,7 @@ function describe(a: ILiveAdvisor, s: ILiveState, t: number) {
       where = a.visits.total ? "Sin visitas pendientes" : "Sin visitas programadas";
   }
 
-  return { detail, where: `${where} · ${zone}` };
+  return { detail, where: `${where}` };
 }
 
 export default function RankingRow({
@@ -96,7 +99,9 @@ export default function RankingRow({
 
       <div className="flex min-w-0 flex-col gap-px">
         <div className="flex min-w-0 items-baseline gap-1.5">
-          <span className="min-w-0 truncate text-[13px] font-semibold text-foreground">{a.name}</span>
+          <span className="min-w-0 truncate text-[13px] font-semibold text-foreground">
+            {a.name}
+          </span>
           <span className="shrink-0 whitespace-nowrap rounded bg-secondary px-[5px] py-px text-[9.5px] font-semibold text-muted-foreground">
             {project?.name ?? MISSING}
           </span>
@@ -128,12 +133,7 @@ export default function RankingRow({
             low ? "bg-secondary text-foreground" : "bg-[#cbe71e] text-[#141414]"
           )}
         >
-          <b className="text-[15px] font-bold tracking-[-0.02em]">{a.activitiesOk ?? MISSING}</b>
-          <small
-            className={cn("text-[11px] font-medium", low ? "text-muted-foreground" : "text-[#3d4a00]")}
-          >
-            /{a.goal ?? MISSING}
-          </small>
+          <b className="text-[15px] font-bold tracking-[-0.02em]">{a.total_activities}</b>
         </span>
         <span className="whitespace-nowrap text-[10.5px] text-muted-foreground">
           <b className="font-semibold text-foreground">

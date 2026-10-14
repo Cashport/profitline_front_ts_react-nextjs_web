@@ -84,6 +84,7 @@ export function toLiveAdvisor(u: ITodayVisitsUser): ILiveAdvisor {
     initials: initialsOf(u.user.userName),
     status: u.state,
     statusLabel: u.state_name,
+    total_activities: u.total_activities,
     visits: {
       total: u.total_visits,
       completed: u.completed_visits,
@@ -127,6 +128,7 @@ export function toDetailAdvisor(d: IAdvisorVisitDetail): ILiveAdvisor {
     initials: initialsOf(d.user.userName),
     status: d.state,
     statusLabel: d.state_name,
+    total_activities: 0,
     visits: { total, completed, failed, pending, done: completed + failed },
     next: next
       ? {
@@ -242,7 +244,7 @@ export interface ILiveTeamKpis {
 export function liveTeamKpis(advisors: ILiveAdvisor[]): ILiveTeamKpis {
   const kpis: ILiveTeamKpis = {
     active: 0,
-    total: advisors.length,
+    total: 0,
     visitsDone: 0,
     visitsPlanned: 0,
     effectivenessPct: 0
@@ -252,6 +254,7 @@ export function liveTeamKpis(advisors: ILiveAdvisor[]): ILiveTeamKpis {
     if (ACTIVE_STATUSES.includes(a.status)) kpis.active++;
     kpis.visitsDone += a.visits.done;
     kpis.visitsPlanned += a.visits.total;
+    kpis.total += a.total_activities;
     effective += a.visits.completed;
   });
   kpis.effectivenessPct = effective ? (effective / kpis.visitsPlanned) * 100 : 0;
