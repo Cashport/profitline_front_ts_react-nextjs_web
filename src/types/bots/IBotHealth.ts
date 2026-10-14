@@ -1,8 +1,22 @@
 // Estados de negocio autorizados para la UI (ver botStatusMap.tsx).
-export type BotHealthStatus = "Operativo" | "Con fallas" | "Ejecutando" | "En revisión";
+export type BotHealthStatus =
+  | "Operativo"
+  | "Con fallas"
+  | "Ejecutando"
+  | "En revisión"
+  | "Pendiente"
+  | "Sin ejecuciones";
 
 // Valores reales que envía BotStatusDTO.estado (cashport-backend, data.service.ts).
-export type BotRawStatus = "SIN_EJECUCIONES" | "PENDIENTE" | "EN_EJECUCION" | "EXITOSO" | "FALLIDO";
+// "EN_REVISION" es un estado propio calculado server-side (última ejecución exitosa
+// con la inmediatamente anterior fallida), NO sinónimo de PENDIENTE/SIN_EJECUCIONES.
+export type BotRawStatus =
+  | "SIN_EJECUCIONES"
+  | "PENDIENTE"
+  | "EN_EJECUCION"
+  | "EXITOSO"
+  | "FALLIDO"
+  | "EN_REVISION";
 
 // Espejo 1:1 de BotStatusDTO (cashport-backend/src/model/data/data.dto.ts).
 export interface IBotHealth {
@@ -52,5 +66,4 @@ export interface IBotRunNowResult {
   schedulerMessage: string;
 }
 
-export type { Pagination };
 

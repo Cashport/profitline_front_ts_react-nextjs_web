@@ -1,12 +1,15 @@
 import { ReactElement } from "react";
-import { CheckCircle, Clock, MagnifyingGlass, XCircle } from "phosphor-react";
+import { CheckCircle, Circle, Clock, MagnifyingGlass, XCircle } from "phosphor-react";
 
 import { BotHealthStatus, BotRawStatus } from "@/types/bots/IBotHealth";
 
-// Mapea el estado crudo que envía el backend (BotStatusDTO.estado) a las 4
-// categorías de negocio que ya existen en la UI. "SIN_EJECUCIONES" y "PENDIENTE"
-// comparten "En revisión": ambos significan que el bot aún no tiene un resultado
-// exitoso/fallido que mostrar.
+// Mapea el estado crudo que envía el backend (BotStatusDTO.estado) a las 6 categorías
+// de negocio de la UI. Alineado con src/modules/dataQuality/constants.ts (BOT_STATUS_META)
+// y src/types/dataQuality/IDataQuality.ts (comentario sobre IBotStatusItem, verificado
+// contra cashport-backend/src/model/data/data.dto.ts): "EN_REVISION" es un estado real
+// y propio que calcula el backend (última ejecución exitosa con la inmediatamente
+// anterior fallida) -- NO es sinónimo de "PENDIENTE" ni de "SIN_EJECUCIONES". Cada uno
+// de los 6 valores se muestra con su propia etiqueta.
 export const mapRawStatusToHealthStatus = (estado: BotRawStatus | string): BotHealthStatus => {
   switch (estado) {
     case "EXITOSO":
@@ -15,9 +18,15 @@ export const mapRawStatusToHealthStatus = (estado: BotRawStatus | string): BotHe
       return "Con fallas";
     case "EN_EJECUCION":
       return "Ejecutando";
+    case "EN_REVISION":
+      return "En revisión";
     case "PENDIENTE":
+      return "Pendiente";
     case "SIN_EJECUCIONES":
+      return "Sin ejecuciones";
     default:
+      // Estado no reconocido: no se descarta en silencio, se cuenta como "En revisión"
+      // (mismo fallback que ya existía antes de distinguir PENDIENTE/SIN_EJECUCIONES).
       return "En revisión";
   }
 };
@@ -30,11 +39,11 @@ export interface BotStatusDetails {
 }
 
 // Paleta reutilizada 1:1 de src/components/organisms/proveedores/utils/documentStatusMap.tsx
-// (único mapa de estado/color/icono existente en Cashport), para no inventar colores nuevos.
-// "En revisión" usa EXACTAMENTE el mismo texto/color/icono que ya existe ahí.
-// "Operativo" y "Con fallas" reutilizan los tokens de "Aprobado" y "Rechazado".
-// "Ejecutando" no tiene equivalente visual existente en Cashport: se reutiliza el token
-// ambar de "Pendiente"/"No clasificado" como placeholder, PENDIENTE de definición de diseño.
+// para "Operativo"/"Con fallas"/"En revisión" (único mapa de estado/color/icono existente
+// en Cashport), y de src/modules/dataQuality/constants.ts (BOT_STATUS_META) para
+// "Ejecutando"/"Pendiente"/"Sin ejecuciones", para que ambos módulos de bots representen
+// el mismo estado con el mismo color. "Ejecutando" deja de usar el ámbar que antes era
+// placeholder (chocaba con "Pendiente") y pasa a gris, igual que en BOT_STATUS_META.
 export const BOT_STATUS_MAP: Record<BotHealthStatus, BotStatusDetails> = {
   Operativo: {
     text: "Operativo",
@@ -50,8 +59,8 @@ export const BOT_STATUS_MAP: Record<BotHealthStatus, BotStatusDetails> = {
   },
   Ejecutando: {
     text: "Ejecutando",
-    color: "#92400e",
-    backgroundColor: "#fef2ca",
+    color: "#6B7280",
+    backgroundColor: "#F5F5F4",
     icon: <Clock size={16} />
   },
   "En revisión": {
@@ -59,6 +68,18 @@ export const BOT_STATUS_MAP: Record<BotHealthStatus, BotStatusDetails> = {
     color: "#2143b0",
     backgroundColor: "#e2ecfe",
     icon: <MagnifyingGlass size={16} />
+  },
+  Pendiente: {
+    text: "Pendiente",
+    color: "#92400e",
+    backgroundColor: "#fef2ca",
+    icon: <Clock size={16} />
+  },
+  "Sin ejecuciones": {
+    text: "Sin ejecuciones",
+    color: "#6B7280",
+    backgroundColor: "#F3F4F6",
+    icon: <Circle size={16} />
   }
 };
 
