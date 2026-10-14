@@ -223,9 +223,8 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
             className={
               path.startsWith("/data-quality/automations") ? styles.buttonIcon : styles.buttonIconActive
             }
-          >
-            {isSideBarLarge && "Salud Bots"}
-          </Button>
+            onClick={(e) => handleNavClick(e, "/data-quality/automations")}
+          />
         </Link>
       )}
 
