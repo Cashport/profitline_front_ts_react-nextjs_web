@@ -419,6 +419,14 @@ export const hasDataQualityManagementPermission = (
 export const canUploadDataFiles = (selectedProject: ISelectedProject | undefined): boolean =>
   checkUserComponentPermission(selectedProject, "DataQuality", "data-upload-files");
 
+// Admin Global Aux: gestiona exclusivamente la pestaña Auxiliares (componente data-aux).
+export const canManageAuxiliaries = (selectedProject: ISelectedProject | undefined): boolean =>
+  checkUserComponentPermission(selectedProject, "DataQuality", "data-aux");
+
+// Indica si el usuario puede cargar la vista general de Data Quality (countries-summary = data-readonly).
+export const canReadDataQuality = (selectedProject: ISelectedProject | undefined): boolean =>
+  checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly");
+
 
 export function capitalize(str: string): string {
   if (typeof str !== "string" || str.length === 0) return "";

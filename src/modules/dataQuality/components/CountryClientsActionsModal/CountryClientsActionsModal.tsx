@@ -14,6 +14,8 @@ type CountryClientsActionsModalProps = {
   onUploadFile?: () => void;
   onUploadMaterialsAuxiliary?: () => void;
   onUploadPointsOfSale?: () => void;
+  onDownloadMaterials?: () => void;
+  onDownloadPointsOfSale?: () => void;
   onUploadPacks?: () => void;
   onUploadInTransitHaleon?: () => void;
   onAddEmails?: () => void;
@@ -29,6 +31,8 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onUploadFile,
   onUploadMaterialsAuxiliary,
   onUploadPointsOfSale,
+  onDownloadMaterials,
+  onDownloadPointsOfSale,
   onUploadPacks,
   onUploadInTransitHaleon,
   onAddEmails,
@@ -54,6 +58,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
         />
         {!downloadCatalogOnly && (
           <>
+            {onDownloadMaterials && (
+              <ButtonGenerateAction
+                icon={<DownloadSimple size={20} />}
+                title="Descargar Auxiliar Materiales"
+                onClick={onDownloadMaterials}
+              />
+            )}
             <ButtonGenerateAction
               icon={<UploadSimple size={20} />}
               title="Cargar Auxiliar Materiales"
@@ -64,6 +75,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
                 icon={<UploadSimple size={20} />}
                 title="Cargar Histórico"
                 onClick={onUploadFile}
+              />
+            )}
+            {onDownloadPointsOfSale && (
+              <ButtonGenerateAction
+                icon={<DownloadSimple size={20} />}
+                title="Descargar Puntos de venta"
+                onClick={onDownloadPointsOfSale}
               />
             )}
             <ButtonGenerateAction
