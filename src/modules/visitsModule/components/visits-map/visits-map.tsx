@@ -380,7 +380,7 @@ export default function VisitsMap(props: VisitsMapProps) {
         selected: selectedId === a.id,
         hovered: hoveredId === a.id,
         pulse: isLive && ACTIVE_STATUSES.includes(status),
-        count: a.activitiesOk,
+        count: a.total_activities,
         leader: leaderId === a.id
       });
       const opacity = focused ? (focused.id === a.id ? 1 : 0.28) : visibleIds.has(a.id) ? 1 : 0.18;

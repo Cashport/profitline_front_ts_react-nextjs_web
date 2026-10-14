@@ -128,7 +128,7 @@ export function toDetailAdvisor(d: IAdvisorVisitDetail): ILiveAdvisor {
     initials: initialsOf(d.user.userName),
     status: d.state,
     statusLabel: d.state_name,
-    total_activities: 0,
+    total_activities: d.activities.registered,
     visits: { total, completed, failed, pending, done: completed + failed },
     next: next
       ? {
