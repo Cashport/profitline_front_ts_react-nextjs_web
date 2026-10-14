@@ -742,3 +742,75 @@ export interface IBotStatusItem {
   error: string | null;
   error_legible?: string | null;
 }
+
+// -----------------------------------------------------------------------------
+// HU-DT-REF-001: referencias dinamicas de Excel.
+// Ambitos permitidos: client | country | region (NO existe global).
+// El backend expone el owner cliente como `id_client` (= data.client_data.id).
+// -----------------------------------------------------------------------------
+export type IReferenceScopeLevel = "client" | "country" | "region";
+
+export interface IReferenceType {
+  code: string;
+  description: string;
+  allow_fallback: number;
+  required_default: number;
+  sheet_name_default: string | null;
+  header_row_default: number | null;
+  is_active: number;
+}
+
+export interface IReferenceFile {
+  id: number;
+  id_project: number;
+  reference_type: string;
+  scope_level: IReferenceScopeLevel;
+  /** data.client_data.id (solo scope = client). */
+  id_client: number | null;
+  /** profit_2.country.ID (solo scope = country). */
+  id_country: number | null;
+  /** data.region.id (solo scope = region). */
+  id_region: number | null;
+  original_filename: string;
+  content_type: string | null;
+  size_bytes: number | null;
+  checksum_sha256: string | null;
+  description: string | null;
+  sheet_name: string | null;
+  header_row: number | null;
+  version: number;
+  is_active: number;
+  file_url: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IReferenceFilesFilters {
+  reference_type?: string;
+  scope_level?: IReferenceScopeLevel;
+  id_client?: number;
+  id_country?: number;
+  id_region?: number;
+  is_active?: 0 | 1;
+}
+
+export interface ICreateReferenceOwnerPayload {
+  id_client?: number;
+  id_country?: number;
+  id_region?: number;
+}
+
+export interface ICreateReferenceFormValues {
+  reference_type: string;
+  scope_level: IReferenceScopeLevel;
+  owner: number;
+  sheet_name?: string;
+  header_row?: number;
+  description?: string;
+  file?: File | null;
+}
+
+export interface IReferenceOwnerOption {
+  value: number;
+  label: string;
+}
