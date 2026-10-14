@@ -15,8 +15,17 @@ export const SOURCES = {
 } as const;
 
 export const CLIENTS_LAYER = "visits-clients";
+const CLIENTS_HALO_LAYER = "visits-clients-halo";
 
 const ROUND_LINE = { "line-join": "round", "line-cap": "round" } as const;
+
+/**
+ * Cuánto crece el halo sobre el punto (`under`). Es la misma idea del contorno de la
+ * línea enfocada: sin él, un punto del color del mapa base (gris sobre Positron)
+ * se pierde. Al ser WebGL, la capa no lee los tokens del tema: el halo va en la
+ * propiedad `under` de cada punto.
+ */
+const HALO_GAP = 3;
 
 /**
  * Capas propias, de abajo hacia arriba. Los colores van en cada feature (`color`,
@@ -24,6 +33,19 @@ const ROUND_LINE = { "line-join": "round", "line-cap": "round" } as const;
  * guiones se miden en anchos de línea (4px/6px sobre 1,6px; 6px/7px sobre 2,5px).
  */
 export const OVERLAY_LAYERS: LayerSpecification[] = [
+  {
+    id: CLIENTS_HALO_LAYER,
+    type: "circle",
+    source: SOURCES.clients,
+    paint: {
+      "circle-radius": ["+", ["get", "radius"], HALO_GAP],
+      "circle-color": ["get", "under"],
+      "circle-stroke-color": ["get", "under"],
+      "circle-stroke-width": 1,
+      "circle-opacity": ["*", ["get", "haloOpacity"], 0.9],
+      "circle-stroke-opacity": ["*", ["get", "haloOpacity"], 0.9]
+    }
+  },
   {
     id: CLIENTS_LAYER,
     type: "circle",
@@ -33,7 +55,7 @@ export const OVERLAY_LAYERS: LayerSpecification[] = [
       "circle-color": ["get", "color"],
       "circle-opacity": ["get", "fillOpacity"],
       "circle-stroke-color": ["get", "color"],
-      "circle-stroke-width": 1.5,
+      "circle-stroke-width": 2,
       "circle-stroke-opacity": ["get", "strokeOpacity"]
     }
   },
@@ -89,6 +111,10 @@ export type ClientDotProperties = {
   radius: number;
   fillOpacity: number;
   strokeOpacity: number;
+  /** Opacidad del halo; va algo por debajo de la del punto para que no sea un disco. */
+  haloOpacity: number;
+  /** Color del halo (`palette.under`): oscuro en claro, negro en oscuro. */
+  under: string;
 };
 
 export const featureCollection = <G extends GeoJSON.Geometry, P>(

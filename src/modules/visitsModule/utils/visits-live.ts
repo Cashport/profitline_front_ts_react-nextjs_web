@@ -194,7 +194,7 @@ export const liveSegments = (a: ILiveAdvisor, now: number): IAdvisorSegment[] =>
 export const rankLiveAdvisors = (advisors: ILiveAdvisor[]) =>
   advisors
     .slice()
-    .sort((x, y) => y.visits.completed - x.visits.completed || x.name.localeCompare(y.name));
+    .sort((x, y) => y.total_activities - x.total_activities || x.name.localeCompare(y.name));
 
 export interface ILiveVisibilityContext {
   filters: IVisitsFilters;
