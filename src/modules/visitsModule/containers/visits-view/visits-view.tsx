@@ -331,7 +331,6 @@ export default function VisitsView() {
             />
           )}
         </aside>
-
         <div className="col-start-2 row-start-2 min-h-0 min-w-0 max-[900px]:col-start-1 max-[900px]:row-start-3">
           <VisitsMap
             advisors={advisors}
