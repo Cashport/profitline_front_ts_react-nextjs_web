@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
 import { fetcher } from "@/utils/api/api";
@@ -22,6 +22,8 @@ import {
 const SEARCH_DEBOUNCE_MS = 300;
 /** Mientras el backend genera la foto de recaudo (202) se reintenta cada pocos segundos. */
 const PENDING_POLL_MS = 5000;
+/** Tablero de la foto anterior (`stale`): se vuelve a pedir hasta que llegue el de la nueva. */
+const STALE_POLL_MS = 3000;
 
 /** La foto todavía no existe: el backend la está generando. */
 interface ITowerPending {
@@ -39,6 +41,9 @@ const pendingPoll = (latest?: GenericResponse<unknown>) =>
 
 const boardOf = (response?: BoardResponse) =>
   response && !isPending(response.data) ? (response.data as ITowerBoard) : undefined;
+
+const boardPoll = (latest?: BoardResponse) =>
+  isPending(latest?.data) ? PENDING_POLL_MS : boardOf(latest)?.stale ? STALE_POLL_MS : 0;
 
 const catalogsOf = (response?: CatalogsResponse) =>
   response && !isPending(response.data) ? (response.data as ITowerCatalogsResponse) : undefined;
@@ -81,13 +86,17 @@ const fetchMockCatalogs = async (
  * llega: el tablero muestra el skeleton), y `lastData`, el último recibido,
  * para que el encabezado (catálogos, periodos) no se apague entre filtros.
  * La búsqueda va con debounce para no pedir una torre por tecla.
+ *
+ * Si el backend todavía está leyendo una foto nueva responde con la anterior
+ * (`stale`) para no hacer esperar: se vuelve a pedir cada pocos segundos
+ * hasta que llegue la nueva.
  */
 export const useCollectionTower = (filters: ICollectionTowerQuery) => {
   const projectId = useAppStore((s) => s.selectedProject?.ID);
   const search = useDebounce(filters.search, SEARCH_DEBOUNCE_MS);
   const query: ICollectionTowerQuery = { ...filters, search };
   const pathKey = projectId ? `${towerPath(projectId)}?${buildTowerQuery(query)}` : null;
-  const { cache } = useSWRConfig();
+  const { cache, mutate } = useSWRConfig();
 
   const {
     data: laggy,
@@ -96,7 +105,7 @@ export const useCollectionTower = (filters: ICollectionTowerQuery) => {
   } = useSWR<BoardResponse>(pathKey, USE_TOWER_MOCK ? () => fetchMock(query) : fetcher, {
     keepPreviousData: true,
     revalidateOnFocus: false,
-    refreshInterval: pendingPoll
+    refreshInterval: boardPoll
   });
   const {
     data: catalogsResponse,
@@ -128,7 +137,16 @@ export const useCollectionTower = (filters: ICollectionTowerQuery) => {
   const lastData = useMemo(() => withCatalogs(lastBoard, catalogs), [lastBoard, catalogs]);
   const error = (boardError ?? catalogsError) as Error | undefined;
 
+  // Tablero y catálogos del proyecto: las llaves empiezan por "<ruta>?".
+  const reload = useCallback(() => {
+    if (!projectId) return;
+    const prefix = `${towerPath(projectId)}?`;
+    mutate((key) => typeof key === "string" && key.startsWith(prefix));
+  }, [mutate, projectId]);
+
   return {
+    /** Vuelve a pedir el tablero y los catálogos (botón "Recargar" o tras "Actualizar ahora"). */
+    reload,
     /** Sin proyecto elegido no se pide nada: el tablero muestra un aviso en vez de cargar. */
     noProject: !projectId,
     /** El backend está generando la foto: se muestra el skeleton y se reintenta. */

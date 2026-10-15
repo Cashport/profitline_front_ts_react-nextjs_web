@@ -2,9 +2,12 @@
 
 import { memo } from "react";
 import { Alert, Empty } from "antd";
+import { RotateCw } from "lucide-react";
 
 import { cn } from "@/utils/utils";
+import { useAppStore } from "@/lib/store/store";
 import { useCollectionTower } from "@/hooks/useCollectionTower";
+import { useCollectionTowerRefresh } from "@/hooks/useCollectionTowerRefresh";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { FOOT_NOTE } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
@@ -30,26 +33,48 @@ const PAIR =
 /**
  * Corte de la foto. Viene del API (mes cerrado: el último día a las 11:59 p. m.):
  * no se toma del reloj del navegador.
+ *
+ * Al lado, como en el Home de Clientes: "Actualizar ahora" regenera la foto
+ * (solo administradores, es pesado); el resto recarga lo último disponible.
  */
 function Cutoff({
   cutoffAt,
   refreshing,
-  noProject
+  updating,
+  noProject,
+  canRegenerate,
+  onRefresh
 }: {
   cutoffAt?: string;
   refreshing: boolean;
+  /** Se está generando una foto nueva pedida con el botón. */
+  updating: boolean;
   noProject: boolean;
+  canRegenerate: boolean;
+  onRefresh: () => void;
 }) {
   if (noProject) return null;
+  const busy = refreshing || updating;
+  const label = canRegenerate ? "Actualizar ahora" : "Recargar";
   return (
     <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
       <span
         className={cn(
           "h-1.5 w-1.5 rounded-full",
-          refreshing ? "animate-pulse bg-amber-500" : "bg-emerald-500"
+          busy ? "animate-pulse bg-amber-500" : "bg-emerald-500"
         )}
       />
-      {cutoffAt ? `Corte ${fmtCutoff(cutoffAt)}` : "Cargando corte…"}
+      {updating ? "Actualizando…" : cutoffAt ? `Corte ${fmtCutoff(cutoffAt)}` : "Cargando corte…"}
+      <button
+        type="button"
+        title={label}
+        aria-label={label}
+        disabled={busy}
+        onClick={onRefresh}
+        className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-foreground hover:bg-muted disabled:cursor-default disabled:opacity-50"
+      >
+        <RotateCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
+      </button>
     </span>
   );
 }
@@ -92,8 +117,19 @@ const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTow
  */
 export default function TorreBoard() {
   const { filters } = useTowerFilters();
-  const { data, lastData, loading, refreshing, error, noProject, pending } =
+  const { data, lastData, loading, refreshing, error, noProject, pending, reload } =
     useCollectionTower(filters);
+  const projectId = useAppStore((s) => s.selectedProject?.ID);
+  // Regenerar la foto es pesado: solo administradores (mismo criterio que el
+  // backend, `isAdminORSuperAdmin`, y que el Home de Clientes).
+  const canRegenerate = useAppStore(
+    (s) => Boolean(s.selectedProject?.isSuperAdmin) || s.selectedProject?.rol_id === 2
+  );
+  const { refresh, refreshing: updating } = useCollectionTowerRefresh(
+    projectId,
+    canRegenerate,
+    reload
+  );
 
   return (
     <>
@@ -102,7 +138,10 @@ export default function TorreBoard() {
           <Cutoff
             cutoffAt={lastData?.cutoffAt}
             refreshing={loading || refreshing}
+            updating={updating}
             noProject={noProject}
+            canRegenerate={canRegenerate}
+            onRefresh={canRegenerate ? refresh : reload}
           />
         }
         tools={<TorreToolbar data={lastData} />}

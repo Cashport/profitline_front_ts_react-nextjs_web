@@ -3,6 +3,8 @@
    Contrato con el backend (`collectionTower.dto.ts` en profitline_back; mantener iguales):
    - GET /collection/tower/project/:projectId?{filtros}             → ICollectionTower
    - GET /collection/tower/project/:projectId/export?table=…&{filtros} → .xlsx (blob)
+   - GET /collection/tower/project/:projectId?part=status          → ITowerSnapshotStatus
+   - POST /collection/tower/project/:projectId/refresh             → ITowerRefreshResponse (admins)
 
    El backend lee una foto en Mongo que regenera cada 30 minutos (el "Corte"
    es la hora de esa foto) y calcula todo (estados de acuerdos, forecast,
@@ -234,7 +236,43 @@ export interface ICollectionTower {
  * Respuesta de la torre en cada cambio de filtro: el tablero sin catálogos y
  * la foto (`runId`) de la que salió. Los catálogos llegan aparte.
  */
-export type ITowerBoard = Omit<ICollectionTower, "catalogs"> & { runId: string };
+export type ITowerBoard = Omit<ICollectionTower, "catalogs"> & {
+  runId: string;
+  /**
+   * Salió de la foto anterior porque la nueva todavía se está leyendo en el
+   * backend (así el clic no la espera); el hook vuelve a pedir en unos segundos.
+   */
+  stale?: boolean;
+};
+
+/** Una foto de la torre, para el botón "Actualizar ahora". */
+export interface ITowerSnapshotRun {
+  runId: string;
+  status: "RUNNING" | "DONE" | "FAILED";
+  trigger: "CRON" | "MANUAL";
+  requestedBy: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  /** Hora del corte de la foto. */
+  generatedAt: string;
+  durationMs: number | null;
+  clientsCount: number;
+  error: string | null;
+}
+
+/** `?part=status`: foto vigente, corrida en curso y último fallo. */
+export interface ITowerSnapshotStatus {
+  current: ITowerSnapshotRun | null;
+  running: ITowerSnapshotRun | null;
+  lastFailed: ITowerSnapshotRun | null;
+  isRefreshing: boolean;
+}
+
+export interface ITowerRefreshResponse {
+  status: "PROCESSING";
+  runId: string;
+  startedAt: string;
+}
 
 /** `?part=catalogs`: opciones de los filtros y nombres de las tablas. Cambian con la foto. */
 export interface ITowerCatalogsResponse {

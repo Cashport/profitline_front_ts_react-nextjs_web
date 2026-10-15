@@ -1,10 +1,13 @@
 import axios from "axios";
 
-import { default as instance } from "@/utils/api/api";
+import { API, default as instance } from "@/utils/api/api";
 
+import { GenericResponse } from "@/types/global/IGlobal";
 import {
   ICollectionTowerQuery,
   ITowerExportState,
+  ITowerRefreshResponse,
+  ITowerSnapshotStatus,
   TowerExportTable
 } from "@/types/collectionTower/ICollectionTower";
 
@@ -14,6 +17,19 @@ export const towerPath = (projectId: number) => `/collection/tower/project/${pro
 
 /** Catálogos de la torre (opciones de los filtros y nombres): van aparte del tablero. */
 export const towerCatalogsPath = (projectId: number) => `${towerPath(projectId)}?part=catalogs`;
+
+/**
+ * "Actualizar ahora" (solo administradores): regenera la foto de la torre.
+ * Responde 202 con el `runId` y la corrida sigue en el backend; el avance se
+ * consulta con `getCollectionTowerStatus`. Si ya hay una en curso, 409.
+ */
+export const refreshCollectionTower = async (
+  projectId: number
+): Promise<GenericResponse<ITowerRefreshResponse>> => API.post(`${towerPath(projectId)}/refresh`);
+
+export const getCollectionTowerStatus = async (
+  projectId: number
+): Promise<GenericResponse<ITowerSnapshotStatus>> => API.get(`${towerPath(projectId)}?part=status`);
 
 /**
  * Serializa los filtros del tablero. Sólo va lo que tiene valor, así un campo
