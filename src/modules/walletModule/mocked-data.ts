@@ -101,6 +101,7 @@ export const WALLET_SUMMARY: IWalletSummary = {
     saldo_factura: 0,
     glosado: 0,
     devolucion: 0,
+    nota_debito: 0,
     otros: 0,
     total: 51.26 * MM,
     vencido: 11.4 * MM,

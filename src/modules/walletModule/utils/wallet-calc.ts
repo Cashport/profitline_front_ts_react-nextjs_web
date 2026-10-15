@@ -19,6 +19,7 @@ const emptySegments = (): WalletSegments => ({
   saldo_factura: 0,
   glosado: 0,
   devolucion: 0,
+  nota_debito: 0,
   otros: 0,
   total: 0,
   vencido: 0,
