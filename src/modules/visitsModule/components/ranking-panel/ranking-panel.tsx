@@ -1,7 +1,7 @@
 "use client";
 
 import { MISSING } from "../../constants";
-import type { ILiveAdvisor, ILiveState, IVisitsPalette } from "../../types";
+import type { ILiveAdvisor, ILiveState, IVisitsPalette, DayMode } from "../../types";
 import { fmtNumber } from "../../utils/visits-format";
 import type { ILiveTeamKpis } from "../../utils/visits-live";
 import RankingRow from "./ranking-row";
@@ -10,8 +10,10 @@ interface RankingPanelProps {
   /** Asesores visibles, ya en orden de ranking, con su estado en `t`. */
   rows: { advisor: ILiveAdvisor; state: ILiveState }[];
   totalAdvisors: number;
-  /** null cuando el día no viene del API: KPIs y contador en "XX". */
+  /** null cuando no hay KPI que pintar: tiles y contador en "XX". */
   kpis: ILiveTeamKpis | null;
+  /** Sólo el día en curso lleva "hoy" en el contador. */
+  dayMode: DayMode;
   t: number;
   palette: IVisitsPalette;
   /** Lo que dice la lista cuando no hay filas (cargando, error, sin coincidencias…). */
@@ -25,6 +27,7 @@ export default function RankingPanel({
   rows,
   totalAdvisors,
   kpis,
+  dayMode,
   t,
   palette,
   emptyText,
@@ -34,7 +37,7 @@ export default function RankingPanel({
   const counter = !kpis
     ? MISSING
     : rows.length === totalAdvisors
-      ? `${totalAdvisors} en campo hoy`
+      ? `${totalAdvisors} en campo${dayMode === "today" ? " hoy" : ""}`
       : `${rows.length} de ${totalAdvisors}`;
 
   const tiles = [

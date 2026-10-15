@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import type { IAdvisorVisitDetail } from "@/types/visits/IVisits";
+import type { IAdvisorVisitDetail, IAdvisorVisitDetailRegister } from "@/types/visits/IVisits";
 import { cn } from "@/utils/utils";
 
 import { ACTIVITY_HOURS } from "../../constants";
@@ -38,7 +38,8 @@ function nowText({ state, visits }: IAdvisorVisitDetail) {
   }
   if (state === "EN_ROUTE") {
     const next = visits.route.find((v) => v.status_code === "SCHEDULED");
-    if (next) return `hacia ${next.client_name} · ${fmtClock(minutesOfDay(next.scheduled_start_at))}`;
+    if (next)
+      return `hacia ${next.client_name} · ${fmtClock(minutesOfDay(next.scheduled_start_at))}`;
   }
   return "";
 }
@@ -67,6 +68,73 @@ function Rail({ done, children }: { done: boolean; children: React.ReactNode }) 
 const NODE =
   "relative mt-[9px] grid h-3.5 w-3.5 place-items-center rounded-full border-2 bg-card text-[8px] font-semibold";
 
+/**
+ * Actividades del día colgadas de la visita a la que pertenecen: cada registro trae su
+ * `visit_id`, así que se cuelga de esa visita de la ruta. Las que no cuelgan de ninguna
+ * (una visita que la ruta no trae) van aparte al final, para no perderlas de vista.
+ */
+function groupRegister({ visits, register }: IAdvisorVisitDetail) {
+  const routeIds = new Set(visits.route.map((v) => v.visit_id));
+  const byVisit = new Map<number, IAdvisorVisitDetailRegister[]>();
+  const orphans: IAdvisorVisitDetailRegister[] = [];
+
+  for (const r of register) {
+    if (!routeIds.has(r.visit_id)) {
+      orphans.push(r);
+      continue;
+    }
+    const list = byVisit.get(r.visit_id);
+    if (list) list.push(r);
+    else byVisit.set(r.visit_id, [r]);
+  }
+  return { byVisit, orphans };
+}
+
+/**
+ * Actividades de una visita. La regla de la izquierda las ata a la visita, pero el texto
+ * va al mismo tamaño y color que el de la visita: son sus hijos, no notas al pie.
+ */
+function RegisterRows({
+  rows,
+  onJumpTo
+}: {
+  rows: IAdvisorVisitDetailRegister[];
+  onJumpTo: (minute: number) => void;
+}) {
+  return (
+    <ol className="ml-1 mt-1 flex flex-col border-l-2 border-border pl-2.5">
+      {rows.map((r) => (
+        <li
+          key={r.response_id}
+          className="grid cursor-pointer grid-cols-[34px_9px_minmax(0,1fr)_auto] items-center gap-x-2 rounded-[6px] py-[5px] text-[12px] leading-[1.35] text-foreground transition-colors hover:bg-secondary"
+          // La visita padre también es clicable: sin cortar, el salto acabaría en el de
+          // la visita y el de la actividad se perdería.
+          onClick={(e) => {
+            e.stopPropagation();
+            onJumpTo(minutesOfDay(r.at));
+          }}
+        >
+          <span className="text-[11px] tabular-nums text-muted-foreground">
+            {fmtClock(minutesOfDay(r.at))}
+          </span>
+          <i
+            className={cn("h-1.5 w-1.5 rounded-full", r.effective ? "bg-[#9bb514]" : "bg-border")}
+          />
+          <span className="truncate">{r.client_name}</span>
+          <span
+            className={cn(
+              "whitespace-nowrap text-[11px]",
+              r.effective ? "font-medium text-foreground/75" : "text-muted-foreground"
+            )}
+          >
+            {r.effective ? "Efectiva" : "No efectiva"}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /** Vista de un asesor desde su detalle del día: estado, actividades, KPIs y ruta. */
 export default function AdvisorDetail({
   detail: d,
@@ -83,6 +151,7 @@ export default function AdvisorDetail({
   const startText = dayStart != null ? fmtClock(dayStart) : "—";
   const lastSignal = tracking.last_signal_at ? minutesOfDay(tracking.last_signal_at) : null;
   const maxHour = Math.max(1, ...activities.by_hour.map((h) => h.count));
+  const { byVisit, orphans } = groupRegister(d);
 
   const tiles: { label: string; value: string | number; suffix?: string; detail: string }[] = [
     {
@@ -168,9 +237,7 @@ export default function AdvisorDetail({
       <div className="mt-3 rounded-xl border border-border px-3 py-2.5">
         <div className="flex items-baseline justify-between gap-2 text-xs font-semibold text-foreground">
           <span>Actividades</span>
-          <b className="whitespace-nowrap text-xl font-semibold">
-            {activities.registered}
-          </b>
+          <b className="whitespace-nowrap text-xl font-semibold">{activities.registered}</b>
         </div>
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-[3px] bg-secondary">
           <i
@@ -265,6 +332,7 @@ export default function AdvisorDetail({
           const scheduled = v.status_code === "SCHEDULED";
           const inProgress = v.status_code === "IN_PROGRESS";
           const started = v.started_at ? minutesOfDay(v.started_at) : null;
+          const rows = byVisit.get(v.visit_id);
 
           return (
             <li
@@ -337,10 +405,29 @@ export default function AdvisorDetail({
                     </>
                   )}
                 </div>
+                {rows && rows.length > 0 && <RegisterRows rows={rows} onJumpTo={onJumpTo} />}
               </div>
             </li>
           );
         })}
+
+        {/* Actividades de visitas que la ruta no trae: al final, sin visita que las sostenga. */}
+        {orphans.length > 0 && (
+          <li className={STATIC_ROW}>
+            <div className="pt-2 text-right text-[11px] tabular-nums text-muted-foreground">
+              {orphans.length}
+            </div>
+            <Rail done={false}>
+              <div className={NODE} style={{ borderColor: palette.ink2 }} />
+            </Rail>
+            <div className="min-w-0 pb-2.5 pt-1.5">
+              <div className="text-[12.5px] font-semibold leading-[1.3] text-foreground">
+                Actividades sin visita
+              </div>
+              <RegisterRows rows={orphans} onJumpTo={onJumpTo} />
+            </div>
+          </li>
+        )}
       </ol>
     </div>
   );

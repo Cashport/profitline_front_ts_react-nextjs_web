@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import type { IAdvisorVisitDetail } from "@/types/visits/IVisits";
 import { cn } from "@/utils/utils";
 
-import { ACTIVITY_HOURS } from "../../constants";
+import { ACTIVITY_HOURS, MISSING } from "../../constants";
 import type { IVisitsPalette } from "../../types";
 import { fmtClock, fmtNumber, initialsOf, minutesOfDay } from "../../utils/visits-format";
 import StatusPill from "../shared/status-pill";
@@ -14,6 +14,8 @@ import StatusPill from "../shared/status-pill";
 interface AdvisorDayModalProps {
   /** Detalle del día del asesor abierto; null cierra el modal. */
   detail: IAdvisorVisitDetail | null;
+  /** El día que se mira, ya en texto ("Hoy · mié 15 oct"); el detalle no lo trae. */
+  dayLabel: string;
   palette: IVisitsPalette;
   isDark: boolean;
   onClose: () => void;
@@ -23,6 +25,7 @@ interface AdvisorDayModalProps {
 /** Cómo va el asesor en el día: meta, proyección al cierre, ritmo y registro de actividades. */
 export default function AdvisorDayModal({
   detail,
+  dayLabel,
   palette,
   isDark,
   onClose,
@@ -41,20 +44,104 @@ export default function AdvisorDayModal({
       rootClassName={isDark ? "dark" : undefined}
       styles={{ content: { padding: 0, overflow: "hidden", borderRadius: 16 } }}
     >
-      {detail && (
-        <DayContent
-          detail={detail}
-          palette={palette}
-          onClose={onClose}
-          onShowOnMap={onShowOnMap}
-        />
-      )}
+      {detail &&
+        (hasActivities(detail) ? (
+          <DayContent
+            detail={detail}
+            dayLabel={dayLabel}
+            palette={palette}
+            onClose={onClose}
+            onShowOnMap={onShowOnMap}
+          />
+        ) : (
+          <NoActivities
+            detail={detail}
+            dayLabel={dayLabel}
+            palette={palette}
+            onClose={onClose}
+            onShowOnMap={onShowOnMap}
+          />
+        ))}
     </Modal>
+  );
+}
+
+/**
+ * Sin actividades el backend no manda `best_hour`: llega null, no viene, o llega como
+ * lista vacía. En cualquiera de los tres casos no hay día que mostrar.
+ */
+function hasActivities(d: IAdvisorVisitDetail): boolean {
+  const best = d.activities.best_hour as unknown;
+  if (best == null) return false;
+  return Array.isArray(best) ? best.length > 0 : true;
+}
+
+/** Modal del día de un asesor sin actividades: misma cabecera y pie, sólo el mensaje. */
+function NoActivities({
+  detail: d,
+  dayLabel,
+  palette,
+  onClose,
+  onShowOnMap
+}: Omit<AdvisorDayModalProps, "detail" | "isDark"> & { detail: IAdvisorVisitDetail }) {
+  const color = palette.status[d.state];
+
+  return (
+    <div className="wallet-scope flex max-h-[calc(100vh-40px)] flex-col bg-card text-foreground">
+      <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+        <div
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-xs font-semibold"
+          style={{ borderColor: color }}
+        >
+          {initialsOf(d.user.userName)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[17px] font-semibold">{d.user.userName}</h3>
+          <p className="mt-px flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {d.zones.length > 0 && (
+              <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
+            )}
+            <StatusPill label={d.state_name} color={color} />
+            <span className="whitespace-nowrap">{dayLabel}</span>
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Cerrar"
+          onClick={onClose}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="grid flex-1 place-items-center px-5 py-12 text-center">
+        <p className="text-sm text-muted-foreground">No tiene actividades en el día.</p>
+      </div>
+
+      <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-10 rounded-[10px] px-3.5 text-[13.5px] font-semibold text-foreground transition-colors hover:bg-secondary"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          onClick={onShowOnMap}
+          className="h-10 rounded-[10px] bg-[#cbe71e] px-[30px] text-[13.5px] font-semibold text-[#141414] transition-colors hover:bg-[#bfd916]"
+        >
+          Ver en mapa
+        </button>
+      </div>
+    </div>
   );
 }
 
 function DayContent({
   detail: d,
+  dayLabel,
   palette,
   onClose,
   onShowOnMap
@@ -77,7 +164,11 @@ function DayContent({
       value: visits.effectivity_pct != null ? fmtNumber(visits.effectivity_pct) : "—",
       suffix: visits.effectivity_pct != null ? "%" : undefined
     },
-    { label: "Recorrido", value: fmtNumber(tracking.distance_km, 1), suffix: "km" }
+    {
+      label: "Recorrido",
+      value: tracking.distance_km ? fmtNumber(tracking.distance_km, 1) : MISSING,
+      suffix: "km"
+    }
   ];
 
   return (
@@ -96,7 +187,9 @@ function DayContent({
               <span className="whitespace-nowrap">Zona {d.zones.join(", ")}</span>
             )}
             <StatusPill label={d.state_name} color={color} />
-            <span className="whitespace-nowrap">Hoy · corte {fmtClock(cutoff)}</span>
+            <span className="whitespace-nowrap">
+              {dayLabel} · corte {fmtClock(cutoff)}
+            </span>
           </p>
         </div>
         <button
@@ -230,7 +323,10 @@ function DayContent({
                     {fmtClock(minutesOfDay(r.at))}
                   </span>
                   <i
-                    className={cn("h-2 w-2 rounded-full", r.effective ? "bg-[#9bb514]" : "bg-border")}
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      r.effective ? "bg-[#9bb514]" : "bg-border"
+                    )}
                   />
                   <span className="truncate">{r.client_name}</span>
                   <span className="whitespace-nowrap text-[11px] text-muted-foreground max-[520px]:hidden">
