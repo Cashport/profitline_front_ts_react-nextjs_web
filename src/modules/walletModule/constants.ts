@@ -30,6 +30,7 @@ export const ORDEN_EST: EstadoKey[] = [
   "abono",
   "novedad",
   "sin_conciliar",
+  "nota_debito",
   "saldo",
   "saldo_factura",
   "glosado",
@@ -116,6 +117,15 @@ export const EST_META: Record<EstadoKey, EstadoMeta> = {
     chip: "warn",
     chipTxt: "Devolución",
     corta: "Documento de devolución"
+  },
+  /* Documento de cartera propio del proyecto 166 (Gilead): suma como una
+     factura sin conciliar, pero se distingue con nombre propio. */
+  nota_debito: {
+    nom: "Nota de débito",
+    bg: "bg-wallet-risk",
+    chip: "crit",
+    chipTxt: "Sin gestión",
+    corta: "Nota de débito sin conciliar"
   },
   otros: {
     nom: "Otros",

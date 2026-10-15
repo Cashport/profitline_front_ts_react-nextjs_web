@@ -59,7 +59,8 @@ const ESTADO_BY_STATUS_KEY: Record<string, EstadoKey> = {
   SALDO: "saldo",
   SALDO_FACTURA: "saldo_factura",
   GLOSADO: "glosado",
-  DEVOLUCION: "devolucion"
+  DEVOLUCION: "devolucion",
+  NOTA_DEBITO: "nota_debito"
 };
 
 /** Un estado sin categoría propia nunca se descarta: si se descartara, la barra
