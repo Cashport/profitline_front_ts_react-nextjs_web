@@ -30,3 +30,4 @@ export function BotStatusBadge({ status }: { status: BotStatus }) {
     </Badge>
   );
 }
+

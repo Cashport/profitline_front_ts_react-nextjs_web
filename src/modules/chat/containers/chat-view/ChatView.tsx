@@ -15,7 +15,7 @@ import AllChats from "../../components/all-chats";
 import ChatDetails from "../chat-details";
 import ChatThread from "../chat-thread";
 import MassMessageSheet from "../../components/mass-message-sheet/mass-message-sheet";
-import { auth } from "../../../../../firebase";
+import { getClientAuth } from "../../../../../firebase";
 import useClientSegmentationDetail from "@/hooks/useClientSegmentationDetail";
 
 export default function ChatInbox() {
@@ -41,7 +41,7 @@ export default function ChatInbox() {
   );
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(getClientAuth(), (user) => {
       if (activeConversation?.id && user?.uid) {
         connect({
           userId: user.uid

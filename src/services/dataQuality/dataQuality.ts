@@ -26,7 +26,10 @@ import {
   IFileType,
   IDataEmail,
   IRegion,
-  IPacksUploadResult
+  IPacksUploadResult,
+  IBotRunNowResult,
+  IBotHistoryList,
+  IVariableHistoryEntry
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -194,6 +197,22 @@ export const editIntake = async (
     return response.data;
   } catch (error) {
     console.error("Error editing intake:", error);
+    throw error;
+  }
+};
+
+// GET /data/client-archive-monthly/:id/variable-history: auditoria de cambios
+// (quien/cuando/que) de las variables de configuracion (credenciales) de una ingesta.
+export const getVariableHistory = async (
+  archiveId: number
+): Promise<IVariableHistoryEntry[]> => {
+  try {
+    const response: GenericResponse<IVariableHistoryEntry[]> = await API.get(
+      `${config.API_HOST}/data/client-archive-monthly/${archiveId}/variable-history`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching variable history:", error);
     throw error;
   }
 };
@@ -419,6 +438,38 @@ export const getFileHistory = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching file history:", error);
+    throw error;
+  }
+};
+
+// POST /data/bots/run-now/:scheduleId: ejecuta a demanda únicamente el schedule
+// indicado (no todos los bots). El header projectId lo inyecta el interceptor de API.
+export const runBotNow = async (scheduleId: number): Promise<IBotRunNowResult> => {
+  try {
+    const response: GenericResponse<IBotRunNowResult> = await API.post(
+      `${config.API_HOST}/data/bots/run-now/${scheduleId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error running bot:", error);
+    throw error;
+  }
+};
+
+// GET /data/bots/:scheduleId/history: historial real de ejecuciones (data.scheduler_runs),
+// más reciente primero (ya ordenado por backend).
+export const getBotHistory = async (
+  scheduleId: number,
+  page: number = 1,
+  limit: number = 20
+): Promise<IBotHistoryList> => {
+  try {
+    const response: GenericResponse<IBotHistoryList> = await API.get(
+      `${config.API_HOST}/data/bots/${scheduleId}/history?page=${page}&limit=${limit}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching bot history:", error);
     throw error;
   }
 };

@@ -28,7 +28,8 @@ import {
   Chats,
   FadersHorizontal,
   Invoice,
-  MapPin
+  MapPin,
+  Robot
 } from "@phosphor-icons/react";
 import { FileHeart } from "lucide-react";
 
@@ -209,6 +210,23 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
           />
         </Link>
       )} */}
+
+      {/* Salud de Automatizaciones: vive bajo Data Quality (origin/main no tiene un
+          permiso "SaludAutomatizaciones" propio en el catálogo, solo "DataQuality").
+          Reutiliza ese permiso real en vez de uno inventado. */}
+      {checkUserViewPermissions(project, "DataQuality") && (
+        <Link href="/data-quality/automations" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={<Robot size={iconSize} />}
+            className={
+              path.startsWith("/data-quality/automations") ? styles.buttonIcon : styles.buttonIconActive
+            }
+            onClick={(e) => handleNavClick(e, "/data-quality/automations")}
+          />
+        </Link>
+      )}
 
       {/* Chat */}
       {checkUserViewPermissions(project, "Whatsapp") && (
