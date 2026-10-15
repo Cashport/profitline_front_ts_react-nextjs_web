@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import dayjs, { type Dayjs } from "dayjs";
 
 import UiSearchInput from "@/components/ui/search-input";
@@ -38,6 +39,7 @@ import type {
   VisitsCameraTarget
 } from "../../types";
 import { hasActiveFilters, normalizeQuery, overviewBuckets } from "../../utils/visits-calc";
+import { DAY_PARAM, fmtDayLabel, formatDayParam, parseDayParam } from "../../utils/visits-format";
 import {
   isLiveVisible,
   livePositionAt,
@@ -58,19 +60,25 @@ const VisitsMap = dynamic(() => import("../../components/visits-map/visits-map")
   )
 });
 
-/** Aviso del panel y del mapa en los días que el API aún no trae. */
-const NOT_FROM_API = "Este día aún no llega del API.";
-
 /**
  * Visitas: seguimiento del día de los asesores en campo, desde GET
- * /visit-admin/today-visits (sólo hoy; los demás días quedan vacíos) y, para el asesor
- * abierto, su detalle del día. Los estados son los que manda el backend; el minuto `t`
- * de la línea de tiempo mueve a los asesores por sus puntos en el mapa.
+ * /visit-admin/today-visits y, para el asesor abierto, su detalle del día (recibe la
+ * misma fecha, así que ambos cargan para cualquier día). Los estados son los que manda
+ * el backend; el minuto `t` de la línea de tiempo mueve a los asesores por sus puntos
+ * en el mapa.
  */
 export default function VisitsView() {
   const { palette, isDark } = useVisitsPalette();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [today] = useState(() => dayjs().startOf("day"));
-  const [day, setDay] = useState<Dayjs>(today);
+  // El día que se mira vive en la URL (?date=YYYY-MM-DD), así que un link o un refresh
+  // abren el mismo día. Sin param, o con uno que no sea una fecha, se mira hoy.
+  const day = useMemo(
+    () => parseDayParam(searchParams.get(DAY_PARAM)) ?? today,
+    [searchParams, today]
+  );
   const offset = day.diff(today, "day");
   const dayMode: DayMode = offset < 0 ? "past" : offset > 0 ? "future" : "today";
   const future = dayMode === "future";
@@ -84,11 +92,9 @@ export default function VisitsView() {
         ? DAY_START_MIN
         : Math.min(DAY_END_MIN, Math.max(DAY_START_MIN, clock));
 
-  const { todayVisits, isLoading, error } = useTodayVisits();
-  const team = useMemo(
-    () => (dayMode === "today" ? (todayVisits?.users.map(toLiveAdvisor) ?? []) : []),
-    [dayMode, todayVisits]
-  );
+  const { dayVisits, isLoading, error } = useTodayVisits(formatDayParam(day), dayMode === "today");
+  // El endpoint recibe la fecha que se mira, así que el equipo sale para cualquier día.
+  const team = useMemo(() => dayVisits?.users.map(toLiveAdvisor) ?? [], [dayVisits]);
 
   const [filters, setFilters] = useState<IVisitsFilters>(EMPTY_VISITS_FILTERS);
   const [search, setSearch] = useState("");
@@ -104,19 +110,23 @@ export default function VisitsView() {
   const [dayOpen, setDayOpen] = useState(false);
 
   // El asesor abierto sale entero de su detalle del día: panel, mapa, línea de tiempo y
-  // chips. El resto del equipo, de today-visits.
+  // chips. El resto del equipo, de today-visits. El detalle se pide para el día que se
+  // mira, así que el asesor sigue abierto al cambiar de fecha y su panel se recarga.
   const openId = team.some((a) => a.id === selectedId) ? selectedId : null;
-  const { detail, error: detailError } = useAdvisorVisitDetail(openId);
+  const { detail, error: detailError } = useAdvisorVisitDetail(
+    openId,
+    formatDayParam(day),
+    dayMode === "today"
+  );
   const detailAdvisor = useMemo(() => (detail ? toDetailAdvisor(detail) : null), [detail]);
   const advisors = useMemo(
-    () =>
-      detailAdvisor ? team.map((a) => (a.id === detailAdvisor.id ? detailAdvisor : a)) : team,
+    () => (detailAdvisor ? team.map((a) => (a.id === detailAdvisor.id ? detailAdvisor : a)) : team),
     [team, detailAdvisor]
   );
 
   const { t, playing, speed, seek, togglePlay, toggleSpeed, goLive, pause } = useVisitsPlayback(
     now,
-    day.format("YYYY-MM-DD")
+    formatDayParam(day)
   );
   const isLive = dayMode === "today" && t === now;
 
@@ -146,40 +156,61 @@ export default function VisitsView() {
   const selected = advisors.find((a) => a.id === selectedId) ?? null;
   // El modal del día va sobre el detalle ya cargado del asesor abierto.
   const dayDetail = dayOpen && detail && selected === detailAdvisor ? detail : null;
-  const emptyText =
-    dayMode !== "today"
-      ? NOT_FROM_API
-      : error
-        ? "No se pudieron cargar las visitas de hoy."
-        : isLoading
-          ? "Cargando asesores…"
-          : advisors.length
-            ? "Ningún asesor coincide con el filtro."
-            : "No hay asesores en campo hoy.";
+  // "hoy" sólo encaja con el día en curso; para el que se mira el texto va sin él, o la
+  // fecha de la barra y el mensaje se contradicen.
+  const dayWord = dayMode === "today" ? "hoy" : "ese día";
+  const emptyText = error
+    ? `No se pudieron cargar las visitas de ${dayWord}.`
+    : isLoading
+      ? "Cargando asesores…"
+      : advisors.length
+        ? "Ningún asesor coincide con el filtro."
+        : `No hay asesores en campo ${dayWord}.`;
 
-  // El primer encuadre llega antes que los datos: se repite cuando aparecen los asesores,
-  // también al volver a hoy desde otro día.
+  // El primer encuadre llega antes que los datos: se repite cuando aparecen los asesores.
+  // `day` también entra porque los asesores ya no llegan vacíos al cambiar de día, así
+  // que `hasAdvisors` no da la señal por sí solo y el mapa se queda donde estaba.
   const hasAdvisors = advisors.length > 0;
   useEffect(() => {
     if (!hasAdvisors) return;
     requestCamera(
       selectedId != null ? { kind: "fit-advisor", advisorId: selectedId } : { kind: "fit-all" }
     );
-  }, [hasAdvisors]);
+  }, [hasAdvisors, day]);
 
   // Al abrir un asesor se encuadra con sus puntos de today-visits; su detalle puede
-  // traerlo en otro lado, así que se vuelve a encuadrar cuando llega.
+  // traerlo en otro lado, así que se vuelve a encuadrar cuando llega, y también al
+  // cambiar de día, que son otros puntos.
   const detailId = detailAdvisor?.id ?? null;
   useEffect(() => {
     if (detailId != null) requestCamera({ kind: "fit-advisor", advisorId: detailId });
-  }, [detailId]);
+  }, [detailId, day]);
+
+  /** Único escritor de la URL: el resto de params que trajera se respetan. */
+  const writeDayParam = useCallback(
+    (next: Dayjs) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(DAY_PARAM, formatDayParam(next));
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
+  // La URL siempre lleva el día: /visits a secas se completa con el de hoy, para que
+  // cualquier enlace diga qué se está mirando. Tras el replace el param coincide y el
+  // guard corta el efecto.
+  useEffect(() => {
+    if (searchParams.get(DAY_PARAM) !== formatDayParam(day)) writeDayParam(day);
+  }, [day, searchParams, writeDayParam]);
 
   const changeDay = (next: Dayjs) => {
     const nextDay = next.startOf("day");
     if (nextDay.isSame(day, "day")) return;
-    setDay(nextDay);
+    // El asesor abierto se queda abierto: su detalle se vuelve a pedir con la fecha
+    // nueva, así que cambiar de día no le cierra el panel.
     setLayers(layersFor(nextDay.isAfter(today, "day")));
     setHoveredId(null);
+    writeDayParam(nextDay);
   };
 
   const selectAdvisor = (id: number, focus?: LngLat) => {
@@ -322,7 +353,8 @@ export default function VisitsView() {
             <RankingPanel
               rows={view.rows}
               totalAdvisors={advisors.length}
-              kpis={dayMode === "today" ? view.kpis : null}
+              kpis={view.kpis}
+              dayMode={dayMode}
               t={t}
               palette={palette}
               emptyText={emptyText}
@@ -345,7 +377,7 @@ export default function VisitsView() {
             palette={palette}
             isDark={isDark}
             camera={camera}
-            notice={dayMode === "today" ? null : NOT_FROM_API}
+            notice={null}
             onSelectAdvisor={selectAdvisor}
             onJumpToRun={jumpToRun}
             onFlyTo={flyTo}
@@ -373,6 +405,7 @@ export default function VisitsView() {
 
       <AdvisorDayModal
         detail={dayDetail}
+        dayLabel={fmtDayLabel(day, today)}
         palette={palette}
         isDark={isDark}
         onClose={() => setDayOpen(false)}

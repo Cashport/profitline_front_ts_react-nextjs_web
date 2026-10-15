@@ -174,7 +174,7 @@ export interface IAdvisorVisitDetailTracking {
   last_signal_at: string | null;
   last_signal_seconds_ago: number | null;
   distance_meters: number;
-  distance_km: number;
+  distance_km?: number;
   /** Puntos del día, en orden cronológico; el último es la última posición conocida. */
   locations: ITodayVisitsLocation[];
 }
