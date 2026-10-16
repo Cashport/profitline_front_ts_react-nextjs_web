@@ -182,7 +182,7 @@ export interface IClientDetailDataArchive {
   id_type_archive: number;
   tipo_archivo: string;
   periodicity: string;
-  periodicity_json: IPeriodicity | null;
+  periodicity_json: IPeriodicity;
   strategy: string;
   input_file_skip_rows: number;
   url: string;
@@ -194,6 +194,21 @@ export interface IClientDetailDataArchive {
     description: string;
   } | null;
   data_type: IDataType;
+}
+
+// Espejo de VariableHistoryEntryDTO (cashport-backend), una fila de auditoría de
+// data.client_data_variable_history. GET /data/client-archive-monthly/:id/variable-history.
+export interface IVariableHistoryEntry {
+  id: number;
+  id_client_data: number;
+  id_data_archives: number;
+  variable_key: string;
+  change_type: "CREATED" | "UPDATED" | "DELETED";
+  old_value: string | null;
+  new_value: string | null;
+  changed_by_user_id: number | null;
+  changed_by_email: string | null;
+  created_at: string;
 }
 
 export interface IClientDetailArchiveClient {
@@ -218,25 +233,6 @@ export interface IClientDetailArchiveClient {
   created_at: string;
   updated_at: string | null;
   data_type: IDataType;
-}
-
-// Un evento del historial de versiones de un archivo (archives_client_data).
-// `event_type` se deja como string: sólo se ha confirmado "created" y los valores
-// no contemplados caen a un ícono/color neutro en lugar de romper el tipado.
-export interface IFileHistoryEvent {
-  id: number;
-  archives_client_data_id: number;
-  file_name: string;
-  url_s3: string | null;
-  version: number;
-  user_id: number | null;
-  user_name: string | null;
-  event_type: string;
-  event_description: string;
-  size_bytes: number;
-  tag: string | null;
-  metadata: { evidence_url: string | null } | null;
-  occurred_at: string;
 }
 
 export interface IClientDetailArchivesByType {
@@ -729,18 +725,96 @@ export interface IRegion {
   country_count: number;
 }
 
+// Espejo de BotStatusDTO (cashport-backend, GET /data/bots/status, rama Develop/API-bots
+// -- verificado leyendo src/model/data/data.dto.ts de ese repo). `estado` lista los 6
+// valores reales que calcula el backend hoy, incluido "EN_REVISION" (regla de negocio ya
+// implementada server-side: última ejecución exitosa con la inmediatamente anterior
+// fallida). PENDIENTE y SIN_EJECUCIONES son estados reales propios, NO sinónimos de
+// EN_REVISION.
 export interface IBotStatusItem {
+  schedule_id: number;
+  id_client_data: number;
   cliente: string;
   bot: string;
-  pais: string;
-  tipo_archivo: string;
+  pais: string | null;
+  tipo_archivo: string | null;
   periodicidad: string[];
+  cron_expression: string;
+  horario_descripcion: string | null;
   proxima_ejecucion: string | null;
   ultima_ejecucion: string | null;
-  estado: "EXITOSO" | "FALLIDO" | "EN_EJECUCION";
+  estado: "SIN_EJECUCIONES" | "PENDIENTE" | "EN_EJECUCION" | "EXITOSO" | "FALLIDO" | "EN_REVISION";
   cantidad_ejecuciones: number;
+  ejecuciones_hoy: number;
+  fallas_hoy: number;
   error: string | null;
-  error_legible?: string | null;
+  error_legible: string | null;
+  codigo_error: string | null;
+  categoria_error: string | null;
+  diagnostico: string | null;
+  detalle_tecnico: string | null;
+  paso_fallido: string | null;
+  accion_requerida: string | null;
+  // Siempre null hoy: data.scheduler_runs no tiene columna de evidencia/captura.
+  evidencia_url: string | null;
+}
+
+// Espejo de BotRunNowResultDTO (cashport-backend), respuesta de
+// POST /data/bots/run-now/:scheduleId.
+export interface IBotRunNowResult {
+  scheduleId: number;
+  accepted: boolean;
+  schedulerStatus: number;
+  schedulerMessage: string;
+}
+
+// Espejo de BotHistoryEntryDTO (cashport-backend), una fila real de data.scheduler_runs.
+// `estado` NO incluye "EN_REVISION": ese es un estado agregado de BotStatusDTO, no de
+// una corrida individual.
+export interface IBotHistoryEntry {
+  id: number;
+  schedule_id: number;
+  fecha_inicio: string;
+  fecha_fin: string | null;
+  estado: "PENDIENTE" | "EN_EJECUCION" | "EXITOSO" | "FALLIDO";
+  duracion_segundos: number | null;
+  error: string | null;
+  error_legible: string | null;
+  codigo_error: string | null;
+  categoria_error: string | null;
+  diagnostico: string | null;
+  detalle_tecnico: string | null;
+  paso_fallido: string | null;
+  accion_requerida: string | null;
+  evidencia_url: string | null;
+}
+
+// Espejo de BotHistoryListResponseDTO, respuesta de GET /data/bots/:scheduleId/history.
+export interface IBotHistoryList {
+  data: IBotHistoryEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+// Un evento del historial de versiones de un archivo (archives_client_data).
+// `event_type` se deja como string: sólo se ha confirmado "created" y los valores
+// no contemplados caen a un ícono/color neutro en lugar de romper el tipado.
+export interface IFileHistoryEvent {
+  id: number;
+  archives_client_data_id: number;
+  file_name: string;
+  url_s3: string | null;
+  version: number;
+  user_id: number | null;
+  user_name: string | null;
+  event_type: string;
+  event_description: string;
+  size_bytes: number;
+  tag: string | null;
+  metadata: { evidence_url: string | null } | null;
+  occurred_at: string;
 }
 
 // -----------------------------------------------------------------------------
