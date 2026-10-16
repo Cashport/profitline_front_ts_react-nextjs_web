@@ -814,3 +814,60 @@ export interface IReferenceOwnerOption {
   value: number;
   label: string;
 }
+
+// -----------------------------------------------------------------------------
+// HU GMN + MATCH: catalogo maestro de GMN oficiales (data.catalog_material_master).
+// El GMN oficial es `Material_Num` (texto); la clave logica es (pais, GMN).
+// -----------------------------------------------------------------------------
+export interface IGmnOficialesCountry {
+  code: string;
+  idCountry: number;
+}
+
+export interface IGmnOficialesConflict {
+  countryCode: string;
+  gmn: string;
+  rowNumber: number;
+}
+
+export interface IGmnOficialesValidationReport {
+  ok: boolean;
+  sheetName: string;
+  rowsRead: number;
+  rowsSkipped: number;
+  rowsDuplicated: number;
+  rowsConflict: number;
+  countries: IGmnOficialesCountry[];
+  conflicts: IGmnOficialesConflict[];
+}
+
+export interface IGmnOficialesLoadResult {
+  loadId: number;
+  fileName: string;
+  checksumSha256: string;
+  sheetName: string;
+  rowsRead: number;
+  rowsSkipped: number;
+  rowsDuplicated: number;
+  rowsConflict: number;
+  rowsInserted: number;
+  rowsUpdated: number;
+  countries: IGmnOficialesCountry[];
+  conflictDetails: IGmnOficialesConflict[];
+}
+
+export interface IGmnOficialesLoadRow {
+  id: number;
+  file_name: string;
+  checksum_sha256: string | null;
+  rows_read: number;
+  rows_inserted: number;
+  rows_updated: number;
+  rows_duplicated: number;
+  rows_conflict: number;
+  rows_skipped: number;
+  status: string;
+  error_message: string | null;
+  uploaded_by: number | null;
+  created_at: string;
+}

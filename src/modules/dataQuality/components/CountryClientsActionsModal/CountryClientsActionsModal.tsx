@@ -17,6 +17,7 @@ type CountryClientsActionsModalProps = {
   onDownloadMaterials?: () => void;
   onDownloadPointsOfSale?: () => void;
   onUploadPacks?: () => void;
+  onUploadGmnOficiales?: () => void;
   onUploadInTransitHaleon?: () => void;
   onAddEmails?: () => void;
   isInDetailView?: boolean;
@@ -34,6 +35,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
   onDownloadMaterials,
   onDownloadPointsOfSale,
   onUploadPacks,
+  onUploadGmnOficiales,
   onUploadInTransitHaleon,
   onAddEmails,
   isInDetailView = false,
@@ -94,6 +96,13 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
               title="Cargar Packs"
               onClick={onUploadPacks}
             />
+            {onUploadGmnOficiales && (
+              <ButtonGenerateAction
+                icon={<UploadSimple size={20} />}
+                title="GMN oficiales"
+                onClick={onUploadGmnOficiales}
+              />
+            )}
             {isInDetailView && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}

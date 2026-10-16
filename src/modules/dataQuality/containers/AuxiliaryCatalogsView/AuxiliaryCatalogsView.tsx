@@ -8,6 +8,7 @@ import Header from "@/components/organisms/header";
 import { AuxiliaryFilesTable } from "../../components/AuxiliaryFilesTable";
 import { CountryClientsActionsModal } from "../../components/CountryClientsActionsModal/CountryClientsActionsModal";
 import { ModalUploadFile } from "@/components/atoms/ModalUploadFile/ModalUploadFile";
+import { ModalGmnOficiales } from "../../components/ModalGmnOficiales/ModalGmnOficiales";
 
 import { Button } from "@/modules/chat/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -34,6 +35,7 @@ export default function AuxiliaryCatalogsView() {
 
   const [actionsOpen, setActionsOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [gmnOpen, setGmnOpen] = useState(false);
   const [uploadKind, setUploadKind] = useState<UploadKind>("materials");
   const [uploading, setUploading] = useState(false);
   const [downloadingCatalog, setDownloadingCatalog] = useState(false);
@@ -131,8 +133,14 @@ export default function AuxiliaryCatalogsView() {
           }
           onUploadPointsOfSale={() => openUpload("pos")}
           onUploadPacks={() => openUpload("packs")}
+          onUploadGmnOficiales={() => {
+            setActionsOpen(false);
+            setGmnOpen(true);
+          }}
         />
       )}
+
+      <ModalGmnOficiales isOpen={gmnOpen} onClose={() => setGmnOpen(false)} />
 
       <ModalUploadFile
         isOpen={uploadOpen}
