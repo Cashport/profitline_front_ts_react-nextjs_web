@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import RecaudoLayout from "@/modules/recaudoModule/containers/recaudo-layout/recaudo-layout";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Dashboard"
+  title: "Torre de control de recaudo",
+  description: "Meta, forecast, acuerdos de pago y PNA del mes"
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ViewWrapper headerTitle="Dashboard">{children}</ViewWrapper>;
+  return <RecaudoLayout>{children}</RecaudoLayout>;
 }

@@ -74,6 +74,7 @@ export interface ITodayVisitsUser {
   user_id: number;
   /** completed + failed + pending. */
   total_visits: number;
+  total_activities: number;
   completed_visits: number;
   failed_visits: number;
   /** Por hacer, incluida la visita en curso. */
@@ -92,6 +93,7 @@ export interface ITodayVisitsUser {
 export interface ITodayVisitsSummary {
   total_visits: number;
   total_users: number;
+  total_activities: number;
   completed_visits: number;
   failed_visits: number;
 }
@@ -172,7 +174,7 @@ export interface IAdvisorVisitDetailTracking {
   last_signal_at: string | null;
   last_signal_seconds_ago: number | null;
   distance_meters: number;
-  distance_km: number;
+  distance_km?: number;
   /** Puntos del día, en orden cronológico; el último es la última posición conocida. */
   locations: ITodayVisitsLocation[];
 }

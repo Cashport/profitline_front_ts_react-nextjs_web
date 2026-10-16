@@ -6,16 +6,27 @@ import { fmt } from "../../../utils/clients-home-format";
 
 const sum = (a: ClientsHomeAgingAmounts) => AGING_BUCKETS.reduce((acc, b) => acc + a[b.key], 0);
 
-/** Ancho y alto aproximado, para ubicarlo arriba o abajo de la celda. */
-export const AGING_TIP_SIZE = { width: 760, height: 210 };
+/** Ancho y alto aproximado (con la fila PNA), para ubicarlo arriba o abajo de la celda. */
+export const AGING_TIP_SIZE = { width: 760, height: 240 };
 
-/** Tooltip de la celda Cartera: Facturas, Saldos y Notas por edad, con su total. */
+/**
+ * Tooltip de la celda Cartera: Facturas, Saldos y Notas por edad, con su total.
+ * Si el proyecto resta los PNA de la cartera, van en su propia fila (sin edad,
+ * solo en la columna Total) para que el total cuadre con la columna Cartera.
+ */
 export default function AgingBreakdownTooltip({ row }: { row: IClientsHomeRow }) {
-  const groups = [
-    { label: "Facturas", values: row.breakdown.invoices, total: false },
-    { label: "Saldos", values: row.breakdown.balances, total: false },
-    { label: "Notas", values: row.breakdown.creditNotes, total: false },
-    { label: "Total", values: row.breakdown.total, total: true }
+  const pna = row.breakdown.unappliedPayments ?? 0;
+  const groups: {
+    label: string;
+    values: ClientsHomeAgingAmounts | null;
+    extra: number;
+    total: boolean;
+  }[] = [
+    { label: "Facturas", values: row.breakdown.invoices, extra: 0, total: false },
+    { label: "Saldos", values: row.breakdown.balances, extra: 0, total: false },
+    { label: "Notas", values: row.breakdown.creditNotes, extra: 0, total: false },
+    ...(pna ? [{ label: "PNA", values: null, extra: pna, total: false }] : []),
+    { label: "Total", values: row.breakdown.total, extra: pna, total: true }
   ];
 
   const cell = (v: number, bold: boolean, border: string, key: string) => (
@@ -67,9 +78,9 @@ export default function AgingBreakdownTooltip({ row }: { row: IClientsHomeRow })
               {g.label}
             </span>,
             ...AGING_BUCKETS.map((b) =>
-              cell(g.values[b.key], g.total, border, `${g.label}-${b.key}`)
+              cell(g.values ? g.values[b.key] : 0, g.total, border, `${g.label}-${b.key}`)
             ),
-            cell(sum(g.values), true, border, `${g.label}-total`)
+            cell((g.values ? sum(g.values) : 0) + g.extra, true, border, `${g.label}-total`)
           ];
         })}
       </div>

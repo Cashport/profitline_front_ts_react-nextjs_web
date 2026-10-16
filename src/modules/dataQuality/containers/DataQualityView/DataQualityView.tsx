@@ -8,6 +8,8 @@ import { getSummaryCountries } from "@/services/dataQuality/dataQuality";
 import { useAppStore } from "@/lib/store/store";
 import {
   checkUserComponentPermission,
+  canManageAuxiliaries,
+  canReadDataQuality,
   cn,
   hasDataQualityManagementPermission
 } from "@/utils/utils";
@@ -23,6 +25,9 @@ import { ISummaryCountries } from "@/types/dataQuality/IDataQuality";
 export default function DataQualityView() {
   const selectedProject = useAppStore((projects) => projects.selectedProject);
   const { ID } = useAppStore((projects) => projects.selectedProject);
+
+  const canReadData = canReadDataQuality(selectedProject);
+  const canManageAux = canManageAuxiliaries(selectedProject);
 
   const [summaryData, setSummaryData] = useState<ISummaryCountries | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,10 +52,36 @@ export default function DataQualityView() {
       }
     };
 
-    if (ID) {
+    if (ID && canReadData) {
       fetchData();
+    } else {
+      setIsLoading(false);
     }
-  }, [ID]);
+  }, [ID, canReadData]);
+
+  // Rol sin acceso a la vista general (p.ej. Admin Global Aux): no invocar countries-summary
+  // y no exponer navegación a países/clientes.
+  if (!canReadData) {
+    return (
+      <div className="flex flex-col gap-4">
+        <Header title="Data Quality" />
+        <div className="flex items-center justify-end">
+          {canManageAux && (
+            <Link href="/data-quality/auxiliary-catalogs">
+              <Button variant="outline" className="text-[#141414]">
+                Auxiliares
+              </Button>
+            </Link>
+          )}
+        </div>
+        <div className="bg-white rounded-lg p-12 text-center">
+          <p className="text-gray-500 text-lg">
+            No tienes acceso a la vista general de Data Quality.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -104,10 +135,17 @@ export default function DataQualityView() {
         </div>
 
         <div className="flex gap-2">
-          {hasDataQualityManagementPermission(selectedProject) && (
+          {(hasDataQualityManagementPermission(selectedProject) || canManageAux) && (
             <Link href="/data-quality/auxiliary-catalogs">
               <Button variant="outline" className="text-[#141414]">
                 Auxiliares
+              </Button>
+            </Link>
+          )}
+          {hasDataQualityManagementPermission(selectedProject) && (
+            <Link href="/data-quality/references">
+              <Button variant="outline" className="text-[#141414]">
+                Referencias
               </Button>
             </Link>
           )}

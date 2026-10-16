@@ -94,6 +94,7 @@ export interface ILiveAdvisor {
   id: number;
   name: string;
   initials: string;
+  total_activities: number;
   /** Estado según el backend (`state`): no cambia con el minuto que se mira. */
   status: AdvisorStatus;
   /** Etiqueta del backend (`state_name`). */

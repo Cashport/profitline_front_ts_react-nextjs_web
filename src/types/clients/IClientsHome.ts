@@ -98,6 +98,8 @@ export interface IClientsHomeRow {
     invoices: ClientsHomeAgingAmounts;
     balances: ClientsHomeAgingAmounts;
     creditNotes: ClientsHomeAgingAmounts;
+    /** PNA que resta la columna Cartera (negativo, sin edad); 0 si el proyecto no lo resta. */
+    unappliedPayments?: number;
     total: ClientsHomeAgingAmounts;
   };
   creditNotes: IClientsHomeAmountCount;

@@ -380,14 +380,13 @@ export default function VisitsMap(props: VisitsMapProps) {
         selected: selectedId === a.id,
         hovered: hoveredId === a.id,
         pulse: isLive && ACTIVE_STATUSES.includes(status),
-        count: a.activitiesOk,
+        count: a.total_activities,
         leader: leaderId === a.id
       });
       const opacity = focused ? (focused.id === a.id ? 1 : 0.28) : visibleIds.has(a.id) ? 1 : 0.18;
       // En el hijo: la opacidad de la raíz la escribe Mapbox (niebla, globo, terreno).
       entry.handles.body.style.opacity = String(opacity);
-      entry.handles.root.style.zIndex =
-        selectedId === a.id ? "3" : hoveredId === a.id ? "2" : "";
+      entry.handles.root.style.zIndex = selectedId === a.id ? "3" : hoveredId === a.id ? "2" : "";
     });
 
     // Vista de equipo: recorrido hecho y lo que falta hasta la próxima visita.
@@ -414,17 +413,19 @@ export default function VisitsMap(props: VisitsMapProps) {
       if (!opacity) return [];
       const style =
         p.phase === "done"
-          ? { color: palette.ink3, radius: 4.5, fill: 0.95 }
+          ? { color: palette.accent, radius: 6.5, fill: 0.95 }
           : p.phase === "now"
-            ? { color: palette.accent, radius: 5.5, fill: 1 }
-            : { color: palette.bone, radius: 4, fill: 0 };
+            ? { color: palette.accent, radius: 8, fill: 1 }
+            : { color: palette.accent, radius: 6, fill: 0 };
       return [
         pointFeature<ClientDotProperties>(p.position, {
           id,
           color: style.color,
           radius: style.radius,
-          fillOpacity: style.fill * opacity,
-          strokeOpacity: opacity * 0.95
+          fillOpacity: 1 * opacity,
+          strokeOpacity: opacity,
+          haloOpacity: opacity,
+          under: palette.under
         })
       ];
     });

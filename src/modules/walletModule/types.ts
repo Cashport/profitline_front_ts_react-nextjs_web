@@ -19,6 +19,7 @@ export type EstadoKey =
   | "saldo_factura"
   | "glosado"
   | "devolucion"
+  | "nota_debito"
   | "otros";
 
 /**
