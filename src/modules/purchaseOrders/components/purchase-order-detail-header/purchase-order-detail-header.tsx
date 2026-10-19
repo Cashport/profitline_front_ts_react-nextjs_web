@@ -91,6 +91,10 @@ export function PurchaseOrderDetailHeader({
   // Abbott 204: en "Generación TXT ERP" solo queda disponible "Descargar TXT ERP".
   const txtErpLocked = data?.status_name === "Generación TXT ERP";
 
+  // TEMPORAL (Abbott 204): "Generar TXT ERP" deshabilitado.
+  // Se conserva el handler y la llamada para reactivar la acción sin reimplementarla.
+  const isTxtErpTemporarilyDisabled = data?.project_id === 204;
+
   const handleDownloadTxtErp = async () => {
     if (!orderId) return;
     setIsTxtErpLoading(true);
@@ -293,7 +297,7 @@ export function PurchaseOrderDetailHeader({
             label: "Descargar TXT ERP",
             icon: <FileOutput className="h-4 w-4" />,
             onClick: handleDownloadTxtErp,
-            disabled: isTxtErpLoading
+            disabled: isTxtErpTemporarilyDisabled || isTxtErpLoading
           } as DropdownItem,
           {
             key: "txt-ean",
