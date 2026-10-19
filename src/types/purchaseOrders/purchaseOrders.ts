@@ -109,6 +109,9 @@ export interface IPurchaseOrderDetail {
   client_name: string;
   client_nit: string;
   delivery_address: IPurchaseOrderDeliveryAddress;
+  region?: string | null;
+  delivery_destination_code?: string | null;
+  cedis?: string | null;
   created_at: string;
   updated_at: string;
   created_by_name: string;
@@ -206,6 +209,7 @@ export interface IPurchaseOrderProduct {
 
 export interface IPurchaseOrderOriginal {
   po_product_description: string;
+  po_sku?: string | null;
   po_quantity: number;
   po_unit_price: number;
   po_total_price: number;
