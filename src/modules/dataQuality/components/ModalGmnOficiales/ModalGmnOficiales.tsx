@@ -267,21 +267,23 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <StatChip label="Filas leídas" value={fmt(report.rowsRead)} />
               <StatChip label="Países" value={fmt(report.countries.length)} />
+              <StatChip label="Conservadas" value={fmt(report.rowsKept)} />
               <StatChip label="Duplicados idénticos" value={fmt(report.rowsDuplicated)} />
-              <StatChip label="Conflictos" value={fmt(report.rowsConflict)} />
+              <StatChip label="Claves multifila" value={fmt(report.duplicateGmnKeys)} />
               <StatChip label="Filas omitidas" value={fmt(report.rowsSkipped)} />
             </div>
 
-            {report.conflicts.length > 0 && (
+            {(report.duplicateGmnKeys ?? 0) > 0 && (
               <p className="text-xs text-[#B45309]">
-                {report.conflicts.length} conflicto(s): mismo país+GMN con datos distintos. Se
-                conserva la primera aparición.
+                {report.duplicateGmnKeys} clave(s) país+GMN con varias filas distintas: se conservan
+                todas (no se colapsan).
               </p>
             )}
 
             <div className="rounded-lg bg-[#F0FDF4] p-3 text-xs text-[#166534]">
-              Actualizará el catálogo oficial utilizado para calcular MATCH. No reemplaza el catálogo
-              completo: los registros ausentes del archivo no se eliminan ni desactivan.
+              Actualizará el catálogo oficial utilizado para calcular MATCH. Las filas idénticas se
+              deduplican; las distintas con el mismo país+GMN se conservan. Los registros que dejen de
+              aparecer en el archivo quedarán <b>inhabilitados</b>.
             </div>
 
             <div className="flex justify-end gap-2">
@@ -311,16 +313,20 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               <StatChip label="Filas leídas" value={fmt(result.rowsRead)} />
+              <StatChip label="Conservadas" value={fmt(result.rowsKept)} />
               <StatChip label="Insertadas" value={fmt(result.rowsInserted)} />
               <StatChip label="Actualizadas" value={fmt(result.rowsUpdated)} />
+              <StatChip label="Sin cambios" value={fmt(result.rowsUnchanged)} />
+              <StatChip label="Inhabilitadas" value={fmt(result.rowsDeactivated)} />
               <StatChip label="Duplicados idénticos" value={fmt(result.rowsDuplicated)} />
-              <StatChip label="Conflictos" value={fmt(result.rowsConflict)} />
+              <StatChip label="Claves multifila" value={fmt(result.duplicateGmnKeys)} />
               <StatChip label="Filas omitidas" value={fmt(result.rowsSkipped)} />
             </div>
 
-            {result.conflictDetails.length > 0 && (
+            {(result.duplicateGmnKeys ?? 0) > 0 && (
               <p className="text-xs text-[#B45309]">
-                Se conservó la primera aparición en {result.conflictDetails.length} conflicto(s).
+                Se conservaron todas las filas de {result.duplicateGmnKeys} clave(s) país+GMN con
+                diferencias.
               </p>
             )}
 
