@@ -15,6 +15,13 @@ import { plural } from "./format";
 export const sumBy = <T>(rows: T[], f: (row: T) => number) =>
   rows.reduce((acc, row) => acc + f(row), 0);
 
+/**
+ * Cumplimiento frente al ritmo esperado al día de corte (1 = va al ritmo). Sin
+ * historia el ritmo es 0: ahí sólo cuenta haber llegado a la meta.
+ */
+export const paceRatio = (compliance: number, pace: number) =>
+  pace > 0 ? compliance / pace : compliance >= 1 ? 1 : 0;
+
 /* ---------- orden ---------- */
 
 /** Clic en un encabezado: invierte si ya ordenaba por esa columna; si no, usa su dirección por defecto. */

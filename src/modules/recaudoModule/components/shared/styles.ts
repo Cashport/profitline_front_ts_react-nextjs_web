@@ -39,6 +39,9 @@ export const SUB = "block truncate text-[10px] font-normal text-muted-foreground
 
 export const AMOUNT = "whitespace-nowrap font-semibold tabular-nums";
 
+/** "Sin meta" en lugar de la barra de avance: sin meta no hay contra qué medir. */
+export const NO_GOAL = "whitespace-nowrap text-[10.5px] font-normal text-muted-foreground";
+
 /** Columnas que se ocultan en pantallas angostas (el h-sm del prototipo). */
 export const HIDE_SM = "max-sm:hidden";
 
