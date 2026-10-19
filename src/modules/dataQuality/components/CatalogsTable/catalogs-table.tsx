@@ -260,6 +260,7 @@ export function CatalogsTable() {
               <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
               <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
               <TableHead style={{ color: "#141414" }}>GMN</TableHead>
+              <TableHead style={{ color: "#141414" }}>MATCH</TableHead>
               <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
               <TableHead style={{ color: "#141414" }}>Factor</TableHead>
               <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
@@ -286,6 +287,16 @@ export function CatalogsTable() {
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{item.material_code}</span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      color: item.MATCH === "TRUE" ? "#166534" : "#B91C1C",
+                      fontWeight: 600
+                    }}
+                  >
+                    {item.MATCH === "TRUE" ? "MATCH" : "NO MATCH"}
+                  </span>
                 </TableCell>
                 <TableCell>
                   <span style={{ color: "#141414" }}>{item.material_name}</span>
