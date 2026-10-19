@@ -8,15 +8,6 @@ import { BotStatus } from "../../types/automations";
 
 export function BotStatusBadge({ status }: { status: BotStatus }) {
   const meta = BOT_STATUS_META[status];
-  // Un estado que el front aún no conoce se muestra tal cual en vez de romper la tabla.
-  if (!meta) {
-    return (
-      <Badge variant="secondary" className="text-xs">
-        {status}
-      </Badge>
-    );
-  }
-
   const Icon = meta.icon;
 
   return (
@@ -30,3 +21,4 @@ export function BotStatusBadge({ status }: { status: BotStatus }) {
     </Badge>
   );
 }
+
