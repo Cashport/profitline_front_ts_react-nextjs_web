@@ -367,6 +367,16 @@ export function PurchaseOrderDetailHeader({
               )}
             </Button>
           )}
+          {data?.project_id === 204 &&
+            (data?.region || data?.delivery_destination_code) && (
+            <span className="ml-2 text-xs text-gray-500">
+              {data?.region ? `Región: ${data.region}` : ""}
+              {data?.region && data?.delivery_destination_code ? " · " : ""}
+              {data?.delivery_destination_code
+                ? `Destino: ${data.delivery_destination_code}`
+                : ""}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {!!data?.approvation && (
