@@ -75,10 +75,19 @@ export interface IClientsHomeCatalogItem {
   clients: number;
 }
 
+/**
+ * Ejecutivo con sus clientes por coordinador. Viene sin el filtro de
+ * coordinador aplicado: el front lo limita con `executivesForCoordinators`.
+ */
+export interface IClientsHomeExecutiveCatalogItem extends IClientsHomeCatalogItem {
+  coordinators: { key: string; clients: number }[];
+}
+
 export interface IClientsHomeSummary extends IClientsHomeRunInfo {
   totals: IClientsHomeTotals;
   markets: IClientsHomeCatalogItem[];
-  executives: IClientsHomeCatalogItem[];
+  executives: IClientsHomeExecutiveCatalogItem[];
+  coordinators: IClientsHomeCatalogItem[];
 }
 
 export interface IClientsHomeRow {
@@ -88,6 +97,7 @@ export interface IClientsHomeRow {
   projectId: number;
   executive: { email: string | null; name: string | null };
   market: { key: string | null; name: string | null };
+  coordinator: { key: string | null; name: string | null };
   portfolio: number;
   pastDue: number;
   pastDuePct: number | null;
@@ -151,6 +161,7 @@ export interface IClientsHomeQuery {
   projectToMonthEnd: boolean;
   markets: string[];
   executives: string[];
+  coordinators: string[];
   dueFrom: string | null;
   dueTo: string | null;
 }

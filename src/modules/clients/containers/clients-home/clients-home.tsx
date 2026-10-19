@@ -12,6 +12,7 @@ import {
 } from "../../hooks/clients-home/use-clients-home";
 import { useHideOnScroll } from "../../hooks/clients-home/use-hide-on-scroll";
 import { useClientsHomeFilters } from "../../stores/clients-home-filters";
+import { executivesForCoordinators } from "../../utils/clients-home-format";
 
 /**
  * Home de Clientes (/clientes/all): KPIs de cartera, recaudo vs meta y la
@@ -24,6 +25,7 @@ import { useClientsHomeFilters } from "../../stores/clients-home-filters";
 export default function ClientsHome() {
   const projectId = useAppStore((s) => s.selectedProject?.ID ?? null);
   const syncProject = useClientsHomeFilters((s) => s.syncProject);
+  const coordinators = useClientsHomeFilters((s) => s.coordinators);
 
   useEffect(() => {
     syncProject(projectId);
@@ -69,7 +71,7 @@ export default function ClientsHome() {
       <ClientsHomeTable
         listRef={listRef}
         markets={summary.summary?.markets ?? []}
-        executives={summary.summary?.executives ?? []}
+        executives={executivesForCoordinators(summary.summary?.executives ?? [], coordinators)}
         rows={clients.rows}
         meta={clients.meta}
         loading={pending || clients.isLoading}

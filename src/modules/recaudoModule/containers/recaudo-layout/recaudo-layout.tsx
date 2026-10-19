@@ -30,15 +30,27 @@ function RecaudoChrome({ children }: { children: React.ReactNode }) {
         token: {
           colorPrimary: "#CBE71E",
           fontFamily: "inherit",
-          ...(isDark && {
-            colorText: "rgba(255, 255, 255, 0.85)",
-            colorTextSecondary: "rgba(255, 255, 255, 0.65)",
-            colorTextPlaceholder: "rgba(255, 255, 255, 0.25)",
-            colorSplit: "rgba(253, 253, 253, 0.12)",
-            colorBgElevated: DARK_ELEVATED_BG
-          })
+          ...(isDark
+            ? {
+                colorText: "rgba(255, 255, 255, 0.85)",
+                colorTextSecondary: "rgba(255, 255, 255, 0.65)",
+                colorTextPlaceholder: "rgba(255, 255, 255, 0.25)",
+                colorSplit: "rgba(253, 253, 253, 0.12)",
+                colorBgElevated: DARK_ELEVATED_BG
+              }
+            : {
+                // The root theme pins it to white, which hid the unselected Segmented options
+                // ("Mes anterior", "Ambas") in the light theme.
+                colorTextSecondary: "rgba(0, 0, 0, 0.65)"
+              })
         },
         components: {
+          // Prototype sizes (antd controls default to 14px): 12px for selects, search and
+          // buttons, 11px for small buttons and the Segmented.
+          Select: { fontSize: 12, optionFontSize: 12 },
+          Input: { fontSize: 12 },
+          Button: { contentFontSize: 12, contentFontSizeSM: 11 },
+          Segmented: { fontSize: 11 },
           // The root theme pins Popover's colorBgElevated (#F7F7F7) at component level, which
           // beats the global token above; re-declare it so the filters panel follows the dark theme.
           ...(isDark && { Popover: { colorBgElevated: DARK_ELEVATED_BG } }),
