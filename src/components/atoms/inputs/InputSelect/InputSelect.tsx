@@ -7,6 +7,8 @@ import "./inputSelect.scss";
 interface Option {
   value: string | number;
   label: string;
+  /** Tooltip de la opción en el desplegable; sin él, antd muestra la etiqueta. */
+  title?: string;
 }
 
 interface InputSelectProps {
@@ -77,7 +79,7 @@ export const InputSelect = ({
               filterOption={filterOption}
             >
               {options.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
+                <Select.Option key={option.value} value={option.value} title={option.title}>
                   {option.label}
                 </Select.Option>
               ))}

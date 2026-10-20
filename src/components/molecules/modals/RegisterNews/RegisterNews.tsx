@@ -162,7 +162,11 @@ const RegisterNews = ({
               control={control}
               error={errors.motive}
               options={
-                motives?.map((motive) => ({ value: motive?.name, label: motive?.name })) || []
+                motives?.map((motive) => ({
+                  value: motive?.name,
+                  label: motive?.name,
+                  title: motive?.description
+                })) || []
               }
               loading={isLoading}
               isError={isError}

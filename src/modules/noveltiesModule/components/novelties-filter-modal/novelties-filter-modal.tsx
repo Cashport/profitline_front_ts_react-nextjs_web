@@ -8,7 +8,6 @@ import type {
   FilterOptionItem,
   FilterSelection
 } from "@/components/ui/filter-modal";
-import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import {
   DateDraft,
   FilterDateTab,
@@ -43,11 +42,12 @@ const toText = (items?: FilterOptionItem[]) => items?.[0]?.id ?? null;
 /**
  * Botón "Filtros" de la bandeja. Cada categoría es de una sola opción porque
  * el listado recibe un id por parámetro. Coordinador, KAM y mercado envían el
- * valor canónico del catálogo, que es lo que el listado espera de vuelta.
+ * valor canónico del catálogo, que es lo que el listado espera de vuelta. Tipo
+ * de novedad sale de ese mismo catálogo, con los inactivos, para poder filtrar
+ * novedades viejas.
  */
 export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilterModalProps) {
   const { statuses, isLoading: isLoadingStatuses } = useNoveltyStatuses();
-  const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
 
   // El draft interno de FilterModal sólo cubre categorías de opciones, así que
@@ -60,7 +60,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
   const estadoOptions: FilterOptionItem[] = statuses
     .filter((s) => s.id !== NOVELTY_STATUS_FUSIONADA_ID)
     .map((s) => ({ id: String(s.id), name: s.description }));
-  const motivoOptions: FilterOptionItem[] = (motives ?? []).map((m) => ({
+  const motivoOptions: FilterOptionItem[] = (filters?.novelty_type ?? []).map((m) => ({
     id: String(m.id),
     name: m.name
   }));
@@ -111,7 +111,7 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
       label: "Tipo de novedad",
       selectMode: "single",
       options: motivoOptions,
-      status: isLoadingMotives ? "loading" : undefined
+      status: filtersStatus
     },
     {
       key: "coordinador",
