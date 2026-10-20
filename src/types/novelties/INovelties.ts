@@ -62,6 +62,8 @@ export interface IIncidentMotive {
   id: number;
   name: string;
   order: number;
+  description: string;
+  is_active: number; // 1 or 0
 }
 
 /**
@@ -80,7 +82,8 @@ export interface IIncidentListFilters {
   kam_lider: IIncidentListCanonicalFilter[];
   market: IIncidentListCanonicalFilter[];
   executive: { id: number; name: string; email: string }[];
-  novelty_type: { id: number; name: string }[];
+  /** Incluye los inactivos: sólo para filtros. Los selects usan GET /invoice/incident/motives. */
+  novelty_type: { id: number; name: string; description: string | null; is_active: number }[];
   novelty_status: INoveltyStatus[];
 }
 

@@ -288,7 +288,13 @@ export const StateConcilationTable = ({ invoices, clientId, setInvoices }: Props
             loading={isLoading}
             className="select__container"
             popupClassName="concilation_table__select__popup"
-            options={motives?.map((motive) => ({ value: motive.id, label: motive.name })) || []}
+            options={
+              motives?.map((motive) => ({
+                value: motive.id,
+                label: motive.name,
+                title: motive.description
+              })) || []
+            }
             onChange={(value) => addSelectMotiveToAll(value)}
             style={{ width: "200px", marginRight: "10px" }}
             disabled={!selectedRows || selectedRows.length === 0}

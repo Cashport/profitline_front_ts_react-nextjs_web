@@ -155,7 +155,13 @@ export const ConcilationTable = ({
           <Select
             placeholder="Seleccionar acción"
             loading={isLoading}
-            options={motives?.map((motive) => ({ value: motive?.name, label: motive?.name })) || []}
+            options={
+              motives?.map((motive) => ({
+                value: motive?.name,
+                label: motive?.name,
+                title: motive?.description
+              })) || []
+            }
             onChange={(value) =>
               addSelectMotive(record.id, motives?.find((motive) => motive.name === value)?.id || 0)
             }

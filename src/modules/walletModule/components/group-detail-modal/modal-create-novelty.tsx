@@ -4,8 +4,8 @@ import { useState } from "react";
 import { DatePicker, Input, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 
+import { useInvoiceIncidentMotives } from "@/hooks/useInvoiceIncidentMotives";
 import { useProjectUsers } from "@/hooks/useProjectUsers";
-import { useIncidentListFilters } from "@/modules/noveltiesModule/hooks/useIncidentListFilters";
 import type { ICreateIncidentBody } from "@/types/novelties/INovelties";
 import { fac, fmtFull } from "../../utils/format";
 import NoveltyDocumentsTable from "./novelty-documents-table";
@@ -35,7 +35,7 @@ function CreateNoveltyForm({
   onClose,
   onCreate
 }: Omit<ModalCreateNoveltyProps, "open">) {
-  const { filters, isLoading: isLoadingFilters } = useIncidentListFilters();
+  const { data: motives, isLoading: isLoadingMotives } = useInvoiceIncidentMotives();
   const { users, isLoading: isLoadingUsers } = useProjectUsers();
 
   const [motiveId, setMotiveId] = useState<number>();
@@ -86,11 +86,15 @@ function CreateNoveltyForm({
             <Select
               className="w-full"
               value={motiveId}
-              options={(filters?.novelty_type ?? []).map((t) => ({ value: t.id, label: t.name }))}
+              options={(motives ?? []).map((m) => ({
+                value: m.id,
+                label: m.name,
+                title: m.description
+              }))}
               onChange={setMotiveId}
               showSearch
               optionFilterProp="label"
-              loading={isLoadingFilters}
+              loading={isLoadingMotives}
               disabled={isSending}
               placeholder="Selecciona el tipo"
             />
