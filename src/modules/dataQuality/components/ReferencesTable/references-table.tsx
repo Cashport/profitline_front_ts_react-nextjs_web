@@ -28,6 +28,8 @@ interface ReferencesTableProps {
   isLoading: boolean;
   isValidating?: boolean;
   busyId?: number | null;
+  /** IDs que resuelven para el contexto (se marcan como "Efectiva"). */
+  effectiveIds?: number[];
   // eslint-disable-next-line no-unused-vars
   onDetail: (reference: IReferenceFile) => void;
   // eslint-disable-next-line no-unused-vars
@@ -44,6 +46,7 @@ export function ReferencesTable({
   isLoading,
   isValidating,
   busyId,
+  effectiveIds,
   onDetail,
   onReplace,
   onToggle
@@ -88,9 +91,20 @@ export function ReferencesTable({
                   style={{ borderColor: "#DDDDDD" }}
                 >
                   <TableCell>
-                    <span className="font-medium" style={{ color: "#141414" }}>
-                      {reference.reference_type}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: "#141414" }}>
+                        {reference.reference_type}
+                      </span>
+                      {effectiveIds?.includes(reference.id) && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px]"
+                          style={{ backgroundColor: "#DBEAFE", color: "#1D4ED8" }}
+                        >
+                          Efectiva
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell style={{ color: "#141414" }}>
                     {scopeLabel(reference.scope_level)}

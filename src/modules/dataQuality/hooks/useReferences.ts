@@ -2,11 +2,16 @@ import useSWR from "swr";
 import { fetcher } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
+  IReferenceContextResult,
   IReferenceFile,
   IReferenceFilesFilters,
   IReferenceType
 } from "@/types/dataQuality/IDataQuality";
-import { buildReferenceFilesQuery } from "../references/references.utils";
+import {
+  ReferenceContextQuery,
+  buildReferenceContextQuery,
+  buildReferenceFilesQuery
+} from "../references/references.utils";
 
 const SWR_OPTIONS = {
   revalidateOnFocus: false,
@@ -28,8 +33,8 @@ export const useReferenceTypes = () => {
   };
 };
 
-export const useReferenceFiles = (filters: IReferenceFilesFilters) => {
-  const key = buildReferenceFilesQuery(filters);
+export const useReferenceFiles = (filters: IReferenceFilesFilters, enabled = true) => {
+  const key = enabled ? buildReferenceFilesQuery(filters) : null;
   const { data, error, isValidating, mutate } = useSWR<GenericResponse<IReferenceFile[]>>(key, fetcher, {
     ...SWR_OPTIONS,
     dedupingInterval: 30000,
@@ -38,7 +43,31 @@ export const useReferenceFiles = (filters: IReferenceFilesFilters) => {
 
   return {
     referenceFiles: data?.data,
-    isLoading: !error && !data,
+    isLoading: enabled && !error && !data,
+    isValidating,
+    error,
+    mutate
+  };
+};
+
+/**
+ * Contexto (propias + heredadas) de un ambito seleccionado.
+ * `params = null` desactiva la peticion.
+ */
+export const useReferenceContext = (params: ReferenceContextQuery | null) => {
+  const key = params ? buildReferenceContextQuery(params) : null;
+  const { data, error, isValidating, mutate } = useSWR<GenericResponse<IReferenceContextResult>>(
+    key,
+    fetcher,
+    {
+      ...SWR_OPTIONS,
+      dedupingInterval: 30000
+    }
+  );
+
+  return {
+    referenceContext: data?.data,
+    isLoading: !!key && !error && !data,
     isValidating,
     error,
     mutate

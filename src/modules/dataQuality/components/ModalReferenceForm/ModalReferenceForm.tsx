@@ -25,6 +25,10 @@ interface ModalReferenceFormProps {
   countries: IReferenceCountry[];
   regions: IReferenceRegion[];
   clients: IReferenceClient[];
+  /** Contexto fijo (acceso desde pais/region o cliente): ambito bloqueado. */
+  lockedScopeLevel?: IReferenceScopeLevel;
+  /** Contexto fijo: propietario bloqueado (data.client_data.id / country / region). */
+  lockedOwnerId?: number;
   // eslint-disable-next-line no-unused-vars
   onSubmit: (values: ICreateReferenceFormValues) => Promise<void>;
 }
@@ -37,6 +41,8 @@ export function ModalReferenceForm({
   countries,
   regions,
   clients,
+  lockedScopeLevel,
+  lockedOwnerId,
   onSubmit
 }: ModalReferenceFormProps) {
   const [form] = Form.useForm<ICreateReferenceFormValues>();
@@ -52,8 +58,17 @@ export function ModalReferenceForm({
       setFile(null);
       setFileError(null);
       setSubmitting(false);
+      return;
     }
-  }, [isOpen, form]);
+    // Acceso contextual: el ambito/propietario vienen fijados y no se editan.
+    if (lockedScopeLevel) {
+      setScope(lockedScopeLevel);
+      form.setFieldsValue({
+        scope_level: lockedScopeLevel,
+        owner: lockedOwnerId
+      });
+    }
+  }, [isOpen, form, lockedScopeLevel, lockedOwnerId]);
 
   const ownerOptions = useMemo(() => {
     if (scope === "client") {
@@ -134,7 +149,7 @@ export function ModalReferenceForm({
           label="Ámbito"
           rules={[{ required: true, message: "Selecciona el ámbito" }]}
         >
-          <Select placeholder="Selecciona el ámbito" options={REFERENCE_SCOPE_OPTIONS} onChange={handleScopeChange} />
+          <Select placeholder="Selecciona el ámbito" options={REFERENCE_SCOPE_OPTIONS} onChange={handleScopeChange} disabled={!!lockedScopeLevel} />
         </Form.Item>
 
         <Form.Item
@@ -147,7 +162,7 @@ export function ModalReferenceForm({
           <Select
             showSearch
             optionFilterProp="label"
-            disabled={!scope}
+            disabled={!scope || lockedOwnerId != null}
             placeholder={scope ? "Selecciona el propietario" : "Primero selecciona el ámbito"}
             options={ownerOptions}
           />
