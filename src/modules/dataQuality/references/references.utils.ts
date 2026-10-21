@@ -101,6 +101,26 @@ export function buildReferenceFilesQuery(filters: IReferenceFilesFilters = {}): 
   return `/data/reference-files${qs ? `?${qs}` : ""}`;
 }
 
+export interface ReferenceContextQuery {
+  scope_level: IReferenceScopeLevel;
+  id_client?: number;
+  id_country?: number;
+  id_region?: number;
+  reference_type?: string;
+}
+
+/** Ruta del contexto (propias + heredadas) para un ambito seleccionado. */
+export function buildReferenceContextQuery(params: ReferenceContextQuery): string {
+  // Reutiliza el endpoint ya registrado `GET /data/reference-files`
+  // (include_context=1) para no requerir un registro nuevo en `endpoint`.
+  const qs = new URLSearchParams({ scope_level: params.scope_level, include_context: "1" });
+  if (params.id_client != null) qs.append("id_client", String(params.id_client));
+  if (params.id_country != null) qs.append("id_country", String(params.id_country));
+  if (params.id_region != null) qs.append("id_region", String(params.id_region));
+  if (params.reference_type) qs.append("reference_type", params.reference_type);
+  return `/data/reference-files?${qs.toString()}`;
+}
+
 export interface ReferenceCatalogs {
   countries: { id: number; country_name: string }[];
   regions: { id: number; abbreviation: string }[];

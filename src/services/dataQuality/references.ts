@@ -8,11 +8,14 @@ import config from "@/config";
 import { API } from "@/utils/api/api";
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
+  IReferenceContextResult,
   IReferenceFile,
   IReferenceFilesFilters,
   IReferenceType
 } from "@/types/dataQuality/IDataQuality";
 import {
+  ReferenceContextQuery,
+  buildReferenceContextQuery,
   buildReferenceCreateFormData,
   buildReferenceFilesQuery
 } from "@/modules/dataQuality/references/references.utils";
@@ -49,6 +52,18 @@ export const getReferenceFiles = async (
 ): Promise<IReferenceFile[]> => {
   const path = buildReferenceFilesQuery(filters);
   const response: GenericResponse<IReferenceFile[]> = await API.get(path);
+  return response.data;
+};
+
+/**
+ * Contexto de referencias: propias del ambito + heredadas que aplican.
+ * La resolucion (cliente -> pais -> region) la calcula el backend.
+ */
+export const getReferenceContext = async (
+  params: ReferenceContextQuery
+): Promise<IReferenceContextResult> => {
+  const path = buildReferenceContextQuery(params);
+  const response: GenericResponse<IReferenceContextResult> = await API.get(path);
   return response.data;
 };
 

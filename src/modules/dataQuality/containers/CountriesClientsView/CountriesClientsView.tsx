@@ -248,6 +248,16 @@ export default function CountriesClientsView() {
                   </Button>
                 </Link>
               )}
+              {hasDataQualityManagementPermission(selectedProject) && (
+                <Link
+                  href={`/data-quality/references?scope=country&id_country=${countryId}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <Button variant="outline" className="h-12">
+                    Referencias
+                  </Button>
+                </Link>
+              )}
               {canManage && (
                 <Button
                   className="h-12 bg-[#CBE71E] text-[#141414] hover:bg-[#b8d119] border-none"

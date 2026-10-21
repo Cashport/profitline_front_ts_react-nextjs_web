@@ -273,6 +273,17 @@ export default function DataQualityClientDetails() {
                   </Link>
                 )}
 
+                {hasDataQualityManagementPermission(selectedProject) && (
+                  <Link
+                    href={`/data-quality/references?scope=client&id_client=${clientDetail.id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    <Button variant="outline" className="">
+                      Referencias
+                    </Button>
+                  </Link>
+                )}
+
                 {checkUserComponentPermission(selectedProject, "DataQuality", "data-readonly") && (
                   <Link
                     href={`/data-quality/catalogs/${clientId}/${clientDetail.id_country}?clientName=${clientDetail.client_name}&countryName=${clientDetail.country_name}`}
