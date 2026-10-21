@@ -347,6 +347,8 @@ export interface IGetCatalogs {
   material_id: number | null;
   material_code: string | null;
   material_name: string | null;
+  /** 'TRUE' | 'FALSE' calculado contra el catálogo oficial de GMN. */
+  MATCH?: "TRUE" | "FALSE" | null;
   factor: number;
   excluded: number;
 }
@@ -926,10 +928,15 @@ export interface IGmnOficialesValidationReport {
   sheetName: string;
   rowsRead: number;
   rowsSkipped: number;
+  rowsKept?: number;
   rowsDuplicated: number;
-  rowsConflict: number;
+  duplicateGmnKeys?: number;
+  /** Compatibilidad con versiones previas del backend. */
+  rowsConflict?: number;
   countries: IGmnOficialesCountry[];
-  conflicts: IGmnOficialesConflict[];
+  /** Legado (ya no se usa: las filas distintas se conservan). */
+  conflicts?: IGmnOficialesConflict[];
+  invalidRows?: Array<{ rowNumber: number; reason: string }>;
 }
 
 export interface IGmnOficialesLoadResult {
@@ -939,12 +946,17 @@ export interface IGmnOficialesLoadResult {
   sheetName: string;
   rowsRead: number;
   rowsSkipped: number;
+  rowsKept?: number;
   rowsDuplicated: number;
-  rowsConflict: number;
+  duplicateGmnKeys?: number;
+  rowsConflict?: number;
   rowsInserted: number;
   rowsUpdated: number;
+  rowsUnchanged?: number;
+  rowsDeactivated?: number;
   countries: IGmnOficialesCountry[];
-  conflictDetails: IGmnOficialesConflict[];
+  /** Legado (ya no se usa). */
+  conflictDetails?: IGmnOficialesConflict[];
 }
 
 export interface IGmnOficialesLoadRow {
