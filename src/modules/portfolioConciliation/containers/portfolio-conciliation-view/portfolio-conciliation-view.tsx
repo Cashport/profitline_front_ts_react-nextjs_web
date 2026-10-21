@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button, Select, Spin, Typography } from "antd";
+import { Button, Select, Typography } from "antd";
 import { CaretLeft, DownloadSimple, UploadSimple } from "phosphor-react";
 
 import PrincipalButton from "@/components/atoms/buttons/principalButton/PrincipalButton";
@@ -21,13 +21,14 @@ import {
   IConciliationUpload
 } from "@/types/portfolioConciliation/IPortfolioConciliation";
 import ConciliationTable from "../../components/conciliation-table/conciliation-table";
+import PortfolioSkeleton from "../../components/portfolio-skeleton/portfolio-skeleton";
 import SummaryCards from "../../components/summary-cards/summary-cards";
 import UploadModal from "../../components/upload-modal/upload-modal";
 import {
   UploadFailedPanel,
   UploadProcessingBanner
 } from "../../components/upload-status/upload-status";
-import { DOCUMENT_TYPE_LABEL, TEMPLATE_URL } from "../../constants";
+import { CONCILIATION_STATUSES, DOCUMENT_TYPE_LABEL, TEMPLATE_URL } from "../../constants";
 import { useConciliationUpload } from "../../hooks/use-conciliation-upload";
 import { usePortfolioConciliation } from "../../hooks/use-portfolio-conciliation";
 import { formatDateTime } from "../../utils/format";
@@ -63,14 +64,9 @@ const PortfolioConciliationView = () => {
   const [dismissedFailedUUID, setDismissedFailedUUID] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const { portfolio, pagination, error, isLoading, isValidating, mutate } =
-    usePortfolioConciliation(clientUUID, {
-      page,
-      status,
-      documentType,
-      search,
-      ...sort
-    });
+  const query: IConciliationQuery = { page, status, documentType, search, ...sort };
+  const { portfolio, pagination, error, isStale, isFirstLoad, isValidating, prefetch, refreshAll } =
+    usePortfolioConciliation(clientUUID, query);
   const { upload: polledUpload } = useConciliationUpload(clientUUID, trackedUpload?.uuid ?? null);
 
   const latestUpload = portfolio?.latest_upload ?? null;
@@ -86,7 +82,7 @@ const PortfolioConciliationView = () => {
     if (!polledUpload || polledUpload.status === "PROCESSING") return;
     setTrackedUpload(null);
     setPage(1);
-    mutate();
+    refreshAll();
     if (polledUpload.status === "DONE") {
       showMessage(
         "success",
@@ -96,6 +92,31 @@ const PortfolioConciliationView = () => {
       showMessage("error", "La carga no se aplicó; revisa los errores");
     }
   }, [polledUpload?.uuid, polledUpload?.status]);
+
+  // Con la página ya en pantalla se piden en segundo plano las otras tarjetas
+  // y la página siguiente: el clic se resuelve desde la caché, sin esperar.
+  const totalPages = pagination?.totalPages ?? 0;
+  useEffect(() => {
+    if (!portfolio || isStale || trackedUpload) return;
+    const timer = window.setTimeout(() => {
+      for (const next of [null, ...CONCILIATION_STATUSES]) {
+        if (next !== status) prefetch({ ...query, page: 1, status: next });
+      }
+      if (page < totalPages) prefetch({ ...query, page: page + 1 });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [
+    Boolean(portfolio),
+    isStale,
+    page,
+    status,
+    documentType,
+    search,
+    sort.sortBy,
+    sort.sortDir,
+    totalPages,
+    Boolean(trackedUpload)
+  ]);
 
   // Filtros y orden vuelven a la primera página
   const changeStatus = (value: ConciliationStatus | null) => {
@@ -175,11 +196,7 @@ const PortfolioConciliationView = () => {
         </div>
       )}
 
-      {isLoading && !portfolio && (
-        <div className="flex justify-center py-16">
-          <Spin />
-        </div>
-      )}
+      {isFirstLoad && <PortfolioSkeleton />}
 
       {isProcessing && (
         <UploadProcessingBanner fileName={(polledUpload ?? trackedUpload)?.file_name} />
@@ -262,7 +279,8 @@ const PortfolioConciliationView = () => {
             page={page}
             total={pagination?.totalRows ?? 0}
             onPageChange={setPage}
-            isLoading={isValidating}
+            isStale={isStale}
+            isRefreshing={isValidating}
           />
         </>
       )}

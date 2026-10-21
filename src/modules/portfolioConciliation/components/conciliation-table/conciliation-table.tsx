@@ -1,6 +1,6 @@
 "use client";
 
-import { Pagination, Spin } from "antd";
+import { Pagination } from "antd";
 
 import { useAppStore } from "@/lib/store/store";
 import { cn, formatNumber } from "@/utils/utils";
@@ -19,7 +19,10 @@ interface Props {
   page: number;
   total: number;
   onPageChange: (page: number) => void;
-  isLoading: boolean;
+  /** Las filas son de la consulta anterior: la nueva todavía no llega. */
+  isStale: boolean;
+  /** Hay una consulta en curso (nueva o refresco en segundo plano). */
+  isRefreshing: boolean;
 }
 
 const COLUMNS: { col: ConciliationSortField; label: string; align?: "right" }[] = [
@@ -41,7 +44,8 @@ const ConciliationTable = ({
   page,
   total,
   onPageChange,
-  isLoading
+  isStale,
+  isRefreshing
 }: Props) => {
   const formatMoney = useAppStore((state) => state.formatMoney);
   const from = total ? (page - 1) * CONCILIATION_PAGE_SIZE + 1 : 0;
@@ -49,13 +53,20 @@ const ConciliationTable = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative overflow-auto rounded-lg border border-[#ececec]">
-        {isLoading && (
-          <div className="absolute inset-0 z-[2] flex items-center justify-center bg-white/60">
-            <Spin />
-          </div>
+      <div
+        className="relative overflow-auto rounded-lg border border-[#ececec]"
+        aria-busy={isRefreshing}
+      >
+        {/* Sin velo: la tabla sigue usable mientras llega la consulta; solo una barra arriba */}
+        {isRefreshing && (
+          <div className="absolute inset-x-0 top-0 z-[2] h-0.5 animate-pulse bg-[#7cb518]" />
         )}
-        <table className="w-full border-collapse text-[12.5px]">
+        <table
+          className={cn(
+            "w-full border-collapse text-[12.5px] transition-opacity duration-150",
+            isStale && "opacity-50"
+          )}
+        >
           <thead className="sticky top-0 z-[1]">
             <tr>
               {COLUMNS.map(({ col, label, align }) => {
@@ -119,7 +130,7 @@ const ConciliationTable = ({
                 </tr>
               );
             })}
-            {!rows.length && !isLoading && (
+            {!rows.length && !isStale && (
               <tr>
                 <td colSpan={COLUMNS.length} className="px-3 py-10 text-center text-[#8a8a8a]">
                   No hay documentos con estos filtros.
@@ -133,7 +144,7 @@ const ConciliationTable = ({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-[12px] text-[#8a8a8a]">
           {total
-            ? `Mostrando ${formatNumber(from)}–${formatNumber(to)} de ${formatNumber(total)} documentos`
+            ? `Mostrando ${formatNumber(from)}–${formatNumber(to)} de ${formatNumber(total)} documentos${isStale ? " · actualizando…" : ""}`
             : ""}
         </span>
         <Pagination
