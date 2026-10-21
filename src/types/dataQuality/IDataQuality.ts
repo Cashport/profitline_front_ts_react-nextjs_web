@@ -868,6 +868,23 @@ export interface IReferenceFilesFilters {
   is_active?: 0 | 1;
 }
 
+/** Referencia dentro de un contexto; `effective_for_type` = resuelve por precedencia. */
+export interface IReferenceContextEntry extends IReferenceFile {
+  effective_for_type: boolean;
+}
+
+/** Propias del ambito + heredadas que aplican (precedencia cliente -> pais -> region). */
+export interface IReferenceContextResult {
+  context: {
+    scope_level: IReferenceScopeLevel;
+    id_client: number | null;
+    id_country: number | null;
+    id_region: number | null;
+  };
+  own: IReferenceContextEntry[];
+  inherited: IReferenceContextEntry[];
+}
+
 export interface ICreateReferenceOwnerPayload {
   id_client?: number;
   id_country?: number;
