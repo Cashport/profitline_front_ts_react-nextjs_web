@@ -4,10 +4,9 @@ import { Upload } from "lucide-react";
 
 import { ProfileMenu } from "@/components/atoms/ProfileMenu/ProfileMenu";
 import UiSearchInput from "@/components/ui/search-input";
-import type { IReportType } from "@/types/reports/IReports";
+import type { IReportsFilters, IReportType } from "@/types/reports/IReports";
 
 import ReportsFilterModal from "../reports-filter-modal/reports-filter-modal";
-import type { IReportsFilters } from "../../types";
 
 interface ReportsHeaderProps {
   search: string;

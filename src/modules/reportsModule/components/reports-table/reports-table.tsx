@@ -15,8 +15,8 @@ interface ReportsTableProps {
   reports: IReport[];
   sort: SortState;
   onSort: (col: string) => void;
-  newReportId: number | null;
-  onOpen: (reportId: number) => void;
+  newReportId: string | null;
+  onOpen: (reportId: string) => void;
 }
 
 /** Listado en escritorio: una fila por informe. La fecha se oculta en pantallas medianas. */
@@ -32,10 +32,15 @@ export default function ReportsTable({
       <table className="w-full border-collapse text-[13px]">
         <thead>
           <tr>
-            <SortableTh col="nombre" label="Nombre del informe" sort={sort} onSort={onSort} />
-            <SortableTh col="tipo" label="Tipo de informe" sort={sort} onSort={onSort} />
+            <SortableTh col="name" label="Nombre del informe" sort={sort} onSort={onSort} />
             <SortableTh
-              col="fecha"
+              col="report_type_name"
+              label="Tipo de informe"
+              sort={sort}
+              onSort={onSort}
+            />
+            <SortableTh
+              col="created_at"
               label="Fecha de publicación"
               sort={sort}
               onSort={onSort}
@@ -72,7 +77,7 @@ export default function ReportsTable({
                 </td>
                 <td className="px-3 py-2.5 text-muted-foreground">{r.report_type_name}</td>
                 <td className="hidden whitespace-nowrap px-3 py-2.5 tabular-nums text-muted-foreground lg:table-cell">
-                  {fmtReportDate(r.published_at)}
+                  {fmtReportDate(r.created_at)}
                 </td>
                 <td className="px-3 py-1.5">
                   <GenericEyeButton href={`/reports/${r.id}`} title="Ver informe" />

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import type { IReportType } from "@/types/reports/IReports";
+
 import { ModalCreateReport } from "../../components/ModalCreateReport/ModalCreateReport";
 import { ModalCreateReportType } from "../../components/ModalCreateReportType/ModalCreateReportType";
 import ReportsHeader from "../../components/reports-header/reports-header";
@@ -21,6 +23,7 @@ type OpenModal = "report" | "reportType" | null;
 export default function ReportsView() {
   const router = useRouter();
   const [openModal, setOpenModal] = useState<OpenModal>(null);
+  const [createdType, setCreatedType] = useState<IReportType | null>(null);
 
   const store = useReportsListStore();
   const { reports, visibleReports, isLoading, error } = useVisibleReports();
@@ -40,6 +43,9 @@ export default function ReportsView() {
       <ReportsList
         reports={visibleReports}
         total={reports?.length ?? 0}
+        hasFilters={Boolean(
+          store.filters.report_type_ids.length || store.filters.from || store.filters.to
+        )}
         isLoading={isLoading}
         error={error}
         sort={store.sort}
@@ -54,12 +60,15 @@ export default function ReportsView() {
         types={types}
         onClose={() => setOpenModal(null)}
         onCreateType={() => setOpenModal("reportType")}
+        createdType={createdType}
         onSuccess={(report) => store.markPublished(report.id)}
       />
-      {/* Al cerrarse (Cancelar o Guardar) vuelve a Publicar con lo que ya se había llenado. */}
+      {/* Al cerrarse (Cancelar o Guardar) vuelve a Publicar con lo que ya se había llenado;
+          con Guardar, además, con el tipo nuevo seleccionado. */}
       <ModalCreateReportType
         isOpen={openModal === "reportType"}
         onClose={() => setOpenModal("report")}
+        onSuccess={setCreatedType}
       />
     </div>
   );

@@ -2,14 +2,15 @@ import useSWR from "swr";
 
 import type { GenericResponse } from "@/types/global/IGlobal";
 import type { IReportDetail } from "@/types/reports/IReports";
+import { fetcher } from "@/utils/api/api";
 
-import { getReportDetailMock } from "../mocks/reports-mock";
-
-/** Un informe con su HTML (GET /reports/:id). Sin id no se pide nada. Por ahora, mock. */
-export const useReportDetail = (reportId: number | null) => {
+/** Un informe con su HTML (GET /reports/:id). */
+export const useReportDetail = (reportId: string) => {
   const { data, error, isLoading } = useSWR<GenericResponse<IReportDetail>>(
-    reportId ? `/reports/${reportId}` : null,
-    () => getReportDetailMock(reportId as number)
+    `/reports/${reportId}`,
+    fetcher,
+    // Un informe publicado no cambia: no se vuelve a bajar su HTML al volver a la pestaña.
+    { revalidateOnFocus: false }
   );
 
   return { report: data?.data, error, isLoading };

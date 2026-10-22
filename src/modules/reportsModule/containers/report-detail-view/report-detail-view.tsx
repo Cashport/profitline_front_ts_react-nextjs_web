@@ -8,8 +8,8 @@ import { useReportDetail } from "../../hooks/useReportDetail";
 import { useVisibleReports } from "../../hooks/useVisibleReports";
 
 interface ReportDetailViewProps {
-  /** Id del informe en el backend: es el que se consulta. */
-  reportId: number;
+  /** UUID del informe: es el que se consulta. */
+  reportId: string;
 }
 
 /**

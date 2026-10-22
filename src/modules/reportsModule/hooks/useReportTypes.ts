@@ -1,16 +1,23 @@
 import useSWR from "swr";
 
+import { createReportType } from "@/services/reports/reports";
 import type { GenericResponse } from "@/types/global/IGlobal";
 import type { IReportType } from "@/types/reports/IReports";
+import { fetcher } from "@/utils/api/api";
 
-import { getReportTypesMock } from "../mocks/reports-mock";
-
-/** Catálogo de tipos de informe (GET /reports/types). Por ahora, mock. */
+/** Catálogo de tipos de informe del proyecto (GET /reports/types), ordenado por nombre. */
 export const useReportTypes = () => {
-  const { data, error, isLoading } = useSWR<GenericResponse<IReportType[]>>(
+  const { data, error, isLoading, mutate } = useSWR<GenericResponse<IReportType[]>>(
     "/reports/types",
-    getReportTypesMock
+    fetcher
   );
 
-  return { types: data?.data ?? [], error, isLoading };
+  /** Crea el tipo y espera el catálogo nuevo, para que ya esté en el select al volver. */
+  const createType = async (name: string) => {
+    const response = await createReportType(name);
+    await mutate();
+    return response.data;
+  };
+
+  return { types: data?.data ?? [], error, isLoading, createType };
 };

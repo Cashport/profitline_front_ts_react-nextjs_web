@@ -30,7 +30,7 @@ export default function ReportCard({ report, isNew }: ReportCardProps) {
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
           <span>{report.report_type_name}</span>
-          <span>{fmtReportDate(report.published_at)}</span>
+          <span>{fmtReportDate(report.created_at)}</span>
         </div>
       </div>
 

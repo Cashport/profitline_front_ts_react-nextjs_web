@@ -11,14 +11,16 @@ import { fmtReportsCount } from "../../utils/reports-format";
 interface ReportsListProps {
   /** Los que quedan tras búsqueda y filtros, ya ordenados. */
   reports: IReport[];
-  /** Todos los publicados, para el contador "2 de 5". */
+  /** Los que devuelve el backend con los filtros de tipo y fecha, para el contador "2 de 5". */
   total: number;
+  /** Hay filtros de tipo o fecha: un listado vacío es por ellos, no porque no haya informes. */
+  hasFilters: boolean;
   isLoading: boolean;
   error?: Error;
   sort: SortState;
   onSort: (col: string) => void;
-  newReportId: number | null;
-  onOpen: (reportId: number) => void;
+  newReportId: string | null;
+  onOpen: (reportId: string) => void;
   onClearCriteria: () => void;
 }
 
@@ -26,6 +28,7 @@ interface ReportsListProps {
 export default function ReportsList({
   reports,
   total,
+  hasFilters,
   isLoading,
   error,
   sort,
@@ -43,7 +46,7 @@ export default function ReportsList({
         </p>
       );
     }
-    if (!total) {
+    if (!total && !hasFilters) {
       return (
         <p className="p-9 text-center text-sm text-muted-foreground">
           Aún no hay informes publicados.
