@@ -6,6 +6,7 @@ import { ArrowsClockwise, CaretLeft, Pencil, Plus } from "phosphor-react";
 import { SelectRoles } from "@/components/molecules/selects/SelectRoles/SelectRoles";
 import { SelectZone } from "@/components/molecules/selects/SelectZone/SelectZone";
 import { SelectStructure } from "@/components/molecules/selects/SelectStructure/SelectStructure";
+import { SelectUserCountries } from "@/components/molecules/selects/SelectUserCountries/SelectUserCountries";
 import { InputForm } from "@/components/atoms/inputs/InputForm/InputForm";
 import { ModalChangeStatus } from "@/components/molecules/modals/ModalChangeStatus/ModalChangeStatus";
 
@@ -66,6 +67,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
   });
   const [isOpenModalStatus, setIsOpenModalStatus] = useState(initDataOpenModalStatus);
   const [assignedGroups, setAssignedGroups] = useState([] as any[]);
+  const [countryIds, setCountryIds] = useState<number[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -89,6 +91,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
         data: finalData
       });
       setZones(zonesFinalData);
+      setCountryIds(finalData.COUNTRY_IDS ?? []);
 
       setSelectedBusinessRules({
         channels: finalData.USER_CHANNELS?.map((channel) => channel.ID),
@@ -119,20 +122,24 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
             selectedBusinessRules,
             selectedGroups: assignedGroups,
             zones,
-            isActive: dataUser.data?.ACTIVE === 1
+            isActive: dataUser.data?.ACTIVE === 1,
+            countryIds
           })
         : await inviteUser(data, ID, {
             selectedBusinessRules,
             selectedGroups: assignedGroups,
-            zones
+            zones,
+            countryIds
           });
 
       if (response.status === 200 || response.status === 202) {
         const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
         showMessage("success", `El usuario fue ${isEdit} exitosamente.`);
         !isViewDetailsUser?.id && onGoBackTable();
-      } else if (response.response.status === 409) {
+      } else if (response.status === 409) {
         showMessage("error", "Este email ya esta en uso, prueba otro.");
+      } else {
+        showMessage("error", response?.message || "Oops ocurrio un error.");
       }
 
       setIsEditAvailable(false);
@@ -269,6 +276,15 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                     setAssignedGroups={setAssignedGroups}
                   />
                 </Flex>
+              </Flex>
+              {/* -----------------------------------Países----------------------------------- */}
+              <Title level={4}>Países</Title>
+              <Flex component={"section"} className="breRules">
+                <SelectUserCountries
+                  disabled={!isEditAvailable}
+                  countryIds={countryIds}
+                  setCountryIds={setCountryIds}
+                />
               </Flex>
             </Flex>
           ) : (

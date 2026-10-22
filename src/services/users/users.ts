@@ -23,12 +23,13 @@ interface InviteUserOptions {
   selectedBusinessRules?: ISelectedBussinessRules;
   selectedGroups?: number[];
   zones?: number[];
+  countryIds?: number[];
 }
 
 export const inviteUser = async (
   data: IUserForm,
   projectId: number,
-  { selectedBusinessRules, selectedGroups, zones }: InviteUserOptions = {}
+  { selectedBusinessRules, selectedGroups, zones, countryIds }: InviteUserOptions = {}
 ): Promise<any> => {
   const modelData: Record<string, any> = {
     email: data.info.email,
@@ -49,6 +50,9 @@ export const inviteUser = async (
   }
   if (selectedGroups?.length) {
     modelData.groups_id = selectedGroups;
+  }
+  if (countryIds !== undefined) {
+    modelData.country_ids = countryIds;
   }
   const endpointRole = data.info.rol?.value === 2 ? "admin" : "user";
   try {
@@ -80,6 +84,7 @@ interface UpdateUserOptions {
   selectedGroups?: number[];
   zones?: number[];
   isActive?: boolean;
+  countryIds?: number[];
 }
 
 export const updateUser = async (
@@ -87,7 +92,7 @@ export const updateUser = async (
   project_id: number,
   options: UpdateUserOptions = {}
 ): Promise<any> => {
-  const { data, selectedBusinessRules, selectedGroups, zones, isActive } = options;
+  const { data, selectedBusinessRules, selectedGroups, zones, isActive, countryIds } = options;
 
   const modelData: Record<string, any> = {
     id: ID,
@@ -118,6 +123,10 @@ export const updateUser = async (
 
   if (isActive !== undefined) {
     modelData.active = isActive ? 1 : 0;
+  }
+
+  if (countryIds !== undefined) {
+    modelData.country_ids = countryIds;
   }
 
   try {

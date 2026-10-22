@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { mutate as globalMutate } from "swr";
+import useSWR, { mutate as globalMutate } from "swr";
 import { ArrowLeft, Layers, Settings, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
@@ -16,14 +16,17 @@ import {
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
-import { getGroupsByUser } from "@/services/users/users";
+import { getGroupsByUser, getUserById, updateUser } from "@/services/users/users";
 import {
   addUserToClientGroups,
   removeUserFromClientGroups
 } from "@/services/groupClients/groupClients";
 import { useAppStore } from "@/lib/store/store";
+import { fetcher } from "@/utils/api/api";
+import { ICountries } from "@/types/countries/ICountries";
 import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
+import PaisesSection from "@/modules/marketAdmin/components/market-admin-user-detail/PaisesSection";
 import ConfiguracionFacturadorTab from "@/modules/marketAdmin/components/market-admin-user-detail/ConfiguracionFacturadorTab";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
@@ -70,6 +73,28 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     loadGrupos();
   }, [loadGrupos]);
 
+  // Los países asignados viven en data.user_data_scope y no vienen en el detalle
+  // de marketplace-admin, así que se piden al endpoint genérico de usuario.
+  const [countryIds, setCountryIds] = useState<number[]>([]);
+  const [paisesLoaded, setPaisesLoaded] = useState(false);
+  const [isSavingPaises, setIsSavingPaises] = useState(false);
+  const { data: countriesData } = useSWR<ICountries>(
+    projectId ? `/country?project_id=${projectId}` : null,
+    fetcher
+  );
+  const allPaises = countriesData?.data ?? [];
+
+  const loadPaises = useCallback(async () => {
+    if (!usuario?.id) return;
+    const response = await getUserById(`${usuario.id}`);
+    setCountryIds(response?.data?.COUNTRY_IDS ?? []);
+    setPaisesLoaded(true);
+  }, [usuario?.id]);
+
+  useEffect(() => {
+    loadPaises();
+  }, [loadPaises]);
+
   const asignados = usuario?.clients ?? [];
 
   const agregarGrupo = async (grupoIds: number[]) => {
@@ -110,6 +135,47 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
       showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el grupo.");
     } finally {
       setIsSavingGrupos(false);
+    }
+  };
+
+  const agregarPaises = async (ids: number[]) => {
+    if (!usuario) return false;
+    const prev = countryIds;
+    const next = Array.from(new Set([...countryIds, ...ids]));
+    setCountryIds(next);
+    try {
+      setIsSavingPaises(true);
+      await updateUser(usuario.id, projectId, { countryIds: next });
+      showMessage(
+        "success",
+        ids.length === 1
+          ? "País agregado correctamente."
+          : `${ids.length} países agregados correctamente.`
+      );
+      return true;
+    } catch (err) {
+      setCountryIds(prev);
+      showMessage("error", err instanceof Error ? err.message : "No se pudo agregar el país.");
+      return false;
+    } finally {
+      setIsSavingPaises(false);
+    }
+  };
+
+  const quitarPais = async (countryId: number) => {
+    if (!usuario) return;
+    const prev = countryIds;
+    const next = countryIds.filter((cid) => cid !== countryId);
+    setCountryIds(next);
+    try {
+      setIsSavingPaises(true);
+      await updateUser(usuario.id, projectId, { countryIds: next });
+      showMessage("success", "País removido correctamente.");
+    } catch (err) {
+      setCountryIds(prev);
+      showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el país.");
+    } finally {
+      setIsSavingPaises(false);
     }
   };
 
@@ -264,13 +330,23 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         {/* Tab content */}
         <div>
           {activeTab === "clientes" && (
-            <ClientesTab
-              clientes={asignados}
-              onAgregar={agregar}
-              onQuitar={quitar}
-              isLoading={isSaving}
-              disabled={isSaving}
-            />
+            <div className="flex flex-col gap-6">
+              <PaisesSection
+                asignadosIds={countryIds}
+                allPaises={allPaises}
+                loading={!paisesLoaded}
+                disabled={isSavingPaises}
+                onAgregar={agregarPaises}
+                onQuitar={quitarPais}
+              />
+              <ClientesTab
+                clientes={asignados}
+                onAgregar={agregar}
+                onQuitar={quitar}
+                isLoading={isSaving}
+                disabled={isSaving}
+              />
+            </div>
           )}
           {activeTab === "grupos" && (
             <GruposTab
