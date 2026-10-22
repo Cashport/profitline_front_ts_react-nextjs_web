@@ -1,0 +1,10 @@
+.profile {
+    display: flex;
+    column-gap: 8px;
+    cursor: pointer;
+    align-items: center;
+
+    .arrow {
+        font-size: 20px;
+    }
+}
