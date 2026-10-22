@@ -646,6 +646,19 @@ export function PurchaseOrderProducts({
                                       }
                                     </span>
                                   </div>
+                                  {data?.project_id === 204 &&
+                                    watchedProducts[index].purchase_order_original!
+                                      .po_sku && (
+                                    <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
+                                      <span className="text-gray-500 shrink-0">EAN</span>
+                                      <span className="text-right font-medium text-cashport-black break-all">
+                                        {
+                                          watchedProducts[index]
+                                            .purchase_order_original!.po_sku
+                                        }
+                                      </span>
+                                    </div>
+                                  )}
                                   <div className="flex justify-between gap-3 py-2.5 border-t border-gray-100">
                                     <span className="text-gray-500 shrink-0">Unidades</span>
                                     <span className="font-medium text-cashport-black">

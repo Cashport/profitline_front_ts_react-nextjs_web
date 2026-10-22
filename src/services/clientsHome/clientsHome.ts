@@ -15,6 +15,7 @@ const baseParams = (q: IClientsHomeQuery) => {
   if (q.projectToMonthEnd) params.set("project_to_month_end", "true");
   if (q.markets.length) params.set("markets", q.markets.join(","));
   if (q.executives.length) params.set("executives", q.executives.join(","));
+  if (q.coordinators.length) params.set("coordinators", q.coordinators.join(","));
   if (q.dueFrom) params.set("due_from", q.dueFrom);
   if (q.dueTo) params.set("due_to", q.dueTo);
   return params;

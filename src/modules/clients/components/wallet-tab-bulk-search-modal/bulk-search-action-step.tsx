@@ -292,7 +292,8 @@ const BulkSearchActionStep = ({
                     onChange={(value) => onConfigChange({ motiveId: value })}
                     options={motives.data?.map((motive) => ({
                       value: motive.id,
-                      label: motive.name
+                      label: motive.name,
+                      title: motive.description
                     }))}
                     loading={motives.isLoading}
                     status={motives.isError ? "error" : undefined}

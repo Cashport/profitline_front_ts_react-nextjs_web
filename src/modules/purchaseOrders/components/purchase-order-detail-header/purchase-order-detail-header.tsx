@@ -91,6 +91,11 @@ export function PurchaseOrderDetailHeader({
   // Abbott 204: en "Generación TXT ERP" solo queda disponible "Descargar TXT ERP".
   const txtErpLocked = data?.status_name === "Generación TXT ERP";
 
+  // TEMPORAL (Abbott 204): "Generar TXT ERP" oculto.
+  // Para reactivarlo, cambiar únicamente este flag a true; el item del dropdown,
+  // el handler y la llamada a downloadMvpTxt se conservan completos.
+  const isTxtErpEnabled = false;
+
   const handleDownloadTxtErp = async () => {
     if (!orderId) return;
     setIsTxtErpLoading(true);
@@ -286,7 +291,8 @@ export function PurchaseOrderDetailHeader({
       onClick: () => onOpenModal?.(11),
       disabled: data?.status_name !== "En refacturación" || txtErpLocked
     },
-    ...(data?.project_id === 204
+    // TEMPORAL (Abbott 204): ERP oculto; el item se conserva para reactivación.
+    ...(isTxtErpEnabled && data?.project_id === 204
       ? [
           {
             key: "txt-erp",
@@ -294,7 +300,11 @@ export function PurchaseOrderDetailHeader({
             icon: <FileOutput className="h-4 w-4" />,
             onClick: handleDownloadTxtErp,
             disabled: isTxtErpLoading
-          } as DropdownItem,
+          } as DropdownItem
+        ]
+      : []),
+    ...(data?.project_id === 204
+      ? [
           {
             key: "txt-ean",
             label: "Descargar TXT EAN",
@@ -366,6 +376,16 @@ export function PurchaseOrderDetailHeader({
                 </>
               )}
             </Button>
+          )}
+          {data?.project_id === 204 &&
+            (data?.region || data?.delivery_destination_code) && (
+            <span className="ml-2 text-xs text-gray-500">
+              {data?.region ? `Región: ${data.region}` : ""}
+              {data?.region && data?.delivery_destination_code ? " · " : ""}
+              {data?.delivery_destination_code
+                ? `Destino: ${data.delivery_destination_code}`
+                : ""}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">

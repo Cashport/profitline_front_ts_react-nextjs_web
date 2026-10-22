@@ -29,6 +29,7 @@ interface ClientsHomeFiltersState extends IClientsHomeQuery {
   toggleMarket: (market: string) => void;
   setExecutives: (executives: string[]) => void;
   toggleExecutive: (executive: string) => void;
+  setCoordinators: (coordinators: string[]) => void;
   setDue: (from: string | null, to: string | null, period: DuePeriod | null) => void;
   setAging: (aging: ClientsHomeAgingBucket | null) => void;
   setForecastStatuses: (statuses: ClientsHomeForecastStatus[]) => void;
@@ -44,6 +45,7 @@ const initialState = {
   projectToMonthEnd: false,
   markets: [] as string[],
   executives: [] as string[],
+  coordinators: [] as string[],
   dueFrom: null as string | null,
   dueTo: null as string | null,
   duePeriod: null as DuePeriod | null,
@@ -65,6 +67,7 @@ export const useClientsHomeFilters = create<ClientsHomeFiltersState>((set) => ({
   toggleMarket: (market) => set((s) => ({ markets: toggle(s.markets, market) })),
   setExecutives: (executives) => set({ executives }),
   toggleExecutive: (executive) => set((s) => ({ executives: toggle(s.executives, executive) })),
+  setCoordinators: (coordinators) => set({ coordinators }),
   setDue: (dueFrom, dueTo, duePeriod) => set({ dueFrom, dueTo, duePeriod }),
   // Al filtrar por edad la tabla se ordena por ese tramo, como en el diseño.
   setAging: (aging) => set(aging ? { aging, sortBy: "portfolio", sortDir: "desc" } : { aging }),
@@ -86,6 +89,7 @@ export const selectClientsHomeQuery = (s: ClientsHomeFiltersState): IClientsHome
   projectToMonthEnd: s.projectToMonthEnd,
   markets: s.markets,
   executives: s.executives,
+  coordinators: s.coordinators,
   dueFrom: s.dueFrom,
   dueTo: s.dueTo
 });

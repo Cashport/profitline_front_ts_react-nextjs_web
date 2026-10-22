@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 
-import type { IClientsHomeCatalogItem } from "@/types/clients/IClientsHome";
+import type {
+  IClientsHomeCatalogItem,
+  IClientsHomeExecutiveCatalogItem
+} from "@/types/clients/IClientsHome";
 import { DUE_PERIODS, type DuePeriod } from "../../../constants/clients-home";
-import { duePeriodRange } from "../../../utils/clients-home-format";
+import { duePeriodRange, executivesForCoordinators } from "../../../utils/clients-home-format";
 
 export interface ClientsHomeFilterDraft {
   due: { from: string; to: string; period: DuePeriod | null };
+  coordinators: string[];
   executives: string[];
   markets: string[];
 }
 
-type CategoryKey = "fecha" | "executives" | "markets";
+type CategoryKey = "fecha" | "coordinators" | "executives" | "markets";
+type ListCategoryKey = Exclude<CategoryKey, "fecha">;
 
 interface ClientsHomeFilterModalProps {
   initial: ClientsHomeFilterDraft;
-  executives: IClientsHomeCatalogItem[];
+  coordinators: IClientsHomeCatalogItem[];
+  executives: IClientsHomeExecutiveCatalogItem[];
   markets: IClientsHomeCatalogItem[];
   onApply: (draft: ClientsHomeFilterDraft) => void;
   onClose: () => void;
@@ -24,19 +30,29 @@ interface ClientsHomeFilterModalProps {
 
 const CATEGORIES: { key: CategoryKey; label: string }[] = [
   { key: "fecha", label: "Fecha" },
+  { key: "coordinators", label: "Coordinador" },
   { key: "executives", label: "Ejecutivo" },
   { key: "markets", label: "Mercado" }
 ];
 
 const emptyDraft = (): ClientsHomeFilterDraft => ({
   due: { from: "", to: "", period: null },
+  coordinators: [],
   executives: [],
   markets: []
 });
 
-/** "Filtros Avanzados" del Home: Fecha (vencimiento), Ejecutivo y Mercado. */
+/* Por dimensión: texto de "sin dato" y nombre en el buscador. */
+const LIST_LABELS: Record<ListCategoryKey, { empty: string; search: string }> = {
+  coordinators: { empty: "Sin coordinador", search: "coordinador" },
+  executives: { empty: "Sin ejecutivo", search: "ejecutivo" },
+  markets: { empty: "Sin mercado", search: "mercado" }
+};
+
+/** "Filtros Avanzados" del Home: Fecha (vencimiento), Coordinador, Ejecutivo y Mercado. */
 export default function ClientsHomeFilterModal({
   initial,
+  coordinators,
   executives,
   markets,
   onApply,
@@ -46,9 +62,16 @@ export default function ClientsHomeFilterModal({
   const [cat, setCat] = useState<CategoryKey>("fecha");
   const [optQuery, setOptQuery] = useState("");
 
-  const catalog = cat === "executives" ? executives : cat === "markets" ? markets : [];
+  // Ejecutivo se limita a los coordinadores marcados en el borrador.
+  const visibleExecutives = executivesForCoordinators(executives, draft.coordinators);
+  const catalogs: Record<ListCategoryKey, IClientsHomeCatalogItem[]> = {
+    coordinators,
+    executives: visibleExecutives,
+    markets
+  };
+  const catalog = cat === "fecha" ? [] : catalogs[cat];
   const nameOf = (o: IClientsHomeCatalogItem) =>
-    o.name ?? (cat === "markets" ? "Sin mercado" : "Sin ejecutivo");
+    o.name ?? (cat === "fecha" ? "" : LIST_LABELS[cat].empty);
   const optList = catalog.filter((o) => nameOf(o).toLowerCase().includes(optQuery.toLowerCase()));
   const selected = cat === "fecha" ? [] : draft[cat];
 
@@ -223,7 +246,7 @@ export default function ClientsHomeFilterModal({
                   <input
                     value={optQuery}
                     onChange={(e) => setOptQuery(e.target.value)}
-                    placeholder={`Buscar en ${cat === "markets" ? "mercado" : "ejecutivo"}...`}
+                    placeholder={`Buscar en ${LIST_LABELS[cat].search}...`}
                     className="flex-1 border-0 bg-transparent text-[13px] outline-none"
                   />
                 </div>
@@ -288,7 +311,11 @@ export default function ClientsHomeFilterModal({
           </button>
           <button
             type="button"
-            onClick={() => onApply(draft)}
+            onClick={() => {
+              // Quita los ejecutivos que quedaron fuera de los coordinadores elegidos.
+              const allowed = new Set(visibleExecutives.map((e) => e.key));
+              onApply({ ...draft, executives: draft.executives.filter((k) => allowed.has(k)) });
+            }}
             className="h-10 cursor-pointer rounded-[10px] border-0 bg-[#cbe71e] px-[18px] text-[13px] font-semibold text-[#141414] hover:bg-[#d8f032]"
           >
             Aplicar Filtros

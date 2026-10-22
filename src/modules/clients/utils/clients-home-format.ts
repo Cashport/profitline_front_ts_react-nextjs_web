@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 
+import type { IClientsHomeExecutiveCatalogItem } from "@/types/clients/IClientsHome";
 import type { DuePeriod } from "../constants/clients-home";
 
 /* Formatos del Home de Clientes, iguales al diseño: montos en millones con
@@ -81,4 +82,22 @@ export const duePeriodRange = (period: DuePeriod): { from: string; to: string } 
     default:
       return { from: f(today), to: f(today) };
   }
+};
+
+/** Cascada Coordinador → Ejecutivo: solo los ejecutivos con clientes de esos
+    coordinadores, con la cantidad de clientes recalculada. Sin coordinadores
+    devuelve el catálogo completo. */
+export const executivesForCoordinators = (
+  executives: IClientsHomeExecutiveCatalogItem[],
+  coordinators: string[]
+): IClientsHomeExecutiveCatalogItem[] => {
+  if (!coordinators.length) return executives;
+  return executives
+    .map((e) => ({
+      ...e,
+      clients: e.coordinators
+        .filter((c) => coordinators.includes(c.key))
+        .reduce((sum, c) => sum + c.clients, 0)
+    }))
+    .filter((e) => e.clients > 0);
 };

@@ -128,6 +128,7 @@ const HeaderActions = () => {
       aging: s.aging,
       forecastStatuses: s.forecastStatuses,
       executives: s.executives,
+      coordinators: s.coordinators,
       markets: s.markets,
       dueFrom: s.dueFrom,
       dueTo: s.dueTo,
@@ -135,6 +136,7 @@ const HeaderActions = () => {
       setAging: s.setAging,
       setForecastStatuses: s.setForecastStatuses,
       setExecutives: s.setExecutives,
+      setCoordinators: s.setCoordinators,
       setMarkets: s.setMarkets,
       setDue: s.setDue
     }))
@@ -143,6 +145,8 @@ const HeaderActions = () => {
 
   const executiveName = (key: string) =>
     summary?.executives.find((e) => e.key === key)?.name ?? "Sin ejecutivo";
+  const coordinatorName = (key: string) =>
+    summary?.coordinators?.find((c) => c.key === key)?.name ?? "Sin coordinador";
   const hasDue = Boolean(f.dueFrom || f.dueTo);
 
   // El mercado no cuenta ni sale como chip: tiene su propia leyenda en la tabla.
@@ -162,6 +166,13 @@ const HeaderActions = () => {
       cat: "Fecha",
       vals: f.duePeriod ?? `${fmtIsoDate(f.dueFrom)} – ${fmtIsoDate(f.dueTo)}`,
       remove: () => f.setDue(null, null, null)
+    });
+  }
+  if (f.coordinators.length) {
+    chips.push({
+      cat: "Coordinador",
+      vals: f.coordinators.map(coordinatorName).join(", "),
+      remove: () => f.setCoordinators([])
     });
   }
   if (f.executives.length) {
@@ -218,14 +229,17 @@ const HeaderActions = () => {
           initial={{
             due: { from: f.dueFrom ?? "", to: f.dueTo ?? "", period: f.duePeriod },
             executives: f.executives,
+            coordinators: f.coordinators,
             markets: f.markets
           }}
           executives={summary?.executives ?? []}
+          coordinators={summary?.coordinators ?? []}
           markets={summary?.markets ?? []}
           onClose={() => setOpen(false)}
           onApply={(draft) => {
             f.setDue(draft.due.from || null, draft.due.to || null, draft.due.period);
             f.setExecutives(draft.executives);
+            f.setCoordinators(draft.coordinators);
             f.setMarkets(draft.markets);
             setOpen(false);
           }}

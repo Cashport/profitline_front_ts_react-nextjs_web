@@ -55,6 +55,11 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
   const selectedProject = useAppStore((state) => state.selectedProject);
   const isAbbott = selectedProject?.ID === 204;
 
+  // TEMPORAL (Abbott 204): "Generar TXT ERP" oculto.
+  // Para reactivarlo, cambiar únicamente este flag a true; el JSX, el handler
+  // y la llamada a downloadMvpTxt se conservan completos.
+  const isTxtErpEnabled = false;
+
   const canSendToBilling =
     selectedPackageRows.length === 1 &&
     selectedPackageRows[0].orders.every((o) => o.status === "Procesado");
@@ -326,12 +331,15 @@ export const ActionsModalPurchaseOrder: React.FC<ActionsModalPurchaseOrderProps>
         <div className="modal-content">
           {isAbbott ? (
             <>
-              <ButtonGenerateAction
-                icon={<DownloadSimple className="h-4 w-4" />}
-                title="Descargar TXT ERP"
-                onClick={handleDownloadMvpTxt}
-                disabled={isMvpTxtLoading || selectedOrders.length === 0}
-              />
+              {/* TEMPORAL (Abbott 204): ERP oculto; el bloque se conserva para reactivación. */}
+              {isTxtErpEnabled && (
+                <ButtonGenerateAction
+                  icon={<DownloadSimple className="h-4 w-4" />}
+                  title="Descargar TXT ERP"
+                  onClick={handleDownloadMvpTxt}
+                  disabled={isMvpTxtLoading || selectedOrders.length === 0}
+                />
+              )}
               <ButtonGenerateAction
                 icon={<DownloadSimple className="h-4 w-4" />}
                 title="Descargar TXT EAN"
