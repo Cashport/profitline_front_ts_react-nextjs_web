@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flex, Input, Modal, Select, Typography } from "antd";
 
 import FooterButtons from "@/components/atoms/FooterButtons/FooterButtons";
@@ -23,6 +23,8 @@ interface ModalCreateReportProps {
   onClose: () => void;
   /** "+ Crear tipo": el contenedor cierra este modal y abre el de tipos. */
   onCreateType: () => void;
+  /** Tipo recién creado desde "+ Crear tipo": al volver a este modal queda seleccionado. */
+  createdType?: IReportType | null;
   onSuccess?: (report: IReport) => void;
 }
 
@@ -32,6 +34,7 @@ export function ModalCreateReport({
   types,
   onClose,
   onCreateType,
+  createdType,
   onSuccess
 }: ModalCreateReportProps) {
   const [typeId, setTypeId] = useState<number | null>(null);
@@ -44,6 +47,10 @@ export function ModalCreateReport({
   const { showMessage } = useMessageApi();
 
   const isReady = Boolean(typeId && name.trim() && file);
+
+  useEffect(() => {
+    if (createdType) setTypeId(createdType.id);
+  }, [createdType]);
 
   // Se vacía al cancelar o publicar, no al pasar a "Crear tipo": al volver de
   // ese modal sigue lo que ya se había llenado.
@@ -129,7 +136,8 @@ export function ModalCreateReport({
             placeholder="Selecciona un tipo"
             value={typeId ?? undefined}
             onChange={setTypeId}
-            options={types.map((t) => ({ value: t.id, label: t.name }))}
+            options={types}
+            fieldNames={{ value: "id", label: "name" }}
           />
         </div>
 

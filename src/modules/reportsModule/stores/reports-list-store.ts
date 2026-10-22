@@ -2,9 +2,9 @@ import { create } from "zustand";
 
 import type { SortState } from "@/modules/walletModule/types";
 import { nextSort } from "@/modules/walletModule/utils/wallet-calc";
+import type { IReportsFilters } from "@/types/reports/IReports";
 
 import { DEFAULT_REPORTS_SORT, EMPTY_REPORTS_FILTERS, REPORTS_TEXTUAL_COLS } from "../constants";
-import type { IReportsFilters } from "../types";
 
 /* Estado del listado de Informes. Vive en un store porque sobrevive al cambio
    de ruta: el detalle (/reports/:id) navega en el mismo orden que el listado y,
@@ -15,14 +15,14 @@ interface ReportsListState {
   filters: IReportsFilters;
   sort: SortState;
   /** Último publicado: se resalta como "Nuevo". */
-  newReportId: number | null;
+  newReportId: string | null;
   setSearch: (search: string) => void;
   setFilters: (filters: IReportsFilters) => void;
   /** Clic en un encabezado: invierte si ya ordenaba por esa columna. */
   sortByColumn: (col: string) => void;
   clearCriteria: () => void;
   /** Deja el publicado arriba y a la vista: sin búsqueda ni filtros, más reciente primero. */
-  markPublished: (reportId: number) => void;
+  markPublished: (reportId: string) => void;
 }
 
 export const useReportsListStore = create<ReportsListState>((set) => ({

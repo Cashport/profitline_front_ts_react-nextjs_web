@@ -14,10 +14,9 @@ import {
   formatDateTagValue
 } from "@/modules/reverseLogistics/components/FilterDateTab/FilterDateTab";
 import { DateFilterTag } from "@/modules/reverseLogistics/components/FilterDateTab/DateFilterTag";
-import type { IReportType } from "@/types/reports/IReports";
+import type { IReportsFilters, IReportType } from "@/types/reports/IReports";
 
 import { EMPTY_REPORTS_FILTERS } from "../../constants";
-import type { IReportsFilters } from "../../types";
 
 /** Misma altura y superficie que el buscador y el botón de tema. */
 const TRIGGER_CLASS =
@@ -43,7 +42,7 @@ export default function ReportsFilterModal({ value, onChange, types }: ReportsFi
   const typeOptions: FilterOptionItem[] = types.map((t) => ({ id: String(t.id), name: t.name }));
 
   const selection: FilterSelection = {
-    tipo: value.typeIds.map((id) => ({
+    tipo: value.report_type_ids.map((id) => ({
       id: String(id),
       name: types.find((t) => t.id === id)?.name ?? String(id)
     }))
@@ -82,8 +81,8 @@ export default function ReportsFilterModal({ value, onChange, types }: ReportsFi
       value={selection}
       trigger={{ label: "Filtrar", className: TRIGGER_CLASS, showChevron: true }}
       formatTagValue={(_cat, items) => items.map((i) => i.name).join(", ")}
-      onApply={(sel) => onChange({ typeIds: toIds(sel.tipo), ...dateDraft })}
-      onValueChange={(sel) => onChange({ ...value, typeIds: toIds(sel.tipo) })}
+      onApply={(sel) => onChange({ report_type_ids: toIds(sel.tipo), ...dateDraft })}
+      onValueChange={(sel) => onChange({ ...value, report_type_ids: toIds(sel.tipo) })}
       onClearAll={() => onChange(EMPTY_REPORTS_FILTERS)}
       onOpen={() => setDateDraft(committedDate)}
       onClearDraft={() => setDateDraft({ from: null, to: null })}

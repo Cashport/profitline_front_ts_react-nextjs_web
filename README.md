@@ -171,7 +171,7 @@ Módulos presentes en el código que Cashport Brain todavía no describe:
 | Portal de archivos (descarga por token)                         | `/portal-archivos` (pública)                | `src/app/portal-archivos/`                          | —                                           |
 | Torre de control                                                | `/torreControl`                             | `src/modules/torreControlModule/` (datos simulados) | oculto en el menú                           |
 | Nuevo dashboard                                                 | `/newDashboard`                             | `src/modules/new_dashboard/` (datos simulados)      | oculto en el menú                           |
-| Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                 | `src/modules/reportsModule/` (datos simulados)      | `Reports`                                   |
+| Informes (informes HTML publicados para el equipo)              | `/reports`, `/reports/[id]`                 | `src/modules/reportsModule/`                        | `Reports`                                   |
 
 ---
 

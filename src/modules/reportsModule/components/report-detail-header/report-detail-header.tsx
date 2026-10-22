@@ -7,7 +7,12 @@ import { ProfileMenu } from "@/components/atoms/ProfileMenu/ProfileMenu";
 import type { IReport } from "@/types/reports/IReports";
 
 import { fmtReportDate } from "../../utils/reports-format";
-import type { IReportPosition } from "../../types";
+
+/** Posición del informe abierto dentro del listado filtrado y ordenado. */
+interface IReportPosition {
+  index: number;
+  total: number;
+}
 
 const NAV_BUTTON_CLASS =
   "flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:text-muted-foreground/50 disabled:hover:bg-card";
@@ -48,7 +53,7 @@ export default function ReportDetailHeader({
             <h1 className="truncate text-2xl font-semibold text-foreground">{report.name}</h1>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">{report.report_type_name}</span>
-              <span>Publicado {fmtReportDate(report.published_at)}</span>
+              <span>Publicado {fmtReportDate(report.created_at)}</span>
             </div>
           </>
         ) : (
