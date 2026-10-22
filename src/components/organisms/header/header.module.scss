@@ -25,27 +25,6 @@
         column-gap: 8px;
         align-items: center;
     }
-
-    .profile {
-        display: flex;
-        column-gap: 8px;
-        cursor: pointer;
-        align-items: center;
-
-        .img {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            flex: 0 0 auto;
-            overflow: hidden;
-            border-radius: 50%;
-            background-color: #cbe71e4d;
-        }
-
-        .arrow {
-            font-size: 20px;
-        }
-    }
 }
 
 @media (max-width: 768px) {
