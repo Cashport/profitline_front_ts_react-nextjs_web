@@ -75,7 +75,7 @@ export default function CountriesClientsView() {
     pageSize: 10
   });
 
-  const { data, filters, isLoading, mutate } = useCountriesClients(
+  const { data, filters, isLoading, error, mutate } = useCountriesClients(
     countryId,
     projectId,
     pagination.current,
@@ -271,20 +271,30 @@ export default function CountriesClientsView() {
           </div>
 
           {/* Clients Table */}
-          <CountriesClientsTable
-            data={clientsData}
-            loading={isLoading}
-            pagination={{ ...pagination, total }}
-            onPaginationChange={(page, pageSize) => {
-              setPagination((prev) => ({
-                ...prev,
-                current: page,
-                pageSize: pageSize || prev.pageSize
-              }));
-            }}
-            scrollHeight={height - 325}
-            onRowClick={handleRowClick}
-          />
+          {error ? (
+            <div className="bg-white rounded-lg p-6 text-center">
+              <p className="text-red-600">
+                {error instanceof Error
+                  ? error.message
+                  : "No se pudo cargar la información de este país."}
+              </p>
+            </div>
+          ) : (
+            <CountriesClientsTable
+              data={clientsData}
+              loading={isLoading}
+              pagination={{ ...pagination, total }}
+              onPaginationChange={(page, pageSize) => {
+                setPagination((prev) => ({
+                  ...prev,
+                  current: page,
+                  pageSize: pageSize || prev.pageSize
+                }));
+              }}
+              scrollHeight={height - 325}
+              onRowClick={handleRowClick}
+            />
+          )}
         </CardContent>
       </Card>
       <CountryClientsActionsModal

@@ -38,7 +38,7 @@ export function CatalogPacksTable() {
   const [packSearch, setPackSearch] = useState("");
   const debouncedSearch = useDebounce(packSearch, 400);
 
-  const { data: packs, mutate } = usePacksDataQuality(clientId, countryId, debouncedSearch);
+  const { data: packs, error, mutate } = usePacksDataQuality(clientId, countryId, debouncedSearch);
 
   const [expandedPacks, setExpandedPacks] = useState<Set<number>>(new Set());
 
@@ -149,6 +149,14 @@ export function CatalogPacksTable() {
       </div>
 
       {/* Table */}
+      {error ? (
+        <div className="bg-white rounded-lg p-6 text-center">
+          <p className="text-red-600">
+            {error instanceof Error ? error.message : "No se pudo cargar los packs de materiales."}
+          </p>
+        </div>
+      ) : (
+      <>
       <Table>
         <TableHeader>
           <TableRow style={{ borderColor: "#DDDDDD" }}>
@@ -297,6 +305,8 @@ export function CatalogPacksTable() {
         Mostrando {packsData.length} packs con{" "}
         {packsData.reduce((acc, p) => acc + p.materials.length, 0)} productos
       </div>
+      </>
+      )}
 
       <ModalAddEditPackMaterial
         isOpen={modalOpen}

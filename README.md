@@ -242,6 +242,23 @@ Cada proyecto (cliente) tiene permisos por rol: `views_permissions[].page_name` 
 - `src/utils/permissions/routePermissions.ts` protege por URL solo las rutas de `ROUTE_PREFIX_TO_PERMISSION`. Las rutas que no están en ese mapa no exigen permiso.
 - Hay comportamiento específico por cliente, controlado por IDs de proyecto en `src/utils/constants/globalConstants.ts` y algunos literales en el código.
 
+### Asignación de países a usuarios
+
+- Los países disponibles se consultan con `GET /country?project_id=<proyecto>`.
+  El detalle de `GET /user/:id` devuelve los asignados en `data.COUNTRY_IDS`.
+- Al registrar un usuario no administrador (roles distintos de 1 y 2), se exige
+  al menos un país para evitar crear una cuenta sin acceso a Data/Alertas.
+- Marketplace-admin usa `updateUserCountries`: antes de guardar consulta el perfil
+  y los grupos actuales y envía el payload completo requerido por `PUT /user`,
+  incluidos `zones` y `groups_id` aunque estén vacíos. No modifica las reglas de
+  negocio ni el estado activo.
+- Los errores de lectura no se interpretan como una lista vacía: se muestran con
+  opción de reintentar. Los errores de guardado se propagan para revertir el estado
+  optimista y evitar mensajes de éxito falsos. El formulario conserva los cambios
+  ante un error y distingue el 409 de correo duplicado.
+- Pruebas de regresión (sin llamadas al backend):
+  `node --test tests/user-countries.test.js`.
+
 ---
 
 ## Procesos programados, tiempo real e integraciones
