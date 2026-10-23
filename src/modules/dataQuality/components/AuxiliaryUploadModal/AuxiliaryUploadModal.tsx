@@ -234,7 +234,11 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
   };
 
   const handleRetryItem = async (item: LocalItem) => {
-    if (!batchId) return;
+    if (!batchId) {
+      // Nunca se creo el lote: hay que reiniciar la seleccion completa.
+      reset();
+      return;
+    }
     await sendSlot(batchId, item.slotIndex, item.file, selected.length || items.length);
     await mutate();
   };
@@ -253,6 +257,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
     (item) => !files.some((file) => file.slot_index === item.slotIndex)
   );
 
+  const hasStarted = isUploading || items.length > 0 || !!batchId;
   const canClose = !isUploading;
 
   return (
@@ -275,7 +280,7 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
     >
       <div className="flex flex-col gap-4">
         {/* Seleccion */}
-        {!batchId && (
+        {!hasStarted && (
           <>
             <UploadDropZone
               onFileUpload={handleSelect}
@@ -328,8 +333,22 @@ export const AuxiliaryUploadModal: React.FC<AuxiliaryUploadModalProps> = ({
         )}
 
         {/* Progreso / resultado */}
-        {(batchId || items.length > 0) && (
+        {hasStarted && (
           <>
+            {!batchId && !isUploading && (
+              <Alert
+                type="error"
+                showIcon
+                message="No se pudo recibir ningun archivo"
+                description="Revisa la conexion e intenta de nuevo. No quedo ningun lote registrado."
+                action={
+                  <Button variant="outline" size="sm" onClick={reset}>
+                    Volver a intentar
+                  </Button>
+                }
+              />
+            )}
+
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <Tag color="blue">Recibidos {batch?.received_count ?? 0}/{summary.total}</Tag>
               <Tag color="success">Exitosos {summary.ok}</Tag>
