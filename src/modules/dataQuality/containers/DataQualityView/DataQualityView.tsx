@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 import { Badge, Spin } from "antd";
 import { BellSimpleRinging } from "phosphor-react";
 import { Users, UserX, Bell, FileText, FileX, Tag, Bot } from "lucide-react";
@@ -32,6 +33,7 @@ export default function DataQualityView() {
   const [summaryData, setSummaryData] = useState<ISummaryCountries | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noCountryAccess, setNoCountryAccess] = useState(false);
 
   const countries = summaryData?.countries || [];
   const totalAlerts = summaryData?.countries.reduce((sum, c) => sum + c.active_alerts, 0) || 0;
@@ -41,10 +43,21 @@ export default function DataQualityView() {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
+      setNoCountryAccess(false);
+      setSummaryData(null);
       try {
         const response = await getSummaryCountries(ID);
         setSummaryData(response);
       } catch (err) {
+        if (
+          axios.isAxiosError<{ message?: string }>(err) &&
+          err.response?.status === 403 &&
+          err.response.data?.message ===
+            "No tienes alcance de datos asignado para este proyecto"
+        ) {
+          setNoCountryAccess(true);
+          return;
+        }
         console.error("Error fetching countries:", err);
         setError("No se pudieron cargar los países. Por favor, intenta de nuevo.");
       } finally {
@@ -55,6 +68,9 @@ export default function DataQualityView() {
     if (ID && canReadData) {
       fetchData();
     } else {
+      setSummaryData(null);
+      setError(null);
+      setNoCountryAccess(false);
       setIsLoading(false);
     }
   }, [ID, canReadData]);
@@ -111,13 +127,27 @@ export default function DataQualityView() {
     );
   }
 
+  if (noCountryAccess) {
+    return (
+      <div className="flex flex-col gap-4">
+        <Header title="Data Quality" />
+        <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
+        <div className="bg-white rounded-lg p-12 text-center">
+          <p className="text-gray-500 text-lg">No tienes países asignados</p>
+        </div>
+      </div>
+    );
+  }
+
   if (countries.length === 0) {
     return (
       <div className="flex flex-col gap-4">
         <Header title="Data Quality" />
         <h2 className="text-xl font-semibold text-[#141414] mb-6">Países y Distribuidores</h2>
         <div className="bg-white rounded-lg p-12 text-center">
-          <p className="text-gray-500 text-lg">No hay países configurados</p>
+          <p className="text-gray-500 text-lg">
+            No hay información disponible para los países asignados.
+          </p>
         </div>
       </div>
     );
