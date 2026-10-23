@@ -26,6 +26,11 @@ import { useAppStore } from "@/lib/store/store";
 import { IBalanceRow, IBalancesFilter } from "@/types/financialDiscounts/IFinancialDiscounts";
 import { FilterBalancesView } from "../../components/FilterBalancesView/FilterBalancesView";
 
+// IDs separados por saltos de línea, comas, punto y coma o espacios
+// (p. ej. pegados desde Excel) → "id1,id2" sin duplicados
+const normalizeSearch = (value: string) =>
+  Array.from(new Set(value.split(/[\s,;]+/).filter(Boolean))).join(",");
+
 export function BalancesView() {
   const { ID } = useAppStore((projects) => projects.selectedProject);
 
@@ -112,7 +117,7 @@ export function BalancesView() {
               <div className="flex items-center gap-4">
                 <UiSearchInput
                   placeholder="Buscar"
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(normalizeSearch(e.target.value))}
                 />
 
                 <GenerateActionButton

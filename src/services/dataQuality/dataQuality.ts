@@ -29,7 +29,8 @@ import {
   IPacksUploadResult,
   IBotRunNowResult,
   IBotHistoryList,
-  IVariableHistoryEntry
+  IVariableHistoryEntry,
+  IAuxiliaryUploadBatch
 } from "@/types/dataQuality/IDataQuality";
 
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
@@ -808,6 +809,65 @@ export const uploadAuxiliaryFile = async (id: number, file: File): Promise<any> 
     console.error("Error uploading auxiliary file:", error);
     throw error;
   }
+};
+
+/**
+ * HU cargue multiple de Auxiliares de LATAM.
+ * Un archivo por request: el backend responde 202 cuando el archivo quedo en
+ * S3 + registrado en MySQL. NO espera la conversion ni el SFTP.
+ */
+export interface IUploadAuxiliaryUploadRequest {
+  id: number;
+  batchId: string;
+  fileCount: number;
+  slotIndex: number;
+  file: File;
+}
+
+export const uploadAuxiliaryUpload = async ({
+  id,
+  batchId,
+  fileCount,
+  slotIndex,
+  file
+}: IUploadAuxiliaryUploadRequest): Promise<{
+  uploadId: number;
+  batchId: string;
+  slotIndex: number;
+  remoteFilename: string;
+  status: string;
+  receivedCount: number;
+  fileCount: number;
+}> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("batch_id", batchId);
+  formData.append("file_count", String(fileCount));
+  formData.append("slot_index", String(slotIndex));
+
+  const response: GenericResponse<any> = await API.post(
+    `${config.API_HOST}/data/auxiliary-files/${id}/uploads`,
+    formData
+  );
+  return response.data;
+};
+
+export const getAuxiliaryUploadBatch = async (
+  batchId: string
+): Promise<IAuxiliaryUploadBatch> => {
+  const response: GenericResponse<IAuxiliaryUploadBatch> = await API.get(
+    `${config.API_HOST}/data/auxiliary-upload-batches/${batchId}`
+  );
+  return response.data;
+};
+
+export const retryAuxiliaryUpload = async (
+  uploadId: number
+): Promise<{ batchId: string }> => {
+  const response: GenericResponse<{ batchId: string }> = await API.post(
+    `${config.API_HOST}/data/auxiliary-uploads/${uploadId}/retry`
+  );
+  return response.data;
 };
 
 // Email routing rules ENDPOINTS
