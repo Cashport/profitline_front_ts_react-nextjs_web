@@ -207,6 +207,11 @@ function renderComponent(file, exportName, mocks, props) {
         }
       ];
     },
+    useRef(initial) {
+      const index = cursor++;
+      if (!(index in slots)) slots[index] = { current: initial };
+      return slots[index];
+    },
     useMemo: memo,
     useCallback: (callback, deps) => memo(() => callback, deps),
     useEffect(effect, deps) {
@@ -377,8 +382,9 @@ for (const failure of [
   });
 }
 
-function marketHarness(services = {}) {
+function marketHarness(services = {}, canManageUserCountries = true) {
   const messages = [];
+  let countriesKey;
   const countries = {
     data: { data: [{ id: 1, country_name: "One" }] },
     isLoading: false,
@@ -388,8 +394,18 @@ function marketHarness(services = {}) {
     marketFile,
     "default",
     {
-      swr: { __esModule: true, default: () => countries, mutate() {} },
+      swr: {
+        __esModule: true,
+        default: (key) => {
+          countriesKey = key;
+          return countries;
+        },
+        mutate() {}
+      },
       "@/utils/api/api": { fetcher() {} },
+      "@/utils/utils": {
+        checkUserViewPermissions: () => canManageUserCountries
+      },
       "@/context/MessageContext": {
         useMessageApi: () => ({
           showMessage: (...args) => messages.push(args)
@@ -416,14 +432,29 @@ function marketHarness(services = {}) {
     },
     { params: { id: "7" } }
   );
-  const section = () => find(view.render(), (node) => node.type === "PaisesSection").props;
-  return { view, section, messages };
+  const section = () => find(view.render(), (node) => node.type === "PaisesSection")?.props;
+  const openCountriesTab = () => {
+    const tree = view.render();
+    const tab = find(
+    tree,
+    (node) =>
+      node.type === "button" &&
+      Array.isArray(node.props.children) &&
+      node.props.children.some(
+        (child) => typeof child === "string" && child.startsWith("Países")
+      )
+    );
+    tab?.props.onClick();
+  };
+  return { view, section, openCountriesTab, messages, getCountriesKey: () => countriesKey };
 }
 
 test("marketplace rolls back failed add/remove and never reports success", async () => {
-  const { view, section, messages } = marketHarness();
+  const { view, section, openCountriesTab, messages } = marketHarness();
   view.render();
   await view.flush();
+  assert.equal(find(view.render(), (node) => node.type === "PaisesSection"), undefined);
+  openCountriesTab();
   assert.deepEqual(section().asignadosIds, [1]);
   assert.equal(await section().onAgregar([2]), false);
   assert.deepEqual(section().asignadosIds, [1]);
@@ -435,14 +466,17 @@ test("marketplace rolls back failed add/remove and never reports success", async
 
 test("marketplace distinguishes a failed load from a valid empty scope and can retry", async () => {
   let fail = true;
-  const { view, section } = marketHarness({
-    getUserById: async () => {
-      if (fail) throw new Error("Could not load countries");
-      return { data: { ...profile, COUNTRY_IDS: [] } };
+  const { view, section, openCountriesTab } = marketHarness(
+    {
+      getUserById: async () => {
+        if (fail) throw new Error("Could not load countries");
+        return { data: { ...profile, COUNTRY_IDS: [] } };
+      }
     }
-  });
+  );
   view.render();
   await view.flush();
+  openCountriesTab();
   assert.match(section().error, /Could not load countries/);
   fail = false;
   section().onRetry();
@@ -451,4 +485,43 @@ test("marketplace distinguishes a failed load from a valid empty scope and can r
   assert.equal(section().error, null);
   assert.equal(section().loading, false);
   assert.deepEqual(section().asignadosIds, []);
+});
+
+test("country management is a separate MarketAdmin-only tab and assignment refetches", async () => {
+  let reads = 0;
+  let assignedIds = [1, 2];
+  const { view, section, openCountriesTab, getCountriesKey } = marketHarness(
+    {
+      getUserById: async () => {
+        reads++;
+        return { data: { ...profile, COUNTRY_IDS: assignedIds } };
+      },
+      updateUserCountries: async (_, __, countryIds) => {
+        assignedIds = countryIds;
+        return { status: 200 };
+      }
+    }
+  );
+  view.render();
+  await view.flush();
+  assert.equal(getCountriesKey(), "/country?project_id=10");
+  openCountriesTab();
+  assert.deepEqual(section().asignadosIds, [1, 2]);
+
+  assert.equal(await section().onAgregar([3]), true);
+  assert.equal(reads, 2);
+  assert.deepEqual(section().asignadosIds, [1, 2, 3]);
+
+  await section().onQuitar(2);
+  assert.equal(reads, 3);
+  assert.deepEqual(section().asignadosIds, [1, 3]);
+
+  const unauthorized = marketHarness({}, false);
+  unauthorized.view.render();
+  await unauthorized.view.flush();
+  assert.equal(unauthorized.getCountriesKey(), null);
+  assert.equal(
+    find(unauthorized.view.render(), (node) => node.type === "PaisesSection"),
+    undefined
+  );
 });

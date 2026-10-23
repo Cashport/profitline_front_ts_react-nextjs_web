@@ -36,7 +36,7 @@ import {
 export const getSummaryCountries = async (projectId: number): Promise<ISummaryCountries> => {
   try {
     const response: GenericResponse<ISummaryCountries> = await API.get(
-      `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=10`
+      `${config.API_HOST}/data/countries-summary/${projectId}?page=1&limit=100`
     );
     return response.data;
   } catch (error) {
