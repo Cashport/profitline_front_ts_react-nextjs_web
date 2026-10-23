@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Flex, Spin, Typography } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { ArrowsClockwise, CaretLeft, Pencil, Plus } from "phosphor-react";
+import axios from "axios";
 
 import { SelectRoles } from "@/components/molecules/selects/SelectRoles/SelectRoles";
 import { SelectZone } from "@/components/molecules/selects/SelectZone/SelectZone";
@@ -25,8 +26,8 @@ import { IUserData, IUserForm } from "@/types/users/IUser";
 import { SelectClientsGroup } from "@/components/molecules/selects/SelectClientsGroup/SelectClientsGroup";
 
 import { ISelectedBussinessRules } from "@/types/bre/IBRE";
-import { IGroupByUser } from "@/types/clientsGroups/IClientsGroups";
 import { useMessageApi } from "@/context/MessageContext";
+import { ApiError } from "@/utils/api/api";
 
 import "./userprojectform.scss";
 const { Title } = Typography;
@@ -42,6 +43,8 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
   const { showMessage } = useMessageApi();
   const [isEditAvailable, setIsEditAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [dataUser, setDataUser] = useState({
     data: {},
     isLoading: false
@@ -63,14 +66,17 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
   const [zones, setZones] = useState([] as number[]);
   const [customFieldsError, setCustomFieldsError] = useState({
     zone: false,
-    channel: false
+    channel: false,
+    country: false
   });
   const [isOpenModalStatus, setIsOpenModalStatus] = useState(initDataOpenModalStatus);
-  const [assignedGroups, setAssignedGroups] = useState([] as any[]);
+  const [assignedGroups, setAssignedGroups] = useState<number[]>([]);
   const [countryIds, setCountryIds] = useState<number[]>([]);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
+      setLoadError(null);
       if (isViewDetailsUser?.id === 0) {
         setIsEditAvailable(true);
         return;
@@ -79,40 +85,47 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
         isLoading: true,
         data: {} as IUserData
       });
-      const response = await getUserById(`${isViewDetailsUser?.id}`);
-      const finalData = response.data;
-
-      const zonesFinalData =
-        finalData.USER_ZONES?.map(
-          (zone: { ZONE_ID: number; ZONE_DESCRIPTION: string }) => zone.ZONE_ID
-        ) ?? [];
-      setDataUser({
-        isLoading: false,
-        data: finalData
-      });
-      setZones(zonesFinalData);
-      setCountryIds(finalData.COUNTRY_IDS ?? []);
-
-      setSelectedBusinessRules({
-        channels: finalData.USER_CHANNELS?.map((channel) => channel.ID),
-        lines: finalData.USER_LINES?.map((line) => line.ID),
-        sublines: finalData.USER_SUBLINES?.map((subline) => subline.ID)
-      });
-
-      const groupsByUserResponse = await getGroupsByUser(isViewDetailsUser?.id, ID);
-      if (groupsByUserResponse.data) {
-        setAssignedGroups(groupsByUserResponse.data.map((group: IGroupByUser) => group.group_id));
+      try {
+        const [response, groupsByUserResponse] = await Promise.all([
+          getUserById(`${isViewDetailsUser.id}`),
+          getGroupsByUser(isViewDetailsUser.id, ID)
+        ]);
+        if (cancelled) return;
+        const finalData = response.data;
+        setDataUser({ isLoading: false, data: finalData });
+        setZones(finalData.USER_ZONES?.map((zone) => zone.ZONE_ID) ?? []);
+        setCountryIds(finalData.COUNTRY_IDS);
+        setSelectedBusinessRules({
+          channels: finalData.USER_CHANNELS?.map((channel) => channel.ID) ?? [],
+          lines: finalData.USER_LINES?.map((line) => line.ID) ?? [],
+          sublines: finalData.USER_SUBLINES?.map((subline) => subline.ID) ?? []
+        });
+        setAssignedGroups(groupsByUserResponse.data.map((group) => group.group_id));
+      } catch (error) {
+        if (cancelled) return;
+        setLoadError(error instanceof Error ? error.message : "No se pudo cargar el usuario.");
+        setDataUser((prev) => ({ ...prev, isLoading: false }));
       }
     })();
-  }, [ID, isViewDetailsUser]);
+    return () => {
+      cancelled = true;
+    };
+  }, [ID, isViewDetailsUser.id, loadAttempt]);
 
   const onSubmitHandler = async (data: IUserForm) => {
+    if (loadError || dataUser.isLoading) return;
     setLoading(true);
+    const countryRequired =
+      !isViewDetailsUser.id &&
+      data.info.rol?.value !== 1 &&
+      data.info.rol?.value !== 2 &&
+      countryIds.length === 0;
     setCustomFieldsError({
       zone: zones.length === 0,
-      channel: selectedBusinessRules?.channels.length === 0
+      channel: selectedBusinessRules?.channels.length === 0,
+      country: countryRequired
     });
-    if (zones.length === 0 || selectedBusinessRules?.channels.length === 0)
+    if (zones.length === 0 || selectedBusinessRules?.channels.length === 0 || countryRequired)
       return setLoading(false);
 
     try {
@@ -136,17 +149,30 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
         const isEdit = isViewDetailsUser?.id ? "editado" : "creado";
         showMessage("success", `El usuario fue ${isEdit} exitosamente.`);
         !isViewDetailsUser?.id && onGoBackTable();
+        setIsEditAvailable(false);
       } else if (response.status === 409) {
         showMessage("error", "Este email ya esta en uso, prueba otro.");
       } else {
         showMessage("error", response?.message || "Oops ocurrio un error.");
       }
-
-      setIsEditAvailable(false);
     } catch (error) {
-      showMessage("error", "Oops ocurrio un error.");
+      const status =
+        error instanceof ApiError
+          ? error.status
+          : axios.isAxiosError(error)
+            ? error.response?.status
+            : undefined;
+      showMessage(
+        "error",
+        status === 409
+          ? "Este email ya esta en uso, prueba otro."
+          : error instanceof Error
+            ? error.message
+            : "Oops ocurrio un error."
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
   const onRemoveUser = async () =>
     await onRemoveUserById(dataUser.data.ID, ID, showMessage, () => onGoBackTable());
@@ -183,6 +209,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                   size="large"
                   htmlType="button"
                   className="buttonOutlined"
+                  disabled={dataUser.isLoading || !!loadError}
                   onClick={(e) => {
                     e.preventDefault();
                     setIsOpenModalStatus({ status: true, remove: false });
@@ -197,6 +224,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
                     setIsEditAvailable(!isEditAvailable);
                   }}
                   className="buttonOutlined"
+                  disabled={dataUser.isLoading || !!loadError}
                   htmlType="button"
                   icon={<Pencil size={"1.45rem"} />}
                 >
@@ -205,7 +233,14 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               </Flex>
             )}
           </Flex>
-          {!dataUser.isLoading ? (
+          {loadError ? (
+            <Flex vertical gap="1rem">
+              <Typography.Text type="danger" role="alert">
+                {loadError}
+              </Typography.Text>
+              <Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Reintentar</Button>
+            </Flex>
+          ) : !dataUser.isLoading ? (
             <Flex vertical component={"main"} className="mainUserForm">
               <Title level={4}>Información del usuario</Title>
               {/* -----------------------------------Informacion del Usuario--------------------------------------- */}
@@ -279,12 +314,17 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               </Flex>
               {/* -----------------------------------Países----------------------------------- */}
               <Title level={4}>Países</Title>
-              <Flex component={"section"} className="breRules">
+              <Flex vertical component={"section"} className="breRules">
                 <SelectUserCountries
                   disabled={!isEditAvailable}
                   countryIds={countryIds}
                   setCountryIds={setCountryIds}
                 />
+                {customFieldsError.country && countryIds.length === 0 && (
+                  <Typography.Text className="textError" role="alert">
+                    Selecciona al menos un país para registrar un usuario no administrador.
+                  </Typography.Text>
+                )}
               </Flex>
             </Flex>
           ) : (
@@ -298,7 +338,7 @@ export const UserProjectForm = ({ isViewDetailsUser, onGoBackTable }: Props) => 
               type="primary"
               className="buttonNewProject"
               htmlType="submit"
-              disabled={loading}
+              disabled={loading || dataUser.isLoading || !!loadError}
               size="large"
               icon={loading ? null : <Plus weight="bold" size={15} />}
             >

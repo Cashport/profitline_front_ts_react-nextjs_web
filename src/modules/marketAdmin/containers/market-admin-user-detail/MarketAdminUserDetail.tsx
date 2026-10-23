@@ -16,7 +16,7 @@ import {
 } from "@/services/marketAdmin/marketAdmin";
 import { ROL_STYLES } from "@/modules/marketAdmin/mocks/users";
 import { useClientsGroupsSimplified } from "@/hooks/useClientsGroupsSimplified";
-import { getGroupsByUser, getUserById, updateUser } from "@/services/users/users";
+import { getGroupsByUser, getUserById, updateUserCountries } from "@/services/users/users";
 import {
   addUserToClientGroups,
   removeUserFromClientGroups
@@ -51,22 +51,26 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: facturadores, isLoading: isLoadingFacturadores } =
     useMarketAdminFacturadores(isSeller);
 
-  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "configuraciones">(
-    "clientes"
-  );
+  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "configuraciones">("clientes");
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBiller, setIsSavingBiller] = useState(false);
   const [isSavingGrupos, setIsSavingGrupos] = useState(false);
   const [grupos, setGrupos] = useState<number[]>([]);
   const [gruposLoaded, setGruposLoaded] = useState(false);
+  const [gruposError, setGruposError] = useState<string | null>(null);
 
   const loadGrupos = useCallback(async () => {
     if (!usuario?.id || !projectId) return;
-    const response = await getGroupsByUser(usuario.id, projectId);
-    if (response?.data) {
+    setGruposError(null);
+    setGruposLoaded(false);
+    try {
+      const response = await getGroupsByUser(usuario.id, projectId);
       setGrupos(response.data.map((g: { group_id: number }) => g.group_id));
+    } catch (error) {
+      setGruposError(error instanceof Error ? error.message : "No se pudo cargar los grupos.");
+    } finally {
+      setGruposLoaded(true);
     }
-    setGruposLoaded(true);
   }, [usuario?.id, projectId]);
 
   useEffect(() => {
@@ -77,23 +81,41 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   // de marketplace-admin, así que se piden al endpoint genérico de usuario.
   const [countryIds, setCountryIds] = useState<number[]>([]);
   const [paisesLoaded, setPaisesLoaded] = useState(false);
+  const [paisesError, setPaisesError] = useState<string | null>(null);
+  const [paisesLoadAttempt, setPaisesLoadAttempt] = useState(0);
   const [isSavingPaises, setIsSavingPaises] = useState(false);
-  const { data: countriesData } = useSWR<ICountries>(
-    projectId ? `/country?project_id=${projectId}` : null,
-    fetcher
-  );
+  const {
+    data: countriesData,
+    isLoading: isLoadingCountries,
+    error: countriesError,
+    mutate: reloadCountries
+  } = useSWR<ICountries>(projectId ? `/country?project_id=${projectId}` : null, fetcher);
   const allPaises = countriesData?.data ?? [];
 
-  const loadPaises = useCallback(async () => {
-    if (!usuario?.id) return;
-    const response = await getUserById(`${usuario.id}`);
-    setCountryIds(response?.data?.COUNTRY_IDS ?? []);
-    setPaisesLoaded(true);
-  }, [usuario?.id]);
-
   useEffect(() => {
+    if (!usuario?.id || !projectId) return;
+    let cancelled = false;
+    setPaisesLoaded(false);
+    setPaisesError(null);
+    const loadPaises = async () => {
+      try {
+        const response = await getUserById(`${usuario.id}`);
+        if (!cancelled) setCountryIds(response.data.COUNTRY_IDS);
+      } catch (error) {
+        if (!cancelled) {
+          setPaisesError(
+            error instanceof Error ? error.message : "No se pudo cargar los países del usuario."
+          );
+        }
+      } finally {
+        if (!cancelled) setPaisesLoaded(true);
+      }
+    };
     loadPaises();
-  }, [loadPaises]);
+    return () => {
+      cancelled = true;
+    };
+  }, [usuario?.id, projectId, paisesLoadAttempt]);
 
   const asignados = usuario?.clients ?? [];
 
@@ -145,7 +167,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     setCountryIds(next);
     try {
       setIsSavingPaises(true);
-      await updateUser(usuario.id, projectId, { countryIds: next });
+      await updateUserCountries(usuario.id, projectId, next);
       showMessage(
         "success",
         ids.length === 1
@@ -169,7 +191,7 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     setCountryIds(next);
     try {
       setIsSavingPaises(true);
-      await updateUser(usuario.id, projectId, { countryIds: next });
+      await updateUserCountries(usuario.id, projectId, next);
       showMessage("success", "País removido correctamente.");
     } catch (err) {
       setCountryIds(prev);
@@ -334,7 +356,19 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               <PaisesSection
                 asignadosIds={countryIds}
                 allPaises={allPaises}
-                loading={!paisesLoaded}
+                loading={!paisesLoaded || isLoadingCountries}
+                error={
+                  paisesError ||
+                  (countriesError ? "No se pudo cargar el catálogo de países." : null)
+                }
+                onRetry={() => {
+                  setPaisesLoadAttempt((attempt) => attempt + 1);
+                  reloadCountries().catch((error) => {
+                    setPaisesError(
+                      error instanceof Error ? error.message : "No se pudo cargar los países."
+                    );
+                  });
+                }}
                 disabled={isSavingPaises}
                 onAgregar={agregarPaises}
                 onQuitar={quitarPais}
@@ -348,16 +382,24 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
               />
             </div>
           )}
-          {activeTab === "grupos" && (
-            <GruposTab
-              asignadosIds={grupos}
-              allGrupos={allGrupos ?? []}
-              loading={!gruposLoaded}
-              disabled={isSavingGrupos}
-              onAgregar={agregarGrupo}
-              onQuitar={quitarGrupo}
-            />
-          )}
+          {activeTab === "grupos" &&
+            (gruposError ? (
+              <div role="alert">
+                <p className="text-red-600">{gruposError}</p>
+                <button onClick={loadGrupos} className="mt-2 text-sm underline">
+                  Reintentar
+                </button>
+              </div>
+            ) : (
+              <GruposTab
+                asignadosIds={grupos}
+                allGrupos={allGrupos ?? []}
+                loading={!gruposLoaded}
+                disabled={isSavingGrupos}
+                onAgregar={agregarGrupo}
+                onQuitar={quitarGrupo}
+              />
+            ))}
           {activeTab === "configuraciones" && isSeller && (
             <ConfiguracionFacturadorTab
               currentBillerId={usuario.biller_id}

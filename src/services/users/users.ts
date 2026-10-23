@@ -12,9 +12,13 @@ export const getUserById = async (idUser: string): Promise<WelcomeData> => {
   try {
     const response: WelcomeData = await API.get(`/user/${idUser}`);
 
+    if (!response.data || !Array.isArray(response.data.COUNTRY_IDS)) {
+      throw new Error("No se pudo cargar la asignación de países del usuario.");
+    }
     return response;
   } catch (error) {
-    return error as any;
+    console.warn("error getting user: ", error);
+    throw error;
   }
 };
 
@@ -79,10 +83,10 @@ export const createPassword = async (token: string, password: string): Promise<a
 };
 //update
 interface UpdateUserOptions {
-  data?: IUserForm;
+  data: IUserForm;
   selectedBusinessRules?: ISelectedBussinessRules;
-  selectedGroups?: number[];
-  zones?: number[];
+  selectedGroups: number[];
+  zones: number[];
   isActive?: boolean;
   countryIds?: number[];
 }
@@ -90,35 +94,26 @@ interface UpdateUserOptions {
 export const updateUser = async (
   ID: number,
   project_id: number,
-  options: UpdateUserOptions = {}
+  options: UpdateUserOptions
 ): Promise<any> => {
   const { data, selectedBusinessRules, selectedGroups, zones, isActive, countryIds } = options;
 
   const modelData: Record<string, any> = {
     id: ID,
-    project_id: `${project_id}`
+    project_id: `${project_id}`,
+    email: data.info.email,
+    user_name: data.info.name,
+    phone: data.info.phone,
+    position: data.info.cargo,
+    rol_id: data.info.rol?.value,
+    zones: zones.map((zone) => ({ ZONE_ID: zone })),
+    groups_id: selectedGroups
   };
-
-  if (data) {
-    modelData.email = data.info.email;
-    modelData.user_name = data.info.name;
-    modelData.phone = data.info.phone;
-    modelData.position = data.info.cargo;
-    modelData.rol_id = data.info.rol?.value;
-  }
 
   if (selectedBusinessRules) {
     modelData.channel = selectedBusinessRules.channels;
     modelData.line = selectedBusinessRules.lines;
     modelData.subline = selectedBusinessRules.sublines;
-  }
-
-  if (zones?.length) {
-    modelData.zones = zones.map((zone: number) => ({ ZONE_ID: zone }));
-  }
-
-  if (selectedGroups) {
-    modelData.groups_id = selectedGroups;
   }
 
   if (isActive !== undefined) {
@@ -134,8 +129,36 @@ export const updateUser = async (
     return response;
   } catch (error) {
     console.warn("error updating user: ", error);
-    return error as any;
+    throw error;
   }
+};
+
+export const updateUserCountries = async (
+  userId: number,
+  projectId: number,
+  countryIds: number[]
+) => {
+  // PUT /user exige el perfil completo incluso cuando solo se cambian los países.
+  const [response, groups] = await Promise.all([
+    getUserById(`${userId}`),
+    getGroupsByUser(userId, projectId)
+  ]);
+  const user = response.data;
+
+  return updateUser(userId, projectId, {
+    data: {
+      info: {
+        name: user.USER_NAME,
+        email: user.EMAIL,
+        phone: user.PHONE,
+        cargo: user.POSITION,
+        rol: { value: user.ROL_ID, label: user.ROL_NAME }
+      }
+    },
+    zones: (user.USER_ZONES ?? []).map((zone) => zone.ZONE_ID),
+    selectedGroups: groups.data.map((group) => group.group_id),
+    countryIds
+  });
 };
 
 export const onChangeStatusById = async (
@@ -233,7 +256,10 @@ export const resendInvitationUsers = async (users_id: number[]): Promise<any> =>
   }
 };
 
-export const getGroupsByUser = async (userID: number, projectID: number) => {
+export const getGroupsByUser = async (
+  userID: number,
+  projectID: number
+): Promise<IGroupsByUser> => {
   try {
     const response: IGroupsByUser = await API.get(
       `/group-client/user/${userID}/project/${projectID}`
@@ -242,7 +268,7 @@ export const getGroupsByUser = async (userID: number, projectID: number) => {
     return response;
   } catch (error) {
     console.warn("error getting groups by user: ", error);
-    return error as any;
+    throw error;
   }
 };
 

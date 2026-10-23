@@ -110,7 +110,7 @@ export default function ModalAgregarPaises({
           titleConfirm="Agregar seleccionados"
           onClose={onClose}
           handleOk={handleAgregar}
-          isConfirmDisabled={selectedIds.length === 0}
+          isConfirmDisabled={disabled || selectedIds.length === 0}
           isConfirmLoading={disabled}
         />
       </div>

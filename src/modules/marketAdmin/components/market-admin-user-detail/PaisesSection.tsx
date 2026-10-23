@@ -14,6 +14,8 @@ type Props = {
   allPaises: ICountry[];
   loading?: boolean;
   disabled?: boolean;
+  error?: string | null;
+  onRetry: () => void;
   onAgregar: (countryIds: number[]) => Promise<boolean>;
   onQuitar: (countryId: number) => void;
 };
@@ -25,6 +27,8 @@ export default function PaisesSection({
   allPaises,
   loading,
   disabled,
+  error,
+  onRetry,
   onAgregar,
   onQuitar
 }: Props) {
@@ -83,6 +87,17 @@ export default function PaisesSection({
     }
   ];
 
+  if (error) {
+    return (
+      <div role="alert">
+        <p className="text-red-600">{error}</p>
+        <button onClick={onRetry} className="mt-2 text-sm underline">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -97,6 +112,7 @@ export default function PaisesSection({
       <div className="flex items-center justify-between gap-4 mb-4">
         <UiSearchInput placeholder="Buscar" onChange={(e) => setSearch(e.target.value)} />
         <button
+          disabled={disabled}
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 text-sm font-semibold bg-[#CBE71E] text-[#141414] px-4 py-2 rounded-lg hover:bg-[#b8d11a] transition-colors flex-shrink-0"
         >
