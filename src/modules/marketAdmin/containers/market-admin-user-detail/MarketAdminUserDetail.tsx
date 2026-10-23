@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, Layers, Settings, Users } from "lucide-react";
+import { ArrowLeft, Globe, Layers, Settings, Users } from "lucide-react";
 import ProfitLoader from "@/components/ui/profit-loader";
 import { useMessageApi } from "@/context/MessageContext";
 import { useMarketAdminUserDetail } from "@/modules/marketAdmin/hooks/useMarketAdminUserDetail";
@@ -24,6 +24,7 @@ import {
 import { useAppStore } from "@/lib/store/store";
 import { fetcher } from "@/utils/api/api";
 import { ICountries } from "@/types/countries/ICountries";
+import { checkUserViewPermissions } from "@/utils/utils";
 import ClientesTab from "@/modules/marketAdmin/components/market-admin-user-detail/ClientesTab";
 import GruposTab from "@/modules/marketAdmin/components/market-admin-user-detail/GruposTab";
 import PaisesSection from "@/modules/marketAdmin/components/market-admin-user-detail/PaisesSection";
@@ -41,7 +42,9 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 export default function MarketAdminUserDetail({ params }: { params: { id: string } }) {
   const { id } = params;
   const { showMessage } = useMessageApi();
-  const { ID: projectId } = useAppStore((state) => state.selectedProject);
+  const selectedProject = useAppStore((state) => state.selectedProject);
+  const projectId = selectedProject.ID;
+  const canManageUserCountries = checkUserViewPermissions(selectedProject, "MarketAdmin");
 
   const { data: usuario, isLoading, error, mutate } = useMarketAdminUserDetail(id);
   const { data: allGrupos } = useClientsGroupsSimplified();
@@ -51,7 +54,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const { data: facturadores, isLoading: isLoadingFacturadores } =
     useMarketAdminFacturadores(isSeller);
 
-  const [activeTab, setActiveTab] = useState<"clientes" | "grupos" | "configuraciones">("clientes");
+  const [activeTab, setActiveTab] = useState<
+    "clientes" | "grupos" | "paises" | "configuraciones"
+  >("clientes");
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBiller, setIsSavingBiller] = useState(false);
   const [isSavingGrupos, setIsSavingGrupos] = useState(false);
@@ -82,40 +87,59 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const [countryIds, setCountryIds] = useState<number[]>([]);
   const [paisesLoaded, setPaisesLoaded] = useState(false);
   const [paisesError, setPaisesError] = useState<string | null>(null);
-  const [paisesLoadAttempt, setPaisesLoadAttempt] = useState(0);
   const [isSavingPaises, setIsSavingPaises] = useState(false);
+  const paisesLoadRequest = useRef(0);
   const {
     data: countriesData,
     isLoading: isLoadingCountries,
     error: countriesError,
     mutate: reloadCountries
-  } = useSWR<ICountries>(projectId ? `/country?project_id=${projectId}` : null, fetcher);
+  } = useSWR<ICountries>(
+    projectId && canManageUserCountries ? `/country?project_id=${projectId}` : null,
+    fetcher
+  );
   const allPaises = countriesData?.data ?? [];
 
-  useEffect(() => {
-    if (!usuario?.id || !projectId) return;
-    let cancelled = false;
+  const loadPaises = useCallback(async () => {
+    if (!canManageUserCountries || !usuario?.id || !projectId) return false;
+
+    const requestId = ++paisesLoadRequest.current;
     setPaisesLoaded(false);
     setPaisesError(null);
-    const loadPaises = async () => {
-      try {
-        const response = await getUserById(`${usuario.id}`);
-        if (!cancelled) setCountryIds(response.data.COUNTRY_IDS);
-      } catch (error) {
-        if (!cancelled) {
-          setPaisesError(
-            error instanceof Error ? error.message : "No se pudo cargar los países del usuario."
-          );
-        }
-      } finally {
-        if (!cancelled) setPaisesLoaded(true);
+    try {
+      const response = await getUserById(`${usuario.id}`);
+      if (requestId !== paisesLoadRequest.current) return false;
+      setCountryIds(response.data.COUNTRY_IDS);
+      return true;
+    } catch (error) {
+      if (requestId !== paisesLoadRequest.current) return false;
+      setPaisesError(
+        error instanceof Error ? error.message : "No se pudo cargar los países del usuario."
+      );
+      return false;
+    } finally {
+      if (requestId === paisesLoadRequest.current) {
+        setPaisesLoaded(true);
       }
-    };
-    loadPaises();
-    return () => {
-      cancelled = true;
-    };
-  }, [usuario?.id, projectId, paisesLoadAttempt]);
+    }
+  }, [canManageUserCountries, projectId, usuario?.id]);
+
+  useEffect(() => {
+    if (canManageUserCountries && usuario?.id && projectId) {
+      setCountryIds([]);
+      void loadPaises();
+    } else {
+      paisesLoadRequest.current += 1;
+      setCountryIds([]);
+      setPaisesLoaded(true);
+    }
+  }, [canManageUserCountries, loadPaises, projectId, usuario?.id]);
+
+  useEffect(() => {
+    if (!canManageUserCountries && activeTab === "paises") {
+      setActiveTab("clientes");
+    }
+  }, [activeTab, canManageUserCountries]);
 
   const asignados = usuario?.clients ?? [];
 
@@ -168,11 +192,14 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     try {
       setIsSavingPaises(true);
       await updateUserCountries(usuario.id, projectId, next);
+      const reloaded = await loadPaises();
       showMessage(
-        "success",
-        ids.length === 1
-          ? "País agregado correctamente."
-          : `${ids.length} países agregados correctamente.`
+        reloaded ? "success" : "error",
+        reloaded
+          ? ids.length === 1
+            ? "País agregado correctamente."
+            : `${ids.length} países agregados correctamente.`
+          : "El país se guardó, pero no se pudo actualizar la lista."
       );
       return true;
     } catch (err) {
@@ -192,7 +219,13 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
     try {
       setIsSavingPaises(true);
       await updateUserCountries(usuario.id, projectId, next);
-      showMessage("success", "País removido correctamente.");
+      const reloaded = await loadPaises();
+      showMessage(
+        reloaded ? "success" : "error",
+        reloaded
+          ? "País removido correctamente."
+          : "El país se quitó, pero no se pudo actualizar la lista."
+      );
     } catch (err) {
       setCountryIds(prev);
       showMessage("error", err instanceof Error ? err.message : "No se pudo quitar el país.");
@@ -290,6 +323,9 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
   const TABS = [
     { id: "clientes", label: `Clientes (${asignados.length})`, icon: Users },
     { id: "grupos", label: `Grupos de clientes (${grupos.length})`, icon: Layers },
+    ...(canManageUserCountries
+      ? [{ id: "paises", label: `Países (${countryIds.length})`, icon: Globe }]
+      : []),
     ...(isSeller ? [{ id: "configuraciones", label: "Configuraciones", icon: Settings }] : [])
   ];
 
@@ -353,26 +389,6 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
         <div>
           {activeTab === "clientes" && (
             <div className="flex flex-col gap-6">
-              <PaisesSection
-                asignadosIds={countryIds}
-                allPaises={allPaises}
-                loading={!paisesLoaded || isLoadingCountries}
-                error={
-                  paisesError ||
-                  (countriesError ? "No se pudo cargar el catálogo de países." : null)
-                }
-                onRetry={() => {
-                  setPaisesLoadAttempt((attempt) => attempt + 1);
-                  reloadCountries().catch((error) => {
-                    setPaisesError(
-                      error instanceof Error ? error.message : "No se pudo cargar los países."
-                    );
-                  });
-                }}
-                disabled={isSavingPaises}
-                onAgregar={agregarPaises}
-                onQuitar={quitarPais}
-              />
               <ClientesTab
                 clientes={asignados}
                 onAgregar={agregar}
@@ -381,6 +397,28 @@ export default function MarketAdminUserDetail({ params }: { params: { id: string
                 disabled={isSaving}
               />
             </div>
+          )}
+          {activeTab === "paises" && canManageUserCountries && (
+            <PaisesSection
+              asignadosIds={countryIds}
+              allPaises={allPaises}
+              loading={!paisesLoaded || isLoadingCountries}
+              error={
+                paisesError ||
+                (countriesError ? "No se pudo cargar el catálogo de países." : null)
+              }
+              onRetry={() => {
+                void loadPaises();
+                reloadCountries().catch((error) => {
+                  setPaisesError(
+                    error instanceof Error ? error.message : "No se pudo cargar los países."
+                  );
+                });
+              }}
+              disabled={isSavingPaises}
+              onAgregar={agregarPaises}
+              onQuitar={quitarPais}
+            />
           )}
           {activeTab === "grupos" &&
             (gruposError ? (
