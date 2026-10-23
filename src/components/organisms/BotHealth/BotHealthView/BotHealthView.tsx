@@ -11,6 +11,7 @@ import IconButton from "@/components/atoms/IconButton/IconButton";
 import { useMessageApi } from "@/context/MessageContext";
 import { useDebounce } from "@/hooks/useDeabouce";
 import { useBotsHealth } from "@/hooks/useBotsHealth";
+import { useConfirmBotExecution } from "@/hooks/useConfirmBotExecution";
 import { executeBotManually } from "@/services/bots/bots";
 import { IBotHealth } from "@/types/bots/IBotHealth";
 
@@ -66,6 +67,8 @@ export const BotHealthView: React.FC = () => {
     setExecutingId(null);
     if (success) mutate();
   };
+
+  const { requestExecution, confirmationModal } = useConfirmBotExecution(handleQuickExecute);
 
   const columns: ColumnsType<IBotHealth> = [
     {
@@ -131,7 +134,7 @@ export const BotHealthView: React.FC = () => {
             style={{ backgroundColor: "#F7F7F7" }}
             icon={<ArrowsClockwise size={20} color="#141414" weight="bold" />}
             loading={executingId === row.schedule_id}
-            onClick={() => handleQuickExecute(row)}
+            onClick={() => requestExecution(row)}
           />
           <IconButton
             style={{ backgroundColor: "#F7F7F7" }}
@@ -170,6 +173,7 @@ export const BotHealthView: React.FC = () => {
         onClose={closeDrawer}
         onExecuted={mutate}
       />
+      {confirmationModal}
     </Container>
   );
 };
