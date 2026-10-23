@@ -90,9 +90,19 @@ El `dockerfile` instala con Yarn, ejecuta `yarn build` y sirve con `yarn start` 
 
 ## Pruebas
 
-**No hay pruebas automatizadas**: no existe test runner configurado ni archivos `*.test.*` / `*.spec.*`.
+No hay un framework de pruebas configurado. La confirmación de ejecución manual
+de bots tiene pruebas puntuales con el runner integrado de Node.js:
 
-La verificación disponible es estática:
+```bash
+node --test tests/bot-execution-confirmation.test.cjs
+```
+
+Las tablas y los drawers de Data Quality y Salud de Bots solicitan confirmación
+antes de invocar el flujo manual existente. Cancelar o cerrar no ejecuta el bot;
+la confirmación queda bloqueada mientras se procesa la solicitud. Los servicios,
+mensajes de resultado y ejecuciones automáticas no cambian.
+
+La verificación estática y de compilación:
 
 ```bash
 npx tsc --noEmit      # tipos
