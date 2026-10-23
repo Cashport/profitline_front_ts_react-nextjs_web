@@ -264,172 +264,172 @@ export function CatalogsTable() {
             </p>
           </div>
         ) : (
-          <>
-            <Table>
-              <TableHeader>
-                <TableRow style={{ borderColor: "#DDDDDD" }}>
-                  <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
-                  <TableHead style={{ color: "#141414" }}>GMN</TableHead>
-                  <TableHead style={{ color: "#141414" }}>MATCH</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Factor</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Estado</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
-                  <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedEquivalencies.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className="hover:bg-gray-50"
-                    style={{ borderColor: "#DDDDDD" }}
+        <>
+        <Table>
+          <TableHeader>
+            <TableRow style={{ borderColor: "#DDDDDD" }}>
+              <TableHead style={{ color: "#141414" }}>Código Cliente</TableHead>
+              <TableHead style={{ color: "#141414" }}>Producto Cliente</TableHead>
+              <TableHead style={{ color: "#141414" }}>GMN</TableHead>
+              <TableHead style={{ color: "#141414" }}>MATCH</TableHead>
+              <TableHead style={{ color: "#141414" }}>Nombre Producto</TableHead>
+              <TableHead style={{ color: "#141414" }}>Factor</TableHead>
+              <TableHead style={{ color: "#141414" }}>Exclusión</TableHead>
+              <TableHead style={{ color: "#141414" }}>Estado</TableHead>
+              <TableHead style={{ color: "#141414" }}>Fecha Actualización</TableHead>
+              <TableHead style={{ color: "#141414" }}>Usuario</TableHead>
+              <TableHead style={{ color: "#141414" }}>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedEquivalencies.map((item) => (
+              <TableRow
+                key={item.id}
+                className="hover:bg-gray-50"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <TableCell>
+                  <span className="font-medium" style={{ color: "#141414" }}>
+                    {item.customer_product_cod}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.material_code}</span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      color: item.MATCH === "TRUE" ? "#166534" : "#B91C1C",
+                      fontWeight: 600
+                    }}
                   >
-                    <TableCell>
-                      <span className="font-medium" style={{ color: "#141414" }}>
-                        {item.customer_product_cod}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>{item.customer_product_description}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>{item.material_code}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        style={{
-                          color: item.MATCH === "TRUE" ? "#166534" : "#B91C1C",
-                          fontWeight: 600
-                        }}
-                      >
-                        {item.MATCH === "TRUE" ? "MATCH" : "NO MATCH"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>{item.material_name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>{item.factor}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={item.excluded === 1}
-                          disabled={isLoadingAction}
+                    {item.MATCH === "TRUE" ? "MATCH" : "NO MATCH"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.material_name}</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>{item.factor}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={item.excluded === 1}
+                      disabled={isLoadingAction}
                       onCheckedChange={(checked) => handleToggleExclusion(item, checked ? 1 : 0)}
-                        />
-                        <span style={{ color: item.excluded === 1 ? "#cf1322" : "#141414" }}>
-                          {item.excluded === 1 ? "Excluido" : "Incluido"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>-</span>
-                    </TableCell>
-                    <TableCell>
-                      <span style={{ color: "#141414" }}>-</span>
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const items = [
-                          {
-                            key: "1",
-                            label: (
-                              <AntButton
-                                icon={<Edit className="w-4 h-4" />}
-                                className="buttonNoBorder"
-                                onClick={() => handleEdit(item)}
-                              >
-                                Editar
-                              </AntButton>
-                            )
-                          },
-                          {
-                            key: "2",
-                            label: (
-                              <AntButton
-                                icon={<Trash2 className="w-4 h-4" />}
-                                className="buttonNoBorder"
-                                onClick={() => {
-                                  setSelectedCatalog(item);
-                                  setWhichModalOpen({ selected: 2 });
-                                }}
-                              >
-                                Eliminar
-                              </AntButton>
-                            )
-                          },
-                          {
-                            key: "3",
-                            label: (
-                              <AntButton
-                                icon={<DropboxLogo size={16} />}
-                                className="buttonNoBorder"
-                                onClick={() => handleMarkAsPack(item)}
-                              >
-                                Marcar como pack
-                              </AntButton>
-                            )
-                          },
-                          {
-                            key: "4",
-                            label: (
-                              <AntButton
-                                icon={<History className="w-4 h-4" />}
-                                className="buttonNoBorder"
-                                onClick={() => {
-                                  setSelectedCatalog(item);
-                                  setHistoryOpen(true);
-                                }}
-                              >
-                                Ver histórico
-                              </AntButton>
-                            )
-                          }
-                        ];
-                        const customDropdown = (menu: ReactNode) => (
-                          <div className="dropdownCatalogsTable">{menu}</div>
-                        );
-                        return (
-                          <Dropdown
-                            dropdownRender={customDropdown}
-                            menu={{ items }}
-                            placement="bottomLeft"
-                            trigger={["click"]}
+                    />
+                    <span style={{ color: item.excluded === 1 ? "#cf1322" : "#141414" }}>
+                      {item.excluded === 1 ? "Excluido" : "Incluido"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>{getStatusBadge(item.status)}</TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>-</span>
+                </TableCell>
+                <TableCell>
+                  <span style={{ color: "#141414" }}>-</span>
+                </TableCell>
+                <TableCell>
+                  {(() => {
+                    const items = [
+                      {
+                        key: "1",
+                        label: (
+                          <AntButton
+                            icon={<Edit className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => handleEdit(item)}
                           >
-                            <AntButton className="dotsBtn">
-                              <DotsThreeVertical size={16} />
-                            </AntButton>
-                          </Dropdown>
-                        );
-                      })()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                            Editar
+                          </AntButton>
+                        )
+                      },
+                      {
+                        key: "2",
+                        label: (
+                          <AntButton
+                            icon={<Trash2 className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => {
+                              setSelectedCatalog(item);
+                              setWhichModalOpen({ selected: 2 });
+                            }}
+                          >
+                            Eliminar
+                          </AntButton>
+                        )
+                      },
+                      {
+                        key: "3",
+                        label: (
+                          <AntButton
+                            icon={<DropboxLogo size={16} />}
+                            className="buttonNoBorder"
+                            onClick={() => handleMarkAsPack(item)}
+                          >
+                            Marcar como pack
+                          </AntButton>
+                        )
+                      },
+                      {
+                        key: "4",
+                        label: (
+                          <AntButton
+                            icon={<History className="w-4 h-4" />}
+                            className="buttonNoBorder"
+                            onClick={() => {
+                              setSelectedCatalog(item);
+                              setHistoryOpen(true);
+                            }}
+                          >
+                            Ver histórico
+                          </AntButton>
+                        )
+                      }
+                    ];
+                    const customDropdown = (menu: ReactNode) => (
+                      <div className="dropdownCatalogsTable">{menu}</div>
+                    );
+                    return (
+                      <Dropdown
+                        dropdownRender={customDropdown}
+                        menu={{ items }}
+                        placement="bottomLeft"
+                        trigger={["click"]}
+                      >
+                        <AntButton className="dotsBtn">
+                          <DotsThreeVertical size={16} />
+                        </AntButton>
+                      </Dropdown>
+                    );
+                  })()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-            <div
-              className="mt-4 pt-4 border-t flex items-center justify-between"
-              style={{ borderColor: "#DDDDDD" }}
-            >
-              <div className="text-sm" style={{ color: "#141414" }}>
-                Mostrando {paginatedEquivalencies.length} de {equivalencies.length} productos
-              </div>
-              <Pagination
-                current={currentPage}
-                onChange={(page) => setCurrentPage(page)}
-                total={equivalencies.length}
-                pageSize={itemsPerPage}
-                showSizeChanger={false}
-              />
-            </div>
-          </>
+        <div
+          className="mt-4 pt-4 border-t flex items-center justify-between"
+          style={{ borderColor: "#DDDDDD" }}
+        >
+          <div className="text-sm" style={{ color: "#141414" }}>
+            Mostrando {paginatedEquivalencies.length} de {equivalencies.length} productos
+          </div>
+          <Pagination
+            current={currentPage}
+            onChange={(page) => setCurrentPage(page)}
+            total={equivalencies.length}
+            pageSize={itemsPerPage}
+            showSizeChanger={false}
+          />
+        </div>
+        </>
         )}
 
         <ModalAddEditCatalog

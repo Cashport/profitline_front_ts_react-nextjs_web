@@ -156,156 +156,156 @@ export function CatalogPacksTable() {
           </p>
         </div>
       ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow style={{ borderColor: "#DDDDDD" }}>
-                <TableHead className="w-10" />
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Id Cliente</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Pack</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Producto</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }}>Factor</TableHead>
-                <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
-                  Acciones
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {packsData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500 py-8">
-                    No hay packs configurados.
+      <>
+      <Table>
+        <TableHeader>
+          <TableRow style={{ borderColor: "#DDDDDD" }}>
+            <TableHead className="w-10" />
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Id Cliente</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Pack</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>SKU</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Nombre Producto</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }}>Factor</TableHead>
+            <TableHead style={{ color: "#141414", fontWeight: 600 }} className="text-right">
+              Acciones
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {packsData.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                No hay packs configurados.
+              </TableCell>
+            </TableRow>
+          )}
+          {packsData.map((pack) => {
+            const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
+            const firstMaterial = pack.materials[0];
+            const remainingMaterials = pack.materials.slice(1);
+
+            return (
+              <>
+                {/* Pack main row (shows first material inline) */}
+                <TableRow
+                  key={pack.idCatalogMaterialAux}
+                  className="hover:bg-gray-50"
+                  style={{ borderColor: "#DDDDDD" }}
+                >
+                  <TableCell className="w-10">
+                    {pack.materials.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-0 h-6 w-6"
+                        onClick={() => togglePackExpand(pack.idCatalogMaterialAux)}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium" style={{ color: "#141414" }}>
+                    {pack.customerProductCod}
+                  </TableCell>
+                  <TableCell style={{ color: "#141414" }}>{pack.clientName}</TableCell>
+                  <TableCell className="text-sm" style={{ color: "#141414" }}>
+                    {firstMaterial?.materialCode || "-"}
+                  </TableCell>
+                  <TableCell style={{ color: "#141414" }}>
+                    {firstMaterial?.materialName || "-"}
+                  </TableCell>
+                  <TableCell style={{ color: "#141414" }}>{firstMaterial?.factor ?? "-"}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleAddMaterialToPack(pack.idCatalogMaterialAux)}
+                        title="Agregar"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                      {firstMaterial && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            handleMaterialEdit(pack.idCatalogMaterialAux, firstMaterial)
+                          }
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {firstMaterial && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMaterialDelete(firstMaterial)}
+                          title="Eliminar"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
-              )}
-              {packsData.map((pack) => {
-                const isExpanded = expandedPacks.has(pack.idCatalogMaterialAux);
-                const firstMaterial = pack.materials[0];
-                const remainingMaterials = pack.materials.slice(1);
 
-                return (
-                  <>
-                    {/* Pack main row (shows first material inline) */}
+                {/* Expanded material rows */}
+                {isExpanded &&
+                  remainingMaterials.map((material) => (
                     <TableRow
-                      key={pack.idCatalogMaterialAux}
-                      className="hover:bg-gray-50"
-                      style={{ borderColor: "#DDDDDD" }}
+                      key={material.idCatalogMaterial}
+                      className="bg-gray-50/60"
+                      style={{ borderColor: "#EEEEEE" }}
                     >
-                      <TableCell className="w-10">
-                        {pack.materials.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-0 h-6 w-6"
-                            onClick={() => togglePackExpand(pack.idCatalogMaterialAux)}
-                          >
-                            {isExpanded ? (
-                              <ChevronUp className="w-4 h-4" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </Button>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium" style={{ color: "#141414" }}>
-                        {pack.customerProductCod}
-                      </TableCell>
-                      <TableCell style={{ color: "#141414" }}>{pack.clientName}</TableCell>
+                      <TableCell />
+                      <TableCell />
+                      <TableCell />
                       <TableCell className="text-sm" style={{ color: "#141414" }}>
-                        {firstMaterial?.materialCode || "-"}
+                        {material.materialCode}
                       </TableCell>
-                      <TableCell style={{ color: "#141414" }}>
-                        {firstMaterial?.materialName || "-"}
-                      </TableCell>
-                      <TableCell style={{ color: "#141414" }}>{firstMaterial?.factor ?? "-"}</TableCell>
+                      <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
+                      <TableCell style={{ color: "#141414" }}>{material.factor}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 justify-end">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleAddMaterialToPack(pack.idCatalogMaterialAux)}
-                            title="Agregar"
+                            onClick={() => handleMaterialEdit(pack.idCatalogMaterialAux, material)}
+                            title="Editar"
                           >
-                            <Plus className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Button>
-                          {firstMaterial && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleMaterialEdit(pack.idCatalogMaterialAux, firstMaterial)
-                              }
-                              title="Editar"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {firstMaterial && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleMaterialDelete(firstMaterial)}
-                              title="Eliminar"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleMaterialDelete(material)}
+                            title="Eliminar"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
-
-                    {/* Expanded material rows */}
-                    {isExpanded &&
-                      remainingMaterials.map((material) => (
-                        <TableRow
-                          key={material.idCatalogMaterial}
-                          className="bg-gray-50/60"
-                          style={{ borderColor: "#EEEEEE" }}
-                        >
-                          <TableCell />
-                          <TableCell />
-                          <TableCell />
-                          <TableCell className="text-sm" style={{ color: "#141414" }}>
-                            {material.materialCode}
-                          </TableCell>
-                          <TableCell style={{ color: "#141414" }}>{material.materialName}</TableCell>
-                          <TableCell style={{ color: "#141414" }}>{material.factor}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 justify-end">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                            onClick={() => handleMaterialEdit(pack.idCatalogMaterialAux, material)}
-                                title="Editar"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleMaterialDelete(material)}
-                                title="Eliminar"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </>
-                );
-              })}
-            </TableBody>
-          </Table>
+                  ))}
+              </>
+            );
+          })}
+        </TableBody>
+      </Table>
 
       <div className="mt-4 pt-4 border-t text-sm text-gray-600" style={{ borderColor: "#DDDDDD" }}>
-            Mostrando {packsData.length} packs con{" "}
-            {packsData.reduce((acc, p) => acc + p.materials.length, 0)} productos
-          </div>
-        </>
+        Mostrando {packsData.length} packs con{" "}
+        {packsData.reduce((acc, p) => acc + p.materials.length, 0)} productos
+      </div>
+      </>
       )}
 
       <ModalAddEditPackMaterial
