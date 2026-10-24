@@ -137,7 +137,7 @@ export default function FilterModal({
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
-          <div className="relative bg-card border border-border w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-card border border-border w-full max-w-4xl h-[calc(85*var(--vh))] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 flex items-center justify-between border-b border-border bg-card/50">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">

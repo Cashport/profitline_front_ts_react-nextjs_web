@@ -377,8 +377,8 @@ export function AprobacionDetalleView({ id }: AprobacionDetalleViewProps) {
               src={resumen.fotosAprobacion}
               alt="Soporte de aprobación"
               style={{
-                maxWidth: "80vw",
-                maxHeight: "80vh",
+                maxWidth: "calc(80 * var(--vw))",
+                maxHeight: "calc(80 * var(--vh))",
                 display: "block",
                 margin: "0 auto"
               }}

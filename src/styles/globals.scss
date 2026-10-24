@@ -6,12 +6,43 @@
     margin: 0;
 }
 
+// Global UI scale. Corporate 14" laptops (Windows at 125–150%) leave the browser ~1280–1440 CSS px
+// wide, so at 100% the app looks oversized; we zoom the whole document out there instead.
+// `zoom` also shrinks vh/vw, so use calc(N * var(--vh)) / calc(N * var(--vw)) for viewport sizes
+// and getAppZoom() (@/utils/utils) in JS that mixes window/rect px with CSS px.
+:root {
+    --app-zoom: 1;
+    --vh: calc(1vh / var(--app-zoom));
+    --vw: calc(1vw / var(--app-zoom));
+}
+
+@media (min-width: 1024px) and (max-width: 1700px) {
+    :root {
+        --app-zoom: 0.85;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1440px) {
+    :root {
+        --app-zoom: 0.75;
+    }
+}
+
+html {
+    zoom: var(--app-zoom);
+}
+
 html,
 body {
-    max-width: 100vw;
+    max-width: calc(100 * var(--vw));
     margin: 0;
     overflow-x: hidden;
-    height: 100vh;
+    height: calc(100 * var(--vh));
+}
+
+// AntD caps modals at calc(100vw - 32px), which zoom would shrink.
+html .ant-modal {
+    max-width: calc(100 * var(--vw) - 32px);
 }
 
 body {

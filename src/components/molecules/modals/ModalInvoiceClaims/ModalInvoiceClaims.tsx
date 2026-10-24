@@ -304,7 +304,7 @@ export const ModalInvoiceClaims = ({ isOpen, onClose, invoice }: ModalInvoiceCla
           rowClassName={(record) => (isRowEditing(record) ? "editingRow" : "")}
           pagination={false}
           size="small"
-          scroll={{ y: "40vh", x: 1050 }}
+          scroll={{ y: "calc(40 * var(--vh))", x: 1050 }}
           locale={{ emptyText: "Esta factura no tiene glosas registradas." }}
           footer={() => (
             <button
