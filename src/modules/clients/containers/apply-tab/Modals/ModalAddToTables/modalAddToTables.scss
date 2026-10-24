@@ -35,7 +35,7 @@
 
     .invoices-list {
         display: flex;
-        max-height: 25vh;
+        max-height: calc(25 * var(--vh));
         overflow-y: auto;
         flex-direction: column;
         gap: 8px;

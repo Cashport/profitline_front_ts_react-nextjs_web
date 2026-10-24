@@ -9,6 +9,28 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Viewport units compensated for the global `zoom` (see --vh / --vw in globals.scss)
+      height: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      minHeight: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      maxHeight: {
+        screen: "calc(100 * var(--vh))",
+        svh: "calc(100 * var(--vh))",
+        dvh: "calc(100 * var(--vh))",
+        lvh: "calc(100 * var(--vh))"
+      },
+      width: {
+        screen: "calc(100 * var(--vw))"
+      },
       colors: {
         "cashport-green": "rgb(var(--cashport-green) / <alpha-value>)",
         "cashport-orange": "rgb(var(--cashport-orange) / <alpha-value>)",

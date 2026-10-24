@@ -207,7 +207,7 @@ const DashboardMap: React.FC = () => {
   return (
     <div 
         className={`w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200 relative animate-fade-in bg-gray-100 transition-all duration-300 ${
-            isFullScreen ? 'fixed inset-0 z-50 h-screen rounded-none' : 'h-[calc(100vh-180px)] md:h-[calc(100vh-140px)]'
+            isFullScreen ? 'fixed inset-0 z-50 h-screen rounded-none' : 'h-[calc(100*var(--vh)-180px)] md:h-[calc(100*var(--vh)-140px)]'
         }`}
     >
       {error && (

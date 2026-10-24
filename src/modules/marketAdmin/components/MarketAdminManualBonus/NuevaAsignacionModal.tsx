@@ -59,7 +59,7 @@ export default function NuevaAsignacionModal({
       centered
       width={560}
       title={<span className="text-base font-bold text-[#141414]">Crear bonificado</span>}
-      styles={{ body: { maxHeight: "60vh", overflowY: "auto" } }}
+      styles={{ body: { maxHeight: "calc(60 * var(--vh))", overflowY: "auto" } }}
       footer={
         <div className="flex gap-3">
           <button

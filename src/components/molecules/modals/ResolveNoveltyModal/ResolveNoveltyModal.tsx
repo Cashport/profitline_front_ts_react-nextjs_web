@@ -142,7 +142,7 @@ const ResolveNoveltyModal: React.FC<ResolveNoveltyModalProps> = ({
       footer={null}
       width={"40%"}
       style={{
-        height: currentView === "selectNote" ? "calc(80vh - 20px)" : "auto",
+        height: currentView === "selectNote" ? "calc(80 * var(--vh) - 20px)" : "auto",
         zIndex: 100000
       }}
       className="resolve-novelty-modal"

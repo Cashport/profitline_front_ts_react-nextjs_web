@@ -114,7 +114,7 @@ export default function ApprovalDetailModal({
 
   return (
     <Dialog open={!!approvalId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="!max-w-[1000px] !w-[95vw] md:!w-[90vw] max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="!max-w-[1000px] !w-[calc(95*var(--vw))] md:!w-[calc(90*var(--vw))] max-h-[calc(90*var(--vh))] overflow-hidden p-0">
         <DialogHeader className="border-b px-4 md:px-8 py-4 pr-8">
           <div className="flex items-center justify-between gap-4">
             {/* Left side: ID + Status */}
@@ -164,7 +164,7 @@ export default function ApprovalDetailModal({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col md:flex-row h-[calc(90vh-100px)] overflow-hidden">
+        <div className="flex flex-col md:flex-row h-[calc(90*var(--vh)-100px)] overflow-hidden">
           {/* LEFT COLUMN - Approval Details */}
           <div className="flex-1 space-y-4 md:space-y-6 overflow-y-auto md:border-r px-4 md:px-8 py-4 md:py-6">
             {/* Solicitado por and Fecha de solicitud - Two columns at top */}
