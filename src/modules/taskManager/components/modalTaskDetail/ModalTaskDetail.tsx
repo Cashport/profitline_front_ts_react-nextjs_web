@@ -183,7 +183,7 @@ export function ModalTaskDetail({
       onCancel={onClose}
       footer={null}
       closable={false}
-      width="min(85vw, 1300px)"
+      width="min(85 * var(--vw), 1300px)"
       centered
       destroyOnClose
       styles={{ body: { padding: 0 } }}
@@ -192,7 +192,7 @@ export function ModalTaskDetail({
       <FormProvider {...formMethods}>
         <div
           className="flex flex-col"
-          style={{ height: "90vh", maxHeight: "850px", borderRadius: "8px" }}
+          style={{ height: "calc(90 * var(--vh))", maxHeight: "850px", borderRadius: "8px" }}
         >
           <div className="flex items-center justify-between px-10 py-6 border-b border-gray-200 bg-gray-50 flex-shrink-0 rounded-t-lg">
             <div className="flex items-center gap-4">

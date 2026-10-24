@@ -27,7 +27,7 @@ export default function DiscountPackages({
 }: Readonly<IDiscountPackageTable>) {
   return (
     <Table
-      scroll={{ y: "61dvh", x: undefined }}
+      scroll={{ y: "calc(61 * var(--vh))", x: undefined }}
       columns={discountPackagesColumns({
         handleSelect: handleSelectToDelete,
         handleChangeStatus

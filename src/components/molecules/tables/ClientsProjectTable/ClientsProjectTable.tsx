@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getAppZoom } from "@/utils/utils";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Flex, MenuProps, message, Spin, Table, TableProps, Typography } from "antd";
 import { Eye, Plus, Triangle } from "phosphor-react";
@@ -17,7 +18,7 @@ export const ClientsProjectTable = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [page, setPage] = useState(1);
   const [messageApi, contextHolder] = message.useMessage();
-  const [height, setHeight] = useState<number>(window.innerHeight);
+  const [height, setHeight] = useState<number>(window.innerHeight / getAppZoom());
   const [filterClients, setFilterClients] = useState({
     city: [] as number[],
     holding: [] as number[],
@@ -51,7 +52,7 @@ export const ClientsProjectTable = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      setHeight(window.innerHeight);
+      setHeight(window.innerHeight / getAppZoom());
     };
     window.addEventListener("resize", handleResize);
     return () => {

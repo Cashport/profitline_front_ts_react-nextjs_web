@@ -142,7 +142,7 @@ export function InvoiceModal({
           </p>
 
           <div
-            className="space-y-3 max-h-[30vh] overflow-y-auto"
+            className="space-y-3 max-h-[calc(30*var(--vh))] overflow-y-auto"
             style={{ scrollbarWidth: "thin" }}
           >
             {invoices.map((invoice) => (

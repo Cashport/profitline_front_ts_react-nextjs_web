@@ -114,5 +114,5 @@
 }
 
 .container-table-of-ant {
-    max-height: 50vh;
+    max-height: calc(50 * var(--vh));
 }

@@ -142,7 +142,7 @@ export function ModalUploadInvoicesPurchaseOrders({
           Selecciona al menos una OC del listado para subir facturas.
         </p>
       ) : (
-        <div className="overflow-auto max-h-[65vh]">
+        <div className="overflow-auto max-h-[calc(65*var(--vh))]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b-2 border-gray-200 bg-gray-50">

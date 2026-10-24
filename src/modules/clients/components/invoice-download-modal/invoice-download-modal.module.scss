@@ -1,7 +1,7 @@
 .fileDownloadModal {
 
   .ant-modal-content {
-    max-height: 90vh;
+    max-height: calc(90 * var(--vh));
     display: flex;
     flex-direction: column;
     padding: 20px 0px 0px 0px !important;
