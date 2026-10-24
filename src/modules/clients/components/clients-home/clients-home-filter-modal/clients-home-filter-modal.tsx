@@ -111,7 +111,7 @@ export default function ClientsHomeFilterModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[calc(100vh-48px)] w-[900px] max-w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_64px_rgba(0,0,0,.22)]"
+        className="flex max-h-[calc(100*var(--vh)-48px)] w-[900px] max-w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_64px_rgba(0,0,0,.22)]"
       >
         <div className="flex items-center gap-3 border-b border-[#ececec] px-[22px] py-[18px]">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f4f9d2]">

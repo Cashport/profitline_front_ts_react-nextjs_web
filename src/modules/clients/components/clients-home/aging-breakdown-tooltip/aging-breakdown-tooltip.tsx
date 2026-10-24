@@ -44,7 +44,7 @@ export default function AgingBreakdownTooltip({ row }: { row: IClientsHomeRow })
   );
 
   return (
-    <div className="box-border flex w-[760px] max-w-[calc(100vw-16px)] flex-col gap-2 rounded-xl bg-[#141414] px-3.5 py-3 text-xs text-white shadow-[0_12px_32px_rgba(0,0,0,.22)]">
+    <div className="box-border flex w-[760px] max-w-[calc(100*var(--vw)-16px)] flex-col gap-2 rounded-xl bg-[#141414] px-3.5 py-3 text-xs text-white shadow-[0_12px_32px_rgba(0,0,0,.22)]">
       <div className="truncate border-b border-[#2e2e2e] pb-2 text-[12.5px] font-semibold">
         {row.clientName}
       </div>

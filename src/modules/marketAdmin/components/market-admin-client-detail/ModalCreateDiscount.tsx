@@ -120,7 +120,7 @@ export default function ModalCreateDiscount({ clientId, saving, onClose, onSave 
           </div>
         </div>
       }
-      styles={{ body: { maxHeight: "65vh", overflowY: "auto" } }}
+      styles={{ body: { maxHeight: "calc(65 * var(--vh))", overflowY: "auto" } }}
       footer={
         <div className="flex items-center justify-between">
           <span className="text-xs text-[#999999]">

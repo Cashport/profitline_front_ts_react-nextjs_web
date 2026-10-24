@@ -87,7 +87,7 @@ function NoActivities({
   const color = palette.status[d.state];
 
   return (
-    <div className="wallet-scope flex max-h-[calc(100vh-40px)] flex-col bg-card text-foreground">
+    <div className="wallet-scope flex max-h-[calc(100*var(--vh)-40px)] flex-col bg-card text-foreground">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <div
           className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-xs font-semibold"
@@ -172,7 +172,7 @@ function DayContent({
   ];
 
   return (
-    <div className="wallet-scope flex max-h-[calc(100vh-40px)] flex-col bg-card text-foreground">
+    <div className="wallet-scope flex max-h-[calc(100*var(--vh)-40px)] flex-col bg-card text-foreground">
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <div
           className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 bg-secondary text-xs font-semibold"
