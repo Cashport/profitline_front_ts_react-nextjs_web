@@ -94,7 +94,7 @@ export const ModalInvoiceBalances = ({
       width={1000}
       centered
       className="modalInvoiceBalances"
-      style={{ maxWidth: "calc(100vw - 32px)" }}
+      style={{ maxWidth: "calc(100 * var(--vw) - 32px)" }}
       destroyOnClose
       title={
         <span>
@@ -110,7 +110,7 @@ export const ModalInvoiceBalances = ({
         columns={columns}
         dataSource={balances}
         pagination={false}
-        scroll={{ y: "40vh" }}
+        scroll={{ y: "calc(40 * var(--vh))" }}
         locale={{ emptyText: "Esta factura no tiene saldos asociados" }}
       />
     </Modal>

@@ -11,6 +11,7 @@ import { useShallow } from "zustand/react/shallow";
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import ProgressVsGoal from "@/components/ui/progress-vs-goal/progress-vs-goal";
 import StatusBadge from "@/components/ui/status-badge/status-badge";
+import { getAppZoom } from "@/utils/utils";
 import type {
   ClientsHomeAgingBucket,
   ClientsHomeForecastStatus,
@@ -70,18 +71,32 @@ const ROW_PAD = "10px 14px";
 const detailHref = (row: IClientsHomeRow) =>
   `/clientes/detail/${row.clientUuid}/project/${row.projectId}`;
 
+type Rect = Pick<DOMRect, "left" | "right" | "top" | "bottom">;
+
+/** Rect y viewport en px CSS: getBoundingClientRect/inner* vienen en px de pantalla (zoom global). */
+const cssRect = (b: DOMRect): Rect => {
+  const z = getAppZoom();
+  return { left: b.left / z, right: b.right / z, top: b.top / z, bottom: b.bottom / z };
+};
+const viewport = () => {
+  const z = getAppZoom();
+  return { width: window.innerWidth / z, height: window.innerHeight / z };
+};
+
 /** Ubica un popover debajo del botón o, si no cabe, encima. */
-const popY = (b: DOMRect, height: number) =>
-  b.bottom + 6 + height <= window.innerHeight - 8
+const popY = (b: Rect, height: number) => {
+  const vh = viewport().height;
+  return b.bottom + 6 + height <= vh - 8
     ? b.bottom + 6
-    : Math.max(8, Math.min(b.top - height - 6, window.innerHeight - height - 8));
+    : Math.max(8, Math.min(b.top - height - 6, vh - height - 8));
+};
 
 /** Tooltip debajo de la celda o, si no cabe, encima. */
-const tipPosition = (b: DOMRect, size: { width: number; height: number }) => {
-  const W = Math.min(size.width, window.innerWidth - 16);
-  const x = Math.max(8, Math.min(b.left, window.innerWidth - W - 8));
-  const y =
-    b.bottom + 8 + size.height > window.innerHeight ? b.top - size.height - 8 : b.bottom + 8;
+const tipPosition = (b: Rect, size: { width: number; height: number }) => {
+  const vp = viewport();
+  const W = Math.min(size.width, vp.width - 16);
+  const x = Math.max(8, Math.min(b.left, vp.width - W - 8));
+  const y = b.bottom + 8 + size.height > vp.height ? b.top - size.height - 8 : b.bottom + 8;
   return { x, y: Math.max(8, y) };
 };
 
@@ -197,7 +212,7 @@ export default function ClientsHomeTable({
 
   const openQf = (kind: "name" | "fc", e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    const b = e.currentTarget.getBoundingClientRect();
+    const b = cssRect(e.currentTarget.getBoundingClientRect());
     setQf((cur) =>
       cur?.kind === kind
         ? null
@@ -205,7 +220,7 @@ export default function ClientsHomeTable({
             kind,
             x: Math.max(
               8,
-              Math.min(kind === "name" ? b.left - 8 : b.right - 240, window.innerWidth - 248)
+              Math.min(kind === "name" ? b.left - 8 : b.right - 240, viewport().width - 248)
             ),
             y: popY(b, 300)
           }
@@ -218,7 +233,7 @@ export default function ClientsHomeTable({
     e: React.MouseEvent<HTMLElement>
   ) => {
     const pos = tipPosition(
-      e.currentTarget.getBoundingClientRect(),
+      cssRect(e.currentTarget.getBoundingClientRect()),
       kind === "aging" ? AGING_TIP_SIZE : COLLECTION_TIP_SIZE
     );
     setTip({ kind, id: row.clientId, ...pos });
@@ -812,7 +827,7 @@ const QuickFilterPopover = ({
   <>
     <div onClick={onClose} className="fixed inset-0 z-[70] cursor-default" />
     <div
-      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100vh-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
+      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100*var(--vh)-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
       style={{ left: x, top: y }}
     >
       <div className="flex flex-col gap-0.5">
