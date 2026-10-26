@@ -27,6 +27,7 @@ import {
   IDataEmail,
   IRegion,
   IPacksUploadResult,
+  IIqviaAuxUploadResult,
   IBotRunNowResult,
   IBotHistoryList,
   IVariableHistoryEntry,
@@ -521,6 +522,47 @@ export const downloadUnifiedCatalogFile = async ({
     }> = await API.get(`${config.API_HOST}/data/catalog/download${queryString}`);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Auxiliar de clientes IQVIA (Haleon Brasil).
+ * Descarga: mismo patrón que el catálogo general (URL de S3).
+ * Carga: upsert por Cod_Iqvia; devuelve el resumen y los errores por fila.
+ */
+export const downloadIqviaAuxCatalog = async ({
+  countryId
+}: {
+  countryId?: number | string;
+}) => {
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<{
+      url: string;
+      filename: string;
+    }> = await API.get(`${config.API_HOST}/data/iqvia/aux/download${queryString}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const uploadIqviaAuxCatalog = async (
+  file: File,
+  countryId?: number | string
+): Promise<IIqviaAuxUploadResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const queryString = countryId ? `?id_country=${countryId}` : "";
+  try {
+    const response: GenericResponse<IIqviaAuxUploadResult> = await API.post(
+      `${config.API_HOST}/data/iqvia/aux/upload${queryString}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading IQVIA auxiliary file:", error);
     throw error;
   }
 };
