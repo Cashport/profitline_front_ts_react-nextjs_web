@@ -120,7 +120,7 @@ export const CountryClientsActionsModal: React.FC<CountryClientsActionsModalProp
             {onUploadGmnOficiales && (
               <ButtonGenerateAction
                 icon={<UploadSimple size={20} />}
-                title="GMN oficiales"
+                title="Cargar Maestra Productos"
                 onClick={onUploadGmnOficiales}
               />
             )}

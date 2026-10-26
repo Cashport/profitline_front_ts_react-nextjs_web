@@ -204,7 +204,7 @@ export const ModalGmnOficiales: React.FC<ModalGmnOficialesProps> = ({
     <Modal
       open={isOpen}
       onCancel={onClose}
-      title="GMN oficiales"
+      title="Cargar Maestra Productos"
       footer={null}
       centered
       width={620}
