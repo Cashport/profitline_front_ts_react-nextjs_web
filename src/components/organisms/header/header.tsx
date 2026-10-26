@@ -1,10 +1,7 @@
 "use client";
-import { FC, ReactNode, useCallback } from "react";
-import { CaretDown, User } from "phosphor-react";
+import { FC, ReactNode } from "react";
 import styles from "./header.module.scss";
-import { Avatar, Button, Popover } from "antd";
-import { logOut } from "../../../../firebase-utils";
-import { useRouter } from "next/navigation";
+import { ProfileMenu } from "@/components/atoms/ProfileMenu/ProfileMenu";
 
 interface HeaderProps {
   title: string;
@@ -14,12 +11,6 @@ interface HeaderProps {
 }
 
 const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra, className }) => {
-  const router = useRouter();
-
-  const handleLogOut = useCallback(() => {
-    logOut(router);
-  }, [router]);
-
   return (
     <header className={`${styles.wrapper} ${className ?? ""}`}>
       <div className={styles.titleWrapper}>
@@ -28,20 +19,7 @@ const Header: FC<HeaderProps> = ({ title, titleExtra, actionsExtra, className })
       </div>
       <div className={styles.actions}>
         {actionsExtra}
-        <div className={styles.profile}>
-          <Avatar icon={<User />} />
-          <Popover
-            placement="bottomRight"
-            trigger="click"
-            content={
-              <>
-                <Button onClick={handleLogOut}>Cerrar Sesion</Button>
-              </>
-            }
-          >
-            <CaretDown className={styles.arrow} />
-          </Popover>
-        </div>
+        <ProfileMenu />
       </div>
     </header>
   );
