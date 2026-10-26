@@ -52,7 +52,7 @@ export function KpiValue({
 }: KpiValueProps) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="truncate text-[13px] text-[#6b6b6b]">{label}</span>
+      <span className="truncate text-[13px] text-cp-ink-3">{label}</span>
       <div
         title={typeof value === "string" ? [value, unit].filter(Boolean).join(" ") : undefined}
         className={cn(
@@ -65,7 +65,7 @@ export function KpiValue({
         {unit && (
           <span
             className={cn(
-              "ml-[3px] shrink-0 font-medium text-[#6b6b6b]",
+              "ml-[3px] shrink-0 font-medium text-cp-ink-3",
               size === "lg" ? "text-xs" : "text-[11px]"
             )}
           >
@@ -73,7 +73,7 @@ export function KpiValue({
           </span>
         )}
       </div>
-      {caption && <span className="truncate text-[11.5px] text-[#6b6b6b]">{caption}</span>}
+      {caption && <span className="truncate text-[11.5px] text-cp-ink-3">{caption}</span>}
     </div>
   );
 }
@@ -89,7 +89,7 @@ interface KpiAsideProps {
 export function KpiAside({ label, pill, value }: KpiAsideProps) {
   return (
     <div className="ml-auto flex flex-col items-end gap-1.5">
-      <span className="text-[13px] text-[#6b6b6b]">{label}</span>
+      <span className="text-[13px] text-cp-ink-3">{label}</span>
       <div className="flex items-center gap-2 whitespace-nowrap">
         {pill}
         <span className="text-[15px] font-semibold">{value}</span>

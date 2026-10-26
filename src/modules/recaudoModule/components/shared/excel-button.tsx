@@ -44,7 +44,10 @@ export default function ExcelButton({ table, state, name, periodLabel }: ExcelBu
         `${name} ${periodLabel.toLowerCase()}.xlsx`
       );
     } catch (error) {
-      showMessage("error", error instanceof Error ? error.message : "No se pudo descargar el Excel.");
+      showMessage(
+        "error",
+        error instanceof Error ? error.message : "No se pudo descargar el Excel."
+      );
     } finally {
       hide();
       setDownloading(false);

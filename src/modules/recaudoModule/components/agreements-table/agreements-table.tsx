@@ -78,7 +78,10 @@ function StateChip({ status }: { status?: ITowerSeries }) {
 function DaysCell({ a }: { a: ITowerAgreement }) {
   if (a.lateDays) {
     return (
-      <StatusChip sev={a.lateDays > LATE_DAYS_CRIT ? "crit" : "warn"} className="rounded tabular-nums">
+      <StatusChip
+        sev={a.lateDays > LATE_DAYS_CRIT ? "crit" : "warn"}
+        className="rounded tabular-nums"
+      >
         {plural(a.lateDays, "día", "días")}
       </StatusChip>
     );
@@ -256,10 +259,14 @@ export default function AgreementsTable({ data }: { data: ICollectionTower }) {
               {list.length > 0 && (
                 <tr>
                   <td className={TD_TOTAL}>Total</td>
-                  <td className={cn(TD_TOTAL, HIDE_SM)}>{plural(list.length, "acuerdo", "acuerdos")}</td>
+                  <td className={cn(TD_TOTAL, HIDE_SM)}>
+                    {plural(list.length, "acuerdo", "acuerdos")}
+                  </td>
                   <td className={TD_TOTAL} />
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>
-                    <span className={cn(list.some(overdue) && TONE_TEXT.crit)}>{money(balance)}</span>
+                    <span className={cn(list.some(overdue) && TONE_TEXT.crit)}>
+                      {money(balance)}
+                    </span>
                   </td>
                   <td className={TD_TOTAL} />
                 </tr>

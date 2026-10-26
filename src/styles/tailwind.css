@@ -6,7 +6,7 @@
   /* Cashport Brand Colors - RGB format for Tailwind compatibility */
   --cashport-black: 20 20 20;
   --cashport-green: 203 231 30;
-  --cashport-orange: 255 167 38;
+  --cashport-orange: 255 106 19;
   --cashport-gray-light: 221 221 221;
   --cashport-gray-lighter: 247 247 247;
   --cashport-white: 255 255 255;
@@ -49,6 +49,48 @@
   --sidebar-accent-foreground: var(--cashport-black);
   --sidebar-border: var(--cashport-gray-light);
   --sidebar-ring: var(--cashport-gray-light);
+
+  /* docs/DESIGN.md §1 — colores sólidos (Tailwind: cp-*). RGB triplets. */
+  --cp-lime: 203 231 30;
+  --cp-lime-dark: 155 181 20;
+  --cp-lime-tint: 244 249 210;
+  --cp-blue: 22 119 255;
+  --cp-blue-hover: 11 91 211;
+  --cp-orange: 255 106 19;
+  --cp-navy: 43 74 95;
+  --cp-magenta: 224 0 122;
+  --cp-red: 229 38 43;
+  --cp-ink: 20 20 20;
+  --cp-ink-2: 74 74 74;
+  --cp-ink-3: 107 107 107;
+  --cp-ink-4: 138 138 138;
+  --cp-line: 236 236 236;
+  --cp-line-2: 227 227 227;
+  --cp-bg: 247 247 247;
+  --cp-surface: 255 255 255;
+  --cp-muted: 242 242 242;
+  --cp-subtle: 250 250 250;
+
+  /* docs/DESIGN.md §2 — densidad, en px CSS (ya compensados por el zoom global). */
+  --rail-w: 64px;
+  --page-pad-x: 16px;
+  --page-pad-bottom: 11px;
+  --header-h: 77px;
+  --card-gap: 13px;
+  --section-gap: 16px;
+  --card-radius: 16px;
+  --card-pad: 15px 21px;
+  --kpi-h: 112px;
+  --control-h: 43px;
+  --search-w: 293px;
+  --chip-h: 35px;
+  --avatar: 37px;
+  --table-title-h: 48px;
+  --table-head-h: 43px;
+  --table-row-h: 56px;
+  --table-row-h-single: 45px;
+  --table-pad-x: 21px;
+  --table-total-h: 48px;
 }
 
 /* Dark theme tokens — scoped to elements carrying the .dark class
@@ -76,6 +118,18 @@
   --sidebar-accent: 39 39 42;
   --sidebar-accent-foreground: 250 250 250;
   --sidebar-border: 39 39 42;
+
+  /* cp-* neutros en oscuro; los de marca/serie no cambian. */
+  --cp-ink: 250 250 250;
+  --cp-ink-2: 212 212 216;
+  --cp-ink-3: 161 161 170;
+  --cp-ink-4: 113 113 122;
+  --cp-line: 39 39 42;
+  --cp-line-2: 63 63 70;
+  --cp-bg: 9 9 11;
+  --cp-surface: 1 24 34;
+  --cp-muted: 39 39 42;
+  --cp-subtle: 24 24 27;
 }
 
 /* Wallet (cartera) scoped tokens — estado + tramo colors.

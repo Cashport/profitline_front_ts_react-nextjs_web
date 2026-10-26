@@ -1,7 +1,8 @@
 /* Clases compartidas de la torre: tarjetas de indicadores y tablas. */
 
 /** Rótulo de las tarjetas de indicadores (el mismo de las tarjetas de la cartera). */
-export const KPI_LABEL = "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
+export const KPI_LABEL =
+  "text-[11px] font-medium uppercase tracking-[0.03em] text-muted-foreground";
 
 /** Cifra de las tarjetas de indicadores. */
 export const KPI_VALUE =

@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { Filter, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 import type { FilterModalProps, FilterOptionItem, FilterSelection } from "./FilterModal.types";
 import FilterTrigger from "./components/FilterTrigger";
@@ -18,6 +17,10 @@ const emptyOptionSelection = (categories: FilterModalProps["categories"]): Filte
   return empty;
 };
 
+/**
+ * "Filtros Avanzados" (docs/DESIGN.md §6). Mismo diseño que el modal del Home de Clientes:
+ * categorías a la izquierda, opciones con círculo de selección y se aplica con "Aplicar Filtros".
+ */
 export default function FilterModal({
   categories,
   value,
@@ -31,7 +34,9 @@ export default function FilterModal({
   formatTagValue,
   isLoading,
   trigger,
-  barEnd
+  barEnd,
+  hideTags,
+  onDraftChange
 }: FilterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(categories[0]?.key ?? "");
@@ -45,6 +50,10 @@ export default function FilterModal({
       acc + (cat.kind === "custom" ? (cat.renderTag?.() ? 1 : 0) : value[cat.key]?.length || 0),
     0
   );
+
+  useEffect(() => {
+    if (isOpen) onDraftChange?.(draft);
+  }, [draft, isOpen]);
 
   const openModal = () => {
     setDraft({ ...value });
@@ -66,8 +75,8 @@ export default function FilterModal({
     const isSingle = activeCategory?.selectMode === "single";
     setDraft((prev) => {
       const current = prev[activeTab] || [];
-      if (isSingle) return { ...prev, [activeTab]: [item] };
       const exists = current.some((v) => v.id === item.id);
+      if (isSingle) return { ...prev, [activeTab]: exists ? [] : [item] };
       return {
         ...prev,
         [activeTab]: exists ? current.filter((v) => v.id !== item.id) : [...current, item]
@@ -119,49 +128,60 @@ export default function FilterModal({
           showChevron={trigger?.showChevron}
         />
 
-        <ActiveFilterTags
-          categories={categories}
-          value={value}
-          activeCount={activeFiltersCount}
-          onClearCategory={clearCategoryCommitted}
-          onClearAll={clearAllCommitted}
-          formatTagValue={formatTagValue}
-        />
+        {!hideTags && (
+          <ActiveFilterTags
+            categories={categories}
+            value={value}
+            activeCount={activeFiltersCount}
+            onClearCategory={clearCategoryCommitted}
+            onClearAll={clearAllCommitted}
+            formatTagValue={formatTagValue}
+          />
+        )}
 
         {barEnd}
       </div>
 
       {isOpen && activeCategory && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgba(20,20,20,.38)] p-6"
+        >
           <div
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="relative bg-card border border-border w-full max-w-4xl h-[calc(85*var(--vh))] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-border bg-card/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Filter className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground leading-tight">
-                    Filtros Avanzados
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Encuentra y selecciona múltiples opciones
-                  </p>
+            onClick={(e) => e.stopPropagation()}
+            className="flex max-h-[calc(100*var(--vh)-48px)] w-[900px] max-w-full flex-col overflow-hidden rounded-2xl bg-cp-surface text-cp-ink shadow-[0_24px_64px_rgba(0,0,0,.22)]"
+          >
+            <div className="flex items-center gap-3 border-b border-cp-line px-[22px] py-[18px]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cp-lime-tint">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="#cbe71e"
+                  stroke="#9bb514"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 5h18l-7 8v6l-4 2v-8z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-[17px] font-semibold">Filtros Avanzados</div>
+                <div className="text-xs text-cp-ink-3">
+                  Encuentra y selecciona múltiples opciones
                 </div>
               </div>
               <button
                 type="button"
+                aria-label="Cerrar"
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary text-muted-foreground transition-colors"
+                className="h-8 w-8 cursor-pointer rounded-lg border-0 bg-transparent text-xl text-cp-ink-2 hover:bg-cp-muted"
               >
-                <X className="w-4 h-4" />
+                ×
               </button>
             </div>
 
-            <div className="flex flex-1 min-h-0 bg-background/30">
+            <div className="flex min-h-[380px] flex-1 overflow-hidden">
               <FilterSidebar
                 categories={categories}
                 activeTab={activeTab}

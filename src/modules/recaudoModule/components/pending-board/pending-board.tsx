@@ -16,7 +16,9 @@ export default function PendingBoard() {
       <RecaudoHeader />
       <div className="flex min-h-[min(520px,calc(100vh_-_160px))] flex-col items-center justify-center gap-2 rounded-xl bg-card p-7 text-center shadow-sm">
         <h2 className="text-[17px] font-bold text-foreground">{board?.name}</h2>
-        {board && <p className="max-w-[440px] text-[12.5px] text-muted-foreground">{board.description}.</p>}
+        {board && (
+          <p className="max-w-[440px] text-[12.5px] text-muted-foreground">{board.description}.</p>
+        )}
         <p className="max-w-[440px] text-[12.5px] text-muted-foreground">
           Este tablero se diseña en una siguiente iteración.
         </p>

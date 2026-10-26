@@ -41,7 +41,7 @@ export default function WalletThemeToggle() {
       <button
         type="button"
         aria-label="Cambiar tema"
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-secondary"
+        className="flex h-[var(--control-h)] w-[var(--control-h)] shrink-0 items-center justify-center rounded-[11px] border border-cp-line-2 bg-cp-surface text-cp-ink transition-colors hover:border-cp-ink"
       >
         <TriggerIcon className="h-4 w-4" />
       </button>

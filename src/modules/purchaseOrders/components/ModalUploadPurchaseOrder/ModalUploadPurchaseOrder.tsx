@@ -284,7 +284,7 @@ export function ModalUploadPurchaseOrder({ onFileUpload, onClose }: ModalUploadP
                 {manualFiles.map((file, index) => (
                   <div key={index} className="uploadInterface__fileItem">
                     <div className="uploadInterface__fileInfo">
-                      <CheckCircle size={20} color="#cbe61e" />
+                      <CheckCircle size={20} color="#cbe71e" />
                       <div className="uploadInterface__fileDetails">
                         <span className="uploadInterface__fileName">{file.name}</span>
                         <span className="uploadInterface__fileSize">
