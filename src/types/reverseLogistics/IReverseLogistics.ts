@@ -57,7 +57,6 @@ export interface ReturnRow extends Partial<IProfit360VisitDevolucion> {
   monto: number;
   estado: EstadoDevolucion;
   pdfUrl?: string;
-  haveApprove: boolean;
   idDevolucion?: string;
   calculatedStatus?: ICalculatedStatus;
   children?: Omit<ReturnRow, "children">[];
@@ -404,4 +403,187 @@ export interface IProfit360DevolucionKpis {
     fromDate?: string | null;
     toDate?: string | null;
   };
+}
+
+// ── Detalle de devolución ─────────────────────────────────────────────────────
+// POST /integration/profit360/devoluciones/pdf — contenido completo del acta:
+// encabezado, documentos con sus productos y los catálogos vigentes.
+export interface IProfit360DevolucionResumen {
+  idboleto: string;
+  idProyectoLogistica: string;
+  estado: string;
+  fecharegistro: string;
+  // Misma forma del blob `Causales` de los otros endpoints, ya parseado.
+  causal: { Causales: IProfit360Causal[] };
+  cliente: string;
+  direccion: string;
+  soldto: string;
+  shipto: string;
+  contacto: string;
+  email: string;
+  telefono: string;
+  observacion: string;
+  usuario: string;
+  // Descripción del embalaje ("1 caja"); la cantidad viene aparte.
+  embalaje: string;
+  idembalaje: string;
+  // Cantidad vigente del embalaje, no la suma de unidades de producto.
+  cantidadEmbalaje: string;
+  // Según la documentación, separados por coma ("P-001,P-002"); también llega
+  // como texto libre ("PRUEBAS ELI LILLY 10001 PRUEBAS").
+  precintos: string;
+  // Pueden traer un string vacío cuando no hay imágenes.
+  imgsembalaje: string[];
+  unidades: string;
+  // Suma de `valorTotal` de todos los productos.
+  valor: number;
+  imgsproductos: string[];
+}
+
+// Producto de un documento. Además del producto, cada fila repite los datos de
+// la devolución, el documento, el cliente y la causal que usa el acta.
+export interface IProfit360DevolucionProducto {
+  // Id compuesto de la devolución: el mismo en todas las filas, no identifica
+  // al producto. El id propio de la fila es `idProductoxDocumento`.
+  id: string;
+  usuarioRegistro: string;
+  idBoleto: string;
+  idProyectoLogistica: string;
+  idSucursalLogistica: string;
+  idProyectoProfitline: string;
+  fechaFinDevolucion: string;
+  valorizacionBoletos: number;
+  idProductoxDocumento: string;
+  idProducto: string;
+  codigo: string;
+  nombreProducto: string;
+  lote: string;
+  fechaVencimiento: string;
+  diasVencimiento: number;
+  cantidadProdXDoc: number;
+  precioUnitario: number;
+  subtotal: number;
+  valorIva: number;
+  valorTotal: number;
+  observacionProducto: string;
+  // Observación general de la devolución, repetida en cada fila.
+  observaciones: string;
+  rgb: string;
+  descripcionCausal: string;
+  idCausal: string;
+  precintos: string;
+  // Datos de Profitline / del proyecto para el acta.
+  descripcionPro: string;
+  direccion: string;
+  telefono: string;
+  idPais: number;
+  email: string;
+  nit: string;
+  infoIdMunicipio: number;
+  causalDescripcion: string;
+  idCausalProductoxDocumento: string;
+  idAprobacionProductoxDocumento: string | null;
+  // Datos del cliente (`descripcion` es su nombre).
+  direccionCliente: string;
+  municipioCliente: number;
+  descripcion: string;
+  codigoCliente: string;
+  idMunicipio: string;
+  cantidadEmbalaje: string;
+  idEmbalaje: string;
+  // Una URL cada una.
+  imagenesEmbalaje: string;
+  imagenesProductos: string;
+  imagenesDocumentos: string;
+  numeroDocumento: string;
+  // Igual a `idDocumentoXDevolucion` del documento.
+  idDevolucionDoc: string;
+  fechaDocumento: string;
+  montoDocumento: number;
+  cantidadDocXDevolucion: number;
+  logoProyecto: string;
+  soldTo: string;
+  shipTo: string;
+  idCanal: string;
+  idLineaNegocio: string;
+}
+
+export interface IProfit360DevolucionDocumento {
+  // Id compuesto de la devolución (el mismo de sus productos); el del documento
+  // es `idDocumentoXDevolucion`.
+  id: string;
+  idDocumentoXDevolucion: string;
+  numeroDocumento: string;
+  fechaDocumento: string;
+  unidades: number;
+  monto: number;
+  imagenes: string[];
+  idCausalProductoxDocumento: string;
+  idAprobacionProductoxDocumento: string | null;
+  data: IProfit360DevolucionProducto[];
+}
+
+export interface IProfit360DevolucionCatalogoProducto {
+  id: string;
+  descripcion: string;
+}
+
+export interface IProfit360DevolucionLote {
+  idProyectoLogistica: string;
+  idProducto: string;
+  lote: string;
+  sku: string;
+  ean: string;
+  fecha: string;
+  unidades: number;
+}
+
+export interface IProfit360DevolucionPdf {
+  resumen: IProfit360DevolucionResumen;
+  datos: IProfit360DevolucionDocumento[];
+  productos: IProfit360DevolucionCatalogoProducto[];
+  lotes: IProfit360DevolucionLote[];
+}
+
+// One change in POST /integration/profit360/devoluciones/actualizar-productos.
+// `oldvalue` and `lote` are informative only — Pharma360 ignores them.
+export interface IProfit360DevolucionCambio {
+  type: "adicionar" | "documento" | "unidad" | "valor" | "observacionProducto" | "eliminar";
+  // The product row's `idProductoxDocumento`.
+  idProductoxDocumento?: string;
+  idDocumentoXDevolucion?: string;
+  campo?: "numeroDocumento" | "fechaDocumento" | "unidades" | "montoDocumento";
+  newvalue?: string;
+  oldvalue?: string;
+  lote?: string;
+}
+
+// Body for POST /integration/profit360/devoluciones/actualizar-productos. Every
+// change is applied in one transaction and the acta PDF is regenerated.
+export interface IProfit360ActualizarDevolucionRequest {
+  id: string;
+  // Observación de la edición (`Devoluciones.ObservacionEdicion`).
+  Observacion?: string;
+  // Observación general del boleto (`Devoluciones.Observacion`).
+  observacionGeneral?: string;
+  // When sent, replaces the whole set of embalajes.
+  embalajes?: { idEmbalaje: string; cantidad: string }[];
+  // `Precintos.Id` of the new set. Omitted → precintos are left untouched.
+  precintos?: string[];
+  data: IProfit360DevolucionCambio[];
+}
+
+// Body for POST /integration/profit360/devoluciones/anular.
+export interface IProfit360AnularDevolucionRequest {
+  id: string;
+  // Motivo de la anulación (`Devoluciones.ObservacionAnulacion`).
+  Observacion?: string;
+}
+
+// `data` returned by actualizar-productos, reenviar and anular.
+export interface IProfit360DevolucionAccionResult {
+  title: string;
+  status: number;
+  message: string;
+  otherdata: string;
 }

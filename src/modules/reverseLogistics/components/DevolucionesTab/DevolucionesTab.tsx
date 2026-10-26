@@ -96,7 +96,6 @@ const mapDevolucionToRow = (
     causales,
     monto: dev.MontoDocumento ?? dev.ValorTotalDocumento ?? 0,
     estado,
-    haveApprove: !!dev.IdAprobacion,
     idDevolucion: dev.Id,
     pdfUrl: dev.PdfBoleto ?? undefined
   };
@@ -145,8 +144,7 @@ const mapVisitToFallbackRow = (visit: IProfit360Visit, visitIndex: number): Retu
     monto: resumen.monto,
     estado,
     pdfUrl: undefined,
-    calculatedStatus: visit.calculatedStatus,
-    haveApprove: false
+    calculatedStatus: visit.calculatedStatus
   };
 };
 

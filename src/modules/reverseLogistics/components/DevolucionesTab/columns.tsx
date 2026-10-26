@@ -8,8 +8,8 @@ import { CausalBadge } from "../CausalBadge/CausalBadge";
 import { fmtCop, fmtNumber, parseFechaReturn } from "../../utils/format";
 import Link from "next/link";
 
-// Per-row action buttons. `record.idDevolucion` doubles as the approval id —
-// both endpoints surface the same GUID under different names.
+// Per-row action buttons. `record.idDevolucion` is the GUID the devolución
+// detail (/logistica-inversa/devoluciones/:id) is loaded with.
 function ActionsCell({ record }: { record: ReturnRow }) {
   return (
     <div className="flex items-center gap-1">
@@ -23,9 +23,9 @@ function ActionsCell({ record }: { record: ReturnRow }) {
           <FileText className="h-3.5 w-3.5" />
         </button>
       ) : null}
-      {record.haveApprove && record.idDevolucion ? (
+      {record.idDevolucion ? (
         <Link
-          href={`/logistica-inversa/aprobaciones/${record.idDevolucion}`}
+          href={`/logistica-inversa/devoluciones/${record.idDevolucion}`}
           type="button"
           aria-label="Ver detalle"
           className="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#1a3a6b] hover:text-[#1a3a6b] transition-colors"

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ViewWrapper from "@/components/organisms/ViewWrapper/ViewWrapper";
+import { ReverseLogisticsLayout } from "@/modules/reverseLogistics/containers/ReverseLogisticsLayout/ReverseLogisticsLayout";
 import { Profit360FiltersProvider } from "@/modules/reverseLogistics/contexts/Profit360FiltersContext";
 import { ReverseLogisticsFiltersProvider } from "@/modules/reverseLogistics/contexts/ReverseLogisticsFiltersContext";
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const LogisticaInversaLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ViewWrapper headerTitle="Listado de devoluciones">
+    <ReverseLogisticsLayout>
       {/* ReverseLogisticsFiltersProvider mounted at the route layout so the
           devoluciones + aprobaciones tabs keep their filter / search / page /
           selection state when the user navigates between sibling
@@ -23,7 +23,7 @@ const LogisticaInversaLayout = ({ children }: { children: React.ReactNode }) => 
             useProfit360Filters() without each tab refetching. */}
         <Profit360FiltersProvider>{children}</Profit360FiltersProvider>
       </ReverseLogisticsFiltersProvider>
-    </ViewWrapper>
+    </ReverseLogisticsLayout>
   );
 };
 

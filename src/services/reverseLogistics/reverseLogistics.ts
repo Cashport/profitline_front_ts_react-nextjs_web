@@ -1,8 +1,12 @@
 import { GenericResponse } from "@/types/global/IGlobal";
 import {
   IApproveReturnRequest,
+  IProfit360ActualizarDevolucionRequest,
+  IProfit360AnularDevolucionRequest,
   IProfit360Approval,
+  IProfit360DevolucionAccionResult,
   IProfit360DevolucionKpis,
+  IProfit360DevolucionPdf,
   IProfit360ApprovalResumen,
   IProfit360Filters,
   IProfit360VisitsResponse,
@@ -162,6 +166,74 @@ export const getProfit360DevolucionKpis = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching profit360 devolucion KPIs:", error);
+    throw error;
+  }
+};
+
+// POST /integration/profit360/devoluciones/pdf — full content of a devolución's
+// acta: header (`resumen`), documentos with their productos, and the product /
+// lote catalogs used to add products while editing.
+export const getProfit360DevolucionPdf = async (id: string): Promise<IProfit360DevolucionPdf> => {
+  try {
+    const response: GenericResponse<IProfit360DevolucionPdf> = await API.post(
+      "/integration/profit360/devoluciones/pdf",
+      { id }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching profit360 devolucion pdf:", error);
+    throw error;
+  }
+};
+
+// POST /integration/profit360/devoluciones/actualizar-productos — applies a
+// batch of changes (documentos, productos, embalajes, observaciones) in one
+// transaction and regenerates the acta PDF.
+export const actualizarProfit360DevolucionProductos = async (
+  body: IProfit360ActualizarDevolucionRequest
+): Promise<IProfit360DevolucionAccionResult> => {
+  try {
+    const response: GenericResponse<IProfit360DevolucionAccionResult> = await API.post(
+      "/integration/profit360/devoluciones/actualizar-productos",
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating profit360 devolucion:", error);
+    throw error;
+  }
+};
+
+// POST /integration/profit360/devoluciones/reenviar — regenerates the acta PDF
+// and re-sends the closing email to the client.
+export const reenviarProfit360Devolucion = async (
+  id: string
+): Promise<IProfit360DevolucionAccionResult> => {
+  try {
+    const response: GenericResponse<IProfit360DevolucionAccionResult> = await API.post(
+      "/integration/profit360/devoluciones/reenviar",
+      { id }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error resending profit360 devolucion:", error);
+    throw error;
+  }
+};
+
+// POST /integration/profit360/devoluciones/anular — moves the devolución to
+// "Anulado", stores the reason and regenerates the acta PDF.
+export const anularProfit360Devolucion = async (
+  body: IProfit360AnularDevolucionRequest
+): Promise<IProfit360DevolucionAccionResult> => {
+  try {
+    const response: GenericResponse<IProfit360DevolucionAccionResult> = await API.post(
+      "/integration/profit360/devoluciones/anular",
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error voiding profit360 devolucion:", error);
     throw error;
   }
 };
