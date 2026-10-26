@@ -119,7 +119,12 @@ interface GoalTableRowProps {
 }
 
 /** Una fila de la tabla. memo: al cambiar la selección sólo se repintan la fila que entra y la que sale. */
-const GoalTableRow = memo(function GoalTableRow({ row: r, selected, color, onSelect }: GoalTableRowProps) {
+const GoalTableRow = memo(function GoalTableRow({
+  row: r,
+  selected,
+  color,
+  onSelect
+}: GoalTableRowProps) {
   return (
     <tr className={cn(ROW_CLICK, selected && ROW_SELECTED)} onClick={() => onSelect(r)}>
       <td className={TD}>
@@ -188,11 +193,19 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
   const color = data.summary.series.collected.color;
   const grouping = GROUPING_BY_ID[by];
   const rows = useMemo(
-    () => sortRows(goalRows(data.clients, by, ix), sort, (r, col) => r[col as keyof GoalRow] as string | number),
+    () =>
+      sortRows(
+        goalRows(data.clients, by, ix),
+        sort,
+        (r, col) => r[col as keyof GoalRow] as string | number
+      ),
     [data.clients, by, ix, sort]
   );
   const { visible, hasMore, sentinelRef } = useProgressiveRows(rows, scrollRef);
-  const select = useCallback((r: GoalRow) => patch((f) => dimensionPatch(f, by, r, ix)), [patch, by, ix]);
+  const select = useCallback(
+    (r: GoalRow) => patch((f) => dimensionPatch(f, by, r, ix)),
+    [patch, by, ix]
+  );
 
   const { onPace, withGoal, tCollected, tGoal, tForecast, tPace } = useMemo(() => {
     const goal = sumBy(rows, (r) => r.goal);
@@ -274,9 +287,13 @@ export default function GoalTable({ data }: { data: ICollectionTower }) {
                 <tr>
                   <td className={TD_TOTAL}>Total</td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>{money(tCollected)}</td>
-                  <td className={cn(TD_TOTAL, "text-right tabular-nums", HIDE_SM)}>{money(tGoal)}</td>
+                  <td className={cn(TD_TOTAL, "text-right tabular-nums", HIDE_SM)}>
+                    {money(tGoal)}
+                  </td>
                   <td className={cn(TD_TOTAL, "text-right tabular-nums")}>
-                    <span className={diffTone(tCollected - tGoal)}>{money(tCollected - tGoal, true)}</span>
+                    <span className={diffTone(tCollected - tGoal)}>
+                      {money(tCollected - tGoal, true)}
+                    </span>
                   </td>
                   <td className={TD_TOTAL}>
                     <Avance

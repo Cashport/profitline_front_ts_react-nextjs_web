@@ -11,6 +11,7 @@ import { useShallow } from "zustand/react/shallow";
 import AgingBar from "@/components/ui/aging-bar/aging-bar";
 import ProgressVsGoal from "@/components/ui/progress-vs-goal/progress-vs-goal";
 import StatusBadge from "@/components/ui/status-badge/status-badge";
+import { getAppZoom } from "@/utils/utils";
 import type {
   ClientsHomeAgingBucket,
   ClientsHomeForecastStatus,
@@ -70,18 +71,32 @@ const ROW_PAD = "10px 14px";
 const detailHref = (row: IClientsHomeRow) =>
   `/clientes/detail/${row.clientUuid}/project/${row.projectId}`;
 
+type Rect = Pick<DOMRect, "left" | "right" | "top" | "bottom">;
+
+/** Rect y viewport en px CSS: getBoundingClientRect/inner* vienen en px de pantalla (zoom global). */
+const cssRect = (b: DOMRect): Rect => {
+  const z = getAppZoom();
+  return { left: b.left / z, right: b.right / z, top: b.top / z, bottom: b.bottom / z };
+};
+const viewport = () => {
+  const z = getAppZoom();
+  return { width: window.innerWidth / z, height: window.innerHeight / z };
+};
+
 /** Ubica un popover debajo del botón o, si no cabe, encima. */
-const popY = (b: DOMRect, height: number) =>
-  b.bottom + 6 + height <= window.innerHeight - 8
+const popY = (b: Rect, height: number) => {
+  const vh = viewport().height;
+  return b.bottom + 6 + height <= vh - 8
     ? b.bottom + 6
-    : Math.max(8, Math.min(b.top - height - 6, window.innerHeight - height - 8));
+    : Math.max(8, Math.min(b.top - height - 6, vh - height - 8));
+};
 
 /** Tooltip debajo de la celda o, si no cabe, encima. */
-const tipPosition = (b: DOMRect, size: { width: number; height: number }) => {
-  const W = Math.min(size.width, window.innerWidth - 16);
-  const x = Math.max(8, Math.min(b.left, window.innerWidth - W - 8));
-  const y =
-    b.bottom + 8 + size.height > window.innerHeight ? b.top - size.height - 8 : b.bottom + 8;
+const tipPosition = (b: Rect, size: { width: number; height: number }) => {
+  const vp = viewport();
+  const W = Math.min(size.width, vp.width - 16);
+  const x = Math.max(8, Math.min(b.left, vp.width - W - 8));
+  const y = b.bottom + 8 + size.height > vp.height ? b.top - size.height - 8 : b.bottom + 8;
   return { x, y: Math.max(8, y) };
 };
 
@@ -197,7 +212,7 @@ export default function ClientsHomeTable({
 
   const openQf = (kind: "name" | "fc", e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    const b = e.currentTarget.getBoundingClientRect();
+    const b = cssRect(e.currentTarget.getBoundingClientRect());
     setQf((cur) =>
       cur?.kind === kind
         ? null
@@ -205,7 +220,7 @@ export default function ClientsHomeTable({
             kind,
             x: Math.max(
               8,
-              Math.min(kind === "name" ? b.left - 8 : b.right - 240, window.innerWidth - 248)
+              Math.min(kind === "name" ? b.left - 8 : b.right - 240, viewport().width - 248)
             ),
             y: popY(b, 300)
           }
@@ -218,7 +233,7 @@ export default function ClientsHomeTable({
     e: React.MouseEvent<HTMLElement>
   ) => {
     const pos = tipPosition(
-      e.currentTarget.getBoundingClientRect(),
+      cssRect(e.currentTarget.getBoundingClientRect()),
       kind === "aging" ? AGING_TIP_SIZE : COLLECTION_TIP_SIZE
     );
     setTip({ kind, id: row.clientId, ...pos });
@@ -554,14 +569,14 @@ export default function ClientsHomeTable({
       ref={cardRef}
       className="box-border flex min-h-[320px] min-w-0 flex-1 flex-col rounded-[14px] bg-white px-2.5 pb-2 pt-3"
     >
-      {/* Título, mercados y buscador */}
+      {/* Título con ayuda, mercados debajo y, a la derecha, el buscador con el contador. */}
       <div className="flex flex-none flex-wrap items-start justify-between gap-x-4 gap-y-2.5 px-1.5 pb-3 pt-2">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1.5">
           <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2.5 gap-y-1 leading-[1.35]">
-            <span className="whitespace-nowrap text-[15px] font-semibold text-[#141414]">
+            <span className="whitespace-nowrap text-[15px] font-semibold text-cp-ink">
               Cartera por cliente
             </span>
-            <span className="min-w-0 flex-[1_1_0] truncate text-[11.5px] leading-[1.35] text-[#8a8a8a]">
+            <span className="min-w-0 flex-[1_1_0] truncate text-[11.5px] leading-[1.35] text-cp-ink-4">
               {mkHint}
             </span>
           </div>
@@ -573,11 +588,11 @@ export default function ClientsHomeTable({
                   key={m.key}
                   type="button"
                   onClick={() => f.toggleMarket(m.key)}
-                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[12.5px] font-medium hover:!text-[#141414]"
+                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[12.5px] font-medium hover:!text-cp-ink"
                   style={{
                     border: `1px solid ${on ? "#cbe71e" : "transparent"}`,
-                    background: on ? "#f4f9d2" : "transparent",
-                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#6b6b6b"
+                    background: on ? "#f7f7f7" : "transparent",
+                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#4a4a4a"
                   }}
                 >
                   <span
@@ -592,7 +607,7 @@ export default function ClientsHomeTable({
               <button
                 type="button"
                 onClick={() => f.setMarkets([])}
-                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-xs font-semibold text-[#141414] hover:underline"
+                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-xs font-semibold text-cp-ink hover:underline"
               >
                 Quitar filtro
               </button>
@@ -600,15 +615,16 @@ export default function ClientsHomeTable({
           </div>
         </div>
         <div className="flex min-w-[200px] flex-[0_1_340px] flex-col items-end gap-1.5">
-          <div className="box-border flex h-10 w-full items-center gap-2.5 rounded-lg bg-[#f7f7f7] px-3.5">
+          <label className="box-border flex h-10 w-full cursor-text items-center gap-2.5 rounded-lg bg-cp-bg px-3.5">
             <svg
               width="15"
               height="15"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#141414"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
+              className="shrink-0 text-cp-ink"
             >
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
@@ -617,10 +633,10 @@ export default function ClientsHomeTable({
               value={f.search}
               onChange={(e) => f.setSearch(e.target.value)}
               placeholder="Buscar cliente, NIT, ejecutivo"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] font-medium text-[#141414] outline-none placeholder:text-[#9a9a9a]"
+              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] font-medium text-cp-ink outline-none placeholder:text-[#9a9a9a]"
             />
-          </div>
-          <span className="whitespace-nowrap text-[11.5px] text-[#8a8a8a]">
+          </label>
+          <span className="whitespace-nowrap text-[11.5px] text-cp-ink-4">
             {meta ? clientsLabel(total) : " "}
           </span>
         </div>
@@ -812,7 +828,7 @@ const QuickFilterPopover = ({
   <>
     <div onClick={onClose} className="fixed inset-0 z-[70] cursor-default" />
     <div
-      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100vh-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
+      className="fixed z-[71] box-border flex max-h-[min(420px,calc(100*var(--vh)-140px))] w-60 cursor-default flex-col gap-0.5 overflow-y-auto rounded-xl border border-[#ececec] bg-white p-1.5 font-normal shadow-[0_12px_32px_rgba(0,0,0,.16)]"
       style={{ left: x, top: y }}
     >
       <div className="flex flex-col gap-0.5">

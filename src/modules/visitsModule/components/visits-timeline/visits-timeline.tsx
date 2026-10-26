@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 
+import { getAppZoom } from "@/utils/utils";
+
 import {
   DAY_END_MIN,
   DAY_START_MIN,
@@ -141,7 +143,8 @@ export default function VisitsTimeline({
       setTooltip(null);
       return;
     }
-    setTooltip({ ...info, x: clientX - wrap.left });
+    // clientX/rect are screen px; `left` is CSS px under the global zoom
+    setTooltip({ ...info, x: (clientX - wrap.left) / getAppZoom() });
   };
 
   const segmentStyle = (s: IAdvisorSegment) => ({

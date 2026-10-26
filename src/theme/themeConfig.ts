@@ -9,6 +9,8 @@ const theme: ThemeConfig = {
     colorSplit: "#FFFFFF",
     fontFamily: "inherit",
     green: "#CBE71E",
+    colorLink: "#1677ff",
+    colorLinkHover: "#0b5bd3",
     colorBgElevated: "#FFFFFF"
   },
   components: {

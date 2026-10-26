@@ -137,7 +137,13 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
         (day, i) =>
           weekdayOf(day.date) === 1 && (
             <g key={`w${day.date}`}>
-              <line x1={M.l + i * bw} x2={M.l + i * bw} y1={M.t} y2={M.t + ih} className={WEEK_LINE} />
+              <line
+                x1={M.l + i * bw}
+                x2={M.l + i * bw}
+                y1={M.t}
+                y2={M.t + ih}
+                className={WEEK_LINE}
+              />
               <line
                 x1={M.l + i * bw}
                 x2={M.l + i * bw}
@@ -222,7 +228,10 @@ function Chart({ data, width }: { data: ICollectionTower; width: number }) {
                     fill={s.color}
                     opacity={!sel.length || inSelection(day.date, s.key) ? 1 : 0.22}
                     strokeWidth={chosen ? 1.5 : 0}
-                    className={cn("cursor-pointer hover:brightness-110", chosen && "stroke-foreground")}
+                    className={cn(
+                      "cursor-pointer hover:brightness-110",
+                      chosen && "stroke-foreground"
+                    )}
                     onClick={(e) => {
                       e.stopPropagation();
                       select(e, i, s.key);

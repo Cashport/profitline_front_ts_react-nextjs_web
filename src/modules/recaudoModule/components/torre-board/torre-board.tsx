@@ -11,7 +11,7 @@ import { useCollectionTowerRefresh } from "@/hooks/useCollectionTowerRefresh";
 import type { ICollectionTower } from "@/types/collectionTower/ICollectionTower";
 import { FOOT_NOTE } from "../../constants";
 import { useTowerFilters } from "../../contexts/tower-filters-context";
-import { fmtCutoff } from "../../utils/format";
+import { fmtCutoff, fmtCutoffShort } from "../../utils/format";
 import AgingCard from "../aging-card/aging-card";
 import AgreementsChart from "../agreements-chart/agreements-chart";
 import AgreementsTable from "../agreements-table/agreements-table";
@@ -57,23 +57,29 @@ function Cutoff({
   const busy = refreshing || updating;
   const label = canRegenerate ? "Actualizar ahora" : "Recargar";
   return (
-    <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+    // Igual que el corte del Home de Clientes: "● Corte 26/10 · 13:17 ↻" (fecha completa en el title).
+    <span
+      className="flex items-center gap-1.5"
+      title={cutoffAt ? `Corte ${fmtCutoff(cutoffAt)}` : undefined}
+    >
       <span
-        className={cn(
-          "h-1.5 w-1.5 rounded-full",
-          busy ? "animate-pulse bg-amber-500" : "bg-emerald-500"
-        )}
+        className={cn("h-2 w-2 shrink-0 rounded-full", busy && "animate-pulse")}
+        style={{ background: busy ? "#f5b700" : "#9bb514" }}
       />
-      {updating ? "Actualizando…" : cutoffAt ? `Corte ${fmtCutoff(cutoffAt)}` : "Cargando corte…"}
+      {updating
+        ? "Actualizando…"
+        : cutoffAt
+          ? `Corte ${fmtCutoffShort(cutoffAt)}`
+          : "Cargando corte…"}
       <button
         type="button"
         title={label}
         aria-label={label}
         disabled={busy}
         onClick={onRefresh}
-        className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-foreground hover:bg-muted disabled:cursor-default disabled:opacity-50"
+        className="-my-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-cp-ink hover:bg-cp-line disabled:cursor-default disabled:opacity-50"
       >
-        <RotateCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
+        <RotateCw className={cn("h-[15px] w-[15px]", busy && "animate-spin")} />
       </button>
     </span>
   );

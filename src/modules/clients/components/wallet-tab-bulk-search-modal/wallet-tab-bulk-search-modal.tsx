@@ -336,7 +336,7 @@ const WalletTabBulkSearchModal = ({
         closeIcon={null}
         centered
         maskClosable={false}
-        width="min(960px, calc(100vw - 32px))"
+        width="min(960px, calc(100 * var(--vw) - 32px))"
         styles={{
           body: { padding: 0 },
           content: { padding: 0, overflow: "hidden", borderRadius: 12 }
@@ -350,7 +350,7 @@ const WalletTabBulkSearchModal = ({
             components: { Segmented: { itemColor: "#6b6b6b", trackBg: "#ececec" } }
           }}
         >
-          <div className="flex h-[min(720px,calc(100vh-64px))] flex-col text-foreground">
+          <div className="flex h-[min(720px,calc(100*var(--vh)-64px))] flex-col text-foreground">
             <header className="flex flex-none flex-wrap items-center gap-x-5 gap-y-3 border-b border-[#ececec] px-[22px] py-4">
               <div className="mr-auto min-w-0 max-w-full">
                 <h3 className="text-base font-semibold">Búsqueda masiva</h3>

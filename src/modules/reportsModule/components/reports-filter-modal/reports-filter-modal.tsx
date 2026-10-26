@@ -19,8 +19,6 @@ import type { IReportsFilters, IReportType } from "@/types/reports/IReports";
 import { EMPTY_REPORTS_FILTERS } from "../../constants";
 
 /** Misma altura y superficie que el buscador y el botón de tema. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface ReportsFilterModalProps {
   value: IReportsFilters;
@@ -79,7 +77,6 @@ export default function ReportsFilterModal({ value, onChange, types }: ReportsFi
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ label: "Filtrar", className: TRIGGER_CLASS, showChevron: true }}
       formatTagValue={(_cat, items) => items.map((i) => i.name).join(", ")}
       onApply={(sel) => onChange({ report_type_ids: toIds(sel.tipo), ...dateDraft })}
       onValueChange={(sel) => onChange({ ...value, report_type_ids: toIds(sel.tipo) })}

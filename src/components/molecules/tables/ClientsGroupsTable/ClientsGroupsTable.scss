@@ -5,7 +5,7 @@
     overflow-y: none;
     height: 100%;
     .container-table-of-ant-client-group {
-        max-height: calc(100vh - 200px);
+        max-height: calc(100 * var(--vh) - 200px);
         width: 100%;
     }
     .mainClientsGroupsTable_header {
