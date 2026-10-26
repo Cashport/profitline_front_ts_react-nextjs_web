@@ -494,6 +494,21 @@ export interface IPacksUploadResult {
   error_log: { url: string; filename: string } | null;
 }
 
+export interface IIqviaAuxUploadError {
+  fila: number;
+  motivo: string;
+  cod_iqvia?: string | null;
+}
+
+export interface IIqviaAuxUploadResult {
+  ok: boolean;
+  total_filas: number;
+  insertados: number;
+  actualizados: number;
+  sin_cambios: number;
+  errores: IIqviaAuxUploadError[];
+}
+
 export interface IPOS {
   id: number;
   id_country: number;
