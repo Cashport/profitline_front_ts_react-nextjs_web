@@ -30,6 +30,10 @@
 
 html {
     zoom: var(--app-zoom);
+    // El documento nunca hace scroll: las vistas desplazan su propio contenedor
+    // (.rightContent) y las páginas públicas el <body>. Sin esto, cualquier capa invisible
+    // que sobresalga pinta una segunda barra nativa en el borde derecho.
+    overflow: hidden;
 }
 
 html,

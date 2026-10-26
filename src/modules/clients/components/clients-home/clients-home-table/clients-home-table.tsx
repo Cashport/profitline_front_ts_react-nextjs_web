@@ -569,14 +569,14 @@ export default function ClientsHomeTable({
       ref={cardRef}
       className="box-border flex min-h-[320px] min-w-0 flex-1 flex-col rounded-[14px] bg-white px-2.5 pb-2 pt-3"
     >
-      {/* Título, mercados y buscador */}
+      {/* Título con ayuda, mercados debajo y, a la derecha, el buscador con el contador. */}
       <div className="flex flex-none flex-wrap items-start justify-between gap-x-4 gap-y-2.5 px-1.5 pb-3 pt-2">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1.5">
           <div className="flex min-w-0 flex-nowrap items-baseline gap-x-2.5 gap-y-1 leading-[1.35]">
-            <span className="whitespace-nowrap text-[15px] font-semibold text-[#141414]">
+            <span className="whitespace-nowrap text-[15px] font-semibold text-cp-ink">
               Cartera por cliente
             </span>
-            <span className="min-w-0 flex-[1_1_0] truncate text-[11.5px] leading-[1.35] text-[#8a8a8a]">
+            <span className="min-w-0 flex-[1_1_0] truncate text-[11.5px] leading-[1.35] text-cp-ink-4">
               {mkHint}
             </span>
           </div>
@@ -588,11 +588,11 @@ export default function ClientsHomeTable({
                   key={m.key}
                   type="button"
                   onClick={() => f.toggleMarket(m.key)}
-                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[12.5px] font-medium hover:!text-[#141414]"
+                  className="-ml-[7px] flex h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[7px] px-[7px] text-[12.5px] font-medium hover:!text-cp-ink"
                   style={{
                     border: `1px solid ${on ? "#cbe71e" : "transparent"}`,
-                    background: on ? "#f4f9d2" : "transparent",
-                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#6b6b6b"
+                    background: on ? "#f7f7f7" : "transparent",
+                    color: on ? "#141414" : anyMarket ? "#a8a8a8" : "#4a4a4a"
                   }}
                 >
                   <span
@@ -607,7 +607,7 @@ export default function ClientsHomeTable({
               <button
                 type="button"
                 onClick={() => f.setMarkets([])}
-                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-xs font-semibold text-[#141414] hover:underline"
+                className="cursor-pointer whitespace-nowrap border-0 bg-transparent px-1 text-xs font-semibold text-cp-ink hover:underline"
               >
                 Quitar filtro
               </button>
@@ -615,15 +615,16 @@ export default function ClientsHomeTable({
           </div>
         </div>
         <div className="flex min-w-[200px] flex-[0_1_340px] flex-col items-end gap-1.5">
-          <div className="box-border flex h-10 w-full items-center gap-2.5 rounded-lg bg-[#f7f7f7] px-3.5">
+          <label className="box-border flex h-10 w-full cursor-text items-center gap-2.5 rounded-lg bg-cp-bg px-3.5">
             <svg
               width="15"
               height="15"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#141414"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
+              className="shrink-0 text-cp-ink"
             >
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
@@ -632,10 +633,10 @@ export default function ClientsHomeTable({
               value={f.search}
               onChange={(e) => f.setSearch(e.target.value)}
               placeholder="Buscar cliente, NIT, ejecutivo"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] font-medium text-[#141414] outline-none placeholder:text-[#9a9a9a]"
+              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] font-medium text-cp-ink outline-none placeholder:text-[#9a9a9a]"
             />
-          </div>
-          <span className="whitespace-nowrap text-[11.5px] text-[#8a8a8a]">
+          </label>
+          <span className="whitespace-nowrap text-[11.5px] text-cp-ink-4">
             {meta ? clientsLabel(total) : " "}
           </span>
         </div>

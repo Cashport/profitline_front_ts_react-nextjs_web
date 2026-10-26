@@ -21,8 +21,6 @@ import { useNoveltyStatuses } from "../../hooks/useNoveltyStatuses";
 import type { INoveltiesFilters } from "../../types";
 
 /** Misma altura y superficie que los demás controles de la barra. */
-const TRIGGER_CLASS =
-  "flex h-12 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-4 text-foreground transition-colors hover:bg-secondary";
 
 interface NoveltiesFilterModalProps {
   value: INoveltiesFilters;
@@ -161,7 +159,6 @@ export default function NoveltiesFilterModal({ value, onChange }: NoveltiesFilte
     <FilterModal
       categories={categories}
       value={selection}
-      trigger={{ className: TRIGGER_CLASS }}
       formatTagValue={(_cat, items) => items[0]?.name ?? ""}
       onApply={(sel) =>
         onChange({

@@ -78,7 +78,10 @@ function Chart({ data, reference, width }: ChartProps) {
   const expected = new Map<number, number>();
   if (open) {
     for (let i = 1; i < projected.length; i++) {
-      expected.set(projected[i].day, (projected[i].projected ?? 0) - (projected[i - 1].projected ?? 0));
+      expected.set(
+        projected[i].day,
+        (projected[i].projected ?? 0) - (projected[i - 1].projected ?? 0)
+      );
     }
   }
 
@@ -100,20 +103,36 @@ function Chart({ data, reference, width }: ChartProps) {
     if (t <= D) {
       rows.push(
         { key: "apl", color: applied.color, label: applied.label, value: money(p.applied ?? 0) },
-        { key: "pna", color: unapplied.color, label: unapplied.label, value: money(p.unapplied ?? 0) },
+        {
+          key: "pna",
+          color: unapplied.color,
+          label: unapplied.label,
+          value: money(p.unapplied ?? 0)
+        },
         { key: "acu", color: collected, label: "Acumulado", value: money(p.cumulative ?? 0) }
       );
       total = { label: "Recaudo del día", value: money(dayTotal(t)) };
     } else if (open) {
       const e = expected.get(t);
       if (e !== undefined) {
-        rows.push({ key: "esp", color: withAlpha(collected, 0.16), label: "Esperado del día", value: money(e) });
+        rows.push({
+          key: "esp",
+          color: withAlpha(collected, 0.16),
+          label: "Esperado del día",
+          value: money(e)
+        });
       }
       if (p.projected !== null) {
-        rows.push({ key: "proy", color: collected, label: "Acumulado proyectado", value: money(p.projected) });
+        rows.push({
+          key: "proy",
+          color: collected,
+          label: "Acumulado proyectado",
+          value: money(p.projected)
+        });
       }
     }
-    if (showPrev) rows.push({ key: "prev", color: PREVIOUS, label: "Mes anterior", value: money(prevAt(t)) });
+    if (showPrev)
+      rows.push({ key: "prev", color: PREVIOUS, label: "Mes anterior", value: money(prevAt(t)) });
     if (showMedian) {
       rows.push({ key: "med", color: MUTED, label: "Mediana 6M", value: money(p.median6m ?? 0) });
     }
@@ -197,10 +216,22 @@ function Chart({ data, reference, width }: ChartProps) {
         return (
           <g key={`b${t}`}>
             {a > 0 && (
-              <rect x={X(t) - barW / 2} y={ya} width={barW} height={Math.max(0, y1 - ya)} fill={applied.color} />
+              <rect
+                x={X(t) - barW / 2}
+                y={ya}
+                width={barW}
+                height={Math.max(0, y1 - ya)}
+                fill={applied.color}
+              />
             )}
             {u > 0 && (
-              <rect x={X(t) - barW / 2} y={yb} width={barW} height={Math.max(0, ya - yb)} fill={unapplied.color} />
+              <rect
+                x={X(t) - barW / 2}
+                y={yb}
+                width={barW}
+                height={Math.max(0, ya - yb)}
+                fill={unapplied.color}
+              />
             )}
           </g>
         );
@@ -219,7 +250,13 @@ function Chart({ data, reference, width }: ChartProps) {
         />
       ))}
 
-      <rect x={M.l} y={Y(summary.goal) - 5} width={iw} height={10} className="fill-muted opacity-60" />
+      <rect
+        x={M.l}
+        y={Y(summary.goal) - 5}
+        width={iw}
+        height={10}
+        className="fill-muted opacity-60"
+      />
       <line
         x1={M.l}
         x2={M.l + iw}

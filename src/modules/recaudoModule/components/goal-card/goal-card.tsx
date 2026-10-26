@@ -40,7 +40,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
   const expected = open && pace > 0 ? s.goal * pace : null;
 
   const forecastRows: TipRow[] = [
-    { key: "rec", color: cs.color, label: "Recaudado", value: money(s.collected), tag: ofGoal(s.collected) },
+    {
+      key: "rec",
+      color: cs.color,
+      label: "Recaudado",
+      value: money(s.collected),
+      tag: ofGoal(s.collected)
+    },
     {
       key: "pen",
       color: ps.color,
@@ -165,7 +171,12 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             tip: {
               title: bs.label,
               rows: [
-                { key: "v", color: bs.color, label: "Saldo vencido", value: money(s.brokenAgreements) }
+                {
+                  key: "v",
+                  color: bs.color,
+                  label: "Saldo vencido",
+                  value: money(s.brokenAgreements)
+                }
               ]
             }
           }
@@ -223,7 +234,11 @@ export default function GoalCard({ data, className }: GoalCardProps) {
       />
 
       <div className="flex flex-wrap items-center gap-3 text-[10.5px] text-muted-foreground">
-        <LegendItem mark={<Swatch color={cs.color} />} label={cs.label} value={money(s.collected)} />
+        <LegendItem
+          mark={<Swatch color={cs.color} />}
+          label={cs.label}
+          value={money(s.collected)}
+        />
         <LegendItem
           mark={<Swatch color={ps.color} />}
           label={ps.label}
@@ -237,16 +252,17 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         {expected !== null && (
           <span className="inline-flex items-center gap-[5px] whitespace-nowrap">
             <i className="inline-block h-[9px] w-0 border-l-2 border-dotted border-muted-foreground" />
-            Ritmo a hoy{" "}
-            <b className="font-bold tabular-nums text-foreground">{money(expected)}</b>
+            Ritmo a hoy <b className="font-bold tabular-nums text-foreground">{money(expected)}</b>
           </span>
         )}
         <span className="ml-auto inline-flex items-center gap-[5px] whitespace-nowrap">
           {open ? (
             <>
               <Swatch color={cs.color} outline />
-              Forecast <b className="font-bold tabular-nums text-foreground">{money(s.forecast)}</b> ·{" "}
-              {pct(forecastRatio)}
+              Forecast <b className="font-bold tabular-nums text-foreground">
+                {money(s.forecast)}
+              </b>{" "}
+              · {pct(forecastRatio)}
             </>
           ) : (
             <>Mes cerrado · {pct(compliance)}</>
