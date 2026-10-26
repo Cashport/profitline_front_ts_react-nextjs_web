@@ -213,7 +213,21 @@ export const MOCK_CLIENTS: MockClient[] = NOMBRES.map((n, i) => {
   const sh = shares();
   const lag = R() < 0.3 ? r(-0.24, -0.1) : r(-0.03, 0.07);
   const pnaF = r(0.45, 1.7);
-  return { id: "k" + i, idx: i, n, nit, e: e.id, kam: canalDe(n), base, perf, pat, sh, lag, pnaF, mes: [] };
+  return {
+    id: "k" + i,
+    idx: i,
+    n,
+    nit,
+    e: e.id,
+    kam: canalDe(n),
+    base,
+    perf,
+    pat,
+    sh,
+    lag,
+    pnaF,
+    mes: []
+  };
 });
 
 MOCK_CLIENTS.forEach((c) => {

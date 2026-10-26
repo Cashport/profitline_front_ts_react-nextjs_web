@@ -58,4 +58,8 @@ export interface FilterModalProps {
   trigger?: { label?: string; className?: string; showChevron?: boolean };
   /** Optional content rendered at the end of the trigger/tags bar (e.g. a theme toggle). */
   barEnd?: ReactNode;
+  /** Hide the applied-filter chips next to the trigger (when the page shows its own). */
+  hideTags?: boolean;
+  /** Fired on every draft change, so wrappers can narrow other categories' options (cascades). */
+  onDraftChange?: (draft: FilterSelection) => void;
 }

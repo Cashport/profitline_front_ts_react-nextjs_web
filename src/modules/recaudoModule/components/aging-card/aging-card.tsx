@@ -36,7 +36,12 @@ export default function AgingCard({ data }: { data: ICollectionTower }) {
               title={bucket?.label ?? seg.key}
               rows={[
                 { key: "v", color: seg.color, label: "Recaudado", value: money(seg.value) },
-                { key: "p", color: seg.color, label: "Participación", value: pct(seg.value / total) }
+                {
+                  key: "p",
+                  color: seg.color,
+                  label: "Participación",
+                  value: pct(seg.value / total)
+                }
               ]}
             >
               {node}

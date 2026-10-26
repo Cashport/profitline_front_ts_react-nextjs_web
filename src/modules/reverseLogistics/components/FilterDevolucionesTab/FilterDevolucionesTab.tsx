@@ -124,11 +124,6 @@ export function FilterDevolucionesTab({ value, onChange }: FilterDevolucionesTab
       categories={categories}
       value={selection}
       isLoading={isLoading}
-      trigger={{
-        className:
-          "h-12 flex items-center gap-2 border border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent px-4 rounded-md",
-        showChevron: true
-      }}
       formatTagValue={(_cat, items) => items[0]?.name ?? ""}
       onApply={(sel) =>
         onChange({

@@ -90,12 +90,6 @@ export default function FilterTasksModal({
       categories={categories}
       value={selection}
       isLoading={isLoading}
-      trigger={{
-        label: "Filtrar",
-        showChevron: true,
-        className:
-          "h-12 flex items-center gap-2 border border-cashport-gray-light text-cashport-black hover:bg-cashport-gray-lighter bg-transparent px-4 rounded-md"
-      }}
       formatTagValue={(_cat, items) => (items.length === 1 ? items[0].name : `${items.length} tipos`)}
       onApply={(sel) =>
         onChange({

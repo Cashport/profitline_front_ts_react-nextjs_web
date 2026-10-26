@@ -1,6 +1,6 @@
 import React from "react";
-import { ChevronRight } from "lucide-react";
 
+import { cn } from "@/utils/utils";
 import type { FilterCategoryConfig, FilterSelection } from "../FilterModal.types";
 
 interface FilterSidebarProps {
@@ -13,6 +13,7 @@ interface FilterSidebarProps {
 const countFor = (cat: FilterCategoryConfig, draft: FilterSelection) =>
   cat.kind === "custom" ? cat.draftCount ?? 0 : (draft[cat.key] || []).length;
 
+/** Categorías del modal (docs/DESIGN.md §6): activa en negrita, fondo gris y barra lima. */
 export default function FilterSidebar({
   categories,
   activeTab,
@@ -20,7 +21,7 @@ export default function FilterSidebar({
   onSelect
 }: FilterSidebarProps) {
   return (
-    <div className="w-1/3 max-w-[240px] border-r border-border bg-card/30 overflow-y-auto py-2">
+    <div className="w-[120px] shrink-0 overflow-y-auto border-r border-cp-line py-2 sm:w-[240px]">
       {categories.map((cat) => {
         const selectedCount = countFor(cat, draft);
         const isActive = activeTab === cat.key;
@@ -29,31 +30,22 @@ export default function FilterSidebar({
             key={cat.key}
             type="button"
             onClick={() => onSelect(cat.key)}
-            className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-all border-l-2 ${
-              isActive
-                ? "bg-secondary/80 text-foreground font-bold border-primary shadow-sm"
-                : "text-muted-foreground hover:bg-secondary/40 border-transparent hover:text-foreground"
-            }`}
+            className={cn(
+              "relative flex h-11 w-full cursor-pointer items-center border-0 pl-[22px] pr-[18px] text-left text-sm",
+              isActive ? "bg-cp-bg font-semibold text-cp-ink" : "bg-transparent text-cp-ink-2"
+            )}
           >
-            <div className="flex items-center gap-2">
-              <span>{cat.label}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedCount > 0 && (
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    isActive ? "bg-primary text-primary-foreground" : "bg-primary/20 text-primary"
-                  }`}
-                >
-                  {selectedCount}
-                </span>
+            <span
+              className={cn(
+                "absolute bottom-2 left-0 top-2 w-[3px] rounded-r-[3px]",
+                isActive ? "bg-cp-lime" : "bg-transparent"
               )}
-              <ChevronRight
-                className={`w-4 h-4 transition-transform ${
-                  isActive ? "text-foreground translate-x-0" : "opacity-0 -translate-x-2"
-                }`}
-              />
-            </div>
+            />
+            <span className="flex-1 truncate">{cat.label}</span>
+            <span className="mr-2 text-[11px] font-normal text-cp-ink-4">
+              {selectedCount || ""}
+            </span>
+            <span className={isActive ? "text-cp-ink" : "text-transparent"}>&gt;</span>
           </button>
         );
       })}

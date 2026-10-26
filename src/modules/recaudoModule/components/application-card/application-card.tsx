@@ -31,20 +31,31 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
       <div className="flex items-start justify-between gap-3">
         <div className={KPI_VALUE}>
           {pct(applied / total, 0)}
-          <small className="text-[12px] font-medium tracking-normal text-muted-foreground"> aplicado</small>
+          <small className="text-[12px] font-medium tracking-normal text-muted-foreground">
+            {" "}
+            aplicado
+          </small>
         </div>
         <TowerTooltip
           title="Lead time de aplicación"
           rows={[
             { key: "mes", color: as.color, label: "Este mes", value: days(lt) },
             { key: "ant", color: MUTED, label: "Mes anterior", value: days(prev) },
-            { key: "le2", color: us.color, label: "Aplicado en ≤ 2 días", value: pct(ap.appliedWithin2Days, 0) }
+            {
+              key: "le2",
+              color: us.color,
+              label: "Aplicado en ≤ 2 días",
+              value: pct(ap.appliedWithin2Days, 0)
+            }
           ]}
         >
           <div className="text-right">
             <div className={KPI_VALUE}>
               {lt === null ? "—" : fmt(lt, 1)}
-              <small className="text-[12px] font-medium tracking-normal text-muted-foreground"> días</small>
+              <small className="text-[12px] font-medium tracking-normal text-muted-foreground">
+                {" "}
+                días
+              </small>
             </div>
             <div className="mt-1 text-[10.5px] text-muted-foreground">
               lead time de aplicación
@@ -75,7 +86,12 @@ export default function ApplicationCard({ data }: { data: ICollectionTower }) {
               title={serie.label}
               rows={[
                 { key: "v", color: serie.color, label: "Valor", value: money(seg.value) },
-                { key: "p", color: serie.color, label: "Del recaudo", value: pct(seg.value / total) }
+                {
+                  key: "p",
+                  color: serie.color,
+                  label: "Del recaudo",
+                  value: pct(seg.value / total)
+                }
               ]}
             >
               {node}
