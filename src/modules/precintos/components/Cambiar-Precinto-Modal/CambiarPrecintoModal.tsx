@@ -53,22 +53,26 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleCambiar = async () => {
+    const handleCambiar = async () => {
     try {
       setIsLoading(true);
       setErrorModal(null);
 
       if (precintosSeleccionados.length === 0) throw new Error("No hay precintos seleccionados");
       if (!ejecutivo) throw new Error("Debes seleccionar un ejecutivo");
-      
       if (ejecutivo === ejecutivoActualId) throw new Error("Los precintos ya pertenecen a este ejecutivo.");
 
       const response = await cambiarEjecutivo(precintosSeleccionados, ejecutivo, fecha, guia);
       
-      if (response && response.data && response.data.omitidos && response.data.omitidos.length > 0) {
-        message.warning(response.message, 6);
-        setErrorModal(response.message);
-        if (response.data.count > 0) onSuccess();
+      // 👇 Tolerante a distintas formas de respuesta
+      const omitidos = response?.data?.omitidos || response?.omitidos || [];
+      const count = response?.data?.count || response?.count || 0;
+
+      if (omitidos.length > 0) {
+        const msg = response?.message || `Se omitieron ${omitidos.length} precintos`;
+        message.warning(msg, 6);
+        setErrorModal(msg);
+        if (count > 0) onSuccess();
         return;
       }
 
@@ -76,7 +80,6 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
       onSuccess();
       
     } catch (error: any) {
-      // 👇 TRUCO: Si el error es un 400, sabemos que es porque ya pertenece al ejecutivo
       let errorMsg = error.response?.data?.message || error.message;
       
       if (errorMsg.includes('Profit360 rechazó el cambio: 400') || error.response?.status === 400) {
@@ -85,7 +88,6 @@ export const CambiarPrecintoModal: React.FC<CambiarPrecintoModalProps> = ({
       
       setErrorModal(errorMsg);
       message.error(errorMsg);
-      // NO llamamos a onSuccess() ni a onClose() para que el modal no se cierre
     } finally {
       setIsLoading(false);
     }

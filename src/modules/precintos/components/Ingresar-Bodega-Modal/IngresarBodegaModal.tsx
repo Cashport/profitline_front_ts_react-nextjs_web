@@ -39,7 +39,7 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleIngresar = async () => {
+    const handleIngresar = async () => {
     try {
       setIsLoading(true);
       setErrorModal(null);
@@ -47,8 +47,6 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
       let listaCodigos: string[] = [];
 
       if (activeTab === 'rango') {
-        // 👇 REGEX MEJORADA: Acepta letras, números y guiones al inicio. 
-        // El grupo 1 es el prefijo, el grupo 2 son los dígitos finales.
         const matchDesde = desde.trim().match(/^([a-zA-Z0-9-]*?)(\d+)$/);
         const matchHasta = hasta.trim().match(/^([a-zA-Z0-9-]*?)(\d+)$/);
 
@@ -67,6 +65,12 @@ export const IngresarBodegaModal: React.FC<IngresarBodegaModalProps> = ({
 
         if (numHasta < numDesde) {
           throw new Error("El número final debe ser mayor o igual al inicial.");
+        }
+
+        // 👈 LÍMITE DE 1.000
+        const cantidad = numHasta - numDesde + 1;
+        if (cantidad > 1000) {
+          throw new Error(`El rango supera el máximo permitido de 1.000 precintos (solicitaste ${cantidad}).`);
         }
 
         for (let i = numDesde; i <= numHasta; i++) {

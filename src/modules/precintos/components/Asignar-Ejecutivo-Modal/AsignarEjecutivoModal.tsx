@@ -67,7 +67,7 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleAsignar = async () => {
+    const handleAsignar = async () => {
     try {
       setIsLoading(true);
       setErrorModal(null);
@@ -78,7 +78,14 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
         const inicio = parseInt(desde);
         const fin = parseInt(hasta);
         if (isNaN(inicio) || isNaN(fin)) throw new Error("Ingresa un rango válido");
-        
+        if (fin < inicio) throw new Error("El número final debe ser mayor o igual al inicial");
+
+        // 👈 LÍMITE DE 1.000
+        const cantidad = fin - inicio + 1;
+        if (cantidad > 1000) {
+          throw new Error(`El rango supera el máximo permitido de 1.000 precintos (solicitaste ${cantidad}).`);
+        }
+
         for (let i = inicio; i <= fin; i++) {
           listaCodigos.push(i.toString());
         }
@@ -89,15 +96,11 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
       if (listaCodigos.length === 0) throw new Error("No hay códigos para asignar");
       if (!ejecutivo) throw new Error("Debes seleccionar un ejecutivo");
 
-      // 👇 Llamada al backend
       const response = await asignarPrecintos(listaCodigos, ejecutivo, fecha, guia);
       
-      // 👇 Validamos si hubo omitidos
       if (response && response.data && response.data.omitidos && response.data.omitidos.length > 0) {
         message.warning(response.message, 6);
         setErrorModal(response.message);
-        // Si hubo omitidos, dejamos el modal abierto o lo cerramos según prefieras
-        // Por ahora, lo cerramos si al menos algunos se asignaron
         if (response.data.count > 0) {
            onSuccess();
         }
@@ -106,12 +109,10 @@ export const AsignarEjecutivoModal: React.FC<AsignarEjecutivoModalProps> = ({
 
       message.success(`¡${listaCodigos.length} precintos asignados con éxito!`);
       onSuccess();
-    }catch (error: any) {
-      // 👇 ATRA PAMOS EL ERROR Y NOS QUEDAMOS EN EL MODAL
+    } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.message;
       setErrorModal(errorMsg);
       message.error("Error: " + errorMsg);
-      // No llamamos a onSuccess() aquí.
     } finally {
       setIsLoading(false);
     }
