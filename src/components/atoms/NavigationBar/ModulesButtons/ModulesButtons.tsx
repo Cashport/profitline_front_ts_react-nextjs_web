@@ -419,6 +419,26 @@ export const ModulesButtons = ({ path, project, isMobileMenu = false }: ModulesB
         </Link>
       )}
 
+      {/* Precintos */}
+      {checkUserViewPermissions(project, "Precintos") && (
+        <Link href="/precintos" passHref legacyBehavior>
+          <Button
+            type="primary"
+            size="large"
+            icon={
+              <svg width={iconSize} height={iconSize} viewBox="0 0 24 30" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="3" width="14" height="15" rx="3" />
+                <circle cx="12" cy="8.5" r="2" />
+                <path d="M12 18v8" />
+                <path d="M8 22h8" />
+              </svg>
+            }
+            className={path.startsWith("/precintos") ? styles.buttonIcon : styles.buttonIconActive}
+            onClick={(e) => handleNavClick(e, "/precintos")}
+          />
+        </Link>
+      )}
+
       {/* Control tower */}
       {/* {checkUserViewPermissions(project, "ControlTower") && (
         <Link href="/torreControl" passHref legacyBehavior>
