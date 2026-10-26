@@ -78,7 +78,7 @@ const UploadModal = ({
       closeIcon={null}
       centered
       maskClosable={false}
-      width="min(640px, calc(100vw - 32px))"
+      width="min(640px, calc(100 * var(--vw) - 32px))"
       styles={{
         body: { padding: 0 },
         content: { padding: 0, overflow: "hidden", borderRadius: 12 }
