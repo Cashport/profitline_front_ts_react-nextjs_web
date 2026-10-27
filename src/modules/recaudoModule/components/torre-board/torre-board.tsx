@@ -92,8 +92,10 @@ function Cutoff({
 const TorreContent = memo(function TorreContent({ data }: { data: ICollectionTower }) {
   return (
     <>
-      <section className="grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)]">
-        <GoalCard data={data} className="sm:col-span-2 min-[1180px]:col-span-1" />
+      {/* Tres filas compartidas (encabezado, barra, leyenda): aplicación y tramos son
+          subgrid y la tarjeta de recaudo las ocupa enteras; su sobrante va a la última. */}
+      <section className="grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2 min-[1180px]:grid-cols-[minmax(0,2.15fr)_minmax(0,1.3fr)_minmax(0,1.1fr)] min-[1180px]:grid-rows-[auto_auto_1fr]">
+        <GoalCard data={data} className="row-span-3 sm:col-span-2 min-[1180px]:col-span-1" />
         <ApplicationCard data={data} />
         <AgingCard data={data} />
       </section>

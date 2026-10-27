@@ -6,8 +6,9 @@ import { TONE_TEXT } from "../../constants";
 import { withAlpha } from "../../utils/chart";
 import { money, pct, pp, splitUnit } from "../../utils/format";
 import GoalBar from "../shared/goal-bar";
-import { FOREGROUND, MUTED } from "../shared/chart-styles";
+import { FORECAST, FOREGROUND, MUTED } from "../shared/chart-styles";
 import { LegendItem, Swatch } from "../shared/legend";
+import { KPI_LABEL } from "../shared/styles";
 import TowerTooltip, { TipRow } from "../shared/tower-tooltip";
 
 interface GoalCardProps {
@@ -74,13 +75,13 @@ export default function GoalCard({ data, className }: GoalCardProps) {
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-col justify-center rounded-xl bg-card px-5 pb-3.5 pt-4 shadow-sm",
+        "flex min-w-0 flex-col rounded-xl bg-card px-5 pb-3.5 pt-3.5 shadow-sm",
         className
       )}
     >
       <div className="flex items-end gap-3.5">
         <div className="min-w-0">
-          <div className="text-[12px] text-muted-foreground">Recaudo</div>
+          <div className={KPI_LABEL}>Recaudo</div>
           <div className="whitespace-nowrap text-[36px] font-bold leading-[1.1] tracking-[-0.03em] tabular-nums text-foreground">
             {value}
             {unit && (
@@ -113,7 +114,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         </div>
 
         <div className="ml-auto pb-0.5 text-right">
-          <div className="text-[12px] text-muted-foreground">Meta</div>
+          <div className={KPI_LABEL}>Meta</div>
           <div className="mt-1 flex items-center gap-2.5">
             {/* Fondo tenue del color del recaudo y texto del tema: el color del API
                 es uno solo para los dos temas y no garantiza contraste como texto. */}
@@ -186,7 +187,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
             ? {
                 from: s.collected,
                 to: s.forecast,
-                color: cs.color,
+                color: FORECAST,
                 tip: { title: "Forecast", rows: forecastRows }
               }
             : null
@@ -258,7 +259,7 @@ export default function GoalCard({ data, className }: GoalCardProps) {
         <span className="ml-auto inline-flex items-center gap-[5px] whitespace-nowrap">
           {open ? (
             <>
-              <Swatch color={cs.color} outline />
+              <Swatch color={FORECAST} outline />
               Forecast <b className="font-bold tabular-nums text-foreground">
                 {money(s.forecast)}
               </b>{" "}

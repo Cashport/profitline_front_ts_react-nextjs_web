@@ -21,10 +21,12 @@ export const WEEK_LINE = "stroke-border opacity-55";
 export const WEEK_TICK = "stroke-muted-foreground";
 export const TODAY_LINE = "stroke-muted-foreground/40";
 
-/** Colores CSS para los cuadritos de los tooltips de series que no vienen del API. */
+/** Colores de las series que no vienen del API (cuadritos de los tooltips, trazos y barras). */
 export const FOREGROUND = "rgb(var(--foreground))";
 export const MUTED = "rgb(var(--muted-foreground))";
 export const PREVIOUS = "rgb(var(--muted-foreground) / 0.6)";
+/** Proyección y forecast: naranja punteado, distinto del recaudo. */
+export const FORECAST = "#FF5500";
 
 /** Márgenes del área de dibujo: los dos gráficos alinean sus días. */
 export const CHART_MARGIN = { l: 62, r: 62, t: 36, b: 24 };

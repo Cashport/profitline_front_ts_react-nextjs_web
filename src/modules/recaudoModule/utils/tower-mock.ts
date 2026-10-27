@@ -46,7 +46,7 @@ const SERIES: Record<
   "collected" | "pendingAgreements" | "brokenAgreements" | "applied" | "unapplied",
   ITowerSeries
 > = {
-  collected: { key: "collected", label: "Recaudo", color: "#FF5500" },
+  collected: { key: "collected", label: "Recaudo", color: "#CBE71E" },
   pendingAgreements: { key: "pendingAgreements", label: "Acuerdos pendientes", color: "#8B949B" },
   brokenAgreements: { key: "brokenAgreements", label: "Incumplidos", color: "#EB5A5B" },
   applied: { key: "applied", label: "Aplicado", color: "#7393B3" },
