@@ -7,7 +7,7 @@ import { useTowerFilters } from "../../contexts/tower-filters-context";
 import { money, pct } from "../../utils/format";
 import { sumBy } from "../../utils/rows";
 import { Swatch } from "../shared/legend";
-import { KPI_LABEL } from "../shared/styles";
+import { KPI_CARD, KPI_LABEL } from "../shared/styles";
 import TowerTooltip from "../shared/tower-tooltip";
 
 /**
@@ -20,11 +20,10 @@ export default function AgingCard({ data }: { data: ICollectionTower }) {
   const total = sumBy(buckets, (b) => b.amount) || 1;
 
   return (
-    <div className="flex min-w-0 flex-col rounded-xl bg-card px-3.5 pb-3 pt-3.5 shadow-sm">
+    <div className={KPI_CARD}>
       <div className={KPI_LABEL}>Recaudo por tramo</div>
 
       <AgingBar
-        className="mt-3"
         height={10}
         highlight={filters.aging}
         onSegmentClick={toggleAging}
@@ -50,7 +49,7 @@ export default function AgingCard({ data }: { data: ICollectionTower }) {
         }}
       />
 
-      <div className="mt-3 grid grid-cols-3 gap-x-3.5 gap-y-1.5">
+      <div className="grid grid-cols-3 gap-x-3.5 gap-y-1.5 self-start">
         {buckets.map((b) => (
           <button
             key={b.key}

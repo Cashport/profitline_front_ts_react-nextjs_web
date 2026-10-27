@@ -22,7 +22,7 @@ import { withAlpha } from "../../utils/chart";
 import { dimensionPatch, indexCatalogs, isDimensionSelected } from "../../utils/filters";
 import { money, pct, sem } from "../../utils/format";
 import { ExecutiveRow, executiveRows, executiveTotal, nextSort, sortRows } from "../../utils/rows";
-import { FOREGROUND } from "../shared/chart-styles";
+import { FORECAST, FOREGROUND } from "../shared/chart-styles";
 import ExcelButton from "../shared/excel-button";
 import GoalBar from "../shared/goal-bar";
 import SentinelRow from "../shared/sentinel-row";
@@ -158,7 +158,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
               },
               {
                 key: "fc",
-                color: withAlpha(collected.color, 0.16),
+                color: withAlpha(FORECAST, 0.16),
                 label: "Forecast",
                 value: `${money(r.forecast)} · ${pct(forecastRatio, 0)}`
               },
@@ -176,7 +176,7 @@ const ExecutiveRowView = memo(function ExecutiveRowView({
                 ]}
                 forecast={
                   open && r.forecast > r.collected
-                    ? { from: r.collected, to: r.forecast, color: collected.color }
+                    ? { from: r.collected, to: r.forecast, color: FORECAST }
                     : null
                 }
                 goal={{ value: r.goal }}
@@ -314,7 +314,7 @@ export default function ExecutivesTable({ data }: { data: ICollectionTower }) {
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[10.5px] text-foreground/80">
         <LegendItem mark={<Swatch color={collected.color} />} label="Recaudado" />
         <LegendItem mark={<Swatch color={pendingAgreements.color} />} label="Acuerdos vigentes" />
-        <LegendItem mark={<Swatch color={collected.color} outline />} label="Forecast" />
+        <LegendItem mark={<Swatch color={FORECAST} outline />} label="Forecast" />
         <LegendItem
           mark={<i className="inline-block h-2 w-[3px] shrink-0 rounded-[1px] bg-foreground" />}
           label="Meta"

@@ -121,4 +121,4 @@ export const TONE_TEXT: Record<Tone, string> = {
 };
 
 export const FOOT_NOTE =
-  "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes + saldo de los acuerdos incumplidos. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas.";
+  "Forecast = recaudo a la fecha de corte + saldo de los acuerdos de pago pendientes que vencen antes del cierre del mes. Ritmo a hoy = lo que ya se debería llevar para cumplir la meta si el mes se comporta como uno típico. PNA = pago identificado que todavía no se aplica a facturas.";
